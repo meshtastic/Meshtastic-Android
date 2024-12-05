@@ -79,7 +79,8 @@ fun NodeSignalQuality(snr: Float, rssi: Int, modifier: Modifier = Modifier) {
         Spacer(Modifier.width(8.dp))
         Text(
             text = "${stringResource(R.string.signal)} ${stringResource(quality.nameRes)}",
-            fontSize = MaterialTheme.typography.button.fontSize
+            fontSize = MaterialTheme.typography.button.fontSize,
+            maxLines = 1,
         )
         Spacer(Modifier.width(8.dp))
         Icon(

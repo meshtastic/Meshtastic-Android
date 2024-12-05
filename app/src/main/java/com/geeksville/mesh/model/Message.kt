@@ -17,10 +17,11 @@
 
 package com.geeksville.mesh.model
 
-import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.Routing
+import com.geeksville.mesh.MeshProtos.User
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
+import com.geeksville.mesh.database.entity.Reaction
 
 val Routing.Error.stringRes: Int
     get() = when (this) {
@@ -46,12 +47,14 @@ val Routing.Error.stringRes: Int
 data class Message(
     val uuid: Long,
     val receivedTime: Long,
-    val user: MeshProtos.User,
+    val user: User,
     val text: String,
     val time: String,
     val read: Boolean,
     val status: MessageStatus?,
     val routingError: Int,
+    val packetId: Int,
+    val emojis: List<Reaction>,
 ) {
     private fun getStatusStringRes(value: Int): Int {
         val error = Routing.Error.forNumber(value) ?: Routing.Error.UNRECOGNIZED

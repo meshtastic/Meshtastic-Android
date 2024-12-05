@@ -84,8 +84,8 @@ class PacketDaoTest {
         }
 
         packetDao = database.packetDao().apply {
-            generateTestPackets(42424243).forEach(::insert)
-            generateTestPackets(myNodeNum).forEach(::insert)
+            generateTestPackets(42424243).forEach { insert(it) }
+            generateTestPackets(myNodeNum).forEach { insert(it) }
         }
     }
 
@@ -132,10 +132,10 @@ class PacketDaoTest {
             val messages = packetDao.getMessagesFrom(contactKey).first()
             assertEquals(SAMPLE_SIZE, messages.size)
 
-            val onlyFromContactKey = messages.all { it.contact_key == contactKey }
+            val onlyFromContactKey = messages.all { it.packet.contact_key == contactKey }
             assertTrue(onlyFromContactKey)
 
-            val onlyMyNodeNum = messages.all { it.myNodeNum == myNodeNum }
+            val onlyMyNodeNum = messages.all { it.packet.myNodeNum == myNodeNum }
             assertTrue(onlyMyNodeNum)
         }
     }

@@ -168,7 +168,7 @@ private fun DeviceMetricsChart(
         Box(
             contentAlignment = Alignment.TopStart,
             modifier = Modifier
-                .horizontalScroll(scrollState)
+                .horizontalScroll(state = scrollState, reverseScrolling = true)
                 .weight(1f)
         ) {
 

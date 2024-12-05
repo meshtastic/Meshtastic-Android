@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui
+package com.geeksville.mesh.ui.message
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -67,6 +67,7 @@ import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.pluralStringResource
@@ -90,6 +91,7 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannel
+import com.geeksville.mesh.ui.message.components.MessageList
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -247,11 +249,12 @@ internal fun MessageScreen(
         }
     ) { innerPadding ->
         if (messages.isNotEmpty()) {
-            MessageListView(
+            MessageList(
                 messages = messages,
                 selectedIds = selectedIds,
                 onUnreadChanged = { viewModel.clearUnreadCount(contactKey, it) },
-                contentPadding = innerPadding
+                contentPadding = innerPadding,
+                onSendReaction = { emoji, id -> viewModel.sendReaction(emoji, id, contactKey) },
             ) {
                 // TODO onCLick()
             }
@@ -357,10 +360,17 @@ private fun QuickChatRow(
     modifier: Modifier = Modifier,
     onClick: (QuickChatAction) -> Unit
 ) {
+    val alertAction = QuickChatAction(
+        name = "🔔",
+        message = "🔔 ${stringResource(R.string.alert_bell_text)} \u0007",
+        mode = QuickChatAction.Mode.Append,
+        position = -1
+    )
+
     LazyRow(
         modifier = modifier,
     ) {
-        items(actions, key = { it.uuid }) { action ->
+        items(listOf(alertAction) + actions, key = { it.uuid }) { action ->
             Button(
                 onClick = { onClick(action) },
                 modifier = Modifier.padding(horizontal = 4.dp),
@@ -385,6 +395,7 @@ private fun TextInput(
     maxSize: Int = 200,
     onClick: (String) -> Unit = {}
 ) = Column(modifier) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     var isFocused by remember { mutableStateOf(false) }
 
     Row(
@@ -415,6 +426,7 @@ private fun TextInput(
                 if (message.value.text.isNotEmpty()) {
                     onClick(message.value.text)
                     message.value = TextFieldValue("")
+                    keyboardController?.hide()
                 }
             },
             modifier = Modifier.size(48.dp),

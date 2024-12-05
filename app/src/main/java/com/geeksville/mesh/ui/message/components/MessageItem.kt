@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui
+package com.geeksville.mesh.ui.message.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -74,6 +74,12 @@ internal fun MessageItem(
     onLongClick: () -> Unit = {},
     onChipClick: () -> Unit = {},
     onStatusClick: () -> Unit = {},
+    onSendReaction: (String) -> Unit = {},
+) = Row(
+    modifier = Modifier
+        .fillMaxWidth()
+        .background(color = if (selected) Color.Gray else MaterialTheme.colors.background),
+    verticalAlignment = Alignment.CenterVertically,
 ) {
     val fromLocal = shortName == null
     val messageColor = if (fromLocal) R.color.colorMyMsg else R.color.colorMsg
@@ -81,13 +87,12 @@ internal fun MessageItem(
     val messageModifier = if (fromLocal) {
         Modifier.padding(start = 48.dp, top = 8.dp, end = 8.dp, bottom = 6.dp)
     } else {
-        Modifier.padding(start = 8.dp, top = 8.dp, end = 48.dp, bottom = 6.dp)
+        Modifier.padding(start = 8.dp, top = 8.dp, end = 0.dp, bottom = 6.dp)
     }
 
     Card(
         modifier = Modifier
-            .background(color = if (selected) Color.Gray else MaterialTheme.colors.background)
-            .fillMaxWidth()
+            .weight(1f)
             .then(messageModifier),
         elevation = 4.dp,
         shape = RoundedCornerShape(topStart, topEnd, 12.dp, 12.dp),
@@ -165,6 +170,9 @@ internal fun MessageItem(
                 }
             }
         }
+    }
+    if (!fromLocal) {
+        ReactionButton(Modifier.padding(16.dp), onSendReaction)
     }
 }
 

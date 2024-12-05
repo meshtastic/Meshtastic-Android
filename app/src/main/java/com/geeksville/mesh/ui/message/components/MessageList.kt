@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui
+package com.geeksville.mesh.ui.message.components
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.ui.components.SimpleAlertDialog
 import kotlinx.coroutines.FlowPreview
@@ -41,11 +42,12 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 
 @Composable
-internal fun MessageListView(
+internal fun MessageList(
     messages: List<Message>,
     selectedIds: MutableState<Set<Long>>,
     onUnreadChanged: (Long) -> Unit,
     contentPadding: PaddingValues,
+    onSendReaction: (String, Int) -> Unit,
     onClick: (Message) -> Unit = {}
 ) {
     val inSelectionMode by remember { derivedStateOf { selectedIds.value.isNotEmpty() } }
@@ -62,6 +64,12 @@ internal fun MessageListView(
         SimpleAlertDialog(title = title, text = text) { showStatusDialog = null }
     }
 
+    var showReactionDialog by remember { mutableStateOf<List<Reaction>?>(null) }
+    if (showReactionDialog != null) {
+        val reactions = showReactionDialog ?: return
+        ReactionDialog(reactions) { showReactionDialog = null }
+    }
+
     fun toggle(uuid: Long) = if (selectedIds.value.contains(uuid)) {
         selectedIds.value -= uuid
     } else {
@@ -75,10 +83,12 @@ internal fun MessageListView(
         contentPadding = contentPadding
     ) {
         items(messages, key = { it.uuid }) { msg ->
+            val fromLocal = msg.user.id == DataPacket.ID_LOCAL
             val selected by remember { derivedStateOf { selectedIds.value.contains(msg.uuid) } }
 
+            ReactionRow(fromLocal, msg.emojis) { showReactionDialog = msg.emojis }
             MessageItem(
-                shortName = msg.user.shortName.takeIf { msg.user.id != DataPacket.ID_LOCAL },
+                shortName = msg.user.shortName.takeIf { !fromLocal },
                 messageText = msg.text,
                 messageTime = msg.time,
                 messageStatus = msg.status,
@@ -86,7 +96,8 @@ internal fun MessageListView(
                 onClick = { if (inSelectionMode) toggle(msg.uuid) },
                 onLongClick = { toggle(msg.uuid) },
                 onChipClick = { onClick(msg) },
-                onStatusClick = { showStatusDialog = msg }
+                onStatusClick = { showStatusDialog = msg },
+                onSendReaction = { onSendReaction(it, msg.packetId) },
             )
         }
     }

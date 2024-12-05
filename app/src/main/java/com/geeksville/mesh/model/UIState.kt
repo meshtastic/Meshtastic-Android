@@ -61,7 +61,6 @@ import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.map.MAP_STYLE_ID
 import com.geeksville.mesh.util.getShortDate
-import com.geeksville.mesh.util.getShortDateTime
 import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -330,20 +329,8 @@ class UIViewModel @Inject constructor(
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey).mapLatest { list ->
-        list.map {
-            Message(
-                uuid = it.uuid,
-                receivedTime = it.received_time,
-                user = getUser(it.data.from),
-                text = it.data.text.orEmpty(),
-                time = getShortDateTime(it.data.time),
-                read = it.read,
-                status = it.data.status,
-                routingError = it.routingError,
-            )
-        }
-    }
+    fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey)
+        .mapLatest { list -> list.map { it.toMessage(::getUser) } }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val waypoints = packetRepository.getWaypoints().mapLatest { list ->
@@ -386,10 +373,8 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    fun sendTapback(emoji: String, replyId: Int, contactKey: String) {
-        viewModelScope.launch {
-            radioConfigRepository.onServiceAction(ServiceAction.Tapback(emoji, replyId, contactKey))
-        }
+    fun sendReaction(emoji: String, replyId: Int, contactKey: String) = viewModelScope.launch {
+        radioConfigRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey))
     }
 
     fun requestTraceroute(destNum: Int) {

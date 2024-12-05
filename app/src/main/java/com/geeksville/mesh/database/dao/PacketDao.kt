@@ -18,7 +18,6 @@
 package com.geeksville.mesh.database.dao
 
 import androidx.room.Dao
-import androidx.room.Insert
 import androidx.room.MapColumn
 import androidx.room.Update
 import androidx.room.Query
@@ -27,7 +26,9 @@ import androidx.room.Upsert
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.database.entity.ContactSettings
+import com.geeksville.mesh.database.entity.PacketEntity
 import com.geeksville.mesh.database.entity.Packet
+import com.geeksville.mesh.database.entity.ReactionEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -81,8 +82,8 @@ interface PacketDao {
     )
     suspend fun clearUnreadCount(contact: String, timestamp: Long)
 
-    @Insert
-    fun insert(packet: Packet)
+    @Upsert
+    suspend fun insert(packet: Packet)
 
     @Query(
         """
@@ -92,7 +93,8 @@ interface PacketDao {
     ORDER BY received_time DESC
     """
     )
-    fun getMessagesFrom(contact: String): Flow<List<Packet>>
+    @Transaction
+    fun getMessagesFrom(contact: String): Flow<List<PacketEntity>>
 
     @Query(
         """
@@ -101,10 +103,10 @@ interface PacketDao {
         AND data = :data
     """
     )
-    fun findDataPacket(data: DataPacket): Packet?
+    suspend fun findDataPacket(data: DataPacket): Packet?
 
     @Query("DELETE FROM packet WHERE uuid in (:uuidList)")
-    fun deleteMessages(uuidList: List<Long>)
+    suspend fun deletePackets(uuidList: List<Long>)
 
     @Query(
         """
@@ -113,27 +115,42 @@ interface PacketDao {
         AND contact_key IN (:contactList)
     """
     )
-    fun deleteContacts(contactList: List<String>)
+    suspend fun deleteContacts(contactList: List<String>)
 
     @Query("DELETE FROM packet WHERE uuid=:uuid")
-    fun _delete(uuid: Long)
+    suspend fun _delete(uuid: Long)
 
     @Transaction
-    fun delete(packet: Packet) {
+    suspend fun delete(packet: Packet) {
         _delete(packet.uuid)
     }
 
-    @Update
-    fun update(packet: Packet)
+    @Query("SELECT packet_id FROM packet WHERE uuid IN (:uuidList)")
+    suspend fun getPacketIdsFrom(uuidList: List<Long>): List<Int>
+
+    @Query("DELETE FROM reactions WHERE reply_id IN (:packetIds)")
+    suspend fun deleteReactions(packetIds: List<Int>)
 
     @Transaction
-    fun updateMessageStatus(data: DataPacket, m: MessageStatus) {
+    suspend fun deleteMessages(uuidList: List<Long>) {
+        val packetIds = getPacketIdsFrom(uuidList)
+        if (packetIds.isNotEmpty()) {
+            deleteReactions(packetIds)
+        }
+        deletePackets(uuidList)
+    }
+
+    @Update
+    suspend fun update(packet: Packet)
+
+    @Transaction
+    suspend fun updateMessageStatus(data: DataPacket, m: MessageStatus) {
         val new = data.copy(status = m)
         findDataPacket(data)?.let { update(it.copy(data = new)) }
     }
 
     @Transaction
-    fun updateMessageId(data: DataPacket, id: Int) {
+    suspend fun updateMessageId(data: DataPacket, id: Int) {
         val new = data.copy(id = id)
         findDataPacket(data)?.let { update(it.copy(data = new)) }
     }
@@ -145,7 +162,7 @@ interface PacketDao {
     ORDER BY received_time ASC
     """
     )
-    fun getDataPackets(): List<DataPacket>
+    suspend fun getDataPackets(): List<DataPacket>
 
     @Query(
         """
@@ -155,10 +172,10 @@ interface PacketDao {
     ORDER BY received_time DESC
     """
     )
-    fun getPacketById(requestId: Int): Packet?
+    suspend fun getPacketById(requestId: Int): Packet?
 
     @Transaction
-    fun getQueuedPackets(): List<DataPacket>? =
+    suspend fun getQueuedPackets(): List<DataPacket>? =
         getDataPackets().filter { it.status == MessageStatus.QUEUED }
 
     @Query(
@@ -169,10 +186,10 @@ interface PacketDao {
     ORDER BY received_time ASC
     """
     )
-    fun getAllWaypoints(): List<Packet>
+    suspend fun getAllWaypoints(): List<Packet>
 
     @Transaction
-    fun deleteWaypoint(id: Int) {
+    suspend fun deleteWaypoint(id: Int) {
         val uuidList = getAllWaypoints().filter { it.data.waypoint?.id == id }.map { it.uuid }
         deleteMessages(uuidList)
     }
@@ -184,7 +201,7 @@ interface PacketDao {
     suspend fun getContactSettings(contact: String): ContactSettings?
 
     @Upsert
-    fun upsertContactSettings(contacts: List<ContactSettings>)
+    suspend fun upsertContactSettings(contacts: List<ContactSettings>)
 
     @Transaction
     suspend fun setMuteUntil(contacts: List<String>, until: Long) {
@@ -194,4 +211,7 @@ interface PacketDao {
         }
         upsertContactSettings(contactList)
     }
+
+    @Upsert
+    suspend fun insert(reaction: ReactionEntity)
 }
