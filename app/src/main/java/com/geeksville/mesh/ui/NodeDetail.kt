@@ -449,6 +449,13 @@ private fun EnvironmentMetrics(
                 value = "%.2f kg".format(weight)
             )
         }
+        if (radiation != 0f) {
+            InfoCard(
+                icon = ImageVector.vectorResource(R.drawable.ic_filled_radioactive_24),
+                text = "Radiation",
+                value = "%.1f µR".format(radiation)
+            )
+        }
     }
 }
 
