@@ -170,6 +170,7 @@ fun NodeItem(
                     NodeKeyStatusIcon(
                         hasPKC = thatNode.hasPKC,
                         mismatchKey = thatNode.mismatchKey,
+                        publicKey = thatNode.user.publicKey,
                         modifier = Modifier.size(32.dp)
                     )
                     Text(
