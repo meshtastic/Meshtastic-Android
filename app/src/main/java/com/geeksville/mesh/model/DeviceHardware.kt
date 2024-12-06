@@ -33,7 +33,7 @@ data class DeviceHardware(
 
     fun getDeviceVectorImage(context: Context): Int {
         val resourceId = context.resources.getIdentifier(
-            "hw_${this.hwModelSlug.lowercase()}",
+            "hw_${this.images?.first()?.removeSuffix(".svg")}",
             "drawable",
             context.packageName
         )
