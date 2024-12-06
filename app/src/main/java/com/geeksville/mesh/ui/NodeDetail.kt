@@ -20,6 +20,7 @@
 package com.geeksville.mesh.ui
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -37,6 +38,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
@@ -73,6 +75,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -137,6 +140,11 @@ private fun NodeDetailList(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 16.dp),
     ) {
+        item {
+            PreferenceCategory("Device") {
+                DeviceDetailsContent(node)
+            }
+        }
         item {
             PreferenceCategory("Details") {
                 NodeDetailsContent(node)
@@ -206,7 +214,7 @@ private fun NodeDetailRow(
 }
 
 @Composable
-private fun NodeDetailsContent(
+private fun DeviceDetailsContent(
     node: NodeEntity,
 ) {
     val context = LocalContext.current
@@ -216,12 +224,41 @@ private fun NodeDetailsContent(
     val hwModelName = deviceHardware?.displayName ?: node.user.hwModel.name
     val isSupported = deviceHardware?.activelySupported == true
     if (deviceImageRes != null) {
-        Image(
-            modifier = Modifier.padding(8.dp),
-            imageVector = ImageVector.vectorResource(deviceImageRes),
-            contentDescription = hwModelName,
+
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .padding(4.dp)
+                .clip(CircleShape)
+                .background(color = Color(node.colors.second).copy(alpha = .5f), shape = CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Image(
+                modifier = Modifier.padding(16.dp),
+                imageVector = ImageVector.vectorResource(deviceImageRes),
+                contentDescription = hwModelName,
+            )
+        }
+    }
+    NodeDetailRow(
+        label = "Hardware",
+        icon = Icons.Default.Router,
+        value = hwModelName
+    )
+    if (isSupported) {
+        NodeDetailRow(
+            label = "Supported",
+            icon = Icons.Default.Verified,
+            value = "",
+            iconTint = Color.Green
         )
     }
+}
+
+@Composable
+private fun NodeDetailsContent(
+    node: NodeEntity,
+) {
     if (node.mismatchKey) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
@@ -257,19 +294,6 @@ private fun NodeDetailsContent(
         icon = Icons.Default.Work,
         value = node.user.role.name
     )
-    NodeDetailRow(
-        label = "Hardware",
-        icon = Icons.Default.Router,
-        value = hwModelName
-    )
-    if (isSupported) {
-        NodeDetailRow(
-            label = "Supported",
-            icon = Icons.Default.Verified,
-            value = "",
-            iconTint = Color.Green
-        )
-    }
     if (node.deviceMetrics.uptimeSeconds > 0) {
         NodeDetailRow(
             label = "Uptime",
