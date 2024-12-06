@@ -15,10 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-@file:Suppress("TooManyFunctions")
+@file:Suppress("TooManyFunctions", "LongMethod")
 
 package com.geeksville.mesh.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -64,6 +65,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Thermostat
+import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material.icons.outlined.Navigation
@@ -74,6 +76,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -85,6 +88,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.NodeEntity
+import com.geeksville.mesh.model.DeviceHardware
 import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.components.PreferenceCategory
@@ -98,8 +102,8 @@ import kotlin.math.ln
 
 @Composable
 fun NodeDetailScreen(
-    viewModel: MetricsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
+    viewModel: MetricsViewModel = hiltViewModel(),
     onNavigate: (Any) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -124,9 +128,9 @@ fun NodeDetailScreen(
 
 @Composable
 private fun NodeDetailList(
+    modifier: Modifier = Modifier,
     node: NodeEntity,
     metricsState: MetricsState,
-    modifier: Modifier = Modifier,
     onNavigate: (Any) -> Unit = {},
 ) {
     LazyColumn(
@@ -176,7 +180,12 @@ private fun NodeDetailList(
 }
 
 @Composable
-private fun NodeDetailRow(label: String, icon: ImageVector, value: String) {
+private fun NodeDetailRow(
+    label: String,
+    icon: ImageVector,
+    value: String,
+    iconTint: Color = MaterialTheme.colors.onSurface
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -186,7 +195,8 @@ private fun NodeDetailRow(label: String, icon: ImageVector, value: String) {
         Icon(
             imageVector = icon,
             contentDescription = label,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(24.dp),
+            tint = iconTint
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(label)
@@ -196,7 +206,22 @@ private fun NodeDetailRow(label: String, icon: ImageVector, value: String) {
 }
 
 @Composable
-private fun NodeDetailsContent(node: NodeEntity) {
+private fun NodeDetailsContent(
+    node: NodeEntity,
+) {
+    val context = LocalContext.current
+    val deviceHardware =
+        DeviceHardware.getDeviceHardwareFromHardwareModel(context, node.user.hwModel)
+    val deviceImageRes = deviceHardware?.getDeviceVectorImage(context)
+    val hwModelName = deviceHardware?.displayName ?: node.user.hwModel.name
+    val isSupported = deviceHardware?.activelySupported == true
+    if (deviceImageRes != null) {
+        Image(
+            modifier = Modifier.padding(8.dp),
+            imageVector = ImageVector.vectorResource(deviceImageRes),
+            contentDescription = hwModelName,
+        )
+    }
     if (node.mismatchKey) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
@@ -235,8 +260,16 @@ private fun NodeDetailsContent(node: NodeEntity) {
     NodeDetailRow(
         label = "Hardware",
         icon = Icons.Default.Router,
-        value = node.user.hwModel.name
+        value = hwModelName
     )
+    if (isSupported) {
+        NodeDetailRow(
+            label = "Supported",
+            icon = Icons.Default.Verified,
+            value = "",
+            iconTint = Color.Green
+        )
+    }
     if (node.deviceMetrics.uptimeSeconds > 0) {
         NodeDetailRow(
             label = "Uptime",
@@ -541,6 +574,9 @@ private fun NodeDetailsPreview(
     node: NodeEntity
 ) {
     AppTheme {
-        NodeDetailList(node, MetricsState.Empty)
+        NodeDetailList(
+            node = node,
+            metricsState = MetricsState.Empty,
+        )
     }
 }
