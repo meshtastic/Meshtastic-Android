@@ -79,7 +79,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
@@ -91,7 +90,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.NodeEntity
-import com.geeksville.mesh.model.DeviceHardware
 import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.components.PreferenceCategory
@@ -142,7 +140,7 @@ private fun NodeDetailList(
     ) {
         item {
             PreferenceCategory("Device") {
-                DeviceDetailsContent(node)
+                DeviceDetailsContent(metricsState)
             }
         }
         item {
@@ -215,22 +213,23 @@ private fun NodeDetailRow(
 
 @Composable
 private fun DeviceDetailsContent(
-    node: NodeEntity,
+    state: MetricsState,
 ) {
-    val context = LocalContext.current
-    val deviceHardware =
-        DeviceHardware.getDeviceHardwareFromHardwareModel(context, node.user.hwModel)
-    val deviceImageRes = deviceHardware?.getDeviceVectorImage(context)
-    val hwModelName = deviceHardware?.displayName ?: node.user.hwModel.name
-    val isSupported = deviceHardware?.activelySupported == true
+    val node = state.node ?: return
+    val deviceHardware = state.deviceHardware ?: return
+    val deviceImageRes = state.deviceImageRes
+    val hwModelName = deviceHardware.displayName
+    val isSupported = deviceHardware.activelySupported
     if (deviceImageRes != null) {
-
         Box(
             modifier = Modifier
                 .size(100.dp)
                 .padding(4.dp)
                 .clip(CircleShape)
-                .background(color = Color(node.colors.second).copy(alpha = .5f), shape = CircleShape),
+                .background(
+                    color = Color(node.colors.second).copy(alpha = .5f),
+                    shape = CircleShape
+                ),
             contentAlignment = Alignment.Center
         ) {
             Image(
