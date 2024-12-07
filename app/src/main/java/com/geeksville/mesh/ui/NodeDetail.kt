@@ -220,24 +220,22 @@ private fun DeviceDetailsContent(
     val deviceImageRes = state.deviceImageRes
     val hwModelName = deviceHardware.displayName
     val isSupported = deviceHardware.activelySupported
-    if (deviceImageRes != null) {
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .padding(4.dp)
-                .clip(CircleShape)
-                .background(
-                    color = Color(node.colors.second).copy(alpha = .5f),
-                    shape = CircleShape
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Image(
-                modifier = Modifier.padding(16.dp),
-                imageVector = ImageVector.vectorResource(deviceImageRes),
-                contentDescription = hwModelName,
-            )
-        }
+    Box(
+        modifier = Modifier
+            .size(100.dp)
+            .padding(4.dp)
+            .clip(CircleShape)
+            .background(
+                color = Color(node.colors.second).copy(alpha = .5f),
+                shape = CircleShape
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            modifier = Modifier.padding(16.dp),
+            imageVector = ImageVector.vectorResource(deviceImageRes),
+            contentDescription = hwModelName,
+        )
     }
     NodeDetailRow(
         label = "Hardware",

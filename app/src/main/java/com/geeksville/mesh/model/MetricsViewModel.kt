@@ -80,7 +80,7 @@ data class MetricsState(
     val tracerouteResults: List<MeshPacket> = emptyList(),
     val positionLogs: List<Position> = emptyList(),
     val deviceHardware: DeviceHardware? = null,
-    @DrawableRes val deviceImageRes: Int? = null,
+    @DrawableRes val deviceImageRes: Int = R.drawable.hw_unknown,
 ) {
     fun hasDeviceMetrics() = deviceMetrics.isNotEmpty()
     fun hasEnvironmentMetrics() = environmentMetrics.isNotEmpty()
