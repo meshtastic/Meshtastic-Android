@@ -62,6 +62,7 @@ import kotlinx.serialization.json.Json
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -332,13 +333,20 @@ class MetricsViewModel @Inject constructor(
         }
     }
 
+    private var deviceHardwareList: List<DeviceHardware> = mutableListOf()
     private fun getDeviceHardwareFromHardwareModel(
         hwModel: HardwareModel
     ): DeviceHardware? {
-        val json =
-            app.assets.open("device_hardware.json").bufferedReader().use { it.readText() }
-        val deviceHardware = Json.decodeFromString<List<DeviceHardware>>(json)
-        return deviceHardware.find { it.hwModel == hwModel.number }
+        if (deviceHardwareList.isEmpty()) {
+            try {
+                val json =
+                    app.assets.open("device_hardware.json").bufferedReader().use { it.readText() }
+                deviceHardwareList = Json.decodeFromString<List<DeviceHardware>>(json)
+            } catch (ex: IOException) {
+                errormsg("Can't read device_hardware.json error: ${ex.message}")
+            }
+        }
+        return deviceHardwareList.find { it.hwModel == hwModel.number }
     }
 
     @Suppress("CyclomaticComplexMethod")
