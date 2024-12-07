@@ -333,7 +333,7 @@ class MetricsViewModel @Inject constructor(
         }
     }
 
-    private var deviceHardwareList: List<DeviceHardware> = mutableListOf()
+    private var deviceHardwareList: List<DeviceHardware> = listOf()
     private fun getDeviceHardwareFromHardwareModel(
         hwModel: HardwareModel
     ): DeviceHardware? {
