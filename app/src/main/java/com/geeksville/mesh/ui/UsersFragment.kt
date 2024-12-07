@@ -41,7 +41,7 @@ import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.components.MenuItemAction
+import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.components.NodeFilterTextField
 import com.geeksville.mesh.ui.components.rememberTimeTickWithLifecycle
 import com.geeksville.mesh.ui.message.navigateToMessages
@@ -131,16 +131,15 @@ fun NodesScreen(
                 gpsFormat = state.gpsFormat,
                 distanceUnits = state.distanceUnits,
                 tempInFahrenheit = state.tempInFahrenheit,
-                ignoreIncomingList = state.ignoreIncomingList,
-                menuItemActionClicked = { menuItem ->
+                onAction = { menuItem ->
                     when (menuItem) {
-                        MenuItemAction.Remove -> model.removeNode(node.num)
-                        MenuItemAction.Ignore -> model.ignoreNode(node.num)
-                        MenuItemAction.DirectMessage -> navigateToMessages(node)
-                        MenuItemAction.RequestUserInfo -> model.requestUserInfo(node.num)
-                        MenuItemAction.RequestPosition -> model.requestPosition(node.num)
-                        MenuItemAction.TraceRoute -> model.requestTraceroute(node.num)
-                        MenuItemAction.MoreDetails -> navigateToNodeDetails(node.num)
+                        is NodeMenuAction.Remove -> model.removeNode(node.num)
+                        is NodeMenuAction.Ignore -> model.ignoreNode(node)
+                        is NodeMenuAction.DirectMessage -> navigateToMessages(node)
+                        is NodeMenuAction.RequestUserInfo -> model.requestUserInfo(node.num)
+                        is NodeMenuAction.RequestPosition -> model.requestPosition(node.num)
+                        is NodeMenuAction.TraceRoute -> model.requestTraceroute(node.num)
+                        is NodeMenuAction.MoreDetails -> navigateToNodeDetails(node.num)
                     }
                 },
                 expanded = state.showDetails,

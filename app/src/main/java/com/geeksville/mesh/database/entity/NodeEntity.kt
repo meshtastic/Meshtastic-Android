@@ -74,6 +74,9 @@ data class NodeEntity(
     @ColumnInfo(name = "is_favorite")
     var isFavorite: Boolean = false,
 
+    @ColumnInfo(name = "is_ignored", defaultValue = "0")
+    var isIgnored: Boolean = false,
+
     @ColumnInfo(name = "environment_metrics", typeAffinity = ColumnInfo.BLOB)
     var environmentTelemetry: TelemetryProtos.Telemetry = TelemetryProtos.Telemetry.getDefaultInstance(),
 

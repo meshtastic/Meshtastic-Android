@@ -142,7 +142,6 @@ data class NodesUiState(
     val gpsFormat: Int = 0,
     val distanceUnits: Int = 0,
     val tempInFahrenheit: Boolean = false,
-    val ignoreIncomingList: List<Int> = emptyList(),
     val showDetails: Boolean = false,
 ) {
     companion object {
@@ -227,7 +226,6 @@ class UIViewModel @Inject constructor(
             gpsFormat = profile.config.display.gpsFormat.number,
             distanceUnits = profile.config.display.units.number,
             tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
-            ignoreIncomingList = profile.config.lora.ignoreIncomingList,
             showDetails = showDetails,
         )
     }.stateIn(
@@ -486,19 +484,11 @@ class UIViewModel @Inject constructor(
             updateLoraConfig { it.copy { region = value } }
         }
 
-    fun ignoreNode(nodeNum: Int) = updateLoraConfig {
-        it.copy {
-            val list = ignoreIncoming.toMutableList().apply {
-                if (contains(nodeNum)) {
-                    debug("removing node $nodeNum from ignore list")
-                    remove(nodeNum)
-                } else {
-                    debug("adding node $nodeNum to ignore list")
-                    add(nodeNum)
-                }
-            }
-            ignoreIncoming.clear()
-            ignoreIncoming.addAll(list)
+    fun ignoreNode(node: NodeEntity) = viewModelScope.launch {
+        try {
+            radioConfigRepository.onServiceAction(ServiceAction.Ignore(node))
+        } catch (ex: RemoteException) {
+            errormsg("Ignore node error:", ex)
         }
     }
 
