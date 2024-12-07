@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.service
 
 import com.geeksville.mesh.IMeshService
@@ -67,5 +84,12 @@ class ServiceRepository @Inject constructor() : Logging {
 
     fun clearTracerouteResponse() {
         setTracerouteResponse(null)
+    }
+
+    private val _serviceAction = MutableSharedFlow<ServiceAction>()
+    val serviceAction: SharedFlow<ServiceAction> get() = _serviceAction
+
+    suspend fun onServiceAction(action: ServiceAction) {
+        _serviceAction.emit(action)
     }
 }

@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.ui.components.config
 
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -23,9 +40,13 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos.Config.NetworkConfig
 import com.geeksville.mesh.R
+import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
+import com.geeksville.mesh.model.RadioConfigViewModel
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.EditIPv4Preference
 import com.geeksville.mesh.ui.components.EditPasswordPreference
@@ -47,6 +68,33 @@ private fun ScanErrorDialog(
 )
 
 @Composable
+fun NetworkConfigScreen(
+    viewModel: RadioConfigViewModel = hiltViewModel(),
+) {
+    val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+
+    if (state.responseState.isWaiting()) {
+        PacketResponseStateDialog(
+            state = state.responseState,
+            onDismiss = viewModel::clearPacketResponse,
+        )
+    }
+
+    NetworkConfigItemList(
+        networkConfig = state.radioConfig.network,
+        enabled = state.connected,
+        onSaveClicked = { networkInput ->
+            val config = config { network = networkInput }
+            viewModel.setConfig(config)
+        }
+    )
+}
+
+private fun extractWifiCredentials(qrCode: String) = Regex("""WIFI:S:(.*?);.*?P:(.*?);""")
+    .find(qrCode)?.destructured
+    ?.let { (ssid, password) -> ssid to password } ?: (null to null)
+
+@Composable
 fun NetworkConfigItemList(
     networkConfig: NetworkConfig,
     enabled: Boolean,
@@ -59,11 +107,6 @@ fun NetworkConfigItemList(
     if (showScanErrorDialog) {
         ScanErrorDialog { showScanErrorDialog = false }
     }
-
-    fun extractWifiCredentials(qrCode: String) = Regex("""WIFI:S:(.*?);.*?P:(.*?);""")
-        .find(qrCode)?.destructured
-        ?.let { (ssid, password) -> ssid to password }
-        ?: (null to null)
 
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
@@ -231,7 +274,7 @@ fun NetworkConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = networkInput != networkConfig,
+                enabled = enabled && networkInput != networkConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     networkInput = networkConfig

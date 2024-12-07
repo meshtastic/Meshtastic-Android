@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.ui.components.config
 
 import androidx.compose.animation.AnimatedVisibility
@@ -47,10 +64,13 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.R
 import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.model.Channel
+import com.geeksville.mesh.model.RadioConfigViewModel
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.dragContainer
@@ -148,6 +168,30 @@ fun ChannelSelection(
 }
 
 @Composable
+fun ChannelConfigScreen(
+    viewModel: RadioConfigViewModel = hiltViewModel(),
+) {
+    val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+
+    if (state.responseState.isWaiting()) {
+        PacketResponseStateDialog(
+            state = state.responseState,
+            onDismiss = viewModel::clearPacketResponse,
+        )
+    }
+
+    ChannelSettingsItemList(
+        settingsList = state.channelList,
+        modemPresetName = Channel(loraConfig = state.radioConfig.lora).name,
+        enabled = state.connected,
+        maxChannels = viewModel.maxChannels,
+        onPositiveClicked = { channelListInput ->
+            viewModel.updateChannels(channelListInput, state.channelList)
+        },
+    )
+}
+
+@Composable
 fun ChannelSettingsItemList(
     settingsList: List<ChannelSettings>,
     modemPresetName: String = "Default",
@@ -224,7 +268,7 @@ fun ChannelSettingsItemList(
 
             item {
                 PreferenceFooter(
-                    enabled = isEditing,
+                    enabled = enabled && isEditing,
                     negativeText = R.string.cancel,
                     onNegativeClicked = {
                         focusManager.clearFocus()

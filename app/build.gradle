@@ -27,13 +27,13 @@ android {
             storePassword keystoreProperties['storePassword']
         }
     }
-    compileSdk 34
+    compileSdk 35
     defaultConfig {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdk 34
-        versionCode 30501 // format is Mmmss (where M is 1+the numeric major number
-        versionName "2.5.1"
+        versionCode 30513 // format is Mmmss (where M is 1+the numeric major number
+        versionName "2.5.13"
         testInstrumentationRunner "com.geeksville.mesh.TestRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio
@@ -148,17 +148,17 @@ dependencies {
     implementation "androidx.appcompat:appcompat-resources:$appcompat_version"
     implementation "androidx.emoji2:emoji2-emojipicker:1.5.0"
 
-    implementation 'androidx.core:core-ktx:1.13.1'
-    implementation 'androidx.core:core-location-altitude:1.0.0-alpha02'
-    implementation 'androidx.fragment:fragment-ktx:1.8.4'
+    implementation 'androidx.core:core-ktx:1.15.0'
+    implementation 'androidx.core:core-location-altitude:1.0.0-alpha03'
+    implementation 'androidx.fragment:fragment-ktx:1.8.5'
     implementation 'androidx.cardview:cardview:1.0.0'
-    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    implementation 'androidx.constraintlayout:constraintlayout:2.2.0'
     implementation 'com.google.android.material:material:1.12.0'
     implementation 'androidx.viewpager2:viewpager2:1.1.0'
     implementation 'androidx.datastore:datastore:1.1.1'
 
     // Lifecycle
-    def lifecycle_version = '2.8.6'
+    def lifecycle_version = '2.8.7'
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
@@ -184,12 +184,12 @@ dependencies {
     kspAndroidTest "com.google.dagger:hilt-compiler:$hilt_version"
 
     // Navigation
-    def nav_version = "2.8.2"
+    def nav_version = "2.8.4"
     implementation "androidx.navigation:navigation-compose:$nav_version"
     androidTestImplementation "androidx.navigation:navigation-testing:$nav_version"
 
     // Compose
-    def composeBom = platform('androidx.compose:compose-bom:2024.09.03')
+    def composeBom = platform('androidx.compose:compose-bom:2024.11.00')
     implementation composeBom
     androidTestImplementation composeBom
 
@@ -236,10 +236,10 @@ dependencies {
     implementation "com.google.protobuf:protobuf-kotlin:$protobuf_version"
 
     // For UART access
-    implementation 'com.github.mik3y:usb-serial-for-android:3.8.0'
+    implementation 'com.github.mik3y:usb-serial-for-android:3.8.1'
 
     // For Firebase Crashlytics & Analytics
-    googleImplementation platform('com.google.firebase:firebase-bom:33.4.0')
+    googleImplementation platform('com.google.firebase:firebase-bom:33.5.1')
     googleImplementation 'com.google.firebase:firebase-crashlytics'
     googleImplementation 'com.google.firebase:firebase-analytics'
 
@@ -249,7 +249,7 @@ dependencies {
     //noinspection GradleDependency
     implementation 'com.google.zxing:core:3.3.0' // <-- don't update
 
-    def work_version = '2.9.1'
+    def work_version = '2.10.0'
     // Work Request - used to delay boot event handling
     implementation "androidx.work:work-runtime-ktx:$work_version"
 

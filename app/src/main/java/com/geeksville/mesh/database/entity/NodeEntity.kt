@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.database.entity
 
 import android.graphics.Color
@@ -57,6 +74,9 @@ data class NodeEntity(
     @ColumnInfo(name = "is_favorite")
     var isFavorite: Boolean = false,
 
+    @ColumnInfo(name = "is_ignored", defaultValue = "0")
+    var isIgnored: Boolean = false,
+
     @ColumnInfo(name = "environment_metrics", typeAffinity = ColumnInfo.BLOB)
     var environmentTelemetry: TelemetryProtos.Telemetry = TelemetryProtos.Telemetry.getDefaultInstance(),
 
@@ -72,8 +92,14 @@ data class NodeEntity(
     val environmentMetrics: TelemetryProtos.EnvironmentMetrics
         get() = environmentTelemetry.environmentMetrics
 
+    val hasEnvironmentMetrics: Boolean
+        get() = environmentMetrics != TelemetryProtos.EnvironmentMetrics.getDefaultInstance()
+
     val powerMetrics: TelemetryProtos.PowerMetrics
         get() = powerTelemetry.powerMetrics
+
+    val hasPowerMetrics: Boolean
+        get() = powerMetrics != TelemetryProtos.PowerMetrics.getDefaultInstance()
 
     val colors: Pair<Int, Int>
         get() { // returns foreground and background @ColorInt for each 'num'
@@ -145,8 +171,6 @@ data class NodeEntity(
             null
         }
         val humidity = if (relativeHumidity != 0f) "%.0f%%".format(relativeHumidity) else null
-        val pressure = if (barometricPressure != 0f) "%.1fhPa".format(barometricPressure) else null
-        val gas = if (gasResistance != 0f) "%.0fMΩ".format(gasResistance) else null
         val voltage = if (this.voltage != 0f) "%.2fV".format(this.voltage) else null
         val current = if (current != 0f) "%.1fmA".format(current) else null
         val iaq = if (iaq != 0) "IAQ: $iaq" else null
@@ -154,20 +178,11 @@ data class NodeEntity(
         return listOfNotNull(
             temp,
             humidity,
-            pressure,
-            gas,
             voltage,
             current,
             iaq,
         ).joinToString(" ")
     }
-
-    private fun TelemetryProtos.PowerMetrics.getDisplayString(): String = listOfNotNull(
-        "%.2fV".format(ch2Voltage).takeIf { hasCh2Voltage() },
-        "%.1fmA".format(ch2Current).takeIf { hasCh2Current() },
-        "%.2fV".format(ch3Voltage).takeIf { hasCh3Voltage() },
-        "%.1fmA".format(ch3Current).takeIf { hasCh3Current() },
-    ).joinToString(" ")
 
     private fun PaxcountProtos.Paxcount.getDisplayString() =
         "PAX: ${ble + wifi} (B:$ble/W:$wifi)".takeIf { ble != 0 && wifi != 0 }
@@ -176,7 +191,6 @@ data class NodeEntity(
         return listOfNotNull(
             paxcounter.getDisplayString(),
             environmentMetrics.getDisplayString(isFahrenheit),
-            powerMetrics.getDisplayString(),
         ).joinToString(" ")
     }
 

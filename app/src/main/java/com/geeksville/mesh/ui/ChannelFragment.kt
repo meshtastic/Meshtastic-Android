@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.ui
 
 import android.net.Uri
@@ -10,15 +27,14 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -27,22 +43,16 @@ import androidx.compose.material.LocalContentColor
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material.icons.twotone.Close
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.icons.twotone.ContentCopy
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -66,17 +76,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.activityViewModels
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
-import com.geeksville.mesh.analytics.DataPair
-import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
+import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.errormsg
+import com.geeksville.mesh.android.GeeksvilleApplication
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.getCameraPermissions
 import com.geeksville.mesh.android.hasCameraPermission
 import com.geeksville.mesh.channelSet
@@ -92,7 +102,6 @@ import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.components.AdaptiveTwoPane
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.PreferenceFooter
-import com.geeksville.mesh.ui.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.components.config.ChannelCard
 import com.geeksville.mesh.ui.components.config.ChannelSelection
 import com.geeksville.mesh.ui.components.config.EditChannelDialog
@@ -104,7 +113,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class ChannelFragment : ScreenFragment("Channel"), Logging {
@@ -119,39 +127,23 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                val scope = rememberCoroutineScope()
-                val snackbarHostState = remember { SnackbarHostState() }
-
                 AppCompatTheme {
-                    Scaffold(
-                        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-                    ) { paddingValues ->
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .padding(paddingValues),
-                        ) {
-                            ChannelScreen(model) { text ->
-                                scope.launch { snackbarHostState.showSnackbar(text) }
-                            }
-                        }
-                    }
+                    ChannelScreen(model)
                 }
             }
         }
     }
 }
 
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun ChannelScreen(
-    viewModel: UIViewModel = viewModel(),
-    showSnackbar: (String) -> Unit = {},
+    viewModel: UIViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
-    val clipboardManager = LocalClipboardManager.current
 
-    val connectionState by viewModel.connectionState.observeAsState()
+    val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val enabled = connectionState == MeshService.ConnectionState.CONNECTED && !viewModel.isManaged
 
     val channels by viewModel.channels.collectAsStateWithLifecycle()
@@ -162,23 +154,21 @@ fun ChannelScreen(
     /* Holds selections made by the user for QR generation. */
     val channelSelections = rememberSaveable(
         saver = listSaver(
-            save = { stateList -> stateList.toList() },
+            save = { it.toList() },
             restore = { it.toMutableStateList() }
         )
     ) { mutableStateListOf(elements = Array(size = 8, init = { true })) }
 
-    val channelUrl = channelSet.getChannelUrl()
+    val selectedChannelSet = channelSet.copy {
+        val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
+        settings.clear()
+        settings.addAll(result)
+    }
     val modemPresetName = Channel(loraConfig = channelSet.loraConfig).name
 
-    var scannedChannelSet by remember { mutableStateOf<ChannelSet?>(null) }
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
-            try {
-                scannedChannelSet = Uri.parse(result.contents).toChannelSet()
-            } catch (ex: Throwable) {
-                errormsg("Channel url error: ${ex.message}")
-                showSnackbar("${context.getString(R.string.channel_invalid)}: ${ex.message}")
-            }
+            viewModel.requestChannelUrl(Uri.parse(result.contents))
         }
     }
 
@@ -237,7 +227,7 @@ fun ChannelScreen(
             channelSet = channels // Throw away user edits
 
             // Tell the user to try again
-            showSnackbar(context.getString(R.string.radio_sleeping))
+            viewModel.showSnackbar(R.string.cant_change_no_radio)
         } finally {
             showChannelEditor = false
         }
@@ -287,17 +277,6 @@ fun ChannelScreen(
                 installSettings(channelSet)
             }
             .show()
-    }
-
-    if (scannedChannelSet != null) {
-        val incoming = scannedChannelSet ?: return
-        /* Prompt the user to modify channels after scanning a QR code. */
-        ScannedQrCodeDialog(
-            channels = channels,
-            incoming = incoming,
-            onDismiss = { scannedChannelSet = null },
-            onConfirm = { newChannelSet -> installSettings(newChannelSet) }
-        )
     }
 
     var showEditChannelDialog: Int? by remember { mutableStateOf(null) }
@@ -376,64 +355,10 @@ fun ChannelScreen(
         }
 
         item {
-            var valueState by remember(channelUrl) { mutableStateOf(channelUrl) }
-            val isError = valueState != channelUrl
-
-            OutlinedTextField(
-                value = valueState.toString(),
-                onValueChange = {
-                    try {
-                        valueState = Uri.parse(it)
-                        channelSet = valueState.toChannelSet()
-                    } catch (ex: Throwable) {
-                        // channelSet failed to update, isError true
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
+            EditChannelUrl(
                 enabled = enabled,
-                label = { Text("URL") },
-                isError = isError,
-                trailingIcon = {
-                    val isUrlEqual = channelUrl == channels.getChannelUrl()
-                    IconButton(onClick = {
-                        when {
-                            isError -> valueState = channelUrl
-                            !isUrlEqual -> viewModel.setRequestChannelUrl(channelUrl)
-                            else -> {
-                                // track how many times users share channels
-                                GeeksvilleApplication.analytics.track(
-                                    "share",
-                                    DataPair("content_type", "channel")
-                                )
-                                clipboardManager.setText(AnnotatedString(channelUrl.toString()))
-                            }
-                        }
-                    }) {
-                        Icon(
-                            imageVector = when {
-                                isError -> Icons.TwoTone.Close
-                                !isUrlEqual -> Icons.TwoTone.Check
-                                else -> Icons.TwoTone.ContentCopy
-                            },
-                            contentDescription = when {
-                                isError -> "Error"
-                                !isUrlEqual -> stringResource(R.string.send)
-                                else -> "Copy"
-                            },
-                            tint = if (isError) {
-                                MaterialTheme.colors.error
-                            } else {
-                                LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
-                            }
-                        )
-                    }
-                },
-                maxLines = 1,
-                singleLine = true,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done
-                ),
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                channelUrl = selectedChannelSet.getChannelUrl(),
+                onConfirm = viewModel::requestChannelUrl
             )
         }
 
@@ -449,21 +374,20 @@ fun ChannelScreen(
                 })
         }
 
-        if (isEditing) item {
-            PreferenceFooter(
-                enabled = enabled,
-                onCancelClicked = {
-                    focusManager.clearFocus()
-                    showChannelEditor = false
-                    channelSet = channels
-                },
-                onSaveClicked = {
-                    focusManager.clearFocus()
-                    // viewModel.setRequestChannelUrl(channelUrl)
-                    sendButton()
-                })
-        } else {
-            item {
+        item {
+            if (isEditing) {
+                PreferenceFooter(
+                    enabled = enabled,
+                    onCancelClicked = {
+                        focusManager.clearFocus()
+                        showChannelEditor = false
+                        channelSet = channels
+                    },
+                    onSaveClicked = {
+                        focusManager.clearFocus()
+                        sendButton()
+                    })
+            } else {
                 PreferenceFooter(
                     enabled = enabled,
                     negativeText = R.string.reset,
@@ -474,12 +398,88 @@ fun ChannelScreen(
                     positiveText = R.string.scan,
                     onPositiveClicked = {
                         focusManager.clearFocus()
-                        // viewModel.setRequestChannelUrl(channelUrl)
                         if (context.hasCameraPermission()) zxingScan() else requestPermissionAndScan()
                     })
             }
         }
     }
+}
+
+@Suppress("LongMethod")
+@Composable
+private fun EditChannelUrl(
+    enabled: Boolean,
+    channelUrl: Uri,
+    modifier: Modifier = Modifier,
+    onConfirm: (Uri) -> Unit
+) {
+    val focusManager = LocalFocusManager.current
+    val clipboardManager = LocalClipboardManager.current
+
+    var valueState by remember(channelUrl) { mutableStateOf(channelUrl) }
+    var isError by remember { mutableStateOf(false) }
+
+    OutlinedTextField(
+        value = valueState.toString(),
+        onValueChange = {
+            isError = runCatching {
+                valueState = Uri.parse(it)
+                valueState.toChannelSet()
+            }.isFailure
+        },
+        modifier = modifier.fillMaxWidth(),
+        enabled = enabled,
+        label = { Text("URL") },
+        isError = isError,
+        trailingIcon = {
+            val isUrlEqual = valueState == channelUrl
+            IconButton(onClick = {
+                when {
+                    isError -> {
+                        isError = false
+                        valueState = channelUrl
+                    }
+
+                    !isUrlEqual -> {
+                        onConfirm(valueState)
+                        valueState = channelUrl
+                    }
+
+                    else -> {
+                        // track how many times users share channels
+                        GeeksvilleApplication.analytics.track(
+                            "share", DataPair("content_type", "channel")
+                        )
+                        clipboardManager.setText(AnnotatedString(valueState.toString()))
+                    }
+                }
+            }) {
+                Icon(
+                    imageVector = when {
+                        isError -> Icons.TwoTone.Close
+                        !isUrlEqual -> Icons.TwoTone.Check
+                        else -> Icons.TwoTone.ContentCopy
+                    },
+                    contentDescription = when {
+                        isError -> stringResource(R.string.share)
+                        !isUrlEqual -> stringResource(R.string.send)
+                        else -> stringResource(R.string.share)
+                    },
+                    tint = if (isError) {
+                        MaterialTheme.colors.error
+                    } else {
+                        LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+                    }
+                )
+            }
+        },
+        maxLines = 1,
+        singleLine = true,
+        keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+    )
 }
 
 @Composable

@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.model
 
 import android.app.Application
@@ -12,13 +29,26 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
-import com.geeksville.mesh.*
+import com.geeksville.mesh.AppOnlyProtos
+import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos.Config
+import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
+import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.Portnums
+import com.geeksville.mesh.Position
+import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.channel
+import com.geeksville.mesh.channelSet
+import com.geeksville.mesh.channelSettings
+import com.geeksville.mesh.config
+import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.MeshLogRepository
+import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.QuickChatActionRepository
 import com.geeksville.mesh.database.entity.MyNodeEntity
@@ -28,12 +58,15 @@ import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.service.ServiceAction
+import com.geeksville.mesh.ui.map.MAP_STYLE_ID
+import com.geeksville.mesh.util.getShortDate
 import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted.Companion.Eagerly
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
@@ -43,18 +76,13 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.osmdroid.util.GeoPoint
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
-import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
@@ -114,20 +142,10 @@ data class NodesUiState(
     val gpsFormat: Int = 0,
     val distanceUnits: Int = 0,
     val tempInFahrenheit: Boolean = false,
-    val ignoreIncomingList: List<Int> = emptyList(),
     val showDetails: Boolean = false,
 ) {
     companion object {
         val Empty = NodesUiState()
-    }
-}
-
-data class MapState(
-    val center: GeoPoint? = null,
-    val zoom: Double = 0.0,
-) {
-    companion object {
-        val Empty = MapState()
     }
 }
 
@@ -142,23 +160,11 @@ data class Contact(
     val isMuted: Boolean,
 )
 
-// return time if within 24 hours, otherwise date
-internal fun getShortDateTime(time: Long): String? {
-    val date = if (time != 0L) Date(time) else return null
-    val isWithin24Hours = System.currentTimeMillis() - date.time <= TimeUnit.DAYS.toMillis(1)
-
-    return if (isWithin24Hours) {
-        DateFormat.getTimeInstance(DateFormat.SHORT).format(date)
-    } else {
-        DateFormat.getDateInstance(DateFormat.SHORT).format(date)
-    }
-}
-
 @Suppress("LongParameterList")
 @HiltViewModel
 class UIViewModel @Inject constructor(
     private val app: Application,
-    private val nodeDB: NodeDB,
+    private val nodeDB: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
     private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: MeshLogRepository,
@@ -184,16 +190,13 @@ class UIViewModel @Inject constructor(
     private val _channels = MutableStateFlow(channelSet {})
     val channels: StateFlow<AppOnlyProtos.ChannelSet> get() = _channels
 
-    private val _quickChatActions = MutableStateFlow<List<QuickChatAction>>(emptyList())
-    val quickChatActions: StateFlow<List<QuickChatAction>> = _quickChatActions
-
-    private val _focusedNode = MutableStateFlow<NodeEntity?>(null)
-    val focusedNode: StateFlow<NodeEntity?> = _focusedNode
+    val quickChatActions get() = quickChatActionRepository.getAllActions()
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val nodeFilterText = MutableStateFlow("")
     private val nodeSortOption = MutableStateFlow(NodeSortOption.LAST_HEARD)
-    private val includeUnknown = MutableStateFlow(false)
-    private val showDetails = MutableStateFlow(false)
+    private val includeUnknown = MutableStateFlow(preferences.getBoolean("include-unknown", false))
+    private val showDetails = MutableStateFlow(preferences.getBoolean("show-details", false))
 
     fun setSortOption(sort: NodeSortOption) {
         nodeSortOption.value = sort
@@ -201,10 +204,12 @@ class UIViewModel @Inject constructor(
 
     fun toggleShowDetails() {
         showDetails.value = !showDetails.value
+        preferences.edit { putBoolean("show-details", showDetails.value) }
     }
 
     fun toggleIncludeUnknown() {
         includeUnknown.value = !includeUnknown.value
+        preferences.edit { putBoolean("include-unknown", includeUnknown.value) }
     }
 
     val nodesUiState: StateFlow<NodesUiState> = combine(
@@ -221,12 +226,11 @@ class UIViewModel @Inject constructor(
             gpsFormat = profile.config.display.gpsFormat.number,
             distanceUnits = profile.config.display.units.number,
             tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
-            ignoreIncomingList = profile.config.lora.ignoreIncomingList,
             showDetails = showDetails,
         )
     }.stateIn(
         scope = viewModelScope,
-        started = Eagerly,
+        started = SharingStarted.WhileSubscribed(5_000),
         initialValue = NodesUiState.Empty,
     )
 
@@ -235,7 +239,7 @@ class UIViewModel @Inject constructor(
         nodeDB.getNodes(state.sort, state.filter, state.includeUnknown)
     }.stateIn(
         scope = viewModelScope,
-        started = Eagerly,
+        started = SharingStarted.WhileSubscribed(5_000),
         initialValue = emptyList(),
     )
 
@@ -245,18 +249,12 @@ class UIViewModel @Inject constructor(
 
     val nodesWithPosition get() = nodeDB.nodeDBbyNum.value.values.filter { it.validPosition != null }
 
-    private val _mapState = MutableStateFlow(MapState.Empty)
-    val mapState: StateFlow<MapState> get() = _mapState
+    var mapStyleId: Int
+        get() = preferences.getInt(MAP_STYLE_ID, 0)
+        set(value) = preferences.edit { putInt(MAP_STYLE_ID, value) }
 
-    fun updateMapCenterAndZoom(center: GeoPoint, zoom: Double) =
-        _mapState.update { it.copy(center = center, zoom = zoom) }
-
-    fun getUser(userId: String?) = nodeDB.getUser(userId) ?: user {
-        id = userId.orEmpty()
-        longName = app.getString(R.string.unknown_username)
-        shortName = app.getString(R.string.unknown_node_short_name)
-        hwModel = MeshProtos.HardwareModel.UNSET
-    }
+    fun getNode(userId: String?) = nodeDB.getNode(userId ?: DataPacket.ID_BROADCAST)
+    fun getUser(userId: String?) = nodeDB.getUser(userId ?: DataPacket.ID_BROADCAST)
 
     private val _snackbarText = MutableLiveData<Any?>(null)
     val snackbarText: LiveData<Any?> get() = _snackbarText
@@ -273,11 +271,6 @@ class UIViewModel @Inject constructor(
         radioConfigRepository.moduleConfigFlow.onEach { config ->
             _moduleConfig.value = config
         }.launchIn(viewModelScope)
-        viewModelScope.launch {
-            quickChatActionRepository.getAllActions().collect { actions ->
-                _quickChatActions.value = actions
-            }
-        }
         radioConfigRepository.channelSetFlow.onEach { channelSet ->
             _channels.value = channelSet
         }.launchIn(viewModelScope)
@@ -321,7 +314,7 @@ class UIViewModel @Inject constructor(
                 contactKey = contactKey,
                 shortName = if (toBroadcast) "${data.channel}" else shortName,
                 longName = longName,
-                lastMessageTime = getShortDateTime(data.time),
+                lastMessageTime = getShortDate(data.time),
                 lastMessageText = if (fromLocal) data.text else "$shortName: ${data.text}",
                 unreadCount = packetRepository.getUnreadCount(contactKey),
                 messageCount = packetRepository.getMessageCount(contactKey),
@@ -330,25 +323,13 @@ class UIViewModel @Inject constructor(
         }
     }.stateIn(
         scope = viewModelScope,
-        started = Eagerly,
+        started = SharingStarted.WhileSubscribed(5_000),
         initialValue = emptyList(),
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey).mapLatest { list ->
-        list.map {
-            Message(
-                uuid = it.uuid,
-                receivedTime = it.received_time,
-                user = MeshUser(getUser(it.data.from)), // FIXME convert to proto User
-                text = it.data.text.orEmpty(),
-                time = it.data.time,
-                read = it.read,
-                status = it.data.status,
-                routingError = it.routingError,
-            )
-        }
-    }
+    fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey)
+        .mapLatest { list -> list.map { it.toMessage(::getNode) } }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val waypoints = packetRepository.getWaypoints().mapLatest { list ->
@@ -389,6 +370,10 @@ class UIViewModel @Inject constructor(
         } catch (ex: RemoteException) {
             errormsg("Send DataPacket error: ${ex.message}")
         }
+    }
+
+    fun sendReaction(emoji: String, replyId: Int, contactKey: String) = viewModelScope.launch {
+        radioConfigRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey))
     }
 
     fun requestTraceroute(destNum: Int) {
@@ -456,21 +441,24 @@ class UIViewModel @Inject constructor(
     }
 
     // Connection state to our radio device
-    val connectionState get() = radioConfigRepository.connectionState.asLiveData()
+    val connectionState get() = radioConfigRepository.connectionState
     fun isConnected() = connectionState.value != MeshService.ConnectionState.DISCONNECTED
 
-    private val _requestChannelUrl = MutableLiveData<Uri?>(null)
-    val requestChannelUrl: LiveData<Uri?> get() = _requestChannelUrl
+    private val _requestChannelSet = MutableStateFlow<AppOnlyProtos.ChannelSet?>(null)
+    val requestChannelSet: StateFlow<AppOnlyProtos.ChannelSet?> get() = _requestChannelSet
 
-    fun setRequestChannelUrl(channelUrl: Uri) {
-        _requestChannelUrl.value = channelUrl
+    fun requestChannelUrl(url: Uri) = runCatching {
+        _requestChannelSet.value = url.toChannelSet()
+    }.onFailure { ex ->
+        errormsg("Channel url error: ${ex.message}")
+        showSnackbar(R.string.channel_invalid)
     }
 
     /**
      * Called immediately after activity observes requestChannelUrl
      */
     fun clearRequestChannelUrl() {
-        _requestChannelUrl.value = null
+        _requestChannelSet.value = null
     }
 
     fun showSnackbar(resString: Any) {
@@ -496,14 +484,13 @@ class UIViewModel @Inject constructor(
             updateLoraConfig { it.copy { region = value } }
         }
 
-    var ignoreIncomingList: MutableList<Int>
-        get() = config.lora.ignoreIncomingList
-        set(value) = updateLoraConfig {
-            it.copy {
-                ignoreIncoming.clear()
-                ignoreIncoming.addAll(value)
-            }
+    fun ignoreNode(node: NodeEntity) = viewModelScope.launch {
+        try {
+            radioConfigRepository.onServiceAction(ServiceAction.Ignore(node))
+        } catch (ex: RemoteException) {
+            errormsg("Ignore node error:", ex)
         }
+    }
 
     // managed mode disables all access to configuration
     val isManaged: Boolean get() = config.device.isManaged || config.security.isManaged
@@ -539,24 +526,14 @@ class UIViewModel @Inject constructor(
     }
 
     /**
-     * Set the radio config (also updates our saved copy in preferences). By default, this will replace
-     * all channels in the existing radio config. Otherwise, it will append all [ChannelSettings] that
-     * are unique in [channelSet] to the existing radio config.
+     * Set the radio config (also updates our saved copy in preferences).
      */
-    fun setChannels(channelSet: AppOnlyProtos.ChannelSet, overwrite: Boolean = true) = viewModelScope.launch {
-        val newRadioSettings: List<ChannelSettings> = if (overwrite) {
-            channelSet.settingsList
-        } else {
-            // To guarantee consistent ordering, using a LinkedHashSet which iterates through it's
-            // entries according to the order an item was *first* inserted.
-            // https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-linked-hash-set/
-            LinkedHashSet(channels.value.settingsList + channelSet.settingsList).toList()
-        }
+    fun setChannels(channelSet: AppOnlyProtos.ChannelSet) = viewModelScope.launch {
+        getChannelList(channelSet.settingsList, channels.value.settingsList).forEach(::setChannel)
+        radioConfigRepository.replaceAllSettings(channelSet.settingsList)
 
-        getChannelList(newRadioSettings, channels.value.settingsList).forEach(::setChannel)
-        radioConfigRepository.replaceAllSettings(newRadioSettings)
         val newConfig = config { lora = channelSet.loraConfig }
-        if (overwrite && config.lora != newConfig.lora) setConfig(newConfig)
+        if (config.lora != newConfig.lora) setConfig(newConfig)
     }
 
     val provideLocation = object : MutableLiveData<Boolean>(preferences.getBoolean("provide-location", false)) {
@@ -695,39 +672,16 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    fun addQuickChatAction(name: String, value: String, mode: QuickChatAction.Mode) {
-        viewModelScope.launch(Dispatchers.Main) {
-            val action = QuickChatAction(0, name, value, mode, _quickChatActions.value.size)
-            quickChatActionRepository.insert(action)
-        }
+    fun addQuickChatAction(action: QuickChatAction) = viewModelScope.launch(Dispatchers.IO) {
+        quickChatActionRepository.upsert(action)
     }
 
-    fun deleteQuickChatAction(action: QuickChatAction) {
-        viewModelScope.launch(Dispatchers.Main) {
-            quickChatActionRepository.delete(action)
-        }
-    }
-
-    fun updateQuickChatAction(
-        action: QuickChatAction,
-        name: String?,
-        message: String?,
-        mode: QuickChatAction.Mode?
-    ) {
-        viewModelScope.launch(Dispatchers.Main) {
-            val newAction = QuickChatAction(
-                action.uuid,
-                name ?: action.name,
-                message ?: action.message,
-                mode ?: action.mode,
-                action.position
-            )
-            quickChatActionRepository.update(newAction)
-        }
+    fun deleteQuickChatAction(action: QuickChatAction) = viewModelScope.launch(Dispatchers.IO) {
+        quickChatActionRepository.delete(action)
     }
 
     fun updateActionPositions(actions: List<QuickChatAction>) {
-        viewModelScope.launch(Dispatchers.Main) {
+        viewModelScope.launch(Dispatchers.IO) {
             for (position in actions.indices) {
                 quickChatActionRepository.setItemPosition(actions[position].uuid, position)
             }
@@ -746,11 +700,6 @@ class UIViewModel @Inject constructor(
 
     fun setCurrentTab(tab: Int) {
         _currentTab.value = tab
-    }
-
-    fun focusUserNode(node: NodeEntity?) {
-        _currentTab.value = 1
-        _focusedNode.value = node
     }
 
     fun setNodeFilterText(text: String) {

@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.ui
 
 import android.os.Bundle
@@ -8,8 +25,8 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
@@ -29,6 +46,7 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.ui.message.navigateToMessages
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -53,7 +71,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
             onLongClick(contact)
         } else {
             debug("calling MessagesFragment filter:${contact.contactKey}")
-            parentFragmentManager.navigateToMessages(contact.contactKey, contact.longName)
+            parentFragmentManager.navigateToMessages(contact.contactKey)
         }
     }
 
@@ -109,7 +127,6 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
     private inner class ActionModeCallback : ActionMode.Callback {
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
             mode.menuInflater.inflate(R.menu.menu_messages, menu)
-            menu.findItem(R.id.resendButton).isVisible = false
             mode.title = "1"
             return true
         }
@@ -209,8 +226,8 @@ fun ContactListView(
     val haptics = LocalHapticFeedback.current
     LazyColumn(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(6.dp),
+            .fillMaxSize(),
+        contentPadding = PaddingValues(6.dp),
     ) {
         items(contacts, key = { it.contactKey }) { contact ->
             val selected by remember { derivedStateOf { selectedList.contains(contact.contactKey) } }

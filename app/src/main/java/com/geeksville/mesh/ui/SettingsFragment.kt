@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.ui
 
 import android.net.InetAddresses
@@ -97,10 +114,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         spinner.isEnabled = !model.isManaged
 
         // Update the status string (highest priority messages first)
+        val regionUnset = region == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET
         val info = model.myNodeInfo.value
         when (connectionState) {
             MeshService.ConnectionState.CONNECTED ->
-                if (region.number == 0) R.string.must_set_region else R.string.connected_to
+                if (regionUnset) R.string.must_set_region else R.string.connected_to
             MeshService.ConnectionState.DISCONNECTED -> R.string.not_connected
             MeshService.ConnectionState.DEVICE_SLEEP -> R.string.connected_sleeping
             else -> null
@@ -182,7 +200,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         }
 
         // Only let user edit their name or set software update while connected to a radio
-        model.connectionState.observe(viewLifecycleOwner) {
+        model.connectionState.asLiveData().observe(viewLifecycleOwner) {
             updateNodeInfo()
         }
 
@@ -364,11 +382,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (devices == null) return
 
         var hasShownOurDevice = false
-        devices.values
-            // Display the device list in alphabetical order while keeping the "None (Disabled)"
-            // device (fullAddress == n) at the top
-            .sortedBy { dle -> if (dle.fullAddress == "n") "0" else dle.name }
-            .forEach { device ->
+        devices.values.forEach { device ->
             if (device.fullAddress == scanModel.selectedNotNull) {
                 hasShownOurDevice = true
             }

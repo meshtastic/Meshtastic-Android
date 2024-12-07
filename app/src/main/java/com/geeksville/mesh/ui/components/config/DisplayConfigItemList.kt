@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.ui.components.config
 
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,13 +29,40 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
+import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
+import com.geeksville.mesh.model.RadioConfigViewModel
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.SwitchPreference
+
+@Composable
+fun DisplayConfigScreen(
+    viewModel: RadioConfigViewModel = hiltViewModel(),
+) {
+    val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+
+    if (state.responseState.isWaiting()) {
+        PacketResponseStateDialog(
+            state = state.responseState,
+            onDismiss = viewModel::clearPacketResponse,
+        )
+    }
+
+    DisplayConfigItemList(
+        displayConfig = state.radioConfig.display,
+        enabled = state.connected,
+        onSaveClicked = { displayInput ->
+            val config = config { display = displayInput }
+            viewModel.setConfig(config)
+        }
+    )
+}
 
 @Composable
 fun DisplayConfigItemList(
@@ -141,7 +185,7 @@ fun DisplayConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = displayInput != displayConfig,
+                enabled = enabled && displayInput != displayConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     displayInput = displayConfig

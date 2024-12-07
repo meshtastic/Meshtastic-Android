@@ -27,9 +27,12 @@
     <string name="routing_error_not_authorized">Non Autorizzato</string>
     <string name="routing_error_pki_failed">Invio Criptato Non Riuscito</string>
     <string name="routing_error_pki_unknown_pubkey">Chiave Pubblica Sconosciuta</string>
+    <string name="routing_error_admin_bad_session_key">Chiave di sessione non valida</string>
+    <string name="routing_error_admin_public_key_unauthorized">Chiave Pubblica non autorizzata</string>
     <string name="role_client">App collegata o dispositivo di messaggistica standalone.</string>
     <string name="role_client_mute">Dispositivo che non inoltra pacchetti da altri dispositivi.</string>
     <string name="role_router">Nodo d\'infrastruttura per estendere la copertura di rete tramite inoltro dei messaggi. Visibile nell\'elenco dei nodi.</string>
+    <string name="role_router_client">Combinazione di ROUTER e CLIENT. Non per dispositivi mobili.</string>
     <string name="role_repeater">Nodo d\'infrastruttura per estendere la copertura della rete tramite inoltro dei messaggi con overhead minimo. Non visibile nell\'elenco dei nodi.</string>
     <string name="role_tracker">Dà priorità alla trasmissione di pacchetti di posizione GPS.</string>
     <string name="role_sensor">Dà priorità alla trasmissione di pacchetti di telemetria.</string>
@@ -37,6 +40,12 @@
     <string name="role_client_hidden">Dispositivo che trasmette solo quando necessario, per risparmiare energia o restare invisibile.</string>
     <string name="role_lost_and_found">Trasmette a intervalli regolari la posizione come messaggio nel canale predefinito per aiutare il recupero del dispositivo.</string>
     <string name="role_tak_tracker">Abilita le trasmissioni automatiche TAK PLI e riduce le trasmissioni di routine.</string>
+    <string name="rebroadcast_mode_all">Ritrasmettere qualsiasi messaggio osservato, se era sul nostro canale privato o da un\'altra mesh con gli stessi parametri lora.</string>
+    <string name="rebroadcast_mode_all_skip_decoding">Stesso comportamento di ALL ma salta la decodifica dei pacchetti e semplicemente li ritrasmette. Disponibile solo nel ruolo Repeater. Attivando questo su qualsiasi altro ruolo, si otterrà il comportamento di ALL.</string>
+    <string name="rebroadcast_mode_local_only">Ignora i messaggi osservati da mesh esterne aperte o quelli che non possono essere decifrati. Ritrasmette il messaggio solo nei canali locali primario / secondario dei nodi.</string>
+    <string name="rebroadcast_mode_known_only">Ignora i messaggi osservati da mesh esterne come fa LOCAL ONLY, ma in più ignora i messaggi da nodi non presenti nella lista dei nodi conosciuti.</string>
+    <string name="rebroadcast_mode_none">Permesso solo per i ruoli SENSOR, TRACKER e TAK_TRACKER, questo inibirà tutte le ritrasmissioni, come il ruolo CLIENT_MUTE.</string>
+    <string name="rebroadcast_mode_core_portnums_only">Ignora pacchetti da numeri di porta non standard come: TAK, RangeTest, PaxCounter, ecc. Ritrasmette solo pacchetti con numeri di porta standard: NodeInfo, Testo, Posizione, Telemetria e Routing.</string>
     <string name="channel_name">Nome del canale</string>
     <string name="channel_options">Opzioni del canale</string>
     <string name="qr_code">Codice QR</string>
@@ -58,9 +67,7 @@
     <string name="change_channel">Cambia canale</string>
     <string name="are_you_sure_channel">Sei sicuro di voler cambiare canale ? Tutte le comunicazioni con gli altri nodi termineranno fino a quando non condividi le impostazioni del nuovo canale.</string>
     <string name="new_channel_rcvd">Ricevuta URL del Nuovo Canale</string>
-    <string name="do_you_want_switch">Passare al canale \'%s\' ?</string>
     <string name="permission_missing">Meshtastic necessita dei permessi di geolocalizzazione e la geolocalizzazione deve essere attiva per cercare nuovi dispositivi via Bluetooth. È possibile disattivarla successivamente.</string>
-    <string name="radio_sleeping">La radio era in sleep, non è stato possibile cambiare canale</string>
     <string name="report_bug">Segnala Bug</string>
     <string name="report_a_bug">Segnalazione di bug</string>
     <string name="report_bug_text">Procedere con la segnalazione di bug? Dopo averlo segnalato, si prega di postarlo in meshtastic.discourse.group in modo che possiamo associare la segnalazione al problema riscontrato.</string>
@@ -74,7 +81,6 @@
     <string name="disconnected">Disconnesso</string>
     <string name="device_sleeping">Il dispositivo è inattivo</string>
     <string name="connected_count">Connesso: %1$s di %2$s online</string>
-    <string name="list_of_nodes">Un elenco di nodi nella rete</string>
     <string name="update_firmware">Aggiorna Firmware</string>
     <string name="ip_address">Indirizzo IP:</string>
     <string name="connected">Connesso alla radio</string>
@@ -95,7 +101,6 @@
     <string name="meshtastic_service_notifications">Notifiche di servizio</string>
     <string name="location_disabled_warning">La localizzazione deve essere attiva per cercare nuovi dispositivi tramite Bluetooth. Può essere spenta di nuovo successivamente.</string>
     <string name="about">Informazioni</string>
-    <string name="a_list_of_nodes_in_the_mesh">Un elenco di nodi nel mesh</string>
     <string name="text_messages">Messaggi di testo</string>
     <string name="channel_invalid">L\'URL di questo Canale non è valida e non può essere usata</string>
     <string name="debug_panel">Pannello Di Debug</string>
@@ -219,10 +224,6 @@
     <string name="mute_8_hours">8 ore</string>
     <string name="mute_1_week">1 settimana</string>
     <string name="mute_always">Sempre</string>
-    <plurals name="add_channel_from_qr">
-        <item quantity="one">Si desidera aggiungere un nuovo canale?</item>
-        <item quantity="other">Si desidera aggiungere %d nuovi canali?</item>
-    </plurals>
     <string name="replace">Sostituisci</string>
     <string name="wifi_qr_code_scan">Scansiona codice QR WiFi</string>
     <string name="wifi_qr_code_error">Formato codice QR delle Credenziali WiFi non valido</string>
@@ -230,9 +231,6 @@
     <string name="battery">Batteria</string>
     <string name="channel_utilization">Utilizzo Canale</string>
     <string name="air_utilization">Tempo di Trasmissione Utilizzato</string>
-    <string name="device">Dispositivo</string>
-    <string name="metrics">Statistiche</string>
-    <string name="environment">Ambiente</string>
     <string name="temperature">Temperatura</string>
     <string name="humidity">Umidità</string>
     <string name="logs">Registri</string>
@@ -247,4 +245,32 @@
     <string name="encryption_pkc_text">I messaggi privati utilizzano la nuova infrastruttura a chiave pubblica per la crittografia. Richiede la versione 2.5 o superiore.</string>
     <string name="encryption_error">Chiave pubblica errata</string>
     <string name="encryption_error_text">La chiave pubblica non corrisponde alla chiave salvata. È possibile rimuovere il nodo e lasciarlo scambiare le chiavi, ma questo può indicare un problema di sicurezza più serio. Contattare l\'utente attraverso un altro canale attendibile, per determinare se il cambiamento di chiave è dovuto a un ripristino di fabbrica o ad altre azioni intenzionali.</string>
+    <string name="request_userinfo">Richiedi informazioni utente</string>
+    <string name="meshtastic_new_nodes_notifications">Notifiche di nuovi nodi</string>
+    <string name="more_details">Ulteriori informazioni</string>
+    <string name="snr">SNR</string>
+    <string name="snr_definition">Rapporto segnale-rumore (Signal-to-Noise Ratio), una misura utilizzata nelle comunicazioni per quantificare il livello di un segnale desiderato rispetto al livello di rumore di fondo. In Meshtastic e in altri sistemi wireless, un SNR più elevato indica un segnale più chiaro che può migliorare l\'affidabilità e la qualità della trasmissione dei dati.</string>
+    <string name="rssi">RSSI</string>
+    <string name="rssi_definition">Indicatore di forza del segnale ricevuto (Received Signal Strength Indicator), una misura utilizzata per determinare il livello di potenza ricevuto dall\'antenna. Un valore RSSI più elevato indica generalmente una connessione più forte e più stabile.</string>
+    <string name="iaq_definition">(Qualità dell\'aria interna) scala relativa del valore della qualità dell\'aria indoor, misurato da Bosch BME680. Valore Intervallo 0–500.</string>
+    <string name="device_metrics_log">Registro Metriche Dispositivo</string>
+    <string name="node_map">Mappa Dei Nodi</string>
+    <string name="position_log">Registro Posizione</string>
+    <string name="env_metrics_log">Registro Metriche Ambientali</string>
+    <string name="sig_metrics_log">Registro Metriche Segnale</string>
+    <string name="administration">Amministrazione</string>
+    <string name="remote_admin">Amministrazione Remota</string>
+    <string name="bad">Scarso</string>
+    <string name="fair">Discreto</string>
+    <string name="good">Buono</string>
+    <string name="none_quality">Nessuno</string>
+    <string name="signal">Segnale</string>
+    <string name="signal_quality">Qualità Segnale</string>
+    <string name="traceroute_log">Registro Di Traceroute</string>
+    <string name="traceroute_direct">Diretto</string>
+    <plurals name="traceroute_hops">
+        <item quantity="one">1 hop</item>
+        <item quantity="other">%d hop</item>
+    </plurals>
+    <string name="traceroute_diff">Hops verso di lui %1$d Hops di ritorno %2$d</string>
 </resources>

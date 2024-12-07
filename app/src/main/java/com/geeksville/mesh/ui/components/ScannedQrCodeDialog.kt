@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
@@ -51,13 +68,16 @@ fun ScannedQrCodeDialog(
     onDismiss: () -> Unit,
     onConfirm: (ChannelSet) -> Unit
 ) {
-    var shouldReplace by remember { mutableStateOf(true) }
+    var shouldReplace by remember { mutableStateOf(incoming.hasLoraConfig()) }
 
     val channelSet = remember(shouldReplace) {
         if (shouldReplace) {
             incoming
         } else {
             channels.copy {
+                // To guarantee consistent ordering, using a LinkedHashSet which iterates through
+                // it's entries according to the order an item was *first* inserted.
+                // https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-linked-hash-set/
                 val result = LinkedHashSet(settings + incoming.settingsList)
                 settings.clear()
                 settings.addAll(result)
@@ -134,6 +154,7 @@ fun ScannedQrCodeDialog(
                             modifier = Modifier
                                 .height(48.dp)
                                 .weight(1f),
+                            enabled = incoming.hasLoraConfig(),
                             colors = if (shouldReplace) selectedColors else unselectedColors,
                         ) { Text(text = stringResource(R.string.replace)) }
                     }

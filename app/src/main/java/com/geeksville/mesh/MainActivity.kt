@@ -1,8 +1,26 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh
 
 import android.app.Activity
 import android.bluetooth.BluetoothAdapter
-import android.content.*
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.hardware.usb.UsbManager
@@ -22,24 +40,47 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
+import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
+import androidx.lifecycle.asLiveData
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.geeksville.mesh.android.*
+import com.geeksville.mesh.android.BindFailedException
+import com.geeksville.mesh.android.GeeksvilleApplication
+import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.android.ServiceClient
+import com.geeksville.mesh.android.getBluetoothPermissions
+import com.geeksville.mesh.android.getNotificationPermissions
+import com.geeksville.mesh.android.hasBluetoothPermission
+import com.geeksville.mesh.android.hasNotificationPermission
+import com.geeksville.mesh.android.permissionMissing
+import com.geeksville.mesh.android.rationaleDialog
+import com.geeksville.mesh.android.shouldShowRequestPermissionRationale
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.model.primaryChannel
-import com.geeksville.mesh.model.shouldAddChannels
-import com.geeksville.mesh.model.toChannelSet
-import com.geeksville.mesh.service.*
-import com.geeksville.mesh.ui.*
+import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.service.MeshServiceNotifications
+import com.geeksville.mesh.service.ServiceRepository
+import com.geeksville.mesh.service.startService
+import com.geeksville.mesh.ui.ChannelFragment
+import com.geeksville.mesh.ui.ContactsFragment
+import com.geeksville.mesh.ui.DebugFragment
+import com.geeksville.mesh.ui.QuickChatSettingsFragment
+import com.geeksville.mesh.ui.SettingsFragment
+import com.geeksville.mesh.ui.UsersFragment
+import com.geeksville.mesh.ui.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.map.MapFragment
+import com.geeksville.mesh.ui.message.navigateToMessages
+import com.geeksville.mesh.ui.navigateToNavGraph
+import com.geeksville.mesh.ui.navigateToShareMessage
+import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.Exceptions
 import com.geeksville.mesh.util.LanguageUtils
 import com.geeksville.mesh.util.getPackageInfoCompat
@@ -137,7 +178,7 @@ class MainActivity : AppCompatActivity(), Logging {
                 info("Notification permissions granted")
             } else {
                 warn("Notification permissions denied")
-                showSnackbar(getString(R.string.notification_denied))
+                showSnackbar(getString(R.string.notification_denied), Snackbar.LENGTH_SHORT)
             }
         }
 
@@ -221,6 +262,25 @@ class MainActivity : AppCompatActivity(), Logging {
             override fun onTabReselected(tab: TabLayout.Tab?) { }
         })
 
+        binding.composeView.setContent {
+            val connState by model.connectionState.collectAsStateWithLifecycle()
+            val channels by model.channels.collectAsStateWithLifecycle()
+            val requestChannelSet by model.requestChannelSet.collectAsStateWithLifecycle()
+
+            AppTheme {
+                if (connState.isConnected()) {
+                    if (requestChannelSet != null) {
+                        ScannedQrCodeDialog(
+                            channels = channels,
+                            incoming = requestChannelSet!!,
+                            onDismiss = model::clearRequestChannelUrl,
+                            onConfirm = model::setChannels,
+                        )
+                    }
+                }
+            }
+        }
+
         // Handle any intent
         handleIntent(intent)
     }
@@ -252,8 +312,6 @@ class MainActivity : AppCompatActivity(), Logging {
         handleIntent(intent)
     }
 
-    private var requestedChannelUrl: Uri? = null
-
     // Handle any intents that were passed into us
     private fun handleIntent(intent: Intent) {
         val appLinkAction = intent.action
@@ -262,12 +320,15 @@ class MainActivity : AppCompatActivity(), Logging {
         when (appLinkAction) {
             Intent.ACTION_VIEW -> {
                 debug("Asked to open a channel URL - ask user if they want to switch to that channel.  If so send the config to the radio")
-                requestedChannelUrl = appLinkData
-
-                // if the device is connected already, process it now
-                perhapsChangeChannel()
+                appLinkData?.let(model::requestChannelUrl)
 
                 // We now wait for the device to connect, once connected, we ask the user if they want to switch to the new channel
+            }
+
+            MeshServiceNotifications.OPEN_MESSAGE_ACTION -> {
+                val contactKey =
+                    intent.getStringExtra(MeshServiceNotifications.OPEN_MESSAGE_EXTRA_CONTACT_KEY)
+                showMessages(contactKey)
             }
 
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
@@ -275,6 +336,13 @@ class MainActivity : AppCompatActivity(), Logging {
             }
 
             Intent.ACTION_MAIN -> {
+            }
+
+            Intent.ACTION_SEND -> {
+                val text = intent.getStringExtra(Intent.EXTRA_TEXT)
+                if (text != null) {
+                    shareMessages(text)
+                }
             }
 
             else -> {
@@ -346,11 +414,6 @@ class MainActivity : AppCompatActivity(), Logging {
 
                                 if (curVer < MeshService.minDeviceVersion) {
                                     showAlert(R.string.firmware_too_old, R.string.firmware_old)
-                                } else {
-                                    // If our app is too old/new, we probably don't understand the new DeviceConfig messages, so we don't read them until here
-
-                                    // we have a connection to our device now, do the channel change
-                                    perhapsChangeChannel()
                                 }
                             }
                         }
@@ -385,9 +448,9 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
-    private fun showSnackbar(msg: String) {
+    private fun showSnackbar(msg: String, duration: Int = Snackbar.LENGTH_INDEFINITE) {
         try {
-            Snackbar.make(binding.root, msg, Snackbar.LENGTH_INDEFINITE)
+            Snackbar.make(binding.root, msg, duration)
                 .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
                 .setAction(R.string.okay) {
                     // dismiss
@@ -395,51 +458,6 @@ class MainActivity : AppCompatActivity(), Logging {
                 .show()
         } catch (ex: IllegalStateException) {
             errormsg("Snackbar couldn't find view for msgString $msg")
-        }
-    }
-
-    @Suppress("NestedBlockDepth")
-    private fun perhapsChangeChannel(url: Uri? = requestedChannelUrl) {
-        // if the device is connected already, process it now
-        if (url != null && model.isConnected()) {
-            requestedChannelUrl = null
-            try {
-                val channels = url.toChannelSet()
-                val shouldAdd = url.shouldAddChannels()
-                val primary = channels.primaryChannel
-                if (primary == null) {
-                    showSnackbar(R.string.channel_invalid)
-                } else {
-                    val dialogMessage = if (!shouldAdd) {
-                        getString(R.string.do_you_want_switch).format(primary.name)
-                    } else {
-                        resources.getQuantityString(
-                            R.plurals.add_channel_from_qr,
-                            channels.settingsCount,
-                            channels.settingsCount
-                        )
-                    }
-                    MaterialAlertDialogBuilder(this)
-                        .setTitle(R.string.new_channel_rcvd)
-                        .setMessage(dialogMessage)
-                        .setNeutralButton(R.string.cancel) { _, _ ->
-                            // Do nothing
-                        }
-                        .setPositiveButton(R.string.accept) { _, _ ->
-                            debug("Setting channel from URL")
-                            try {
-                                model.setChannels(channels, !shouldAdd)
-                            } catch (ex: RemoteException) {
-                                errormsg("Couldn't change channel ${ex.message}")
-                                showSnackbar(R.string.cant_change_no_radio)
-                            }
-                        }
-                        .show()
-                }
-            } catch (ex: Throwable) {
-                errormsg("Channel url error: ${ex.message}")
-                showSnackbar("${getString(R.string.channel_invalid)}: ${ex.message}")
-            }
         }
     }
 
@@ -533,7 +551,7 @@ class MainActivity : AppCompatActivity(), Logging {
     override fun onStart() {
         super.onStart()
 
-        model.connectionState.observe(this) { state ->
+        model.connectionState.asLiveData().observe(this) { state ->
             onMeshConnectionChanged(state)
             updateConnectionStatusImage(state)
         }
@@ -550,15 +568,6 @@ class MainActivity : AppCompatActivity(), Logging {
                         bluetoothPermissionsLauncher.launch(bluetoothPermissions)
                     }
                 }
-            }
-        }
-
-        // Call perhapsChangeChannel() whenever [requestChannelUrl] updates with a non-null value
-        model.requestChannelUrl.observe(this) { url ->
-            url?.let {
-                requestedChannelUrl = url
-                model.clearRequestChannelUrl()
-                perhapsChangeChannel()
             }
         }
 
@@ -599,12 +608,26 @@ class MainActivity : AppCompatActivity(), Logging {
         binding.pager.currentItem = 5
     }
 
+    private fun showMessages(contactKey: String?) {
+        model.setCurrentTab(0)
+        if (contactKey != null) {
+            supportFragmentManager.navigateToMessages(contactKey)
+        }
+    }
+
+    private fun shareMessages(message: String?) {
+        model.setCurrentTab(0)
+        if (message != null) {
+            supportFragmentManager.navigateToShareMessage(message)
+        }
+    }
+
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
         menuInflater.inflate(R.menu.menu_main, menu)
         model.actionBarMenu = menu
 
-        updateConnectionStatusImage(model.connectionState.value!!)
+        updateConnectionStatusImage(model.connectionState.value)
 
         return true
     }
@@ -660,7 +683,7 @@ class MainActivity : AppCompatActivity(), Logging {
                 return true
             }
             R.id.radio_config -> {
-                supportFragmentManager.navigateToRadioConfig()
+                supportFragmentManager.navigateToNavGraph()
                 return true
             }
             R.id.save_messages_csv -> {

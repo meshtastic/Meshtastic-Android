@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.model
 
 import android.graphics.Bitmap
@@ -11,9 +28,9 @@ import com.journeyapps.barcodescanner.BarcodeEncoder
 import java.net.MalformedURLException
 import kotlin.jvm.Throws
 
-internal const val URL_PREFIX = "https://meshtastic.org/e/#"
-private const val MESHTASTIC_DOMAIN = "meshtastic.org"
-private const val MESHTASTIC_CHANNEL_CONFIG_PATH = "/e/"
+private const val MESHTASTIC_HOST = "meshtastic.org"
+private const val MESHTASTIC_PATH = "/e/"
+internal const val URL_PREFIX = "https://$MESHTASTIC_HOST$MESHTASTIC_PATH#"
 private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
 
 /**
@@ -23,37 +40,21 @@ private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PAD
 @Throws(MalformedURLException::class)
 fun Uri.toChannelSet(): ChannelSet {
     if (fragment.isNullOrBlank() ||
-        !host.equals(MESHTASTIC_DOMAIN, true) ||
-        !path.equals(MESHTASTIC_CHANNEL_CONFIG_PATH, true)
+        !host.equals(MESHTASTIC_HOST, true) ||
+        !path.equals(MESHTASTIC_PATH, true)
     ) {
         throw MalformedURLException("Not a valid Meshtastic URL: ${toString().take(40)}")
     }
 
     // Older versions of Meshtastic clients (Apple/web) included `?add=true` within the URL fragment.
     // This gracefully handles those cases until the newer version are generally available/used.
-    return ChannelSet.parseFrom(Base64.decode(fragment!!.substringBefore('?'), BASE64FLAGS))
-}
-
-/**
- * Return a [Boolean] if the URL indicates the associated [ChannelSet] should be added to the
- * existing configuration.
- * @throws MalformedURLException when not recognized as a valid Meshtastic URL
- */
-@Throws(MalformedURLException::class)
-fun Uri.shouldAddChannels(): Boolean {
-    if (fragment.isNullOrBlank() ||
-        !host.equals(MESHTASTIC_DOMAIN, true) ||
-        !path.equals(MESHTASTIC_CHANNEL_CONFIG_PATH, true)
-    ) {
-        throw MalformedURLException("Not a valid Meshtastic URL: ${toString().take(40)}")
-    }
-
-    // Older versions of Meshtastic clients (Apple/web) included `?add=true` within the URL fragment.
-    // This gracefully handles those cases until the newer version are generally available/used.
-    return fragment?.substringAfter('?', "")
+    val url = ChannelSet.parseFrom(Base64.decode(fragment!!.substringBefore('?'), BASE64FLAGS))
+    val shouldAdd = fragment?.substringAfter('?', "")
         ?.takeUnless { it.isBlank() }
         ?.equals("add=true")
         ?: getBooleanQueryParameter("add", false)
+
+    return url.toBuilder().apply { if (shouldAdd) clearLoraConfig() }.build()
 }
 
 /**

@@ -1,10 +1,53 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.database.entity
 
 import androidx.room.ColumnInfo
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
+import androidx.room.Relation
 import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.MeshProtos.User
+import com.geeksville.mesh.model.Message
+import com.geeksville.mesh.util.getShortDateTime
+
+data class PacketEntity(
+    @Embedded val packet: Packet,
+    @Relation(entity = ReactionEntity::class, parentColumn = "packet_id", entityColumn = "reply_id")
+    val reactions: List<ReactionEntity> = emptyList(),
+) {
+    suspend fun toMessage(getNode: suspend (userId: String?) -> NodeEntity) = with(packet) {
+        Message(
+            uuid = uuid,
+            receivedTime = received_time,
+            node = getNode(data.from),
+            text = data.text.orEmpty(),
+            time = getShortDateTime(data.time),
+            read = read,
+            status = data.status,
+            routingError = routingError,
+            packetId = packetId,
+            emojis = reactions.toReaction(getNode),
+        )
+    }
+}
 
 @Entity(
     tableName = "packet",
@@ -25,6 +68,7 @@ data class Packet(
     @ColumnInfo(name = "data") val data: DataPacket,
     @ColumnInfo(name = "packet_id", defaultValue = "0") val packetId: Int = 0,
     @ColumnInfo(name = "routing_error", defaultValue = "-1") var routingError: Int = -1,
+    @ColumnInfo(name = "reply_id", defaultValue = "0") val replyId: Int = 0,
 )
 
 @Entity(tableName = "contact_settings")
@@ -34,3 +78,37 @@ data class ContactSettings(
 ) {
     val isMuted get() = System.currentTimeMillis() <= muteUntil
 }
+
+data class Reaction(
+    val replyId: Int,
+    val user: User,
+    val emoji: String,
+    val timestamp: Long,
+)
+
+@Entity(
+    tableName = "reactions",
+    primaryKeys = ["reply_id", "user_id", "emoji"],
+    indices = [
+        Index(value = ["reply_id"]),
+    ],
+)
+data class ReactionEntity(
+    @ColumnInfo(name = "reply_id") val replyId: Int,
+    @ColumnInfo(name = "user_id") val userId: String,
+    val emoji: String,
+    val timestamp: Long,
+)
+
+private suspend fun ReactionEntity.toReaction(
+    getNode: suspend (userId: String?) -> NodeEntity
+) = Reaction(
+    replyId = replyId,
+    user = getNode(userId).user,
+    emoji = emoji,
+    timestamp = timestamp,
+)
+
+private suspend fun List<ReactionEntity>.toReaction(
+    getNode: suspend (userId: String?) -> NodeEntity
+) = this.map { it.toReaction(getNode) }

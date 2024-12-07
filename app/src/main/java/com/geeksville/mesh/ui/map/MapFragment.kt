@@ -1,8 +1,23 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.ui.map
 
 import android.content.Context
-import android.graphics.Color
-import android.graphics.Paint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -16,6 +31,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationDisabled
+import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,6 +47,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
@@ -35,7 +55,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.R
@@ -51,18 +70,20 @@ import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.model.map.MarkerWithLabel
+import com.geeksville.mesh.model.map.clustering.RadiusMarkerClusterer
 import com.geeksville.mesh.ui.ScreenFragment
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.SqlTileWriterExt
+import com.geeksville.mesh.util.addCopyright
+import com.geeksville.mesh.util.addScaleBarOverlay
+import com.geeksville.mesh.util.createLatLongGrid
 import com.geeksville.mesh.util.formatAgo
-import com.geeksville.mesh.util.requiredZoomLevel
 import com.geeksville.mesh.util.zoomIn
 import com.geeksville.mesh.waypoint
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
-import org.osmdroid.events.DelayedMapListener
 import org.osmdroid.events.MapEventsReceiver
 import org.osmdroid.events.MapListener
 import org.osmdroid.events.ScrollEvent
@@ -74,16 +95,12 @@ import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.tileprovider.tilesource.TileSourcePolicyException
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
-import org.osmdroid.views.CustomZoomButtonsController
 import org.osmdroid.views.MapView
-import org.osmdroid.views.overlay.CopyrightOverlay
 import org.osmdroid.views.overlay.MapEventsOverlay
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
-import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
-import com.geeksville.mesh.model.map.clustering.RadiusMarkerClusterer
 import java.io.File
 import java.text.DateFormat
 
@@ -121,41 +138,6 @@ private fun MapView.UpdateMarkers(
     nodeClusterer.items.clear()
     nodeClusterer.items.addAll(nodeMarkers)
     nodeClusterer.invalidate()
-}
-
-/**
- * Adds copyright to map depending on what source is showing
- */
-private fun MapView.addCopyright() {
-    if (overlays.none { it is CopyrightOverlay }) {
-        val copyrightNotice: String = tileProvider.tileSource.copyrightNotice ?: return
-        val copyrightOverlay = CopyrightOverlay(context)
-        copyrightOverlay.setCopyrightNotice(copyrightNotice)
-        overlays.add(copyrightOverlay)
-    }
-}
-
-/**
- * Create LatLong Grid line overlay
- * @param enabled: turn on/off gridlines
- */
-private fun MapView.createLatLongGrid(enabled: Boolean) {
-    val latLongGridOverlay = LatLonGridlineOverlay2()
-    latLongGridOverlay.isEnabled = enabled
-    if (latLongGridOverlay.isEnabled) {
-        val textPaint = Paint().apply {
-            textSize = 40f
-            color = Color.GRAY
-            isAntiAlias = true
-            isFakeBoldText = true
-            textAlign = Paint.Align.CENTER
-        }
-        latLongGridOverlay.textPaint = textPaint
-        latLongGridOverlay.setBackgroundColor(Color.TRANSPARENT)
-        latLongGridOverlay.setLineWidth(3.0f)
-        latLongGridOverlay.setLineColor(Color.GRAY)
-        overlays.add(latLongGridOverlay)
-    }
 }
 
 //    private fun addWeatherLayer() {
@@ -242,33 +224,12 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
     builder.show()
 }
 
-private const val INACTIVITY_DELAY_MILLIS = 500L
-private fun MapView.addMapEventListener(onEvent: () -> Unit) {
-    addMapListener(DelayedMapListener(object : MapListener {
-        override fun onScroll(event: ScrollEvent): Boolean {
-            onEvent()
-            return true
-        }
-
-        override fun onZoom(event: ZoomEvent): Boolean {
-            onEvent()
-            return true
-        }
-    }, INACTIVITY_DELAY_MILLIS))
-}
-
-private const val MaxZoomLevel = 20.0
-
 @Composable
 fun MapView(
     model: UIViewModel = viewModel(),
 ) {
     // UI Elements
     var cacheEstimate by remember { mutableStateOf("") }
-
-    // constants
-    val prefsName = "org.geeksville.osm.prefs"
-    val mapStyleId = "map_style_id"
 
     var zoomLevelMin by remember { mutableDoubleStateOf(0.0) }
     var zoomLevelMax by remember { mutableDoubleStateOf(0.0) }
@@ -277,16 +238,33 @@ fun MapView(
     var downloadRegionBoundingBox: BoundingBox? by remember { mutableStateOf(null) }
     var myLocationOverlay: MyLocationNewOverlay? by remember { mutableStateOf(null) }
 
+    var showDownloadButton: Boolean by remember { mutableStateOf(false) }
+    var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
+    var showCurrentCacheInfo by remember { mutableStateOf(false) }
+
     val context = LocalContext.current
-    val mPrefs = remember { context.getSharedPreferences(prefsName, Context.MODE_PRIVATE) }
+    val density = LocalDensity.current
 
     val haptic = LocalHapticFeedback.current
     fun performHapticFeedback() = haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
     val hasGps = remember { context.hasGps() }
 
-    val map = rememberMapViewWithLifecycle(context)
-    val state by model.mapState.collectAsStateWithLifecycle()
+    fun loadOnlineTileSourceBase(): ITileSource {
+        val id = model.mapStyleId
+        debug("mapStyleId from prefs: $id")
+        return CustomTileSource.getTileSource(id).also {
+            zoomLevelMax = it.maximumZoomLevel.toDouble()
+            showDownloadButton =
+                if (it is OnlineTileSourceBase) it.tileSourcePolicy.acceptsBulkDownload() else false
+        }
+    }
+
+    val cameraView = remember {
+        val geoPoints = model.nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
+        BoundingBox.fromGeoPoints(geoPoints)
+    }
+    val map = rememberMapViewWithLifecycle(cameraView, loadOnlineTileSourceBase())
 
     val nodeClusterer = remember { RadiusMarkerClusterer(context) }
 
@@ -329,10 +307,6 @@ fun MapView(
     val nodes by model.nodeList.collectAsStateWithLifecycle()
     val waypoints by model.waypoints.collectAsStateWithLifecycle(emptyMap())
 
-    var showDownloadButton: Boolean by remember { mutableStateOf(false) }
-    var showEditWaypointDialog by remember { mutableStateOf<Waypoint?>(null) }
-    var showCurrentCacheInfo by remember { mutableStateOf(false) }
-
     val markerIcon = remember {
         AppCompatResources.getDrawable(context, R.drawable.ic_baseline_location_on_24)
     }
@@ -360,11 +334,11 @@ fun MapView(
                 position = nodePosition
                 icon = markerIcon
 
-                setOnLongClickListener {
-                    performHapticFeedback()
-                    model.focusUserNode(node)
-                    true
-                }
+//                setOnLongClickListener {
+//                    performHapticFeedback()
+//                    TODO NodeMenu?
+//                    true
+//                }
                 setNodeColors(node.colors)
                 setPrecisionBits(p.precisionBits)
             }
@@ -415,11 +389,11 @@ fun MapView(
     }
 
     fun MapView.onWaypointChanged(waypoints: Collection<Packet>): List<MarkerWithLabel> {
+        val dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
         return waypoints.mapNotNull { waypoint ->
             val pt = waypoint.data.waypoint ?: return@mapNotNull null
             val lock = if (pt.lockedTo != 0) "\uD83D\uDD12" else ""
-            val time = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
-                .format(waypoint.received_time)
+            val time = dateFormat.format(waypoint.received_time)
             val label = pt.name + " " + formatAgo((waypoint.received_time / 1000).toInt())
             val emoji = String(Character.toChars(if (pt.icon == 0) 128205 else pt.icon))
             MarkerWithLabel(this, label, emoji).apply {
@@ -489,6 +463,7 @@ fun MapView(
         }
 
         addCopyright() // Copyright is required for certain map sources
+        addScaleBarOverlay(density)
         createLatLongGrid(false)
 
         invalidate()
@@ -496,30 +471,6 @@ fun MapView(
 
     with(map) {
         UpdateMarkers(onNodesChanged(nodes), onWaypointChanged(waypoints.values), nodeClusterer)
-    }
-
-    fun MapView.zoomToNodes() {
-        if (state.center == null) {
-            val geoPoints = model.nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
-            val box = BoundingBox.fromGeoPoints(geoPoints)
-            val center = GeoPoint(box.centerLatitude, box.centerLongitude)
-            val finalZoomLevel = minOf(box.requiredZoomLevel() * 0.8, maxZoomLevel)
-            controller.setCenter(center)
-            controller.setZoom(finalZoomLevel)
-        } else {
-            controller.setCenter(state.center)
-            controller.setZoom(state.zoom)
-        }
-    }
-
-    fun loadOnlineTileSourceBase(): ITileSource {
-        val id = mPrefs.getInt(mapStyleId, 0)
-        debug("mapStyleId from prefs: $id")
-        return CustomTileSource.getTileSource(id).also {
-            zoomLevelMax = it.maximumZoomLevel.toDouble()
-            showDownloadButton =
-                if (it is OnlineTileSourceBase) it.tileSourcePolicy.acceptsBulkDownload() else false
-        }
     }
 
     /**
@@ -597,10 +548,10 @@ fun MapView(
         val builder = MaterialAlertDialogBuilder(context)
         val mapStyles: Array<CharSequence> = CustomTileSource.mTileSources.values.toTypedArray()
 
-        val mapStyleInt = mPrefs.getInt(mapStyleId, 0)
+        val mapStyleInt = model.mapStyleId
         builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
             debug("Set mapStyleId pref to $which")
-            mPrefs.edit().putInt(mapStyleId, which).apply()
+            model.mapStyleId = which
             dialog.dismiss()
             map.setTileSource(loadOnlineTileSourceBase())
         }
@@ -647,29 +598,8 @@ fun MapView(
             AndroidView(
                 factory = {
                     map.apply {
-                        // Required to get online tiles
-                        Configuration.getInstance().userAgentValue = BuildConfig.APPLICATION_ID
-                        setTileSource(loadOnlineTileSourceBase())
                         setDestroyMode(false) // keeps map instance alive when in the background
-                        isVerticalMapRepetitionEnabled = false // disables map repetition
-                        setMultiTouchControls(true)
-                        setScrollableAreaLimitLatitude( // bounds scrollable map
-                            overlayManager.tilesOverlay.bounds.actualNorth,
-                            overlayManager.tilesOverlay.bounds.actualSouth,
-                            0
-                        )
-                        // scales the map tiles to the display density of the screen
-                        isTilesScaledToDpi = true
-                        // sets the minimum zoom level (the furthest out you can zoom)
-                        minZoomLevel = 1.5
-                        maxZoomLevel = MaxZoomLevel
-                        // Disables default +/- button for zooming
-                        zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
                         addMapListener(boxOverlayListener)
-                        addMapEventListener {
-                            model.updateMapCenterAndZoom(projection.currentCenter, zoomLevelDouble)
-                        }
-                        zoomToNodes()
                     }
                 },
                 modifier = Modifier.fillMaxSize(),
@@ -691,26 +621,25 @@ fun MapView(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 MapButton(
-                    onClick = { showMapStyleDialog() },
-                    drawableRes = R.drawable.ic_twotone_layers_24,
+                    onClick = ::showMapStyleDialog,
+                    icon = Icons.Outlined.Layers,
                     contentDescription = R.string.map_style_selection,
                 )
                 MapButton(
-                    onClick = {
-                        if (context.hasLocationPermission()) {
-                            map.toggleMyLocation()
-                        } else {
-                            requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
-                        }
-                    },
                     enabled = hasGps,
-                    drawableRes = if (myLocationOverlay == null) {
-                        R.drawable.ic_twotone_my_location_24
+                    icon = if (myLocationOverlay == null) {
+                        Icons.Outlined.MyLocation
                     } else {
-                        R.drawable.ic_twotone_location_disabled_24
+                        Icons.Default.LocationDisabled
                     },
                     contentDescription = null,
-                )
+                ) {
+                    if (context.hasLocationPermission()) {
+                        map.toggleMyLocation()
+                    } else {
+                        requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
+                    }
+                }
             }
         }
     }

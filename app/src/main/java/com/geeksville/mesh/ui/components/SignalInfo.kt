@@ -1,4 +1,21 @@
-package com.geeksville.mesh.ui
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.geeksville.mesh.ui.components
 
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -17,11 +34,11 @@ const val MAX_VALID_SNR = 100F
 const val MAX_VALID_RSSI = 0
 
 @Composable
-fun signalInfo(
+fun SignalInfo(
     modifier: Modifier = Modifier,
     node: NodeEntity,
     isThisNode: Boolean
-): Boolean {
+) {
     val text = if (isThisNode) {
         stringResource(R.string.channel_air_util).format(
             node.deviceMetrics.channelUtilization,
@@ -40,24 +57,22 @@ fun signalInfo(
             if (node.channel > 0) {
                 add("ch:${node.channel}")
             }
-            if (node.hopsAway <= 0) {
-                if (node.snr < MAX_VALID_SNR && node.rssi < MAX_VALID_RSSI) {
-                    add("RSSI: %d SNR: %.1f".format(node.rssi, node.snr))
-                }
-            }
-            add(hopsString)
-        }.joinToString(" | ")
+            if (node.hopsAway != 0) add(hopsString)
+        }.joinToString(" ")
     }
-    return if (text.isNotEmpty()) {
+    if (text.isNotEmpty()) {
         Text(
             modifier = modifier,
             text = text,
             color = MaterialTheme.colors.onSurface,
             fontSize = MaterialTheme.typography.button.fontSize
         )
-        true
-    } else {
-        false
+    }
+    /* We only know the Signal Quality from direct nodes aka 0 hop. */
+    if (node.hopsAway <= 0) {
+        if (node.snr < MAX_VALID_SNR && node.rssi < MAX_VALID_RSSI) {
+            NodeSignalQuality(node.snr, node.rssi)
+        }
     }
 }
 
@@ -65,7 +80,7 @@ fun signalInfo(
 @Preview(showBackground = true)
 fun SignalInfoSimplePreview() {
     AppTheme {
-        signalInfo(
+        SignalInfo(
             node = NodeEntity(
                 num = 1,
                 lastHeard = 0,
@@ -86,7 +101,7 @@ fun SignalInfoPreview(
     node: NodeEntity
 ) {
     AppTheme {
-        signalInfo(
+        SignalInfo(
             node = node,
             isThisNode = false
         )
@@ -100,7 +115,7 @@ fun SignalInfoSelfPreview(
     node: NodeEntity
 ) {
     AppTheme {
-        signalInfo(
+        SignalInfo(
             node = node,
             isThisNode = true
         )

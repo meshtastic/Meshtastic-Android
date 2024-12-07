@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.ui.components.config
 
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,9 +33,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
 import com.geeksville.mesh.R
+import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
+import com.geeksville.mesh.model.RadioConfigViewModel
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
@@ -41,6 +62,40 @@ private val DeviceConfig.Role.stringRes: Int
         else -> R.string.unrecognized
     }
 
+private val DeviceConfig.RebroadcastMode.stringRes: Int
+    get() = when (this) {
+        DeviceConfig.RebroadcastMode.ALL -> R.string.rebroadcast_mode_all
+        DeviceConfig.RebroadcastMode.ALL_SKIP_DECODING -> R.string.rebroadcast_mode_all_skip_decoding
+        DeviceConfig.RebroadcastMode.LOCAL_ONLY -> R.string.rebroadcast_mode_local_only
+        DeviceConfig.RebroadcastMode.KNOWN_ONLY -> R.string.rebroadcast_mode_known_only
+        DeviceConfig.RebroadcastMode.NONE -> R.string.rebroadcast_mode_none
+        DeviceConfig.RebroadcastMode.CORE_PORTNUMS_ONLY -> R.string.rebroadcast_mode_core_portnums_only
+        else -> R.string.unrecognized
+    }
+
+@Composable
+fun DeviceConfigScreen(
+    viewModel: RadioConfigViewModel = hiltViewModel(),
+) {
+    val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+
+    if (state.responseState.isWaiting()) {
+        PacketResponseStateDialog(
+            state = state.responseState,
+            onDismiss = viewModel::clearPacketResponse,
+        )
+    }
+
+    DeviceConfigItemList(
+        deviceConfig = state.radioConfig.device,
+        enabled = state.connected,
+        onSaveClicked = { deviceInput ->
+            val config = config { device = deviceInput }
+            viewModel.setConfig(config)
+        }
+    )
+}
+
 @Composable
 fun DeviceConfigItemList(
     deviceConfig: DeviceConfig,
@@ -56,16 +111,15 @@ fun DeviceConfigItemList(
         item { PreferenceCategory(text = "Device Config") }
 
         item {
-            DropDownPreference(title = "Role",
-                summary = stringResource(id = deviceInput.role.stringRes),
+            DropDownPreference(
+                title = "Role",
                 enabled = enabled,
-                items = DeviceConfig.Role.entries
-                    .filter { it != DeviceConfig.Role.UNRECOGNIZED }
-                    .map { it to it.name },
                 selectedItem = deviceInput.role,
-                onItemSelected = { deviceInput = deviceInput.copy { role = it } })
+                onItemSelected = { deviceInput = deviceInput.copy { role = it } },
+                summary = stringResource(id = deviceInput.role.stringRes),
+            )
+            Divider()
         }
-        item { Divider() }
 
         item {
             EditTextPreference(title = "Redefine PIN_BUTTON",
@@ -88,15 +142,15 @@ fun DeviceConfigItemList(
         }
 
         item {
-            DropDownPreference(title = "Rebroadcast mode",
+            DropDownPreference(
+                title = "Rebroadcast mode",
                 enabled = enabled,
-                items = DeviceConfig.RebroadcastMode.entries
-                    .filter { it != DeviceConfig.RebroadcastMode.UNRECOGNIZED }
-                    .map { it to it.name },
                 selectedItem = deviceInput.rebroadcastMode,
-                onItemSelected = { deviceInput = deviceInput.copy { rebroadcastMode = it } })
+                onItemSelected = { deviceInput = deviceInput.copy { rebroadcastMode = it } },
+                summary = stringResource(id = deviceInput.rebroadcastMode.stringRes),
+            )
+            Divider()
         }
-        item { Divider() }
 
         item {
             EditTextPreference(title = "NodeInfo broadcast interval (seconds)",
@@ -109,24 +163,26 @@ fun DeviceConfigItemList(
         }
 
         item {
-            SwitchPreference(title = "Double tap as button press",
+            SwitchPreference(
+                title = "Double tap as button press",
+                summary = stringResource(id = R.string.config_device_doubleTapAsButtonPress_summary),
                 checked = deviceInput.doubleTapAsButtonPress,
                 enabled = enabled,
-                onCheckedChange = {
-                    deviceInput = deviceInput.copy { doubleTapAsButtonPress = it }
-                })
+                onCheckedChange = { deviceInput = deviceInput.copy { doubleTapAsButtonPress = it } }
+            )
+            Divider()
         }
-        item { Divider() }
 
         item {
-            SwitchPreference(title = "Disable triple-click",
+            SwitchPreference(
+                title = "Disable triple-click",
+                summary = stringResource(id = R.string.config_device_disableTripleClick_summary),
                 checked = deviceInput.disableTripleClick,
                 enabled = enabled,
-                onCheckedChange = {
-                    deviceInput = deviceInput.copy { disableTripleClick = it }
-                })
+                onCheckedChange = { deviceInput = deviceInput.copy { disableTripleClick = it } }
+            )
+            Divider()
         }
-        item { Divider() }
 
         item {
             EditTextPreference(title = "POSIX Timezone",
@@ -145,18 +201,19 @@ fun DeviceConfigItemList(
         }
 
         item {
-            SwitchPreference(title = "Disable LED heartbeat",
+            SwitchPreference(
+                title = "Disable LED heartbeat",
+                summary = stringResource(id = R.string.config_device_ledHeartbeatDisabled_summary),
                 checked = deviceInput.ledHeartbeatDisabled,
                 enabled = enabled,
-                onCheckedChange = {
-                    deviceInput = deviceInput.copy { ledHeartbeatDisabled = it }
-                })
+                onCheckedChange = { deviceInput = deviceInput.copy { ledHeartbeatDisabled = it } }
+            )
+            Divider()
         }
-        item { Divider() }
 
         item {
             PreferenceFooter(
-                enabled = deviceInput != deviceConfig,
+                enabled = enabled && deviceInput != deviceConfig,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     deviceInput = deviceConfig

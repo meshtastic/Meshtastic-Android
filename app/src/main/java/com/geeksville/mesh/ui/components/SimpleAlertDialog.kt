@@ -1,7 +1,23 @@
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.ui.components
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -23,10 +39,11 @@ import com.geeksville.mesh.ui.theme.AppTheme
 fun SimpleAlertDialog(
     @StringRes title: Int,
     text: @Composable (() -> Unit)? = null,
+    onConfirm: (() -> Unit)? = null,
     onDismiss: () -> Unit = {},
 ) = AlertDialog(
     onDismissRequest = onDismiss,
-    confirmButton = {
+    dismissButton = {
         TextButton(
             onClick = onDismiss,
             modifier = Modifier
@@ -35,6 +52,18 @@ fun SimpleAlertDialog(
                 contentColor = MaterialTheme.colors.onSurface,
             ),
         ) { Text(text = stringResource(id = R.string.close)) }
+    },
+    confirmButton = {
+        onConfirm?.let {
+        TextButton(
+            onClick = onConfirm,
+            modifier = Modifier
+                .padding(horizontal = 16.dp),
+            colors = ButtonDefaults.textButtonColors(
+                contentColor = MaterialTheme.colors.onSurface,
+            ),
+        ) { Text(text = stringResource(id = R.string.okay)) }
+        }
     },
     title = {
         Text(
@@ -52,13 +81,34 @@ fun SimpleAlertDialog(
 fun SimpleAlertDialog(
     @StringRes title: Int,
     @StringRes text: Int,
+    onConfirm: (() -> Unit)? = null,
     onDismiss: () -> Unit = {},
 ) = SimpleAlertDialog(
+    onConfirm = onConfirm,
     onDismiss = onDismiss,
     title = title,
     text = {
         Text(
             text = stringResource(id = text),
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+        )
+    },
+)
+
+@Composable
+fun SimpleAlertDialog(
+    @StringRes title: Int,
+    text: String,
+    onConfirm: (() -> Unit)? = null,
+    onDismiss: () -> Unit = {},
+) = SimpleAlertDialog(
+    onConfirm = onConfirm,
+    onDismiss = onDismiss,
+    title = title,
+    text = {
+        Text(
+            text = text,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
         )

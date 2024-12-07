@@ -1,5 +1,23 @@
-package com.geeksville.mesh.ui
+/*
+ * Copyright (c) 2024 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
+package com.geeksville.mesh.ui.message.components
+
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -7,6 +25,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,23 +33,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.ui.components.SimpleAlertDialog
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
-import java.util.Date
 
 @Composable
-internal fun MessageListView(
+internal fun MessageList(
     messages: List<Message>,
-    selectedList: List<Message>,
-    onClick: (Message) -> Unit,
-    onLongClick: (Message) -> Unit,
-    onChipClick: (Message) -> Unit,
+    selectedIds: MutableState<Set<Long>>,
     onUnreadChanged: (Long) -> Unit,
+    contentPadding: PaddingValues,
+    onSendReaction: (String, Int) -> Unit,
+    onClick: (Message) -> Unit = {}
 ) {
+    val haptics = LocalHapticFeedback.current
+    val inSelectionMode by remember { derivedStateOf { selectedIds.value.isNotEmpty() } }
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = messages.indexOfLast { !it.read }.coerceAtLeast(0)
     )
@@ -44,25 +67,43 @@ internal fun MessageListView(
         SimpleAlertDialog(title = title, text = text) { showStatusDialog = null }
     }
 
+    var showReactionDialog by remember { mutableStateOf<List<Reaction>?>(null) }
+    if (showReactionDialog != null) {
+        val reactions = showReactionDialog ?: return
+        ReactionDialog(reactions) { showReactionDialog = null }
+    }
+
+    fun MutableState<Set<Long>>.toggle(uuid: Long) = if (value.contains(uuid)) {
+        value -= uuid
+    } else {
+        value += uuid
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         state = listState,
         reverseLayout = true,
-        // contentPadding = PaddingValues(8.dp)
+        contentPadding = contentPadding
     ) {
         items(messages, key = { it.uuid }) { msg ->
-            val selected by remember { derivedStateOf { selectedList.contains(msg) } }
+            val fromLocal = msg.node.user.id == DataPacket.ID_LOCAL
+            val selected by remember { derivedStateOf { selectedIds.value.contains(msg.uuid) } }
 
+            ReactionRow(fromLocal, msg.emojis) { showReactionDialog = msg.emojis }
             MessageItem(
-                shortName = msg.user.shortName.takeIf { msg.user.id != DataPacket.ID_LOCAL },
+                node = msg.node,
                 messageText = msg.text,
-                messageTime = getShortDateTime(Date(msg.time)),
+                messageTime = msg.time,
                 messageStatus = msg.status,
                 selected = selected,
-                onClick = { onClick(msg) },
-                onLongClick = { onLongClick(msg) },
-                onChipClick = { onChipClick(msg) },
-                onStatusClick = { showStatusDialog = msg }
+                onClick = { if (inSelectionMode) selectedIds.toggle(msg.uuid) },
+                onLongClick = {
+                    selectedIds.toggle(msg.uuid)
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                },
+                onChipClick = { onClick(msg) },
+                onStatusClick = { showStatusDialog = msg },
+                onSendReaction = { onSendReaction(it, msg.packetId) },
             )
         }
     }
