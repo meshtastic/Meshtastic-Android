@@ -15,10 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-@file:Suppress("TooManyFunctions")
+@file:Suppress("TooManyFunctions", "LongMethod")
 
 package com.geeksville.mesh.ui
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +38,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
@@ -64,6 +67,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Thermostat
+import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material.icons.outlined.Navigation
@@ -71,6 +75,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -98,8 +103,8 @@ import kotlin.math.ln
 
 @Composable
 fun NodeDetailScreen(
-    viewModel: MetricsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
+    viewModel: MetricsViewModel = hiltViewModel(),
     onNavigate: (Any) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -124,15 +129,20 @@ fun NodeDetailScreen(
 
 @Composable
 private fun NodeDetailList(
+    modifier: Modifier = Modifier,
     node: NodeEntity,
     metricsState: MetricsState,
-    modifier: Modifier = Modifier,
     onNavigate: (Any) -> Unit = {},
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 16.dp),
     ) {
+        item {
+            PreferenceCategory("Device") {
+                DeviceDetailsContent(metricsState)
+            }
+        }
         item {
             PreferenceCategory("Details") {
                 NodeDetailsContent(node)
@@ -176,7 +186,12 @@ private fun NodeDetailList(
 }
 
 @Composable
-private fun NodeDetailRow(label: String, icon: ImageVector, value: String) {
+private fun NodeDetailRow(
+    label: String,
+    icon: ImageVector,
+    value: String,
+    iconTint: Color = MaterialTheme.colors.onSurface
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -186,7 +201,8 @@ private fun NodeDetailRow(label: String, icon: ImageVector, value: String) {
         Icon(
             imageVector = icon,
             contentDescription = label,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(24.dp),
+            tint = iconTint
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(label)
@@ -196,7 +212,50 @@ private fun NodeDetailRow(label: String, icon: ImageVector, value: String) {
 }
 
 @Composable
-private fun NodeDetailsContent(node: NodeEntity) {
+private fun DeviceDetailsContent(
+    state: MetricsState,
+) {
+    val node = state.node ?: return
+    val deviceHardware = state.deviceHardware ?: return
+    val deviceImageRes = state.deviceImageRes
+    val hwModelName = deviceHardware.displayName
+    val isSupported = deviceHardware.activelySupported
+    Box(
+        modifier = Modifier
+            .size(100.dp)
+            .padding(4.dp)
+            .clip(CircleShape)
+            .background(
+                color = Color(node.colors.second).copy(alpha = .5f),
+                shape = CircleShape
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            modifier = Modifier.padding(16.dp),
+            imageVector = ImageVector.vectorResource(deviceImageRes),
+            contentDescription = hwModelName,
+        )
+    }
+    NodeDetailRow(
+        label = "Hardware",
+        icon = Icons.Default.Router,
+        value = hwModelName
+    )
+    if (isSupported) {
+        NodeDetailRow(
+            label = "Supported",
+            icon = Icons.Default.Verified,
+            value = "",
+            iconTint = Color.Green
+        )
+    }
+}
+
+@Composable
+private fun NodeDetailsContent(
+    node: NodeEntity,
+) {
     if (node.mismatchKey) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
@@ -231,11 +290,6 @@ private fun NodeDetailsContent(node: NodeEntity) {
         label = "Role",
         icon = Icons.Default.Work,
         value = node.user.role.name
-    )
-    NodeDetailRow(
-        label = "Hardware",
-        icon = Icons.Default.Router,
-        value = node.user.hwModel.name
     )
     if (node.deviceMetrics.uptimeSeconds > 0) {
         NodeDetailRow(
@@ -541,6 +595,9 @@ private fun NodeDetailsPreview(
     node: NodeEntity
 ) {
     AppTheme {
-        NodeDetailList(node, MetricsState.Empty)
+        NodeDetailList(
+            node = node,
+            metricsState = MetricsState.Empty,
+        )
     }
 }
