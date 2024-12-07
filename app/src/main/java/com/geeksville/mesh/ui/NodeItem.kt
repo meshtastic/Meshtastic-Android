@@ -60,7 +60,7 @@ import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.NodeEntity
-import com.geeksville.mesh.ui.components.MenuItemAction
+import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.components.NodeMenu
 import com.geeksville.mesh.ui.components.SignalInfo
@@ -79,13 +79,12 @@ fun NodeItem(
     gpsFormat: Int,
     distanceUnits: Int,
     tempInFahrenheit: Boolean,
-    ignoreIncomingList: List<Int> = emptyList(),
-    menuItemActionClicked: (MenuItemAction) -> Unit = {},
+    onAction: (NodeMenuAction) -> Unit = {},
     expanded: Boolean = false,
     currentTimeMillis: Long,
     isConnected: Boolean = false,
 ) {
-    val isIgnored = ignoreIncomingList.contains(thatNode.num)
+    val isIgnored = thatNode.isIgnored
     val longName = thatNode.user.longName.ifEmpty { stringResource(id = R.string.unknown_username) }
 
     val isThisNode = thisNode?.num == thatNode.num
@@ -159,12 +158,10 @@ fun NodeItem(
                         }
                         NodeMenu(
                             node = thatNode,
-                            ignoreIncomingList = ignoreIncomingList,
-                            isThisNode = isThisNode,
-                            onMenuItemAction = menuItemActionClicked,
+                            showFullMenu = !isThisNode && isConnected,
+                            onAction = onAction,
                             expanded = menuExpanded,
                             onDismissRequest = { menuExpanded = false },
-                            isConnected = isConnected,
                         )
                     }
                     NodeKeyStatusIcon(

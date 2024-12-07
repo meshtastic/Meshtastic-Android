@@ -77,6 +77,7 @@ import javax.inject.Inject
 import kotlin.math.absoluteValue
 
 sealed class ServiceAction {
+    data class Ignore(val node: NodeEntity) : ServiceAction()
     data class Reaction(val emoji: String, val replyId: Int, val contactKey: String) : ServiceAction()
 }
 
@@ -303,6 +304,7 @@ class MeshService : Service(), Logging {
             .launchIn(serviceScope)
         radioConfigRepository.serviceAction.onEach { action ->
             when (action) {
+                is ServiceAction.Ignore -> ignoreNode(action.node)
                 is ServiceAction.Reaction -> sendReaction(action)
             }
         }.launchIn(serviceScope)
@@ -1453,6 +1455,7 @@ class MeshService : Service(), Logging {
                 -1
             }
             it.isFavorite = info.isFavorite
+            it.isIgnored = info.isIgnored
         }
     }
 
@@ -1754,6 +1757,21 @@ class MeshService : Service(), Logging {
     private fun enqueueForSending(p: DataPacket) {
         if (p.dataType in rememberDataType) {
             offlineSentPackets.add(p)
+        }
+    }
+
+    private fun ignoreNode(node: NodeEntity) = toRemoteExceptions {
+        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+            if (node.isIgnored) {
+                debug("removing node ${node.num} from ignore list")
+                removeIgnoredNode = node.num
+            } else {
+                debug("adding node ${node.num} to ignore list")
+                setIgnoredNode = node.num
+            }
+        })
+        updateNodeInfo(node.num) {
+            it.isIgnored = !node.isIgnored
         }
     }
 
