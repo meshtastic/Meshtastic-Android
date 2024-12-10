@@ -42,6 +42,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -81,6 +82,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -262,18 +264,21 @@ private fun NodeDetailsContent(
                 contentDescription = stringResource(id = R.string.encryption_error),
                 tint = Color.Red,
             )
-            Column(modifier = Modifier.padding(start = 8.dp)) {
-                Text(
-                    text = stringResource(id = R.string.encryption_error),
-                    style = MaterialTheme.typography.h6.copy(color = Color.Red)
-                )
-                Text(
-                    text = stringResource(id = R.string.encryption_error_text),
-                    style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                )
-            }
+            Spacer(Modifier.width(12.dp))
+            Text(
+                text = stringResource(id = R.string.encryption_error),
+                style = MaterialTheme.typography.h6.copy(color = Color.Red),
+                textAlign = TextAlign.Center,
+            )
         }
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = stringResource(id = R.string.encryption_error_text),
+            style = MaterialTheme.typography.body2,
+            color = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(16.dp))
     }
     NodeDetailRow(
         label = "Node Number",
