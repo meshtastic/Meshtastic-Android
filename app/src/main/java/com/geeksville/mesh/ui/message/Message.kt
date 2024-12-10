@@ -88,11 +88,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannel
-import com.geeksville.mesh.ui.message.components.MessageList
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
+import com.geeksville.mesh.ui.components.NodeMenuAction
+import com.geeksville.mesh.ui.message.components.MessageList
+import com.geeksville.mesh.ui.navigateToNavGraph
 import com.geeksville.mesh.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -111,6 +114,19 @@ internal fun FragmentManager.navigateToMessages(contactKey: String, message: Str
 class MessagesFragment : Fragment(), Logging {
     private val model: UIViewModel by activityViewModels()
 
+    private fun navigateToMessages(node: NodeEntity) = node.user.let { user ->
+        val hasPKC = model.ourNodeInfo.value?.hasPKC == true && node.hasPKC // TODO use meta.hasPKC
+        val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
+        val contactKey = "$channel${user.id}"
+        info("calling MessagesFragment filter: $contactKey")
+        parentFragmentManager.navigateToMessages(contactKey)
+    }
+
+    private fun navigateToNodeDetails(nodeNum: Int) {
+        info("calling NodeDetails --> destNum: $nodeNum")
+        parentFragmentManager.navigateToNavGraph(nodeNum, "NodeDetails")
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -128,6 +144,8 @@ class MessagesFragment : Fragment(), Logging {
                         contactKey = contactKey,
                         message = message,
                         viewModel = model,
+                        navigateToMessages = ::navigateToMessages,
+                        navigateToNodeDetails = ::navigateToNodeDetails,
                     ) { parentFragmentManager.popBackStack() }
                 }
             }
@@ -148,6 +166,8 @@ internal fun MessageScreen(
     contactKey: String,
     message: String,
     viewModel: UIViewModel = hiltViewModel(),
+    navigateToMessages: (NodeEntity) -> Unit,
+    navigateToNodeDetails: (Int) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -255,8 +275,16 @@ internal fun MessageScreen(
                 onUnreadChanged = { viewModel.clearUnreadCount(contactKey, it) },
                 contentPadding = innerPadding,
                 onSendReaction = { emoji, id -> viewModel.sendReaction(emoji, id, contactKey) },
-            ) {
-                // TODO onCLick()
+            ) { action ->
+                when (action) {
+                    is NodeMenuAction.Remove -> viewModel.removeNode(action.node.num)
+                    is NodeMenuAction.Ignore -> viewModel.ignoreNode(action.node)
+                    is NodeMenuAction.DirectMessage -> navigateToMessages(action.node)
+                    is NodeMenuAction.RequestUserInfo -> viewModel.requestUserInfo(action.node.num)
+                    is NodeMenuAction.RequestPosition -> viewModel.requestPosition(action.node.num)
+                    is NodeMenuAction.TraceRoute -> viewModel.requestTraceroute(action.node.num)
+                    is NodeMenuAction.MoreDetails -> navigateToNodeDetails(action.node.num)
+                }
             }
         }
     }
