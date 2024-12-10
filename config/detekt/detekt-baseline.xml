@@ -2,6 +2,7 @@
 <SmellBaseline>
   <ManuallySuppressedIssues></ManuallySuppressedIssues>
   <CurrentIssues>
+    <ID>AbsentOrWrongFileLicense:LazyColumnDragAndDropDemo.kt$com.geeksville.mesh.ui.components.LazyColumnDragAndDropDemo.kt</ID>
     <ID>ChainWrapping:Channel.kt$Channel$&amp;&amp;</ID>
     <ID>ChainWrapping:CustomTileSource.kt$CustomTileSource.Companion.&lt;no name provided&gt;$+</ID>
     <ID>ChainWrapping:SqlTileWriterExt.kt$SqlTileWriterExt$+</ID>
