@@ -217,7 +217,6 @@ private fun DeviceDetailsContent(
 ) {
     val node = state.node ?: return
     val deviceHardware = state.deviceHardware ?: return
-    val deviceImageRes = state.deviceImageRes
     val hwModelName = deviceHardware.displayName
     val isSupported = deviceHardware.activelySupported
     Box(
@@ -233,7 +232,7 @@ private fun DeviceDetailsContent(
     ) {
         Image(
             modifier = Modifier.padding(16.dp),
-            imageVector = ImageVector.vectorResource(deviceImageRes),
+            imageVector = ImageVector.vectorResource(deviceHardware.image),
             contentDescription = hwModelName,
         )
     }
