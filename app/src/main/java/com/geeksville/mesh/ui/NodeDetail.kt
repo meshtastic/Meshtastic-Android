@@ -91,11 +91,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.R
-import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
+import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.ui.components.PreferenceCategory
-import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
+import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.DistanceUnit
 import com.geeksville.mesh.util.formatAgo
@@ -132,7 +132,7 @@ fun NodeDetailScreen(
 @Composable
 private fun NodeDetailList(
     modifier: Modifier = Modifier,
-    node: NodeEntity,
+    node: Node,
     metricsState: MetricsState,
     onNavigate: (Any) -> Unit = {},
 ) {
@@ -255,7 +255,7 @@ private fun DeviceDetailsContent(
 
 @Composable
 private fun NodeDetailsContent(
-    node: NodeEntity,
+    node: Node,
 ) {
     if (node.mismatchKey) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -411,7 +411,7 @@ private fun InfoCard(
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 private fun EnvironmentMetrics(
-    node: NodeEntity,
+    node: Node,
     isFahrenheit: Boolean = false,
 ) = with(node.environmentMetrics) {
     FlowRow(
@@ -541,7 +541,7 @@ private fun calculateDewPoint(tempCelsius: Float, humidity: Float): Float {
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-private fun PowerMetrics(node: NodeEntity) = with(node.powerMetrics) {
+private fun PowerMetrics(node: Node) = with(node.powerMetrics) {
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -595,8 +595,8 @@ private fun PowerMetrics(node: NodeEntity) = with(node.powerMetrics) {
 @Preview(showBackground = true)
 @Composable
 private fun NodeDetailsPreview(
-    @PreviewParameter(NodeEntityPreviewParameterProvider::class)
-    node: NodeEntity
+    @PreviewParameter(NodePreviewParameterProvider::class)
+    node: Node
 ) {
     AppTheme {
         NodeDetailList(

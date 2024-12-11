@@ -22,8 +22,11 @@ import androidx.room.Insert
 import androidx.room.MapColumn
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Upsert
+import com.geeksville.mesh.database.entity.MetadataEntity
 import com.geeksville.mesh.database.entity.MyNodeEntity
+import com.geeksville.mesh.database.entity.NodeWithRelations
 import com.geeksville.mesh.database.entity.NodeEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -49,7 +52,8 @@ interface NodeInfoDao {
         last_heard DESC
         """
     )
-    fun nodeDBbyNum(): Flow<Map<@MapColumn(columnName = "num") Int, NodeEntity>>
+    @Transaction
+    fun nodeDBbyNum(): Flow<Map<@MapColumn(columnName = "num") Int, NodeWithRelations>>
 
     @Query(
         """
@@ -92,11 +96,12 @@ interface NodeInfoDao {
     last_heard DESC
     """
     )
+    @Transaction
     fun getNodes(
         sort: String,
         filter: String,
         includeUnknown: Boolean,
-    ): Flow<List<NodeEntity>>
+    ): Flow<List<NodeWithRelations>>
 
     @Upsert
     fun upsert(node: NodeEntity)
@@ -109,4 +114,7 @@ interface NodeInfoDao {
 
     @Query("DELETE FROM nodes WHERE num=:num")
     fun deleteNode(num: Int)
+
+    @Upsert
+    fun upsert(meta: MetadataEntity)
 }

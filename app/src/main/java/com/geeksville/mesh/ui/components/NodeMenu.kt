@@ -36,12 +36,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
-import com.geeksville.mesh.database.entity.NodeEntity
+import com.geeksville.mesh.model.Node
 
 @Suppress("LongMethod")
 @Composable
 fun NodeMenu(
-    node: NodeEntity,
+    node: Node,
     showFullMenu: Boolean = false,
     onDismissRequest: () -> Unit,
     expanded: Boolean = false,
@@ -150,11 +150,11 @@ fun NodeMenu(
 }
 
 sealed class NodeMenuAction {
-    data class Remove(val node: NodeEntity) : NodeMenuAction()
-    data class Ignore(val node: NodeEntity) : NodeMenuAction()
-    data class DirectMessage(val node: NodeEntity) : NodeMenuAction()
-    data class RequestUserInfo(val node: NodeEntity) : NodeMenuAction()
-    data class RequestPosition(val node: NodeEntity) : NodeMenuAction()
-    data class TraceRoute(val node: NodeEntity) : NodeMenuAction()
-    data class MoreDetails(val node: NodeEntity) : NodeMenuAction()
+    data class Remove(val node: Node) : NodeMenuAction()
+    data class Ignore(val node: Node) : NodeMenuAction()
+    data class DirectMessage(val node: Node) : NodeMenuAction()
+    data class RequestUserInfo(val node: Node) : NodeMenuAction()
+    data class RequestPosition(val node: Node) : NodeMenuAction()
+    data class TraceRoute(val node: Node) : NodeMenuAction()
+    data class MoreDetails(val node: Node) : NodeMenuAction()
 }

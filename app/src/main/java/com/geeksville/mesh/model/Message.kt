@@ -20,7 +20,6 @@ package com.geeksville.mesh.model
 import com.geeksville.mesh.MeshProtos.Routing
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
-import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Reaction
 
 val Routing.Error.stringRes: Int
@@ -47,7 +46,7 @@ val Routing.Error.stringRes: Int
 data class Message(
     val uuid: Long,
     val receivedTime: Long,
-    val node: NodeEntity,
+    val node: Node,
     val text: String,
     val time: String,
     val read: Boolean,
