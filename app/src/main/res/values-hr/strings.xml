@@ -18,7 +18,7 @@
     <string name="unknown_username">Nepoznati korisnik</string>
     <string name="send">Potvrdi</string>
     <string name="send_text">Pošalji poruku</string>
-    <string name="warning_not_paired">Još niste povezali Meshtastic radio uređaj s ovim telefonom. Povežite uređaj i postavite svoje korisničko ime.\n\nOva aplikacija otvorenog koda je u razvoju, ako naiđete na probleme, objavite na našem forumu: meshtastic.discourse.group.\n\nZa više informacija pogledajte našu web stranicu - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Još niste povezali Meshtastic radio uređaj s ovim telefonom. Povežite uređaj i postavite svoje korisničko ime.\n\nOva aplikacija otvorenog koda je u razvoju, ako naiđete na probleme, objavite na našem forumu: https://github.com/orgs/meshtastic/discussions.\n\nZa više informacija pogledajte našu web stranicu - www.meshtastic.org.</string>
     <string name="you">Vi</string>
     <string name="your_name">Vaše ime</string>
     <string name="analytics_okay">Anonimni statistički podaci o korištenju i izvješća o rušenju sustava.</string>
@@ -33,7 +33,7 @@
     <string name="permission_missing">Meshtastic treba dopuštenje za lokaciju i lokacija mora biti uključena kako bi pronašao nove uređaje putem Bluetootha. Nakon toga ga možete ponovno isključiti.</string>
     <string name="report_bug">Prijavi grešku</string>
     <string name="report_a_bug">Prijavi grešku</string>
-    <string name="report_bug_text">Jeste li sigurni da želite prijaviti grešku? Nakon prijave, objavite poruku na meshtastic.discourse.group kako bismo mogli utvrditi dosljednost poruke o pogrešci i onoga što ste pronašli.</string>
+    <string name="report_bug_text">Jeste li sigurni da želite prijaviti grešku? Nakon prijave, objavite poruku na https://github.com/orgs/meshtastic/discussions kako bismo mogli utvrditi dosljednost poruke o pogrešci i onoga što ste pronašli.</string>
     <string name="report">Izvješće</string>
     <string name="not_paired_yet">Još niste uparili radio.</string>
     <string name="change_radio">Promijeni radio</string>

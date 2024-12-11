@@ -18,7 +18,7 @@
     <string name="unknown_username">Nombre de usuario desconocido</string>
     <string name="send">Enviar</string>
     <string name="send_text">Enviar texto</string>
-    <string name="warning_not_paired">Aún no ha emparejado una radio compatible con Meshtastic con este teléfono. Empareje un dispositivo y configure su nombre de usuario. \n\nEsta aplicación de código abierto es una prueba alfa; si encuentra un problema publiquelo en el foro: meshtastic.discourse.group. \n\nPara obtener más información visite nuestra página web - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Aún no ha emparejado una radio compatible con Meshtastic con este teléfono. Empareje un dispositivo y configure su nombre de usuario. \n\nEsta aplicación de código abierto es una prueba alfa; si encuentra un problema publiquelo en el foro: https://github.com/orgs/meshtastic/discussions. \n\nPara obtener más información visite nuestra página web - www.meshtastic.org.</string>
     <string name="you">Usted</string>
     <string name="your_name">Tu nombre</string>
     <string name="analytics_okay">Estadísticas de uso anónimo e informes de fallos.</string>
@@ -33,7 +33,7 @@
     <string name="permission_missing">Meshtastic necesita permiso de ubicación y la ubicación debe estar encendida para encontrar nuevos dispositivos a través de Bluetooth. Puedes apagarla después.</string>
     <string name="report_bug">Informar de un fallo</string>
     <string name="report_a_bug">Informar de un fallo</string>
-    <string name="report_bug_text">¿Está seguro de que quiere informar de un error? Después de informar por favor publique en meshtastic.discourse.group para que podamos comparar el informe con lo que encontró.</string>
+    <string name="report_bug_text">¿Está seguro de que quiere informar de un error? Después de informar por favor publique en https://github.com/orgs/meshtastic/discussions para que podamos comparar el informe con lo que encontró.</string>
     <string name="report">Informar</string>
     <string name="not_paired_yet">Todavía no has emparejado una radio.</string>
     <string name="change_radio">Cambiar la radio</string>

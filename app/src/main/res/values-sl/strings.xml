@@ -24,7 +24,7 @@
     <string name="permission_missing">Meshtastic potrebuje dovoljenje za lokacijo in za iskanje novih naprav prek povezave Bluetooth mora biti lokacija vklopljena. Pozneje jo lahko znova izklopite.</string>
     <string name="report_bug">Prijavi napako</string>
     <string name="report_a_bug">Prijavite napako</string>
-    <string name="report_bug_text">Ali ste prepričani, da želite prijaviti napako? Po poročanju objavite v meshtastic.discourse.group, da bomo lahko primerjali poročilo s tistim, kar ste našli.</string>
+    <string name="report_bug_text">Ali ste prepričani, da želite prijaviti napako? Po poročanju objavite v https://github.com/orgs/meshtastic/discussions, da bomo lahko primerjali poročilo s tistim, kar ste našli.</string>
     <string name="report">Poročilo</string>
     <string name="not_paired_yet">Radia še niste seznanili.</string>
     <string name="change_radio">Spremenite radio</string>

@@ -27,7 +27,7 @@ alt="Download at https://play.google.com/store/apps/details?id=com.geeksville.me
 width="32%">](https://play.google.com/store/apps/details?id=com.geeksville.mesh&referrer=utm_source%3Dgithub-android-readme)
 
 If you want to join the Play Store testing program go to [this URL](https://play.google.com/apps/testing/com.geeksville.mesh) and opt-in to become a tester.
-If you encounter any problems or have questions, [post in the forum](https://meshtastic.discourse.group/) and we'll help.
+If you encounter any problems or have questions, [post in the forum](https://github.com/orgs/meshtastic/discussions) and we'll help.
 
 However, if you must use 'raw' APKs you can get them from our [github releases](https://github.com/meshtastic/Meshtastic-Android/releases). This is not recommended because if you manually install an APK it will not automatically update.
 

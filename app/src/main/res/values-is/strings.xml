@@ -9,7 +9,7 @@
     <string name="unknown_username">Óþekkt notendanafn</string>
     <string name="send">Senda</string>
     <string name="send_text">Senda textaskilaboð</string>
-    <string name="warning_not_paired">Þú hefur ekki parað Meshtastic radíó við þennan síma. Vinsamlegast paraðu búnað og veldu notendnafn.\n\nÞessi opni hugbúnaður er enn í þróun, finnir þú vandamál vinsamlegast búðu til þráð á spjallborðinu okkar: meshtastic.discourse.group.\n\nFyrir frekari upplýsingar sjá vefsíðu - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Þú hefur ekki parað Meshtastic radíó við þennan síma. Vinsamlegast paraðu búnað og veldu notendnafn.\n\nÞessi opni hugbúnaður er enn í þróun, finnir þú vandamál vinsamlegast búðu til þráð á spjallborðinu okkar: https://github.com/orgs/meshtastic/discussions.\n\nFyrir frekari upplýsingar sjá vefsíðu - www.meshtastic.org.</string>
     <string name="you">Þú</string>
     <string name="your_name">Þitt nafn</string>
     <string name="analytics_okay">Ópersónurekjanleg gögn um notkun og villumeldingar.</string>
@@ -24,7 +24,7 @@
     <string name="permission_missing">Meshtastic þarf leyfi til að nota staðsetningu símans og verður að vera kveikt á staðsetningu til að finna nýjan búnað yfir Blátönn. Þú getur slökkt á henni að því loknu.</string>
     <string name="report_bug">Tilkynna villu</string>
     <string name="report_a_bug">Tilkynna villu</string>
-    <string name="report_bug_text">Er þú viss um að vilja tilkynna villu? Eftir tilkynningu, settu vinsamlega inn þráð á meshtastic.discourse.group svo við getum tengt saman tilkynninguna við villuna sem þú fannst.</string>
+    <string name="report_bug_text">Er þú viss um að vilja tilkynna villu? Eftir tilkynningu, settu vinsamlega inn þráð á https://github.com/orgs/meshtastic/discussions svo við getum tengt saman tilkynninguna við villuna sem þú fannst.</string>
     <string name="report">Tilkynna</string>
     <string name="not_paired_yet">Þú hefur enn ekki parað radíó við símann.</string>
     <string name="change_radio">Skipta um radíó</string>

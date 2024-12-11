@@ -9,7 +9,7 @@
     <string name="unknown_username">Nežinomas vartotojo vardas</string>
     <string name="send">Siųsti</string>
     <string name="send_text">Siųsti tekstą</string>
-    <string name="warning_not_paired">Šiuo telefonu dar susietas joks Meshtastic suderinamas radijas. Prašome suporuoti įrenginį ir nustatyti savo vartotojo vardą..\n\nŠi atvirojo kodo programa yra kūrimo stadijoje, jei pastebėsite problemas, prašome pranešti mūsų forume: meshtastic.discourse.group.\n\nDaugiau informacijos rasite mūsų interneto svetainėje - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Šiuo telefonu dar susietas joks Meshtastic suderinamas radijas. Prašome suporuoti įrenginį ir nustatyti savo vartotojo vardą..\n\nŠi atvirojo kodo programa yra kūrimo stadijoje, jei pastebėsite problemas, prašome pranešti mūsų forume: https://github.com/orgs/meshtastic/discussions.\n\nDaugiau informacijos rasite mūsų interneto svetainėje - www.meshtastic.org.</string>
     <string name="you">Tu</string>
     <string name="your_name">Jūsų vardas</string>
     <string name="analytics_okay">Anoniminė naudojimo statistika ir avarijų ataskaitos.</string>
@@ -24,7 +24,7 @@
     <string name="permission_missing">Meshtastic reikalauja vietos nustatymo leidimo, ir vietos nustatymas turi būti įjungtas, kad būtų galima rasti naujus įrenginius per „Bluetooth“. Vėliau jį galite išjungti.</string>
     <string name="report_bug">Pranešti apie klaidą</string>
     <string name="report_a_bug">Pranešti apie klaidą</string>
-    <string name="report_bug_text">Ar tikrai norite pranešti apie klaidą? Po pranešimo prašome parašyti forume meshtastic.discourse.group, kad galėtume suderinti pranešimą su jūsų pastebėjimais.</string>
+    <string name="report_bug_text">Ar tikrai norite pranešti apie klaidą? Po pranešimo prašome parašyti forume https://github.com/orgs/meshtastic/discussions, kad galėtume suderinti pranešimą su jūsų pastebėjimais.</string>
     <string name="report">Raportuoti</string>
     <string name="not_paired_yet">Jūs dar nesusiejote radijo.</string>
     <string name="change_radio">Pakeisti radiją</string>

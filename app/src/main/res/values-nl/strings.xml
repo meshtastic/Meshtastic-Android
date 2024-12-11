@@ -70,7 +70,7 @@
     <string name="permission_missing">Een vereiste toelating ontbreekt, Meshtastic kan niet goed werken. Graag aanzetten in Instellingen.</string>
     <string name="report_bug">Rapporteer Bug</string>
     <string name="report_a_bug">Rapporteer een Bug</string>
-    <string name="report_bug_text">Ben je zeker dat je een bug wil rapporteren? Na het doorsturen, graag een post in meshtastic.discourse.group zodat we het rapport kunnen toetsen aan hetgeen je ondervond.</string>
+    <string name="report_bug_text">Ben je zeker dat je een bug wil rapporteren? Na het doorsturen, graag een post in https://github.com/orgs/meshtastic/discussions zodat we het rapport kunnen toetsen aan hetgeen je ondervond.</string>
     <string name="report">Rapport</string>
     <string name="not_paired_yet">Je hebt nog geen radio gekoppeld.</string>
     <string name="change_radio">Wijzig radio</string>

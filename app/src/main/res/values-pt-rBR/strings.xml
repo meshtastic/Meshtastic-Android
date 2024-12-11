@@ -46,7 +46,7 @@
     <string name="unknown_username">Nome desconhecido</string>
     <string name="send">Enviar</string>
     <string name="send_text">Enviar Texto</string>
-    <string name="warning_not_paired">Você ainda não pareou um rádio compatível ao Meshtastic com este smartphone. Por favor pareie um dispositivo e configure seu nome de usuário.\n\nEste aplicativo open source está em desenvolvimento, caso encontre algum problema por favor publique em nosso fórum: meshtastic.discourse.group.\n\nPara mais informações acesse nossa página: www.meshtastic.org.</string>
+    <string name="warning_not_paired">Você ainda não pareou um rádio compatível ao Meshtastic com este smartphone. Por favor pareie um dispositivo e configure seu nome de usuário.\n\nEste aplicativo open source está em desenvolvimento, caso encontre algum problema por favor publique em nosso fórum: https://github.com/orgs/meshtastic/discussions.\n\nPara mais informações acesse nossa página: www.meshtastic.org.</string>
     <string name="you">Você</string>
     <string name="your_name">Seu Nome</string>
     <string name="analytics_okay">Estatísticas de uso anônimas e relatórios de falhas.</string>
@@ -61,7 +61,7 @@
     <string name="permission_missing">Meshtastic precisa da permissão de localização e localização ativada para encontrar novos dispositivos via Bluetooth. Você pode desativar novamente depois.</string>
     <string name="report_bug">Informar Bug</string>
     <string name="report_a_bug">Informar um bug</string>
-    <string name="report_bug_text">Tem certeza que deseja informar um erro? Após o envio, por favor envie uma mensagem em meshtastic.discourse.group para podermos comparar o relatório com o problema encontrado.</string>
+    <string name="report_bug_text">Tem certeza que deseja informar um erro? Após o envio, por favor envie uma mensagem em https://github.com/orgs/meshtastic/discussions para podermos comparar o relatório com o problema encontrado.</string>
     <string name="report">Informar</string>
     <string name="not_paired_yet">Você ainda não pareou um rádio.</string>
     <string name="change_radio">Trocar rádio</string>

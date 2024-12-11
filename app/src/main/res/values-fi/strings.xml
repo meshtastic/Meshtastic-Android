@@ -70,7 +70,7 @@
     <string name="permission_missing">Meshtastic tarvitsee sijaintiluvan, ja sijainnin on oltava päällä uusien laitteiden löytämiseksi Bluetoothin kautta. Voit sammuttaa sen jälkeen sijainnin uudelleen.</string>
     <string name="report_bug">Ilmoita virheestä</string>
     <string name="report_a_bug">Ilmoita virheestä</string>
-    <string name="report_bug_text">Oletko varma, että haluat ilmoittaa viasta? Raportoinnin jälkeen tee postaus meshtastic.discourse.group-ryhmään, jotta voimme sovittaa raportin yhteen sen kanssa mitä löysit.</string>
+    <string name="report_bug_text">Oletko varma, että haluat ilmoittaa viasta? Raportoinnin jälkeen tee postaus https://github.com/orgs/meshtastic/discussions-ryhmään, jotta voimme sovittaa raportin yhteen sen kanssa mitä löysit.</string>
     <string name="report">Raportti</string>
     <string name="not_paired_yet">Et ole vielä yhdistänyt radiota.</string>
     <string name="change_radio">Vaihda radio</string>

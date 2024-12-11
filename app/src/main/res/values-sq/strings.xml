@@ -70,7 +70,7 @@
     <string name="permission_missing">Meshtastic ka nevojë për leje vendndodhjeje dhe vendndodhja duhet të jetë e aktivizuar për të gjetur paisje të reja përmes Bluetooth. Mund ta fikni përsëri pas kësaj.</string>
     <string name="report_bug">Raporto Bug</string>
     <string name="report_a_bug">Raporto një bug</string>
-    <string name="report_bug_text">Jeni të sigurtë që dëshironi të raportoni një bug? Pas raportimit, ju lutem postoni në meshtastic.discourse.group që të mund të lidhim raportin me atë që keni gjetur.</string>
+    <string name="report_bug_text">Jeni të sigurtë që dëshironi të raportoni një bug? Pas raportimit, ju lutem postoni në https://github.com/orgs/meshtastic/discussions që të mund të lidhim raportin me atë që keni gjetur.</string>
     <string name="report">Raporto</string>
     <string name="not_paired_yet">Nuk keni lidhur ende një radio.</string>
     <string name="change_radio">Ndërro radio</string>

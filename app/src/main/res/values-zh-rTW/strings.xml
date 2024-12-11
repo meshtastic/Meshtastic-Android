@@ -55,7 +55,7 @@
     <string name="unknown_username">未知的使用者名稱</string>
     <string name="send">傳送</string>
     <string name="send_text">傳送訊息</string>
-    <string name="warning_not_paired">您尚未將手機與 Meshtastic 相容的裝置配對。請先配對裝置並設置您的使用者名稱。\n\n此開源應用程式仍在開發中，如有問題，請在我們的論壇 meshtastic.discourse.group 上面發文詢問。\n\n 也可參閱我們的網頁 - www.meshtastic.org。</string>
+    <string name="warning_not_paired">您尚未將手機與 Meshtastic 相容的裝置配對。請先配對裝置並設置您的使用者名稱。\n\n此開源應用程式仍在開發中，如有問題，請在我們的論壇 https://github.com/orgs/meshtastic/discussions 上面發文詢問。\n\n 也可參閱我們的網頁 - www.meshtastic.org。</string>
     <string name="you">你</string>
     <string name="your_name">你的名稱</string>
     <string name="analytics_okay">匿名使用統計資訊和故障報告</string>
@@ -70,7 +70,7 @@
     <string name="permission_missing">Meshtastic 需要位置權限並啟用位置信息才能通過藍牙查找新設備。找到之後可以再關閉這權限。</string>
     <string name="report_bug">回報BUG</string>
     <string name="report_a_bug">回報問題</string>
-    <string name="report_bug_text">您確定要報告錯誤嗎？報告後，請在 meshtastic.discourse.group 上貼文，以便我們可以將報告與您發現的問題匹配。</string>
+    <string name="report_bug_text">您確定要報告錯誤嗎？報告後，請在 https://github.com/orgs/meshtastic/discussions 上貼文，以便我們可以將報告與您發現的問題匹配。</string>
     <string name="report">報告</string>
     <string name="not_paired_yet">您還沒有配對.</string>
     <string name="change_radio">換設備</string>

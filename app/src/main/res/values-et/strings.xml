@@ -70,7 +70,7 @@
     <string name="permission_missing">Meshtastic vajab sinihamba kaudu uute seadmete tuvastamiseks luba asukoha kasutamiseks,  asukoht peab olema sisse lülitatud. Hiljem saad asukoha uuesti välja lülitada.</string>
     <string name="report_bug">Teata veast</string>
     <string name="report_a_bug">Teata veast</string>
-    <string name="report_bug_text">Kas soovid kindlasti veast teatada? Saada hiljem selgitus aadressile meshtastic.discourse.group, et saaksime selgitust leituga sobitada.</string>
+    <string name="report_bug_text">Kas soovid kindlasti veast teatada? Saada hiljem selgitus aadressile https://github.com/orgs/meshtastic/discussions, et saaksime selgitust leituga sobitada.</string>
     <string name="report">Raport</string>
     <string name="not_paired_yet">Sa ei ole veel raadiot sidunud</string>
     <string name="change_radio">Vaheta raadiot</string>

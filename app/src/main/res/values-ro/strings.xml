@@ -9,7 +9,7 @@
     <string name="unknown_username">Nume utilizator necunoscut</string>
     <string name="send">Trimite</string>
     <string name="send_text">Trimite textul</string>
-    <string name="warning_not_paired">Încă nu ai asociat un radio compatibil cu Meshtastic cu acest telefon. Te rugăm să asociezi un dispozitiv și să îți setezi numele de utilizator.\n\nAceastă aplicaţie open-source este în dezvoltare, dacă întâmpinaţi probleme, vă rugăm să postaţi pe forumul nostru: meshtastic.discourse.group.\n\nPentru mai multe informații, consultați pagina noastră de internet - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Încă nu ai asociat un radio compatibil cu Meshtastic cu acest telefon. Te rugăm să asociezi un dispozitiv și să îți setezi numele de utilizator.\n\nAceastă aplicaţie open-source este în dezvoltare, dacă întâmpinaţi probleme, vă rugăm să postaţi pe forumul nostru: https://github.com/orgs/meshtastic/discussions.\n\nPentru mai multe informații, consultați pagina noastră de internet - www.meshtastic.org.</string>
     <string name="you">Tu</string>
     <string name="your_name">Numele tău</string>
     <string name="analytics_okay">Trimite în mod anonim statistici de utilizare și raporturi de crash.</string>
@@ -24,7 +24,7 @@
     <string name="permission_missing">O permisiune necesară lipsește, Meshtastic nu o să funcționeze corespunzător.  Te rugăm activează-o în setările Android.</string>
     <string name="report_bug">Raportează Bug</string>
     <string name="report_a_bug">Raportează un bug</string>
-    <string name="report_bug_text">Ești sigur că vrei să raportezi un bug? După ce ai raportat, te rog postează în meshtastic.discourse.group că să reușim să potrivim reportul tău cu ce ai găsit.</string>
+    <string name="report_bug_text">Ești sigur că vrei să raportezi un bug? După ce ai raportat, te rog postează în https://github.com/orgs/meshtastic/discussions că să reușim să potrivim reportul tău cu ce ai găsit.</string>
     <string name="report">Raportare</string>
     <string name="not_paired_yet">Nu ai conectat un dispozitiv încă.</string>
     <string name="change_radio">Schimbă dispozitivul</string>
