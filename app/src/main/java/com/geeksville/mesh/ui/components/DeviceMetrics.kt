@@ -66,7 +66,7 @@ import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.theme.Orange
 import com.geeksville.mesh.util.GraphUtil.plotPoint
-import java.util.concurrent.TimeUnit
+import com.geeksville.mesh.util.GraphUtil.createPath
 
 private val DEVICE_METRICS_COLORS = listOf(Color.Green, Color.Magenta, Color.Cyan)
 private const val MAX_PERCENT_VALUE = 100f
@@ -224,45 +224,25 @@ private fun DeviceMetricsChart(
                     )
                 }
 
-                // TODO this works to draw lines only according to it's time
-                //  Can this be made into a function that could be reused for other graphs???
+                /* Battery Line */
                 var index = 0
-                var timeBreak = false
                 while (index < telemetries.size) {
-                    val testPath = Path().apply {
-                        while(index < telemetries.size) {
-                            val telemetry = telemetries[index]
-                            val nextTelemetry = telemetries.getOrNull(index + 1) ?: telemetries.last()
-
-                            /* Check to see if we have a significant time break between telemetries. */
-                            if (nextTelemetry.time - telemetry.time > TimeUnit.HOURS.toSeconds(2)) { // TODO constant
-                                timeBreak = true
-                                index++
-                                break
-                            }
-
-                            val x1Ratio = (telemetry.time - oldest.time).toFloat() / timeDiff
-                            val x1 = x1Ratio * width
-                            val y1Ratio = telemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
-                            val y1 = height - (y1Ratio * height)
-
-                            val x2Ratio = (nextTelemetry.time - oldest.time).toFloat() / timeDiff
-                            val x2 = x2Ratio * width
-                            val y2Ratio = nextTelemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
-                            val y2 = height - (y2Ratio * height)
-
-                            if (timeBreak || index == 0) {
-                                timeBreak = false
-                                moveTo(x1, y1)
-                            }
-
-                            quadraticTo(x1, y1, (x1 + x2) / 2f, (y1 + y2) / 2f)
-
-                            index++
-                        }
+                    val path = Path()
+                    index = createPath(
+                        telemetries = telemetries,
+                        index = index,
+                        path = path,
+                        oldestTime = oldest.time,
+                        timeRange = timeDiff,
+                        width = width
+                    ) { i ->
+                        val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
+                        val ratio = telemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
+                        val y = height - (ratio * height)
+                        return@createPath y
                     }
                     drawPath(
-                        path = testPath,
+                        path = path,
                         color = DEVICE_METRICS_COLORS[Device.BATTERY.ordinal],
                         style = Stroke(
                             width = dataPointRadius,
