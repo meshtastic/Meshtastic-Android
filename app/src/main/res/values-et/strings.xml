@@ -55,7 +55,7 @@
     <string name="unknown_username">Tundmatu kasutajanimi</string>
     <string name="send">Saada</string>
     <string name="send_text">Saada tekst</string>
-    <string name="warning_not_paired">Ei ole veel ühendanud Meshtastic -kokku sobivat raadiot telefoniga. Seo seade selle telefoniga ja määra kasutajanimi.\n\nSee avatud lähtekoodiga programm on alpha-testi staatuses. Kui märkad vigu, saada palun saada sõnum meie veebisaidi foorumisse.\n\nLisateave kodulehel - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Ei ole veel ühendanud Meshtastic -kokku sobivat raadiot telefoniga. Seo seade selle telefoniga ja määra kasutajanimi.\n\nSee avatud lähtekoodiga programm on alpha-testi staatuses. Kui märkad vigu, saada palun sõnum meie foorumisse: https://github.com/orgs/meshtastic/discussions\n\nLisateave kodulehel - www.meshtastic.org.</string>
     <string name="you">Sina</string>
     <string name="your_name">Sinu nimi</string>
     <string name="analytics_okay">Anonüümne kasutus statistika ja krahhiaruanded.</string>

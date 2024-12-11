@@ -55,7 +55,7 @@
     <string name="unknown_username">Tuntematon käyttäjänimi</string>
     <string name="send">Lähetä</string>
     <string name="send_text">Lähetä teksti</string>
-    <string name="warning_not_paired">Et ole vielä yhdistänyt Meshtastic -yhteensopivaa radiota tähän puhelimeen. Parita laitteesi tämän puhelimen kanssa ja aseta käyttäjänimesi.\n\nTämä avoimen lähdekoodin (open source) ohjelma on alpha-testausvaiheessa. Mikäli huomaat ongelmia, lähetäthän viestin verkkosivumme keskustelupalstalle.\n\nLisätietoja verkkosivuiltamme - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Et ole vielä yhdistänyt Meshtastic -yhteensopivaa radiota tähän puhelimeen. Parita laitteesi tämän puhelimen kanssa ja aseta käyttäjänimesi.\n\nTämä avoimen lähdekoodin (open source) ohjelma on alpha-testausvaiheessa. Mikäli huomaat ongelmia, lähetäthän viestin foorumillemme: https://github.com/orgs/meshtastic/discussions\n\nLisätietoja verkkosivuiltamme - www.meshtastic.org.</string>
     <string name="you">Sinä</string>
     <string name="your_name">Nimesi</string>
     <string name="analytics_okay">Nimettömät käyttötilastot ja kaatumisraportit.</string>
@@ -70,7 +70,7 @@
     <string name="permission_missing">Meshtastic tarvitsee sijaintiluvan, ja sijainnin on oltava päällä uusien laitteiden löytämiseksi Bluetoothin kautta. Voit sammuttaa sen jälkeen sijainnin uudelleen.</string>
     <string name="report_bug">Ilmoita virheestä</string>
     <string name="report_a_bug">Ilmoita virheestä</string>
-    <string name="report_bug_text">Oletko varma, että haluat ilmoittaa viasta? Raportoinnin jälkeen tee postaus https://github.com/orgs/meshtastic/discussions-ryhmään, jotta voimme sovittaa raportin yhteen sen kanssa mitä löysit.</string>
+    <string name="report_bug_text">Oletko varma, että haluat ilmoittaa viasta? Raportoinnin jälkeen tee postaus https://github.com/orgs/meshtastic/discussions, jotta voimme sovittaa raportin yhteen sen kanssa mitä löysit.</string>
     <string name="report">Raportti</string>
     <string name="not_paired_yet">Et ole vielä yhdistänyt radiota.</string>
     <string name="change_radio">Vaihda radio</string>

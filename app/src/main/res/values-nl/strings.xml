@@ -55,7 +55,7 @@
     <string name="unknown_username">Onbekende Gebruikersnaam</string>
     <string name="send">Verzenden</string>
     <string name="send_text">Stuur tekst</string>
-    <string name="warning_not_paired">Je hebt nog geen Meshtastic compatibele radio met deze telefoon gekoppeld. Paar alstublieft een apparaat en voer je gebruikersnaam in.\n\nDeze open-source applicatie is in alpha-test, indien je een probleem vaststelt, kan je het posten op onze website chat.\n\nVoor meer informatie bezoek onze web pagina - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Je hebt nog geen Meshtastic compatibele radio met deze telefoon gekoppeld. Paar alstublieft een apparaat en voer je gebruikersnaam in.\n\nDeze open-source applicatie is in alpha-test, indien je een probleem vaststelt, kan je het posten op onze forum: https://github.com/orgs/meshtastic/discussions\n\nVoor meer informatie bezoek onze web pagina - www.meshtastic.org.</string>
     <string name="you">Jij</string>
     <string name="your_name">Je Naam</string>
     <string name="analytics_okay">Anonieme gebruiksstatistieken en crashmeldingen.</string>
