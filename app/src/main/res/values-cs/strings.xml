@@ -46,7 +46,7 @@
     <string name="unknown_username">Neznámé uživatelské jméno</string>
     <string name="send">Odeslat</string>
     <string name="send_text">Odeslat text</string>
-    <string name="warning_not_paired">Ještě jste s tímto telefonem nespárovali rádio kompatibilní s Meshtastic. Spárujte prosím zařízení a nastavte své uživatelské jméno.\n\nTato open-source aplikace je ve vývoji, pokud narazíte na problémy, napište na naše fórum: meshtastic.discourse.group.\n\nDalší informace naleznete na naší webové stránce - www. meshtastic.org.</string>
+    <string name="warning_not_paired">Ještě jste s tímto telefonem nespárovali rádio kompatibilní s Meshtastic. Spárujte prosím zařízení a nastavte své uživatelské jméno.\n\nTato open-source aplikace je ve vývoji, pokud narazíte na problémy, napište na naše fórum: https://github.com/orgs/meshtastic/discussions.\n\nDalší informace naleznete na naší webové stránce - www. meshtastic.org.</string>
     <string name="you">Vy</string>
     <string name="your_name">Vaše jméno</string>
     <string name="analytics_okay">Anonymní hlášení o používání aplikace a jejích chybách.</string>
@@ -61,7 +61,7 @@
     <string name="permission_missing">Chybí požadovaná oprávnění, Meshtastic nebude fungovat správně. Prosím změntě oprávnění pro aplikaci.</string>
     <string name="report_bug">Nahlášení chyby</string>
     <string name="report_a_bug">Nahlásit chybu</string>
-    <string name="report_bug_text">Jste si jistý, že chcete nahlásit chybu? Po odeslání prosím přidejte zprávu do meshtastic.discourse.group abychom mohli přiřadit Vaši nahlášenou chybu k příspěvku.</string>
+    <string name="report_bug_text">Jste si jistý, že chcete nahlásit chybu? Po odeslání prosím přidejte zprávu do https://github.com/orgs/meshtastic/discussions abychom mohli přiřadit Vaši nahlášenou chybu k příspěvku.</string>
     <string name="report">Odeslat chybové hlášení</string>
     <string name="not_paired_yet">Žádný vysílač zatím nebyl spárovaný.</string>
     <string name="change_radio">Změnit vysílač</string>

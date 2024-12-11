@@ -46,7 +46,7 @@
     <string name="unknown_username">Άγνωστο Όνομα Χρήστη</string>
     <string name="send">Αποστολή</string>
     <string name="send_text">Αποστολή κειμένου</string>
-    <string name="warning_not_paired">Δεν έχετε κάνει ακόμη pair μια συσκευή συμβατή με Meshtastic με το τηλέφωνο. Παρακαλώ κάντε pair μια συσκευή και ορίστε το όνομα χρήστη.\n\nΗ εφαρμογή ανοιχτού κώδικα βρίσκεται σε alpha-testing, αν εντοπίσετε προβλήματα παρακαλώ δημοσιεύστε τα στο forum: meshtastic.discourse.group.\n\nΠερισσότερες πληροφορίες στην ιστοσελίδα - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Δεν έχετε κάνει ακόμη pair μια συσκευή συμβατή με Meshtastic με το τηλέφωνο. Παρακαλώ κάντε pair μια συσκευή και ορίστε το όνομα χρήστη.\n\nΗ εφαρμογή ανοιχτού κώδικα βρίσκεται σε alpha-testing, αν εντοπίσετε προβλήματα παρακαλώ δημοσιεύστε τα στο forum: https://github.com/orgs/meshtastic/discussions.\n\nΠερισσότερες πληροφορίες στην ιστοσελίδα - www.meshtastic.org.</string>
     <string name="you">Εσύ, Εσείς</string>
     <string name="your_name">Όνομα</string>
     <string name="analytics_okay">Ανώνυμα στατιστικά στοιχεία χρήσης και αναφορές κατάρρευσης.</string>
@@ -61,7 +61,7 @@
     <string name="permission_missing">Λείπει μια απαιτούμενη άδεια, Meshtastic δεν θα λειτοργεί σωστά.  Ενεργοποιήστε τις ρυθμίσεις εφαρμογής Android.</string>
     <string name="report_bug">Αναφορά Σφάλματος</string>
     <string name="report_a_bug">Αναφέρετε ένα σφάλμα</string>
-    <string name="report_bug_text">Είστε σίγουροι ότι θέλετε να αναφέρετε ένα σφαλμα? Μετά την αναφορά δημοσιεύστε στο meshtastic.discourse.group ώστε να συνδέσουμε την αναφορά με το συμβάν.</string>
+    <string name="report_bug_text">Είστε σίγουροι ότι θέλετε να αναφέρετε ένα σφαλμα? Μετά την αναφορά δημοσιεύστε στο https://github.com/orgs/meshtastic/discussions ώστε να συνδέσουμε την αναφορά με το συμβάν.</string>
     <string name="report">Αναφορά</string>
     <string name="not_paired_yet">Δεν έχετε κάνει pair με radio ακόμη.</string>
     <string name="change_radio">Αλλαγή radio</string>

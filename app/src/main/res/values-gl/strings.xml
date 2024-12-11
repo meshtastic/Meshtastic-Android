@@ -18,7 +18,7 @@
     <string name="unknown_username">Nome de usuario descoñecido</string>
     <string name="send">Enviar</string>
     <string name="send_text">Enviar texto</string>
-    <string name="warning_not_paired">Aínda non enlazaches unha radio compatible con Meshtástic neste teléfono. Por favor enlaza un dispositivo e coloca o teu nome de usuario. \n\n Esta aplicación de código aberto está en desenvolvemento. Se atopas problemas por favor publícaos no noso foro: meshtastic.discourse.group. \n\nPara máis información visita a nosa páxina - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Aínda non enlazaches unha radio compatible con Meshtástic neste teléfono. Por favor enlaza un dispositivo e coloca o teu nome de usuario. \n\n Esta aplicación de código aberto está en desenvolvemento. Se atopas problemas por favor publícaos no noso foro: https://github.com/orgs/meshtastic/discussions. \n\nPara máis información visita a nosa páxina - www.meshtastic.org.</string>
     <string name="you">Ti</string>
     <string name="your_name">Teu nome</string>
     <string name="analytics_okay">Estadísticas de uso anónimo e informes de fallos.</string>
@@ -33,7 +33,7 @@
     <string name="permission_missing">Meshtástic precisa permisos de ubicación e ten que estar prendida para atopar novos dispositivos vía Bluetooth. Podes apagala despois.</string>
     <string name="report_bug">Reportar erro</string>
     <string name="report_a_bug">Reporta un erro</string>
-    <string name="report_bug_text">Seguro que queres reportar un erro? Despois de reportar, por favor publica en meshtastic.discourse.group para poder unir o reporte co que atopaches.</string>
+    <string name="report_bug_text">Seguro que queres reportar un erro? Despois de reportar, por favor publica en https://github.com/orgs/meshtastic/discussions para poder unir o reporte co que atopaches.</string>
     <string name="report">Reportar</string>
     <string name="not_paired_yet">Aínda non enlazaches unha radio.</string>
     <string name="change_radio">Cambiar radio</string>

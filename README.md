@@ -13,7 +13,7 @@
 This is a tool for using Android with open-source mesh radios. For more information see our webpage: [meshtastic.org](https://www.meshtastic.org). If you are looking for the the device side code, see [here](https://github.com/meshtastic/Meshtastic-device).
 
 This project is currently beta testing, if you have questions or feedback
-please [Join our discussion forum](https://meshtastic.discourse.group/). We would love to hear from
+please [Join our discussion forum](https://github.com/orgs/meshtastic/discussions). We would love to hear from
 you!
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
@@ -27,7 +27,7 @@ alt="Download at https://play.google.com/store/apps/details?id=com.geeksville.me
 width="32%">](https://play.google.com/store/apps/details?id=com.geeksville.mesh&referrer=utm_source%3Dgithub-android-readme)
 
 If you want to join the Play Store testing program go to [this URL](https://play.google.com/apps/testing/com.geeksville.mesh) and opt-in to become a tester.
-If you encounter any problems or have questions, [post in the forum](https://meshtastic.discourse.group/) and we'll help.
+If you encounter any problems or have questions, [post in the forum](https://github.com/orgs/meshtastic/discussions) and we'll help.
 
 However, if you must use 'raw' APKs you can get them from our [github releases](https://github.com/meshtastic/Meshtastic-Android/releases). This is not recommended because if you manually install an APK it will not automatically update.
 

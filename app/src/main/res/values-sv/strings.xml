@@ -18,7 +18,7 @@
     <string name="unknown_username">Okänt användarnamn</string>
     <string name="send">Skicka</string>
     <string name="send_text">Skicka text</string>
-    <string name="warning_not_paired">Du har ännu inte parat en Meshtastic-kompatibel radio med den här telefonen. Koppla ihop en enhet och ange ditt användarnamn.\n\nDetta öppna källkodsprogram (open source) är under utveckling, om du hittar problem, vänligen publicera det på vårt forum: meshtastic.discourse.group\n\nFör mer information se vår webbsida - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Du har ännu inte parat en Meshtastic-kompatibel radio med den här telefonen. Koppla ihop en enhet och ange ditt användarnamn.\n\nDetta öppna källkodsprogram (open source) är under utveckling, om du hittar problem, vänligen publicera det på vårt forum: https://github.com/orgs/meshtastic/discussions\n\nFör mer information se vår webbsida - www.meshtastic.org.</string>
     <string name="you">Du</string>
     <string name="your_name">Ditt Namn</string>
     <string name="analytics_okay">Anonym användningsstatistik och kraschrapporter.</string>
@@ -33,7 +33,7 @@
     <string name="permission_missing">Meshtastic behöver platsbehörighet och Plats måste vara aktiverad för att hitta nya enheter via Bluetooth. Du kan stänga av Plats igen efteråt.</string>
     <string name="report_bug">Rapportera bugg</string>
     <string name="report_a_bug">Rapportera bugg</string>
-    <string name="report_bug_text">Är du säker på att du vill rapportera en bugg? Efter rapportering, vänligen posta i meshtastic.discourse.group så att vi kan matcha rapporten med buggen du hittat.</string>
+    <string name="report_bug_text">Är du säker på att du vill rapportera en bugg? Efter rapportering, vänligen posta i https://github.com/orgs/meshtastic/discussions så att vi kan matcha rapporten med buggen du hittat.</string>
     <string name="report">Rapportera</string>
     <string name="not_paired_yet">Du har inte parat ihop en radio än.</string>
     <string name="change_radio">Byt radioenhet</string>

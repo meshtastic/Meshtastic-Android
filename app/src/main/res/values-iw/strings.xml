@@ -9,7 +9,7 @@
     <string name="unknown_username">שם המשתמש אינו מוכר</string>
     <string name="send">שלח</string>
     <string name="send_text">שלח טקסט</string>
-    <string name="warning_not_paired">עוד לא צימדת מכשיר תומך משטסטיק לטלפון זה. בבקשה צמד מכשיר והגדר שם משתמש.\n\nאפליקציית קוד פתוח זה נמצא בפיתוח, במקשר של בעיות בבקשה גש לפורום: meshtastic.discourse.group.\n\n למידע נוסף בקרו באתר - www.meshtastic.org.</string>
+    <string name="warning_not_paired">עוד לא צימדת מכשיר תומך משטסטיק לטלפון זה. בבקשה צמד מכשיר והגדר שם משתמש.\n\nאפליקציית קוד פתוח זה נמצא בפיתוח, במקשר של בעיות בבקשה גש לפורום: https://github.com/orgs/meshtastic/discussions.\n\n למידע נוסף בקרו באתר - www.meshtastic.org.</string>
     <string name="you">אתה</string>
     <string name="your_name">שמך</string>
     <string name="analytics_okay">שלח סטטיסטיקות שימוש אנונימיות ודוחות קריסה.</string>
@@ -24,7 +24,7 @@
     <string name="permission_missing">משטסטיק צריך גישה למיקום ועל מיקום להיות דולק בכדי למצוא מכשירי בלוטוס. ניתן לכבות חזרה לאחר מכן.</string>
     <string name="report_bug">דווח על באג</string>
     <string name="report_a_bug">דווח על באג</string>
-    <string name="report_bug_text">בטוח שתרצה לדווח על באג? לאחר דיווח, בבקשה תעלה פוסט לפורום meshtastic.discourse.group כדי שנוכל לחבר בין חווייתך לדווח זה.</string>
+    <string name="report_bug_text">בטוח שתרצה לדווח על באג? לאחר דיווח, בבקשה תעלה פוסט לפורום https://github.com/orgs/meshtastic/discussions כדי שנוכל לחבר בין חווייתך לדווח זה.</string>
     <string name="report">דווח</string>
     <string name="not_paired_yet">עוד לא צימדת מכשיר.</string>
     <string name="change_radio">שנה מכשיר</string>

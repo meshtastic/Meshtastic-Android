@@ -70,7 +70,7 @@
     <string name="permission_missing">Tá cead riachtanach ar iarraidh, ní bheidh Meshtastic in ann oibriú i gceart. Cumasaigh i socruithe feidhmchláir le do thoil.</string>
     <string name="report_bug">Tuairiscigh fabht</string>
     <string name="report_a_bug">Tuairiscigh fabht</string>
-    <string name="report_bug_text">An bhfuil tú cinnte gur mhaith leat fabht a thuairisciú? Tar éis tuairisciú a dhéanamh, cuir sa phost é le do thoil i meshtastic.discourse.group ionas gur féidir linn an tuarascáil a mheaitseáil leis an méid a d’aimsigh tú.</string>
+    <string name="report_bug_text">An bhfuil tú cinnte gur mhaith leat fabht a thuairisciú? Tar éis tuairisciú a dhéanamh, cuir sa phost é le do thoil i https://github.com/orgs/meshtastic/discussions ionas gur féidir linn an tuarascáil a mheaitseáil leis an méid a d’aimsigh tú.</string>
     <string name="report">Tuairiscigh</string>
     <string name="not_paired_yet">Níl raidió péireálite agat fós.</string>
     <string name="change_radio">Athraigh raidió</string>

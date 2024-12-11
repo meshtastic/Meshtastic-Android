@@ -70,7 +70,7 @@
     <string name="permission_missing">Meshtastic benötigt Standortberechtigung und Standort muss eingeschaltet werden, um neue Geräte über Bluetooth zu finden. Sie können es später wieder deaktivieren.</string>
     <string name="report_bug">Fehler melden</string>
     <string name="report_a_bug">Fehler melden</string>
-    <string name="report_bug_text">Bist du sicher, dass du einen Fehler melden möchtest? Nach dem Melden bitte auf meshtastic.discourse.group eine Nachricht veröffentlichen, damit wir die Übereinstimmung der Fehlermeldung und dessen, was Sie gefunden haben, feststellen können.</string>
+    <string name="report_bug_text">Bist du sicher, dass du einen Fehler melden möchtest? Nach dem Melden bitte auf https://github.com/orgs/meshtastic/discussions eine Nachricht veröffentlichen, damit wir die Übereinstimmung der Fehlermeldung und dessen, was Sie gefunden haben, feststellen können.</string>
     <string name="report">Melden</string>
     <string name="not_paired_yet">Sie haben noch kein gekoppeltes Funkgerät.</string>
     <string name="change_radio">Funkgerät wechseln</string>

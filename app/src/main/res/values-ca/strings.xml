@@ -18,7 +18,7 @@
     <string name="unknown_username">Nom d\'usuari desconegut</string>
     <string name="send">Enviar</string>
     <string name="send_text">Enviar text</string>
-    <string name="warning_not_paired">Encara no has emparellat una ràdio compatible amb Meshtastic amb aquest telèfon. Si us plau emparella un dispositiu i configura el teu nom d\'usuari. \n\nAquesta aplicació de codi obert està en desenvolupament. Si hi trobes problemes publica-ho en el nostre fòrum meshtastic.discourse.group.\n\nPer a més informació visita la nostra pàgina web - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Encara no has emparellat una ràdio compatible amb Meshtastic amb aquest telèfon. Si us plau emparella un dispositiu i configura el teu nom d\'usuari. \n\nAquesta aplicació de codi obert està en desenvolupament. Si hi trobes problemes publica-ho en el nostre fòrum https://github.com/orgs/meshtastic/discussions.\n\nPer a més informació visita la nostra pàgina web - www.meshtastic.org.</string>
     <string name="you">Tu</string>
     <string name="your_name">El teu nom</string>
     <string name="analytics_okay">Estadístiques anònimes d\'ús i informes de fallades.</string>
@@ -33,7 +33,7 @@
     <string name="permission_missing">Meshtastic necessita permisos de posicionament i la posició ha d\'estar activada per trobar nous dispositius Bluetooth. Els podràs apagar posteriorment.</string>
     <string name="report_bug">Informar d\'error</string>
     <string name="report_a_bug">Informar d\'un error</string>
-    <string name="report_bug_text">Estàs segur que vols informar d\'un error? Després d\'informar-ne, si us plau publica en meshtastic.discourse.group de tal manera que puguem emparellar l\'informe amb allò que has trobat.</string>
+    <string name="report_bug_text">Estàs segur que vols informar d\'un error? Després d\'informar-ne, si us plau publica en https://github.com/orgs/meshtastic/discussions de tal manera que puguem emparellar l\'informe amb allò que has trobat.</string>
     <string name="report">Informe</string>
     <string name="not_paired_yet">Encara no has emparellat una ràdio.</string>
     <string name="change_radio">Canviar ràdio</string>

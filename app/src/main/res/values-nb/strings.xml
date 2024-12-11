@@ -46,7 +46,7 @@
     <string name="unknown_username">Ukjent Brukernavn</string>
     <string name="send">Send</string>
     <string name="send_text">Send Tekst</string>
-    <string name="warning_not_paired">Du har ikke paret en Meshtastic kompatibel radio med denne telefonen. Vennligst parr en enhet, og sett ditt brukernavn.\n\nDenne åpen kildekode applikasjonen er i alfa-testing, Hvis du finner problemer, vennligst post på vårt forum: meshtastic.discourse.group.\n\nFor mer informasjon, se vår nettside - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Du har ikke paret en Meshtastic kompatibel radio med denne telefonen. Vennligst parr en enhet, og sett ditt brukernavn.\n\nDenne åpen kildekode applikasjonen er i alfa-testing, Hvis du finner problemer, vennligst post på vårt forum: https://github.com/orgs/meshtastic/discussions.\n\nFor mer informasjon, se vår nettside - www.meshtastic.org.</string>
     <string name="you">Deg</string>
     <string name="your_name">Ditt Navn</string>
     <string name="analytics_okay">Anonym brukerstatistikk og kræsjrapporter.</string>
@@ -61,7 +61,7 @@
     <string name="permission_missing">En påkrevet tilgang mangler, Meshtastic vil ikke fungere korrekt.  Vennligst slå på i Android appliksjonsinstillinger.</string>
     <string name="report_bug">Rapporter Feil</string>
     <string name="report_a_bug">Rapporter en feil</string>
-    <string name="report_bug_text">Er du sikker på at du vil rapportere en feil? Etter rapportering, vennligst posti meshtastic.discourse.group så vi kan matche rapporten med hva du fant</string>
+    <string name="report_bug_text">Er du sikker på at du vil rapportere en feil? Etter rapportering, vennligst posti https://github.com/orgs/meshtastic/discussions så vi kan matche rapporten med hva du fant</string>
     <string name="report">Rapport</string>
     <string name="not_paired_yet">Du har ikke paret med en radio ennå.</string>
     <string name="change_radio">Endre radio</string>

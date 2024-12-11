@@ -18,7 +18,7 @@
     <string name="unknown_username">Неизвестен потребител</string>
     <string name="send">Изпрати</string>
     <string name="send_text">Текст за изпращане</string>
-    <string name="warning_not_paired">Все още не сте сдвоили радио, съвместимо с Meshtastic, с този телефон. Моля, сдвоете устройство и задайте вашето потребителско име.\n\nТова приложение с отворен код е в процес на разработка, ако откриете проблеми, моля, публикувайте в нашия форум: meshtastic.discourse.group.\n\nЗа повече информация вижте нашата уеб страница на адрес www.meshtastic.org.</string>
+    <string name="warning_not_paired">Все още не сте сдвоили радио, съвместимо с Meshtastic, с този телефон. Моля, сдвоете устройство и задайте вашето потребителско име.\n\nТова приложение с отворен код е в процес на разработка, ако откриете проблеми, моля, публикувайте в нашия форум: https://github.com/orgs/meshtastic/discussions.\n\nЗа повече информация вижте нашата уеб страница на адрес www.meshtastic.org.</string>
     <string name="you">Вие</string>
     <string name="your_name">Вашето име</string>
     <string name="analytics_okay">Анонимна статистика за използване и доклади за сривове.</string>
@@ -33,7 +33,7 @@
     <string name="permission_missing">Meshtastic се нуждае от разрешение за местоположение. Местоположението трябва да е включено, за да намира нови устройства чрез Bluetooth. Можете да го изключите отново след това.</string>
     <string name="report_bug">Докладване за грешка</string>
     <string name="report_a_bug">Докладвайте грешка</string>
-    <string name="report_bug_text">Сигурни ли сте, че искате да докладвате за грешка? След като докладвате, моля, публикувайте в meshtastic.discourse.group, за да можем да сравним доклада с това, което сте открили.</string>
+    <string name="report_bug_text">Сигурни ли сте, че искате да докладвате за грешка? След като докладвате, моля, публикувайте в https://github.com/orgs/meshtastic/discussions, за да можем да сравним доклада с това, което сте открили.</string>
     <string name="report">Докладвай</string>
     <string name="not_paired_yet">Все още не сте сдвоили радио.</string>
     <string name="change_radio">Смяна на радиото</string>
