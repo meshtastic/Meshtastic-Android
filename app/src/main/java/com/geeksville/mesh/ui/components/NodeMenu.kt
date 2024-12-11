@@ -42,26 +42,23 @@ import com.geeksville.mesh.database.entity.NodeEntity
 @Composable
 fun NodeMenu(
     node: NodeEntity,
-    ignoreIncomingList: List<Int>,
-    isThisNode: Boolean = false,
-    onMenuItemAction: (MenuItemAction) -> Unit,
+    showFullMenu: Boolean = false,
     onDismissRequest: () -> Unit,
     expanded: Boolean = false,
-    isConnected: Boolean = false,
+    onAction: (NodeMenuAction) -> Unit
 ) {
-    val isIgnored = ignoreIncomingList.contains(node.num)
     var displayIgnoreDialog by remember { mutableStateOf(false) }
     var displayRemoveDialog by remember { mutableStateOf(false) }
     if (displayIgnoreDialog) {
         SimpleAlertDialog(
             title = R.string.ignore,
             text = stringResource(
-                id = if (isIgnored) R.string.ignore_remove else R.string.ignore_add,
+                id = if (node.isIgnored) R.string.ignore_remove else R.string.ignore_add,
                 node.user.longName
             ),
             onConfirm = {
                 displayIgnoreDialog = false
-                onMenuItemAction(MenuItemAction.Ignore)
+                onAction(NodeMenuAction.Ignore(node))
             },
             onDismiss = {
                 displayIgnoreDialog = false
@@ -74,7 +71,7 @@ fun NodeMenu(
             text = R.string.remove_node_text,
             onConfirm = {
                 displayRemoveDialog = false
-                onMenuItemAction(MenuItemAction.Remove)
+                onAction(NodeMenuAction.Remove(node))
             },
             onDismiss = {
                 displayRemoveDialog = false
@@ -87,32 +84,32 @@ fun NodeMenu(
         onDismissRequest = onDismissRequest,
     ) {
 
-        if (!isThisNode && isConnected) {
+        if (showFullMenu) {
             DropdownMenuItem(
                 onClick = {
                     onDismissRequest()
-                    onMenuItemAction(MenuItemAction.DirectMessage)
+                    onAction(NodeMenuAction.DirectMessage(node))
                 },
                 content = { Text(stringResource(R.string.direct_message)) }
             )
             DropdownMenuItem(
                 onClick = {
                     onDismissRequest()
-                    onMenuItemAction(MenuItemAction.RequestUserInfo)
+                    onAction(NodeMenuAction.RequestUserInfo(node))
                 },
                 content = { Text(stringResource(R.string.request_userinfo)) }
             )
             DropdownMenuItem(
                 onClick = {
                     onDismissRequest()
-                    onMenuItemAction(MenuItemAction.RequestPosition)
+                    onAction(NodeMenuAction.RequestPosition(node))
                 },
                 content = { Text(stringResource(R.string.request_position)) }
             )
             DropdownMenuItem(
                 onClick = {
                     onDismissRequest()
-                    onMenuItemAction(MenuItemAction.TraceRoute)
+                    onAction(NodeMenuAction.TraceRoute(node))
                 },
                 content = { Text(stringResource(R.string.traceroute)) }
             )
@@ -121,17 +118,15 @@ fun NodeMenu(
                     onDismissRequest()
                     displayIgnoreDialog = true
                 },
-                enabled = ignoreIncomingList.size < 3 || isIgnored
             ) {
                 Text(stringResource(R.string.ignore))
                 Spacer(Modifier.weight(1f))
                 Checkbox(
-                    checked = isIgnored,
+                    checked = node.isIgnored,
                     onCheckedChange = {
                         onDismissRequest()
                         displayIgnoreDialog = true
                     },
-                    enabled = isIgnored || ignoreIncomingList.size < 3,
                     modifier = Modifier.size(24.dp),
                 )
             }
@@ -140,25 +135,26 @@ fun NodeMenu(
                     onDismissRequest()
                     displayRemoveDialog = true
                 },
+                enabled = !node.isIgnored,
             ) { Text(stringResource(R.string.remove)) }
             Divider(Modifier.padding(vertical = 8.dp))
         }
         DropdownMenuItem(
             onClick = {
                 onDismissRequest()
-                onMenuItemAction(MenuItemAction.MoreDetails)
+                onAction(NodeMenuAction.MoreDetails(node))
             },
             content = { Text(stringResource(R.string.more_details)) }
         )
     }
 }
 
-enum class MenuItemAction {
-    Remove,
-    Ignore,
-    DirectMessage,
-    RequestUserInfo,
-    RequestPosition,
-    TraceRoute,
-    MoreDetails
+sealed class NodeMenuAction {
+    data class Remove(val node: NodeEntity) : NodeMenuAction()
+    data class Ignore(val node: NodeEntity) : NodeMenuAction()
+    data class DirectMessage(val node: NodeEntity) : NodeMenuAction()
+    data class RequestUserInfo(val node: NodeEntity) : NodeMenuAction()
+    data class RequestPosition(val node: NodeEntity) : NodeMenuAction()
+    data class TraceRoute(val node: NodeEntity) : NodeMenuAction()
+    data class MoreDetails(val node: NodeEntity) : NodeMenuAction()
 }

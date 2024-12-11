@@ -29,6 +29,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.CoroutineDispatchers
+import com.geeksville.mesh.MeshProtos.HardwareModel
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.Position
 import com.geeksville.mesh.Portnums.PortNum
@@ -56,9 +57,11 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -75,6 +78,7 @@ data class MetricsState(
     val tracerouteRequests: List<MeshLog> = emptyList(),
     val tracerouteResults: List<MeshPacket> = emptyList(),
     val positionLogs: List<Position> = emptyList(),
+    val deviceHardware: DeviceHardware? = null,
 ) {
     fun hasDeviceMetrics() = deviceMetrics.isNotEmpty()
     fun hasEnvironmentMetrics() = environmentMetrics.isNotEmpty()
@@ -207,12 +211,21 @@ class MetricsViewModel @Inject constructor(
     private val _timeFrame = MutableStateFlow(TimeFrame.TWENTY_FOUR_HOURS)
     val timeFrame: StateFlow<TimeFrame> = _timeFrame
 
+    private var deviceHardwareList: List<DeviceHardware> = listOf()
+
     init {
         @OptIn(ExperimentalCoroutinesApi::class)
         radioConfigRepository.nodeDBbyNum
             .mapLatest { nodes -> nodes[destNum] }
             .distinctUntilChanged()
-            .onEach { node -> _state.update { state -> state.copy(node = node) } }
+            .onEach { node ->
+                _state.update { state -> state.copy(node = node) }
+                node?.user?.hwModel?.let { hwModel ->
+                    _state.update { state ->
+                        state.copy(deviceHardware = getDeviceHardwareFromHardwareModel(hwModel))
+                    }
+                }
+            }
             .launchIn(viewModelScope)
 
         radioConfigRepository.deviceProfileFlow.onEach { profile ->
@@ -315,5 +328,21 @@ class MetricsViewModel @Inject constructor(
         } catch (ex: FileNotFoundException) {
             errormsg("Can't write file error: ${ex.message}")
         }
+    }
+
+    private fun getDeviceHardwareFromHardwareModel(
+        hwModel: HardwareModel
+    ): DeviceHardware? {
+        if (deviceHardwareList.isEmpty()) {
+            try {
+                val json =
+                    app.assets.open("device_hardware.json").bufferedReader().use { it.readText() }
+                deviceHardwareList = Json.decodeFromString<List<DeviceHardwareDto>>(json)
+                    .map { it.toDeviceHardware() }
+            } catch (ex: IOException) {
+                errormsg("Can't read device_hardware.json error: ${ex.message}")
+            }
+        }
+        return deviceHardwareList.find { it.hwModel == hwModel.number }
     }
 }

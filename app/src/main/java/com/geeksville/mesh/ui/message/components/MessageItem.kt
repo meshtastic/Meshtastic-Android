@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.Chip
+import androidx.compose.material.ChipDefaults
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalContentColor
@@ -55,16 +56,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
+import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.ui.components.AutoLinkText
+import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
 
 @Suppress("LongMethod")
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun MessageItem(
-    shortName: String?,
+    node: NodeEntity,
     messageText: String?,
     messageTime: String,
     messageStatus: MessageStatus?,
@@ -81,7 +85,7 @@ internal fun MessageItem(
         .background(color = if (selected) Color.Gray else MaterialTheme.colors.background),
     verticalAlignment = Alignment.CenterVertically,
 ) {
-    val fromLocal = shortName == null
+    val fromLocal = node.user.id == DataPacket.ID_LOCAL
     val messageColor = if (fromLocal) R.color.colorMyMsg else R.color.colorMsg
     val (topStart, topEnd) = if (fromLocal) 12.dp to 4.dp else 4.dp to 12.dp
     val messageModifier = if (fromLocal) {
@@ -110,15 +114,19 @@ internal fun MessageItem(
                     .padding(horizontal = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (shortName != null) {
+                if (!fromLocal) {
                     Chip(
                         onClick = onChipClick,
                         modifier = Modifier
                             .padding(end = 8.dp)
                             .width(72.dp),
+                        colors = ChipDefaults.chipColors(
+                            backgroundColor = Color(node.colors.second),
+                            contentColor = Color(node.colors.first),
+                        ),
                     ) {
                         Text(
-                            text = shortName,
+                            text = node.user.shortName,
                             modifier = Modifier.fillMaxWidth(),
                             fontSize = MaterialTheme.typography.button.fontSize,
                             fontWeight = FontWeight.Normal,
@@ -129,11 +137,14 @@ internal fun MessageItem(
                 Column(
                     modifier = Modifier.padding(top = 8.dp),
                 ) {
-//                    Text(
-//                        text = longName ?: stringResource(id = R.string.unknown_username),
-//                        color = MaterialTheme.colors.onSurface,
-//                        fontSize = MaterialTheme.typography.button.fontSize,
-//                    )
+//                    if (!fromLocal) {
+//                        Text(
+//                            text = with(node.user) { "$longName ($id)" },
+//                            modifier = Modifier.padding(bottom = 4.dp),
+//                            color = MaterialTheme.colors.onSurface,
+//                            fontSize = MaterialTheme.typography.caption.fontSize,
+//                        )
+//                    }
                     AutoLinkText(
                         text = messageText.orEmpty(),
                         style = LocalTextStyle.current.copy(
@@ -181,8 +192,7 @@ internal fun MessageItem(
 private fun MessageItemPreview() {
     AppTheme {
         MessageItem(
-            shortName = stringResource(R.string.some_username),
-            // longName = stringResource(R.string.unknown_username),
+            node = NodeEntityPreviewParameterProvider().values.first(),
             messageText = stringResource(R.string.sample_message),
             messageTime = "10:00",
             messageStatus = MessageStatus.DELIVERED,
