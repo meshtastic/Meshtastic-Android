@@ -55,7 +55,7 @@
     <string name="unknown_username">Neznáme užívateľské meno</string>
     <string name="send">Odoslať</string>
     <string name="send_text">Odoslať text</string>
-    <string name="warning_not_paired">K tomuto telefónu ste ešte nespárovali žiadne zariadenie kompatibilné s Meshtastic. Prosím spárujte zariadenie a nastavte svoje užívateľské meno. Táto open-source aplikácia je v alpha testovacej fáze, ak nájdete chybu, prosím popíšte ju na fóre: meshtastic.discourse.group.\n\n Pre viac informácií navštívte web stránku - www.meshtastic.org.</string>
+    <string name="warning_not_paired">K tomuto telefónu ste ešte nespárovali žiadne zariadenie kompatibilné s Meshtastic. Prosím spárujte zariadenie a nastavte svoje užívateľské meno.\n\nTáto open-source aplikácia je v alpha testovacej fáze, ak nájdete chybu, prosím popíšte ju na fóre: https://github.com/orgs/meshtastic/discussions\n\n Pre viac informácií navštívte web stránku - www.meshtastic.org.</string>
     <string name="you">Vy</string>
     <string name="your_name">Vaše meno</string>
     <string name="analytics_okay">Anonymné štatistiky používania a správy o zlyhaní.</string>
@@ -70,7 +70,7 @@
     <string name="permission_missing">Aplikácia Meshtastic nemá pridelené požadované oprávnenie a pravdepodobne nebude fungovať správne. Prosím povoľte tieto oprávnenia v nastaveniach aplikácie.</string>
     <string name="report_bug">Nahlásiť chybu</string>
     <string name="report_a_bug">Nahlásiť chybu</string>
-    <string name="report_bug_text">Ste si istý, že chcete nahlásiť chybu? Po odoslaní prosím pridajte správu do meshtastic.discourse.group aby sme vedeli priradiť Vami nahlásenú chybu ku Vášmu príspevku.</string>
+    <string name="report_bug_text">Ste si istý, že chcete nahlásiť chybu? Po odoslaní prosím pridajte správu do https://github.com/orgs/meshtastic/discussions aby sme vedeli priradiť Vami nahlásenú chybu ku Vášmu príspevku.</string>
     <string name="report">Nahlásiť</string>
     <string name="not_paired_yet">Zatiaľ ste nespárovali žiaden vysielač.</string>
     <string name="change_radio">Zmeniť vysielač</string>

@@ -46,7 +46,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
@@ -66,6 +65,8 @@ import com.geeksville.mesh.ui.BatteryInfo
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.theme.Orange
+import com.geeksville.mesh.util.GraphUtil.plotPoint
+import com.geeksville.mesh.util.GraphUtil.createPath
 
 private val DEVICE_METRICS_COLORS = listOf(Color.Green, Color.Magenta, Color.Cyan)
 private const val MAX_PERCENT_VALUE = 100f
@@ -195,61 +196,60 @@ private fun DeviceMetricsChart(
                 val height = size.height
                 val width = size.width
                 val dataPointRadius = 2.dp.toPx()
-                val strokePath = Path().apply {
-                    for (i in telemetries.indices) {
-                        val telemetry = telemetries[i]
+                for (i in telemetries.indices) {
+                    val telemetry = telemetries[i]
 
-                        /* x-value for all three */
-                        val x1Ratio = (telemetry.time - oldest.time).toFloat() / timeDiff
-                        val x1 = x1Ratio * width
+                    /* x-value time */
+                    val xRatio = (telemetry.time - oldest.time).toFloat() / timeDiff
+                    val x = xRatio * width
 
-                        /* Channel Utilization */
-                        val chUtilRatio =
-                            telemetry.deviceMetrics.channelUtilization / MAX_PERCENT_VALUE
-                        val yChUtil = height - (chUtilRatio * height)
-                        drawCircle(
-                            color = DEVICE_METRICS_COLORS[Device.CH_UTIL.ordinal],
-                            radius = dataPointRadius,
-                            center = Offset(x1, yChUtil)
-                        )
+                    /* Channel Utilization */
+                    plotPoint(
+                        drawContext = drawContext,
+                        color = DEVICE_METRICS_COLORS[Device.CH_UTIL.ordinal],
+                        radius = dataPointRadius,
+                        x = x,
+                        value = telemetry.deviceMetrics.channelUtilization,
+                        divisor = MAX_PERCENT_VALUE
+                    )
 
-                        /* Air Utilization Transmit */
-                        val airUtilRatio = telemetry.deviceMetrics.airUtilTx / MAX_PERCENT_VALUE
-                        val yAirUtil = height - (airUtilRatio * height)
-                        drawCircle(
-                            color = DEVICE_METRICS_COLORS[Device.AIR_UTIL.ordinal],
-                            radius = dataPointRadius,
-                            center = Offset(x1, yAirUtil)
-                        )
-
-                        /* Battery line */
-                        val nextTelemetry = telemetries.getOrNull(i + 1) ?: telemetries.last()
-                        val y1Ratio = telemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
-                        val y1 = height - (y1Ratio * height)
-
-                        val x2Ratio = (nextTelemetry.time - oldest.time).toFloat() / timeDiff
-                        val x2 = x2Ratio * width
-
-                        val y2Ratio = nextTelemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
-                        val y2 = height - (y2Ratio * height)
-
-                        if (i == 0) {
-                            moveTo(x1, y1)
-                        }
-
-                        quadraticTo(x1, y1, (x1 + x2) / 2f, (y1 + y2) / 2f)
-                    }
+                    /* Air Utilization Transmit */
+                    plotPoint(
+                        drawContext = drawContext,
+                        color = DEVICE_METRICS_COLORS[Device.AIR_UTIL.ordinal],
+                        radius = dataPointRadius,
+                        x = x,
+                        value = telemetry.deviceMetrics.airUtilTx,
+                        divisor = MAX_PERCENT_VALUE
+                    )
                 }
 
                 /* Battery Line */
-                drawPath(
-                    path = strokePath,
-                    color = DEVICE_METRICS_COLORS[Device.BATTERY.ordinal],
-                    style = Stroke(
-                        width = dataPointRadius,
-                        cap = StrokeCap.Round
+                var index = 0
+                while (index < telemetries.size) {
+                    val path = Path()
+                    index = createPath(
+                        telemetries = telemetries,
+                        index = index,
+                        path = path,
+                        oldestTime = oldest.time,
+                        timeRange = timeDiff,
+                        width = width
+                    ) { i ->
+                        val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
+                        val ratio = telemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
+                        val y = height - (ratio * height)
+                        return@createPath y
+                    }
+                    drawPath(
+                        path = path,
+                        color = DEVICE_METRICS_COLORS[Device.BATTERY.ordinal],
+                        style = Stroke(
+                            width = dataPointRadius,
+                            cap = StrokeCap.Round
+                        )
                     )
-                )
+                }
             }
         }
         YAxisLabels(

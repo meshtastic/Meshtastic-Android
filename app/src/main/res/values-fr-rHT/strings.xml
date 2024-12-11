@@ -55,7 +55,7 @@
     <string name="unknown_username">Non itilizatè enkoni</string>
     <string name="send">Voye</string>
     <string name="send_text">Voye tèks</string>
-    <string name="warning_not_paired">Ou poko konekte ak yon radyo ki konpatib ak Meshtastic sou telefòn sa a. Tanpri konekte yon aparèy epi mete non itilizatè w lan. Sa a se yon aplikasyon piblik ki nan tès Alpha. Si ou gen pwoblèm, tanpri pataje sou fowòm nou an: meshtastic.discourse.group. Pou plis enfòmasyon, vizite sit wèb nou an - www.meshtastic.org</string>
+    <string name="warning_not_paired">Ou poko konekte ak yon radyo ki konpatib ak Meshtastic sou telefòn sa a. Tanpri konekte yon aparèy epi mete non itilizatè w lan.\n\nSa a se yon aplikasyon piblik ki nan tès Alpha. Si ou gen pwoblèm, tanpri pataje sou fowòm nou an: https://github.com/orgs/meshtastic/discussions\n\nPou plis enfòmasyon, vizite sit wèb nou an - www.meshtastic.org.</string>
     <string name="you">Ou</string>
     <string name="your_name">Non ou</string>
     <string name="analytics_okay">Statistik itilizasyon anonim ak rapò aksidantèl.</string>
@@ -70,7 +70,7 @@
     <string name="permission_missing">Manke pèmisyon obligatwa, Meshtastic p ap ka fonksyone byen. Tanpri ale bay pèmisyon an nan paramèt aplikasyon android ou.</string>
     <string name="report_bug">Rapòte yon pwoblèm</string>
     <string name="report_a_bug">Rapòte pwoblèm</string>
-    <string name="report_bug_text">Èske ou sèten ou vle rapòte yon pwoblèm? Aprew fin rapòte, tanpri pataje sou meshtastic.discourse.group pou nou ka konpare rapò a ak sa ou jwenn nan.</string>
+    <string name="report_bug_text">Èske ou sèten ou vle rapòte yon pwoblèm? Aprew fin rapòte, tanpri pataje sou https://github.com/orgs/meshtastic/discussions pou nou ka konpare rapò a ak sa ou jwenn nan.</string>
     <string name="report">Rapò</string>
     <string name="not_paired_yet">Ou poko konekte ak yon radyo.</string>
     <string name="change_radio">Chanje radyo</string>

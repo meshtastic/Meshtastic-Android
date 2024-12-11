@@ -55,7 +55,7 @@
     <string name="unknown_username">Nanashisan</string>
     <string name="send">送信</string>
     <string name="send_text">メッセージを入力</string>
-    <string name="warning_not_paired">このスマートフォンはMeshtasticデバイスとペアリングされていません。デバイスとペアリングしてユーザー名を設定してください。\n\nこのオープンソースアプリケーションはアルファテスト中です。問題を発見した場合はBBSに書き込んでください。 meshtastic.discourse.group \n\n詳しくはWEBページをご覧ください。 www.meshtastic.org</string>
+    <string name="warning_not_paired">このスマートフォンはMeshtasticデバイスとペアリングされていません。デバイスとペアリングしてユーザー名を設定してください。\n\nこのオープンソースアプリケーションはアルファテスト中です。問題を発見した場合はBBSに書き込んでください。 https://github.com/orgs/meshtastic/discussions\n\n詳しくはWEBページをご覧ください。 www.meshtastic.org</string>
     <string name="you">ユーザ</string>
     <string name="your_name">ユーザー名</string>
     <string name="analytics_okay">匿名の診断情報と不具合報告</string>
@@ -70,7 +70,7 @@
     <string name="permission_missing">必要なアクセス権限が拒否されているため、アプリが正常に動作しません。設定により権限を許可してください。</string>
     <string name="report_bug">バグ報告</string>
     <string name="report_a_bug">バグの報告</string>
-    <string name="report_bug_text">不具合報告として診断情報を送信しますか？送信した場合は meshtastic.discourse.group に検証できる報告を書き込んでください。</string>
+    <string name="report_bug_text">不具合報告として診断情報を送信しますか？送信した場合は https://github.com/orgs/meshtastic/discussions に検証できる報告を書き込んでください。</string>
     <string name="report">報告</string>
     <string name="not_paired_yet">Meshtasticデバイスとペアリングされていません。</string>
     <string name="change_radio">Meshtasticデバイス変更</string>

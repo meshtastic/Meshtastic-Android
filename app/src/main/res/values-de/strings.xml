@@ -45,7 +45,7 @@
     <string name="rebroadcast_mode_local_only">Ignoriert beobachtete Nachrichten aus fremden Netzen, die offen sind oder die, die nicht entschlüsselt werden können. Sendet nur die Nachricht auf den Knoten lokalen primären / sekundären Kanälen.</string>
     <string name="rebroadcast_mode_known_only">Ignores observed messages from foreign meshes like LOCAL ONLY, but takes it step further by also ignoring messages from nodes not already in the node\'s known list.</string>
     <string name="rebroadcast_mode_none">Dies ist nur für SENSOR, TRACKER und TAK_TRACKER zulässig. Dies verhindert alle Übertragungen, nicht anders als CLIENT_MUTE Rolle.</string>
-    <string name="rebroadcast_mode_core_portnums_only">Ignores packets from non-standard portnums such as: TAK, RangeTest, PaxCounter, etc. Only rebroadcasts packets with standard portnums: NodeInfo, Text, Position, Telemetry, and Routing.</string>
+    <string name="rebroadcast_mode_core_portnums_only">Ignoriert Pakete von nicht standardmäßigen portnums wie: TAK, Range Test, PaxCounter, etc. Sendet nur Pakete mit Standardportnums: NodeInfo, Text, Position, Telemetrie und Routing erneut.</string>
     <string name="channel_name">Kanalname</string>
     <string name="channel_options">Kanaloptionen</string>
     <string name="qr_code">QR-Code</string>
@@ -70,7 +70,7 @@
     <string name="permission_missing">Meshtastic benötigt Standortberechtigung und Standort muss eingeschaltet werden, um neue Geräte über Bluetooth zu finden. Sie können es später wieder deaktivieren.</string>
     <string name="report_bug">Fehler melden</string>
     <string name="report_a_bug">Fehler melden</string>
-    <string name="report_bug_text">Bist du sicher, dass du einen Fehler melden möchtest? Nach dem Melden bitte auf meshtastic.discourse.group eine Nachricht veröffentlichen, damit wir die Übereinstimmung der Fehlermeldung und dessen, was Sie gefunden haben, feststellen können.</string>
+    <string name="report_bug_text">Bist du sicher, dass du einen Fehler melden möchtest? Nach dem Melden bitte auf https://github.com/orgs/meshtastic/discussions eine Nachricht veröffentlichen, damit wir die Übereinstimmung der Fehlermeldung und dessen, was Sie gefunden haben, feststellen können.</string>
     <string name="report">Melden</string>
     <string name="not_paired_yet">Sie haben noch kein gekoppeltes Funkgerät.</string>
     <string name="change_radio">Funkgerät wechseln</string>
@@ -256,7 +256,7 @@
     <string name="device_metrics_log">Geräte-Metriken-Protokoll</string>
     <string name="node_map">Nodekarte</string>
     <string name="position_log">Positions-Protokoll</string>
-    <string name="env_metrics_log">Geräte-Metriken-Protokoll</string>
+    <string name="env_metrics_log">Umgebungs-Metriken-Protokoll</string>
     <string name="sig_metrics_log">Signal-Metriken-Protkoll</string>
     <string name="administration">Administration</string>
     <string name="remote_admin">Fernadministration</string>

@@ -17,8 +17,10 @@
 
 package com.geeksville.mesh.ui.message.components
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -32,17 +34,21 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.model.Message
+import com.geeksville.mesh.ui.components.NodeMenu
+import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.components.SimpleAlertDialog
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
 
+@Suppress("LongMethod")
 @Composable
 internal fun MessageList(
     messages: List<Message>,
@@ -50,7 +56,7 @@ internal fun MessageList(
     onUnreadChanged: (Long) -> Unit,
     contentPadding: PaddingValues,
     onSendReaction: (String, Int) -> Unit,
-    onClick: (Message) -> Unit = {}
+    onNodeMenuAction: (NodeMenuAction) -> Unit = {}
 ) {
     val haptics = LocalHapticFeedback.current
     val inSelectionMode by remember { derivedStateOf { selectedIds.value.isNotEmpty() } }
@@ -90,21 +96,35 @@ internal fun MessageList(
             val selected by remember { derivedStateOf { selectedIds.value.contains(msg.uuid) } }
 
             ReactionRow(fromLocal, msg.emojis) { showReactionDialog = msg.emojis }
-            MessageItem(
-                node = msg.node,
-                messageText = msg.text,
-                messageTime = msg.time,
-                messageStatus = msg.status,
-                selected = selected,
-                onClick = { if (inSelectionMode) selectedIds.toggle(msg.uuid) },
-                onLongClick = {
-                    selectedIds.toggle(msg.uuid)
-                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                },
-                onChipClick = { onClick(msg) },
-                onStatusClick = { showStatusDialog = msg },
-                onSendReaction = { onSendReaction(it, msg.packetId) },
-            )
+            Box(Modifier.wrapContentSize(Alignment.TopStart)) {
+                var expandedNodeMenu by remember { mutableStateOf(false) }
+                MessageItem(
+                    node = msg.node,
+                    messageText = msg.text,
+                    messageTime = msg.time,
+                    messageStatus = msg.status,
+                    selected = selected,
+                    onClick = { if (inSelectionMode) selectedIds.toggle(msg.uuid) },
+                    onLongClick = {
+                        selectedIds.toggle(msg.uuid)
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    },
+                    onChipClick = {
+                        if (msg.node.num != 0) {
+                            expandedNodeMenu = true
+                        }
+                    },
+                    onStatusClick = { showStatusDialog = msg },
+                    onSendReaction = { onSendReaction(it, msg.packetId) },
+                )
+                NodeMenu(
+                    node = msg.node,
+                    showFullMenu = true,
+                    onDismissRequest = { expandedNodeMenu = false },
+                    expanded = expandedNodeMenu,
+                    onAction = onNodeMenuAction
+                )
+            }
         }
     }
 }

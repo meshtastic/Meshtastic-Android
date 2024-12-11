@@ -81,7 +81,7 @@
     <string name="unknown_username">Unknown Username</string>
     <string name="send">Send</string>
     <string name="send_text">Send Text</string>
-    <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in development, if you find problems please post on our forum: meshtastic.discourse.group.\n\nFor more information see our web page - www.meshtastic.org.</string>
+    <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in development, if you find problems please post on our forum: https://github.com/orgs/meshtastic/discussions.\n\nFor more information see our web page - www.meshtastic.org.</string>
     <string name="you">You</string>
     <string name="your_name">Your Name</string>
     <string name="analytics_okay">Anonymous usage statistics and crash reports.</string>
@@ -96,7 +96,7 @@
     <string name="permission_missing">Meshtastic needs location permission and location must be turned on to find new devices via Bluetooth. You can turn it off again afterwards.</string>
     <string name="report_bug">Report Bug</string>
     <string name="report_a_bug">Report a bug</string>
-    <string name="report_bug_text">Are you sure you want to report a bug? After reporting, please post in meshtastic.discourse.group so we can match up the report with what you found.</string>
+    <string name="report_bug_text">Are you sure you want to report a bug? After reporting, please post in https://github.com/orgs/meshtastic/discussions so we can match up the report with what you found.</string>
     <string name="report">Report</string>
     <string name="not_paired_yet">You have not paired a radio yet.</string>
     <string name="change_radio">Change radio</string>

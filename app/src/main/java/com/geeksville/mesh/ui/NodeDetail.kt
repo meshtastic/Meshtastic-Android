@@ -15,10 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-@file:Suppress("TooManyFunctions")
+@file:Suppress("TooManyFunctions", "LongMethod")
 
 package com.geeksville.mesh.ui
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,9 +38,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
 import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -64,6 +68,7 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Thermostat
+import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material.icons.outlined.Navigation
@@ -71,11 +76,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
@@ -98,8 +105,8 @@ import kotlin.math.ln
 
 @Composable
 fun NodeDetailScreen(
-    viewModel: MetricsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
+    viewModel: MetricsViewModel = hiltViewModel(),
     onNavigate: (Any) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -124,15 +131,20 @@ fun NodeDetailScreen(
 
 @Composable
 private fun NodeDetailList(
+    modifier: Modifier = Modifier,
     node: NodeEntity,
     metricsState: MetricsState,
-    modifier: Modifier = Modifier,
     onNavigate: (Any) -> Unit = {},
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 16.dp),
     ) {
+        item {
+            PreferenceCategory("Device") {
+                DeviceDetailsContent(metricsState)
+            }
+        }
         item {
             PreferenceCategory("Details") {
                 NodeDetailsContent(node)
@@ -176,7 +188,12 @@ private fun NodeDetailList(
 }
 
 @Composable
-private fun NodeDetailRow(label: String, icon: ImageVector, value: String) {
+private fun NodeDetailRow(
+    label: String,
+    icon: ImageVector,
+    value: String,
+    iconTint: Color = MaterialTheme.colors.onSurface
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -186,7 +203,8 @@ private fun NodeDetailRow(label: String, icon: ImageVector, value: String) {
         Icon(
             imageVector = icon,
             contentDescription = label,
-            modifier = Modifier.size(24.dp)
+            modifier = Modifier.size(24.dp),
+            tint = iconTint
         )
         Spacer(modifier = Modifier.width(8.dp))
         Text(label)
@@ -196,7 +214,49 @@ private fun NodeDetailRow(label: String, icon: ImageVector, value: String) {
 }
 
 @Composable
-private fun NodeDetailsContent(node: NodeEntity) {
+private fun DeviceDetailsContent(
+    state: MetricsState,
+) {
+    val node = state.node ?: return
+    val deviceHardware = state.deviceHardware ?: return
+    val hwModelName = deviceHardware.displayName
+    val isSupported = deviceHardware.activelySupported
+    Box(
+        modifier = Modifier
+            .size(100.dp)
+            .padding(4.dp)
+            .clip(CircleShape)
+            .background(
+                color = Color(node.colors.second).copy(alpha = .5f),
+                shape = CircleShape
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Image(
+            modifier = Modifier.padding(16.dp),
+            imageVector = ImageVector.vectorResource(deviceHardware.image),
+            contentDescription = hwModelName,
+        )
+    }
+    NodeDetailRow(
+        label = "Hardware",
+        icon = Icons.Default.Router,
+        value = hwModelName
+    )
+    if (isSupported) {
+        NodeDetailRow(
+            label = "Supported",
+            icon = Icons.Default.Verified,
+            value = "",
+            iconTint = Color.Green
+        )
+    }
+}
+
+@Composable
+private fun NodeDetailsContent(
+    node: NodeEntity,
+) {
     if (node.mismatchKey) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
@@ -204,18 +264,21 @@ private fun NodeDetailsContent(node: NodeEntity) {
                 contentDescription = stringResource(id = R.string.encryption_error),
                 tint = Color.Red,
             )
-            Column(modifier = Modifier.padding(start = 8.dp)) {
-                Text(
-                    text = stringResource(id = R.string.encryption_error),
-                    style = MaterialTheme.typography.h6.copy(color = Color.Red)
-                )
-                Text(
-                    text = stringResource(id = R.string.encryption_error_text),
-                    style = MaterialTheme.typography.body2,
-                    color = MaterialTheme.colors.onSurface.copy(alpha = 0.6f)
-                )
-            }
+            Spacer(Modifier.width(12.dp))
+            Text(
+                text = stringResource(id = R.string.encryption_error),
+                style = MaterialTheme.typography.h6.copy(color = Color.Red),
+                textAlign = TextAlign.Center,
+            )
         }
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = stringResource(id = R.string.encryption_error_text),
+            style = MaterialTheme.typography.body2,
+            color = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(16.dp))
     }
     NodeDetailRow(
         label = "Node Number",
@@ -231,11 +294,6 @@ private fun NodeDetailsContent(node: NodeEntity) {
         label = "Role",
         icon = Icons.Default.Work,
         value = node.user.role.name
-    )
-    NodeDetailRow(
-        label = "Hardware",
-        icon = Icons.Default.Router,
-        value = node.user.hwModel.name
     )
     if (node.deviceMetrics.uptimeSeconds > 0) {
         NodeDetailRow(
@@ -541,6 +599,9 @@ private fun NodeDetailsPreview(
     node: NodeEntity
 ) {
     AppTheme {
-        NodeDetailList(node, MetricsState.Empty)
+        NodeDetailList(
+            node = node,
+            metricsState = MetricsState.Empty,
+        )
     }
 }

@@ -55,7 +55,7 @@
     <string name="unknown_username">Ainm Úsáideora Anaithnid</string>
     <string name="send">Seol</string>
     <string name="send_text">Seol Téacs</string>
-    <string name="warning_not_paired">Níl raidió comhoiriúnach Meshtastic péireáilte leis an bhfón seo agat fós. Péireáil gléas le do thoil agus socraigh d’ainm úsáideora. Tá an feidhmchlár foinse oscailte seo faoi alfa-thástáil, má aimsíonn tú fadhbanna cuir leis an gcomhrá ar ár suíomh gréasáin iad le do thoil. Le haghaidh tuilleadh faisnéise féach ar ár leathanach gréasáin - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Níl raidió comhoiriúnach Meshtastic péireáilte leis an bhfón seo agat fós. Péireáil gléas le do thoil agus socraigh d’ainm úsáideora.\n\nTá an feidhmchlár foinse oscailte seo faoi alfa-thástáil, má aimsíonn tú fadhbanna cuir iad ar ár bhfóram: https://github.com/orgs/meshtastic/discussions\n\nLe haghaidh tuilleadh faisnéise féach ar ár leathanach gréasáin - www.meshtastic.org.</string>
     <string name="you">Tú</string>
     <string name="your_name">D’ainm</string>
     <string name="analytics_okay">Staitisticí úsáide gan ainm agus tuairiscí tuairteála.</string>
@@ -70,7 +70,7 @@
     <string name="permission_missing">Tá cead riachtanach ar iarraidh, ní bheidh Meshtastic in ann oibriú i gceart. Cumasaigh i socruithe feidhmchláir le do thoil.</string>
     <string name="report_bug">Tuairiscigh fabht</string>
     <string name="report_a_bug">Tuairiscigh fabht</string>
-    <string name="report_bug_text">An bhfuil tú cinnte gur mhaith leat fabht a thuairisciú? Tar éis tuairisciú a dhéanamh, cuir sa phost é le do thoil i meshtastic.discourse.group ionas gur féidir linn an tuarascáil a mheaitseáil leis an méid a d’aimsigh tú.</string>
+    <string name="report_bug_text">An bhfuil tú cinnte gur mhaith leat fabht a thuairisciú? Tar éis tuairisciú a dhéanamh, cuir sa phost é le do thoil in https://github.com/orgs/meshtastic/discussions ionas gur féidir linn an tuarascáil a mheaitseáil leis an méid a d’aimsigh tú.</string>
     <string name="report">Tuairiscigh</string>
     <string name="not_paired_yet">Níl raidió péireálite agat fós.</string>
     <string name="change_radio">Athraigh raidió</string>

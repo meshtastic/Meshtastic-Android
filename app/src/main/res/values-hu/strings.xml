@@ -55,7 +55,7 @@
     <string name="unknown_username">Ismeretlen felhasználónév</string>
     <string name="send">Küldeni</string>
     <string name="send_text">Szöveg elküldése</string>
-    <string name="warning_not_paired">Még nem párosított egyetlen Meshtastic rádiót sem ehhez a telefonhoz. Kérem pároztasson egyet és állítsa be a felhasználónevet.\n\nEz a szabad forráskódú alkalmazás fejlesztés alatt áll, ha hibát talál kérem írjon a projekt fórumába: meshtastic.discourse.group.\n\nBővebb információért látogasson el a projekt weboldalára - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Még nem párosított egyetlen Meshtastic rádiót sem ehhez a telefonhoz. Kérem pároztasson egyet és állítsa be a felhasználónevet.\n\nEz a szabad forráskódú alkalmazás fejlesztés alatt áll, ha hibát talál kérem írjon a projekt fórumába: https://github.com/orgs/meshtastic/discussions\n\nBővebb információért látogasson el a projekt weboldalára - www.meshtastic.org.</string>
     <string name="you">Te</string>
     <string name="your_name">A neve</string>
     <string name="analytics_okay">Névtelen felhasználási statisztikák és hibajelentések.</string>
@@ -70,7 +70,7 @@
     <string name="permission_missing">Egy szükséges engedély hiányzik, ezért a Meshtastic nem fog tudni rendesen működni. Kérem engedélyezze az Android alkalmazások beállításai között.</string>
     <string name="report_bug">Hiba jelentése</string>
     <string name="report_a_bug">Hiba jelentése</string>
-    <string name="report_bug_text">Biztosan jelenteni akarja a hibát? Bejelentés után kérem írjon a meshtastic.discourse.group fórumba, hogy így össze tudjuk hangolni a jelentést azzal, amit talált.</string>
+    <string name="report_bug_text">Biztosan jelenteni akarja a hibát? Bejelentés után kérem írjon a https://github.com/orgs/meshtastic/discussions fórumba, hogy így össze tudjuk hangolni a jelentést azzal, amit talált.</string>
     <string name="report">Jelentés</string>
     <string name="not_paired_yet">Még nem párosított egyetlen rádiót sem.</string>
     <string name="change_radio">Rádió váltás</string>

@@ -55,7 +55,7 @@
     <string name="unknown_username">Onbekende Gebruikersnaam</string>
     <string name="send">Verzenden</string>
     <string name="send_text">Stuur tekst</string>
-    <string name="warning_not_paired">Je hebt nog geen Meshtastic compatibele radio met deze telefoon gekoppeld. Paar alstublieft een apparaat en voer je gebruikersnaam in.\n\nDeze open-source applicatie is in alpha-test, indien je een probleem vaststelt, kan je het posten op onze website chat.\n\nVoor meer informatie bezoek onze web pagina - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Je hebt nog geen Meshtastic compatibele radio met deze telefoon gekoppeld. Paar alstublieft een apparaat en voer je gebruikersnaam in.\n\nDeze open-source applicatie is in alpha-test, indien je een probleem vaststelt, kan je het posten op onze forum: https://github.com/orgs/meshtastic/discussions\n\nVoor meer informatie bezoek onze web pagina - www.meshtastic.org.</string>
     <string name="you">Jij</string>
     <string name="your_name">Je Naam</string>
     <string name="analytics_okay">Anonieme gebruiksstatistieken en crashmeldingen.</string>
@@ -70,7 +70,7 @@
     <string name="permission_missing">Een vereiste toelating ontbreekt, Meshtastic kan niet goed werken. Graag aanzetten in Instellingen.</string>
     <string name="report_bug">Rapporteer Bug</string>
     <string name="report_a_bug">Rapporteer een Bug</string>
-    <string name="report_bug_text">Ben je zeker dat je een bug wil rapporteren? Na het doorsturen, graag een post in meshtastic.discourse.group zodat we het rapport kunnen toetsen aan hetgeen je ondervond.</string>
+    <string name="report_bug_text">Ben je zeker dat je een bug wil rapporteren? Na het doorsturen, graag een post in https://github.com/orgs/meshtastic/discussions zodat we het rapport kunnen toetsen aan hetgeen je ondervond.</string>
     <string name="report">Rapport</string>
     <string name="not_paired_yet">Je hebt nog geen radio gekoppeld.</string>
     <string name="change_radio">Wijzig radio</string>

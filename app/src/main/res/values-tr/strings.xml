@@ -55,7 +55,7 @@
     <string name="unknown_username">Bilinmeyen kullanıcı adı</string>
     <string name="send">Gönder</string>
     <string name="send_text">Metni Gönder</string>
-    <string name="warning_not_paired">Telefonu, Meshtastic uyumlu bir cihaz ile eşleştirmediniz. Bir cihazla eşleştirin ve kullanıcı adınızı belirleyin.\n\nAçık kaynaklı bu uygulama şu an alfa-test aşamasında, problem fark ederseniz forumda lütfen paylaşın: meshtastic.discourse.group.\n\nDaha fazla bilgi için, sitemiz: www.meshtastic.org.</string>
+    <string name="warning_not_paired">Telefonu, Meshtastic uyumlu bir cihaz ile eşleştirmediniz. Bir cihazla eşleştirin ve kullanıcı adınızı belirleyin.\n\nAçık kaynaklı bu uygulama şu an alfa-test aşamasında, problem fark ederseniz forumda lütfen paylaşın: https://github.com/orgs/meshtastic/discussions\n\nDaha fazla bilgi için, sitemiz: www.meshtastic.org.</string>
     <string name="you">Siz</string>
     <string name="your_name">Adınız</string>
     <string name="analytics_okay">Anonim kullanim istatistikleri ve hata raporları.</string>
@@ -70,7 +70,7 @@
     <string name="permission_missing">Meshtastic\'in konum iznine ihtiyacı var ve Bluetooth ile yeni cihazlar bulmak için konumun açık olması gerekiyor. Daha sonra isterseniz kapatabilirsiniz.</string>
     <string name="report_bug">Hata Bildir</string>
     <string name="report_a_bug">Hata Bildir</string>
-    <string name="report_bug_text">Hata bildirmek istediğinizden emin misiniz? Hata bildirdikten sonra, lütfen meshtastic.discourse.group sayfasında paylaşınız ki raporu bulgularınızla eşleştirebilelim.</string>
+    <string name="report_bug_text">Hata bildirmek istediğinizden emin misiniz? Hata bildirdikten sonra, lütfen https://github.com/orgs/meshtastic/discussions sayfasında paylaşınız ki raporu bulgularınızla eşleştirebilelim.</string>
     <string name="report">Bildir</string>
     <string name="not_paired_yet">Henüz bir cihaz ile eşleşmediniz.</string>
     <string name="change_radio">Cihazı değiştir</string>
