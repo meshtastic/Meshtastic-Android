@@ -142,7 +142,6 @@ data class NodesUiState(
     val gpsFormat: Int = 0,
     val distanceUnits: Int = 0,
     val tempInFahrenheit: Boolean = false,
-    val ignoreIncomingList: List<Int> = emptyList(),
     val showDetails: Boolean = false,
 ) {
     companion object {
@@ -227,7 +226,6 @@ class UIViewModel @Inject constructor(
             gpsFormat = profile.config.display.gpsFormat.number,
             distanceUnits = profile.config.display.units.number,
             tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
-            ignoreIncomingList = profile.config.lora.ignoreIncomingList,
             showDetails = showDetails,
         )
     }.stateIn(
@@ -255,6 +253,7 @@ class UIViewModel @Inject constructor(
         get() = preferences.getInt(MAP_STYLE_ID, 0)
         set(value) = preferences.edit { putInt(MAP_STYLE_ID, value) }
 
+    fun getNode(userId: String?) = nodeDB.getNode(userId ?: DataPacket.ID_BROADCAST)
     fun getUser(userId: String?) = nodeDB.getUser(userId ?: DataPacket.ID_BROADCAST)
 
     private val _snackbarText = MutableLiveData<Any?>(null)
@@ -330,7 +329,7 @@ class UIViewModel @Inject constructor(
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey)
-        .mapLatest { list -> list.map { it.toMessage(::getUser) } }
+        .mapLatest { list -> list.map { it.toMessage(::getNode) } }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     val waypoints = packetRepository.getWaypoints().mapLatest { list ->
@@ -485,19 +484,11 @@ class UIViewModel @Inject constructor(
             updateLoraConfig { it.copy { region = value } }
         }
 
-    fun ignoreNode(nodeNum: Int) = updateLoraConfig {
-        it.copy {
-            val list = ignoreIncoming.toMutableList().apply {
-                if (contains(nodeNum)) {
-                    debug("removing node $nodeNum from ignore list")
-                    remove(nodeNum)
-                } else {
-                    debug("adding node $nodeNum to ignore list")
-                    add(nodeNum)
-                }
-            }
-            ignoreIncoming.clear()
-            ignoreIncoming.addAll(list)
+    fun ignoreNode(node: NodeEntity) = viewModelScope.launch {
+        try {
+            radioConfigRepository.onServiceAction(ServiceAction.Ignore(node))
+        } catch (ex: RemoteException) {
+            errormsg("Ignore node error:", ex)
         }
     }
 

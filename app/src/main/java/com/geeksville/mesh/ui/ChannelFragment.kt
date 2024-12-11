@@ -49,6 +49,7 @@ import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.ContentCopy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -321,6 +322,11 @@ fun ChannelScreen(
                     channelSelections = channelSelections,
                     onClick = { showChannelEditor = true }
                 )
+                EditChannelUrl(
+                    enabled = enabled,
+                    channelUrl = selectedChannelSet.getChannelUrl(),
+                    onConfirm = viewModel::requestChannelUrl
+                )
             }
         } else {
             dragDropItemsIndexed(
@@ -352,14 +358,6 @@ fun ChannelScreen(
                     )
                 ) { Text(text = stringResource(R.string.add)) }
             }
-        }
-
-        item {
-            EditChannelUrl(
-                enabled = enabled,
-                channelUrl = selectedChannelSet.getChannelUrl(),
-                onConfirm = viewModel::requestChannelUrl
-            )
         }
 
         item {
@@ -418,6 +416,13 @@ private fun EditChannelUrl(
 
     var valueState by remember(channelUrl) { mutableStateOf(channelUrl) }
     var isError by remember { mutableStateOf(false) }
+
+    // Trigger dialog automatically when users paste a new valid URL
+    LaunchedEffect(valueState, isError) {
+        if (!isError && valueState != channelUrl) {
+            onConfirm(valueState)
+        }
+    }
 
     OutlinedTextField(
         value = valueState.toString(),

@@ -33,6 +33,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.model.Message
@@ -50,6 +52,7 @@ internal fun MessageList(
     onSendReaction: (String, Int) -> Unit,
     onClick: (Message) -> Unit = {}
 ) {
+    val haptics = LocalHapticFeedback.current
     val inSelectionMode by remember { derivedStateOf { selectedIds.value.isNotEmpty() } }
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = messages.indexOfLast { !it.read }.coerceAtLeast(0)
@@ -70,10 +73,10 @@ internal fun MessageList(
         ReactionDialog(reactions) { showReactionDialog = null }
     }
 
-    fun toggle(uuid: Long) = if (selectedIds.value.contains(uuid)) {
-        selectedIds.value -= uuid
+    fun MutableState<Set<Long>>.toggle(uuid: Long) = if (value.contains(uuid)) {
+        value -= uuid
     } else {
-        selectedIds.value += uuid
+        value += uuid
     }
 
     LazyColumn(
@@ -83,18 +86,21 @@ internal fun MessageList(
         contentPadding = contentPadding
     ) {
         items(messages, key = { it.uuid }) { msg ->
-            val fromLocal = msg.user.id == DataPacket.ID_LOCAL
+            val fromLocal = msg.node.user.id == DataPacket.ID_LOCAL
             val selected by remember { derivedStateOf { selectedIds.value.contains(msg.uuid) } }
 
             ReactionRow(fromLocal, msg.emojis) { showReactionDialog = msg.emojis }
             MessageItem(
-                shortName = msg.user.shortName.takeIf { !fromLocal },
+                node = msg.node,
                 messageText = msg.text,
                 messageTime = msg.time,
                 messageStatus = msg.status,
                 selected = selected,
-                onClick = { if (inSelectionMode) toggle(msg.uuid) },
-                onLongClick = { toggle(msg.uuid) },
+                onClick = { if (inSelectionMode) selectedIds.toggle(msg.uuid) },
+                onLongClick = {
+                    selectedIds.toggle(msg.uuid)
+                    haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                },
                 onChipClick = { onClick(msg) },
                 onStatusClick = { showStatusDialog = msg },
                 onSendReaction = { onSendReaction(it, msg.packetId) },
