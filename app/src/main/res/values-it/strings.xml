@@ -55,7 +55,7 @@
     <string name="unknown_username">Nome Utente Sconosciuto</string>
     <string name="send">Invia</string>
     <string name="send_text">Invia Messaggio</string>
-    <string name="warning_not_paired">Non è ancora stato abbinato un dispositivo radio compatibile Meshtastic a questo telefono. È necessario abbinare un dispositivo e impostare il nome utente.\n\nQuesta applicazione open-source è ancora in via di sviluppo, se si riscontrano problemi, rivolgersi al forum: https://github.com/orgs/meshtastic/discussions.\n\nPer maggiori informazioni visitare la pagina web - www.meshtastic.org.</string>
+    <string name="warning_not_paired">Non è ancora stato abbinato un dispositivo radio compatibile Meshtastic a questo telefono. È necessario abbinare un dispositivo e impostare il nome utente.\n\nQuesta applicazione open-source è ancora in via di sviluppo, se si riscontrano problemi, rivolgersi al forum: https://github.com/orgs/meshtastic/discussions\n\nPer maggiori informazioni visitare la pagina web - www.meshtastic.org.</string>
     <string name="you">Tu</string>
     <string name="your_name">Il tuo nome</string>
     <string name="analytics_okay">Invia statistiche di utilizzo anonime e rapporti sugli arresti anomali.</string>

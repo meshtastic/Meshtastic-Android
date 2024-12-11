@@ -55,7 +55,7 @@
     <string name="unknown_username">Nanashisan</string>
     <string name="send">送信</string>
     <string name="send_text">メッセージを入力</string>
-    <string name="warning_not_paired">このスマートフォンはMeshtasticデバイスとペアリングされていません。デバイスとペアリングしてユーザー名を設定してください。\n\nこのオープンソースアプリケーションはアルファテスト中です。問題を発見した場合はBBSに書き込んでください。 https://github.com/orgs/meshtastic/discussions \n\n詳しくはWEBページをご覧ください。 www.meshtastic.org</string>
+    <string name="warning_not_paired">このスマートフォンはMeshtasticデバイスとペアリングされていません。デバイスとペアリングしてユーザー名を設定してください。\n\nこのオープンソースアプリケーションはアルファテスト中です。問題を発見した場合はBBSに書き込んでください。 https://github.com/orgs/meshtastic/discussions\n\n詳しくはWEBページをご覧ください。 www.meshtastic.org</string>
     <string name="you">ユーザ</string>
     <string name="your_name">ユーザー名</string>
     <string name="analytics_okay">匿名の診断情報と不具合報告</string>
