@@ -114,4 +114,19 @@ class Converters : Logging {
     fun paxCounterToBytes(value: PaxcountProtos.Paxcount): ByteArray? {
         return value.toByteArray()
     }
+
+    @TypeConverter
+    fun bytesToMetadata(bytes: ByteArray): MeshProtos.DeviceMetadata {
+        return try {
+            MeshProtos.DeviceMetadata.parseFrom(bytes)
+        } catch (ex: InvalidProtocolBufferException) {
+            errormsg("bytesToMetadata TypeConverter error:", ex)
+            MeshProtos.DeviceMetadata.getDefaultInstance()
+        }
+    }
+
+    @TypeConverter
+    fun metadataToBytes(value: MeshProtos.DeviceMetadata): ByteArray? {
+        return value.toByteArray()
+    }
 }

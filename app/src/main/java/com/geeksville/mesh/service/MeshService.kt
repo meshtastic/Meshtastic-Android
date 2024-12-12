@@ -26,17 +26,38 @@ import android.os.IBinder
 import android.os.RemoteException
 import androidx.core.app.ServiceCompat
 import androidx.core.location.LocationCompat
-import com.geeksville.mesh.*
+import com.geeksville.mesh.AdminProtos
+import com.geeksville.mesh.AppOnlyProtos
+import com.geeksville.mesh.BuildConfig
+import com.geeksville.mesh.ChannelProtos
+import com.geeksville.mesh.ConfigProtos
+import com.geeksville.mesh.CoroutineDispatchers
+import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
+import com.geeksville.mesh.MeshUser
+import com.geeksville.mesh.MessageStatus
+import com.geeksville.mesh.ModuleConfigProtos
+import com.geeksville.mesh.MyNodeInfo
+import com.geeksville.mesh.NodeInfo
+import com.geeksville.mesh.PaxcountProtos
+import com.geeksville.mesh.Portnums
+import com.geeksville.mesh.Position
+import com.geeksville.mesh.R
+import com.geeksville.mesh.StoreAndForwardProtos
+import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.concurrent.handledLaunch
+import com.geeksville.mesh.config
+import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.MeshLog
@@ -44,15 +65,22 @@ import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.ReactionEntity
-import com.geeksville.mesh.database.entity.toNodeInfo
+import com.geeksville.mesh.fromRadio
 import com.geeksville.mesh.model.DeviceVersion
+import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.getTracerouteResponse
+import com.geeksville.mesh.position
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.network.MQTTRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.radio.RadioServiceConnectionState
-import com.geeksville.mesh.util.*
+import com.geeksville.mesh.telemetry
+import com.geeksville.mesh.user
+import com.geeksville.mesh.util.anonymize
+import com.geeksville.mesh.util.toOneLineString
+import com.geeksville.mesh.util.toPIIString
+import com.geeksville.mesh.util.toRemoteExceptions
 import com.google.protobuf.ByteString
 import com.google.protobuf.InvalidProtocolBufferException
 import dagger.Lazy
@@ -77,7 +105,7 @@ import javax.inject.Inject
 import kotlin.math.absoluteValue
 
 sealed class ServiceAction {
-    data class Ignore(val node: NodeEntity) : ServiceAction()
+    data class Ignore(val node: Node) : ServiceAction()
     data class Reaction(val emoji: String, val replyId: Int, val contactKey: String) : ServiceAction()
 }
 
@@ -375,10 +403,10 @@ class MeshService : Service(), Logging {
     // BEGINNING OF MODEL - FIXME, move elsewhere
     //
 
-    private fun loadSettings() {
+    private fun loadSettings() = serviceScope.handledLaunch {
         discardNodeDB() // Get rid of any old state
         myNodeInfo = radioConfigRepository.myNodeInfo.value
-        nodeDBbyNodeNum.putAll(radioConfigRepository.nodeDBbyNum.value)
+        nodeDBbyNodeNum.putAll(radioConfigRepository.getNodeDBbyNum())
         // Note: we do not haveNodeDB = true because that means we've got a valid db from a real device (rather than this possibly stale hint)
     }
 
@@ -808,15 +836,17 @@ class MeshService : Service(), Logging {
     }
 
     private fun handleReceivedAdmin(fromNodeNum: Int, a: AdminProtos.AdminMessage) {
-        if (fromNodeNum == myNodeNum) {
-            when (a.payloadVariantCase) {
-                AdminProtos.AdminMessage.PayloadVariantCase.GET_CONFIG_RESPONSE -> {
+        when (a.payloadVariantCase) {
+            AdminProtos.AdminMessage.PayloadVariantCase.GET_CONFIG_RESPONSE -> {
+                if (fromNodeNum == myNodeNum) {
                     val response = a.getConfigResponse
                     debug("Admin: received config ${response.payloadVariantCase}")
                     setLocalConfig(response)
                 }
+            }
 
-                AdminProtos.AdminMessage.PayloadVariantCase.GET_CHANNEL_RESPONSE -> {
+            AdminProtos.AdminMessage.PayloadVariantCase.GET_CHANNEL_RESPONSE -> {
+                if (fromNodeNum == myNodeNum) {
                     val mi = myNodeInfo
                     if (mi != null) {
                         val ch = a.getChannelResponse
@@ -827,12 +857,18 @@ class MeshService : Service(), Logging {
                         }
                     }
                 }
-                else -> warn("No special processing needed for ${a.payloadVariantCase}")
             }
-        } else {
-            debug("Admin: Received session_passkey from $fromNodeNum")
-            sessionPasskey = a.sessionPasskey
+
+            AdminProtos.AdminMessage.PayloadVariantCase.GET_DEVICE_METADATA_RESPONSE -> {
+                serviceScope.handledLaunch {
+                    radioConfigRepository.insertMetadata(fromNodeNum, a.getDeviceMetadataResponse)
+                }
+            }
+
+            else -> warn("No special processing needed for ${a.payloadVariantCase}")
         }
+        debug("Admin: Received session_passkey from $fromNodeNum")
+        sessionPasskey = a.sessionPasskey
     }
 
     // Update our DB of users based on someone sending out a User subpacket
@@ -1141,13 +1177,6 @@ class MeshService : Service(), Logging {
     private fun setLocalModuleConfig(config: ModuleConfigProtos.ModuleConfig) {
         serviceScope.handledLaunch {
             radioConfigRepository.setLocalModuleConfig(config)
-        }
-    }
-
-    private fun clearLocalConfig() {
-        serviceScope.handledLaunch {
-            radioConfigRepository.clearLocalConfig()
-            radioConfigRepository.clearLocalModuleConfig()
         }
     }
 
@@ -1760,7 +1789,7 @@ class MeshService : Service(), Logging {
         }
     }
 
-    private fun ignoreNode(node: NodeEntity) = toRemoteExceptions {
+    private fun ignoreNode(node: Node) = toRemoteExceptions {
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
             if (node.isIgnored) {
                 debug("removing node ${node.num} from ignore list")
