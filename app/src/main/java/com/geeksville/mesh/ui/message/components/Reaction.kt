@@ -17,24 +17,30 @@
 
 package com.geeksville.mesh.ui.message.components
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.FlowRowOverflow
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Badge
-import androidx.compose.material.BadgedBox
 import androidx.compose.material.ContentAlpha
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
@@ -43,7 +49,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.EmojiEmotions
+import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,10 +59,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.ui.components.BottomSheetDialog
@@ -80,7 +86,7 @@ fun ReactionButton(
     }
     IconButton(onClick = { showEmojiPickerDialog = true }) {
         Icon(
-            imageVector = Icons.Default.EmojiEmotions,
+            imageVector = Icons.Default.AddReaction,
             contentDescription = "emoji",
             modifier = modifier.size(16.dp),
             tint = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
@@ -94,35 +100,51 @@ private fun ReactionItem(
     emojiCount: Int = 1,
     onClick: () -> Unit = {},
 ) {
-    BadgedBox(
-        modifier = Modifier.padding(start = 2.dp, top = 8.dp, end = 2.dp, bottom = 4.dp),
-        badge = {
-            if (emojiCount > 1) {
-                Badge(
-                    backgroundColor = MaterialTheme.colors.onBackground,
-                    contentColor = MaterialTheme.colors.background,
+
+    Surface(
+        modifier = Modifier
+            .padding(2.dp)
+            .border(
+                1.dp,
+                MaterialTheme.colors.onSurface.copy(ContentAlpha.medium),
+                RoundedCornerShape(8.dp)
+            )
+            .clickable { onClick() },
+        color = MaterialTheme.colors.surface.copy(alpha = ContentAlpha.medium),
+        contentColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
+        shape = RoundedCornerShape(8.dp),
+        elevation = 4.dp,
+    ) {
+        Row(
+            modifier = Modifier
+                .background(MaterialTheme.colors.surface)
+                .padding(4.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                style = MaterialTheme.typography.h6,
+                text = emoji
+            )
+            if (emojiCount > 0) {
+                Spacer(
+                    modifier = Modifier.width(2.dp)
+                )
+                AnimatedContent(
+                    targetState = emojiCount,
+                    transitionSpec = {
+                        if (targetState > initialState) {
+                            slideInVertically { -it } togetherWith slideOutVertically { it }
+                        } else {
+                            slideInVertically { it } togetherWith slideOutVertically { -it }
+                        }
+                    }
                 ) {
                     Text(
-                        fontWeight = FontWeight.Bold,
-                        text = emojiCount.toString()
+                        text = "$it",
+                        style = MaterialTheme.typography.body2,
                     )
                 }
             }
-        }
-    ) {
-        Surface(
-            modifier = Modifier
-                .clickable { onClick() },
-            color = MaterialTheme.colors.surface,
-            shape = RoundedCornerShape(32.dp),
-            elevation = 4.dp,
-        ) {
-            Text(
-                text = emoji,
-                modifier = Modifier
-                    .padding(8.dp)
-                    .clip(CircleShape),
-            )
         }
     }
 }
@@ -146,11 +168,21 @@ fun ReactionRow(
         )
     }
 
+    var maxLines by remember { mutableStateOf(1) }
     FlowRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
-        horizontalArrangement = if (fromLocal) Arrangement.End else Arrangement.Start
+        horizontalArrangement = if (fromLocal) Arrangement.End else Arrangement.Start,
+        maxLines = maxLines,
+        overflow = FlowRowOverflow.expandIndicator {
+            ReactionItem(
+                emoji = "...",
+                emojiCount = 0
+            ) {
+                maxLines += 1
+            }
+        }
     ) {
         emojiList.forEach { entry ->
             ReactionItem(
@@ -161,6 +193,23 @@ fun ReactionRow(
                 }
             )
         }
+    }
+}
+
+@Composable
+internal fun Ellipsis(text: String, onClick: () -> Unit) {
+    Surface(
+        color = MaterialTheme.colors.surface,
+        contentColor = MaterialTheme.colors.onSurface,
+        modifier = Modifier
+            .clickable(onClick = onClick)
+    ) {
+        Text(
+            modifier = Modifier
+                .padding(3.dp),
+            text = text,
+            fontSize = 18.sp
+        )
     }
 }
 
@@ -231,6 +280,7 @@ fun ReactionItemPreview() {
         ) {
             ReactionItem(emoji = "\uD83D\uDE42")
             ReactionItem(emoji = "\uD83D\uDE42", emojiCount = 2)
+            ReactionItem(emoji = "\uD83D\uDE42", emojiCount = 222)
             ReactionButton()
         }
     }
