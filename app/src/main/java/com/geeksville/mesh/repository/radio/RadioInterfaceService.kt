@@ -259,7 +259,7 @@ class RadioInterfaceService @Inject constructor(
      * @return true if the device changed, false if no change
      */
     private fun setBondedDeviceAddress(address: String?): Boolean {
-        return if (getBondedDeviceAddress() == address && isStarted) {
+        return if (getBondedDeviceAddress() == address && isStarted && isConnected) {
             warn("Ignoring setBondedDevice ${address.anonymize}, because we are already using that device")
             false
         } else {
