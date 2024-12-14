@@ -29,6 +29,7 @@ import com.geeksville.mesh.database.entity.ContactSettings
 import com.geeksville.mesh.database.entity.PacketEntity
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.ReactionEntity
+import com.geeksville.mesh.database.entity.ReplyEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -214,4 +215,7 @@ interface PacketDao {
 
     @Upsert
     suspend fun insert(reaction: ReactionEntity)
+
+    @Upsert
+    suspend fun insert(reply: ReplyEntity)
 }

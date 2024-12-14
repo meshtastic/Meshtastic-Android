@@ -124,7 +124,8 @@ internal fun MessageList(
                         },
                         onStatusClick = { showStatusDialog = msg },
                         onSendReaction = { onSendReaction(it, msg.packetId) },
-                        onReplyClick = { onReplyClick(msg) }
+                        onReplyClick = { onReplyClick(msg) },
+                        replies = msg.replies,
                     )
                     NodeMenu(
                         node = msg.node,
