@@ -36,6 +36,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -49,6 +50,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.Reply
 import androidx.compose.material.icons.automirrored.twotone.Send
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.SelectAll
@@ -269,7 +271,27 @@ internal fun MessageScreen(
                 }
                 val isReply = replyingTo != null
                 if (isReply) {
-                    Text("Replying to: ${replyingTo?.text}")
+                    Card {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Replying to: ${replyingTo?.text}",
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(8.dp)
+                            )
+                            IconButton(onClick = { replyingTo = null }) {
+                                Icon(
+                                    imageVector = Icons.Default.Cancel,
+                                    contentDescription = "Cancel"
+                                )
+                            }
+                        }
+                    }
                 }
                 TextInput(isConnected, isReply, messageInput) { message ->
                     if (isReply) {
@@ -464,7 +486,8 @@ private fun TextInput(
                 .weight(1f)
                 .onFocusEvent { isFocused = it.isFocused },
             enabled = enabled,
-            placeholder = { Text(
+            label = {
+                Text(
                 text = if (isReply) {
                     stringResource(id = R.string.send_reply)
                 } else {
