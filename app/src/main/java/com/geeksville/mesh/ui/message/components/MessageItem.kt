@@ -28,6 +28,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
@@ -41,6 +42,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.twotone.Reply
 import androidx.compose.material.icons.twotone.Cloud
 import androidx.compose.material.icons.twotone.CloudDone
 import androidx.compose.material.icons.twotone.CloudOff
@@ -61,9 +63,11 @@ import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.NodeEntity
+import com.geeksville.mesh.database.entity.Reply
 import com.geeksville.mesh.ui.components.AutoLinkText
 import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
+import com.geeksville.mesh.util.getShortDateTime
 
 @Suppress("LongMethod")
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
@@ -81,6 +85,7 @@ internal fun MessageItem(
     onStatusClick: () -> Unit = {},
     onSendReaction: (String) -> Unit = {},
     onReplyClick: () -> Unit = {},
+    replies: List<Reply> = emptyList(),
 
 ) = Row(
     modifier = Modifier
@@ -111,35 +116,36 @@ internal fun MessageItem(
             ),
             color = colorResource(id = messageColor),
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (!fromLocal) {
-                    Chip(
-                        onClick = onChipClick,
-                        modifier = Modifier
-                            .padding(end = 8.dp)
-                            .width(72.dp),
-                        colors = ChipDefaults.chipColors(
-                            backgroundColor = Color(node.colors.second),
-                            contentColor = Color(node.colors.first),
-                        ),
-                    ) {
-                        Text(
-                            text = node.user.shortName,
-                            modifier = Modifier.fillMaxWidth(),
-                            fontSize = MaterialTheme.typography.button.fontSize,
-                            fontWeight = FontWeight.Normal,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                }
-                Column(
-                    modifier = Modifier.padding(top = 8.dp),
+            Column {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    if (!fromLocal) {
+                        Chip(
+                            onClick = onChipClick,
+                            modifier = Modifier
+                                .padding(end = 8.dp)
+                                .width(72.dp),
+                            colors = ChipDefaults.chipColors(
+                                backgroundColor = Color(node.colors.second),
+                                contentColor = Color(node.colors.first),
+                            ),
+                        ) {
+                            Text(
+                                text = node.user.shortName,
+                                modifier = Modifier.fillMaxWidth(),
+                                fontSize = MaterialTheme.typography.button.fontSize,
+                                fontWeight = FontWeight.Normal,
+                                textAlign = TextAlign.Center,
+                            )
+                        }
+                    }
+                    Column(
+                        modifier = Modifier.padding(top = 8.dp),
+                    ) {
 //                    if (!fromLocal) {
 //                        Text(
 //                            text = with(node.user) { "$longName ($id)" },
@@ -148,49 +154,113 @@ internal fun MessageItem(
 //                            fontSize = MaterialTheme.typography.caption.fontSize,
 //                        )
 //                    }
-                    AutoLinkText(
-                        text = messageText.orEmpty(),
-                        style = LocalTextStyle.current.copy(
-                            color = LocalContentColor.current,
-                        ),
-                    )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = messageTime,
-                            color = MaterialTheme.colors.onSurface,
-                            fontSize = MaterialTheme.typography.caption.fontSize,
+                        AutoLinkText(
+                            text = messageText.orEmpty(),
+                            style = LocalTextStyle.current.copy(
+                                color = LocalContentColor.current,
+                            ),
                         )
-                        AnimatedVisibility(visible = fromLocal) {
-                            Icon(
-                                imageVector = when (messageStatus) {
-                                    MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
-                                    MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
-                                    MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
-                                    MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
-                                    MessageStatus.ERROR -> Icons.TwoTone.CloudOff
-                                    else -> Icons.TwoTone.Warning
-                                },
-                                contentDescription = stringResource(R.string.message_delivery_status),
-                                modifier = Modifier
-                                    .padding(start = 8.dp)
-                                    .clickable { onStatusClick() },
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = messageTime,
+                                color = MaterialTheme.colors.onSurface,
+                                fontSize = MaterialTheme.typography.caption.fontSize,
                             )
+                            AnimatedVisibility(visible = fromLocal) {
+                                Icon(
+                                    imageVector = when (messageStatus) {
+                                        MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
+                                        MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
+                                        MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
+                                        MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
+                                        MessageStatus.ERROR -> Icons.TwoTone.CloudOff
+                                        else -> Icons.TwoTone.Warning
+                                    },
+                                    contentDescription = stringResource(R.string.message_delivery_status),
+                                    modifier = Modifier
+                                        .padding(start = 8.dp)
+                                        .clickable { onStatusClick() },
+                                )
+                            }
                         }
                     }
+                }
+                replies.forEach { reply ->
+                    ReplyRow(reply = reply)
                 }
             }
         }
     }
-    if (!fromLocal && selected) {
+    if (selected) {
         ReactionButton(Modifier.padding(16.dp), onSendReaction)
 
         ReplyButton(Modifier.padding(16.dp), onReplyClick)
     } else if (!fromLocal) {
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(48.dp))
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+private fun ReplyRow(
+    reply: Reply,
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp, start = 32.dp, end = 4.dp),
+        elevation = 4.dp,
+    ) {
+        Surface(
+            color = MaterialTheme.colors.surface,
+            contentColor = MaterialTheme.colors.onSurface,
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(8.dp),
+            ) {
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Top,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = reply.user.shortName,
+                        fontSize = MaterialTheme.typography.caption.fontSize,
+                        fontWeight = FontWeight.Light,
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                        text = reply.message,
+                        modifier = Modifier.weight(1f),
+                        color = MaterialTheme.colors.onSurface,
+                        fontSize = MaterialTheme.typography.caption.fontSize,
+                    )
+                    Icon(
+                        imageVector = Icons.AutoMirrored.TwoTone.Reply,
+                        contentDescription = stringResource(R.string.reply),
+                        modifier = Modifier.size(8.dp),
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Text(
+                        text = getShortDateTime(reply.timestamp),
+                        fontSize = MaterialTheme.typography.caption.fontSize,
+                        fontWeight = FontWeight.Light,
+                    )
+                }
+            }
+        }
     }
 }
 
@@ -201,9 +271,23 @@ private fun MessageItemPreview() {
         MessageItem(
             node = NodeEntityPreviewParameterProvider().values.first(),
             messageText = stringResource(R.string.sample_message),
-            messageTime = "10:00",
+            messageTime = getShortDateTime(System.currentTimeMillis() - 720000),
             messageStatus = MessageStatus.DELIVERED,
             selected = false,
+            replies = listOf(
+                Reply(
+                    user = NodeEntityPreviewParameterProvider().values.first().user,
+                    message = "Nevermind, it's not scary. Phew!",
+                    replyId = 1,
+                    timestamp = System.currentTimeMillis() - 320000
+                ),
+                Reply(
+                    user = NodeEntityPreviewParameterProvider().values.last().user,
+                    message = "Nice, good job!",
+                    replyId = 2,
+                    timestamp = System.currentTimeMillis()
+                )
+            )
         )
     }
 }

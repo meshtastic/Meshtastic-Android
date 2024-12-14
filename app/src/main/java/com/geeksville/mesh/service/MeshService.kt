@@ -26,17 +26,38 @@ import android.os.IBinder
 import android.os.RemoteException
 import androidx.core.app.ServiceCompat
 import androidx.core.location.LocationCompat
-import com.geeksville.mesh.*
+import com.geeksville.mesh.AdminProtos
+import com.geeksville.mesh.AppOnlyProtos
+import com.geeksville.mesh.BuildConfig
+import com.geeksville.mesh.ChannelProtos
+import com.geeksville.mesh.ConfigProtos
+import com.geeksville.mesh.CoroutineDispatchers
+import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
+import com.geeksville.mesh.MeshUser
+import com.geeksville.mesh.MessageStatus
+import com.geeksville.mesh.ModuleConfigProtos
+import com.geeksville.mesh.MyNodeInfo
+import com.geeksville.mesh.NodeInfo
+import com.geeksville.mesh.PaxcountProtos
+import com.geeksville.mesh.Portnums
+import com.geeksville.mesh.Position
+import com.geeksville.mesh.R
+import com.geeksville.mesh.StoreAndForwardProtos
+import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.concurrent.handledLaunch
+import com.geeksville.mesh.config
+import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.MeshLog
@@ -44,15 +65,23 @@ import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.ReactionEntity
+import com.geeksville.mesh.database.entity.ReplyEntity
 import com.geeksville.mesh.database.entity.toNodeInfo
+import com.geeksville.mesh.fromRadio
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.getTracerouteResponse
+import com.geeksville.mesh.position
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.network.MQTTRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.radio.RadioServiceConnectionState
-import com.geeksville.mesh.util.*
+import com.geeksville.mesh.telemetry
+import com.geeksville.mesh.user
+import com.geeksville.mesh.util.anonymize
+import com.geeksville.mesh.util.toOneLineString
+import com.geeksville.mesh.util.toPIIString
+import com.geeksville.mesh.util.toRemoteExceptions
 import com.google.protobuf.ByteString
 import com.google.protobuf.InvalidProtocolBufferException
 import dagger.Lazy
@@ -645,6 +674,16 @@ class MeshService : Service(), Logging {
         packetRepository.get().insertReaction(reaction)
     }
 
+    private fun rememberReply(packet: MeshPacket) = serviceScope.handledLaunch {
+        val reply = ReplyEntity(
+            replyId = packet.decoded.replyId,
+            userId = toNodeID(packet.from),
+            message = packet.decoded.payload.toByteArray().decodeToString(),
+            timestamp = System.currentTimeMillis(),
+        )
+        packetRepository.get().insertReply(reply)
+    }
+
 
 
     private fun rememberDataPacket(dataPacket: DataPacket, updateNotification: Boolean = true) {
@@ -702,6 +741,9 @@ class MeshService : Service(), Logging {
                         if (data.emoji != 0) {
                             debug("Received EMOJI from $fromId")
                             rememberReaction(packet)
+                        } else if (data.replyId != 0) {
+                            debug("Received REPLY from $fromId")
+                            rememberReply(packet)
                         } else {
                             debug("Received CLEAR_TEXT from $fromId")
                             rememberDataPacket(dataPacket)
@@ -1810,7 +1852,7 @@ class MeshService : Service(), Logging {
             payload = ByteString.copyFrom(reply.message.encodeToByteArray())
         }
         sendToRadio(packet)
-//        rememberReply(packet.copy { from = myNodeNum })
+        rememberReply(packet.copy { from = myNodeNum })
     }
 
     private val binder = object : IMeshService.Stub() {

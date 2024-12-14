@@ -47,8 +47,8 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Reply
-import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.automirrored.twotone.Reply
+import androidx.compose.material.icons.automirrored.twotone.Send
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.SelectAll
@@ -290,9 +290,13 @@ internal fun MessageScreen(
                 selectedIds = selectedIds,
                 onUnreadChanged = { viewModel.clearUnreadCount(contactKey, it) },
                 contentPadding = innerPadding,
-                onSendReaction = { emoji, id -> viewModel.sendReaction(emoji, id, contactKey) },
+                onSendReaction = { emoji, id ->
+                    viewModel.sendReaction(emoji, id, contactKey)
+                    selectedIds.value = emptySet()
+                },
                 onReplyClick = { msg ->
                     replyingTo = msg
+                    selectedIds.value = emptySet()
                 },
             ) { action ->
                 when (action) {
@@ -489,9 +493,9 @@ private fun TextInput(
         ) {
             Icon(
                 imageVector = if (isReply) {
-                    Icons.AutoMirrored.Filled.Reply
+                    Icons.AutoMirrored.TwoTone.Reply
                 } else {
-                    Icons.AutoMirrored.Default.Send
+                    Icons.AutoMirrored.TwoTone.Send
                 },
                 contentDescription = stringResource(id = R.string.send_text),
                 modifier = Modifier.scale(scale = 1.5f),
