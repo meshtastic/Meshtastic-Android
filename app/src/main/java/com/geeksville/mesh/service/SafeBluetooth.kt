@@ -210,7 +210,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                                 lowLevelConnect(true)
                             }
                         } else if (status == 147) {
-                            info( "got 147, calling lostConnection()")
+                            info("got 147, calling lostConnection()")
                             lostConnection("code 147")
                         }
 
