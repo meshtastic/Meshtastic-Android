@@ -25,6 +25,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -79,6 +80,8 @@ internal fun MessageItem(
     onChipClick: () -> Unit = {},
     onStatusClick: () -> Unit = {},
     onSendReaction: (String) -> Unit = {},
+    onReplyClick: () -> Unit = {},
+
 ) = Row(
     modifier = Modifier
         .fillMaxWidth()
@@ -182,8 +185,12 @@ internal fun MessageItem(
             }
         }
     }
-    if (!fromLocal) {
+    if (!fromLocal && selected) {
         ReactionButton(Modifier.padding(16.dp), onSendReaction)
+
+        ReplyButton(Modifier.padding(16.dp), onReplyClick)
+    } else if (!fromLocal) {
+        Spacer(modifier = Modifier.width(16.dp))
     }
 }
 
