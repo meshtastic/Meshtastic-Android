@@ -49,6 +49,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.AddReaction
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -88,6 +89,21 @@ fun ReactionButton(
         Icon(
             imageVector = Icons.Default.AddReaction,
             contentDescription = "emoji",
+            modifier = modifier.size(16.dp),
+            tint = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
+        )
+    }
+}
+
+@Composable
+fun ReplyButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
+    IconButton(onClick = onClick) {
+        Icon(
+            imageVector = Icons.AutoMirrored.Filled.Reply,
+            contentDescription = "reply",
             modifier = modifier.size(16.dp),
             tint = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
         )

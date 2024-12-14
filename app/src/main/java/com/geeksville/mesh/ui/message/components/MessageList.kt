@@ -60,6 +60,7 @@ internal fun MessageList(
     onUnreadChanged: (Long) -> Unit,
     contentPadding: PaddingValues,
     onSendReaction: (String, Int) -> Unit,
+    onReplyClick: (Message) -> Unit,
     onNodeMenuAction: (NodeMenuAction) -> Unit = {}
 ) {
     val haptics = LocalHapticFeedback.current
@@ -123,6 +124,7 @@ internal fun MessageList(
                         },
                         onStatusClick = { showStatusDialog = msg },
                         onSendReaction = { onSendReaction(it, msg.packetId) },
+                        onReplyClick = { onReplyClick(msg) }
                     )
                     NodeMenu(
                         node = msg.node,

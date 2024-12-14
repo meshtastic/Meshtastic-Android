@@ -79,6 +79,7 @@ import kotlin.math.absoluteValue
 sealed class ServiceAction {
     data class Ignore(val node: NodeEntity) : ServiceAction()
     data class Reaction(val emoji: String, val replyId: Int, val contactKey: String) : ServiceAction()
+    data class Reply(val message: String, val replyId: Int, val contactKey: String) : ServiceAction()
 }
 
 /**
@@ -306,6 +307,7 @@ class MeshService : Service(), Logging {
             when (action) {
                 is ServiceAction.Ignore -> ignoreNode(action.node)
                 is ServiceAction.Reaction -> sendReaction(action)
+                is ServiceAction.Reply -> sendReply(action)
             }
         }.launchIn(serviceScope)
 
@@ -642,6 +644,8 @@ class MeshService : Service(), Logging {
         )
         packetRepository.get().insertReaction(reaction)
     }
+
+
 
     private fun rememberDataPacket(dataPacket: DataPacket, updateNotification: Boolean = true) {
         if (dataPacket.dataType !in rememberDataType) return
@@ -1791,6 +1795,22 @@ class MeshService : Service(), Logging {
         }
         sendToRadio(packet)
         rememberReaction(packet.copy { from = myNodeNum })
+    }
+
+    private fun sendReply(reply: ServiceAction.Reply) = toRemoteExceptions {
+        val channel = reply.contactKey[0].digitToInt()
+        val destNum = reply.contactKey.substring(1)
+
+        val packet = newMeshPacketTo(destNum).buildMeshPacket(
+            channel = channel,
+            priority = MeshPacket.Priority.DEFAULT,
+            ) {
+            replyId = reply.replyId
+            portnumValue = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE
+            payload = ByteString.copyFrom(reply.message.encodeToByteArray())
+        }
+        sendToRadio(packet)
+//        rememberReply(packet.copy { from = myNodeNum })
     }
 
     private val binder = object : IMeshService.Stub() {
