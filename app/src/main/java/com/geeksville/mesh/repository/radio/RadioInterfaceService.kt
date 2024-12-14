@@ -23,6 +23,7 @@ import androidx.core.content.edit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import com.geeksville.mesh.CoroutineDispatchers
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.android.BinaryLogFile
 import com.geeksville.mesh.android.BuildUtils
 import com.geeksville.mesh.android.GeeksvilleApplication
@@ -110,8 +111,20 @@ class RadioInterfaceService @Inject constructor(
         }.launchIn(processLifecycle.coroutineScope)
     }
 
-    companion object : Logging {
+    companion object {
         const val DEVADDR_KEY = "devAddr2" // the new name for devaddr
+        private const val HEARTBEAT_INTERVAL_MILLIS = 5 * 60 * 1000L
+    }
+
+    private var lastHeartbeatMillis = 0L
+    private fun keepAlive(now: Long) {
+        if (now - lastHeartbeatMillis > HEARTBEAT_INTERVAL_MILLIS) {
+            info("Sending ToRadio heartbeat")
+            val heartbeat = MeshProtos.ToRadio.newBuilder()
+                .setHeartbeat(MeshProtos.Heartbeat.getDefaultInstance()).build()
+            handleSendToRadio(heartbeat.toByteArray())
+            lastHeartbeatMillis = now
+        }
     }
 
     /**
@@ -182,6 +195,10 @@ class RadioInterfaceService @Inject constructor(
         if (logReceives) {
             receivedPacketsLog.write(p)
             receivedPacketsLog.flush()
+        }
+
+        if (radioIf is SerialInterface) {
+            keepAlive(System.currentTimeMillis())
         }
 
         // ignoreException { debug("FromRadio: ${MeshProtos.FromRadio.parseFrom(p)}") }
