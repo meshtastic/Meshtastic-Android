@@ -460,6 +460,7 @@ private fun QuickChatRow(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun TextInput(
     enabled: Boolean,

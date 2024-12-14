@@ -69,7 +69,7 @@ import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.getShortDateTime
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun MessageItem(
@@ -264,6 +264,7 @@ private fun ReplyRow(
     }
 }
 
+@Suppress("MagicNumber")
 @PreviewLightDark
 @Composable
 private fun MessageItemPreview() {

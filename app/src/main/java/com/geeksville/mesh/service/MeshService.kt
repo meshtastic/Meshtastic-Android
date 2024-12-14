@@ -684,8 +684,6 @@ class MeshService : Service(), Logging {
         packetRepository.get().insertReply(reply)
     }
 
-
-
     private fun rememberDataPacket(dataPacket: DataPacket, updateNotification: Boolean = true) {
         if (dataPacket.dataType !in rememberDataType) return
         val fromLocal = dataPacket.from == DataPacket.ID_LOCAL
