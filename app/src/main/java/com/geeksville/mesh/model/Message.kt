@@ -22,6 +22,7 @@ import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Reaction
+import com.geeksville.mesh.database.entity.Reply
 
 val Routing.Error.stringRes: Int
     get() = when (this) {
@@ -55,6 +56,7 @@ data class Message(
     val routingError: Int,
     val packetId: Int,
     val emojis: List<Reaction>,
+    val replies: List<Reply>,
 ) {
     private fun getStatusStringRes(value: Int): Int {
         val error = Routing.Error.forNumber(value) ?: Routing.Error.UNRECOGNIZED

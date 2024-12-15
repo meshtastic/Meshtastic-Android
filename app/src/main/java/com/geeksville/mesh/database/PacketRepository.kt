@@ -24,6 +24,7 @@ import com.geeksville.mesh.database.dao.PacketDao
 import com.geeksville.mesh.database.entity.ContactSettings
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.ReactionEntity
+import com.geeksville.mesh.database.entity.ReplyEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.withContext
@@ -106,5 +107,9 @@ class PacketRepository @Inject constructor(private val packetDaoLazy: dagger.Laz
 
     suspend fun insertReaction(reaction: ReactionEntity) = withContext(Dispatchers.IO) {
         packetDao.insert(reaction)
+    }
+
+    suspend fun insertReply(reply: ReplyEntity) = withContext(Dispatchers.IO) {
+        packetDao.insert(reply)
     }
 }

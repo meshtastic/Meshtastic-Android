@@ -32,6 +32,8 @@ data class PacketEntity(
     @Embedded val packet: Packet,
     @Relation(entity = ReactionEntity::class, parentColumn = "packet_id", entityColumn = "reply_id")
     val reactions: List<ReactionEntity> = emptyList(),
+    @Relation(entity = ReplyEntity::class, parentColumn = "packet_id", entityColumn = "reply_id")
+    val replies: List<ReplyEntity> = emptyList(),
 ) {
     suspend fun toMessage(getNode: suspend (userId: String?) -> NodeEntity) = with(packet) {
         Message(
@@ -45,6 +47,7 @@ data class PacketEntity(
             routingError = routingError,
             packetId = packetId,
             emojis = reactions.toReaction(getNode),
+            replies = replies.toReply(getNode),
         )
     }
 }
@@ -112,3 +115,37 @@ private suspend fun ReactionEntity.toReaction(
 private suspend fun List<ReactionEntity>.toReaction(
     getNode: suspend (userId: String?) -> NodeEntity
 ) = this.map { it.toReaction(getNode) }
+
+data class Reply(
+    val replyId: Int,
+    val user: User,
+    val message: String,
+    val timestamp: Long,
+)
+
+@Entity(
+    tableName = "replies",
+    primaryKeys = ["reply_id", "user_id", "message"],
+    indices = [
+        Index(value = ["reply_id"]),
+    ],
+)
+data class ReplyEntity(
+    @ColumnInfo(name = "reply_id") val replyId: Int,
+    @ColumnInfo(name = "user_id") val userId: String,
+    val message: String,
+    val timestamp: Long,
+)
+
+private suspend fun ReplyEntity.toReply(
+    getNode: suspend (userId: String?) -> NodeEntity
+) = Reply(
+    replyId = replyId,
+    user = getNode(userId).user,
+    message = message,
+    timestamp = timestamp,
+)
+
+private suspend fun List<ReplyEntity>.toReply(
+    getNode: suspend (userId: String?) -> NodeEntity
+) = this.map { it.toReply(getNode) }

@@ -36,6 +36,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.Card
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
@@ -47,7 +48,9 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.automirrored.twotone.Reply
+import androidx.compose.material.icons.automirrored.twotone.Send
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.SelectAll
@@ -90,6 +93,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.QuickChatAction
+import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannel
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
@@ -197,6 +201,7 @@ internal fun MessageScreen(
     val messageInput = rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(message))
     }
+    var replyingTo by rememberSaveable { mutableStateOf<Message?>(null) }
 
     var showDeleteDialog by remember { mutableStateOf(false) }
     if (showDeleteDialog) {
@@ -264,7 +269,40 @@ internal fun MessageScreen(
                         viewModel.sendMessage(action.message, contactKey)
                     }
                 }
-                TextInput(isConnected, messageInput) { viewModel.sendMessage(it, contactKey) }
+                val isReply = replyingTo != null
+                if (isReply) {
+                    Card {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Replying to: ${replyingTo?.text}",
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(8.dp)
+                            )
+                            IconButton(onClick = { replyingTo = null }) {
+                                Icon(
+                                    imageVector = Icons.Default.Cancel,
+                                    contentDescription = "Cancel"
+                                )
+                            }
+                        }
+                    }
+                }
+                TextInput(isConnected, isReply, messageInput) { message ->
+                    if (isReply) {
+                        replyingTo?.let {
+                            viewModel.sendReply(message, it.packetId, contactKey)
+                            replyingTo = null
+                        }
+                    } else {
+                        viewModel.sendMessage(message, contactKey)
+                    }
+                }
             }
         }
     ) { innerPadding ->
@@ -274,7 +312,14 @@ internal fun MessageScreen(
                 selectedIds = selectedIds,
                 onUnreadChanged = { viewModel.clearUnreadCount(contactKey, it) },
                 contentPadding = innerPadding,
-                onSendReaction = { emoji, id -> viewModel.sendReaction(emoji, id, contactKey) },
+                onSendReaction = { emoji, id ->
+                    viewModel.sendReaction(emoji, id, contactKey)
+                    selectedIds.value = emptySet()
+                },
+                onReplyClick = { msg ->
+                    replyingTo = msg
+                    selectedIds.value = emptySet()
+                },
             ) { action ->
                 when (action) {
                     is NodeMenuAction.Remove -> viewModel.removeNode(action.node.num)
@@ -415,9 +460,11 @@ private fun QuickChatRow(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun TextInput(
     enabled: Boolean,
+    isReply: Boolean = false,
     message: MutableState<TextFieldValue>,
     modifier: Modifier = Modifier,
     maxSize: Int = 200,
@@ -440,7 +487,14 @@ private fun TextInput(
                 .weight(1f)
                 .onFocusEvent { isFocused = it.isFocused },
             enabled = enabled,
-            placeholder = { Text(stringResource(id = R.string.send_text)) },
+            label = {
+                Text(
+                text = if (isReply) {
+                    stringResource(id = R.string.send_reply)
+                } else {
+                    stringResource(id = R.string.send_text)
+                }
+            ) },
             maxLines = 3,
             shape = RoundedCornerShape(24.dp),
             colors = TextFieldDefaults.textFieldColors(
@@ -462,7 +516,11 @@ private fun TextInput(
             shape = CircleShape,
         ) {
             Icon(
-                imageVector = Icons.AutoMirrored.Default.Send,
+                imageVector = if (isReply) {
+                    Icons.AutoMirrored.TwoTone.Reply
+                } else {
+                    Icons.AutoMirrored.TwoTone.Send
+                },
                 contentDescription = stringResource(id = R.string.send_text),
                 modifier = Modifier.scale(scale = 1.5f),
             )

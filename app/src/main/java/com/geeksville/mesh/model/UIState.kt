@@ -376,6 +376,10 @@ class UIViewModel @Inject constructor(
         radioConfigRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey))
     }
 
+    fun sendReply(message: String, replyId: Int, contactKey: String) = viewModelScope.launch {
+        radioConfigRepository.onServiceAction(ServiceAction.Reply(message, replyId, contactKey))
+    }
+
     fun requestTraceroute(destNum: Int) {
         info("Requesting traceroute for '$destNum'")
         try {
