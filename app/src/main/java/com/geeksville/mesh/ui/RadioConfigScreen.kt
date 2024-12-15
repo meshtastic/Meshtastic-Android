@@ -65,6 +65,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.RadioConfigState
 import com.geeksville.mesh.model.RadioConfigViewModel
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.config.EditDeviceProfileDialog
@@ -150,8 +151,7 @@ fun RadioConfigScreen(
     }
 
     RadioConfigItemList(
-        enabled = state.connected && !isWaiting,
-        isLocal = state.isLocal,
+        state = state,
         modifier = modifier,
         onRouteClick = { route ->
             isWaiting = true
@@ -285,28 +285,28 @@ private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Un
 
 @Composable
 private fun RadioConfigItemList(
-    enabled: Boolean = true,
-    isLocal: Boolean = true,
+    state: RadioConfigState,
     modifier: Modifier = Modifier,
     onRouteClick: (Enum<*>) -> Unit = {},
     onImport: () -> Unit = {},
     onExport: () -> Unit = {},
 ) {
+    val enabled = state.connected && !state.responseState.isWaiting()
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = 16.dp),
     ) {
         item { PreferenceCategory(stringResource(R.string.device_settings)) }
-        items(ConfigRoute.entries) {
+        items(ConfigRoute.getFrom(state.metadata)) {
             NavCard(title = it.title, icon = it.icon, enabled = enabled) { onRouteClick(it) }
         }
 
         item { PreferenceCategory(stringResource(R.string.module_settings)) }
-        items(ModuleRoute.entries) {
+        items(ModuleRoute.getFrom(state.metadata)) {
             NavCard(title = it.title, icon = it.icon, enabled = enabled) { onRouteClick(it) }
         }
 
-        if (isLocal) {
+        if (state.isLocal) {
             item {
                 PreferenceCategory("Backup & Restore")
                 NavCard(
@@ -331,5 +331,7 @@ private fun RadioConfigItemList(
 @Preview(showBackground = true)
 @Composable
 private fun RadioSettingsScreenPreview() {
-    RadioConfigItemList()
+    RadioConfigItemList(
+        RadioConfigState(isLocal = true, connected = true)
+    )
 }

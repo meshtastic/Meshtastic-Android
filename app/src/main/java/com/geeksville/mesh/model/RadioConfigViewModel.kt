@@ -440,10 +440,15 @@ class RadioConfigViewModel @Inject constructor(
     fun setResponseStateLoading(route: Enum<*>) {
         val destNum = destNode.value?.num ?: return
 
-        _radioConfigState.value = RadioConfigState(
-            route = route.name,
-            responseState = ResponseState.Loading(),
-        )
+        _radioConfigState.update {
+            RadioConfigState(
+                isLocal = it.isLocal,
+                connected = it.connected,
+                route = route.name,
+                metadata = it.metadata,
+                responseState = ResponseState.Loading(),
+            )
+        }
 
         when (route) {
             ConfigRoute.USER -> getOwner(destNum)

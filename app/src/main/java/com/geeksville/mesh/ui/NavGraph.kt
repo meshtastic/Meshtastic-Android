@@ -71,6 +71,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.geeksville.mesh.MeshProtos.DeviceMetadata
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.model.MetricsViewModel
@@ -234,6 +235,18 @@ enum class ConfigRoute(val title: String, val route: Route, val icon: ImageVecto
     LORA("LoRa", Route.LoRa, Icons.Default.CellTower, 5),
     BLUETOOTH("Bluetooth", Route.Bluetooth, Icons.Default.Bluetooth, 6),
     SECURITY("Security", Route.Security, Icons.Default.Security, type = 7),
+    ;
+
+    companion object {
+        fun getFrom(metadata: DeviceMetadata?): List<ConfigRoute> = ConfigRoute.entries.filter {
+            when {
+                metadata == null -> true
+                it == BLUETOOTH -> metadata.hasBluetooth
+                it == NETWORK -> metadata.hasWifi || metadata.hasEthernet
+                else -> true // Include all other routes by default
+            }
+        }
+    }
 }
 
 // ModuleConfig (type = AdminProtos.AdminMessage.ModuleConfigType)
@@ -251,6 +264,18 @@ enum class ModuleRoute(val title: String, val route: Route, val icon: ImageVecto
     AMBIENT_LIGHTING("Ambient Lighting", Route.AmbientLighting, Icons.Default.LightMode, 10),
     DETECTION_SENSOR("Detection Sensor", Route.DetectionSensor, Icons.Default.Sensors, 11),
     PAXCOUNTER("Paxcounter", Route.Paxcounter, Icons.Default.PermScanWifi, 12),
+    ;
+
+    val bitfield: Int get() = 1 shl ordinal
+
+    companion object {
+        fun getFrom(metadata: DeviceMetadata?): List<ModuleRoute> = entries.filter {
+            when (metadata) {
+                null -> true
+                else -> metadata.excludedModules and it.bitfield == 0
+            }
+        }
+    }
 }
 
 /**
