@@ -860,6 +860,7 @@ class MeshService : Service(), Logging {
             }
 
             AdminProtos.AdminMessage.PayloadVariantCase.GET_DEVICE_METADATA_RESPONSE -> {
+                debug("Admin: received DeviceMetadata from $fromNodeNum")
                 serviceScope.handledLaunch {
                     radioConfigRepository.insertMetadata(fromNodeNum, a.getDeviceMetadataResponse)
                 }
@@ -1505,30 +1506,32 @@ class MeshService : Service(), Logging {
     }
 
     private var rawMyNodeInfo: MeshProtos.MyNodeInfo? = null
-    private var rawDeviceMetadata: MeshProtos.DeviceMetadata? = null
 
     /** Regenerate the myNodeInfo model.  We call this twice.  Once after we receive myNodeInfo from the device
      * and again after we have the node DB (which might allow us a better notion of our HwModel.
      */
-    private fun regenMyNodeInfo() {
+    private fun regenMyNodeInfo(metadata: MeshProtos.DeviceMetadata) {
         val myInfo = rawMyNodeInfo
         if (myInfo != null) {
             val mi = with(myInfo) {
                 MyNodeEntity(
                     myNodeNum = myNodeNum,
-                    model = when (val hwModel = rawDeviceMetadata?.hwModel) {
+                    model = when (val hwModel = metadata.hwModel) {
                         null, MeshProtos.HardwareModel.UNSET -> null
                         else -> hwModel.name.replace('_', '-').replace('p', '.').lowercase()
                     },
-                    firmwareVersion = rawDeviceMetadata?.firmwareVersion,
+                    firmwareVersion = metadata.firmwareVersion,
                     couldUpdate = false,
                     shouldUpdate = false, // TODO add check after re-implementing firmware updates
                     currentPacketId = currentPacketId and 0xffffffffL,
                     messageTimeoutMsec = 5 * 60 * 1000, // constants from current firmware code
                     minAppVersion = minAppVersion,
                     maxChannels = 8,
-                    hasWifi = rawDeviceMetadata?.hasWifi ?: false,
+                    hasWifi = metadata.hasWifi,
                 )
+            }
+            serviceScope.handledLaunch {
+                radioConfigRepository.insertMetadata(mi.myNodeNum, metadata)
             }
             newMyNodeInfo = mi
         }
@@ -1583,8 +1586,7 @@ class MeshService : Service(), Logging {
         )
         insertMeshLog(packetToSave)
 
-        rawDeviceMetadata = metadata
-        regenMyNodeInfo()
+        regenMyNodeInfo(metadata)
     }
 
     /**
