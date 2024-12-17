@@ -30,6 +30,7 @@ import com.geeksville.mesh.database.entity.NodeWithRelations
 import com.geeksville.mesh.database.entity.NodeEntity
 import kotlinx.coroutines.flow.Flow
 
+@Suppress("TooManyFunctions")
 @Dao
 interface NodeInfoDao {
 
@@ -117,4 +118,7 @@ interface NodeInfoDao {
 
     @Upsert
     fun upsert(meta: MetadataEntity)
+
+    @Query("DELETE FROM metadata WHERE num=:num")
+    fun deleteMetadata(num: Int)
 }

@@ -118,6 +118,7 @@ class NodeRepository @Inject constructor(
 
     suspend fun deleteNode(num: Int) = withContext(dispatchers.io) {
         nodeInfoDao.deleteNode(num)
+        nodeInfoDao.deleteMetadata(num)
     }
 
     suspend fun insertMetadata(metadata: MetadataEntity) = withContext(dispatchers.io) {
