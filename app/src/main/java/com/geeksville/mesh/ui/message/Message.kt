@@ -451,10 +451,11 @@ private fun TextInput(
         Spacer(Modifier.width(8.dp))
         Button(
             onClick = {
-                if (message.value.text.isNotEmpty()) {
-                    onClick(message.value.text)
-                    message.value = TextFieldValue("")
+                val str = message.value.text.trim()
+                if (str.isNotEmpty()) {
                     focusManager.clearFocus()
+                    onClick(str)
+                    message.value = TextFieldValue("")
                 }
             },
             modifier = Modifier.size(48.dp),
