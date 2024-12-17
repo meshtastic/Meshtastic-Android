@@ -92,9 +92,14 @@ private fun KeyStatusDialog(
                 Spacer(Modifier.height(16.dp))
                 if (key != null && title == R.string.encryption_pkc) {
                     val keyString = Base64.encodeToString(key.toByteArray(), Base64.NO_WRAP)
+                    Text(
+                        text = stringResource(id = R.string.config_security_public_key) + ":",
+                        textAlign = TextAlign.Center,
+                    )
+                    Spacer(Modifier.height(8.dp))
                     SelectionContainer {
                         Text(
-                            text = "Public Key: $keyString",
+                            text = keyString,
                             textAlign = TextAlign.Center,
                         )
                     }

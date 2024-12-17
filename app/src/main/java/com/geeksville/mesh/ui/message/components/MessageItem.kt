@@ -34,7 +34,6 @@ import androidx.compose.material.Chip
 import androidx.compose.material.ChipDefaults
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentColor
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
@@ -54,8 +53,10 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
@@ -64,7 +65,7 @@ import com.geeksville.mesh.ui.components.AutoLinkText
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 internal fun MessageItem(
@@ -137,18 +138,22 @@ internal fun MessageItem(
                 Column(
                     modifier = Modifier.padding(top = 8.dp),
                 ) {
-//                    if (!fromLocal) {
-//                        Text(
-//                            text = with(node.user) { "$longName ($id)" },
-//                            modifier = Modifier.padding(bottom = 4.dp),
-//                            color = MaterialTheme.colors.onSurface,
-//                            fontSize = MaterialTheme.typography.caption.fontSize,
-//                        )
-//                    }
+                    if (!fromLocal) {
+                        Text(
+                            text = with(node.user) { "$longName ($id)" },
+                            modifier = Modifier.padding(bottom = 4.dp),
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1,
+                            style = MaterialTheme.typography.button.copy(
+                                color = MaterialTheme.colors.onSurface,
+                                letterSpacing = 0.1.sp,
+                            )
+                        )
+                    }
                     AutoLinkText(
                         text = messageText.orEmpty(),
                         style = LocalTextStyle.current.copy(
-                            color = LocalContentColor.current,
+                            color = MaterialTheme.colors.onBackground,
                         ),
                     )
                     Row(
