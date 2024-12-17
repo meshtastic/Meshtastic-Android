@@ -20,6 +20,7 @@ package com.geeksville.mesh.model
 import android.app.Application
 import android.net.Uri
 import android.os.RemoteException
+import androidx.annotation.StringRes
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -47,6 +48,7 @@ import com.geeksville.mesh.ui.ConfigRoute
 import com.geeksville.mesh.ui.ModuleRoute
 import com.geeksville.mesh.ui.ResponseState
 import com.geeksville.mesh.ui.Route
+import com.geeksville.mesh.util.UiText
 import com.google.protobuf.MessageLite
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -118,7 +120,7 @@ class RadioConfigViewModel @Inject constructor(
         combine(radioConfigRepository.connectionState, radioConfigState) { connState, configState ->
             _radioConfigState.update { it.copy(connected = connState == ConnectionState.CONNECTED) }
             if (connState.isDisconnected() && configState.responseState.isWaiting()) {
-                setResponseStateError(app.getString(R.string.disconnected))
+                sendError(R.string.disconnected)
             }
         }.launchIn(viewModelScope)
 
@@ -321,7 +323,7 @@ class RadioConfigViewModel @Inject constructor(
             AdminRoute.REBOOT.name -> requestReboot(destNum)
             AdminRoute.SHUTDOWN.name -> with(radioConfigState.value) {
                 if (hasMetadata() && !metadata.canShutdown) {
-                    setResponseStateError(app.getString(R.string.cant_shutdown))
+                    sendError(R.string.cant_shutdown)
                 } else {
                     requestShutdown(destNum)
                 }
@@ -364,7 +366,7 @@ class RadioConfigViewModel @Inject constructor(
             }
         } catch (ex: Exception) {
             errormsg("Import DeviceProfile error: ${ex.message}")
-            setResponseStateError(ex.customMessage)
+            sendError(ex.customMessage)
         }
     }
 
@@ -382,7 +384,7 @@ class RadioConfigViewModel @Inject constructor(
             setResponseStateSuccess()
         } catch (ex: Exception) {
             errormsg("Can't write file error: ${ex.message}")
-            setResponseStateError(ex.customMessage)
+            sendError(ex.customMessage)
         }
     }
 
@@ -399,11 +401,13 @@ class RadioConfigViewModel @Inject constructor(
                 setOwner(user)
             }
         }
-        if (hasChannelUrl()) try {
-            setChannels(channelUrl)
-        } catch (ex: Exception) {
-            errormsg("DeviceProfile channel import error", ex)
-            setResponseStateError(ex.customMessage)
+        if (hasChannelUrl()) {
+            try {
+                setChannels(channelUrl)
+            } catch (ex: Exception) {
+                errormsg("DeviceProfile channel import error", ex)
+                sendError(ex.customMessage)
+            }
         }
         if (hasConfig()) {
             val descriptor = ConfigProtos.Config.getDescriptor()
@@ -494,7 +498,9 @@ class RadioConfigViewModel @Inject constructor(
     }
 
     private val Exception.customMessage: String get() = "${javaClass.simpleName}: $message"
-    private fun setResponseStateError(error: String) {
+    private fun sendError(error: String) = setResponseStateError(UiText.DynamicString(error))
+    private fun sendError(@StringRes id: Int) = setResponseStateError(UiText.StringResource(id))
+    private fun setResponseStateError(error: UiText) {
         _radioConfigState.update { it.copy(responseState = ResponseState.Error(error)) }
     }
 
@@ -521,7 +527,7 @@ class RadioConfigViewModel @Inject constructor(
             val parsed = MeshProtos.Routing.parseFrom(data.payload)
             debug(debugMsg.format(parsed.errorReason.name))
             if (parsed.errorReason != MeshProtos.Routing.Error.NONE) {
-                setResponseStateError(app.getString(parsed.errorReason.stringRes))
+                sendError(getStringResFrom(parsed.errorReasonValue))
             } else if (packet.from == destNum && route.isEmpty()) {
                 requestIds.update { it.apply { remove(data.requestId) } }
                 if (requestIds.value.isEmpty()) {
@@ -535,7 +541,7 @@ class RadioConfigViewModel @Inject constructor(
             val parsed = AdminProtos.AdminMessage.parseFrom(data.payload)
             debug(debugMsg.format(parsed.payloadVariantCase.name))
             if (destNum != packet.from) {
-                setResponseStateError("Unexpected sender: ${packet.from.toUInt()} instead of ${destNum.toUInt()}.")
+                sendError("Unexpected sender: ${packet.from.toUInt()} instead of ${destNum.toUInt()}.")
                 return
             }
             when (parsed.payloadVariantCase) {
@@ -572,7 +578,7 @@ class RadioConfigViewModel @Inject constructor(
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_CONFIG_RESPONSE -> {
                     val response = parsed.getConfigResponse
                     if (response.payloadVariantCase.number == 0) { // PAYLOADVARIANT_NOT_SET
-                        setResponseStateError(response.payloadVariantCase.name)
+                        sendError(response.payloadVariantCase.name)
                     }
                     _radioConfigState.update { it.copy(radioConfig = response) }
                     incrementCompleted()
@@ -581,7 +587,7 @@ class RadioConfigViewModel @Inject constructor(
                 AdminProtos.AdminMessage.PayloadVariantCase.GET_MODULE_CONFIG_RESPONSE -> {
                     val response = parsed.getModuleConfigResponse
                     if (response.payloadVariantCase.number == 0) { // PAYLOADVARIANT_NOT_SET
-                        setResponseStateError(response.payloadVariantCase.name)
+                        sendError(response.payloadVariantCase.name)
                     }
                     _radioConfigState.update { it.copy(moduleConfig = response) }
                     incrementCompleted()
