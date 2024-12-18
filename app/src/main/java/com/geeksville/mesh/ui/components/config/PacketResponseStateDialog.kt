@@ -74,7 +74,7 @@ fun <T> PacketResponseStateDialog(
                 }
                 if (state is ResponseState.Error) {
                     Text(text = stringResource(id = R.string.error), minLines = 2)
-                    Text(text = state.error)
+                    Text(text = state.error.asString())
                 }
             }
         },

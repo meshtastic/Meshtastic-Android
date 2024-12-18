@@ -81,6 +81,7 @@ import com.geeksville.mesh.ui.components.NodeMapScreen
 import com.geeksville.mesh.ui.components.PositionLogScreen
 import com.geeksville.mesh.ui.components.SignalMetricsScreen
 import com.geeksville.mesh.ui.components.TracerouteLogScreen
+import com.geeksville.mesh.util.UiText
 import com.geeksville.mesh.ui.components.config.AmbientLightingConfigScreen
 import com.geeksville.mesh.ui.components.config.AudioConfigScreen
 import com.geeksville.mesh.ui.components.config.BluetoothConfigScreen
@@ -260,7 +261,7 @@ sealed class ResponseState<out T> {
     data object Empty : ResponseState<Nothing>()
     data class Loading(var total: Int = 1, var completed: Int = 0) : ResponseState<Nothing>()
     data class Success<T>(val result: T) : ResponseState<T>()
-    data class Error(val error: String) : ResponseState<Nothing>()
+    data class Error(val error: UiText) : ResponseState<Nothing>()
 
     fun isWaiting() = this !is Empty
 }
