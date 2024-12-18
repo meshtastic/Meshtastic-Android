@@ -256,7 +256,7 @@
     <string name="device_metrics_log">Geräte-Metriken-Protokoll</string>
     <string name="node_map">Nodekarte</string>
     <string name="position_log">Positions-Protokoll</string>
-    <string name="env_metrics_log">Umgebungs-Metriken-Protokoll</string>
+    <string name="env_metrics_log">Sensor-Protokoll</string>
     <string name="sig_metrics_log">Signal-Metriken-Protkoll</string>
     <string name="administration">Administration</string>
     <string name="remote_admin">Fernadministration</string>

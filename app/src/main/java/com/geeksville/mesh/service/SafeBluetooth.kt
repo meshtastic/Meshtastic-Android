@@ -209,6 +209,9 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                                 closeGatt() // Close the old non-auto connection
                                 lowLevelConnect(true)
                             }
+                        } else if (status == 147) {
+                            info("got 147, calling lostConnection()")
+                            lostConnection("code 147")
                         }
 
                         if (status == 257) { // mystery error code when phone is hung
