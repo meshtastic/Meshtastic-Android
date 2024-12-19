@@ -106,7 +106,7 @@ private fun ReactionItem(
             .padding(2.dp)
             .border(
                 1.dp,
-                MaterialTheme.colors.onSurface.copy(ContentAlpha.medium),
+                MaterialTheme.colors.secondaryVariant.copy(ContentAlpha.medium),
                 RoundedCornerShape(8.dp)
             )
             .clickable { onClick() },
