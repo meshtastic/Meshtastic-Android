@@ -29,6 +29,7 @@ import androidx.core.location.LocationRequestCompat
 import androidx.core.location.altitude.AltitudeConverterCompat
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.android.hasGps
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
@@ -115,4 +116,6 @@ class LocationRepository @Inject constructor(
      */
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
     fun getLocations() = locationManager.get().requestLocationUpdates()
+
+    fun hasGps(): Boolean = context.hasGps()
 }
