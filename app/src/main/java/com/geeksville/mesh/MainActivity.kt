@@ -185,6 +185,12 @@ class MainActivity : AppCompatActivity(), Logging {
     data class TabInfo(val text: String, val icon: Int, val content: Fragment)
 
     private val tabInfos = arrayOf(
+        // TODO - Remember to return the original order
+        TabInfo(
+            "Settings",
+            R.drawable.ic_twotone_settings_applications_24,
+            SettingsFragment()
+        ),
         TabInfo(
             "Messages",
             R.drawable.ic_twotone_message_24,
@@ -205,11 +211,6 @@ class MainActivity : AppCompatActivity(), Logging {
             R.drawable.ic_twotone_contactless_24,
             ChannelFragment()
         ),
-        TabInfo(
-            "Settings",
-            R.drawable.ic_twotone_settings_applications_24,
-            SettingsFragment()
-        )
     )
 
     private val tabsAdapter = object : FragmentStateAdapter(supportFragmentManager, lifecycle) {

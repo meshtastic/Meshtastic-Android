@@ -34,6 +34,8 @@ import android.widget.RadioButton
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.core.widget.doAfterTextChanged
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
@@ -47,6 +49,7 @@ import com.geeksville.mesh.model.RegionInfo
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.exceptionToSnackbar
 import com.geeksville.mesh.util.onEditorAction
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -75,7 +78,14 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         savedInstanceState: Bundle?
     ): View {
         _binding = SettingsFragmentBinding.inflate(inflater, container, false)
-        return binding.root
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                AppTheme {
+                    SettingsScreen()
+                }
+            }
+        }
     }
 
     /**
