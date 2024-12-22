@@ -605,7 +605,7 @@ class RadioConfigViewModel @Inject constructor(
                     incrementCompleted()
                 }
 
-                else -> TODO()
+                else -> debug("No custom processing needed for ${parsed.payloadVariantCase}")
             }
 
             if (AdminRoute.entries.any { it.name == route }) {
