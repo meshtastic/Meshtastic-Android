@@ -66,7 +66,7 @@ private fun getDrawableFrom(hwModel: Int): Int = when (hwModel) {
     HardwareModel.DIY_V1_VALUE -> R.drawable.hw_diy
     HardwareModel.HELTEC_HT62_VALUE -> R.drawable.hw_heltec_ht62_esp32c3_sx1262
     HardwareModel.HELTEC_MESH_NODE_T114_VALUE -> R.drawable.hw_heltec_mesh_node_t114
-    HardwareModel.HELTEC_V3_VALUE -> R.drawable.hw_heltec_v3
+    HardwareModel.HELTEC_V3_VALUE -> R.drawable.hw_heltec_v3_case
     HardwareModel.HELTEC_VISION_MASTER_E213_VALUE -> R.drawable.hw_heltec_vision_master_e213
     HardwareModel.HELTEC_VISION_MASTER_E290_VALUE -> R.drawable.hw_heltec_vision_master_e290
     HardwareModel.HELTEC_VISION_MASTER_T190_VALUE -> R.drawable.hw_heltec_vision_master_t190
@@ -78,7 +78,7 @@ private fun getDrawableFrom(hwModel: Int): Int = when (hwModel) {
     HardwareModel.RPI_PICO_VALUE -> R.drawable.hw_pico
     HardwareModel.NRF52_PROMICRO_DIY_VALUE -> R.drawable.hw_promicro
     HardwareModel.RAK11310_VALUE -> R.drawable.hw_rak11310
-    HardwareModel.RAK4631_VALUE -> R.drawable.hw_rak4631
+    HardwareModel.RAK4631_VALUE -> R.drawable.hw_rak4631_case
     HardwareModel.RPI_PICO2_VALUE -> R.drawable.hw_rpipicow
     HardwareModel.SENSECAP_INDICATOR_VALUE -> R.drawable.hw_seeed_sensecap_indicator
     HardwareModel.SEEED_XIAO_S3_VALUE -> R.drawable.hw_seeed_xiao_s3

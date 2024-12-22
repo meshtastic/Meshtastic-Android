@@ -140,9 +140,11 @@ private fun NodeDetailList(
         modifier = modifier.fillMaxSize(),
         contentPadding = PaddingValues(horizontal = 16.dp),
     ) {
-        item {
-            PreferenceCategory("Device") {
-                DeviceDetailsContent(metricsState)
+        if (metricsState.deviceHardware != null) {
+            item {
+                PreferenceCategory("Device") {
+                    DeviceDetailsContent(metricsState)
+                }
             }
         }
         item {
@@ -198,7 +200,8 @@ private fun NodeDetailRow(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Icon(
             imageVector = icon,
@@ -206,10 +209,9 @@ private fun NodeDetailRow(
             modifier = Modifier.size(24.dp),
             tint = iconTint
         )
-        Spacer(modifier = Modifier.width(8.dp))
         Text(label)
         Spacer(modifier = Modifier.weight(1f))
-        Text(value)
+        Text(textAlign = TextAlign.End, text = value)
     }
 }
 
