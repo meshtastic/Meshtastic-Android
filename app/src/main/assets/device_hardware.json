@@ -730,8 +730,8 @@
     "requiresDfu": true
   },
   {
-    "hwModel": 72,
-    "hwModelSlug": "Seeed_XIAO_S3",
+    "hwModel": 81,
+    "hwModelSlug": "SEEED_XIAO_S3",
     "platformioTarget": "seeed-xiao-s3",
     "architecture": "esp32-s3",
     "activelySupported": true,
