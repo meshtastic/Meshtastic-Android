@@ -148,6 +148,20 @@ enum class TimeFrame(
     }
 
     /**
+     * Used to detect a significant time separation between [Telemetry]s.
+     */
+    fun timeThreshold(): Long {
+        return when (this.ordinal) {
+            TWENTY_FOUR_HOURS.ordinal ->
+                TimeUnit.HOURS.toSeconds(6)
+            FORTY_EIGHT_HOURS.ordinal ->
+                TimeUnit.HOURS.toSeconds(12)
+            else ->
+                TimeUnit.DAYS.toSeconds(1)
+        }
+    }
+
+    /**
      * Calculates the needed [Dp] depending on the amount of time being plotted.
      *
      * @param time in seconds
