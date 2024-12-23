@@ -58,6 +58,7 @@ import androidx.compose.material.icons.filled.KeyOff
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
+import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Numbers
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Power
@@ -302,6 +303,13 @@ private fun NodeDetailsContent(
             label = "Uptime",
             icon = Icons.Default.CheckCircle,
             value = formatUptime(node.deviceMetrics.uptimeSeconds)
+        )
+    }
+    if (node.metadata != null) {
+        NodeDetailRow(
+            label = "Firmware version",
+            icon = Icons.Default.Memory,
+            value = node.metadata.firmwareVersion.substringBeforeLast(".")
         )
     }
     NodeDetailRow(
