@@ -81,6 +81,8 @@ fun NetworkConfigScreen(
     }
 
     NetworkConfigItemList(
+        hasWifi = state.metadata?.hasWifi ?: true,
+        hasEthernet = state.metadata?.hasEthernet ?: true,
         networkConfig = state.radioConfig.network,
         enabled = state.connected,
         onSaveClicked = { networkInput ->
@@ -94,8 +96,11 @@ private fun extractWifiCredentials(qrCode: String) = Regex("""WIFI:S:(.*?);.*?P:
     .find(qrCode)?.destructured
     ?.let { (ssid, password) -> ssid to password } ?: (null to null)
 
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun NetworkConfigItemList(
+    hasWifi: Boolean,
+    hasEthernet: Boolean,
     networkConfig: NetworkConfig,
     enabled: Boolean,
     onSaveClicked: (NetworkConfig) -> Unit,
@@ -137,16 +142,16 @@ fun NetworkConfigItemList(
         item {
             SwitchPreference(title = "WiFi enabled",
                 checked = networkInput.wifiEnabled,
-                enabled = enabled,
+                enabled = enabled && hasWifi,
                 onCheckedChange = { networkInput = networkInput.copy { wifiEnabled = it } })
+            Divider()
         }
-        item { Divider() }
 
         item {
             EditTextPreference(title = "SSID",
                 value = networkInput.wifiSsid,
                 maxSize = 32, // wifi_ssid max_size:33
-                enabled = enabled,
+                enabled = enabled && hasWifi,
                 isError = false,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
@@ -161,7 +166,7 @@ fun NetworkConfigItemList(
             EditPasswordPreference(title = "PSK",
                 value = networkInput.wifiPsk,
                 maxSize = 64, // wifi_psk max_size:65
-                enabled = enabled,
+                enabled = enabled && hasWifi,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = { networkInput = networkInput.copy { wifiPsk = it } })
         }
@@ -173,10 +178,18 @@ fun NetworkConfigItemList(
                     .fillMaxWidth()
                     .padding(vertical = 8.dp)
                     .height(48.dp),
-                enabled = enabled,
+                enabled = enabled && hasWifi,
             ) {
                 Text(text = stringResource(R.string.wifi_qr_code_scan))
             }
+        }
+
+        item {
+            SwitchPreference(title = "Ethernet enabled",
+                checked = networkInput.ethEnabled,
+                enabled = enabled && hasEthernet,
+                onCheckedChange = { networkInput = networkInput.copy { ethEnabled = it } })
+            Divider()
         }
 
         item {
@@ -210,14 +223,6 @@ fun NetworkConfigItemList(
         }
 
         item {
-            SwitchPreference(title = "Ethernet enabled",
-                checked = networkInput.ethEnabled,
-                enabled = enabled,
-                onCheckedChange = { networkInput = networkInput.copy { ethEnabled = it } })
-        }
-        item { Divider() }
-
-        item {
             DropDownPreference(title = "IPv4 mode",
                 enabled = enabled,
                 items = NetworkConfig.AddressMode.entries
@@ -225,8 +230,8 @@ fun NetworkConfigItemList(
                     .map { it to it.name },
                 selectedItem = networkInput.addressMode,
                 onItemSelected = { networkInput = networkInput.copy { addressMode = it } })
+            Divider()
         }
-        item { Divider() }
 
         item {
             EditIPv4Preference(title = "IP",
@@ -292,6 +297,8 @@ fun NetworkConfigItemList(
 @Composable
 private fun NetworkConfigPreview() {
     NetworkConfigItemList(
+        hasWifi = true,
+        hasEthernet = true,
         networkConfig = NetworkConfig.getDefaultInstance(),
         enabled = true,
         onSaveClicked = { },

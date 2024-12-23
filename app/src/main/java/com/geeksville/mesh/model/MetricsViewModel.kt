@@ -38,7 +38,6 @@ import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.entity.MeshLog
-import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.ui.Route
@@ -71,7 +70,7 @@ data class MetricsState(
     val isManaged: Boolean = true,
     val isFahrenheit: Boolean = false,
     val displayUnits: DisplayUnits = DisplayUnits.METRIC,
-    val node: NodeEntity? = null,
+    val node: Node? = null,
     val deviceMetrics: List<Telemetry> = emptyList(),
     val environmentMetrics: List<Telemetry> = emptyList(),
     val signalMetrics: List<MeshPacket> = emptyList(),
