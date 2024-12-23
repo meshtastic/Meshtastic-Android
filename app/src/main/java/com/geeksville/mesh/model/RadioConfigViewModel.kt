@@ -337,15 +337,6 @@ class RadioConfigViewModel @Inject constructor(
         }
     }
 
-    private fun getSessionPasskey(destNum: Int) {
-        if (radioConfigState.value.metadata != null) {
-            sendAdminRequest(destNum)
-        } else {
-            getConfig(destNum, AdminProtos.AdminMessage.ConfigType.SESSIONKEY_CONFIG_VALUE)
-            setResponseStateTotal(2)
-        }
-    }
-
     fun setFixedPosition(position: Position) {
         val destNum = destNode.value?.num ?: return
         try {
@@ -464,7 +455,10 @@ class RadioConfigViewModel @Inject constructor(
                 setResponseStateTotal(maxChannels + 1)
             }
 
-            is AdminRoute -> getSessionPasskey(destNum)
+            is AdminRoute -> {
+                getConfig(destNum, AdminProtos.AdminMessage.ConfigType.SESSIONKEY_CONFIG_VALUE)
+                setResponseStateTotal(2)
+            }
 
             is ConfigRoute -> {
                 if (route == ConfigRoute.LORA) {
