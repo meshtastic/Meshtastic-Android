@@ -155,12 +155,12 @@ private fun DeviceMetricsChart(
     Spacer(modifier = Modifier.height(16.dp))
 
     val graphColor = MaterialTheme.colors.onSurface
-    val scrollState = rememberScrollState()
 
+    val scrollState = rememberScrollState()
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp
     val dp by remember(key1 = selectedTime) {
-        mutableStateOf(selectedTime.dp(screenWidth, time = (newest.time - oldest.time).toLong()))
+        mutableStateOf(selectedTime.dp(screenWidth, time = timeDiff.toLong()))
     }
 
     Row {
