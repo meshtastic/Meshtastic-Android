@@ -124,6 +124,7 @@ fun SignalMetricsScreen(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun SignalMetricsChart(
     modifier: Modifier = Modifier,
