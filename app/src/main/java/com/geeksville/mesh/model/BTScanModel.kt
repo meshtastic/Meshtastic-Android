@@ -24,12 +24,13 @@ import android.content.Context
 import android.hardware.usb.UsbManager
 import android.net.nsd.NsdServiceInfo
 import android.os.RemoteException
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.repository.radio.InterfaceId
@@ -60,7 +61,7 @@ class BTScanModel @Inject constructor(
 ) : ViewModel(), Logging {
 
     private val context: Context get() = application.applicationContext
-    val devices = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
+    val devices = mutableStateMapOf<String, DeviceListEntry>()
     val errorText = MutableLiveData<String?>(null)
 
     private val showMockInterface = MutableStateFlow(radioInterfaceService.isMockInterface)
@@ -76,27 +77,27 @@ class BTScanModel @Inject constructor(
             usbRepository.serialDevicesWithDrivers,
             showMockInterface,
         ) { ble, tcp, usb, showMockInterface ->
-            devices.value = mutableMapOf<String, DeviceListEntry>().apply {
-                fun addDevice(entry: DeviceListEntry) { this[entry.fullAddress] = entry }
+            fun addDevice(entry: DeviceListEntry) {
+                devices.put(entry.fullAddress, entry)
+            }
 
-                // Include a placeholder for "None"
-                addDevice(DeviceListEntry(context.getString(R.string.none), "n", true))
+            // Include a placeholder for "None"
+            addDevice(DeviceListEntry(context.getString(R.string.none), "n", true))
 
-                if (showMockInterface) {
-                    addDevice(DeviceListEntry("Demo Mode", "m", true))
-                }
+            if (showMockInterface) {
+                addDevice(DeviceListEntry("Demo Mode", "m", true))
+            }
 
-                // Include paired Bluetooth devices
-                ble.bondedDevices.map(::BLEDeviceListEntry).sortedBy { it.name }.forEach(::addDevice)
+            // Include paired Bluetooth devices
+            ble.bondedDevices.map(::BLEDeviceListEntry).sortedBy { it.name }.forEach(::addDevice)
 
-                // Include Network Service Discovery
-                tcp.forEach { service ->
-                    addDevice(TCPDeviceListEntry(service))
-                }
+            // Include Network Service Discovery
+            tcp.forEach { service ->
+                addDevice(TCPDeviceListEntry(service))
+            }
 
-                usb.forEach { (_, d) ->
-                    addDevice(USBDeviceListEntry(radioInterfaceService, usbManagerLazy.get(), d))
-                }
+            usb.forEach { (_, d) ->
+                addDevice(USBDeviceListEntry(radioInterfaceService, usbManagerLazy.get(), d))
             }
         }.launchIn(viewModelScope)
 
@@ -191,23 +192,23 @@ class BTScanModel @Inject constructor(
         _spinner.value = true
         scanJob = bluetoothRepository.scan()
             .onEach { result ->
-            val fullAddress = radioInterfaceService.toInterfaceAddress(
-                InterfaceId.BLUETOOTH,
-                result.device.address
-            )
-            // prevent log spam because we'll get lots of redundant scan results
-            val isBonded = result.device.bondState == BluetoothDevice.BOND_BONDED
-            val oldDevs = scanResult.value!!
-            val oldEntry = oldDevs[fullAddress]
-            // Don't spam the GUI with endless updates for non changing nodes
-            if (oldEntry == null || oldEntry.bonded != isBonded) {
-                val entry = DeviceListEntry(result.device.name, fullAddress, isBonded)
-                oldDevs[entry.fullAddress] = entry
-                scanResult.value = oldDevs
-            }
-        }.catch { ex ->
-            serviceRepository.setErrorMessage("Unexpected Bluetooth scan failure: ${ex.message}")
-        }.launchIn(viewModelScope)
+                val fullAddress = radioInterfaceService.toInterfaceAddress(
+                    InterfaceId.BLUETOOTH,
+                    result.device.address
+                )
+                // prevent log spam because we'll get lots of redundant scan results
+                val isBonded = result.device.bondState == BluetoothDevice.BOND_BONDED
+                val oldDevs = scanResult.value!!
+                val oldEntry = oldDevs[fullAddress]
+                // Don't spam the GUI with endless updates for non changing nodes
+                if (oldEntry == null || oldEntry.bonded != isBonded) {
+                    val entry = DeviceListEntry(result.device.name, fullAddress, isBonded)
+                    oldDevs[entry.fullAddress] = entry
+                    scanResult.value = oldDevs
+                }
+            }.catch { ex ->
+                serviceRepository.setErrorMessage("Unexpected Bluetooth scan failure: ${ex.message}")
+            }.launchIn(viewModelScope)
     }
 
     private fun changeDeviceAddress(address: String) {
@@ -215,7 +216,7 @@ class BTScanModel @Inject constructor(
             serviceRepository.meshService?.let { service ->
                 MeshService.changeDeviceAddress(context, service, address)
             }
-            devices.value = devices.value // Force a GUI update
+//            devices.value = devices.value // Force a GUI update
         } catch (ex: RemoteException) {
             errormsg("changeDeviceSelection failed, probably it is shutting down", ex)
             // ignore the failure and the GUI won't be updating anyways

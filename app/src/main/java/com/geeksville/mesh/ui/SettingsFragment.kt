@@ -205,9 +205,9 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             binding.usernameEditText.setText(node?.user?.longName.orEmpty())
         }
 
-        scanModel.devices.observe(viewLifecycleOwner) { devices ->
-            updateDevicesButtons(devices)
-        }
+//        scanModel.devices.observe(viewLifecycleOwner) { devices ->
+//            updateDevicesButtons(devices)
+//        }
 
         // Only let user edit their name or set software update while connected to a radio
         model.connectionState.asLiveData().observe(viewLifecycleOwner) {

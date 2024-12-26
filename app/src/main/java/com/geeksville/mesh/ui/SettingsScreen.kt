@@ -46,7 +46,7 @@ fun SettingsScreen(
     viewModel: SettingsScreenViewModel = hiltViewModel(),
     btScanModel: BTScanModel = hiltViewModel(),
 ) {
-    LaunchedEffect(btScanModel.devices.value?.values, viewModel.connectionState) {
+    LaunchedEffect(btScanModel.devices, viewModel.isConnected) {
         viewModel.updateNodeInfo()
     }
     Surface {
@@ -63,7 +63,7 @@ fun SettingsScreen(
             }
             RadioConnectionStatusMessage()
             RadioSelectorRadioButtons(
-                devices = btScanModel.devices.value?.values?.toList() ?: emptyList(),
+                devices = btScanModel.devices.values.toList(),
                 onDeviceSelected = { btScanModel.onSelected(it) },
                 selectedAddress = btScanModel.selectedNotNull,
 
@@ -258,7 +258,7 @@ private fun ProvideLocationCheckBox(modifier: Modifier = Modifier, enabled: Bool
 @Composable
 private fun RadioConnectionStatusMessage(modifier: Modifier = Modifier) {
     // TODO - add condition for if we are paired or not
-    Text(stringResource(R.string.not_paired_yet))
+    Text(stringResource(R.string.not_paired_yet), modifier = modifier)
 }
 
 
