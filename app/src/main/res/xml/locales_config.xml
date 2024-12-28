@@ -30,6 +30,7 @@
    <locale android:name="ro"/> <!-- Romanian -->
    <locale android:name="ru"/> <!-- Russian -->
    <locale android:name="sq"/> <!-- Albanian -->
+   <locale android:name="sr"/> <!-- Serbian (Cyrillic) -->
    <locale android:name="sk"/> <!-- Slovak -->
    <locale android:name="sl"/> <!-- Slovenian -->
    <locale android:name="fi"/> <!-- Finnish -->

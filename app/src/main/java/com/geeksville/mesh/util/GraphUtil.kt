@@ -22,9 +22,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawContext
 import com.geeksville.mesh.TelemetryProtos.Telemetry
-import java.util.concurrent.TimeUnit
-
-private const val TIME_SEPARATION_THRESHOLD = 2L
 
 object GraphUtil {
 
@@ -59,6 +56,7 @@ object GraphUtil {
      * @param path [Path] that will be used to draw
      * @param timeRange The time range for the data set
      * @param width of the [DrawContext]
+     * @param timeThreshold to determine significant breaks in time between [Telemetry]s
      * @param calculateY (`index`) -> `y` coordinate
      */
     fun createPath(
@@ -68,6 +66,7 @@ object GraphUtil {
         oldestTime: Int,
         timeRange: Int,
         width: Float,
+        timeThreshold: Long,
         calculateY: (Int) -> Float
     ): Int {
         var i = index
@@ -78,7 +77,7 @@ object GraphUtil {
                 val nextTelemetry = telemetries.getOrNull(i + 1) ?: telemetries.last()
 
                 /* Check to see if we have a significant time break between telemetries. */
-                if (nextTelemetry.time - telemetry.time > TimeUnit.HOURS.toSeconds(TIME_SEPARATION_THRESHOLD)) {
+                if (nextTelemetry.time - telemetry.time > timeThreshold) {
                     i++
                     break
                 }
