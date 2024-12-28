@@ -234,7 +234,8 @@ private fun DeviceMetricsChart(
                         path = path,
                         oldestTime = oldest.time,
                         timeRange = timeDiff,
-                        width = width
+                        width = width,
+                        timeThreshold = selectedTime.timeThreshold()
                     ) { i ->
                         val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
                         val ratio = telemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE

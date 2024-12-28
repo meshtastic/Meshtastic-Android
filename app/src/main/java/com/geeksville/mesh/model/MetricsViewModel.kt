@@ -135,9 +135,10 @@ enum class TimeFrame(
      */
     fun lineInterval(): Long {
         return when (this.ordinal) {
-            TWENTY_FOUR_HOURS.ordinal,
+            TWENTY_FOUR_HOURS.ordinal ->
+                TimeUnit.HOURS.toSeconds(6)
             FORTY_EIGHT_HOURS.ordinal ->
-                TimeUnit.HOURS.toSeconds(1)
+                TimeUnit.HOURS.toSeconds(12)
             ONE_WEEK.ordinal,
             TWO_WEEKS.ordinal ->
                 TimeUnit.DAYS.toSeconds(1)
@@ -147,23 +148,26 @@ enum class TimeFrame(
     }
 
     /**
+     * Used to detect a significant time separation between [Telemetry]s.
+     */
+    fun timeThreshold(): Long {
+        return when (this.ordinal) {
+            TWENTY_FOUR_HOURS.ordinal ->
+                TimeUnit.HOURS.toSeconds(6)
+            FORTY_EIGHT_HOURS.ordinal ->
+                TimeUnit.HOURS.toSeconds(12)
+            else ->
+                TimeUnit.DAYS.toSeconds(1)
+        }
+    }
+
+    /**
      * Calculates the needed [Dp] depending on the amount of time being plotted.
      *
      * @param time in seconds
      */
     fun dp(screenWidth: Int, time: Long): Dp {
-
-        val timePerScreen = when (this.ordinal) {
-            TWENTY_FOUR_HOURS.ordinal,
-            FORTY_EIGHT_HOURS.ordinal ->
-                TimeUnit.HOURS.toSeconds(1)
-            ONE_WEEK.ordinal,
-            TWO_WEEKS.ordinal ->
-                TimeUnit.DAYS.toSeconds(1)
-            else ->
-                TimeUnit.DAYS.toSeconds(7)
-        }
-
+        val timePerScreen = this.lineInterval()
         val multiplier = time / timePerScreen
         val dp = (screenWidth * multiplier).toInt().dp
         return dp.takeIf { it != 0.dp } ?: screenWidth.dp
