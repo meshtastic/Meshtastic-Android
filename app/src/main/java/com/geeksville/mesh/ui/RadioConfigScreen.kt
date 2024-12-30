@@ -297,12 +297,12 @@ private fun RadioConfigItemList(
         contentPadding = PaddingValues(horizontal = 16.dp),
     ) {
         item { PreferenceCategory(stringResource(R.string.device_settings)) }
-        items(ConfigRoute.getFrom(state.metadata)) {
+        items(ConfigRoute.filterExcludedFrom(state.metadata)) {
             NavCard(title = it.title, icon = it.icon, enabled = enabled) { onRouteClick(it) }
         }
 
         item { PreferenceCategory(stringResource(R.string.module_settings)) }
-        items(ModuleRoute.getFrom(state.metadata)) {
+        items(ModuleRoute.filterExcludedFrom(state.metadata)) {
             NavCard(title = it.title, icon = it.icon, enabled = enabled) { onRouteClick(it) }
         }
 

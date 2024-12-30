@@ -239,7 +239,7 @@ enum class ConfigRoute(val title: String, val route: Route, val icon: ImageVecto
     ;
 
     companion object {
-        fun getFrom(metadata: DeviceMetadata?): List<ConfigRoute> = ConfigRoute.entries.filter {
+        fun filterExcludedFrom(metadata: DeviceMetadata?): List<ConfigRoute> = entries.filter {
             when {
                 metadata == null -> true
                 it == BLUETOOTH -> metadata.hasBluetooth
@@ -270,7 +270,7 @@ enum class ModuleRoute(val title: String, val route: Route, val icon: ImageVecto
     val bitfield: Int get() = 1 shl ordinal
 
     companion object {
-        fun getFrom(metadata: DeviceMetadata?): List<ModuleRoute> = entries.filter {
+        fun filterExcludedFrom(metadata: DeviceMetadata?): List<ModuleRoute> = entries.filter {
             when (metadata) {
                 null -> true
                 else -> metadata.excludedModules and it.bitfield == 0
