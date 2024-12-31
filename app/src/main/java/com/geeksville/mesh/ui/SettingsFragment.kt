@@ -134,7 +134,8 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             else -> null
         }?.let {
             val firmwareString = info?.firmwareString ?: getString(R.string.unknown)
-            scanModel.setErrorText(getString(it, firmwareString))
+            // TODO: Implement in new compose UI
+//            scanModel.setErrorText(getString(it, firmwareString))
         }
     }
 
@@ -223,11 +224,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             updateNodeInfo()
         }
 
-        scanModel.errorText.observe(viewLifecycleOwner) { errMsg ->
-            if (errMsg != null) {
-                binding.scanStatusText.text = errMsg
-            }
-        }
+//        scanModel.errorText.observe(viewLifecycleOwner) { errMsg ->
+//            if (errMsg != null) {
+//                binding.scanStatusText.text = errMsg
+//            }
+//        }
 
         var scanDialog: AlertDialog? = null
         scanModel.scanResult.observe(viewLifecycleOwner) { results ->
@@ -422,7 +423,7 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             binding.warningNotPaired.visibility = View.GONE
         } else if (bluetoothViewModel.enabled.value == true) {
             binding.warningNotPaired.visibility = View.VISIBLE
-            scanModel.setErrorText(getString(R.string.not_paired_yet))
+//            scanModel.setErrorText(getString(R.string.not_paired_yet))
         }
     }
 

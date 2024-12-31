@@ -24,7 +24,10 @@ import android.content.Context
 import android.hardware.usb.UsbManager
 import android.net.nsd.NsdServiceInfo
 import android.os.RemoteException
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateMapOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -61,8 +64,10 @@ class BTScanModel @Inject constructor(
 ) : ViewModel(), Logging {
 
     private val context: Context get() = application.applicationContext
+    // TODO: Change this to only externally expose a read-only map
     val devices = mutableStateMapOf<String, DeviceListEntry>()
-    val errorText = MutableLiveData<String?>(null)
+    var errorText by mutableStateOf<String?>(null)
+        private set
 
     private val showMockInterface = MutableStateFlow(radioInterfaceService.isMockInterface)
 
@@ -102,7 +107,7 @@ class BTScanModel @Inject constructor(
         }.launchIn(viewModelScope)
 
         serviceRepository.statusMessage
-            .onEach { errorText.value = it }
+            .onEach { errorText = it }
             .launchIn(viewModelScope)
 
         debug("BTScanModel created")
@@ -152,9 +157,6 @@ class BTScanModel @Inject constructor(
         debug("BTScanModel cleared")
     }
 
-    fun setErrorText(text: String) {
-        errorText.value = text
-    }
 
     private var scanJob: Job? = null
 
@@ -234,10 +236,10 @@ class BTScanModel @Inject constructor(
                 if (state != BluetoothDevice.BOND_BONDING) {
                     debug("Bonding completed, state=$state")
                     if (state == BluetoothDevice.BOND_BONDED) {
-                        setErrorText(context.getString(R.string.pairing_completed))
+                        errorText = context.getString(R.string.pairing_completed)
                         changeDeviceAddress(it.fullAddress)
                     } else {
-                        setErrorText(context.getString(R.string.pairing_failed_try_again))
+                        errorText = context.getString(R.string.pairing_failed_try_again)
                     }
                 }
             }.catch { ex ->

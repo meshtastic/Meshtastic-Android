@@ -72,10 +72,12 @@ class SettingsScreenViewModel @Inject constructor(
     var isConnected = false
         private set
 
+    var nodeFirmwareVersion by mutableStateOf<String?>(null)
+
     init {
         viewModelScope.launch {
             radioConfigRepository.connectionState.collect { connectionState ->
-                isConnected = connectionState == MeshService.ConnectionState.CONNECTED
+                isConnected = connectionState.isConnected()
                 showNodeSettings = isConnected
                 showProvideLocation = isConnected
                 enableUsernameEdit = isConnected && !isManaged
@@ -85,6 +87,12 @@ class SettingsScreenViewModel @Inject constructor(
         viewModelScope.launch {
             nodeRepository.ourNodeInfo.collect { node ->
                 userName = node?.user?.longName ?: userName
+            }
+        }
+
+        viewModelScope.launch {
+            nodeRepository.myNodeInfo.collect { node ->
+                nodeFirmwareVersion = node?.firmwareString
             }
         }
 
@@ -101,9 +109,7 @@ class SettingsScreenViewModel @Inject constructor(
     /**
      * Pull the latest device info from the model and into the GUI
      */
-    suspend fun updateNodeInfo() {
-
-
+    fun updateNodeInfo() {
         enableProvideLocation = locationRepository.hasGps()
 
         // update the region selection from the device

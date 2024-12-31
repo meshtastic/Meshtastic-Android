@@ -61,7 +61,11 @@ fun SettingsScreen(
                     onRegionSelected = viewModel::onRegionSelected,
                 )
             }
-            RadioConnectionStatusMessage()
+            RadioConnectionStatusMessage(
+                errorMessage = btScanModel.errorText,
+                selectedAddress = btScanModel.selectedAddress,
+                connectedRadioFirmwareVersion = viewModel.nodeFirmwareVersion
+            )
             RadioSelectorRadioButtons(
                 devices = btScanModel.devices.values.toList(),
                 onDeviceSelected = { btScanModel.onSelected(it) },
@@ -76,13 +80,15 @@ fun SettingsScreen(
                 ProvideLocationCheckBox(enabled = viewModel.enableProvideLocation)
             }
 
-            Text(
-                text = stringResource(R.string.warning_not_paired),
-                style = MaterialTheme.typography.caption,
-                modifier = Modifier
-                    .padding(top = 16.dp)
-                    .alpha(0.7f)
-            )
+            if (btScanModel.selectedAddress == null || btScanModel.selectedAddress == "m") {
+                Text(
+                    text = stringResource(R.string.warning_not_paired),
+                    style = MaterialTheme.typography.caption,
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .alpha(0.7f)
+                )
+            }
 
             Spacer(modifier = Modifier.weight(1f))
 
@@ -256,9 +262,29 @@ private fun ProvideLocationCheckBox(modifier: Modifier = Modifier, enabled: Bool
 }
 
 @Composable
-private fun RadioConnectionStatusMessage(modifier: Modifier = Modifier) {
-    // TODO - add condition for if we are paired or not
-    Text(stringResource(R.string.not_paired_yet), modifier = modifier)
+private fun RadioConnectionStatusMessage(
+    modifier: Modifier = Modifier,
+    errorMessage: String?,
+    selectedAddress: String? = null,
+    connectedRadioFirmwareVersion: String?
+) {
+    when {
+        selectedAddress.isNullOrBlank() -> {
+            val message = stringResource(R.string.not_paired_yet)
+            Text(message, modifier = modifier)
+        }
+        connectedRadioFirmwareVersion != null -> {
+            val message = stringResource(R.string.connected_to, connectedRadioFirmwareVersion)
+            Text(message, modifier = modifier)
+        }
+        errorMessage != null -> {
+            Text(errorMessage, modifier = modifier)
+        }
+        else -> {
+            val message = stringResource(R.string.not_connected)
+            Text(message, modifier = modifier)
+        }
+    }
 }
 
 
