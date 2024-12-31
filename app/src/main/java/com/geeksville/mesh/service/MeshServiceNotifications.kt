@@ -22,11 +22,17 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.Context.AUDIO_SERVICE
 import android.content.Intent
 import android.graphics.Color
 import android.media.AudioAttributes
+import android.media.AudioManager
+import android.media.MediaMetadataRetriever
 import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
@@ -36,6 +42,7 @@ import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.android.notificationManager
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.util.formatUptime
+import kotlin.math.ceil
 
 @Suppress("TooManyFunctions")
 class MeshServiceNotifications(
@@ -45,13 +52,72 @@ class MeshServiceNotifications(
     companion object {
         private const val FIFTEEN_MINUTES_IN_MILLIS = 15L * 60 * 1000
         const val OPEN_MESSAGE_ACTION = "com.geeksville.mesh.OPEN_MESSAGE_ACTION"
-        const val OPEN_MESSAGE_EXTRA_CONTACT_KEY = "com.geeksville.mesh.OPEN_MESSAGE_EXTRA_CONTACT_KEY"
+        const val OPEN_MESSAGE_EXTRA_CONTACT_KEY =
+            "com.geeksville.mesh.OPEN_MESSAGE_EXTRA_CONTACT_KEY"
     }
 
     private val notificationManager: NotificationManager get() = context.notificationManager
 
     // We have two notification channels: one for general service status and another one for messages
     val notifyId = 101
+
+    private fun overrideSilentModeAndConfigureCustomVolume(ringToneVolume: Float?) {
+        try {
+            val audioManager = context.getSystemService(AUDIO_SERVICE) as AudioManager
+            var originalRingMode = audioManager.ringerMode
+            val originalNotificationVolume =
+                audioManager.getStreamVolume(AudioManager.STREAM_NOTIFICATION)
+            val maxNotificationVolume =
+                audioManager.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION)
+
+            // When DND mode is enabled, we get ringerMode as silent even though actual ringer mode is Normal
+            val isDndModeEnabled = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                notificationManager.currentInterruptionFilter != NotificationManager.INTERRUPTION_FILTER_ALL
+            } else {
+                true
+            }
+            if (isDndModeEnabled &&
+                originalRingMode == AudioManager.RINGER_MODE_SILENT &&
+                originalNotificationVolume != 0
+            ) {
+                originalRingMode = AudioManager.RINGER_MODE_NORMAL
+            }
+
+            val newVolume = if (ringToneVolume != null) {
+                ceil(maxNotificationVolume * ringToneVolume).toInt()
+            } else {
+                originalNotificationVolume
+            }
+
+            audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
+            audioManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, newVolume, 0)
+
+            // Resetting the original ring mode, volume and dnd mode
+            Handler(Looper.getMainLooper()).postDelayed(
+                {
+                    audioManager.ringerMode = originalRingMode
+                    audioManager.setStreamVolume(
+                        AudioManager.STREAM_NOTIFICATION,
+                        originalNotificationVolume,
+                        0
+                    )
+                },
+                getSoundFileDuration(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+            )
+        } catch (ex: Exception) {
+        }
+    }
+
+    private fun getSoundFileDuration(uri: Uri): Long {
+        return try {
+            val mmr = MediaMetadataRetriever()
+            mmr.setDataSource(context, uri)
+            val durationStr = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+            durationStr?.toLong() ?: 0
+        } catch (ex: Exception) {
+            5000
+        }
+    }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel(): String {
@@ -78,6 +144,31 @@ class MeshServiceNotifications(
             channelName,
             NotificationManager.IMPORTANCE_HIGH
         ).apply {
+            lightColor = Color.BLUE
+            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+            setShowBadge(true)
+            setSound(
+                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
+                AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build()
+            )
+        }
+        notificationManager.createNotificationChannel(channel)
+        return channelId
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createAlertNotificationChannel(): String {
+        val channelId = "my_alerts"
+        val channelName = context.getString(R.string.meshtastic_alerts_notifications)
+        val channel = NotificationChannel(
+            channelId,
+            channelName,
+            NotificationManager.IMPORTANCE_HIGH
+        ).apply {
+            setBypassDnd(true)
             lightColor = Color.BLUE
             lockscreenVisibility = Notification.VISIBILITY_PUBLIC
             setShowBadge(true)
@@ -137,6 +228,14 @@ class MeshServiceNotifications(
         }
     }
 
+    private val alertChannelId: String by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createAlertNotificationChannel()
+        } else {
+            ""
+        }
+    }
+
     private val newNodeChannelId: String by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNewNodeNotificationChannel()
@@ -178,6 +277,14 @@ class MeshServiceNotifications(
             contactKey.hashCode(), // show unique notifications,
             createMessageNotification(contactKey, name, message)
         )
+
+    fun showAlertNotification(contactKey: String, name: String, alert: String) {
+        overrideSilentModeAndConfigureCustomVolume(0.8f)
+        notificationManager.notify(
+            contactKey.hashCode(), // show unique notifications,
+            createAlertNotification(contactKey, name, alert)
+        )
+    }
 
     fun showNewNodeSeenNotification(node: NodeEntity) {
         notificationManager.notify(
@@ -268,7 +375,11 @@ class MeshServiceNotifications(
     }
 
     lateinit var messageNotificationBuilder: NotificationCompat.Builder
-    private fun createMessageNotification(contactKey: String, name: String, message: String): Notification {
+    private fun createMessageNotification(
+        contactKey: String,
+        name: String,
+        message: String
+    ): Notification {
         if (!::messageNotificationBuilder.isInitialized) {
             messageNotificationBuilder = commonBuilder(messageChannelId)
         }
@@ -279,10 +390,34 @@ class MeshServiceNotifications(
             setCategory(Notification.CATEGORY_MESSAGE)
             setAutoCancel(true)
             setStyle(
-                NotificationCompat.MessagingStyle(person).addMessage(message, System.currentTimeMillis(), person)
+                NotificationCompat.MessagingStyle(person)
+                    .addMessage(message, System.currentTimeMillis(), person)
             )
         }
         return messageNotificationBuilder.build()
+    }
+
+    lateinit var alertNotificationBuilder: NotificationCompat.Builder
+    private fun createAlertNotification(
+        contactKey: String,
+        name: String,
+        alert: String
+    ): Notification {
+        if (!::alertNotificationBuilder.isInitialized) {
+            alertNotificationBuilder = commonBuilder(alertChannelId)
+        }
+        val person = Person.Builder().setName(name).build()
+        with(alertNotificationBuilder) {
+            setContentIntent(openMessageIntent(contactKey))
+            priority = NotificationCompat.PRIORITY_MAX
+            setCategory(Notification.CATEGORY_MESSAGE)
+            setAutoCancel(true)
+            setStyle(
+                NotificationCompat.MessagingStyle(person)
+                    .addMessage(alert, System.currentTimeMillis(), person)
+            )
+        }
+        return alertNotificationBuilder.build()
     }
 
     lateinit var newNodeSeenNotificationBuilder: NotificationCompat.Builder
