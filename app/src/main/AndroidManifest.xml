@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
      Copyright (c) 2024 Meshtastic LLC
 
      This program is free software: you can redistribute it and/or modify
@@ -29,14 +28,17 @@
         android:required="false" />
 
     <!-- Request legacy Bluetooth permissions on older devices -->
-    <uses-permission android:name="android.permission.BLUETOOTH"
+    <uses-permission
+        android:name="android.permission.BLUETOOTH"
         android:maxSdkVersion="30" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_ADMIN"
         android:maxSdkVersion="30" />
 
     <!-- API 31+ Bluetooth permissions -->
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN"
+    <uses-permission
+        android:name="android.permission.BLUETOOTH_SCAN"
         android:usesPermissionFlags="neverForLocation"
         tools:targetApi="s" />
 
@@ -73,6 +75,9 @@
     <!-- zxing library for QR Code scanning using camera -->
     <uses-permission android:name="android.permission.CAMERA" />
 
+    <!-- Needed for AlertApp to override Do Not Disturb -->
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
@@ -92,13 +97,13 @@
         android:allowBackup="false"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="false"
+        android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher2"
         android:label="@string/app_name"
+        android:localeConfig="@xml/locales_config"
         android:roundIcon="@mipmap/ic_launcher2_round"
         android:supportsRtl="true"
-        android:hardwareAccelerated="true"
-        android:theme="@style/AppTheme"
-        android:localeConfig="@xml/locales_config">
+        android:theme="@style/AppTheme">
 
         <!-- Default crash collection and analytics off until we (possibly) turn it on in application.onCreate -->
         <meta-data
@@ -109,20 +114,21 @@
             android:value="false" />
 
         <!-- we need bind job service for oreo -->
-<!--
-        <service
-            android:name="com.geeksville.mesh.service.SoftwareUpdateService"
-            android:enabled="true"
-            android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
--->
+        <!--
+                <service
+                    android:name="com.geeksville.mesh.service.SoftwareUpdateService"
+                    android:enabled="true"
+                    android:exported="false"
+                    android:permission="android.permission.BIND_JOB_SERVICE" />
+        -->
 
         <!-- This is the public API for doing mesh radio operations from android apps -->
         <service
             android:name="com.geeksville.mesh.service.MeshService"
             android:enabled="true"
+            android:exported="true"
             android:foregroundServiceType="connectedDevice|location"
-            android:exported="true" tools:ignore="ExportedActivity">
+            tools:ignore="ExportedActivity">
             <intent-filter>
                 <action android:name="com.geeksville.mesh.Service" />
             </intent-filter>
@@ -144,11 +150,11 @@
 
         <activity
             android:name="com.geeksville.mesh.MainActivity"
+            android:exported="true"
             android:launchMode="singleInstance"
             android:screenOrientation="unspecified"
-            android:windowSoftInputMode="stateAlwaysHidden"
             android:theme="@style/Theme.App.Starting"
-            android:exported="true">
+            android:windowSoftInputMode="stateAlwaysHidden">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -172,13 +178,13 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="https"
                     android:host="meshtastic.org"
-                    android:pathPrefix="/e/" />
+                    android:pathPrefix="/e/"
+                    android:scheme="https" />
                 <data
-                    android:scheme="https"
                     android:host="meshtastic.org"
-                    android:pathPrefix="/E/" />
+                    android:pathPrefix="/E/"
+                    android:scheme="https" />
             </intent-filter>
 
             <intent-filter>
@@ -191,7 +197,8 @@
                 android:resource="@xml/device_filter" />
         </activity>
 
-        <receiver android:name="com.geeksville.mesh.service.BootCompleteReceiver"
+        <receiver
+            android:name="com.geeksville.mesh.service.BootCompleteReceiver"
             android:exported="false">
             <!-- handle boot events -->
             <intent-filter>
@@ -216,8 +223,7 @@
             </intent-filter>
         </receiver>
 
-        <activity
-            android:name=".AppIntroduction"/>
+        <activity android:name=".AppIntroduction" />
 
         <!-- allow for plugin discovery -->
         <activity
