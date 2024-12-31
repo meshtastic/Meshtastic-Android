@@ -142,6 +142,7 @@
     <string name="message_reception_state">message reception state</string>
     <string name="message_delivery_status">Message delivery status</string>
     <string name="meshtastic_messages_notifications">Message notifications</string>
+    <string name="meshtastic_alerts_notifications">Alert notifications</string>
     <string name="protocol_stress_test">Protocol stress test</string>
     <string name="firmware_too_old">Firmware update required</string>
     <string name="firmware_old">The radio firmware is too old to talk to this application. For more information on this see <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
@@ -313,6 +314,8 @@
     <string name="unknown_age">Unknown Age</string>
     <string name="copy">Copy</string>
     <string name="alert_bell_text">Alert Bell Character!</string>
+    <string name="dnd_required">Do Not Disturb Permission Required</string>
+    <string name="why_dnd_required"><![CDATA[\"Alerts requires Mode Control permission to work\\n To grant Modes Control permission, tap on \'Open settings\' > Allow Modes access to \'Meshtastic\' app\"]]></string>
     <string name="favorite">Favorite</string>
     <string name="favorite_add">Add \'%s\' as a favorite node?</string>
     <string name="favorite_remove">Remove \'%s\' as a favorite node?</string>

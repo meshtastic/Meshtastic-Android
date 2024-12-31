@@ -50,6 +50,7 @@ class MeshServiceNotifications(
 ) {
 
     companion object {
+        private const val OVERRIDE_VOLUME = 8.8f
         private const val FIFTEEN_MINUTES_IN_MILLIS = 15L * 60 * 1000
         const val OPEN_MESSAGE_ACTION = "com.geeksville.mesh.OPEN_MESSAGE_ACTION"
         const val OPEN_MESSAGE_EXTRA_CONTACT_KEY =
@@ -62,61 +63,54 @@ class MeshServiceNotifications(
     val notifyId = 101
 
     private fun overrideSilentModeAndConfigureCustomVolume(ringToneVolume: Float?) {
-        try {
-            val audioManager = context.getSystemService(AUDIO_SERVICE) as AudioManager
-            var originalRingMode = audioManager.ringerMode
-            val originalNotificationVolume =
-                audioManager.getStreamVolume(AudioManager.STREAM_NOTIFICATION)
-            val maxNotificationVolume =
-                audioManager.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION)
+        val audioManager = context.getSystemService(AUDIO_SERVICE) as AudioManager
+        var originalRingMode = audioManager.ringerMode
+        val originalNotificationVolume =
+            audioManager.getStreamVolume(AudioManager.STREAM_NOTIFICATION)
+        val maxNotificationVolume =
+            audioManager.getStreamMaxVolume(AudioManager.STREAM_NOTIFICATION)
 
-            // When DND mode is enabled, we get ringerMode as silent even though actual ringer mode is Normal
-            val isDndModeEnabled = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                notificationManager.currentInterruptionFilter != NotificationManager.INTERRUPTION_FILTER_ALL
-            } else {
-                true
-            }
-            if (isDndModeEnabled &&
-                originalRingMode == AudioManager.RINGER_MODE_SILENT &&
-                originalNotificationVolume != 0
-            ) {
-                originalRingMode = AudioManager.RINGER_MODE_NORMAL
-            }
-
-            val newVolume = if (ringToneVolume != null) {
-                ceil(maxNotificationVolume * ringToneVolume).toInt()
-            } else {
-                originalNotificationVolume
-            }
-
-            audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
-            audioManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, newVolume, 0)
-
-            // Resetting the original ring mode, volume and dnd mode
-            Handler(Looper.getMainLooper()).postDelayed(
-                {
-                    audioManager.ringerMode = originalRingMode
-                    audioManager.setStreamVolume(
-                        AudioManager.STREAM_NOTIFICATION,
-                        originalNotificationVolume,
-                        0
-                    )
-                },
-                getSoundFileDuration(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-            )
-        } catch (ex: Exception) {
+        // When DND mode is enabled, we get ringerMode as silent even though actual ringer mode is Normal
+        val isDndModeEnabled = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            notificationManager.currentInterruptionFilter != NotificationManager.INTERRUPTION_FILTER_ALL
+        } else {
+            true
         }
+        if (isDndModeEnabled &&
+            originalRingMode == AudioManager.RINGER_MODE_SILENT &&
+            originalNotificationVolume != 0
+        ) {
+            originalRingMode = AudioManager.RINGER_MODE_NORMAL
+        }
+
+        val newVolume = if (ringToneVolume != null) {
+            ceil(maxNotificationVolume * ringToneVolume).toInt()
+        } else {
+            originalNotificationVolume
+        }
+
+        audioManager.ringerMode = AudioManager.RINGER_MODE_NORMAL
+        audioManager.setStreamVolume(AudioManager.STREAM_NOTIFICATION, newVolume, 0)
+
+        // Resetting the original ring mode, volume and dnd mode
+        Handler(Looper.getMainLooper()).postDelayed(
+            {
+                audioManager.ringerMode = originalRingMode
+                audioManager.setStreamVolume(
+                    AudioManager.STREAM_NOTIFICATION,
+                    originalNotificationVolume,
+                    0
+                )
+            },
+            getSoundFileDuration(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+        )
     }
 
     private fun getSoundFileDuration(uri: Uri): Long {
-        return try {
-            val mmr = MediaMetadataRetriever()
-            mmr.setDataSource(context, uri)
-            val durationStr = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-            durationStr?.toLong() ?: 0
-        } catch (ex: Exception) {
-            5000
-        }
+        val mmr = MediaMetadataRetriever()
+        mmr.setDataSource(context, uri)
+        val durationStr = mmr.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
+        return durationStr?.toLong() ?: 0
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
@@ -279,7 +273,7 @@ class MeshServiceNotifications(
         )
 
     fun showAlertNotification(contactKey: String, name: String, alert: String) {
-        overrideSilentModeAndConfigureCustomVolume(0.8f)
+        overrideSilentModeAndConfigureCustomVolume(OVERRIDE_VOLUME)
         notificationManager.notify(
             contactKey.hashCode(), // show unique notifications,
             createAlertNotification(contactKey, name, alert)

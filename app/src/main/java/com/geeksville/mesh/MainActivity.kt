@@ -25,10 +25,12 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.hardware.usb.UsbManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.RemoteException
+import android.provider.Settings
 import android.text.method.LinkMovementMethod
 import android.view.Menu
 import android.view.MenuItem
@@ -56,6 +58,7 @@ import com.geeksville.mesh.android.ServiceClient
 import com.geeksville.mesh.android.getBluetoothPermissions
 import com.geeksville.mesh.android.getNotificationPermissions
 import com.geeksville.mesh.android.hasBluetoothPermission
+import com.geeksville.mesh.android.isNotificationPolicyAccessGranted
 import com.geeksville.mesh.android.hasNotificationPermission
 import com.geeksville.mesh.android.permissionMissing
 import com.geeksville.mesh.android.rationaleDialog
@@ -435,6 +438,15 @@ class MainActivity : AppCompatActivity(), Logging {
                     getString(R.string.why_notification_required),
                 ) {
                     notificationPermissionsLauncher.launch(notificationPermissions)
+                }
+            }
+            if (!isNotificationPolicyAccessGranted() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                rationaleDialog(
+                    title = R.string.dnd_required,
+                    rationale = getString(R.string.why_dnd_required),
+                ) {
+                    val intent = Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
+                    startActivity(intent)
                 }
             }
         }
