@@ -134,7 +134,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             else -> null
         }?.let {
             val firmwareString = info?.firmwareString ?: getString(R.string.unknown)
-            // TODO: Implement in new compose UI
 //            scanModel.setErrorText(getString(it, firmwareString))
         }
     }
@@ -242,23 +241,24 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 ) { dialog, position ->
                     val selectedDevice = devices.elementAt(position)
                     scanModel.onSelected(selectedDevice)
-                    scanModel.clearScanResults()
+//                    scanModel.clearScanResults()
                     dialog.dismiss()
                     scanDialog = null
                 }
                 .setPositiveButton(R.string.cancel) { dialog, _ ->
-                    scanModel.clearScanResults()
+//                    scanModel.clearScanResults()
                     dialog.dismiss()
                     scanDialog = null
                 }
                 .show()
         }
 
+        // TODO: Implement progress indicator in new compose ui
         // show the spinner when [spinner] is true
-        scanModel.spinner.observe(viewLifecycleOwner) { show ->
-            binding.changeRadioButton.isEnabled = !show
-            binding.scanProgressBar.visibility = if (show) View.VISIBLE else View.GONE
-        }
+//        scanModel.spinner.observe(viewLifecycleOwner) { show ->
+//            binding.changeRadioButton.isEnabled = !show
+//            binding.scanProgressBar.visibility = if (show) View.VISIBLE else View.GONE
+//        }
 
         binding.usernameEditText.onEditorAction(EditorInfo.IME_ACTION_DONE) {
             debug("received IME_ACTION_DONE")
@@ -436,13 +436,13 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         if (!scanning) { // Stops scanning after a pre-defined scan period.
             Handler(Looper.getMainLooper()).postDelayed({
                 scanning = false
-                scanModel.stopScan()
+//                scanModel.stopScan()
             }, SCAN_PERIOD)
             scanning = true
-            scanModel.startScan()
+//            scanModel.startScan()
         } else {
             scanning = false
-            scanModel.stopScan()
+//            scanModel.stopScan()
         }
     }
 

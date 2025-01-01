@@ -17,8 +17,32 @@ import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.service.MeshService
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+sealed class Effect {
+    object CheckForBluetoothPermission : Effect()
+}
+
+data class UIState(
+    val userName: String,
+    val regionDropDownExpanded: Boolean,
+    val selectedRegion: RegionInfo,
+    val localConfig: LocalConfig,
+    val showNodeSettings: Boolean,
+    val showProvideLocation: Boolean,
+    val enableUsernameEdit: Boolean,
+    val enableProvideLocation: Boolean,
+    val errorText: String?,
+    val isConnected: Boolean,
+    val nodeFirmwareVersion: String?,
+    val ipAddress: String,
+)
 
 @HiltViewModel
 class SettingsScreenViewModel @Inject constructor(
@@ -28,65 +52,77 @@ class SettingsScreenViewModel @Inject constructor(
     private val nodeRepository: NodeRepository,
 ) : ViewModel() {
 
-    var userName by mutableStateOf("")
-        private set
+    private val _effectFlow = MutableSharedFlow<Effect>(replay = 0)
+    val effectFlow: SharedFlow<Effect> = _effectFlow.asSharedFlow()
+
+    private val _uiState = MutableStateFlow(
+        UIState(
+            userName = "",
+            regionDropDownExpanded = false,
+            selectedRegion = RegionInfo.UNSET,
+            localConfig = LocalConfig.getDefaultInstance(),
+            showNodeSettings = false,
+            showProvideLocation = false,
+            enableUsernameEdit = false,
+            enableProvideLocation = false,
+            errorText = null,
+            isConnected = false,
+            nodeFirmwareVersion = null,
+            ipAddress = "",
+
+            )
+    )
+    val uiState: StateFlow<UIState> = _uiState
 
     fun onUserNameChange(newName: String) {
-        userName = newName
+        _uiState.value = _uiState.value.copy(userName = newName)
     }
 
-    var regionDropDownExpanded by mutableStateOf(false)
-        private set
 
     fun onToggleRegionDropDown() {
-        regionDropDownExpanded = !regionDropDownExpanded
+        viewModelScope.launch {
+            _uiState.emit(
+                _uiState.value.copy(regionDropDownExpanded = !_uiState.value.regionDropDownExpanded)
+            )
+        }
     }
 
-    var selectedRegion by mutableStateOf(RegionInfo.UNSET)
-        private set
 
     fun onRegionSelected(newRegion: RegionInfo) {
-        selectedRegion = newRegion
+        viewModelScope.launch {
+            _uiState.emit(_uiState.value.copy(selectedRegion = newRegion))
+        }
         onToggleRegionDropDown()
         updateLoraConfig { it.toBuilder().setRegion(newRegion.regionCode).build() }
     }
 
-
-    var localConfig by mutableStateOf<LocalConfig>(LocalConfig.getDefaultInstance())
-        private set
-    var showNodeSettings by mutableStateOf(false)
-        private set
-    var showProvideLocation by mutableStateOf(false)
-        private set
-    var enableUsernameEdit by mutableStateOf(false)
-        private set
-    var enableProvideLocation by mutableStateOf(false)
-        private set
-
-    // managed mode disables all access to configuration
-    val isManaged: Boolean get() = localConfig.device.isManaged || localConfig.security.isManaged
-
-    var errorText by mutableStateOf(null as String?)
-        private set
-
-    var isConnected = false
-        private set
 
     var nodeFirmwareVersion by mutableStateOf<String?>(null)
 
     init {
         viewModelScope.launch {
             radioConfigRepository.connectionState.collect { connectionState ->
-                isConnected = connectionState.isConnected()
-                showNodeSettings = isConnected
-                showProvideLocation = isConnected
-                enableUsernameEdit = isConnected && !isManaged
+                // managed mode disables all access to configuration
+                val isManaged =
+                    _uiState.value.localConfig.let { it.device.isManaged || it.security.isManaged }
+                _uiState.emit(
+                    _uiState.value.copy(
+                        isConnected = connectionState.isConnected(),
+                        showNodeSettings = connectionState.isConnected(),
+                        showProvideLocation = connectionState.isConnected(),
+                        enableUsernameEdit = connectionState.isConnected() && !isManaged
+                    )
+                )
             }
         }
 
         viewModelScope.launch {
             nodeRepository.ourNodeInfo.collect { node ->
-                userName = node?.user?.longName ?: userName
+                _uiState.emit(
+                    _uiState.value.copy(
+                        userName = node?.user?.longName ?: _uiState.value.userName
+                    )
+                )
             }
         }
 
@@ -98,10 +134,13 @@ class SettingsScreenViewModel @Inject constructor(
 
         viewModelScope.launch {
             radioConfigRepository.localConfigFlow.collect {
-                localConfig = it
-                selectedRegion = localConfig.lora.region.let { region ->
-                    RegionInfo.entries.firstOrNull { it.regionCode == region } ?: RegionInfo.UNSET
-                }
+                _uiState.emit(_uiState.value.copy(
+                    localConfig = it,
+                    selectedRegion = uiState.value.localConfig.lora.region.let { region ->
+                        RegionInfo.entries.firstOrNull { it.regionCode == region }
+                            ?: RegionInfo.UNSET
+                    }
+                ))
             }
         }
     }
@@ -109,14 +148,15 @@ class SettingsScreenViewModel @Inject constructor(
     /**
      * Pull the latest device info from the model and into the GUI
      */
-    fun updateNodeInfo() {
-        enableProvideLocation = locationRepository.hasGps()
-
+    suspend fun updateNodeInfo() {
         // update the region selection from the device
-        val region = localConfig.lora.region
+        val region = uiState.value.localConfig.lora.region
 
-        selectedRegion =
+        _uiState.emit(_uiState.value.copy(
+            enableProvideLocation = locationRepository.hasGps(),
+            selectedRegion =
             RegionInfo.entries.firstOrNull { it.regionCode == region } ?: RegionInfo.UNSET
+        ))
 
         // Update the status string (highest priority messages first)
         val regionUnset = region == Config.LoRaConfig.RegionCode.UNSET
@@ -129,7 +169,9 @@ class SettingsScreenViewModel @Inject constructor(
             MeshService.ConnectionState.DEVICE_SLEEP -> R.string.connected_sleeping
             else -> null
         }?.let {
-            errorText = info?.firmwareString ?: application.resources.getString(R.string.unknown)
+            val errorText =
+                info?.firmwareString ?: application.resources.getString(R.string.unknown)
+            _uiState.emit(_uiState.value.copy(errorText = errorText))
         }
 
     }
@@ -143,7 +185,7 @@ class SettingsScreenViewModel @Inject constructor(
 
 
     private inline fun updateLoraConfig(crossinline body: (Config.LoRaConfig) -> Config.LoRaConfig) {
-        val data = body(localConfig.lora)
+        val data = body(uiState.value.localConfig.lora)
         setConfig(config { lora = data })
     }
 
@@ -153,6 +195,12 @@ class SettingsScreenViewModel @Inject constructor(
             radioConfigRepository.meshService?.setConfig(config.toByteArray())
         } catch (ex: RemoteException) {
             // TODO: Show error message to ui
+        }
+    }
+
+    fun onAddRadioButtonClicked() {
+        viewModelScope.launch {
+            _effectFlow.emit(Effect.CheckForBluetoothPermission)
         }
     }
 

@@ -11,9 +11,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Checkbox
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.DropdownMenu
 import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.ExtendedFloatingActionButton
+import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
@@ -26,48 +27,86 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.getBluetoothPermissions
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.RegionInfo
 import com.geeksville.mesh.ui.theme.AppTheme
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun SettingsScreen(
     modifier: Modifier = Modifier,
     viewModel: SettingsScreenViewModel = hiltViewModel(),
     btScanModel: BTScanModel = hiltViewModel(),
 ) {
-    LaunchedEffect(btScanModel.devices, viewModel.isConnected) {
+    val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+    val btScanUiState by btScanModel.uiState.collectAsStateWithLifecycle()
+
+    val context = LocalContext.current
+    LaunchedEffect(btScanUiState.devices, uiState.isConnected) {
         viewModel.updateNodeInfo()
     }
+    val multiplePermissionsState =
+        rememberMultiplePermissionsState(context.getBluetoothPermissions().toList())
+    LaunchedEffect(Unit) {
+        viewModel.effectFlow.collect { effect ->
+            when (effect) {
+                is Effect.CheckForBluetoothPermission -> {
+                    if (multiplePermissionsState.allPermissionsGranted) {
+                        btScanModel.scanForDevices()
+                    } else {
+                        // Show a dialog explaining why we need the permissions
+                        multiplePermissionsState.launchMultiplePermissionRequest()
+                        btScanModel.scanForDevices()
+                    }
+                }
+            }
+        }
+
+        btScanModel.effect.collect { scanEffect ->
+            when (scanEffect) {
+                com.geeksville.mesh.model.Effect.RequestForCheckLocationPermission -> TODO()
+                com.geeksville.mesh.model.Effect.RequestBluetoothPermission -> TODO()
+                com.geeksville.mesh.model.Effect.ShowBluetoothIsDisabled -> TODO()
+                else -> {}
+            }
+        }
+    }
+
     Surface {
         Column(modifier = modifier.padding(16.dp)) {
-            if (viewModel.showNodeSettings) {
+            if (uiState.showNodeSettings) {
                 NameAndRegionRow(
-                    textValue = viewModel.userName,
+                    textValue = uiState.userName,
                     onValueChange = viewModel::onUserNameChange,
-                    dropDownExpanded = viewModel.regionDropDownExpanded,
+                    dropDownExpanded = uiState.regionDropDownExpanded,
                     onToggleDropDown = viewModel::onToggleRegionDropDown,
-                    selectedRegion = viewModel.selectedRegion,
+                    selectedRegion = uiState.selectedRegion,
                     onRegionSelected = viewModel::onRegionSelected,
                 )
             }
             RadioConnectionStatusMessage(
-                errorMessage = btScanModel.errorText,
+                errorMessage = btScanUiState.errorText,
                 selectedAddress = btScanModel.selectedAddress,
                 connectedRadioFirmwareVersion = viewModel.nodeFirmwareVersion
             )
             RadioSelectorRadioButtons(
-                devices = btScanModel.devices.values.toList(),
+                devices = btScanUiState.devices.values.toList(),
                 onDeviceSelected = { btScanModel.onSelected(it) },
                 selectedAddress = btScanModel.selectedNotNull,
 
@@ -76,8 +115,8 @@ fun SettingsScreen(
                 ipAddress = viewModel.ipAddress,
                 onIpAddressChange = viewModel::onIpAddressChange
             )
-            if (viewModel.showProvideLocation) {
-                ProvideLocationCheckBox(enabled = viewModel.enableProvideLocation)
+            if (uiState.showProvideLocation) {
+                ProvideLocationCheckBox(enabled = uiState.enableProvideLocation)
             }
 
             if (btScanModel.selectedAddress == null || btScanModel.selectedAddress == "m") {
@@ -92,26 +131,14 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            ExtendedFloatingActionButton(
-                onClick = { /*TODO*/ },
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = stringResource(R.string.add_radio),
-                        tint = Color.White
-                    )
-                },
-                text = {
-                    Text(
-                        stringResource(R.string.add_radio),
-                        color = Color.White
-                    )
-                },
-                modifier = Modifier.fillMaxWidth()
+            AddRadioFloatingActionButton(
+                onClick = viewModel::onAddRadioButtonClicked,
+                showScanningProgress = btScanUiState.scanning
             )
         }
     }
 }
+
 
 @Composable
 private fun NameAndRegionRow(
@@ -273,13 +300,16 @@ private fun RadioConnectionStatusMessage(
             val message = stringResource(R.string.not_paired_yet)
             Text(message, modifier = modifier)
         }
+
         connectedRadioFirmwareVersion != null -> {
             val message = stringResource(R.string.connected_to, connectedRadioFirmwareVersion)
             Text(message, modifier = modifier)
         }
+
         errorMessage != null -> {
             Text(errorMessage, modifier = modifier)
         }
+
         else -> {
             val message = stringResource(R.string.not_connected)
             Text(message, modifier = modifier)
@@ -287,6 +317,29 @@ private fun RadioConnectionStatusMessage(
     }
 }
 
+@Composable
+fun AddRadioFloatingActionButton(
+    modifier: Modifier = Modifier,
+    showScanningProgress: Boolean = false,
+    onClick: () -> Unit = {},
+) {
+    Box(modifier = modifier.fillMaxWidth(), contentAlignment = Alignment.CenterEnd) {
+        if (showScanningProgress) {
+            CircularProgressIndicator(modifier = Modifier)
+        } else {
+            FloatingActionButton(
+                onClick = onClick,
+                modifier = Modifier
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = stringResource(R.string.add_radio),
+                    tint = Color.White
+                )
+            }
+        }
+    }
+}
 
 @Preview
 @Composable
