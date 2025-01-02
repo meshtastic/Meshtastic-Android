@@ -188,7 +188,7 @@
     "displayName": "LILYGO T-LoRa V2.1-1.8",
     "tags": [
       "LilyGo",
-      "2.4G LoRA"
+      "2.4GHz"
     ],
     "images": [
       "tlora-v2-1-1_8.svg"
@@ -584,7 +584,7 @@
     "hwModelSlug": "HELTEC_WIRELESS_TRACKER",
     "platformioTarget": "tracksenger",
     "architecture": "esp32-s3",
-    "activelySupported": true,
+    "activelySupported": false,
     "supportLevel": 3,
     "displayName": "TrackSenger (small TFT)",
     "requiresDfu": true
@@ -594,7 +594,7 @@
     "hwModelSlug": "HELTEC_WIRELESS_TRACKER",
     "platformioTarget": "tracksenger-lcd",
     "architecture": "esp32-s3",
-    "activelySupported": true,
+    "activelySupported": false,
     "supportLevel": 3,
     "displayName": "TrackSenger (big TFT)",
     "requiresDfu": true
@@ -604,7 +604,7 @@
     "hwModelSlug": "HELTEC_WIRELESS_TRACKER",
     "platformioTarget": "tracksenger-oled",
     "architecture": "esp32-s3",
-    "activelySupported": true,
+    "activelySupported": false,
     "supportLevel": 3,
     "displayName": "TrackSenger (big OLED)"
   },
@@ -750,7 +750,7 @@
     "hwModelSlug": "WISMESH_TAP",
     "platformioTarget": "rak_wismeshtap",
     "architecture": "nrf52840",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "RAK WisMesh Tap",
     "tags": [
@@ -758,6 +758,22 @@
     ],
     "images": [
       "rak-wismeshtap.svg"
+    ],
+    "requiresDfu": true
+  },
+  {
+    "hwModel": 63,
+    "hwModelSlug": "NRF52_PROMICRO_DIY",
+    "platformioTarget": "nrf52_promicro_diy_tcxo",
+    "architecture": "nrf52840",
+    "activelySupported": true,
+    "supportLevel": 3,
+    "displayName": "NRF52 Pro-micro DIY",
+    "tags": [
+      "DIY"
+    ],
+    "images": [
+      "promicro.svg"
     ],
     "requiresDfu": true
   }
