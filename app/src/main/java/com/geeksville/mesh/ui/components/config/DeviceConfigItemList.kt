@@ -59,6 +59,7 @@ private val DeviceConfig.Role.stringRes: Int
         DeviceConfig.Role.CLIENT_HIDDEN -> R.string.role_client_hidden
         DeviceConfig.Role.LOST_AND_FOUND -> R.string.role_lost_and_found
         DeviceConfig.Role.TAK_TRACKER -> R.string.role_tak_tracker
+        DeviceConfig.Role.ROUTER_LATE -> R.string.role_router_late
         else -> R.string.unrecognized
     }
 
