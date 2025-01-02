@@ -115,7 +115,7 @@
     <string name="meshtastic_messages_notifications">Sõnumiteated</string>
     <string name="protocol_stress_test">Protokolli stressitest</string>
     <string name="firmware_too_old">Püsivara värskendus on vajalik</string>
-    <string name="firmware_old">Raadio püsivara on selle rakenduse kasutamiseks liiga vana. Mine seadete lehele ja vali \"Uuenda püsivara\". Lisateabe saamiseks vaata meie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">püsivara paigaldusjuhendit</a>.</string>
+    <string name="firmware_old">Raadio püsivara on selle rakenduse kasutamiseks liiga vana. Lisateabe saamiseks vaata meie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">püsivara paigaldusjuhendit</a>.</string>
     <string name="okay">Olgu</string>
     <string name="must_set_region">Pead valima regiooni!</string>
     <string name="region">Regioon</string>

@@ -115,7 +115,7 @@
     <string name="meshtastic_messages_notifications">Powiadomienia wiadomości</string>
     <string name="protocol_stress_test">Protokół testu warunków skrajnych</string>
     <string name="firmware_too_old">Wymagana aktualizacja firmware\'u</string>
-    <string name="firmware_old">Oprogramowanie układowe radia jest zbyt stare, aby komunikować się z tą aplikacją, przejdź do panelu ustawień i wybierz „Aktualizuj oprogramowanie układowe”. Aby uzyskać więcej informacji na ten temat, zobacz <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">nasz przewodnik instalacji oprogramowania układowego</a> na Github.</string>
+    <string name="firmware_old">Oprogramowanie układowe radia jest zbyt stare, aby komunikować się z tą aplikacją. Aby uzyskać więcej informacji na ten temat, zobacz <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">nasz przewodnik instalacji oprogramowania układowego</a>.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">Musisz ustawić region!</string>
     <string name="region">Region</string>
@@ -262,7 +262,7 @@
     <string name="sig_metrics_log">Historia danych sygnału</string>
     <string name="administration">Zarządzanie</string>
     <string name="remote_admin">Zdalne zarządzanie</string>
-    <string name="bad">zły</string>
+    <string name="bad">słaby</string>
     <string name="fair">wystarczający</string>
     <string name="good">dobry</string>
     <string name="none_quality">brak</string>
