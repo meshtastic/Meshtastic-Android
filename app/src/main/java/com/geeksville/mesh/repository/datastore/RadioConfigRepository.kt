@@ -203,7 +203,7 @@ class RadioConfigRepository @Inject constructor(
         serviceRepository.emitMeshPacket(packet)
     }
 
-    val serviceAction: SharedFlow<ServiceAction> get() = serviceRepository.serviceAction
+    val serviceAction: Flow<ServiceAction> get() = serviceRepository.serviceAction
 
     suspend fun onServiceAction(action: ServiceAction) = coroutineScope {
         serviceRepository.onServiceAction(action)

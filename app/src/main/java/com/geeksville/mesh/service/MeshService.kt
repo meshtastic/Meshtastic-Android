@@ -105,6 +105,7 @@ import javax.inject.Inject
 import kotlin.math.absoluteValue
 
 sealed class ServiceAction {
+    data class GetDeviceMetadata(val destNum: Int) : ServiceAction()
     data class Ignore(val node: Node) : ServiceAction()
     data class Reaction(val emoji: String, val replyId: Int, val contactKey: String) : ServiceAction()
 }
@@ -330,12 +331,8 @@ class MeshService : Service(), Logging {
             .launchIn(serviceScope)
         radioConfigRepository.channelSetFlow.onEach { channelSet = it }
             .launchIn(serviceScope)
-        radioConfigRepository.serviceAction.onEach { action ->
-            when (action) {
-                is ServiceAction.Ignore -> ignoreNode(action.node)
-                is ServiceAction.Reaction -> sendReaction(action)
-            }
-        }.launchIn(serviceScope)
+        radioConfigRepository.serviceAction.onEach(::onServiceAction)
+            .launchIn(serviceScope)
 
         loadSettings() // Load our last known node DB
 
@@ -1789,6 +1786,20 @@ class MeshService : Service(), Logging {
         if (p.dataType in rememberDataType) {
             offlineSentPackets.add(p)
         }
+    }
+
+    private fun onServiceAction(action: ServiceAction) {
+        when (action) {
+            is ServiceAction.GetDeviceMetadata -> getDeviceMetadata(action.destNum)
+            is ServiceAction.Ignore -> ignoreNode(action.node)
+            is ServiceAction.Reaction -> sendReaction(action)
+        }
+    }
+
+    private fun getDeviceMetadata(destNum: Int) = toRemoteExceptions {
+        sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(wantResponse = true) {
+            getDeviceMetadataRequest = true
+        })
     }
 
     private fun ignoreNode(node: Node) = toRemoteExceptions {
