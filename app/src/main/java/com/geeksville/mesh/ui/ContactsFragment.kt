@@ -46,7 +46,6 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.message.navigateToMessages
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
@@ -71,7 +70,7 @@ class ContactsFragment : ScreenFragment("Messages"), Logging {
             onLongClick(contact)
         } else {
             debug("calling MessagesFragment filter:${contact.contactKey}")
-            parentFragmentManager.navigateToMessages(contact.contactKey)
+            // parentFragmentManager.navigateToMessages(contact.contactKey)
         }
     }
 

@@ -23,35 +23,21 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.core.os.bundleOf
-import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.R
 import com.geeksville.mesh.databinding.ShareFragmentBinding
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.message.navigateToMessages
 import com.geeksville.mesh.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
-
-internal fun FragmentManager.navigateToShareMessage(message: String) {
-    val shareFragment = ShareFragment().apply {
-        arguments = bundleOf("message" to message)
-    }
-    beginTransaction()
-        .add(R.id.mainActivityLayout, shareFragment)
-        .addToBackStack(null)
-        .commit()
-}
 
 @AndroidEntryPoint
 class ShareFragment : ScreenFragment("Messages"), Logging {
@@ -67,10 +53,10 @@ class ShareFragment : ScreenFragment("Messages"), Logging {
 
     private fun shareMessage(contact: Contact) {
         debug("calling MessagesFragment filter:${contact.contactKey}")
-        parentFragmentManager.navigateToMessages(
-            contact.contactKey,
-            arguments?.getString("message").toString()
-        )
+//        parentFragmentManager.navigateToMessages(
+//            contact.contactKey,
+//            arguments?.getString("message").toString()
+//        )
     }
 
     private fun onClick(contact: Contact) {

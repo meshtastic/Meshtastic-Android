@@ -18,11 +18,7 @@
 package com.geeksville.mesh.ui
 
 import android.net.Uri
-import android.os.Bundle
 import android.os.RemoteException
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
@@ -63,12 +59,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -76,7 +70,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.activityViewModels
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
@@ -87,7 +80,6 @@ import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.errormsg
 import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.getCameraPermissions
 import com.geeksville.mesh.android.hasCameraPermission
 import com.geeksville.mesh.channelSet
@@ -109,32 +101,9 @@ import com.geeksville.mesh.ui.components.config.EditChannelDialog
 import com.geeksville.mesh.ui.components.dragContainer
 import com.geeksville.mesh.ui.components.dragDropItemsIndexed
 import com.geeksville.mesh.ui.components.rememberDragDropState
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
-import dagger.hilt.android.AndroidEntryPoint
-
-@AndroidEntryPoint
-class ChannelFragment : ScreenFragment("Channel"), Logging {
-
-    private val model: UIViewModel by activityViewModels()
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                AppCompatTheme {
-                    ChannelScreen(model)
-                }
-            }
-        }
-    }
-}
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -291,8 +260,11 @@ fun ChannelScreen(
             modemPresetName = modemPresetName,
             onAddClick = {
                 with(channelSet) {
-                    if (settingsCount > index) channelSet = copy { settings[index] = it }
-                    else channelSet = copy { settings.add(it) }
+                    if (settingsCount > index) {
+                        channelSet = copy { settings[index] = it }
+                    } else {
+                        channelSet = copy { settings.add(it) }
+                    }
                 }
                 showEditChannelDialog = null
             },

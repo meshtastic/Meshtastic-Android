@@ -22,7 +22,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.RemoteException
-import android.view.Menu
+import androidx.compose.material.SnackbarHostState
 import androidx.core.content.edit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -171,8 +171,6 @@ class UIViewModel @Inject constructor(
     private val quickChatActionRepository: QuickChatActionRepository,
     private val preferences: SharedPreferences
 ) : ViewModel(), Logging {
-
-    var actionBarMenu: Menu? = null
     val meshService: IMeshService? get() = radioConfigRepository.meshService
 
     val bondedAddress get() = radioInterfaceService.getBondedDeviceAddress()
@@ -255,12 +253,15 @@ class UIViewModel @Inject constructor(
     fun getNode(userId: String?) = nodeDB.getNode(userId ?: DataPacket.ID_BROADCAST)
     fun getUser(userId: String?) = nodeDB.getUser(userId ?: DataPacket.ID_BROADCAST)
 
-    private val _snackbarText = MutableLiveData<Any?>(null)
-    val snackbarText: LiveData<Any?> get() = _snackbarText
+    val snackbarState = SnackbarHostState()
+    fun showSnackbar(text: Int) = showSnackbar(app.getString(text))
+    fun showSnackbar(text: String) = viewModelScope.launch {
+        snackbarState.showSnackbar(text)
+    }
 
     init {
         radioConfigRepository.errorMessage.filterNotNull().onEach {
-            _snackbarText.value = it
+            showSnackbar(it)
             radioConfigRepository.clearErrorMessage()
         }.launchIn(viewModelScope)
 
@@ -458,17 +459,6 @@ class UIViewModel @Inject constructor(
      */
     fun clearRequestChannelUrl() {
         _requestChannelSet.value = null
-    }
-
-    fun showSnackbar(resString: Any) {
-        _snackbarText.value = resString
-    }
-
-    /**
-     * Called immediately after activity observes [snackbarText]
-     */
-    fun clearSnackbarText() {
-        _snackbarText.value = null
     }
 
     var txEnabled: Boolean
@@ -692,13 +682,6 @@ class UIViewModel @Inject constructor(
 
     fun clearTracerouteResponse() {
         radioConfigRepository.clearTracerouteResponse()
-    }
-
-    private val _currentTab = MutableLiveData(0)
-    val currentTab: LiveData<Int> get() = _currentTab
-
-    fun setCurrentTab(tab: Int) {
-        _currentTab.value = tab
     }
 
     fun setNodeFilterText(text: String) {

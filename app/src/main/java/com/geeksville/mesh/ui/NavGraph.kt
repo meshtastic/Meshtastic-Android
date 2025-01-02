@@ -17,19 +17,9 @@
 
 package com.geeksville.mesh.ui
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Forward
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Message
@@ -54,35 +44,27 @@ import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Usb
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.stringResource
-import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.viewModels
+import androidx.fragment.compose.AndroidFragment
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.geeksville.mesh.MeshProtos.DeviceMetadata
 import com.geeksville.mesh.R
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.RadioConfigViewModel
+import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.components.DeviceMetricsScreen
 import com.geeksville.mesh.ui.components.EnvironmentMetricsScreen
 import com.geeksville.mesh.ui.components.NodeMapScreen
 import com.geeksville.mesh.ui.components.PositionLogScreen
 import com.geeksville.mesh.ui.components.SignalMetricsScreen
 import com.geeksville.mesh.ui.components.TracerouteLogScreen
-import com.geeksville.mesh.util.UiText
 import com.geeksville.mesh.ui.components.config.AmbientLightingConfigScreen
 import com.geeksville.mesh.ui.components.config.AudioConfigScreen
 import com.geeksville.mesh.ui.components.config.BluetoothConfigScreen
@@ -106,75 +88,10 @@ import com.geeksville.mesh.ui.components.config.SerialConfigScreen
 import com.geeksville.mesh.ui.components.config.StoreForwardConfigScreen
 import com.geeksville.mesh.ui.components.config.TelemetryConfigScreen
 import com.geeksville.mesh.ui.components.config.UserConfigScreen
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
-import dagger.hilt.android.AndroidEntryPoint
+import com.geeksville.mesh.ui.map.MapView
+import com.geeksville.mesh.ui.message.MessageScreen
+import com.geeksville.mesh.util.UiText
 import kotlinx.serialization.Serializable
-
-internal fun FragmentManager.navigateToNavGraph(
-    destNum: Int? = null,
-    startDestination: String = "RadioConfig",
-) {
-    val radioConfigFragment = NavGraphFragment().apply {
-        arguments = bundleOf("destNum" to destNum, "startDestination" to startDestination)
-    }
-    beginTransaction()
-        .replace(R.id.mainActivityLayout, radioConfigFragment)
-        .addToBackStack(null)
-        .commit()
-}
-
-@AndroidEntryPoint
-class NavGraphFragment : ScreenFragment("NavGraph"), Logging {
-
-    private val model: RadioConfigViewModel by viewModels()
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        @Suppress("DEPRECATION")
-        val destNum = arguments?.getSerializable("destNum") as? Int
-        val startDestination: Any = when (arguments?.getString("startDestination")) {
-            "NodeDetails" -> Route.NodeDetail(destNum!!)
-            else -> Route.RadioConfig(destNum)
-        }
-
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setBackgroundColor(ContextCompat.getColor(context, R.color.colorAdvancedBackground))
-            setContent {
-                val node by model.destNode.collectAsStateWithLifecycle()
-
-                AppCompatTheme {
-                    val navController: NavHostController = rememberNavController()
-                    Scaffold(
-                        topBar = {
-                            MeshAppBar(
-                                currentScreen = node?.user?.longName
-                                    ?: stringResource(R.string.unknown_username),
-                                canNavigateBack = true,
-                                navigateUp = {
-                                    if (navController.previousBackStackEntry != null) {
-                                        navController.navigateUp()
-                                    } else {
-                                        parentFragmentManager.popBackStack()
-                                    }
-                                },
-                            )
-                        }
-                    ) { innerPadding ->
-                        NavGraph(
-                            navController = navController,
-                            startDestination = startDestination,
-                            modifier = Modifier.padding(innerPadding),
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
 
 enum class AdminRoute(@StringRes val title: Int) {
     REBOOT(R.string.reboot),
@@ -184,13 +101,21 @@ enum class AdminRoute(@StringRes val title: Int) {
 }
 
 sealed interface Route {
+    @Serializable data object Contacts : Route
+    @Serializable data object Nodes : Route
+    @Serializable data object Map : Route
+    @Serializable data object Channels : Route
+    @Serializable data object Settings : Route
+
+    @Serializable data object DebugPanel : Route
     @Serializable
     data class Messages(val contactKey: String, val message: String = "") : Route
+    @Serializable data object QuickChat : Route
 
     @Serializable
     data class RadioConfig(val destNum: Int? = null) : Route
     @Serializable data object User : Route
-    @Serializable data object Channels : Route
+    @Serializable data object ChannelConfig : Route
     @Serializable data object Device : Route
     @Serializable data object Position : Route
     @Serializable data object Power : Route
@@ -227,7 +152,7 @@ sealed interface Route {
 // Config (type = AdminProtos.AdminMessage.ConfigType)
 enum class ConfigRoute(val title: String, val route: Route, val icon: ImageVector?, val type: Int = 0) {
     USER("User", Route.User, Icons.Default.Person, 0),
-    CHANNELS("Channels", Route.Channels, Icons.AutoMirrored.Default.List, 0),
+    CHANNELS("Channels", Route.ChannelConfig, Icons.AutoMirrored.Default.List, 0),
     DEVICE("Device", Route.Device, Icons.Default.Router, 0),
     POSITION("Position", Route.Position, Icons.Default.LocationOn, 1),
     POWER("Power", Route.Power, Icons.Default.Power, 2),
@@ -291,41 +216,54 @@ sealed class ResponseState<out T> {
     fun isWaiting() = this !is Empty
 }
 
-@Composable
-private fun MeshAppBar(
-    currentScreen: String,
-    canNavigateBack: Boolean,
-    navigateUp: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    TopAppBar(
-        title = { Text(currentScreen) },
-        modifier = modifier,
-        navigationIcon = {
-            if (canNavigateBack) {
-                IconButton(onClick = navigateUp) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(id = R.string.navigate_back),
-                    )
-                }
-            }
-        }
-    )
-}
-
 @Suppress("LongMethod")
 @Composable
 fun NavGraph(
+    model: UIViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController(),
-    startDestination: Any,
     modifier: Modifier = Modifier,
 ) {
     NavHost(
         navController = navController,
-        startDestination = startDestination,
+        startDestination = Route.Contacts,
         modifier = modifier,
     ) {
+        composable<Route.Contacts> {
+            AndroidFragment<ContactsFragment>()
+        }
+        composable<Route.Nodes> {
+            NodeScreen(
+                model = model,
+                navigateToMessages = { navController.navigate(Route.Messages(it)) },
+                navigateToNodeDetails = { navController.navigate(Route.NodeDetail(it)) },
+            )
+        }
+        composable<Route.Map> {
+            MapView(model)
+        }
+        composable<Route.Channels> {
+            ChannelScreen(model)
+        }
+        composable<Route.Settings> {
+            AndroidFragment<SettingsFragment>(Modifier.fillMaxSize())
+        }
+        composable<Route.DebugPanel> {
+            DebugScreen()
+        }
+        composable<Route.Messages> { backStackEntry ->
+            val args = backStackEntry.toRoute<Route.Messages>()
+            MessageScreen(
+                contactKey = args.contactKey,
+                message = args.message,
+                viewModel = model,
+                navigateToMessages = { navController.navigate(Route.Messages(it)) },
+                navigateToNodeDetails = { navController.navigate(Route.NodeDetail(it)) },
+                onNavigateBack = navController::navigateUp
+            )
+        }
+        composable<Route.QuickChat> {
+            QuickChatScreen()
+        }
         composable<Route.NodeDetail> {
             NodeDetailScreen { navController.navigate(route = it) }
         }
@@ -360,7 +298,7 @@ fun NavGraph(
             val parentEntry = remember { navController.getBackStackEntry<Route.RadioConfig>() }
             UserConfigScreen(hiltViewModel<RadioConfigViewModel>(parentEntry))
         }
-        composable<Route.Channels> {
+        composable<Route.ChannelConfig> {
             val parentEntry = remember { navController.getBackStackEntry<Route.RadioConfig>() }
             ChannelConfigScreen(hiltViewModel<RadioConfigViewModel>(parentEntry))
         }

@@ -26,29 +26,17 @@ import android.content.pm.PackageManager
 import android.hardware.usb.UsbManager
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.os.RemoteException
 import android.text.method.LinkMovementMethod
-import android.view.Menu
-import android.view.MenuItem
 import android.view.MotionEvent
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.appcompat.widget.Toolbar
-import androidx.compose.runtime.getValue
-import androidx.core.content.ContextCompat
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.geeksville.mesh.android.BindFailedException
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
@@ -61,7 +49,6 @@ import com.geeksville.mesh.android.permissionMissing
 import com.geeksville.mesh.android.rationaleDialog
 import com.geeksville.mesh.android.shouldShowRequestPermissionRationale
 import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
@@ -69,87 +56,22 @@ import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.service.startService
-import com.geeksville.mesh.ui.ChannelFragment
-import com.geeksville.mesh.ui.ContactsFragment
-import com.geeksville.mesh.ui.DebugFragment
-import com.geeksville.mesh.ui.QuickChatSettingsFragment
-import com.geeksville.mesh.ui.SettingsFragment
-import com.geeksville.mesh.ui.UsersFragment
-import com.geeksville.mesh.ui.components.ScannedQrCodeDialog
-import com.geeksville.mesh.ui.map.MapFragment
-import com.geeksville.mesh.ui.message.navigateToMessages
-import com.geeksville.mesh.ui.navigateToNavGraph
-import com.geeksville.mesh.ui.navigateToShareMessage
+import com.geeksville.mesh.ui.MainMenuAction
+import com.geeksville.mesh.ui.MainScreen
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.Exceptions
 import com.geeksville.mesh.util.LanguageUtils
 import com.geeksville.mesh.util.getPackageInfoCompat
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
-import java.text.DateFormat
-import java.util.Date
 import javax.inject.Inject
-
-/*
-UI design
-
-material setup instructions: https://material.io/develop/android/docs/getting-started/
-dark theme (or use system eventually) https://material.io/develop/android/theming/dark/
-
-NavDrawer is a standard draw which can be dragged in from the left or the menu icon inside the app
-title.
-
-Fragments:
-
-SettingsFragment shows "Settings"
-  username
-  shortname
-  bluetooth pairing list
-  (eventually misc device settings that are not channel related)
-
-Channel fragment "Channel"
-  qr code, copy link button
-  ch number
-  misc other settings
-  (eventually a way of choosing between past channels)
-
-ChatFragment "Messages"
-  a text box to enter new texts
-  a scrolling list of rows.  each row is a text and a sender info layout
-
-NodeListFragment "Users"
-  a node info row for every node
-
-ViewModels:
-
-  BTScanModel starts/stops bt scan and provides list of devices (manages entire scan lifecycle)
-
-  MeshModel contains: (manages entire service relationship)
-  current received texts
-  current radio macaddr
-  current node infos (updated dynamically)
-
-eventually use bottom navigation bar to switch between, Members, Chat, Channel, Settings. https://material.io/develop/android/components/bottom-navigation-view/
-  use numbers of # chat messages and # of members in the badges.
-
-(per this recommendation to not use top tabs: https://ux.stackexchange.com/questions/102439/android-ux-when-to-use-bottom-navigation-and-when-to-use-tabs )
-
-
-eventually:
-  make a custom theme: https://github.com/material-components/material-components-android/tree/master/material-theme-builder
-*/
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), Logging {
-
-    private lateinit var binding: ActivityMainBinding
 
     // Used to schedule a coroutine in the GUI thread
     private val mainScope = CoroutineScope(Dispatchers.Main + Job())
@@ -166,7 +88,7 @@ class MainActivity : AppCompatActivity(), Logging {
                 info("Bluetooth permissions granted")
             } else {
                 warn("Bluetooth permissions denied")
-                showSnackbar(permissionMissing)
+                model.showSnackbar(permissionMissing)
             }
             requestedEnable = false
             bluetoothViewModel.permissionsUpdated()
@@ -178,44 +100,9 @@ class MainActivity : AppCompatActivity(), Logging {
                 info("Notification permissions granted")
             } else {
                 warn("Notification permissions denied")
-                showSnackbar(getString(R.string.notification_denied), Snackbar.LENGTH_SHORT)
+                model.showSnackbar(getString(R.string.notification_denied))
             }
         }
-
-    data class TabInfo(val text: String, val icon: Int, val content: Fragment)
-
-    private val tabInfos = arrayOf(
-        TabInfo(
-            "Messages",
-            R.drawable.ic_twotone_message_24,
-            ContactsFragment()
-        ),
-        TabInfo(
-            "Users",
-            R.drawable.ic_twotone_people_24,
-            UsersFragment()
-        ),
-        TabInfo(
-            "Map",
-            R.drawable.ic_twotone_map_24,
-            MapFragment()
-        ),
-        TabInfo(
-            "Channel",
-            R.drawable.ic_twotone_contactless_24,
-            ChannelFragment()
-        ),
-        TabInfo(
-            "Settings",
-            R.drawable.ic_twotone_settings_applications_24,
-            SettingsFragment()
-        )
-    )
-
-    private val tabsAdapter = object : FragmentStateAdapter(supportFragmentManager, lifecycle) {
-        override fun getItemCount(): Int = tabInfos.size
-        override fun createFragment(position: Int): Fragment = tabInfos[position].content
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -239,72 +126,14 @@ class MainActivity : AppCompatActivity(), Logging {
             (application as GeeksvilleApplication).askToRate(this)
         }
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        initToolbar()
-
-        binding.pager.adapter = tabsAdapter
-        binding.pager.isUserInputEnabled =
-            false // Gestures for screen switching doesn't work so good with the map view
-        // pager.offscreenPageLimit = 0 // Don't keep any offscreen pages around, because we want to make sure our bluetooth scanning stops
-        TabLayoutMediator(binding.tabLayout, binding.pager, false, false) { tab, position ->
-            // tab.text = tabInfos[position].text // I think it looks better with icons only
-            tab.icon = ContextCompat.getDrawable(this, tabInfos[position].icon)
-        }.attach()
-
-        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                val mainTab = tab?.position ?: 0
-                model.setCurrentTab(mainTab)
-            }
-            override fun onTabUnselected(tab: TabLayout.Tab?) { }
-            override fun onTabReselected(tab: TabLayout.Tab?) { }
-        })
-
-        binding.composeView.setContent {
-            val connState by model.connectionState.collectAsStateWithLifecycle()
-            val channels by model.channels.collectAsStateWithLifecycle()
-            val requestChannelSet by model.requestChannelSet.collectAsStateWithLifecycle()
-
+        setContent {
             AppTheme {
-                if (connState.isConnected()) {
-                    if (requestChannelSet != null) {
-                        ScannedQrCodeDialog(
-                            channels = channels,
-                            incoming = requestChannelSet!!,
-                            onDismiss = model::clearRequestChannelUrl,
-                            onConfirm = model::setChannels,
-                        )
-                    }
-                }
+                MainScreen(model, ::onMainMenuAction)
             }
         }
 
         // Handle any intent
         handleIntent(intent)
-    }
-
-    private fun initToolbar() {
-        val toolbar = binding.toolbar as Toolbar
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayShowTitleEnabled(false)
-    }
-
-    private fun updateConnectionStatusImage(connected: MeshService.ConnectionState) {
-        if (model.actionBarMenu == null) return
-
-        val (image, tooltip) = when (connected) {
-            MeshService.ConnectionState.CONNECTED -> R.drawable.cloud_on to R.string.connected
-            MeshService.ConnectionState.DEVICE_SLEEP -> R.drawable.ic_twotone_cloud_upload_24 to R.string.device_sleeping
-            MeshService.ConnectionState.DISCONNECTED -> R.drawable.cloud_off to R.string.disconnected
-        }
-
-        val item = model.actionBarMenu?.findItem(R.id.connectStatusImage)
-        if (item != null) {
-            item.setIcon(image)
-            item.setTitle(tooltip)
-        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -328,7 +157,9 @@ class MainActivity : AppCompatActivity(), Logging {
             MeshServiceNotifications.OPEN_MESSAGE_ACTION -> {
                 val contactKey =
                     intent.getStringExtra(MeshServiceNotifications.OPEN_MESSAGE_EXTRA_CONTACT_KEY)
-                showMessages(contactKey)
+                if (contactKey != null) {
+                    // showMessages(contactKey)
+                }
             }
 
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
@@ -341,7 +172,7 @@ class MainActivity : AppCompatActivity(), Logging {
             Intent.ACTION_SEND -> {
                 val text = intent.getStringExtra(Intent.EXTRA_TEXT)
                 if (text != null) {
-                    shareMessages(text)
+                    // shareMessages(text)
                 }
             }
 
@@ -440,27 +271,6 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
-    private fun showSnackbar(msgId: Int) {
-        try {
-            Snackbar.make(binding.root, msgId, Snackbar.LENGTH_LONG).show()
-        } catch (ex: IllegalStateException) {
-            errormsg("Snackbar couldn't find view for msgId $msgId")
-        }
-    }
-
-    private fun showSnackbar(msg: String, duration: Int = Snackbar.LENGTH_INDEFINITE) {
-        try {
-            Snackbar.make(binding.root, msg, duration)
-                .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
-                .setAction(R.string.okay) {
-                    // dismiss
-                }
-                .show()
-        } catch (ex: IllegalStateException) {
-            errormsg("Snackbar couldn't find view for msgString $msg")
-        }
-    }
-
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
         return try {
             super.dispatchTouchEvent(ev)
@@ -475,10 +285,7 @@ class MainActivity : AppCompatActivity(), Logging {
 
     private var connectionJob: Job? = null
 
-    private val mesh = object :
-        ServiceClient<IMeshService>({
-            IMeshService.Stub.asInterface(it)
-        }) {
+    private val mesh = object : ServiceClient<IMeshService>(IMeshService.Stub::asInterface) {
         override fun onConnected(service: IMeshService) {
             connectionJob = mainScope.handledLaunch {
                 serviceRepository.setMeshService(service)
@@ -551,11 +358,6 @@ class MainActivity : AppCompatActivity(), Logging {
     override fun onStart() {
         super.onStart()
 
-        model.connectionState.asLiveData().observe(this) { state ->
-            onMeshConnectionChanged(state)
-            updateConnectionStatusImage(state)
-        }
-
         bluetoothViewModel.enabled.observe(this) { enabled ->
             if (!enabled && !requestedEnable && model.selectedBluetooth) {
                 requestedEnable = true
@@ -569,17 +371,6 @@ class MainActivity : AppCompatActivity(), Logging {
                     }
                 }
             }
-        }
-
-        // Call showSnackbar() whenever [snackbarText] updates with a non-null value
-        model.snackbarText.observe(this) { text ->
-            if (text is Int) showSnackbar(text)
-            if (text is String) showSnackbar(text)
-            if (text != null) model.clearSnackbarText()
-        }
-
-        model.currentTab.observe(this) {
-            binding.tabLayout.getTabAt(it)?.select()
         }
 
         model.tracerouteResponse.observe(this) { response ->
@@ -605,118 +396,32 @@ class MainActivity : AppCompatActivity(), Logging {
     }
 
     private fun showSettingsPage() {
-        binding.pager.currentItem = 5
+        // binding.pager.currentItem = 5
     }
 
-    private fun showMessages(contactKey: String?) {
-        model.setCurrentTab(0)
-        if (contactKey != null) {
-            supportFragmentManager.navigateToMessages(contactKey)
-        }
-    }
-
-    private fun shareMessages(message: String?) {
-        model.setCurrentTab(0)
-        if (message != null) {
-            supportFragmentManager.navigateToShareMessage(message)
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-        model.actionBarMenu = menu
-
-        updateConnectionStatusImage(model.connectionState.value)
-
-        return true
-    }
-
-    private val handler: Handler by lazy {
-        Handler(Looper.getMainLooper())
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.stress_test).isVisible =
-            BuildConfig.DEBUG // only show stress test for debug builds (for now)
-        menu.findItem(R.id.radio_config).isEnabled = !model.isManaged
-        return super.onPrepareOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.about -> {
+    private fun onMainMenuAction(action: MainMenuAction) {
+        when (action) {
+            MainMenuAction.ABOUT -> {
                 getVersionInfo()
-                return true
             }
-            R.id.connectStatusImage -> {
-                Toast.makeText(applicationContext, item.title, Toast.LENGTH_SHORT).show()
-                return true
-            }
-            R.id.debug -> {
-                val fragmentManager: FragmentManager = supportFragmentManager
-                val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
-                val nameFragment = DebugFragment()
-                fragmentTransaction.add(R.id.mainActivityLayout, nameFragment)
-                fragmentTransaction.addToBackStack(null)
-                fragmentTransaction.commit()
-                return true
-            }
-            R.id.stress_test -> {
-                fun postPing() {
-                    // Send ping message and arrange delayed recursion.
-                    debug("Sending ping")
-                    val str = "Ping " + DateFormat.getTimeInstance(DateFormat.MEDIUM)
-                        .format(Date(System.currentTimeMillis()))
-                    model.sendMessage(str)
-                    handler.postDelayed({ postPing() }, 30000)
-                }
-                item.isChecked = !item.isChecked // toggle ping test
-                if (item.isChecked) {
-                    postPing()
-                } else {
-                    handler.removeCallbacksAndMessages(null)
-                }
-                return true
-            }
-            R.id.radio_config -> {
-                supportFragmentManager.navigateToNavGraph()
-                return true
-            }
-            R.id.save_messages_csv -> {
+            MainMenuAction.EXPORT_MESSAGES -> {
                 val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
                     type = "application/csv"
                     putExtra(Intent.EXTRA_TITLE, "rangetest.csv")
                 }
                 createDocumentLauncher.launch(intent)
-                return true
             }
-            R.id.theme -> {
+            MainMenuAction.THEME -> {
                 chooseThemeDialog()
-                return true
             }
-            R.id.preferences_language -> {
+            MainMenuAction.LANGUAGE -> {
                 chooseLangDialog()
-                return true
             }
-            R.id.show_intro -> {
+            MainMenuAction.SHOW_INTRO -> {
                 startActivity(Intent(this, AppIntroduction::class.java))
-                return true
             }
-            R.id.preferences_quick_chat -> {
-                val fragmentManager: FragmentManager = supportFragmentManager
-                val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
-                val nameFragment = QuickChatSettingsFragment()
-                fragmentTransaction.add(R.id.mainActivityLayout, nameFragment)
-                fragmentTransaction.addToBackStack(null)
-                fragmentTransaction.commit()
-                return true
-            }
-            else -> super.onOptionsItemSelected(item)
+            else -> {}
         }
     }
 

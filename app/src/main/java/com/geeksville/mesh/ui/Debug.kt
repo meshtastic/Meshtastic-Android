@@ -17,13 +17,8 @@
 
 package com.geeksville.mesh.ui
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,13 +31,9 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -51,8 +42,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
@@ -64,62 +53,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
-import androidx.fragment.app.Fragment
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.model.DebugViewModel
 import com.geeksville.mesh.ui.theme.AppTheme
-import dagger.hilt.android.AndroidEntryPoint
 import java.text.DateFormat
 import java.util.Locale
-
-@AndroidEntryPoint
-class DebugFragment : Fragment() {
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setBackgroundColor(ContextCompat.getColor(context, R.color.colorAdvancedBackground))
-            setContent {
-                val viewModel: DebugViewModel = hiltViewModel()
-
-                AppTheme {
-                    Scaffold(
-                        topBar = {
-                            TopAppBar(
-                                title = { Text(stringResource(id = R.string.debug_panel)) },
-                                navigationIcon = {
-                                    IconButton(onClick = { parentFragmentManager.popBackStack() }) {
-                                        Icon(
-                                            Icons.AutoMirrored.Filled.ArrowBack,
-                                            stringResource(id = R.string.navigate_back),
-                                        )
-                                    }
-                                },
-                                actions = {
-                                    Button(onClick = viewModel::deleteAllLogs) {
-                                        Text(text = stringResource(R.string.clear))
-                                    }
-                                }
-                            )
-                        },
-                    ) { innerPadding ->
-                        DebugScreen(
-                            viewModel = viewModel,
-                            contentPadding = innerPadding,
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
 
@@ -185,7 +126,6 @@ private fun Int.asNodeId(): String {
 @Composable
 internal fun DebugScreen(
     viewModel: DebugViewModel = hiltViewModel(),
-    contentPadding: PaddingValues,
 ) {
     val listState = rememberLazyListState()
     val logs by viewModel.meshLog.collectAsStateWithLifecycle()
@@ -203,7 +143,6 @@ internal fun DebugScreen(
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             state = listState,
-            contentPadding = contentPadding,
         ) {
             items(logs, key = { it.uuid }) { log -> DebugItem(annotateMeshLog(log)) }
         }
@@ -298,5 +237,18 @@ private fun DebugScreenPreview() {
                         "to: -1409790708",
             )
         )
+    }
+}
+
+@Composable
+fun DebugMenuActions(
+    viewModel: DebugViewModel = hiltViewModel(),
+    modifier: Modifier = Modifier,
+) {
+    Button(
+        onClick = viewModel::deleteAllLogs,
+        modifier = modifier,
+    ) {
+        Text(text = stringResource(R.string.clear))
     }
 }
