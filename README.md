@@ -39,4 +39,4 @@ You can help translate the app into your native language using [Crowdin](https:/
 
 https://meshtastic.org/docs/development/android/
 
-Copyright 2024, Meshtastic LLC. GPL-3.0 license
+Copyright 2025, Meshtastic LLC. GPL-3.0 license
