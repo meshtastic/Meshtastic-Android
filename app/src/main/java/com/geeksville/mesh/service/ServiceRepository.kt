@@ -20,10 +20,12 @@ package com.geeksville.mesh.service
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.android.Logging
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -86,10 +88,10 @@ class ServiceRepository @Inject constructor() : Logging {
         setTracerouteResponse(null)
     }
 
-    private val _serviceAction = MutableSharedFlow<ServiceAction>()
-    val serviceAction: SharedFlow<ServiceAction> get() = _serviceAction
+    private val _serviceAction = Channel<ServiceAction>()
+    val serviceAction = _serviceAction.receiveAsFlow()
 
     suspend fun onServiceAction(action: ServiceAction) {
-        _serviceAction.emit(action)
+        _serviceAction.send(action)
     }
 }

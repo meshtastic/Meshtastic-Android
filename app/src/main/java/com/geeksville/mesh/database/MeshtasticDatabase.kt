@@ -31,6 +31,7 @@ import com.geeksville.mesh.database.dao.NodeInfoDao
 import com.geeksville.mesh.database.dao.QuickChatActionDao
 import com.geeksville.mesh.database.entity.ContactSettings
 import com.geeksville.mesh.database.entity.MeshLog
+import com.geeksville.mesh.database.entity.MetadataEntity
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Packet
@@ -46,6 +47,7 @@ import com.geeksville.mesh.database.entity.ReactionEntity
         MeshLog::class,
         QuickChatAction::class,
         ReactionEntity::class,
+        MetadataEntity::class,
     ],
     autoMigrations = [
         AutoMigration(from = 3, to = 4),
@@ -60,8 +62,9 @@ import com.geeksville.mesh.database.entity.ReactionEntity
         AutoMigration(from = 12, to = 13, spec = AutoMigration12to13::class),
         AutoMigration(from = 13, to = 14),
         AutoMigration(from = 14, to = 15),
+        AutoMigration(from = 15, to = 16),
     ],
-    version = 15,
+    version = 16,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)

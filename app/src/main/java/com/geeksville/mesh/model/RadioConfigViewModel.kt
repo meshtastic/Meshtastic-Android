@@ -38,7 +38,6 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.config
 import com.geeksville.mesh.database.entity.MyNodeEntity
-import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
@@ -56,6 +55,7 @@ import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
@@ -73,7 +73,7 @@ data class RadioConfigState(
     val isLocal: Boolean = false,
     val connected: Boolean = false,
     val route: String = "",
-    val metadata: MeshProtos.DeviceMetadata = MeshProtos.DeviceMetadata.getDefaultInstance(),
+    val metadata: MeshProtos.DeviceMetadata? = null,
     val userConfig: MeshProtos.User = MeshProtos.User.getDefaultInstance(),
     val channelList: List<ChannelProtos.ChannelSettings> = emptyList(),
     val radioConfig: ConfigProtos.Config = config {},
@@ -81,9 +81,7 @@ data class RadioConfigState(
     val ringtone: String = "",
     val cannedMessageMessages: String = "",
     val responseState: ResponseState<Boolean> = ResponseState.Empty,
-) {
-    fun hasMetadata() = metadata != MeshProtos.DeviceMetadata.getDefaultInstance()
-}
+)
 
 @HiltViewModel
 class RadioConfigViewModel @Inject constructor(
@@ -94,8 +92,8 @@ class RadioConfigViewModel @Inject constructor(
     private val meshService: IMeshService? get() = radioConfigRepository.meshService
 
     private val destNum = savedStateHandle.toRoute<Route.RadioConfig>().destNum
-    private val _destNode = MutableStateFlow<NodeEntity?>(null)
-    val destNode: StateFlow<NodeEntity?> get() = _destNode
+    private val _destNode = MutableStateFlow<Node?>(null)
+    val destNode: StateFlow<Node?> get() = _destNode
 
     private val requestIds = MutableStateFlow(hashSetOf<Int>())
     private val _radioConfigState = MutableStateFlow(RadioConfigState())
@@ -106,9 +104,14 @@ class RadioConfigViewModel @Inject constructor(
 
     init {
         @OptIn(ExperimentalCoroutinesApi::class)
-        radioConfigRepository.nodeDBbyNum.mapLatest { nodes ->
-            nodes[destNum] ?: nodes.values.firstOrNull()
-        }.onEach { _destNode.value = it }.launchIn(viewModelScope)
+        radioConfigRepository.nodeDBbyNum
+            .mapLatest { nodes -> nodes[destNum] ?: nodes.values.firstOrNull() }
+            .distinctUntilChanged()
+            .onEach {
+                _destNode.value = it
+                _radioConfigState.update { state -> state.copy(metadata = it?.metadata) }
+            }
+            .launchIn(viewModelScope)
 
         radioConfigRepository.deviceProfileFlow.onEach {
             _currentDeviceProfile.value = it
@@ -322,7 +325,7 @@ class RadioConfigViewModel @Inject constructor(
         when (route) {
             AdminRoute.REBOOT.name -> requestReboot(destNum)
             AdminRoute.SHUTDOWN.name -> with(radioConfigState.value) {
-                if (hasMetadata() && !metadata.canShutdown) {
+                if (metadata != null && !metadata.canShutdown) {
                     sendError(R.string.cant_shutdown)
                 } else {
                     requestShutdown(destNum)
@@ -331,15 +334,6 @@ class RadioConfigViewModel @Inject constructor(
 
             AdminRoute.FACTORY_RESET.name -> requestFactoryReset(destNum)
             AdminRoute.NODEDB_RESET.name -> requestNodedbReset(destNum)
-        }
-    }
-
-    private fun getSessionPasskey(destNum: Int) {
-        if (radioConfigState.value.hasMetadata()) {
-            sendAdminRequest(destNum)
-        } else {
-            getConfig(destNum, AdminProtos.AdminMessage.ConfigType.SESSIONKEY_CONFIG_VALUE)
-            setResponseStateTotal(2)
         }
     }
 
@@ -441,10 +435,15 @@ class RadioConfigViewModel @Inject constructor(
     fun setResponseStateLoading(route: Enum<*>) {
         val destNum = destNode.value?.num ?: return
 
-        _radioConfigState.value = RadioConfigState(
-            route = route.name,
-            responseState = ResponseState.Loading(),
-        )
+        _radioConfigState.update {
+            RadioConfigState(
+                isLocal = it.isLocal,
+                connected = it.connected,
+                route = route.name,
+                metadata = it.metadata,
+                responseState = ResponseState.Loading(),
+            )
+        }
 
         when (route) {
             ConfigRoute.USER -> getOwner(destNum)
@@ -456,7 +455,10 @@ class RadioConfigViewModel @Inject constructor(
                 setResponseStateTotal(maxChannels + 1)
             }
 
-            is AdminRoute -> getSessionPasskey(destNum)
+            is AdminRoute -> {
+                getConfig(destNum, AdminProtos.AdminMessage.ConfigType.SESSIONKEY_CONFIG_VALUE)
+                setResponseStateTotal(2)
+            }
 
             is ConfigRoute -> {
                 if (route == ConfigRoute.LORA) {

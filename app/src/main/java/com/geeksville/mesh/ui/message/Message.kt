@@ -90,8 +90,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.QuickChatAction
+import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannel
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
@@ -116,7 +116,7 @@ internal fun FragmentManager.navigateToMessages(contactKey: String, message: Str
 class MessagesFragment : Fragment(), Logging {
     private val model: UIViewModel by activityViewModels()
 
-    private fun navigateToMessages(node: NodeEntity) = node.user.let { user ->
+    private fun navigateToMessages(node: Node) = node.user.let { user ->
         val hasPKC = model.ourNodeInfo.value?.hasPKC == true && node.hasPKC // TODO use meta.hasPKC
         val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
         val contactKey = "$channel${user.id}"
@@ -168,7 +168,7 @@ internal fun MessageScreen(
     contactKey: String,
     message: String,
     viewModel: UIViewModel = hiltViewModel(),
-    navigateToMessages: (NodeEntity) -> Unit,
+    navigateToMessages: (Node) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
     onNavigateBack: () -> Unit
 ) {
