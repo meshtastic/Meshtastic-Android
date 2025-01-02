@@ -115,7 +115,7 @@
     <string name="meshtastic_messages_notifications">Обавештења о порукама</string>
     <string name="protocol_stress_test">Тест стреса протокола</string>
     <string name="firmware_too_old">Ажурирање фирмвера је неопходно</string>
-    <string name="firmware_old">Радио фирмвер је превише стар да би комуницирао са овом апликацијом, молимо вас да одете у подешавања и изаберете \"Ажурирај фирмвер\". За више информација о овоме погледајте <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">наш водич за инсталацију фирмвера</a>.</string>
+    <string name="firmware_old">Радио фирмвер је превише стар да би комуницирао са овом апликацијом. За више информација о овоме погледајте <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">наш водич за инсталацију фирмвера</a>.</string>
     <string name="okay">Океј</string>
     <string name="must_set_region">Мораш одабрати регион!</string>
     <string name="region">Регион</string>

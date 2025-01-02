@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,8 +24,10 @@ import com.geeksville.mesh.database.MeshtasticDatabase
 import com.geeksville.mesh.database.dao.NodeInfoDao
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
+import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.NodeSortOption
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -39,6 +41,18 @@ import org.junit.runner.RunWith
 class NodeInfoDaoTest {
     private lateinit var database: MeshtasticDatabase
     private lateinit var nodeInfoDao: NodeInfoDao
+
+    private val unknownNode = NodeEntity(
+        num = 7,
+        user = user {
+            id = "!a1b2c3d4"
+            longName = "Meshtastic c3d4"
+            shortName = "c3d4"
+            hwModel = MeshProtos.HardwareModel.UNSET
+        },
+        longName = "Meshtastic c3d4",
+        shortName = null // Dao filter for includeUnknown
+    )
 
     private val ourNode = NodeEntity(
         num = 8,
@@ -79,7 +93,7 @@ class NodeInfoDaoTest {
         39.952583 to -75.165222,  // Philadelphia
     )
 
-    private val testNodes = listOf(ourNode) + testPositions.mapIndexed { index, pos ->
+    private val testNodes = listOf(ourNode, unknownNode) + testPositions.mapIndexed { index, pos ->
         NodeEntity(
             num = 9 + index,
             user = user {
@@ -89,7 +103,7 @@ class NodeInfoDaoTest {
                 hwModel = MeshProtos.HardwareModel.ANDROID_SIM
                 isLicensed = false
             },
-            longName = "Kevin Mester$index", shortName = if (index == 2) null else "KM$index",
+            longName = "Kevin Mester$index", shortName = "KM$index",
             latitude = pos.first, longitude = pos.second,
             lastHeard = 9 + index,
         )
@@ -124,18 +138,18 @@ class NodeInfoDaoTest {
         sort = sort.sqlValue,
         filter = filter,
         includeUnknown = includeUnknown,
-    ).first().filter { it != ourNode }
+    ).map { list -> list.map { it.toModel() } }.first().filter { it.num != ourNode.num }
 
     @Test // node list size
     fun testNodeListSize() = runBlocking {
         val nodes = nodeInfoDao.nodeDBbyNum().first()
-        assertEquals(11, nodes.size)
+        assertEquals(12, nodes.size)
     }
 
     @Test // nodeDBbyNum() re-orders our node at the top of the list
     fun testOurNodeInfoIsFirst() = runBlocking {
         val nodes = nodeInfoDao.nodeDBbyNum().first()
-        assertEquals(ourNode, nodes.values.first())
+        assertEquals(ourNode.num, nodes.values.first().node.num)
     }
 
     @Test
@@ -155,8 +169,9 @@ class NodeInfoDaoTest {
     @Test
     fun testSortByDistance() = runBlocking {
         val nodes = getNodes(sort = NodeSortOption.DISTANCE)
+        fun NodeEntity.toNode() = Node(num = num, user = user, position = position)
         val sortedNodes = nodes.sortedWith( // nodes with invalid (null) positions at the end
-            compareBy<NodeEntity> { it.validPosition == null }.thenBy { it.distance(ourNode) }
+            compareBy<Node> { it.validPosition == null }.thenBy { it.distance(ourNode.toNode()) }
         )
         assertEquals(sortedNodes, nodes)
     }
@@ -185,7 +200,7 @@ class NodeInfoDaoTest {
     @Test
     fun testIncludeUnknownIsTrue() = runBlocking {
         val nodes = getNodes(includeUnknown = true)
-        val containsUnsetNode = nodes.any { it.shortName == null }
+        val containsUnsetNode = nodes.any { it.isUnknownUser }
         assertTrue(containsUnsetNode)
     }
 }

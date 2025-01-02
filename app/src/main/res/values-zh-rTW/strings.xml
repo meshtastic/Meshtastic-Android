@@ -115,7 +115,7 @@
     <string name="meshtastic_messages_notifications">訊息通知</string>
     <string name="protocol_stress_test">通訊協定壓力測試</string>
     <string name="firmware_too_old">需要更新韌體</string>
-    <string name="firmware_old">無法與此應用程式通訊，無線電韌體太舊。請前往設定面板並選擇「更新韌體」。有關詳細信息，請參閱<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">我們的韌體安裝指南</a>。</string>
+    <string name="firmware_old">無法與此應用程式通訊，無線電韌體太舊。有關詳細信息，請參閱<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">我們的韌體安裝指南</a>。</string>
     <string name="okay">好的</string>
     <string name="must_set_region">您必須設定一個區域！</string>
     <string name="region">地區</string>
