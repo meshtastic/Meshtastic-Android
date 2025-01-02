@@ -17,116 +17,104 @@
 
 package com.geeksville.mesh.ui
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.Button
+import androidx.compose.material.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.activityViewModels
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.databinding.ShareFragmentBinding
+import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.theme.AppTheme
-import dagger.hilt.android.AndroidEntryPoint
 
-@AndroidEntryPoint
-class ShareFragment : ScreenFragment("Messages"), Logging {
+@Composable
+fun ShareScreen(
+    viewModel: UIViewModel = hiltViewModel(),
+    onConfirm: (String) -> Unit
+) {
+    val contactList by viewModel.contactList.collectAsStateWithLifecycle()
 
-    private val model: UIViewModel by activityViewModels()
-    private var _binding: ShareFragmentBinding? = null
+    ShareScreen(
+        contacts = contactList,
+        onConfirm = onConfirm,
+    )
+}
 
-    // This property is only valid between onCreateView and onDestroyView.
-    private val binding get() = _binding!!
+@Composable
+fun ShareScreen(
+    contacts: List<Contact>,
+    onConfirm: (String) -> Unit
+) {
+    var selectedContact by remember { mutableStateOf("") }
 
-    private val contacts get() = model.contactList.value
-    private var selectedContact = mutableStateOf("")
-
-    private fun shareMessage(contact: Contact) {
-        debug("calling MessagesFragment filter:${contact.contactKey}")
-//        parentFragmentManager.navigateToMessages(
-//            contact.contactKey,
-//            arguments?.getString("message").toString()
-//        )
-    }
-
-    private fun onClick(contact: Contact) {
-        if (selectedContact.value == contact.contactKey) {
-            selectedContact.value = ""
-            binding.shareButton.isEnabled = false
-        } else {
-            selectedContact.value = contact.contactKey
-            binding.shareButton.isEnabled = true
-        }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = ShareFragmentBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-
-    @Suppress("LongMethod", "CyclomaticComplexMethod")
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-        binding.toolbar.setNavigationOnClickListener {
-            parentFragmentManager.popBackStack()
-        }
-
-        binding.shareButton.isEnabled = false
-
-        binding.shareButton.setOnClickListener {
-            debug("User clicked shareButton")
-            val contact = contacts.find { c -> c.contactKey == selectedContact.value }
-            if (contact != null) {
-                shareMessage(contact)
-            }
-        }
-
-        binding.contactListView.setContent {
-            val contacts by model.contactList.collectAsStateWithLifecycle()
-            AppTheme {
-                ShareContactListView(
-                    contacts = contacts,
-                    selectedContact = selectedContact.value,
-                    onClick = ::onClick,
+    Column {
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            contentPadding = PaddingValues(6.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            items(contacts, key = { it.contactKey }) { contact ->
+                val selected = contact.contactKey == selectedContact
+                ContactItem(
+                    contact = contact,
+                    selected = selected,
+                    onClick = { selectedContact = contact.contactKey },
                 )
             }
+        }
+
+        Button(
+            onClick = {
+                onConfirm(selectedContact)
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            enabled = selectedContact.isNotEmpty(),
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Default.Send,
+                contentDescription = stringResource(id = R.string.share)
+            )
         }
     }
 }
 
+@PreviewScreenSizes
 @Composable
-fun ShareContactListView(
-    contacts: List<Contact>,
-    selectedContact: String,
-    onClick: (Contact) -> Unit,
-) {
-    LazyColumn(
-        modifier = Modifier
-            .fillMaxSize(),
-        contentPadding = PaddingValues(6.dp),
-    ) {
-        items(contacts, key = { it.contactKey }) { contact ->
-            val selected = contact.contactKey == selectedContact
-            ContactItem(
-                contact = contact,
-                selected = selected,
-                onClick = { onClick(contact) },
-                onLongClick = {},
-            )
-        }
+private fun ShareScreenPreview() {
+    AppTheme {
+        ShareScreen(
+            contacts = listOf(
+                Contact(
+                    contactKey = "0^all",
+                    shortName = stringResource(R.string.some_username),
+                    longName = stringResource(R.string.unknown_username),
+                    lastMessageTime = "3 minutes ago",
+                    lastMessageText = stringResource(R.string.sample_message),
+                    unreadCount = 2,
+                    messageCount = 10,
+                    isMuted = true,
+                ),
+            ),
+            onConfirm = {},
+        )
     }
 }

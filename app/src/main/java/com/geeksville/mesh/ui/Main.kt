@@ -173,7 +173,8 @@ private fun MainAppBar(
     TopAppBar(
         title = {
             when {
-                currentDestination == null || isTopLevelRoute -> {
+                currentDestination == null || isTopLevelRoute ||
+                        currentDestination.hasRoute<Route.Messages>() -> {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.app_icon),
@@ -191,6 +192,9 @@ private fun MainAppBar(
 
                 currentDestination.hasRoute<Route.QuickChat>() ->
                     Text(stringResource(id = R.string.quick_chat))
+
+                currentDestination.hasRoute<Route.Share>() ->
+                    Text(stringResource(id = R.string.share_to))
 
                 else -> Text("Node name here") // TODO show destNode longName
             }

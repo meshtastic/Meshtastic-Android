@@ -111,6 +111,8 @@ sealed interface Route {
     @Serializable
     data class Messages(val contactKey: String, val message: String = "") : Route
     @Serializable data object QuickChat : Route
+    @Serializable
+    data class Share(val message: String) : Route
 
     @Serializable
     data class RadioConfig(val destNum: Int? = null) : Route
@@ -385,6 +387,14 @@ fun NavGraph(
         composable<Route.Paxcounter> {
             val parentEntry = remember { navController.getBackStackEntry<Route.RadioConfig>() }
             PaxcounterConfigScreen(hiltViewModel<RadioConfigViewModel>(parentEntry))
+        }
+        composable<Route.Share> { backStackEntry ->
+            val message = backStackEntry.toRoute<Route.Share>().message
+            ShareScreen(model) {
+                navController.navigate(Route.Messages(it, message)) {
+                    popUpTo<Route.Share> { inclusive = true }
+                }
+            }
         }
     }
 }
