@@ -152,6 +152,7 @@ private fun ReactionItem(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ReactionRow(
+    modifier: Modifier = Modifier,
     fromLocal: Boolean,
     reactions: List<Reaction> = emptyList(),
     onSendReaction: (String) -> Unit = {}
@@ -170,7 +171,7 @@ fun ReactionRow(
 
     var maxLines by remember { mutableStateOf(1) }
     FlowRow(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp),
         horizontalArrangement = if (fromLocal) Arrangement.End else Arrangement.Start,

@@ -17,12 +17,10 @@
 
 package com.geeksville.mesh.ui.message.components
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -42,6 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.model.Message
@@ -99,41 +98,40 @@ internal fun MessageList(
             val fromLocal = msg.node.user.id == DataPacket.ID_LOCAL
             val selected by remember { derivedStateOf { selectedIds.value.contains(msg.uuid) } }
 
-            Column(
-                modifier = Modifier.padding(vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy((-12).dp)
-            ) {
-                Box(Modifier.wrapContentSize(Alignment.TopStart)) {
-                    var expandedNodeMenu by remember { mutableStateOf(false) }
-                    MessageItem(
-                        node = msg.node,
-                        messageText = msg.text,
-                        messageTime = msg.time,
-                        messageStatus = msg.status,
-                        selected = selected,
-                        onClick = { if (inSelectionMode) selectedIds.toggle(msg.uuid) },
-                        onLongClick = {
-                            selectedIds.toggle(msg.uuid)
-                            haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                        },
-                        onChipClick = {
-                            if (msg.node.num != 0) {
-                                expandedNodeMenu = true
-                            }
-                        },
-                        onStatusClick = { showStatusDialog = msg },
-                        onSendReaction = { onSendReaction(it, msg.packetId) },
-                    )
-                    NodeMenu(
-                        node = msg.node,
-                        showFullMenu = true,
-                        onDismissRequest = { expandedNodeMenu = false },
-                        expanded = expandedNodeMenu,
-                        onAction = onNodeMenuAction
-                    )
-                }
-                ReactionRow(fromLocal, msg.emojis) { showReactionDialog = msg.emojis }
+            Box(Modifier.wrapContentSize(Alignment.TopStart)) {
+                var expandedNodeMenu by remember { mutableStateOf(false) }
+                MessageItem(
+                    node = msg.node,
+                    messageText = msg.text,
+                    messageTime = msg.time,
+                    messageStatus = msg.status,
+                    selected = selected,
+                    onClick = { if (inSelectionMode) selectedIds.toggle(msg.uuid) },
+                    onLongClick = {
+                        selectedIds.toggle(msg.uuid)
+                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
+                    },
+                    onChipClick = {
+                        if (msg.node.num != 0) {
+                            expandedNodeMenu = true
+                        }
+                    },
+                    onStatusClick = { showStatusDialog = msg },
+                    onSendReaction = { onSendReaction(it, msg.packetId) },
+                )
+                NodeMenu(
+                    node = msg.node,
+                    showFullMenu = true,
+                    onDismissRequest = { expandedNodeMenu = false },
+                    expanded = expandedNodeMenu,
+                    onAction = onNodeMenuAction
+                )
             }
+            ReactionRow(
+                modifier = Modifier.zIndex(1F).offset(y = (-8).dp),
+                fromLocal = fromLocal,
+                reactions = msg.emojis
+            ) { showReactionDialog = msg.emojis }
         }
     }
 }
