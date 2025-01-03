@@ -54,6 +54,7 @@ import androidx.compose.material.icons.filled.ChargingStation
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Height
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyOff
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocationOn
@@ -95,6 +96,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
@@ -117,7 +119,12 @@ fun NodeDetailScreen(
         NodeDetailList(
             node = node,
             metricsState = state,
-            onNavigate = onNavigate,
+            onAction = { action ->
+                when (action) {
+                    is Route -> onNavigate(action)
+                    is ServiceAction -> viewModel.onServiceAction(action)
+                }
+            },
             modifier = modifier,
         )
     } else {
@@ -135,7 +142,7 @@ private fun NodeDetailList(
     modifier: Modifier = Modifier,
     node: Node,
     metricsState: MetricsState,
-    onNavigate: (Any) -> Unit = {},
+    onAction: (Any) -> Unit = {},
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -172,10 +179,17 @@ private fun NodeDetailList(
 
         item {
             PreferenceCategory(stringResource(id = R.string.logs))
-            LogNavigationList(metricsState, onNavigate)
+            LogNavigationList(metricsState, onAction)
         }
 
-        if (!metricsState.isManaged) {
+        if (!metricsState.isLocal) {
+            item {
+                PreferenceCategory("Actions")
+                NodeActionList(node, onAction)
+            }
+        }
+
+        if (node.metadata != null && !metricsState.isManaged) {
             item {
                 PreferenceCategory(stringResource(id = R.string.administration))
                 NavCard(
@@ -183,7 +197,7 @@ private fun NodeDetailList(
                     icon = Icons.Default.Settings,
                     enabled = true
                 ) {
-                    onNavigate(Route.RadioConfig(node.num))
+                    onAction(Route.RadioConfig(node.num))
                 }
             }
         }
@@ -320,7 +334,7 @@ private fun NodeDetailsContent(
 }
 
 @Composable
-fun LogNavigationList(state: MetricsState, onNavigate: (Any) -> Unit) {
+fun LogNavigationList(state: MetricsState, onNavigate: (Route) -> Unit) {
     NavCard(
         title = stringResource(R.string.device_metrics_log),
         icon = Icons.Default.ChargingStation,
@@ -367,6 +381,17 @@ fun LogNavigationList(state: MetricsState, onNavigate: (Any) -> Unit) {
         enabled = state.hasTracerouteLogs()
     ) {
         onNavigate(Route.TracerouteLog)
+    }
+}
+
+@Composable
+fun NodeActionList(node: Node, onAction: (ServiceAction) -> Unit) {
+    NavCard(
+        title = "Request Metadata",
+        icon = Icons.Default.Info,
+        enabled = true
+    ) {
+        onAction(ServiceAction.GetDeviceMetadata(node.num))
     }
 }
 
@@ -604,7 +629,7 @@ private fun PowerMetrics(node: Node) = with(node.powerMetrics) {
 
 @Preview(showBackground = true)
 @Composable
-private fun NodeDetailsPreview(
+private fun NodeDetailPreview(
     @PreviewParameter(NodePreviewParameterProvider::class)
     node: Node
 ) {
