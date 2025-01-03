@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,14 +23,19 @@ import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.database.dao.NodeInfoDao
+import com.geeksville.mesh.database.entity.MetadataEntity
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
+import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.NodeSortOption
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.withContext
@@ -49,15 +54,20 @@ class NodeRepository @Inject constructor(
         .stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, null)
 
     // our node info
-    private val _ourNodeInfo = MutableStateFlow<NodeEntity?>(null)
-    val ourNodeInfo: StateFlow<NodeEntity?> get() = _ourNodeInfo
+    private val _ourNodeInfo = MutableStateFlow<Node?>(null)
+    val ourNodeInfo: StateFlow<Node?> get() = _ourNodeInfo
 
     // The unique userId of our node
     private val _myId = MutableStateFlow<String?>(null)
     val myId: StateFlow<String?> get() = _myId
 
-    // A map from nodeNum to NodeEntity
-    val nodeDBbyNum: StateFlow<Map<Int, NodeEntity>> = nodeInfoDao.nodeDBbyNum()
+    fun getNodeDBbyNum() = nodeInfoDao.nodeDBbyNum()
+        .map { map -> map.mapValues { (_, it) -> it.toEntity() } }
+
+    // A map from nodeNum to Node
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val nodeDBbyNum: StateFlow<Map<Int, Node>> = nodeInfoDao.nodeDBbyNum()
+        .mapLatest { map -> map.mapValues { (_, it) -> it.toModel() } }
         .onEach {
             val ourNodeInfo = it.values.firstOrNull()
             _ourNodeInfo.value = ourNodeInfo
@@ -67,8 +77,8 @@ class NodeRepository @Inject constructor(
         .conflate()
         .stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, emptyMap())
 
-    fun getNode(userId: String): NodeEntity = nodeDBbyNum.value.values.find { it.user.id == userId }
-        ?: NodeEntity(
+    fun getNode(userId: String): Node = nodeDBbyNum.value.values.find { it.user.id == userId }
+        ?: Node(
             num = DataPacket.idToDefaultNodeNum(userId) ?: 0,
             user = getUser(userId),
         )
@@ -84,6 +94,7 @@ class NodeRepository @Inject constructor(
                 .setHwModel(MeshProtos.HardwareModel.UNSET)
                 .build()
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun getNodes(
         sort: NodeSortOption = NodeSortOption.LAST_HEARD,
         filter: String = "",
@@ -92,7 +103,7 @@ class NodeRepository @Inject constructor(
         sort = sort.sqlValue,
         filter = filter,
         includeUnknown = includeUnknown,
-    ).flowOn(dispatchers.io).conflate()
+    ).mapLatest { list -> list.map { it.toModel() } }.flowOn(dispatchers.io).conflate()
 
     suspend fun upsert(node: NodeEntity) = withContext(dispatchers.io) {
         nodeInfoDao.upsert(node)
@@ -107,5 +118,10 @@ class NodeRepository @Inject constructor(
 
     suspend fun deleteNode(num: Int) = withContext(dispatchers.io) {
         nodeInfoDao.deleteNode(num)
+        nodeInfoDao.deleteMetadata(num)
+    }
+
+    suspend fun insertMetadata(metadata: MetadataEntity) = withContext(dispatchers.io) {
+        nodeInfoDao.upsert(metadata)
     }
 }

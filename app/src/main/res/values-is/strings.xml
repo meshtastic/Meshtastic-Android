@@ -115,7 +115,7 @@
     <string name="meshtastic_messages_notifications">Tilkynningar um skilaboð</string>
     <string name="protocol_stress_test">Álagsprófun staðals</string>
     <string name="firmware_too_old">Uppfærsla fastbúnaðar nauðsynleg</string>
-    <string name="firmware_old">Fastbúnaður radíósins er of gamall til að tala við þetta smáforrit, vinsamlegast farðu í stillingar og veldur „Uppfæra fastbúnað.“ Fyrir ítarlegri upplýsingar sjá  <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Leiðbeiningar um uppfærslu fastbúnaðar</a> á Github.</string>
+    <string name="firmware_old">Fastbúnaður radíósins er of gamall til að tala við þetta smáforrit. Fyrir ítarlegri upplýsingar sjá <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Leiðbeiningar um uppfærslu fastbúnaðar</a>.</string>
     <string name="okay">Í lagi</string>
     <string name="must_set_region">Þú verður að velja svæði!</string>
     <string name="region">Svæði</string>

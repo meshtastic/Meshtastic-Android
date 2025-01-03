@@ -115,7 +115,7 @@
     <string name="meshtastic_messages_notifications">Mesaj bildirimleri</string>
     <string name="protocol_stress_test">Protokol stres testi</string>
     <string name="firmware_too_old">Yazılım güncellemesi gerekli</string>
-    <string name="firmware_old">Radyo yazılımı bu uygulamayla iletişim kurmak için çok eski, lütfen ayarlardan \"Ürün Yazılımını Güncelle\"yi seçin. Bu konuda daha fazla bilgi için: <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Yazılım yükleme kılavuzumuza</a> bakın.</string>
+    <string name="firmware_old">Radyo yazılımı bu uygulamayla iletişim kurmak için çok eski. Bu konuda daha fazla bilgi için: <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Yazılım yükleme kılavuzumuza</a> bakın.</string>
     <string name="okay">Tamam</string>
     <string name="must_set_region">Bölge seçmelisin!</string>
     <string name="region">Bölge</string>

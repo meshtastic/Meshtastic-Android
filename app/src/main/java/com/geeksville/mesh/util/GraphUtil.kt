@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.util
 
+import android.content.res.Resources
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -25,6 +26,8 @@ import com.geeksville.mesh.TelemetryProtos.Telemetry
 
 object GraphUtil {
 
+    val RADIUS = Resources.getSystem().displayMetrics.density * 2
+
     /**
      * @param value Must be zero-scaled before passing.
      * @param divisor The range for the data set.
@@ -32,7 +35,6 @@ object GraphUtil {
     fun plotPoint(
         drawContext: DrawContext,
         color: Color,
-        radius: Float,
         x: Float,
         value: Float,
         divisor: Float,
@@ -42,7 +44,7 @@ object GraphUtil {
         val y = height - (ratio * height)
         drawContext.canvas.drawCircle(
             center = Offset(x, y),
-            radius = radius,
+            radius = RADIUS,
             paint = androidx.compose.ui.graphics.Paint().apply { this.color = color }
         )
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,19 +20,17 @@ package com.geeksville.mesh.ui.preview
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import com.geeksville.mesh.DeviceMetrics.Companion.currentTime
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.deviceMetrics
 import com.geeksville.mesh.environmentMetrics
+import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.paxcount
 import com.geeksville.mesh.position
-import com.geeksville.mesh.telemetry
 import com.geeksville.mesh.user
 import com.google.protobuf.ByteString
 import kotlin.random.Random
 
-class NodeEntityPreviewParameterProvider : PreviewParameterProvider<NodeEntity> {
-
-    val mickeyMouse = NodeEntity(
+class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
+    val mickeyMouse = Node(
         num = 1955,
         user = user {
             id = "mickeyMouseId"
@@ -40,28 +38,22 @@ class NodeEntityPreviewParameterProvider : PreviewParameterProvider<NodeEntity> 
             shortName = "MM"
             hwModel = MeshProtos.HardwareModel.TBEAM
         },
-        longName = "Mickey Mouse",
-        shortName = "MM",
         position = position {
             latitudeI = 338125110
             longitudeI = -1179189760
             altitude = 138
             satsInView = 4
         },
-        latitude = 33.812511,
-        longitude = -117.918976,
         lastHeard = currentTime(),
         channel = 0,
         snr = 12.5F,
         rssi = -42,
-        deviceTelemetry = telemetry {
-            deviceMetrics = deviceMetrics {
-                channelUtilization = 2.4F
-                airUtilTx = 3.5F
-                batteryLevel = 85
-                voltage = 3.7F
-                uptimeSeconds = 3600
-            }
+        deviceMetrics = deviceMetrics {
+            channelUtilization = 2.4F
+            airUtilTx = 3.5F
+            batteryLevel = 85
+            voltage = 3.7F
+            uptimeSeconds = 3600
         },
         hopsAway = 0
     )
@@ -74,17 +66,13 @@ class NodeEntityPreviewParameterProvider : PreviewParameterProvider<NodeEntity> 
             id = "minnieMouseId"
             hwModel = MeshProtos.HardwareModel.HELTEC_V3
         },
-        longName = "Minnie Mouse",
-        shortName = "MiMo",
         snr = 12.5F,
         rssi = -42,
         position = position {},
-        latitude = 0.0,
-        longitude = 0.0,
         hopsAway = 1
     )
 
-    private val donaldDuck = NodeEntity(
+    private val donaldDuck = Node(
         num = Random.nextInt(),
         position = position {
             latitudeI = 338052347
@@ -92,20 +80,16 @@ class NodeEntityPreviewParameterProvider : PreviewParameterProvider<NodeEntity> 
             altitude = 121
             satsInView = 66
         },
-        latitude = 33.8052347,
-        longitude = -117.9208460,
         lastHeard = currentTime() - 300,
         channel = 0,
         snr = 12.5F,
         rssi = -42,
-        deviceTelemetry = telemetry {
-            deviceMetrics = deviceMetrics {
-                channelUtilization = 2.4F
-                airUtilTx = 3.5F
-                batteryLevel = 85
-                voltage = 3.7F
-                uptimeSeconds = 3600
-            }
+        deviceMetrics = deviceMetrics {
+            channelUtilization = 2.4F
+            airUtilTx = 3.5F
+            batteryLevel = 85
+            voltage = 3.7F
+            uptimeSeconds = 3600
         },
         user = user {
             id = "donaldDuckId"
@@ -114,18 +98,14 @@ class NodeEntityPreviewParameterProvider : PreviewParameterProvider<NodeEntity> 
             hwModel = MeshProtos.HardwareModel.HELTEC_V3
             publicKey = ByteString.copyFrom(ByteArray(32) { 1 })
         },
-        longName = "Donald Duck, the Grand Duck of the Ducks",
-        shortName = "DoDu",
-        environmentTelemetry = telemetry {
-            environmentMetrics = environmentMetrics {
-                temperature = 28.0F
-                relativeHumidity = 50.0F
-                barometricPressure = 1013.25F
-                gasResistance = 0.0F
-                voltage = 3.7F
-                current = 0.0F
-                iaq = 100
-            }
+        environmentMetrics = environmentMetrics {
+            temperature = 28.0F
+            relativeHumidity = 50.0F
+            barometricPressure = 1013.25F
+            gasResistance = 0.0F
+            voltage = 3.7F
+            current = 0.0F
+            iaq = 100
         },
         paxcounter = paxcount {
             wifi = 30
@@ -142,19 +122,15 @@ class NodeEntityPreviewParameterProvider : PreviewParameterProvider<NodeEntity> 
             shortName = "myId"
             hwModel = MeshProtos.HardwareModel.UNSET
         },
-        longName = "Meshtastic myId",
-        shortName = null,
-        environmentTelemetry = telemetry {
-            environmentMetrics = environmentMetrics {}
-        },
+        environmentMetrics = environmentMetrics {},
         paxcounter = paxcount {},
     )
 
-    private val almostNothing = NodeEntity(
+    private val almostNothing = Node(
         num = Random.nextInt(),
     )
 
-    override val values: Sequence<NodeEntity>
+    override val values: Sequence<Node>
         get() = sequenceOf(
             mickeyMouse, // "this" node
             unknown,

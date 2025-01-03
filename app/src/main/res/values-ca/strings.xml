@@ -115,7 +115,7 @@
     <string name="meshtastic_messages_notifications">Notificacions de missatge</string>
     <string name="protocol_stress_test">Prova d\'estrès del protocol</string>
     <string name="firmware_too_old">Actualització de firmware necessària</string>
-    <string name="firmware_old">El firmware de la ràdio és massa antic per comunicar-se amb aquesta aplicació, si us plau ves al panell de configuració i selecciona \"Actualitzar firmware\". Per a més informació sobre això veure <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
+    <string name="firmware_old">El firmware de la ràdio és massa antic per comunicar-se amb aquesta aplicació. Per a més informació sobre això veure <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
     <string name="okay">Acceptar</string>
     <string name="must_set_region">Has de configurar la regió!</string>
     <string name="region">Regió</string>
