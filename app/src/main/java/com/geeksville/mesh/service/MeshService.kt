@@ -105,7 +105,7 @@ import javax.inject.Inject
 import kotlin.math.absoluteValue
 
 sealed class ServiceAction {
-    data class GetDeviceMetadata(val destNum: Int) : ServiceAction()
+    data class Favorite(val node: Node) : ServiceAction()
     data class Ignore(val node: Node) : ServiceAction()
     data class Reaction(val emoji: String, val replyId: Int, val contactKey: String) : ServiceAction()
 }
@@ -1791,6 +1791,7 @@ class MeshService : Service(), Logging {
     private fun onServiceAction(action: ServiceAction) {
         when (action) {
             is ServiceAction.GetDeviceMetadata -> getDeviceMetadata(action.destNum)
+            is ServiceAction.Favorite -> favoriteNode(action.node)
             is ServiceAction.Ignore -> ignoreNode(action.node)
             is ServiceAction.Reaction -> sendReaction(action)
         }
@@ -1802,6 +1803,21 @@ class MeshService : Service(), Logging {
         })
     }
 
+    private fun favoriteNode(node: Node) = toRemoteExceptions {
+        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+            if (node.isFavorite) {
+                debug("removing node ${node.num} from favorite list")
+                removeFavoriteNode = node.num
+            } else {
+                debug("adding node ${node.num} to favorite list")
+                setFavoriteNode = node.num
+            }
+        })
+        updateNodeInfo(node.num) {
+            it.isFavorite = !node.isFavorite
+        }
+    }
+    
     private fun ignoreNode(node: Node) = toRemoteExceptions {
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
             if (node.isIgnored) {
