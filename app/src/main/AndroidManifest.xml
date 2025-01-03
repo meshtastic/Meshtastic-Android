@@ -73,6 +73,9 @@
     <!-- zxing library for QR Code scanning using camera -->
     <uses-permission android:name="android.permission.CAMERA" />
 
+    <!-- Needed for AlertApp to override Do Not Disturb -->
+    <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+
     <uses-feature
         android:name="android.hardware.camera"
         android:required="false" />
