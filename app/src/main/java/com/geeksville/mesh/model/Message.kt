@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@ import androidx.annotation.StringRes
 import com.geeksville.mesh.MeshProtos.Routing
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
-import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Reaction
 
 @Suppress("CyclomaticComplexMethod")
@@ -49,7 +48,7 @@ fun getStringResFrom(routingError: Int): Int = when (routingError) {
 data class Message(
     val uuid: Long,
     val receivedTime: Long,
-    val node: NodeEntity,
+    val node: Node,
     val text: String,
     val time: String,
     val read: Boolean,

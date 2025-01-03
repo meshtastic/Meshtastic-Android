@@ -115,7 +115,7 @@
     <string name="meshtastic_messages_notifications">Meddelandeaviseringar</string>
     <string name="protocol_stress_test">Stresstest för protokoll</string>
     <string name="firmware_too_old">Uppdatering av firmware krävs</string>
-    <string name="firmware_old">Radiomodulens firmware är för gammal för att prata med denna applikation, gå till inställningsfönstret och välj \"Uppdatera Firmware\". För mer information om detta se <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">vår installationsguide för Firmware</a>.</string>
+    <string name="firmware_old">Radiomodulens firmware är för gammal för att prata med denna applikation. För mer information om detta se <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">vår installationsguide för Firmware</a>.</string>
     <string name="okay">Okej</string>
     <string name="must_set_region">Du måste ställa in en region!</string>
     <string name="region">Region</string>

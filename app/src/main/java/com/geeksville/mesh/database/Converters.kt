@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,6 +112,21 @@ class Converters : Logging {
 
     @TypeConverter
     fun paxCounterToBytes(value: PaxcountProtos.Paxcount): ByteArray? {
+        return value.toByteArray()
+    }
+
+    @TypeConverter
+    fun bytesToMetadata(bytes: ByteArray): MeshProtos.DeviceMetadata {
+        return try {
+            MeshProtos.DeviceMetadata.parseFrom(bytes)
+        } catch (ex: InvalidProtocolBufferException) {
+            errormsg("bytesToMetadata TypeConverter error:", ex)
+            MeshProtos.DeviceMetadata.getDefaultInstance()
+        }
+    }
+
+    @TypeConverter
+    fun metadataToBytes(value: MeshProtos.DeviceMetadata): ByteArray? {
         return value.toByteArray()
     }
 }

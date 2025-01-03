@@ -115,8 +115,8 @@
     <string name="meshtastic_messages_notifications">Notificacións de mensaxe</string>
     <string name="protocol_stress_test">Protocolo de proba de esforzo</string>
     <string name="firmware_too_old">Actualización de firmware necesaria</string>
-    <string name="firmware_old">O firmware de radio é moi vello para falar con esta aplicación, por favor vai ao panel de configuración e escolle \"Actualizar firmware\". Para máis información nisto visita <a href="https://meshtastic.org/docs/getting-started/flashing-firmware"> a nosa guía de instalación de Firmware</a>.</string>
-    <string name="okay">Okay</string>
+    <string name="firmware_old">O firmware de radio é moi vello para falar con esta aplicación. Para máis información nisto visita <a href="https://meshtastic.org/docs/getting-started/flashing-firmware"> a nosa guía de instalación de Firmware</a>.</string>
+    <string name="okay">OK</string>
     <string name="must_set_region">Tes que seleccionar rexión!</string>
     <string name="region">Rexión</string>
     <string name="cant_change_no_radio">Non se puido cambiar de canle, porque a radio aínda non está conectada. Por favor inténteo de novo.</string>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,14 +59,14 @@ import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
-import com.geeksville.mesh.database.entity.NodeEntity
-import com.geeksville.mesh.ui.components.NodeMenuAction
+import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.components.NodeMenu
+import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.components.SignalInfo
 import com.geeksville.mesh.ui.compose.ElevationInfo
 import com.geeksville.mesh.ui.compose.SatelliteCountInfo
-import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
+import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.toDistanceString
 
@@ -74,8 +74,8 @@ import com.geeksville.mesh.util.toDistanceString
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun NodeItem(
-    thisNode: NodeEntity?,
-    thatNode: NodeEntity,
+    thisNode: Node?,
+    thatNode: Node,
     gpsFormat: Int,
     distanceUnits: Int,
     tempInFahrenheit: Boolean,
@@ -295,8 +295,8 @@ fun NodeItem(
 @Preview(showBackground = false)
 fun NodeInfoSimplePreview() {
     AppTheme {
-        val thisNode = NodeEntityPreviewParameterProvider().values.first()
-        val thatNode = NodeEntityPreviewParameterProvider().values.last()
+        val thisNode = NodePreviewParameterProvider().values.first()
+        val thatNode = NodePreviewParameterProvider().values.last()
         NodeItem(
             thisNode = thisNode,
             thatNode = thatNode,
@@ -314,11 +314,11 @@ fun NodeInfoSimplePreview() {
     uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES,
 )
 fun NodeInfoPreview(
-    @PreviewParameter(NodeEntityPreviewParameterProvider::class)
-    thatNode: NodeEntity
+    @PreviewParameter(NodePreviewParameterProvider::class)
+    thatNode: Node
 ) {
     AppTheme {
-        val thisNode = NodeEntityPreviewParameterProvider().values.first()
+        val thisNode = NodePreviewParameterProvider().values.first()
         Column {
             Text(
                 text = "Details Collapsed",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import androidx.room.Relation
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MeshProtos.User
 import com.geeksville.mesh.model.Message
+import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.util.getShortDateTime
 
 data class PacketEntity(
@@ -33,7 +34,7 @@ data class PacketEntity(
     @Relation(entity = ReactionEntity::class, parentColumn = "packet_id", entityColumn = "reply_id")
     val reactions: List<ReactionEntity> = emptyList(),
 ) {
-    suspend fun toMessage(getNode: suspend (userId: String?) -> NodeEntity) = with(packet) {
+    suspend fun toMessage(getNode: suspend (userId: String?) -> Node) = with(packet) {
         Message(
             uuid = uuid,
             receivedTime = received_time,
@@ -101,7 +102,7 @@ data class ReactionEntity(
 )
 
 private suspend fun ReactionEntity.toReaction(
-    getNode: suspend (userId: String?) -> NodeEntity
+    getNode: suspend (userId: String?) -> Node
 ) = Reaction(
     replyId = replyId,
     user = getNode(userId).user,
@@ -110,5 +111,5 @@ private suspend fun ReactionEntity.toReaction(
 )
 
 private suspend fun List<ReactionEntity>.toReaction(
-    getNode: suspend (userId: String?) -> NodeEntity
+    getNode: suspend (userId: String?) -> Node
 ) = this.map { it.toReaction(getNode) }

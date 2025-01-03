@@ -115,8 +115,8 @@
     <string name="meshtastic_messages_notifications">Nachrichten-Benachrichtigungen</string>
     <string name="protocol_stress_test">Protokollstress-Test</string>
     <string name="firmware_too_old">Firmware-Aktualisierung erforderlich</string>
-    <string name="firmware_old">Die Funkgerät-Firmware ist zu alt, um mit dieser App kommunizieren zu können. Bitte gehen Sie in die Einstellung-Leiste und wählen Sie „Firmware aktualisieren“. Für mehr Informationen darüber besuchen Sie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">unsere Firmware-Installationsanleitung</a> auf Github.</string>
-    <string name="okay">Okay</string>
+    <string name="firmware_old">Die Funkgerät-Firmware ist zu alt, um mit dieser App kommunizieren zu können. Für mehr Informationen darüber besuchen Sie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">unsere Firmware-Installationsanleitung</a>.</string>
+    <string name="okay">OK</string>
     <string name="must_set_region">Sie müssen eine Region festlegen!</string>
     <string name="region">Region</string>
     <string name="cant_change_no_radio">Konnte den Kanal nicht ändern, da das Funkgerät noch nicht verbunden ist. Bitte versuchen Sie es erneut.</string>
@@ -253,11 +253,11 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Received Signal Strength Indicator, a measurement used to determine the power level being received by the antenna. A higher RSSI value generally indicates a stronger and more stable connection.</string>
     <string name="iaq_definition">(Innenluftqualität) relativer IAQ-Wert gemessen von Bosch BME680.</string>
-    <string name="device_metrics_log">Geräte-Metriken-Protokoll</string>
-    <string name="node_map">Nodekarte</string>
+    <string name="device_metrics_log">Funkauslastung</string>
+    <string name="node_map">Node Positionsverlaufkarte</string>
     <string name="position_log">Positions-Protokoll</string>
-    <string name="env_metrics_log">Sensor-Protokoll</string>
-    <string name="sig_metrics_log">Signal-Metriken-Protkoll</string>
+    <string name="env_metrics_log">Sensorprotokoll</string>
+    <string name="sig_metrics_log">Signalprotokoll</string>
     <string name="administration">Administration</string>
     <string name="remote_admin">Fernadministration</string>
     <string name="bad">Schlecht</string>

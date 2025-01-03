@@ -115,7 +115,7 @@
     <string name="meshtastic_messages_notifications">メッセージ通知</string>
     <string name="protocol_stress_test">プロトコルストレステスト</string>
     <string name="firmware_too_old">ファームウェア更新が必要です。</string>
-    <string name="firmware_old">ラジオファームウェアは旧バージョンのため、アプリと通信ができません。設定パネルからファームウェアを更新してください。詳細はGithub<a href="https://meshtastic.org/docs/getting-started/flashing-firmware"> Firmware Installation guide</a> に記載されております。</string>
+    <string name="firmware_old">ラジオファームウェアは旧バージョンのため、アプリと通信ができません。詳細は<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Firmware Installation guide</a> に記載されております。</string>
     <string name="okay">OK</string>
     <string name="must_set_region">リージョンを指定する必要があります。</string>
     <string name="region">リージョン</string>

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,8 +26,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import com.geeksville.mesh.R
-import com.geeksville.mesh.database.entity.NodeEntity
-import com.geeksville.mesh.ui.preview.NodeEntityPreviewParameterProvider
+import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
 
 const val MAX_VALID_SNR = 100F
@@ -36,7 +36,7 @@ const val MAX_VALID_RSSI = 0
 @Composable
 fun SignalInfo(
     modifier: Modifier = Modifier,
-    node: NodeEntity,
+    node: Node,
     isThisNode: Boolean
 ) {
     val text = if (isThisNode) {
@@ -81,7 +81,7 @@ fun SignalInfo(
 fun SignalInfoSimplePreview() {
     AppTheme {
         SignalInfo(
-            node = NodeEntity(
+            node = Node(
                 num = 1,
                 lastHeard = 0,
                 channel = 0,
@@ -97,8 +97,8 @@ fun SignalInfoSimplePreview() {
 @PreviewLightDark
 @Composable
 fun SignalInfoPreview(
-    @PreviewParameter(NodeEntityPreviewParameterProvider::class)
-    node: NodeEntity
+    @PreviewParameter(NodePreviewParameterProvider::class)
+    node: Node
 ) {
     AppTheme {
         SignalInfo(
@@ -111,8 +111,8 @@ fun SignalInfoPreview(
 @Composable
 @PreviewLightDark
 fun SignalInfoSelfPreview(
-    @PreviewParameter(NodeEntityPreviewParameterProvider::class)
-    node: NodeEntity
+    @PreviewParameter(NodePreviewParameterProvider::class)
+    node: Node
 ) {
     AppTheme {
         SignalInfo(

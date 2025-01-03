@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,6 @@ import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.QuickChatActionRepository
 import com.geeksville.mesh.database.entity.MyNodeEntity
-import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
@@ -235,7 +234,7 @@ class UIViewModel @Inject constructor(
     )
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val nodeList: StateFlow<List<NodeEntity>> = nodesUiState.flatMapLatest { state ->
+    val nodeList: StateFlow<List<Node>> = nodesUiState.flatMapLatest { state ->
         nodeDB.getNodes(state.sort, state.filter, state.includeUnknown)
     }.stateIn(
         scope = viewModelScope,
@@ -245,7 +244,7 @@ class UIViewModel @Inject constructor(
 
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeEntity?> get() = nodeDB.myNodeInfo
-    val ourNodeInfo: StateFlow<NodeEntity?> get() = nodeDB.ourNodeInfo
+    val ourNodeInfo: StateFlow<Node?> get() = nodeDB.ourNodeInfo
 
     val nodesWithPosition get() = nodeDB.nodeDBbyNum.value.values.filter { it.validPosition != null }
 
@@ -484,7 +483,7 @@ class UIViewModel @Inject constructor(
             updateLoraConfig { it.copy { region = value } }
         }
 
-    fun favoriteNode(node: NodeEntity) = viewModelScope.launch {
+    fun favoriteNode(node: Node) = viewModelScope.launch {
         try {
             radioConfigRepository.onServiceAction(ServiceAction.Favorite(node))
         } catch (ex: RemoteException) {
@@ -492,7 +491,7 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    fun ignoreNode(node: NodeEntity) = viewModelScope.launch {
+    fun ignoreNode(node: Node) = viewModelScope.launch {
         try {
             radioConfigRepository.onServiceAction(ServiceAction.Ignore(node))
         } catch (ex: RemoteException) {
