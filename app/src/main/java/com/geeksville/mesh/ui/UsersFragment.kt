@@ -135,6 +135,7 @@ fun NodesScreen(
                     when (menuItem) {
                         is NodeMenuAction.Remove -> model.removeNode(node.num)
                         is NodeMenuAction.Ignore -> model.ignoreNode(node)
+                        is NodeMenuAction.Favorite -> model.favoriteNode(node)
                         is NodeMenuAction.DirectMessage -> navigateToMessages(node)
                         is NodeMenuAction.RequestUserInfo -> model.requestUserInfo(node.num)
                         is NodeMenuAction.RequestPosition -> model.requestPosition(node.num)

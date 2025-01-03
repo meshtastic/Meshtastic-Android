@@ -281,6 +281,7 @@ internal fun MessageScreen(
                 when (action) {
                     is NodeMenuAction.Remove -> viewModel.removeNode(action.node.num)
                     is NodeMenuAction.Ignore -> viewModel.ignoreNode(action.node)
+                    is NodeMenuAction.Favorite -> viewModel.favoriteNode(action.node)
                     is NodeMenuAction.DirectMessage -> navigateToMessages(action.node)
                     is NodeMenuAction.RequestUserInfo -> viewModel.requestUserInfo(action.node.num)
                     is NodeMenuAction.RequestPosition -> viewModel.requestPosition(action.node.num)

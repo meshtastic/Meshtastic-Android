@@ -47,8 +47,25 @@ fun NodeMenu(
     expanded: Boolean = false,
     onAction: (NodeMenuAction) -> Unit
 ) {
+    var displayFavoriteDialog by remember { mutableStateOf(false) }
     var displayIgnoreDialog by remember { mutableStateOf(false) }
     var displayRemoveDialog by remember { mutableStateOf(false) }
+    if (displayFavoriteDialog) {
+        SimpleAlertDialog(
+            title = R.string.favorite,
+            text = stringResource(
+                id = if (node.isFavorite) R.string.favorite_remove else R.string.favorite_add,
+                node.user.longName
+            ),
+            onConfirm = {
+                displayFavoriteDialog = false
+                onAction(NodeMenuAction.Favorite(node))
+            },
+            onDismiss = {
+                displayFavoriteDialog = false
+            }
+        )
+    }
     if (displayIgnoreDialog) {
         SimpleAlertDialog(
             title = R.string.ignore,
@@ -116,6 +133,25 @@ fun NodeMenu(
             DropdownMenuItem(
                 onClick = {
                     onDismissRequest()
+                    displayFavoriteDialog = true
+                },
+                enabled = !node.isIgnored,
+            ) {
+                Text(stringResource(R.string.favorite))
+                Spacer(Modifier.weight(1f))
+                Checkbox(
+                    checked = node.isFavorite,
+                    onCheckedChange = {
+                        onDismissRequest()
+                        displayFavoriteDialog = true
+                    },
+                    modifier = Modifier.size(24.dp),
+                    enabled = !node.isIgnored,
+                )
+            }
+            DropdownMenuItem(
+                onClick = {
+                    onDismissRequest()
                     displayIgnoreDialog = true
                 },
             ) {
@@ -152,6 +188,7 @@ fun NodeMenu(
 sealed class NodeMenuAction {
     data class Remove(val node: NodeEntity) : NodeMenuAction()
     data class Ignore(val node: NodeEntity) : NodeMenuAction()
+    data class Favorite(val node: NodeEntity) : NodeMenuAction()
     data class DirectMessage(val node: NodeEntity) : NodeMenuAction()
     data class RequestUserInfo(val node: NodeEntity) : NodeMenuAction()
     data class RequestPosition(val node: NodeEntity) : NodeMenuAction()
