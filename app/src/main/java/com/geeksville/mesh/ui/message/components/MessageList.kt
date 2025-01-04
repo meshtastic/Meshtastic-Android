@@ -20,7 +20,7 @@ package com.geeksville.mesh.ui.message.components
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -38,9 +38,10 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.model.Message
@@ -97,10 +98,12 @@ internal fun MessageList(
         items(messages, key = { it.uuid }) { msg ->
             val fromLocal = msg.node.user.id == DataPacket.ID_LOCAL
             val selected by remember { derivedStateOf { selectedIds.value.contains(msg.uuid) } }
-
-            Box(Modifier.wrapContentSize(Alignment.TopStart)) {
+            var messageItemHeight by remember { mutableStateOf(0) }
+            val density = LocalDensity.current
+            Box(Modifier.wrapContentSize(Alignment.TopStart).padding(vertical = 8.dp)) {
                 var expandedNodeMenu by remember { mutableStateOf(false) }
                 MessageItem(
+                    modifier = Modifier.onGloballyPositioned { messageItemHeight = it.size.height },
                     node = msg.node,
                     messageText = msg.text,
                     messageTime = msg.time,
@@ -126,12 +129,14 @@ internal fun MessageList(
                     expanded = expandedNodeMenu,
                     onAction = onNodeMenuAction
                 )
+                ReactionRow(
+                    modifier = Modifier.padding(
+                        top = with(density) { messageItemHeight.toDp() } + 4.dp
+                    ),
+                    fromLocal = fromLocal,
+                    reactions = msg.emojis
+                ) { showReactionDialog = msg.emojis }
             }
-            ReactionRow(
-                modifier = Modifier.zIndex(1F).offset(y = (-8).dp),
-                fromLocal = fromLocal,
-                reactions = msg.emojis
-            ) { showReactionDialog = msg.emojis }
         }
     }
 }
