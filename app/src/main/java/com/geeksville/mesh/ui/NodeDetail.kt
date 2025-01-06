@@ -558,46 +558,46 @@ private fun PowerMetrics(node: Node) = with(node.powerMetrics) {
         verticalArrangement = Arrangement.SpaceEvenly,
     ) {
         if (ch1Voltage != 0f) {
-            InfoCard(
-                icon = Icons.Default.Bolt,
-                text = "Channel 1",
-                value = "%.2fV".format(ch1Voltage)
-            )
-        }
-        if (ch1Current != 0f) {
-            InfoCard(
-                icon = Icons.Default.Power,
-                text = "Channel 1",
-                value = "%.1fmA".format(ch1Current)
-            )
+            Column {
+                InfoCard(
+                    icon = Icons.Default.Bolt,
+                    text = "Channel 1",
+                    value = "%.2fV".format(ch1Voltage)
+                )
+                InfoCard(
+                    icon = Icons.Default.Power,
+                    text = "Channel 1",
+                    value = "%.1fmA".format(ch1Current)
+                )
+            }
         }
         if (ch2Voltage != 0f) {
-            InfoCard(
-                icon = Icons.Default.Bolt,
-                text = "Channel 2",
-                value = "%.2fV".format(ch2Voltage)
-            )
-        }
-        if (ch2Current != 0f) {
-            InfoCard(
-                icon = Icons.Default.Power,
-                text = "Channel 2",
-                value = "%.1fmA".format(ch2Current)
-            )
+            Column {
+                InfoCard(
+                    icon = Icons.Default.Bolt,
+                    text = "Channel 2",
+                    value = "%.2fV".format(ch2Voltage)
+                )
+                InfoCard(
+                    icon = Icons.Default.Power,
+                    text = "Channel 2",
+                    value = "%.1fmA".format(ch2Current)
+                )
+            }
         }
         if (ch3Voltage != 0f) {
-            InfoCard(
-                icon = Icons.Default.Bolt,
-                text = "Channel 3",
-                value = "%.2fV".format(ch3Voltage)
-            )
-        }
-        if (ch3Current != 0f) {
-            InfoCard(
-                icon = Icons.Default.Power,
-                text = "Channel 3",
-                value = "%.1fmA".format(ch3Current)
-            )
+            Column {
+                InfoCard(
+                    icon = Icons.Default.Bolt,
+                    text = "Channel 3",
+                    value = "%.2fV".format(ch3Voltage)
+                )
+                InfoCard(
+                    icon = Icons.Default.Power,
+                    text = "Channel 3",
+                    value = "%.1fmA".format(ch3Current)
+                )
+            }
         }
     }
 }
