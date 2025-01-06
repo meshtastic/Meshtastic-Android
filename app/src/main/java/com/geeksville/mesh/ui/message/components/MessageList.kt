@@ -18,7 +18,6 @@
 package com.geeksville.mesh.ui.message.components
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -54,7 +53,6 @@ internal fun MessageList(
     messages: List<Message>,
     selectedIds: MutableState<Set<Long>>,
     onUnreadChanged: (Long) -> Unit,
-    contentPadding: PaddingValues,
     onSendReaction: (String, Int) -> Unit,
     onNodeMenuAction: (NodeMenuAction) -> Unit = {}
 ) {
@@ -89,7 +87,6 @@ internal fun MessageList(
         modifier = Modifier.fillMaxSize(),
         state = listState,
         reverseLayout = true,
-        contentPadding = contentPadding
     ) {
         items(messages, key = { it.uuid }) { msg ->
             val fromLocal = msg.node.user.id == DataPacket.ID_LOCAL

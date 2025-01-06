@@ -42,7 +42,7 @@ import androidx.lifecycle.compose.dropUnlessResumed
 import com.geeksville.mesh.R
 
 @Composable
-fun BaseScaffold(
+internal fun BaseScaffold(
     title: String,
     modifier: Modifier = Modifier,
     canNavigateBack: Boolean = true,
@@ -82,7 +82,7 @@ fun BaseScaffold(
 }
 
 @Composable
-fun BaseScaffold(
+internal fun BaseScaffold(
     modifier: Modifier = Modifier,
     topBar: @Composable () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},

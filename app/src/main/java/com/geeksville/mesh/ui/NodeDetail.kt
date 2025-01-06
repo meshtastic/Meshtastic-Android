@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-@file:Suppress("TooManyFunctions", "LongMethod")
+@file:Suppress("TooManyFunctions")
 
 package com.geeksville.mesh.ui
 
@@ -108,7 +108,7 @@ import kotlin.math.ln
 fun NodeDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: MetricsViewModel = hiltViewModel(),
-    onNavigate: (Any) -> Unit,
+    onNavigate: (Route) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -135,7 +135,7 @@ private fun NodeDetailList(
     modifier: Modifier = Modifier,
     node: Node,
     metricsState: MetricsState,
-    onNavigate: (Any) -> Unit = {},
+    onNavigate: (Route) -> Unit = {},
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -320,7 +320,7 @@ private fun NodeDetailsContent(
 }
 
 @Composable
-fun LogNavigationList(state: MetricsState, onNavigate: (Any) -> Unit) {
+fun LogNavigationList(state: MetricsState, onNavigate: (Route) -> Unit) {
     NavCard(
         title = stringResource(R.string.device_metrics_log),
         icon = Icons.Default.ChargingStation,
