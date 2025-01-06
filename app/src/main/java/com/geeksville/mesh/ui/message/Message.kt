@@ -17,10 +17,6 @@
 
 package com.geeksville.mesh.ui.message
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -66,10 +62,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -80,87 +74,18 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
-import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.activityViewModels
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.R
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.QuickChatAction
-import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannel
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.message.components.MessageList
-import com.geeksville.mesh.ui.navigateToNavGraph
 import com.geeksville.mesh.ui.theme.AppTheme
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-
-internal fun FragmentManager.navigateToMessages(contactKey: String, message: String = "") {
-    val messagesFragment = MessagesFragment().apply {
-        arguments = bundleOf("contactKey" to contactKey, "message" to message)
-    }
-    beginTransaction()
-        .add(R.id.mainActivityLayout, messagesFragment)
-        .addToBackStack(null)
-        .commit()
-}
-
-@AndroidEntryPoint
-class MessagesFragment : Fragment(), Logging {
-    private val model: UIViewModel by activityViewModels()
-
-    private fun navigateToMessages(node: Node) = node.user.let { user ->
-        val hasPKC = model.ourNodeInfo.value?.hasPKC == true && node.hasPKC // TODO use meta.hasPKC
-        val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
-        val contactKey = "$channel${user.id}"
-        info("calling MessagesFragment filter: $contactKey")
-        parentFragmentManager.navigateToMessages(contactKey)
-    }
-
-    private fun navigateToNodeDetails(nodeNum: Int) {
-        info("calling NodeDetails --> destNum: $nodeNum")
-        parentFragmentManager.navigateToNavGraph(nodeNum, "NodeDetails")
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        val contactKey = arguments?.getString("contactKey").toString()
-        val message = arguments?.getString("message").toString()
-
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setBackgroundColor(ContextCompat.getColor(context, R.color.colorAdvancedBackground))
-            setContent {
-                AppTheme {
-                    MessageScreen(
-                        contactKey = contactKey,
-                        message = message,
-                        viewModel = model,
-                        navigateToMessages = ::navigateToMessages,
-                        navigateToNodeDetails = ::navigateToNodeDetails,
-                    ) { parentFragmentManager.popBackStack() }
-                }
-            }
-        }
-    }
-}
-
-sealed class MessageMenuAction {
-    data object ClipboardCopy : MessageMenuAction()
-    data object Delete : MessageMenuAction()
-    data object Dismiss : MessageMenuAction()
-    data object SelectAll : MessageMenuAction()
-}
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -168,7 +93,7 @@ internal fun MessageScreen(
     contactKey: String,
     message: String,
     viewModel: UIViewModel = hiltViewModel(),
-    navigateToMessages: (Node) -> Unit,
+    navigateToMessages: (String) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
     onNavigateBack: () -> Unit
 ) {
@@ -281,7 +206,11 @@ internal fun MessageScreen(
                 when (action) {
                     is NodeMenuAction.Remove -> viewModel.removeNode(action.node.num)
                     is NodeMenuAction.Ignore -> viewModel.ignoreNode(action.node)
-                    is NodeMenuAction.DirectMessage -> navigateToMessages(action.node)
+                    is NodeMenuAction.DirectMessage -> {
+                        val hasPKC = viewModel.ourNodeInfo.value?.hasPKC == true && action.node.hasPKC
+                        val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else action.node.channel
+                        navigateToMessages("$channel${action.node.user.id}")
+                    }
                     is NodeMenuAction.RequestUserInfo -> viewModel.requestUserInfo(action.node.num)
                     is NodeMenuAction.RequestPosition -> viewModel.requestPosition(action.node.num)
                     is NodeMenuAction.TraceRoute -> viewModel.requestTraceroute(action.node.num)
@@ -322,6 +251,13 @@ private fun DeleteMessageDialog(
             }
         }
     )
+}
+
+sealed class MessageMenuAction {
+    data object ClipboardCopy : MessageMenuAction()
+    data object Delete : MessageMenuAction()
+    data object Dismiss : MessageMenuAction()
+    data object SelectAll : MessageMenuAction()
 }
 
 @Composable
