@@ -82,7 +82,6 @@ import com.geeksville.mesh.ui.components.NodeMapScreen
 import com.geeksville.mesh.ui.components.PositionLogScreen
 import com.geeksville.mesh.ui.components.SignalMetricsScreen
 import com.geeksville.mesh.ui.components.TracerouteLogScreen
-import com.geeksville.mesh.util.UiText
 import com.geeksville.mesh.ui.components.config.AmbientLightingConfigScreen
 import com.geeksville.mesh.ui.components.config.AudioConfigScreen
 import com.geeksville.mesh.ui.components.config.BluetoothConfigScreen
@@ -106,7 +105,8 @@ import com.geeksville.mesh.ui.components.config.SerialConfigScreen
 import com.geeksville.mesh.ui.components.config.StoreForwardConfigScreen
 import com.geeksville.mesh.ui.components.config.TelemetryConfigScreen
 import com.geeksville.mesh.ui.components.config.UserConfigScreen
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
+import com.geeksville.mesh.ui.theme.AppTheme
+import com.geeksville.mesh.util.UiText
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.Serializable
 
@@ -146,7 +146,7 @@ class NavGraphFragment : ScreenFragment("NavGraph"), Logging {
             setContent {
                 val node by model.destNode.collectAsStateWithLifecycle()
 
-                AppCompatTheme {
+                AppTheme {
                     val navController: NavHostController = rememberNavController()
                     Scaffold(
                         topBar = {
