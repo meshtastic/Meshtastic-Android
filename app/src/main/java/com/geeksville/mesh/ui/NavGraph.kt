@@ -71,6 +71,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.geeksville.mesh.MeshProtos.DeviceMetadata
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
@@ -186,6 +187,8 @@ enum class AdminRoute(@StringRes val title: Int) {
 sealed interface Route {
     @Serializable
     data class Messages(val contactKey: String, val message: String = "") : Route
+    @Serializable
+    data class Share(val message: String) : Route
 
     @Serializable
     data class RadioConfig(val destNum: Int? = null) : Route
@@ -447,6 +450,16 @@ fun NavGraph(
         composable<Route.Paxcounter> {
             val parentEntry = remember { navController.getBackStackEntry<Route.RadioConfig>() }
             PaxcounterConfigScreen(hiltViewModel<RadioConfigViewModel>(parentEntry))
+        }
+        composable<Route.Share> { backStackEntry ->
+            val message = backStackEntry.toRoute<Route.Share>().message
+            ShareScreen(
+                navigateUp = navController::navigateUp,
+            ) {
+                navController.navigate(Route.Messages(it, message)) {
+                    popUpTo<Route.Share> { inclusive = true }
+                }
+            }
         }
     }
 }
