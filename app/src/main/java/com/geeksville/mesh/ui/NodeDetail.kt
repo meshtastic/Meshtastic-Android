@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-@file:Suppress("TooManyFunctions", "LongMethod")
+@file:Suppress("TooManyFunctions")
 
 package com.geeksville.mesh.ui
 
@@ -108,7 +108,7 @@ import kotlin.math.ln
 fun NodeDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: MetricsViewModel = hiltViewModel(),
-    onNavigate: (Any) -> Unit,
+    onNavigate: (Route) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -135,7 +135,7 @@ private fun NodeDetailList(
     modifier: Modifier = Modifier,
     node: Node,
     metricsState: MetricsState,
-    onNavigate: (Any) -> Unit = {},
+    onNavigate: (Route) -> Unit = {},
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -320,7 +320,7 @@ private fun NodeDetailsContent(
 }
 
 @Composable
-fun LogNavigationList(state: MetricsState, onNavigate: (Any) -> Unit) {
+fun LogNavigationList(state: MetricsState, onNavigate: (Route) -> Unit) {
     NavCard(
         title = stringResource(R.string.device_metrics_log),
         icon = Icons.Default.ChargingStation,
@@ -558,46 +558,46 @@ private fun PowerMetrics(node: Node) = with(node.powerMetrics) {
         verticalArrangement = Arrangement.SpaceEvenly,
     ) {
         if (ch1Voltage != 0f) {
-            InfoCard(
-                icon = Icons.Default.Bolt,
-                text = "Channel 1",
-                value = "%.2fV".format(ch1Voltage)
-            )
-        }
-        if (ch1Current != 0f) {
-            InfoCard(
-                icon = Icons.Default.Power,
-                text = "Channel 1",
-                value = "%.1fmA".format(ch1Current)
-            )
+            Column {
+                InfoCard(
+                    icon = Icons.Default.Bolt,
+                    text = "Channel 1",
+                    value = "%.2fV".format(ch1Voltage)
+                )
+                InfoCard(
+                    icon = Icons.Default.Power,
+                    text = "Channel 1",
+                    value = "%.1fmA".format(ch1Current)
+                )
+            }
         }
         if (ch2Voltage != 0f) {
-            InfoCard(
-                icon = Icons.Default.Bolt,
-                text = "Channel 2",
-                value = "%.2fV".format(ch2Voltage)
-            )
-        }
-        if (ch2Current != 0f) {
-            InfoCard(
-                icon = Icons.Default.Power,
-                text = "Channel 2",
-                value = "%.1fmA".format(ch2Current)
-            )
+            Column {
+                InfoCard(
+                    icon = Icons.Default.Bolt,
+                    text = "Channel 2",
+                    value = "%.2fV".format(ch2Voltage)
+                )
+                InfoCard(
+                    icon = Icons.Default.Power,
+                    text = "Channel 2",
+                    value = "%.1fmA".format(ch2Current)
+                )
+            }
         }
         if (ch3Voltage != 0f) {
-            InfoCard(
-                icon = Icons.Default.Bolt,
-                text = "Channel 3",
-                value = "%.2fV".format(ch3Voltage)
-            )
-        }
-        if (ch3Current != 0f) {
-            InfoCard(
-                icon = Icons.Default.Power,
-                text = "Channel 3",
-                value = "%.1fmA".format(ch3Current)
-            )
+            Column {
+                InfoCard(
+                    icon = Icons.Default.Bolt,
+                    text = "Channel 3",
+                    value = "%.2fV".format(ch3Voltage)
+                )
+                InfoCard(
+                    icon = Icons.Default.Power,
+                    text = "Channel 3",
+                    value = "%.1fmA".format(ch3Current)
+                )
+            }
         }
     }
 }
