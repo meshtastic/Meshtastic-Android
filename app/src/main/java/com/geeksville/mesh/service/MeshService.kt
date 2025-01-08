@@ -105,6 +105,7 @@ import javax.inject.Inject
 import kotlin.math.absoluteValue
 
 sealed class ServiceAction {
+    data class GetDeviceMetadata(val destNum: Int) : ServiceAction()
     data class Favorite(val node: Node) : ServiceAction()
     data class Ignore(val node: Node) : ServiceAction()
     data class Reaction(val emoji: String, val replyId: Int, val contactKey: String) : ServiceAction()
