@@ -104,12 +104,12 @@ import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.components.AdaptiveTwoPane
 import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.PreferenceFooter
-import com.geeksville.mesh.ui.components.config.ChannelCard
-import com.geeksville.mesh.ui.components.config.ChannelSelection
-import com.geeksville.mesh.ui.components.config.EditChannelDialog
 import com.geeksville.mesh.ui.components.dragContainer
 import com.geeksville.mesh.ui.components.dragDropItemsIndexed
 import com.geeksville.mesh.ui.components.rememberDragDropState
+import com.geeksville.mesh.ui.radioconfig.components.ChannelCard
+import com.geeksville.mesh.ui.radioconfig.components.ChannelSelection
+import com.geeksville.mesh.ui.radioconfig.components.EditChannelDialog
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.journeyapps.barcodescanner.ScanContract

@@ -97,6 +97,7 @@ import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
+import com.geeksville.mesh.ui.radioconfig.NavCard
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.DistanceUnit
 import com.geeksville.mesh.util.formatAgo
