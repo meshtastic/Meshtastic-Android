@@ -41,6 +41,7 @@ import androidx.navigation.toRoute
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.model.MetricsViewModel
+import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.addRadioConfigSection
 import com.geeksville.mesh.ui.components.BaseScaffold
 import com.geeksville.mesh.ui.components.DeviceMetricsScreen
@@ -52,7 +53,6 @@ import com.geeksville.mesh.ui.components.TracerouteLogScreen
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.serialization.Serializable
 
 internal fun FragmentManager.navigateToNavGraph(
     destNum: Int? = null,
@@ -112,49 +112,6 @@ class NavGraphFragment : ScreenFragment("NavGraph"), Logging {
             }
         }
     }
-}
-
-sealed interface Route {
-    @Serializable
-    data class Messages(val contactKey: String, val message: String = "") : Route
-    @Serializable
-    data class Share(val message: String) : Route
-
-    @Serializable
-    data class RadioConfig(val destNum: Int? = null) : Route
-    @Serializable data object User : Route
-    @Serializable data object ChannelConfig : Route
-    @Serializable data object Device : Route
-    @Serializable data object Position : Route
-    @Serializable data object Power : Route
-    @Serializable data object Network : Route
-    @Serializable data object Display : Route
-    @Serializable data object LoRa : Route
-    @Serializable data object Bluetooth : Route
-    @Serializable data object Security : Route
-
-    @Serializable data object MQTT : Route
-    @Serializable data object Serial : Route
-    @Serializable data object ExtNotification : Route
-    @Serializable data object StoreForward : Route
-    @Serializable data object RangeTest : Route
-    @Serializable data object Telemetry : Route
-    @Serializable data object CannedMessage : Route
-    @Serializable data object Audio : Route
-    @Serializable data object RemoteHardware : Route
-    @Serializable data object NeighborInfo : Route
-    @Serializable data object AmbientLighting : Route
-    @Serializable data object DetectionSensor : Route
-    @Serializable data object Paxcounter : Route
-
-    @Serializable
-    data class NodeDetail(val destNum: Int) : Route
-    @Serializable data object DeviceMetrics : Route
-    @Serializable data object NodeMap : Route
-    @Serializable data object PositionLog : Route
-    @Serializable data object EnvironmentMetrics : Route
-    @Serializable data object SignalMetrics : Route
-    @Serializable data object TracerouteLog : Route
 }
 
 @Composable

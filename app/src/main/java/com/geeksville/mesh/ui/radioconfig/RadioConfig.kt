@@ -65,7 +65,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
-import com.geeksville.mesh.ui.Route
+import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.radioconfig.components.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog

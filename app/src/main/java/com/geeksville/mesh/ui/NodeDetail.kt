@@ -95,6 +95,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.radioconfig.NavCard
