@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,14 +22,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Forward
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.automirrored.filled.Message
@@ -61,7 +54,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
-import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
@@ -71,17 +63,19 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import com.geeksville.mesh.MeshProtos.DeviceMetadata
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.RadioConfigViewModel
+import com.geeksville.mesh.ui.components.BaseScaffold
 import com.geeksville.mesh.ui.components.DeviceMetricsScreen
 import com.geeksville.mesh.ui.components.EnvironmentMetricsScreen
 import com.geeksville.mesh.ui.components.NodeMapScreen
 import com.geeksville.mesh.ui.components.PositionLogScreen
 import com.geeksville.mesh.ui.components.SignalMetricsScreen
 import com.geeksville.mesh.ui.components.TracerouteLogScreen
-import com.geeksville.mesh.util.UiText
 import com.geeksville.mesh.ui.components.config.AmbientLightingConfigScreen
 import com.geeksville.mesh.ui.components.config.AudioConfigScreen
 import com.geeksville.mesh.ui.components.config.BluetoothConfigScreen
@@ -105,7 +99,8 @@ import com.geeksville.mesh.ui.components.config.SerialConfigScreen
 import com.geeksville.mesh.ui.components.config.StoreForwardConfigScreen
 import com.geeksville.mesh.ui.components.config.TelemetryConfigScreen
 import com.geeksville.mesh.ui.components.config.UserConfigScreen
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
+import com.geeksville.mesh.ui.theme.AppTheme
+import com.geeksville.mesh.util.UiText
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.serialization.Serializable
 
@@ -141,32 +136,26 @@ class NavGraphFragment : ScreenFragment("NavGraph"), Logging {
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setBackgroundColor(ContextCompat.getColor(context, R.color.colorAdvancedBackground))
             setContent {
                 val node by model.destNode.collectAsStateWithLifecycle()
 
-                AppCompatTheme {
+                AppTheme {
                     val navController: NavHostController = rememberNavController()
-                    Scaffold(
-                        topBar = {
-                            MeshAppBar(
-                                currentScreen = node?.user?.longName
-                                    ?: stringResource(R.string.unknown_username),
-                                canNavigateBack = true,
-                                navigateUp = {
-                                    if (navController.previousBackStackEntry != null) {
-                                        navController.navigateUp()
-                                    } else {
-                                        parentFragmentManager.popBackStack()
-                                    }
-                                },
-                            )
-                        }
-                    ) { innerPadding ->
+                    BaseScaffold(
+                        title = node?.user?.longName
+                            ?: stringResource(R.string.unknown_username),
+                        canNavigateBack = true,
+                        navigateUp = {
+                            if (navController.previousBackStackEntry != null) {
+                                navController.navigateUp()
+                            } else {
+                                parentFragmentManager.popBackStack()
+                            }
+                        },
+                    ) {
                         NavGraph(
                             navController = navController,
                             startDestination = startDestination,
-                            modifier = Modifier.padding(innerPadding),
                         )
                     }
                 }
@@ -185,6 +174,8 @@ enum class AdminRoute(@StringRes val title: Int) {
 sealed interface Route {
     @Serializable
     data class Messages(val contactKey: String, val message: String = "") : Route
+    @Serializable
+    data class Share(val message: String) : Route
 
     @Serializable
     data class RadioConfig(val destNum: Int? = null) : Route
@@ -235,6 +226,18 @@ enum class ConfigRoute(val title: String, val route: Route, val icon: ImageVecto
     LORA("LoRa", Route.LoRa, Icons.Default.CellTower, 5),
     BLUETOOTH("Bluetooth", Route.Bluetooth, Icons.Default.Bluetooth, 6),
     SECURITY("Security", Route.Security, Icons.Default.Security, type = 7),
+    ;
+
+    companion object {
+        fun filterExcludedFrom(metadata: DeviceMetadata?): List<ConfigRoute> = entries.filter {
+            when {
+                metadata == null -> true
+                it == BLUETOOTH -> metadata.hasBluetooth
+                it == NETWORK -> metadata.hasWifi || metadata.hasEthernet
+                else -> true // Include all other routes by default
+            }
+        }
+    }
 }
 
 // ModuleConfig (type = AdminProtos.AdminMessage.ModuleConfigType)
@@ -252,6 +255,18 @@ enum class ModuleRoute(val title: String, val route: Route, val icon: ImageVecto
     AMBIENT_LIGHTING("Ambient Lighting", Route.AmbientLighting, Icons.Default.LightMode, 10),
     DETECTION_SENSOR("Detection Sensor", Route.DetectionSensor, Icons.Default.Sensors, 11),
     PAXCOUNTER("Paxcounter", Route.Paxcounter, Icons.Default.PermScanWifi, 12),
+    ;
+
+    val bitfield: Int get() = 1 shl ordinal
+
+    companion object {
+        fun filterExcludedFrom(metadata: DeviceMetadata?): List<ModuleRoute> = entries.filter {
+            when (metadata) {
+                null -> true
+                else -> metadata.excludedModules and it.bitfield == 0
+            }
+        }
+    }
 }
 
 /**
@@ -264,29 +279,6 @@ sealed class ResponseState<out T> {
     data class Error(val error: UiText) : ResponseState<Nothing>()
 
     fun isWaiting() = this !is Empty
-}
-
-@Composable
-private fun MeshAppBar(
-    currentScreen: String,
-    canNavigateBack: Boolean,
-    navigateUp: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
-    TopAppBar(
-        title = { Text(currentScreen) },
-        modifier = modifier,
-        navigationIcon = {
-            if (canNavigateBack) {
-                IconButton(onClick = navigateUp) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(id = R.string.navigate_back),
-                    )
-                }
-            }
-        }
-    )
 }
 
 @Suppress("LongMethod")
@@ -422,6 +414,16 @@ fun NavGraph(
         composable<Route.Paxcounter> {
             val parentEntry = remember { navController.getBackStackEntry<Route.RadioConfig>() }
             PaxcounterConfigScreen(hiltViewModel<RadioConfigViewModel>(parentEntry))
+        }
+        composable<Route.Share> { backStackEntry ->
+            val message = backStackEntry.toRoute<Route.Share>().message
+            ShareScreen(
+                navigateUp = navController::navigateUp,
+            ) {
+                navController.navigate(Route.Messages(it, message)) {
+                    popUpTo<Route.Share> { inclusive = true }
+                }
+            }
         }
     }
 }

@@ -32,8 +32,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdk 34
-        versionCode 30515 // format is Mmmss (where M is 1+the numeric major number
-        versionName "2.5.15"
+        versionCode 30516 // format is Mmmss (where M is 1+the numeric major number
+        versionName "2.5.16"
         testInstrumentationRunner "com.geeksville.mesh.TestRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio
@@ -197,7 +197,6 @@ dependencies {
     implementation 'androidx.compose.material:material-icons-extended'
     implementation 'androidx.activity:activity-compose'
     implementation 'androidx.compose.runtime:runtime-livedata'
-    implementation "com.google.accompanist:accompanist-themeadapter-appcompat:0.36.0"
 
     // Android Studio Preview support
     implementation 'androidx.compose.ui:ui-tooling-preview'

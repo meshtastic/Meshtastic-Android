@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,6 +64,7 @@ fun SwitchPreference(
         secondaryText = {
             Text(
                 text = summary,
+                modifier = Modifier.padding(bottom = 16.dp),
                 color = color,
             )
         },

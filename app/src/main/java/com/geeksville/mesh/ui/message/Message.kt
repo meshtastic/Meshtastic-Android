@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,6 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
@@ -80,7 +79,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -90,10 +88,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.QuickChatAction
+import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannel
+import com.geeksville.mesh.ui.components.BaseScaffold
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.message.components.MessageList
@@ -116,7 +115,7 @@ internal fun FragmentManager.navigateToMessages(contactKey: String, message: Str
 class MessagesFragment : Fragment(), Logging {
     private val model: UIViewModel by activityViewModels()
 
-    private fun navigateToMessages(node: NodeEntity) = node.user.let { user ->
+    private fun navigateToMessages(node: Node) = node.user.let { user ->
         val hasPKC = model.ourNodeInfo.value?.hasPKC == true && node.hasPKC // TODO use meta.hasPKC
         val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
         val contactKey = "$channel${user.id}"
@@ -139,7 +138,6 @@ class MessagesFragment : Fragment(), Logging {
 
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setBackgroundColor(ContextCompat.getColor(context, R.color.colorAdvancedBackground))
             setContent {
                 AppTheme {
                     MessageScreen(
@@ -168,7 +166,7 @@ internal fun MessageScreen(
     contactKey: String,
     message: String,
     viewModel: UIViewModel = hiltViewModel(),
-    navigateToMessages: (NodeEntity) -> Unit,
+    navigateToMessages: (Node) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
     onNavigateBack: () -> Unit
 ) {
@@ -213,7 +211,7 @@ internal fun MessageScreen(
         )
     }
 
-    Scaffold(
+    BaseScaffold(
         topBar = {
             if (inSelectionMode) {
                 ActionModeTopBar(selectedIds.value) { action ->
@@ -269,13 +267,12 @@ internal fun MessageScreen(
                 TextInput(isConnected, messageInput) { viewModel.sendMessage(it, contactKey) }
             }
         }
-    ) { innerPadding ->
+    ) {
         if (messages.isNotEmpty()) {
             MessageList(
                 messages = messages,
                 selectedIds = selectedIds,
                 onUnreadChanged = { viewModel.clearUnreadCount(contactKey, it) },
-                contentPadding = innerPadding,
                 onSendReaction = { emoji, id -> viewModel.sendReaction(emoji, id, contactKey) },
             ) { action ->
                 when (action) {

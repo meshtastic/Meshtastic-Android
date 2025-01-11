@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,12 +25,15 @@ import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
+import com.geeksville.mesh.MeshProtos.DeviceMetadata
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
+import com.geeksville.mesh.database.NodeRepository
+import com.geeksville.mesh.database.entity.MetadataEntity
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.deviceProfile
-import com.geeksville.mesh.database.NodeRepository
+import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.getChannelUrl
 import com.geeksville.mesh.service.MeshService.ConnectionState
 import com.geeksville.mesh.service.ServiceAction
@@ -40,6 +43,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 /**
@@ -70,15 +74,19 @@ class RadioConfigRepository @Inject constructor(
     val myNodeInfo: StateFlow<MyNodeEntity?> get() = nodeDB.myNodeInfo
 
     /**
-     * Flow representing the [NodeEntity] database.
+     * Flow representing the [Node] database.
      */
-    val nodeDBbyNum: StateFlow<Map<Int, NodeEntity>> get() = nodeDB.nodeDBbyNum
+    val nodeDBbyNum: StateFlow<Map<Int, Node>> get() = nodeDB.nodeDBbyNum
 
     fun getUser(nodeNum: Int) = nodeDB.getUser(nodeNum)
 
+    suspend fun getNodeDBbyNum() = nodeDB.getNodeDBbyNum().first()
     suspend fun upsert(node: NodeEntity) = nodeDB.upsert(node)
     suspend fun installNodeDB(mi: MyNodeEntity, nodes: List<NodeEntity>) {
         nodeDB.installNodeDB(mi, nodes)
+    }
+    suspend fun insertMetadata(fromNum: Int, metadata: DeviceMetadata) {
+        nodeDB.insertMetadata(MetadataEntity(fromNum, metadata))
     }
 
     /**
@@ -195,7 +203,7 @@ class RadioConfigRepository @Inject constructor(
         serviceRepository.emitMeshPacket(packet)
     }
 
-    val serviceAction: SharedFlow<ServiceAction> get() = serviceRepository.serviceAction
+    val serviceAction: Flow<ServiceAction> get() = serviceRepository.serviceAction
 
     suspend fun onServiceAction(action: ServiceAction) = coroutineScope {
         serviceRepository.onServiceAction(action)

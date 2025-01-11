@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@ import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.ContentCopy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -109,7 +110,7 @@ import com.geeksville.mesh.ui.components.config.EditChannelDialog
 import com.geeksville.mesh.ui.components.dragContainer
 import com.geeksville.mesh.ui.components.dragDropItemsIndexed
 import com.geeksville.mesh.ui.components.rememberDragDropState
-import com.google.accompanist.themeadapter.appcompat.AppCompatTheme
+import com.geeksville.mesh.ui.theme.AppTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
@@ -128,8 +129,12 @@ class ChannelFragment : ScreenFragment("Channel"), Logging {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
-                AppCompatTheme {
-                    ChannelScreen(model)
+                AppTheme {
+                    CompositionLocalProvider(
+                        LocalContentColor provides MaterialTheme.colors.onSurface
+                    ) {
+                        ChannelScreen(model)
+                    }
                 }
             }
         }

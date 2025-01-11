@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Meshtastic LLC
+ * Copyright (c) 2025 Meshtastic LLC
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.database.entity.NodeEntity
+import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.components.NodeFilterTextField
@@ -53,7 +53,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 
     private val model: UIViewModel by activityViewModels()
 
-    private fun navigateToMessages(node: NodeEntity) = node.user.let { user ->
+    private fun navigateToMessages(node: Node) = node.user.let { user ->
         val hasPKC = model.ourNodeInfo.value?.hasPKC == true && node.hasPKC // TODO use meta.hasPKC
         val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
         val contactKey = "$channel${user.id}"
@@ -91,7 +91,7 @@ class UsersFragment : ScreenFragment("Users"), Logging {
 @Suppress("LongMethod")
 fun NodesScreen(
     model: UIViewModel = hiltViewModel(),
-    navigateToMessages: (NodeEntity) -> Unit,
+    navigateToMessages: (Node) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
 ) {
     val state by model.nodesUiState.collectAsStateWithLifecycle()
