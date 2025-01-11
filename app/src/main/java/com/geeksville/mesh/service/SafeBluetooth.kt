@@ -52,7 +52,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     Logging, Closeable {
 
     /// Timeout before we declare a bluetooth operation failed (used for synchronous API operations only)
-    var timeoutMsec = 20 * 1000L
+    var timeoutMsec = 15 * 1000L
 
     /// Users can access the GATT directly as needed
     @Volatile
