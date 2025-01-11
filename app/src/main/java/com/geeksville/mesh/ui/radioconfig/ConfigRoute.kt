@@ -30,7 +30,7 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.geeksville.mesh.MeshProtos.DeviceMetadata
-import com.geeksville.mesh.ui.Route
+import com.geeksville.mesh.navigation.Route
 
 @Suppress("MagicNumber")
 // Config (type = AdminProtos.AdminMessage.ConfigType)

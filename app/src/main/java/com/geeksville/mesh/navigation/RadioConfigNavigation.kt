@@ -22,7 +22,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import com.geeksville.mesh.ui.Route
 import com.geeksville.mesh.ui.radioconfig.RadioConfigScreen
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.ui.radioconfig.components.AmbientLightingConfigScreen

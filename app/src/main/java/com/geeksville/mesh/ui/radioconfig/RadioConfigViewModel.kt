@@ -44,9 +44,9 @@ import com.geeksville.mesh.model.getChannelList
 import com.geeksville.mesh.model.getStringResFrom
 import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.moduleConfig
+import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.MeshService.ConnectionState
-import com.geeksville.mesh.ui.Route
 import com.geeksville.mesh.util.UiText
 import com.google.protobuf.MessageLite
 import dagger.hilt.android.lifecycle.HiltViewModel
