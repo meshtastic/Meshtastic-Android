@@ -65,6 +65,7 @@ import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.navigation.navigateToNavGraph
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceRepository
@@ -78,7 +79,6 @@ import com.geeksville.mesh.ui.UsersFragment
 import com.geeksville.mesh.ui.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.map.MapFragment
 import com.geeksville.mesh.ui.message.navigateToMessages
-import com.geeksville.mesh.ui.navigateToNavGraph
 import com.geeksville.mesh.ui.navigateToShareMessage
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.Exceptions
