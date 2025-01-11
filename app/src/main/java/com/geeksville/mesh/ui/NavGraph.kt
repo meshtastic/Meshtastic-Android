@@ -23,7 +23,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
@@ -31,25 +30,18 @@ import androidx.compose.ui.res.stringResource
 import androidx.core.os.bundleOf
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.viewModels
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.toRoute
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.navigation.addNodDetailSection
 import com.geeksville.mesh.navigation.addRadioConfigSection
+import com.geeksville.mesh.navigation.navigateToSharedMessage
+import com.geeksville.mesh.navigation.shareScreen
 import com.geeksville.mesh.ui.components.BaseScaffold
-import com.geeksville.mesh.ui.components.DeviceMetricsScreen
-import com.geeksville.mesh.ui.components.EnvironmentMetricsScreen
-import com.geeksville.mesh.ui.components.NodeMapScreen
-import com.geeksville.mesh.ui.components.PositionLogScreen
-import com.geeksville.mesh.ui.components.SignalMetricsScreen
-import com.geeksville.mesh.ui.components.TracerouteLogScreen
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -125,43 +117,11 @@ fun NavGraph(
         startDestination = startDestination,
         modifier = modifier,
     ) {
-        composable<Route.NodeDetail> {
-            NodeDetailScreen { navController.navigate(route = it) }
-        }
-        composable<Route.DeviceMetrics> {
-            val parentEntry = remember { navController.getBackStackEntry<Route.NodeDetail>() }
-            DeviceMetricsScreen(hiltViewModel<MetricsViewModel>(parentEntry))
-        }
-        composable<Route.NodeMap> {
-            val parentEntry = remember { navController.getBackStackEntry<Route.NodeDetail>() }
-            NodeMapScreen(hiltViewModel<MetricsViewModel>(parentEntry))
-        }
-        composable<Route.PositionLog> {
-            val parentEntry = remember { navController.getBackStackEntry<Route.NodeDetail>() }
-            PositionLogScreen(hiltViewModel<MetricsViewModel>(parentEntry))
-        }
-        composable<Route.EnvironmentMetrics> {
-            val parentEntry = remember { navController.getBackStackEntry<Route.NodeDetail>() }
-            EnvironmentMetricsScreen(hiltViewModel<MetricsViewModel>(parentEntry))
-        }
-        composable<Route.SignalMetrics> {
-            val parentEntry = remember { navController.getBackStackEntry<Route.NodeDetail>() }
-            SignalMetricsScreen(hiltViewModel<MetricsViewModel>(parentEntry))
-        }
-        composable<Route.TracerouteLog> {
-            val parentEntry = remember { navController.getBackStackEntry<Route.NodeDetail>() }
-            TracerouteLogScreen(hiltViewModel<MetricsViewModel>(parentEntry))
-        }
+        addNodDetailSection(navController)
         addRadioConfigSection(navController)
-        composable<Route.Share> { backStackEntry ->
-            val message = backStackEntry.toRoute<Route.Share>().message
-            ShareScreen(
-                navigateUp = navController::navigateUp,
-            ) {
-                navController.navigate(Route.Messages(it, message)) {
-                    popUpTo<Route.Share> { inclusive = true }
-                }
-            }
-        }
+        shareScreen(
+            navigateUp = navController::navigateUp,
+            onConfirm = navController::navigateToSharedMessage,
+        )
     }
 }
