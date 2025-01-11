@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui
+package com.geeksville.mesh.navigation
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -36,11 +36,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.navigation.Route
-import com.geeksville.mesh.navigation.addNodDetailSection
-import com.geeksville.mesh.navigation.addRadioConfigSection
-import com.geeksville.mesh.navigation.navigateToSharedMessage
-import com.geeksville.mesh.navigation.shareScreen
+import com.geeksville.mesh.ui.ScreenFragment
 import com.geeksville.mesh.ui.components.BaseScaffold
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.ui.theme.AppTheme
