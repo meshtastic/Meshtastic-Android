@@ -52,11 +52,18 @@ jobs:
     - name: Run local tests
       run: ./gradlew testFdroidDebug testGoogleDebug
 
-    - name: Upload debug artifact
+    - name: Upload fdroid debug artifact
       uses: actions/upload-artifact@v4
       with:
         name: fdroidDebug
         path: app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
+        retention-days: 30
+
+    - name: Upload sideload debug artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: sideloadDebug
+        path: app/build/outputs/apk/sideload/debug/app-sideload-debug.apk
         retention-days: 30
 
     - name: Upload build reports
