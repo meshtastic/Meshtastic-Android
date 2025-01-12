@@ -39,8 +39,8 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.model.map.CustomTileSource
+import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
-import com.geeksville.mesh.ui.Route
 import com.geeksville.mesh.ui.map.MAP_STYLE_ID
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
