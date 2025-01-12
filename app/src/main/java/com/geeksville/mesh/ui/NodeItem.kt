@@ -84,6 +84,7 @@ fun NodeItem(
     currentTimeMillis: Long,
     isConnected: Boolean = false,
 ) {
+    val isFavorite = thatNode.isFavorite
     val isIgnored = thatNode.isIgnored
     val longName = thatNode.user.longName.ifEmpty { stringResource(id = R.string.unknown_username) }
 
@@ -150,7 +151,7 @@ fun NodeItem(
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
                                 text = thatNode.user.shortName.ifEmpty { "???" },
-                                fontWeight = FontWeight.Normal,
+                                fontWeight = if (isFavorite) FontWeight.Bold else FontWeight.Normal,
                                 fontSize = MaterialTheme.typography.button.fontSize,
                                 textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                                 textAlign = TextAlign.Center,
@@ -173,6 +174,7 @@ fun NodeItem(
                     Text(
                         modifier = Modifier.weight(1f),
                         text = longName,
+                        fontWeight = if (isFavorite) FontWeight.Bold else FontWeight.Normal,
                         style = style,
                         textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                         softWrap = true,
