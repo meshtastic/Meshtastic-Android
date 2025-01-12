@@ -27,7 +27,7 @@ import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.position
-import com.geeksville.mesh.ui.components.config.EditDeviceProfileDialog
+import com.geeksville.mesh.ui.radioconfig.components.EditDeviceProfileDialog
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test

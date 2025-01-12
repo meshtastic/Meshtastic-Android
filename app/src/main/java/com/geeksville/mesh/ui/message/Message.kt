@@ -92,11 +92,11 @@ import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannel
+import com.geeksville.mesh.navigation.navigateToNavGraph
 import com.geeksville.mesh.ui.components.BaseScaffold
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.message.components.MessageList
-import com.geeksville.mesh.ui.navigateToNavGraph
 import com.geeksville.mesh.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
