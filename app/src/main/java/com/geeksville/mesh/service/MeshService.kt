@@ -1818,7 +1818,7 @@ class MeshService : Service(), Logging {
             it.isFavorite = !node.isFavorite
         }
     }
-    
+
     private fun ignoreNode(node: Node) = toRemoteExceptions {
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
             if (node.isIgnored) {
