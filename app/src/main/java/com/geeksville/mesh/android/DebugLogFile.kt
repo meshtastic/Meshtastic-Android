@@ -18,9 +18,17 @@
 package com.geeksville.mesh.android
 
 import android.content.Context
+import android.os.Build
+import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.util.toOneLineString
 import java.io.File
 import java.io.FileOutputStream
 import java.io.PrintWriter
+import java.text.SimpleDateFormat
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.Locale
 
 /**
  * Create a debug log on the SD card (if needed and allowed and app is configured for debugging (FIXME)
@@ -41,13 +49,53 @@ class DebugLogFile(context: Context, name: String) {
     }
 }
 
-
 /**
- * Create a debug log on the SD card (if needed and allowed and app is configured for debugging (FIXME)
- *
- * write strings to that file
+ * Write received and sent packets to a file
  */
-class BinaryLogFile(context: Context, name: String) :
-    FileOutputStream(File(context.getExternalFilesDir(null), name), true) {
+class PacketLogFile(val context: Context, val type: PacketLogType) {
+    private val name = when (type) {
+        PacketLogType.SENT -> "sent_packets.log"
+        PacketLogType.RECEIVED -> "received_packets.log"
+    }
+    private val file = PrintWriter(
+        FileOutputStream(File(context.getExternalFilesDir(null), name), true)
+    )
 
+    init {
+        file.use {
+            it.println("${getTimeStamp()}: Log Start")
+        }
+    }
+
+    fun close() {
+        file.use {
+            it.println("${getTimeStamp()}: Log End")
+        }
+    }
+
+    fun log(p: ByteArray) {
+        val logString = if (type == PacketLogType.SENT) {
+            val toRadio = MeshProtos.ToRadio.parser().parseFrom(p)
+            toRadio.toOneLineString()
+        } else {
+            MeshProtos.FromRadio.parser().parseFrom(p).toOneLineString()
+        }
+        file.use {
+            it.println("${getTimeStamp()}: $logString")
+        }
+    }
+
+    private fun getTimeStamp(): String {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+        } else {
+            val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.getDefault())
+            dateFormat.format(Date())
+        }
+    }
+
+    enum class PacketLogType {
+        SENT,
+        RECEIVED
+    }
 }
