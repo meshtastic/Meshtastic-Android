@@ -180,8 +180,6 @@ private fun DeviceMetricsChart(
             HorizontalLinesOverlay(
                 modifier.width(dp),
                 lineColors = listOf(graphColor, Orange, Color.Red, graphColor, graphColor),
-                minValue = 0f,
-                maxValue = 100f
             )
 
             TimeAxisOverlay(

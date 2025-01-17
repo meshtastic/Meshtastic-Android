@@ -104,7 +104,7 @@ fun ChartHeader(amount: Int) {
  * @param lineColors A list of 5 `Color`s for the chart lines, 0 being the lowest line on the chart.
  * @param leaveSpace When true the lines will leave space for Y labels on the left side of the graph.
  */
-@Deprecated("Will soon be replaced with YAxisLabels() and HorizontalLines()", level = DeprecationLevel.WARNING)
+@Deprecated("Will soon be replaced with YAxisLabels() and HorizontalLinesOverlay()", level = DeprecationLevel.WARNING)
 @Composable
 fun ChartOverlay(
     modifier: Modifier,
@@ -166,7 +166,7 @@ fun ChartOverlay(
 }
 
 /**
- * Draws chart lines with respect to the Y-axis range; defined by (`maxValue` - `minValue`).
+ * Draws chart lines with respect to the Y-axis.
  *
  * @param lineColors A list of 5 `Color`s for the chart lines, 0 being the lowest line on the chart.
  */
@@ -174,21 +174,19 @@ fun ChartOverlay(
 fun HorizontalLinesOverlay(
     modifier: Modifier,
     lineColors: List<Color>,
-    minValue: Float,
-    maxValue: Float,
 ) {
-    val range = maxValue - minValue
+    /* 100 is a good number to divide into quarters */
+    val range = 100f
     val verticalSpacing = range / LINE_LIMIT
     Canvas(modifier = modifier) {
 
         val lineStart = 0f
         val height = size.height
         val width = size.width
-
         /* Horizontal Lines */
-        var lineY = minValue
+        var lineY = 0f
         for (i in 0..LINE_LIMIT) {
-            val ratio = (lineY - minValue) / range
+            val ratio = lineY / range
             val y = height - (ratio * height)
             drawLine(
                 start = Offset(lineStart, y),

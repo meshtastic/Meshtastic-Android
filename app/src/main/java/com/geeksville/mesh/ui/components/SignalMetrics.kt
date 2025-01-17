@@ -179,8 +179,6 @@ private fun SignalMetricsChart(
             HorizontalLinesOverlay(
                 modifier.width(dp),
                 lineColors = List(size = 5) { graphColor },
-                minValue = Metric.SNR.min,
-                maxValue = Metric.SNR.max
             )
 
             TimeAxisOverlay(
