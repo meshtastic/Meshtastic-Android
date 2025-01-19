@@ -48,6 +48,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -61,6 +64,8 @@ import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
+import com.geeksville.mesh.util.GraphUtil
+import com.geeksville.mesh.util.GraphUtil.createPath
 
 private val METRICS_COLORS = listOf(Color.Green, Color.Cyan, Color.Magenta)
 
@@ -75,7 +80,7 @@ private enum class Power(val min: Float, val max: Float) {
 }
 // TODO maybe channel enum
 private val LEGEND_DATA = listOf(
-    // TODO resources, magic numbers
+    // TODO magic numbers
     LegendData(nameRes = R.string.channel_1, color = METRICS_COLORS[0], isLine = true),
     LegendData(nameRes = R.string.channel_2, color = METRICS_COLORS[1], isLine = true),
     LegendData(nameRes = R.string.channel_3, color = METRICS_COLORS[2], isLine = true)
@@ -183,6 +188,34 @@ private fun PowerMetricsChart(
             /* Plot */
             Canvas(modifier = modifier.width(dp)) {
                 val width = size.width
+                val height = size.height
+                var index = 0
+                /* Channel 1 Voltage */
+                while (index < telemetries.size) {
+                    val path = Path()
+                    index = createPath(
+                        telemetries = telemetries,
+                        index = index,
+                        path = path,
+                        oldestTime = oldest.time,
+                        timeRange = timeDiff,
+                        width = width,
+                        timeThreshold = selectedTime.timeThreshold()
+                    ) { i ->
+                        val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
+                        val ratio = telemetry.powerMetrics.ch1Voltage / voltageDiff
+                        val y = height - (ratio * height)
+                        return@createPath y
+                    }
+                    drawPath(
+                        path = path,
+                        color = METRICS_COLORS[0], // TODO constant, name?? -> CHANNEL_COLORS
+                        style = Stroke(
+                            width = GraphUtil.RADIUS,
+                            cap = StrokeCap.Round
+                        )
+                    )
+                }
             }
         }
         YAxisLabels(
@@ -232,6 +265,15 @@ private fun PowerMetricsCard(telemetry: Telemetry) {
                                     text = DATE_TIME_FORMAT.format(time),
                                     style = TextStyle(fontWeight = FontWeight.Bold),
                                     fontSize = MaterialTheme.typography.button.fontSize
+                                )
+                            }
+                            Row {
+                                Text(
+                                    text = "${telemetry.powerMetrics.ch1Voltage}"
+                                )
+
+                                Text(
+                                    text = "${telemetry.powerMetrics.ch1Current}"
                                 )
                             }
 
