@@ -364,6 +364,14 @@ fun LogNavigationList(state: MetricsState, onNavigate: (Route) -> Unit) {
     }
 
     NavCard(
+        title = stringResource(R.string.power_metrics_log),
+        icon = Icons.Default.Power,
+        enabled = state.hasPowerMetrics()
+    ) {
+        onNavigate(Route.PowerMetrics)
+    }
+
+    NavCard(
         title = stringResource(R.string.traceroute_log),
         icon = Icons.Default.Route,
         enabled = state.hasTracerouteLogs()
