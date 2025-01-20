@@ -2,9 +2,6 @@ package com.geeksville.mesh.ui
 
 import android.app.Application
 import android.os.RemoteException
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.ConfigProtos.Config
@@ -34,8 +31,6 @@ data class UIState(
     val regionDropDownExpanded: Boolean,
     val selectedRegion: RegionInfo,
     val localConfig: LocalConfig,
-    val showNodeSettings: Boolean,
-    val showProvideLocation: Boolean,
     val enableUsernameEdit: Boolean,
     val enableProvideLocation: Boolean,
     val errorText: String?,
@@ -61,15 +56,12 @@ class SettingsScreenViewModel @Inject constructor(
             regionDropDownExpanded = false,
             selectedRegion = RegionInfo.UNSET,
             localConfig = LocalConfig.getDefaultInstance(),
-            showNodeSettings = false,
-            showProvideLocation = false,
             enableUsernameEdit = false,
             enableProvideLocation = false,
             errorText = null,
             isConnected = false,
             nodeFirmwareVersion = null,
             ipAddress = "",
-
             )
     )
     val uiState: StateFlow<UIState> = _uiState
@@ -96,23 +88,27 @@ class SettingsScreenViewModel @Inject constructor(
         updateLoraConfig { it.toBuilder().setRegion(newRegion.regionCode).build() }
     }
 
-
-    var nodeFirmwareVersion by mutableStateOf<String?>(null)
-
     init {
         viewModelScope.launch {
             radioConfigRepository.connectionState.collect { connectionState ->
                 // managed mode disables all access to configuration
                 val isManaged =
                     _uiState.value.localConfig.let { it.device.isManaged || it.security.isManaged }
+                val isConnected = connectionState.isConnected()
                 _uiState.emit(
                     _uiState.value.copy(
-                        isConnected = connectionState.isConnected(),
-                        showNodeSettings = connectionState.isConnected(),
-                        showProvideLocation = connectionState.isConnected(),
-                        enableUsernameEdit = connectionState.isConnected() && !isManaged
+                        isConnected = isConnected,
+                        enableUsernameEdit = isConnected && !isManaged,
                     )
                 )
+                // Reset node values if not connected
+                if (!isConnected) {
+                    _uiState.emit(
+                        _uiState.value.copy(
+                            nodeFirmwareVersion = null,
+                        )
+                    )
+                }
             }
         }
 
@@ -128,13 +124,13 @@ class SettingsScreenViewModel @Inject constructor(
 
         viewModelScope.launch {
             nodeRepository.myNodeInfo.collect { node ->
-                nodeFirmwareVersion = node?.firmwareString
+                _uiState.emit(uiState.value.copy(nodeFirmwareVersion = node?.firmwareString))
             }
         }
 
         viewModelScope.launch {
             radioConfigRepository.localConfigFlow.collect {
-                _uiState.emit(_uiState.value.copy(
+                _uiState.emit(uiState.value.copy(
                     localConfig = it,
                     selectedRegion = uiState.value.localConfig.lora.region.let { region ->
                         RegionInfo.entries.firstOrNull { it.regionCode == region }
@@ -176,11 +172,8 @@ class SettingsScreenViewModel @Inject constructor(
 
     }
 
-    var ipAddress by mutableStateOf("")
-        private set
-
     fun onIpAddressChange(newAddress: String) {
-        ipAddress = newAddress
+        _uiState.value = _uiState.value.copy(ipAddress = newAddress)
     }
 
 

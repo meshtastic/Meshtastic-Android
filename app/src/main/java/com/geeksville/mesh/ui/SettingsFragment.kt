@@ -230,28 +230,28 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 //        }
 
         var scanDialog: AlertDialog? = null
-        scanModel.scanResult.observe(viewLifecycleOwner) { results ->
-            val devices = results.values.ifEmpty { return@observe }
-            scanDialog?.dismiss()
-            scanDialog = MaterialAlertDialogBuilder(requireContext())
-                .setTitle("Select a Bluetooth device")
-                .setSingleChoiceItems(
-                    devices.map { it.name }.toTypedArray(),
-                    -1
-                ) { dialog, position ->
-                    val selectedDevice = devices.elementAt(position)
-                    scanModel.onSelected(selectedDevice)
+//        scanModel.scanResult.observe(viewLifecycleOwner) { results ->
+//            val devices = results.values.ifEmpty { return@observe }
+//            scanDialog?.dismiss()
+//            scanDialog = MaterialAlertDialogBuilder(requireContext())
+//                .setTitle("Select a Bluetooth device")
+//                .setSingleChoiceItems(
+//                    devices.map { it.name }.toTypedArray(),
+//                    -1
+//                ) { dialog, position ->
+//                    val selectedDevice = devices.elementAt(position)
+//                    scanModel.onSelected(selectedDevice)
 //                    scanModel.clearScanResults()
-                    dialog.dismiss()
-                    scanDialog = null
-                }
-                .setPositiveButton(R.string.cancel) { dialog, _ ->
+//                    dialog.dismiss()
+//                    scanDialog = null
+//                }
+//                .setPositiveButton(R.string.cancel) { dialog, _ ->
 //                    scanModel.clearScanResults()
-                    dialog.dismiss()
-                    scanDialog = null
-                }
-                .show()
-        }
+//                    dialog.dismiss()
+//                    scanDialog = null
+//                }
+//                .show()
+//        }
 
         // TODO: Implement progress indicator in new compose ui
         // show the spinner when [spinner] is true

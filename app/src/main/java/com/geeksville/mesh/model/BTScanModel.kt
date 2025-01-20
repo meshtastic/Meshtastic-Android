@@ -25,7 +25,6 @@ import android.hardware.usb.UsbManager
 import android.net.nsd.NsdServiceInfo
 import android.os.Build
 import android.os.RemoteException
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.R
@@ -51,13 +50,14 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed class Effect {
-    object RequestBluetoothPermission : Effect()
-    object ShowBluetoothIsDisabled : Effect()
-    object RequestForCheckLocationPermission : Effect()
+sealed class ScanEffect {
+    object RequestBluetoothPermission : ScanEffect()
+    object ShowBluetoothIsDisabled : ScanEffect()
+    object RequestForCheckLocationPermission : ScanEffect()
 }
 
 const val SCAN_PERIOD: Long = 10000 // Stops scanning after 10 seconds
@@ -65,7 +65,10 @@ const val SCAN_PERIOD: Long = 10000 // Stops scanning after 10 seconds
 data class UIState(
     val devices: Map<String, DeviceListEntry>,
     val errorText: String?,
+    val statusMessage: String?,
     val scanning: Boolean,
+    val scanResult: Map<String, DeviceListEntry>,
+    val showScanResults: Boolean,
 )
 
 @HiltViewModel
@@ -79,10 +82,10 @@ class BTScanModel @Inject constructor(
     private val radioInterfaceService: RadioInterfaceService,
 ) : ViewModel(), Logging {
 
-    private val _effect = MutableSharedFlow<Effect>()
+    private val _effect = MutableSharedFlow<ScanEffect>()
     val effect = _effect.asSharedFlow()
 
-    private val _uiState = MutableStateFlow(UIState(emptyMap(), null, false))
+    private val _uiState = MutableStateFlow(UIState(emptyMap(), null, null, false, emptyMap(), false))
     val uiState = _uiState.asStateFlow()
 
     private val context: Context get() = application.applicationContext
@@ -100,8 +103,12 @@ class BTScanModel @Inject constructor(
             usbRepository.serialDevicesWithDrivers,
             showMockInterface,
         ) { ble, tcp, usb, showMockInterface ->
-            suspend fun addDevice(entry: DeviceListEntry) {
-                _uiState.emit(uiState.value.copy(devices = uiState.value.devices + (entry.fullAddress to entry)))
+            fun addDevice(entry: DeviceListEntry) {
+                _uiState.update { state ->
+                    val newDevices = state.devices.toMutableMap()
+                    newDevices[entry.fullAddress] = entry
+                    state.copy(devices = newDevices)
+                }
             }
 
             // Include a placeholder for "None"
@@ -112,7 +119,7 @@ class BTScanModel @Inject constructor(
             }
 
             // Include paired Bluetooth devices
-            ble.bondedDevices.map(::BLEDeviceListEntry).sortedBy { it.name }.forEach{
+            ble.bondedDevices.map(::BLEDeviceListEntry).sortedBy { it.name }.forEach {
                 addDevice(it)
             }
 
@@ -127,7 +134,7 @@ class BTScanModel @Inject constructor(
         }.launchIn(viewModelScope)
 
         serviceRepository.statusMessage
-            .onEach { _uiState.emit(uiState.value.copy(errorText = it)) }
+            .onEach { _uiState.emit(uiState.value.copy(statusMessage = it)) }
             .launchIn(viewModelScope)
 
         debug("BTScanModel created")
@@ -186,11 +193,11 @@ class BTScanModel @Inject constructor(
     /// Use the string for the NopInterface
     val selectedNotNull: String get() = selectedAddress ?: "n"
 
-    val scanResult = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
-
     suspend fun clearScanResults() {
         stopScan()
-        scanResult.value = mutableMapOf()
+        _uiState.update {
+            it.copy(scanResult = emptyMap())
+        }
     }
 
     private suspend fun stopScan() {
@@ -211,6 +218,7 @@ class BTScanModel @Inject constructor(
     private suspend fun startScan() {
         debug("starting classic scan")
 
+        clearScanResults()
         _uiState.emit(uiState.value.copy(scanning = true))
         scanJob = bluetoothRepository.scan()
             .onEach { result ->
@@ -218,15 +226,15 @@ class BTScanModel @Inject constructor(
                     InterfaceId.BLUETOOTH,
                     result.device.address
                 )
-                // prevent log spam because we'll get lots of redundant scan results
                 val isBonded = result.device.bondState == BluetoothDevice.BOND_BONDED
-                val oldDevs = scanResult.value!!
-                val oldEntry = oldDevs[fullAddress]
-                // Don't spam the GUI with endless updates for non changing nodes
-                if (oldEntry == null || oldEntry.bonded != isBonded) {
-                    val entry = DeviceListEntry(result.device.name, fullAddress, isBonded)
-                    oldDevs[entry.fullAddress] = entry
-                    scanResult.value = oldDevs
+                // prevent log spam because we'll get lots of redundant scan results
+                if (!uiState.value.devices.containsKey(fullAddress) ) {
+                    val device = DeviceListEntry(result.device.name, fullAddress, isBonded)
+                    _uiState.update {
+                        it.copy(
+                            scanResult = uiState.value.scanResult + (device.fullAddress to device)
+                        )
+                    }
                 }
             }.catch { ex ->
                 serviceRepository.setErrorMessage("Unexpected Bluetooth scan failure: ${ex.message}")
@@ -238,7 +246,6 @@ class BTScanModel @Inject constructor(
             serviceRepository.meshService?.let { service ->
                 MeshService.changeDeviceAddress(context, service, address)
             }
-//            devices.value = devices.value // Force a GUI update
         } catch (ex: RemoteException) {
             errormsg("changeDeviceSelection failed, probably it is shutting down", ex)
             // ignore the failure and the GUI won't be updating anyways
@@ -249,17 +256,21 @@ class BTScanModel @Inject constructor(
         var job: Job? = null
         job = viewModelScope.launch {
             bluetoothRepository.state.value.let { state ->
+                // Bluetooth is disabled on user phone, proceed no further and let them know
                 if (!state.enabled) {
-                    _effect.emit(Effect.ShowBluetoothIsDisabled)
+                    _effect.emit(ScanEffect.ShowBluetoothIsDisabled)
                     job?.cancel()
                 }
             }
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                _effect.emit(Effect.RequestForCheckLocationPermission)
+                _effect.emit(ScanEffect.RequestForCheckLocationPermission)
             }
             startScan()
             delay(SCAN_PERIOD)
             stopScan()
+            if (uiState.value.scanResult.isNotEmpty()) {
+                _uiState.emit(uiState.value.copy(showScanResults = true))
+            }
         }
     }
 
@@ -321,4 +332,9 @@ class BTScanModel @Inject constructor(
         }
     }
 
+    fun onDismissScanResults() {
+        viewModelScope.launch {
+            _uiState.emit(uiState.value.copy(showScanResults = false))
+        }
+    }
 }

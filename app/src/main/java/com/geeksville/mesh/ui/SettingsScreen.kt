@@ -42,6 +42,10 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.android.getBluetoothPermissions
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.RegionInfo
+import com.geeksville.mesh.model.ScanEffect.RequestBluetoothPermission
+import com.geeksville.mesh.model.ScanEffect.RequestForCheckLocationPermission
+import com.geeksville.mesh.model.ScanEffect.ShowBluetoothIsDisabled
+import com.geeksville.mesh.ui.components.SelectBtRadioDialog
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -80,9 +84,9 @@ fun SettingsScreen(
 
         btScanModel.effect.collect { scanEffect ->
             when (scanEffect) {
-                com.geeksville.mesh.model.Effect.RequestForCheckLocationPermission -> TODO()
-                com.geeksville.mesh.model.Effect.RequestBluetoothPermission -> TODO()
-                com.geeksville.mesh.model.Effect.ShowBluetoothIsDisabled -> TODO()
+                RequestForCheckLocationPermission -> TODO()
+                RequestBluetoothPermission -> TODO()
+                ShowBluetoothIsDisabled -> TODO()
                 else -> {}
             }
         }
@@ -90,7 +94,7 @@ fun SettingsScreen(
 
     Surface {
         Column(modifier = modifier.padding(16.dp)) {
-            if (uiState.showNodeSettings) {
+            if (uiState.isConnected) {
                 NameAndRegionRow(
                     textValue = uiState.userName,
                     onValueChange = viewModel::onUserNameChange,
@@ -102,20 +106,21 @@ fun SettingsScreen(
             }
             RadioConnectionStatusMessage(
                 errorMessage = btScanUiState.errorText,
+                statusMessage = btScanUiState.statusMessage,
                 selectedAddress = btScanModel.selectedAddress,
-                connectedRadioFirmwareVersion = viewModel.nodeFirmwareVersion
+                connectedRadioFirmwareVersion = uiState.nodeFirmwareVersion,
+                isConnected = uiState.isConnected,
             )
             RadioSelectorRadioButtons(
                 devices = btScanUiState.devices.values.toList(),
                 onDeviceSelected = { btScanModel.onSelected(it) },
                 selectedAddress = btScanModel.selectedNotNull,
-
-                )
+            )
             AddDeviceByIPAddress(
-                ipAddress = viewModel.ipAddress,
+                ipAddress = uiState.ipAddress,
                 onIpAddressChange = viewModel::onIpAddressChange
             )
-            if (uiState.showProvideLocation) {
+            if (uiState.isConnected) {
                 ProvideLocationCheckBox(enabled = uiState.enableProvideLocation)
             }
 
@@ -136,9 +141,16 @@ fun SettingsScreen(
                 showScanningProgress = btScanUiState.scanning
             )
         }
+
+        if (btScanUiState.showScanResults) {
+            SelectBtRadioDialog(
+                devices = btScanUiState.scanResult,
+                onRadioSelected = { btScanModel.onSelected(it) },
+                onDismissRequest = { btScanModel.onDismissScanResults() },
+            )
+        }
     }
 }
-
 
 @Composable
 private fun NameAndRegionRow(
@@ -292,8 +304,10 @@ private fun ProvideLocationCheckBox(modifier: Modifier = Modifier, enabled: Bool
 private fun RadioConnectionStatusMessage(
     modifier: Modifier = Modifier,
     errorMessage: String?,
-    selectedAddress: String? = null,
-    connectedRadioFirmwareVersion: String?
+    statusMessage: String?,
+    selectedAddress: String?,
+    connectedRadioFirmwareVersion: String?,
+    isConnected: Boolean,
 ) {
     when {
         selectedAddress.isNullOrBlank() -> {
@@ -301,7 +315,7 @@ private fun RadioConnectionStatusMessage(
             Text(message, modifier = modifier)
         }
 
-        connectedRadioFirmwareVersion != null -> {
+        connectedRadioFirmwareVersion != null && isConnected -> {
             val message = stringResource(R.string.connected_to, connectedRadioFirmwareVersion)
             Text(message, modifier = modifier)
         }
@@ -310,7 +324,11 @@ private fun RadioConnectionStatusMessage(
             Text(errorMessage, modifier = modifier)
         }
 
-        else -> {
+        statusMessage != null && isConnected -> {
+            Text(statusMessage, modifier = modifier)
+        }
+
+        !isConnected -> {
             val message = stringResource(R.string.not_connected)
             Text(message, modifier = modifier)
         }
