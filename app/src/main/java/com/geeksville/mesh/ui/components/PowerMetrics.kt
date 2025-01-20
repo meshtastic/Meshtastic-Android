@@ -57,6 +57,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
@@ -151,6 +152,17 @@ private fun PowerMetricsChart(
         newest = newest.time
     )
 
+    Row {
+        Text(
+            text = stringResource(R.string.mA_dotted),
+            fontSize = 12.sp
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        Text(
+            text = "V",
+            fontSize = 12.sp
+        )
+    }
     Spacer(modifier = Modifier.height(16.dp))
 
     val graphColor = MaterialTheme.colors.onSurface
