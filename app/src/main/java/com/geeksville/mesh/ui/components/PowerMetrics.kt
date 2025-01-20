@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.components
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -57,7 +58,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
@@ -72,23 +72,22 @@ import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.createPath
 
 @Suppress("MagicNumber")
-private enum class Power(val min: Float, val max: Float) {
-    CURRENT(-500f, 500f),
-    VOLTAGE(0f, 20f);
+private enum class Power(val color: Color, val min: Float, val max: Float) {
+    CURRENT(Color.Blue, -500f, 500f),
+    VOLTAGE(Color.Red, 0f, 20f);
     /**
      * Difference between the metrics `max` and `min` values.
      */
     fun difference() = max - min
 }
-private enum class Channel(val color: Color) {
-    ONE(Color.Green),
-    TWO(Color.Cyan),
-    THREE(Color.Magenta)
+private enum class PowerChannel(@StringRes val strRes: Int) {
+    ONE(R.string.channel_1),
+    TWO(R.string.channel_2),
+    THREE(R.string.channel_3)
 }
 private val LEGEND_DATA = listOf(
-    LegendData(nameRes = R.string.channel_1, color = Channel.ONE.color, isLine = true),
-    LegendData(nameRes = R.string.channel_2, color = Channel.TWO.color, isLine = true),
-    LegendData(nameRes = R.string.channel_3, color = Channel.THREE.color, isLine = true)
+    LegendData(nameRes = R.string.current, color = Power.CURRENT.color, isLine = true),
+    LegendData(nameRes = R.string.voltage, color = Power.VOLTAGE.color, isLine = true),
 )
 
 @Composable
@@ -98,6 +97,7 @@ fun PowerMetricsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     var displayInfoDialog by remember { mutableStateOf(false) }
     val selectedTimeFrame by viewModel.timeFrame.collectAsState()
+    var selectedChannel by remember { mutableStateOf(PowerChannel.ONE) }
     val data = state.powerMetricsFiltered(selectedTimeFrame)
 
     Column {
@@ -108,14 +108,24 @@ fun PowerMetricsScreen(
                 .fillMaxHeight(fraction = 0.33f),
             telemetries = data.reversed(),
             selectedTimeFrame,
+            selectedChannel,
             promptInfoDialog = { displayInfoDialog = true }
         )
 
-        MetricsTimeSelector(
+        SlidingSelector(
+            PowerChannel.entries.toList(),
+            selectedChannel,
+            onOptionSelected = { selectedChannel = it }
+        ) {
+            OptionLabel(stringResource(it.strRes))
+        }
+        Spacer(modifier = Modifier.height(2.dp))
+        SlidingSelector(
+            TimeFrame.entries.toList(),
             selectedTimeFrame,
             onOptionSelected = { viewModel.setTimeFrame(it) }
         ) {
-            TimeLabel(stringResource(it.strRes))
+            OptionLabel(stringResource(it.strRes))
         }
 
         LazyColumn(
@@ -132,6 +142,7 @@ private fun PowerMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
     selectedTime: TimeFrame,
+    selectedChannel: PowerChannel,
     promptInfoDialog: () -> Unit
 ) {
     ChartHeader(amount = telemetries.size)
@@ -152,17 +163,6 @@ private fun PowerMetricsChart(
         newest = newest.time
     )
 
-    Row {
-        Text(
-            text = stringResource(R.string.mA_dotted),
-            fontSize = 12.sp
-        )
-        Spacer(modifier = Modifier.weight(1f))
-        Text(
-            text = "V",
-            fontSize = 12.sp
-        )
-    }
     Spacer(modifier = Modifier.height(16.dp))
 
     val graphColor = MaterialTheme.colors.onSurface
@@ -179,7 +179,7 @@ private fun PowerMetricsChart(
     Row {
         YAxisLabels(
             modifier = modifier.weight(weight = .1f),
-            graphColor,
+            Power.CURRENT.color,
             minValue = Power.CURRENT.min,
             maxValue = Power.CURRENT.max,
         )
@@ -205,7 +205,7 @@ private fun PowerMetricsChart(
             Canvas(modifier = modifier.width(dp)) {
                 val width = size.width
                 val height = size.height
-                /* Channel 1 Voltage */
+                /* Voltage */
                 var index = 0
                 while (index < telemetries.size) {
                     val path = Path()
@@ -218,6 +218,7 @@ private fun PowerMetricsChart(
                         width = width,
                         timeThreshold = selectedTime.timeThreshold()
                     ) { i ->
+                        // TODO this block will depend on the channelSelected
                         val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
                         val ratio = telemetry.powerMetrics.ch1Voltage / voltageDiff
                         val y = height - (ratio * height)
@@ -225,15 +226,15 @@ private fun PowerMetricsChart(
                     }
                     drawPath(
                         path = path,
-                        color = Channel.ONE.color,
+                        color = Power.VOLTAGE.color,
                         style = Stroke(
                             width = GraphUtil.RADIUS,
                             cap = StrokeCap.Round
                         )
                     )
                 }
-                /* Channel 1 Current */
-                var ch1CurrIndex = 0
+                /* Current */
+                var ch1CurrIndex = 0 // TODO fix var name
                 while (ch1CurrIndex < telemetries.size) {
                     val path = Path()
                     ch1CurrIndex = createPath(
@@ -245,6 +246,7 @@ private fun PowerMetricsChart(
                         width = width,
                         timeThreshold = selectedTime.timeThreshold()
                     ) { i ->
+                        // TODO also a flexible block needed here
                         val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
                         val ratio = (telemetry.powerMetrics.ch1Current - Power.CURRENT.min) / currentDiff
                         val y = height - (ratio * height)
@@ -252,7 +254,7 @@ private fun PowerMetricsChart(
                     }
                     drawPath(
                         path = path,
-                        color = Channel.ONE.color,
+                        color = Power.CURRENT.color,
                         style = Stroke(
                             width = GraphUtil.RADIUS,
                             cap = StrokeCap.Round,
@@ -264,7 +266,7 @@ private fun PowerMetricsChart(
         }
         YAxisLabels(
             modifier = modifier.weight(weight = .1f),
-            graphColor,
+            Power.VOLTAGE.color,
             minValue = Power.VOLTAGE.min,
             maxValue = Power.VOLTAGE.max,
         )
