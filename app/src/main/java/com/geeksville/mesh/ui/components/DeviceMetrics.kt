@@ -69,17 +69,16 @@ import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.plotPoint
 import com.geeksville.mesh.util.GraphUtil.createPath
 
-private val DEVICE_METRICS_COLORS = listOf(Color.Green, Color.Magenta, Color.Cyan)
 private const val MAX_PERCENT_VALUE = 100f
-private enum class Device {
-    BATTERY,
-    CH_UTIL,
-    AIR_UTIL
+private enum class Device(val color: Color) {
+    BATTERY(Color.Green),
+    CH_UTIL(Color.Magenta),
+    AIR_UTIL(Color.Cyan)
 }
 private val LEGEND_DATA = listOf(
-    LegendData(nameRes = R.string.battery, color = DEVICE_METRICS_COLORS[Device.BATTERY.ordinal], isLine = true),
-    LegendData(nameRes = R.string.channel_utilization, color = DEVICE_METRICS_COLORS[Device.CH_UTIL.ordinal]),
-    LegendData(nameRes = R.string.air_utilization, color = DEVICE_METRICS_COLORS[Device.AIR_UTIL.ordinal]),
+    LegendData(nameRes = R.string.battery, color = Device.BATTERY.color, isLine = true),
+    LegendData(nameRes = R.string.channel_utilization, color = Device.CH_UTIL.color),
+    LegendData(nameRes = R.string.air_utilization, color = Device.AIR_UTIL.color),
 )
 
 @Composable
@@ -204,7 +203,7 @@ private fun DeviceMetricsChart(
                     /* Channel Utilization */
                     plotPoint(
                         drawContext = drawContext,
-                        color = DEVICE_METRICS_COLORS[Device.CH_UTIL.ordinal],
+                        color = Device.CH_UTIL.color,
                         x = x,
                         value = telemetry.deviceMetrics.channelUtilization,
                         divisor = MAX_PERCENT_VALUE
@@ -213,7 +212,7 @@ private fun DeviceMetricsChart(
                     /* Air Utilization Transmit */
                     plotPoint(
                         drawContext = drawContext,
-                        color = DEVICE_METRICS_COLORS[Device.AIR_UTIL.ordinal],
+                        color = Device.AIR_UTIL.color,
                         x = x,
                         value = telemetry.deviceMetrics.airUtilTx,
                         divisor = MAX_PERCENT_VALUE
@@ -240,7 +239,7 @@ private fun DeviceMetricsChart(
                     }
                     drawPath(
                         path = path,
-                        color = DEVICE_METRICS_COLORS[Device.BATTERY.ordinal],
+                        color = Device.BATTERY.color,
                         style = Stroke(
                             width = GraphUtil.RADIUS,
                             cap = StrokeCap.Round
