@@ -256,7 +256,6 @@ private fun PowerMetricsChart(
                         style = Stroke(
                             width = GraphUtil.RADIUS,
                             cap = StrokeCap.Round,
-                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(LINE_ON, LINE_OFF), 0f)
                         )
                     )
                 }
