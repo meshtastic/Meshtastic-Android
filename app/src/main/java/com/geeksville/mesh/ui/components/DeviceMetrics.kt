@@ -64,12 +64,12 @@ import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.BatteryInfo
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
+import com.geeksville.mesh.ui.components.CommonCharts.MAX_PERCENT_VALUE
 import com.geeksville.mesh.ui.theme.Orange
 import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.plotPoint
 import com.geeksville.mesh.util.GraphUtil.createPath
 
-private const val MAX_PERCENT_VALUE = 100f
 private enum class Device(val color: Color) {
     BATTERY(Color.Green),
     CH_UTIL(Color.Magenta),

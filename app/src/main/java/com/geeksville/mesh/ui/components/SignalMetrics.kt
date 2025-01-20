@@ -63,7 +63,6 @@ import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.util.GraphUtil.plotPoint
 
-
 @Suppress("MagicNumber")
 private enum class Metric(val color: Color, val min: Float, val max: Float) {
     SNR(Color.Green, -20f, 12f), /* Selected 12 as the max to get 4 equal vertical sections. */

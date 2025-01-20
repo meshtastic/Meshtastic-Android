@@ -61,6 +61,7 @@ import com.geeksville.mesh.ui.components.CommonCharts.LINE_LIMIT
 import com.geeksville.mesh.ui.components.CommonCharts.TEXT_PAINT_ALPHA
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.components.CommonCharts.LEFT_LABEL_SPACING
+import com.geeksville.mesh.ui.components.CommonCharts.MAX_PERCENT_VALUE
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import java.text.DateFormat
 
@@ -71,6 +72,7 @@ object CommonCharts {
     const val MS_PER_SEC = 1000L
     const val LINE_LIMIT = 4
     const val TEXT_PAINT_ALPHA = 192
+    const val MAX_PERCENT_VALUE = 100f
 }
 
 private const val LINE_ON = 10f
@@ -176,8 +178,7 @@ fun HorizontalLinesOverlay(
     lineColors: List<Color>,
 ) {
     /* 100 is a good number to divide into quarters */
-    val range = 100f
-    val verticalSpacing = range / LINE_LIMIT
+    val verticalSpacing = MAX_PERCENT_VALUE / LINE_LIMIT
     Canvas(modifier = modifier) {
 
         val lineStart = 0f
@@ -186,7 +187,7 @@ fun HorizontalLinesOverlay(
         /* Horizontal Lines */
         var lineY = 0f
         for (i in 0..LINE_LIMIT) {
-            val ratio = lineY / range
+            val ratio = lineY / MAX_PERCENT_VALUE
             val y = height - (ratio * height)
             drawLine(
                 start = Offset(lineStart, y),
@@ -365,7 +366,7 @@ fun Legend(
                 Spacer(modifier = Modifier.weight(1f))
             }
         }
-        if(displayInfoIcon) {
+        if (displayInfoIcon) {
             Spacer(modifier = Modifier.width(4.dp))
             Icon(
                 imageVector = Icons.Default.Info,

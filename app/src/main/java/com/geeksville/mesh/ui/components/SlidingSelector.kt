@@ -99,7 +99,7 @@ private val BACKGROUND_SHAPE = RoundedCornerShape(8.dp)
  * (Inspired by https://gist.github.com/zach-klippenstein/7ae8874db304f957d6bb91263e292117)
  */
 @Composable
-fun <T: Any> SlidingSelector(
+fun <T : Any> SlidingSelector(
     options: List<T>,
     selectedOption: T,
     onOptionSelected: (T) -> Unit,
