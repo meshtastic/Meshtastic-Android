@@ -61,6 +61,8 @@ import com.geeksville.mesh.ui.components.CommonCharts.LINE_LIMIT
 import com.geeksville.mesh.ui.components.CommonCharts.TEXT_PAINT_ALPHA
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.components.CommonCharts.LEFT_LABEL_SPACING
+import com.geeksville.mesh.ui.components.CommonCharts.LINE_OFF
+import com.geeksville.mesh.ui.components.CommonCharts.LINE_ON
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import java.text.DateFormat
 
@@ -71,12 +73,12 @@ object CommonCharts {
     const val MS_PER_SEC = 1000L
     const val LINE_LIMIT = 4
     const val TEXT_PAINT_ALPHA = 192
+    const val LINE_ON = 10f
+    const val LINE_OFF = 20f
 }
 
 private val TIME_FORMAT: DateFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM)
 private val DATE_FORMAT: DateFormat = DateFormat.getDateInstance(DateFormat.SHORT)
-private const val LINE_ON = 10f
-private const val LINE_OFF = 20f
 private const val DATE_Y = 32f
 
 data class LegendData(val nameRes: Int, val color: Color, val isLine: Boolean = false)

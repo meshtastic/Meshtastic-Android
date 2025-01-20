@@ -49,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
@@ -64,10 +65,10 @@ import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
+import com.geeksville.mesh.ui.components.CommonCharts.LINE_OFF
+import com.geeksville.mesh.ui.components.CommonCharts.LINE_ON
 import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.createPath
-
-private val METRICS_COLORS = listOf(Color.Green, Color.Cyan, Color.Magenta)
 
 @Suppress("MagicNumber")
 private enum class Power(val min: Float, val max: Float) {
@@ -78,12 +79,15 @@ private enum class Power(val min: Float, val max: Float) {
      */
     fun difference() = max - min
 }
-// TODO maybe channel enum
+private enum class Channel(val color: Color) {
+    ONE(Color.Green),
+    TWO(Color.Cyan),
+    THREE(Color.Magenta)
+}
 private val LEGEND_DATA = listOf(
-    // TODO magic numbers
-    LegendData(nameRes = R.string.channel_1, color = METRICS_COLORS[0], isLine = true),
-    LegendData(nameRes = R.string.channel_2, color = METRICS_COLORS[1], isLine = true),
-    LegendData(nameRes = R.string.channel_3, color = METRICS_COLORS[2], isLine = true)
+    LegendData(nameRes = R.string.channel_1, color = Channel.ONE.color, isLine = true),
+    LegendData(nameRes = R.string.channel_2, color = Channel.TWO.color, isLine = true),
+    LegendData(nameRes = R.string.channel_3, color = Channel.THREE.color, isLine = true)
 )
 
 @Composable
@@ -189,8 +193,8 @@ private fun PowerMetricsChart(
             Canvas(modifier = modifier.width(dp)) {
                 val width = size.width
                 val height = size.height
-                var index = 0
                 /* Channel 1 Voltage */
+                var index = 0
                 while (index < telemetries.size) {
                     val path = Path()
                     index = createPath(
@@ -209,10 +213,38 @@ private fun PowerMetricsChart(
                     }
                     drawPath(
                         path = path,
-                        color = METRICS_COLORS[0], // TODO constant, name?? -> CHANNEL_COLORS
+                        color = Channel.ONE.color,
                         style = Stroke(
                             width = GraphUtil.RADIUS,
                             cap = StrokeCap.Round
+                        )
+                    )
+                }
+                /* Channel 1 Current */
+                var ch1CurrIndex = 0
+                while (ch1CurrIndex < telemetries.size) {
+                    val path = Path()
+                    ch1CurrIndex = createPath(
+                        telemetries = telemetries,
+                        index = ch1CurrIndex,
+                        path = path,
+                        oldestTime = oldest.time,
+                        timeRange = timeDiff,
+                        width = width,
+                        timeThreshold = selectedTime.timeThreshold()
+                    ) { i ->
+                        val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
+                        val ratio = (telemetry.powerMetrics.ch1Current - Power.CURRENT.min) / currentDiff
+                        val y = height - (ratio * height)
+                        return@createPath y
+                    }
+                    drawPath(
+                        path = path,
+                        color = Channel.ONE.color,
+                        style = Stroke(
+                            width = GraphUtil.RADIUS,
+                            cap = StrokeCap.Round,
+                            pathEffect = PathEffect.dashPathEffect(floatArrayOf(LINE_ON, LINE_OFF), 0f)
                         )
                     )
                 }
