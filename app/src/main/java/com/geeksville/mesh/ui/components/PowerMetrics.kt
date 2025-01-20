@@ -218,9 +218,8 @@ private fun PowerMetricsChart(
                         width = width,
                         timeThreshold = selectedTime.timeThreshold()
                     ) { i ->
-                        // TODO this block will depend on the channelSelected
                         val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
-                        val ratio = telemetry.powerMetrics.ch1Voltage / voltageDiff
+                        val ratio = retrieveVoltage(selectedChannel, telemetry) / voltageDiff
                         val y = height - (ratio * height)
                         return@createPath y
                     }
@@ -234,21 +233,20 @@ private fun PowerMetricsChart(
                     )
                 }
                 /* Current */
-                var ch1CurrIndex = 0 // TODO fix var name
-                while (ch1CurrIndex < telemetries.size) {
+                index = 0
+                while (index < telemetries.size) {
                     val path = Path()
-                    ch1CurrIndex = createPath(
+                    index = createPath(
                         telemetries = telemetries,
-                        index = ch1CurrIndex,
+                        index = index,
                         path = path,
                         oldestTime = oldest.time,
                         timeRange = timeDiff,
                         width = width,
                         timeThreshold = selectedTime.timeThreshold()
                     ) { i ->
-                        // TODO also a flexible block needed here
                         val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
-                        val ratio = (telemetry.powerMetrics.ch1Current - Power.CURRENT.min) / currentDiff
+                        val ratio = (retrieveCurrent(selectedChannel, telemetry) - Power.CURRENT.min) / currentDiff
                         val y = height - (ratio * height)
                         return@createPath y
                     }
@@ -329,5 +327,27 @@ private fun PowerMetricsCard(telemetry: Telemetry) {
                 }
             }
         }
+    }
+}
+
+/**
+ * Retrieves the appropriate voltage depending on `channelSelected`.
+ */
+private fun retrieveVoltage(channelSelected: PowerChannel, telemetry: Telemetry): Float {
+    return when (channelSelected) {
+        PowerChannel.ONE -> telemetry.powerMetrics.ch1Voltage
+        PowerChannel.TWO -> telemetry.powerMetrics.ch2Voltage
+        PowerChannel.THREE -> telemetry.powerMetrics.ch3Voltage
+    }
+}
+
+/**
+ * Retrieves the appropriate current depending on `channelSelected`.
+ */
+private fun retrieveCurrent(channelSelected: PowerChannel, telemetry: Telemetry): Float {
+    return when (channelSelected) {
+        PowerChannel.ONE -> telemetry.powerMetrics.ch1Current
+        PowerChannel.TWO -> telemetry.powerMetrics.ch2Current
+        PowerChannel.THREE -> telemetry.powerMetrics.ch3Current
     }
 }
