@@ -23,7 +23,6 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -283,43 +282,69 @@ private fun PowerMetricsCard(telemetry: Telemetry) {
                 Row(
                     modifier = Modifier.fillMaxWidth()
                 ) {
-
-                    /* Data */
-                    Box(
+                    Column(
                         modifier = Modifier
-                            .weight(weight = 5f)
-                            .height(IntrinsicSize.Min)
+                            .padding(8.dp)
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .padding(8.dp)
+                        /* Time */
+                        Row {
+                            Text(
+                                text = DATE_TIME_FORMAT.format(time),
+                                style = TextStyle(fontWeight = FontWeight.Bold),
+                                fontSize = MaterialTheme.typography.button.fontSize
+                            )
+                        }
+                        Row(
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            /* Time */
-                            Row(
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(
-                                    text = DATE_TIME_FORMAT.format(time),
-                                    style = TextStyle(fontWeight = FontWeight.Bold),
-                                    fontSize = MaterialTheme.typography.button.fontSize
+                            if (telemetry.powerMetrics.hasCh1Current() || telemetry.powerMetrics.hasCh1Voltage()) {
+                                PowerChannelColumn(
+                                    R.string.channel_1,
+                                    telemetry.powerMetrics.ch1Voltage,
+                                    telemetry.powerMetrics.ch1Current
                                 )
                             }
-                            Row {
-                                Text(
-                                    text = "${telemetry.powerMetrics.ch1Voltage}"
-                                )
-
-                                Text(
-                                    text = "${telemetry.powerMetrics.ch1Current}"
+                            if (telemetry.powerMetrics.hasCh2Current() || telemetry.powerMetrics.hasCh2Voltage()) {
+                                PowerChannelColumn(
+                                    R.string.channel_2,
+                                    telemetry.powerMetrics.ch2Voltage,
+                                    telemetry.powerMetrics.ch2Current
                                 )
                             }
-
-                            Spacer(modifier = Modifier.height(8.dp))
+                            if (telemetry.powerMetrics.hasCh3Current() || telemetry.powerMetrics.hasCh3Voltage()) {
+                                PowerChannelColumn(
+                                    R.string.channel_3,
+                                    telemetry.powerMetrics.ch3Voltage,
+                                    telemetry.powerMetrics.ch3Current
+                                )
+                            }
                         }
                     }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun PowerChannelColumn(@StringRes titleRes: Int, voltage: Float, current: Float) {
+    Column {
+        Text(
+            text = stringResource(titleRes),
+            style = TextStyle(fontWeight = FontWeight.Bold),
+            fontSize = MaterialTheme.typography.button.fontSize
+        )
+        Text(
+            text = "%.2fV".format(voltage),
+            color = MaterialTheme.colors.onSurface,
+            fontSize = MaterialTheme.typography.button.fontSize
+        )
+        Text(
+            text = "%.1fmA".format(current),
+            color = MaterialTheme.colors.onSurface,
+            fontSize = MaterialTheme.typography.button.fontSize
+        )
     }
 }
 
