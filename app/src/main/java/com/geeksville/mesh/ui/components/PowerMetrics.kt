@@ -50,7 +50,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalConfiguration
@@ -66,8 +65,6 @@ import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
-import com.geeksville.mesh.ui.components.CommonCharts.LINE_OFF
-import com.geeksville.mesh.ui.components.CommonCharts.LINE_ON
 import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.createPath
 
@@ -95,7 +92,6 @@ fun PowerMetricsScreen(
     viewModel: MetricsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    var displayInfoDialog by remember { mutableStateOf(false) }
     val selectedTimeFrame by viewModel.timeFrame.collectAsState()
     var selectedChannel by remember { mutableStateOf(PowerChannel.ONE) }
     val data = state.powerMetricsFiltered(selectedTimeFrame)
@@ -109,7 +105,6 @@ fun PowerMetricsScreen(
             telemetries = data.reversed(),
             selectedTimeFrame,
             selectedChannel,
-            promptInfoDialog = { displayInfoDialog = true }
         )
 
         SlidingSelector(
@@ -143,7 +138,6 @@ private fun PowerMetricsChart(
     telemetries: List<Telemetry>,
     selectedTime: TimeFrame,
     selectedChannel: PowerChannel,
-    promptInfoDialog: () -> Unit
 ) {
     ChartHeader(amount = telemetries.size)
     if (telemetries.isEmpty()) {
@@ -271,7 +265,7 @@ private fun PowerMetricsChart(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    Legend(legendData = LEGEND_DATA, promptInfoDialog)
+    Legend(legendData = LEGEND_DATA, displayInfoIcon = false)
 
     Spacer(modifier = Modifier.height(16.dp))
 }

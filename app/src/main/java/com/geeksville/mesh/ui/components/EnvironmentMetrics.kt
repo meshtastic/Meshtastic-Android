@@ -400,7 +400,7 @@ private fun EnvironmentMetricsChart(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    Legend(LEGEND_DATA, promptInfoDialog)
+    Legend(LEGEND_DATA, promptInfoDialog = promptInfoDialog)
 
     Spacer(modifier = Modifier.height(16.dp))
 }

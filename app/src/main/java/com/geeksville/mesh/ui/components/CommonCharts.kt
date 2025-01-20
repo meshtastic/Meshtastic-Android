@@ -61,8 +61,6 @@ import com.geeksville.mesh.ui.components.CommonCharts.LINE_LIMIT
 import com.geeksville.mesh.ui.components.CommonCharts.TEXT_PAINT_ALPHA
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.components.CommonCharts.LEFT_LABEL_SPACING
-import com.geeksville.mesh.ui.components.CommonCharts.LINE_OFF
-import com.geeksville.mesh.ui.components.CommonCharts.LINE_ON
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import java.text.DateFormat
 
@@ -73,10 +71,10 @@ object CommonCharts {
     const val MS_PER_SEC = 1000L
     const val LINE_LIMIT = 4
     const val TEXT_PAINT_ALPHA = 192
-    const val LINE_ON = 10f
-    const val LINE_OFF = 20f
 }
 
+private const val LINE_ON = 10f
+private const val LINE_OFF = 20f
 private val TIME_FORMAT: DateFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM)
 private val DATE_FORMAT: DateFormat = DateFormat.getDateInstance(DateFormat.SHORT)
 private const val DATE_Y = 32f
@@ -346,7 +344,11 @@ fun TimeLabels(
  * @param promptInfoDialog Executes when the user presses the info icon.
  */
 @Composable
-fun Legend(legendData: List<LegendData>, promptInfoDialog: () -> Unit) {
+fun Legend(
+    legendData: List<LegendData>,
+    displayInfoIcon: Boolean = true,
+    promptInfoDialog: () -> Unit = {}
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -363,13 +365,14 @@ fun Legend(legendData: List<LegendData>, promptInfoDialog: () -> Unit) {
                 Spacer(modifier = Modifier.weight(1f))
             }
         }
-        Spacer(modifier = Modifier.width(4.dp))
-
-        Icon(
-            imageVector = Icons.Default.Info,
-            modifier = Modifier.clickable { promptInfoDialog() },
-            contentDescription = stringResource(R.string.info)
-        )
+        if(displayInfoIcon) {
+            Spacer(modifier = Modifier.width(4.dp))
+            Icon(
+                imageVector = Icons.Default.Info,
+                modifier = Modifier.clickable { promptInfoDialog() },
+                contentDescription = stringResource(R.string.info)
+            )
+        }
 
         Spacer(modifier = Modifier.weight(1f))
     }

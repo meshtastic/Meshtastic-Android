@@ -227,7 +227,7 @@ private fun SignalMetricsChart(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    Legend(legendData = LEGEND_DATA, promptInfoDialog)
+    Legend(legendData = LEGEND_DATA, promptInfoDialog = promptInfoDialog)
 
     Spacer(modifier = Modifier.height(16.dp))
 }
