@@ -322,11 +322,7 @@ fun TimeLabels(
     oldest: Int,
     newest: Int
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    Row {
         Text(
             text = DATE_TIME_FORMAT.format(oldest * MS_PER_SEC),
             modifier = Modifier.wrapContentWidth(),
