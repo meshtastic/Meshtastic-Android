@@ -61,6 +61,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.MetricsViewModel
+import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.components.CommonCharts.X_AXIS_SPACING
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
@@ -136,11 +137,12 @@ fun EnvironmentMetricsScreen(
             promptInfoDialog = { displayInfoDialog = true }
         )
 
-        MetricsTimeSelector(
+        SlidingSelector(
+            TimeFrame.entries.toList(),
             selectedTimeFrame,
             onOptionSelected = { viewModel.setTimeFrame(it) }
         ) {
-            TimeLabel(stringResource(it.strRes))
+            OptionLabel(stringResource(it.strRes))
         }
 
         /* Environment Metric Cards */
