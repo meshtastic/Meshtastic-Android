@@ -61,6 +61,7 @@ import com.geeksville.mesh.ui.components.CommonCharts.LINE_LIMIT
 import com.geeksville.mesh.ui.components.CommonCharts.TEXT_PAINT_ALPHA
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.components.CommonCharts.LEFT_LABEL_SPACING
+import com.geeksville.mesh.ui.components.CommonCharts.MAX_PERCENT_VALUE
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import java.text.DateFormat
 
@@ -71,12 +72,13 @@ object CommonCharts {
     const val MS_PER_SEC = 1000L
     const val LINE_LIMIT = 4
     const val TEXT_PAINT_ALPHA = 192
+    const val MAX_PERCENT_VALUE = 100f
 }
 
-private val TIME_FORMAT: DateFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM)
-private val DATE_FORMAT: DateFormat = DateFormat.getDateInstance(DateFormat.SHORT)
 private const val LINE_ON = 10f
 private const val LINE_OFF = 20f
+private val TIME_FORMAT: DateFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM)
+private val DATE_FORMAT: DateFormat = DateFormat.getDateInstance(DateFormat.SHORT)
 private const val DATE_Y = 32f
 
 data class LegendData(val nameRes: Int, val color: Color, val isLine: Boolean = false)
@@ -104,7 +106,7 @@ fun ChartHeader(amount: Int) {
  * @param lineColors A list of 5 `Color`s for the chart lines, 0 being the lowest line on the chart.
  * @param leaveSpace When true the lines will leave space for Y labels on the left side of the graph.
  */
-@Deprecated("Will soon be replaced with YAxisLabels() and HorizontalLines()", level = DeprecationLevel.WARNING)
+@Deprecated("Will soon be replaced with YAxisLabels() and HorizontalLinesOverlay()", level = DeprecationLevel.WARNING)
 @Composable
 fun ChartOverlay(
     modifier: Modifier,
@@ -166,7 +168,7 @@ fun ChartOverlay(
 }
 
 /**
- * Draws chart lines with respect to the Y-axis range; defined by (`maxValue` - `minValue`).
+ * Draws chart lines with respect to the Y-axis.
  *
  * @param lineColors A list of 5 `Color`s for the chart lines, 0 being the lowest line on the chart.
  */
@@ -174,21 +176,18 @@ fun ChartOverlay(
 fun HorizontalLinesOverlay(
     modifier: Modifier,
     lineColors: List<Color>,
-    minValue: Float,
-    maxValue: Float,
 ) {
-    val range = maxValue - minValue
-    val verticalSpacing = range / LINE_LIMIT
+    /* 100 is a good number to divide into quarters */
+    val verticalSpacing = MAX_PERCENT_VALUE / LINE_LIMIT
     Canvas(modifier = modifier) {
 
         val lineStart = 0f
         val height = size.height
         val width = size.width
-
         /* Horizontal Lines */
-        var lineY = minValue
+        var lineY = 0f
         for (i in 0..LINE_LIMIT) {
-            val ratio = (lineY - minValue) / range
+            val ratio = lineY / MAX_PERCENT_VALUE
             val y = height - (ratio * height)
             drawLine(
                 start = Offset(lineStart, y),
@@ -322,11 +321,7 @@ fun TimeLabels(
     oldest: Int,
     newest: Int
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    Row {
         Text(
             text = DATE_TIME_FORMAT.format(oldest * MS_PER_SEC),
             modifier = Modifier.wrapContentWidth(),
@@ -350,7 +345,11 @@ fun TimeLabels(
  * @param promptInfoDialog Executes when the user presses the info icon.
  */
 @Composable
-fun Legend(legendData: List<LegendData>, promptInfoDialog: () -> Unit) {
+fun Legend(
+    legendData: List<LegendData>,
+    displayInfoIcon: Boolean = true,
+    promptInfoDialog: () -> Unit = {}
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
@@ -367,13 +366,14 @@ fun Legend(legendData: List<LegendData>, promptInfoDialog: () -> Unit) {
                 Spacer(modifier = Modifier.weight(1f))
             }
         }
-        Spacer(modifier = Modifier.width(4.dp))
-
-        Icon(
-            imageVector = Icons.Default.Info,
-            modifier = Modifier.clickable { promptInfoDialog() },
-            contentDescription = stringResource(R.string.info)
-        )
+        if (displayInfoIcon) {
+            Spacer(modifier = Modifier.width(4.dp))
+            Icon(
+                imageVector = Icons.Default.Info,
+                modifier = Modifier.clickable { promptInfoDialog() },
+                contentDescription = stringResource(R.string.info)
+            )
+        }
 
         Spacer(modifier = Modifier.weight(1f))
     }

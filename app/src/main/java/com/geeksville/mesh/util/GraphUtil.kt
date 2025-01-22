@@ -60,6 +60,7 @@ object GraphUtil {
      * @param width of the [DrawContext]
      * @param timeThreshold to determine significant breaks in time between [Telemetry]s
      * @param calculateY (`index`) -> `y` coordinate
+     * @return the current index after iterating
      */
     fun createPath(
         telemetries: List<Telemetry>,

@@ -313,4 +313,10 @@
     <string name="unknown_age">Unknown Age</string>
     <string name="copy">Copy</string>
     <string name="alert_bell_text">Alert Bell Character!</string>
+    <string name="power_metrics_log">Power Metrics Log</string>
+    <string name="channel_1">Channel 1</string>
+    <string name="channel_2">Channel 2</string>
+    <string name="channel_3">Channel 3</string>
+    <string name="current">Current</string>
+    <string name="voltage">Voltage</string>
 </resources>

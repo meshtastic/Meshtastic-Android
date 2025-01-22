@@ -61,30 +61,30 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.MetricsViewModel
+import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.components.CommonCharts.X_AXIS_SPACING
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 
-private val ENVIRONMENT_METRICS_COLORS = listOf(Color.Red, Color.Blue, Color.Green)
-private enum class Environment {
-    TEMPERATURE,
-    HUMIDITY,
-    IAQ
+private enum class Environment(val color: Color) {
+    TEMPERATURE(Color.Red),
+    HUMIDITY(Color.Blue),
+    IAQ(Color.Green)
 }
 private val LEGEND_DATA = listOf(
     LegendData(
         nameRes = R.string.temperature,
-        color = ENVIRONMENT_METRICS_COLORS[Environment.TEMPERATURE.ordinal],
+        color = Environment.TEMPERATURE.color,
         isLine = true
     ),
     LegendData(
         nameRes = R.string.humidity,
-        color = ENVIRONMENT_METRICS_COLORS[Environment.HUMIDITY.ordinal],
+        color = Environment.HUMIDITY.color,
         isLine = true
     ),
     LegendData(
         nameRes = R.string.iaq,
-        color = ENVIRONMENT_METRICS_COLORS[Environment.IAQ.ordinal],
+        color = Environment.IAQ.color,
         isLine = true
     ),
 )
@@ -137,11 +137,12 @@ fun EnvironmentMetricsScreen(
             promptInfoDialog = { displayInfoDialog = true }
         )
 
-        MetricsTimeSelector(
+        SlidingSelector(
+            TimeFrame.entries.toList(),
             selectedTimeFrame,
             onOptionSelected = { viewModel.setTimeFrame(it) }
         ) {
-            TimeLabel(stringResource(it.strRes))
+            OptionLabel(stringResource(it.strRes))
         }
 
         /* Environment Metric Cards */
@@ -178,13 +179,13 @@ private fun EnvironmentMetricsChart(
 
     val graphColor = MaterialTheme.colors.onSurface
     val transparentTemperatureColor = remember {
-        ENVIRONMENT_METRICS_COLORS[Environment.TEMPERATURE.ordinal].copy(alpha = 0.5f)
+        Environment.TEMPERATURE.color.copy(alpha = 0.5f)
     }
     val transparentHumidityColor = remember {
-        ENVIRONMENT_METRICS_COLORS[Environment.HUMIDITY.ordinal].copy(alpha = 0.5f)
+        Environment.HUMIDITY.color.copy(alpha = 0.5f)
     }
     val transparentIAQColor = remember {
-        ENVIRONMENT_METRICS_COLORS[Environment.IAQ.ordinal].copy(alpha = 0.5f)
+        Environment.IAQ.color.copy(alpha = 0.5f)
     }
     val spacing = X_AXIS_SPACING
 
@@ -280,7 +281,7 @@ private fun EnvironmentMetricsChart(
 
             drawPath(
                 path = temperaturePath,
-                color = ENVIRONMENT_METRICS_COLORS[Environment.TEMPERATURE.ordinal],
+                color = Environment.TEMPERATURE.color,
                 style = Stroke(
                     width = 2.dp.toPx(),
                     cap = StrokeCap.Round
@@ -333,7 +334,7 @@ private fun EnvironmentMetricsChart(
 
             drawPath(
                 path = humidityPath,
-                color = ENVIRONMENT_METRICS_COLORS[Environment.HUMIDITY.ordinal],
+                color = Environment.HUMIDITY.color,
                 style = Stroke(
                     width = 2.dp.toPx(),
                     cap = StrokeCap.Round
@@ -388,7 +389,7 @@ private fun EnvironmentMetricsChart(
 
             drawPath(
                 path = iaqPath,
-                color = ENVIRONMENT_METRICS_COLORS[Environment.IAQ.ordinal],
+                color = Environment.IAQ.color,
                 style = Stroke(
                     width = 2.dp.toPx(),
                     cap = StrokeCap.Round
@@ -399,7 +400,7 @@ private fun EnvironmentMetricsChart(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    Legend(LEGEND_DATA, promptInfoDialog)
+    Legend(LEGEND_DATA, promptInfoDialog = promptInfoDialog)
 
     Spacer(modifier = Modifier.height(16.dp))
 }

@@ -63,20 +63,18 @@ import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.util.GraphUtil.plotPoint
 
-private val METRICS_COLORS = listOf(Color.Green, Color.Blue)
-
 @Suppress("MagicNumber")
-private enum class Metric(val min: Float, val max: Float) {
-    SNR(-20f, 12f), /* Selected 12 as the max to get 4 equal vertical sections. */
-    RSSI(-140f, -20f);
+private enum class Metric(val color: Color, val min: Float, val max: Float) {
+    SNR(Color.Green, -20f, 12f), /* Selected 12 as the max to get 4 equal vertical sections. */
+    RSSI(Color.Blue, -140f, -20f);
     /**
      * Difference between the metrics `max` and `min` values.
      */
     fun difference() = max - min
 }
 private val LEGEND_DATA = listOf(
-    LegendData(nameRes = R.string.rssi, color = METRICS_COLORS[Metric.RSSI.ordinal]),
-    LegendData(nameRes = R.string.snr, color = METRICS_COLORS[Metric.SNR.ordinal])
+    LegendData(nameRes = R.string.rssi, color = Metric.RSSI.color),
+    LegendData(nameRes = R.string.snr, color = Metric.SNR.color)
 )
 
 @Composable
@@ -109,11 +107,12 @@ fun SignalMetricsScreen(
             promptInfoDialog = { displayInfoDialog = true }
         )
 
-        MetricsTimeSelector(
+        SlidingSelector(
+            TimeFrame.entries.toList(),
             selectedTimeFrame,
             onOptionSelected = { viewModel.setTimeFrame(it) }
         ) {
-            TimeLabel(stringResource(it.strRes))
+            OptionLabel(stringResource(it.strRes))
         }
 
         LazyColumn(
@@ -166,7 +165,7 @@ private fun SignalMetricsChart(
     Row {
         YAxisLabels(
             modifier = modifier.weight(weight = .1f),
-            METRICS_COLORS[Metric.RSSI.ordinal],
+            Metric.RSSI.color,
             minValue = Metric.RSSI.min,
             maxValue = Metric.RSSI.max,
         )
@@ -179,8 +178,6 @@ private fun SignalMetricsChart(
             HorizontalLinesOverlay(
                 modifier.width(dp),
                 lineColors = List(size = 5) { graphColor },
-                minValue = Metric.SNR.min,
-                maxValue = Metric.SNR.max
             )
 
             TimeAxisOverlay(
@@ -202,7 +199,7 @@ private fun SignalMetricsChart(
                     /* SNR */
                     plotPoint(
                         drawContext = drawContext,
-                        color = METRICS_COLORS[Metric.SNR.ordinal],
+                        color = Metric.SNR.color,
                         x = x,
                         value = packet.rxSnr - Metric.SNR.min,
                         divisor = snrDiff
@@ -211,7 +208,7 @@ private fun SignalMetricsChart(
                     /* RSSI */
                     plotPoint(
                         drawContext = drawContext,
-                        color = METRICS_COLORS[Metric.RSSI.ordinal],
+                        color = Metric.RSSI.color,
                         x = x,
                         value = packet.rxRssi - Metric.RSSI.min,
                         divisor = rssiDiff
@@ -221,7 +218,7 @@ private fun SignalMetricsChart(
         }
         YAxisLabels(
             modifier = modifier.weight(weight = .1f),
-            METRICS_COLORS[Metric.SNR.ordinal],
+            Metric.SNR.color,
             minValue = Metric.SNR.min,
             maxValue = Metric.SNR.max,
         )
@@ -229,7 +226,7 @@ private fun SignalMetricsChart(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    Legend(legendData = LEGEND_DATA, promptInfoDialog)
+    Legend(legendData = LEGEND_DATA, promptInfoDialog = promptInfoDialog)
 
     Spacer(modifier = Modifier.height(16.dp))
 }

@@ -74,6 +74,7 @@ data class MetricsState(
     val deviceMetrics: List<Telemetry> = emptyList(),
     val environmentMetrics: List<Telemetry> = emptyList(),
     val signalMetrics: List<MeshPacket> = emptyList(),
+    val powerMetrics: List<Telemetry> = emptyList(),
     val tracerouteRequests: List<MeshLog> = emptyList(),
     val tracerouteResults: List<MeshPacket> = emptyList(),
     val positionLogs: List<Position> = emptyList(),
@@ -82,6 +83,7 @@ data class MetricsState(
     fun hasDeviceMetrics() = deviceMetrics.isNotEmpty()
     fun hasEnvironmentMetrics() = environmentMetrics.isNotEmpty()
     fun hasSignalMetrics() = signalMetrics.isNotEmpty()
+    fun hasPowerMetrics() = powerMetrics.isNotEmpty()
     fun hasTracerouteLogs() = tracerouteRequests.isNotEmpty()
     fun hasPositionLogs() = positionLogs.isNotEmpty()
 
@@ -98,6 +100,11 @@ data class MetricsState(
     fun signalMetricsFiltered(timeFrame: TimeFrame): List<MeshPacket> {
         val oldestTime = timeFrame.calculateOldestTime()
         return signalMetrics.filter { it.rxTime >= oldestTime }
+    }
+
+    fun powerMetricsFiltered(timeFrame: TimeFrame): List<Telemetry> {
+        val oldestTime = timeFrame.calculateOldestTime()
+        return powerMetrics.filter { it.time >= oldestTime }
     }
 
     companion object {
@@ -247,7 +254,8 @@ class MetricsViewModel @Inject constructor(
                     deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
                     environmentMetrics = telemetry.filter {
                         it.hasEnvironmentMetrics() && it.environmentMetrics.relativeHumidity >= 0f
-                    }
+                    },
+                    powerMetrics = telemetry.filter { it.hasPowerMetrics() }
                 )
             }
         }.launchIn(viewModelScope)

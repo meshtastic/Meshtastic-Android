@@ -28,6 +28,7 @@ import com.geeksville.mesh.ui.components.DeviceMetricsScreen
 import com.geeksville.mesh.ui.components.EnvironmentMetricsScreen
 import com.geeksville.mesh.ui.components.NodeMapScreen
 import com.geeksville.mesh.ui.components.PositionLogScreen
+import com.geeksville.mesh.ui.components.PowerMetricsScreen
 import com.geeksville.mesh.ui.components.SignalMetricsScreen
 import com.geeksville.mesh.ui.components.TracerouteLogScreen
 
@@ -64,6 +65,12 @@ fun NavGraphBuilder.addNodDetailSection(navController: NavController) {
     composable<Route.SignalMetrics> {
         val parentEntry = remember { navController.getBackStackEntry<Route.NodeDetail>() }
         SignalMetricsScreen(
+            viewModel = hiltViewModel<MetricsViewModel>(parentEntry),
+        )
+    }
+    composable<Route.PowerMetrics> {
+        val parentEntry = remember { navController.getBackStackEntry<Route.NodeDetail>() }
+        PowerMetricsScreen(
             viewModel = hiltViewModel<MetricsViewModel>(parentEntry),
         )
     }

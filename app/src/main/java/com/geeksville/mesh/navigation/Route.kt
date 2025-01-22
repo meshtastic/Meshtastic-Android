@@ -66,5 +66,6 @@ sealed interface Route {
     @Serializable data object PositionLog : Route
     @Serializable data object EnvironmentMetrics : Route
     @Serializable data object SignalMetrics : Route
+    @Serializable data object PowerMetrics : Route
     @Serializable data object TracerouteLog : Route
 }
