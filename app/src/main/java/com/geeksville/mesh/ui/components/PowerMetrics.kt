@@ -69,7 +69,7 @@ import com.geeksville.mesh.util.GraphUtil.createPath
 
 @Suppress("MagicNumber")
 private enum class Power(val color: Color, val min: Float, val max: Float) {
-    CURRENT(Color.Blue, -500f, 500f),
+    CURRENT(Color(75, 119, 190), -500f, 500f),
     VOLTAGE(Color.Red, 0f, 20f);
     /**
      * Difference between the metrics `max` and `min` values.
