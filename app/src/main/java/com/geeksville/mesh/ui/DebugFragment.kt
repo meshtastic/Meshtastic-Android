@@ -63,13 +63,11 @@ import androidx.fragment.app.Fragment
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
-import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.model.DebugViewModel
+import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
 import com.geeksville.mesh.ui.components.BaseScaffold
 import com.geeksville.mesh.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
-import java.text.DateFormat
-import java.util.Locale
 
 @AndroidEntryPoint
 class DebugFragment : Fragment() {
@@ -91,65 +89,6 @@ class DebugFragment : Fragment() {
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
 
-/**
- * Transform the input [MeshLog] by enhancing the raw message with annotations.
- */
-private fun annotateMeshLog(meshLog: MeshLog): MeshLog {
-    val annotated = when (meshLog.message_type) {
-        "Packet" -> meshLog.meshPacket?.let { packet ->
-            annotateRawMessage(meshLog.raw_message, packet.from, packet.to)
-        }
-
-        "NodeInfo" -> meshLog.nodeInfo?.let { nodeInfo ->
-            annotateRawMessage(meshLog.raw_message, nodeInfo.num)
-        }
-
-        "MyNodeInfo" -> meshLog.myNodeInfo?.let { nodeInfo ->
-            annotateRawMessage(meshLog.raw_message, nodeInfo.myNodeNum)
-        }
-
-        else -> null
-    }
-    return if (annotated == null) {
-        meshLog
-    } else {
-        meshLog.copy(raw_message = annotated)
-    }
-}
-
-/**
- * Annotate the raw message string with the node IDs provided, in hex, if they are present.
- */
-private fun annotateRawMessage(rawMessage: String, vararg nodeIds: Int): String {
-    val msg = StringBuilder(rawMessage)
-    var mutated = false
-    nodeIds.forEach { nodeId ->
-        mutated = mutated or msg.annotateNodeId(nodeId)
-    }
-    return if (mutated) {
-        return msg.toString()
-    } else {
-        rawMessage
-    }
-}
-
-/**
- * Look for a single node ID integer in the string and annotate it with the hex equivalent
- * if found.
- */
-private fun StringBuilder.annotateNodeId(nodeId: Int): Boolean {
-    val nodeIdStr = nodeId.toUInt().toString()
-    indexOf(nodeIdStr).takeIf { it >= 0 }?.let { idx ->
-        insert(idx + nodeIdStr.length, " (${nodeId.asNodeId()})")
-        return true
-    }
-    return false
-}
-
-private fun Int.asNodeId(): String {
-    return "!%08x".format(Locale.getDefault(), this)
-}
-
 @Composable
 internal fun DebugScreen(
     viewModel: DebugViewModel = hiltViewModel(),
@@ -162,7 +101,7 @@ internal fun DebugScreen(
     if (shouldAutoScroll) {
         LaunchedEffect(logs) {
             if (!listState.isScrollInProgress) {
-                listState.scrollToItem(0)
+                listState.animateScrollToItem(0)
             }
         }
     }
@@ -181,18 +120,24 @@ internal fun DebugScreen(
                 modifier = Modifier.fillMaxSize(),
                 state = listState,
             ) {
-                items(logs, key = { it.uuid }) { log -> DebugItem(annotateMeshLog(log)) }
+                items(logs, key = { it.uuid }) { log ->
+                    DebugItem(
+                        modifier = Modifier.animateItem(),
+                        log = log,
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-internal fun DebugItem(log: MeshLog) {
-    val timeFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
-
+internal fun DebugItem(
+    log: UiMeshLog,
+    modifier: Modifier = Modifier,
+) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(4.dp),
         elevation = 4.dp,
@@ -209,7 +154,7 @@ internal fun DebugItem(log: MeshLog) {
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
                     Text(
-                        text = log.message_type,
+                        text = log.messageType,
                         modifier = Modifier.weight(1f),
                         style = TextStyle(fontWeight = FontWeight.Bold),
                     )
@@ -220,7 +165,7 @@ internal fun DebugItem(log: MeshLog) {
                         modifier = Modifier.padding(end = 8.dp),
                     )
                     Text(
-                        text = timeFormat.format(log.received_date),
+                        text = log.formattedReceivedDate,
                         style = TextStyle(fontWeight = FontWeight.Bold),
                     )
                 }
@@ -229,10 +174,17 @@ internal fun DebugItem(log: MeshLog) {
                     color = colorResource(id = R.color.colorAnnotation),
                     fontStyle = FontStyle.Italic,
                 )
-                val annotatedString = buildAnnotatedString {
-                    append(log.raw_message)
-                    REGEX_ANNOTATED_NODE_ID.findAll(log.raw_message).toList().reversed().forEach {
-                        addStyle(style = style, start = it.range.first, end = it.range.last + 1)
+                val annotatedString = remember(log.uuid) {
+                    buildAnnotatedString {
+                        append(log.logMessage)
+                        REGEX_ANNOTATED_NODE_ID.findAll(log.logMessage).toList().reversed()
+                            .forEach {
+                                addStyle(
+                                    style = style,
+                                    start = it.range.first,
+                                    end = it.range.last + 1
+                                )
+                            }
                     }
                 }
 
@@ -254,11 +206,11 @@ internal fun DebugItem(log: MeshLog) {
 private fun DebugScreenPreview() {
     AppTheme {
         DebugItem(
-            MeshLog(
+            UiMeshLog(
                 uuid = "",
-                message_type = "NodeInfo",
-                received_date = 1601251258000L,
-                raw_message = "from: 2885173132\n" +
+                messageType = "NodeInfo",
+                formattedReceivedDate = "9/27/20, 8:00:58 PM",
+                logMessage = "from: 2885173132\n" +
                         "decoded {\n" +
                         "   position {\n" +
                         "       altitude: 60\n" +
