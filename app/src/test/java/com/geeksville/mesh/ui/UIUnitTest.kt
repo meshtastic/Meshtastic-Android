@@ -37,5 +37,6 @@ class UIUnitTest {
         assertEquals("TG", getInitials("The \uD83D\uDC10 Goat"))
         assertEquals("TT", getInitials("The \uD83E\uDD14Thinker"))
         assertEquals("TCH", getInitials("\uD83D\uDC4F\uD83C\uDFFFThe Clapping Hands"))
+        assertEquals("山羊", getInitials("山羊\uD83D\uDC10"))
     }
 }
