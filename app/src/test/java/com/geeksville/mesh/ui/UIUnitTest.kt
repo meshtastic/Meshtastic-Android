@@ -18,22 +18,24 @@
 package com.geeksville.mesh.ui
 
 import com.geeksville.mesh.model.getInitials
-import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
-/**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
- */
 class UIUnitTest {
     @Test
     fun initialsGood() {
-        Assert.assertEquals("KH", getInitials("Kevin Hester"))
-        Assert.assertEquals("KHLC", getInitials("  Kevin Hester Lesser Cat  "))
-        Assert.assertEquals("", getInitials("  "))
-        Assert.assertEquals("gksv", getInitials("geeksville"))
-        Assert.assertEquals("geek", getInitials("geek"))
-        Assert.assertEquals("gks1", getInitials("geeks1"))
+        assertEquals("KH", getInitials("Kevin Hester"))
+        assertEquals("KHLC", getInitials("  Kevin Hester Lesser Cat  "))
+        assertEquals("", getInitials("  "))
+        assertEquals("gksv", getInitials("geeksville"))
+        assertEquals("geek", getInitials("geek"))
+        assertEquals("gks1", getInitials("geeks1"))
+    }
+
+    @Test
+    fun ignoreEmojisWhenCreatingInitials() {
+        assertEquals("TG", getInitials("The \uD83D\uDC10 Goat"))
+        assertEquals("TT", getInitials("The \uD83E\uDD14Thinker"))
+        assertEquals("TCH", getInitials("\uD83D\uDC4F\uD83C\uDFFFThe Clapping Hands"))
     }
 }
