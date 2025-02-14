@@ -23,7 +23,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -36,13 +35,9 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Button
 import androidx.compose.material.Card
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -64,13 +59,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.model.DebugViewModel
+import com.geeksville.mesh.ui.components.BaseScaffold
 import com.geeksville.mesh.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import java.text.DateFormat
@@ -85,36 +80,9 @@ class DebugFragment : Fragment() {
     ): View {
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setBackgroundColor(ContextCompat.getColor(context, R.color.colorAdvancedBackground))
             setContent {
-                val viewModel: DebugViewModel = hiltViewModel()
-
                 AppTheme {
-                    Scaffold(
-                        topBar = {
-                            TopAppBar(
-                                title = { Text(stringResource(id = R.string.debug_panel)) },
-                                navigationIcon = {
-                                    IconButton(onClick = { parentFragmentManager.popBackStack() }) {
-                                        Icon(
-                                            Icons.AutoMirrored.Filled.ArrowBack,
-                                            stringResource(id = R.string.navigate_back),
-                                        )
-                                    }
-                                },
-                                actions = {
-                                    Button(onClick = viewModel::deleteAllLogs) {
-                                        Text(text = stringResource(R.string.clear))
-                                    }
-                                }
-                            )
-                        },
-                    ) { innerPadding ->
-                        DebugScreen(
-                            viewModel = viewModel,
-                            contentPadding = innerPadding,
-                        )
-                    }
+                    DebugScreen { parentFragmentManager.popBackStack() }
                 }
             }
         }
@@ -185,7 +153,7 @@ private fun Int.asNodeId(): String {
 @Composable
 internal fun DebugScreen(
     viewModel: DebugViewModel = hiltViewModel(),
-    contentPadding: PaddingValues,
+    navigateUp: () -> Unit
 ) {
     val listState = rememberLazyListState()
     val logs by viewModel.meshLog.collectAsStateWithLifecycle()
@@ -199,13 +167,22 @@ internal fun DebugScreen(
         }
     }
 
-    SelectionContainer {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            state = listState,
-            contentPadding = contentPadding,
-        ) {
-            items(logs, key = { it.uuid }) { log -> DebugItem(annotateMeshLog(log)) }
+    BaseScaffold(
+        title = stringResource(id = R.string.debug_panel),
+        navigateUp = navigateUp,
+        actions = {
+            Button(onClick = viewModel::deleteAllLogs) {
+                Text(text = stringResource(R.string.clear))
+            }
+        }
+    ) {
+        SelectionContainer {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                state = listState,
+            ) {
+                items(logs, key = { it.uuid }) { log -> DebugItem(annotateMeshLog(log)) }
+            }
         }
     }
 }

@@ -65,6 +65,7 @@ import com.geeksville.mesh.ui.BatteryInfo
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.theme.Orange
+import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.plotPoint
 import com.geeksville.mesh.util.GraphUtil.createPath
 
@@ -155,12 +156,12 @@ private fun DeviceMetricsChart(
     Spacer(modifier = Modifier.height(16.dp))
 
     val graphColor = MaterialTheme.colors.onSurface
-    val scrollState = rememberScrollState()
 
+    val scrollState = rememberScrollState()
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp
     val dp by remember(key1 = selectedTime) {
-        mutableStateOf(selectedTime.dp(screenWidth, time = (newest.time - oldest.time).toLong()))
+        mutableStateOf(selectedTime.dp(screenWidth, time = timeDiff.toLong()))
     }
 
     Row {
@@ -195,7 +196,6 @@ private fun DeviceMetricsChart(
 
                 val height = size.height
                 val width = size.width
-                val dataPointRadius = 2.dp.toPx()
                 for (i in telemetries.indices) {
                     val telemetry = telemetries[i]
 
@@ -207,7 +207,6 @@ private fun DeviceMetricsChart(
                     plotPoint(
                         drawContext = drawContext,
                         color = DEVICE_METRICS_COLORS[Device.CH_UTIL.ordinal],
-                        radius = dataPointRadius,
                         x = x,
                         value = telemetry.deviceMetrics.channelUtilization,
                         divisor = MAX_PERCENT_VALUE
@@ -217,7 +216,6 @@ private fun DeviceMetricsChart(
                     plotPoint(
                         drawContext = drawContext,
                         color = DEVICE_METRICS_COLORS[Device.AIR_UTIL.ordinal],
-                        radius = dataPointRadius,
                         x = x,
                         value = telemetry.deviceMetrics.airUtilTx,
                         divisor = MAX_PERCENT_VALUE
@@ -246,7 +244,7 @@ private fun DeviceMetricsChart(
                         path = path,
                         color = DEVICE_METRICS_COLORS[Device.BATTERY.ordinal],
                         style = Stroke(
-                            width = dataPointRadius,
+                            width = GraphUtil.RADIUS,
                             cap = StrokeCap.Round
                         )
                     )

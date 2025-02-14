@@ -27,12 +27,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Card
-import androidx.compose.material.Chip
-import androidx.compose.material.ChipDefaults
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
@@ -51,8 +47,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
@@ -62,11 +56,12 @@ import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.ui.components.AutoLinkText
+import com.geeksville.mesh.ui.components.UserAvatar
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.theme.AppTheme
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
-@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun MessageItem(
     node: Node,
@@ -95,6 +90,15 @@ internal fun MessageItem(
         Modifier.padding(start = 8.dp, top = 8.dp, end = 0.dp, bottom = 6.dp)
     }
 
+    if (!fromLocal) {
+        UserAvatar(
+            node = node,
+            modifier = Modifier
+                .padding(start = 8.dp, top = 8.dp)
+                .align(Alignment.Top),
+        ) { onChipClick() }
+    }
+
     Card(
         modifier = Modifier
             .weight(1f)
@@ -115,26 +119,6 @@ internal fun MessageItem(
                     .padding(horizontal = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                if (!fromLocal) {
-                    Chip(
-                        onClick = onChipClick,
-                        modifier = Modifier
-                            .padding(end = 8.dp)
-                            .width(72.dp),
-                        colors = ChipDefaults.chipColors(
-                            backgroundColor = Color(node.colors.second),
-                            contentColor = Color(node.colors.first),
-                        ),
-                    ) {
-                        Text(
-                            text = node.user.shortName,
-                            modifier = Modifier.fillMaxWidth(),
-                            fontSize = MaterialTheme.typography.button.fontSize,
-                            fontWeight = FontWeight.Normal,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                }
                 Column(
                     modifier = Modifier.padding(top = 8.dp),
                 ) {
