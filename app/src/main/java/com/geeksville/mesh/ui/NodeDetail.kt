@@ -455,14 +455,14 @@ private fun EnvironmentMetrics(
             InfoCard(
                 icon = Icons.Default.Speed,
                 text = "Pressure",
-                value = "%.0f".format(barometricPressure)
+                value = "%.0f hPa".format(barometricPressure)
             )
         }
         if (gasResistance != 0f) {
             InfoCard(
                 icon = Icons.Default.BlurOn,
                 text = "Gas Resistance",
-                value = "%.0f".format(gasResistance)
+                value = "%.0f MΩ".format(gasResistance)
             )
         }
         if (voltage != 0f) {
@@ -497,7 +497,7 @@ private fun EnvironmentMetrics(
             InfoCard(
                 icon = Icons.Default.LightMode,
                 text = "Lux",
-                value = "%.0f".format(lux)
+                value = "%.0f lx".format(lux)
             )
         }
         if (hasWindSpeed()) {
@@ -521,7 +521,7 @@ private fun EnvironmentMetrics(
             InfoCard(
                 icon = ImageVector.vectorResource(R.drawable.ic_filled_radioactive_24),
                 text = "Radiation",
-                value = "%.1f µR".format(radiation)
+                value = "%.1f µR/h".format(radiation)
             )
         }
     }
