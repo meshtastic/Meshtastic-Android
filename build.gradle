@@ -5,7 +5,7 @@ buildscript {
         useCrashlytics = false
         kotlin_version = '2.1.10'
         hilt_version = '2.54'
-        protobuf_version = '4.29.2'
+        protobuf_version = '4.29.3'
     }
 
     repositories {
