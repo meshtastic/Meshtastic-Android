@@ -8,5 +8,6 @@
     "replacements:all",
     "workarounds:all"
   ],
-  "commitMessageTopic": "{{depName}}"
+  "commitMessageTopic": "{{depName}}",
+  "labels": ["dependencies"]
 }
