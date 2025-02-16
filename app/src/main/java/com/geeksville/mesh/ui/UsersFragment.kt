@@ -22,12 +22,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -113,6 +115,7 @@ fun NodesScreen(
             NodeFilterTextField(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(MaterialTheme.colors.background)
                     .padding(8.dp),
                 filterText = state.filter,
                 onTextChange = model::setNodeFilterText,
