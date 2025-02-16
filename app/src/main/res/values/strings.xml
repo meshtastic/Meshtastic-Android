@@ -313,6 +313,9 @@
     <string name="unknown_age">Unknown Age</string>
     <string name="copy">Copy</string>
     <string name="alert_bell_text">Alert Bell Character!</string>
+    <string name="favorite">Favorite</string>
+    <string name="favorite_add">Add \'%s\' as a favorite node?</string>
+    <string name="favorite_remove">Remove \'%s\' as a favorite node?</string>
     <string name="power_metrics_log">Power Metrics Log</string>
     <string name="channel_1">Channel 1</string>
     <string name="channel_2">Channel 2</string>

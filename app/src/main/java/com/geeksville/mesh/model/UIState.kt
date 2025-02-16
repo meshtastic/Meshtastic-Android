@@ -485,6 +485,14 @@ class UIViewModel @Inject constructor(
             updateLoraConfig { it.copy { region = value } }
         }
 
+    fun favoriteNode(node: Node) = viewModelScope.launch {
+        try {
+            radioConfigRepository.onServiceAction(ServiceAction.Favorite(node))
+        } catch (ex: RemoteException) {
+            errormsg("Favorite node error:", ex)
+        }
+    }
+
     fun ignoreNode(node: Node) = viewModelScope.launch {
         try {
             radioConfigRepository.onServiceAction(ServiceAction.Ignore(node))
