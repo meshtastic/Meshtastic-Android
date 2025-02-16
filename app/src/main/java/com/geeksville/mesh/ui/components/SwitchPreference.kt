@@ -64,6 +64,7 @@ fun SwitchPreference(
         secondaryText = {
             Text(
                 text = summary,
+                modifier = Modifier.padding(bottom = 16.dp),
                 color = color,
             )
         },

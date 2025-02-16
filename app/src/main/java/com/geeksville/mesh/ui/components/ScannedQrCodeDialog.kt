@@ -54,7 +54,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
-import com.geeksville.mesh.ui.components.config.ChannelSelection
+import com.geeksville.mesh.ui.radioconfig.components.ChannelSelection
 
 /**
  * Enables the user to select which channels to accept after scanning a QR code.

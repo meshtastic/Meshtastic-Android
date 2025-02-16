@@ -144,8 +144,8 @@
     <string name="meshtastic_messages_notifications">Message notifications</string>
     <string name="protocol_stress_test">Protocol stress test</string>
     <string name="firmware_too_old">Firmware update required</string>
-    <string name="firmware_old">The radio firmware is too old to talk to this application, please go to the settings pane and choose \"Update Firmware\".  For more information on this see <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
-    <string name="okay">Okay</string>
+    <string name="firmware_old">The radio firmware is too old to talk to this application. For more information on this see <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
+    <string name="okay">OK</string>
     <string name="must_set_region">You must set a region!</string>
     <string name="region">Region</string>
     <string name="cant_change_no_radio">Couldn\'t change channel, because radio is not yet connected. Please try again.</string>
@@ -275,7 +275,7 @@
     <string name="encryption_error">Public key mismatch</string>
     <string name="encryption_error_text">The public key does not match the recorded key. You may remove the node and let it exchange keys again, but this may indicate a more serious security problem. Contact the user through another trusted channel, to determine if the key change was due to a factory reset or other intentional action.</string>
     <string name="request_userinfo">Request user info</string>
-    <string name="meshtastic_new_nodes_notifications">New nodes notifications</string>
+    <string name="meshtastic_new_nodes_notifications">New node notifications</string>
     <string name="more_details">More details</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Signal-to-Noise Ratio, a measure used in communications to quantify the level of a desired signal to the level of background noise. In Meshtastic and other wireless systems, a higher SNR indicates a clearer signal that can enhance the reliability and quality of data transmission.</string>
@@ -310,9 +310,13 @@
     <string name="two_weeks">2W</string>
     <string name="four_weeks">4W</string>
     <string name="max">Max</string>
-    <string name="selected">Selected</string>
-    <string name="not_selected">Not Selected</string>
     <string name="unknown_age">Unknown Age</string>
     <string name="copy">Copy</string>
     <string name="alert_bell_text">Alert Bell Character!</string>
+    <string name="power_metrics_log">Power Metrics Log</string>
+    <string name="channel_1">Channel 1</string>
+    <string name="channel_2">Channel 2</string>
+    <string name="channel_3">Channel 3</string>
+    <string name="current">Current</string>
+    <string name="voltage">Voltage</string>
 </resources>

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-@file:Suppress("TooManyFunctions", "LongMethod")
+@file:Suppress("TooManyFunctions")
 
 package com.geeksville.mesh.ui
 
@@ -95,8 +95,10 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
+import com.geeksville.mesh.ui.radioconfig.NavCard
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.DistanceUnit
 import com.geeksville.mesh.util.formatAgo
@@ -108,7 +110,7 @@ import kotlin.math.ln
 fun NodeDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: MetricsViewModel = hiltViewModel(),
-    onNavigate: (Any) -> Unit,
+    onNavigate: (Route) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
@@ -135,7 +137,7 @@ private fun NodeDetailList(
     modifier: Modifier = Modifier,
     node: Node,
     metricsState: MetricsState,
-    onNavigate: (Any) -> Unit = {},
+    onNavigate: (Route) -> Unit = {},
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -320,7 +322,7 @@ private fun NodeDetailsContent(
 }
 
 @Composable
-fun LogNavigationList(state: MetricsState, onNavigate: (Any) -> Unit) {
+fun LogNavigationList(state: MetricsState, onNavigate: (Route) -> Unit) {
     NavCard(
         title = stringResource(R.string.device_metrics_log),
         icon = Icons.Default.ChargingStation,
@@ -359,6 +361,14 @@ fun LogNavigationList(state: MetricsState, onNavigate: (Any) -> Unit) {
         enabled = state.hasSignalMetrics()
     ) {
         onNavigate(Route.SignalMetrics)
+    }
+
+    NavCard(
+        title = stringResource(R.string.power_metrics_log),
+        icon = Icons.Default.Power,
+        enabled = state.hasPowerMetrics()
+    ) {
+        onNavigate(Route.PowerMetrics)
     }
 
     NavCard(
@@ -455,14 +465,14 @@ private fun EnvironmentMetrics(
             InfoCard(
                 icon = Icons.Default.Speed,
                 text = "Pressure",
-                value = "%.0f".format(barometricPressure)
+                value = "%.0f hPa".format(barometricPressure)
             )
         }
         if (gasResistance != 0f) {
             InfoCard(
                 icon = Icons.Default.BlurOn,
                 text = "Gas Resistance",
-                value = "%.0f".format(gasResistance)
+                value = "%.0f MΩ".format(gasResistance)
             )
         }
         if (voltage != 0f) {
@@ -497,7 +507,7 @@ private fun EnvironmentMetrics(
             InfoCard(
                 icon = Icons.Default.LightMode,
                 text = "Lux",
-                value = "%.0f".format(lux)
+                value = "%.0f lx".format(lux)
             )
         }
         if (hasWindSpeed()) {
@@ -521,7 +531,7 @@ private fun EnvironmentMetrics(
             InfoCard(
                 icon = ImageVector.vectorResource(R.drawable.ic_filled_radioactive_24),
                 text = "Radiation",
-                value = "%.1f µR".format(radiation)
+                value = "%.1f µR/h".format(radiation)
             )
         }
     }
@@ -558,46 +568,46 @@ private fun PowerMetrics(node: Node) = with(node.powerMetrics) {
         verticalArrangement = Arrangement.SpaceEvenly,
     ) {
         if (ch1Voltage != 0f) {
-            InfoCard(
-                icon = Icons.Default.Bolt,
-                text = "Channel 1",
-                value = "%.2fV".format(ch1Voltage)
-            )
-        }
-        if (ch1Current != 0f) {
-            InfoCard(
-                icon = Icons.Default.Power,
-                text = "Channel 1",
-                value = "%.1fmA".format(ch1Current)
-            )
+            Column {
+                InfoCard(
+                    icon = Icons.Default.Bolt,
+                    text = "Channel 1",
+                    value = "%.2fV".format(ch1Voltage)
+                )
+                InfoCard(
+                    icon = Icons.Default.Power,
+                    text = "Channel 1",
+                    value = "%.1fmA".format(ch1Current)
+                )
+            }
         }
         if (ch2Voltage != 0f) {
-            InfoCard(
-                icon = Icons.Default.Bolt,
-                text = "Channel 2",
-                value = "%.2fV".format(ch2Voltage)
-            )
-        }
-        if (ch2Current != 0f) {
-            InfoCard(
-                icon = Icons.Default.Power,
-                text = "Channel 2",
-                value = "%.1fmA".format(ch2Current)
-            )
+            Column {
+                InfoCard(
+                    icon = Icons.Default.Bolt,
+                    text = "Channel 2",
+                    value = "%.2fV".format(ch2Voltage)
+                )
+                InfoCard(
+                    icon = Icons.Default.Power,
+                    text = "Channel 2",
+                    value = "%.1fmA".format(ch2Current)
+                )
+            }
         }
         if (ch3Voltage != 0f) {
-            InfoCard(
-                icon = Icons.Default.Bolt,
-                text = "Channel 3",
-                value = "%.2fV".format(ch3Voltage)
-            )
-        }
-        if (ch3Current != 0f) {
-            InfoCard(
-                icon = Icons.Default.Power,
-                text = "Channel 3",
-                value = "%.1fmA".format(ch3Current)
-            )
+            Column {
+                InfoCard(
+                    icon = Icons.Default.Bolt,
+                    text = "Channel 3",
+                    value = "%.2fV".format(ch3Voltage)
+                )
+                InfoCard(
+                    icon = Icons.Default.Power,
+                    text = "Channel 3",
+                    value = "%.1fmA".format(ch3Current)
+                )
+            }
         }
     }
 }
