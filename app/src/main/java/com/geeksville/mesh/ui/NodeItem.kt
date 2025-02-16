@@ -79,6 +79,7 @@ fun NodeItem(
     gpsFormat: Int,
     distanceUnits: Int,
     tempInFahrenheit: Boolean,
+    modifier: Modifier = Modifier,
     onAction: (NodeMenuAction) -> Unit = {},
     expanded: Boolean = false,
     currentTimeMillis: Long,
@@ -114,7 +115,7 @@ fun NodeItem(
     val (detailsShown, showDetails) = remember { mutableStateOf(expanded) }
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp)
             .defaultMinSize(minHeight = 80.dp),
