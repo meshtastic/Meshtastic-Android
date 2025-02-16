@@ -51,6 +51,7 @@ import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -172,24 +173,7 @@ internal fun DebugItem(
                     )
                 }
 
-                val style = SpanStyle(
-                    color = colorResource(id = R.color.colorAnnotation),
-                    fontStyle = FontStyle.Italic,
-                )
-                val annotatedString = remember(log.uuid) {
-                    buildAnnotatedString {
-                        append(log.logMessage)
-                        REGEX_ANNOTATED_NODE_ID.findAll(log.logMessage).toList().reversed()
-                            .forEach {
-                                addStyle(
-                                    style = style,
-                                    start = it.range.first,
-                                    end = it.range.last + 1
-                                )
-                            }
-                    }
-                }
-
+                val annotatedString = rememberAnnotatedLogMessage(log)
                 Text(
                     text = annotatedString,
                     softWrap = false,
@@ -199,6 +183,27 @@ internal fun DebugItem(
                     )
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun rememberAnnotatedLogMessage(log: UiMeshLog): AnnotatedString {
+    val style = SpanStyle(
+        color = colorResource(id = R.color.colorAnnotation),
+        fontStyle = FontStyle.Italic,
+    )
+    return remember(log.uuid) {
+        buildAnnotatedString {
+            append(log.logMessage)
+            REGEX_ANNOTATED_NODE_ID.findAll(log.logMessage).toList().reversed()
+                .forEach {
+                    addStyle(
+                        style = style,
+                        start = it.range.first,
+                        end = it.range.last + 1
+                    )
+                }
         }
     }
 }
