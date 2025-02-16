@@ -224,7 +224,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0"
 
     // rate this app
-    googleImplementation 'com.suddenh4x.ratingdialog:awesome-app-rating:2.7.0'
+    googleImplementation 'com.suddenh4x.ratingdialog:awesome-app-rating:2.8.0'
 
     // Coroutines
     def coroutines_version = '1.10.1'
