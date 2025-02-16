@@ -198,6 +198,9 @@ dependencies {
     implementation 'androidx.activity:activity-compose'
     implementation 'androidx.compose.runtime:runtime-livedata'
 
+    // Immutable Collections (for Compose UI State)
+    implementation("org.jetbrains.kotlinx:kotlinx-collections-immutable:0.3.8")
+
     // Android Studio Preview support
     implementation 'androidx.compose.ui:ui-tooling-preview'
     debugImplementation 'androidx.compose.ui:ui-tooling'
