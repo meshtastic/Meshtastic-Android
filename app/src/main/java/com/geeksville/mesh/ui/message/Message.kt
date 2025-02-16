@@ -101,6 +101,8 @@ import com.geeksville.mesh.ui.theme.AppTheme
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
+private const val MESSAGE_CHARACTER_LIMIT = 200
+
 internal fun FragmentManager.navigateToMessages(contactKey: String, message: String = "") {
     val messagesFragment = MessagesFragment().apply {
         arguments = bundleOf("contactKey" to contactKey, "message" to message)
@@ -253,13 +255,16 @@ internal fun MessageScreen(
                 QuickChatRow(isConnected, quickChat) { action ->
                     if (action.mode == QuickChatAction.Mode.Append) {
                         val originalText = messageInput.value.text
-                        val needsSpace = !originalText.endsWith(' ') && originalText.isNotEmpty()
-                        val newText = buildString {
-                            append(originalText)
-                            if (needsSpace) append(' ')
-                            append(action.message)
+                        if (!originalText.contains(action.message)) {
+                            val needsSpace =
+                                !originalText.endsWith(' ') && originalText.isNotEmpty()
+                            val newText = buildString {
+                                append(originalText)
+                                if (needsSpace) append(' ')
+                                append(action.message)
+                            }.take(MESSAGE_CHARACTER_LIMIT)
+                            messageInput.value = TextFieldValue(newText, TextRange(newText.length))
                         }
-                        messageInput.value = TextFieldValue(newText, TextRange(newText.length))
                     } else {
                         viewModel.sendMessage(action.message, contactKey)
                     }
@@ -278,6 +283,7 @@ internal fun MessageScreen(
                 when (action) {
                     is NodeMenuAction.Remove -> viewModel.removeNode(action.node.num)
                     is NodeMenuAction.Ignore -> viewModel.ignoreNode(action.node)
+                    is NodeMenuAction.Favorite -> viewModel.favoriteNode(action.node)
                     is NodeMenuAction.DirectMessage -> navigateToMessages(action.node)
                     is NodeMenuAction.RequestUserInfo -> viewModel.requestUserInfo(action.node.num)
                     is NodeMenuAction.RequestPosition -> viewModel.requestPosition(action.node.num)
@@ -419,7 +425,7 @@ private fun TextInput(
     enabled: Boolean,
     message: MutableState<TextFieldValue>,
     modifier: Modifier = Modifier,
-    maxSize: Int = 200,
+    maxSize: Int = MESSAGE_CHARACTER_LIMIT,
     onClick: (String) -> Unit = {}
 ) = Column(modifier) {
     val focusManager = LocalFocusManager.current
