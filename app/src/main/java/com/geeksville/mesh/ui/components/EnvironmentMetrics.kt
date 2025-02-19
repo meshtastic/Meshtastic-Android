@@ -65,10 +65,11 @@ import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.components.CommonCharts.X_AXIS_SPACING
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
+import com.geeksville.mesh.ui.components.CommonCharts.INFANTRY_BLUE
 
 private enum class Environment(val color: Color) {
     TEMPERATURE(Color.Red),
-    HUMIDITY(Color(75, 119, 190)),
+    HUMIDITY(INFANTRY_BLUE),
     IAQ(Color.Green)
 }
 private val LEGEND_DATA = listOf(
