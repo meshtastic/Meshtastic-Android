@@ -68,7 +68,7 @@ import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 
 private enum class Environment(val color: Color) {
     TEMPERATURE(Color.Red),
-    HUMIDITY(Color.Blue),
+    HUMIDITY(Color(75, 119, 190)),
     IAQ(Color.Green)
 }
 private val LEGEND_DATA = listOf(
