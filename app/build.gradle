@@ -41,6 +41,11 @@ android {
     }
     flavorDimensions = ['default']
     productFlavors {
+        sideload {
+            dimension = 'default'
+            applicationIdSuffix ".sideload"
+            versionNameSuffix "-sideload"
+        }
         fdroid {
             dimension = 'default'
             dependenciesInfo {
