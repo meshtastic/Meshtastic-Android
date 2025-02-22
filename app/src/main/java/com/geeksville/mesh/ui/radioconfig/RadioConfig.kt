@@ -69,6 +69,7 @@ import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.radioconfig.components.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
+import com.geeksville.mesh.ui.theme.AppTheme
 
 private fun getNavRouteFrom(routeName: String): Route? {
     return ConfigRoute.entries.find { it.name == routeName }?.route
@@ -332,7 +333,7 @@ private fun RadioConfigItemList(
 
 @Preview(showBackground = true)
 @Composable
-private fun RadioSettingsScreenPreview() {
+private fun RadioSettingsScreenPreview() = AppTheme {
     RadioConfigItemList(
         RadioConfigState(isLocal = true, connected = true)
     )
