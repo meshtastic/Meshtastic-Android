@@ -73,6 +73,7 @@ object CommonCharts {
     const val LINE_LIMIT = 4
     const val TEXT_PAINT_ALPHA = 192
     const val MAX_PERCENT_VALUE = 100f
+    val INFANTRY_BLUE = Color(75, 119, 190)
 }
 
 private const val LINE_ON = 10f
