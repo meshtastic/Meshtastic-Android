@@ -31,11 +31,11 @@ import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.coroutines.resume
 
 internal fun NsdManager.serviceList(
-    serviceTypes: List<String>,
+    serviceTypes: Set<String>,
     serviceName: String,
 ): Flow<List<NsdServiceInfo>> {
     val flows = serviceTypes.map { serviceType -> serviceList(serviceType, serviceName) }
-    return combine(flows) { lists -> lists.flatMap { it }.distinctBy { it.serviceName } }
+    return combine(flows) { lists -> lists.flatMap { it } }
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)

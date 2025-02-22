@@ -22,7 +22,6 @@ import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.hardware.usb.UsbManager
-import android.net.nsd.NsdServiceInfo
 import android.os.RemoteException
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -32,6 +31,7 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.R
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.network.NetworkRepository
+import com.geeksville.mesh.repository.network.NetworkRepository.Companion.toAddressString
 import com.geeksville.mesh.repository.radio.InterfaceId
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.usb.UsbRepository
@@ -91,7 +91,8 @@ class BTScanModel @Inject constructor(
 
                 // Include Network Service Discovery
                 tcp.forEach { service ->
-                    addDevice(TCPDeviceListEntry(service))
+                    val address = service.toAddressString()
+                    addDevice(DeviceListEntry(address, "t$address", true))
                 }
 
                 usb.forEach { (_, d) ->
@@ -138,12 +139,6 @@ class BTScanModel @Inject constructor(
         usb.device.deviceName,
         radioInterfaceService.toInterfaceAddress(InterfaceId.SERIAL, usb.device.deviceName),
         usbManager.hasPermission(usb.device),
-    )
-
-    class TCPDeviceListEntry(val service: NsdServiceInfo) : DeviceListEntry(
-        service.host.toString().substring(1),
-        service.host.toString().replace("/", "t"),
-        true
     )
 
     override fun onCleared() {
