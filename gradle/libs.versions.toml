@@ -2,12 +2,13 @@
 appcompat = "1.7.0"
 appintro = "6.3.1"
 awesome-app-rating = "2.8.0"
-compose-bom = "2025.02.00"
-core-splashscreen = "1.0.1"
 cardview = "1.0.0"
+compose-bom = "2025.02.00"
 constraintlayout = "2.2.0"
 core-ktx = "1.15.0"
 core-location-altitude = "1.0.0-alpha03"
+core-splashscreen = "1.0.1"
+datastore = "1.1.2"
 detekt = "1.23.8"
 devtools-ksp = "2.1.10-1.0.30"
 emoji2 = "1.5.0"
@@ -37,7 +38,6 @@ room = "2.6.1"
 streamsupport-minifuture = "1.7.4"
 usb-serial-android = "3.8.1"
 viewpager2 = "1.1.0"
-datastore = "1.1.2"
 work-runtime-ktx = "2.10.0"
 zxing-android-embedded = "4.3.0"
 zxing-core = "3.3.0" #do not update
@@ -51,12 +51,12 @@ cardview = { group = "androidx.cardview", name = "cardview", version.ref = "card
 compose-activity-compose = { module = "androidx.activity:activity-compose" }
 compose-androidx-material = { module = "androidx.compose.material:material" }
 compose-bom = { module = "androidx.compose:compose-bom", version.ref = "compose-bom" }
-compose-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata" }
 compose-material-icons-extended = { module = "androidx.compose.material:material-icons-extended" }
-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+compose-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata" }
 compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
+compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 core-location-altitude = { group = "androidx.core", name = "core-location-altitude", version.ref = "core-location-altitude" }
@@ -66,8 +66,8 @@ detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", 
 emoji2-emojipicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2" }
 espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso-core" }
 ext-junit = { module = "androidx.test.ext:junit", version.ref = "junit-version" }
-firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics"}
 firebase-crashlytics-gradle = { module = "com.google.firebase:firebase-crashlytics-gradle" }
 fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragment-ktx" }
@@ -85,13 +85,13 @@ kotlinx-collections-immutable = { group = "org.jetbrains.kotlinx", name = "kotli
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinx-coroutines-android" }
 kotlinx-coroutines-guava = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-guava", version.ref = "kotlinx-coroutines-android" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
-lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycle" }
-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
-lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
 lifecycle-common-java8 = { group = "androidx.lifecycle", name = "lifecycle-common-java8", version.ref = "lifecycle" }
+lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycle" }
 lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycle" }
+lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
+lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
+lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 mgrs = { module = "mil.nga:mgrs", version.ref = "mgrs" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
@@ -99,14 +99,14 @@ navigation-testing = { group = "androidx.navigation", name = "navigation-testing
 org-eclipse-paho-client-mqttv3 = { module = "org.eclipse.paho:org.eclipse.paho.client.mqttv3", version.ref = "org-eclipse-paho-client-mqttv3" }
 osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version.ref = "osmbonuspack" }
 osmdroid-android = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid-android" }
-osmdroid-wms = { group = "org.osmdroid", name = "osmdroid-wms", version.ref = "osmdroid-android" }
 osmdroid-geopackage = { group = "org.osmdroid", name = "osmdroid-geopackage", version.ref = "osmdroid-android" }
+osmdroid-wms = { group = "org.osmdroid", name = "osmdroid-wms", version.ref = "osmdroid-android" }
 protobuf-gradle-plugin = { module = "com.google.protobuf:protobuf-gradle-plugin", version.ref = "protobuf-gradle-plugin" }
 protobuf-kotlin = { module = "com.google.protobuf:protobuf-kotlin", version.ref = "protobuf-kotlin" }
 protobuf-protoc = { group = "com.google.protobuf", name ="protoc", version.ref = "protobuf-kotlin" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
 streamsupport-minifuture = { module = "net.sourceforge.streamsupport:streamsupport-minifuture", version.ref = "streamsupport-minifuture" }
 usb-serial-android = { module = "com.github.mik3y:usb-serial-for-android", version.ref = "usb-serial-android" }
@@ -122,7 +122,7 @@ detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "devtools-ksp" }
 hilt = { id = "com.google.dagger.hilt.android" }
 kotlin-android = { id = "org.jetbrains.kotlin.android" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize" }
 kotlin-serialization = { id = "kotlinx-serialization" }
-kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 protobuf = { id = "com.google.protobuf" }
