@@ -187,10 +187,11 @@ dependencies {
 
     ksp(libs.room.compiler)
     ksp(libs.hilt.compiler)
+    kspAndroidTest(libs.hilt.compiler)
 
     testImplementation(libs.bundles.testing)
+    debugImplementation(libs.bundles.testing.android.manifest)
     androidTestImplementation(libs.bundles.testing.android)
-    androidTestImplementation(libs.bundles.testing.android.manifest)
     androidTestImplementation(libs.bundles.testing.hilt)
     androidTestImplementation(libs.bundles.testing.navigation)
     androidTestImplementation(libs.bundles.testing.room)
