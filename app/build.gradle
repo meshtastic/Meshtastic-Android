@@ -143,124 +143,58 @@ dependencies {
 
     implementation(fileTree(dir: 'libs', include: ['*.jar']))
 
-    implementation(libs.appcompat)
-    // For loading and tinting drawables on older versions of the platform
-    implementation(libs.appcompat.resources)
-    implementation(libs.emoji2.emojipicker)
-    implementation(libs.core.ktx)
-    implementation(libs.core.location.altitude)
-    implementation(libs.fragment.ktx)
-    implementation(libs.cardview)
-    implementation(libs.constraintlayout)
-    implementation(libs.material)
-    implementation(libs.viewpager2)
-    implementation(libs.datastore)
+    // Bundles
+    implementation(libs.bundles.androidx)
+    implementation(libs.bundles.ui)
+    debugImplementation(libs.bundles.ui.tooling)
+    implementation(libs.bundles.lifecycle)
+    implementation(libs.bundles.navigation)
+    implementation(libs.bundles.coroutines)
+    implementation(libs.bundles.datastore)
+    implementation(libs.bundles.room)
+    implementation(libs.bundles.hilt)
+    implementation(libs.bundles.protobuf)
 
-    // Lifecycle
-    implementation(libs.lifecycle.viewmodel.ktx)
-    implementation(libs.lifecycle.viewmodel.compose)
-    implementation(libs.lifecycle.livedata.ktx)
-    implementation(libs.lifecycle.runtime.ktx)
-    implementation(libs.lifecycle.runtime.compose)
-    implementation(libs.lifecycle.common.java8)
-    implementation(libs.lifecycle.process)
+    //OSM
+    implementation(libs.bundles.osm)
+    implementation(libs.osmdroid.geopackage){ exclude group: "com.j256.ormlite" }
 
-    // Room
-    implementation(libs.room.runtime)
-    ksp libs.room.compiler
-    // optional - Kotlin Extensions and Coroutines support for Room
-    implementation libs.room.ktx
-    // optional - Test helpers
-    androidTestImplementation libs.room.testing
-
-    // Hilt
-    implementation(libs.hilt.android)
-    implementation(libs.hilt.navigation.compose)
-    ksp libs.hilt.compiler
-    androidTestImplementation libs.hilt.android.testing
-    kspAndroidTest libs.hilt.compiler
-
-    // Navigation
-    implementation libs.navigation.compose
-    androidTestImplementation libs.navigation.testing
-
-    // Compose
-    def composeBom = platform(libs.compose.bom)
-    implementation(composeBom)
-    androidTestImplementation(composeBom)
-
-    implementation(libs.compose.material)
-    implementation(libs.compose.material3)
-    implementation(libs.compose.material.icons.extended)
-    implementation(libs.compose.activity.compose)
-    implementation(libs.compose.runtime.livedata)
-
-    // Immutable Collections (for Compose UI State)
-    implementation(libs.kotlinx.collections.immutable)
-
-    // Android Studio Preview support
-    implementation(libs.compose.ui.tooling.preview)
-    debugImplementation libs.compose.ui.tooling
-
-    // UI Tests
-    androidTestImplementation libs.compose.ui.test.junit4
-    debugImplementation libs.compose.ui.test.manifest
-
-    // Osmdroid & Maps
-    implementation(libs.osmdroid.android)
-    implementation(libs.osmdroid.wms)
-    implementation(libs.osmdroid.geopackage) {
-        exclude group: 'com.j256.ormlite'
-    }
-    implementation(libs.osmbonuspack)
-    implementation(libs.mgrs)
-
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.espresso.core)
-
-    // kotlin serialization
-    implementation(libs.kotlinx.serialization.json)
-
-    // rate this app
-    googleImplementation(libs.awesome.app.rating)
-
-    // Coroutines
-    implementation libs.kotlinx.coroutines.android
-    implementation libs.kotlinx.coroutines.guava
-
-    // For now I'm not using javalite, because I want JSON printing
-    implementation libs.protobuf.kotlin
-
-    // For UART access
-    implementation(libs.usb.serial.android)
-
-    // For Firebase Crashlytics & Analytics
-    googleImplementation(platform(libs.firebase.bom))
-    googleImplementation(libs.firebase.crashlytics)
-    googleImplementation(libs.firebase.analytics)
-
-    // barcode support
-    // per https://github.com/journeyapps/zxing-android-embedded#older-sdk-versions for minSdkVersion 21
+    //ZXing
     implementation(libs.zxing.android.embedded) { transitive = false }
-    //noinspection GradleDependency
-    implementation(libs.zxing.core) // <-- don't update
+    implementation(libs.zxing.core)  // do not update
 
-    // Work Request - used to delay boot event handling
-    implementation(libs.work.runtime.ktx)
-
-    implementation(libs.core.splashscreen)
-
-    // CompletableFuture backport for API 14+
-    implementation(libs.streamsupport.minifuture)
-
-    // App intro
+    // Individual dependencies
     implementation(libs.appintro)
-
-    // MQTT
+    implementation(libs.awesome.app.rating)
+    implementation(libs.core.splashscreen)
+    implementation(libs.emoji2.emojipicker)
+    implementation(libs.kotlinx.collections.immutable)
+    implementation(libs.kotlinx.serialization.json)
     implementation(libs.org.eclipse.paho.client.mqttv3)
+    implementation(libs.streamsupport.minifuture)
+    implementation(libs.usb.serial.android)
+    implementation(libs.work.runtime.ktx)
+    implementation(libs.core.location.altitude)
 
-    // detekt ktlint formatting
+    //Compose BOM
+    implementation(platform(libs.compose.bom))
+    androidTestImplementation(platform(libs.compose.bom))
+
+    //Firebase BOM
+    googleImplementation(platform(libs.firebase.bom)) //For Firebase
+    googleImplementation(libs.bundles.firebase)
+
+
+    ksp(libs.room.compiler)
+    ksp(libs.hilt.compiler)
+
+    testImplementation(libs.bundles.testing)
+    androidTestImplementation(libs.bundles.testing.android)
+    androidTestImplementation(libs.bundles.testing.android.manifest)
+    androidTestImplementation(libs.bundles.testing.hilt)
+    androidTestImplementation(libs.bundles.testing.navigation)
+    androidTestImplementation(libs.bundles.testing.room)
+
     detektPlugins(libs.detekt.formatting)
 }
 
