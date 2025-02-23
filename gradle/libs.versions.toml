@@ -4,19 +4,23 @@ appintro = "6.3.1"
 awesome-app-rating = "2.8.0"
 compose-bom = "2025.02.00"
 core-splashscreen = "1.0.1"
-detekt-formatting = "1.23.8"
-emoji2 = "1.5.0"
+cardview = "1.0.0"
+constraintlayout = "2.2.0"
 core-ktx = "1.15.0"
 core-location-altitude = "1.0.0-alpha03"
+detekt = "1.23.8"
+devtools-ksp = "2.1.10-1.0.30"
+emoji2 = "1.5.0"
 espresso-core = "3.6.1"
 firebase-bom = "33.9.0"
 fragment-ktx = "1.8.6"
-cardview = "1.0.0"
-constraintlayout = "2.2.0"
+google-services = "4.4.2"
+gradle = "8.8.1"
 hilt = "2.55"
 hilt-navigation-compose = "1.2.0"
 junit = "4.13.2"
 junit-version = "1.2.1"
+kotlin = "2.1.10"
 kotlinx-collections-immutable = "0.3.8"
 kotlinx-coroutines-android = "1.10.1"
 kotlinx-serialization-json = "1.8.0"
@@ -27,6 +31,7 @@ navigation = "2.8.7"
 org-eclipse-paho-client-mqttv3 = "1.2.5"
 osmbonuspack = "6.9.0"
 osmdroid-android = "6.1.14"
+protobuf-gradle-plugin = "0.9.4"
 protobuf-kotlin = "4.29.3"
 room = "2.6.1"
 streamsupport-minifuture = "1.7.4"
@@ -42,9 +47,6 @@ appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "a
 appcompat-resources = { group = "androidx.appcompat", name = "appcompat-resources", version.ref = "appcompat" }
 appintro = { module = "com.github.AppIntro:AppIntro", version.ref = "appintro" }
 awesome-app-rating = { module = "com.suddenh4x.ratingdialog:awesome-app-rating", version.ref = "awesome-app-rating" }
-core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "core-splashscreen" }
-detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt-formatting" }
-emoji2-emojipicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2" }
 cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardview" }
 compose-activity-compose = { module = "androidx.activity:activity-compose" }
 compose-androidx-material = { module = "androidx.compose.material:material" }
@@ -58,17 +60,27 @@ compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
 core-location-altitude = { group = "androidx.core", name = "core-location-altitude", version.ref = "core-location-altitude" }
+core-splashscreen = { module = "androidx.core:core-splashscreen", version.ref = "core-splashscreen" }
+datastore = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
+detekt-formatting = { module = "io.gitlab.arturbosch.detekt:detekt-formatting", version.ref = "detekt" }
+emoji2-emojipicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2" }
 espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso-core" }
 ext-junit = { module = "androidx.test.ext:junit", version.ref = "junit-version" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics"}
-firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics"}
+firebase-crashlytics-gradle = { module = "com.google.firebase:firebase-crashlytics-gradle" }
 fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragment-ktx" }
+google-services = { module = "com.google.gms:google-services", version.ref = "google-services" }
+gradle = { module = "com.android.tools.build:gradle", version.ref = "gradle" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-android-gradle-plugin = { module = "com.google.dagger:hilt-android-gradle-plugin", version.ref = "hilt" }
 hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hilt-navigation-compose" }
 junit = { module = "junit:junit", version.ref = "junit" }
+kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-serialization = { group = "org.jetbrains.kotlin", name = "kotlin-serialization", version.ref = "kotlin" }
 kotlinx-collections-immutable = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinx-coroutines-android" }
 kotlinx-coroutines-guava = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-guava", version.ref = "kotlinx-coroutines-android" }
@@ -89,7 +101,9 @@ osmbonuspack = { module = "com.github.MKergall:osmbonuspack", version.ref = "osm
 osmdroid-android = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid-android" }
 osmdroid-wms = { group = "org.osmdroid", name = "osmdroid-wms", version.ref = "osmdroid-android" }
 osmdroid-geopackage = { group = "org.osmdroid", name = "osmdroid-geopackage", version.ref = "osmdroid-android" }
+protobuf-gradle-plugin = { module = "com.google.protobuf:protobuf-gradle-plugin", version.ref = "protobuf-gradle-plugin" }
 protobuf-kotlin = { module = "com.google.protobuf:protobuf-kotlin", version.ref = "protobuf-kotlin" }
+protobuf-protoc = { group = "com.google.protobuf", name ="protoc", version.ref = "protobuf-kotlin" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
@@ -97,7 +111,18 @@ room-testing = { group = "androidx.room", name = "room-testing", version.ref = "
 streamsupport-minifuture = { module = "net.sourceforge.streamsupport:streamsupport-minifuture", version.ref = "streamsupport-minifuture" }
 usb-serial-android = { module = "com.github.mik3y:usb-serial-for-android", version.ref = "usb-serial-android" }
 viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "viewpager2" }
-datastore = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
 work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "work-runtime-ktx" }
 zxing-android-embedded = { module = "com.journeyapps:zxing-android-embedded", version.ref = "zxing-android-embedded" }
 zxing-core = { module = "com.google.zxing:core", version.ref = "zxing-core" }
+
+[plugins]
+android-application = { id = "com.android.application" }
+compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "devtools-ksp" }
+hilt = { id = "com.google.dagger.hilt.android" }
+kotlin-android = { id = "org.jetbrains.kotlin.android" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize" }
+kotlin-serialization = { id = "kotlinx-serialization" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+protobuf = { id = "com.google.protobuf" }
