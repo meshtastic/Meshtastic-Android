@@ -141,9 +141,9 @@ androidComponents {
 
 dependencies {
 
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation(fileTree(dir: 'libs', include: ['*.jar']))
 
-    implementation libs.appcompat
+    implementation(libs.appcompat)
     // For loading and tinting drawables on older versions of the platform
     implementation(libs.appcompat.resources)
     implementation(libs.emoji2.emojipicker)
@@ -157,16 +157,16 @@ dependencies {
     implementation(libs.datastore)
 
     // Lifecycle
-    implementation libs.lifecycle.viewmodel.ktx
-    implementation libs.lifecycle.viewmodel.compose
-    implementation libs.lifecycle.livedata.ktx
-    implementation libs.lifecycle.runtime.ktx
-    implementation libs.lifecycle.runtime.compose
-    implementation libs.lifecycle.common.java8
-    implementation libs.lifecycle.process
+    implementation(libs.lifecycle.viewmodel.ktx)
+    implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.lifecycle.livedata.ktx)
+    implementation(libs.lifecycle.runtime.ktx)
+    implementation(libs.lifecycle.runtime.compose)
+    implementation(libs.lifecycle.common.java8)
+    implementation(libs.lifecycle.process)
 
     // Room
-    implementation libs.room.runtime
+    implementation(libs.room.runtime)
     ksp libs.room.compiler
     // optional - Kotlin Extensions and Coroutines support for Room
     implementation libs.room.ktx
@@ -174,8 +174,8 @@ dependencies {
     androidTestImplementation libs.room.testing
 
     // Hilt
-    implementation libs.hilt.android
-    implementation libs.hilt.navigation.compose
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
     ksp libs.hilt.compiler
     androidTestImplementation libs.hilt.android.testing
     kspAndroidTest libs.hilt.compiler
@@ -186,19 +186,20 @@ dependencies {
 
     // Compose
     def composeBom = platform(libs.compose.bom)
-    implementation composeBom
-    androidTestImplementation composeBom
+    implementation(composeBom)
+    androidTestImplementation(composeBom)
 
-    implementation libs.compose.androidx.material
-    implementation libs.compose.material.icons.extended
-    implementation libs.compose.activity.compose
-    implementation libs.compose.runtime.livedata
+    implementation(libs.compose.material)
+    implementation(libs.compose.material3)
+    implementation(libs.compose.material.icons.extended)
+    implementation(libs.compose.activity.compose)
+    implementation(libs.compose.runtime.livedata)
 
     // Immutable Collections (for Compose UI State)
     implementation(libs.kotlinx.collections.immutable)
 
     // Android Studio Preview support
-    implementation libs.compose.ui.tooling.preview
+    implementation(libs.compose.ui.tooling.preview)
     debugImplementation libs.compose.ui.tooling
 
     // UI Tests
@@ -206,23 +207,23 @@ dependencies {
     debugImplementation libs.compose.ui.test.manifest
 
     // Osmdroid & Maps
-    implementation libs.osmdroid.android
-    implementation libs.osmdroid.wms
+    implementation(libs.osmdroid.android)
+    implementation(libs.osmdroid.wms)
     implementation(libs.osmdroid.geopackage) {
         exclude group: 'com.j256.ormlite'
     }
-    implementation libs.osmbonuspack
-    implementation libs.mgrs
+    implementation(libs.osmbonuspack)
+    implementation(libs.mgrs)
 
-    testImplementation libs.junit
-    androidTestImplementation libs.ext.junit
-    androidTestImplementation libs.espresso.core
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
 
     // kotlin serialization
-    implementation libs.kotlinx.serialization.json
+    implementation(libs.kotlinx.serialization.json)
 
     // rate this app
-    googleImplementation libs.awesome.app.rating
+    googleImplementation(libs.awesome.app.rating)
 
     // Coroutines
     implementation libs.kotlinx.coroutines.android
@@ -232,32 +233,32 @@ dependencies {
     implementation libs.protobuf.kotlin
 
     // For UART access
-    implementation libs.usb.serial.android
+    implementation(libs.usb.serial.android)
 
     // For Firebase Crashlytics & Analytics
-    googleImplementation platform(libs.firebase.bom)
-    googleImplementation libs.firebase.crashlytics
-    googleImplementation libs.firebase.analytics
+    googleImplementation(platform(libs.firebase.bom))
+    googleImplementation(libs.firebase.crashlytics)
+    googleImplementation(libs.firebase.analytics)
 
     // barcode support
     // per https://github.com/journeyapps/zxing-android-embedded#older-sdk-versions for minSdkVersion 21
     implementation(libs.zxing.android.embedded) { transitive = false }
     //noinspection GradleDependency
-    implementation libs.zxing.core // <-- don't update
+    implementation(libs.zxing.core) // <-- don't update
 
     // Work Request - used to delay boot event handling
-    implementation libs.work.runtime.ktx
+    implementation(libs.work.runtime.ktx)
 
-    implementation libs.core.splashscreen
+    implementation(libs.core.splashscreen)
 
     // CompletableFuture backport for API 14+
-    implementation libs.streamsupport.minifuture
+    implementation(libs.streamsupport.minifuture)
 
     // App intro
-    implementation libs.appintro
+    implementation(libs.appintro)
 
     // MQTT
-    implementation libs.org.eclipse.paho.client.mqttv3
+    implementation(libs.org.eclipse.paho.client.mqttv3)
 
     // detekt ktlint formatting
     detektPlugins(libs.detekt.formatting)
