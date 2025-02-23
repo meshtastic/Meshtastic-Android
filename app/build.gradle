@@ -163,7 +163,7 @@ dependencies {
     implementation(libs.zxing.android.embedded) { transitive = false }
     implementation(libs.zxing.core)  // do not update
 
-    // Individual dependencies
+    //Individual dependencies
     implementation(libs.appintro)
     implementation(libs.awesome.app.rating)
     implementation(libs.core.splashscreen)
@@ -184,11 +184,12 @@ dependencies {
     googleImplementation(platform(libs.firebase.bom)) //For Firebase
     googleImplementation(libs.bundles.firebase)
 
-
+    //ksp
     ksp(libs.room.compiler)
     ksp(libs.hilt.compiler)
     kspAndroidTest(libs.hilt.compiler)
 
+    //Testing
     testImplementation(libs.bundles.testing)
     debugImplementation(libs.bundles.testing.android.manifest)
     androidTestImplementation(libs.bundles.testing.android)
