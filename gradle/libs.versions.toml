@@ -94,7 +94,6 @@ lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtim
 lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
-material3 = { group = "androidx.compose.material3", name = "material3" }
 mgrs = { group = "mil.nga", name = "mgrs", version.ref = "mgrs" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigation" }
@@ -122,7 +121,7 @@ zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing-c
 androidx = ["core-ktx", "appcompat", "appcompat-resources", "cardview", "fragment-ktx", "activity-compose"]
 
 # UI
-ui = ["material", "material3", "constraintlayout", "viewpager2", "compose-material", "compose-material-icons-extended", "compose-ui-tooling-preview", "compose-runtime-livedata"]
+ui = ["material", "constraintlayout", "viewpager2", "compose-material", "compose-material-icons-extended", "compose-ui-tooling-preview", "compose-runtime-livedata"]
 ui-tooling = ["compose-ui-tooling"] #Separate for debugImplementation
 
 # Lifecycle
