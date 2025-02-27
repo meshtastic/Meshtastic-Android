@@ -44,10 +44,12 @@ class MeshServiceNotifications(
     private val context: Context
 ) {
 
-    val notificationLightColor = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        context.getColor(R.color.colorPrimary)
-    } else {
-        Color.GREEN
+    val notificationLightColor by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            context.getColor(R.color.colorPrimary)
+        } else {
+            Color.GREEN
+        }
     }
 
     companion object {
@@ -361,7 +363,7 @@ class MeshServiceNotifications(
         with(alertNotificationBuilder) {
             setContentIntent(openMessageIntent(contactKey))
             priority = NotificationCompat.PRIORITY_HIGH
-            setCategory(Notification.CATEGORY_MESSAGE)
+            setCategory(Notification.CATEGORY_ALARM)
             setAutoCancel(true)
             setStyle(
                 NotificationCompat.MessagingStyle(person)
