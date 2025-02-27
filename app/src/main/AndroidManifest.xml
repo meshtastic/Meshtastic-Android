@@ -108,15 +108,6 @@
             android:name="firebase_analytics_collection_enabled"
             android:value="false" />
 
-        <!-- we need bind job service for oreo -->
-<!--
-        <service
-            android:name="com.geeksville.mesh.service.SoftwareUpdateService"
-            android:enabled="true"
-            android:exported="false"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
--->
-
         <!-- This is the public API for doing mesh radio operations from android apps -->
         <service
             android:name="com.geeksville.mesh.service.MeshService"

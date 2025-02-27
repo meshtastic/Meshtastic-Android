@@ -1,6 +1,6 @@
 <?xml version="1.0" ?>
 <SmellBaseline>
-  <ManuallySuppressedIssues></ManuallySuppressedIssues>
+  <ManuallySuppressedIssues/>
   <CurrentIssues>
     <ID>AbsentOrWrongFileLicense:LazyColumnDragAndDropDemo.kt$com.geeksville.mesh.ui.components.LazyColumnDragAndDropDemo.kt</ID>
     <ID>ChainWrapping:Channel.kt$Channel$&amp;&amp;</ID>
@@ -126,7 +126,6 @@
     <ID>FinalNewline:SerialConnectionListener.kt$com.geeksville.mesh.repository.usb.SerialConnectionListener.kt</ID>
     <ID>FinalNewline:SerialInterface.kt$com.geeksville.mesh.repository.radio.SerialInterface.kt</ID>
     <ID>FinalNewline:SerialInterfaceFactory.kt$com.geeksville.mesh.repository.radio.SerialInterfaceFactory.kt</ID>
-    <ID>FinalNewline:SoftwareUpdateService.kt$com.geeksville.mesh.service.SoftwareUpdateService.kt</ID>
     <ID>FinalNewline:SqlTileWriterExt.kt$com.geeksville.mesh.util.SqlTileWriterExt.kt</ID>
     <ID>FinalNewline:TCPInterfaceFactory.kt$com.geeksville.mesh.repository.radio.TCPInterfaceFactory.kt</ID>
     <ID>FinalNewline:UsbBroadcastReceiver.kt$com.geeksville.mesh.repository.usb.UsbBroadcastReceiver.kt</ID>
@@ -186,7 +185,6 @@
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$1500</ID>
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$500</ID>
     <ID>MagicNumber:BluetoothInterface.kt$BluetoothInterface$512</ID>
-    <ID>MagicNumber:BuildUtils.kt$BuildUtils$21</ID>
     <ID>MagicNumber:Channel.kt$0xff</ID>
     <ID>MagicNumber:ChannelOption.kt$.03125f</ID>
     <ID>MagicNumber:ChannelOption.kt$.0625f</ID>
@@ -336,12 +334,6 @@
     <ID>MagicNumber:SerialConnectionImpl.kt$SerialConnectionImpl$115200</ID>
     <ID>MagicNumber:SerialConnectionImpl.kt$SerialConnectionImpl$200</ID>
     <ID>MagicNumber:ServiceClient.kt$ServiceClient$500</ID>
-    <ID>MagicNumber:SoftwareUpdateService.kt$0xFF</ID>
-    <ID>MagicNumber:SoftwareUpdateService.kt$16</ID>
-    <ID>MagicNumber:SoftwareUpdateService.kt$24</ID>
-    <ID>MagicNumber:SoftwareUpdateService.kt$3</ID>
-    <ID>MagicNumber:SoftwareUpdateService.kt$4</ID>
-    <ID>MagicNumber:SoftwareUpdateService.kt$8</ID>
     <ID>MagicNumber:StreamInterface.kt$StreamInterface$0xff</ID>
     <ID>MagicNumber:StreamInterface.kt$StreamInterface$3</ID>
     <ID>MagicNumber:StreamInterface.kt$StreamInterface$4</ID>
@@ -460,8 +452,6 @@
     <ID>MultiLineIfElse:BluetoothInterface.kt$BluetoothInterface$warn("Not connecting, because safe==null, someone must have closed us")</ID>
     <ID>MultiLineIfElse:BluetoothRepository.kt$BluetoothRepository$bondedDevices.filter { it.name?.matches(Regex(BLE_NAME_PATTERN)) == true }</ID>
     <ID>MultiLineIfElse:BluetoothRepository.kt$BluetoothRepository$emptyList()</ID>
-    <ID>MultiLineIfElse:BuildUtils.kt$BuildUtils$return Build.SUPPORTED_64_BIT_ABIS.size &gt; 0</ID>
-    <ID>MultiLineIfElse:BuildUtils.kt$BuildUtils$return false</ID>
     <ID>MultiLineIfElse:Channel.kt$Channel$"Custom"</ID>
     <ID>MultiLineIfElse:Channel.kt$Channel$when (loraConfig.modemPreset) { ModemPreset.SHORT_TURBO -&gt; "ShortTurbo" ModemPreset.SHORT_FAST -&gt; "ShortFast" ModemPreset.SHORT_SLOW -&gt; "ShortSlow" ModemPreset.MEDIUM_FAST -&gt; "MediumFast" ModemPreset.MEDIUM_SLOW -&gt; "MediumSlow" ModemPreset.LONG_FAST -&gt; "LongFast" ModemPreset.LONG_SLOW -&gt; "LongSlow" ModemPreset.LONG_MODERATE -&gt; "LongMod" ModemPreset.VERY_LONG_SLOW -&gt; "VLongSlow" else -&gt; "Invalid" }</ID>
     <ID>MultiLineIfElse:ChannelFragment.kt$channelSet = copy { settings.add(it) }</ID>
@@ -561,7 +551,6 @@
     <ID>NewLineAtEndOfFile:SerialConnectionListener.kt$com.geeksville.mesh.repository.usb.SerialConnectionListener.kt</ID>
     <ID>NewLineAtEndOfFile:SerialInterface.kt$com.geeksville.mesh.repository.radio.SerialInterface.kt</ID>
     <ID>NewLineAtEndOfFile:SerialInterfaceFactory.kt$com.geeksville.mesh.repository.radio.SerialInterfaceFactory.kt</ID>
-    <ID>NewLineAtEndOfFile:SoftwareUpdateService.kt$com.geeksville.mesh.service.SoftwareUpdateService.kt</ID>
     <ID>NewLineAtEndOfFile:SqlTileWriterExt.kt$com.geeksville.mesh.util.SqlTileWriterExt.kt</ID>
     <ID>NewLineAtEndOfFile:TCPInterfaceFactory.kt$com.geeksville.mesh.repository.radio.TCPInterfaceFactory.kt</ID>
     <ID>NewLineAtEndOfFile:UsbBroadcastReceiver.kt$com.geeksville.mesh.repository.usb.UsbBroadcastReceiver.kt</ID>
@@ -597,7 +586,6 @@
     <ID>NoTrailingSpaces:ExpireChecker.kt$ExpireChecker$ </ID>
     <ID>NoWildcardImports:BluetoothInterface.kt$import com.geeksville.mesh.service.*</ID>
     <ID>NoWildcardImports:DeviceVersionTest.kt$import org.junit.Assert.*</ID>
-    <ID>NoWildcardImports:ExampleUnitTest.kt$import org.junit.Assert.*</ID>
     <ID>NoWildcardImports:MockInterface.kt$import com.geeksville.mesh.*</ID>
     <ID>NoWildcardImports:PreferenceFooter.kt$import androidx.compose.foundation.layout.*</ID>
     <ID>NoWildcardImports:PreferenceFooter.kt$import androidx.compose.material.*</ID>
@@ -710,7 +698,6 @@
     <ID>VariableNaming:SafeBluetooth.kt$SafeBluetooth$private val STATUS_TIMEOUT = 4404</ID>
     <ID>WildcardImport:BluetoothInterface.kt$import com.geeksville.mesh.service.*</ID>
     <ID>WildcardImport:DeviceVersionTest.kt$import org.junit.Assert.*</ID>
-    <ID>WildcardImport:ExampleUnitTest.kt$import org.junit.Assert.*</ID>
     <ID>WildcardImport:MockInterface.kt$import com.geeksville.mesh.*</ID>
     <ID>WildcardImport:PreferenceFooter.kt$import androidx.compose.foundation.layout.*</ID>
     <ID>WildcardImport:PreferenceFooter.kt$import androidx.compose.material.*</ID>
