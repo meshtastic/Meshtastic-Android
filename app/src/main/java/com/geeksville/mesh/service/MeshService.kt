@@ -305,7 +305,7 @@ class MeshService : Service(), Logging {
         serviceNotifications.showAlertNotification(
             contactKey,
             getSenderName(dataPacket),
-            dataPacket.text!!
+            dataPacket.text ?: getString(R.string.critical_alert)
         )
     }
 

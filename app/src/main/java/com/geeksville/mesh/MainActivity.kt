@@ -44,6 +44,7 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -58,8 +59,8 @@ import com.geeksville.mesh.android.ServiceClient
 import com.geeksville.mesh.android.getBluetoothPermissions
 import com.geeksville.mesh.android.getNotificationPermissions
 import com.geeksville.mesh.android.hasBluetoothPermission
-import com.geeksville.mesh.android.isNotificationPolicyAccessGranted
 import com.geeksville.mesh.android.hasNotificationPermission
+import com.geeksville.mesh.android.isNotificationPolicyAccessGranted
 import com.geeksville.mesh.android.permissionMissing
 import com.geeksville.mesh.android.rationaleDialog
 import com.geeksville.mesh.android.shouldShowRequestPermissionRationale
@@ -184,6 +185,17 @@ class MainActivity : AppCompatActivity(), Logging {
                 showSnackbar(getString(R.string.notification_denied), Snackbar.LENGTH_SHORT)
             }
         }
+
+    private val notificationPolicyAccessLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (isNotificationPolicyAccessGranted()) {
+            info("Notification Policy Access Granted")
+        } else {
+            warn("Notification Policy Access Denied")
+            showSnackbar(getString(R.string.dnd_denied), Snackbar.LENGTH_SHORT)
+        }
+    }
 
     data class TabInfo(val text: String, val icon: Int, val content: Fragment)
 
@@ -429,25 +441,45 @@ class MainActivity : AppCompatActivity(), Logging {
                     service.startProvideLocation()
                 }
             }
+            checkNotificationPermissions()
+        }
+    }
 
-            if (!hasNotificationPermission()) {
-                val notificationPermissions = getNotificationPermissions()
-                rationaleDialog(
-                    shouldShowRequestPermissionRationale(notificationPermissions),
-                    R.string.notification_required,
-                    getString(R.string.why_notification_required),
-                ) {
-                    notificationPermissionsLauncher.launch(notificationPermissions)
-                }
+    private fun checkNotificationPermissions() {
+        if (!hasNotificationPermission()) {
+            val notificationPermissions = getNotificationPermissions()
+            rationaleDialog(
+                shouldShowRequestPermissionRationale(notificationPermissions),
+                R.string.notification_required,
+                getString(R.string.why_notification_required),
+            ) {
+                notificationPermissionsLauncher.launch(notificationPermissions)
             }
-            if (!isNotificationPolicyAccessGranted() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                rationaleDialog(
-                    title = R.string.dnd_required,
-                    rationale = getString(R.string.why_dnd_required),
-                ) {
-                    val intent = Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
-                    startActivity(intent)
+        }
+        if (!isNotificationPolicyAccessGranted() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val prefs = UIViewModel.getPreferences(this)
+            val rationaleShown = prefs.getBoolean("dnd_rationale_shown", false)
+            if (!rationaleShown) {
+                fun requestModesOverride() {
+                    notificationPolicyAccessLauncher.launch(
+                        Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
+                    )
                 }
+                MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.dnd_required)
+                    .setMessage(getString(R.string.why_dnd_required))
+                    .setNeutralButton(R.string.cancel) { dialog, _ ->
+                        showSnackbar(getString(R.string.dnd_denied), Snackbar.LENGTH_LONG) {
+                            requestModesOverride()
+                        }
+                        dialog.dismiss()
+                    }
+                    .setPositiveButton(R.string.okay) { dialog, _ ->
+                        requestModesOverride()
+                        dialog.dismiss()
+                    }
+                    .show()
+                prefs.edit { putBoolean("dnd_rationale_shown", true) }
             }
         }
     }
@@ -460,12 +492,13 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
-    private fun showSnackbar(msg: String, duration: Int = Snackbar.LENGTH_INDEFINITE) {
+    private fun showSnackbar(msg: String, duration: Int = Snackbar.LENGTH_INDEFINITE, action: () -> Unit = {}) {
         try {
             Snackbar.make(binding.root, msg, duration)
                 .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
                 .setAction(R.string.okay) {
                     // dismiss
+                    action()
                 }
                 .show()
         } catch (ex: IllegalStateException) {
