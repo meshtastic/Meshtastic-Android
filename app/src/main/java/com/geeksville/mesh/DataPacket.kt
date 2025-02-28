@@ -85,6 +85,13 @@ data class DataPacket(
             null
         }
 
+    val alert: String?
+        get() = if (dataType == Portnums.PortNum.ALERT_APP_VALUE) {
+            bytes?.decodeToString()
+        } else {
+            null
+        }
+
     constructor(to: String?, channel: Int, waypoint: MeshProtos.Waypoint) : this(
         to = to,
         bytes = waypoint.toByteArray(),
