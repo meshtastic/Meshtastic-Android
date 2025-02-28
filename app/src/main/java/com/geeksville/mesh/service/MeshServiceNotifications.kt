@@ -44,13 +44,7 @@ class MeshServiceNotifications(
     private val context: Context
 ) {
 
-    val notificationLightColor by lazy {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            context.getColor(R.color.colorPrimary)
-        } else {
-            Color.GREEN
-        }
-    }
+    val notificationLightColor = Color.BLUE
 
     companion object {
         private const val FIFTEEN_MINUTES_IN_MILLIS = 15L * 60 * 1000
