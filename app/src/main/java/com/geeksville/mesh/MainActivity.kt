@@ -180,6 +180,7 @@ class MainActivity : AppCompatActivity(), Logging {
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
             if (result.entries.all { it.value }) {
                 info("Notification permissions granted")
+                checkNotificationPolicyAccess()
             } else {
                 warn("Notification permissions denied")
                 showSnackbar(getString(R.string.notification_denied), Snackbar.LENGTH_SHORT)
@@ -445,6 +446,14 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
+    private fun showSnackbar(msgId: Int) {
+        try {
+            Snackbar.make(binding.root, msgId, Snackbar.LENGTH_LONG).show()
+        } catch (ex: IllegalStateException) {
+            errormsg("Snackbar couldn't find view for msgId $msgId")
+        }
+    }
+
     private fun checkNotificationPermissions() {
         if (!hasNotificationPermission()) {
             val notificationPermissions = getNotificationPermissions()
@@ -456,6 +465,9 @@ class MainActivity : AppCompatActivity(), Logging {
                 notificationPermissionsLauncher.launch(notificationPermissions)
             }
         }
+    }
+
+    private fun checkNotificationPolicyAccess(){
         if (!isNotificationPolicyAccessGranted() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val prefs = UIViewModel.getPreferences(this)
             val rationaleShown = prefs.getBoolean("dnd_rationale_shown", false)
@@ -481,14 +493,6 @@ class MainActivity : AppCompatActivity(), Logging {
                     .show()
                 prefs.edit { putBoolean("dnd_rationale_shown", true) }
             }
-        }
-    }
-
-    private fun showSnackbar(msgId: Int) {
-        try {
-            Snackbar.make(binding.root, msgId, Snackbar.LENGTH_LONG).show()
-        } catch (ex: IllegalStateException) {
-            errormsg("Snackbar couldn't find view for msgId $msgId")
         }
     }
 
