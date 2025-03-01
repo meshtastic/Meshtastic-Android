@@ -467,7 +467,7 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
-    private fun checkNotificationPolicyAccess(){
+    private fun checkNotificationPolicyAccess() {
         if (!isNotificationPolicyAccessGranted() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val prefs = UIViewModel.getPreferences(this)
             val rationaleShown = prefs.getBoolean("dnd_rationale_shown", false)
