@@ -47,6 +47,40 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 
 @Composable
+fun SignedIntegerEditTextPreference(
+    title: String,
+    value: Int,
+    enabled: Boolean,
+    keyboardActions: KeyboardActions,
+    onValueChanged: (Int) -> Unit,
+    modifier: Modifier = Modifier,
+    onFocusChanged: (FocusState) -> Unit = {},
+    trailingIcon: (@Composable () -> Unit)? = null,
+) {
+    var valueState by remember(value) { mutableStateOf(value.toString()) }
+
+    EditTextPreference(
+        title = title,
+        value = valueState,
+        enabled = enabled,
+        isError = valueState.toIntOrNull() == null,
+        keyboardOptions = KeyboardOptions.Default.copy(
+            keyboardType = KeyboardType.Number, imeAction = ImeAction.Done
+        ),
+        keyboardActions = keyboardActions,
+        onValueChanged = {
+            valueState = it
+            it.toIntOrNull()?.let { int ->
+                onValueChanged(int)
+            }
+        },
+        onFocusChanged = onFocusChanged,
+        modifier = modifier,
+        trailingIcon = trailingIcon
+    )
+}
+
+@Composable
 fun EditTextPreference(
     title: String,
     value: Int,
