@@ -439,21 +439,21 @@ private fun EnvironmentMetrics(
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalArrangement = Arrangement.SpaceEvenly,
     ) {
-        if (temperature != 0f) {
+        if (hasTemperature()) {
             InfoCard(
                 icon = Icons.Default.Thermostat,
                 text = "Temperature",
                 value = temperature.toTempString(isFahrenheit)
             )
         }
-        if (relativeHumidity != 0f) {
+        if (hasRelativeHumidity()) {
             InfoCard(
                 icon = Icons.Default.WaterDrop,
                 text = "Humidity",
                 value = "%.0f%%".format(relativeHumidity)
             )
         }
-        if (temperature != 0f && relativeHumidity != 0f) {
+        if (hasTemperature() && hasRelativeHumidity()) {
             val dewPoint = calculateDewPoint(temperature, relativeHumidity)
             InfoCard(
                 icon = ImageVector.vectorResource(R.drawable.ic_outlined_dew_point_24),
@@ -461,49 +461,49 @@ private fun EnvironmentMetrics(
                 value = dewPoint.toTempString(isFahrenheit)
             )
         }
-        if (barometricPressure != 0f) {
+        if (hasBarometricPressure()) {
             InfoCard(
                 icon = Icons.Default.Speed,
                 text = "Pressure",
                 value = "%.0f hPa".format(barometricPressure)
             )
         }
-        if (gasResistance != 0f) {
+        if (hasGasResistance()) {
             InfoCard(
                 icon = Icons.Default.BlurOn,
                 text = "Gas Resistance",
                 value = "%.0f MΩ".format(gasResistance)
             )
         }
-        if (voltage != 0f) {
+        if (hasVoltage()) {
             InfoCard(
                 icon = Icons.Default.Bolt,
                 text = "Voltage",
                 value = "%.2fV".format(voltage)
             )
         }
-        if (current != 0f) {
+        if (hasCurrent()) {
             InfoCard(
                 icon = Icons.Default.Power,
                 text = "Current",
                 value = "%.1fmA".format(current)
             )
         }
-        if (iaq != 0) {
+        if (hasIaq()) {
             InfoCard(
                 icon = Icons.Default.Air,
                 text = "IAQ",
                 value = iaq.toString()
             )
         }
-        if (distance != 0f) {
+        if (hasDistance()) {
             InfoCard(
                 icon = Icons.Default.Height,
                 text = "Distance",
                 value = "%.0f mm".format(distance)
             )
         }
-        if (lux != 0f) {
+        if (hasLux()) {
             InfoCard(
                 icon = Icons.Default.LightMode,
                 text = "Lux",
@@ -520,14 +520,14 @@ private fun EnvironmentMetrics(
                 rotateIcon = normalizedBearing.toFloat(),
             )
         }
-        if (weight != 0f) {
+        if (hasWeight()) {
             InfoCard(
                 icon = Icons.Default.Scale,
                 text = "Weight",
                 value = "%.2f kg".format(weight)
             )
         }
-        if (radiation != 0f) {
+        if (hasRadiation()) {
             InfoCard(
                 icon = ImageVector.vectorResource(R.drawable.ic_filled_radioactive_24),
                 text = "Radiation",
