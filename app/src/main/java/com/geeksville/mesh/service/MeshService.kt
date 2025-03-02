@@ -325,7 +325,7 @@ class MeshService : Service(), Logging {
         super.onCreate()
 
         info("Creating mesh service")
-
+        serviceNotifications.initChannels()
         // Switch to the IO thread
         serviceScope.handledLaunch {
             radioInterfaceService.connect()

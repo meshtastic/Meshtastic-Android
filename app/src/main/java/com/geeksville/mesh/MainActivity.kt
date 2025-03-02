@@ -60,7 +60,6 @@ import com.geeksville.mesh.android.getBluetoothPermissions
 import com.geeksville.mesh.android.getNotificationPermissions
 import com.geeksville.mesh.android.hasBluetoothPermission
 import com.geeksville.mesh.android.hasNotificationPermission
-import com.geeksville.mesh.android.isNotificationPolicyAccessGranted
 import com.geeksville.mesh.android.permissionMissing
 import com.geeksville.mesh.android.rationaleDialog
 import com.geeksville.mesh.android.shouldShowRequestPermissionRationale
@@ -180,23 +179,12 @@ class MainActivity : AppCompatActivity(), Logging {
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
             if (result.entries.all { it.value }) {
                 info("Notification permissions granted")
-                checkNotificationPolicyAccess()
+                checkAlertDnD()
             } else {
                 warn("Notification permissions denied")
                 showSnackbar(getString(R.string.notification_denied), Snackbar.LENGTH_SHORT)
             }
         }
-
-    private val notificationPolicyAccessLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (isNotificationPolicyAccessGranted()) {
-            info("Notification Policy Access Granted")
-        } else {
-            warn("Notification Policy Access Denied")
-            showSnackbar(getString(R.string.dnd_denied), Snackbar.LENGTH_SHORT)
-        }
-    }
 
     data class TabInfo(val text: String, val icon: Int, val content: Fragment)
 
@@ -446,14 +434,6 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
-    private fun showSnackbar(msgId: Int) {
-        try {
-            Snackbar.make(binding.root, msgId, Snackbar.LENGTH_LONG).show()
-        } catch (ex: IllegalStateException) {
-            errormsg("Snackbar couldn't find view for msgId $msgId")
-        }
-    }
-
     private fun checkNotificationPermissions() {
         if (!hasNotificationPermission()) {
             val notificationPermissions = getNotificationPermissions()
@@ -467,42 +447,50 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
-    private fun checkNotificationPolicyAccess() {
-        if (!isNotificationPolicyAccessGranted() && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+    private fun checkAlertDnD() {
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+        ) {
             val prefs = UIViewModel.getPreferences(this)
             val rationaleShown = prefs.getBoolean("dnd_rationale_shown", false)
-            if (!rationaleShown) {
-                fun requestModesOverride() {
-                    notificationPolicyAccessLauncher.launch(
-                        Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS)
-                    )
+            if (!rationaleShown && hasNotificationPermission()) {
+                fun showAlertAppNotificationSettings() {
+                    val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                    intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                    intent.putExtra(Settings.EXTRA_CHANNEL_ID, "my_alerts")
+                    startActivity(intent)
                 }
                 MaterialAlertDialogBuilder(this)
-                    .setTitle(R.string.dnd_required)
-                    .setMessage(getString(R.string.why_dnd_required))
+                    .setTitle(R.string.alerts_dnd_request_title)
+                    .setMessage(getString(R.string.alerts_dnd_request_text))
                     .setNeutralButton(R.string.cancel) { dialog, _ ->
-                        showSnackbar(getString(R.string.dnd_denied), Snackbar.LENGTH_LONG) {
-                            requestModesOverride()
-                        }
+                        prefs.edit { putBoolean("dnd_rationale_shown", true) }
                         dialog.dismiss()
                     }
-                    .setPositiveButton(R.string.okay) { dialog, _ ->
-                        requestModesOverride()
+                    .setPositiveButton(R.string.alerts_channel_settings) { dialog, _ ->
+                        showAlertAppNotificationSettings()
+                        prefs.edit { putBoolean("dnd_rationale_shown", true) }
                         dialog.dismiss()
-                    }
+                    }.setCancelable(false)
                     .show()
-                prefs.edit { putBoolean("dnd_rationale_shown", true) }
             }
         }
     }
 
-    private fun showSnackbar(msg: String, duration: Int = Snackbar.LENGTH_INDEFINITE, action: () -> Unit = {}) {
+    private fun showSnackbar(msgId: Int) {
+        try {
+            Snackbar.make(binding.root, msgId, Snackbar.LENGTH_LONG).show()
+        } catch (ex: IllegalStateException) {
+            errormsg("Snackbar couldn't find view for msgId $msgId")
+        }
+    }
+
+    private fun showSnackbar(msg: String, duration: Int = Snackbar.LENGTH_INDEFINITE) {
         try {
             Snackbar.make(binding.root, msg, duration)
                 .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
                 .setAction(R.string.okay) {
                     // dismiss
-                    action()
                 }
                 .show()
         } catch (ex: IllegalStateException) {

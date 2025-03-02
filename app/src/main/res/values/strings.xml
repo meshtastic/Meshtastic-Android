@@ -314,9 +314,9 @@
     <string name="unknown_age">Unknown Age</string>
     <string name="copy">Copy</string>
     <string name="alert_bell_text">Alert Bell Character!</string>
-    <string name="dnd_required">Do Not Disturb Permission Required</string>
-    <string name="why_dnd_required">Critical Alerts requires Mode Control permission to work.\nTo grant Modes Control permission, tap on \'Open settings\' > Allow Modes access to Meshtastic app.</string>
-    <string name="dnd_denied">Do Not Disturb override permission denied. To allow Critical Alerts while your phone is on Do Not Disturb - enable \'Override Do Not Disturb\` for the Meshtastic app in your device settings.</string>
+    <string name="alerts_channel_settings">Alerts Channel Settings</string>
+    <string name="alerts_dnd_request_title">Enable Critical Alerts to bypass Do Not Disturb</string>
+    <string name="alerts_dnd_request_text">To allow Critical Alerts while your phone is on \'Do Not Disturb\' - enable \'Override Do Not Disturb\` for the Alerts channel in the Meshtastic app notification settings.</string>
     <string name="critical_alert">Critical Alert!</string>
     <string name="favorite">Favorite</string>
     <string name="favorite_add">Add \'%s\' as a favorite node?</string>

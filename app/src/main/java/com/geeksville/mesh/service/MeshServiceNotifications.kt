@@ -58,100 +58,118 @@ class MeshServiceNotifications(
     // We have two notification channels: one for general service status and another one for messages
     val notifyId = 101
 
+    fun initChannels() {
+        // create notification channels on service creation
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createNotificationChannel()
+            createMessageNotificationChannel()
+            createAlertNotificationChannel()
+            createNewNodeNotificationChannel()
+        }
+    }
+
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNotificationChannel(): String {
         val channelId = "my_service"
-        val channelName = context.getString(R.string.meshtastic_service_notifications)
-        val channel = NotificationChannel(
-            channelId,
-            channelName,
-            NotificationManager.IMPORTANCE_MIN
-        ).apply {
-            lightColor = notificationLightColor
-            lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+        if (notificationManager.getNotificationChannel(channelId) == null) {
+            val channelName = context.getString(R.string.meshtastic_service_notifications)
+            val channel = NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_MIN
+            ).apply {
+                lightColor = notificationLightColor
+                lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+            }
+            notificationManager.createNotificationChannel(channel)
         }
-        notificationManager.createNotificationChannel(channel)
         return channelId
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createMessageNotificationChannel(): String {
         val channelId = "my_messages"
-        val channelName = context.getString(R.string.meshtastic_messages_notifications)
-        val channel = NotificationChannel(
-            channelId,
-            channelName,
-            NotificationManager.IMPORTANCE_HIGH
-        ).apply {
-            lightColor = notificationLightColor
-            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-            setShowBadge(true)
-            setSound(
-                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .build()
-            )
+        if (notificationManager.getNotificationChannel(channelId) == null) {
+            val channelName = context.getString(R.string.meshtastic_messages_notifications)
+            val channel = NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                lightColor = notificationLightColor
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                setShowBadge(true)
+                setSound(
+                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
+            }
+            notificationManager.createNotificationChannel(channel)
         }
-        notificationManager.createNotificationChannel(channel)
         return channelId
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createAlertNotificationChannel(): String {
         val channelId = "my_alerts"
-        val channelName = context.getString(R.string.meshtastic_alerts_notifications)
-        val channel = NotificationChannel(
-            channelId,
-            channelName,
-            NotificationManager.IMPORTANCE_HIGH
-        ).apply {
-            enableLights(true)
-            enableVibration(true)
-            setBypassDnd(true)
-            lightColor = notificationLightColor
-            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-            setShowBadge(true)
-            val alertSoundUri =
-                (
-                    ContentResolver.SCHEME_ANDROID_RESOURCE +
-                                "://" + context.applicationContext.packageName +
-                                "/" + R.raw.alert
-                        ).toUri()
-            setSound(
-                alertSoundUri,
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .build()
-            )
+        if (notificationManager.getNotificationChannel(channelId) == null) {
+            val channelName = context.getString(R.string.meshtastic_alerts_notifications)
+            val channel = NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                enableLights(true)
+                enableVibration(true)
+                setBypassDnd(true)
+                lightColor = notificationLightColor
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                setShowBadge(true)
+                val alertSoundUri =
+                    (
+                            ContentResolver.SCHEME_ANDROID_RESOURCE +
+                                    "://" + context.applicationContext.packageName +
+                                    "/" + R.raw.alert
+                            ).toUri()
+                setSound(
+                    alertSoundUri,
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
+            }
+            notificationManager.createNotificationChannel(channel)
         }
-        notificationManager.createNotificationChannel(channel)
         return channelId
     }
 
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createNewNodeNotificationChannel(): String {
         val channelId = "new_nodes"
-        val channelName = context.getString(R.string.meshtastic_new_nodes_notifications)
-        val channel = NotificationChannel(
-            channelId,
-            channelName,
-            NotificationManager.IMPORTANCE_HIGH
-        ).apply {
-            lightColor = notificationLightColor
-            lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-            setShowBadge(true)
-            setSound(
-                RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
-                AudioAttributes.Builder()
-                    .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                    .build()
-            )
+        if (notificationManager.getNotificationChannel(channelId) == null) {
+            val channelName = context.getString(R.string.meshtastic_new_nodes_notifications)
+            val channel = NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                lightColor = notificationLightColor
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                setShowBadge(true)
+                setSound(
+                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
+            }
+            notificationManager.createNotificationChannel(channel)
         }
-        notificationManager.createNotificationChannel(channel)
         return channelId
     }
 

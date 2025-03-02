@@ -24,7 +24,6 @@ import android.bluetooth.BluetoothManager
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.LocationManager
-import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -168,11 +167,8 @@ fun Context.hasLocationPermission() = getLocationPermissions().isEmpty()
  */
 fun Context.getNotificationPermissions(): Array<String> {
     val perms = mutableListOf<String>()
-    if (Build.VERSION.SDK_INT >= 33) {
+    if (android.os.Build.VERSION.SDK_INT >= 33) {
         perms.add(Manifest.permission.POST_NOTIFICATIONS)
-    }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-        perms.add(Manifest.permission.ACCESS_NOTIFICATION_POLICY)
     }
 
     return getMissingPermissions(perms)
@@ -180,9 +176,3 @@ fun Context.getNotificationPermissions(): Array<String> {
 
 /** @return true if the user already has notification permission */
 fun Context.hasNotificationPermission() = getNotificationPermissions().isEmpty()
-
-fun Context.isNotificationPolicyAccessGranted() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-    notificationManager.isNotificationPolicyAccessGranted
-} else {
-    false
-}
