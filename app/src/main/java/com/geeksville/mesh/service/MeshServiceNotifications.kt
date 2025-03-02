@@ -281,6 +281,8 @@ class MeshServiceNotifications(
             setStyle(
                 NotificationCompat.MessagingStyle(person).addMessage(message, System.currentTimeMillis(), person)
             )
+            setWhen(System.currentTimeMillis())
+            setShowWhen(true)
         }
         return messageNotificationBuilder.build()
     }
