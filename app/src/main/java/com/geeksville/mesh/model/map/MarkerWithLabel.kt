@@ -22,6 +22,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.view.MotionEvent
+import com.geeksville.mesh.android.spToPx
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon
@@ -31,6 +32,8 @@ class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) :
     companion object {
         private const val LABEL_CORNER_RADIUS = 12F
         private const val LABEL_Y_OFFSET = 100F
+        private const val FONT_SIZE_SP = 14f
+        private const val EMOJI_FONT_SIZE_SP = 20f
     }
 
     private var nodeColor: Int = Color.GRAY
@@ -69,14 +72,14 @@ class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) :
     private val mLabel = label
     private val mEmoji = emoji
     private val textPaint = Paint().apply {
-        textSize = 40f
+        textSize = mapView?.context?.spToPx(FONT_SIZE_SP)?.toFloat() ?: 40f
         color = Color.DKGRAY
         isAntiAlias = true
         isFakeBoldText = true
         textAlign = Paint.Align.CENTER
     }
     private val emojiPaint = Paint().apply {
-        textSize = 80f
+        textSize = mapView?.context?.spToPx(EMOJI_FONT_SIZE_SP)?.toFloat() ?: 80f
         isAntiAlias = true
         textAlign = Paint.Align.CENTER
     }

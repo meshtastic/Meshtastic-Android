@@ -19,6 +19,7 @@ package com.geeksville.mesh.android
 
 import android.app.Activity
 import android.content.Context
+import android.util.TypedValue
 import android.view.inputmethod.InputMethodManager
 import android.widget.Toast
 
@@ -35,3 +36,7 @@ fun Activity.hideKeyboard() {
         imm?.hideSoftInputFromWindow(v.windowToken, 0)
     }
 }
+
+// Converts SP to pixels.
+fun Context.spToPx(sp: Float): Int =
+    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, resources.displayMetrics).toInt()
