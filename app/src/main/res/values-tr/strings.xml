@@ -40,12 +40,19 @@
     <string name="role_client_hidden">Gizlilik veya güç tasarrufu için sadece gerektiğinde yayın yapan cihaz.</string>
     <string name="role_lost_and_found">Cihazın kurtarılmasına yardımcı olmak için konumunu düzenli olarak varsayılan kanala mesaj olarak gönderir.</string>
     <string name="role_tak_tracker">Rutin yayınları azaltarak otomatik TAK PLI yayınlarını etkinleştirir.</string>
+    <string name="role_router_late">Tüm diğer modlardan sonra paketleri her zaman bir kez yeniden yayınlayan ve yerel kümeler için ek kapsama alanı sağlayan altyapı düğümü. Düğümler listesinde görünür.</string>
     <string name="rebroadcast_mode_all">Tespit edilen herhangi bir mesajı, özel kanalımızdaysa veya aynı LoRa parametrelerine sahip başka bir ağdan geliyorsa yeniden yayınlayın.</string>
     <string name="rebroadcast_mode_all_skip_decoding">ALL ile aynı davranış, ancak paketleri çözmeksizin yeniden yayınlar. Yalnızca Repeater rolünde kullanılabilir. Bunu başka herhangi bir rolde ayarlamak ALL davranışıyla sonuçlanacaktır.</string>
     <string name="rebroadcast_mode_local_only">Açık olan veya şifresini çözemediği yabancı ağlardan geldiği tespit edilen mesajları yok sayar. Yalnızca düğümlerin yerel birincil / ikincil kanallarında mesajı yeniden yayınlar.</string>
     <string name="rebroadcast_mode_known_only">LOCAL ONLY gibi yabancı ağlardan geldiği tespit edilen mesajları yok sayar, ancak düğümün bilinen listesinde bulunmayan düğümlerden gelen mesajları da yok sayarak bir adım daha ileri gider.</string>
     <string name="rebroadcast_mode_none">Yalnızca SENSOR, TRACKER ve TAK_TRACKER rolleri için izin verilir, CLIENT_MUTE rolünden farklı olarak tüm yeniden yayınları engeller.</string>
     <string name="rebroadcast_mode_core_portnums_only">TAK, RangeTest, PaxCounter gibi standart olmayan portnum\'ları yok sayarken sadece standart portnum\'lar olan NodeInfo, Text, Position, Telemetry ve Routing\'i yeniden yayınlar.</string>
+    <string name="config_device_doubleTapAsButtonPress_summary">Desteklenen ivmeölçerlere çift dokunmayı kullanıcı düğmesine basma olarak değerlendirir.</string>
+    <string name="config_device_disableTripleClick_summary">GPS\'i etkinleştirmek veya devre dışı bırakmak için kullanıcı düğmesine üç kez basılmasını devre dışı bırakır.</string>
+    <string name="config_device_ledHeartbeatDisabled_summary">Cihaz üzerindeki yanıp sönen LED\'i kontrol eder. Çoğu cihaz için bu, en fazla 4 LED\'den birini kontrol edecektir, şarj ve GPS LED\'leri kontrol edilemez.</string>
+    <string name="config_device_transmitOverLora_summary">MQTT ve PhoneAPI\'ye göndermenin yanı sıra, NeighborInfo\'muzun LoRa üzerinden iletilip iletilmeyeceğidir. Varsayılan anahtar ve ada sahip bir kanalda kullanılamaz.</string>
+    <string name="config_security_public_key">Genel Anahtar</string>
+    <string name="config_security_private_key">Özel Anahtar</string>
     <string name="channel_name">Kanal Adı</string>
     <string name="channel_options">Kanal Seçenekleri</string>
     <string name="qr_code">Karekod</string>
@@ -55,7 +62,7 @@
     <string name="unknown_username">Bilinmeyen kullanıcı adı</string>
     <string name="send">Gönder</string>
     <string name="send_text">Metni Gönder</string>
-    <string name="warning_not_paired">Telefonu, Meshtastic uyumlu bir cihaz ile eşleştirmediniz. Bir cihazla eşleştirin ve kullanıcı adınızı belirleyin.\n\nAçık kaynaklı bu uygulama şu an alfa-test aşamasında, problem fark ederseniz forumda lütfen paylaşın: https://github.com/orgs/meshtastic/discussions\n\nDaha fazla bilgi için, sitemiz: www.meshtastic.org.</string>
+    <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in development, if you find problems please post on our forum: https://github.com/orgs/meshtastic/discussions.\n\nFor more information see our web page - www.meshtastic.org.</string>
     <string name="you">Siz</string>
     <string name="your_name">Adınız</string>
     <string name="analytics_okay">Anonim kullanim istatistikleri ve hata raporları.</string>
@@ -264,6 +271,8 @@
     <string name="fair">İdare Eder</string>
     <string name="good">İyi</string>
     <string name="none_quality">Yok</string>
+    <string name="share_to">Paylaş: …</string>
+    <string name="share_message">Mesajı paylaş</string>
     <string name="signal">Sinyal</string>
     <string name="signal_quality">Sinyal Kalitesi</string>
     <string name="traceroute_log">Yol İzleme Kayıtları</string>
@@ -273,4 +282,12 @@
         <item quantity="other">%d atlama</item>
     </plurals>
     <string name="traceroute_diff">İleri atlama %1$d Geri atlama %2$d</string>
+    <string name="twenty_four_hours">24S</string>
+    <string name="forty_eight_hours">48S</string>
+    <string name="one_week">1H</string>
+    <string name="two_weeks">2H</string>
+    <string name="four_weeks">4H</string>
+    <string name="max">Maks</string>
+    <string name="copy">Kopyala</string>
+    <string name="alert_bell_text">Zili Çaldır!</string>
 </resources>

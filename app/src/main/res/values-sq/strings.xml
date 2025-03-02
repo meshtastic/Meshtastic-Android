@@ -40,12 +40,19 @@
     <string name="role_client_hidden">Pajisje që transmeton vetëm kur është e nevojshme për fshehtësi ose kursim energjie.</string>
     <string name="role_lost_and_found">Transmeton vendndodhjen si mesazh në kanalin e parazgjedhur rregullisht për të ndihmuar në rikuperimin e pajisjeve.</string>
     <string name="role_tak_tracker">Aktivizon transmetimet automatikisht TAK PLI dhe zvogëlon transmetimet rutinë.</string>
+    <string name="role_router_late">Infrastructure node that always rebroadcasts packets once but only after all other modes, ensuring additional coverage for local clusters. Visible in nodes list.</string>
     <string name="rebroadcast_mode_all">Ritransmeton çdo mesazh të vërejtur, nëse ishte në kanalin tonë privat ose nga një tjetër rrjet me të njëjtat parametra LoRa.</string>
     <string name="rebroadcast_mode_all_skip_decoding">Po të njëjtën sjellje si ALL, por kalon pa dekoduar paketat dhe thjesht i ritransmeton. I disponueshëm vetëm për rolin Repeater. Vendosja e kësaj në rolet e tjera do të rezultojë në sjelljen e ALL.</string>
     <string name="rebroadcast_mode_local_only">Injoron mesazhet e vëzhguara nga rrjete të huaja që janë të hapura ose ato që nuk mund t\'i dekodoj. Vetëm ritransmeton mesazhe në kanalet lokale primare / dytësore të nyjës.</string>
     <string name="rebroadcast_mode_known_only">Injoron mesazhet e vëzhguara nga rrjete të huaja si LOCAL ONLY, por e çon më tutje duke injoruar edhe mesazhet nga nyje që nuk janë në listën e njohur të nyjës.</string>
     <string name="rebroadcast_mode_none">Lejohet vetëm për rolet SENSOR, TRACKER dhe TAK_TRACKER, kjo do të pengojë të gjitha ritransmetimet, jo ndryshe nga roli CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only">Injoron paketat nga portnumra jo standardë si: TAK, RangeTest, PaxCounter, etj. Vetëm ritransmeton paketat me portnumra standard: NodeInfo, Text, Position, Telemetry, dhe Routing.</string>
+    <string name="config_device_doubleTapAsButtonPress_summary">Treat double tap on supported accelerometers as a user button press.</string>
+    <string name="config_device_disableTripleClick_summary">Disables the triple-press of user button to enable or disable GPS.</string>
+    <string name="config_device_ledHeartbeatDisabled_summary">Controls the blinking LED on the device. For most devices this will control one of the up to 4 LEDs, the charger and GPS LEDs are not controllable.</string>
+    <string name="config_device_transmitOverLora_summary">Whether in addition to sending it to MQTT and the PhoneAPI, our NeighborInfo should be transmitted over LoRa. Not available on a channel with default key and name.</string>
+    <string name="config_security_public_key">Public Key</string>
+    <string name="config_security_private_key">Private Key</string>
     <string name="channel_name">Emri i kanalit radio</string>
     <string name="channel_options">Parametrat e kanalit radio</string>
     <string name="qr_code">Kodi QR</string>
@@ -55,7 +62,7 @@
     <string name="unknown_username">Emri i përdoruesit është i panjohur</string>
     <string name="send">Dërgo</string>
     <string name="send_text">Dërgo një Mesazh</string>
-    <string name="warning_not_paired">Ju ende nuk keni lidhur një paisje radio Meshtastic me këtë telefon. Ju lutem lidhni një paisje radio dhe vendosni emrin e përdoruesit.\n\nKy aplikacion është software i lire \"open-source\" dhe në variantin Alpha për testim. Nëse hasni probleme, ju lutem shkruani në çatin e faqes tonë të internetit: https://github.com/orgs/meshtastic/discussions\n\nPër më shumë informacione vizitoni faqen tonë në internet - www.meshtastic.org.</string>
+    <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in development, if you find problems please post on our forum: https://github.com/orgs/meshtastic/discussions.\n\nFor more information see our web page - www.meshtastic.org.</string>
     <string name="you">Ju</string>
     <string name="your_name">Emri juaj</string>
     <string name="analytics_okay">Statistikat e përdorimit dhe raportet e keq funksionimit mblidhen në mënyrë krejtësisht anonime</string>
@@ -264,6 +271,8 @@
     <string name="fair">Mesatar</string>
     <string name="good">Mirë</string>
     <string name="none_quality">Asnjë</string>
+    <string name="share_to">Share to…</string>
+    <string name="share_message">Share message</string>
     <string name="signal">Sinjal</string>
     <string name="signal_quality">Cilësia e Sinjalit</string>
     <string name="traceroute_log">Regjistri i Traceroute</string>
@@ -273,4 +282,12 @@
         <item quantity="other">%d hops</item>
     </plurals>
     <string name="traceroute_diff">Hops drejt %1$d Hops prapa %2$d</string>
+    <string name="twenty_four_hours">24H</string>
+    <string name="forty_eight_hours">48H</string>
+    <string name="one_week">1W</string>
+    <string name="two_weeks">2W</string>
+    <string name="four_weeks">4W</string>
+    <string name="max">Max</string>
+    <string name="copy">Copy</string>
+    <string name="alert_bell_text">Alert Bell Character!</string>
 </resources>
