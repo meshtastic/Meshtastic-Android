@@ -13,6 +13,12 @@
     <string name="sample_coords" translatable="false">55.332244 34.442211</string>
     <string name="sample_message" translatable="false">hey I found the cache, it is over here next to the big tiger. I\'m kinda scared.</string>
 
+    <string name="main_tab_messages">Messages</string>
+    <string name="main_tab_users">Users</string>
+    <string name="main_tab_map">Map</string>
+    <string name="main_tab_channel">Channel</string>
+    <string name="main_tab_settings">Settings</string>
+
     <string name="unknown_node_short_name" translatable="false">\???</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">clear node filter</string>
