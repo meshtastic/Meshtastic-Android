@@ -17,21 +17,34 @@
 
 package com.geeksville.mesh.ui.radioconfig.components
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Checkbox
 import androidx.compose.material.Divider
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -97,6 +110,74 @@ fun DeviceConfigScreen(
     )
 }
 
+@Suppress("LongMethod")
+@Composable
+fun RouterRoleConfirmationDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    val dialogTitle = "Are you sure?"
+    val annotatedDialogText = buildAnnotatedString {
+        append("I have read the ")
+        withLink(
+            link = LinkAnnotation.Url(
+                "https://meshtastic.org/docs/configuration/radio/device/#roles",
+                TextLinkStyles(style = SpanStyle(color = Color.Blue))
+            )
+        ) {
+            append("Device Role Documentation ")
+        }
+        append("and the blog post about ")
+        withLink(
+            link = LinkAnnotation.Url(
+                "http://meshtastic.org/blog/choosing-the-right-device-role",
+                TextLinkStyles(style = SpanStyle(color = Color.Blue))
+            )
+        ) {
+            append("Choosing The Right Device Role")
+        }
+        append(".")
+    }
+
+    var confirmed by rememberSaveable { mutableStateOf(false) }
+
+    AlertDialog(
+        title = {
+            Text(text = dialogTitle)
+        },
+        text = {
+            Column {
+                Text(text = annotatedDialogText)
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = confirmed,
+                        onCheckedChange = { confirmed = it }
+                    )
+                    Text("I know what I'm doing.")
+                }
+            }
+        },
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                enabled = confirmed
+            ) {
+                Text("Confirm")
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss
+            ) {
+                Text("Dismiss")
+            }
+        }
+    )
+}
+
 @Composable
 fun DeviceConfigItemList(
     deviceConfig: DeviceConfig,
@@ -106,6 +187,17 @@ fun DeviceConfigItemList(
     val focusManager = LocalFocusManager.current
     var deviceInput by rememberSaveable { mutableStateOf(deviceConfig) }
 
+    var showRouterRoleConfirmationDialog = true
+//    var showRouterRoleConfirmationDialog by rememberSaveable { mutableStateOf(false) }
+    if (showRouterRoleConfirmationDialog) {
+        RouterRoleConfirmationDialog(
+            onDismiss = { showRouterRoleConfirmationDialog = false },
+            onConfirm = {
+                showRouterRoleConfirmationDialog = false
+                deviceInput = deviceInput.copy { role = DeviceConfig.Role.ROUTER }
+            }
+        )
+    }
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -116,7 +208,14 @@ fun DeviceConfigItemList(
                 title = "Role",
                 enabled = enabled,
                 selectedItem = deviceInput.role,
-                onItemSelected = { deviceInput = deviceInput.copy { role = it } },
+                onItemSelected = {
+                    if (it == DeviceConfig.Role.ROUTER && deviceInput.role != DeviceConfig.Role.ROUTER) {
+                        showRouterRoleConfirmationDialog = true
+                        return@DropDownPreference
+                    } else {
+                        deviceInput = deviceInput.copy { role = it }
+                    }
+                },
                 summary = stringResource(id = deviceInput.role.stringRes),
             )
             Divider()
