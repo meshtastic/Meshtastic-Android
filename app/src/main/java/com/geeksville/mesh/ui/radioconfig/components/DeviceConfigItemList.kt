@@ -211,7 +211,6 @@ fun DeviceConfigItemList(
                 onItemSelected = {
                     if (it == DeviceConfig.Role.ROUTER && deviceInput.role != DeviceConfig.Role.ROUTER) {
                         showRouterRoleConfirmationDialog = true
-                        return@DropDownPreference
                     } else {
                         deviceInput = deviceInput.copy { role = it }
                     }
