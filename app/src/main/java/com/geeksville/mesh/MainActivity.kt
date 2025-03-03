@@ -45,6 +45,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
+import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
@@ -453,6 +454,7 @@ class MainActivity : AppCompatActivity(), Logging {
         ) {
             val prefs = UIViewModel.getPreferences(this)
             val rationaleShown = prefs.getBoolean("dnd_rationale_shown", false)
+            val isSamsung = true // Build.MANUFACTURER.equals("samsung", ignoreCase = true)
             if (!rationaleShown && hasNotificationPermission()) {
                 fun showAlertAppNotificationSettings() {
                     val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
@@ -460,19 +462,41 @@ class MainActivity : AppCompatActivity(), Logging {
                     intent.putExtra(Settings.EXTRA_CHANNEL_ID, "my_alerts")
                     startActivity(intent)
                 }
-                MaterialAlertDialogBuilder(this)
+                fun showSamsungInstructions() {
+                    val intent = Intent(Intent.ACTION_VIEW)
+                    intent.setData(
+                        (
+                                "https://www.samsung.com/latin_en/support/mobile-devices/" +
+                                        "how-to-use-the-do-not-disturb-mode-on-your-galaxy-phone/"
+                                ).toUri()
+                    )
+                    startActivity(intent)
+                }
+
+                var message = getString(R.string.alerts_dnd_request_text)
+                if (isSamsung) {
+                    message += getString(R.string.samsung_instructions_text)
+                }
+                val dialog = MaterialAlertDialogBuilder(this)
                     .setTitle(R.string.alerts_dnd_request_title)
-                    .setMessage(getString(R.string.alerts_dnd_request_text))
+                    .setMessage(message)
                     .setNeutralButton(R.string.cancel) { dialog, _ ->
                         prefs.edit { putBoolean("dnd_rationale_shown", true) }
                         dialog.dismiss()
                     }
-                    .setPositiveButton(R.string.alerts_channel_settings) { dialog, _ ->
+                    .setPositiveButton(R.string.channel_settings) { dialog, _ ->
                         showAlertAppNotificationSettings()
                         prefs.edit { putBoolean("dnd_rationale_shown", true) }
                         dialog.dismiss()
-                    }.setCancelable(false)
-                    .show()
+                    }
+                    .setCancelable(false)
+                if (isSamsung) {
+                    dialog.setNegativeButton(R.string.samsung_instructions) { dialog, _ ->
+                        showSamsungInstructions()
+                        dialog.dismiss()
+                    }
+                }
+                dialog.show()
             }
         }
     }
