@@ -187,8 +187,7 @@ fun DeviceConfigItemList(
     val focusManager = LocalFocusManager.current
     var deviceInput by rememberSaveable { mutableStateOf(deviceConfig) }
 
-    var showRouterRoleConfirmationDialog = true
-//    var showRouterRoleConfirmationDialog by rememberSaveable { mutableStateOf(false) }
+    var showRouterRoleConfirmationDialog by rememberSaveable { mutableStateOf(false) }
     if (showRouterRoleConfirmationDialog) {
         RouterRoleConfirmationDialog(
             onDismiss = { showRouterRoleConfirmationDialog = false },
