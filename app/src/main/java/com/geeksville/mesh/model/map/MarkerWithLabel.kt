@@ -22,6 +22,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.view.MotionEvent
+import com.geeksville.mesh.android.dpToPx
 import com.geeksville.mesh.android.spToPx
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
@@ -30,10 +31,18 @@ import org.osmdroid.views.overlay.Polygon
 class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) : Marker(mapView) {
 
     companion object {
-        private const val LABEL_CORNER_RADIUS = 12F
-        private const val LABEL_Y_OFFSET = 100F
+        private const val LABEL_CORNER_RADIUS_DP = 4f
+        private const val LABEL_Y_OFFSET_DP = 34f
         private const val FONT_SIZE_SP = 14f
         private const val EMOJI_FONT_SIZE_SP = 20f
+    }
+
+    private val labelYOffsetPx by lazy {
+        mapView?.context?.dpToPx(LABEL_Y_OFFSET_DP) ?: 100
+    }
+
+    private val labelCornerRadiusPx by lazy {
+        mapView?.context?.dpToPx(LABEL_CORNER_RADIUS_DP) ?: 12
     }
 
     private var nodeColor: Int = Color.GRAY
@@ -109,12 +118,12 @@ class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) :
     override fun draw(c: Canvas, osmv: MapView?, shadow: Boolean) {
         super.draw(c, osmv, false)
         val p = mPositionPixels
-        val bgRect = getTextBackgroundSize(mLabel, (p.x - 0F), (p.y - LABEL_Y_OFFSET))
+        val bgRect = getTextBackgroundSize(mLabel, p.x.toFloat(), (p.y - labelYOffsetPx.toFloat()))
         bgRect.inset(-8F, -2F)
 
         if (mLabel.isNotEmpty()) {
-            c.drawRoundRect(bgRect, LABEL_CORNER_RADIUS, LABEL_CORNER_RADIUS, bgPaint)
-            c.drawText(mLabel, (p.x - 0F), (p.y - LABEL_Y_OFFSET), textPaint)
+            c.drawRoundRect(bgRect, labelCornerRadiusPx.toFloat(), labelCornerRadiusPx.toFloat(), bgPaint)
+            c.drawText(mLabel, (p.x - 0F), (p.y - labelYOffsetPx.toFloat()), textPaint)
         }
         mEmoji?.let { c.drawText(it, (p.x - 0f), (p.y - 30f), emojiPaint) }
 
