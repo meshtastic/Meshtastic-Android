@@ -40,3 +40,7 @@ fun Activity.hideKeyboard() {
 // Converts SP to pixels.
 fun Context.spToPx(sp: Float): Int =
     TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, resources.displayMetrics).toInt()
+
+// Converts DP to pixels.
+fun Context.dpToPx(dp: Float): Int =
+    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, resources.displayMetrics).toInt()
