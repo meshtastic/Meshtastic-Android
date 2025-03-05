@@ -25,10 +25,13 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.hardware.usb.UsbManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.RemoteException
+import android.provider.Settings
+import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.view.Menu
 import android.view.MenuItem
@@ -43,7 +46,9 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.Toolbar
 import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
@@ -177,6 +182,7 @@ class MainActivity : AppCompatActivity(), Logging {
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
             if (result.entries.all { it.value }) {
                 info("Notification permissions granted")
+                checkAlertDnD()
             } else {
                 warn("Notification permissions denied")
                 showSnackbar(getString(R.string.notification_denied), Snackbar.LENGTH_SHORT)
@@ -427,16 +433,58 @@ class MainActivity : AppCompatActivity(), Logging {
                     service.startProvideLocation()
                 }
             }
+            checkNotificationPermissions()
+        }
+    }
 
-            if (!hasNotificationPermission()) {
-                val notificationPermissions = getNotificationPermissions()
-                rationaleDialog(
-                    shouldShowRequestPermissionRationale(notificationPermissions),
-                    R.string.notification_required,
-                    getString(R.string.why_notification_required),
-                ) {
-                    notificationPermissionsLauncher.launch(notificationPermissions)
+    private fun checkNotificationPermissions() {
+        if (!hasNotificationPermission()) {
+            val notificationPermissions = getNotificationPermissions()
+            rationaleDialog(
+                shouldShowRequestPermissionRationale(notificationPermissions),
+                R.string.notification_required,
+                getString(R.string.why_notification_required),
+            ) {
+                notificationPermissionsLauncher.launch(notificationPermissions)
+            }
+        }
+    }
+
+    private fun checkAlertDnD() {
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+        ) {
+            val prefs = UIViewModel.getPreferences(this)
+            val rationaleShown = prefs.getBoolean("dnd_rationale_shown", false)
+            if (!rationaleShown && hasNotificationPermission()) {
+                fun showAlertAppNotificationSettings() {
+                    val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                    intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                    intent.putExtra(Settings.EXTRA_CHANNEL_ID, "my_alerts")
+                    startActivity(intent)
                 }
+                val message = Html.fromHtml(
+                    getString(R.string.alerts_dnd_request_text),
+                    Html.FROM_HTML_MODE_COMPACT
+                )
+                val messageTextView = TextView(this).also {
+                    it.text = message
+                    it.movementMethod = LinkMovementMethod.getInstance()
+                    it.setPadding(resources.getDimension(R.dimen.margin_normal).toInt())
+                }
+                MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.alerts_dnd_request_title)
+                    .setView(messageTextView)
+                    .setNeutralButton(R.string.cancel) { dialog, _ ->
+                        prefs.edit { putBoolean("dnd_rationale_shown", true) }
+                        dialog.dismiss()
+                    }
+                    .setPositiveButton(R.string.channel_settings) { dialog, _ ->
+                        showAlertAppNotificationSettings()
+                        prefs.edit { putBoolean("dnd_rationale_shown", true) }
+                        dialog.dismiss()
+                    }
+                    .setCancelable(false).show()
             }
         }
     }

@@ -148,6 +148,7 @@
     <string name="message_reception_state">message reception state</string>
     <string name="message_delivery_status">Message delivery status</string>
     <string name="meshtastic_messages_notifications">Message notifications</string>
+    <string name="meshtastic_alerts_notifications">Alert notifications</string>
     <string name="protocol_stress_test">Protocol stress test</string>
     <string name="firmware_too_old">Firmware update required</string>
     <string name="firmware_old">The radio firmware is too old to talk to this application. For more information on this see <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
@@ -319,6 +320,11 @@
     <string name="unknown_age">Unknown Age</string>
     <string name="copy">Copy</string>
     <string name="alert_bell_text">Alert Bell Character!</string>
+    <string name="channel_settings">Channel Settings</string>
+    <string name="samsung_instructions">Samsung Instructions</string>
+    <string name="alerts_dnd_request_title">Enable Critical Alerts to bypass Do Not Disturb</string>
+    <string name="alerts_dnd_request_text"><![CDATA[To allow Critical Alerts while your phone is on Do Not Disturb - enable Override Do Not Disturb for the Alerts channel in the Meshtastic app notification settings.<br/><br/>Samsung users may need to add an exception in system settings before enabling it for the Alerts Channel. <a href="https://www.samsung.com/latin_en/support/mobile-devices/how-to-use-the-do-not-disturb-mode-on-your-galaxy-phone/">Visit Samsung Support for assistance.</a>.]]></string>
+    <string name="critical_alert">Critical Alert!</string>
     <string name="favorite">Favorite</string>
     <string name="favorite_add">Add \'%s\' as a favorite node?</string>
     <string name="favorite_remove">Remove \'%s\' as a favorite node?</string>
