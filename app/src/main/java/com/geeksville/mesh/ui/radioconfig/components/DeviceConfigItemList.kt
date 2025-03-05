@@ -38,13 +38,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.LinkAnnotation
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
-import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.withLink
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -116,28 +115,11 @@ fun RouterRoleConfirmationDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
 ) {
-    val dialogTitle = "Are you sure?"
-    val annotatedDialogText = buildAnnotatedString {
-        append("I have read the ")
-        withLink(
-            link = LinkAnnotation.Url(
-                "https://meshtastic.org/docs/configuration/radio/device/#roles",
-                TextLinkStyles(style = SpanStyle(color = Color.Blue))
-            )
-        ) {
-            append("Device Role Documentation ")
-        }
-        append("and the blog post about ")
-        withLink(
-            link = LinkAnnotation.Url(
-                "http://meshtastic.org/blog/choosing-the-right-device-role",
-                TextLinkStyles(style = SpanStyle(color = Color.Blue))
-            )
-        ) {
-            append("Choosing The Right Device Role")
-        }
-        append(".")
-    }
+    val dialogTitle = stringResource(R.string.are_you_sure)
+    val annotatedDialogText = AnnotatedString.fromHtml(
+        htmlString = stringResource(R.string.router_role_confirmation_text),
+        linkStyles = TextLinkStyles(style = SpanStyle(color = Color.Blue))
+    )
 
     var confirmed by rememberSaveable { mutableStateOf(false) }
 
@@ -155,7 +137,7 @@ fun RouterRoleConfirmationDialog(
                         checked = confirmed,
                         onCheckedChange = { confirmed = it }
                     )
-                    Text("I know what I'm doing.")
+                    Text(stringResource(R.string.i_know_what_i_m_doing))
                 }
             }
         },
@@ -165,14 +147,14 @@ fun RouterRoleConfirmationDialog(
                 onClick = onConfirm,
                 enabled = confirmed
             ) {
-                Text("Confirm")
+                Text(stringResource(R.string.accept))
             }
         },
         dismissButton = {
             TextButton(
                 onClick = onDismiss
             ) {
-                Text("Dismiss")
+                Text(stringResource(R.string.cancel))
             }
         }
     )
