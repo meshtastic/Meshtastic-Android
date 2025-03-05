@@ -316,9 +316,8 @@
     <string name="alert_bell_text">Alert Bell Character!</string>
     <string name="channel_settings">Channel Settings</string>
     <string name="samsung_instructions">Samsung Instructions</string>
-    <string name="samsung_instructions_text">\n\nSamsung users may need to add an exception in system settings before enabling it for the Alerts Channel. See instructions below.</string>
     <string name="alerts_dnd_request_title">Enable Critical Alerts to bypass Do Not Disturb</string>
-    <string name="alerts_dnd_request_text">To allow Critical Alerts while your phone is on \'Do Not Disturb\' - enable \'Override Do Not Disturb\` for the Alerts channel in the Meshtastic app notification settings.</string>
+    <string name="alerts_dnd_request_text"><![CDATA[To allow Critical Alerts while your phone is on Do Not Disturb - enable Override Do Not Disturb for the Alerts channel in the Meshtastic app notification settings.<br/><br/>Samsung users may need to add an exception in system settings before enabling it for the Alerts Channel. <a href="https://www.samsung.com/latin_en/support/mobile-devices/how-to-use-the-do-not-disturb-mode-on-your-galaxy-phone/">Visit Samsung Support for assistance.</a>.]]></string>
     <string name="critical_alert">Critical Alert!</string>
     <string name="favorite">Favorite</string>
     <string name="favorite_add">Add \'%s\' as a favorite node?</string>

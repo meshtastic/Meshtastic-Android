@@ -31,6 +31,7 @@ import android.os.Handler
 import android.os.Looper
 import android.os.RemoteException
 import android.provider.Settings
+import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.view.Menu
 import android.view.MenuItem
@@ -45,8 +46,8 @@ import androidx.appcompat.widget.Toolbar
 import androidx.compose.runtime.getValue
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
-import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.setPadding
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentManager
 import androidx.fragment.app.FragmentTransaction
@@ -454,7 +455,6 @@ class MainActivity : AppCompatActivity(), Logging {
         ) {
             val prefs = UIViewModel.getPreferences(this)
             val rationaleShown = prefs.getBoolean("dnd_rationale_shown", false)
-            val isSamsung = true // Build.MANUFACTURER.equals("samsung", ignoreCase = true)
             if (!rationaleShown && hasNotificationPermission()) {
                 fun showAlertAppNotificationSettings() {
                     val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
@@ -462,24 +462,18 @@ class MainActivity : AppCompatActivity(), Logging {
                     intent.putExtra(Settings.EXTRA_CHANNEL_ID, "my_alerts")
                     startActivity(intent)
                 }
-                fun showSamsungInstructions() {
-                    val intent = Intent(Intent.ACTION_VIEW)
-                    intent.setData(
-                        (
-                                "https://www.samsung.com/latin_en/support/mobile-devices/" +
-                                        "how-to-use-the-do-not-disturb-mode-on-your-galaxy-phone/"
-                                ).toUri()
-                    )
-                    startActivity(intent)
+                val message = Html.fromHtml(
+                    getString(R.string.alerts_dnd_request_text),
+                    Html.FROM_HTML_MODE_COMPACT
+                )
+                val messageTextView = TextView(this).also {
+                    it.text = message
+                    it.movementMethod = LinkMovementMethod.getInstance()
+                    it.setPadding(resources.getDimension(R.dimen.margin_normal).toInt())
                 }
-
-                var message = getString(R.string.alerts_dnd_request_text)
-                if (isSamsung) {
-                    message += getString(R.string.samsung_instructions_text)
-                }
-                val dialog = MaterialAlertDialogBuilder(this)
+                MaterialAlertDialogBuilder(this)
                     .setTitle(R.string.alerts_dnd_request_title)
-                    .setMessage(message)
+                    .setView(messageTextView)
                     .setNeutralButton(R.string.cancel) { dialog, _ ->
                         prefs.edit { putBoolean("dnd_rationale_shown", true) }
                         dialog.dismiss()
@@ -489,14 +483,7 @@ class MainActivity : AppCompatActivity(), Logging {
                         prefs.edit { putBoolean("dnd_rationale_shown", true) }
                         dialog.dismiss()
                     }
-                    .setCancelable(false)
-                if (isSamsung) {
-                    dialog.setNegativeButton(R.string.samsung_instructions) { dialog, _ ->
-                        showSamsungInstructions()
-                        dialog.dismiss()
-                    }
-                }
-                dialog.show()
+                    .setCancelable(false).show()
             }
         }
     }
