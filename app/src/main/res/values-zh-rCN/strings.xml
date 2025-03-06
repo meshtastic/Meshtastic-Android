@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="node_filter_placeholder">筛选器csvfganw</string>
+    <string name="node_filter_placeholder">筛选</string>
     <string name="desc_node_filter_clear">清除筛选</string>
     <string name="node_filter_include_unknown">包括未知内容</string>
     <string name="node_filter_show_details">显示详细信息</string>
@@ -39,13 +39,20 @@
     <string name="role_tak">优化ATAK系统通讯，减少常规广播。</string>
     <string name="role_client_hidden">仅在需要时广播的设备，用于隐蔽或节能模式</string>
     <string name="role_lost_and_found">定期向默认频道广播位置，以协助设备恢复。</string>
-    <string name="role_tak_tracker">启用自动TAKPLI广播并减少常规广播。</string>
+    <string name="role_tak_tracker">启用自动 TAK PLI 广播并减少常规广播。</string>
+    <string name="role_router_late">基础设施节点，总是在所有其他模式之后重新广播数据包一次，以确保本地集群的额外覆盖范围。会在节点列表中显示。</string>
     <string name="rebroadcast_mode_all">重新广播任何观察到的消息，无论是来自我们的私有频道还是具有相同 LoRa 参数的其他网状网络。</string>
     <string name="rebroadcast_mode_all_skip_decoding">与 ALL 模式的行为相同，但跳过数据包解码，仅简单地重新广播它们。仅适用于中继器角色。在其他角色中设置此选项将表现为 ALL 模式。</string>
     <string name="rebroadcast_mode_local_only">忽略来自开放网状网络或无法解密的消息，仅在节点的本地主/次频道上重新广播消息。</string>
     <string name="rebroadcast_mode_known_only">与 LOCAL_ONLY 类似，忽略来自其他网状网络的消息，但更进一步，忽略来自不在节点已知列表中的节点的消息。</string>
     <string name="rebroadcast_mode_none">仅限 SENSOR、TRACKER 和 TAK_TRACKER 角色，此模式将禁止所有重新广播，与 CLIENT_MUTE 角色类似。</string>
     <string name="rebroadcast_mode_core_portnums_only">忽略来自非标准端口号（如 TAK、RangeTest、PaxCounter 等）的数据包，仅重新广播标准端口号的数据包：NodeInfo、Text、Position、Telemetry 和 Routing。</string>
+    <string name="config_device_doubleTapAsButtonPress_summary">将支持的加速度计上的双击操作视为 User 按键的按压动作。</string>
+    <string name="config_device_disableTripleClick_summary">禁用 User 按键的三击操作来启用或禁用 GPS。</string>
+    <string name="config_device_ledHeartbeatDisabled_summary">控制设备上的指示灯闪烁。对于大多数设备，这将控制最多 4 个指示灯，充电器和 GPS 指示灯无法控制。</string>
+    <string name="config_device_transmitOverLora_summary">是否除了发送到 MQTT 和 PhoneAPI 外，还应通过 LoRa 传输我们的邻居信息（NeighborInfo）。在具有默认密钥和名称的通道上不可用。</string>
+    <string name="config_security_public_key">公钥</string>
+    <string name="config_security_private_key">私钥</string>
     <string name="channel_name">频道名称</string>
     <string name="channel_options">频道选项</string>
     <string name="qr_code">QR 码</string>
@@ -55,7 +62,7 @@
     <string name="unknown_username">未知的使用者名称</string>
     <string name="send">传送</string>
     <string name="send_text">发送短信</string>
-    <string name="warning_not_paired">您尚未将手机与 Meshtastic 兼容的装置配对。请先配对装置并设置您的用户名称。\n\n此开源应用程序仍在开发中，如有问题，请在我们的论坛 https://github.com/orgs/meshtastic/discussions 上面发文询问。\n\n 也可参阅我们的网页 - www.meshtastic.org。</string>
+    <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in development, if you find problems please post on our forum: https://github.com/orgs/meshtastic/discussions.\n\nFor more information see our web page - www.meshtastic.org.</string>
     <string name="you">你</string>
     <string name="your_name">您的姓名</string>
     <string name="analytics_okay">匿名使用统计信息和故障报告</string>
@@ -72,7 +79,7 @@
     <string name="report_a_bug">报告 Bug 详细信息</string>
     <string name="report_bug_text">您确定要报告错误吗？报告后，请在 https://github.com/orgs/meshtastic/discussions 上贴文，以便我们可以将报告与您发现的问题匹配。</string>
     <string name="report">报告</string>
-    <string name="not_paired_yet">您还没有配对.</string>
+    <string name="not_paired_yet">您还没有配对。</string>
     <string name="change_radio">换设备</string>
     <string name="pairing_completed">配对完成，启动服务</string>
     <string name="pairing_failed_try_again">配对失败，请重新选择</string>
@@ -165,7 +172,7 @@
     <string name="shutdown">关机</string>
     <string name="cant_shutdown">此设备不支持关机</string>
     <string name="reboot">重新开机</string>
-    <string name="traceroute">追踪器</string>
+    <string name="traceroute">路由追踪</string>
     <string name="intro_show">简要介绍</string>
     <string name="intro_welcome">欢迎来到Meshtasc</string>
     <string name="intro_welcome_text">Meshtastic 是一个开源、离网、加密的通讯平台。Meshtastic 无线电组成网状网络，使用 LoRa 协议传送文字讯息进行通讯。</string>
@@ -265,12 +272,22 @@
     <string name="fair">一般</string>
     <string name="good">良好</string>
     <string name="none_quality">无</string>
+    <string name="share_to">分享到…</string>
+    <string name="share_message">分享消息</string>
     <string name="signal">信号</string>
     <string name="signal_quality">信号质量</string>
-    <string name="traceroute_log">路由追踪</string>
+    <string name="traceroute_log">路由追踪日志</string>
     <string name="traceroute_direct">直连</string>
     <plurals name="traceroute_hops">
         <item quantity="other">%d 跳数</item>
     </plurals>
     <string name="traceroute_diff">传输跳数：去程 %1$d，回程 %2$d</string>
+    <string name="twenty_four_hours">24 小时</string>
+    <string name="forty_eight_hours">48 小时</string>
+    <string name="one_week">1 周</string>
+    <string name="two_weeks">2 周</string>
+    <string name="four_weeks">4 周</string>
+    <string name="max">最大值</string>
+    <string name="copy">复制</string>
+    <string name="alert_bell_text">警钟字符！</string>
 </resources>

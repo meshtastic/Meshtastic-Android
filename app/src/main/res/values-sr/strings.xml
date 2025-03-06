@@ -40,12 +40,19 @@
     <string name="role_client_hidden">Уређај који преноси само када је потребно ради скривености или уштеде енергије.</string>
     <string name="role_lost_and_found">Преноси локацију као поруку на подразумевани канал редовно како би помогао у проналаску уређаја.</string>
     <string name="role_tak_tracker">Омогућава аутоматске TAK PLI преносе и смањује рутинске преносе.</string>
+    <string name="role_router_late">Инфраструктурни чвор који увек поново емитује пакете само једном, али тек након свих других режима, обезбеђујући додатно покривање за локалне кластере. Видљиво на листи чворова.</string>
     <string name="rebroadcast_mode_all">Поново преноси сваку примећену поруку, ако је била на нашем приватном каналу или из друге мреже са истим LoRA параметрима.</string>
     <string name="rebroadcast_mode_all_skip_decoding">Исто као понашање као ALL, али прескаче декодирање пакета и једноставно их поново преноси. Доступно само у Repeater улози. Постављање овога на било коју другу улогу резултираће ALL понашањем.</string>
     <string name="rebroadcast_mode_local_only">Игнорише примећене поруке из страних мрежа које су отворене или оне које не може да декодира. Поново преноси поруку само на локалне примарне/секундарне канале чвора.</string>
     <string name="rebroadcast_mode_known_only">Игнорише примећене поруке из страних мрежа као LOCAL ONLY, али иде корак даље тако што такође игнорише поруке са чворова који нису већ на листи познатих чворова.</string>
     <string name="rebroadcast_mode_none">Дозвољено само за улоге SENSOR, TRACKER и TAK_TRACKER, ово ће онемогућити све поновне преносе, слично као улога CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only">Игнорише пакете са нестандардним бројевима порта као што су: TAK, RangeTest, PaxCounter, итд. Поново преноси само пакете са стандардним бројевима порта: NodeInfo, Text, Position, Telemetry и Routing.</string>
+    <string name="config_device_doubleTapAsButtonPress_summary">Третирај двоструки тап на подржаним акцелерометрима као притисак корисничког дугмета.</string>
+    <string name="config_device_disableTripleClick_summary">Онемогућава троструко притискање корисничког дугмета за укључивање или искључивање GPS-а.</string>
+    <string name="config_device_ledHeartbeatDisabled_summary">Контролише трепћућу LED лампицу на уређају. За већину уређаја ово ће контролисати једну од до 4 LED лампице, LED лампице за пуњач и GPS нису контролисане.</string>
+    <string name="config_device_transmitOverLora_summary">Да ли би поред слања на MQTT и PhoneAPI, наша NeighborInfo требало да се преноси преко LoRa? Није доступно на каналу са подразумеваним кључем и именом.</string>
+    <string name="config_security_public_key">Јавни кључ</string>
+    <string name="config_security_private_key">Приватни кључ</string>
     <string name="channel_name">Назив канала</string>
     <string name="channel_options">Опције канала</string>
     <string name="qr_code">QR код</string>
@@ -55,7 +62,7 @@
     <string name="unknown_username">Непознато корисничко име</string>
     <string name="send">Пошаљи</string>
     <string name="send_text">Пошаљи текст</string>
-    <string name="warning_not_paired">Још нисте упарили Мештастик компатибилан радио са овим телефоном. Молимо вас да упарите уређај и поставите своје корисничко име.\n\nОва апликација отвореног кода је у развоју, ако нађете проблеме, молимо вас да их објавите на нашем форуму: https://github.com/orgs/meshtastic/discussions\n\nЗа више информација посетите нашу веб страницу - www.meshtastic.org.</string>
+    <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in development, if you find problems please post on our forum: https://github.com/orgs/meshtastic/discussions.\n\nFor more information see our web page - www.meshtastic.org.</string>
     <string name="you">Ти</string>
     <string name="your_name">Твоје име</string>
     <string name="analytics_okay">Анонимне статистике коришћења и извештаји о падовима апликације.</string>
@@ -247,7 +254,7 @@
     <string name="encryption_error">Неусаглашеност јавних кључева</string>
     <string name="encryption_error_text">Јавни кључ се не поклапа са забележеним кључем. Можете уклонити чвор и омогућити му поновну размену кључева, али ово може указивати на озбиљнији безбедносни проблем. Контактирајте корисника путем другог поузданог канала да бисте утврдили да ли је промена кључа резултат фабричког ресетовања или друге намерне акције.</string>
     <string name="request_userinfo">Затражите информације о кориснику</string>
-    <string name="meshtastic_new_nodes_notifications">Обавештење о новом чвору</string>
+    <string name="meshtastic_new_nodes_notifications">Обавештења о новим чворовима</string>
     <string name="more_details">Више детаља</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Однос сигнал/шум SNR је мера која се користи у комуникацијама за квантитативно одређивање нивоа жељеног сигнала у односу на ниво позадинског шума. У Мештастик и другим бежичним системима, већи SNR указује на јаснији сигнал који може побољшати поузданост и квалитет преноса података.</string>
@@ -265,6 +272,8 @@
     <string name="fair">Прихватљиво</string>
     <string name="good">Добро</string>
     <string name="none_quality">Без</string>
+    <string name="share_to">Подели на…</string>
+    <string name="share_message">Подели поруку</string>
     <string name="signal">Сингал</string>
     <string name="signal_quality">Квалитет сигнала</string>
     <string name="traceroute_log">Дневник праћења руте</string>
@@ -275,4 +284,12 @@
         <item quantity="other">%d скокова</item>
     </plurals>
     <string name="traceroute_diff">Скокови ка %1$d Скокови назад %2$d</string>
+    <string name="twenty_four_hours">24ч</string>
+    <string name="forty_eight_hours">48ч</string>
+    <string name="one_week">1н</string>
+    <string name="two_weeks">2н</string>
+    <string name="four_weeks">4н</string>
+    <string name="max">Максимум</string>
+    <string name="copy">Копирај</string>
+    <string name="alert_bell_text">Карактер звона за упозорења!</string>
 </resources>
