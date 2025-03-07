@@ -65,6 +65,7 @@ class MeshServiceNotifications(
             createMessageNotificationChannel()
             createAlertNotificationChannel()
             createNewNodeNotificationChannel()
+            createLowBatteryNotificationChannel()
         }
     }
 
@@ -173,6 +174,60 @@ class MeshServiceNotifications(
         return channelId
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createLowBatteryNotificationChannel(): String {
+        val channelId = "low_battery"
+        if (notificationManager.getNotificationChannel(channelId) == null) {
+            val channelName = context.getString(R.string.meshtastic_low_battery_notifications)
+            val channel = NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                lightColor = notificationLightColor
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                setShowBadge(true)
+                setSound(
+                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+        return channelId
+    }
+
+    // TODO: Once we get a dedicated settings page in the app, this function should be removed and
+    //     the feature should be implemented in the regular low battery notification stuff
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createLowBatteryRemoteNotificationChannel(): String {
+        val channelId = "low_battery_remote"
+        if (notificationManager.getNotificationChannel(channelId) == null) {
+            val channelName = context.getString(R.string.meshtastic_low_battery_temporary_remote_notifications)
+            val channel = NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                lightColor = notificationLightColor
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                setShowBadge(true)
+                setSound(
+                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+        return channelId
+    }
+
     private val channelId: String by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel()
@@ -204,6 +259,24 @@ class MeshServiceNotifications(
     private val newNodeChannelId: String by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNewNodeNotificationChannel()
+        } else {
+            ""
+        }
+    }
+
+    private val lowBatteryChannelId: String by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createLowBatteryNotificationChannel()
+        } else {
+            ""
+        }
+    }
+
+    // TODO: Once we get a dedicated settings page in the app, this function should be removed and
+    //     the feature should be implemented in the regular low battery notification stuff
+    private val lowBatteryRemoteChannelId: String by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createLowBatteryRemoteNotificationChannel()
         } else {
             ""
         }
@@ -255,6 +328,22 @@ class MeshServiceNotifications(
         notificationManager.notify(
             node.num, // show unique notifications
             createNewNodeSeenNotification(node.user.shortName, node.user.longName)
+        )
+    }
+
+    fun showOrUpdateLowBatteryNotification(node: NodeEntity) {
+        notificationManager.notify(
+            node.num, // show unique notifications
+            createLowBatteryNotification(node)
+        )
+    }
+
+    // TODO: Once we get a dedicated settings page in the app, this function should be removed and
+    //     the feature should be implemented in the regular low battery notification stuff
+    fun showOrUpdateLowBatteryRemoteNotification(node: NodeEntity) {
+        notificationManager.notify(
+            node.num, // show unique notifications
+            createLowBatteryRemoteNotification(node)
         )
     }
 
@@ -408,5 +497,71 @@ class MeshServiceNotifications(
             setShowWhen(true)
         }
         return newNodeSeenNotificationBuilder.build()
+    }
+
+    lateinit var lowBatteryNotificationBuilder: NotificationCompat.Builder
+    private fun createLowBatteryNotification(node: NodeEntity): Notification {
+        if (!::lowBatteryNotificationBuilder.isInitialized) {
+            lowBatteryNotificationBuilder = commonBuilder(lowBatteryChannelId)
+        }
+        with(lowBatteryNotificationBuilder) {
+            priority = NotificationCompat.PRIORITY_MIN
+            setCategory(Notification.CATEGORY_STATUS)
+            setAutoCancel(true)
+            setShowWhen(true)
+            setOnlyAlertOnce(true)
+            setWhen(System.currentTimeMillis())
+            setContentTitle(
+                context.getString(R.string.low_battery_title).format(
+                    node.shortName
+                )
+            )
+            val message = context.getString(R.string.low_battery_message).format(
+                node.longName,
+                node.deviceMetrics.batteryLevel
+            )
+            message.let {
+                setContentText(it)
+                setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .bigText(it),
+                )
+            }
+        }
+        return lowBatteryNotificationBuilder.build()
+    }
+
+    // TODO: Once we get a dedicated settings page in the app, this function should be removed and
+    //     the feature should be implemented in the regular low battery notification stuff
+    lateinit var lowBatteryRemoteNotificationBuilder: NotificationCompat.Builder
+    private fun createLowBatteryRemoteNotification(node: NodeEntity): Notification {
+        if (!::lowBatteryRemoteNotificationBuilder.isInitialized) {
+            lowBatteryRemoteNotificationBuilder = commonBuilder(lowBatteryRemoteChannelId)
+        }
+        with(lowBatteryRemoteNotificationBuilder) {
+            priority = NotificationCompat.PRIORITY_MIN
+            setCategory(Notification.CATEGORY_STATUS)
+            setAutoCancel(true)
+            setShowWhen(true)
+            setOnlyAlertOnce(true)
+            setWhen(System.currentTimeMillis())
+            setContentTitle(
+                context.getString(R.string.low_battery_title).format(
+                    node.shortName
+                )
+            )
+            val message = context.getString(R.string.low_battery_message).format(
+                node.longName,
+                node.deviceMetrics.batteryLevel
+            )
+            message.let {
+                setContentText(it)
+                setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .bigText(it),
+                )
+            }
+        }
+        return lowBatteryRemoteNotificationBuilder.build()
     }
 }

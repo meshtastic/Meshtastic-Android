@@ -939,7 +939,17 @@ class MeshService : Service(), Logging {
         }
         updateNodeInfo(fromNum) {
             when {
-                t.hasDeviceMetrics() -> it.deviceTelemetry = t
+                t.hasDeviceMetrics() -> {
+                    it.deviceTelemetry = t
+                    when {
+                        fromNum == myNodeNum && (t.deviceMetrics.voltage > 0.0 && t.deviceMetrics.batteryLevel < 20.0) -> {
+                            serviceNotifications.showOrUpdateLowBatteryNotification(it)
+                        }
+                        (fromNum != myNodeNum && it.isFavorite) && (t.deviceMetrics.voltage > 0.0 && t.deviceMetrics.batteryLevel < 20.0) -> {
+                            serviceNotifications.showOrUpdateLowBatteryRemoteNotification(it)
+                        }
+                    }
+                }
                 t.hasEnvironmentMetrics() -> it.environmentTelemetry = t
                 t.hasPowerMetrics() -> it.powerTelemetry = t
             }
