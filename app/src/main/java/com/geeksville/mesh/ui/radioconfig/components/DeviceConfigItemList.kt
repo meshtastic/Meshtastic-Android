@@ -168,13 +168,12 @@ fun DeviceConfigItemList(
 ) {
     val focusManager = LocalFocusManager.current
     var deviceInput by rememberSaveable { mutableStateOf(deviceConfig) }
-
-    var showRouterRoleConfirmationDialog by rememberSaveable { mutableStateOf(false) }
-    if (showRouterRoleConfirmationDialog) {
+    var showRoleConfirmationDialog by rememberSaveable { mutableStateOf(false) }
+    if (showRoleConfirmationDialog) {
         RouterRoleConfirmationDialog(
-            onDismiss = { showRouterRoleConfirmationDialog = false },
+            onDismiss = { showRoleConfirmationDialog = false },
             onConfirm = {
-                showRouterRoleConfirmationDialog = false
+                showRoleConfirmationDialog = false
                 deviceInput = deviceInput.copy { role = DeviceConfig.Role.ROUTER }
             }
         )
@@ -190,8 +189,13 @@ fun DeviceConfigItemList(
                 enabled = enabled,
                 selectedItem = deviceInput.role,
                 onItemSelected = {
-                    if (it == DeviceConfig.Role.ROUTER && deviceInput.role != DeviceConfig.Role.ROUTER) {
-                        showRouterRoleConfirmationDialog = true
+                    if (it in listOf(
+                            DeviceConfig.Role.ROUTER,
+                            DeviceConfig.Role.ROUTER_CLIENT,
+                            DeviceConfig.Role.REPEATER
+                        )
+                    ) {
+                        showRoleConfirmationDialog = true
                     } else {
                         deviceInput = deviceInput.copy { role = it }
                     }
