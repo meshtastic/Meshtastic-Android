@@ -200,7 +200,7 @@ class MeshServiceNotifications(
         return channelId
     }
 
-    // TODO: Once we get a dedicated settings page in the app, this function should be removed and
+    // FIXME, Once we get a dedicated settings page in the app, this function should be removed and
     //     the feature should be implemented in the regular low battery notification stuff
     @RequiresApi(Build.VERSION_CODES.O)
     private fun createLowBatteryRemoteNotificationChannel(): String {
@@ -272,7 +272,7 @@ class MeshServiceNotifications(
         }
     }
 
-    // TODO: Once we get a dedicated settings page in the app, this function should be removed and
+    // FIXME, Once we get a dedicated settings page in the app, this function should be removed and
     //     the feature should be implemented in the regular low battery notification stuff
     private val lowBatteryRemoteChannelId: String by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -338,7 +338,7 @@ class MeshServiceNotifications(
         )
     }
 
-    // TODO: Once we get a dedicated settings page in the app, this function should be removed and
+    // FIXME, Once we get a dedicated settings page in the app, this function should be removed and
     //     the feature should be implemented in the regular low battery notification stuff
     fun showOrUpdateLowBatteryRemoteNotification(node: NodeEntity) {
         notificationManager.notify(
@@ -531,7 +531,7 @@ class MeshServiceNotifications(
         return lowBatteryNotificationBuilder.build()
     }
 
-    // TODO: Once we get a dedicated settings page in the app, this function should be removed and
+    // FIXME, Once we get a dedicated settings page in the app, this function should be removed and
     //     the feature should be implemented in the regular low battery notification stuff
     lateinit var lowBatteryRemoteNotificationBuilder: NotificationCompat.Builder
     private fun createLowBatteryRemoteNotification(node: NodeEntity): Notification {
