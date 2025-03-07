@@ -133,9 +133,11 @@ fun RouterRoleConfirmationDialog(
             Column {
                 Text(text = annotatedDialogText)
                 Row(
-                    modifier = Modifier.fillMaxWidth().clickable(true) {
-                        confirmed = !confirmed
-                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(true) {
+                            confirmed = !confirmed
+                        },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Checkbox(
@@ -176,7 +178,6 @@ fun DeviceConfigItemList(
     var selectedRole by rememberSaveable { mutableStateOf(deviceInput.role) }
     val infrastructureRoles = listOf(
         DeviceConfig.Role.ROUTER,
-        DeviceConfig.Role.ROUTER_CLIENT,
         DeviceConfig.Role.REPEATER,
     )
     if (selectedRole != deviceInput.role) {
