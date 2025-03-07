@@ -213,6 +213,9 @@ class MeshService : Service(), Logging {
     private var locationFlow: Job? = null
     private var mqttMessageFlow: Job? = null
 
+    private val batteryPercentUnsupported= 0.0
+    private val batteryPercentLowThreshold = 20.0
+
     private fun getSenderName(packet: DataPacket?): String {
         val name = nodeDBbyID[packet?.from]?.user?.longName
         return name ?: getString(R.string.unknown_username)
@@ -942,10 +945,14 @@ class MeshService : Service(), Logging {
                 t.hasDeviceMetrics() -> {
                     it.deviceTelemetry = t
                     when {
-                        fromNum == myNodeNum && (t.deviceMetrics.voltage > 0.0 && t.deviceMetrics.batteryLevel < 20.0) -> {
+                        fromNum == myNodeNum && (
+                                t.deviceMetrics.voltage > batteryPercentUnsupported
+                                && t.deviceMetrics.batteryLevel < batteryPercentLowThreshold) -> {
                             serviceNotifications.showOrUpdateLowBatteryNotification(it)
                         }
-                        (fromNum != myNodeNum && it.isFavorite) && (t.deviceMetrics.voltage > 0.0 && t.deviceMetrics.batteryLevel < 20.0) -> {
+                        (fromNum != myNodeNum && it.isFavorite) && (
+                                t.deviceMetrics.voltage > batteryPercentUnsupported
+                                && t.deviceMetrics.batteryLevel < batteryPercentLowThreshold) -> {
                             serviceNotifications.showOrUpdateLowBatteryRemoteNotification(it)
                         }
                     }
