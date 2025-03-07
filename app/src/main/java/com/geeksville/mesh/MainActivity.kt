@@ -59,6 +59,7 @@ import com.geeksville.mesh.android.BindFailedException
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.ServiceClient
+import com.geeksville.mesh.android.dpToPx
 import com.geeksville.mesh.android.getBluetoothPermissions
 import com.geeksville.mesh.android.getNotificationPermissions
 import com.geeksville.mesh.android.hasBluetoothPermission
@@ -450,6 +451,7 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
+    @Suppress("MagicNumber")
     private fun checkAlertDnD() {
         if (
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
@@ -470,7 +472,7 @@ class MainActivity : AppCompatActivity(), Logging {
                 val messageTextView = TextView(this).also {
                     it.text = message
                     it.movementMethod = LinkMovementMethod.getInstance()
-                    it.setPadding(resources.getDimension(R.dimen.margin_normal).toInt())
+                    it.setPadding(dpToPx(16f))
                 }
                 MaterialAlertDialogBuilder(this)
                     .setTitle(R.string.alerts_dnd_request_title)
