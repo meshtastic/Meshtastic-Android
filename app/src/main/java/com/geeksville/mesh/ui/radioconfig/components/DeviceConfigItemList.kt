@@ -17,9 +17,11 @@
 
 package com.geeksville.mesh.ui.radioconfig.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -131,6 +133,9 @@ fun RouterRoleConfirmationDialog(
             Column {
                 Text(text = annotatedDialogText)
                 Row(
+                    modifier = Modifier.fillMaxWidth().clickable(true) {
+                        confirmed = !confirmed
+                    },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Checkbox(
@@ -168,15 +173,23 @@ fun DeviceConfigItemList(
 ) {
     val focusManager = LocalFocusManager.current
     var deviceInput by rememberSaveable { mutableStateOf(deviceConfig) }
-    var showRoleConfirmationDialog by rememberSaveable { mutableStateOf(false) }
-    if (showRoleConfirmationDialog) {
-        RouterRoleConfirmationDialog(
-            onDismiss = { showRoleConfirmationDialog = false },
-            onConfirm = {
-                showRoleConfirmationDialog = false
-                deviceInput = deviceInput.copy { role = DeviceConfig.Role.ROUTER }
-            }
-        )
+    var selectedRole by rememberSaveable { mutableStateOf(deviceInput.role) }
+    val infrastructureRoles = listOf(
+        DeviceConfig.Role.ROUTER,
+        DeviceConfig.Role.ROUTER_CLIENT,
+        DeviceConfig.Role.REPEATER,
+    )
+    if (selectedRole != deviceInput.role) {
+        if (selectedRole in infrastructureRoles) {
+            RouterRoleConfirmationDialog(
+                onDismiss = { selectedRole = deviceInput.role },
+                onConfirm = {
+                    deviceInput = deviceInput.copy { role = selectedRole }
+                }
+            )
+        } else {
+            deviceInput = deviceInput.copy { role = selectedRole }
+        }
     }
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -189,16 +202,7 @@ fun DeviceConfigItemList(
                 enabled = enabled,
                 selectedItem = deviceInput.role,
                 onItemSelected = {
-                    if (it in listOf(
-                            DeviceConfig.Role.ROUTER,
-                            DeviceConfig.Role.ROUTER_CLIENT,
-                            DeviceConfig.Role.REPEATER
-                        )
-                    ) {
-                        showRoleConfirmationDialog = true
-                    } else {
-                        deviceInput = deviceInput.copy { role = it }
-                    }
+                    selectedRole = it
                 },
                 summary = stringResource(id = deviceInput.role.stringRes),
             )
