@@ -165,7 +165,7 @@ dependencies {
 
     //Individual dependencies
     implementation(libs.appintro)
-    implementation(libs.awesome.app.rating)
+    googleImplementation(libs.awesome.app.rating)
     implementation(libs.core.splashscreen)
     implementation(libs.emoji2.emojipicker)
     implementation(libs.kotlinx.collections.immutable)
