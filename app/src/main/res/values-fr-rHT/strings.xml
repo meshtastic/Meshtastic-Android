@@ -40,12 +40,19 @@
     <string name="role_client_hidden">Aparèy ki sèlman voye kòm sa nesesè pou kachèt oswa ekonomi pouvwa.</string>
     <string name="role_lost_and_found">Voye pozisyon kòm mesaj nan kanal default regilyèman pou ede ak rekiperasyon aparèy.</string>
     <string name="role_tak_tracker">Pèmèt emisyon TAK PLI otomatik epi redwi emisyon regilye.</string>
+    <string name="role_router_late">Infrastructure node that always rebroadcasts packets once but only after all other modes, ensuring additional coverage for local clusters. Visible in nodes list.</string>
     <string name="rebroadcast_mode_all">Rebroadcast nenpòt mesaj obsève, si li te sou kanal prive nou oswa soti nan yon lòt mesh ak menm paramèt lora.</string>
     <string name="rebroadcast_mode_all_skip_decoding">Menm jan ak konpòtman kòm \"ALL\" men sote dekodaj pakè yo epi senpleman rebroadcast yo. Disponib sèlman nan wòl Repeater. Mete sa sou nenpòt lòt wòl ap bay konpòtman \"ALL\".</string>
     <string name="rebroadcast_mode_local_only">Ignoré mesaj obsève soti nan meshes etranje ki louvri oswa sa yo li pa ka dekripte. Sèlman rebroadcast mesaj sou kanal prensipal / segondè lokal nœud.</string>
     <string name="rebroadcast_mode_known_only">Ignoré mesaj obsève soti nan meshes etranje tankou \"LOCAL ONLY\", men ale yon etap pi lwen pa tou ignorer mesaj ki soti nan nœud ki poko nan lis konnen nœud la.</string>
     <string name="rebroadcast_mode_none">Sèlman pèmèt pou wòl SENSOR, TRACKER ak TAK_TRACKER, sa a ap entèdi tout rebroadcasts, pa diferan de wòl CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only">Ignoré pakè soti nan portnum ki pa estanda tankou: TAK, RangeTest, PaxCounter, elatriye. Sèlman rebroadcast pakè ak portnum estanda: NodeInfo, Tèks, Pozisyon, Telemetri, ak Routing.</string>
+    <string name="config_device_doubleTapAsButtonPress_summary">Treat double tap on supported accelerometers as a user button press.</string>
+    <string name="config_device_disableTripleClick_summary">Disables the triple-press of user button to enable or disable GPS.</string>
+    <string name="config_device_ledHeartbeatDisabled_summary">Controls the blinking LED on the device. For most devices this will control one of the up to 4 LEDs, the charger and GPS LEDs are not controllable.</string>
+    <string name="config_device_transmitOverLora_summary">Whether in addition to sending it to MQTT and the PhoneAPI, our NeighborInfo should be transmitted over LoRa. Not available on a channel with default key and name.</string>
+    <string name="config_security_public_key">Public Key</string>
+    <string name="config_security_private_key">Private Key</string>
     <string name="channel_name">Non kanal</string>
     <string name="channel_options">Opsyon kanal</string>
     <string name="qr_code">Kòd QR</string>
@@ -55,7 +62,7 @@
     <string name="unknown_username">Non itilizatè enkoni</string>
     <string name="send">Voye</string>
     <string name="send_text">Voye tèks</string>
-    <string name="warning_not_paired">Ou poko konekte ak yon radyo ki konpatib ak Meshtastic sou telefòn sa a. Tanpri konekte yon aparèy epi mete non itilizatè w lan.\n\nSa a se yon aplikasyon piblik ki nan tès Alpha. Si ou gen pwoblèm, tanpri pataje sou fowòm nou an: https://github.com/orgs/meshtastic/discussions\n\nPou plis enfòmasyon, vizite sit wèb nou an - www.meshtastic.org.</string>
+    <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in development, if you find problems please post on our forum: https://github.com/orgs/meshtastic/discussions.\n\nFor more information see our web page - www.meshtastic.org.</string>
     <string name="you">Ou</string>
     <string name="your_name">Non ou</string>
     <string name="analytics_okay">Statistik itilizasyon anonim ak rapò aksidantèl.</string>
@@ -264,6 +271,8 @@
     <string name="fair">Mwayen</string>
     <string name="good">Bon</string>
     <string name="none_quality">Pa gen</string>
+    <string name="share_to">Share to…</string>
+    <string name="share_message">Share message</string>
     <string name="signal">Siynal</string>
     <string name="signal_quality">Kalite Siynal</string>
     <string name="traceroute_log">Jounal Traceroute</string>
@@ -273,4 +282,12 @@
         <item quantity="other">%d hops</item>
     </plurals>
     <string name="traceroute_diff">Hops vèsus %1$d Hops tounen %2$d</string>
+    <string name="twenty_four_hours">24H</string>
+    <string name="forty_eight_hours">48H</string>
+    <string name="one_week">1W</string>
+    <string name="two_weeks">2W</string>
+    <string name="four_weeks">4W</string>
+    <string name="max">Max</string>
+    <string name="copy">Copy</string>
+    <string name="alert_bell_text">Alert Bell Character!</string>
 </resources>
