@@ -949,6 +949,8 @@ class MeshService : Service(), Logging {
                         if (t.deviceMetrics.voltage > batteryPercentUnsupported &&
                             t.deviceMetrics.batteryLevel < batteryPercentLowThreshold) {
                             serviceNotifications.showOrUpdateLowBatteryNotification(it, isRemote)
+                        } else {
+                            serviceNotifications.cancelLowBatteryNotification(it)
                         }
                     }
                 }
