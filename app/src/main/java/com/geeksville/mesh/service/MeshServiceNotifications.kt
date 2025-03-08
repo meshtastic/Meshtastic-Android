@@ -66,6 +66,7 @@ class MeshServiceNotifications(
             createAlertNotificationChannel()
             createNewNodeNotificationChannel()
             createLowBatteryNotificationChannel()
+            createLowBatteryRemoteNotificationChannel()
         }
     }
 
@@ -331,19 +332,10 @@ class MeshServiceNotifications(
         )
     }
 
-    fun showOrUpdateLowBatteryNotification(node: NodeEntity) {
+    fun showOrUpdateLowBatteryNotification(node: NodeEntity, isRemote: Boolean) {
         notificationManager.notify(
             node.num, // show unique notifications
-            createLowBatteryNotification(node)
-        )
-    }
-
-    // FIXME, Once we get a dedicated settings page in the app, this function should be removed and
-    //     the feature should be implemented in the regular low battery notification stuff
-    fun showOrUpdateLowBatteryRemoteNotification(node: NodeEntity) {
-        notificationManager.notify(
-            node.num, // show unique notifications
-            createLowBatteryRemoteNotification(node)
+            createLowBatteryNotification(node, isRemote)
         )
     }
 
@@ -499,47 +491,22 @@ class MeshServiceNotifications(
         return newNodeSeenNotificationBuilder.build()
     }
 
-    lateinit var lowBatteryNotificationBuilder: NotificationCompat.Builder
-    private fun createLowBatteryNotification(node: NodeEntity): Notification {
-        if (!::lowBatteryNotificationBuilder.isInitialized) {
-            lowBatteryNotificationBuilder = commonBuilder(lowBatteryChannelId)
-        }
-        with(lowBatteryNotificationBuilder) {
-            priority = NotificationCompat.PRIORITY_MIN
-            setCategory(Notification.CATEGORY_STATUS)
-            setAutoCancel(true)
-            setShowWhen(true)
-            setOnlyAlertOnce(true)
-            setWhen(System.currentTimeMillis())
-            setContentTitle(
-                context.getString(R.string.low_battery_title).format(
-                    node.shortName
-                )
-            )
-            val message = context.getString(R.string.low_battery_message).format(
-                node.longName,
-                node.deviceMetrics.batteryLevel
-            )
-            message.let {
-                setContentText(it)
-                setStyle(
-                    NotificationCompat.BigTextStyle()
-                        .bigText(it),
-                )
-            }
-        }
-        return lowBatteryNotificationBuilder.build()
-    }
-
-    // FIXME, Once we get a dedicated settings page in the app, this function should be removed and
-    //     the feature should be implemented in the regular low battery notification stuff
     lateinit var lowBatteryRemoteNotificationBuilder: NotificationCompat.Builder
-    private fun createLowBatteryRemoteNotification(node: NodeEntity): Notification {
-        if (!::lowBatteryRemoteNotificationBuilder.isInitialized) {
-            lowBatteryRemoteNotificationBuilder = commonBuilder(lowBatteryRemoteChannelId)
+    lateinit var lowBatteryNotificationBuilder: NotificationCompat.Builder
+    private fun createLowBatteryNotification(node: NodeEntity, isRemote: Boolean): Notification {
+        val tempNotificationBuilder: NotificationCompat.Builder = if (isRemote) {
+            if (!::lowBatteryRemoteNotificationBuilder.isInitialized) {
+                lowBatteryRemoteNotificationBuilder = commonBuilder(lowBatteryChannelId)
+            }
+            lowBatteryRemoteNotificationBuilder
+        } else {
+            if (!::lowBatteryNotificationBuilder.isInitialized) {
+                lowBatteryNotificationBuilder = commonBuilder(lowBatteryRemoteChannelId)
+            }
+            lowBatteryNotificationBuilder
         }
-        with(lowBatteryRemoteNotificationBuilder) {
-            priority = NotificationCompat.PRIORITY_MIN
+        with(tempNotificationBuilder) {
+            priority = NotificationCompat.PRIORITY_DEFAULT
             setCategory(Notification.CATEGORY_STATUS)
             setAutoCancel(true)
             setShowWhen(true)
@@ -562,6 +529,12 @@ class MeshServiceNotifications(
                 )
             }
         }
-        return lowBatteryRemoteNotificationBuilder.build()
+        if (isRemote) {
+            lowBatteryRemoteNotificationBuilder = tempNotificationBuilder
+            return lowBatteryRemoteNotificationBuilder.build()
+        } else {
+            lowBatteryNotificationBuilder = tempNotificationBuilder
+            return lowBatteryNotificationBuilder.build()
+        }
     }
 }
