@@ -184,7 +184,7 @@ class MeshService : Service(), Logging {
         /** The minimum firmware version we know how to talk to. We'll still be able
          * to talk to 2.0 firmwares but only well enough to ask them to firmware update.
          */
-        val minDeviceVersion = DeviceVersion("2.3.2")
+        val minDeviceVersion = DeviceVersion("2.3.15")
     }
 
     enum class ConnectionState {
