@@ -56,6 +56,7 @@ class MeshServiceNotifications(
         const val ALERT_GROUP = "ALERT_NOTIFICATION_GROUP"
         const val NEW_NODE_GROUP = "NEW_NODE_NOTIFICATION_GROUP"
         const val LOW_BATTERY_GROUP = "LOW_BATTERY_NOTIFICATION_GROUP"
+        const val MAX_BATTERY_LEVEL = 100
     }
 
     private val notificationManager: NotificationManager get() = context.notificationManager
@@ -527,6 +528,7 @@ class MeshServiceNotifications(
             setShowWhen(true)
             setOnlyAlertOnce(true)
             setWhen(System.currentTimeMillis())
+            setProgress(MAX_BATTERY_LEVEL, node.deviceMetrics.batteryLevel, false)
             setContentTitle(
                 context.getString(R.string.low_battery_title).format(
                     node.shortName
