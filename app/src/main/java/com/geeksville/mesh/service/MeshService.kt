@@ -945,10 +945,11 @@ class MeshService : Service(), Logging {
                 t.hasDeviceMetrics() -> {
                     it.deviceTelemetry = t
                     val isRemote = (fromNum != myNodeNum)
-                    if ((fromNum == myNodeNum || (isRemote && it.isFavorite)) &&
-                        t.deviceMetrics.voltage > batteryPercentUnsupported &&
-                        t.deviceMetrics.batteryLevel < batteryPercentLowThreshold) {
+                    if (fromNum == myNodeNum || (isRemote && it.isFavorite)) {
+                        if (t.deviceMetrics.voltage > batteryPercentUnsupported &&
+                            t.deviceMetrics.batteryLevel < batteryPercentLowThreshold) {
                             serviceNotifications.showOrUpdateLowBatteryNotification(it, isRemote)
+                        }
                     }
                 }
                 t.hasEnvironmentMetrics() -> it.environmentTelemetry = t
