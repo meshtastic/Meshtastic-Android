@@ -20,8 +20,15 @@ package com.geeksville.mesh.util
 import android.content.res.Resources
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.asAndroidPath
+import androidx.compose.ui.graphics.asComposePath
 import androidx.compose.ui.graphics.drawscope.DrawContext
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 
 object GraphUtil {
@@ -103,5 +110,39 @@ object GraphUtil {
             }
         }
         return i
+    }
+
+    fun DrawScope.drawPathWithGradient(
+        path: Path,
+        color: Color,
+        height: Float,
+        x1: Float,
+        x2: Float
+    ) {
+        drawPath(
+            path = path,
+            color = color,
+            style = Stroke(
+                width = 2.dp.toPx(),
+                cap = StrokeCap.Round
+            )
+        )
+        val fillPath = android.graphics.Path(path.asAndroidPath())
+            .asComposePath()
+            .apply {
+                lineTo(x1, height)
+                lineTo(x2, height)
+                close()
+            }
+        drawPath(
+            path = fillPath,
+            brush = Brush.verticalGradient(
+                colors = listOf(
+                    color.copy(alpha = 0.5f),
+                    Color.Transparent
+                ),
+                endY = height
+            ),
+        )
     }
 }

@@ -158,8 +158,7 @@ private fun DeviceMetricsChart(
     val graphColor = MaterialTheme.colors.onSurface
 
     val scrollState = rememberScrollState()
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp
+    val screenWidth = LocalConfiguration.current.screenWidthDp
     val dp by remember(key1 = selectedTime) {
         mutableStateOf(selectedTime.dp(screenWidth, time = timeDiff.toLong()))
     }
@@ -169,7 +168,7 @@ private fun DeviceMetricsChart(
             contentAlignment = Alignment.TopStart,
             modifier = Modifier
                 .horizontalScroll(state = scrollState, reverseScrolling = true)
-                .weight(1f)
+                .weight(weight = 1f)
         ) {
 
             /*
