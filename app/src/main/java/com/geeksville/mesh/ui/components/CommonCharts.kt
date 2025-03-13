@@ -57,21 +57,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.R
-import com.geeksville.mesh.ui.components.CommonCharts.LINE_LIMIT
-import com.geeksville.mesh.ui.components.CommonCharts.TEXT_PAINT_ALPHA
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
-import com.geeksville.mesh.ui.components.CommonCharts.LEFT_LABEL_SPACING
 import com.geeksville.mesh.ui.components.CommonCharts.MAX_PERCENT_VALUE
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import java.text.DateFormat
 
 object CommonCharts {
     val DATE_TIME_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
-    const val X_AXIS_SPACING = 8f
-    const val LEFT_LABEL_SPACING = 36
     const val MS_PER_SEC = 1000L
-    const val LINE_LIMIT = 4
-    const val TEXT_PAINT_ALPHA = 192
     const val MAX_PERCENT_VALUE = 100f
     val INFANTRY_BLUE = Color(75, 119, 190)
 }
@@ -81,6 +74,8 @@ private const val LINE_OFF = 20f
 private val TIME_FORMAT: DateFormat = DateFormat.getTimeInstance(DateFormat.MEDIUM)
 private val DATE_FORMAT: DateFormat = DateFormat.getDateInstance(DateFormat.SHORT)
 private const val DATE_Y = 32f
+private const val LINE_LIMIT = 4
+private const val TEXT_PAINT_ALPHA = 192
 
 data class LegendData(val nameRes: Int, val color: Color, val isLine: Boolean = false)
 
@@ -101,77 +96,9 @@ fun ChartHeader(amount: Int) {
 }
 
 /**
- * Draws chart lines and labels with respect to the Y-axis range; defined by (`maxValue` - `minValue`).
- *
- * @param labelColor The color to be used for the Y labels.
- * @param lineColors A list of 5 `Color`s for the chart lines, 0 being the lowest line on the chart.
- * @param leaveSpace When true the lines will leave space for Y labels on the left side of the graph.
- */
-@Deprecated("Will soon be replaced with YAxisLabels() and HorizontalLinesOverlay()", level = DeprecationLevel.WARNING)
-@Composable
-fun ChartOverlay(
-    modifier: Modifier,
-    labelColor: Color,
-    lineColors: List<Color>,
-    minValue: Float,
-    maxValue: Float,
-    leaveSpace: Boolean = false
-) {
-    val range = maxValue - minValue
-    val verticalSpacing = range / LINE_LIMIT
-    val density = LocalDensity.current
-    Canvas(modifier = modifier) {
-
-        val lineStart = if (leaveSpace) LEFT_LABEL_SPACING.dp.toPx() else 0f
-        val height = size.height
-        val width = size.width - 28.dp.toPx()
-
-        /* Horizontal Lines */
-        var lineY = minValue
-        for (i in 0..LINE_LIMIT) {
-            val ratio = (lineY - minValue) / range
-            val y = height - (ratio * height)
-            drawLine(
-                start = Offset(lineStart, y),
-                end = Offset(width, y),
-                color = lineColors[i],
-                strokeWidth = 1.dp.toPx(),
-                cap = StrokeCap.Round,
-                pathEffect = PathEffect.dashPathEffect(floatArrayOf(LINE_ON, LINE_OFF), 0f)
-            )
-            lineY += verticalSpacing
-        }
-
-        /* Y Labels */
-
-        val textPaint = Paint().apply {
-            color = labelColor.toArgb()
-            textAlign = Paint.Align.LEFT
-            textSize = density.run { 12.dp.toPx() }
-            typeface = setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD))
-            alpha = TEXT_PAINT_ALPHA
-        }
-        drawContext.canvas.nativeCanvas.apply {
-            var label = minValue
-            for (i in 0..LINE_LIMIT) {
-                val ratio = (label - minValue) / range
-                val y = height - (ratio * height)
-                drawText(
-                    "${label.toInt()}",
-                    width + 4.dp.toPx(),
-                    y + 4.dp.toPx(),
-                    textPaint
-                )
-                label += verticalSpacing
-            }
-        }
-    }
-}
-
-/**
  * Draws chart lines with respect to the Y-axis.
  *
- * @param lineColors A list of 5 `Color`s for the chart lines, 0 being the lowest line on the chart.
+ * @param lineColors A list of 5 [Color]s for the chart lines, 0 being the lowest line on the chart.
  */
 @Composable
 fun HorizontalLinesOverlay(
