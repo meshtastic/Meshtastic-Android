@@ -40,12 +40,19 @@
     <string name="role_client_hidden">Device that only broadcasts as needed for stealth or power savings.</string>
     <string name="role_lost_and_found">Broadcasts location as message to default channel regularly for to assist with device recovery.</string>
     <string name="role_tak_tracker">Enables automatic TAK PLI broadcasts and reduces routine broadcasts.</string>
+    <string name="role_router_late">Infrastructure node that always rebroadcasts packets once but only after all other modes, ensuring additional coverage for local clusters. Visible in nodes list.</string>
     <string name="rebroadcast_mode_all">Rebroadcast any observed message, if it was on our private channel or from another mesh with the same lora parameters.</string>
     <string name="rebroadcast_mode_all_skip_decoding">Same as behavior as ALL but skips packet decoding and simply rebroadcasts them. Only available in Repeater role. Setting this on any other roles will result in ALL behavior.</string>
     <string name="rebroadcast_mode_local_only">Ignores observed messages from foreign meshes that are open or those which it cannot decrypt. Only rebroadcasts message on the nodes local primary / secondary channels.</string>
     <string name="rebroadcast_mode_known_only">Ignores observed messages from foreign meshes like LOCAL ONLY, but takes it step further by also ignoring messages from nodes not already in the node\'s known list.</string>
     <string name="rebroadcast_mode_none">Only permitted for SENSOR, TRACKER and TAK_TRACKER roles, this will inhibit all rebroadcasts, not unlike CLIENT_MUTE role.</string>
     <string name="rebroadcast_mode_core_portnums_only">Ignores packets from non-standard portnums such as: TAK, RangeTest, PaxCounter, etc. Only rebroadcasts packets with standard portnums: NodeInfo, Text, Position, Telemetry, and Routing.</string>
+    <string name="config_device_doubleTapAsButtonPress_summary">Treat double tap on supported accelerometers as a user button press.</string>
+    <string name="config_device_disableTripleClick_summary">Disables the triple-press of user button to enable or disable GPS.</string>
+    <string name="config_device_ledHeartbeatDisabled_summary">Controls the blinking LED on the device. For most devices this will control one of the up to 4 LEDs, the charger and GPS LEDs are not controllable.</string>
+    <string name="config_device_transmitOverLora_summary">Whether in addition to sending it to MQTT and the PhoneAPI, our NeighborInfo should be transmitted over LoRa. Not available on a channel with default key and name.</string>
+    <string name="config_security_public_key">Public Key</string>
+    <string name="config_security_private_key">Private Key</string>
     <string name="channel_name">Όνομα Καναλιού</string>
     <string name="channel_options">Επιλογές Καναλιού</string>
     <string name="qr_code">Κώδικας QR</string>
@@ -55,7 +62,7 @@
     <string name="unknown_username">Άγνωστο Όνομα Χρήστη</string>
     <string name="send">Αποστολή</string>
     <string name="send_text">Αποστολή κειμένου</string>
-    <string name="warning_not_paired">Δεν έχετε κάνει ακόμη pair μια συσκευή συμβατή με Meshtastic με το τηλέφωνο. Παρακαλώ κάντε pair μια συσκευή και ορίστε το όνομα χρήστη.\n\nΗ εφαρμογή ανοιχτού κώδικα βρίσκεται σε alpha-testing, αν εντοπίσετε προβλήματα παρακαλώ δημοσιεύστε τα στο forum: https://github.com/orgs/meshtastic/discussions\n\nΠερισσότερες πληροφορίες στην ιστοσελίδα - www.meshtastic.org.</string>
+    <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in development, if you find problems please post on our forum: https://github.com/orgs/meshtastic/discussions.\n\nFor more information see our web page - www.meshtastic.org.</string>
     <string name="you">Εσύ, Εσείς</string>
     <string name="your_name">Όνομα</string>
     <string name="analytics_okay">Ανώνυμα στατιστικά στοιχεία χρήσης και αναφορές κατάρρευσης.</string>
@@ -265,6 +272,8 @@
     <string name="fair">Fair</string>
     <string name="good">Good</string>
     <string name="none_quality">None</string>
+    <string name="share_to">Share to…</string>
+    <string name="share_message">Share message</string>
     <string name="signal">Signal</string>
     <string name="signal_quality">Signal Quality</string>
     <string name="traceroute_log">Traceroute Log</string>
@@ -274,4 +283,12 @@
         <item quantity="other">%d hops</item>
     </plurals>
     <string name="traceroute_diff">Hops towards %1$d Hops back %2$d</string>
+    <string name="twenty_four_hours">24H</string>
+    <string name="forty_eight_hours">48H</string>
+    <string name="one_week">1W</string>
+    <string name="two_weeks">2W</string>
+    <string name="four_weeks">4W</string>
+    <string name="max">Max</string>
+    <string name="copy">Copy</string>
+    <string name="alert_bell_text">Alert Bell Character!</string>
 </resources>
