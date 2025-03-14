@@ -244,6 +244,17 @@ class UIViewModel @Inject constructor(
         initialValue = emptyList(),
     )
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val filteredNodeList: StateFlow<List<Node>> = nodeList.mapLatest { list ->
+        list.filter { node ->
+            !node.isIgnored
+        }
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = emptyList(),
+    )
+
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeEntity?> get() = nodeDB.myNodeInfo
     val ourNodeInfo: StateFlow<Node?> get() = nodeDB.ourNodeInfo
