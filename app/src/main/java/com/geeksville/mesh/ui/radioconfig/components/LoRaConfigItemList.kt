@@ -44,6 +44,7 @@ import com.geeksville.mesh.ui.components.EditListPreference
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
+import com.geeksville.mesh.ui.components.SignedIntegerEditTextPreference
 import com.geeksville.mesh.ui.components.SwitchPreference
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 
@@ -171,11 +172,13 @@ fun LoRaConfigItemList(
         item { Divider() }
 
         item {
-            EditTextPreference(title = "TX power (dBm)",
+            SignedIntegerEditTextPreference(
+                title = "TX power (dBm)",
                 value = loraInput.txPower,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { loraInput = loraInput.copy { txPower = it } })
+                onValueChanged = { loraInput = loraInput.copy { txPower = it } },
+            )
         }
 
         item {

@@ -101,12 +101,7 @@ internal class SerialConnectionImpl(
             ioRef.set(this)
         }
 
-        Thread(io).apply {
-            isDaemon = true
-            priority = Thread.MAX_PRIORITY
-            name = "serial reader"
-        }.start() // No need to keep reference to thread around, we quit by asking the ioManager to quit
-
+        io.start()
         listener.onConnected()
     }
 }

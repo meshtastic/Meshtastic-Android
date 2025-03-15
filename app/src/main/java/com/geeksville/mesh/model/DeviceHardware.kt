@@ -78,6 +78,7 @@ private fun getDrawableFrom(hwModel: Int): Int = when (hwModel) {
     HardwareModel.RPI_PICO_VALUE -> R.drawable.hw_pico
     HardwareModel.NRF52_PROMICRO_DIY_VALUE -> R.drawable.hw_promicro
     HardwareModel.RAK11310_VALUE -> R.drawable.hw_rak11310
+    HardwareModel.RAK2560_VALUE -> R.drawable.hw_rak2560
     HardwareModel.RAK4631_VALUE -> R.drawable.hw_rak4631_case
     HardwareModel.RPI_PICO2_VALUE -> R.drawable.hw_rpipicow
     HardwareModel.SENSECAP_INDICATOR_VALUE -> R.drawable.hw_seeed_sensecap_indicator

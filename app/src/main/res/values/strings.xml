@@ -13,6 +13,12 @@
     <string name="sample_coords" translatable="false">55.332244 34.442211</string>
     <string name="sample_message" translatable="false">hey I found the cache, it is over here next to the big tiger. I\'m kinda scared.</string>
 
+    <string name="main_tab_messages">Messages</string>
+    <string name="main_tab_users">Users</string>
+    <string name="main_tab_map">Map</string>
+    <string name="main_tab_channel">Channel</string>
+    <string name="main_tab_settings">Settings</string>
+
     <string name="unknown_node_short_name" translatable="false">\???</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">clear node filter</string>
@@ -142,6 +148,7 @@
     <string name="message_reception_state">message reception state</string>
     <string name="message_delivery_status">Message delivery status</string>
     <string name="meshtastic_messages_notifications">Message notifications</string>
+    <string name="meshtastic_alerts_notifications">Alert notifications</string>
     <string name="protocol_stress_test">Protocol stress test</string>
     <string name="firmware_too_old">Firmware update required</string>
     <string name="firmware_old">The radio firmware is too old to talk to this application. For more information on this see <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
@@ -314,4 +321,25 @@
     <string name="add_radio">Add Radio</string>
     <string name="copy">Copy</string>
     <string name="alert_bell_text">Alert Bell Character!</string>
+    <string name="channel_settings">Channel Settings</string>
+    <string name="samsung_instructions">Samsung Instructions</string>
+    <string name="alerts_dnd_request_title">Enable Critical Alerts to bypass Do Not Disturb</string>
+    <string name="alerts_dnd_request_text"><![CDATA[To allow Critical Alerts while your phone is on Do Not Disturb - enable Override Do Not Disturb for the Alerts channel in the Meshtastic app notification settings.<br/><br/>Samsung users may need to add an exception in system settings before enabling it for the Alerts Channel. <a href="https://www.samsung.com/latin_en/support/mobile-devices/how-to-use-the-do-not-disturb-mode-on-your-galaxy-phone/">Visit Samsung Support for assistance.</a>.]]></string>
+    <string name="critical_alert">Critical Alert!</string>
+    <string name="favorite">Favorite</string>
+    <string name="favorite_add">Add \'%s\' as a favorite node?</string>
+    <string name="favorite_remove">Remove \'%s\' as a favorite node?</string>
+    <string name="power_metrics_log">Power Metrics Log</string>
+    <string name="channel_1">Channel 1</string>
+    <string name="channel_2">Channel 2</string>
+    <string name="channel_3">Channel 3</string>
+    <string name="current">Current</string>
+    <string name="voltage">Voltage</string>
+    <string name="are_you_sure">Are you sure?</string>
+    <string name="router_role_confirmation_text"><![CDATA[I have read the <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Device Role Documentation</a> and the blog post about <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Choosing The Right Device Role</a>.]]></string>
+    <string name="i_know_what_i_m_doing">I know what I\'m doing.</string>
+    <string name="low_battery_message">Node %s has a low battery (%d%%)</string>
+    <string name="meshtastic_low_battery_notifications">Low battery notifications</string>
+    <string name="low_battery_title">Low battery: %s</string>
+    <string name="meshtastic_low_battery_temporary_remote_notifications">Low battery notifications (favorite nodes)</string>
 </resources>

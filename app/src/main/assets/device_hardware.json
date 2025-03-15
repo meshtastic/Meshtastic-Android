@@ -271,6 +271,22 @@
     "requiresDfu": true
   },
   {
+    "hwModel": 22,
+    "hwModelSlug": "WISMESH_HUB",
+    "platformioTarget": "rak2560",
+    "architecture": "nrf52840",
+    "activelySupported": true,
+    "supportLevel": 1,
+    "displayName": "RAK WisMesh Repeater",
+    "tags": [
+      "RAK"
+    ],
+    "images": [
+      "rak2560.svg"
+    ],
+    "requiresDfu": true
+  },
+  {
     "hwModel": 25,
     "hwModelSlug": "STATION_G1",
     "platformioTarget": "station-g1",

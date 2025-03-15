@@ -135,7 +135,7 @@ data class Node(
     }
 
     private fun PaxcountProtos.Paxcount.getDisplayString() =
-        "PAX: ${ble + wifi} (B:$ble/W:$wifi)".takeIf { ble != 0 && wifi != 0 }
+        "PAX: ${ble + wifi} (B:$ble/W:$wifi)".takeIf { ble != 0 || wifi != 0 }
 
     fun getTelemetryString(isFahrenheit: Boolean = false): String {
         return listOfNotNull(

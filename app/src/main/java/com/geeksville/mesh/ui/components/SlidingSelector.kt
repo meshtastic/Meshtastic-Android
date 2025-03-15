@@ -94,20 +94,22 @@ private const val PRESSED_UNSELECTED_ALPHA = .6f
 private val BACKGROUND_SHAPE = RoundedCornerShape(8.dp)
 
 /**
- * Provides the user with a set of time options they can choose from that controls
- * the time frame the data being plotted was received.
+ * Provides the user with a set of options they can choose from.
+ *
  * (Inspired by https://gist.github.com/zach-klippenstein/7ae8874db304f957d6bb91263e292117)
  */
 @Composable
-fun MetricsTimeSelector(
-    selectedTime: TimeFrame,
-    onOptionSelected: (TimeFrame) -> Unit,
+fun <T : Any> SlidingSelector(
+    options: List<T>,
+    selectedOption: T,
+    onOptionSelected: (T) -> Unit,
     modifier: Modifier = Modifier,
-    content: @Composable (TimeFrame) -> Unit
+    content: @Composable (T) -> Unit
 ) {
-    val state = remember { TimeSelectorState() }
-    state.selectedOption = state.options.indexOf(selectedTime)
-    state.onOptionSelected = { onOptionSelected(state.options[it]) }
+    val state = remember { SelectorState() }
+    state.optionCount = options.size
+    state.selectedOption = options.indexOf(selectedOption)
+    state.onOptionSelected = { onOptionSelected(options[it]) }
 
     /* Animate between whole-number indices so we don't need to do pixel calculations. */
     val selectedIndexOffset by animateFloatAsState(state.selectedOption.toFloat(), label = "Selected Index Offset")
@@ -116,7 +118,7 @@ fun MetricsTimeSelector(
         content = {
             SelectedIndicator(state)
             Dividers(state)
-            TimeOptions(state, content)
+            Options(state, options, content)
         },
         modifier = modifier
             .fillMaxWidth()
@@ -133,7 +135,7 @@ fun MetricsTimeSelector(
         /* Measure the indicator and dividers to be the right size. */
         val indicatorPlaceable = indicatorMeasurable.measure(
             Constraints.fixed(
-                width = optionsPlaceable.width / state.options.size,
+                width = optionsPlaceable.width / options.size,
                 height = optionsPlaceable.height
             )
         )
@@ -146,7 +148,7 @@ fun MetricsTimeSelector(
         )
 
         layout(optionsPlaceable.width, optionsPlaceable.height) {
-            val optionWidth = optionsPlaceable.width / state.options.size
+            val optionWidth = optionsPlaceable.width / options.size
 
             /* Place the indicator first so that it's below the option labels. */
             indicatorPlaceable.placeRelative(
@@ -160,18 +162,18 @@ fun MetricsTimeSelector(
 }
 
 /**
- * Visual representation of the time option the user may select.
+ * Visual representation of the option the user may select.
  */
 @Composable
-fun TimeLabel(text: String) {
+fun OptionLabel(text: String) {
     Text(text, maxLines = 1, overflow = Ellipsis)
 }
 
 /**
- * Draws the selected indicator on the [MetricsTimeSelector] track.
+ * Draws the selected indicator on the [SlidingSelector] track.
  */
 @Composable
-private fun SelectedIndicator(state: TimeSelectorState) {
+private fun SelectedIndicator(state: SelectorState) {
     Box(
         Modifier
             .then(
@@ -186,18 +188,18 @@ private fun SelectedIndicator(state: TimeSelectorState) {
 }
 
 /**
- * Draws dividers between [TimeLabel]s.
+ * Draws dividers between [OptionLabel]s.
  */
 @Composable
-private fun Dividers(state: TimeSelectorState) {
+private fun Dividers(state: SelectorState) {
     /* Animate each divider independently. */
-    val alphas = (0 until state.options.size).map { i ->
+    val alphas = (0 until state.optionCount).map { i ->
         val selectionAdjacent = i == state.selectedOption || i - 1 == state.selectedOption
         animateFloatAsState(if (selectionAdjacent) 0f else 1f, label = "Dividers")
     }
 
     Canvas(Modifier.fillMaxSize()) {
-        val optionWidth = size.width / state.options.size
+        val optionWidth = size.width / state.optionCount
         val dividerPadding = TRACK_PADDING + PRESSED_TRACK_PADDING
 
         alphas.forEachIndexed { i, alpha ->
@@ -213,12 +215,13 @@ private fun Dividers(state: TimeSelectorState) {
 }
 
 /**
- * Draws the time options available to the user.
+ * Draws the options available to the user.
  */
 @Composable
-private fun TimeOptions(
-    state: TimeSelectorState,
-    content: @Composable (TimeFrame) -> Unit
+private fun <T> Options(
+    state: SelectorState,
+    options: List<T>,
+    content: @Composable (T) -> Unit
 ) {
     CompositionLocalProvider(
         LocalTextStyle provides TextStyle(fontWeight = FontWeight.Medium)
@@ -229,7 +232,7 @@ private fun TimeOptions(
                 .fillMaxWidth()
                 .selectableGroup()
         ) {
-            state.options.forEachIndexed { i, timeFrame ->
+            options.forEachIndexed { i, timeFrame ->
                 val isSelected = i == state.selectedOption
                 val isPressed = i == state.pressedOption
 
@@ -267,10 +270,10 @@ private fun TimeOptions(
 }
 
 /**
- * Contains and handles the state necessary to present the [MetricsTimeSelector] to the user.
+ * Contains and handles the state necessary to present the [SlidingSelector] to the user.
  */
-private class TimeSelectorState {
-    val options = TimeFrame.entries.toTypedArray()
+private class SelectorState {
+    var optionCount by mutableIntStateOf(0)
     var selectedOption by mutableIntStateOf(0)
     var onOptionSelected: (Int) -> Unit by mutableStateOf({})
     var pressedOption by mutableIntStateOf(NO_OPTION_INDEX)
@@ -317,7 +320,7 @@ private class TimeSelectorState {
             this.transformOrigin = TransformOrigin(
                 pivotFractionX = when (option) {
                     0 -> 0f
-                    options.size - 1 -> 1f
+                    optionCount - 1 -> 1f
                     else -> .5f
                 },
                 pivotFractionY = .5f
@@ -326,7 +329,7 @@ private class TimeSelectorState {
             /* But should still move inwards to keep the pressed padding consistent with top and bottom. */
             this.translationX = when (option) {
                 0 -> xOffset.toPx()
-                options.size - 1 -> -xOffset.toPx()
+                optionCount - 1 -> -xOffset.toPx()
                 else -> 0f
             }
         }
@@ -336,14 +339,14 @@ private class TimeSelectorState {
      * A [Modifier] that will listen for touch gestures and update the selected and pressed properties
      * of this state appropriately.
      */
-    val inputModifier = Modifier.pointerInput(options.size) {
-        val optionWidth = size.width / options.size
+    val inputModifier = Modifier.pointerInput(optionCount) {
+        val optionWidth = size.width / optionCount
 
         /* Helper to calculate which option an event occurred in. */
         fun optionIndex(change: PointerInputChange): Int =
-            ((change.position.x / size.width.toFloat()) * options.size)
+            ((change.position.x / size.width.toFloat()) * optionCount)
                 .toInt()
-                .coerceIn(0, options.size - 1)
+                .coerceIn(0, optionCount - 1)
 
         awaitEachGesture {
             val down = awaitFirstDown()
@@ -401,17 +404,18 @@ private suspend fun AwaitPointerEventScope.waitForUpOrCancellation(inBounds: Rec
 
 @Preview
 @Composable
-fun MetricsTimeSelectorPreview() {
+fun SlidingSelectorPreview() {
     MaterialTheme {
         Surface {
             Column(Modifier.padding(8.dp)) {
 
                 var selectedOption by remember { mutableStateOf(TimeFrame.TWENTY_FOUR_HOURS) }
-                MetricsTimeSelector(
+                SlidingSelector(
+                    TimeFrame.entries.toList(),
                     selectedOption,
                     onOptionSelected = { selectedOption = it }
                 ) {
-                    TimeLabel(stringResource(it.strRes))
+                    OptionLabel(stringResource(it.strRes))
                 }
             }
         }

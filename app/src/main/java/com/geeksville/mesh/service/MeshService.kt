@@ -106,6 +106,7 @@ import kotlin.math.absoluteValue
 
 sealed class ServiceAction {
     data class GetDeviceMetadata(val destNum: Int) : ServiceAction()
+    data class Favorite(val node: Node) : ServiceAction()
     data class Ignore(val node: Node) : ServiceAction()
     data class Reaction(val emoji: String, val replyId: Int, val contactKey: String) : ServiceAction()
 }
@@ -183,7 +184,7 @@ class MeshService : Service(), Logging {
         /** The minimum firmware version we know how to talk to. We'll still be able
          * to talk to 2.0 firmwares but only well enough to ask them to firmware update.
          */
-        val minDeviceVersion = DeviceVersion("2.3.2")
+        val minDeviceVersion = DeviceVersion("2.3.15")
     }
 
     enum class ConnectionState {
@@ -211,6 +212,9 @@ class MeshService : Service(), Logging {
 
     private var locationFlow: Job? = null
     private var mqttMessageFlow: Job? = null
+
+    private val batteryPercentUnsupported = 0.0
+    private val batteryPercentLowThreshold = 20.0
 
     private fun getSenderName(packet: DataPacket?): String {
         val name = nodeDBbyID[packet?.from]?.user?.longName
@@ -300,6 +304,14 @@ class MeshService : Service(), Logging {
         startPacketQueue()
     }
 
+    private fun showAlertNotification(contactKey: String, dataPacket: DataPacket) {
+        serviceNotifications.showAlertNotification(
+            contactKey,
+            getSenderName(dataPacket),
+            dataPacket.alert ?: getString(R.string.critical_alert)
+        )
+    }
+
     private fun updateMessageNotification(contactKey: String, dataPacket: DataPacket) {
         val message: String = when (dataPacket.dataType) {
             Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> dataPacket.text!!
@@ -316,7 +328,7 @@ class MeshService : Service(), Logging {
         super.onCreate()
 
         info("Creating mesh service")
-
+        serviceNotifications.initChannels()
         // Switch to the IO thread
         serviceScope.handledLaunch {
             radioInterfaceService.connect()
@@ -655,6 +667,7 @@ class MeshService : Service(), Logging {
 
     private val rememberDataType = setOf(
         Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+        Portnums.PortNum.ALERT_APP_VALUE,
         Portnums.PortNum.WAYPOINT_APP_VALUE,
     )
 
@@ -691,7 +704,11 @@ class MeshService : Service(), Logging {
             packetRepository.get().apply {
                 insert(packetToSave)
                 val isMuted = getContactSettings(contactKey).isMuted
-                if (updateNotification && !isMuted) updateMessageNotification(contactKey, dataPacket)
+                if (packetToSave.port_num == Portnums.PortNum.ALERT_APP_VALUE && !isMuted) {
+                    showAlertNotification(contactKey, dataPacket)
+                } else if (updateNotification && !isMuted) {
+                    updateMessageNotification(contactKey, dataPacket)
+                }
             }
         }
     }
@@ -727,6 +744,11 @@ class MeshService : Service(), Logging {
                             debug("Received CLEAR_TEXT from $fromId")
                             rememberDataPacket(dataPacket)
                         }
+                    }
+
+                    Portnums.PortNum.ALERT_APP_VALUE -> {
+                        debug("Received ALERT_APP from $fromId")
+                        rememberDataPacket(dataPacket)
                     }
 
                     Portnums.PortNum.WAYPOINT_APP_VALUE -> {
@@ -920,7 +942,18 @@ class MeshService : Service(), Logging {
         }
         updateNodeInfo(fromNum) {
             when {
-                t.hasDeviceMetrics() -> it.deviceTelemetry = t
+                t.hasDeviceMetrics() -> {
+                    it.deviceTelemetry = t
+                    val isRemote = (fromNum != myNodeNum)
+                    if (fromNum == myNodeNum || (isRemote && it.isFavorite)) {
+                        if (t.deviceMetrics.voltage > batteryPercentUnsupported &&
+                            t.deviceMetrics.batteryLevel < batteryPercentLowThreshold) {
+                            serviceNotifications.showOrUpdateLowBatteryNotification(it, isRemote)
+                        } else {
+                            serviceNotifications.cancelLowBatteryNotification(it)
+                        }
+                    }
+                }
                 t.hasEnvironmentMetrics() -> it.environmentTelemetry = t
                 t.hasPowerMetrics() -> it.powerTelemetry = t
             }
@@ -1791,6 +1824,7 @@ class MeshService : Service(), Logging {
     private fun onServiceAction(action: ServiceAction) {
         when (action) {
             is ServiceAction.GetDeviceMetadata -> getDeviceMetadata(action.destNum)
+            is ServiceAction.Favorite -> favoriteNode(action.node)
             is ServiceAction.Ignore -> ignoreNode(action.node)
             is ServiceAction.Reaction -> sendReaction(action)
         }
@@ -1800,6 +1834,21 @@ class MeshService : Service(), Logging {
         sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(wantResponse = true) {
             getDeviceMetadataRequest = true
         })
+    }
+
+    private fun favoriteNode(node: Node) = toRemoteExceptions {
+        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+            if (node.isFavorite) {
+                debug("removing node ${node.num} from favorite list")
+                removeFavoriteNode = node.num
+            } else {
+                debug("adding node ${node.num} to favorite list")
+                setFavoriteNode = node.num
+            }
+        })
+        updateNodeInfo(node.num) {
+            it.isFavorite = !node.isFavorite
+        }
     }
 
     private fun ignoreNode(node: Node) = toRemoteExceptions {

@@ -17,19 +17,33 @@
 
 package com.geeksville.mesh.ui.radioconfig.components
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Checkbox
 import androidx.compose.material.Divider
+import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -97,6 +111,62 @@ fun DeviceConfigScreen(
     )
 }
 
+@Suppress("LongMethod")
+@Composable
+fun RouterRoleConfirmationDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    val dialogTitle = stringResource(R.string.are_you_sure)
+    val annotatedDialogText = AnnotatedString.fromHtml(
+        htmlString = stringResource(R.string.router_role_confirmation_text),
+        linkStyles = TextLinkStyles(style = SpanStyle(color = Color.Blue))
+    )
+
+    var confirmed by rememberSaveable { mutableStateOf(false) }
+
+    AlertDialog(
+        title = {
+            Text(text = dialogTitle)
+        },
+        text = {
+            Column {
+                Text(text = annotatedDialogText)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable(true) {
+                            confirmed = !confirmed
+                        },
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = confirmed,
+                        onCheckedChange = { confirmed = it }
+                    )
+                    Text(stringResource(R.string.i_know_what_i_m_doing))
+                }
+            }
+        },
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                enabled = confirmed
+            ) {
+                Text(stringResource(R.string.accept))
+            }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = onDismiss
+            ) {
+                Text(stringResource(R.string.cancel))
+            }
+        }
+    )
+}
+
 @Composable
 fun DeviceConfigItemList(
     deviceConfig: DeviceConfig,
@@ -105,7 +175,23 @@ fun DeviceConfigItemList(
 ) {
     val focusManager = LocalFocusManager.current
     var deviceInput by rememberSaveable { mutableStateOf(deviceConfig) }
-
+    var selectedRole by rememberSaveable { mutableStateOf(deviceInput.role) }
+    val infrastructureRoles = listOf(
+        DeviceConfig.Role.ROUTER,
+        DeviceConfig.Role.REPEATER,
+    )
+    if (selectedRole != deviceInput.role) {
+        if (selectedRole in infrastructureRoles) {
+            RouterRoleConfirmationDialog(
+                onDismiss = { selectedRole = deviceInput.role },
+                onConfirm = {
+                    deviceInput = deviceInput.copy { role = selectedRole }
+                }
+            )
+        } else {
+            deviceInput = deviceInput.copy { role = selectedRole }
+        }
+    }
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -116,7 +202,9 @@ fun DeviceConfigItemList(
                 title = "Role",
                 enabled = enabled,
                 selectedItem = deviceInput.role,
-                onItemSelected = { deviceInput = deviceInput.copy { role = it } },
+                onItemSelected = {
+                    selectedRole = it
+                },
                 summary = stringResource(id = deviceInput.role.stringRes),
             )
             Divider()
