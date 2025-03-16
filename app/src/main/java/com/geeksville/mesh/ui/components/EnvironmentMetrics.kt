@@ -67,9 +67,23 @@ import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.drawPathWithGradient
 
 private enum class Environment(val color: Color) {
-    TEMPERATURE(Color.Red),
-    HUMIDITY(INFANTRY_BLUE),
-    IAQ(Color.Green)
+    TEMPERATURE(Color.Red) {
+        override fun getValue(telemetry: Telemetry): Float {
+            return telemetry.environmentMetrics.temperature
+        }
+    },
+    HUMIDITY(INFANTRY_BLUE) {
+        override fun getValue(telemetry: Telemetry): Float {
+            return telemetry.environmentMetrics.relativeHumidity
+        }
+    },
+    IAQ(Color.Green) {
+        override fun getValue(telemetry: Telemetry): Float {
+            return telemetry.environmentMetrics.iaq.toFloat()
+        }
+    };
+
+    abstract fun getValue(telemetry: Telemetry): Float
 }
 private val LEGEND_DATA = listOf(
     LegendData(
@@ -250,89 +264,35 @@ private fun EnvironmentMetricsChart(
                 val height = size.height
                 val width = size.width
 
-                /* Temperature */
-                var index = 0
+                var index: Int
                 var first: Int
-                while (index < telemetries.size) {
-                    first = index
-                    val path = Path()
-                    index = createPath(
-                        telemetries = telemetries,
-                        index = index,
-                        path = path,
-                        oldestTime = oldest.time,
-                        timeRange = timeDiff,
-                        width = width,
-                        timeThreshold = selectedTime.timeThreshold()
-                    ) { i ->
-                        val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
-                        val ratio = (telemetry.environmentMetrics.temperature - min) / diff
-                        val y = height - (ratio * height)
-                        return@createPath y
+                for (metric in Environment.entries) {
+                    index = 0
+                    while (index < telemetries.size) {
+                        first = index
+                        val path = Path()
+                        index = createPath(
+                            telemetries = telemetries,
+                            index = index,
+                            path = path,
+                            oldestTime = oldest.time,
+                            timeRange = timeDiff,
+                            width = width,
+                            timeThreshold = selectedTime.timeThreshold()
+                        ) { i ->
+                            val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
+                            val ratio = (metric.getValue(telemetry) - min) / diff
+                            val y = height - (ratio * height)
+                            return@createPath y
+                        }
+                        drawPathWithGradient(
+                            path = path,
+                            color = metric.color,
+                            height = height,
+                            x1 = ((telemetries[index - 1].time - oldest.time).toFloat() / timeDiff) * width,
+                            x2 = ((telemetries[first].time - oldest.time).toFloat() / timeDiff) * width
+                        )
                     }
-                    drawPathWithGradient(
-                        path = path,
-                        color = Environment.TEMPERATURE.color,
-                        height = height,
-                        x1 = ((telemetries[index - 1].time - oldest.time).toFloat() / timeDiff) * width,
-                        x2 = ((telemetries[first].time - oldest.time).toFloat() / timeDiff) * width
-                    )
-                }
-
-                /* Relative Humidity */
-                index = 0
-                while (index < telemetries.size) {
-                    first = index
-                    val path = Path()
-                    index = createPath(
-                        telemetries = telemetries,
-                        index = index,
-                        path = path,
-                        oldestTime = oldest.time,
-                        timeRange = timeDiff,
-                        width = width,
-                        timeThreshold = selectedTime.timeThreshold()
-                    ) { i ->
-                        val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
-                        val ratio = (telemetry.environmentMetrics.relativeHumidity - min) / diff
-                        val y = height - (ratio * height)
-                        return@createPath y
-                    }
-                    drawPathWithGradient(
-                        path = path,
-                        color = Environment.HUMIDITY.color,
-                        height = height,
-                        x1 = ((telemetries[index - 1].time - oldest.time).toFloat() / timeDiff) * width,
-                        x2 = ((telemetries[first].time - oldest.time).toFloat() / timeDiff) * width
-                    )
-                }
-
-                /* Air Quality */
-                index = 0
-                while (index < telemetries.size) {
-                    first = index
-                    val path = Path()
-                    index = createPath(
-                        telemetries = telemetries,
-                        index = index,
-                        path = path,
-                        oldestTime = oldest.time,
-                        timeRange = timeDiff,
-                        width = width,
-                        timeThreshold = selectedTime.timeThreshold()
-                    ) { i ->
-                        val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
-                        val ratio = (telemetry.environmentMetrics.iaq - min) / diff
-                        val y = height - (ratio * height)
-                        return@createPath y
-                    }
-                    drawPathWithGradient(
-                        path = path,
-                        color = Environment.IAQ.color,
-                        height = height,
-                        x1 = ((telemetries[index - 1].time - oldest.time).toFloat() / timeDiff) * width,
-                        x2 = ((telemetries[first].time - oldest.time).toFloat() / timeDiff) * width
-                    )
                 }
             }
         }
