@@ -216,22 +216,29 @@ private fun EnvironmentMetricsChart(
             telemetries.maxBy { it.environmentMetrics.relativeHumidity }
         )
     }
+    val minValues = mutableListOf(
+        minTemp.environmentMetrics.temperature,
+        minHumidity.environmentMetrics.relativeHumidity
+    )
+    val maxValues = mutableListOf(
+        maxTemp.environmentMetrics.temperature,
+        maxHumidity.environmentMetrics.relativeHumidity
+    )
     val (minIAQ, maxIAQ) = remember(key1 = telemetries) {
         Pair(
             telemetries.minBy { it.environmentMetrics.iaq },
             telemetries.maxBy { it.environmentMetrics.iaq }
         )
     }
-    val min = minOf(
-        minTemp.environmentMetrics.temperature,
-        minHumidity.environmentMetrics.relativeHumidity,
-        minIAQ.environmentMetrics.iaq.toFloat()
-    )
-    val max = maxOf(
-        maxTemp.environmentMetrics.temperature,
-        maxHumidity.environmentMetrics.relativeHumidity,
-        maxIAQ.environmentMetrics.iaq.toFloat()
-    )
+    var plotIAQ = false
+    if (minIAQ.environmentMetrics.iaq != 0 && maxIAQ.environmentMetrics.iaq != 0) {
+        minValues.add(minIAQ.environmentMetrics.iaq.toFloat())
+        maxValues.add(maxIAQ.environmentMetrics.iaq.toFloat())
+        plotIAQ = true
+    }
+
+    val min = minValues.minOf { it }
+    val max = maxValues.maxOf { it }
     val diff = max - min
 
     val scrollState = rememberScrollState()
@@ -267,6 +274,9 @@ private fun EnvironmentMetricsChart(
                 var index: Int
                 var first: Int
                 for (metric in Environment.entries) {
+                    if (metric == Environment.IAQ && !plotIAQ) {
+                        continue
+                    }
                     index = 0
                     while (index < telemetries.size) {
                         first = index
