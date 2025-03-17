@@ -35,4 +35,5 @@ val LightRed = Color(0xFFFFB3B3)
 val MeshtasticGreen = Color(0xFF67EA94)
 
 val HyperlinkBlue = Color(0xFF43C3B0)
-val Orange = Color(255, 153, 0)
+val InfantryBlue = Color(red = 75, green = 119, blue = 190)
+val Orange = Color( red = 247, green = 147, blue = 26)

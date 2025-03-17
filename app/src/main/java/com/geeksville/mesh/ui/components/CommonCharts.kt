@@ -66,7 +66,6 @@ object CommonCharts {
     val DATE_TIME_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
     const val MS_PER_SEC = 1000L
     const val MAX_PERCENT_VALUE = 100f
-    val INFANTRY_BLUE = Color(75, 119, 190)
 }
 
 private const val LINE_ON = 10f

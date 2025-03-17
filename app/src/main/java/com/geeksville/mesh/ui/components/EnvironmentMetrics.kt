@@ -62,7 +62,8 @@ import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
-import com.geeksville.mesh.ui.components.CommonCharts.INFANTRY_BLUE
+import com.geeksville.mesh.ui.theme.InfantryBlue
+import com.geeksville.mesh.ui.theme.Orange
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.drawPathWithGradient
 
@@ -72,7 +73,7 @@ private enum class Environment(val color: Color) {
             return telemetry.environmentMetrics.temperature
         }
     },
-    HUMIDITY(INFANTRY_BLUE) {
+    HUMIDITY(InfantryBlue) {
         override fun getValue(telemetry: Telemetry): Float {
             return telemetry.environmentMetrics.relativeHumidity
         }
@@ -81,11 +82,16 @@ private enum class Environment(val color: Color) {
         override fun getValue(telemetry: Telemetry): Float {
             return telemetry.environmentMetrics.iaq.toFloat()
         }
+    },
+    BAROMETRIC_PRESSURE(Orange) {
+        override fun getValue(telemetry: Telemetry): Float {
+            return telemetry.environmentMetrics.barometricPressure
+        }
     };
 
     abstract fun getValue(telemetry: Telemetry): Float
 }
-private val LEGEND_DATA = listOf(
+private val LEGEND_DATA_1 = listOf(
     LegendData(
         nameRes = R.string.temperature,
         color = Environment.TEMPERATURE.color,
@@ -96,11 +102,18 @@ private val LEGEND_DATA = listOf(
         color = Environment.HUMIDITY.color,
         isLine = true
     ),
+)
+private val LEGEND_DATA_2 = listOf(
     LegendData(
         nameRes = R.string.iaq,
         color = Environment.IAQ.color,
         isLine = true
     ),
+    LegendData(
+        nameRes = R.string.baro_pressure,
+        color = Environment.BAROMETRIC_PRESSURE.color,
+        isLine = true
+    )
 )
 
 @Composable
@@ -174,7 +187,7 @@ fun EnvironmentMetricsScreen(
     }
 }
 
-@Suppress("LongMethod", "CyclomaticComplexMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod", "ComplexCondition")
 @Composable
 private fun EnvironmentMetricsChart(
     modifier: Modifier = Modifier,
@@ -239,7 +252,21 @@ private fun EnvironmentMetricsChart(
 
     val min = minValues.minOf { it }
     val max = maxValues.maxOf { it }
-    val diff = max - min
+    var diff = max - min
+
+    val (minPressure, maxPressure) = remember(key1 = telemetries) {
+        Pair(
+            telemetries.minBy { it.environmentMetrics.barometricPressure },
+            telemetries.maxBy { it.environmentMetrics.barometricPressure }
+        )
+    }
+    var plotPressure = false
+    val pressureDiff =
+        maxPressure.environmentMetrics.barometricPressure - minPressure.environmentMetrics.barometricPressure
+    if (minPressure.environmentMetrics.barometricPressure != 0.0F &&
+        maxPressure.environmentMetrics.barometricPressure != 0.0F) {
+        plotPressure = true
+    }
 
     val scrollState = rememberScrollState()
     val screenWidth = LocalConfiguration.current.screenWidthDp
@@ -248,6 +275,14 @@ private fun EnvironmentMetricsChart(
     }
 
     Row {
+        if (plotPressure) {
+            YAxisLabels(
+                modifier = modifier.weight(weight = .1f),
+                Environment.BAROMETRIC_PRESSURE.color,
+                minValue = minPressure.environmentMetrics.barometricPressure,
+                maxValue = maxPressure.environmentMetrics.barometricPressure
+            )
+        }
         Box(
             contentAlignment = Alignment.TopStart,
             modifier = Modifier
@@ -274,8 +309,12 @@ private fun EnvironmentMetricsChart(
                 var index: Int
                 var first: Int
                 for (metric in Environment.entries) {
-                    if (metric == Environment.IAQ && !plotIAQ) {
+                    if (metric == Environment.IAQ && !plotIAQ ||
+                        metric == Environment.BAROMETRIC_PRESSURE && !plotPressure) {
                         continue
+                    }
+                    if (metric == Environment.BAROMETRIC_PRESSURE) {
+                        diff = pressureDiff
                     }
                     index = 0
                     while (index < telemetries.size) {
@@ -316,7 +355,8 @@ private fun EnvironmentMetricsChart(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    Legend(LEGEND_DATA, promptInfoDialog = promptInfoDialog)
+    Legend(LEGEND_DATA_1, displayInfoIcon = false)
+    Legend(LEGEND_DATA_2, promptInfoDialog = promptInfoDialog)
 
     Spacer(modifier = Modifier.height(16.dp))
 }
