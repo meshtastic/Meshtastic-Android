@@ -234,7 +234,6 @@ class UIViewModel @Inject constructor(
         initialValue = NodesUiState.Empty,
     )
 
-
     val nodeList: StateFlow<List<Node>> = nodesUiState.flatMapLatest { state ->
         nodeDB.getNodes(state.sort, state.filter, state.includeUnknown)
     }.stateIn(
@@ -242,7 +241,6 @@ class UIViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = emptyList(),
     )
-
 
     val filteredNodeList: StateFlow<List<Node>> = nodeList.mapLatest { list ->
         list.filter { node ->
@@ -338,10 +336,8 @@ class UIViewModel @Inject constructor(
         initialValue = emptyList(),
     )
 
-
     fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey)
         .mapLatest { list -> list.map { it.toMessage(::getNode) } }
-
 
     val waypoints = packetRepository.getWaypoints().mapLatest { list ->
         list.associateBy { packet -> packet.data.waypoint!!.id }
