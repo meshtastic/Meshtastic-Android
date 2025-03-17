@@ -51,7 +51,6 @@ import com.geeksville.mesh.util.UiText
 import com.google.protobuf.MessageLite
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -103,7 +102,6 @@ class RadioConfigViewModel @Inject constructor(
     val currentDeviceProfile get() = _currentDeviceProfile.value
 
     init {
-        @OptIn(ExperimentalCoroutinesApi::class)
         radioConfigRepository.nodeDBbyNum
             .mapLatest { nodes -> nodes[destNum] ?: nodes.values.firstOrNull() }
             .distinctUntilChanged()

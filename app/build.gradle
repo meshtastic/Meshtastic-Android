@@ -96,7 +96,10 @@ android {
     }
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_17.toString()
-        freeCompilerArgs += ['-opt-in=kotlin.RequiresOptIn']
+        freeCompilerArgs += [
+                '-opt-in=kotlin.RequiresOptIn',
+                '-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi'
+        ]
     }
     lint {
         abortOnError false

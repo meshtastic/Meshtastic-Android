@@ -63,7 +63,6 @@ import com.geeksville.mesh.util.getShortDate
 import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -235,7 +234,7 @@ class UIViewModel @Inject constructor(
         initialValue = NodesUiState.Empty,
     )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+
     val nodeList: StateFlow<List<Node>> = nodesUiState.flatMapLatest { state ->
         nodeDB.getNodes(state.sort, state.filter, state.includeUnknown)
     }.stateIn(
@@ -244,7 +243,7 @@ class UIViewModel @Inject constructor(
         initialValue = emptyList(),
     )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+
     val filteredNodeList: StateFlow<List<Node>> = nodeList.mapLatest { list ->
         list.filter { node ->
             !node.isIgnored
@@ -339,11 +338,11 @@ class UIViewModel @Inject constructor(
         initialValue = emptyList(),
     )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+
     fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey)
         .mapLatest { list -> list.map { it.toMessage(::getNode) } }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
+
     val waypoints = packetRepository.getWaypoints().mapLatest { list ->
         list.associateBy { packet -> packet.data.waypoint!!.id }
             .filterValues { it.data.waypoint!!.expire > System.currentTimeMillis() / 1000 }
