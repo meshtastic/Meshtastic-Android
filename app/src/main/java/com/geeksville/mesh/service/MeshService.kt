@@ -95,6 +95,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeoutOrNull
+import java.time.Instant
 import java.util.Random
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -214,7 +215,11 @@ class MeshService : Service(), Logging {
     private var mqttMessageFlow: Job? = null
 
     private val batteryPercentUnsupported = 0.0
-    private val batteryPercentLowThreshold = 20.0
+    private val batteryPercentLowThreshold = 20
+    private val batteryPercentLowDivisor = 5
+    private val batteryPercentCriticalThreshold = 5
+    private val batteryPercentCooldownSeconds = 1500
+    private val batteryPercentCooldowns: HashMap<Int, Long> = HashMap()
 
     private fun getSenderName(packet: DataPacket?): String {
         val name = nodeDBbyID[packet?.from]?.user?.longName
@@ -947,9 +952,28 @@ class MeshService : Service(), Logging {
                     val isRemote = (fromNum != myNodeNum)
                     if (fromNum == myNodeNum || (isRemote && it.isFavorite)) {
                         if (t.deviceMetrics.voltage > batteryPercentUnsupported &&
-                            t.deviceMetrics.batteryLevel < batteryPercentLowThreshold) {
-                            serviceNotifications.showOrUpdateLowBatteryNotification(it, isRemote)
+                            t.deviceMetrics.batteryLevel <= batteryPercentLowThreshold) {
+                            var shouldDisplay = false
+                            when {
+                                t.deviceMetrics.batteryLevel <= batteryPercentCriticalThreshold -> shouldDisplay = true
+                                t.deviceMetrics.batteryLevel == batteryPercentLowThreshold -> shouldDisplay = true
+                                t.deviceMetrics.batteryLevel.mod(batteryPercentLowDivisor) == 0 &&
+                                    !isRemote -> shouldDisplay = true
+                                isRemote -> shouldDisplay = true
+                            }
+                            if (shouldDisplay) {
+                                val now = Instant.now().epochSecond
+                                if (!batteryPercentCooldowns.containsKey(fromNum)) batteryPercentCooldowns[fromNum] = 0
+                                if ((now - batteryPercentCooldowns[fromNum]!!) >= batteryPercentCooldownSeconds) {
+                                    batteryPercentCooldowns[fromNum] = now
+                                    serviceNotifications.showOrUpdateLowBatteryNotification(
+                                        it,
+                                        isRemote
+                                    )
+                                }
+                            }
                         } else {
+                            if (batteryPercentCooldowns.containsKey(fromNum)) batteryPercentCooldowns.remove(fromNum)
                             serviceNotifications.cancelLowBatteryNotification(it)
                         }
                     }
