@@ -954,8 +954,12 @@ class MeshService : Service(), Logging {
                         if (t.deviceMetrics.voltage > batteryPercentUnsupported &&
                             t.deviceMetrics.batteryLevel <= batteryPercentLowThreshold) {
                             var shouldDisplay = false
+                            var forceDisplay = false
                             when {
-                                t.deviceMetrics.batteryLevel <= batteryPercentCriticalThreshold -> shouldDisplay = true
+                                t.deviceMetrics.batteryLevel <= batteryPercentCriticalThreshold -> {
+                                    shouldDisplay = true
+                                    forceDisplay = true
+                                }
                                 t.deviceMetrics.batteryLevel == batteryPercentLowThreshold -> shouldDisplay = true
                                 t.deviceMetrics.batteryLevel.mod(batteryPercentLowDivisor) == 0 &&
                                     !isRemote -> shouldDisplay = true
@@ -964,7 +968,8 @@ class MeshService : Service(), Logging {
                             if (shouldDisplay) {
                                 val now = Instant.now().epochSecond
                                 if (!batteryPercentCooldowns.containsKey(fromNum)) batteryPercentCooldowns[fromNum] = 0
-                                if ((now - batteryPercentCooldowns[fromNum]!!) >= batteryPercentCooldownSeconds) {
+                                if ((now - batteryPercentCooldowns[fromNum]!!) >= batteryPercentCooldownSeconds ||
+                                    forceDisplay) {
                                     batteryPercentCooldowns[fromNum] = now
                                     serviceNotifications.showOrUpdateLowBatteryNotification(
                                         it,
