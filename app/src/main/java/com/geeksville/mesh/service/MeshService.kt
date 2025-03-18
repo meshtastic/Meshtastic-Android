@@ -563,7 +563,8 @@ class MeshService : Service(), Logging {
             nodeDBbyNodeNum[myNodeNum]?.hasPKC == true && nodeDBbyNodeNum[to]?.hasPKC == true ->
                 DataPacket.PKC_CHANNEL_INDEX
 
-            else -> channelSet.settingsList
+            else ->
+                channelSet.settingsList
                 .indexOfFirst { it.name.equals("admin", ignoreCase = true) }
                 .coerceAtLeast(0)
         }
@@ -902,9 +903,13 @@ class MeshService : Service(), Logging {
             val newNode = (it.isUnknownUser && p.hwModel != MeshProtos.HardwareModel.UNSET)
 
             val keyMatch = !it.hasPKC || it.user.publicKey == p.publicKey
-            it.user = if (keyMatch) p else p.copy {
+            it.user = if (keyMatch) {
+                p
+            } else {
+                p.copy {
                 warn("Public key mismatch from $longName ($shortName)")
                 publicKey = it.errorByteString
+            }
             }
             it.longName = p.longName
             it.shortName = p.shortName
@@ -952,33 +957,18 @@ class MeshService : Service(), Logging {
                     val isRemote = (fromNum != myNodeNum)
                     if (fromNum == myNodeNum || (isRemote && it.isFavorite)) {
                         if (t.deviceMetrics.voltage > batteryPercentUnsupported &&
-                            t.deviceMetrics.batteryLevel <= batteryPercentLowThreshold) {
-                            var shouldDisplay = false
-                            var forceDisplay = false
-                            when {
-                                t.deviceMetrics.batteryLevel <= batteryPercentCriticalThreshold -> {
-                                    shouldDisplay = true
-                                    forceDisplay = true
-                                }
-                                t.deviceMetrics.batteryLevel == batteryPercentLowThreshold -> shouldDisplay = true
-                                t.deviceMetrics.batteryLevel.mod(batteryPercentLowDivisor) == 0 &&
-                                    !isRemote -> shouldDisplay = true
-                                isRemote -> shouldDisplay = true
-                            }
-                            if (shouldDisplay) {
-                                val now = Instant.now().epochSecond
-                                if (!batteryPercentCooldowns.containsKey(fromNum)) batteryPercentCooldowns[fromNum] = 0
-                                if ((now - batteryPercentCooldowns[fromNum]!!) >= batteryPercentCooldownSeconds ||
-                                    forceDisplay) {
-                                    batteryPercentCooldowns[fromNum] = now
-                                    serviceNotifications.showOrUpdateLowBatteryNotification(
-                                        it,
-                                        isRemote
-                                    )
-                                }
+                            t.deviceMetrics.batteryLevel <= batteryPercentLowThreshold
+                        ) {
+                            if (shouldBatteryNotificationShow(fromNum, t)) {
+                                serviceNotifications.showOrUpdateLowBatteryNotification(
+                                    it,
+                                    isRemote
+                                )
                             }
                         } else {
-                            if (batteryPercentCooldowns.containsKey(fromNum)) batteryPercentCooldowns.remove(fromNum)
+                            if (batteryPercentCooldowns.containsKey(fromNum)) {
+                                batteryPercentCooldowns.remove(fromNum)
+                            }
                             serviceNotifications.cancelLowBatteryNotification(it)
                         }
                     }
@@ -987,6 +977,32 @@ class MeshService : Service(), Logging {
                 t.hasPowerMetrics() -> it.powerTelemetry = t
             }
         }
+    }
+
+    private fun shouldBatteryNotificationShow(fromNum: Int, t: TelemetryProtos.Telemetry): Boolean {
+        val isRemote = (fromNum != myNodeNum)
+        var shouldDisplay = false
+        var forceDisplay = false
+        when {
+            t.deviceMetrics.batteryLevel <= batteryPercentCriticalThreshold -> {
+                shouldDisplay = true
+                forceDisplay = true
+            }
+            t.deviceMetrics.batteryLevel == batteryPercentLowThreshold -> shouldDisplay = true
+            t.deviceMetrics.batteryLevel.mod(batteryPercentLowDivisor) == 0 && !isRemote -> shouldDisplay = true
+            isRemote -> shouldDisplay = true
+        }
+        if (shouldDisplay) {
+            val now = Instant.now().epochSecond
+            if (!batteryPercentCooldowns.containsKey(fromNum)) batteryPercentCooldowns[fromNum] = 0
+            if ((now - batteryPercentCooldowns[fromNum]!!) >= batteryPercentCooldownSeconds ||
+                forceDisplay
+            ) {
+                batteryPercentCooldowns[fromNum] = now
+                return true
+            }
+        }
+        return false
     }
 
     private fun handleReceivedPaxcounter(fromNum: Int, p: PaxcountProtos.Paxcount) {
@@ -1041,10 +1057,12 @@ class MeshService : Service(), Logging {
     // Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedMeshPacket(packet: MeshPacket) {
         if (haveNodeDB) {
-            processReceivedMeshPacket(packet.toBuilder().apply {
+            processReceivedMeshPacket(
+                packet.toBuilder().apply {
                 // If the rxTime was not set by the device, update with current time
                 if (packet.rxTime == 0) setRxTime(currentSecond())
-            }.build())
+            }.build()
+            )
             onNodeDBChanged()
         } else {
             warn("Ignoring early received packet: ${packet.toOneLineString()}")
@@ -1063,9 +1081,11 @@ class MeshService : Service(), Logging {
         queueResponse[packet.id] = future
         try {
             if (connectionState != ConnectionState.CONNECTED) throw RadioNotConnectedException()
-            sendToRadio(ToRadio.newBuilder().apply {
+            sendToRadio(
+                ToRadio.newBuilder().apply {
                 this.packet = packet
-            })
+            }
+            )
         } catch (ex: Exception) {
             errormsg("sendToRadio error:", ex)
             future.complete(false)
@@ -1139,10 +1159,12 @@ class MeshService : Service(), Logging {
      * Change the status on a DataPacket and update watchers
      */
     private fun changeStatus(packetId: Int, m: MessageStatus) = serviceScope.handledLaunch {
-        if (packetId != 0) getDataPacketById(packetId)?.let { p ->
+        if (packetId != 0) {
+            getDataPacketById(packetId)?.let { p ->
             if (p.status == m) return@handledLaunch
             packetRepository.get().updateMessageStatus(p, m)
             serviceBroadcasts.broadcastMessageStatus(packetId, m)
+        }
         }
     }
 
@@ -1737,16 +1759,20 @@ class MeshService : Service(), Logging {
 
                 haveNodeDB = true // we now have nodes from real hardware
 
-                sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+                sendToRadio(
+                    newMeshPacketTo(myNodeNum).buildAdminPacket {
                     setTimeOnly = currentSecond()
-                })
+                }
+                )
                 sendAnalytics()
 
                 if (deviceVersion < minDeviceVersion || appVersion < minAppVersion) {
                     info("Device firmware or app is too old, faking config so firmware update can occur")
-                    setLocalConfig(config {
+                    setLocalConfig(
+                        config {
                         security = localConfig.security.copy { isManaged = true }
-                    })
+                    }
+                    )
                 }
                 onHasSettings()
             }
@@ -1765,9 +1791,11 @@ class MeshService : Service(), Logging {
 
         debug("Starting config nonce=$configNonce")
 
-        sendToRadio(ToRadio.newBuilder().apply {
+        sendToRadio(
+            ToRadio.newBuilder().apply {
             this.wantConfigId = configNonce
-        })
+        }
+        )
     }
 
     /**
@@ -1789,14 +1817,16 @@ class MeshService : Service(), Logging {
                     handleReceivedPosition(mi.myNodeNum, position)
                 }
 
-                sendToRadio(newMeshPacketTo(idNum).buildMeshPacket(
+                sendToRadio(
+                    newMeshPacketTo(idNum).buildMeshPacket(
                     channel = if (destNum == null) 0 else nodeDBbyNodeNum[destNum]?.channel ?: 0,
                     priority = MeshPacket.Priority.BACKGROUND,
                 ) {
                     portnumValue = Portnums.PortNum.POSITION_APP_VALUE
                     payload = position.toByteString()
                     this.wantResponse = wantResponse
-                })
+                }
+                )
             }
         } catch (ex: BLEException) {
             warn("Ignoring disconnected radio during gps location update")
@@ -1819,9 +1849,11 @@ class MeshService : Service(), Logging {
             handleReceivedUser(dest.num, user)
 
             // encapsulate our payload in the proper protobuf and fire it off
-            sendToRadio(newMeshPacketTo(dest.num).buildAdminPacket(id = packetId) {
+            sendToRadio(
+                newMeshPacketTo(dest.num).buildAdminPacket(id = packetId) {
                 setOwner = user
-            })
+            }
+            )
         }
     }
 
@@ -1860,13 +1892,16 @@ class MeshService : Service(), Logging {
     }
 
     private fun getDeviceMetadata(destNum: Int) = toRemoteExceptions {
-        sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(wantResponse = true) {
+        sendToRadio(
+            newMeshPacketTo(destNum).buildAdminPacket(wantResponse = true) {
             getDeviceMetadataRequest = true
-        })
+        }
+        )
     }
 
     private fun favoriteNode(node: Node) = toRemoteExceptions {
-        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+        sendToRadio(
+            newMeshPacketTo(myNodeNum).buildAdminPacket {
             if (node.isFavorite) {
                 debug("removing node ${node.num} from favorite list")
                 removeFavoriteNode = node.num
@@ -1874,14 +1909,16 @@ class MeshService : Service(), Logging {
                 debug("adding node ${node.num} to favorite list")
                 setFavoriteNode = node.num
             }
-        })
+        }
+        )
         updateNodeInfo(node.num) {
             it.isFavorite = !node.isFavorite
         }
     }
 
     private fun ignoreNode(node: Node) = toRemoteExceptions {
-        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+        sendToRadio(
+            newMeshPacketTo(myNodeNum).buildAdminPacket {
             if (node.isIgnored) {
                 debug("removing node ${node.num} from ignore list")
                 removeIgnoredNode = node.num
@@ -1889,7 +1926,8 @@ class MeshService : Service(), Logging {
                 debug("adding node ${node.num} to ignore list")
                 setIgnoredNode = node.num
             }
-        })
+        }
+        )
         updateNodeInfo(node.num) {
             it.isIgnored = !node.isIgnored
         }
@@ -1947,12 +1985,15 @@ class MeshService : Service(), Logging {
         override fun getPacketId() = toRemoteExceptions { generatePacketId() }
 
         override fun setOwner(user: MeshUser) = toRemoteExceptions {
-            setOwner(generatePacketId(), user {
+            setOwner(
+                generatePacketId(),
+                user {
                 id = user.id
                 longName = user.longName
                 shortName = user.shortName
                 isLicensed = user.isLicensed
-            })
+            }
+            )
         }
 
         override fun setRemoteOwner(id: Int, payload: ByteArray) = toRemoteExceptions {
@@ -1961,9 +2002,11 @@ class MeshService : Service(), Logging {
         }
 
         override fun getRemoteOwner(id: Int, destNum: Int) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
+            sendToRadio(
+                newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
                 getOwnerRequest = true
-            })
+            }
+            )
         }
 
         override fun send(p: DataPacket) {
@@ -1983,11 +2026,13 @@ class MeshService : Service(), Logging {
                     p.status = MessageStatus.QUEUED
                 }
 
-                if (connectionState == ConnectionState.CONNECTED) try {
+                if (connectionState == ConnectionState.CONNECTED) {
+                    try {
                     sendNow(p)
                 } catch (ex: Exception) {
                     errormsg("Error sending message, so enqueueing", ex)
                     enqueueForSending(p)
+                }
                 } else {
                     enqueueForSending(p)
                 }
@@ -2027,13 +2072,15 @@ class MeshService : Service(), Logging {
         }
 
         override fun getRemoteConfig(id: Int, destNum: Int, config: Int) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
+            sendToRadio(
+                newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
                 if (config == AdminProtos.AdminMessage.ConfigType.SESSIONKEY_CONFIG_VALUE) {
                     getDeviceMetadataRequest = true
                 } else {
                     getConfigRequestValue = config
                 }
-            })
+            }
+            )
         }
 
         /** Send our current module config to the device
@@ -2046,33 +2093,43 @@ class MeshService : Service(), Logging {
         }
 
         override fun getModuleConfig(id: Int, destNum: Int, config: Int) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
+            sendToRadio(
+                newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
                 getModuleConfigRequestValue = config
-            })
+            }
+            )
         }
 
         override fun setRingtone(destNum: Int, ringtone: String) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket {
+            sendToRadio(
+                newMeshPacketTo(destNum).buildAdminPacket {
                 setRingtoneMessage = ringtone
-            })
+            }
+            )
         }
 
         override fun getRingtone(id: Int, destNum: Int) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
+            sendToRadio(
+                newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
                 getRingtoneRequest = true
-            })
+            }
+            )
         }
 
         override fun setCannedMessages(destNum: Int, messages: String) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket {
+            sendToRadio(
+                newMeshPacketTo(destNum).buildAdminPacket {
                 setCannedMessageModuleMessages = messages
-            })
+            }
+            )
         }
 
         override fun getCannedMessages(id: Int, destNum: Int) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
+            sendToRadio(
+                newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
                 getCannedMessageModuleMessagesRequest = true
-            })
+            }
+            )
         }
 
         override fun setChannel(payload: ByteArray?) = toRemoteExceptions {
@@ -2085,21 +2142,27 @@ class MeshService : Service(), Logging {
         }
 
         override fun getRemoteChannel(id: Int, destNum: Int, index: Int) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
+            sendToRadio(
+                newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
                 getChannelRequest = index + 1
-            })
+            }
+            )
         }
 
         override fun beginEditSettings() = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+            sendToRadio(
+                newMeshPacketTo(myNodeNum).buildAdminPacket {
                 beginEditSettings = true
-            })
+            }
+            )
         }
 
         override fun commitEditSettings() = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+            sendToRadio(
+                newMeshPacketTo(myNodeNum).buildAdminPacket {
                 commitEditSettings = true
-            })
+            }
+            )
         }
 
         override fun getChannelSet(): ByteArray = toRemoteExceptions {
@@ -2129,30 +2192,37 @@ class MeshService : Service(), Logging {
 
         override fun removeByNodenum(requestId: Int, nodeNum: Int) = toRemoteExceptions {
             nodeDBbyNodeNum.remove(nodeNum)
-            sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+            sendToRadio(
+                newMeshPacketTo(myNodeNum).buildAdminPacket {
                 removeByNodenum = nodeNum
-            })
+            }
+            )
         }
         override fun requestUserInfo(destNum: Int) = toRemoteExceptions {
             if (destNum != myNodeNum) {
-                sendToRadio(newMeshPacketTo(destNum
+                sendToRadio(
+                    newMeshPacketTo(
+                        destNum
                 ).buildMeshPacket(
                     channel = nodeDBbyNodeNum[destNum]?.channel ?: 0
                 ) {
                     portnumValue = Portnums.PortNum.NODEINFO_APP_VALUE
                     wantResponse = true
                     payload = nodeDBbyNodeNum[myNodeNum]!!.user.toByteString()
-                })
+                }
+                )
             }
         }
         override fun requestPosition(destNum: Int, position: Position) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(
+            sendToRadio(
+                newMeshPacketTo(destNum).buildMeshPacket(
                 channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
                 priority = MeshPacket.Priority.BACKGROUND,
             ) {
                 portnumValue = Portnums.PortNum.POSITION_APP_VALUE
                 wantResponse = true
-            })
+            }
+            )
         }
 
         override fun setFixedPosition(destNum: Int, position: Position) = toRemoteExceptions {
@@ -2161,51 +2231,63 @@ class MeshService : Service(), Logging {
                 longitudeI = Position.degI(position.longitude)
                 altitude = position.altitude
             }
-            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket {
+            sendToRadio(
+                newMeshPacketTo(destNum).buildAdminPacket {
                 if (position != Position(0.0, 0.0, 0)) {
                     setFixedPosition = pos
                 } else {
                     removeFixedPosition = true
                 }
-            })
+            }
+            )
             updateNodeInfo(destNum) {
                 it.setPosition(pos, currentSecond())
             }
         }
 
         override fun requestTraceroute(requestId: Int, destNum: Int) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(
+            sendToRadio(
+                newMeshPacketTo(destNum).buildMeshPacket(
                 wantAck = true,
                 id = requestId,
                 channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
             ) {
                 portnumValue = Portnums.PortNum.TRACEROUTE_APP_VALUE
                 wantResponse = true
-            })
+            }
+            )
         }
 
         override fun requestShutdown(requestId: Int, destNum: Int) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
+            sendToRadio(
+                newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
                 shutdownSeconds = 5
-            })
+            }
+            )
         }
 
         override fun requestReboot(requestId: Int, destNum: Int) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
+            sendToRadio(
+                newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
                 rebootSeconds = 5
-            })
+            }
+            )
         }
 
         override fun requestFactoryReset(requestId: Int, destNum: Int) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
+            sendToRadio(
+                newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
                 factoryResetDevice = 1
-            })
+            }
+            )
         }
 
         override fun requestNodedbReset(requestId: Int, destNum: Int) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
+            sendToRadio(
+                newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
                 nodedbReset = 1
-            })
+            }
+            )
         }
     }
 }
