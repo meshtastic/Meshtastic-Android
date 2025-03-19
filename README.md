@@ -29,7 +29,7 @@ width="32%">](https://play.google.com/store/apps/details?id=com.geeksville.mesh&
 If you want to join the Play Store testing program go to [this URL](https://play.google.com/apps/testing/com.geeksville.mesh) and opt-in to become a tester.
 If you encounter any problems or have questions, [post in the forum](https://github.com/orgs/meshtastic/discussions) and we'll help.
 
-However, if you must use 'raw' APKs you can get them from our [github releases](https://github.com/meshtastic/Meshtastic-Android/releases). This is not recommended because if you manually install an APK it will not automatically update.
+However, if you must use 'raw' APKs you can get them from our [github releases](https://github.com/meshtastic/Meshtastic-Android/releases). It is recommend to use these with [Obtainum](https://github.com/ImranR98/Obtainium) to get the latest updates.
 
 ## Translations
 
