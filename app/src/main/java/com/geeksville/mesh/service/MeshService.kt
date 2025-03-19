@@ -95,7 +95,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeoutOrNull
-import java.time.Instant
 import java.util.Random
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -990,7 +989,7 @@ class MeshService : Service(), Logging {
             isRemote -> shouldDisplay = true
         }
         if (shouldDisplay) {
-            val now = Instant.now().epochSecond
+            val now = System.currentTimeMillis() / 1000
             if (!batteryPercentCooldowns.containsKey(fromNum)) batteryPercentCooldowns[fromNum] = 0
             if ((now - batteryPercentCooldowns[fromNum]!!) >= batteryPercentCooldownSeconds ||
                 forceDisplay
