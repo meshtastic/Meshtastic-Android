@@ -64,13 +64,13 @@ import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
-import com.geeksville.mesh.ui.components.CommonCharts.INFANTRY_BLUE
+import com.geeksville.mesh.ui.theme.InfantryBlue
 import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.createPath
 
 @Suppress("MagicNumber")
 private enum class Power(val color: Color, val min: Float, val max: Float) {
-    CURRENT(INFANTRY_BLUE, -500f, 500f),
+    CURRENT(InfantryBlue, -500f, 500f),
     VOLTAGE(Color.Red, 0f, 20f);
     /**
      * Difference between the metrics `max` and `min` values.
