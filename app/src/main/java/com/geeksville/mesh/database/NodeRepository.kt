@@ -28,7 +28,6 @@ import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.NodeSortOption
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -65,7 +64,6 @@ class NodeRepository @Inject constructor(
         .map { map -> map.mapValues { (_, it) -> it.toEntity() } }
 
     // A map from nodeNum to Node
-    @OptIn(ExperimentalCoroutinesApi::class)
     val nodeDBbyNum: StateFlow<Map<Int, Node>> = nodeInfoDao.nodeDBbyNum()
         .mapLatest { map -> map.mapValues { (_, it) -> it.toModel() } }
         .onEach {
@@ -94,7 +92,6 @@ class NodeRepository @Inject constructor(
                 .setHwModel(MeshProtos.HardwareModel.UNSET)
                 .build()
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     fun getNodes(
         sort: NodeSortOption = NodeSortOption.LAST_HEARD,
         filter: String = "",
