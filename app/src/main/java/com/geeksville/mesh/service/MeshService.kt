@@ -214,7 +214,11 @@ class MeshService : Service(), Logging {
     private var mqttMessageFlow: Job? = null
 
     private val batteryPercentUnsupported = 0.0
-    private val batteryPercentLowThreshold = 20.0
+    private val batteryPercentLowThreshold = 20
+    private val batteryPercentLowDivisor = 5
+    private val batteryPercentCriticalThreshold = 5
+    private val batteryPercentCooldownSeconds = 1500
+    private val batteryPercentCooldowns: HashMap<Int, Long> = HashMap()
 
     private fun getSenderName(packet: DataPacket?): String {
         val name = nodeDBbyID[packet?.from]?.user?.longName
@@ -949,9 +953,18 @@ class MeshService : Service(), Logging {
                     val isRemote = (fromNum != myNodeNum)
                     if (fromNum == myNodeNum || (isRemote && it.isFavorite)) {
                         if (t.deviceMetrics.voltage > batteryPercentUnsupported &&
-                            t.deviceMetrics.batteryLevel < batteryPercentLowThreshold) {
-                            serviceNotifications.showOrUpdateLowBatteryNotification(it, isRemote)
+                            t.deviceMetrics.batteryLevel <= batteryPercentLowThreshold
+                        ) {
+                            if (shouldBatteryNotificationShow(fromNum, t)) {
+                                serviceNotifications.showOrUpdateLowBatteryNotification(
+                                    it,
+                                    isRemote
+                                )
+                            }
                         } else {
+                            if (batteryPercentCooldowns.containsKey(fromNum)) {
+                                batteryPercentCooldowns.remove(fromNum)
+                            }
                             serviceNotifications.cancelLowBatteryNotification(it)
                         }
                     }
@@ -960,6 +973,32 @@ class MeshService : Service(), Logging {
                 t.hasPowerMetrics() -> it.powerTelemetry = t
             }
         }
+    }
+
+    private fun shouldBatteryNotificationShow(fromNum: Int, t: TelemetryProtos.Telemetry): Boolean {
+        val isRemote = (fromNum != myNodeNum)
+        var shouldDisplay = false
+        var forceDisplay = false
+        when {
+            t.deviceMetrics.batteryLevel <= batteryPercentCriticalThreshold -> {
+                shouldDisplay = true
+                forceDisplay = true
+            }
+            t.deviceMetrics.batteryLevel == batteryPercentLowThreshold -> shouldDisplay = true
+            t.deviceMetrics.batteryLevel.mod(batteryPercentLowDivisor) == 0 && !isRemote -> shouldDisplay = true
+            isRemote -> shouldDisplay = true
+        }
+        if (shouldDisplay) {
+            val now = System.currentTimeMillis() / 1000
+            if (!batteryPercentCooldowns.containsKey(fromNum)) batteryPercentCooldowns[fromNum] = 0
+            if ((now - batteryPercentCooldowns[fromNum]!!) >= batteryPercentCooldownSeconds ||
+                forceDisplay
+            ) {
+                batteryPercentCooldowns[fromNum] = now
+                return true
+            }
+        }
+        return false
     }
 
     private fun handleReceivedPaxcounter(fromNum: Int, p: PaxcountProtos.Paxcount) {
