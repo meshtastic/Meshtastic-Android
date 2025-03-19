@@ -341,4 +341,6 @@
     <string name="meshtastic_low_battery_notifications">Low battery notifications</string>
     <string name="low_battery_title">Low battery: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Low battery notifications (favorite nodes)</string>
+    <string name="mesh_via_udp_enabled">Mesh via UDP enabled</string>
+    <string name="udp_config">UDP Config</string>
 </resources>

@@ -43,7 +43,6 @@ import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.ui.map.MAP_STYLE_ID
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
@@ -224,7 +223,6 @@ class MetricsViewModel @Inject constructor(
     private var deviceHardwareList: List<DeviceHardware> = listOf()
 
     init {
-        @OptIn(ExperimentalCoroutinesApi::class)
         radioConfigRepository.nodeDBbyNum
             .mapLatest { nodes -> nodes[destNum] }
             .distinctUntilChanged()

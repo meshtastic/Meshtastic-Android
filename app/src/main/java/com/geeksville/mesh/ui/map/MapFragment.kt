@@ -304,7 +304,7 @@ fun MapView(
             if (permissions.entries.all { it.value }) map.toggleMyLocation()
         }
 
-    val nodes by model.nodeList.collectAsStateWithLifecycle()
+    val nodes by model.filteredNodeList.collectAsStateWithLifecycle()
     val waypoints by model.waypoints.collectAsStateWithLifecycle(emptyMap())
 
     val markerIcon = remember {
