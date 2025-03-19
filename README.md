@@ -39,4 +39,7 @@ You can help translate the app into your native language using [Crowdin](https:/
 
 https://meshtastic.org/docs/development/android/
 
+## Repository Statistics
+![Alt](https://repobeats.axiom.co/api/embed/fdb0a61e65b85e53bf4b5f92e634b0f352953d00.svg "Repobeats analytics image")
+
 Copyright 2025, Meshtastic LLC. GPL-3.0 license
