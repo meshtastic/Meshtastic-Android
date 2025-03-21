@@ -663,7 +663,7 @@ class MeshService : Service(), Logging {
     private fun toMeshPacket(p: DataPacket): MeshPacket {
         return newMeshPacketTo(p.to!!).buildMeshPacket(
             id = p.id,
-            wantAck = (Boolean) p.wantAck,
+            wantAck = p.wantAck,
             hopLimit = p.hopLimit,
             channel = p.channel,
         ) {
