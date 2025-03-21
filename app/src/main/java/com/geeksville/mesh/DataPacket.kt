@@ -119,7 +119,7 @@ data class DataPacket(
         parcel.readParcelableCompat(MessageStatus::class.java.classLoader),
         parcel.readInt(),
         parcel.readInt(),
-        parcel.readBoolean(),
+        parcel.readInt(),
     )
 
     override fun equals(other: Any?): Boolean {
