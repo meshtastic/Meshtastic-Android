@@ -58,7 +58,7 @@ data class DataPacket(
     var status: MessageStatus? = MessageStatus.UNKNOWN,
     var hopLimit: Int = 0,
     var channel: Int = 0, // channel index
-    var wantAck: Boolean, // If true, the receiver should send an ack back
+    var wantAck: Boolean = true, // If true, the receiver should send an ack back
 ) : Parcelable {
 
     /**
