@@ -162,7 +162,7 @@ private fun NodeSortButton(
     IconButton(onClick = { expanded = true }) {
         Icon(
             imageVector = ImageVector.vectorResource(id = R.drawable.ic_twotone_sort_24),
-            contentDescription = null,
+            contentDescription = stringResource(R.string.node_sort_button),
             modifier = Modifier.heightIn(max = 48.dp),
             tint = MaterialTheme.colors.onSurface
         )
