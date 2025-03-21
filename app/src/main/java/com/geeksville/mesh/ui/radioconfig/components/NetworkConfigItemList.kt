@@ -277,24 +277,26 @@ fun NetworkConfigItemList(
                 })
         }
         item { Divider() }
+        if (hasEthernet && hasWifi) {
+            item {
+                PreferenceCategory(text = stringResource(R.string.udp_config))
+            }
 
-        item {
-            PreferenceCategory(text = stringResource(R.string.udp_config))
+            item {
+                SwitchPreference(
+                    title = stringResource(R.string.mesh_via_udp_enabled),
+                    checked = networkInput.enabledProtocols == 1,
+                    enabled = enabled,
+                    onCheckedChange = {
+                        networkInput =
+                            networkInput.copy {
+                                if (it) enabledProtocols = 1 else enabledProtocols = 0
+                            }
+                    })
+            }
+
+            item { Divider() }
         }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.mesh_via_udp_enabled),
-                checked = networkInput.enabledProtocols == 1,
-                enabled = enabled,
-                onCheckedChange = {
-                    networkInput =
-                        networkInput.copy { if (it) enabledProtocols = 1 else enabledProtocols = 0 }
-                })
-        }
-
-        item { Divider() }
-
         item {
             PreferenceFooter(
                 enabled = enabled && networkInput != networkConfig,
