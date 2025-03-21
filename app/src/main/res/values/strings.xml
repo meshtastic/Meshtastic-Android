@@ -230,7 +230,7 @@
     <string name="map_select_download_region">Select download region</string>
     <string name="map_tile_download_estimate">Tile download estimate:</string>
     <string name="map_start_download">Start Download</string>
-    <string name="request_position">Request position</string>
+    <string name="exchange_position">Exchange position</string>
     <string name="close">Close</string>
     <string name="device_settings">Radio configuration</string>
     <string name="module_settings">Module configuration</string>
@@ -282,7 +282,7 @@
     <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption. Requires firmware version 2.5 or greater.</string>
     <string name="encryption_error">Public key mismatch</string>
     <string name="encryption_error_text">The public key does not match the recorded key. You may remove the node and let it exchange keys again, but this may indicate a more serious security problem. Contact the user through another trusted channel, to determine if the key change was due to a factory reset or other intentional action.</string>
-    <string name="request_userinfo">Request user info</string>
+    <string name="exchange_userinfo">Exchange user info</string>
     <string name="meshtastic_new_nodes_notifications">New node notifications</string>
     <string name="more_details">More details</string>
     <string name="snr">SNR</string>

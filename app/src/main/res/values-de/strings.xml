@@ -193,7 +193,7 @@
     <string name="map_select_download_region">Herunterlade-Region auswählen</string>
     <string name="map_tile_download_estimate">Kachel-Herunterladen-Schätzung:</string>
     <string name="map_start_download">Herunterladen starten</string>
-    <string name="request_position">Position anfordern</string>
+    <string name="exchange_position">Position anfordern</string>
     <string name="close">Schließen</string>
     <string name="device_settings">Geräteeinstellungen</string>
     <string name="module_settings">Moduleinstellungen</string>
@@ -245,7 +245,7 @@
     <string name="encryption_pkc_text">Direkte Nachrichten verwenden die neue öffentliche Schlüssel-Infrastruktur für die Verschlüsselung. Benötigt Firmware-Version 2.5 oder höher.</string>
     <string name="encryption_error">Public-Key Fehler</string>
     <string name="encryption_error_text">The public key does not match the recorded key. You may remove the node and let it exchange keys again, but this may indicate a more serious security problem. Contact the user through another trusted channel, to determine if the key change was due to a factory reset or other intentional action.</string>
-    <string name="request_userinfo">Benutzerinfo anfordern</string>
+    <string name="exchange_userinfo">Benutzerinfo anfordern</string>
     <string name="meshtastic_new_nodes_notifications">Neue Node Benachrichtigung</string>
     <string name="more_details">Mehr Details</string>
     <string name="snr">SNR</string>

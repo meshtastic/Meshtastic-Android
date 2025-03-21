@@ -195,7 +195,7 @@
     <string name="map_select_download_region">Vyberte oblast stahování</string>
     <string name="map_tile_download_estimate">Odhad stažení dlaždic:</string>
     <string name="map_start_download">Zahájit stahování</string>
-    <string name="request_position">Vyžádat pozici</string>
+    <string name="exchange_position">Vyžádat pozici</string>
     <string name="close">Zavřít</string>
     <string name="device_settings">Nastavení zařízení</string>
     <string name="module_settings">Nastavení modulů</string>
@@ -247,7 +247,7 @@
     <string name="encryption_pkc_text">Přímé zprávy používají novou infrastrukturu veřejných klíčů pro šifrování. Vyžaduje firmware verze 2.5 nebo vyšší.</string>
     <string name="encryption_error">Neshoda veřejného klíče</string>
     <string name="encryption_error_text">Veřejný klíč neodpovídá zaznamenanému klíči. Můžete odebrat uzel a nechat jej znovu vyměnit klíče, ale to může naznačovat závažnější bezpečnostní problém. Kontaktujte uživatele prostřednictvím jiného důvěryhodného kanálu, abyste zjistili, zda byla změna klíče způsobena resetováním továrního zařízení nebo jiným záměrným jednáním.</string>
-    <string name="request_userinfo">Vyžádat informace o uživateli</string>
+    <string name="exchange_userinfo">Vyžádat informace o uživateli</string>
     <string name="meshtastic_new_nodes_notifications">Oznámení o nových uzlech</string>
     <string name="more_details">Více detailů</string>
     <string name="snr">SNR</string>

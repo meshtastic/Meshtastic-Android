@@ -193,7 +193,7 @@
     <string name="map_select_download_region">Chwazi rejyon telechajman</string>
     <string name="map_tile_download_estimate">Estimasyon telechajman tèk</string>
     <string name="map_start_download">Kòmanse telechajman</string>
-    <string name="request_position">Mande pozisyon</string>
+    <string name="exchange_position">Mande pozisyon</string>
     <string name="close">Fèmen</string>
     <string name="device_settings">Konfigirasyon radyo</string>
     <string name="module_settings">Konfigirasyon modil</string>
@@ -245,7 +245,7 @@
     <string name="encryption_pkc_text">Mesaj dirèk yo ap itilize nouvo enfrastrikti kle piblik pou chifreman. Sa mande vèsyon lojisyèl 2.5 oswa plis.</string>
     <string name="encryption_error">Pa matche kle piblik</string>
     <string name="encryption_error_text">Kle piblik la pa matche ak kle anrejistre a. Ou ka retire nœud la e kite li echanje kle ankò, men sa ka endike yon pwoblèm sekirite pi grav. Kontakte itilizatè a atravè yon lòt chanèl ki fè konfyans, pou detèmine si chanjman kle a te fèt akòz yon reyajisteman faktori oswa lòt aksyon entansyonèl.</string>
-    <string name="request_userinfo">Mande enfòmasyon itilizatè</string>
+    <string name="exchange_userinfo">Mande enfòmasyon itilizatè</string>
     <string name="meshtastic_new_nodes_notifications">Notifikasyon nouvo nœud</string>
     <string name="more_details">Plis detay</string>
     <string name="snr">SNR</string>

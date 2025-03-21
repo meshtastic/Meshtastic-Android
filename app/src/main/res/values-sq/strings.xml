@@ -193,7 +193,7 @@
     <string name="map_select_download_region">Zgjidh rajonin për shkarkim</string>
     <string name="map_tile_download_estimate">Parashikimi i shkarkimit të pllakatës:</string>
     <string name="map_start_download">Filloni shkarkimin</string>
-    <string name="request_position">Kërkoni pozicionin</string>
+    <string name="exchange_position">Kërkoni pozicionin</string>
     <string name="close">Mbylle</string>
     <string name="device_settings">Konfigurimi i radios</string>
     <string name="module_settings">Konfigurimi i modulit</string>
@@ -245,7 +245,7 @@
     <string name="encryption_pkc_text">Mesazhet direkte po përdorin infrastrukturën e re të çelësave publikë për kriptim. Kërkon versionin 2.5 të firmuerit ose më të ri.</string>
     <string name="encryption_error">Përputhje e Gabuar e Çelësit Publik</string>
     <string name="encryption_error_text">Çelësi publik nuk përputhet me çelësin e regjistruar. Mund të hiqni nyjën dhe të lejoni që ajo të shkëmbejë përsëri çelësat, por kjo mund të tregojë një problem më serioz të sigurisë. Kontaktoni përdoruesin përmes një kanali tjetër të besuar për të përcaktuar nëse ndryshimi i çelësit ishte si pasojë e një rikthimi në fabrikë ose një veprim tjetër të qëllimshëm.</string>
-    <string name="request_userinfo">Kërkoni informacionin e përdoruesit</string>
+    <string name="exchange_userinfo">Kërkoni informacionin e përdoruesit</string>
     <string name="meshtastic_new_nodes_notifications">Njoftimet për nyje të reja</string>
     <string name="more_details">Më shumë detaje</string>
     <string name="snr">SNR</string>

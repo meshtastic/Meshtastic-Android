@@ -193,7 +193,7 @@
     <string name="map_select_download_region">Valitse ladattava kartta-alue</string>
     <string name="map_tile_download_estimate">Laattojen latauksessa kuluva aika-arvio:</string>
     <string name="map_start_download">Aloita Lataus</string>
-    <string name="request_position">Pyydä sijaintia</string>
+    <string name="exchange_position">Pyydä sijaintia</string>
     <string name="close">Sulje</string>
     <string name="device_settings">Radion asetukset</string>
     <string name="module_settings">Moduulin asetukset</string>
@@ -245,7 +245,7 @@
     <string name="encryption_pkc_text">Suorat viestit käyttävät uutta julkisen avaimen infrastruktuuria salaukseen. Vaatii laiteohjelmiston version 2.5 tai uudemman.</string>
     <string name="encryption_error">Julkinen avain ei täsmää</string>
     <string name="encryption_error_text">Julkinen avain ei vastaa kirjattua avainta. Voit poistaa laitteen ja antaa sen vaihtaa avaimia uudelleen, mutta tämä saattaa merkitä vakavampaa turvallisuusongelmaa. Ota yhteyttä käyttäjään toisen luotetun kanavan kautta määrittääksesi, johtuiko avain tehtaan resetoinnista tai muusta tarkoituksellisesta toiminnosta.</string>
-    <string name="request_userinfo">Pyydä käyttäjätietoja</string>
+    <string name="exchange_userinfo">Pyydä käyttäjätietoja</string>
     <string name="meshtastic_new_nodes_notifications">Uuden laitteen ilmoitukset</string>
     <string name="more_details">Lisätietoja</string>
     <string name="snr">SNR</string>

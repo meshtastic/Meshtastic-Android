@@ -195,7 +195,7 @@
     <string name="map_select_download_region">Wybierz region do pobrania</string>
     <string name="map_tile_download_estimate">Szacowany czas pobrania:</string>
     <string name="map_start_download">Rozpocznij pobieranie</string>
-    <string name="request_position">Poproś o pozycję</string>
+    <string name="exchange_position">Poproś o pozycję</string>
     <string name="close">Zamknij</string>
     <string name="device_settings">Ustawienia urządzenia</string>
     <string name="module_settings">Ustawienia modułu</string>
@@ -247,7 +247,7 @@
     <string name="encryption_pkc_text">Wiadomości bezpośrednie używają nowego systemu klucza publicznego do szyfrowania. Wymagana jest wersja firmware 2.5 lub wyższa.</string>
     <string name="encryption_error">Niezgodność klucza publicznego</string>
     <string name="encryption_error_text">Klucz publiczny nie pasuje do otrzymanego wcześniej klucza. Możesz usunąć węzeł i pozwolić na ponowną wymianę kluczy, ale może również wskazywać to na poważniejszy problem z bezpieczeństwem. Skontaktuj się z użytkownikiem za pomocą innego zaufanego kanału, aby ustalić, czy zmiana klucza była spowodowana przywróceniem ustawień fabrycznych czy innym działaniem.</string>
-    <string name="request_userinfo">Poproś o informacje</string>
+    <string name="exchange_userinfo">Poproś o informacje</string>
     <string name="meshtastic_new_nodes_notifications">Powiadomienia o nowych węzłach</string>
     <string name="more_details">Więcej...</string>
     <string name="snr">SNR</string>

@@ -114,14 +114,14 @@ fun NodeMenu(
                     onDismissRequest()
                     onAction(NodeMenuAction.RequestUserInfo(node))
                 },
-                content = { Text(stringResource(R.string.request_userinfo)) }
+                content = { Text(stringResource(R.string.exchange_userinfo)) }
             )
             DropdownMenuItem(
                 onClick = {
                     onDismissRequest()
                     onAction(NodeMenuAction.RequestPosition(node))
                 },
-                content = { Text(stringResource(R.string.request_position)) }
+                content = { Text(stringResource(R.string.exchange_position)) }
             )
             DropdownMenuItem(
                 onClick = {
