@@ -193,7 +193,7 @@
     <string name="map_select_download_region">Selecione a região para download</string>
     <string name="map_tile_download_estimate">Estimativa de download do bloco:</string>
     <string name="map_start_download">Iniciar download</string>
-    <string name="request_position">Solicitar posição</string>
+    <string name="exchange_position">Solicitar posição</string>
     <string name="close">Fechar</string>
     <string name="device_settings">Configurações do dispositivo</string>
     <string name="module_settings">Configurações dos módulos</string>
@@ -245,7 +245,7 @@
     <string name="encryption_pkc_text">Mensagens diretas estão usando a nova infraestrutura de chave pública para criptografia. Requer firmware versão 2.5 ou superior.</string>
     <string name="encryption_error">Chave pública não confere</string>
     <string name="encryption_error_text">A chave pública não corresponde à chave gravada. Você pode remover o nó e deixá-lo trocar as chaves novamente, mas isso pode indicar um problema de segurança mais sério. Contate o usuário através de outro canal confiável, para determinar se a chave mudou devido a uma restauração de fábrica ou outra ação intencional.</string>
-    <string name="request_userinfo">Request user info</string>
+    <string name="exchange_userinfo">Request user info</string>
     <string name="meshtastic_new_nodes_notifications">New node notifications</string>
     <string name="more_details">More details</string>
     <string name="snr">SNR</string>
