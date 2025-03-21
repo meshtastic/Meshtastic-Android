@@ -58,7 +58,7 @@ data class DataPacket(
     var status: MessageStatus? = MessageStatus.UNKNOWN,
     var hopLimit: Int = 0,
     var channel: Int = 0, // channel index
-    var wantAck: Int = 1, // If true, the receiver should send an ack back
+    var wantAck: Boolean = true, // If true, the receiver should send an ack back
 ) : Parcelable {
 
     /**
@@ -119,7 +119,7 @@ data class DataPacket(
         parcel.readParcelableCompat(MessageStatus::class.java.classLoader),
         parcel.readInt(),
         parcel.readInt(),
-        parcel.readInt(),
+        parcel.readInt() == 1,
     )
 
     override fun equals(other: Any?): Boolean {
@@ -152,7 +152,7 @@ data class DataPacket(
         result = 31 * result + status.hashCode()
         result = 31 * result + hopLimit
         result = 31 * result + channel
-        result = 31 * result + wantAck
+        result = 31 * result + wantAck.hashCode()
         return result
     }
 
@@ -166,7 +166,7 @@ data class DataPacket(
         parcel.writeParcelable(status, flags)
         parcel.writeInt(hopLimit)
         parcel.writeInt(channel)
-        parcel.writeInt(wantAck)
+        parcel.writeInt(if (wantAck) 1 else 0)
     }
 
     override fun describeContents(): Int {
@@ -184,7 +184,7 @@ data class DataPacket(
         status = parcel.readParcelableCompat(MessageStatus::class.java.classLoader)
         hopLimit = parcel.readInt()
         channel = parcel.readInt()
-        wantAck = parcel.readInt()
+        wantAck = parcel.readInt() == 1
     }
 
     companion object CREATOR : Parcelable.Creator<DataPacket> {
