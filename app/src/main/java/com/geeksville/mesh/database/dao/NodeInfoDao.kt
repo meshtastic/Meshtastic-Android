@@ -92,6 +92,7 @@ interface NodeInfoDao {
             END
         WHEN :sort = 'channel' THEN channel
         WHEN :sort = 'via_mqtt' THEN via_mqtt
+        WHEN :sort = 'via_favorite' THEN is_favorite * -1
         ELSE 0
     END ASC,
     last_heard DESC
