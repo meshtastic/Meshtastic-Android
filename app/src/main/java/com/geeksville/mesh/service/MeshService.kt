@@ -655,6 +655,7 @@ class MeshService : Service(), Logging {
                 bytes = data.payload.toByteArray(),
                 hopLimit = packet.hopLimit,
                 channel = if (packet.pkiEncrypted) DataPacket.PKC_CHANNEL_INDEX else packet.channel,
+                wantAck = packet.wantAck,
             )
         }
     }
@@ -662,7 +663,7 @@ class MeshService : Service(), Logging {
     private fun toMeshPacket(p: DataPacket): MeshPacket {
         return newMeshPacketTo(p.to!!).buildMeshPacket(
             id = p.id,
-            wantAck = true,
+            wantAck = p.wantAck,
             hopLimit = p.hopLimit,
             channel = p.channel,
         ) {
