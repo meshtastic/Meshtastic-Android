@@ -142,7 +142,7 @@
     <string name="map_select_download_region">Selecione a região para download</string>
     <string name="map_tile_download_estimate">Estimativa de download do bloco:</string>
     <string name="map_start_download">Iniciar download</string>
-    <string name="request_position">Solicitar posição</string>
+    <string name="exchange_position">Solicitar posição</string>
     <string name="close">Fechar</string>
     <string name="device_settings">Configurações do dispositivo</string>
     <string name="module_settings">Configurações dos módulos</string>

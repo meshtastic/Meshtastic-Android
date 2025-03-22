@@ -214,7 +214,11 @@ class MeshService : Service(), Logging {
     private var mqttMessageFlow: Job? = null
 
     private val batteryPercentUnsupported = 0.0
-    private val batteryPercentLowThreshold = 20.0
+    private val batteryPercentLowThreshold = 20
+    private val batteryPercentLowDivisor = 5
+    private val batteryPercentCriticalThreshold = 5
+    private val batteryPercentCooldownSeconds = 1500
+    private val batteryPercentCooldowns: HashMap<Int, Long> = HashMap()
 
     private fun getSenderName(packet: DataPacket?): String {
         val name = nodeDBbyID[packet?.from]?.user?.longName
@@ -473,7 +477,7 @@ class MeshService : Service(), Logging {
         }
 
     // given a nodeNum, return a db entry - creating if necessary
-    private fun getOrCreateNodeInfo(n: Int) = nodeDBbyNodeNum.getOrPut(n) {
+    private fun getOrCreateNodeInfo(n: Int, channel: Int = 0) = nodeDBbyNodeNum.getOrPut(n) {
         val userId = DataPacket.nodeNumToDefaultId(n)
         val defaultUser = user {
             id = userId
@@ -486,6 +490,7 @@ class MeshService : Service(), Logging {
             num = n,
             user = defaultUser,
             longName = defaultUser.longName,
+            channel = channel,
         )
     }
 
@@ -527,9 +532,10 @@ class MeshService : Service(), Logging {
     private inline fun updateNodeInfo(
         nodeNum: Int,
         withBroadcast: Boolean = true,
+        channel: Int = 0,
         crossinline updateFn: (NodeEntity) -> Unit,
     ) {
-        val info = getOrCreateNodeInfo(nodeNum)
+        val info = getOrCreateNodeInfo(nodeNum, channel)
         updateFn(info)
 
         if (info.user.id.isNotEmpty() && haveNodeDB) {
@@ -649,6 +655,7 @@ class MeshService : Service(), Logging {
                 bytes = data.payload.toByteArray(),
                 hopLimit = packet.hopLimit,
                 channel = if (packet.pkiEncrypted) DataPacket.PKC_CHANNEL_INDEX else packet.channel,
+                wantAck = packet.wantAck,
             )
         }
     }
@@ -656,7 +663,7 @@ class MeshService : Service(), Logging {
     private fun toMeshPacket(p: DataPacket): MeshPacket {
         return newMeshPacketTo(p.to!!).buildMeshPacket(
             id = p.id,
-            wantAck = true,
+            wantAck = p.wantAck,
             hopLimit = p.hopLimit,
             channel = p.channel,
         ) {
@@ -947,9 +954,18 @@ class MeshService : Service(), Logging {
                     val isRemote = (fromNum != myNodeNum)
                     if (fromNum == myNodeNum || (isRemote && it.isFavorite)) {
                         if (t.deviceMetrics.voltage > batteryPercentUnsupported &&
-                            t.deviceMetrics.batteryLevel < batteryPercentLowThreshold) {
-                            serviceNotifications.showOrUpdateLowBatteryNotification(it, isRemote)
+                            t.deviceMetrics.batteryLevel <= batteryPercentLowThreshold
+                        ) {
+                            if (shouldBatteryNotificationShow(fromNum, t)) {
+                                serviceNotifications.showOrUpdateLowBatteryNotification(
+                                    it,
+                                    isRemote
+                                )
+                            }
                         } else {
+                            if (batteryPercentCooldowns.containsKey(fromNum)) {
+                                batteryPercentCooldowns.remove(fromNum)
+                            }
                             serviceNotifications.cancelLowBatteryNotification(it)
                         }
                     }
@@ -958,6 +974,32 @@ class MeshService : Service(), Logging {
                 t.hasPowerMetrics() -> it.powerTelemetry = t
             }
         }
+    }
+
+    private fun shouldBatteryNotificationShow(fromNum: Int, t: TelemetryProtos.Telemetry): Boolean {
+        val isRemote = (fromNum != myNodeNum)
+        var shouldDisplay = false
+        var forceDisplay = false
+        when {
+            t.deviceMetrics.batteryLevel <= batteryPercentCriticalThreshold -> {
+                shouldDisplay = true
+                forceDisplay = true
+            }
+            t.deviceMetrics.batteryLevel == batteryPercentLowThreshold -> shouldDisplay = true
+            t.deviceMetrics.batteryLevel.mod(batteryPercentLowDivisor) == 0 && !isRemote -> shouldDisplay = true
+            isRemote -> shouldDisplay = true
+        }
+        if (shouldDisplay) {
+            val now = System.currentTimeMillis() / 1000
+            if (!batteryPercentCooldowns.containsKey(fromNum)) batteryPercentCooldowns[fromNum] = 0
+            if ((now - batteryPercentCooldowns[fromNum]!!) >= batteryPercentCooldownSeconds ||
+                forceDisplay
+            ) {
+                batteryPercentCooldowns[fromNum] = now
+                return true
+            }
+        }
+        return false
     }
 
     private fun handleReceivedPaxcounter(fromNum: Int, p: PaxcountProtos.Paxcount) {
@@ -1174,7 +1216,7 @@ class MeshService : Service(), Logging {
 
             // Do not generate redundant broadcasts of node change for this bookkeeping updateNodeInfo call
             // because apps really only care about important updates of node state - which handledReceivedData will give them
-            updateNodeInfo(fromNum, withBroadcast = false) {
+            updateNodeInfo(fromNum, withBroadcast = false, channel = packet.channel) {
                 // Update our last seen based on any valid timestamps.  If the device didn't provide a timestamp make one
                 it.lastHeard = packet.rxTime
                 it.snr = packet.rxSnr

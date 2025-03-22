@@ -304,7 +304,7 @@ fun MapView(
             if (permissions.entries.all { it.value }) map.toggleMyLocation()
         }
 
-    val nodes by model.nodeList.collectAsStateWithLifecycle()
+    val nodes by model.filteredNodeList.collectAsStateWithLifecycle()
     val waypoints by model.waypoints.collectAsStateWithLifecycle(emptyMap())
 
     val markerIcon = remember {
@@ -324,8 +324,13 @@ fun MapView(
                 label = "${u.shortName} ${formatAgo(p.time)}"
             ).apply {
                 id = u.id
-                title = "${u.longName} ${node.batteryStr}"
-                snippet = node.gpsString(gpsFormat)
+                title = u.longName
+                snippet = context.getString(R.string.map_node_popup_details,
+                    node.gpsString(gpsFormat),
+                    formatAgo(node.lastHeard),
+                    formatAgo(p.time),
+                    if (node.batteryStr != "") node.batteryStr else "?"
+                )
                 ourNode?.distanceStr(node, displayUnits)?.let { dist ->
                     subDescription =
                         context.getString(R.string.map_subDescription, ourNode.bearing(node), dist)

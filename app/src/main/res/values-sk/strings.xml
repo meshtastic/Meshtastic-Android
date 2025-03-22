@@ -195,7 +195,7 @@
     <string name="map_select_download_region">Vybrať oblasť na stiahnutie</string>
     <string name="map_tile_download_estimate">Odhad sťahovania dlaždíc:</string>
     <string name="map_start_download">Spustiť sťahovanie</string>
-    <string name="request_position">Požiadať o pozíciu</string>
+    <string name="exchange_position">Požiadať o pozíciu</string>
     <string name="close">Zavrieť</string>
     <string name="device_settings">Konfigurácia vysielača</string>
     <string name="module_settings">Konfigurácia modulu</string>
@@ -247,7 +247,7 @@
     <string name="encryption_pkc_text">Priame správy využívajú na šifrovanie novú infraštruktúru verejného kľúča. Vyžaduje verziu firmvéru 2.5 alebo vyššiu.</string>
     <string name="encryption_error">Nezhoda verejného kľúča</string>
     <string name="encryption_error_text">Verejný kľúč sa nezhoduje so zaznamenaným kľúčom. Môžete odstrániť uzol a nechať ho znova vymeniť kľúče, ale to môže naznačovať vážnejší bezpečnostný problém. Kontaktujte používateľa prostredníctvom iného dôveryhodného kanála a zistite, či bola zmena kľúča spôsobená obnovením továrenských nastavení alebo inou úmyselnou akciou.</string>
-    <string name="request_userinfo">Požiadať o informácie o užívateľovi</string>
+    <string name="exchange_userinfo">Požiadať o informácie o užívateľovi</string>
     <string name="meshtastic_new_nodes_notifications">Notifikácie nových uzlov</string>
     <string name="more_details">Viac detailov</string>
     <string name="snr">SNR</string>

@@ -193,7 +193,7 @@
     <string name="map_select_download_region">Sélectionnez la région de téléchargement</string>
     <string name="map_tile_download_estimate">Estimation du téléchargement de tuiles :</string>
     <string name="map_start_download">Commencer le téléchargement</string>
-    <string name="request_position">Demander la position</string>
+    <string name="exchange_position">Demander la position</string>
     <string name="close">Fermer</string>
     <string name="device_settings">Réglages de l\'appareil</string>
     <string name="module_settings">Réglages du module</string>
@@ -245,7 +245,7 @@
     <string name="encryption_pkc_text">Les messages directs utilisent la nouvelle infrastructure de clé publique pour le chiffrement. Nécessite une version de firmware 2.5 ou plus.</string>
     <string name="encryption_error">Les messages directs utilisent la nouvelle infrastructure de clé publique pour le chiffrement. Nécessite une version de firmware 2.5 ou plus.</string>
     <string name="encryption_error_text">La clé publique ne correspond pas à la clé enregistrée. Vous pouvez supprimer le nœud et le laisser à nouveau échanger les clés, mais cela peut indiquer un problème de sécurité plus grave. Contactez l\'utilisateur à travers un autre canal de confiance, pour déterminer si le changement de clé est dû à une réinitialisation d\'usine ou à une autre action intentionnelle.</string>
-    <string name="request_userinfo">Demander les informations de l\'utilisateur</string>
+    <string name="exchange_userinfo">Demander les informations de l\'utilisateur</string>
     <string name="meshtastic_new_nodes_notifications">Notifications de nouveaux nœuds</string>
     <string name="more_details">Plus de détails</string>
     <string name="snr">SNR</string>

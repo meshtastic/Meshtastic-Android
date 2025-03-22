@@ -196,7 +196,7 @@
     <string name="map_select_download_region">Roghnaigh réigiún íoslódála</string>
     <string name="map_tile_download_estimate">Meastachán íoslódála tile:</string>
     <string name="map_start_download">Tosaigh íoslódáil</string>
-    <string name="request_position">Iarr an suíomh</string>
+    <string name="exchange_position">Iarr an suíomh</string>
     <string name="close">Dún</string>
     <string name="device_settings">Cumraíocht raidió</string>
     <string name="module_settings">Cumraíocht an mhódule</string>
@@ -248,7 +248,7 @@
     <string name="encryption_pkc_text">Tá teachtaireachtaí díreacha á n-úsáid leis an gcórais eochair phoiblí nua do chriptiú. Riachtanach atá leagan firmware 2.5 nó níos mó.</string>
     <string name="encryption_error">Mícomhoiriúnacht na heochrach phoiblí</string>
     <string name="encryption_error_text">Ní chomhoireann an eochair phoiblí leis an eochair atá cláraithe. Féachfaidh tú le hiarraidh na nod agus athmhaoin na heochrach ach seo féadfaidh a léiriú fadhb níos tromchúisí i gcúrsaí slándála. Téigh i dteagmháil leis an úsáideoir tríd an gcainéal eile atá ar fáil chun a fháil amach an bhfuil athrú eochrach de réir athshocrú monarcha nó aidhm eile ar do chuid.</string>
-    <string name="request_userinfo">Iarr eolas úsáideoirí</string>
+    <string name="exchange_userinfo">Iarr eolas úsáideoirí</string>
     <string name="meshtastic_new_nodes_notifications">Fógartha faoi na nodes nua</string>
     <string name="more_details">Tuilleadh sonraí</string>
     <string name="snr">SNR</string>

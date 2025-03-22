@@ -196,7 +196,7 @@ Suderinamus įrenginius galite pamatyti apsilankę adresu www.meshtastic.org/doc
     <string name="map_select_download_region">Pasirinkite atsisiuntimo regioną</string>
     <string name="map_tile_download_estimate">Plytelių atsisiuntimo apskaičiavimas:</string>
     <string name="map_start_download">Pradėti atsiuntimą</string>
-    <string name="request_position">Prašyti pozicijos</string>
+    <string name="exchange_position">Prašyti pozicijos</string>
     <string name="close">Uždaryti</string>
     <string name="device_settings">Radijo modulio konfigūracija</string>
     <string name="module_settings">Modulio konfigūracija</string>
@@ -248,7 +248,7 @@ Suderinamus įrenginius galite pamatyti apsilankę adresu www.meshtastic.org/doc
     <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption. Requires firmware version 2.5 or greater.</string>
     <string name="encryption_error">Viešojo rakto neatitikimas</string>
     <string name="encryption_error_text">The public key does not match the recorded key. You may remove the node and let it exchange keys again, but this may indicate a more serious security problem. Contact the user through another trusted channel, to determine if the key change was due to a factory reset or other intentional action.</string>
-    <string name="request_userinfo">Gauti naudotojo informaciją</string>
+    <string name="exchange_userinfo">Gauti naudotojo informaciją</string>
     <string name="meshtastic_new_nodes_notifications">Naujų įtaisų pranešimai</string>
     <string name="more_details">Daugiau info</string>
     <string name="snr">SNR</string>
