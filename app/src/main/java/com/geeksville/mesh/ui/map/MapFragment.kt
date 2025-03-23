@@ -50,6 +50,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.activityViewModels
@@ -637,7 +638,7 @@ fun MapView(
                     } else {
                         Icons.Default.LocationDisabled
                     },
-                    contentDescription = null,
+                    contentDescription = stringResource(R.string.toggle_my_position),
                 ) {
                     if (context.hasLocationPermission()) {
                         map.toggleMyLocation()

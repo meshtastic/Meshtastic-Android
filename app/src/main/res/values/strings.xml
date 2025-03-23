@@ -346,4 +346,5 @@
     <string name="mesh_via_udp_enabled">Mesh via UDP enabled</string>
     <string name="udp_config">UDP Config</string>
     <string name="map_node_popup_details"><![CDATA[%s<br>Last heard: %s<br>Last position: %s<br>Battery: %s]]></string>
+    <string name="toggle_my_position">Toggle my position</string>
 </resources>
