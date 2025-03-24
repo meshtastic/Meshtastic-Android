@@ -9,5 +9,16 @@
     "workarounds:all"
   ],
   "commitMessageTopic": "{{depName}}",
-  "labels": ["dependencies"]
+  "labels": [
+    "dependencies"
+  ],
+  "packageRules": [
+    {
+      "groupName": "Kotlin and KSP",
+      "matchPackageNames": [
+        "com.google.devtools.ksp:{/,}**",
+        "org.jetbrains.kotlin:{/,}**"
+      ]
+    }
+  ]
 }
