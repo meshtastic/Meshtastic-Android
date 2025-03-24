@@ -50,6 +50,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.ViewCompositionStrategy
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.fragment.app.activityViewModels
@@ -619,30 +620,32 @@ fun MapView(
                     map.invalidate()
                 },
                 modifier = Modifier.align(Alignment.BottomCenter)
-            ) else Column(
-                modifier = Modifier
-                    .padding(top = 16.dp, end = 16.dp)
-                    .align(Alignment.TopEnd),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                MapButton(
-                    onClick = ::showMapStyleDialog,
-                    icon = Icons.Outlined.Layers,
-                    contentDescription = R.string.map_style_selection,
-                )
-                MapButton(
-                    enabled = hasGps,
-                    icon = if (myLocationOverlay == null) {
-                        Icons.Outlined.MyLocation
-                    } else {
-                        Icons.Default.LocationDisabled
-                    },
-                    contentDescription = null,
+            ) else {
+                Column(
+                    modifier = Modifier
+                        .padding(top = 16.dp, end = 16.dp)
+                        .align(Alignment.TopEnd),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    if (context.hasLocationPermission()) {
-                        map.toggleMyLocation()
-                    } else {
-                        requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
+                    MapButton(
+                        onClick = ::showMapStyleDialog,
+                        icon = Icons.Outlined.Layers,
+                        contentDescription = R.string.map_style_selection,
+                    )
+                    MapButton(
+                        enabled = hasGps,
+                        icon = if (myLocationOverlay == null) {
+                            Icons.Outlined.MyLocation
+                        } else {
+                            Icons.Default.LocationDisabled
+                        },
+                        contentDescription = stringResource(R.string.toggle_my_position),
+                    ) {
+                        if (context.hasLocationPermission()) {
+                            map.toggleMyLocation()
+                        } else {
+                            requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
+                        }
                     }
                 }
             }

@@ -471,9 +471,9 @@ private fun EditChannelUrl(
                         else -> Icons.TwoTone.ContentCopy
                     },
                     contentDescription = when {
-                        isError -> stringResource(R.string.share)
+                        isError -> stringResource(R.string.copy)
                         !isUrlEqual -> stringResource(R.string.send)
-                        else -> stringResource(R.string.share)
+                        else -> stringResource(R.string.copy)
                     },
                     tint = if (isError) {
                         MaterialTheme.colors.error
