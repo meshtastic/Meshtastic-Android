@@ -10,7 +10,7 @@ jobs:
     steps:
 
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
       with:
         submodules: 'recursive'
 
@@ -20,7 +20,7 @@ jobs:
         echo "versionName=$(grep -oP 'versionName \"\K[^\"]+' ./app/build.gradle)" >> $GITHUB_ENV
 
     - name: Validate Gradle wrapper
-      uses: gradle/actions/wrapper-validation@v4
+      uses: gradle/actions/wrapper-validation@94baf225fe0a508e581a564467443d0e2379123b # v4
 
     - name: Load secrets
       run: |
@@ -36,7 +36,7 @@ jobs:
           KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
 
     - name: Set up JDK 17
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@3a4f6e1af504cf6a31855fa899c6aa5355ba6c12 # v4
       with:
         java-version: '17'
         distribution: 'zulu'
@@ -52,7 +52,7 @@ jobs:
       run: ./gradlew bundleGoogleRelease assembleGoogleRelease
 
     - name: Create GitHub release
-      uses: actions/create-release@v1
+      uses: actions/create-release@0cb9c9b65d5d1901c1f53e5e66eaf4afd303e70e # v1
       id: create_release
       with:
         draft: true
@@ -65,7 +65,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Add F-Droid APK to release
-      uses: actions/upload-release-asset@v1
+      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -75,7 +75,7 @@ jobs:
         asset_content_type: application/zip
 
     - name: Add Play Store AAB to release
-      uses: actions/upload-release-asset@v1
+      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -85,7 +85,7 @@ jobs:
         asset_content_type: application/zip
 
     - name: Add Play Store APK to release
-      uses: actions/upload-release-asset@v1
+      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -96,7 +96,7 @@ jobs:
 
     # https://github.com/f-droid/fdroiddata/blob/master/metadata/com.geeksville.mesh.yml#L34
     - name: Add `version_info.txt` to release
-      uses: actions/upload-release-asset@v1
+      uses: actions/upload-release-asset@e8f9f06c4b078e705bd2ea027f0926603fc9b4d5 # v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
