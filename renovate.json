@@ -6,7 +6,8 @@
     ":ignoreModulesAndTests",
     "group:recommended",
     "replacements:all",
-    "workarounds:all"
+    "workarounds:all",
+    "helpers:pinGitHubActionDigests"
   ],
   "commitMessageTopic": "{{depName}}",
   "labels": [
@@ -14,10 +15,10 @@
   ],
   "packageRules": [
     {
-      "groupName": "Kotlin and KSP",
+      "groupName": "kotlin",
       "matchPackageNames": [
-        "com.google.devtools.ksp:{/,}**",
-        "org.jetbrains.kotlin:{/,}**"
+        "com.google.devtools.ksp",
+        "org.jetbrains.kotlin.*"
       ]
     }
   ]
