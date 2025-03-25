@@ -184,6 +184,8 @@ internal fun MessageScreen(
         DataPacket.ID_BROADCAST -> channelName
         else -> viewModel.getUser(nodeId).longName
     }
+    val mismatchKey =
+        DataPacket.PKC_CHANNEL_INDEX == channelIndex && viewModel.getNode(nodeId).mismatchKey
 
 //    if (channelIndex != DataPacket.PKC_CHANNEL_INDEX && nodeId != DataPacket.ID_BROADCAST) {
 //        subtitle = "(ch: $channelIndex - $channelName)"
@@ -242,7 +244,7 @@ internal fun MessageScreen(
                     }
                 }
             } else {
-                MessageTopBar(title, channelIndex, onNavigateBack)
+                MessageTopBar(title, channelIndex, mismatchKey, onNavigateBack)
             }
         },
         bottomBar = {
@@ -368,6 +370,7 @@ private fun ActionModeTopBar(
 private fun MessageTopBar(
     title: String,
     channelIndex: Int?,
+    mismatchKey: Boolean = false,
     onNavigateBack: () -> Unit
 ) = TopAppBar(
     title = { Text(text = title) },
@@ -381,7 +384,7 @@ private fun MessageTopBar(
     },
     actions = {
         if (channelIndex == DataPacket.PKC_CHANNEL_INDEX) {
-            NodeKeyStatusIcon(hasPKC = true, mismatchKey = false)
+            NodeKeyStatusIcon(hasPKC = true, mismatchKey = mismatchKey)
         }
     }
 )
