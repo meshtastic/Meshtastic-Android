@@ -110,7 +110,7 @@ interface NodeInfoDao {
     @Upsert
     fun upsert(node: NodeEntity)
 
-    fun upsertCheckKeyMatch(node: NodeEntity){
+    fun upsertCheckKeyMatch(node: NodeEntity) {
         val existingNode = getNodeByNum(node.num)
         if (existingNode != null && existingNode.user.publicKey != node.user.publicKey) {
             Log.w(TAG, "Node ${node.num} has changed its public key")
