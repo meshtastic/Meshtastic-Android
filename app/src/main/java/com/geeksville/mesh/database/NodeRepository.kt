@@ -103,7 +103,7 @@ class NodeRepository @Inject constructor(
     ).mapLatest { list -> list.map { it.toModel() } }.flowOn(dispatchers.io).conflate()
 
     suspend fun upsert(node: NodeEntity) = withContext(dispatchers.io) {
-        nodeInfoDao.upsert(node)
+        nodeInfoDao.upsertCheckKeyMatch(node)
     }
 
     suspend fun installNodeDB(mi: MyNodeEntity, nodes: List<NodeEntity>) = withContext(dispatchers.io) {

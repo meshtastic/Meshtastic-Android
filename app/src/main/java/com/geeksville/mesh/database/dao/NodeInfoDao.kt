@@ -110,21 +110,19 @@ interface NodeInfoDao {
     @Upsert
     fun upsert(node: NodeEntity)
 
+    fun upsertCheckKeyMatch(node: NodeEntity){
+        val existingNode = getNodeByNum(node.num)
+        if (existingNode != null && existingNode.user.publicKey != node.user.publicKey) {
+            Log.w(TAG, "Node ${node.num} has changed its public key")
+            val user =
+                node.user.toBuilder().setPublicKey(NodeEntity.ERROR_BYTE_STRING).build()
+            node.user = user
+        }
+        upsert(node)
+    }
     @Transaction
     fun putAll(nodes: List<NodeEntity>) {
-        val existingNodes = nodes.mapNotNull {
-            getNodeByNum(it.num)
-        }
-        nodes.forEach { newNode ->
-            val existingNode = existingNodes.firstOrNull { it.num == newNode.num }
-            if (existingNode != null && existingNode.user.publicKey != newNode.user.publicKey) {
-                Log.w(TAG, "Node ${newNode.num} has changed its public key")
-                val user =
-                    newNode.user.toBuilder().setPublicKey(NodeEntity.ERROR_BYTE_STRING).build()
-                newNode.user = user
-            }
-            upsert(newNode)
-        }
+        nodes.forEach { upsertCheckKeyMatch(it) }
     }
 
     @Query("DELETE FROM nodes")
