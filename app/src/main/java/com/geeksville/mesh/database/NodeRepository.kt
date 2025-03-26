@@ -107,7 +107,7 @@ class NodeRepository @Inject constructor(
     }
 
     suspend fun installNodeDB(mi: MyNodeEntity, nodes: List<NodeEntity>) = withContext(dispatchers.io) {
-        val isDifferentNode = myNodeInfo.value?.myNodeNum == mi.myNodeNum
+        val isDifferentNode = myNodeInfo.value?.myNodeNum != mi.myNodeNum
         nodeInfoDao.clearMyNodeInfo()
         nodeInfoDao.setMyNodeInfo(mi) // set MyNodeEntity first
         if (isDifferentNode) {
