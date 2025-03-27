@@ -17,7 +17,7 @@
 -->
 
 <resources>
-    <color name="colorOnPrimary">#FFFFFF</color>
+    <color name="colorOnPrimary">#000000</color>
     <color name="colorPrimary">#67EA94</color>
     <color name="colorPrimaryDark">#67EA94</color>
     <color name="colorMsg">#F2F2F2</color>
