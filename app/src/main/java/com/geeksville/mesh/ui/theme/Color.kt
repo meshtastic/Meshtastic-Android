@@ -32,6 +32,8 @@ val LightPink = Color(0xFFFFE6E6)
 val LightGreen = Color(0xFFCFE8A9)
 val LightRed = Color(0xFFFFB3B3)
 
+val Black = Color(0x000000)
+
 val MeshtasticGreen = Color(0xFF67EA94)
 
 val HyperlinkBlue = Color(0xFF43C3B0)
