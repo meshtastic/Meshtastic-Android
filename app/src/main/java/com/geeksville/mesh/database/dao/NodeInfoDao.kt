@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.database.dao
 
+import android.util.Log
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.MapColumn
@@ -26,10 +27,11 @@ import androidx.room.Transaction
 import androidx.room.Upsert
 import com.geeksville.mesh.database.entity.MetadataEntity
 import com.geeksville.mesh.database.entity.MyNodeEntity
-import com.geeksville.mesh.database.entity.NodeWithRelations
 import com.geeksville.mesh.database.entity.NodeEntity
+import com.geeksville.mesh.database.entity.NodeWithRelations
 import kotlinx.coroutines.flow.Flow
 
+private const val TAG = "NodeInfoDao"
 @Suppress("TooManyFunctions")
 @Dao
 interface NodeInfoDao {
@@ -108,8 +110,20 @@ interface NodeInfoDao {
     @Upsert
     fun upsert(node: NodeEntity)
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun putAll(nodes: List<NodeEntity>)
+    fun upsertCheckKeyMatch(node: NodeEntity) {
+        val existingNode = getNodeByNum(node.num)
+        if (existingNode != null && existingNode.user.publicKey != node.user.publicKey) {
+            Log.w(TAG, "Node ${node.num} has changed its public key")
+            val user =
+                node.user.toBuilder().setPublicKey(NodeEntity.ERROR_BYTE_STRING).build()
+            node.user = user
+        }
+        upsert(node)
+    }
+    @Transaction
+    fun putAll(nodes: List<NodeEntity>) {
+        nodes.forEach { upsertCheckKeyMatch(it) }
+    }
 
     @Query("DELETE FROM nodes")
     fun clearNodeInfo()
@@ -122,4 +136,7 @@ interface NodeInfoDao {
 
     @Query("DELETE FROM metadata WHERE num=:num")
     fun deleteMetadata(num: Int)
+
+    @Query("SELECT * FROM nodes WHERE num = :num")
+    fun getNodeByNum(num: Int): NodeEntity?
 }

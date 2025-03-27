@@ -26,6 +26,7 @@ import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.NodeSortOption
+import com.google.protobuf.ByteString
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
@@ -92,7 +93,6 @@ class NodeInfoDaoTest {
         41.878113 to -87.629799,  // Chicago
         39.952583 to -75.165222,  // Philadelphia
     )
-
     private val testNodes = listOf(ourNode, unknownNode) + testPositions.mapIndexed { index, pos ->
         NodeEntity(
             num = 9 + index,
@@ -102,6 +102,7 @@ class NodeInfoDaoTest {
                 shortName = "KM$index"
                 hwModel = MeshProtos.HardwareModel.ANDROID_SIM
                 isLicensed = false
+                publicKey = ByteString.copyFrom(ByteArray(32) { index.toByte() })
             },
             longName = "Kevin Mester$index", shortName = "KM$index",
             latitude = pos.first, longitude = pos.second,
@@ -202,5 +203,16 @@ class NodeInfoDaoTest {
         val nodes = getNodes(includeUnknown = true)
         val containsUnsetNode = nodes.any { it.isUnknownUser }
         assertTrue(containsUnsetNode)
+    }
+
+    @Test
+    fun testPkcMismatch() = runBlocking {
+        val newNode = testNodes[1].copy(user = testNodes[1].user.copy {
+            publicKey = ByteString.copyFrom(ByteArray(32) { 99 })
+        })
+        nodeInfoDao.putAll(listOf(newNode))
+        val nodes = getNodes()
+        val containsMismatchNode = nodes.any { it.mismatchKey }
+        assertTrue(containsMismatchNode)
     }
 }

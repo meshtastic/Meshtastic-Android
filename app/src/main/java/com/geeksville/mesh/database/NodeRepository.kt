@@ -103,13 +103,16 @@ class NodeRepository @Inject constructor(
     ).mapLatest { list -> list.map { it.toModel() } }.flowOn(dispatchers.io).conflate()
 
     suspend fun upsert(node: NodeEntity) = withContext(dispatchers.io) {
-        nodeInfoDao.upsert(node)
+        nodeInfoDao.upsertCheckKeyMatch(node)
     }
 
     suspend fun installNodeDB(mi: MyNodeEntity, nodes: List<NodeEntity>) = withContext(dispatchers.io) {
+        val isDifferentNode = myNodeInfo.value?.myNodeNum != mi.myNodeNum
         nodeInfoDao.clearMyNodeInfo()
         nodeInfoDao.setMyNodeInfo(mi) // set MyNodeEntity first
-        nodeInfoDao.clearNodeInfo()
+        if (isDifferentNode) {
+            nodeInfoDao.clearNodeInfo()
+        }
         nodeInfoDao.putAll(nodes)
     }
 
