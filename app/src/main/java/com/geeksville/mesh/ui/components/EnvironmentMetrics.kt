@@ -250,7 +250,7 @@ private fun EnvironmentMetricsChart(
         plotIAQ = true
     }
 
-    val min = minValues.minOf { it }
+    var min = minValues.minOf { it }
     val max = maxValues.maxOf { it }
     var diff = max - min
 
@@ -315,6 +315,7 @@ private fun EnvironmentMetricsChart(
                     }
                     if (metric == Environment.BAROMETRIC_PRESSURE) {
                         diff = pressureDiff
+                        min = minPressure.environmentMetrics.barometricPressure
                     }
                     index = 0
                     while (index < telemetries.size) {
