@@ -277,7 +277,7 @@ fun NetworkConfigItemList(
                 })
         }
         item { Divider() }
-        if (hasEthernet && hasWifi) {
+        if (hasEthernet || hasWifi) {
             item {
                 PreferenceCategory(text = stringResource(R.string.udp_config))
             }
