@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="main_tab_messages">Mesajlar</string>
+    <string name="main_tab_users">Kullanıcılar</string>
+    <string name="main_tab_map">Harita</string>
+    <string name="main_tab_channel">Kanal</string>
+    <string name="main_tab_settings">Ayarlar</string>
     <string name="node_filter_placeholder">Filtre</string>
     <string name="desc_node_filter_clear">düğüm filtresini kaldır</string>
     <string name="node_filter_include_unknown">Bilinmeyenleri göster</string>
@@ -40,12 +45,19 @@
     <string name="role_client_hidden">Gizlilik veya güç tasarrufu için sadece gerektiğinde yayın yapan cihaz.</string>
     <string name="role_lost_and_found">Cihazın kurtarılmasına yardımcı olmak için konumunu düzenli olarak varsayılan kanala mesaj olarak gönderir.</string>
     <string name="role_tak_tracker">Rutin yayınları azaltarak otomatik TAK PLI yayınlarını etkinleştirir.</string>
+    <string name="role_router_late">Tüm diğer modlardan sonra paketleri her zaman bir kez yeniden yayınlayan ve yerel kümeler için ek kapsama alanı sağlayan altyapı düğümü. Düğümler listesinde görünür.</string>
     <string name="rebroadcast_mode_all">Tespit edilen herhangi bir mesajı, özel kanalımızdaysa veya aynı LoRa parametrelerine sahip başka bir ağdan geliyorsa yeniden yayınlayın.</string>
     <string name="rebroadcast_mode_all_skip_decoding">ALL ile aynı davranış, ancak paketleri çözmeksizin yeniden yayınlar. Yalnızca Repeater rolünde kullanılabilir. Bunu başka herhangi bir rolde ayarlamak ALL davranışıyla sonuçlanacaktır.</string>
     <string name="rebroadcast_mode_local_only">Açık olan veya şifresini çözemediği yabancı ağlardan geldiği tespit edilen mesajları yok sayar. Yalnızca düğümlerin yerel birincil / ikincil kanallarında mesajı yeniden yayınlar.</string>
     <string name="rebroadcast_mode_known_only">LOCAL ONLY gibi yabancı ağlardan geldiği tespit edilen mesajları yok sayar, ancak düğümün bilinen listesinde bulunmayan düğümlerden gelen mesajları da yok sayarak bir adım daha ileri gider.</string>
     <string name="rebroadcast_mode_none">Yalnızca SENSOR, TRACKER ve TAK_TRACKER rolleri için izin verilir, CLIENT_MUTE rolünden farklı olarak tüm yeniden yayınları engeller.</string>
     <string name="rebroadcast_mode_core_portnums_only">TAK, RangeTest, PaxCounter gibi standart olmayan portnum\'ları yok sayarken sadece standart portnum\'lar olan NodeInfo, Text, Position, Telemetry ve Routing\'i yeniden yayınlar.</string>
+    <string name="config_device_doubleTapAsButtonPress_summary">Desteklenen ivmeölçerlere çift dokunmayı kullanıcı düğmesine basma olarak değerlendirir.</string>
+    <string name="config_device_disableTripleClick_summary">GPS\'i etkinleştirmek veya devre dışı bırakmak için kullanıcı düğmesine üç kez basılmasını devre dışı bırakır.</string>
+    <string name="config_device_ledHeartbeatDisabled_summary">Cihaz üzerindeki yanıp sönen LED\'i kontrol eder. Çoğu cihaz için bu, en fazla 4 LED\'den birini kontrol edecektir, şarj ve GPS LED\'leri kontrol edilemez.</string>
+    <string name="config_device_transmitOverLora_summary">MQTT ve PhoneAPI\'ye göndermenin yanı sıra, NeighborInfo\'muzun LoRa üzerinden iletilip iletilmeyeceğidir. Varsayılan anahtar ve ada sahip bir kanalda kullanılamaz.</string>
+    <string name="config_security_public_key">Genel Anahtar</string>
+    <string name="config_security_private_key">Özel Anahtar</string>
     <string name="channel_name">Kanal Adı</string>
     <string name="channel_options">Kanal Seçenekleri</string>
     <string name="qr_code">Karekod</string>
@@ -113,6 +125,7 @@
     <string name="message_reception_state">mesaj alım durumu</string>
     <string name="message_delivery_status">Mesaj teslim durumu</string>
     <string name="meshtastic_messages_notifications">Mesaj bildirimleri</string>
+    <string name="meshtastic_alerts_notifications">Uyarı bildirimleri</string>
     <string name="protocol_stress_test">Protokol stres testi</string>
     <string name="firmware_too_old">Yazılım güncellemesi gerekli</string>
     <string name="firmware_old">Radyo yazılımı bu uygulamayla iletişim kurmak için çok eski. Bu konuda daha fazla bilgi için: <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Yazılım yükleme kılavuzumuza</a> bakın.</string>
@@ -193,7 +206,7 @@
     <string name="map_select_download_region">İndirilecek bölgeyi seçin</string>
     <string name="map_tile_download_estimate">Tahmini indirme boyutu:</string>
     <string name="map_start_download">İndirmeye başla</string>
-    <string name="exchange_position">Konum iste</string>
+    <string name="request_position">Konum iste</string>
     <string name="close">Kapat</string>
     <string name="device_settings">Cihaz ayarları</string>
     <string name="module_settings">Modül ayarları</string>
@@ -245,7 +258,7 @@
     <string name="encryption_pkc_text">Doğrudan mesajlar şifreleme için yeni genel anahtar alt yapısını kullanmaktadır. Bu bağlamda 2.5 ve üstü firmware yüklemeniz gerekmektedir.</string>
     <string name="encryption_error">Genel Anahtar Uyuşmazlığı</string>
     <string name="encryption_error_text">Genel anahtar, kayıtlı anahtarla eşleşmiyor. Düğümü kaldırabilir ve tekrar anahtar değişimi yapmasına izin verebilirsiniz, ancak bu daha ciddi bir güvenlik sorununa işaret edebilir. Anahtar değişikliğinin fabrika ayarlarına sıfırlamadan veya başka bir kasıtlı eylemden kaynaklanıp kaynaklanmadığını belirlemek için başka bir güvenilir kanal aracılığıyla kullanıcıyla iletişime geçiniz.</string>
-    <string name="exchange_userinfo">Kullanıcı bilgisi iste</string>
+    <string name="request_userinfo">Kullanıcı bilgisi iste</string>
     <string name="meshtastic_new_nodes_notifications">Yeni düğüm bildirimleri</string>
     <string name="more_details">Daha fazla detay</string>
     <string name="snr">SNR</string>
@@ -264,6 +277,8 @@
     <string name="fair">İdare Eder</string>
     <string name="good">İyi</string>
     <string name="none_quality">Yok</string>
+    <string name="share_to">Paylaş: …</string>
+    <string name="share_message">Mesajı paylaş</string>
     <string name="signal">Sinyal</string>
     <string name="signal_quality">Sinyal Kalitesi</string>
     <string name="traceroute_log">Yol İzleme Kayıtları</string>
@@ -273,4 +288,38 @@
         <item quantity="other">%d atlama</item>
     </plurals>
     <string name="traceroute_diff">İleri atlama %1$d Geri atlama %2$d</string>
+    <string name="twenty_four_hours">24S</string>
+    <string name="forty_eight_hours">48S</string>
+    <string name="one_week">1H</string>
+    <string name="two_weeks">2H</string>
+    <string name="four_weeks">4H</string>
+    <string name="max">Maks</string>
+    <string name="unknown_age">Bilinmeyen Yaş</string>
+    <string name="copy">Kopyala</string>
+    <string name="alert_bell_text">Zili Çaldır!</string>
+    <string name="channel_settings">Kanal Ayarları</string>
+    <string name="samsung_instructions">Samsung Talimatları</string>
+    <string name="alerts_dnd_request_title">Rahatsız Etmeyi devre dışı bırakmak için Kritik Uyarıları etkinleştirin</string>
+    <string name="alerts_dnd_request_text"><![CDATA[To allow Critical Alerts while your phone is on Do Not Disturb - enable Override Do Not Disturb for the Alerts channel in the Meshtastic app notification settings.<br/><br/>Samsung users may need to add an exception in system settings before enabling it for the Alerts Channel. <a href="https://www.samsung.com/latin_en/support/mobile-devices/how-to-use-the-do-not-disturb-mode-on-your-galaxy-phone/">Visit Samsung Support for assistance.</a>.]]></string>
+    <string name="critical_alert">Kritik Uyarı!</string>
+    <string name="favorite">Favori</string>
+    <string name="favorite_add">\'%s\' düğümünü favorilere eklemek istiyor musunuz?</string>
+    <string name="favorite_remove">\'%s\' düğümünü favorilerden silmek istiyor musunuz?</string>
+    <string name="power_metrics_log">Güç Ölçüm Kayıtları</string>
+    <string name="channel_1">Kanal 1</string>
+    <string name="channel_2">Kanal 2</string>
+    <string name="channel_3">Kanal 3</string>
+    <string name="current">Akım</string>
+    <string name="voltage">Voltaj</string>
+    <string name="are_you_sure">Emin misiniz?</string>
+    <string name="router_role_confirmation_text"><![CDATA[<a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Cihaz Rolü Dokümantasyonu</a> ve <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Doğru Cihaz Rolünü Seçme</a> hakkındaki blog yazılarını okudum.]]></string>
+    <string name="i_know_what_i_m_doing">Ne yaptığımı biliyorum.</string>
+    <string name="low_battery_message">%s Düğümünün pili düşük (%d%%)</string>
+    <string name="meshtastic_low_battery_notifications">Düşük pil bildirimleri</string>
+    <string name="low_battery_title">Düşük pil: %s</string>
+    <string name="meshtastic_low_battery_temporary_remote_notifications">Düşük pil bildirimleri (favori düğümler)</string>
+    <string name="baro_pressure">Barometrik Basınç</string>
+    <string name="mesh_via_udp_enabled">UDP üzerinden Mesh etkinleştirildi</string>
+    <string name="udp_config">UDP Ayarları</string>
+    <string name="map_node_popup_details"><![CDATA[%s<br>Son duyulma: %s<br>Son konum: %s<br>Pil: %s]]></string>
 </resources>
