@@ -51,11 +51,6 @@ class MeshServiceNotifications(
         const val OPEN_MESSAGE_ACTION = "com.geeksville.mesh.OPEN_MESSAGE_ACTION"
         const val OPEN_MESSAGE_EXTRA_CONTACT_KEY =
             "com.geeksville.mesh.OPEN_MESSAGE_EXTRA_CONTACT_KEY"
-        const val SERVICE_GROUP = "SERVICE_NOTIFICATION_GROUP"
-        const val MESSAGE_GROUP = "MESSAGE_NOTIFICATION_GROUP"
-        const val ALERT_GROUP = "ALERT_NOTIFICATION_GROUP"
-        const val NEW_NODE_GROUP = "NEW_NODE_NOTIFICATION_GROUP"
-        const val LOW_BATTERY_GROUP = "LOW_BATTERY_NOTIFICATION_GROUP"
         const val MAX_BATTERY_LEVEL = 100
     }
 
@@ -407,7 +402,6 @@ class MeshServiceNotifications(
         }
         with(serviceNotificationBuilder) {
             priority = NotificationCompat.PRIORITY_MIN
-            setGroup(SERVICE_GROUP)
             setCategory(Notification.CATEGORY_SERVICE)
             setOngoing(true)
             setContentTitle(name)
@@ -446,7 +440,6 @@ class MeshServiceNotifications(
             setContentIntent(openMessageIntent(contactKey))
             priority = NotificationCompat.PRIORITY_DEFAULT
             setCategory(Notification.CATEGORY_MESSAGE)
-            setGroup(MESSAGE_GROUP)
             setAutoCancel(true)
             setStyle(
                 NotificationCompat.MessagingStyle(person)
@@ -472,7 +465,6 @@ class MeshServiceNotifications(
             setContentIntent(openMessageIntent(contactKey))
             priority = NotificationCompat.PRIORITY_HIGH
             setCategory(Notification.CATEGORY_ALARM)
-            setGroup(ALERT_GROUP)
             setAutoCancel(true)
             setStyle(
                 NotificationCompat.MessagingStyle(person)
@@ -489,7 +481,6 @@ class MeshServiceNotifications(
         }
         with(newNodeSeenNotificationBuilder) {
             priority = NotificationCompat.PRIORITY_DEFAULT
-            setGroup(NEW_NODE_GROUP)
             setCategory(Notification.CATEGORY_STATUS)
             setAutoCancel(true)
             setContentTitle("New Node Seen: $name")
@@ -524,7 +515,6 @@ class MeshServiceNotifications(
             priority = NotificationCompat.PRIORITY_DEFAULT
             setCategory(Notification.CATEGORY_STATUS)
             setOngoing(true)
-            setGroup(LOW_BATTERY_GROUP)
             setShowWhen(true)
             setOnlyAlertOnce(true)
             setWhen(System.currentTimeMillis())
