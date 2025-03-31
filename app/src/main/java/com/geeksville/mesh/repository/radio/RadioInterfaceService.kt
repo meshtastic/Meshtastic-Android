@@ -22,12 +22,14 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
+import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.android.BinaryLogFile
 import com.geeksville.mesh.android.BuildUtils
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.android.PacketLogFile
+import com.geeksville.mesh.android.PacketLogFile.PacketLogType
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.network.NetworkRepository
@@ -74,10 +76,10 @@ class RadioInterfaceService @Inject constructor(
     private val _receivedData = MutableSharedFlow<ByteArray>()
     val receivedData: SharedFlow<ByteArray> = _receivedData
 
-    private val logSends = false
-    private val logReceives = false
-    private lateinit var sentPacketsLog: BinaryLogFile // inited in onCreate
-    private lateinit var receivedPacketsLog: BinaryLogFile
+    private val logSends = BuildConfig.DEBUG
+    private val logReceives = BuildConfig.DEBUG
+    private lateinit var sentPacketsLog: PacketLogFile // inited in onCreate
+    private lateinit var receivedPacketsLog: PacketLogFile
 
     val mockInterfaceAddress: String by lazy {
         toInterfaceAddress(InterfaceId.MOCK, "")
@@ -187,14 +189,16 @@ class RadioInterfaceService @Inject constructor(
 
     // Send a packet/command out the radio link, this routine can block if it needs to
     private fun handleSendToRadio(p: ByteArray) {
+        if (logSends) {
+            sentPacketsLog.log(p)
+        }
         radioIf.handleSendToRadio(p)
     }
 
     // Handle an incoming packet from the radio, broadcasts it as an android intent
     fun handleFromRadio(p: ByteArray) {
         if (logReceives) {
-            receivedPacketsLog.write(p)
-            receivedPacketsLog.flush()
+            receivedPacketsLog.log(p)
         }
 
         if (radioIf is SerialInterface) {
@@ -235,10 +239,12 @@ class RadioInterfaceService @Inject constructor(
                 isStarted = true
 
                 if (logSends) {
-                    sentPacketsLog = BinaryLogFile(context, "sent_log.pb")
+                    sentPacketsLog =
+                        PacketLogFile(context, PacketLogType.SENT)
                 }
                 if (logReceives) {
-                    receivedPacketsLog = BinaryLogFile(context, "receive_log.pb")
+                    receivedPacketsLog =
+                        PacketLogFile(context, PacketLogType.RECEIVED)
                 }
 
                 radioIf = interfaceFactory.createInterface(address)
