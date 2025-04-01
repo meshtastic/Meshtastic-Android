@@ -1574,7 +1574,7 @@ class MeshService : Service(), Logging {
         insertMeshLog(packetToSave)
 
         newNodes.add(info)
-        radioConfigRepository.setStatusMessage("Nodes (${newNodes.size} / 100)")
+        radioConfigRepository.setStatusMessage("Nodes (${newNodes.size})")
     }
 
     private var rawMyNodeInfo: MeshProtos.MyNodeInfo? = null
