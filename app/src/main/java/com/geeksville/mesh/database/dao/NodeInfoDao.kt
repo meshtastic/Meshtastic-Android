@@ -32,7 +32,6 @@ import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.NodeWithRelations
 import kotlinx.coroutines.flow.Flow
 
-private const val TAG = "NodeInfoDao"
 @Suppress("TooManyFunctions")
 @Dao
 interface NodeInfoDao {
@@ -113,9 +112,13 @@ interface NodeInfoDao {
         val found = getNodeByNum(node.num)?.node
         found?.let {
             val keyMatch = !it.hasPKC || it.user.publicKey == node.user.publicKey
-            it.user = if (keyMatch) node.user else node.user.copy {
-                warn("Public key mismatch from $longName ($shortName)")
-                publicKey = NodeEntity.ERROR_BYTE_STRING
+            it.user = if (keyMatch) {
+                node.user
+            } else {
+                node.user.copy {
+                    warn("Public key mismatch from $longName ($shortName)")
+                    publicKey = NodeEntity.ERROR_BYTE_STRING
+                }
             }
         }
         doUpsert(node)
@@ -127,9 +130,13 @@ interface NodeInfoDao {
             val found = getNodeByNum(node.num)?.node
             found?.let {
                 val keyMatch = !it.hasPKC || it.user.publicKey == node.user.publicKey
-                it.user = if (keyMatch) node.user else node.user.copy {
-                    warn("Public key mismatch from $longName ($shortName)")
-                    publicKey = NodeEntity.ERROR_BYTE_STRING
+                it.user = if (keyMatch) {
+                    node.user
+                } else {
+                    node.user.copy {
+                        warn("Public key mismatch from $longName ($shortName)")
+                        publicKey = NodeEntity.ERROR_BYTE_STRING
+                    }
                 }
             }
         }
