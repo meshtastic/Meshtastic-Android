@@ -244,7 +244,7 @@ private fun EnvironmentMetricsChart(
         )
     }
     var plotIAQ = false
-    if (minIAQ.environmentMetrics.iaq != 0 && maxIAQ.environmentMetrics.iaq != 0) {
+    if (minIAQ.environmentMetrics.iaq != 0 || maxIAQ.environmentMetrics.iaq != 0) {
         minValues.add(minIAQ.environmentMetrics.iaq.toFloat())
         maxValues.add(maxIAQ.environmentMetrics.iaq.toFloat())
         plotIAQ = true
