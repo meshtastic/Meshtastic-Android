@@ -304,17 +304,27 @@ class RadioConfigViewModel @Inject constructor(
         "Request reboot error"
     )
 
-    private fun requestFactoryReset(destNum: Int) = request(
-        destNum,
-        { service, packetId, dest -> service.requestFactoryReset(packetId, dest) },
-        "Request factory reset error"
-    )
+    private fun requestFactoryReset(destNum: Int) {
+        request(
+            destNum,
+            { service, packetId, dest -> service.requestFactoryReset(packetId, dest) },
+            "Request factory reset error"
+        )
+        if (destNum == myNodeNum) {
+            viewModelScope.launch { radioConfigRepository.clearNodeDB() }
+        }
+    }
 
-    private fun requestNodedbReset(destNum: Int) = request(
-        destNum,
-        { service, packetId, dest -> service.requestNodedbReset(packetId, dest) },
-        "Request NodeDB reset error"
-    )
+    private fun requestNodedbReset(destNum: Int) {
+        request(
+            destNum,
+            { service, packetId, dest -> service.requestNodedbReset(packetId, dest) },
+            "Request NodeDB reset error"
+        )
+        if (destNum == myNodeNum) {
+            viewModelScope.launch { radioConfigRepository.clearNodeDB() }
+        }
+    }
 
     private fun sendAdminRequest(destNum: Int) {
         val route = radioConfigState.value.route

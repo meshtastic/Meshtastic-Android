@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.database.dao
 
-import android.util.Log
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.MapColumn
@@ -25,6 +24,8 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
+import com.geeksville.mesh.android.BuildUtils.warn
+import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.entity.MetadataEntity
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
@@ -108,21 +109,31 @@ interface NodeInfoDao {
     ): Flow<List<NodeWithRelations>>
 
     @Upsert
-    fun upsert(node: NodeEntity)
-
-    fun upsertCheckKeyMatch(node: NodeEntity) {
-        val existingNode = getNodeByNum(node.num)
-        if (existingNode != null && existingNode.user.publicKey != node.user.publicKey) {
-            Log.w(TAG, "Node ${node.num} has changed its public key")
-            val user =
-                node.user.toBuilder().setPublicKey(NodeEntity.ERROR_BYTE_STRING).build()
-            node.user = user
+    fun upsert(node: NodeEntity) {
+        val found = getNodeByNum(node.num)?.node
+        found?.let {
+            val keyMatch = !it.hasPKC || it.user.publicKey == node.user.publicKey
+            it.user = if (keyMatch) node.user else node.user.copy {
+                warn("Public key mismatch from $longName ($shortName)")
+                publicKey = NodeEntity.ERROR_BYTE_STRING
+            }
         }
-        upsert(node)
+        doUpsert(node)
     }
-    @Transaction
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun putAll(nodes: List<NodeEntity>) {
-        nodes.forEach { upsertCheckKeyMatch(it) }
+        nodes.forEach { node ->
+            val found = getNodeByNum(node.num)?.node
+            found?.let {
+                val keyMatch = !it.hasPKC || it.user.publicKey == node.user.publicKey
+                it.user = if (keyMatch) node.user else node.user.copy {
+                    warn("Public key mismatch from $longName ($shortName)")
+                    publicKey = NodeEntity.ERROR_BYTE_STRING
+                }
+            }
+        }
+        doPutAll(nodes)
     }
 
     @Query("DELETE FROM nodes")
@@ -137,6 +148,13 @@ interface NodeInfoDao {
     @Query("DELETE FROM metadata WHERE num=:num")
     fun deleteMetadata(num: Int)
 
-    @Query("SELECT * FROM nodes WHERE num = :num")
-    fun getNodeByNum(num: Int): NodeEntity?
+    @Query("SELECT * FROM nodes WHERE num=:num")
+    @Transaction
+    fun getNodeByNum(num: Int): NodeWithRelations?
+
+    @Upsert
+    fun doUpsert(node: NodeEntity)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    fun doPutAll(nodes: List<NodeEntity>)
 }
