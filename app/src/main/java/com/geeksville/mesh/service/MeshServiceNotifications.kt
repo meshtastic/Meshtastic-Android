@@ -24,6 +24,7 @@ import android.app.PendingIntent
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ShortcutInfo
 import android.graphics.Color
 import android.media.AudioAttributes
 import android.media.RingtoneManager
@@ -31,6 +32,10 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
+import androidx.core.content.LocusIdCompat
+import androidx.core.content.pm.ShortcutInfoCompat
+import androidx.core.content.pm.ShortcutManagerCompat
+import androidx.core.graphics.drawable.IconCompat
 import androidx.core.net.toUri
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
@@ -314,11 +319,15 @@ class MeshServiceNotifications(
         )
     }
 
-    fun updateMessageNotification(contactKey: String, name: String, message: String) =
+    fun updateMessageNotification(contactKey: String, name: String, message: String) {
         notificationManager.notify(
             contactKey.hashCode(), // show unique notifications,
             createMessageNotification(contactKey, name, message)
         )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            updateConversationShortcuts(contactKey, name)
+        }
+    }
 
     fun showAlertNotification(contactKey: String, name: String, alert: String) {
         notificationManager.notify(
@@ -426,6 +435,45 @@ class MeshServiceNotifications(
         return serviceNotificationBuilder.build()
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun updateConversationShortcuts(
+        contactKey: String,
+        name: String,
+    ) {
+        val shortcutInfo = createShortcutInfo(context, contactKey, name)
+        ShortcutManagerCompat.pushDynamicShortcut(context, shortcutInfo)
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun createShortcutInfo(
+        context: Context,
+        contactKey: String,
+        name: String,
+    ): ShortcutInfoCompat {
+        val shortcutIntent = Intent(context, MainActivity::class.java).apply {
+            action = OPEN_MESSAGE_ACTION
+            putExtra(OPEN_MESSAGE_EXTRA_CONTACT_KEY, contactKey)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        }
+        val shortcutId = "conv_$contactKey"
+        return ShortcutInfoCompat.Builder(context, "conv_$contactKey")
+            .setShortLabel(name)
+            .setLongLabel("Chat with $name")
+            .setIcon(
+                IconCompat.createWithResource(
+                    context,
+                    R.drawable.app_icon
+                )
+            ) // Replace with contact icon if available
+            .setIntent(shortcutIntent)
+            .setCategories(setOf(ShortcutInfo.SHORTCUT_CATEGORY_CONVERSATION))
+            .setPerson(Person.Builder().setName(name).build())
+            .setLongLived(true)
+            .setLocusId(LocusIdCompat(shortcutId))
+            .build()
+    }
+
+    // Modify updateMessageNotification to create the shortcut
     lateinit var messageNotificationBuilder: NotificationCompat.Builder
     private fun createMessageNotification(
         contactKey: String,
@@ -435,12 +483,19 @@ class MeshServiceNotifications(
         if (!::messageNotificationBuilder.isInitialized) {
             messageNotificationBuilder = commonBuilder(messageChannelId)
         }
+        val shortcutId = "conv_$contactKey"
         val person = Person.Builder().setName(name).build()
         with(messageNotificationBuilder) {
             setContentIntent(openMessageIntent(contactKey))
             priority = NotificationCompat.PRIORITY_DEFAULT
             setCategory(Notification.CATEGORY_MESSAGE)
             setAutoCancel(true)
+            setShortcutId(shortcutId)
+            setLocusId(LocusIdCompat(shortcutId))
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val shortcutInfo = createShortcutInfo(context, contactKey, name)
+                setShortcutInfo(shortcutInfo)
+            }
             setStyle(
                 NotificationCompat.MessagingStyle(person)
                     .addMessage(message, System.currentTimeMillis(), person)
