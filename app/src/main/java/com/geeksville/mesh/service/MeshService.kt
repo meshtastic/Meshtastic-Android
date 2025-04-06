@@ -904,9 +904,13 @@ class MeshService : Service(), Logging {
             val newNode = (it.isUnknownUser && p.hwModel != MeshProtos.HardwareModel.UNSET)
 
             val keyMatch = !it.hasPKC || it.user.publicKey == p.publicKey
-            it.user = if (keyMatch) p else p.copy {
-                warn("Public key mismatch from $longName ($shortName)")
-                publicKey = it.errorByteString
+            it.user = if (keyMatch) {
+                p
+            } else {
+                p.copy {
+                    warn("Public key mismatch from $longName ($shortName)")
+                    publicKey = NodeEntity.ERROR_BYTE_STRING
+                }
             }
             it.longName = p.longName
             it.shortName = p.shortName

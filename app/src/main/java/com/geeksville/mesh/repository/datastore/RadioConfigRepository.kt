@@ -89,6 +89,10 @@ class RadioConfigRepository @Inject constructor(
         nodeDB.insertMetadata(MetadataEntity(fromNum, metadata))
     }
 
+    suspend fun clearNodeDB() {
+        nodeDB.clearNodeDB()
+    }
+
     /**
      * Flow representing the [ChannelSet] data store.
      */
