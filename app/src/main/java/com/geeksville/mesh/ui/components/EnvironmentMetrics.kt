@@ -237,7 +237,8 @@ private fun EnvironmentMetricsChart(
             telemetries.maxBy { it.environmentMetrics.relativeHumidity }
         )
     }
-    if (minHumidity.environmentMetrics.relativeHumidity != 0f || maxHumidity.environmentMetrics.relativeHumidity != 0f) {
+    if (minHumidity.environmentMetrics.relativeHumidity != 0f ||
+        maxHumidity.environmentMetrics.relativeHumidity != 0f) {
         minValues.add(minHumidity.environmentMetrics.relativeHumidity)
         maxValues.add(maxHumidity.environmentMetrics.relativeHumidity)
         Environment.HUMIDITY.shouldPlot = true
