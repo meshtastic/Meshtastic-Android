@@ -67,7 +67,7 @@ import com.geeksville.mesh.ui.theme.Orange
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.drawPathWithGradient
 
-private enum class Environment(val color: Color) {
+private enum class Environment(val color: Color, var shouldPlot: Boolean = false) {
     TEMPERATURE(Color.Red) {
         override fun getValue(telemetry: Telemetry): Float {
             return telemetry.environmentMetrics.temperature
@@ -216,41 +216,47 @@ private fun EnvironmentMetricsChart(
 
     val graphColor = MaterialTheme.colors.onSurface
 
-    /* Grab the combined min and max for all data being plotted. */
+    /* Grab the combined min and max for temp, humidity, and iaq. */
+    val minValues = mutableListOf<Float>()
+    val maxValues = mutableListOf<Float>()
     val (minTemp, maxTemp) = remember(key1 = telemetries) {
         Pair(
             telemetries.minBy { it.environmentMetrics.temperature },
             telemetries.maxBy { it.environmentMetrics.temperature }
         )
     }
+    if (minTemp.environmentMetrics.temperature != 0f || maxTemp.environmentMetrics.temperature != 0f) {
+        minValues.add(minTemp.environmentMetrics.temperature)
+        maxValues.add(maxTemp.environmentMetrics.temperature)
+        Environment.TEMPERATURE.shouldPlot = true
+    }
+
     val (minHumidity, maxHumidity) = remember(key1 = telemetries) {
         Pair(
             telemetries.minBy { it.environmentMetrics.relativeHumidity },
             telemetries.maxBy { it.environmentMetrics.relativeHumidity }
         )
     }
-    val minValues = mutableListOf(
-        minTemp.environmentMetrics.temperature,
-        minHumidity.environmentMetrics.relativeHumidity
-    )
-    val maxValues = mutableListOf(
-        maxTemp.environmentMetrics.temperature,
-        maxHumidity.environmentMetrics.relativeHumidity
-    )
+    if (minHumidity.environmentMetrics.relativeHumidity != 0f || maxHumidity.environmentMetrics.relativeHumidity != 0f) {
+        minValues.add(minHumidity.environmentMetrics.relativeHumidity)
+        maxValues.add(maxHumidity.environmentMetrics.relativeHumidity)
+        Environment.HUMIDITY.shouldPlot = true
+    }
+
     val (minIAQ, maxIAQ) = remember(key1 = telemetries) {
         Pair(
             telemetries.minBy { it.environmentMetrics.iaq },
             telemetries.maxBy { it.environmentMetrics.iaq }
         )
     }
-    var plotIAQ = false
     if (minIAQ.environmentMetrics.iaq != 0 || maxIAQ.environmentMetrics.iaq != 0) {
         minValues.add(minIAQ.environmentMetrics.iaq.toFloat())
         maxValues.add(maxIAQ.environmentMetrics.iaq.toFloat())
-        plotIAQ = true
+        Environment.IAQ.shouldPlot = true
     }
 
     var min = minValues.minOf { it }
+    val rightLabelsMin = min
     val max = maxValues.maxOf { it }
     var diff = max - min
 
@@ -266,6 +272,7 @@ private fun EnvironmentMetricsChart(
     if (minPressure.environmentMetrics.barometricPressure != 0.0F &&
         maxPressure.environmentMetrics.barometricPressure != 0.0F) {
         plotPressure = true
+        Environment.BAROMETRIC_PRESSURE.shouldPlot = true
     }
 
     val scrollState = rememberScrollState()
@@ -309,8 +316,8 @@ private fun EnvironmentMetricsChart(
                 var index: Int
                 var first: Int
                 for (metric in Environment.entries) {
-                    if (metric == Environment.IAQ && !plotIAQ ||
-                        metric == Environment.BAROMETRIC_PRESSURE && !plotPressure) {
+
+                    if (!metric.shouldPlot) {
                         continue
                     }
                     if (metric == Environment.BAROMETRIC_PRESSURE) {
@@ -349,7 +356,7 @@ private fun EnvironmentMetricsChart(
         YAxisLabels(
             modifier = modifier.weight(weight = .1f),
             graphColor,
-            minValue = min,
+            minValue = rightLabelsMin,
             maxValue = max
         )
     }
