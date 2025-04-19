@@ -135,8 +135,8 @@ androidComponents {
     onVariants(selector().all(), { variant ->
         afterEvaluate {
             def capName = variant.name.capitalize()
-            tasks.getByName("ksp${capName}Kotlin") {
-                setSource(tasks.getByName("generate${capName}Proto").outputs)
+            tasks.named("ksp${capName}Kotlin") {
+                dependsOn("generate${capName}Proto")
             }
         }
     })
