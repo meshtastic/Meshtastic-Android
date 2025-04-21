@@ -19,8 +19,6 @@ package com.geeksville.mesh.ui.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.FabPosition
 import androidx.compose.material.Icon
@@ -50,7 +48,6 @@ internal fun BaseScaffold(
     actions: @Composable (RowScope.() -> Unit)? = null,
     floatingActionButton: @Composable () -> Unit = {},
     floatingActionButtonPosition: FabPosition = FabPosition.End,
-    contentWindowInsets: WindowInsets = WindowInsets(0, 0, 0, 0),
     content: @Composable () -> Unit,
 ) {
     BaseScaffold(
@@ -76,7 +73,6 @@ internal fun BaseScaffold(
         },
         floatingActionButton = floatingActionButton,
         floatingActionButtonPosition = floatingActionButtonPosition,
-        contentWindowInsets = contentWindowInsets,
         content = content
     )
 }
@@ -91,11 +87,10 @@ internal fun BaseScaffold(
     floatingActionButtonPosition: FabPosition = FabPosition.End,
     backgroundColor: Color = MaterialTheme.colors.background,
     contentColor: Color = contentColorFor(backgroundColor),
-    contentWindowInsets: WindowInsets = WindowInsets(0, 0, 0, 0),
     content: @Composable () -> Unit,
 ) {
     Scaffold(
-        modifier = modifier.imePadding(),
+        modifier = modifier,
         topBar = topBar,
         bottomBar = bottomBar,
         snackbarHost = snackbarHost,
@@ -103,7 +98,6 @@ internal fun BaseScaffold(
         floatingActionButtonPosition = floatingActionButtonPosition,
         backgroundColor = backgroundColor,
         contentColor = contentColor,
-        contentWindowInsets = contentWindowInsets,
     ) { innerPadding ->
         Box(modifier = Modifier.padding(innerPadding)) {
             content()
