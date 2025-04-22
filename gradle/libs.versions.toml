@@ -33,11 +33,13 @@ material = "1.12.0"
 material3 = "1.3.2"
 mgrs = "2.1.3"
 navigation = "2.9.0"
+okhttp = "4.12.0"
 org-eclipse-paho-client-mqttv3 = "1.2.5"
 osmbonuspack = "6.9.0"
 osmdroid-android = "6.1.14"
 protobuf-gradle-plugin = "0.9.5"
 protobuf-kotlin = "4.31.0"
+retrofit = "2.11.0"
 room = "2.7.1"
 streamsupport-minifuture = "1.7.4"
 usb-serial-android = "3.9.0"
@@ -106,6 +108,8 @@ material = { group = "com.google.android.material", name = "material", version.r
 mgrs = { group = "mil.nga", name = "mgrs", version.ref = "mgrs" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
 navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigation" }
+okhttp3 = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+okhttp3-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 org-eclipse-paho-client-mqttv3 = { group = "org.eclipse.paho", name = "org.eclipse.paho.client.mqttv3", version.ref = "org-eclipse-paho-client-mqttv3" }
 osmbonuspack = { group = "com.github.MKergall", name = "osmbonuspack", version.ref = "osmbonuspack" }
 osmdroid-android = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid-android" }
@@ -114,6 +118,8 @@ osmdroid-wms = { group = "org.osmdroid", name = "osmdroid-wms", version.ref = "o
 protobuf-gradle-plugin = { group = "com.google.protobuf", name = "protobuf-gradle-plugin", version.ref = "protobuf-gradle-plugin" }
 protobuf-kotlin = { group = "com.google.protobuf", name = "protobuf-kotlin", version.ref = "protobuf-kotlin" }
 protobuf-protoc = { group = "com.google.protobuf", name ="protoc", version.ref = "protobuf-kotlin" }
+retrofit2 = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
+retrofit2-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
@@ -165,6 +171,9 @@ firebase = ["firebase-analytics", "firebase-crashlytics"]
 
 #Protobuf
 protobuf = ["protobuf-kotlin"]
+
+#retrofit
+retrofit = ["retrofit2", "retrofit2-converter-gson", "okhttp3", "okhttp3-logging-interceptor"]
 
 # coil
 coil = ["coil", "coil-svg"]

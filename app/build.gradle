@@ -153,12 +153,14 @@ dependencies {
     debugImplementation(libs.bundles.ui.tooling)
     implementation(libs.bundles.lifecycle)
     implementation(libs.bundles.navigation)
+    implementation(libs.bundles.coil)
     implementation(libs.bundles.coroutines)
     implementation(libs.bundles.datastore)
     implementation(libs.bundles.room)
     implementation(libs.bundles.hilt)
     implementation(libs.bundles.protobuf)
-    implementation(libs.bundles.coil)
+    implementation(libs.bundles.retrofit)
+
     //OSM
     implementation(libs.bundles.osm)
     implementation(libs.osmdroid.geopackage){ exclude group: "com.j256.ormlite" }

@@ -1604,6 +1604,7 @@ class MeshService : Service(), Logging {
                     minAppVersion = minAppVersion,
                     maxChannels = 8,
                     hasWifi = metadata.hasWifi,
+                    deviceId = deviceId.toStringUtf8(),
                 )
             }
             serviceScope.handledLaunch {
