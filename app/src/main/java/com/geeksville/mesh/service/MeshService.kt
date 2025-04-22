@@ -228,8 +228,7 @@ class MeshService : Service(), Logging {
     private val notificationSummary
         get() = when (connectionState) {
             ConnectionState.CONNECTED -> getString(R.string.connected_count).format(
-                numOnlineNodes,
-                numNodes
+                numOnlineNodes
             )
             ConnectionState.DISCONNECTED -> getString(R.string.disconnected)
             ConnectionState.DEVICE_SLEEP -> getString(R.string.device_sleeping)
