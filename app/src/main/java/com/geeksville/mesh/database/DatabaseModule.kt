@@ -18,6 +18,7 @@
 package com.geeksville.mesh.database
 
 import android.app.Application
+import com.geeksville.mesh.database.dao.DeviceRegistrationDao
 import com.geeksville.mesh.database.dao.MeshLogDao
 import com.geeksville.mesh.database.dao.NodeInfoDao
 import com.geeksville.mesh.database.dao.PacketDao
@@ -54,5 +55,10 @@ class DatabaseModule {
     @Provides
     fun provideQuickChatActionDao(database: MeshtasticDatabase): QuickChatActionDao {
         return database.quickChatActionDao()
+    }
+
+    @Provides
+    fun provideDeviceRegistrationDao(database: MeshtasticDatabase): DeviceRegistrationDao {
+        return database.deviceRegistrationDao()
     }
 }

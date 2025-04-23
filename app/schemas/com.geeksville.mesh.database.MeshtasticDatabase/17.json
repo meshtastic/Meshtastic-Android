@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 17,
-    "identityHash": "1926d1cb8ccd1f4990f44bb3d50f0ca2",
+    "identityHash": "222f833c4a08a72fd691889bd2ea72a4",
     "entities": [
       {
         "tableName": "my_node",
@@ -542,11 +542,41 @@
             "createSql": "CREATE INDEX IF NOT EXISTS `index_metadata_num` ON `${TABLE_NAME}` (`num`)"
           }
         ]
+      },
+      {
+        "tableName": "device_registration",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`deviceId` TEXT NOT NULL, `is_registered` INTEGER NOT NULL, `last_updated` INTEGER NOT NULL, PRIMARY KEY(`deviceId`))",
+        "fields": [
+          {
+            "fieldPath": "deviceId",
+            "columnName": "deviceId",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isRegistered",
+            "columnName": "is_registered",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastUpdated",
+            "columnName": "last_updated",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "deviceId"
+          ]
+        }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '1926d1cb8ccd1f4990f44bb3d50f0ca2')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '222f833c4a08a72fd691889bd2ea72a4')"
     ]
   }
 }

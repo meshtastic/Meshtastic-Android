@@ -25,11 +25,13 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
+import com.geeksville.mesh.database.dao.DeviceRegistrationDao
 import com.geeksville.mesh.database.dao.PacketDao
 import com.geeksville.mesh.database.dao.MeshLogDao
 import com.geeksville.mesh.database.dao.NodeInfoDao
 import com.geeksville.mesh.database.dao.QuickChatActionDao
 import com.geeksville.mesh.database.entity.ContactSettings
+import com.geeksville.mesh.database.entity.DeviceRegistrationEntity
 import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.database.entity.MetadataEntity
 import com.geeksville.mesh.database.entity.MyNodeEntity
@@ -48,6 +50,7 @@ import com.geeksville.mesh.database.entity.ReactionEntity
         QuickChatAction::class,
         ReactionEntity::class,
         MetadataEntity::class,
+        DeviceRegistrationEntity::class,
     ],
     autoMigrations = [
         AutoMigration(from = 3, to = 4),
@@ -74,6 +77,7 @@ abstract class MeshtasticDatabase : RoomDatabase() {
     abstract fun packetDao(): PacketDao
     abstract fun meshLogDao(): MeshLogDao
     abstract fun quickChatActionDao(): QuickChatActionDao
+    abstract fun deviceRegistrationDao(): DeviceRegistrationDao
 
     companion object {
         fun getDatabase(context: Context): MeshtasticDatabase {

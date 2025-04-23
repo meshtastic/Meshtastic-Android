@@ -40,6 +40,7 @@ import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.repository.api.DeviceRegistrationRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.map.MAP_STYLE_ID
@@ -79,6 +80,8 @@ data class MetricsState(
     val tracerouteResults: List<MeshPacket> = emptyList(),
     val positionLogs: List<Position> = emptyList(),
     val deviceHardware: DeviceHardware? = null,
+    val isLocalDevice: Boolean = false,
+    val isRegistered: Boolean = false,
 ) {
     fun hasDeviceMetrics() = deviceMetrics.isNotEmpty()
     fun hasSignalMetrics() = signalMetrics.isNotEmpty()
@@ -188,6 +191,7 @@ private fun MeshPacket.toPosition(): Position? = if (!decoded.wantResponse) {
     null
 }
 
+@Suppress("LongParameterList")
 @HiltViewModel
 class MetricsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
@@ -195,6 +199,7 @@ class MetricsViewModel @Inject constructor(
     private val dispatchers: CoroutineDispatchers,
     private val meshLogRepository: MeshLogRepository,
     private val radioConfigRepository: RadioConfigRepository,
+    private val deviceRegistrationRepository: DeviceRegistrationRepository,
     private val preferences: SharedPreferences,
 ) : ViewModel(), Logging {
     private val destNum = savedStateHandle.toRoute<Route.NodeDetail>().destNum
@@ -237,13 +242,22 @@ class MetricsViewModel @Inject constructor(
                 .mapLatest { nodes -> nodes[destNum] to nodes.keys.firstOrNull() }
                 .distinctUntilChanged()
                 .onEach { (node, ourNode) ->
-                    _state.update { state -> state.copy(node = node, isLocal = destNum == ourNode) }
+                    val isLocal = destNum == ourNode
+                    _state.update { state -> state.copy(node = node, isLocal = isLocal) }
                     node?.user?.hwModel?.let { hwModel ->
                         val deviceHardware = getDeviceHardwareFromHardwareModel(hwModel)
                         deviceHardware?.let {
                             _state.update { state ->
                                 state.copy(deviceHardware = it)
                             }
+                        }
+                    }
+                    if(isLocal) {
+                        val deviceid = radioConfigRepository.myNodeInfo.value.deviceId
+                        _state.update {
+                            it.copy(
+                                isRegistered = deviceRegistrationRepository.isDeviceRegistered(deviceid) ?: false
+                            )
                         }
                     }
                 }

@@ -57,7 +57,6 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Thermostat
-import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material.icons.outlined.Navigation
@@ -67,6 +66,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material.icons.twotone.Verified
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -321,6 +321,8 @@ private fun DeviceDetailsContent(
     val deviceHardware = state.deviceHardware ?: return
     val hwModelName = deviceHardware.displayName
     val isSupported = deviceHardware.activelySupported
+    val isLocalDevice = state.isLocalDevice
+    val isRegistered = state.isRegistered
     Box(
         modifier = Modifier
             .size(100.dp)
@@ -343,12 +345,18 @@ private fun DeviceDetailsContent(
         icon = Icons.Default.Router,
         value = hwModelName
     )
-    if (isSupported) {
+    NodeDetailRow(
+        label = if (isSupported) stringResource(R.string.supported) else "Supported by Community",
+        icon = if (isSupported) Icons.TwoTone.Verified else ImageVector.vectorResource(R.drawable.unverified),
+        value = "",
+        iconTint = if (isSupported) Color.Green else Color.Red
+    )
+    if (isLocalDevice) {
         NodeDetailRow(
-            label = stringResource(R.string.supported),
-            icon = Icons.Default.Verified,
+            label = if (isRegistered) "Registered by Backer" else "Not Registered",
+            icon = if (isRegistered) Icons.TwoTone.Verified else ImageVector.vectorResource(R.drawable.unverified),
             value = "",
-            iconTint = Color.Green
+            iconTint = if (isRegistered) Color.Green else Color.Red
         )
     }
 }

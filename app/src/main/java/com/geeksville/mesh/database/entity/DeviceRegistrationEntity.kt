@@ -15,15 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.api
+package com.geeksville.mesh.database.entity
 
-import retrofit2.Response
-import retrofit2.http.GET
-import retrofit2.http.Query
+import androidx.room.ColumnInfo
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 
-interface ApiService {
-
-    // TODO: update to point to actual endpoint path for device registration
-    @GET("posts")
-    suspend fun checkDeviceRegistration(@Query("deviceId") deviceId: String): Response<Unit>
-}
+@Entity(tableName = "device_registration")
+data class DeviceRegistrationEntity(
+    @PrimaryKey val deviceId: String,
+    @ColumnInfo(name = "is_registered") val isRegistered: Boolean,
+    @ColumnInfo(name = "last_updated") val lastUpdated: Long = System.currentTimeMillis()
+)
