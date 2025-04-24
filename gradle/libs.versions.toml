@@ -39,7 +39,7 @@ room = "2.7.0"
 streamsupport-minifuture = "1.7.4"
 usb-serial-android = "3.9.0"
 viewpager2 = "1.1.0"
-work-runtime-ktx = "2.10.0"
+work-runtime-ktx = "2.10.1"
 zxing-android-embedded = "4.3.0"
 #noinspection GradleDependency
 zxing-core = "3.3.0" #do not update
