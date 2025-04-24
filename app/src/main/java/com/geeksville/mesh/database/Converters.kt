@@ -129,4 +129,20 @@ class Converters : Logging {
     fun metadataToBytes(value: MeshProtos.DeviceMetadata): ByteArray? {
         return value.toByteArray()
     }
+
+    @TypeConverter
+    fun fromStringList(value: String?): List<String>? {
+        if (value == null) {
+            return null
+        }
+        return Json.decodeFromString<List<String>>(value)
+    }
+
+    @TypeConverter
+    fun toStringList(list: List<String>?): String? {
+        if (list == null) {
+            return null
+        }
+        return Json.encodeToString(list)
+    }
 }

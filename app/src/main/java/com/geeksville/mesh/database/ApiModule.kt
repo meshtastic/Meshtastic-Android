@@ -25,6 +25,7 @@ import dagger.hilt.components.SingletonComponent
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
 
 @InstallIn(SingletonComponent::class)
@@ -45,9 +46,9 @@ class ApiModule {
     @Provides
     @Singleton
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
-        // TODO: point to proper api service url
         return Retrofit.Builder()
-            .baseUrl("https://jsonplaceholder.typicode.com/") // Replace with your base URL
+            .baseUrl("https://api.meshtastic.org/") // Replace with your base URL
+            .addConverterFactory(GsonConverterFactory.create())
             .client(okHttpClient)
             .build()
     }

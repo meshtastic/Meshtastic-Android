@@ -29,7 +29,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.CoroutineDispatchers
-import com.geeksville.mesh.MeshProtos.HardwareModel
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.Position
 import com.geeksville.mesh.Portnums.PortNum
@@ -40,6 +39,7 @@ import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.repository.api.DeviceHardwareRepository
 import com.geeksville.mesh.repository.api.DeviceRegistrationRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.ServiceAction
@@ -51,17 +51,16 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
-import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -200,6 +199,7 @@ class MetricsViewModel @Inject constructor(
     private val meshLogRepository: MeshLogRepository,
     private val radioConfigRepository: RadioConfigRepository,
     private val deviceRegistrationRepository: DeviceRegistrationRepository,
+    private val deviceHardwareRepository: DeviceHardwareRepository,
     private val preferences: SharedPreferences,
 ) : ViewModel(), Logging {
     private val destNum = savedStateHandle.toRoute<Route.NodeDetail>().destNum
@@ -234,34 +234,39 @@ class MetricsViewModel @Inject constructor(
     private val _timeFrame = MutableStateFlow(TimeFrame.TWENTY_FOUR_HOURS)
     val timeFrame: StateFlow<TimeFrame> = _timeFrame
 
-    private var deviceHardwareList: List<DeviceHardware> = listOf()
-
     init {
-        destNum?.let {
-            radioConfigRepository.nodeDBbyNum
-                .mapLatest { nodes -> nodes[destNum] to nodes.keys.firstOrNull() }
-                .distinctUntilChanged()
-                .onEach { (node, ourNode) ->
-                    val isLocal = destNum == ourNode
-                    _state.update { state -> state.copy(node = node, isLocal = isLocal) }
-                    node?.user?.hwModel?.let { hwModel ->
-                        val deviceHardware = getDeviceHardwareFromHardwareModel(hwModel)
-                        deviceHardware?.let {
-                            _state.update { state ->
-                                state.copy(deviceHardware = it)
-                            }
-                        }
-                    }
-                    if(isLocal) {
-                        val deviceid = radioConfigRepository.myNodeInfo.value.deviceId
-                        _state.update {
-                            it.copy(
-                                isRegistered = deviceRegistrationRepository.isDeviceRegistered(deviceid) ?: false
+        destNum.let {
+        radioConfigRepository.nodeDBbyNum
+            .mapLatest { nodes -> nodes[destNum] }
+            .distinctUntilChanged()
+            .onEach { node ->
+                val isLocalDevice = node?.user?.id == radioConfigRepository.myId.value
+                _state.update { state -> state.copy(isLocalDevice = isLocalDevice) }
+                if (isLocalDevice) {
+                    val deviceId = radioConfigRepository.myNodeInfo.value?.deviceId
+                    deviceId?.let {
+                        _state.update { state ->
+                            state.copy(
+                                isRegistered = deviceRegistrationRepository.isDeviceRegistered(
+                                    it
+                                ) ?: false
                             )
                         }
                     }
                 }
-                .launchIn(viewModelScope)
+                _state.update { state -> state.copy(node = node) }
+            }.map { node ->
+                node?.user?.hwModel?.let { hwModel ->
+                    _state.update { state ->
+                        state.copy(
+                            deviceHardware = deviceHardwareRepository.getDeviceHardwareByModel(
+                                hwModel.number
+                            )
+                        )
+                    }
+                }
+            }
+            .launchIn(viewModelScope)
 
             radioConfigRepository.deviceProfileFlow.onEach { profile ->
                 val moduleConfig = profile.moduleConfig
@@ -374,23 +379,5 @@ class MetricsViewModel @Inject constructor(
         } catch (ex: FileNotFoundException) {
             errormsg("Can't write file error: ${ex.message}")
         }
-    }
-
-    private fun getDeviceHardwareFromHardwareModel(
-        hwModel: HardwareModel
-    ): DeviceHardware? {
-        if (deviceHardwareList.isEmpty()) {
-            try {
-                val json =
-                    app.assets.open("device_hardware.json").bufferedReader().use { it.readText() }
-                deviceHardwareList = Json.decodeFromString<List<DeviceHardware>>(json)
-                return deviceHardwareList.find { it.hwModel == hwModel.number }
-            } catch (ex: IOException) {
-                errormsg("Can't read device_hardware.json error: ${ex.message}")
-            } catch (ex: IllegalArgumentException) {
-                errormsg(ex.message.toString())
-            }
-        }
-        return null
     }
 }
