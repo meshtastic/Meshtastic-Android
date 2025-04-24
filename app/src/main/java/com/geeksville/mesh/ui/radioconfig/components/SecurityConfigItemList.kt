@@ -83,7 +83,8 @@ fun SecurityConfigItemList(
             EditBase64Preference(
                 title = "Public Key",
                 value = securityInput.publicKey,
-                enabled = false,
+                enabled = true,
+                readOnly = true,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChange = {
                     if (it.size() == 32) {

@@ -60,6 +60,7 @@ fun EditBase64Preference(
     modifier: Modifier = Modifier,
     onGenerateKey: (() -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
+    readOnly: Boolean = false,
 ) {
     fun ByteString.encodeToString() = Base64.encodeToString(this.toByteArray(), Base64.NO_WRAP)
     fun String.toByteString() = Base64.decode(this, Base64.NO_WRAP).toByteString()
@@ -84,13 +85,16 @@ fun EditBase64Preference(
     OutlinedTextField(
         value = valueState,
         onValueChange = {
-            valueState = it
-            runCatching { it.toByteString() }.onSuccess(onValueChange)
+            if (!readOnly) {
+                valueState = it
+                runCatching { it.toByteString() }.onSuccess(onValueChange)
+            }
         },
         modifier = modifier
             .fillMaxWidth()
             .onFocusChanged { focusState -> isFocused = focusState.isFocused },
         enabled = enabled,
+        readOnly = readOnly,
         label = { Text(text = title) },
         isError = isError,
         keyboardOptions = KeyboardOptions.Default.copy(
