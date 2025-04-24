@@ -17,8 +17,8 @@
 
 package com.geeksville.mesh.repository.api
 
+import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.warn
-import com.geeksville.mesh.database.dao.DeviceHardwareDao
 import com.geeksville.mesh.database.entity.asExternalModel
 import com.geeksville.mesh.model.DeviceHardware
 import kotlinx.coroutines.Dispatchers
@@ -27,69 +27,47 @@ import java.io.IOException
 import javax.inject.Inject
 
 class DeviceHardwareRepository @Inject constructor(
-    private val apiDataSource: DeviceHardwareApiDataSource,
-    private val deviceHardwareDaoLazy: dagger.Lazy<DeviceHardwareDao>
+    private val apiDataSource: DeviceHardwareNetworkDataSource,
+    private val localDataSource: DeviceHardwareLocalDataSource,
 ) {
 
     companion object {
-        // Define the cache expiration time (e.g., 1 day)
+        // 1 day
         private const val CACHE_EXPIRATION_TIME_MS = 24 * 60 * 60 * 1000L
-    }
-
-    private val deviceHardwareDao by lazy {
-        deviceHardwareDaoLazy.get()
-    }
-
-    suspend fun getAllDeviceHardware(refresh: Boolean = false): List<DeviceHardware>? {
-        return withContext(Dispatchers.IO) {
-            // Check the cache first
-            if (!refresh) {
-                val cachedHardware = deviceHardwareDao.getAll()
-                if (cachedHardware.isNotEmpty()) {
-                    if (!isCacheExpired(cachedHardware.first().lastUpdated)) {
-                        return@withContext cachedHardware.map { it.asExternalModel() }
-                    }
-                }
-            }
-
-            // If cache miss or expired, check the server
-            try {
-                deviceHardwareDao.insertAll(apiDataSource.getAllDeviceHardware())
-                return@withContext deviceHardwareDao.getAll().map { it.asExternalModel() }
-            } catch (e: IOException) {
-                warn("Failed to fetch device hardware from server: ${e.message}")
-                // return cached data if available or null if not
-                return@withContext deviceHardwareDao.getAll().map { it.asExternalModel() }
-            }
-        }
     }
 
     suspend fun getDeviceHardwareByModel(hwModel: Int, refresh: Boolean = false): DeviceHardware? {
         return withContext(Dispatchers.IO) {
-            // Check the cache first
-            if (!refresh) {
-                val cachedHardware = deviceHardwareDao.getByHwModel(hwModel)
-                if (cachedHardware != null) {
-                    return@withContext cachedHardware.asExternalModel()
+            if (refresh) {
+                invalidateCache()
+            } else {
+                // Check the cache first
+                val cachedHardware = localDataSource.getByHwModel(hwModel)
+                if (cachedHardware != null && !isCacheExpired(cachedHardware.lastUpdated)) {
+                    debug("Using cached device hardware")
+                    val externalModel = cachedHardware.asExternalModel()
+                    return@withContext externalModel
                 }
             }
 
             // If cache miss, check the server
             try {
-                deviceHardwareDao.insertAll(apiDataSource.getAllDeviceHardware())
-                return@withContext deviceHardwareDao.getByHwModel(hwModel)?.asExternalModel()
+                debug("Fetching device hardware from server")
+                localDataSource.insertAllDeviceHardware(apiDataSource.getAllDeviceHardware())
+                val cachedHardware = localDataSource.getByHwModel(hwModel)
+                val externalModel = cachedHardware?.asExternalModel()
+                return@withContext externalModel
             } catch (e: IOException) {
                 warn("Failed to fetch device hardware from server: ${e.message}")
-                // return cached data if available or null if not
-                return@withContext deviceHardwareDao.getByHwModel(hwModel)?.asExternalModel()
+                val cachedHardware = localDataSource.getByHwModel(hwModel)
+                val externalModel = cachedHardware?.asExternalModel()
+                return@withContext externalModel
             }
         }
     }
 
     suspend fun invalidateCache() {
-        withContext(Dispatchers.IO) {
-            deviceHardwareDao.deleteAll()
-        }
+        localDataSource.deleteAllDeviceHardware()
     }
 
     /**

@@ -21,22 +21,12 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import androidx.room.Update
 import com.geeksville.mesh.database.entity.DeviceHardwareEntity
 
 @Dao
 interface DeviceHardwareDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(deviceHardwareEntity: DeviceHardwareEntity)
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(deviceHardwareEntities: List<DeviceHardwareEntity>)
-
-    @Update
-    suspend fun update(deviceHardwareEntity: DeviceHardwareEntity)
-
-    @Query("SELECT * FROM device_hardware")
-    suspend fun getAll(): List<DeviceHardwareEntity>
 
     @Query("SELECT * FROM device_hardware WHERE hwModel = :hwModel")
     suspend fun getByHwModel(hwModel: Int): DeviceHardwareEntity?

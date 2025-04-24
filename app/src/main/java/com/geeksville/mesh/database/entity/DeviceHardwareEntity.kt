@@ -51,7 +51,8 @@ fun NetworkDeviceHardware.asEntity() = DeviceHardwareEntity(
     tags = tags,
     images = images,
     requiresDfu = requiresDfu,
-    platformioTarget = platformioTarget
+    platformioTarget = platformioTarget,
+    lastUpdated = System.currentTimeMillis()
 )
 
 fun DeviceHardwareEntity.asExternalModel() = DeviceHardware(

@@ -17,17 +17,16 @@
 
 package com.geeksville.mesh.api
 
-import com.geeksville.mesh.database.entity.DeviceHardwareEntity
-import com.geeksville.mesh.repository.api.DeviceHardwareApi
+import com.geeksville.mesh.database.entity.NetworkDeviceHardware
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface ApiService : DeviceHardwareApi {
+interface ApiService {
     // TODO: update to point to actual endpoint path for device registration
     @GET(".")
     suspend fun checkDeviceRegistration(@Query("deviceId") deviceId: String): Response<Unit>
 
     @GET("resource/deviceHardware")
-    suspend fun getDeviceHardware(): Response<List<DeviceHardwareEntity>>
+    suspend fun getDeviceHardware(): Response<List<NetworkDeviceHardware>>
 }
