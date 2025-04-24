@@ -99,9 +99,7 @@ fun EditBase64Preference(
         ),
         keyboardActions = keyboardActions,
         trailingIcon = {
-            if (trailingIcon != null) {
-                trailingIcon()
-            } else if (icon != null) {
+            if (icon != null) {
                 IconButton(
                     onClick = {
                         if (isError) {
@@ -123,6 +121,8 @@ fun EditBase64Preference(
                         }
                     )
                 }
+            } else if (trailingIcon != null) {
+                trailingIcon()
             }
         },
     )
