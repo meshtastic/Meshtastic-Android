@@ -106,7 +106,6 @@ fun SecurityConfigItemList(
                 title = "Private Key",
                 value = securityInput.privateKey,
                 enabled = enabled,
-                readOnly = true,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChange = {
                     if (it.size() == 32) {
