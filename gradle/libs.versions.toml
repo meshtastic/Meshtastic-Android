@@ -119,7 +119,7 @@ protobuf-gradle-plugin = { group = "com.google.protobuf", name = "protobuf-gradl
 protobuf-kotlin = { group = "com.google.protobuf", name = "protobuf-kotlin", version.ref = "protobuf-kotlin" }
 protobuf-protoc = { group = "com.google.protobuf", name ="protoc", version.ref = "protobuf-kotlin" }
 retrofit2 = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
-retrofit2-converter-gson = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit" }
+retrofit2-kotlin-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
@@ -173,7 +173,7 @@ firebase = ["firebase-analytics", "firebase-crashlytics"]
 protobuf = ["protobuf-kotlin"]
 
 #retrofit
-retrofit = ["retrofit2", "retrofit2-converter-gson", "okhttp3", "okhttp3-logging-interceptor"]
+retrofit = ["retrofit2", "retrofit2-kotlin-serialization", "okhttp3", "okhttp3-logging-interceptor"]
 
 # coil
 coil = ["coil", "coil-svg"]
@@ -187,6 +187,7 @@ hilt = { id = "com.google.dagger.hilt.android" }
 kotlin-android = { id = "org.jetbrains.kotlin.android" }
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize" }
-kotlin-serialization = { id = "kotlinx-serialization" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization" }
 protobuf = { id = "com.google.protobuf" }
+android-library = { id = "com.android.library" }
 

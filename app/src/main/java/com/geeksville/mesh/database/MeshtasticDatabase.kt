@@ -91,7 +91,7 @@ abstract class MeshtasticDatabase : RoomDatabase() {
                 MeshtasticDatabase::class.java,
                 "meshtastic_database"
             )
-                .fallbackToDestructiveMigration()
+                .fallbackToDestructiveMigration(false)
                 .build()
         }
     }

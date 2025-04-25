@@ -15,22 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.database.dao
+package com.geeksville.mesh.network
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import com.geeksville.mesh.database.entity.DeviceHardwareEntity
+import com.geeksville.mesh.network.model.NetworkDeviceHardware
+import com.geeksville.mesh.network.retrofit.ApiService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-@Dao
-interface DeviceHardwareDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(deviceHardware: DeviceHardwareEntity)
-
-    @Query("SELECT * FROM device_hardware WHERE hwModel = :hwModel")
-    suspend fun getByHwModel(hwModel: Int): DeviceHardwareEntity?
-
-    @Query("DELETE FROM device_hardware")
-    suspend fun deleteAll()
+class DeviceHardwareRemoteDataSource @Inject constructor(
+    private val apiService: ApiService,
+) {
+    suspend fun getAllDeviceHardware(): List<NetworkDeviceHardware> = withContext(Dispatchers.IO) {
+        apiService.getDeviceHardware().body() ?: emptyList()
+    }
 }

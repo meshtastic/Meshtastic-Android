@@ -243,13 +243,12 @@ class MetricsViewModel @Inject constructor(
                 val isLocalDevice = node?.user?.id == radioConfigRepository.myId.value
                 _state.update { state -> state.copy(isLocalDevice = isLocalDevice) }
                 if (isLocalDevice) {
-                    val deviceId = radioConfigRepository.myNodeInfo.value?.deviceId
-                    deviceId?.let {
+                    radioConfigRepository.myNodeInfo.value?.deviceId?.let { deviceId ->
                         _state.update { state ->
                             state.copy(
                                 isRegistered = deviceRegistrationRepository.isDeviceRegistered(
-                                    it
-                                ) ?: false
+                                    deviceId
+                                )?.isRegistered ?: false
                             )
                         }
                     }

@@ -15,18 +15,18 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.api
+package com.geeksville.mesh.network
 
-import com.geeksville.mesh.database.entity.NetworkDeviceHardware
-import retrofit2.Response
-import retrofit2.http.GET
-import retrofit2.http.Query
+import com.geeksville.mesh.network.model.NetworkDeviceRegistration
+import com.geeksville.mesh.network.retrofit.ApiService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
-interface ApiService {
-    // TODO: update to point to actual endpoint path for device registration
-    @GET(".")
-    suspend fun checkDeviceRegistration(@Query("deviceId") deviceId: String): Response<Unit>
-
-    @GET("resource/deviceHardware")
-    suspend fun getDeviceHardware(): Response<List<NetworkDeviceHardware>>
+class DeviceRegistrationRemoteDataSource @Inject constructor(
+    private val apiService: ApiService,
+) {
+    suspend fun checkDeviceRegistration(deviceId: String): NetworkDeviceRegistration = withContext(Dispatchers.IO) {
+        NetworkDeviceRegistration(apiService.checkDeviceRegistration(deviceId).isSuccessful)
+    }
 }

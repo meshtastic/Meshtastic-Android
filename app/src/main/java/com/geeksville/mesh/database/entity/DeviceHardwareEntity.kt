@@ -23,62 +23,60 @@ import androidx.room.PrimaryKey
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DeviceHardware
+import com.geeksville.mesh.network.model.NetworkDeviceHardware
 import kotlinx.serialization.Serializable
 
 @Serializable
 @Entity(tableName = "device_hardware")
 data class DeviceHardwareEntity(
+    @ColumnInfo(name = "actively_supported") val activelySupported: Boolean,
+    val architecture: String,
+    @ColumnInfo(name = "display_name") val displayName: String,
+    @ColumnInfo(name = "has_ink_hud") val hasInkHud: Boolean? = null,
+    @ColumnInfo(name = "has_mui") val hasMui: Boolean? = null,
     @PrimaryKey val hwModel: Int,
     @ColumnInfo(name = "hw_model_slug") val hwModelSlug: String,
-    @ColumnInfo(name = "platformio_target") val platformioTarget: String,
-    val architecture: String,
-    @ColumnInfo(name = "actively_supported") val activelySupported: Boolean,
-    @ColumnInfo(name = "support_level") val supportLevel: Int?,
-    @ColumnInfo(name = "display_name") val displayName: String,
-    val tags: List<String>?,
     val images: List<String>?,
+    @ColumnInfo(name = "last_updated") val lastUpdated: Long = System.currentTimeMillis(),
+    @ColumnInfo(name = "partition_scheme") val partitionScheme: String? = null,
+    @ColumnInfo(name = "platformio_target") val platformioTarget: String,
     @ColumnInfo(name = "requires_dfu") val requiresDfu: Boolean?,
-    @ColumnInfo(name = "last_updated") val lastUpdated: Long = System.currentTimeMillis()
+    @ColumnInfo(name = "support_level") val supportLevel: Int?,
+    val tags: List<String>?,
 )
 
 fun NetworkDeviceHardware.asEntity() = DeviceHardwareEntity(
+    activelySupported = activelySupported,
+    architecture = architecture,
+    displayName = displayName,
+    hasInkHud = hasInkHud,
+    hasMui = hasMui,
     hwModel = hwModel,
     hwModelSlug = hwModelSlug,
-    architecture = architecture,
-    activelySupported = activelySupported,
-    supportLevel = supportLevel,
-    displayName = displayName,
-    tags = tags,
     images = images,
-    requiresDfu = requiresDfu,
+    lastUpdated = System.currentTimeMillis(),
+    partitionScheme = partitionScheme,
     platformioTarget = platformioTarget,
-    lastUpdated = System.currentTimeMillis()
+    requiresDfu = requiresDfu,
+    supportLevel = supportLevel,
+    tags = tags,
 )
 
 fun DeviceHardwareEntity.asExternalModel() = DeviceHardware(
+    activelySupported = activelySupported,
+    architecture = architecture,
+    displayName = displayName,
+    hasInkHud = hasInkHud,
+    hasMui = hasMui,
     hwModel = hwModel,
     hwModelSlug = hwModelSlug,
-    architecture = architecture,
-    activelySupported = activelySupported,
-    supportLevel = supportLevel,
-    displayName = displayName,
-    tags = tags,
     image = getDrawableFrom(hwModel),
-    requiresDfu = requiresDfu
-)
-
-@Serializable
-data class NetworkDeviceHardware(
-    val hwModel: Int,
-    val hwModelSlug: String,
-    val platformioTarget: String,
-    val architecture: String,
-    val activelySupported: Boolean,
-    val supportLevel: Int?,
-    val displayName: String,
-    val tags: List<String>?,
-    val images: List<String>?,
-    val requiresDfu: Boolean?
+    images = images,
+    partitionScheme = partitionScheme,
+    platformioTarget = platformioTarget,
+    requiresDfu = requiresDfu,
+    supportLevel = supportLevel,
+    tags = tags,
 )
 
 @Suppress("CyclomaticComplexMethod")

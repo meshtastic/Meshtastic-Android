@@ -15,22 +15,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.database.dao
+package com.geeksville.mesh.network.retrofit
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
-import com.geeksville.mesh.database.entity.DeviceHardwareEntity
+import com.geeksville.mesh.network.model.NetworkDeviceHardware
+import retrofit2.Response
+import retrofit2.http.GET
+import retrofit2.http.Query
 
-@Dao
-interface DeviceHardwareDao {
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(deviceHardware: DeviceHardwareEntity)
+interface ApiService {
+    @GET(".")
+    suspend fun checkDeviceRegistration(@Query("deviceId") deviceId: String): Response<Unit>
 
-    @Query("SELECT * FROM device_hardware WHERE hwModel = :hwModel")
-    suspend fun getByHwModel(hwModel: Int): DeviceHardwareEntity?
-
-    @Query("DELETE FROM device_hardware")
-    suspend fun deleteAll()
+    @GET("resource/deviceHardware")
+    suspend fun getDeviceHardware(): Response<List<NetworkDeviceHardware>>
 }

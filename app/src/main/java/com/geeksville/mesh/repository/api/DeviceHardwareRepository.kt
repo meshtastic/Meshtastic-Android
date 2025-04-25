@@ -21,13 +21,14 @@ import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.warn
 import com.geeksville.mesh.database.entity.asExternalModel
 import com.geeksville.mesh.model.DeviceHardware
+import com.geeksville.mesh.network.DeviceHardwareRemoteDataSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
 import javax.inject.Inject
 
 class DeviceHardwareRepository @Inject constructor(
-    private val apiDataSource: DeviceHardwareNetworkDataSource,
+    private val apiDataSource: DeviceHardwareRemoteDataSource,
     private val localDataSource: DeviceHardwareLocalDataSource,
 ) {
 
@@ -41,7 +42,6 @@ class DeviceHardwareRepository @Inject constructor(
             if (refresh) {
                 invalidateCache()
             } else {
-                // Check the cache first
                 val cachedHardware = localDataSource.getByHwModel(hwModel)
                 if (cachedHardware != null && !isCacheExpired(cachedHardware.lastUpdated)) {
                     debug("Using cached device hardware")
@@ -49,8 +49,6 @@ class DeviceHardwareRepository @Inject constructor(
                     return@withContext externalModel
                 }
             }
-
-            // If cache miss, check the server
             try {
                 debug("Fetching device hardware from server")
                 localDataSource.insertAllDeviceHardware(apiDataSource.getAllDeviceHardware())

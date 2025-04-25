@@ -20,10 +20,29 @@ package com.geeksville.mesh.database.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.geeksville.mesh.network.model.NetworkDeviceRegistration
 
 @Entity(tableName = "device_registration")
 data class DeviceRegistrationEntity(
     @PrimaryKey val deviceId: String,
     @ColumnInfo(name = "is_registered") val isRegistered: Boolean,
     @ColumnInfo(name = "last_updated") val lastUpdated: Long = System.currentTimeMillis()
+)
+
+fun DeviceRegistrationEntity.asExternalModel() = DeviceRegistration(
+    deviceId = deviceId,
+    isRegistered = isRegistered,
+    lastUpdated = lastUpdated,
+)
+
+fun NetworkDeviceRegistration.asEntity(deviceId: String) = DeviceRegistrationEntity(
+    deviceId = deviceId,
+    isRegistered = registered,
+    lastUpdated = System.currentTimeMillis(),
+)
+
+data class DeviceRegistration(
+    val deviceId: String,
+    val isRegistered: Boolean,
+    val lastUpdated: Long,
 )

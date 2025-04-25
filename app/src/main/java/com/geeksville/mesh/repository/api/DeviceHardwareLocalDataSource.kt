@@ -17,22 +17,13 @@
 
 package com.geeksville.mesh.repository.api
 
-import com.geeksville.mesh.api.ApiService
 import com.geeksville.mesh.database.dao.DeviceHardwareDao
 import com.geeksville.mesh.database.entity.DeviceHardwareEntity
-import com.geeksville.mesh.database.entity.NetworkDeviceHardware
 import com.geeksville.mesh.database.entity.asEntity
+import com.geeksville.mesh.network.model.NetworkDeviceHardware
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
-
-class DeviceHardwareNetworkDataSource @Inject constructor(
-    private val apiService: ApiService,
-) {
-    suspend fun getAllDeviceHardware(): List<NetworkDeviceHardware> = withContext(Dispatchers.IO) {
-        apiService.getDeviceHardware().body() ?: emptyList()
-    }
-}
 
 class DeviceHardwareLocalDataSource @Inject constructor(
     private val deviceHardwareDaoLazy: dagger.Lazy<DeviceHardwareDao>
@@ -44,8 +35,7 @@ class DeviceHardwareLocalDataSource @Inject constructor(
     suspend fun insertAllDeviceHardware(deviceHardware: List<NetworkDeviceHardware>) =
         withContext(Dispatchers.IO) {
             deviceHardware.forEach { deviceHardware ->
-                val entity = deviceHardware.asEntity()
-                deviceHardwareDao.insert(entity)
+                deviceHardwareDao.insert(deviceHardware.asEntity())
             }
         }
 
@@ -54,7 +44,6 @@ class DeviceHardwareLocalDataSource @Inject constructor(
     }
 
     suspend fun getByHwModel(hwModel: Int): DeviceHardwareEntity? = withContext(Dispatchers.IO) {
-        val hwModel = deviceHardwareDao.getByHwModel(hwModel)
-        hwModel
+        deviceHardwareDao.getByHwModel(hwModel)
     }
 }
