@@ -34,12 +34,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos.Config.SecurityConfig
 import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
+import com.geeksville.mesh.ui.components.CopyIconButton
 import com.geeksville.mesh.ui.components.EditBase64Preference
 import com.geeksville.mesh.ui.components.EditListPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.SwitchPreference
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
+import com.geeksville.mesh.util.encodeToString
 
 @Composable
 fun SecurityConfigScreen(
@@ -83,13 +85,19 @@ fun SecurityConfigItemList(
             EditBase64Preference(
                 title = "Public Key",
                 value = securityInput.publicKey,
-                enabled = false,
+                enabled = enabled,
+                readOnly = true,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChange = {
                     if (it.size() == 32) {
                         securityInput = securityInput.copy { publicKey = it }
                     }
                 },
+                trailingIcon = {
+                    CopyIconButton(
+                        valueToCopy = securityInput.privateKey.encodeToString(),
+                    )
+                }
             )
         }
 
@@ -104,6 +112,11 @@ fun SecurityConfigItemList(
                         securityInput = securityInput.copy { privateKey = it }
                     }
                 },
+                trailingIcon = {
+                    CopyIconButton(
+                        valueToCopy = securityInput.privateKey.encodeToString(),
+                    )
+                }
             )
         }
 
