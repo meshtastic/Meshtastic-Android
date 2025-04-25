@@ -10,6 +10,9 @@ plugins {
 }
 
 android {
+    buildFeatures {
+        buildConfig = true
+    }
     compileSdk = 35
     defaultConfig {
         minSdk = 21
@@ -31,6 +34,7 @@ kotlin {
 dependencies {
     implementation(libs.bundles.hilt)
     implementation(libs.bundles.retrofit)
+    implementation(libs.bundles.coil)
     ksp(libs.hilt.compiler)
     implementation(libs.kotlinx.serialization.json)
     detektPlugins(libs.detekt.formatting)

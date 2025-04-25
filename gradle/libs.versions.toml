@@ -59,6 +59,8 @@ appintro = { group = "com.github.AppIntro", name = "AppIntro", version.ref = "ap
 awesome-app-rating = { group = "com.suddenh4x.ratingdialog", name = "awesome-app-rating", version.ref = "awesome-app-rating" }
 cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardview" }
 coil = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-network-core = { group = "io.coil-kt.coil3", name = "coil-network-core", version.ref = "coil" }
+coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 coil-svg = { group = "io.coil-kt.coil3", name = "coil-svg", version.ref = "coil" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
@@ -169,14 +171,14 @@ osm = ["osmdroid-android", "osmdroid-wms", "osmbonuspack", "mgrs"]
 # Firebase
 firebase = ["firebase-analytics", "firebase-crashlytics"]
 
-#Protobuf
+# Protobuf
 protobuf = ["protobuf-kotlin"]
 
-#retrofit
+# retrofit
 retrofit = ["retrofit2", "retrofit2-kotlin-serialization", "okhttp3", "okhttp3-logging-interceptor"]
 
 # coil
-coil = ["coil", "coil-svg"]
+coil = ["coil", "coil-network-core", "coil-network-okhttp", "coil-svg"]
 
 [plugins]
 android-application = { id = "com.android.application" }

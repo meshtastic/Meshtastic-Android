@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -79,6 +80,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -90,7 +92,11 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
+import coil3.request.ErrorResult
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.model.DeviceHardware
 import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
@@ -334,11 +340,7 @@ private fun DeviceDetailsContent(
             ),
         contentAlignment = Alignment.Center
     ) {
-        DeviceHardwareImage(
-            deviceHardware = deviceHardware,
-            modifier = Modifier
-                .size(100.dp)
-        )
+        DeviceHardwareImage(deviceHardware, Modifier.fillMaxSize())
     }
     NodeDetailRow(
         label = stringResource(R.string.hardware),
@@ -366,16 +368,43 @@ fun DeviceHardwareImage(
     deviceHardware: DeviceHardware,
     modifier: Modifier = Modifier,
 ) {
-    val hwImg = deviceHardware.images?.lastOrNull()
+    val hwImg = deviceHardware.images?.get(1) ?: deviceHardware.images?.get(0)
     if (hwImg != null) {
-        val imageUrl = "file:///android_asset/device_hardware/$hwImg"
+        val imageUrl = "https://flasher.meshtastic.org/img/devices/$hwImg"
+        val listener = object : ImageRequest.Listener {
+            override fun onStart(request: ImageRequest) {
+                super.onStart(request)
+                debug("Image request started")
+            }
+
+            override fun onError(request: ImageRequest, result: ErrorResult) {
+                super.onError(request, result)
+                debug("Image request failed: ${result.throwable.message}")
+            }
+
+            override fun onSuccess(request: ImageRequest, result: SuccessResult) {
+                super.onSuccess(request, result)
+                debug("Image request succeeded: ${result.dataSource.name}")
+            }
+        }
         AsyncImage(
-            model = imageUrl,
+            model = ImageRequest.Builder(LocalContext.current)
+                .listener(listener)
+                .data(imageUrl)
+                .build(),
             contentScale = ContentScale.Inside,
             contentDescription = deviceHardware.displayName,
             placeholder = painterResource(R.drawable.hw_unknown),
             error = painterResource(R.drawable.hw_unknown),
             fallback = painterResource(R.drawable.hw_unknown),
+            modifier = modifier
+                .padding(16.dp)
+        )
+    } else {
+        Image(
+            painter = painterResource(R.drawable.hw_unknown),
+            contentScale = ContentScale.Inside,
+            contentDescription = deviceHardware.displayName,
             modifier = modifier
                 .padding(16.dp)
         )
