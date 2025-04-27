@@ -229,8 +229,11 @@ class MetricsViewModel @Inject constructor(
             .onEach { node ->
                 _state.update { state -> state.copy(node = node) }
                 node?.user?.hwModel?.let { hwModel ->
-                    _state.update { state ->
-                        state.copy(deviceHardware = getDeviceHardwareFromHardwareModel(hwModel))
+                    val deviceHardware = getDeviceHardwareFromHardwareModel(hwModel)
+                    deviceHardware?.let {
+                        _state.update { state ->
+                            state.copy(deviceHardware = it)
+                        }
                     }
                 }
             }
@@ -348,12 +351,14 @@ class MetricsViewModel @Inject constructor(
             try {
                 val json =
                     app.assets.open("device_hardware.json").bufferedReader().use { it.readText() }
-                deviceHardwareList = Json.decodeFromString<List<DeviceHardwareDto>>(json)
-                    .map { it.toDeviceHardware() }
+                deviceHardwareList = Json.decodeFromString<List<DeviceHardware>>(json)
+                return deviceHardwareList.find { it.hwModel == hwModel.number }
             } catch (ex: IOException) {
                 errormsg("Can't read device_hardware.json error: ${ex.message}")
+            } catch (ex: IllegalArgumentException) {
+                errormsg(ex.message.toString())
             }
         }
-        return deviceHardwareList.find { it.hwModel == hwModel.number }
+        return null
     }
 }

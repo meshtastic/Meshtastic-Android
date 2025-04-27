@@ -4,6 +4,7 @@ appcompat = "1.7.0"
 appintro = "6.3.1"
 awesome-app-rating = "2.8.0"
 cardview = "1.0.0"
+coil = "3.1.0"
 compose-bom = "2025.04.01"
 constraintlayout = "2.2.1"
 core-ktx = "1.16.0"
@@ -52,6 +53,8 @@ appcompat-resources = { group = "androidx.appcompat", name = "appcompat-resource
 appintro = { group = "com.github.AppIntro", name = "AppIntro", version.ref = "appintro" }
 awesome-app-rating = { group = "com.suddenh4x.ratingdialog", name = "awesome-app-rating", version.ref = "awesome-app-rating" }
 cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardview" }
+coil = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-svg = { group = "io.coil-kt.coil3", name = "coil-svg", version.ref = "coil" }
 compose-material = { group = "androidx.compose.material", name = "material" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
 compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
@@ -157,6 +160,9 @@ firebase = ["firebase-analytics", "firebase-crashlytics"]
 
 #Protobuf
 protobuf = ["protobuf-kotlin"]
+
+# coil
+coil = ["coil", "coil-svg"]
 
 [plugins]
 android-application = { id = "com.android.application" }

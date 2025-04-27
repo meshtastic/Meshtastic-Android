@@ -87,7 +87,8 @@
     "images": [
       "t-echo.svg"
     ],
-    "requiresDfu": true
+    "requiresDfu": true,
+    "hasInkHud": true
   },
   {
     "hwModel": 8,
@@ -153,17 +154,21 @@
     "images": [
       "tbeam-s3-core.svg"
     ],
-    "requiresDfu": true
+    "requiresDfu": true,
+    "partitionScheme": "8MB"
   },
   {
     "hwModel": 13,
     "hwModelSlug": "RAK11200",
     "platformioTarget": "rak11200",
     "architecture": "esp32",
-    "activelySupported": false,
+    "activelySupported": true,
     "displayName": "RAK WisBlock 11200",
     "tags": [
       "RAK"
+    ],
+    "images": [
+      "rak11200.svg"
     ]
   },
   {
@@ -271,22 +276,6 @@
     "requiresDfu": true
   },
   {
-    "hwModel": 22,
-    "hwModelSlug": "WISMESH_HUB",
-    "platformioTarget": "rak2560",
-    "architecture": "nrf52840",
-    "activelySupported": true,
-    "supportLevel": 1,
-    "displayName": "RAK WisMesh Repeater",
-    "tags": [
-      "RAK"
-    ],
-    "images": [
-      "rak2560.svg"
-    ],
-    "requiresDfu": true
-  },
-  {
     "hwModel": 25,
     "hwModelSlug": "STATION_G1",
     "platformioTarget": "station-g1",
@@ -354,7 +343,8 @@
     "requiresDfu": true,
     "images": [
       "station-g2.svg"
-    ]
+    ],
+    "partitionScheme": "16MB"
   },
   {
     "hwModel": 39,
@@ -420,7 +410,8 @@
     "images": [
       "heltec-v3.svg",
       "heltec-v3-case.svg"
-    ]
+    ],
+    "partitionScheme": "8MB"
   },
   {
     "hwModel": 44,
@@ -435,7 +426,8 @@
     ],
     "images": [
       "heltec-wsl-v3.svg"
-    ]
+    ],
+    "partitionScheme": "8MB"
   },
   {
     "hwModel": 47,
@@ -485,7 +477,8 @@
     "images": [
       "heltec-wireless-tracker.svg"
     ],
-    "requiresDfu": true
+    "requiresDfu": true,
+    "partitionScheme": "8MB"
   },
   {
     "hwModel": 58,
@@ -498,7 +491,8 @@
     "images": [
       "heltec-wireless-tracker.svg"
     ],
-    "requiresDfu": true
+    "requiresDfu": true,
+    "partitionScheme": "8MB"
   },
   {
     "hwModel": 49,
@@ -513,7 +507,9 @@
     ],
     "images": [
       "heltec-wireless-paper.svg"
-    ]
+    ],
+    "hasInkHud": true,
+    "partitionScheme": "8MB"
   },
   {
     "hwModel": 50,
@@ -529,7 +525,9 @@
     "images": [
       "t-deck.svg"
     ],
-    "requiresDfu": true
+    "requiresDfu": true,
+    "hasMui": true,
+    "partitionScheme": "16MB"
   },
   {
     "hwModel": 51,
@@ -544,7 +542,8 @@
     ],
     "images": [
       "t-watch-s3.svg"
-    ]
+    ],
+    "partitionScheme": "8MB"
   },
   {
     "hwModel": 52,
@@ -553,7 +552,9 @@
     "architecture": "esp32-s3",
     "activelySupported": true,
     "supportLevel": 3,
-    "displayName": "Pi Computer S3"
+    "displayName": "Pi Computer S3",
+    "hasMui": true,
+    "partitionScheme": "8MB"
   },
   {
     "hwModel": 53,
@@ -583,7 +584,8 @@
     "displayName": "Heltec Wireless Paper V1.0",
     "images": [
       "heltec-wireless-paper-v1_0.svg"
-    ]
+    ],
+    "partitionScheme": "8MB"
   },
   {
     "hwModel": 59,
@@ -593,17 +595,20 @@
     "activelySupported": true,
     "supportLevel": 3,
     "displayName": "unPhone",
-    "requiresDfu": true
+    "requiresDfu": true,
+    "hasMui": true,
+    "partitionScheme": "8MB"
   },
   {
     "hwModel": 48,
     "hwModelSlug": "HELTEC_WIRELESS_TRACKER",
     "platformioTarget": "tracksenger",
     "architecture": "esp32-s3",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 3,
     "displayName": "TrackSenger (small TFT)",
-    "requiresDfu": true
+    "requiresDfu": true,
+    "partitionScheme": "8MB"
   },
   {
     "hwModel": 48,
@@ -613,16 +618,18 @@
     "activelySupported": false,
     "supportLevel": 3,
     "displayName": "TrackSenger (big TFT)",
-    "requiresDfu": true
+    "requiresDfu": true,
+    "partitionScheme": "8MB"
   },
   {
     "hwModel": 48,
     "hwModelSlug": "HELTEC_WIRELESS_TRACKER",
     "platformioTarget": "tracksenger-oled",
     "architecture": "esp32-s3",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 3,
-    "displayName": "TrackSenger (big OLED)"
+    "displayName": "TrackSenger (big OLED)",
+    "partitionScheme": "8MB"
   },
   {
     "hwModel": 61,
@@ -663,7 +670,8 @@
     "images": [
       "heltec-vision-master-t190.svg"
     ],
-    "requiresDfu": true
+    "requiresDfu": true,
+    "partitionScheme": "8MB"
   },
   {
     "hwModel": 67,
@@ -679,7 +687,9 @@
     "images": [
       "heltec-vision-master-e213.svg"
     ],
-    "requiresDfu": true
+    "requiresDfu": true,
+    "hasInkHud": true,
+    "partitionScheme": "8MB"
   },
   {
     "hwModel": 68,
@@ -695,7 +705,9 @@
     "images": [
       "heltec-vision-master-e290.svg"
     ],
-    "requiresDfu": true
+    "requiresDfu": true,
+    "hasInkHud": true,
+    "partitionScheme": "8MB"
   },
   {
     "hwModel": 69,
@@ -727,7 +739,9 @@
     ],
     "images": [
       "seeed-sensecap-indicator.svg"
-    ]
+    ],
+    "hasMui": true,
+    "partitionScheme": "8MB"
   },
   {
     "hwModel": 71,
@@ -759,7 +773,8 @@
     "images": [
       "seeed-xiao-s3.svg"
     ],
-    "requiresDfu": true
+    "requiresDfu": true,
+    "partitionScheme": "8MB"
   },
   {
     "hwModel": 84,
@@ -778,6 +793,22 @@
     "requiresDfu": true
   },
   {
+    "hwModel": 22,
+    "hwModelSlug": "WISMESH_HUB",
+    "platformioTarget": "rak2560",
+    "architecture": "nrf52840",
+    "activelySupported": true,
+    "supportLevel": 1,
+    "displayName": "RAK WisMesh Repeater",
+    "tags": [
+      "RAK"
+    ],
+    "images": [
+      "rak2560.svg"
+    ],
+    "requiresDfu": true
+  },
+  {
     "hwModel": 63,
     "hwModelSlug": "NRF52_PROMICRO_DIY",
     "platformioTarget": "nrf52_promicro_diy_tcxo",
@@ -790,6 +821,68 @@
     ],
     "images": [
       "promicro.svg"
+    ],
+    "requiresDfu": true
+  },
+  {
+    "hwModel": 88,
+    "hwModelSlug": "XIAO_NRF52_KIT",
+    "platformioTarget": "seeed_xiao_nrf52840_kit",
+    "architecture": "nrf52840",
+    "activelySupported": true,
+    "supportLevel": 1,
+    "displayName": "Seeed Xiao NRF52840 Kit",
+    "tags": [
+      "Seeed"
+    ],
+    "requiresDfu": true,
+    "images": [
+      "seeed_xiao_nrf52_kit.svg"
+    ]
+  },
+  {
+    "hwModel": 89,
+    "hwModelSlug": "THINKNODE_M1",
+    "platformioTarget": "thinknode_m1",
+    "architecture": "nrf52840",
+    "activelySupported": true,
+    "supportLevel": 1,
+    "displayName": "ThinkNode M1",
+    "tags": [
+      "Elecrow"
+    ],
+    "requiresDfu": true,
+    "images": [
+      "thinknode_m1.svg"
+    ],
+    "hasInkHud": true
+  },
+  {
+    "hwModel": 90,
+    "hwModelSlug": "THINKNODE_M2",
+    "platformioTarget": "thinknode_m2",
+    "architecture": "esp32-s3",
+    "activelySupported": true,
+    "supportLevel": 1,
+    "displayName": "ThinkNode M2",
+    "tags": [
+      "Elecrow"
+    ],
+    "requiresDfu": false,
+    "images": [
+      "thinknode_m2.svg"
+    ]
+  },
+  {
+    "hwModel": 94,
+    "hwModelSlug": "HELTEC_MESH_POCKET",
+    "platformioTarget": "heltec_mesh_pocket",
+    "architecture": "nrf52840",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "Heltec MeshPocket",
+    "tags": [
+      "Heltec"
     ],
     "requiresDfu": true
   }

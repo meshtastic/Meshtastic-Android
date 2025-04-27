@@ -19,7 +19,6 @@
 
 package com.geeksville.mesh.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -81,6 +80,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
@@ -90,8 +91,10 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.AsyncImage
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.DeviceHardware
 import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.Node
@@ -237,10 +240,10 @@ private fun DeviceDetailsContent(
             ),
         contentAlignment = Alignment.Center
     ) {
-        Image(
-            modifier = Modifier.padding(16.dp),
-            imageVector = ImageVector.vectorResource(deviceHardware.image),
-            contentDescription = hwModelName,
+        DeviceHardwareImage(
+            deviceHardware = deviceHardware,
+            modifier = Modifier
+                .size(100.dp)
         )
     }
     NodeDetailRow(
@@ -254,6 +257,27 @@ private fun DeviceDetailsContent(
             icon = Icons.Default.Verified,
             value = "",
             iconTint = Color.Green
+        )
+    }
+}
+
+@Composable
+fun DeviceHardwareImage(
+    deviceHardware: DeviceHardware,
+    modifier: Modifier = Modifier,
+) {
+    val hwImg = deviceHardware.images?.lastOrNull()
+    if (hwImg != null) {
+        val imageUrl = "file:///android_asset/device_hardware/$hwImg"
+        AsyncImage(
+            model = imageUrl,
+            contentScale = ContentScale.Inside,
+            contentDescription = deviceHardware.displayName,
+            placeholder = painterResource(R.drawable.hw_unknown),
+            error = painterResource(R.drawable.hw_unknown),
+            fallback = painterResource(R.drawable.hw_unknown),
+            modifier = modifier
+                .padding(16.dp)
         )
     }
 }
