@@ -30,6 +30,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.MQTTConfig
+import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.ui.components.EditPasswordPreference
@@ -82,18 +84,21 @@ fun MQTTConfigItemList(
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        item { PreferenceCategory(text = "MQTT Config") }
+        item { PreferenceCategory(text = stringResource(R.string.mqtt_config)) }
 
         item {
-            SwitchPreference(title = "MQTT enabled",
+            SwitchPreference(
+                title = stringResource(R.string.mqtt_enabled),
                 checked = mqttInput.enabled,
                 enabled = enabled,
-                onCheckedChange = { mqttInput = mqttInput.copy { this.enabled = it } })
+                onCheckedChange = { mqttInput = mqttInput.copy { this.enabled = it } }
+            )
         }
         item { Divider() }
 
         item {
-            EditTextPreference(title = "Address",
+            EditTextPreference(
+                title = stringResource(R.string.address),
                 value = mqttInput.address,
                 maxSize = 63, // address max_size:64
                 enabled = enabled,
@@ -102,11 +107,13 @@ fun MQTTConfigItemList(
                     keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { mqttInput = mqttInput.copy { address = it } })
+                onValueChanged = { mqttInput = mqttInput.copy { address = it } }
+            )
         }
 
         item {
-            EditTextPreference(title = "Username",
+            EditTextPreference(
+                title = stringResource(R.string.username),
                 value = mqttInput.username,
                 maxSize = 63, // username max_size:64
                 enabled = enabled,
@@ -115,44 +122,54 @@ fun MQTTConfigItemList(
                     keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { mqttInput = mqttInput.copy { username = it } })
+                onValueChanged = { mqttInput = mqttInput.copy { username = it } }
+            )
         }
 
         item {
-            EditPasswordPreference(title = "Password",
+            EditPasswordPreference(
+                title = stringResource(R.string.password),
                 value = mqttInput.password,
                 maxSize = 63, // password max_size:64
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { mqttInput = mqttInput.copy { password = it } })
+                onValueChanged = { mqttInput = mqttInput.copy { password = it } }
+            )
         }
 
         item {
-            SwitchPreference(title = "Encryption enabled",
+            SwitchPreference(
+                title = stringResource(R.string.encryption_enabled),
                 checked = mqttInput.encryptionEnabled,
                 enabled = enabled,
-                onCheckedChange = { mqttInput = mqttInput.copy { encryptionEnabled = it } })
+                onCheckedChange = { mqttInput = mqttInput.copy { encryptionEnabled = it } }
+            )
         }
         item { Divider() }
 
         item {
-            SwitchPreference(title = "JSON output enabled",
+            SwitchPreference(
+                title = stringResource(R.string.json_output_enabled),
                 checked = mqttInput.jsonEnabled,
                 enabled = enabled,
-                onCheckedChange = { mqttInput = mqttInput.copy { jsonEnabled = it } })
+                onCheckedChange = { mqttInput = mqttInput.copy { jsonEnabled = it } }
+            )
         }
         item { Divider() }
 
         item {
-            SwitchPreference(title = "TLS enabled",
+            SwitchPreference(
+                title = stringResource(R.string.tls_enabled),
                 checked = mqttInput.tlsEnabled,
                 enabled = enabled,
-                onCheckedChange = { mqttInput = mqttInput.copy { tlsEnabled = it } })
+                onCheckedChange = { mqttInput = mqttInput.copy { tlsEnabled = it } }
+            )
         }
         item { Divider() }
 
         item {
-            EditTextPreference(title = "Root topic",
+            EditTextPreference(
+                title = stringResource(R.string.root_topic),
                 value = mqttInput.root,
                 maxSize = 31, // root max_size:32
                 enabled = enabled,
@@ -161,20 +178,23 @@ fun MQTTConfigItemList(
                     keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { mqttInput = mqttInput.copy { root = it } })
+                onValueChanged = { mqttInput = mqttInput.copy { root = it } }
+            )
         }
 
         item {
-            SwitchPreference(title = "Proxy to client enabled",
+            SwitchPreference(
+                title = stringResource(R.string.proxy_to_client_enabled),
                 checked = mqttInput.proxyToClientEnabled,
                 enabled = enabled,
-                onCheckedChange = { mqttInput = mqttInput.copy { proxyToClientEnabled = it } })
+                onCheckedChange = { mqttInput = mqttInput.copy { proxyToClientEnabled = it } }
+            )
         }
         item { Divider() }
 
         item {
             PositionPrecisionPreference(
-                title = "Map reporting",
+                title = stringResource(R.string.map_reporting),
                 enabled = enabled,
                 value = mqttInput.mapReportSettings.positionPrecision,
                 onValueChanged = {
@@ -190,7 +210,8 @@ fun MQTTConfigItemList(
         item { Divider() }
 
         item {
-            EditTextPreference(title = "Map reporting interval (seconds)",
+            EditTextPreference(
+                title = stringResource(R.string.map_reporting_interval_seconds),
                 value = mqttInput.mapReportSettings.publishIntervalSecs,
                 enabled = enabled && mqttInput.mapReportingEnabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),

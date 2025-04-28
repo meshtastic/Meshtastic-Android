@@ -28,10 +28,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ModuleConfigProtos
+import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.ui.components.EditTextPreference
@@ -75,50 +77,60 @@ fun AmbientLightingConfigItemList(
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        item { PreferenceCategory(text = "Ambient Lighting Config") }
+        item { PreferenceCategory(text = stringResource(R.string.ambient_lighting_config)) }
 
         item {
-            SwitchPreference(title = "LED state",
+            SwitchPreference(
+                title = stringResource(R.string.led_state),
                 checked = ambientLightingInput.ledState,
                 enabled = enabled,
                 onCheckedChange = {
                     ambientLightingInput = ambientLightingInput.copy { ledState = it }
-                })
+                }
+            )
         }
         item { Divider() }
 
         item {
-            EditTextPreference(title = "Current",
+            EditTextPreference(
+                title = stringResource(R.string.current),
                 value = ambientLightingInput.current,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     ambientLightingInput = ambientLightingInput.copy { current = it }
-                })
+                }
+            )
         }
 
         item {
-            EditTextPreference(title = "Red",
+            EditTextPreference(
+                title = stringResource(R.string.red),
                 value = ambientLightingInput.red,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { ambientLightingInput = ambientLightingInput.copy { red = it } })
+                onValueChanged = { ambientLightingInput = ambientLightingInput.copy { red = it } }
+            )
         }
 
         item {
-            EditTextPreference(title = "Green",
+            EditTextPreference(
+                title = stringResource(R.string.green),
                 value = ambientLightingInput.green,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { ambientLightingInput = ambientLightingInput.copy { green = it } })
+                onValueChanged = { ambientLightingInput = ambientLightingInput.copy { green = it } }
+            )
         }
 
         item {
-            EditTextPreference(title = "Blue",
+            EditTextPreference(
+                title = stringResource(R.string.blue),
                 value = ambientLightingInput.blue,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { ambientLightingInput = ambientLightingInput.copy { blue = it } })
+                onValueChanged = { ambientLightingInput = ambientLightingInput.copy { blue = it } }
+            )
         }
 
         item {

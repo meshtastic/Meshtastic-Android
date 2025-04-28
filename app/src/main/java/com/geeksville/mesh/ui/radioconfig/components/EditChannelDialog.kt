@@ -62,7 +62,7 @@ fun EditChannelDialog(
     onAddClick: (ChannelProtos.ChannelSettings) -> Unit,
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
-    modemPresetName: String = "Default",
+    modemPresetName: String = stringResource(R.string.default_),
 ) {
     val focusManager = LocalFocusManager.current
     var isFocused by remember { mutableStateOf(false) }
@@ -111,7 +111,7 @@ fun EditChannelDialog(
                 )
 
                 SwitchPreference(
-                    title = "Uplink enabled",
+                    title = stringResource(R.string.uplink_enabled),
                     checked = channelInput.uplinkEnabled,
                     enabled = true,
                     onCheckedChange = {
@@ -121,7 +121,7 @@ fun EditChannelDialog(
                 )
 
                 SwitchPreference(
-                    title = "Downlink enabled",
+                    title = stringResource(R.string.downlink_enabled),
                     checked = channelInput.downlinkEnabled,
                     enabled = true,
                     onCheckedChange = {
@@ -131,7 +131,7 @@ fun EditChannelDialog(
                 )
 
                 PositionPrecisionPreference(
-                    title = "Position enabled",
+                    title = stringResource(R.string.position_enabled),
                     enabled = true,
                     value = channelInput.moduleSettings.positionPrecision,
                     onValueChanged = {

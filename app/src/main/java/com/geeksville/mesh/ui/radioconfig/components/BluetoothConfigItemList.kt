@@ -28,10 +28,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos.Config.BluetoothConfig
+import com.geeksville.mesh.R
 import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.components.DropDownPreference
@@ -76,29 +78,34 @@ fun BluetoothConfigItemList(
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        item { PreferenceCategory(text = "Bluetooth Config") }
+        item { PreferenceCategory(text = stringResource(R.string.bluetooth_config)) }
 
         item {
-            SwitchPreference(title = "Bluetooth enabled",
+            SwitchPreference(
+                title = stringResource(R.string.bluetooth_enabled),
                 checked = bluetoothInput.enabled,
                 enabled = enabled,
-                onCheckedChange = { bluetoothInput = bluetoothInput.copy { this.enabled = it } })
+                onCheckedChange = { bluetoothInput = bluetoothInput.copy { this.enabled = it } }
+            )
         }
         item { Divider() }
 
         item {
-            DropDownPreference(title = "Pairing mode",
+            DropDownPreference(
+                title = stringResource(R.string.pairing_mode),
                 enabled = enabled,
                 items = BluetoothConfig.PairingMode.entries
                     .filter { it != BluetoothConfig.PairingMode.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = bluetoothInput.mode,
-                onItemSelected = { bluetoothInput = bluetoothInput.copy { mode = it } })
+                onItemSelected = { bluetoothInput = bluetoothInput.copy { mode = it } }
+            )
         }
         item { Divider() }
 
         item {
-            EditTextPreference(title = "Fixed PIN",
+            EditTextPreference(
+                title = stringResource(R.string.fixed_pin),
                 value = bluetoothInput.fixedPin,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -106,7 +113,8 @@ fun BluetoothConfigItemList(
                     if (it.toString().length == 6) { // ensure 6 digits
                         bluetoothInput = bluetoothInput.copy { fixedPin = it }
                     }
-                })
+                }
+            )
         }
 
         item {

@@ -28,10 +28,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.RangeTestConfig
+import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.ui.components.EditTextPreference
@@ -75,29 +77,35 @@ fun RangeTestConfigItemList(
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        item { PreferenceCategory(text = "Range Test Config") }
+        item { PreferenceCategory(text = stringResource(R.string.range_test_config)) }
 
         item {
-            SwitchPreference(title = "Range test enabled",
+            SwitchPreference(
+                title = stringResource(R.string.range_test_enabled),
                 checked = rangeTestInput.enabled,
                 enabled = enabled,
-                onCheckedChange = { rangeTestInput = rangeTestInput.copy { this.enabled = it } })
+                onCheckedChange = { rangeTestInput = rangeTestInput.copy { this.enabled = it } }
+            )
         }
         item { Divider() }
 
         item {
-            EditTextPreference(title = "Sender message interval (seconds)",
+            EditTextPreference(
+                title = stringResource(R.string.sender_message_interval_seconds),
                 value = rangeTestInput.sender,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { rangeTestInput = rangeTestInput.copy { sender = it } })
+                onValueChanged = { rangeTestInput = rangeTestInput.copy { sender = it } }
+            )
         }
 
         item {
-            SwitchPreference(title = "Save .CSV in storage (ESP32 only)",
+            SwitchPreference(
+                title = stringResource(R.string.save_csv_in_storage_esp32_only),
                 checked = rangeTestInput.save,
                 enabled = enabled,
-                onCheckedChange = { rangeTestInput = rangeTestInput.copy { save = it } })
+                onCheckedChange = { rangeTestInput = rangeTestInput.copy { save = it } }
+            )
         }
         item { Divider() }
 

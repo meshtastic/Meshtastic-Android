@@ -195,11 +195,11 @@ fun DeviceConfigItemList(
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        item { PreferenceCategory(text = "Device Config") }
+        item { PreferenceCategory(text = stringResource(R.string.device_config)) }
 
         item {
             DropDownPreference(
-                title = "Role",
+                title = stringResource(R.string.role),
                 enabled = enabled,
                 selectedItem = deviceInput.role,
                 onItemSelected = {
@@ -211,28 +211,32 @@ fun DeviceConfigItemList(
         }
 
         item {
-            EditTextPreference(title = "Redefine PIN_BUTTON",
+            EditTextPreference(
+                title = stringResource(R.string.redefine_pin_button),
                 value = deviceInput.buttonGpio,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     deviceInput = deviceInput.copy { buttonGpio = it }
-                })
+                }
+            )
         }
 
         item {
-            EditTextPreference(title = "Redefine PIN_BUZZER",
+            EditTextPreference(
+                title = stringResource(R.string.redefine_pin_buzzer),
                 value = deviceInput.buzzerGpio,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     deviceInput = deviceInput.copy { buzzerGpio = it }
-                })
+                }
+            )
         }
 
         item {
             DropDownPreference(
-                title = "Rebroadcast mode",
+                title = stringResource(R.string.rebroadcast_mode),
                 enabled = enabled,
                 selectedItem = deviceInput.rebroadcastMode,
                 onItemSelected = { deviceInput = deviceInput.copy { rebroadcastMode = it } },
@@ -242,18 +246,20 @@ fun DeviceConfigItemList(
         }
 
         item {
-            EditTextPreference(title = "NodeInfo broadcast interval (seconds)",
+            EditTextPreference(
+                title = stringResource(R.string.nodeinfo_broadcast_interval_seconds),
                 value = deviceInput.nodeInfoBroadcastSecs,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     deviceInput = deviceInput.copy { nodeInfoBroadcastSecs = it }
-                })
+                }
+            )
         }
 
         item {
             SwitchPreference(
-                title = "Double tap as button press",
+                title = stringResource(R.string.double_tap_as_button_press),
                 summary = stringResource(id = R.string.config_device_doubleTapAsButtonPress_summary),
                 checked = deviceInput.doubleTapAsButtonPress,
                 enabled = enabled,
@@ -264,7 +270,7 @@ fun DeviceConfigItemList(
 
         item {
             SwitchPreference(
-                title = "Disable triple-click",
+                title = stringResource(R.string.disable_triple_click),
                 summary = stringResource(id = R.string.config_device_disableTripleClick_summary),
                 checked = deviceInput.disableTripleClick,
                 enabled = enabled,
@@ -274,7 +280,8 @@ fun DeviceConfigItemList(
         }
 
         item {
-            EditTextPreference(title = "POSIX Timezone",
+            EditTextPreference(
+                title = stringResource(R.string.posix_timezone),
                 value = deviceInput.tzdef,
                 maxSize = 64, // tzdef max_size:65
                 enabled = enabled,
@@ -291,7 +298,7 @@ fun DeviceConfigItemList(
 
         item {
             SwitchPreference(
-                title = "Disable LED heartbeat",
+                title = stringResource(R.string.disable_led_heartbeat),
                 summary = stringResource(id = R.string.config_device_ledHeartbeatDisabled_summary),
                 checked = deviceInput.ledHeartbeatDisabled,
                 enabled = enabled,

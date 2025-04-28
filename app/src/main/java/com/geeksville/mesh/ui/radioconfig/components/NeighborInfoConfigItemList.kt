@@ -77,31 +77,35 @@ fun NeighborInfoConfigItemList(
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        item { PreferenceCategory(text = "Neighbor Info Config") }
+        item { PreferenceCategory(text = stringResource(R.string.neighbor_info_config)) }
 
         item {
-            SwitchPreference(title = "Neighbor Info enabled",
+            SwitchPreference(
+                title = stringResource(R.string.neighbor_info_enabled),
                 checked = neighborInfoInput.enabled,
                 enabled = enabled,
                 onCheckedChange = {
                     neighborInfoInput = neighborInfoInput.copy { this.enabled = it }
-                })
+                }
+            )
         }
         item { Divider() }
 
         item {
-            EditTextPreference(title = "Update interval (seconds)",
+            EditTextPreference(
+                title = stringResource(R.string.update_interval_seconds),
                 value = neighborInfoInput.updateInterval,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     neighborInfoInput = neighborInfoInput.copy { updateInterval = it }
-                })
+                }
+            )
         }
 
         item {
             SwitchPreference(
-                title = "Transmit over LoRa",
+                title = stringResource(R.string.transmit_over_lora),
                 summary = stringResource(id = R.string.config_device_transmitOverLora_summary),
                 checked = neighborInfoInput.transmitOverLora,
                 enabled = enabled,

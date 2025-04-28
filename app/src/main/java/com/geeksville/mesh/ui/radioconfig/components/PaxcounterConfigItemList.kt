@@ -28,10 +28,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ModuleConfigProtos
+import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.ui.components.EditTextPreference
@@ -75,46 +77,54 @@ fun PaxcounterConfigItemList(
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        item { PreferenceCategory(text = "Paxcounter Config") }
+        item { PreferenceCategory(text = stringResource(R.string.paxcounter_config)) }
 
         item {
-            SwitchPreference(title = "Paxcounter enabled",
+            SwitchPreference(
+                title = stringResource(R.string.paxcounter_enabled),
                 checked = paxcounterInput.enabled,
                 enabled = enabled,
                 onCheckedChange = {
                     paxcounterInput = paxcounterInput.copy { this.enabled = it }
-                })
+                }
+            )
         }
         item { Divider() }
 
         item {
-            EditTextPreference(title = "Update interval (seconds)",
+            EditTextPreference(
+                title = stringResource(R.string.update_interval_seconds),
                 value = paxcounterInput.paxcounterUpdateInterval,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     paxcounterInput = paxcounterInput.copy { paxcounterUpdateInterval = it }
-                })
+                }
+            )
         }
 
         item {
-            EditTextPreference(title = "WiFi RSSI threshold (defaults to -80)",
+            EditTextPreference(
+                title = stringResource(R.string.wifi_rssi_threshold_defaults_to_80),
                 value = paxcounterInput.wifiThreshold,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     paxcounterInput = paxcounterInput.copy { wifiThreshold = it }
-                })
+                }
+            )
         }
 
         item {
-            EditTextPreference(title = "BLE RSSI threshold (defaults to -80)",
+            EditTextPreference(
+                title = stringResource(R.string.ble_rssi_threshold_defaults_to_80),
                 value = paxcounterInput.bleThreshold,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     paxcounterInput = paxcounterInput.copy { bleThreshold = it }
-                })
+                }
+            )
         }
 
         item {
