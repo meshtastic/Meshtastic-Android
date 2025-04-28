@@ -348,4 +348,27 @@
     <string name="udp_config">UDP Config</string>
     <string name="map_node_popup_details"><![CDATA[%s<br>Last heard: %s<br>Last position: %s<br>Battery: %s]]></string>
     <string name="toggle_my_position">Toggle my position</string>
+    <string name="user">User</string>
+    <string name="channels">Channels</string>
+    <string name="device">Device</string>
+    <string name="position">Position</string>
+    <string name="power">Power</string>
+    <string name="network">Network</string>
+    <string name="display">Display</string>
+    <string name="lora">LoRa</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="security">Security</string>
+    <string name="mqtt">MQTT</string>
+    <string name="serial">Serial</string>
+    <string name="external_notification">External Notification</string>
+    <string name="store_forward"><![CDATA[Store & Forward]]></string>
+    <string name="range_test">Range Test</string>
+    <string name="telemetry">Telemetry</string>
+    <string name="canned_message">Canned Message</string>
+    <string name="audio">Audio</string>
+    <string name="remote_hardware">Remote Hardware</string>
+    <string name="neighbor_info">Neighbor Info</string>
+    <string name="ambient_lighting">Ambient Lighting</string>
+    <string name="detection_sensor">Detection Sensor</string>
+    <string name="paxcounter">Paxcounter</string>
 </resources>
