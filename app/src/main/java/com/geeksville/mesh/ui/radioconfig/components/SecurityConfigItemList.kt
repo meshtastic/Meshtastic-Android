@@ -95,7 +95,7 @@ fun SecurityConfigItemList(
                 },
                 trailingIcon = {
                     CopyIconButton(
-                        valueToCopy = securityInput.privateKey.encodeToString(),
+                        valueToCopy = securityInput.publicKey.encodeToString(),
                     )
                 }
             )
