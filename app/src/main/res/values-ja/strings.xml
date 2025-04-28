@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="main_tab_messages">メッセージ</string>
+    <string name="main_tab_users">ユーザー</string>
+    <string name="main_tab_map">地図</string>
+    <string name="main_tab_channel">チャンネル</string>
+    <string name="main_tab_settings">設定</string>
     <string name="node_filter_placeholder">フィルター</string>
     <string name="desc_node_filter_clear">ノードフィルターをクリアします</string>
     <string name="node_filter_include_unknown">不明なものを含める</string>
@@ -80,7 +85,6 @@
     <string name="share">シェア</string>
     <string name="disconnected">切断</string>
     <string name="device_sleeping">スリープ</string>
-    <string name="connected_count">接続済み：%1$s人オンライン%2$s人中</string>
     <string name="update_firmware">ファームウェア更新</string>
     <string name="ip_address">IPアドレス</string>
     <string name="connected">ラジオに接続しました</string>
@@ -192,7 +196,6 @@
     <string name="map_select_download_region">ダウンロードリージョンを選択する</string>
     <string name="map_tile_download_estimate">タイルダウンロードの見積もり:</string>
     <string name="map_start_download">ダウンロード開始</string>
-    <string name="exchange_position">位置を求める</string>
     <string name="close">終了</string>
     <string name="device_settings">デバイスの設定</string>
     <string name="module_settings">モジュールの設定</string>
@@ -244,14 +247,13 @@
     <string name="encryption_pkc_text">ダイレクトメッセージは、新しい公開キーインフラストラクチャを使用して暗号化しています。ファームウェアバージョン 2.5 以上が必要です。</string>
     <string name="encryption_error">公開キーが一致しません</string>
     <string name="encryption_error_text">公開キーが保存されたキーと一致しません。 ノードを削除し、もう一度キーを交換させることもできますが、これはより深刻なセキュリティ上の問題を示している可能性があります。 別の信頼されたチャンネルを介してユーザーに連絡し、キーの変更が工場出荷時のリセットまたはその他の意図的なアクションによるものであったかどうかを判断してください。</string>
-    <string name="exchange_userinfo">ユーザー情報を要求する</string>
     <string name="meshtastic_new_nodes_notifications">新しいノードの通知</string>
     <string name="more_details">詳細を見る</string>
     <string name="snr">SN比</string>
     <string name="snr_definition">信号対ノイズ比は、通信で使用される信号のレベルをバックグラウンドノイズのレベルに対比して定量化する測定値。 Meshtasticなどのワイヤレスシステムでは、SN比が高いほど、データ伝送の信頼性と品質を向上させることができる明瞭な信号であることを示します。</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">受信信号強度指標は、アンテナが受信する電力レベルを測定するために使用されます。 RSSI値が高いほど、一般的にはより強く安定した接続であることを示します。</string>
-    <string name="iaq_definition">(屋内空気質) 相対スケールIAQ値は、ボッシュBME680によって測定されます。 値の範囲は 0-500。</string>
+    <string name="iaq_definition">(屋内空気質) 相対スケールIAQ値は、ボッシュBME680によって測定されます。 値の範囲は 0–500。</string>
     <string name="device_metrics_log">デバイス・メトリックログ</string>
     <string name="node_map">ノードマップ</string>
     <string name="position_log">位置ログ</string>
@@ -271,4 +273,16 @@
         <item quantity="other">%d ホップ</item>
     </plurals>
     <string name="traceroute_diff">ホップ数 行き %1$d 帰り %2$d</string>
+    <string name="twenty_four_hours">24時間</string>
+    <string name="forty_eight_hours">48時間</string>
+    <string name="one_week">1週間</string>
+    <string name="two_weeks">2週間</string>
+    <string name="four_weeks">4週間</string>
+    <string name="max">最大</string>
+    <string name="unknown_age">年齢不明</string>
+    <string name="copy">コピー</string>
+    <string name="channel_settings">チャンネル設定</string>
+    <string name="channel_1">チャンネル 1</string>
+    <string name="channel_2">チャンネル 2</string>
+    <string name="channel_3">チャンネル 3</string>
 </resources>

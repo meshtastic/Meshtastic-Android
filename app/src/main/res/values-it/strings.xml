@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="main_tab_messages">Messaggi</string>
+    <string name="main_tab_users">Utenti</string>
+    <string name="main_tab_map">Mappa</string>
+    <string name="main_tab_channel">Canale</string>
+    <string name="main_tab_settings">Impostazioni</string>
     <string name="node_filter_placeholder">Filtro</string>
-    <string name="desc_node_filter_clear">cancella filtro nodi</string>
+    <string name="desc_node_filter_clear">elimina filtro nodi</string>
     <string name="node_filter_include_unknown">Includi sconosciuti</string>
     <string name="node_filter_show_details">Mostra dettagli</string>
     <string name="node_sort_alpha">A-Z</string>
@@ -14,7 +19,7 @@
     <string name="message_status_enroute">In attesa di conferma</string>
     <string name="message_status_queued">In coda per l\'invio</string>
     <string name="routing_error_none">Confermato</string>
-    <string name="routing_error_no_route">Nessuna route</string>
+    <string name="routing_error_no_route">Nessun percorso</string>
     <string name="routing_error_got_nak">Ricevuta una conferma negativa</string>
     <string name="routing_error_timeout">Timeout</string>
     <string name="routing_error_no_interface">Nessuna Interfaccia</string>
@@ -23,7 +28,7 @@
     <string name="routing_error_too_large">Pacchetto troppo grande</string>
     <string name="routing_error_no_response">Nessuna risposta</string>
     <string name="routing_error_bad_request">Richiesta Non Valida</string>
-    <string name="routing_error_duty_cycle_limit">Raggiunto il limite di duty cycle regionale</string>
+    <string name="routing_error_duty_cycle_limit">Raggiunto il limite del ciclo di lavoro regionale</string>
     <string name="routing_error_not_authorized">Non Autorizzato</string>
     <string name="routing_error_pki_failed">Invio Criptato Non Riuscito</string>
     <string name="routing_error_pki_unknown_pubkey">Chiave Pubblica Sconosciuta</string>
@@ -40,12 +45,19 @@
     <string name="role_client_hidden">Dispositivo che trasmette solo quando necessario, per risparmiare energia o restare invisibile.</string>
     <string name="role_lost_and_found">Trasmette a intervalli regolari la posizione come messaggio nel canale predefinito per aiutare il recupero del dispositivo.</string>
     <string name="role_tak_tracker">Abilita le trasmissioni automatiche TAK PLI e riduce le trasmissioni di routine.</string>
+    <string name="role_router_late">Nodo dell\'infrastruttura che ritrasmette sempre i pacchetti una volta ma solo dopo tutte le altre modalità, garantendo una copertura aggiuntiva per i cluster locali. Visibile nella lista dei nodi.</string>
     <string name="rebroadcast_mode_all">Ritrasmettere qualsiasi messaggio osservato, se era sul nostro canale privato o da un\'altra mesh con gli stessi parametri lora.</string>
     <string name="rebroadcast_mode_all_skip_decoding">Stesso comportamento di ALL ma salta la decodifica dei pacchetti e semplicemente li ritrasmette. Disponibile solo nel ruolo Repeater. Attivando questo su qualsiasi altro ruolo, si otterrà il comportamento di ALL.</string>
     <string name="rebroadcast_mode_local_only">Ignora i messaggi osservati da mesh esterne aperte o quelli che non possono essere decifrati. Ritrasmette il messaggio solo nei canali locali primario / secondario dei nodi.</string>
     <string name="rebroadcast_mode_known_only">Ignora i messaggi osservati da mesh esterne come fa LOCAL ONLY, ma in più ignora i messaggi da nodi non presenti nella lista dei nodi conosciuti.</string>
     <string name="rebroadcast_mode_none">Permesso solo per i ruoli SENSOR, TRACKER e TAK_TRACKER, questo inibirà tutte le ritrasmissioni, come il ruolo CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only">Ignora pacchetti da numeri di porta non standard come: TAK, RangeTest, PaxCounter, ecc. Ritrasmette solo pacchetti con numeri di porta standard: NodeInfo, Testo, Posizione, Telemetria e Routing.</string>
+    <string name="config_device_doubleTapAsButtonPress_summary">Considera il doppio tocco sugli accelerometri supportati come la pressione di un pulsante utente.</string>
+    <string name="config_device_disableTripleClick_summary">Disabilita la tripla pressione del pulsante utente per abilitare o disabilitare il GPS.</string>
+    <string name="config_device_ledHeartbeatDisabled_summary">Controlla il LED lampeggiante del dispositivo. Per la maggior parte dei dispositivi questo controllerà uno dei LED (fino a 4), il LED dell\'alimentazione e il LED del GPS non sono controllabili.</string>
+    <string name="config_device_transmitOverLora_summary">Se oltre a inviarli tramite MQTT e PhoneAPI, i dati NeighborInfo devono essere trasmessi tramite LoRa. Non disponibile su un canale con chiave e nome predefiniti.</string>
+    <string name="config_security_public_key">Chiave Pubblica</string>
+    <string name="config_security_private_key">Chiave Privata</string>
     <string name="channel_name">Nome del canale</string>
     <string name="channel_options">Opzioni del canale</string>
     <string name="qr_code">Codice QR</string>
@@ -80,7 +92,6 @@
     <string name="share">Condividi</string>
     <string name="disconnected">Disconnesso</string>
     <string name="device_sleeping">Il dispositivo è inattivo</string>
-    <string name="connected_count">Connesso: %1$s di %2$s online</string>
     <string name="update_firmware">Aggiorna Firmware</string>
     <string name="ip_address">Indirizzo IP:</string>
     <string name="connected">Connesso alla radio</string>
@@ -113,6 +124,7 @@
     <string name="message_reception_state">stato di ricezione messaggio</string>
     <string name="message_delivery_status">Stato di consegna messaggi</string>
     <string name="meshtastic_messages_notifications">Notifiche messaggio</string>
+    <string name="meshtastic_alerts_notifications">Notifiche di allarme</string>
     <string name="protocol_stress_test">Stress test del protocollo</string>
     <string name="firmware_too_old">Aggiornamento del firmware necessario</string>
     <string name="firmware_old">Il firmware radio è troppo vecchio per parlare con questa applicazione. Per ulteriori informazioni su questo vedi <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">la nostra guida all\'installazione del firmware</a>.</string>
@@ -168,7 +180,7 @@
     <string name="intro_show">Mostra Guida introduttiva</string>
     <string name="intro_welcome">Benvenuto su Meshtastic</string>
     <string name="intro_welcome_text">Meshtastic è una piattaforma di comunicazione open-source, off-grid, crittografata. Le radio Meshtastic formano una rete mesh e comunicano utilizzando il protocollo LoRa per inviare messaggi.</string>
-    <string name="intro_started">...Iniziamo!</string>
+    <string name="intro_started">…Iniziamo!</string>
     <string name="intro_started_text">Collega il tuo dispositivo Meshtastic utilizzando Bluetooth, Serial o WiFi. \n\nPuoi vedere quali dispositivi sono compatibili su www.meshtastic.org/docs/hardware</string>
     <string name="intro_encryption">"Impostazione della crittografia"</string>
     <string name="intro_encryption_text">Come standard, è impostata una chiave di crittografia predefinita. Per abilitare il tuo canale e la crittografia migliorata, vai alla scheda del canale e cambia il nome del canale, questo imposterà una chiave casuale per la crittografia AES256. \n\nPer comunicare con altri dispositivi sarà necessario eseguire la scansione del codice QR o seguire il link condiviso per configurare le impostazioni del canale.</string>
@@ -193,7 +205,6 @@
     <string name="map_select_download_region">Seleziona la regione da scaricare</string>
     <string name="map_tile_download_estimate">Stima dei riquadri da scaricare:</string>
     <string name="map_start_download">Inizia download</string>
-    <string name="exchange_position">Richiedi posizione</string>
     <string name="close">Chiudi</string>
     <string name="device_settings">Impostazioni dispositivo</string>
     <string name="module_settings">Impostazioni moduli</string>
@@ -245,7 +256,6 @@
     <string name="encryption_pkc_text">I messaggi privati utilizzano la nuova infrastruttura a chiave pubblica per la crittografia. Richiede la versione 2.5 o superiore.</string>
     <string name="encryption_error">Chiave pubblica errata</string>
     <string name="encryption_error_text">La chiave pubblica non corrisponde alla chiave salvata. È possibile rimuovere il nodo e lasciarlo scambiare le chiavi, ma questo può indicare un problema di sicurezza più serio. Contattare l\'utente attraverso un altro canale attendibile, per determinare se il cambiamento di chiave è dovuto a un ripristino di fabbrica o ad altre azioni intenzionali.</string>
-    <string name="exchange_userinfo">Richiedi informazioni utente</string>
     <string name="meshtastic_new_nodes_notifications">Notifiche di nuovi nodi</string>
     <string name="more_details">Ulteriori informazioni</string>
     <string name="snr">SNR</string>
@@ -264,6 +274,8 @@
     <string name="fair">Discreto</string>
     <string name="good">Buono</string>
     <string name="none_quality">Nessuno</string>
+    <string name="share_to">Condividi con…</string>
+    <string name="share_message">Condividi messaggio</string>
     <string name="signal">Segnale</string>
     <string name="signal_quality">Qualità Segnale</string>
     <string name="traceroute_log">Registro Di Traceroute</string>
@@ -273,4 +285,38 @@
         <item quantity="other">%d hop</item>
     </plurals>
     <string name="traceroute_diff">Hops verso di lui %1$d Hops di ritorno %2$d</string>
+    <string name="twenty_four_hours">24H</string>
+    <string name="forty_eight_hours">48H</string>
+    <string name="one_week">1S</string>
+    <string name="two_weeks">2S</string>
+    <string name="four_weeks">4S</string>
+    <string name="max">Max</string>
+    <string name="unknown_age">Età sconosciuta</string>
+    <string name="copy">Copia</string>
+    <string name="alert_bell_text">Carattere Campana Di Allarme!</string>
+    <string name="channel_settings">Impostazioni Canale</string>
+    <string name="samsung_instructions">Istruzioni Samsung</string>
+    <string name="alerts_dnd_request_title">Abilita gli avvisi critici per bypassare Non disturbare</string>
+    <string name="alerts_dnd_request_text"><![CDATA[Per consentire gli avvisi critici mentre il telefono è in modalità Non disturbare, attivare la funzione di annullamento della modalità Non disturbare per il canale degli avvisi nelle impostazioni di notifica dell\'app Meshtastic.<br/><br/>Gli utenti Samsung potrebbero dover aggiungere un\'eccezione nelle impostazioni di sistema prima di attivarla per il canale degli avvisi. <a href="https://www.samsung.com/latin_en/support/mobile-devices/how-to-use-the-do-not-disturb-mode-on-your-galaxy-phone/">Visitare il Supporto Samsung per assistenza.</a>.]]></string>
+    <string name="critical_alert">Avvisi critici</string>
+    <string name="favorite">Preferito</string>
+    <string name="favorite_add">Aggiungi \'%s\' come nodo preferito?</string>
+    <string name="favorite_remove">Rimuovi \'%s\' come nodo preferito?</string>
+    <string name="power_metrics_log">Registri delle metriche di potenza</string>
+    <string name="channel_1">Canale 1</string>
+    <string name="channel_2">Canale 2</string>
+    <string name="channel_3">Canale 3</string>
+    <string name="current">Attuale</string>
+    <string name="voltage">Tensione</string>
+    <string name="are_you_sure">Sei sicuro?</string>
+    <string name="router_role_confirmation_text"><![CDATA[Ho letto la <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Documentazione sui ruoli dei dispositivi </a> e il post del blog su <a href="http://meshtastic.org/blog/choosing-the-right-device-role"> Scegliere il ruolo giusto del dispositivo </a>.]]></string>
+    <string name="i_know_what_i_m_doing">So cosa sto facendo.</string>
+    <string name="low_battery_message">Il nodo %s ha la batteria scarica (%d%%)</string>
+    <string name="meshtastic_low_battery_notifications">Notifica di batteria scarica</string>
+    <string name="low_battery_title">Poca energia rimanente nella batteria: %s</string>
+    <string name="meshtastic_low_battery_temporary_remote_notifications">Notifiche batteria scarica (nodi preferiti)</string>
+    <string name="baro_pressure">Pressione barometrica</string>
+    <string name="mesh_via_udp_enabled">Mesh via UDP abilitato</string>
+    <string name="udp_config">Configurazione UDP</string>
+    <string name="map_node_popup_details"><![CDATA[%s<br>Ultima notizia: %s<br>Ultima posizione: %s<br>Batteria: %s]]></string>
 </resources>

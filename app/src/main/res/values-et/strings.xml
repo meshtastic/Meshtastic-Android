@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="main_tab_channel">Kanal</string>
     <string name="node_filter_placeholder">Filtreeri</string>
     <string name="desc_node_filter_clear">eemalda sõlmefilter</string>
     <string name="node_filter_include_unknown">Kaasa tundmatud</string>
@@ -27,12 +28,9 @@
     <string name="routing_error_not_authorized">Autoriseerimata</string>
     <string name="routing_error_pki_failed">Krüpteeritud saatmine nurjus</string>
     <string name="routing_error_pki_unknown_pubkey">Tundmatu avalik võti</string>
-    <string name="routing_error_admin_bad_session_key">Bad session key</string>
-    <string name="routing_error_admin_public_key_unauthorized">Public Key unauthorized</string>
     <string name="role_client">Rakendusega ühendatud või iseseisev sõnumsideseade.</string>
     <string name="role_client_mute">Seade, mis ei edasta pakette teistelt seadmetelt.</string>
     <string name="role_router">Infrastruktuuri sõlm võrgu leviala laiendamiseks sõnumite edastamise kaudu. Nähtav sõlmede loendis.</string>
-    <string name="role_router_client">Combination of both ROUTER and CLIENT. Not for mobile devices.</string>
     <string name="role_repeater">Infrastruktuuri sõlm võrgu leviala laiendamiseks, edastades sõnumeid minimaalse üldkuluga. Pole sõlmede loendis nähtav.</string>
     <string name="role_tracker">Esmajärjekorras edastatakse GPS asukoha pakette.</string>
     <string name="role_sensor">Esmalt edastatakse telemeetria pakette.</string>
@@ -40,12 +38,6 @@
     <string name="role_client_hidden">Seade, mis edastab ülekandeid ainult siis, kui see on vajalik varjamiseks või energia säästmiseks.</string>
     <string name="role_lost_and_found">Edastab asukohta regulaarselt vaikekanalile sõnumina, et aidata seadme leidmisel.</string>
     <string name="role_tak_tracker">Võimaldab automaatseid TAK PLI saateid ja vähendab rutiinseid saateid.</string>
-    <string name="rebroadcast_mode_all">Rebroadcast any observed message, if it was on our private channel or from another mesh with the same lora parameters.</string>
-    <string name="rebroadcast_mode_all_skip_decoding">Same as behavior as ALL but skips packet decoding and simply rebroadcasts them. Only available in Repeater role. Setting this on any other roles will result in ALL behavior.</string>
-    <string name="rebroadcast_mode_local_only">Ignores observed messages from foreign meshes that are open or those which it cannot decrypt. Only rebroadcasts message on the nodes local primary / secondary channels.</string>
-    <string name="rebroadcast_mode_known_only">Ignores observed messages from foreign meshes like LOCAL ONLY, but takes it step further by also ignoring messages from nodes not already in the node\'s known list.</string>
-    <string name="rebroadcast_mode_none">Only permitted for SENSOR, TRACKER and TAK_TRACKER roles, this will inhibit all rebroadcasts, not unlike CLIENT_MUTE role.</string>
-    <string name="rebroadcast_mode_core_portnums_only">Ignores packets from non-standard portnums such as: TAK, RangeTest, PaxCounter, etc. Only rebroadcasts packets with standard portnums: NodeInfo, Text, Position, Telemetry, and Routing.</string>
     <string name="channel_name">Kanali nimi</string>
     <string name="channel_options">Kanali valikud</string>
     <string name="qr_code">QR kood</string>
@@ -80,7 +72,6 @@
     <string name="share">Jaga</string>
     <string name="disconnected">Ühendus katkenud</string>
     <string name="device_sleeping">Seade on unerežiimis</string>
-    <string name="connected_count">Ühendatud %1$s / %2$s aktiivset</string>
     <string name="update_firmware">Värskenda püsivara</string>
     <string name="ip_address">IP-aadress:</string>
     <string name="connected">Ühendatud raadioga</string>
@@ -193,7 +184,6 @@
     <string name="map_select_download_region">Vali allalaetav piirkond</string>
     <string name="map_tile_download_estimate">Paanide allalaadimise prognoos:</string>
     <string name="map_start_download">Alusta allalaadimist</string>
-    <string name="exchange_position">Küsi asukohta</string>
     <string name="close">Sule</string>
     <string name="device_settings">Raadio sätted</string>
     <string name="module_settings">Mooduli sätted</string>
@@ -245,21 +235,6 @@
     <string name="encryption_pkc_text">Otsesõnumid kasutavad krüpteerimiseks uut avaliku võtme taristut. Eeldab püsivara versiooni 2.5 või uuemat.</string>
     <string name="encryption_error">Kokkusobimatu avalik võti</string>
     <string name="encryption_error_text">Avalik võti ei ühti salvestatud võtmega. Võite sõlme eemaldada ja lasta sellel uuesti võtmeid vahetada, kuid see võib viidata tõsisemale turvaprobleemile. Võtke kasutajaga ühendust mõne muu usaldusväärse kanali kaudu, et teha kindlaks, kas võtme muudatuse põhjuseks oli tehaseseadete taastamine või muu tahtlik tegevus.</string>
-    <string name="exchange_userinfo">Request user info</string>
-    <string name="meshtastic_new_nodes_notifications">New node notifications</string>
-    <string name="more_details">More details</string>
-    <string name="snr">SNR</string>
-    <string name="snr_definition">Signal-to-Noise Ratio, a measure used in communications to quantify the level of a desired signal to the level of background noise. In Meshtastic and other wireless systems, a higher SNR indicates a clearer signal that can enhance the reliability and quality of data transmission.</string>
-    <string name="rssi">RSSI</string>
-    <string name="rssi_definition">Received Signal Strength Indicator, a measurement used to determine the power level being received by the antenna. A higher RSSI value generally indicates a stronger and more stable connection.</string>
-    <string name="iaq_definition">(Indoor Air Quality) relative scale IAQ value as measured by Bosch BME680. Value Range 0–500.</string>
-    <string name="device_metrics_log">Device Metrics Log</string>
-    <string name="node_map">Node Map</string>
-    <string name="position_log">Position Log</string>
-    <string name="env_metrics_log">Environment Metrics Log</string>
-    <string name="sig_metrics_log">Signal Metrics Log</string>
-    <string name="administration">Administration</string>
-    <string name="remote_admin">Remote Administration</string>
     <string name="bad">Halb</string>
     <string name="fair">Rahuldav</string>
     <string name="good">Hea</string>
@@ -272,5 +247,4 @@
         <item quantity="one">1 hüpe</item>
         <item quantity="other">%d hüppet</item>
     </plurals>
-    <string name="traceroute_diff">Hops towards %1$d Hops back %2$d</string>
 </resources>

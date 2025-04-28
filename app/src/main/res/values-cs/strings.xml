@@ -1,15 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="main_tab_messages">Zprávy</string>
+    <string name="main_tab_users">Uživatelé</string>
+    <string name="main_tab_map">Mapa</string>
+    <string name="main_tab_channel">Kanál</string>
+    <string name="main_tab_settings">Nastavení</string>
     <string name="node_filter_placeholder">Filtr</string>
     <string name="desc_node_filter_clear">vyčistit filtr uzlů</string>
     <string name="node_filter_include_unknown">Včetně neznámých</string>
     <string name="node_filter_show_details">Zobrazit detaily</string>
+    <string name="node_sort_button">Možnosti řazení uzlů</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Kanál</string>
     <string name="node_sort_distance">Vzdálenost</string>
     <string name="node_sort_hops_away">Počet skoků</string>
     <string name="node_sort_last_heard">Naposledy slyšen</string>
     <string name="node_sort_via_mqtt">přes MQTT</string>
+    <string name="node_sort_via_favorite">Oblíbené</string>
     <string name="unrecognized">Neznámý</string>
     <string name="message_status_enroute">Čeká na potvrzení</string>
     <string name="message_status_queued">Ve frontě k odeslání</string>
@@ -40,12 +47,19 @@
     <string name="role_client_hidden">Zařízení, které vysílá pouze podle potřeby pro utajení nebo úsporu energie.</string>
     <string name="role_lost_and_found">Pravidelně vysílá polohu jako zprávu do výchozího kanálu a pomáhá tak při hledání ztraceného zařízení.</string>
     <string name="role_tak_tracker">Povolí automatické vysílání TAK PLI a snižuje běžné vysílání.</string>
+    <string name="role_router_late">Infrastrukturní uzel, který vždy jednou zopakuje pakety, ale až po všech ostatních režimech, čímž zajišťuje lepší pokrytí místních clusterů. Je viditelný v seznamu uzlů.</string>
     <string name="rebroadcast_mode_all">Znovu odeslat jakoukoli pozorovanou zprávu, pokud byla na našem soukromém kanálu nebo z jiné sítě se stejnými parametry lory.</string>
     <string name="rebroadcast_mode_all_skip_decoding">Stejné chování jako ALL, ale přeskočí dekódování paketů a jednoduše je znovu vysílá. Dostupné pouze v roli Repeater. Nastavení této možnosti pro jiné role povede k chování jako u ALL.</string>
     <string name="rebroadcast_mode_local_only">Ignoruje přijaté zprávy z cizích mesh sítí, které jsou otevřené nebo které nelze dešifrovat. Opakuje pouze zprávy na primárních / sekundárních kanálech místního uzlu.</string>
     <string name="rebroadcast_mode_known_only">Ignoruje přijaté zprávy z cizích mesh sítí, jako je LOCAL ONLY, ale jde ještě o krok dál tím, že také ignoruje zprávy od uzlů, které již nejsou v seznamu známých uzlů daného uzlu.</string>
     <string name="rebroadcast_mode_none">Povoleno pouze pro role SENSOR, TRACKER a TAK_TRACKER. Toto nastavení zabrání všem opakovaným vysíláním, podobně jako role CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only">Ignoruje pakety z nestandardních portů, jako jsou: TAK, RangeTest, PaxCounter atd. Opakuje pouze pakety se standardními porty: NodeInfo, Text, Position, Telemetry a Routing.</string>
+    <string name="config_device_doubleTapAsButtonPress_summary">Zachází s dvojitým poklepáním na podporovaných akcelerometrech jako se stisknutím uživatelského tlačítka.</string>
+    <string name="config_device_disableTripleClick_summary">Zakáže funkci trojnásobného stisknutí uživatelského tlačítka pro zapnutí nebo vypnutí GPS.</string>
+    <string name="config_device_ledHeartbeatDisabled_summary">Nastavuje blikání LED diody na zařízení. U většiny zařízení lze ovládat jednu ze čtyř LED diod, avšak LED diody nabíječky a GPS nelze ovládat.</string>
+    <string name="config_device_transmitOverLora_summary">Umožní odesílat informace o sousedních uzlech (NeighborInfo) nejen do MQTT a PhoneAPI, ale také přes LoRa. Nedostupné na kanálech s výchozím klíčem a názvem.</string>
+    <string name="config_security_public_key">Veřejný klíč</string>
+    <string name="config_security_private_key">Soukromý klíč</string>
     <string name="channel_name">Název kanálu</string>
     <string name="channel_options">Nastavení kanálu</string>
     <string name="qr_code">QR kód</string>
@@ -80,7 +94,6 @@
     <string name="share">Sdílet</string>
     <string name="disconnected">Odpojeno</string>
     <string name="device_sleeping">Zařízení spí</string>
-    <string name="connected_count">Připojeno: %1$s z %2$s je online</string>
     <string name="update_firmware">Aktualizace softwaru</string>
     <string name="ip_address">IP adresa:</string>
     <string name="connected">Připojeno k vysílači</string>
@@ -113,6 +126,7 @@
     <string name="message_reception_state">stav přijetí zprávy</string>
     <string name="message_delivery_status">Stav doručení zprávy</string>
     <string name="meshtastic_messages_notifications">Upozornění na zprávy</string>
+    <string name="meshtastic_alerts_notifications">Upozornění na varování</string>
     <string name="protocol_stress_test">Protokol zátěžového testu</string>
     <string name="firmware_too_old">Vyžadována aktualizace firmwaru</string>
     <string name="firmware_old">Firmware rádia je příliš starý na to, aby mohl komunikovat s touto aplikací. Více informací o tomto naleznete v <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">naší firmware instalační příručce</a>.</string>
@@ -195,7 +209,6 @@
     <string name="map_select_download_region">Vyberte oblast stahování</string>
     <string name="map_tile_download_estimate">Odhad stažení dlaždic:</string>
     <string name="map_start_download">Zahájit stahování</string>
-    <string name="exchange_position">Vyžádat pozici</string>
     <string name="close">Zavřít</string>
     <string name="device_settings">Nastavení zařízení</string>
     <string name="module_settings">Nastavení modulů</string>
@@ -247,7 +260,6 @@
     <string name="encryption_pkc_text">Přímé zprávy používají novou infrastrukturu veřejných klíčů pro šifrování. Vyžaduje firmware verze 2.5 nebo vyšší.</string>
     <string name="encryption_error">Neshoda veřejného klíče</string>
     <string name="encryption_error_text">Veřejný klíč neodpovídá zaznamenanému klíči. Můžete odebrat uzel a nechat jej znovu vyměnit klíče, ale to může naznačovat závažnější bezpečnostní problém. Kontaktujte uživatele prostřednictvím jiného důvěryhodného kanálu, abyste zjistili, zda byla změna klíče způsobena resetováním továrního zařízení nebo jiným záměrným jednáním.</string>
-    <string name="exchange_userinfo">Vyžádat informace o uživateli</string>
     <string name="meshtastic_new_nodes_notifications">Oznámení o nových uzlech</string>
     <string name="more_details">Více detailů</string>
     <string name="snr">SNR</string>
@@ -266,6 +278,8 @@
     <string name="fair">Slabý</string>
     <string name="good">Silný</string>
     <string name="none_quality">Žádný</string>
+    <string name="share_to">Sdílet do…</string>
+    <string name="share_message">Sdílet zprávu</string>
     <string name="signal">Signál</string>
     <string name="signal_quality">Kvalita signálu</string>
     <string name="traceroute_log">Traceroute protokol</string>
@@ -277,4 +291,37 @@
         <item quantity="other">%d skoků</item>
     </plurals>
     <string name="traceroute_diff">Skok směrem k %1$d Skok zpět do %2$d</string>
+    <string name="twenty_four_hours">24H</string>
+    <string name="forty_eight_hours">48H</string>
+    <string name="one_week">1T</string>
+    <string name="two_weeks">2T</string>
+    <string name="four_weeks">4T</string>
+    <string name="max">Max</string>
+    <string name="unknown_age">Neznámé stáří</string>
+    <string name="copy">Kopírovat</string>
+    <string name="alert_bell_text">Výstražný zvonek!</string>
+    <string name="channel_settings">Nastavení kanálu</string>
+    <string name="samsung_instructions">Samsung instrukce</string>
+    <string name="alerts_dnd_request_title">Povolit kritická varování a obejít režim Nerušit</string>
+    <string name="alerts_dnd_request_text"><![CDATA[Chcete-li povolit kritická varování když je váš telefon v režimu Nerušit - povolte přepsat režim Nerušit pro kanál Upozornění v nastavení oznámení Meshtastic.<br/><br/>Uživatelé Samsung možná budou muset přidat výjimku v nastavení systému před povolením pro varování v kanálu. <a href="https://www.samsung.com/latin_en/support/mobile-devices/how-to-use-the-do-not-disturb-mode-on-your-galaxy-phone/">Navštivte Samsung podporu pro pomoc.</a>.]]></string>
+    <string name="critical_alert">Kritické varování!</string>
+    <string name="favorite">Oblíbené</string>
+    <string name="favorite_add">Přidat \'%s\' jako oblíbený uzel?</string>
+    <string name="favorite_remove">Odstranit \'%s\' z oblíbených uzlů?</string>
+    <string name="power_metrics_log">Protokol metrik napájení</string>
+    <string name="channel_1">Kanál 1</string>
+    <string name="channel_2">Kanál 2</string>
+    <string name="channel_3">Kanál 3</string>
+    <string name="current">Proud</string>
+    <string name="voltage">Napětí</string>
+    <string name="are_you_sure">Jste si jistý?</string>
+    <string name="router_role_confirmation_text"><![CDATA[Přečetl jsem si <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">dokumentaci o rolích zařízení</a> a blogový příspěvek o <a href="http://meshtastic.org/blog/choosing-the-right-device-role">výběru správné role zařízení</a>.]]></string>
+    <string name="i_know_what_i_m_doing">Vím co dělám.</string>
+    <string name="low_battery_message">Uzel %s má nízký stav baterie (%d%%)</string>
+    <string name="meshtastic_low_battery_notifications">Upozornění na nízký stav baterie</string>
+    <string name="low_battery_title">Nízký stav baterie: %s</string>
+    <string name="meshtastic_low_battery_temporary_remote_notifications">Upozornění na nízký stav baterie (oblíbené uzly)</string>
+    <string name="baro_pressure">Barometrický tlak</string>
+    <string name="udp_config">UDP Konfigurace</string>
+    <string name="map_node_popup_details"><![CDATA[%s<br>Naposledy slyšen: %s<br>Poslední pozice: %s<br>Baterie: %s]]></string>
 </resources>

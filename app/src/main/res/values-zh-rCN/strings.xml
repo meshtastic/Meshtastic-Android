@@ -1,15 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="node_filter_placeholder">筛选器csvfganw</string>
+    <string name="main_tab_messages">消息</string>
+    <string name="main_tab_users">用户</string>
+    <string name="main_tab_map">地图</string>
+    <string name="main_tab_channel">频道</string>
+    <string name="main_tab_settings">设置</string>
+    <string name="node_filter_placeholder">筛选</string>
     <string name="desc_node_filter_clear">清除筛选</string>
     <string name="node_filter_include_unknown">包括未知内容</string>
     <string name="node_filter_show_details">显示详细信息</string>
+    <string name="node_sort_button">节点排序选项</string>
     <string name="node_sort_alpha">字母顺序</string>
     <string name="node_sort_channel">频道</string>
     <string name="node_sort_distance">距离</string>
     <string name="node_sort_hops_away">跳数</string>
     <string name="node_sort_last_heard">上次连接时间</string>
     <string name="node_sort_via_mqtt">通过 MQTT</string>
+    <string name="node_sort_via_favorite">通过收藏夹</string>
     <string name="unrecognized">无法识别的</string>
     <string name="message_status_enroute">正在等待确认</string>
     <string name="message_status_queued">发送队列中</string>
@@ -39,13 +46,20 @@
     <string name="role_tak">优化ATAK系统通讯，减少常规广播。</string>
     <string name="role_client_hidden">仅在需要时广播的设备，用于隐蔽或节能模式</string>
     <string name="role_lost_and_found">定期向默认频道广播位置，以协助设备恢复。</string>
-    <string name="role_tak_tracker">启用自动TAKPLI广播并减少常规广播。</string>
+    <string name="role_tak_tracker">启用自动 TAK PLI 广播并减少常规广播。</string>
+    <string name="role_router_late">基础设施节点，总是在所有其他模式之后重新广播数据包一次，以确保本地集群的额外覆盖范围。会在节点列表中显示。</string>
     <string name="rebroadcast_mode_all">重新广播任何观察到的消息，无论是来自我们的私有频道还是具有相同 LoRa 参数的其他网状网络。</string>
     <string name="rebroadcast_mode_all_skip_decoding">与 ALL 模式的行为相同，但跳过数据包解码，仅简单地重新广播它们。仅适用于中继器角色。在其他角色中设置此选项将表现为 ALL 模式。</string>
     <string name="rebroadcast_mode_local_only">忽略来自开放网状网络或无法解密的消息，仅在节点的本地主/次频道上重新广播消息。</string>
     <string name="rebroadcast_mode_known_only">与 LOCAL_ONLY 类似，忽略来自其他网状网络的消息，但更进一步，忽略来自不在节点已知列表中的节点的消息。</string>
     <string name="rebroadcast_mode_none">仅限 SENSOR、TRACKER 和 TAK_TRACKER 角色，此模式将禁止所有重新广播，与 CLIENT_MUTE 角色类似。</string>
     <string name="rebroadcast_mode_core_portnums_only">忽略来自非标准端口号（如 TAK、RangeTest、PaxCounter 等）的数据包，仅重新广播标准端口号的数据包：NodeInfo、Text、Position、Telemetry 和 Routing。</string>
+    <string name="config_device_doubleTapAsButtonPress_summary">将支持的加速度计上的双击操作视为 User 按键的按压动作。</string>
+    <string name="config_device_disableTripleClick_summary">禁用 User 按键的三击操作来启用或禁用 GPS。</string>
+    <string name="config_device_ledHeartbeatDisabled_summary">控制设备上的指示灯闪烁。对于大多数设备，这将控制最多 4 个指示灯，充电器和 GPS 指示灯无法控制。</string>
+    <string name="config_device_transmitOverLora_summary">是否除了发送到 MQTT 和 PhoneAPI 外，还应通过 LoRa 传输我们的邻居信息（NeighborInfo）。在具有默认密钥和名称的通道上不可用。</string>
+    <string name="config_security_public_key">公钥</string>
+    <string name="config_security_private_key">私钥</string>
     <string name="channel_name">频道名称</string>
     <string name="channel_options">频道选项</string>
     <string name="qr_code">QR 码</string>
@@ -59,7 +73,7 @@
     <string name="you">你</string>
     <string name="your_name">您的姓名</string>
     <string name="analytics_okay">匿名使用统计信息和故障报告</string>
-    <string name="looking_for_meshtastic_devices">正在寻找 Meshtastic 装置...</string>
+    <string name="looking_for_meshtastic_devices">正在寻找 Meshtastic 装置…</string>
     <string name="starting_pairing">开始配对</string>
     <string name="url_for_join">加入 Meshtastic 网状网络的 URL</string>
     <string name="accept">接受</string>
@@ -72,7 +86,7 @@
     <string name="report_a_bug">报告 Bug 详细信息</string>
     <string name="report_bug_text">您确定要报告错误吗？报告后，请在 https://github.com/orgs/meshtastic/discussions 上贴文，以便我们可以将报告与您发现的问题匹配。</string>
     <string name="report">报告</string>
-    <string name="not_paired_yet">您还没有配对.</string>
+    <string name="not_paired_yet">您还没有配对。</string>
     <string name="change_radio">换设备</string>
     <string name="pairing_completed">配对完成，启动服务</string>
     <string name="pairing_failed_try_again">配对失败，请重新选择</string>
@@ -80,7 +94,6 @@
     <string name="share">分享</string>
     <string name="disconnected">已断开连接</string>
     <string name="device_sleeping">设备休眠中</string>
-    <string name="connected_count">已连接：%1$s 的 %2$s 上线</string>
     <string name="update_firmware">更新固件</string>
     <string name="ip_address">IP地址：</string>
     <string name="connected">已连接至设备</string>
@@ -113,8 +126,9 @@
     <string name="message_reception_state">消息接收状态</string>
     <string name="message_delivery_status">消息传递状态</string>
     <string name="meshtastic_messages_notifications">消息通知</string>
+    <string name="meshtastic_alerts_notifications">提醒通知</string>
     <string name="protocol_stress_test">协议压力测试</string>
-    <string name="firmware_too_old">需要固件更新</string>
+    <string name="firmware_too_old">需要更新固件</string>
     <string name="firmware_old">版本过旧，无法与此应用程序通讯。欲了解更多信息，请参阅 Meshtastic 网站上的<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">韧体安装指南</a>。</string>
     <string name="okay">好的</string>
     <string name="must_set_region">您必须先选择一个地区</string>
@@ -144,9 +158,9 @@
     <string name="modem_config_slow_short">短距離（速度慢）</string>
     <string name="modem_config_slow_medium">中等距離（速度慢）</string>
     <plurals name="delete_messages">
-        <item quantity="other">删除 讯息?
+        <item quantity="other">删除 消息?
 
-删除 %s 讯息?</item>
+删除 %s 条消息?</item>
     </plurals>
     <string name="delete">删除</string>
     <string name="delete_for_everyone">也从所有人的聊天纪录中删除</string>
@@ -164,8 +178,8 @@
     <string name="resend">重新发送</string>
     <string name="shutdown">关机</string>
     <string name="cant_shutdown">此设备不支持关机</string>
-    <string name="reboot">重新开机</string>
-    <string name="traceroute">追踪器</string>
+    <string name="reboot">重启</string>
+    <string name="traceroute">路由追踪</string>
     <string name="intro_show">简要介绍</string>
     <string name="intro_welcome">欢迎来到Meshtasc</string>
     <string name="intro_welcome_text">Meshtastic 是一个开源、离网、加密的通讯平台。Meshtastic 无线电组成网状网络，使用 LoRa 协议传送文字讯息进行通讯。</string>
@@ -178,7 +192,7 @@
     <string name="quick_chat_new">新的快速聊天</string>
     <string name="quick_chat_edit">编辑快速聊天</string>
     <string name="quick_chat_append">附加到消息中</string>
-    <string name="quick_chat_instant">实时发送</string>
+    <string name="quick_chat_instant">立即发送</string>
     <string name="factory_reset">恢复出厂设置</string>
     <string name="factory_reset_description">这将清除你已经完成的所有设备设定。</string>
     <string name="bluetooth_disabled">蓝牙已禁用</string>
@@ -186,7 +200,7 @@
     <string name="direct_message">私信</string>
     <string name="nodedb_reset">重置节点数据库</string>
     <string name="nodedb_reset_description">这将从该列表中清除所有节点。</string>
-    <string name="delivery_confirmed">发送确认</string>
+    <string name="delivery_confirmed">已送达</string>
     <string name="error">错误</string>
     <string name="ignore">忽略</string>
     <string name="ignore_add">添加 \'%s\' 到忽略列表？</string>
@@ -194,20 +208,20 @@
     <string name="map_select_download_region">选择下载地区</string>
     <string name="map_tile_download_estimate">局部地图下载估算:</string>
     <string name="map_start_download">开始下载</string>
-    <string name="exchange_position">请求位置</string>
+    <string name="exchange_position">交换位置</string>
     <string name="close">关闭</string>
     <string name="device_settings">设备配置</string>
     <string name="module_settings">模块设定</string>
     <string name="add">新增</string>
     <string name="edit">编辑</string>
     <string name="calculating">正在计算……</string>
-    <string name="map_offline_manager">脱机管理</string>
+    <string name="map_offline_manager">离线管理</string>
     <string name="map_cache_size">当前缓存大小</string>
     <string name="map_cache_info">缓存容量: %1$.2f MB\n缓存使用: %2$.2f MB</string>
     <string name="map_clear_tiles">清除下载的区域地图</string>
     <string name="map_tile_source">区域地图来源</string>
-    <string name="map_purge_success">清除 %s 的 SQL 快取</string>
-    <string name="map_purge_fail">清除 SQL 快取失败，请查看 logcat 纪录</string>
+    <string name="map_purge_success">清除 %s 的 SQL 缓存</string>
+    <string name="map_purge_fail">清除 SQL 缓存失败，请查看 logcat 纪录</string>
     <string name="map_cache_manager">缓存管理员</string>
     <string name="map_download_complete">下载已完成！</string>
     <string name="map_download_errors">下载完成，但有 %d 个错误</string>
@@ -216,8 +230,8 @@
     <string name="waypoint_edit">编辑航点</string>
     <string name="waypoint_delete">删除航点?</string>
     <string name="waypoint_new">新建航点</string>
-    <string name="waypoint_received">收到编辑航点：%s</string>
-    <string name="error_duty_cycle">占空比限制已达到。暂时无法发送消息，请稍后再试。</string>
+    <string name="waypoint_received">收到航点：%s</string>
+    <string name="error_duty_cycle">触及占空比上限。暂时无法发送消息，请稍后再试。</string>
     <string name="remove">移除</string>
     <string name="remove_node_text">此节点将从您的列表中删除，直到您的节点再次收到它的数据。</string>
     <string name="mute">静音</string>
@@ -237,7 +251,7 @@
     <string name="logs">日志</string>
     <string name="hops_away">跳数</string>
     <string name="info">信息</string>
-    <string name="ch_util_definition">当前信道的利用情况，包括格式正确的发送（TX）、接收（RX）以及格式错误的接收（即噪声）。</string>
+    <string name="ch_util_definition">当前信道的利用情况，包括格式正确的发送（TX）、接收（RX）以及无法解码的接收（即噪声）。</string>
     <string name="air_util_definition">过去一小时内用于传输的空中占用时间百分比。</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">共享密钥</string>
@@ -246,12 +260,12 @@
     <string name="encryption_pkc_text">私信使用新的公钥基础设施（PKC）进行加密。需要固件版本 2.5 或更高。</string>
     <string name="encryption_error">公钥不匹配</string>
     <string name="encryption_error_text">公钥与记录的密钥不匹配。 您可以移除该节点并让它再次交换密钥，但这可能会显示一个更严重的安全问题。 通过另一个信任频道联系用户，以确定密钥更改是否是出厂重置或其他故意操作。</string>
-    <string name="exchange_userinfo">请求用户信息</string>
+    <string name="exchange_userinfo">交换用户信息</string>
     <string name="meshtastic_new_nodes_notifications">新节点通知</string>
     <string name="more_details">查看更多</string>
-    <string name="snr">SNR</string>
+    <string name="snr">SNR（信噪比）</string>
     <string name="snr_definition">信噪比（Signal-to-Noise Ratio, SNR）是一种用于通信领域的测量指标，用于量化目标信号与背景噪声的比例。在 Meshtastic 及其他无线系统中，较高的信噪比表示信号更加清晰，从而能够提升数据传输的可靠性和质量。</string>
-    <string name="rssi">RSSI</string>
+    <string name="rssi">RSSI（接收信号强度指示）</string>
     <string name="rssi_definition">接收信号强度指示（Received Signal Strength Indicator, RSSI）是一种用于测量天线接收到的信号功率的指标。较高的 RSSI 值通常表示更强、更稳定的连接。</string>
     <string name="iaq_definition">室内空气质量（Indoor Air Quality, IAQ）：由 Bosch BME680 传感器测量的相对标尺 IAQ 值，取值范围为 0–500。</string>
     <string name="device_metrics_log">设备测量日志</string>
@@ -265,12 +279,49 @@
     <string name="fair">一般</string>
     <string name="good">良好</string>
     <string name="none_quality">无</string>
+    <string name="share_to">分享到…</string>
+    <string name="share_message">分享消息</string>
     <string name="signal">信号</string>
     <string name="signal_quality">信号质量</string>
-    <string name="traceroute_log">路由追踪</string>
+    <string name="traceroute_log">路由追踪日志</string>
     <string name="traceroute_direct">直连</string>
     <plurals name="traceroute_hops">
         <item quantity="other">%d 跳数</item>
     </plurals>
     <string name="traceroute_diff">传输跳数：去程 %1$d，回程 %2$d</string>
+    <string name="twenty_four_hours">24 小时</string>
+    <string name="forty_eight_hours">48 小时</string>
+    <string name="one_week">1 周</string>
+    <string name="two_weeks">2 周</string>
+    <string name="four_weeks">4 周</string>
+    <string name="max">最大值</string>
+    <string name="unknown_age">未知时长</string>
+    <string name="copy">复制</string>
+    <string name="alert_bell_text">警铃字符！</string>
+    <string name="channel_settings">频道设置</string>
+    <string name="samsung_instructions">三星指南</string>
+    <string name="alerts_dnd_request_title">告警频道无视勿扰模式</string>
+    <string name="alerts_dnd_request_text"><![CDATA[当你的手机处于勿扰模式下，- 在Meshtastic App的通知设置中启用“告警频道无视勿扰模式”。<br/><br/>三星手机用户可能需要在手机设置的通知中为告警频道额外添加规则 <a href="https://www.samsung.com/latin_en/support/mobile-devices/how-to-use-the-do-not-disturb-mode-on-your-galaxy-phone/">查阅三星帮助支持页面</a>。]]></string>
+    <string name="critical_alert">关键告警！</string>
+    <string name="favorite">收藏</string>
+    <string name="favorite_add">添加 \'%s\'为收藏节点？</string>
+    <string name="favorite_remove">不再把\'%s\'作为收藏节点？</string>
+    <string name="power_metrics_log">电源计量日志</string>
+    <string name="channel_1">频道 1</string>
+    <string name="channel_2">频道 2</string>
+    <string name="channel_3">频道 3</string>
+    <string name="current">当前</string>
+    <string name="voltage">电压</string>
+    <string name="are_you_sure">你确定吗？</string>
+    <string name="router_role_confirmation_text"><![CDATA[我已经阅读 <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">设备角色文档</a> 以及关于 <a href="http://meshtastic.org/blog/choosing-the-right-device-role">选择正确设备角色</a>的博客文章。]]></string>
+    <string name="i_know_what_i_m_doing">我知道自己在做什么</string>
+    <string name="low_battery_message">节点 %s 电池电量低(%d%%)</string>
+    <string name="meshtastic_low_battery_notifications">低电量通知</string>
+    <string name="low_battery_title">电池电量低: %s</string>
+    <string name="meshtastic_low_battery_temporary_remote_notifications">低电量通知 (收藏节点)</string>
+    <string name="baro_pressure">气压</string>
+    <string name="mesh_via_udp_enabled">通过 UDP 的Mesh</string>
+    <string name="udp_config">UDP 设置</string>
+    <string name="map_node_popup_details"><![CDATA[%s<br>最后听到: %s<br>最后位置: %s<br>电量: %s]]></string>
+    <string name="toggle_my_position">切换我的位置</string>
 </resources>
