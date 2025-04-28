@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="main_tab_channel">Csatorna</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">állomás filter törlése</string>
     <string name="node_filter_include_unknown">Ismeretlent tartalmaz</string>
@@ -15,7 +16,6 @@
     <string name="message_status_queued">Elküldésre vár</string>
     <string name="routing_error_none">Visszaigazolva</string>
     <string name="routing_error_no_route">Nincs út</string>
-    <string name="routing_error_got_nak">Received a negative acknowledgment</string>
     <string name="routing_error_timeout">Időtúllépés</string>
     <string name="routing_error_no_interface">Nincs Interfész</string>
     <string name="routing_error_max_retransmit">Maximális Újraküldés Elérve</string>
@@ -29,23 +29,6 @@
     <string name="routing_error_pki_unknown_pubkey">Nem Ismert Publikus Kulcs</string>
     <string name="routing_error_admin_bad_session_key">Hibás munkamenet kulcs</string>
     <string name="routing_error_admin_public_key_unauthorized">Nem Engedélyezett Publikus Kulcs</string>
-    <string name="role_client">App connected or standalone messaging device.</string>
-    <string name="role_client_mute">Device that does not forward packets from other devices.</string>
-    <string name="role_router">Infrastructure node for extending network coverage by relaying messages. Visible in nodes list.</string>
-    <string name="role_router_client">Combination of both ROUTER and CLIENT. Not for mobile devices.</string>
-    <string name="role_repeater">Infrastructure node for extending network coverage by relaying messages with minimal overhead. Not visible in nodes list.</string>
-    <string name="role_tracker">Broadcasts GPS position packets as priority.</string>
-    <string name="role_sensor">Broadcasts telemetry packets as priority.</string>
-    <string name="role_tak">Optimized for ATAK system communication, reduces routine broadcasts.</string>
-    <string name="role_client_hidden">Device that only broadcasts as needed for stealth or power savings.</string>
-    <string name="role_lost_and_found">Broadcasts location as message to default channel regularly for to assist with device recovery.</string>
-    <string name="role_tak_tracker">Enables automatic TAK PLI broadcasts and reduces routine broadcasts.</string>
-    <string name="rebroadcast_mode_all">Rebroadcast any observed message, if it was on our private channel or from another mesh with the same lora parameters.</string>
-    <string name="rebroadcast_mode_all_skip_decoding">Same as behavior as ALL but skips packet decoding and simply rebroadcasts them. Only available in Repeater role. Setting this on any other roles will result in ALL behavior.</string>
-    <string name="rebroadcast_mode_local_only">Ignores observed messages from foreign meshes that are open or those which it cannot decrypt. Only rebroadcasts message on the nodes local primary / secondary channels.</string>
-    <string name="rebroadcast_mode_known_only">Ignores observed messages from foreign meshes like LOCAL ONLY, but takes it step further by also ignoring messages from nodes not already in the node\'s known list.</string>
-    <string name="rebroadcast_mode_none">Only permitted for SENSOR, TRACKER and TAK_TRACKER roles, this will inhibit all rebroadcasts, not unlike CLIENT_MUTE role.</string>
-    <string name="rebroadcast_mode_core_portnums_only">Ignores packets from non-standard portnums such as: TAK, RangeTest, PaxCounter, etc. Only rebroadcasts packets with standard portnums: NodeInfo, Text, Position, Telemetry, and Routing.</string>
     <string name="channel_name">Csatorna neve</string>
     <string name="channel_options">Csatorna opciók</string>
     <string name="qr_code">QR kód</string>
@@ -80,7 +63,6 @@
     <string name="share">Megosztás</string>
     <string name="disconnected">Szétkapcsolva</string>
     <string name="device_sleeping">Az eszköz alszik</string>
-    <string name="connected_count">Kapcsolódva: %1$s a %2$s-ból(ből) elérhető</string>
     <string name="update_firmware">Firmware frissítés</string>
     <string name="ip_address">IP cím:</string>
     <string name="connected">Kapcsolódva a rádióhoz</string>
@@ -139,8 +121,6 @@
     <string name="camera_required">Kamera hozzáférés engedély</string>
     <string name="why_camera_required">A QR kód olvasáshoz kötelező megadni a kamera hozzáférést. A képek vagy videók nem kerülnek mentésre.</string>
     <string name="notification_required">Értesítések engedélyezése</string>
-    <string name="why_notification_required">Meshtastic needs permission for service and message notifications.</string>
-    <string name="notification_denied">Notification permission denied. To turn on notifications, access: Android Settings &gt; Apps &gt; Meshtastic &gt; Notifications.</string>
     <string name="modem_config_slow_short">Rövid hatótáv (lassú)</string>
     <string name="modem_config_slow_medium">Közepes hatótáv (lassú)</string>
     <plurals name="delete_messages">
@@ -188,12 +168,9 @@
     <string name="delivery_confirmed">Kézbesítés sikeres</string>
     <string name="error">Hiba</string>
     <string name="ignore">Mellőzés</string>
-    <string name="ignore_add">Add \'%s\' to ignore list?</string>
-    <string name="ignore_remove">Remove \'%s\' from ignore list?</string>
     <string name="map_select_download_region">Válassz letöltési régiót</string>
     <string name="map_tile_download_estimate">Csempe letöltés számítása:</string>
     <string name="map_start_download">Letöltés indítása</string>
-    <string name="exchange_position">Pozíció kérése</string>
     <string name="close">Bezárás</string>
     <string name="device_settings">Eszköz beállítások</string>
     <string name="module_settings">Modul beállítások</string>
@@ -215,10 +192,7 @@
     <string name="waypoint_edit">Útpont szerkesztés</string>
     <string name="waypoint_delete">Útpont törlés?</string>
     <string name="waypoint_new">Új útpont</string>
-    <string name="waypoint_received">Received waypoint: %s</string>
-    <string name="error_duty_cycle">Duty Cycle limit reached. Cannot send messages right now, please try again later.</string>
     <string name="remove">Törlés</string>
-    <string name="remove_node_text">This node will be removed from your list until your node receives data from it again.</string>
     <string name="mute">Némítás</string>
     <string name="mute_notifications">Értesítések némítása</string>
     <string name="mute_8_hours">8 óra</string>
@@ -226,7 +200,6 @@
     <string name="mute_always">Mindig</string>
     <string name="replace">Csere</string>
     <string name="wifi_qr_code_scan">WiFi QR kód szkennelése</string>
-    <string name="wifi_qr_code_error">Invalid WiFi Credential QR code format</string>
     <string name="navigate_back">Vissza</string>
     <string name="battery">Akkumulátor</string>
     <string name="channel_utilization">Csatornahasználat</string>
@@ -236,23 +209,14 @@
     <string name="logs">Naplók</string>
     <string name="hops_away">Ugrás Messzire</string>
     <string name="info">Információ</string>
-    <string name="ch_util_definition">Utilization for the current channel, including well formed TX, RX and malformed RX (aka noise).</string>
-    <string name="air_util_definition">Percent of airtime for transmission used within the last hour.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Megosztott kulcs</string>
-    <string name="encryption_psk_text">Direct messages are using the shared key for the channel.</string>
     <string name="encryption_pkc">Publikus Kulcs Titkosítás</string>
-    <string name="encryption_pkc_text">Direct messages are using the new public key infrastructure for encryption. Requires firmware version 2.5 or greater.</string>
     <string name="encryption_error">Publikus kulcs nem egyezik</string>
-    <string name="encryption_error_text">The public key does not match the recorded key. You may remove the node and let it exchange keys again, but this may indicate a more serious security problem. Contact the user through another trusted channel, to determine if the key change was due to a factory reset or other intentional action.</string>
-    <string name="exchange_userinfo">Felhasználó információ kérése</string>
     <string name="meshtastic_new_nodes_notifications">Új állomás értesítések</string>
     <string name="more_details">Több részlet</string>
     <string name="snr">SNR</string>
-    <string name="snr_definition">Signal-to-Noise Ratio, a measure used in communications to quantify the level of a desired signal to the level of background noise. In Meshtastic and other wireless systems, a higher SNR indicates a clearer signal that can enhance the reliability and quality of data transmission.</string>
     <string name="rssi">RSSI</string>
-    <string name="rssi_definition">Received Signal Strength Indicator, a measurement used to determine the power level being received by the antenna. A higher RSSI value generally indicates a stronger and more stable connection.</string>
-    <string name="iaq_definition">(Indoor Air Quality) relative scale IAQ value as measured by Bosch BME680. Value Range 0–500.</string>
     <string name="device_metrics_log">Eszközmérő Napló</string>
     <string name="node_map">Állomás Térkép</string>
     <string name="position_log">Pozíciónapló</string>
