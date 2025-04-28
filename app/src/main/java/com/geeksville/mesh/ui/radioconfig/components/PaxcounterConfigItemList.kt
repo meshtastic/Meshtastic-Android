@@ -65,6 +65,7 @@ fun PaxcounterConfigScreen(
     )
 }
 
+@Suppress("LongMethod")
 @Composable
 fun PaxcounterConfigItemList(
     paxcounterConfig: ModuleConfigProtos.ModuleConfig.PaxcounterConfig,
