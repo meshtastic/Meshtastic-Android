@@ -191,6 +191,7 @@ fun ChannelConfigScreen(
     )
 }
 
+@Suppress("LongMethod")
 @Composable
 fun ChannelSettingsItemList(
     settingsList: List<ChannelSettings>,
