@@ -29,12 +29,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.CannedMessageConfig
+import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.ui.components.DropDownPreference
@@ -87,60 +89,71 @@ fun CannedMessageConfigItemList(
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        item { PreferenceCategory(text = "Canned Message Config") }
+        item { PreferenceCategory(text = stringResource(R.string.canned_message_config)) }
 
         item {
-            SwitchPreference(title = "Canned message enabled",
+            SwitchPreference(
+                title = stringResource(R.string.canned_message_enabled),
                 checked = cannedMessageInput.enabled,
                 enabled = enabled,
                 onCheckedChange = {
                     cannedMessageInput = cannedMessageInput.copy { this.enabled = it }
-                })
+                }
+            )
         }
         item { Divider() }
 
         item {
-            SwitchPreference(title = "Rotary encoder #1 enabled",
+            SwitchPreference(
+                title = stringResource(R.string.rotary_encoder_1_enabled),
                 checked = cannedMessageInput.rotary1Enabled,
                 enabled = enabled,
                 onCheckedChange = {
                     cannedMessageInput = cannedMessageInput.copy { rotary1Enabled = it }
-                })
+                }
+            )
         }
         item { Divider() }
 
         item {
-            EditTextPreference(title = "GPIO pin for rotary encoder A port",
+            EditTextPreference(
+                title = stringResource(R.string.gpio_pin_for_rotary_encoder_a_port),
                 value = cannedMessageInput.inputbrokerPinA,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     cannedMessageInput = cannedMessageInput.copy { inputbrokerPinA = it }
-                })
+                }
+            )
         }
 
         item {
-            EditTextPreference(title = "GPIO pin for rotary encoder B port",
+            EditTextPreference(
+                title = stringResource(R.string.gpio_pin_for_rotary_encoder_b_port),
                 value = cannedMessageInput.inputbrokerPinB,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     cannedMessageInput = cannedMessageInput.copy { inputbrokerPinB = it }
-                })
+                }
+            )
         }
 
         item {
-            EditTextPreference(title = "GPIO pin for rotary encoder Press port",
+            EditTextPreference(
+                title = stringResource(R.string.gpio_pin_for_rotary_encoder_press_port),
                 value = cannedMessageInput.inputbrokerPinPress,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     cannedMessageInput = cannedMessageInput.copy { inputbrokerPinPress = it }
-                })
+                }
+            )
         }
 
         item {
-            DropDownPreference(title = "Generate input event on Press",
+            DropDownPreference(
+                title = stringResource(R.string.generate_input_event_on_press),
                 enabled = enabled,
                 items = CannedMessageConfig.InputEventChar.entries
                     .filter { it != CannedMessageConfig.InputEventChar.UNRECOGNIZED }
@@ -148,12 +161,14 @@ fun CannedMessageConfigItemList(
                 selectedItem = cannedMessageInput.inputbrokerEventPress,
                 onItemSelected = {
                     cannedMessageInput = cannedMessageInput.copy { inputbrokerEventPress = it }
-                })
+                }
+            )
         }
         item { Divider() }
 
         item {
-            DropDownPreference(title = "Generate input event on CW",
+            DropDownPreference(
+                title = stringResource(R.string.generate_input_event_on_cw),
                 enabled = enabled,
                 items = CannedMessageConfig.InputEventChar.entries
                     .filter { it != CannedMessageConfig.InputEventChar.UNRECOGNIZED }
@@ -161,12 +176,14 @@ fun CannedMessageConfigItemList(
                 selectedItem = cannedMessageInput.inputbrokerEventCw,
                 onItemSelected = {
                     cannedMessageInput = cannedMessageInput.copy { inputbrokerEventCw = it }
-                })
+                }
+            )
         }
         item { Divider() }
 
         item {
-            DropDownPreference(title = "Generate input event on CCW",
+            DropDownPreference(
+                title = stringResource(R.string.generate_input_event_on_ccw),
                 enabled = enabled,
                 items = CannedMessageConfig.InputEventChar.entries
                     .filter { it != CannedMessageConfig.InputEventChar.UNRECOGNIZED }
@@ -174,22 +191,26 @@ fun CannedMessageConfigItemList(
                 selectedItem = cannedMessageInput.inputbrokerEventCcw,
                 onItemSelected = {
                     cannedMessageInput = cannedMessageInput.copy { inputbrokerEventCcw = it }
-                })
+                }
+            )
         }
         item { Divider() }
 
         item {
-            SwitchPreference(title = "Up/Down/Select input enabled",
+            SwitchPreference(
+                title = stringResource(R.string.up_down_select_input_enabled),
                 checked = cannedMessageInput.updown1Enabled,
                 enabled = enabled,
                 onCheckedChange = {
                     cannedMessageInput = cannedMessageInput.copy { updown1Enabled = it }
-                })
+                }
+            )
         }
         item { Divider() }
 
         item {
-            EditTextPreference(title = "Allow input source",
+            EditTextPreference(
+                title = stringResource(R.string.allow_input_source),
                 value = cannedMessageInput.allowInputSource,
                 maxSize = 63, // allow_input_source max_size:16
                 enabled = enabled,
@@ -200,21 +221,25 @@ fun CannedMessageConfigItemList(
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     cannedMessageInput = cannedMessageInput.copy { allowInputSource = it }
-                })
+                }
+            )
         }
 
         item {
-            SwitchPreference(title = "Send bell",
+            SwitchPreference(
+                title = stringResource(R.string.send_bell),
                 checked = cannedMessageInput.sendBell,
                 enabled = enabled,
                 onCheckedChange = {
                     cannedMessageInput = cannedMessageInput.copy { sendBell = it }
-                })
+                }
+            )
         }
         item { Divider() }
 
         item {
-            EditTextPreference(title = "Messages",
+            EditTextPreference(
+                title = stringResource(R.string.messages),
                 value = messagesInput,
                 maxSize = 200, // messages max_size:201
                 enabled = enabled,

@@ -28,10 +28,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.SerialConfig
+import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.ui.components.DropDownPreference
@@ -76,77 +78,93 @@ fun SerialConfigItemList(
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        item { PreferenceCategory(text = "Serial Config") }
+        item { PreferenceCategory(text = stringResource(R.string.serial_config)) }
 
         item {
-            SwitchPreference(title = "Serial enabled",
+            SwitchPreference(
+                title = stringResource(R.string.serial_enabled),
                 checked = serialInput.enabled,
                 enabled = enabled,
-                onCheckedChange = { serialInput = serialInput.copy { this.enabled = it } })
+                onCheckedChange = { serialInput = serialInput.copy { this.enabled = it } }
+            )
         }
         item { Divider() }
 
         item {
-            SwitchPreference(title = "Echo enabled",
+            SwitchPreference(
+                title = stringResource(R.string.echo_enabled),
                 checked = serialInput.echo,
                 enabled = enabled,
-                onCheckedChange = { serialInput = serialInput.copy { echo = it } })
+                onCheckedChange = { serialInput = serialInput.copy { echo = it } }
+            )
         }
         item { Divider() }
 
         item {
-            EditTextPreference(title = "RX",
+            EditTextPreference(
+                title = "RX",
                 value = serialInput.rxd,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { serialInput = serialInput.copy { rxd = it } })
+                onValueChanged = { serialInput = serialInput.copy { rxd = it } }
+            )
         }
 
         item {
-            EditTextPreference(title = "TX",
+            EditTextPreference(
+                title = "TX",
                 value = serialInput.txd,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { serialInput = serialInput.copy { txd = it } })
+                onValueChanged = { serialInput = serialInput.copy { txd = it } }
+            )
         }
 
         item {
-            DropDownPreference(title = "Serial baud rate",
+            DropDownPreference(
+                title = stringResource(R.string.serial_baud_rate),
                 enabled = enabled,
                 items = SerialConfig.Serial_Baud.entries
                     .filter { it != SerialConfig.Serial_Baud.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = serialInput.baud,
-                onItemSelected = { serialInput = serialInput.copy { baud = it } })
+                onItemSelected = { serialInput = serialInput.copy { baud = it } }
+            )
         }
         item { Divider() }
 
         item {
-            EditTextPreference(title = "Timeout",
+            EditTextPreference(
+                title = stringResource(R.string.timeout),
                 value = serialInput.timeout,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { serialInput = serialInput.copy { timeout = it } })
+                onValueChanged = { serialInput = serialInput.copy { timeout = it } }
+            )
         }
 
         item {
-            DropDownPreference(title = "Serial mode",
+            DropDownPreference(
+                title = stringResource(R.string.serial_mode),
                 enabled = enabled,
                 items = SerialConfig.Serial_Mode.entries
                     .filter { it != SerialConfig.Serial_Mode.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = serialInput.mode,
-                onItemSelected = { serialInput = serialInput.copy { mode = it } })
+                onItemSelected = { serialInput = serialInput.copy { mode = it } }
+            )
         }
         item { Divider() }
 
         item {
-            SwitchPreference(title = "Override console serial port",
+            SwitchPreference(
+                title = stringResource(R.string.override_console_serial_port),
                 checked = serialInput.overrideConsoleSerialPort,
                 enabled = enabled,
                 onCheckedChange = {
                     serialInput = serialInput.copy { overrideConsoleSerialPort = it }
-                })
+                }
+            )
         }
         item { Divider() }
 

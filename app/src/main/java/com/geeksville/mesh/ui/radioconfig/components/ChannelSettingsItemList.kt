@@ -191,10 +191,11 @@ fun ChannelConfigScreen(
     )
 }
 
+@Suppress("LongMethod")
 @Composable
 fun ChannelSettingsItemList(
     settingsList: List<ChannelSettings>,
-    modemPresetName: String = "Default",
+    modemPresetName: String = stringResource(R.string.default_),
     maxChannels: Int = 8,
     enabled: Boolean,
     onNegativeClicked: () -> Unit = { },
@@ -249,7 +250,7 @@ fun ChannelSettingsItemList(
             state = listState,
             contentPadding = PaddingValues(horizontal = 16.dp),
         ) {
-            item { PreferenceCategory(text = "Channels") }
+            item { PreferenceCategory(text = stringResource(R.string.channels)) }
 
             dragDropItemsIndexed(
                 items = settingsListInput,
@@ -300,9 +301,11 @@ fun ChannelSettingsItemList(
             FloatingActionButton(
                 onClick = {
                     if (maxChannels > settingsListInput.size) {
-                        settingsListInput.add(channelSettings {
+                        settingsListInput.add(
+                            channelSettings {
                             psk = Channel.default.settings.psk
-                        })
+                        }
+                        )
                         showEditChannelDialog = settingsListInput.lastIndex
                     }
                 },

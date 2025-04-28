@@ -29,12 +29,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.getInitials
 import com.geeksville.mesh.ui.components.EditTextPreference
@@ -77,17 +79,20 @@ fun UserConfigItemList(
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        item { PreferenceCategory(text = "User Config") }
+        item { PreferenceCategory(text = stringResource(R.string.user_config)) }
 
         item {
-            RegularPreference(title = "Node ID",
+            RegularPreference(
+                title = stringResource(R.string.node_id),
                 subtitle = userInput.id,
-                onClick = {})
+                onClick = {}
+            )
         }
         item { Divider() }
 
         item {
-            EditTextPreference(title = "Long name",
+            EditTextPreference(
+                title = stringResource(R.string.long_name),
                 value = userInput.longName,
                 maxSize = 39, // long_name max_size:40
                 enabled = enabled,
@@ -101,11 +106,13 @@ fun UserConfigItemList(
                     if (getInitials(it).toByteArray().size <= 4) { // short_name max_size:5
                         userInput = userInput.copy { shortName = getInitials(it) }
                     }
-                })
+                }
+            )
         }
 
         item {
-            EditTextPreference(title = "Short name",
+            EditTextPreference(
+                title = stringResource(R.string.short_name),
                 value = userInput.shortName,
                 maxSize = 4, // short_name max_size:5
                 enabled = enabled,
@@ -114,21 +121,26 @@ fun UserConfigItemList(
                     keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
                 ),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { userInput = userInput.copy { shortName = it } })
+                onValueChanged = { userInput = userInput.copy { shortName = it } }
+            )
         }
 
         item {
-            RegularPreference(title = "Hardware model",
+            RegularPreference(
+                title = stringResource(R.string.hardware_model),
                 subtitle = userInput.hwModel.name,
-                onClick = {})
+                onClick = {}
+            )
         }
         item { Divider() }
 
         item {
-            SwitchPreference(title = "Licensed amateur radio",
+            SwitchPreference(
+                title = stringResource(R.string.licensed_amateur_radio),
                 checked = userInput.isLicensed,
                 enabled = enabled,
-                onCheckedChange = { userInput = userInput.copy { isLicensed = it } })
+                onCheckedChange = { userInput = userInput.copy { isLicensed = it } }
+            )
         }
         item { Divider() }
 

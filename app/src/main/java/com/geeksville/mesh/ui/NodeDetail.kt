@@ -148,20 +148,20 @@ private fun NodeDetailList(
     ) {
         if (metricsState.deviceHardware != null) {
             item {
-                PreferenceCategory("Device") {
+                PreferenceCategory(stringResource(R.string.device)) {
                     DeviceDetailsContent(metricsState)
                 }
             }
         }
         item {
-            PreferenceCategory("Details") {
+            PreferenceCategory(stringResource(R.string.details)) {
                 NodeDetailsContent(node)
             }
         }
 
         if (node.hasEnvironmentMetrics) {
             item {
-                PreferenceCategory("Environment")
+                PreferenceCategory(stringResource(R.string.environment))
                 EnvironmentMetrics(node, metricsState.isFahrenheit)
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -169,7 +169,7 @@ private fun NodeDetailList(
 
         if (node.hasPowerMetrics) {
             item {
-                PreferenceCategory("Power")
+                PreferenceCategory(stringResource(R.string.power))
                 PowerMetrics(node)
                 Spacer(modifier = Modifier.height(8.dp))
             }

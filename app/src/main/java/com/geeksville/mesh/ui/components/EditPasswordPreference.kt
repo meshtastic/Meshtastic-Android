@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -67,7 +68,11 @@ fun EditPasswordPreference(
                 Icon(
                     painter = if (isPasswordVisible) painterResource(R.drawable.ic_twotone_visibility_off_24)
                     else painterResource(R.drawable.ic_twotone_visibility_24),
-                    contentDescription = if (isPasswordVisible) "Hide password" else "Show password",
+                    contentDescription = if (isPasswordVisible) {
+                        stringResource(R.string.hide_password)
+                    } else {
+                        stringResource(R.string.show_password)
+                    },
                 )
             }
         },
