@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -368,47 +367,37 @@ fun DeviceHardwareImage(
     deviceHardware: DeviceHardware,
     modifier: Modifier = Modifier,
 ) {
-    val hwImg = deviceHardware.images?.get(1) ?: deviceHardware.images?.get(0)
-    if (hwImg != null) {
-        val imageUrl = "https://flasher.meshtastic.org/img/devices/$hwImg"
-        val listener = object : ImageRequest.Listener {
-            override fun onStart(request: ImageRequest) {
-                super.onStart(request)
-                debug("Image request started")
-            }
-
-            override fun onError(request: ImageRequest, result: ErrorResult) {
-                super.onError(request, result)
-                debug("Image request failed: ${result.throwable.message}")
-            }
-
-            override fun onSuccess(request: ImageRequest, result: SuccessResult) {
-                super.onSuccess(request, result)
-                debug("Image request succeeded: ${result.dataSource.name}")
-            }
+    val hwImg = deviceHardware.images?.get(1) ?: deviceHardware.images?.get(0) ?: "unknown.svg"
+    val imageUrl = "https://flasher.meshtastic.org/img/devices/$hwImg"
+    val listener = object : ImageRequest.Listener {
+        override fun onStart(request: ImageRequest) {
+            super.onStart(request)
+            debug("Image request started")
         }
-        AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .listener(listener)
-                .data(imageUrl)
-                .build(),
-            contentScale = ContentScale.Inside,
-            contentDescription = deviceHardware.displayName,
-            placeholder = painterResource(R.drawable.hw_unknown),
-            error = painterResource(R.drawable.hw_unknown),
-            fallback = painterResource(R.drawable.hw_unknown),
-            modifier = modifier
-                .padding(16.dp)
-        )
-    } else {
-        Image(
-            painter = painterResource(R.drawable.hw_unknown),
-            contentScale = ContentScale.Inside,
-            contentDescription = deviceHardware.displayName,
-            modifier = modifier
-                .padding(16.dp)
-        )
+
+        override fun onError(request: ImageRequest, result: ErrorResult) {
+            super.onError(request, result)
+            debug("Image request failed: ${result.throwable.message}")
+        }
+
+        override fun onSuccess(request: ImageRequest, result: SuccessResult) {
+            super.onSuccess(request, result)
+            debug("Image request succeeded: ${result.dataSource.name}")
+        }
     }
+    AsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .listener(listener)
+            .data(imageUrl)
+            .build(),
+        contentScale = ContentScale.Inside,
+        contentDescription = deviceHardware.displayName,
+        placeholder = painterResource(R.drawable.hw_unknown),
+        error = painterResource(R.drawable.hw_unknown),
+        fallback = painterResource(R.drawable.hw_unknown),
+        modifier = modifier
+            .padding(16.dp)
+    )
 }
 
 @Suppress("LongMethod")
