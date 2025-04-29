@@ -328,4 +328,10 @@
     <string name="udp_config">Konfigurácia UDP</string>
     <string name="map_node_popup_details"><![CDATA[%s<br>Naposledy počutý: %s<br>Posledná pozícia: %s<br>Batéria: %s]]></string>
     <string name="toggle_my_position">Zapnúť lokalizáciu</string>
+    <string name="device">Zariadenie</string>
+    <string name="environment">Prostredie</string>
+    <string name="messages">Správy</string>
+    <string name="public_key">Verejný kľúč</string>
+    <string name="private_key">Súkromný kľúč</string>
+    <string name="timeout">Časový limit</string>
 </resources>

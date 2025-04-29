@@ -328,4 +328,8 @@
     <string name="udp_config">Ustawienia UDP</string>
     <string name="map_node_popup_details"><![CDATA[%s-<br>Ostatnio słyszany: %s<br>Ostatnia pozycja: %s<br>Bateria: %s]]></string>
     <string name="toggle_my_position">Pokaż moją pozycję</string>
+    <string name="messages">Wiadomości</string>
+    <string name="public_key">Klucz publiczny</string>
+    <string name="private_key">Klucz prywatny</string>
+    <string name="timeout">Upłynął limit czasu</string>
 </resources>

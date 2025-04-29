@@ -272,4 +272,5 @@
     </plurals>
     <string name="traceroute_diff">Sprongen richting %1$d Springt terug %2$d</string>
     <string name="alert_bell_text">Melding Bell teken!</string>
+    <string name="timeout">Time-Out</string>
 </resources>

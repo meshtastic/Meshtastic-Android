@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="main_tab_messages">訊息</string>
+    <string name="main_tab_users">用戶</string>
+    <string name="main_tab_map">地圖</string>
     <string name="main_tab_channel">頻道</string>
+    <string name="main_tab_settings">設定</string>
     <string name="node_filter_placeholder">篩選條件</string>
     <string name="desc_node_filter_clear">清除節點篩選條件</string>
     <string name="node_filter_include_unknown">顯示未知節點</string>
@@ -67,7 +71,7 @@
     <string name="you">您</string>
     <string name="your_name">您的名稱</string>
     <string name="analytics_okay">匿名使用統計資訊和故障報告</string>
-    <string name="looking_for_meshtastic_devices">正在尋找 Meshtastic 裝置…</string>
+    <string name="looking_for_meshtastic_devices">正在尋找 Meshtastic 裝置...</string>
     <string name="starting_pairing">開始配對</string>
     <string name="url_for_join">加入 Meshtastic 網狀網路的 URL</string>
     <string name="accept">確定</string>
@@ -286,4 +290,46 @@
     <string name="max">最大值</string>
     <string name="copy">複製</string>
     <string name="alert_bell_text">警鈴字符！</string>
+    <string name="favorite">收藏</string>
+    <string name="current">當前</string>
+    <string name="i_know_what_i_m_doing">我知道我在做什麼。</string>
+    <string name="meshtastic_low_battery_notifications">低電量通知</string>
+    <string name="baro_pressure">氣壓</string>
+    <string name="mesh_via_udp_enabled">通过 UDP 的Mesh</string>
+    <string name="user">用戶</string>
+    <string name="channels">頻道</string>
+    <string name="device">裝置</string>
+    <string name="position">位置</string>
+    <string name="power">電源</string>
+    <string name="network">網路</string>
+    <string name="display">顯示</string>
+    <string name="lora">LoRa</string>
+    <string name="bluetooth">藍芽</string>
+    <string name="security">安全</string>
+    <string name="mqtt">MQTT</string>
+    <string name="serial">序號</string>
+    <string name="i2s_clock">I2S 時鐘</string>
+    <string name="bluetooth_config">藍牙配置</string>
+    <string name="bluetooth_enabled">藍牙已啟用</string>
+    <string name="pairing_mode">配對模式</string>
+    <string name="fixed_pin">固定引脚</string>
+    <string name="uplink_enabled">已啓用上行</string>
+    <string name="downlink_enabled">已啓用下行</string>
+    <string name="default_">默認</string>
+    <string name="gpio_pin">GPIO 引脚</string>
+    <string name="type">類別</string>
+    <string name="hide_password">隱藏密碼</string>
+    <string name="show_password">顯示密碼</string>
+    <string name="details">詳情</string>
+    <string name="environment">環境</string>
+    <string name="led_state">LED狀態</string>
+    <string name="red">紅色</string>
+    <string name="green">綠色</string>
+    <string name="blue">藍色</string>
+    <string name="send_bell">發送振鈴</string>
+    <string name="messages">訊息</string>
+    <string name="role">角色</string>
+    <string name="public_key">公鑰</string>
+    <string name="private_key">私鑰</string>
+    <string name="timeout">逾時</string>
 </resources>

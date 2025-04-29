@@ -322,4 +322,8 @@
     <string name="mesh_via_udp_enabled">UDP üzerinden Mesh etkinleştirildi</string>
     <string name="udp_config">UDP Ayarları</string>
     <string name="map_node_popup_details"><![CDATA[%s<br>Son duyulma: %s<br>Son konum: %s<br>Pil: %s]]></string>
+    <string name="messages">Mesajlar</string>
+    <string name="public_key">Genel Anahtar</string>
+    <string name="private_key">Özel Anahtar</string>
+    <string name="timeout">Zaman Aşımı</string>
 </resources>

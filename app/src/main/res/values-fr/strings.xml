@@ -306,4 +306,8 @@
     <string name="voltage">Tension</string>
     <string name="router_role_confirmation_text"><![CDATA[J\'ai lu la <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Documentation de l\'appareil</a> et le message du blog sur <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Choisir le rôle de l\'appareil approprié</a>.]]></string>
     <string name="i_know_what_i_m_doing">Je sais ce que je fais</string>
+    <string name="messages">Messages</string>
+    <string name="public_key">Clé publique</string>
+    <string name="private_key">Clé privée</string>
+    <string name="timeout">Délai dépassé</string>
 </resources>

@@ -253,7 +253,7 @@
     <string name="snr_definition">信号対ノイズ比は、通信で使用される信号のレベルをバックグラウンドノイズのレベルに対比して定量化する測定値。 Meshtasticなどのワイヤレスシステムでは、SN比が高いほど、データ伝送の信頼性と品質を向上させることができる明瞭な信号であることを示します。</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">受信信号強度指標は、アンテナが受信する電力レベルを測定するために使用されます。 RSSI値が高いほど、一般的にはより強く安定した接続であることを示します。</string>
-    <string name="iaq_definition">(屋内空気質) 相対スケールIAQ値は、ボッシュBME680によって測定されます。 値の範囲は 0–500。</string>
+    <string name="iaq_definition">(屋内空気質) 相対スケールIAQ値は、ボッシュBME680によって測定されます。 値の範囲は 0-500。</string>
     <string name="device_metrics_log">デバイス・メトリックログ</string>
     <string name="node_map">ノードマップ</string>
     <string name="position_log">位置ログ</string>
@@ -285,4 +285,6 @@
     <string name="channel_1">チャンネル 1</string>
     <string name="channel_2">チャンネル 2</string>
     <string name="channel_3">チャンネル 3</string>
+    <string name="messages">メッセージ</string>
+    <string name="timeout">タイムアウト</string>
 </resources>

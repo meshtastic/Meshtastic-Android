@@ -324,4 +324,8 @@
     <string name="udp_config">UDP Konfiguration</string>
     <string name="map_node_popup_details"><![CDATA[%s<br>zuletzt gehört:%s<br>letzte Position:%s<br>Batterie:%s]]></string>
     <string name="toggle_my_position">Position einschalten</string>
+    <string name="messages">Nachrichten</string>
+    <string name="public_key">Öffentlicher Schlüssel</string>
+    <string name="private_key">Privater Schlüssel</string>
+    <string name="timeout">Zeitüberschreitung</string>
 </resources>

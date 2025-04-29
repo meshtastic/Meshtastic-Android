@@ -257,7 +257,7 @@
     <string name="snr_definition">Signal-to-Noise Ratio, är ett mått som används inom kommunikation för att kvantifiera nivån av en önskad signal mot nivån av bakgrundsbrus. I Meshtastic och andra trådlösa system indikerar en högre SNR en tydligare signal som kan förbättra tillförlitligheten och kvaliteten på dataöverföringen.</string>
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Received Signal Strength Indicator, ett mått som används för att avgöra effektnivån som togs emot av antennen. Ett högre RSSI-värde indikerar generellt en starkare och stabilare anslutning.</string>
-    <string name="iaq_definition">(Indoor Air Quality) relativ skala IAQ värdet mätt med Bosch BME600. Värdeintervall 0–500.</string>
+    <string name="iaq_definition">(Indoor Air Quality) relativ skala IAQ värdet mätt med Bosch BME600. Värdeintervall 0-500.</string>
     <string name="device_metrics_log">Enhetsstatistik Loggbok</string>
     <string name="node_map">Nod karta</string>
     <string name="position_log">Position Loggbok</string>
@@ -288,4 +288,7 @@
     <string name="max">Max</string>
     <string name="copy">Kopiera</string>
     <string name="alert_bell_text">Varningsklocka!</string>
+    <string name="public_key">Publik nyckel</string>
+    <string name="private_key">Privat nyckel</string>
+    <string name="timeout">Timeout</string>
 </resources>

@@ -273,4 +273,5 @@
         <item quantity="other">%d céimeanna</item>
     </plurals>
     <string name="traceroute_diff">Céimeanna i dtreo %1$d Céimeanna ar ais %2$d</string>
+    <string name="timeout">Am tráth</string>
 </resources>

@@ -247,4 +247,7 @@
         <item quantity="one">1 hüpe</item>
         <item quantity="other">%d hüppet</item>
     </plurals>
+    <string name="device">Seade</string>
+    <string name="environment">Keskkond</string>
+    <string name="timeout">Aegunud</string>
 </resources>

@@ -292,4 +292,7 @@
     <string name="max">Maks.</string>
     <string name="copy">Kopiraj</string>
     <string name="alert_bell_text">Znak opozorilnega zvonca!</string>
+    <string name="public_key">Javni ključ</string>
+    <string name="private_key">Zasebni ključ</string>
+    <string name="timeout">Časovna omejitev</string>
 </resources>
