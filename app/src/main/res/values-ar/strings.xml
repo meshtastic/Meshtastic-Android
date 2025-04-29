@@ -141,4 +141,5 @@
     <string name="meshtastic_low_battery_notifications">إشعارات انخفاض شدة البطارية</string>
     <string name="low_battery_title">البطارية منخفضه: %s</string>
     <string name="baro_pressure">الضغط الجوي</string>
+    <string name="messages">الرسائل</string>
 </resources>

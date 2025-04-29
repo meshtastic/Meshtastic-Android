@@ -319,4 +319,10 @@
     <string name="mesh_via_udp_enabled">Mesh via UDP abilitato</string>
     <string name="udp_config">Configurazione UDP</string>
     <string name="map_node_popup_details"><![CDATA[%s<br>Ultima notizia: %s<br>Ultima posizione: %s<br>Batteria: %s]]></string>
+    <string name="device">Dispositivo</string>
+    <string name="environment">Ambiente</string>
+    <string name="messages">Messaggi</string>
+    <string name="public_key">Chiave Pubblica</string>
+    <string name="private_key">Chiave Privata</string>
+    <string name="timeout">Timeout</string>
 </resources>

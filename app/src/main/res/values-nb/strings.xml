@@ -288,4 +288,7 @@
     <string name="max">Maks</string>
     <string name="copy">Kopier</string>
     <string name="alert_bell_text">Varsel, bjellekarakter!</string>
+    <string name="public_key">Offentlig nøkkel</string>
+    <string name="private_key">Privat nøkkel</string>
+    <string name="timeout">Tidsavbrudd</string>
 </resources>

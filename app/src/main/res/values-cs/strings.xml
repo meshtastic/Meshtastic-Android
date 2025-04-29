@@ -94,6 +94,7 @@
     <string name="share">Sdílet</string>
     <string name="disconnected">Odpojeno</string>
     <string name="device_sleeping">Zařízení spí</string>
+    <string name="connected_count">Připojeno: %1$s online</string>
     <string name="update_firmware">Aktualizace softwaru</string>
     <string name="ip_address">IP adresa:</string>
     <string name="connected">Připojeno k vysílači</string>
@@ -324,4 +325,18 @@
     <string name="baro_pressure">Barometrický tlak</string>
     <string name="udp_config">UDP Konfigurace</string>
     <string name="map_node_popup_details"><![CDATA[%s<br>Naposledy slyšen: %s<br>Poslední pozice: %s<br>Baterie: %s]]></string>
+    <string name="user">Uživatel</string>
+    <string name="device">Zařízení</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="mqtt">MQTT</string>
+    <string name="telemetry">Telemetrie</string>
+    <string name="fixed_pin">Pevný PIN</string>
+    <string name="default_">Výchozí</string>
+    <string name="environment">Životní prostředí</string>
+    <string name="messages">Zprávy</string>
+    <string name="username">Uživatelské jméno</string>
+    <string name="password">Heslo</string>
+    <string name="public_key">Veřejný klíč</string>
+    <string name="private_key">Soukromý klíč</string>
+    <string name="timeout">Vypršel čas spojení</string>
 </resources>

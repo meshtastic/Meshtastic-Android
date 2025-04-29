@@ -288,4 +288,7 @@
     <string name="max">Máx.</string>
     <string name="copy">Copiar</string>
     <string name="alert_bell_text">Caractere de Alerta!</string>
+    <string name="public_key">Chave Publica</string>
+    <string name="private_key">Chave Privada</string>
+    <string name="timeout">Tempo esgotado</string>
 </resources>

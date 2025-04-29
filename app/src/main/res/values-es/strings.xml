@@ -312,4 +312,8 @@ Rango de Valores 0 - 500.</string>
     <string name="udp_config">Configuración UDP</string>
     <string name="map_node_popup_details"><![CDATA[%s<br>Última escucha: %s<br>Última posición: %s<br>Batería: %s]]></string>
     <string name="toggle_my_position">Cambiar mi posición</string>
+    <string name="messages">Mensajes</string>
+    <string name="public_key">Clave Pública</string>
+    <string name="private_key">Clave privada</string>
+    <string name="timeout">Tiempo agotado</string>
 </resources>

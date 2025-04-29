@@ -278,4 +278,8 @@
     <string name="are_you_sure">Вы уверены?</string>
     <string name="i_know_what_i_m_doing">Я знаю, что я делаю.</string>
     <string name="baro_pressure">Давление на барометре</string>
+    <string name="messages">Сообщения</string>
+    <string name="public_key">Публичный ключ</string>
+    <string name="private_key">Закрытый ключ</string>
+    <string name="timeout">Время ожидания истекло</string>
 </resources>

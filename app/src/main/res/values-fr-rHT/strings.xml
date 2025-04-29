@@ -262,4 +262,5 @@
     <string name="traceroute_log">Jounal Traceroute</string>
     <string name="traceroute_direct">Direk</string>
     <string name="traceroute_diff">Hops vèsus %1$d Hops tounen %2$d</string>
+    <string name="timeout">Tan pase</string>
 </resources>
