@@ -15,6 +15,7 @@ jobs:
       - name: Synchronize with Crowdin
         uses: crowdin/github-action@v2
         with:
+          base_url: 'https://meshtastic.crowdin.com/api/v2'
           config: 'config/crowdin/crowdin.yml'
           upload_sources: true
           upload_translations: false
