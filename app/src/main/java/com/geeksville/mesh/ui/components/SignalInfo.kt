@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.components
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -60,18 +61,20 @@ fun SignalInfo(
             if (node.hopsAway != 0) add(hopsString)
         }.joinToString(" ")
     }
-    if (text.isNotEmpty()) {
-        Text(
-            modifier = modifier,
-            text = text,
-            color = MaterialTheme.colors.onSurface,
-            fontSize = MaterialTheme.typography.button.fontSize
-        )
-    }
-    /* We only know the Signal Quality from direct nodes aka 0 hop. */
-    if (node.hopsAway <= 0) {
-        if (node.snr < MAX_VALID_SNR && node.rssi < MAX_VALID_RSSI) {
-            NodeSignalQuality(node.snr, node.rssi)
+    Column {
+        if (text.isNotEmpty()) {
+            Text(
+                modifier = modifier,
+                text = text,
+                color = MaterialTheme.colors.onSurface,
+                fontSize = MaterialTheme.typography.caption.fontSize
+            )
+        }
+        /* We only know the Signal Quality from direct nodes aka 0 hop. */
+        if (node.hopsAway <= 0) {
+            if (node.snr < MAX_VALID_SNR && node.rssi < MAX_VALID_RSSI) {
+                NodeSignalQuality(node.snr, node.rssi)
+            }
         }
     }
 }

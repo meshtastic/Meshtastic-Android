@@ -19,7 +19,7 @@ package com.geeksville.mesh.ui.compose
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -44,7 +44,7 @@ fun SatelliteCountInfo(
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Icon(
-            modifier = Modifier.height(18.dp),
+            modifier = Modifier.size(18.dp),
             imageVector = ImageVector.vectorResource(id = R.drawable.ic_satellite),
             contentDescription = null,
             tint = MaterialTheme.colors.onSurface,
