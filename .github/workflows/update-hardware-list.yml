@@ -25,7 +25,7 @@ jobs:
         id: fetch-data
         run: |
           # Define variables for file paths
-          device_hardware_json="public/data/app/src/main/assets/device_hardware.json"
+          device_hardware_json="app/src/main/assets/device_hardware.json"
           new_device_hardware_json="/tmp/new_device_hardware.json"
           
           # Fetch data from API
