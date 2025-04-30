@@ -30,6 +30,7 @@ import javax.inject.Inject
 class DeviceHardwareRepository @Inject constructor(
     private val apiDataSource: DeviceHardwareRemoteDataSource,
     private val localDataSource: DeviceHardwareLocalDataSource,
+    private val jsonDataSource: DeviceHardwareJsonDataSource,
 ) {
 
     companion object {
@@ -44,7 +45,7 @@ class DeviceHardwareRepository @Inject constructor(
             } else {
                 val cachedHardware = localDataSource.getByHwModel(hwModel)
                 if (cachedHardware != null && !isCacheExpired(cachedHardware.lastUpdated)) {
-                    debug("Using cached device hardware")
+                    debug("Using recent cached device hardware")
                     val externalModel = cachedHardware.asExternalModel()
                     return@withContext externalModel
                 }
@@ -57,7 +58,14 @@ class DeviceHardwareRepository @Inject constructor(
                 return@withContext externalModel
             } catch (e: IOException) {
                 warn("Failed to fetch device hardware from server: ${e.message}")
-                val cachedHardware = localDataSource.getByHwModel(hwModel)
+                var cachedHardware = localDataSource.getByHwModel(hwModel)
+                if (cachedHardware != null) {
+                    debug("Using stale cached device hardware")
+                    return@withContext cachedHardware.asExternalModel()
+                }
+                debug("Loading and caching device hardware from local JSON asset")
+                localDataSource.insertAllDeviceHardware(jsonDataSource.loadDeviceHardwareFromJsonAsset())
+                cachedHardware = localDataSource.getByHwModel(hwModel)
                 val externalModel = cachedHardware?.asExternalModel()
                 return@withContext externalModel
             }
