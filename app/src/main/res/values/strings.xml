@@ -581,4 +581,12 @@
     <string name="short_name">Short name</string>
     <string name="hardware_model">Hardware model</string>
     <string name="licensed_amateur_radio">Licensed amateur radio</string>
+    <string name="dew_point">Dew Point</string>
+    <string name="pressure">Pressure</string>
+    <string name="gas_resistance">Gas Resistance</string>
+    <string name="distance">Distance</string>
+    <string name="lux">Lux</string>
+    <string name="wind">Wind</string>
+    <string name="weight">Weight</string>
+    <string name="radiation">Radiation</string>
 </resources>
