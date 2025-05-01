@@ -38,7 +38,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.model.getInitials
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
@@ -103,9 +102,6 @@ fun UserConfigItemList(
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     userInput = userInput.copy { longName = it }
-                    if (getInitials(it).toByteArray().size <= 4) { // short_name max_size:5
-                        userInput = userInput.copy { shortName = getInitials(it) }
-                    }
                 }
             )
         }
