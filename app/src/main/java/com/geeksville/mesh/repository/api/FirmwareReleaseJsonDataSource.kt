@@ -18,18 +18,22 @@
 package com.geeksville.mesh.repository.api
 
 import android.app.Application
-import com.geeksville.mesh.network.model.NetworkDeviceHardware
+import com.geeksville.mesh.network.model.NetworkFirmwareReleases
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
 import javax.inject.Inject
 
-class DeviceHardwareJsonDataSource @Inject constructor(
+class FirmwareReleaseJsonDataSource @Inject constructor(
     private val application: Application,
 ) {
     @OptIn(ExperimentalSerializationApi::class)
-    fun loadDeviceHardwareFromJsonAsset(): List<NetworkDeviceHardware> {
-        val inputStream = application.assets.open("device_hardware.json")
-        return Json.decodeFromStream<List<NetworkDeviceHardware>>(inputStream)
+    fun loadFirmwareReleaseFromJsonAsset(): NetworkFirmwareReleases {
+        val inputStream = application.assets.open("firmware_releases.json")
+        val result = inputStream.use {
+            Json.decodeFromStream<NetworkFirmwareReleases>(inputStream)
+        }
+        return result
     }
 }
+

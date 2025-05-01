@@ -12,20 +12,11 @@
   "labels": [
     "dependencies"
   ],
-  "git-submodules": {
-    "enabled": true
-  },
   "packageRules": [
     {
       "matchUpdateTypes": ["minor", "patch"],
       "matchCurrentVersion": "!/^0/",
       "automerge": true
-    },
-    {
-      "matchPackageNames": [
-        "https://github.com/meshtastic/protobufs.git"
-      ],
-      "changelogUrl": "https://github.com/meshtastic/protobufs/compare/{{currentDigest}}...{{newDigest}}"
     },
     {
       "matchPackageNames": [

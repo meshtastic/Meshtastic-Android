@@ -36,11 +36,13 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.MeshLogRepository
+import com.geeksville.mesh.database.entity.FirmwareRelease
 import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.repository.api.DeviceHardwareRepository
 import com.geeksville.mesh.repository.api.DeviceRegistrationRepository
+import com.geeksville.mesh.repository.api.FirmwareReleaseRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.map.MAP_STYLE_ID
@@ -81,6 +83,8 @@ data class MetricsState(
     val deviceHardware: DeviceHardware? = null,
     val isLocalDevice: Boolean = false,
     val isRegistered: Boolean = false,
+    val latestStableFirmware: FirmwareRelease? = null,
+    val latestAlphaFirmware: FirmwareRelease? = null,
 ) {
     fun hasDeviceMetrics() = deviceMetrics.isNotEmpty()
     fun hasSignalMetrics() = signalMetrics.isNotEmpty()
@@ -200,6 +204,7 @@ class MetricsViewModel @Inject constructor(
     private val radioConfigRepository: RadioConfigRepository,
     private val deviceRegistrationRepository: DeviceRegistrationRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
+    private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val preferences: SharedPreferences,
 ) : ViewModel(), Logging {
     private val destNum = savedStateHandle.toRoute<Route.NodeDetail>().destNum
@@ -235,37 +240,37 @@ class MetricsViewModel @Inject constructor(
     val timeFrame: StateFlow<TimeFrame> = _timeFrame
 
     init {
-        destNum.let {
-        radioConfigRepository.nodeDBbyNum
-            .mapLatest { nodes -> nodes[destNum] }
-            .distinctUntilChanged()
-            .onEach { node ->
-                val isLocalDevice = node?.user?.id == radioConfigRepository.myId.value
-                _state.update { state -> state.copy(isLocalDevice = isLocalDevice) }
-                if (isLocalDevice) {
-                    radioConfigRepository.myNodeInfo.value?.deviceId?.let { deviceId ->
+        destNum?.let {
+            radioConfigRepository.nodeDBbyNum
+                .mapLatest { nodes -> nodes[destNum] }
+                .distinctUntilChanged()
+                .onEach { node ->
+                    val isLocalDevice = node?.user?.id == radioConfigRepository.myId.value
+                    _state.update { state -> state.copy(isLocalDevice = isLocalDevice) }
+                    if (isLocalDevice) {
+                        radioConfigRepository.myNodeInfo.value?.deviceId?.let { deviceId ->
+                            _state.update { state ->
+                                state.copy(
+                                    isRegistered = deviceRegistrationRepository.isDeviceRegistered(
+                                        deviceId
+                                    )?.isRegistered ?: false
+                                )
+                            }
+                        }
+                    }
+                    _state.update { state -> state.copy(node = node) }
+                }.map { node ->
+                    node?.user?.hwModel?.let { hwModel ->
                         _state.update { state ->
                             state.copy(
-                                isRegistered = deviceRegistrationRepository.isDeviceRegistered(
-                                    deviceId
-                                )?.isRegistered ?: false
+                                deviceHardware = deviceHardwareRepository.getDeviceHardwareByModel(
+                                    hwModel.number
+                                )
                             )
                         }
                     }
                 }
-                _state.update { state -> state.copy(node = node) }
-            }.map { node ->
-                node?.user?.hwModel?.let { hwModel ->
-                    _state.update { state ->
-                        state.copy(
-                            deviceHardware = deviceHardwareRepository.getDeviceHardwareByModel(
-                                hwModel.number
-                            )
-                        )
-                    }
-                }
-            }
-            .launchIn(viewModelScope)
+                .launchIn(viewModelScope)
 
             radioConfigRepository.deviceProfileFlow.onEach { profile ->
                 val moduleConfig = profile.moduleConfig
@@ -325,6 +330,18 @@ class MetricsViewModel @Inject constructor(
                         state.copy(positionLogs = distinctPositions)
                     }
                 }.launchIn(viewModelScope)
+
+            firmwareReleaseRepository.stableRelease.onEach { latestStable ->
+                _state.update { state ->
+                    state.copy(latestStableFirmware = latestStable)
+                }
+            }.launchIn(viewModelScope)
+
+            firmwareReleaseRepository.alphaRelease.onEach { latestAlpha ->
+                _state.update { state ->
+                    state.copy(latestAlphaFirmware = latestAlpha)
+                }
+            }.launchIn(viewModelScope)
 
             debug("MetricsViewModel created")
         }

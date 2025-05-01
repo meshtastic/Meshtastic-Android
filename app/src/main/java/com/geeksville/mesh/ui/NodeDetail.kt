@@ -212,6 +212,33 @@ private fun NodeDetailList(
                 NodeDetailsContent(node)
             }
         }
+        node.metadata?.firmwareVersion?.let { firmwareVersion ->
+            item {
+                PreferenceCategory(stringResource(R.string.firmware)) {
+                    val latestStableFirmware = metricsState.latestStableFirmware
+                    val latestAlphaFirmware = metricsState.latestAlphaFirmware
+                    NodeDetailRow(
+                        label = "Installed",
+                        icon = Icons.Default.Memory,
+                        value = firmwareVersion.substringBeforeLast(".")
+                    )
+                    latestStableFirmware?.let { stable ->
+                        NodeDetailRow(
+                            label = "Latest stable",
+                            icon = Icons.Default.Memory,
+                            value = stable.id.substringBeforeLast(".").replace("v", "")
+                        )
+                    }
+                    latestAlphaFirmware?.let { alpha ->
+                        NodeDetailRow(
+                            label = "Latest alpha",
+                            icon = Icons.Default.Memory,
+                            value = alpha.id.substringBeforeLast(".").replace("v", "")
+                        )
+                    }
+                }
+            }
+        }
 
         item {
             DeviceActions(
@@ -459,13 +486,6 @@ private fun NodeDetailsContent(
             label = stringResource(R.string.uptime),
             icon = Icons.Default.CheckCircle,
             value = formatUptime(node.deviceMetrics.uptimeSeconds)
-        )
-    }
-    if (node.metadata != null) {
-        NodeDetailRow(
-            label = stringResource(R.string.firmware_version),
-            icon = Icons.Default.Memory,
-            value = node.metadata.firmwareVersion.substringBeforeLast(".")
         )
     }
     NodeDetailRow(

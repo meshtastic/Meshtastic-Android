@@ -15,21 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.repository.api
+package com.geeksville.mesh.network
 
-import android.app.Application
-import com.geeksville.mesh.network.model.NetworkDeviceHardware
-import kotlinx.serialization.ExperimentalSerializationApi
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromStream
+import com.geeksville.mesh.network.model.NetworkFirmwareRelease
+import com.geeksville.mesh.network.model.NetworkFirmwareReleases
+import com.geeksville.mesh.network.retrofit.ApiService
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class DeviceHardwareJsonDataSource @Inject constructor(
-    private val application: Application,
+class FirmwareReleaseRemoteDataSource @Inject constructor(
+    private val apiService: ApiService,
 ) {
-    @OptIn(ExperimentalSerializationApi::class)
-    fun loadDeviceHardwareFromJsonAsset(): List<NetworkDeviceHardware> {
-        val inputStream = application.assets.open("device_hardware.json")
-        return Json.decodeFromStream<List<NetworkDeviceHardware>>(inputStream)
+    suspend fun getFirmwareReleases(): NetworkFirmwareReleases = withContext(Dispatchers.IO) {
+        apiService.getFirmwareReleases().body() ?: NetworkFirmwareReleases()
     }
 }

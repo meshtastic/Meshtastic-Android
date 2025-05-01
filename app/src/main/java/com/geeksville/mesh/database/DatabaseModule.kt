@@ -20,6 +20,7 @@ package com.geeksville.mesh.database
 import android.app.Application
 import com.geeksville.mesh.database.dao.DeviceHardwareDao
 import com.geeksville.mesh.database.dao.DeviceRegistrationDao
+import com.geeksville.mesh.database.dao.FirmwareReleaseDao
 import com.geeksville.mesh.database.dao.MeshLogDao
 import com.geeksville.mesh.database.dao.NodeInfoDao
 import com.geeksville.mesh.database.dao.PacketDao
@@ -66,5 +67,10 @@ class DatabaseModule {
     @Provides
     fun provideDeviceHardwareDao(database: MeshtasticDatabase): DeviceHardwareDao {
         return database.deviceHardwareDao()
+    }
+
+    @Provides
+    fun provideFirmwareReleaseDao(database: MeshtasticDatabase): FirmwareReleaseDao {
+        return database.firmwareReleaseDao()
     }
 }
