@@ -589,4 +589,7 @@
     <string name="wind">Wind</string>
     <string name="weight">Weight</string>
     <string name="radiation">Radiation</string>
+    <string name="store_forward_config"><![CDATA[Store & Forward Config]]></string>
+    <string name="indoor_air_quality_iaq">Indoor Air Quality (IAQ)</string>
+    <string name="url">URL</string>
 </resources>
