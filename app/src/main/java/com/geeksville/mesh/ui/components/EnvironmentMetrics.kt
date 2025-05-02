@@ -121,8 +121,9 @@ fun EnvironmentMetricsScreen(
     viewModel: MetricsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
     val selectedTimeFrame by viewModel.timeFrame.collectAsState()
-    val data = state.environmentMetricsFiltered(selectedTimeFrame)
+    val data = environmentState.environmentMetricsFiltered(selectedTimeFrame)
 
     /* Convert Celsius to Fahrenheit */
     @Suppress("MagicNumber")

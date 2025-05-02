@@ -71,7 +71,6 @@ data class MetricsState(
     val displayUnits: DisplayUnits = DisplayUnits.METRIC,
     val node: Node? = null,
     val deviceMetrics: List<Telemetry> = emptyList(),
-    val environmentMetrics: List<Telemetry> = emptyList(),
     val signalMetrics: List<MeshPacket> = emptyList(),
     val powerMetrics: List<Telemetry> = emptyList(),
     val tracerouteRequests: List<MeshLog> = emptyList(),
@@ -80,7 +79,6 @@ data class MetricsState(
     val deviceHardware: DeviceHardware? = null,
 ) {
     fun hasDeviceMetrics() = deviceMetrics.isNotEmpty()
-    fun hasEnvironmentMetrics() = environmentMetrics.isNotEmpty()
     fun hasSignalMetrics() = signalMetrics.isNotEmpty()
     fun hasPowerMetrics() = powerMetrics.isNotEmpty()
     fun hasTracerouteLogs() = tracerouteRequests.isNotEmpty()
@@ -89,11 +87,6 @@ data class MetricsState(
     fun deviceMetricsFiltered(timeFrame: TimeFrame): List<Telemetry> {
         val oldestTime = timeFrame.calculateOldestTime()
         return deviceMetrics.filter { it.time >= oldestTime }
-    }
-
-    fun environmentMetricsFiltered(timeFrame: TimeFrame): List<Telemetry> {
-        val oldestTime = timeFrame.calculateOldestTime()
-        return environmentMetrics.filter { it.time >= oldestTime }
     }
 
     fun signalMetricsFiltered(timeFrame: TimeFrame): List<MeshPacket> {
@@ -108,6 +101,17 @@ data class MetricsState(
 
     companion object {
         val Empty = MetricsState()
+    }
+}
+
+data class EnvironmentMetricsState(
+    val environmentMetrics: List<Telemetry> = emptyList(),
+) {
+    fun hasEnvironmentMetrics() = environmentMetrics.isNotEmpty()
+
+    fun environmentMetricsFiltered(timeFrame: TimeFrame): List<Telemetry> {
+        val oldestTime = timeFrame.calculateOldestTime()
+        return environmentMetrics.filter { it.time >= oldestTime }
     }
 }
 
@@ -217,6 +221,9 @@ class MetricsViewModel @Inject constructor(
     private val _state = MutableStateFlow(MetricsState.Empty)
     val state: StateFlow<MetricsState> = _state
 
+    private val _envState = MutableStateFlow(EnvironmentMetricsState())
+    val environmentState: StateFlow<EnvironmentMetricsState> = _envState
+
     private val _timeFrame = MutableStateFlow(TimeFrame.TWENTY_FOUR_HOURS)
     val timeFrame: StateFlow<TimeFrame> = _timeFrame
 
@@ -250,12 +257,16 @@ class MetricsViewModel @Inject constructor(
             _state.update { state ->
                 state.copy(
                     deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
+                    powerMetrics = telemetry.filter { it.hasPowerMetrics() }
+                )
+            }
+            _envState.update { state ->
+                state.copy(
                     environmentMetrics = telemetry.filter {
                         it.hasEnvironmentMetrics() &&
                         it.environmentMetrics.relativeHumidity >= 0f &&
                         !it.environmentMetrics.temperature.isNaN()
                     },
-                    powerMetrics = telemetry.filter { it.hasPowerMetrics() }
                 )
             }
         }.launchIn(viewModelScope)

@@ -128,14 +128,15 @@ fun NodeDetailScreen(
     onNavigate: (Route) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
 
     /* The order is with respect to the enum above: LogsType */
-    val t = remember(key1 = state) {
+    val availabilities = remember(key1 = state, key2 = environmentState) {
         booleanArrayOf(
             state.hasDeviceMetrics(),
             state.hasPositionLogs(),
             state.hasPositionLogs(),
-            state.hasEnvironmentMetrics(),
+            environmentState.hasEnvironmentMetrics(),
             state.hasSignalMetrics(),
             state.hasPowerMetrics(),
             state.hasTracerouteLogs())
@@ -148,7 +149,7 @@ fun NodeDetailScreen(
             metricsState = state,
             onNavigate = onNavigate,
             modifier = modifier,
-            metricsAvailability = t
+            metricsAvailability = availabilities
         )
     } else {
         Box(
