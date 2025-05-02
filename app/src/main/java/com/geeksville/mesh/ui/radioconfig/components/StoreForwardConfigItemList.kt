@@ -77,7 +77,7 @@ fun StoreForwardConfigItemList(
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        item { PreferenceCategory(text = "Store & Forward Config") }
+        item { PreferenceCategory(text = stringResource(R.string.store_forward_config)) }
 
         item {
             SwitchPreference(

@@ -466,14 +466,14 @@ private fun EnvironmentMetrics(
         if (hasTemperature()) {
             InfoCard(
                 icon = Icons.Default.Thermostat,
-                text = "Temperature",
+                text = stringResource(R.string.temperature),
                 value = temperature.toTempString(isFahrenheit)
             )
         }
         if (hasRelativeHumidity()) {
             InfoCard(
                 icon = Icons.Default.WaterDrop,
-                text = "Humidity",
+                text = stringResource(R.string.humidity),
                 value = "%.0f%%".format(relativeHumidity)
             )
         }
@@ -481,56 +481,56 @@ private fun EnvironmentMetrics(
             val dewPoint = calculateDewPoint(temperature, relativeHumidity)
             InfoCard(
                 icon = ImageVector.vectorResource(R.drawable.ic_outlined_dew_point_24),
-                text = "Dew Point",
+                text = stringResource(R.string.dew_point),
                 value = dewPoint.toTempString(isFahrenheit)
             )
         }
         if (hasBarometricPressure()) {
             InfoCard(
                 icon = Icons.Default.Speed,
-                text = "Pressure",
+                text = stringResource(R.string.pressure),
                 value = "%.0f hPa".format(barometricPressure)
             )
         }
         if (hasGasResistance()) {
             InfoCard(
                 icon = Icons.Default.BlurOn,
-                text = "Gas Resistance",
+                text = stringResource(R.string.gas_resistance),
                 value = "%.0f MΩ".format(gasResistance)
             )
         }
         if (hasVoltage()) {
             InfoCard(
                 icon = Icons.Default.Bolt,
-                text = "Voltage",
+                text = stringResource(R.string.voltage),
                 value = "%.2fV".format(voltage)
             )
         }
         if (hasCurrent()) {
             InfoCard(
                 icon = Icons.Default.Power,
-                text = "Current",
+                text = stringResource(R.string.current),
                 value = "%.1fmA".format(current)
             )
         }
         if (hasIaq()) {
             InfoCard(
                 icon = Icons.Default.Air,
-                text = "IAQ",
+                text = stringResource(R.string.iaq),
                 value = iaq.toString()
             )
         }
         if (hasDistance()) {
             InfoCard(
                 icon = Icons.Default.Height,
-                text = "Distance",
+                text = stringResource(R.string.distance),
                 value = "%.0f mm".format(distance)
             )
         }
         if (hasLux()) {
             InfoCard(
                 icon = Icons.Default.LightMode,
-                text = "Lux",
+                text = stringResource(R.string.lux),
                 value = "%.0f lx".format(lux)
             )
         }
@@ -539,7 +539,7 @@ private fun EnvironmentMetrics(
             val normalizedBearing = (windDirection % 360 + 360) % 360
             InfoCard(
                 icon = Icons.Outlined.Navigation,
-                text = "Wind",
+                text = stringResource(R.string.wind),
                 value = windSpeed.toSpeedString(),
                 rotateIcon = normalizedBearing.toFloat(),
             )
@@ -547,14 +547,14 @@ private fun EnvironmentMetrics(
         if (hasWeight()) {
             InfoCard(
                 icon = Icons.Default.Scale,
-                text = "Weight",
+                text = stringResource(R.string.weight),
                 value = "%.2f kg".format(weight)
             )
         }
         if (hasRadiation()) {
             InfoCard(
                 icon = ImageVector.vectorResource(R.drawable.ic_filled_radioactive_24),
-                text = "Radiation",
+                text = stringResource(R.string.radiation),
                 value = "%.1f µR/h".format(radiation)
             )
         }
@@ -595,12 +595,12 @@ private fun PowerMetrics(node: Node) = with(node.powerMetrics) {
             Column {
                 InfoCard(
                     icon = Icons.Default.Bolt,
-                    text = "Channel 1",
+                    text = stringResource(R.string.channel_1),
                     value = "%.2fV".format(ch1Voltage)
                 )
                 InfoCard(
                     icon = Icons.Default.Power,
-                    text = "Channel 1",
+                    text = stringResource(R.string.channel_1),
                     value = "%.1fmA".format(ch1Current)
                 )
             }
@@ -609,12 +609,12 @@ private fun PowerMetrics(node: Node) = with(node.powerMetrics) {
             Column {
                 InfoCard(
                     icon = Icons.Default.Bolt,
-                    text = "Channel 2",
+                    text = stringResource(R.string.channel_2),
                     value = "%.2fV".format(ch2Voltage)
                 )
                 InfoCard(
                     icon = Icons.Default.Power,
-                    text = "Channel 2",
+                    text = stringResource(R.string.channel_2),
                     value = "%.1fmA".format(ch2Current)
                 )
             }
@@ -623,12 +623,12 @@ private fun PowerMetrics(node: Node) = with(node.powerMetrics) {
             Column {
                 InfoCard(
                     icon = Icons.Default.Bolt,
-                    text = "Channel 3",
+                    text = stringResource(R.string.channel_3),
                     value = "%.2fV".format(ch3Voltage)
                 )
                 InfoCard(
                     icon = Icons.Default.Power,
-                    text = "Channel 3",
+                    text = stringResource(R.string.channel_3),
                     value = "%.1fmA".format(ch3Current)
                 )
             }

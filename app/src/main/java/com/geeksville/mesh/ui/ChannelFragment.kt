@@ -439,7 +439,7 @@ private fun EditChannelUrl(
         },
         modifier = modifier.fillMaxWidth(),
         enabled = enabled,
-        label = { Text("URL") },
+        label = { Text(stringResource(R.string.url)) },
         isError = isError,
         trailingIcon = {
             val isUrlEqual = valueState == channelUrl
