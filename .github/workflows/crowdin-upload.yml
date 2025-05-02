@@ -1,0 +1,28 @@
+name: Crowdin Upload Sources Action
+
+on:
+  push:                  # Watch source strings.xml for changes on master
+    paths: [ 'app/src/main/res/values/strings.xml' ]
+    branches: [ master ]
+  workflow_dispatch:     # Allow manual triggering
+
+jobs:
+  synchronize-with-crowdin:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Upload sources with Crowdin
+        uses: crowdin/github-action@v2
+        with:
+          base_url: 'https://meshtastic.crowdin.com/api/v2'
+          config: 'config/crowdin/crowdin.yml'
+          upload_sources: true
+          upload_translations: false
+          download_translations: false
+          crowdin_branch_name: 'master'
+        env:
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
