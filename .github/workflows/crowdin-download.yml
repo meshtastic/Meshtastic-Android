@@ -1,8 +1,8 @@
-name: Crowdin Action
+name: Crowdin Download Translations Action
 
 on:
-  push:
-    branches: [ master ]
+  schedule:              # Every Sunday at midnight
+    - cron: '0 0 * * 0'
   workflow_dispatch:     # Allow manual triggering
 
 jobs:
@@ -13,12 +13,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Synchronize with Crowdin
+      - name: Download translations with Crowdin
         uses: crowdin/github-action@v2
         with:
           base_url: 'https://meshtastic.crowdin.com/api/v2'
           config: 'config/crowdin/crowdin.yml'
-          upload_sources: true
+          upload_sources: false
           upload_translations: false
           download_translations: true
           localization_branch_name: l10n_crowdin_translations
@@ -30,11 +30,6 @@ jobs:
           pull_request_labels: 'l10n'
           crowdin_branch_name: 'master'
         env:
-          # A classic GitHub Personal Access Token with the 'repo' scope selected (the user should have write access to the repository).
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-          # A numeric ID, found at https://crowdin.com/project/<projectName>/tools/api
           CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
-
-          # Visit https://crowdin.com/settings#api-key to create this token
           CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}
