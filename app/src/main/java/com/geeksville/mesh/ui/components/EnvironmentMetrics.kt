@@ -46,7 +46,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
@@ -58,39 +57,15 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.copy
+import com.geeksville.mesh.model.Environment
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
-import com.geeksville.mesh.ui.theme.InfantryBlue
-import com.geeksville.mesh.ui.theme.Orange
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.drawPathWithGradient
 
-private enum class Environment(val color: Color, var shouldPlot: Boolean = false) {
-    TEMPERATURE(Color.Red) {
-        override fun getValue(telemetry: Telemetry): Float {
-            return telemetry.environmentMetrics.temperature
-        }
-    },
-    HUMIDITY(InfantryBlue) {
-        override fun getValue(telemetry: Telemetry): Float {
-            return telemetry.environmentMetrics.relativeHumidity
-        }
-    },
-    IAQ(Color.Green) {
-        override fun getValue(telemetry: Telemetry): Float {
-            return telemetry.environmentMetrics.iaq.toFloat()
-        }
-    },
-    BAROMETRIC_PRESSURE(Orange) {
-        override fun getValue(telemetry: Telemetry): Float {
-            return telemetry.environmentMetrics.barometricPressure
-        }
-    };
 
-    abstract fun getValue(telemetry: Telemetry): Float
-}
 private val LEGEND_DATA_1 = listOf(
     LegendData(
         nameRes = R.string.temperature,
@@ -123,7 +98,7 @@ fun EnvironmentMetricsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
     val selectedTimeFrame by viewModel.timeFrame.collectAsState()
-    val data = environmentState.environmentMetricsFiltered(selectedTimeFrame)
+    val (data, shouldPlot, minMaxes) = environmentState.environmentMetricsFiltered(selectedTimeFrame)
 
     /* Convert Celsius to Fahrenheit */
     @Suppress("MagicNumber")
@@ -162,6 +137,8 @@ fun EnvironmentMetricsScreen(
                 .fillMaxWidth()
                 .fillMaxHeight(fraction = 0.33f),
             telemetries = processedTelemetries.reversed(),
+            shouldPlot,
+            minMaxes,
             selectedTimeFrame,
             promptInfoDialog = { displayInfoDialog = true }
         )
@@ -188,11 +165,17 @@ fun EnvironmentMetricsScreen(
     }
 }
 
-@Suppress("LongMethod", "CyclomaticComplexMethod", "ComplexCondition")
+/**
+ * @param minMaxes [Pair] containing two others with the first being the min and max of the right
+ * side of the graph, the second are the left side of the graph.
+ */
+@Suppress("LongMethod", "LongParameterList")
 @Composable
 private fun EnvironmentMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
+    shouldPlot: BooleanArray,
+    minMaxes: Pair<Pair<Float, Float>, Pair<Float, Float>>,
     selectedTime: TimeFrame,
     promptInfoDialog: () -> Unit
 ) {
@@ -217,65 +200,10 @@ private fun EnvironmentMetricsChart(
 
     val graphColor = MaterialTheme.colors.onSurface
 
-    /* Grab the combined min and max for temp, humidity, and iaq. */
-    val minValues = mutableListOf<Float>()
-    val maxValues = mutableListOf<Float>()
-    val (minTemp, maxTemp) = remember(key1 = telemetries) {
-        Pair(
-            telemetries.minBy { it.environmentMetrics.temperature },
-            telemetries.maxBy { it.environmentMetrics.temperature }
-        )
-    }
-    if (minTemp.environmentMetrics.temperature != 0f || maxTemp.environmentMetrics.temperature != 0f) {
-        minValues.add(minTemp.environmentMetrics.temperature)
-        maxValues.add(maxTemp.environmentMetrics.temperature)
-        Environment.TEMPERATURE.shouldPlot = true
-    }
-
-    val (minHumidity, maxHumidity) = remember(key1 = telemetries) {
-        Pair(
-            telemetries.minBy { it.environmentMetrics.relativeHumidity },
-            telemetries.maxBy { it.environmentMetrics.relativeHumidity }
-        )
-    }
-    if (minHumidity.environmentMetrics.relativeHumidity != 0f ||
-        maxHumidity.environmentMetrics.relativeHumidity != 0f) {
-        minValues.add(minHumidity.environmentMetrics.relativeHumidity)
-        maxValues.add(maxHumidity.environmentMetrics.relativeHumidity)
-        Environment.HUMIDITY.shouldPlot = true
-    }
-
-    val (minIAQ, maxIAQ) = remember(key1 = telemetries) {
-        Pair(
-            telemetries.minBy { it.environmentMetrics.iaq },
-            telemetries.maxBy { it.environmentMetrics.iaq }
-        )
-    }
-    if (minIAQ.environmentMetrics.iaq != 0 || maxIAQ.environmentMetrics.iaq != 0) {
-        minValues.add(minIAQ.environmentMetrics.iaq.toFloat())
-        maxValues.add(maxIAQ.environmentMetrics.iaq.toFloat())
-        Environment.IAQ.shouldPlot = true
-    }
-
-    var min = minValues.minOf { it }
-    val rightLabelsMin = min
-    val max = maxValues.maxOf { it }
-    var diff = max - min
-
-    val (minPressure, maxPressure) = remember(key1 = telemetries) {
-        Pair(
-            telemetries.minBy { it.environmentMetrics.barometricPressure },
-            telemetries.maxBy { it.environmentMetrics.barometricPressure }
-        )
-    }
-    var plotPressure = false
-    val pressureDiff =
-        maxPressure.environmentMetrics.barometricPressure - minPressure.environmentMetrics.barometricPressure
-    if (minPressure.environmentMetrics.barometricPressure != 0.0F &&
-        maxPressure.environmentMetrics.barometricPressure != 0.0F) {
-        plotPressure = true
-        Environment.BAROMETRIC_PRESSURE.shouldPlot = true
-    }
+    val (rightMin, rightMax) = minMaxes.first
+    val (pressureMin, pressureMax) = minMaxes.second
+    var min = rightMin
+    var diff = rightMax - rightMin
 
     val scrollState = rememberScrollState()
     val screenWidth = LocalConfiguration.current.screenWidthDp
@@ -284,12 +212,12 @@ private fun EnvironmentMetricsChart(
     }
 
     Row {
-        if (plotPressure) {
+        if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
             YAxisLabels(
                 modifier = modifier.weight(weight = .1f),
                 Environment.BAROMETRIC_PRESSURE.color,
-                minValue = minPressure.environmentMetrics.barometricPressure,
-                maxValue = maxPressure.environmentMetrics.barometricPressure
+                minValue = pressureMin,
+                maxValue = pressureMax
             )
         }
         Box(
@@ -319,12 +247,12 @@ private fun EnvironmentMetricsChart(
                 var first: Int
                 for (metric in Environment.entries) {
 
-                    if (!metric.shouldPlot) {
+                    if (!shouldPlot[metric.ordinal]) {
                         continue
                     }
                     if (metric == Environment.BAROMETRIC_PRESSURE) {
-                        diff = pressureDiff
-                        min = minPressure.environmentMetrics.barometricPressure
+                        diff = pressureMax - pressureMin
+                        min = pressureMin
                     }
                     index = 0
                     while (index < telemetries.size) {
@@ -358,8 +286,8 @@ private fun EnvironmentMetricsChart(
         YAxisLabels(
             modifier = modifier.weight(weight = .1f),
             graphColor,
-            minValue = rightLabelsMin,
-            maxValue = max
+            minValue = rightMin,
+            maxValue = rightMax
         )
     }
 

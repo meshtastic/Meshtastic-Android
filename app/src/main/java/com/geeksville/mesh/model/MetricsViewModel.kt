@@ -104,17 +104,6 @@ data class MetricsState(
     }
 }
 
-data class EnvironmentMetricsState(
-    val environmentMetrics: List<Telemetry> = emptyList(),
-) {
-    fun hasEnvironmentMetrics() = environmentMetrics.isNotEmpty()
-
-    fun environmentMetricsFiltered(timeFrame: TimeFrame): List<Telemetry> {
-        val oldestTime = timeFrame.calculateOldestTime()
-        return environmentMetrics.filter { it.time >= oldestTime }
-    }
-}
-
 /**
  * Supported time frames used to display data.
  */
