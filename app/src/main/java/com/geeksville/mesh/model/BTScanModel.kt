@@ -22,13 +22,14 @@ import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.hardware.usb.UsbManager
+import android.net.nsd.NsdServiceInfo
+import android.os.Build
 import android.os.RemoteException
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.model.BTScanModel.DeviceListEntry
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.repository.network.NetworkRepository.Companion.toAddressString
@@ -41,12 +42,35 @@ import com.geeksville.mesh.util.anonymize
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import javax.inject.Inject
+
+sealed class ScanEffect {
+    object RequestBluetoothPermission : ScanEffect()
+    object ShowBluetoothIsDisabled : ScanEffect()
+    object RequestForCheckLocationPermission : ScanEffect()
+}
+
+const val SCAN_PERIOD: Long = 10000 // Stops scanning after 10 seconds
+
+data class UIState(
+    val devices: Map<String, DeviceListEntry>,
+    val errorText: String?,
+    val statusMessage: String?,
+    val scanning: Boolean,
+    val scanResult: Map<String, DeviceListEntry>,
+    val showScanResults: Boolean,
+)
 
 @HiltViewModel
 class BTScanModel @Inject constructor(
@@ -59,9 +83,13 @@ class BTScanModel @Inject constructor(
     private val radioInterfaceService: RadioInterfaceService,
 ) : ViewModel(), Logging {
 
+    private val _effect = MutableSharedFlow<ScanEffect>()
+    val effect = _effect.asSharedFlow()
+
+    private val _uiState = MutableStateFlow(UIState(emptyMap(), null, null, false, emptyMap(), false))
+    val uiState = _uiState.asStateFlow()
+
     private val context: Context get() = application.applicationContext
-    val devices = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
-    val errorText = MutableLiveData<String?>(null)
 
     private val showMockInterface = MutableStateFlow(radioInterfaceService.isMockInterface)
 
@@ -76,33 +104,43 @@ class BTScanModel @Inject constructor(
             usbRepository.serialDevicesWithDrivers,
             showMockInterface,
         ) { ble, tcp, usb, showMockInterface ->
-            devices.value = mutableMapOf<String, DeviceListEntry>().apply {
-                fun addDevice(entry: DeviceListEntry) { this[entry.fullAddress] = entry }
-
-                // Include a placeholder for "None"
-                addDevice(DeviceListEntry(context.getString(R.string.none), "n", true))
-
-                if (showMockInterface) {
-                    addDevice(DeviceListEntry("Demo Mode", "m", true))
+            fun addDevice(entry: DeviceListEntry) {
+                _uiState.update { state ->
+                    val newDevices = state.devices.toMutableMap()
+                    newDevices[entry.fullAddress] = entry
+                    state.copy(devices = newDevices)
                 }
+            }
 
-                // Include paired Bluetooth devices
-                ble.bondedDevices.map(::BLEDeviceListEntry).sortedBy { it.name }.forEach(::addDevice)
+            // Include a placeholder for "None"
+            addDevice(DeviceListEntry(context.getString(R.string.none), "n", true))
 
+            if (showMockInterface) {
+                addDevice(DeviceListEntry("Demo Mode", "m", true))
+            }
+
+            // Include paired Bluetooth devices
+            ble.bondedDevices.map(::BLEDeviceListEntry).sortedBy { it.name }.forEach {
+                addDevice(it)
+            }
+
+            // Include Network Service Discovery
+            tcp.forEach { service ->
+                addDevice(TCPDeviceListEntry(service))
+            }
                 // Include Network Service Discovery
                 tcp.forEach { service ->
                     val address = service.toAddressString()
                     addDevice(DeviceListEntry(address, "t$address", true))
                 }
 
-                usb.forEach { (_, d) ->
-                    addDevice(USBDeviceListEntry(radioInterfaceService, usbManagerLazy.get(), d))
-                }
+            usb.forEach { (_, d) ->
+                addDevice(USBDeviceListEntry(radioInterfaceService, usbManagerLazy.get(), d))
             }
         }.launchIn(viewModelScope)
 
         serviceRepository.statusMessage
-            .onEach { errorText.value = it }
+            .onEach { _uiState.emit(uiState.value.copy(statusMessage = it)) }
             .launchIn(viewModelScope)
 
         debug("BTScanModel created")
@@ -146,9 +184,6 @@ class BTScanModel @Inject constructor(
         debug("BTScanModel cleared")
     }
 
-    fun setErrorText(text: String) {
-        errorText.value = text
-    }
 
     private var scanJob: Job? = null
 
@@ -158,14 +193,14 @@ class BTScanModel @Inject constructor(
     /// Use the string for the NopInterface
     val selectedNotNull: String get() = selectedAddress ?: "n"
 
-    val scanResult = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
-
-    fun clearScanResults() {
+    suspend fun clearScanResults() {
         stopScan()
-        scanResult.value = mutableMapOf()
+        _uiState.update {
+            it.copy(scanResult = emptyMap())
+        }
     }
 
-    fun stopScan() {
+    private suspend fun stopScan() {
         if (scanJob != null) {
             debug("stopping scan")
             try {
@@ -176,33 +211,34 @@ class BTScanModel @Inject constructor(
                 scanJob = null
             }
         }
-        _spinner.value = false
+        _uiState.emit(uiState.value.copy(scanning = false))
     }
 
     @SuppressLint("MissingPermission")
-    fun startScan() {
+    private suspend fun startScan() {
         debug("starting classic scan")
 
-        _spinner.value = true
+        clearScanResults()
+        _uiState.emit(uiState.value.copy(scanning = true))
         scanJob = bluetoothRepository.scan()
             .onEach { result ->
-            val fullAddress = radioInterfaceService.toInterfaceAddress(
-                InterfaceId.BLUETOOTH,
-                result.device.address
-            )
-            // prevent log spam because we'll get lots of redundant scan results
-            val isBonded = result.device.bondState == BluetoothDevice.BOND_BONDED
-            val oldDevs = scanResult.value!!
-            val oldEntry = oldDevs[fullAddress]
-            // Don't spam the GUI with endless updates for non changing nodes
-            if (oldEntry == null || oldEntry.bonded != isBonded) {
-                val entry = DeviceListEntry(result.device.name, fullAddress, isBonded)
-                oldDevs[entry.fullAddress] = entry
-                scanResult.value = oldDevs
-            }
-        }.catch { ex ->
-            serviceRepository.setErrorMessage("Unexpected Bluetooth scan failure: ${ex.message}")
-        }.launchIn(viewModelScope)
+                val fullAddress = radioInterfaceService.toInterfaceAddress(
+                    InterfaceId.BLUETOOTH,
+                    result.device.address
+                )
+                val isBonded = result.device.bondState == BluetoothDevice.BOND_BONDED
+                // prevent log spam because we'll get lots of redundant scan results
+                if (!uiState.value.devices.containsKey(fullAddress) ) {
+                    val device = DeviceListEntry(result.device.name, fullAddress, isBonded)
+                    _uiState.update {
+                        it.copy(
+                            scanResult = uiState.value.scanResult + (device.fullAddress to device)
+                        )
+                    }
+                }
+            }.catch { ex ->
+                serviceRepository.setErrorMessage("Unexpected Bluetooth scan failure: ${ex.message}")
+            }.launchIn(viewModelScope)
     }
 
     private fun changeDeviceAddress(address: String) {
@@ -210,10 +246,31 @@ class BTScanModel @Inject constructor(
             serviceRepository.meshService?.let { service ->
                 MeshService.changeDeviceAddress(context, service, address)
             }
-            devices.value = devices.value // Force a GUI update
         } catch (ex: RemoteException) {
             errormsg("changeDeviceSelection failed, probably it is shutting down", ex)
             // ignore the failure and the GUI won't be updating anyways
+        }
+    }
+
+    fun scanForDevices() {
+        var job: Job? = null
+        job = viewModelScope.launch {
+            bluetoothRepository.state.value.let { state ->
+                // Bluetooth is disabled on user phone, proceed no further and let them know
+                if (!state.enabled) {
+                    _effect.emit(ScanEffect.ShowBluetoothIsDisabled)
+                    job?.cancel()
+                }
+            }
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
+                _effect.emit(ScanEffect.RequestForCheckLocationPermission)
+            }
+            startScan()
+            delay(SCAN_PERIOD)
+            stopScan()
+            if (uiState.value.scanResult.isNotEmpty()) {
+                _uiState.emit(uiState.value.copy(showScanResults = true))
+            }
         }
     }
 
@@ -228,10 +285,10 @@ class BTScanModel @Inject constructor(
                 if (state != BluetoothDevice.BOND_BONDING) {
                     debug("Bonding completed, state=$state")
                     if (state == BluetoothDevice.BOND_BONDED) {
-                        setErrorText(context.getString(R.string.pairing_completed))
+                        _uiState.emit(uiState.value.copy(errorText = context.getString(R.string.pairing_completed)))
                         changeDeviceAddress(it.fullAddress)
                     } else {
-                        setErrorText(context.getString(R.string.pairing_failed_try_again))
+                        _uiState.emit(uiState.value.copy(errorText = context.getString(R.string.pairing_failed_try_again)))
                     }
                 }
             }.catch { ex ->
@@ -275,6 +332,9 @@ class BTScanModel @Inject constructor(
         }
     }
 
-    private val _spinner = MutableLiveData(false)
-    val spinner: LiveData<Boolean> get() = _spinner
+    fun onDismissScanResults() {
+        viewModelScope.launch {
+            _uiState.emit(uiState.value.copy(showScanResults = false))
+        }
+    }
 }
