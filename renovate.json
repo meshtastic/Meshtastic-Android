@@ -14,5 +14,19 @@
   ],
   "git-submodules": {
     "enabled": true
-  }
+  },
+  "packageRules": [
+    {
+      "matchPackageNames": [
+        "https://github.com/meshtastic/protobufs.git"
+      ],
+      "changelogUrl": "https://github.com/meshtastic/protobufs/compare/{{currentDigest}}...{{newDigest}}"
+    },
+    {
+      "matchPackageNames": [
+        "https://github.com/meshtastic/design.git"
+      ],
+      "changelogUrl": "https://github.com/meshtastic/design/compare/{{currentDigest}}...{{newDigest}}"
+    }
+  ]
 }
