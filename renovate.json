@@ -11,5 +11,8 @@
   "commitMessageTopic": "{{depName}}",
   "labels": [
     "dependencies"
-  ]
+  ],
+  "git-submodules": {
+    "enabled": true
+  }
 }
