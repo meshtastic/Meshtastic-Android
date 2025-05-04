@@ -65,7 +65,6 @@ import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.drawPathWithGradient
 
-
 private val LEGEND_DATA_1 = listOf(
     LegendData(
         nameRes = R.string.temperature,
