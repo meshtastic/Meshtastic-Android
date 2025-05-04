@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="main_tab_channel">kanal</string>
     <string name="node_filter_placeholder">Filtre</string>
     <string name="desc_node_filter_clear">klarifye filtè nœud</string>
     <string name="node_filter_include_unknown">Enkli enkoni</string>
     <string name="node_filter_show_details">Montre detay</string>
-    <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">kanal</string>
     <string name="node_sort_distance">Distans</string>
     <string name="node_sort_hops_away">Sote lwen</string>
@@ -80,7 +80,6 @@
     <string name="share">Pataje</string>
     <string name="disconnected">Dekonekte</string>
     <string name="device_sleeping">Aparèy ap dòmi</string>
-    <string name="connected_count">Konekte: %1$s nan %2$s disponib</string>
     <string name="update_firmware">Mete ajou mikrolojisyèl</string>
     <string name="ip_address">Adrès IP:</string>
     <string name="connected">Konekte ak radyo</string>
@@ -164,7 +163,6 @@
     <string name="shutdown">Fèmen</string>
     <string name="cant_shutdown">Fèmen pa sipòte sou aparèy sa a</string>
     <string name="reboot">Rekòmanse</string>
-    <string name="traceroute">Traceroute</string>
     <string name="intro_show">Montre entwodiksyon</string>
     <string name="intro_welcome">Byenveni nan Meshtastic</string>
     <string name="intro_welcome_text">Meshtastic se yon platfòm kominikasyon chifreman, sous louvri, san rezo. Radyo Meshtastic yo fòme yon rezo mesh epi yo kominike itilize pwotokòl LoRa pou voye mesaj tèks.</string>
@@ -193,7 +191,6 @@
     <string name="map_select_download_region">Chwazi rejyon telechajman</string>
     <string name="map_tile_download_estimate">Estimasyon telechajman tèk</string>
     <string name="map_start_download">Kòmanse telechajman</string>
-    <string name="exchange_position">Mande pozisyon</string>
     <string name="close">Fèmen</string>
     <string name="device_settings">Konfigirasyon radyo</string>
     <string name="module_settings">Konfigirasyon modil</string>
@@ -238,19 +235,15 @@
     <string name="info">Enfòmasyon</string>
     <string name="ch_util_definition">Itilizasyon pou kanal aktyèl la, ki enkli TX, RX byen fòme ak RX mal fòme (sa yo rele bri).</string>
     <string name="air_util_definition">Pousantaj tan lè transmisyon te itilize nan dènye èdtan an.</string>
-    <string name="iaq">IAQ</string>
     <string name="encryption_psk">Kle Pataje</string>
     <string name="encryption_psk_text">Mesaj dirèk yo ap itilize kle pataje pou kanal la.</string>
     <string name="encryption_pkc">Chifreman Kle Piblik</string>
     <string name="encryption_pkc_text">Mesaj dirèk yo ap itilize nouvo enfrastrikti kle piblik pou chifreman. Sa mande vèsyon lojisyèl 2.5 oswa plis.</string>
     <string name="encryption_error">Pa matche kle piblik</string>
     <string name="encryption_error_text">Kle piblik la pa matche ak kle anrejistre a. Ou ka retire nœud la e kite li echanje kle ankò, men sa ka endike yon pwoblèm sekirite pi grav. Kontakte itilizatè a atravè yon lòt chanèl ki fè konfyans, pou detèmine si chanjman kle a te fèt akòz yon reyajisteman faktori oswa lòt aksyon entansyonèl.</string>
-    <string name="exchange_userinfo">Mande enfòmasyon itilizatè</string>
     <string name="meshtastic_new_nodes_notifications">Notifikasyon nouvo nœud</string>
     <string name="more_details">Plis detay</string>
-    <string name="snr">SNR</string>
     <string name="snr_definition">Rapò Siynal sou Bri, yon mezi ki itilize nan kominikasyon pou mezire nivo siynal vle a kont nivo bri ki nan anviwònman an. Nan Meshtastic ak lòt sistèm san fil, yon SNR pi wo endike yon siynal pi klè ki ka amelyore fyab ak kalite transmisyon done.</string>
-    <string name="rssi">RSSI</string>
     <string name="rssi_definition">Endikatè Fòs Siynal Resevwa, yon mezi ki itilize pou detèmine nivo pouvwa siynal ki resevwa pa antèn nan. Yon RSSI pi wo jeneralman endike yon koneksyon pi fò ak plis estab.</string>
     <string name="iaq_definition">(Kalite Lèy Entèryè) echèl relatif valè IAQ jan li mezire pa Bosch BME680. Ranje valè 0–500.</string>
     <string name="device_metrics_log">Jounal Metik Aparèy</string>
@@ -268,9 +261,6 @@
     <string name="signal_quality">Kalite Siynal</string>
     <string name="traceroute_log">Jounal Traceroute</string>
     <string name="traceroute_direct">Direk</string>
-    <plurals name="traceroute_hops">
-        <item quantity="one">1 hop</item>
-        <item quantity="other">%d hops</item>
-    </plurals>
     <string name="traceroute_diff">Hops vèsus %1$d Hops tounen %2$d</string>
+    <string name="timeout">Tan pase</string>
 </resources>

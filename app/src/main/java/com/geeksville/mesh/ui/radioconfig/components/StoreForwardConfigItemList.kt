@@ -28,10 +28,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.StoreForwardConfig
+import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.ui.components.EditTextPreference
@@ -75,60 +77,71 @@ fun StoreForwardConfigItemList(
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        item { PreferenceCategory(text = "Store & Forward Config") }
+        item { PreferenceCategory(text = stringResource(R.string.store_forward_config)) }
 
         item {
-            SwitchPreference(title = "Store & Forward enabled",
+            SwitchPreference(
+                title = stringResource(R.string.store_forward_enabled),
                 checked = storeForwardInput.enabled,
                 enabled = enabled,
                 onCheckedChange = {
                     storeForwardInput = storeForwardInput.copy { this.enabled = it }
-                })
+                }
+            )
         }
         item { Divider() }
 
         item {
-            SwitchPreference(title = "Heartbeat",
+            SwitchPreference(
+                title = stringResource(R.string.heartbeat),
                 checked = storeForwardInput.heartbeat,
                 enabled = enabled,
-                onCheckedChange = { storeForwardInput = storeForwardInput.copy { heartbeat = it } })
+                onCheckedChange = { storeForwardInput = storeForwardInput.copy { heartbeat = it } }
+            )
         }
         item { Divider() }
 
         item {
-            EditTextPreference(title = "Number of records",
+            EditTextPreference(
+                title = stringResource(R.string.number_of_records),
                 value = storeForwardInput.records,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { storeForwardInput = storeForwardInput.copy { records = it } })
+                onValueChanged = { storeForwardInput = storeForwardInput.copy { records = it } }
+            )
         }
 
         item {
-            EditTextPreference(title = "History return max",
+            EditTextPreference(
+                title = stringResource(R.string.history_return_max),
                 value = storeForwardInput.historyReturnMax,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     storeForwardInput = storeForwardInput.copy { historyReturnMax = it }
-                })
+                }
+            )
         }
 
         item {
-            EditTextPreference(title = "History return window",
+            EditTextPreference(
+                title = stringResource(R.string.history_return_window),
                 value = storeForwardInput.historyReturnWindow,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     storeForwardInput = storeForwardInput.copy { historyReturnWindow = it }
-                })
+                }
+            )
         }
 
         item {
             SwitchPreference(
-                title = "Server",
+                title = stringResource(R.string.server),
                 checked = storeForwardInput.isServer,
                 enabled = enabled,
-                onCheckedChange = { storeForwardInput = storeForwardInput.copy { isServer = it } })
+                onCheckedChange = { storeForwardInput = storeForwardInput.copy { isServer = it } }
+            )
         }
         item { Divider() }
 

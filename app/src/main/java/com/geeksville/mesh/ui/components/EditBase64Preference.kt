@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.ui.components
 
-import android.util.Base64
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
@@ -47,22 +46,23 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Channel
+import com.geeksville.mesh.util.encodeToString
+import com.geeksville.mesh.util.toByteString
 import com.google.protobuf.ByteString
-import com.google.protobuf.kotlin.toByteString
 
+@Suppress("LongMethod")
 @Composable
 fun EditBase64Preference(
+    modifier: Modifier = Modifier,
     title: String,
     value: ByteString,
     enabled: Boolean,
+    readOnly: Boolean = false,
     keyboardActions: KeyboardActions,
     onValueChange: (ByteString) -> Unit,
-    modifier: Modifier = Modifier,
     onGenerateKey: (() -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
 ) {
-    fun ByteString.encodeToString() = Base64.encodeToString(this.toByteArray(), Base64.NO_WRAP)
-    fun String.toByteString() = Base64.decode(this, Base64.NO_WRAP).toByteString()
 
     var valueState by remember { mutableStateOf(value.encodeToString()) }
     val isError = value.encodeToString() != valueState
@@ -91,6 +91,7 @@ fun EditBase64Preference(
             .fillMaxWidth()
             .onFocusChanged { focusState -> isFocused = focusState.isFocused },
         enabled = enabled,
+        readOnly = readOnly,
         label = { Text(text = title) },
         isError = isError,
         keyboardOptions = KeyboardOptions.Default.copy(
@@ -98,9 +99,7 @@ fun EditBase64Preference(
         ),
         keyboardActions = keyboardActions,
         trailingIcon = {
-            if (trailingIcon != null) {
-                trailingIcon()
-            } else if (icon != null) {
+            if (icon != null) {
                 IconButton(
                     onClick = {
                         if (isError) {
@@ -122,6 +121,8 @@ fun EditBase64Preference(
                         }
                     )
                 }
+            } else if (trailingIcon != null) {
+                trailingIcon()
             }
         },
     )

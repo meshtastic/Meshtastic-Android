@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.radioconfig
 
+import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.Bluetooth
@@ -30,21 +31,22 @@ import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.geeksville.mesh.MeshProtos.DeviceMetadata
+import com.geeksville.mesh.R
 import com.geeksville.mesh.navigation.Route
 
 @Suppress("MagicNumber")
 // Config (type = AdminProtos.AdminMessage.ConfigType)
-enum class ConfigRoute(val title: String, val route: Route, val icon: ImageVector?, val type: Int = 0) {
-    USER("User", Route.User, Icons.Default.Person, 0),
-    CHANNELS("Channels", Route.ChannelConfig, Icons.AutoMirrored.Default.List, 0),
-    DEVICE("Device", Route.Device, Icons.Default.Router, 0),
-    POSITION("Position", Route.Position, Icons.Default.LocationOn, 1),
-    POWER("Power", Route.Power, Icons.Default.Power, 2),
-    NETWORK("Network", Route.Network, Icons.Default.Wifi, 3),
-    DISPLAY("Display", Route.Display, Icons.Default.DisplaySettings, 4),
-    LORA("LoRa", Route.LoRa, Icons.Default.CellTower, 5),
-    BLUETOOTH("Bluetooth", Route.Bluetooth, Icons.Default.Bluetooth, 6),
-    SECURITY("Security", Route.Security, Icons.Default.Security, 7),
+enum class ConfigRoute(@StringRes val title: Int, val route: Route, val icon: ImageVector?, val type: Int = 0) {
+    USER(R.string.user, Route.User, Icons.Default.Person, 0),
+    CHANNELS(R.string.channels, Route.ChannelConfig, Icons.AutoMirrored.Default.List, 0),
+    DEVICE(R.string.device, Route.Device, Icons.Default.Router, 0),
+    POSITION(R.string.position, Route.Position, Icons.Default.LocationOn, 1),
+    POWER(R.string.power, Route.Power, Icons.Default.Power, 2),
+    NETWORK(R.string.network, Route.Network, Icons.Default.Wifi, 3),
+    DISPLAY(R.string.display, Route.Display, Icons.Default.DisplaySettings, 4),
+    LORA(R.string.lora, Route.LoRa, Icons.Default.CellTower, 5),
+    BLUETOOTH(R.string.bluetooth, Route.Bluetooth, Icons.Default.Bluetooth, 6),
+    SECURITY(R.string.security, Route.Security, Icons.Default.Security, 7),
     ;
 
     companion object {

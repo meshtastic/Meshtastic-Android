@@ -1,31 +1,32 @@
 [versions]
-agp = "8.9.1"
+agp = "8.9.2"
 appcompat = "1.7.0"
 appintro = "6.3.1"
 awesome-app-rating = "2.8.0"
 cardview = "1.0.0"
-compose-bom = "2025.03.01"
+coil = "3.1.0"
+compose-bom = "2025.04.01"
 constraintlayout = "2.2.1"
-core-ktx = "1.15.0"
+core-ktx = "1.16.0"
 core-location-altitude = "1.0.0-alpha03"
 core-splashscreen = "1.0.1"
 crashlytics = "3.0.3"
-datastore = "1.1.4"
+datastore = "1.1.5"
 detekt = "1.23.8"
-devtools-ksp = "2.1.20-1.0.32"
+devtools-ksp = "2.1.20-2.0.1"
 emoji2 = "1.5.0"
 espresso-core = "3.6.1"
-firebase-bom = "33.11.0"
+firebase-bom = "33.13.0"
 fragment-ktx = "1.8.6"
 google-services = "4.4.2"
-hilt = "2.56.1"
+hilt = "2.56.2"
 hilt-navigation-compose = "1.2.0"
 junit = "4.13.2"
 junit-version = "1.2.1"
 kotlin = "2.1.20"
 kotlinx-collections-immutable = "0.3.8"
-kotlinx-coroutines-android = "1.10.1"
-kotlinx-serialization-json = "1.8.0"
+kotlinx-coroutines-android = "1.10.2"
+kotlinx-serialization-json = "1.8.1"
 lifecycle = "2.8.7"
 material = "1.12.0"
 mgrs = "2.1.3"
@@ -33,13 +34,13 @@ navigation = "2.8.9"
 org-eclipse-paho-client-mqttv3 = "1.2.5"
 osmbonuspack = "6.9.0"
 osmdroid-android = "6.1.14"
-protobuf-gradle-plugin = "0.9.4"
+protobuf-gradle-plugin = "0.9.5"
 protobuf-kotlin = "4.30.2"
-room = "2.6.1"
+room = "2.7.1"
 streamsupport-minifuture = "1.7.4"
 usb-serial-android = "3.9.0"
 viewpager2 = "1.1.0"
-work-runtime-ktx = "2.10.0"
+work-runtime-ktx = "2.10.1"
 zxing-android-embedded = "4.3.0"
 #noinspection GradleDependency
 zxing-core = "3.3.0" #do not update
@@ -52,6 +53,8 @@ appcompat-resources = { group = "androidx.appcompat", name = "appcompat-resource
 appintro = { group = "com.github.AppIntro", name = "AppIntro", version.ref = "appintro" }
 awesome-app-rating = { group = "com.suddenh4x.ratingdialog", name = "awesome-app-rating", version.ref = "awesome-app-rating" }
 cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardview" }
+coil = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-svg = { group = "io.coil-kt.coil3", name = "coil-svg", version.ref = "coil" }
 compose-material = { group = "androidx.compose.material", name = "material" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
 compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
@@ -157,6 +160,9 @@ firebase = ["firebase-analytics", "firebase-crashlytics"]
 
 #Protobuf
 protobuf = ["protobuf-kotlin"]
+
+# coil
+coil = ["coil", "coil-svg"]
 
 [plugins]
 android-application = { id = "com.android.application" }

@@ -28,10 +28,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.RemoteHardwareConfig
+import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.ui.components.EditListPreference
@@ -75,30 +77,35 @@ fun RemoteHardwareConfigItemList(
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        item { PreferenceCategory(text = "Remote Hardware Config") }
+        item { PreferenceCategory(text = stringResource(R.string.remote_hardware_config)) }
 
         item {
-            SwitchPreference(title = "Remote Hardware enabled",
+            SwitchPreference(
+                title = stringResource(R.string.remote_hardware_enabled),
                 checked = remoteHardwareInput.enabled,
                 enabled = enabled,
                 onCheckedChange = {
                     remoteHardwareInput = remoteHardwareInput.copy { this.enabled = it }
-                })
+                }
+            )
         }
         item { Divider() }
 
         item {
-            SwitchPreference(title = "Allow undefined pin access",
+            SwitchPreference(
+                title = stringResource(R.string.allow_undefined_pin_access),
                 checked = remoteHardwareInput.allowUndefinedPinAccess,
                 enabled = enabled,
                 onCheckedChange = {
                     remoteHardwareInput = remoteHardwareInput.copy { allowUndefinedPinAccess = it }
-                })
+                }
+            )
         }
         item { Divider() }
 
         item {
-            EditListPreference(title = "Available pins",
+            EditListPreference(
+                title = stringResource(R.string.available_pins),
                 list = remoteHardwareInput.availablePinsList,
                 maxCount = 4, // available_pins max_count:4
                 enabled = enabled,
@@ -108,7 +115,8 @@ fun RemoteHardwareConfigItemList(
                         availablePins.clear()
                         availablePins.addAll(list)
                     }
-                })
+                }
+            )
         }
 
         item {

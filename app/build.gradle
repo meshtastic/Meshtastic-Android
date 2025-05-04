@@ -32,8 +32,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
         targetSdk 34
-        versionCode 30521 // format is Mmmss (where M is 1+the numeric major number
-        versionName "2.5.21"
+        versionCode 30524 // format is Mmmss (where M is 1+the numeric major number
+        versionName "2.5.24"
         testInstrumentationRunner "com.geeksville.mesh.TestRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio
@@ -135,8 +135,8 @@ androidComponents {
     onVariants(selector().all(), { variant ->
         afterEvaluate {
             def capName = variant.name.capitalize()
-            tasks.getByName("ksp${capName}Kotlin") {
-                setSource(tasks.getByName("generate${capName}Proto").outputs)
+            tasks.named("ksp${capName}Kotlin") {
+                dependsOn("generate${capName}Proto")
             }
         }
     })
@@ -157,7 +157,7 @@ dependencies {
     implementation(libs.bundles.room)
     implementation(libs.bundles.hilt)
     implementation(libs.bundles.protobuf)
-
+    implementation(libs.bundles.coil)
     //OSM
     implementation(libs.bundles.osm)
     implementation(libs.osmdroid.geopackage){ exclude group: "com.j256.ormlite" }

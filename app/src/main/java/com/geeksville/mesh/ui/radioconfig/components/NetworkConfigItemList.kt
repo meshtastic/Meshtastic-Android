@@ -117,7 +117,10 @@ fun NetworkConfigItemList(
         if (result.contents != null) {
             val (ssid, psk) = extractWifiCredentials(result.contents)
             if (ssid != null && psk != null) {
-                networkInput = networkInput.copy { wifiSsid = ssid; wifiPsk = psk }
+                networkInput = networkInput.copy {
+                    wifiSsid = ssid
+                wifiPsk = psk
+                }
             } else {
                 showScanErrorDialog = true
             }
@@ -137,18 +140,21 @@ fun NetworkConfigItemList(
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
-        item { PreferenceCategory(text = "Network Config") }
+        item { PreferenceCategory(text = stringResource(R.string.network_config)) }
 
         item {
-            SwitchPreference(title = "WiFi enabled",
+            SwitchPreference(
+                title = stringResource(R.string.wifi_enabled),
                 checked = networkInput.wifiEnabled,
                 enabled = enabled && hasWifi,
-                onCheckedChange = { networkInput = networkInput.copy { wifiEnabled = it } })
+                onCheckedChange = { networkInput = networkInput.copy { wifiEnabled = it } }
+            )
             Divider()
         }
 
         item {
-            EditTextPreference(title = "SSID",
+            EditTextPreference(
+                title = stringResource(R.string.ssid),
                 value = networkInput.wifiSsid,
                 maxSize = 32, // wifi_ssid max_size:33
                 enabled = enabled && hasWifi,
@@ -159,16 +165,19 @@ fun NetworkConfigItemList(
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     networkInput = networkInput.copy { wifiSsid = it }
-                })
+                }
+            )
         }
 
         item {
-            EditPasswordPreference(title = "PSK",
+            EditPasswordPreference(
+                title = stringResource(R.string.psk),
                 value = networkInput.wifiPsk,
                 maxSize = 64, // wifi_psk max_size:65
                 enabled = enabled && hasWifi,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { networkInput = networkInput.copy { wifiPsk = it } })
+                onValueChanged = { networkInput = networkInput.copy { wifiPsk = it } }
+            )
         }
 
         item {
@@ -185,15 +194,18 @@ fun NetworkConfigItemList(
         }
 
         item {
-            SwitchPreference(title = "Ethernet enabled",
+            SwitchPreference(
+                title = stringResource(R.string.ethernet_enabled),
                 checked = networkInput.ethEnabled,
                 enabled = enabled && hasEthernet,
-                onCheckedChange = { networkInput = networkInput.copy { ethEnabled = it } })
+                onCheckedChange = { networkInput = networkInput.copy { ethEnabled = it } }
+            )
             Divider()
         }
 
         item {
-            EditTextPreference(title = "NTP server",
+            EditTextPreference(
+                title = stringResource(R.string.ntp_server),
                 value = networkInput.ntpServer,
                 maxSize = 32, // ntp_server max_size:33
                 enabled = enabled,
@@ -204,11 +216,13 @@ fun NetworkConfigItemList(
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     networkInput = networkInput.copy { ntpServer = it }
-                })
+                }
+            )
         }
 
         item {
-            EditTextPreference(title = "rsyslog server",
+            EditTextPreference(
+                title = stringResource(R.string.rsyslog_server),
                 value = networkInput.rsyslogServer,
                 maxSize = 32, // rsyslog_server max_size:33
                 enabled = enabled,
@@ -219,62 +233,73 @@ fun NetworkConfigItemList(
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     networkInput = networkInput.copy { rsyslogServer = it }
-                })
+                }
+            )
         }
 
         item {
-            DropDownPreference(title = "IPv4 mode",
+            DropDownPreference(
+                title = stringResource(R.string.ipv4_mode),
                 enabled = enabled,
                 items = NetworkConfig.AddressMode.entries
                     .filter { it != NetworkConfig.AddressMode.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = networkInput.addressMode,
-                onItemSelected = { networkInput = networkInput.copy { addressMode = it } })
+                onItemSelected = { networkInput = networkInput.copy { addressMode = it } }
+            )
             Divider()
         }
 
         item {
-            EditIPv4Preference(title = "IP",
+            EditIPv4Preference(
+                title = stringResource(R.string.ip),
                 value = networkInput.ipv4Config.ip,
                 enabled = enabled && networkInput.addressMode == NetworkConfig.AddressMode.STATIC,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     val ipv4 = networkInput.ipv4Config.copy { ip = it }
                     networkInput = networkInput.copy { ipv4Config = ipv4 }
-                })
+                }
+            )
         }
 
         item {
-            EditIPv4Preference(title = "Gateway",
+            EditIPv4Preference(
+                title = stringResource(R.string.gateway),
                 value = networkInput.ipv4Config.gateway,
                 enabled = enabled && networkInput.addressMode == NetworkConfig.AddressMode.STATIC,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     val ipv4 = networkInput.ipv4Config.copy { gateway = it }
                     networkInput = networkInput.copy { ipv4Config = ipv4 }
-                })
+                }
+            )
         }
 
         item {
-            EditIPv4Preference(title = "Subnet",
+            EditIPv4Preference(
+                title = stringResource(R.string.subnet),
                 value = networkInput.ipv4Config.subnet,
                 enabled = enabled && networkInput.addressMode == NetworkConfig.AddressMode.STATIC,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     val ipv4 = networkInput.ipv4Config.copy { subnet = it }
                     networkInput = networkInput.copy { ipv4Config = ipv4 }
-                })
+                }
+            )
         }
 
         item {
-            EditIPv4Preference(title = "DNS",
+            EditIPv4Preference(
+                title = "DNS",
                 value = networkInput.ipv4Config.dns,
                 enabled = enabled && networkInput.addressMode == NetworkConfig.AddressMode.STATIC,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     val ipv4 = networkInput.ipv4Config.copy { dns = it }
                     networkInput = networkInput.copy { ipv4Config = ipv4 }
-                })
+                }
+            )
         }
         item { Divider() }
         if (hasEthernet || hasWifi) {
@@ -292,7 +317,8 @@ fun NetworkConfigItemList(
                             networkInput.copy {
                                 if (it) enabledProtocols = 1 else enabledProtocols = 0
                             }
-                    })
+                    }
+                )
             }
 
             item { Divider() }
