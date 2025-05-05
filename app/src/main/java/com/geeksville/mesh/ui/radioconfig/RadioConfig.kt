@@ -127,7 +127,11 @@ fun RadioConfigScreen(
 
     if (showEditDeviceProfileDialog) {
         EditDeviceProfileDialog(
-            title = if (deviceProfile != null) "Import configuration" else "Export configuration",
+            title = if (deviceProfile != null) {
+                stringResource(R.string.import_configuration)
+            } else {
+                stringResource(R.string.export_configuration)
+            },
             deviceProfile = deviceProfile ?: viewModel.currentDeviceProfile,
             onConfirm = {
                 showEditDeviceProfileDialog = false
@@ -311,15 +315,15 @@ private fun RadioConfigItemList(
 
         if (state.isLocal) {
             item {
-                PreferenceCategory("Backup & Restore")
+                PreferenceCategory(stringResource(R.string.backup_restore))
                 NavCard(
-                    title = "Import configuration",
+                    title = stringResource(R.string.import_configuration),
                     icon = Icons.Default.Download,
                     enabled = enabled,
                     onClick = onImport,
                 )
                 NavCard(
-                    title = "Export configuration",
+                    title = stringResource(R.string.export_configuration),
                     icon = Icons.Default.Upload,
                     enabled = enabled,
                     onClick = onExport,

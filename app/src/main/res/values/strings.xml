@@ -592,4 +592,7 @@
     <string name="store_forward_config"><![CDATA[Store & Forward Config]]></string>
     <string name="indoor_air_quality_iaq">Indoor Air Quality (IAQ)</string>
     <string name="url">URL</string>
+    <string name="backup_restore"><![CDATA[Backup & Restore]]></string>
+    <string name="import_configuration">Import configuration</string>
+    <string name="export_configuration">Export configuration</string>
 </resources>
