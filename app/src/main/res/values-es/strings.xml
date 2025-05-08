@@ -243,6 +243,7 @@
     <string name="logs">Registros</string>
     <string name="hops_away">Saltos de distancia</string>
     <string name="info">Información</string>
+    <string name="ch_util_definition">Utilización del canal actual, incluyendo TX, RX bien formado y RX mal formado (ruido similar).</string>
     <string name="air_util_definition">Porcentaje de tiempo de transmisión utilizado en la última hora.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Clave compartida</string>
@@ -312,8 +313,15 @@ Rango de Valores 0 - 500.</string>
     <string name="udp_config">Configuración UDP</string>
     <string name="map_node_popup_details"><![CDATA[%s<br>Última escucha: %s<br>Última posición: %s<br>Batería: %s]]></string>
     <string name="toggle_my_position">Cambiar mi posición</string>
+    <string name="security">Seguridad</string>
+    <string name="audio_config">Configuración de sonido</string>
+    <string name="codec_2_enabled">CODEC 2 activado</string>
+    <string name="bluetooth_config">Configuración Bluetooth</string>
+    <string name="bluetooth_enabled">Bluetooth activado</string>
+    <string name="pairing_mode">Modo de emparejamiento</string>
     <string name="messages">Mensajes</string>
     <string name="public_key">Clave Pública</string>
     <string name="private_key">Clave privada</string>
     <string name="timeout">Tiempo agotado</string>
+    <string name="distance">Distancia</string>
 </resources>

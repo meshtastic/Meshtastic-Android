@@ -291,4 +291,5 @@
     <string name="public_key">Chave Publica</string>
     <string name="private_key">Chave Privada</string>
     <string name="timeout">Tempo esgotado</string>
+    <string name="distance">Distância</string>
 </resources>

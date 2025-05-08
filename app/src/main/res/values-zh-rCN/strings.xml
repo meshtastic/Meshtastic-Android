@@ -252,7 +252,7 @@
     <string name="logs">日志</string>
     <string name="hops_away">跳数</string>
     <string name="info">信息</string>
-    <string name="ch_util_definition">当前信道的利用情况，包括格式正确的发送（TX）、接收（RX）以及无法解码的接收（即噪声）。</string>
+    <string name="ch_util_definition">当前信道的利用情况，包括格式正确的发送(TX）、接收（RX）以及无法解码的接收(即噪声）。</string>
     <string name="air_util_definition">过去一小时内用于传输的空中占用时间百分比。</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">共享密钥</string>
@@ -311,7 +311,7 @@
     <string name="channel_1">频道 1</string>
     <string name="channel_2">频道 2</string>
     <string name="channel_3">频道 3</string>
-    <string name="current">当前</string>
+    <string name="current">电流</string>
     <string name="voltage">电压</string>
     <string name="are_you_sure">你确定吗？</string>
     <string name="router_role_confirmation_text"><![CDATA[我已经阅读 <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">设备角色文档</a> 以及关于 <a href="http://meshtastic.org/blog/choosing-the-right-device-role">选择正确设备角色</a>的博客文章。]]></string>
@@ -558,4 +558,18 @@
     <string name="short_name">简称</string>
     <string name="hardware_model">硬件型号</string>
     <string name="licensed_amateur_radio">持证业余台</string>
+    <string name="dew_point">结露点</string>
+    <string name="pressure">气压</string>
+    <string name="gas_resistance">气体抗性</string>
+    <string name="distance">距离</string>
+    <string name="lux">照度</string>
+    <string name="wind">风</string>
+    <string name="weight">重量</string>
+    <string name="radiation">辐射</string>
+    <string name="store_forward_config"><![CDATA[存储和转发配置]]></string>
+    <string name="indoor_air_quality_iaq">室内空气质量 (IAQ)</string>
+    <string name="url">网址</string>
+    <string name="backup_restore"><![CDATA[备份与恢复]]></string>
+    <string name="import_configuration">导入配置</string>
+    <string name="export_configuration">导出配置</string>
 </resources>

@@ -291,4 +291,5 @@
     <string name="public_key">Offentlig nøkkel</string>
     <string name="private_key">Privat nøkkel</string>
     <string name="timeout">Tidsavbrudd</string>
+    <string name="distance">Distanse</string>
 </resources>

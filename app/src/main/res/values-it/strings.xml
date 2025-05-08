@@ -558,4 +558,15 @@
     <string name="short_name">Nome breve</string>
     <string name="hardware_model">Modello hardware</string>
     <string name="licensed_amateur_radio">Radioamatore con licenza</string>
+    <string name="dew_point">Punto Di Rugiada</string>
+    <string name="pressure">Pressione</string>
+    <string name="gas_resistance">Resistenza Ai Gas</string>
+    <string name="distance">Distanza</string>
+    <string name="lux">Lux</string>
+    <string name="wind">Vento</string>
+    <string name="weight">Peso</string>
+    <string name="radiation">Radiazione</string>
+    <string name="store_forward_config"><![CDATA[Configurazione Salva & Inoltra]]></string>
+    <string name="indoor_air_quality_iaq">Qualità dell\'Aria Interna (IAQ)</string>
+    <string name="url">URL</string>
 </resources>

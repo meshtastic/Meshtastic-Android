@@ -15,6 +15,7 @@
     <string name="node_sort_hops_away">依轉跳排序</string>
     <string name="node_sort_last_heard">最後接收時間</string>
     <string name="node_sort_via_mqtt">透過 MQTT</string>
+    <string name="node_sort_via_favorite">通過喜好</string>
     <string name="unrecognized">無法識別</string>
     <string name="message_status_enroute">正在等待確認</string>
     <string name="message_status_queued">已加入發送佇列</string>
@@ -92,6 +93,7 @@
     <string name="share">分享</string>
     <string name="disconnected">已中斷連線</string>
     <string name="device_sleeping">設備休眠中</string>
+    <string name="connected_count">已連接:%1$s 在線</string>
     <string name="update_firmware">更新韌體</string>
     <string name="ip_address">IP地址：</string>
     <string name="connected">連接到設備</string>
@@ -124,6 +126,7 @@
     <string name="message_reception_state">訊息接收狀態</string>
     <string name="message_delivery_status">訊息傳遞狀態</string>
     <string name="meshtastic_messages_notifications">訊息通知</string>
+    <string name="meshtastic_alerts_notifications">警告信息</string>
     <string name="protocol_stress_test">通訊協定壓力測試</string>
     <string name="firmware_too_old">需要更新韌體</string>
     <string name="firmware_old">由於無線電裝置韌體過舊，無法與此應用程式通訊。詳細請參閱<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">我們的韌體安裝指南</a>。</string>
@@ -203,6 +206,7 @@
     <string name="map_select_download_region">選擇下載地區</string>
     <string name="map_tile_download_estimate">圖磚下載估計：</string>
     <string name="map_start_download">開始下載</string>
+    <string name="exchange_position">交換位置</string>
     <string name="close">關閉</string>
     <string name="device_settings">裝置設定</string>
     <string name="module_settings">模組設定</string>
@@ -254,6 +258,7 @@
     <string name="encryption_pkc_text">私訊採用全新的公鑰加密技術進行加密。需要將韌體版本更新至 2.5 或以上。</string>
     <string name="encryption_error">公鑰不相符</string>
     <string name="encryption_error_text">公鑰與記錄的公鑰不符。您可以移除節點並讓其重新交換金鑰，但這可能表示存在更嚴重的安全問題。請透過其他可信賴的管道聯繫使用者，以確定金鑰更改是否由於出廠重置或其他有意行動所致。</string>
+    <string name="exchange_userinfo">交換用戶信息</string>
     <string name="meshtastic_new_nodes_notifications">新節點通知</string>
     <string name="more_details">詳細資訊</string>
     <string name="snr">SNR</string>
@@ -290,12 +295,21 @@
     <string name="max">最大值</string>
     <string name="copy">複製</string>
     <string name="alert_bell_text">警鈴字符！</string>
+    <string name="channel_settings">頻道設置</string>
+    <string name="critical_alert">嚴重警告！</string>
     <string name="favorite">收藏</string>
+    <string name="channel_1">頻道1</string>
+    <string name="channel_2">頻道2</string>
+    <string name="channel_3">頻道3</string>
     <string name="current">當前</string>
+    <string name="voltage">電壓</string>
+    <string name="are_you_sure">你確定嗎？</string>
     <string name="i_know_what_i_m_doing">我知道我在做什麼。</string>
     <string name="meshtastic_low_battery_notifications">低電量通知</string>
+    <string name="low_battery_title">低電量:%s</string>
     <string name="baro_pressure">氣壓</string>
     <string name="mesh_via_udp_enabled">通过 UDP 的Mesh</string>
+    <string name="udp_config">UDP設置</string>
     <string name="user">用戶</string>
     <string name="channels">頻道</string>
     <string name="device">裝置</string>
@@ -308,6 +322,11 @@
     <string name="security">安全</string>
     <string name="mqtt">MQTT</string>
     <string name="serial">序號</string>
+    <string name="range_test">範圍測試</string>
+    <string name="audio">音頻</string>
+    <string name="remote_hardware">遠程硬件</string>
+    <string name="audio_config">音頻設置</string>
+    <string name="ptt_pin">PTT針腳</string>
     <string name="i2s_clock">I2S 時鐘</string>
     <string name="bluetooth_config">藍牙配置</string>
     <string name="bluetooth_enabled">藍牙已啟用</string>
@@ -316,6 +335,7 @@
     <string name="uplink_enabled">已啓用上行</string>
     <string name="downlink_enabled">已啓用下行</string>
     <string name="default_">默認</string>
+    <string name="position_enabled">位置已啟用</string>
     <string name="gpio_pin">GPIO 引脚</string>
     <string name="type">類別</string>
     <string name="hide_password">隱藏密碼</string>
@@ -328,8 +348,22 @@
     <string name="blue">藍色</string>
     <string name="send_bell">發送振鈴</string>
     <string name="messages">訊息</string>
+    <string name="device_config">設備設置</string>
     <string name="role">角色</string>
+    <string name="disable_led_heartbeat">禁用LED心跳</string>
+    <string name="display_config">顯示設置</string>
+    <string name="screen_timeout_seconds">屏幕超時時間(秒)</string>
+    <string name="ringtone">鈴聲</string>
+    <string name="bandwidth">帶寬</string>
+    <string name="tx_enabled">TX已啟用</string>
+    <string name="tx_power_dbm">TX功率 (dBm)</string>
+    <string name="username">用戶名</string>
+    <string name="password">密碼</string>
+    <string name="encryption_enabled">加密已啟用</string>
+    <string name="json_output_enabled">JSON輸出已啟用</string>
+    <string name="tls_enabled">TLS已啟用</string>
     <string name="public_key">公鑰</string>
     <string name="private_key">私鑰</string>
     <string name="timeout">逾時</string>
+    <string name="distance">距離</string>
 </resources>
