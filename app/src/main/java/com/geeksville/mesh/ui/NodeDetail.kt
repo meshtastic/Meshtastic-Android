@@ -74,6 +74,7 @@ import androidx.compose.material.icons.filled.Work
 import androidx.compose.material.icons.outlined.Navigation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -109,6 +110,20 @@ import com.geeksville.mesh.util.formatUptime
 import com.geeksville.mesh.util.thenIf
 import kotlin.math.ln
 
+private enum class LogsType(
+    val titleRes: Int,
+    val icon: ImageVector,
+    val route: Route
+) {
+    DEVICE(R.string.device_metrics_log, Icons.Default.ChargingStation, Route.DeviceMetrics),
+    NODE_MAP(R.string.node_map, Icons.Default.Map, Route.NodeMap),
+    POSITIONS(R.string.position_log, Icons.Default.LocationOn, Route.PositionLog),
+    ENVIRONMENT(R.string.env_metrics_log, Icons.Default.Thermostat, Route.EnvironmentMetrics),
+    SIGNAL(R.string.sig_metrics_log, Icons.Default.SignalCellularAlt, Route.SignalMetrics),
+    POWER(R.string.power_metrics_log, Icons.Default.Power, Route.PowerMetrics),
+    TRACEROUTE(R.string.traceroute_log, Icons.Default.Route, Route.TracerouteLog)
+}
+
 @Composable
 fun NodeDetailScreen(
     modifier: Modifier = Modifier,
@@ -116,6 +131,19 @@ fun NodeDetailScreen(
     onNavigate: (Route) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
+
+    /* The order is with respect to the enum above: LogsType */
+    val availabilities = remember(key1 = state, key2 = environmentState) {
+        booleanArrayOf(
+            state.hasDeviceMetrics(),
+            state.hasPositionLogs(),
+            state.hasPositionLogs(),
+            environmentState.hasEnvironmentMetrics(),
+            state.hasSignalMetrics(),
+            state.hasPowerMetrics(),
+            state.hasTracerouteLogs())
+    }
 
     if (state.node != null) {
         val node = state.node ?: return
@@ -124,6 +152,7 @@ fun NodeDetailScreen(
             metricsState = state,
             onNavigate = onNavigate,
             modifier = modifier,
+            metricsAvailability = availabilities
         )
     } else {
         Box(
@@ -141,6 +170,7 @@ private fun NodeDetailList(
     node: Node,
     metricsState: MetricsState,
     onNavigate: (Route) -> Unit = {},
+    metricsAvailability: BooleanArray
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -175,9 +205,18 @@ private fun NodeDetailList(
             }
         }
 
+        /* Metric Logs Navigation */
         item {
             PreferenceCategory(stringResource(id = R.string.logs))
-            LogNavigationList(metricsState, onNavigate)
+            for (type in LogsType.entries) {
+                NavCard(
+                    title = stringResource(type.titleRes),
+                    icon = type.icon,
+                    enabled = metricsAvailability[type.ordinal]
+                ) {
+                    onNavigate(type.route)
+                }
+            }
         }
 
         if (!metricsState.isManaged) {
@@ -343,65 +382,6 @@ private fun NodeDetailsContent(
         icon = Icons.Default.History,
         value = formatAgo(node.lastHeard)
     )
-}
-
-@Composable
-fun LogNavigationList(state: MetricsState, onNavigate: (Route) -> Unit) {
-    NavCard(
-        title = stringResource(R.string.device_metrics_log),
-        icon = Icons.Default.ChargingStation,
-        enabled = state.hasDeviceMetrics()
-    ) {
-        onNavigate(Route.DeviceMetrics)
-    }
-
-    NavCard(
-        title = stringResource(R.string.node_map),
-        icon = Icons.Default.Map,
-        enabled = state.hasPositionLogs()
-    ) {
-        onNavigate(Route.NodeMap)
-    }
-
-    NavCard(
-        title = stringResource(R.string.position_log),
-        icon = Icons.Default.LocationOn,
-        enabled = state.hasPositionLogs()
-    ) {
-        onNavigate(Route.PositionLog)
-    }
-
-    NavCard(
-        title = stringResource(R.string.env_metrics_log),
-        icon = Icons.Default.Thermostat,
-        enabled = state.hasEnvironmentMetrics()
-    ) {
-        onNavigate(Route.EnvironmentMetrics)
-    }
-
-    NavCard(
-        title = stringResource(R.string.sig_metrics_log),
-        icon = Icons.Default.SignalCellularAlt,
-        enabled = state.hasSignalMetrics()
-    ) {
-        onNavigate(Route.SignalMetrics)
-    }
-
-    NavCard(
-        title = stringResource(R.string.power_metrics_log),
-        icon = Icons.Default.Power,
-        enabled = state.hasPowerMetrics()
-    ) {
-        onNavigate(Route.PowerMetrics)
-    }
-
-    NavCard(
-        title = stringResource(R.string.traceroute_log),
-        icon = Icons.Default.Route,
-        enabled = state.hasTracerouteLogs()
-    ) {
-        onNavigate(Route.TracerouteLog)
-    }
 }
 
 @Composable
@@ -646,6 +626,7 @@ private fun NodeDetailsPreview(
         NodeDetailList(
             node = node,
             metricsState = MetricsState.Empty,
+            metricsAvailability = BooleanArray(LogsType.entries.size) { false }
         )
     }
 }
