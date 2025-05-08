@@ -302,7 +302,7 @@
     <string name="channel_settings">Kanal Ayarları</string>
     <string name="samsung_instructions">Samsung Talimatları</string>
     <string name="alerts_dnd_request_title">Rahatsız Etmeyi devre dışı bırakmak için Kritik Uyarıları etkinleştirin</string>
-    <string name="alerts_dnd_request_text"><![CDATA[Telefonunuz Rahatsız Etmeyin modundayken Kritik Uyarılara izin vermek için, Meshtastic uygulamasındaki bildirim ayarlarında Uyarılar kanalı için Rahatsız Etmeyin modunu geçersiz kılmayı etkinleştirin.<br/><br/>Samsung kullanıcılarının, Uyarılar Kanalı için etkinleştirmeden önce sistem ayarlarında bir istisna eklemesi gerekebilir. Yardım için <a href="https://www.samsung.com/latin_en/support/mobile-devices/how-to-use-the-do-not-disturb-mode-on-your-galaxy-phone/">Samsung Destek'i ziyaret edin.</a>.]]></string>
+    <string name="alerts_dnd_request_text"><![CDATA[Telefonunuz Rahatsız Etmeyin modundayken Kritik Uyarılara izin vermek için, Meshtastic uygulamasındaki bildirim ayarlarında Uyarılar kanalı için Rahatsız Etmeyin modunu geçersiz kılmayı etkinleştirin.<br/><br/>Samsung kullanıcılarının, Uyarılar Kanalı için etkinleştirmeden önce sistem ayarlarında bir istisna eklemesi gerekebilir. Yardım için <a href="https://www.samsung.com/latin_en/support/mobile-devices/how-to-use-the-do-not-disturb-mode-on-your-galaxy-phone/">Samsung Destek\'i ziyaret edin.</a>.]]></string>
     <string name="critical_alert">Kritik Uyarı!</string>
     <string name="favorite">Favori</string>
     <string name="favorite_add">\'%s\' düğümünü favorilere eklemek istiyor musunuz?</string>
