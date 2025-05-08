@@ -238,4 +238,5 @@
     </plurals>
     <string name="traceroute_diff">Ugrások oda %1$d Vissza %2$d</string>
     <string name="timeout">Időtúllépés</string>
+    <string name="distance">Távolság</string>
 </resources>

@@ -195,4 +195,5 @@
     <string name="signal_quality">Якість сигналу</string>
     <string name="router_role_confirmation_text"><![CDATA[<a href="https://meshtastic.org/docs/configuration/radio/device/#roles">]]></string>
     <string name="messages">Повідомлення</string>
+    <string name="distance">Відстань</string>
 </resources>

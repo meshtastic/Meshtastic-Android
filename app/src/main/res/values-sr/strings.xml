@@ -321,4 +321,5 @@
     <string name="public_key">Јавни кључ</string>
     <string name="private_key">Приватни кључ</string>
     <string name="timeout">Истекло време</string>
+    <string name="distance">Удаљеност</string>
 </resources>

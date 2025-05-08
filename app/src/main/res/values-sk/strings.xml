@@ -334,4 +334,5 @@
     <string name="public_key">Verejný kľúč</string>
     <string name="private_key">Súkromný kľúč</string>
     <string name="timeout">Časový limit</string>
+    <string name="distance">Vzdialenosť</string>
 </resources>

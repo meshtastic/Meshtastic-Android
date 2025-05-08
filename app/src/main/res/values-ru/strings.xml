@@ -282,4 +282,5 @@
     <string name="public_key">Публичный ключ</string>
     <string name="private_key">Закрытый ключ</string>
     <string name="timeout">Время ожидания истекло</string>
+    <string name="distance">Расстояние</string>
 </resources>

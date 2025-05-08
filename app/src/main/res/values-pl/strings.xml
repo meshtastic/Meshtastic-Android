@@ -332,4 +332,5 @@
     <string name="public_key">Klucz publiczny</string>
     <string name="private_key">Klucz prywatny</string>
     <string name="timeout">Upłynął limit czasu</string>
+    <string name="distance">Odległość</string>
 </resources>
