@@ -886,5 +886,18 @@
       "Heltec"
     ],
     "requiresDfu": true
+  },
+  {
+    "hwModel": 95,
+    "hwModelSlug": "SEEED_SOLAR_NODE",
+    "platformioTarget": "seeed_solar_node",
+    "architecture": "nrf52840",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "SenseCAP Solar Node",
+    "tags": [
+      "Seeed"
+    ],
+    "requiresDfu": true
   }
 ]
