@@ -122,7 +122,7 @@ inline fun <reified T> EditListPreference(
             // handle remoteHardware.availablePins: List<RemoteHardwarePin>
             if (value is RemoteHardwarePin) {
                 EditTextPreference(
-                    title = "GPIO pin",
+                    title = stringResource(R.string.gpio_pin),
                     value = value.gpioPin,
                     enabled = enabled,
                     keyboardActions = keyboardActions,
@@ -134,7 +134,7 @@ inline fun <reified T> EditListPreference(
                     },
                 )
                 EditTextPreference(
-                    title = "Name",
+                    title = stringResource(R.string.name),
                     value = value.name,
                     maxSize = 14, // name max_size:15
                     enabled = enabled,
@@ -150,7 +150,7 @@ inline fun <reified T> EditListPreference(
                     trailingIcon = trailingIcon,
                 )
                 DropDownPreference(
-                    title = "Type",
+                    title = stringResource(R.string.type),
                     enabled = enabled,
                     items = RemoteHardwarePinType.entries
                         .filter { it != RemoteHardwarePinType.UNRECOGNIZED }

@@ -1,0 +1,35 @@
+name: Crowdin Download Translations Action
+
+on:
+  schedule:              # Every Sunday at midnight
+    - cron: '0 0 * * 0'
+  workflow_dispatch:     # Allow manual triggering
+
+jobs:
+  synchronize-with-crowdin:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download translations with Crowdin
+        uses: crowdin/github-action@v2
+        with:
+          base_url: 'https://meshtastic.crowdin.com/api/v2'
+          config: 'config/crowdin/crowdin.yml'
+          upload_sources: false
+          upload_translations: false
+          download_translations: true
+          localization_branch_name: l10n_crowdin_translations
+          commit_message: 'chore(l10n): New Crowdin Translations by GitHub Action'
+          create_pull_request: true
+          pull_request_title: 'chore(l10n): New Crowdin Translations'
+          pull_request_body: 'New Crowdin translations by [Crowdin GH Action](https://github.com/crowdin/github-action)'
+          pull_request_base_branch_name: 'master'
+          pull_request_labels: 'l10n'
+          crowdin_branch_name: 'master'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          CROWDIN_PROJECT_ID: ${{ secrets.CROWDIN_PROJECT_ID }}
+          CROWDIN_PERSONAL_TOKEN: ${{ secrets.CROWDIN_PERSONAL_TOKEN }}

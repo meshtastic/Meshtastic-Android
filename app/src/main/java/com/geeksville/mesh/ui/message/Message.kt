@@ -36,7 +36,6 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.TextField
@@ -81,6 +80,8 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannel
+import com.geeksville.mesh.navigation.navigateToNavGraph
+import com.geeksville.mesh.ui.components.BaseScaffold
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.message.components.MessageList
@@ -109,6 +110,8 @@ internal fun MessageScreen(
         DataPacket.ID_BROADCAST -> channelName
         else -> viewModel.getUser(nodeId).longName
     }
+    val mismatchKey =
+        DataPacket.PKC_CHANNEL_INDEX == channelIndex && viewModel.getNode(nodeId).mismatchKey
 
 //    if (channelIndex != DataPacket.PKC_CHANNEL_INDEX && nodeId != DataPacket.ID_BROADCAST) {
 //        subtitle = "(ch: $channelIndex - $channelName)"
@@ -138,7 +141,7 @@ internal fun MessageScreen(
         )
     }
 
-    Scaffold(
+    BaseScaffold(
         topBar = {
             if (inSelectionMode) {
                 ActionModeTopBar(selectedIds.value) { action ->
@@ -167,7 +170,7 @@ internal fun MessageScreen(
                     }
                 }
             } else {
-                MessageTopBar(title, channelIndex, onNavigateBack)
+                MessageTopBar(title, channelIndex, mismatchKey, onNavigateBack)
             }
         },
         bottomBar = {
@@ -180,13 +183,16 @@ internal fun MessageScreen(
                 QuickChatRow(isConnected, quickChat) { action ->
                     if (action.mode == QuickChatAction.Mode.Append) {
                         val originalText = messageInput.value.text
-                        val needsSpace = !originalText.endsWith(' ') && originalText.isNotEmpty()
-                        val newText = buildString {
-                            append(originalText)
-                            if (needsSpace) append(' ')
-                            append(action.message)
+                        if (!originalText.contains(action.message)) {
+                            val needsSpace =
+                                !originalText.endsWith(' ') && originalText.isNotEmpty()
+                            val newText = buildString {
+                                append(originalText)
+                                if (needsSpace) append(' ')
+                                append(action.message)
+                            }.take(MESSAGE_CHARACTER_LIMIT)
+                            messageInput.value = TextFieldValue(newText, TextRange(newText.length))
                         }
-                        messageInput.value = TextFieldValue(newText, TextRange(newText.length))
                     } else {
                         viewModel.sendMessage(action.message, contactKey)
                     }
@@ -194,18 +200,18 @@ internal fun MessageScreen(
                 TextInput(isConnected, messageInput) { viewModel.sendMessage(it, contactKey) }
             }
         }
-    ) { innerPadding ->
+    ) {
         if (messages.isNotEmpty()) {
             MessageList(
                 messages = messages,
                 selectedIds = selectedIds,
                 onUnreadChanged = { viewModel.clearUnreadCount(contactKey, it) },
-                contentPadding = innerPadding,
                 onSendReaction = { emoji, id -> viewModel.sendReaction(emoji, id, contactKey) },
             ) { action ->
                 when (action) {
                     is NodeMenuAction.Remove -> viewModel.removeNode(action.node.num)
                     is NodeMenuAction.Ignore -> viewModel.ignoreNode(action.node)
+                    is NodeMenuAction.Favorite -> viewModel.favoriteNode(action.node)
                     is NodeMenuAction.DirectMessage -> {
                         val hasPKC = viewModel.ourNodeInfo.value?.hasPKC == true && action.node.hasPKC
                         val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else action.node.channel
@@ -301,6 +307,7 @@ private fun ActionModeTopBar(
 private fun MessageTopBar(
     title: String,
     channelIndex: Int?,
+    mismatchKey: Boolean = false,
     onNavigateBack: () -> Unit
 ) = TopAppBar(
     title = { Text(text = title) },
@@ -314,7 +321,7 @@ private fun MessageTopBar(
     },
     actions = {
         if (channelIndex == DataPacket.PKC_CHANNEL_INDEX) {
-            NodeKeyStatusIcon(hasPKC = true, mismatchKey = false)
+            NodeKeyStatusIcon(hasPKC = true, mismatchKey = mismatchKey)
         }
     }
 )
@@ -358,7 +365,7 @@ private fun TextInput(
     enabled: Boolean,
     message: MutableState<TextFieldValue>,
     modifier: Modifier = Modifier,
-    maxSize: Int = 200,
+    maxSize: Int = MESSAGE_CHARACTER_LIMIT,
     onClick: (String) -> Unit = {}
 ) = Column(modifier) {
     val focusManager = LocalFocusManager.current

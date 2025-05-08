@@ -25,8 +25,11 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.hardware.usb.UsbManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.os.RemoteException
+import android.provider.Settings
+import android.text.Html
 import android.text.method.LinkMovementMethod
 import android.view.MotionEvent
 import android.widget.TextView
@@ -34,6 +37,7 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
+import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -41,6 +45,7 @@ import com.geeksville.mesh.android.BindFailedException
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.ServiceClient
+import com.geeksville.mesh.android.dpToPx
 import com.geeksville.mesh.android.getBluetoothPermissions
 import com.geeksville.mesh.android.getNotificationPermissions
 import com.geeksville.mesh.android.hasBluetoothPermission
@@ -52,6 +57,7 @@ import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.navigation.navigateToNavGraph
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceRepository
@@ -98,6 +104,7 @@ class MainActivity : AppCompatActivity(), Logging {
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
             if (result.entries.all { it.value }) {
                 info("Notification permissions granted")
+                checkAlertDnD()
             } else {
                 warn("Notification permissions denied")
                 model.showSnackbar(getString(R.string.notification_denied))
@@ -257,16 +264,59 @@ class MainActivity : AppCompatActivity(), Logging {
                     service.startProvideLocation()
                 }
             }
+            checkNotificationPermissions()
+        }
+    }
 
-            if (!hasNotificationPermission()) {
-                val notificationPermissions = getNotificationPermissions()
-                rationaleDialog(
-                    shouldShowRequestPermissionRationale(notificationPermissions),
-                    R.string.notification_required,
-                    getString(R.string.why_notification_required),
-                ) {
-                    notificationPermissionsLauncher.launch(notificationPermissions)
+    private fun checkNotificationPermissions() {
+        if (!hasNotificationPermission()) {
+            val notificationPermissions = getNotificationPermissions()
+            rationaleDialog(
+                shouldShowRequestPermissionRationale(notificationPermissions),
+                R.string.notification_required,
+                getString(R.string.why_notification_required),
+            ) {
+                notificationPermissionsLauncher.launch(notificationPermissions)
+            }
+        }
+    }
+
+    @Suppress("MagicNumber")
+    private fun checkAlertDnD() {
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
+        ) {
+            val prefs = UIViewModel.getPreferences(this)
+            val rationaleShown = prefs.getBoolean("dnd_rationale_shown", false)
+            if (!rationaleShown && hasNotificationPermission()) {
+                fun showAlertAppNotificationSettings() {
+                    val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                    intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                    intent.putExtra(Settings.EXTRA_CHANNEL_ID, "my_alerts")
+                    startActivity(intent)
                 }
+                val message = Html.fromHtml(
+                    getString(R.string.alerts_dnd_request_text),
+                    Html.FROM_HTML_MODE_COMPACT
+                )
+                val messageTextView = TextView(this).also {
+                    it.text = message
+                    it.movementMethod = LinkMovementMethod.getInstance()
+                    it.setPadding(dpToPx(16f))
+                }
+                MaterialAlertDialogBuilder(this)
+                    .setTitle(R.string.alerts_dnd_request_title)
+                    .setView(messageTextView)
+                    .setNeutralButton(R.string.cancel) { dialog, _ ->
+                        prefs.edit { putBoolean("dnd_rationale_shown", true) }
+                        dialog.dismiss()
+                    }
+                    .setPositiveButton(R.string.channel_settings) { dialog, _ ->
+                        showAlertAppNotificationSettings()
+                        prefs.edit { putBoolean("dnd_rationale_shown", true) }
+                        dialog.dismiss()
+                    }
+                    .setCancelable(false).show()
             }
         }
     }

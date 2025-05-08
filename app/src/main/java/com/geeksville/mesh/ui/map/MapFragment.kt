@@ -44,6 +44,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -272,7 +273,7 @@ fun MapView(
             if (permissions.entries.all { it.value }) map.toggleMyLocation()
         }
 
-    val nodes by model.nodeList.collectAsStateWithLifecycle()
+    val nodes by model.filteredNodeList.collectAsStateWithLifecycle()
     val waypoints by model.waypoints.collectAsStateWithLifecycle(emptyMap())
 
     val markerIcon = remember {
@@ -292,8 +293,13 @@ fun MapView(
                 label = "${u.shortName} ${formatAgo(p.time)}"
             ).apply {
                 id = u.id
-                title = "${u.longName} ${node.batteryStr}"
-                snippet = node.gpsString(gpsFormat)
+                title = u.longName
+                snippet = context.getString(R.string.map_node_popup_details,
+                    node.gpsString(gpsFormat),
+                    formatAgo(node.lastHeard),
+                    formatAgo(p.time),
+                    if (node.batteryStr != "") node.batteryStr else "?"
+                )
                 ourNode?.distanceStr(node, displayUnits)?.let { dist ->
                     subDescription =
                         context.getString(R.string.map_subDescription, ourNode.bearing(node), dist)
@@ -582,30 +588,32 @@ fun MapView(
                     map.invalidate()
                 },
                 modifier = Modifier.align(Alignment.BottomCenter)
-            ) else Column(
-                modifier = Modifier
-                    .padding(top = 16.dp, end = 16.dp)
-                    .align(Alignment.TopEnd),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                MapButton(
-                    onClick = ::showMapStyleDialog,
-                    icon = Icons.Outlined.Layers,
-                    contentDescription = R.string.map_style_selection,
-                )
-                MapButton(
-                    enabled = hasGps,
-                    icon = if (myLocationOverlay == null) {
-                        Icons.Outlined.MyLocation
-                    } else {
-                        Icons.Default.LocationDisabled
-                    },
-                    contentDescription = null,
+            ) else {
+                Column(
+                    modifier = Modifier
+                        .padding(top = 16.dp, end = 16.dp)
+                        .align(Alignment.TopEnd),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    if (context.hasLocationPermission()) {
-                        map.toggleMyLocation()
-                    } else {
-                        requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
+                    MapButton(
+                        onClick = ::showMapStyleDialog,
+                        icon = Icons.Outlined.Layers,
+                        contentDescription = R.string.map_style_selection,
+                    )
+                    MapButton(
+                        enabled = hasGps,
+                        icon = if (myLocationOverlay == null) {
+                            Icons.Outlined.MyLocation
+                        } else {
+                            Icons.Default.LocationDisabled
+                        },
+                        contentDescription = stringResource(R.string.toggle_my_position),
+                    ) {
+                        if (context.hasLocationPermission()) {
+                            map.toggleMyLocation()
+                        } else {
+                            requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
+                        }
                     }
                 }
             }

@@ -24,10 +24,10 @@ import com.geeksville.mesh.PaxcountProtos
 import com.geeksville.mesh.TelemetryProtos.DeviceMetrics
 import com.geeksville.mesh.TelemetryProtos.EnvironmentMetrics
 import com.geeksville.mesh.TelemetryProtos.PowerMetrics
+import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.util.GPSFormat
 import com.geeksville.mesh.util.latLongToMeter
 import com.geeksville.mesh.util.toDistanceString
-import com.google.protobuf.ByteString
 
 @Suppress("MagicNumber")
 data class Node(
@@ -59,8 +59,7 @@ data class Node(
 
     val isUnknownUser get() = user.hwModel == MeshProtos.HardwareModel.UNSET
     val hasPKC get() = !user.publicKey.isEmpty
-    val errorByteString: ByteString get() = ByteString.copyFrom(ByteArray(32) { 0 })
-    val mismatchKey get() = user.publicKey == errorByteString
+    val mismatchKey get() = user.publicKey == NodeEntity.ERROR_BYTE_STRING
 
     val hasEnvironmentMetrics: Boolean
         get() = environmentMetrics != EnvironmentMetrics.getDefaultInstance()
@@ -135,7 +134,7 @@ data class Node(
     }
 
     private fun PaxcountProtos.Paxcount.getDisplayString() =
-        "PAX: ${ble + wifi} (B:$ble/W:$wifi)".takeIf { ble != 0 && wifi != 0 }
+        "PAX: ${ble + wifi} (B:$ble/W:$wifi)".takeIf { ble != 0 || wifi != 0 }
 
     fun getTelemetryString(isFahrenheit: Boolean = false): String {
         return listOfNotNull(

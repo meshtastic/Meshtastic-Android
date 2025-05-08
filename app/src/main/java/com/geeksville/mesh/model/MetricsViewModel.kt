@@ -39,11 +39,10 @@ import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.model.map.CustomTileSource
+import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
-import com.geeksville.mesh.ui.Route
 import com.geeksville.mesh.ui.map.MAP_STYLE_ID
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
@@ -72,16 +71,16 @@ data class MetricsState(
     val displayUnits: DisplayUnits = DisplayUnits.METRIC,
     val node: Node? = null,
     val deviceMetrics: List<Telemetry> = emptyList(),
-    val environmentMetrics: List<Telemetry> = emptyList(),
     val signalMetrics: List<MeshPacket> = emptyList(),
+    val powerMetrics: List<Telemetry> = emptyList(),
     val tracerouteRequests: List<MeshLog> = emptyList(),
     val tracerouteResults: List<MeshPacket> = emptyList(),
     val positionLogs: List<Position> = emptyList(),
     val deviceHardware: DeviceHardware? = null,
 ) {
     fun hasDeviceMetrics() = deviceMetrics.isNotEmpty()
-    fun hasEnvironmentMetrics() = environmentMetrics.isNotEmpty()
     fun hasSignalMetrics() = signalMetrics.isNotEmpty()
+    fun hasPowerMetrics() = powerMetrics.isNotEmpty()
     fun hasTracerouteLogs() = tracerouteRequests.isNotEmpty()
     fun hasPositionLogs() = positionLogs.isNotEmpty()
 
@@ -90,14 +89,14 @@ data class MetricsState(
         return deviceMetrics.filter { it.time >= oldestTime }
     }
 
-    fun environmentMetricsFiltered(timeFrame: TimeFrame): List<Telemetry> {
-        val oldestTime = timeFrame.calculateOldestTime()
-        return environmentMetrics.filter { it.time >= oldestTime }
-    }
-
     fun signalMetricsFiltered(timeFrame: TimeFrame): List<MeshPacket> {
         val oldestTime = timeFrame.calculateOldestTime()
         return signalMetrics.filter { it.rxTime >= oldestTime }
+    }
+
+    fun powerMetricsFiltered(timeFrame: TimeFrame): List<Telemetry> {
+        val oldestTime = timeFrame.calculateOldestTime()
+        return powerMetrics.filter { it.time >= oldestTime }
     }
 
     companion object {
@@ -211,21 +210,26 @@ class MetricsViewModel @Inject constructor(
     private val _state = MutableStateFlow(MetricsState.Empty)
     val state: StateFlow<MetricsState> = _state
 
+    private val _envState = MutableStateFlow(EnvironmentMetricsState())
+    val environmentState: StateFlow<EnvironmentMetricsState> = _envState
+
     private val _timeFrame = MutableStateFlow(TimeFrame.TWENTY_FOUR_HOURS)
     val timeFrame: StateFlow<TimeFrame> = _timeFrame
 
     private var deviceHardwareList: List<DeviceHardware> = listOf()
 
     init {
-        @OptIn(ExperimentalCoroutinesApi::class)
         radioConfigRepository.nodeDBbyNum
             .mapLatest { nodes -> nodes[destNum] }
             .distinctUntilChanged()
             .onEach { node ->
                 _state.update { state -> state.copy(node = node) }
                 node?.user?.hwModel?.let { hwModel ->
-                    _state.update { state ->
-                        state.copy(deviceHardware = getDeviceHardwareFromHardwareModel(hwModel))
+                    val deviceHardware = getDeviceHardwareFromHardwareModel(hwModel)
+                    deviceHardware?.let {
+                        _state.update { state ->
+                            state.copy(deviceHardware = it)
+                        }
                     }
                 }
             }
@@ -245,9 +249,16 @@ class MetricsViewModel @Inject constructor(
             _state.update { state ->
                 state.copy(
                     deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
+                    powerMetrics = telemetry.filter { it.hasPowerMetrics() }
+                )
+            }
+            _envState.update { state ->
+                state.copy(
                     environmentMetrics = telemetry.filter {
-                        it.hasEnvironmentMetrics() && it.environmentMetrics.relativeHumidity >= 0f
-                    }
+                        it.hasEnvironmentMetrics() &&
+                        it.environmentMetrics.relativeHumidity >= 0f &&
+                        !it.environmentMetrics.temperature.isNaN()
+                    },
                 )
             }
         }.launchIn(viewModelScope)
@@ -340,12 +351,14 @@ class MetricsViewModel @Inject constructor(
             try {
                 val json =
                     app.assets.open("device_hardware.json").bufferedReader().use { it.readText() }
-                deviceHardwareList = Json.decodeFromString<List<DeviceHardwareDto>>(json)
-                    .map { it.toDeviceHardware() }
+                deviceHardwareList = Json.decodeFromString<List<DeviceHardware>>(json)
+                return deviceHardwareList.find { it.hwModel == hwModel.number }
             } catch (ex: IOException) {
                 errormsg("Can't read device_hardware.json error: ${ex.message}")
+            } catch (ex: IllegalArgumentException) {
+                errormsg(ex.message.toString())
             }
         }
-        return deviceHardwareList.find { it.hwModel == hwModel.number }
+        return null
     }
 }

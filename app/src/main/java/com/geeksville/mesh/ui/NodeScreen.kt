@@ -18,12 +18,14 @@
 package com.geeksville.mesh.ui
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
@@ -62,6 +64,7 @@ fun NodeScreen(
             NodeFilterTextField(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .background(MaterialTheme.colors.background)
                     .padding(8.dp),
                 filterText = state.filter,
                 onTextChange = model::setNodeFilterText,
@@ -76,6 +79,7 @@ fun NodeScreen(
 
         items(nodes, key = { it.num }) { node ->
             NodeItem(
+                modifier = Modifier.animateContentSize(),
                 thisNode = ourNode,
                 thatNode = node,
                 gpsFormat = state.gpsFormat,
@@ -85,12 +89,12 @@ fun NodeScreen(
                     when (menuItem) {
                         is NodeMenuAction.Remove -> model.removeNode(node.num)
                         is NodeMenuAction.Ignore -> model.ignoreNode(node)
+                        is NodeMenuAction.Favorite -> model.favoriteNode(node)
                         is NodeMenuAction.DirectMessage -> {
                             val hasPKC = model.ourNodeInfo.value?.hasPKC == true && node.hasPKC
                             val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
                             navigateToMessages("$channel${node.user.id}")
                         }
-
                         is NodeMenuAction.RequestUserInfo -> model.requestUserInfo(node.num)
                         is NodeMenuAction.RequestPosition -> model.requestPosition(node.num)
                         is NodeMenuAction.TraceRoute -> model.requestTraceroute(node.num)

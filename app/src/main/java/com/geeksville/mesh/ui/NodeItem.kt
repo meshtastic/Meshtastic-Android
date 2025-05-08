@@ -79,11 +79,13 @@ fun NodeItem(
     gpsFormat: Int,
     distanceUnits: Int,
     tempInFahrenheit: Boolean,
+    modifier: Modifier = Modifier,
     onAction: (NodeMenuAction) -> Unit = {},
     expanded: Boolean = false,
     currentTimeMillis: Long,
     isConnected: Boolean = false,
 ) {
+    val isFavorite = thatNode.isFavorite
     val isIgnored = thatNode.isIgnored
     val longName = thatNode.user.longName.ifEmpty { stringResource(id = R.string.unknown_username) }
 
@@ -113,7 +115,7 @@ fun NodeItem(
     val (detailsShown, showDetails) = remember { mutableStateOf(expanded) }
 
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp)
             .defaultMinSize(minHeight = 80.dp),
@@ -150,7 +152,7 @@ fun NodeItem(
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
                                 text = thatNode.user.shortName.ifEmpty { "???" },
-                                fontWeight = FontWeight.Normal,
+                                fontWeight = if (isFavorite) FontWeight.Bold else FontWeight.Normal,
                                 fontSize = MaterialTheme.typography.button.fontSize,
                                 textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                                 textAlign = TextAlign.Center,
@@ -173,6 +175,7 @@ fun NodeItem(
                     Text(
                         modifier = Modifier.weight(1f),
                         text = longName,
+                        fontWeight = if (isFavorite) FontWeight.Bold else FontWeight.Normal,
                         style = style,
                         textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                         softWrap = true,

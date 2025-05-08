@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="main_tab_channel">Kanal</string>
     <string name="node_filter_placeholder">Filtrimi</string>
     <string name="desc_node_filter_clear">pastro filtrin e nyjës</string>
     <string name="node_filter_include_unknown">Përfshi të panjohurat</string>
     <string name="node_filter_show_details">Shfaq detajet</string>
-    <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Kanal</string>
     <string name="node_sort_distance">Distanca</string>
     <string name="node_sort_hops_away">Hop-e larg</string>
@@ -80,7 +80,6 @@
     <string name="share">Ndaj</string>
     <string name="disconnected">I shkëputur</string>
     <string name="device_sleeping">Pajisja po fle</string>
-    <string name="connected_count">Të lidhur: %1$s nga %2$s në linjë</string>
     <string name="update_firmware">Përditëso firmware-n</string>
     <string name="ip_address">Adresa IP:</string>
     <string name="connected">E lidhur me radio</string>
@@ -164,7 +163,6 @@
     <string name="shutdown">Fik</string>
     <string name="cant_shutdown">Fikja nuk mbështetet në këtë pajisje</string>
     <string name="reboot">Rindiz</string>
-    <string name="traceroute">Traceroute</string>
     <string name="intro_show">Shfaq prezantimin</string>
     <string name="intro_welcome">Mirësevini në Meshtastic</string>
     <string name="intro_welcome_text">Meshtastic është një platformë komunikimi e hapur, jashtë rrjetit, e koduar. Radio Meshtastic formojnë një rrjet mesh dhe komunikojnë duke përdorur protokollin LoRa për të dërguar mesazhe tekstual.</string>
@@ -193,7 +191,6 @@
     <string name="map_select_download_region">Zgjidh rajonin për shkarkim</string>
     <string name="map_tile_download_estimate">Parashikimi i shkarkimit të pllakatës:</string>
     <string name="map_start_download">Filloni shkarkimin</string>
-    <string name="request_position">Kërkoni pozicionin</string>
     <string name="close">Mbylle</string>
     <string name="device_settings">Konfigurimi i radios</string>
     <string name="module_settings">Konfigurimi i modulit</string>
@@ -238,19 +235,15 @@
     <string name="info">Informacion</string>
     <string name="ch_util_definition">Përdorimi për kanalin aktual, duke përfshirë TX të formuar mirë, RX dhe RX të dëmtuar (në gjuhën e thjeshtë: zhurmë).</string>
     <string name="air_util_definition">Përqindja e kohës së përdorur për transmetim brenda orës së kaluar.</string>
-    <string name="iaq">IAQ</string>
     <string name="encryption_psk">Çelësi i Përbashkët</string>
     <string name="encryption_psk_text">Mesazhet direkte po përdorin çelësin e përbashkët për kanalin.</string>
     <string name="encryption_pkc">Kriptimi me Çelës Publik</string>
     <string name="encryption_pkc_text">Mesazhet direkte po përdorin infrastrukturën e re të çelësave publikë për kriptim. Kërkon versionin 2.5 të firmuerit ose më të ri.</string>
     <string name="encryption_error">Përputhje e Gabuar e Çelësit Publik</string>
     <string name="encryption_error_text">Çelësi publik nuk përputhet me çelësin e regjistruar. Mund të hiqni nyjën dhe të lejoni që ajo të shkëmbejë përsëri çelësat, por kjo mund të tregojë një problem më serioz të sigurisë. Kontaktoni përdoruesin përmes një kanali tjetër të besuar për të përcaktuar nëse ndryshimi i çelësit ishte si pasojë e një rikthimi në fabrikë ose një veprim tjetër të qëllimshëm.</string>
-    <string name="request_userinfo">Kërkoni informacionin e përdoruesit</string>
     <string name="meshtastic_new_nodes_notifications">Njoftimet për nyje të reja</string>
     <string name="more_details">Më shumë detaje</string>
-    <string name="snr">SNR</string>
     <string name="snr_definition">Raporti i Sinjalit në Zhurmë, një masë e përdorur në komunikime për të kuantifikuar nivelin e një sinjali të dëshiruar ndaj nivelit të zhurmës në background. Në Meshtastic dhe sisteme të tjera pa tel, një SNR më i lartë tregon një sinjal më të pastër që mund të rrisë besueshmërinë dhe cilësinë e transmetimit të të dhënave.</string>
-    <string name="rssi">RSSI</string>
     <string name="rssi_definition">Indikatori i Fuqisë së Sinjalit të Marrë, një matje e përdorur për të përcaktuar nivelin e energjisë që po merret nga antena. Një vlerë më e lartë RSSI zakonisht tregon një lidhje më të fortë dhe më të qëndrueshme.</string>
     <string name="iaq_definition">(Cilësia e Ajrit të Brendshëm) shkalla relative e vlerës IAQ siç matet nga Bosch BME680. Intervali i Vlerave 0–500.</string>
     <string name="device_metrics_log">Regjistri i Metrikave të Pajisjes</string>
@@ -268,9 +261,7 @@
     <string name="signal_quality">Cilësia e Sinjalit</string>
     <string name="traceroute_log">Regjistri i Traceroute</string>
     <string name="traceroute_direct">Direkt</string>
-    <plurals name="traceroute_hops">
-        <item quantity="one">1 hop</item>
-        <item quantity="other">%d hops</item>
-    </plurals>
     <string name="traceroute_diff">Hops drejt %1$d Hops prapa %2$d</string>
+    <string name="timeout">Koha e skaduar</string>
+    <string name="distance">Distanca</string>
 </resources>

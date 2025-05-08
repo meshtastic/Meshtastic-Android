@@ -217,7 +217,7 @@ fun IAQScale(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.Start
     ) {
         Text(
-            text = "Indoor Air Quality (IAQ)",
+            text = stringResource(R.string.indoor_air_quality_iaq),
             style = MaterialTheme.typography.h6.copy(
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,

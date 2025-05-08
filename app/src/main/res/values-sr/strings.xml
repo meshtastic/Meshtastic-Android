@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="main_tab_messages">Поруке</string>
+    <string name="main_tab_users">Корисници</string>
+    <string name="main_tab_map">Мапа</string>
+    <string name="main_tab_channel">Канал</string>
+    <string name="main_tab_settings">Подешавања</string>
     <string name="node_filter_placeholder">Филтер</string>
     <string name="desc_node_filter_clear">очисти филтер чворова</string>
     <string name="node_filter_include_unknown">Укључи непознато</string>
@@ -40,12 +45,19 @@
     <string name="role_client_hidden">Уређај који преноси само када је потребно ради скривености или уштеде енергије.</string>
     <string name="role_lost_and_found">Преноси локацију као поруку на подразумевани канал редовно како би помогао у проналаску уређаја.</string>
     <string name="role_tak_tracker">Омогућава аутоматске TAK PLI преносе и смањује рутинске преносе.</string>
+    <string name="role_router_late">Инфраструктурни чвор који увек поново емитује пакете само једном, али тек након свих других режима, обезбеђујући додатно покривање за локалне кластере. Видљиво на листи чворова.</string>
     <string name="rebroadcast_mode_all">Поново преноси сваку примећену поруку, ако је била на нашем приватном каналу или из друге мреже са истим LoRA параметрима.</string>
     <string name="rebroadcast_mode_all_skip_decoding">Исто као понашање као ALL, али прескаче декодирање пакета и једноставно их поново преноси. Доступно само у Repeater улози. Постављање овога на било коју другу улогу резултираће ALL понашањем.</string>
     <string name="rebroadcast_mode_local_only">Игнорише примећене поруке из страних мрежа које су отворене или оне које не може да декодира. Поново преноси поруку само на локалне примарне/секундарне канале чвора.</string>
     <string name="rebroadcast_mode_known_only">Игнорише примећене поруке из страних мрежа као LOCAL ONLY, али иде корак даље тако што такође игнорише поруке са чворова који нису већ на листи познатих чворова.</string>
     <string name="rebroadcast_mode_none">Дозвољено само за улоге SENSOR, TRACKER и TAK_TRACKER, ово ће онемогућити све поновне преносе, слично као улога CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only">Игнорише пакете са нестандардним бројевима порта као што су: TAK, RangeTest, PaxCounter, итд. Поново преноси само пакете са стандардним бројевима порта: NodeInfo, Text, Position, Telemetry и Routing.</string>
+    <string name="config_device_doubleTapAsButtonPress_summary">Третирај двоструки тап на подржаним акцелерометрима као притисак корисничког дугмета.</string>
+    <string name="config_device_disableTripleClick_summary">Онемогућава троструко притискање корисничког дугмета за укључивање или искључивање GPS-а.</string>
+    <string name="config_device_ledHeartbeatDisabled_summary">Контролише трепћућу LED лампицу на уређају. За већину уређаја ово ће контролисати једну од до 4 LED лампице, LED лампице за пуњач и GPS нису контролисане.</string>
+    <string name="config_device_transmitOverLora_summary">Да ли би поред слања на MQTT и PhoneAPI, наша NeighborInfo требало да се преноси преко LoRa? Није доступно на каналу са подразумеваним кључем и именом.</string>
+    <string name="config_security_public_key">Јавни кључ</string>
+    <string name="config_security_private_key">Приватни кључ</string>
     <string name="channel_name">Назив канала</string>
     <string name="channel_options">Опције канала</string>
     <string name="qr_code">QR код</string>
@@ -80,7 +92,6 @@
     <string name="share">Подели</string>
     <string name="disconnected">Раскачено</string>
     <string name="device_sleeping">Уређај је у стању спавања</string>
-    <string name="connected_count">Повезано: %1$s од %2$s на мрежи</string>
     <string name="update_firmware">Ажурирај фирмвер</string>
     <string name="ip_address">IP адреса:</string>
     <string name="connected">Повезан на радио уређај</string>
@@ -89,7 +100,7 @@
     <string name="connected_sleeping">Повезан на радио уређај, али уређај је у стању спавања</string>
     <string name="update_to">Ажурирај до %s</string>
     <string name="app_too_old">Неопходно је ажурирање апликације</string>
-    <string name="must_update">Морате ажурирати ову апликацију у продавници апликација (или на Гитхабу). Превише је стара да би могла комуницирати са овим радио фирмвером. Молимо вас да прочитате наша &lt;a href=\'https://meshtastic.org/docs/software/android/installation\'&gt;документа&lt;/a&gt; на ову тему.</string>
+    <string name="must_update">Морате ажурирати ову апликацију у продавници апликација (или на Гитхабу). Превише је стара да би могла комуницирати са овим радио фирмвером. Молимо вас да прочитате нашу <a href="https://meshtastic.org/docs/software/android/installation">документацијау</a> на ову тему.</string>
     <string name="none">Ништа (онемогућено)</string>
     <string name="modem_config_turbo">Кратки домет / Турбо</string>
     <string name="modem_config_short">Кратки домет / Брзо</string>
@@ -113,6 +124,7 @@
     <string name="message_reception_state">статус пријема поруке</string>
     <string name="message_delivery_status">Статус пријема поруке</string>
     <string name="meshtastic_messages_notifications">Обавештења о порукама</string>
+    <string name="meshtastic_alerts_notifications">Обавештења о упозорењима</string>
     <string name="protocol_stress_test">Тест стреса протокола</string>
     <string name="firmware_too_old">Ажурирање фирмвера је неопходно</string>
     <string name="firmware_old">Радио фирмвер је превише стар да би комуницирао са овом апликацијом. За више информација о овоме погледајте <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">наш водич за инсталацију фирмвера</a>.</string>
@@ -194,7 +206,6 @@
     <string name="map_select_download_region">Изаберите регион за преузимање</string>
     <string name="map_tile_download_estimate">Процена преузимања плочица:</string>
     <string name="map_start_download">Започни преузимање</string>
-    <string name="request_position">Захтевај позицију</string>
     <string name="close">Затвори</string>
     <string name="device_settings">Конфигурација радио уређаја</string>
     <string name="module_settings">Конфигурација модула</string>
@@ -246,7 +257,6 @@
     <string name="encryption_pkc_text">Директне поруке користе нову инфраструктуру јавног кључа за шифровање. Потребна је верзија фирмвера 2,5 или новија.</string>
     <string name="encryption_error">Неусаглашеност јавних кључева</string>
     <string name="encryption_error_text">Јавни кључ се не поклапа са забележеним кључем. Можете уклонити чвор и омогућити му поновну размену кључева, али ово може указивати на озбиљнији безбедносни проблем. Контактирајте корисника путем другог поузданог канала да бисте утврдили да ли је промена кључа резултат фабричког ресетовања или друге намерне акције.</string>
-    <string name="request_userinfo">Затражите информације о кориснику</string>
     <string name="meshtastic_new_nodes_notifications">Обавештење о новом чвору</string>
     <string name="more_details">Више детаља</string>
     <string name="snr">SNR</string>
@@ -265,6 +275,8 @@
     <string name="fair">Прихватљиво</string>
     <string name="good">Добро</string>
     <string name="none_quality">Без</string>
+    <string name="share_to">Подели на…</string>
+    <string name="share_message">Подели поруку</string>
     <string name="signal">Сингал</string>
     <string name="signal_quality">Квалитет сигнала</string>
     <string name="traceroute_log">Дневник праћења руте</string>
@@ -275,4 +287,39 @@
         <item quantity="other">%d скокова</item>
     </plurals>
     <string name="traceroute_diff">Скокови ка %1$d Скокови назад %2$d</string>
+    <string name="twenty_four_hours">24ч</string>
+    <string name="forty_eight_hours">48ч</string>
+    <string name="one_week">1н</string>
+    <string name="two_weeks">2н</string>
+    <string name="four_weeks">4н</string>
+    <string name="max">Максимум</string>
+    <string name="unknown_age">Непозната старост</string>
+    <string name="copy">Копирај</string>
+    <string name="alert_bell_text">Карактер звона за упозорења!</string>
+    <string name="channel_settings">Подешавања канала</string>
+    <string name="samsung_instructions">Самсунг инструкције</string>
+    <string name="alerts_dnd_request_title">Омогућите критична упозорења да бисте заобишли поставке не узнемиравај</string>
+    <string name="alerts_dnd_request_text"><![CDATA[Да бисте дозволили критична упозорења док је ваш телефон на режиму не узнемиравај - омогућите „надгласати не узнемиравај” за канал упозорења у подешавањима обавештења апликације Месхтастиц.<br/><br/>Корисници компаније Самсунг ће можда морати да додају изузетак у системска подешавања пре него што га омогуће за канал упозорења. <a href="https://www.samsung.com/latin_en/support/mobile-devices/how-to-use-the-do-not-disturb-mode-on-your-galaxy-phone/">Посетите подршку компаније Самсунг за помоћ.</a>.]]></string>
+    <string name="critical_alert">Критично упозорење!</string>
+    <string name="favorite">Омиљени</string>
+    <string name="favorite_add">Додај „%s” у омиљене чворове?</string>
+    <string name="favorite_remove">Углони „%s” из листе омиљених чворова?</string>
+    <string name="power_metrics_log">Логови метрика снаге</string>
+    <string name="channel_1">Канал 1</string>
+    <string name="channel_2">Канал 2</string>
+    <string name="channel_3">Канал 3</string>
+    <string name="current">Струја</string>
+    <string name="voltage">Напон</string>
+    <string name="are_you_sure">Да ли сте сигурни?</string>
+    <string name="router_role_confirmation_text"><![CDATA[Прочитао сам <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Документацију улога уређаја</a> и објаву на блогу <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Одабир праве улоге за уређај</a>.]]></string>
+    <string name="i_know_what_i_m_doing">Знам шта радим.</string>
+    <string name="low_battery_message">Чвор %s има низак ниво батерије (%d%%)</string>
+    <string name="meshtastic_low_battery_notifications">Нотификације о ниском нивоу батерије</string>
+    <string name="low_battery_title">Низак ниво батерије: %s</string>
+    <string name="meshtastic_low_battery_temporary_remote_notifications">Нотификације о ниском нивоу батерије (омиљени чворови)</string>
+    <string name="messages">Поруке</string>
+    <string name="public_key">Јавни кључ</string>
+    <string name="private_key">Приватни кључ</string>
+    <string name="timeout">Истекло време</string>
+    <string name="distance">Удаљеност</string>
 </resources>

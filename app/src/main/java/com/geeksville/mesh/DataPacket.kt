@@ -58,6 +58,7 @@ data class DataPacket(
     var status: MessageStatus? = MessageStatus.UNKNOWN,
     var hopLimit: Int = 0,
     var channel: Int = 0, // channel index
+    var wantAck: Boolean = true, // If true, the receiver should send an ack back
 ) : Parcelable {
 
     /**
@@ -80,6 +81,13 @@ data class DataPacket(
      */
     val text: String?
         get() = if (dataType == Portnums.PortNum.TEXT_MESSAGE_APP_VALUE) {
+            bytes?.decodeToString()
+        } else {
+            null
+        }
+
+    val alert: String?
+        get() = if (dataType == Portnums.PortNum.ALERT_APP_VALUE) {
             bytes?.decodeToString()
         } else {
             null
@@ -111,6 +119,7 @@ data class DataPacket(
         parcel.readParcelableCompat(MessageStatus::class.java.classLoader),
         parcel.readInt(),
         parcel.readInt(),
+        parcel.readInt() == 1,
     )
 
     override fun equals(other: Any?): Boolean {
@@ -128,6 +137,7 @@ data class DataPacket(
         if (!bytes!!.contentEquals(other.bytes!!)) return false
         if (status != other.status) return false
         if (hopLimit != other.hopLimit) return false
+        if (wantAck != other.wantAck) return false
 
         return true
     }
@@ -142,6 +152,7 @@ data class DataPacket(
         result = 31 * result + status.hashCode()
         result = 31 * result + hopLimit
         result = 31 * result + channel
+        result = 31 * result + wantAck.hashCode()
         return result
     }
 
@@ -155,6 +166,7 @@ data class DataPacket(
         parcel.writeParcelable(status, flags)
         parcel.writeInt(hopLimit)
         parcel.writeInt(channel)
+        parcel.writeInt(if (wantAck) 1 else 0)
     }
 
     override fun describeContents(): Int {
@@ -172,6 +184,7 @@ data class DataPacket(
         status = parcel.readParcelableCompat(MessageStatus::class.java.classLoader)
         hopLimit = parcel.readInt()
         channel = parcel.readInt()
+        wantAck = parcel.readInt() == 1
     }
 
     companion object CREATOR : Parcelable.Creator<DataPacket> {

@@ -1,4 +1,5 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
     <string name="channel_name">Nome do Canal</string>
     <string name="channel_options">Opções do Canal</string>
     <string name="qr_code">Código QR</string>
@@ -33,7 +34,6 @@
     <string name="share">Partilha</string>
     <string name="disconnected">Desconectado</string>
     <string name="device_sleeping">Dispositivo a dormir</string>
-    <string name="connected_count">Conectado: %1$s de %2$s online</string>
     <string name="update_firmware">Atualizar Firmware</string>
     <string name="ip_address">Endereço IP:</string>
     <string name="connected">Conectado ao rádio</string>
@@ -96,7 +96,7 @@
     <string name="modem_config_slow_short">Curto alcance / lento</string>
     <string name="modem_config_slow_medium">Médio alcance / lento</string>
     <plurals name="delete_messages">
-        <item quantity="one" tools:ignore="ImpliedQuantity">Excluir mensagem?</item>
+        <item quantity="one">Excluir mensagem?</item>
         <item quantity="other">Excluir %s mensagens?</item>
     </plurals>
     <string name="delete">Excluir</string>
@@ -142,7 +142,6 @@
     <string name="map_select_download_region">Selecione a região para download</string>
     <string name="map_tile_download_estimate">Estimativa de download do bloco:</string>
     <string name="map_start_download">Iniciar download</string>
-    <string name="request_position">Solicitar posição</string>
     <string name="close">Fechar</string>
     <string name="device_settings">Configurações do dispositivo</string>
     <string name="module_settings">Configurações dos módulos</string>

@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="main_tab_channel">Cainéal</string>
     <string name="node_filter_placeholder">Scagaire</string>
     <string name="desc_node_filter_clear">Cuir scagaire na nóid in áirithe</string>
     <string name="node_filter_include_unknown">Cuir Anaithnid san áireamh</string>
     <string name="node_filter_show_details">Taispeáin sonraí</string>
-    <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Cainéal</string>
     <string name="node_sort_distance">Sáth</string>
     <string name="node_sort_hops_away">Cúlaithe</string>
@@ -42,7 +42,6 @@
     <string name="role_tak_tracker">Ceadaíonn fadhb beathú do bhoganna PLI i sórtú  PLI i feidhm reatha.</string>
     <string name="rebroadcast_mode_all">Athsheoladh aon teachtaireacht i ndáiríre má bhí sí oiriúnach le do cheist go léannais foghlamhrúcháin.</string>
     <string name="rebroadcast_mode_all_skip_decoding">Ceim misniúla thosaí go lucht shnaithte!</string>
-    <string name="rebroadcast_mode_local_only">Ignores observed messages from foreign meshes that are open or those which it cannot decrypt. Only rebroadcasts message on the nodes local primary / secondary channels.</string>
     <string name="rebroadcast_mode_known_only">Cuireann sé bac ar theachtaireachtaí a fhaightear ó mhóilíní seachtracha cosúil le LOCAL ONLY, ach téann sé céim níos faide trí theachtaireachtaí ó nóid nach bhfuil sa liosta aitheanta ag an nóid a chosc freisin.</string>
     <string name="rebroadcast_mode_none">Ceadaítear é seo ach amháin do na róil SENSOR, TRACKER agus TAK_TRACKER, agus cuirfidh sé bac ar gach athdháileadh, cosúil leis an róil CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only">Cuireann sé bac ar phacáistí ó phortníomhaíochtaí neamhchaighdeánacha mar: TAK, RangeTest, PaxCounter, srl. Ní athdháileann ach pacáistí le portníomhaíochtaí caighdeánacha: NodeInfo, Text, Position, Telemetry, agus Routing.</string>
@@ -80,7 +79,6 @@
     <string name="share">Roinn</string>
     <string name="disconnected">Na ceangailte</string>
     <string name="device_sleeping">Gléas ina chodladh</string>
-    <string name="connected_count">Ceangailte: %1$s as %2$s ar líne</string>
     <string name="update_firmware">Nuashonraigh firmware</string>
     <string name="ip_address">Seoladh IP:</string>
     <string name="connected">Ceangailte le raidió</string>
@@ -196,7 +194,6 @@
     <string name="map_select_download_region">Roghnaigh réigiún íoslódála</string>
     <string name="map_tile_download_estimate">Meastachán íoslódála tile:</string>
     <string name="map_start_download">Tosaigh íoslódáil</string>
-    <string name="request_position">Iarr an suíomh</string>
     <string name="close">Dún</string>
     <string name="device_settings">Cumraíocht raidió</string>
     <string name="module_settings">Cumraíocht an mhódule</string>
@@ -248,12 +245,9 @@
     <string name="encryption_pkc_text">Tá teachtaireachtaí díreacha á n-úsáid leis an gcórais eochair phoiblí nua do chriptiú. Riachtanach atá leagan firmware 2.5 nó níos mó.</string>
     <string name="encryption_error">Mícomhoiriúnacht na heochrach phoiblí</string>
     <string name="encryption_error_text">Ní chomhoireann an eochair phoiblí leis an eochair atá cláraithe. Féachfaidh tú le hiarraidh na nod agus athmhaoin na heochrach ach seo féadfaidh a léiriú fadhb níos tromchúisí i gcúrsaí slándála. Téigh i dteagmháil leis an úsáideoir tríd an gcainéal eile atá ar fáil chun a fháil amach an bhfuil athrú eochrach de réir athshocrú monarcha nó aidhm eile ar do chuid.</string>
-    <string name="request_userinfo">Iarr eolas úsáideoirí</string>
     <string name="meshtastic_new_nodes_notifications">Fógartha faoi na nodes nua</string>
     <string name="more_details">Tuilleadh sonraí</string>
-    <string name="snr">SNR</string>
     <string name="snr_definition">Ráta Sigineal go Torann, tomhas a úsáidtear i gcomhfhreagras chun an leibhéal de shígnéil inmhianaithe agus torann cúlra a mheas. I Meshtastic agus i gcórais gan sreang eile, ciallaíonn SNR níos airde go bhfuil sígneál níos soiléire ann agus ábalta méadú ar chreideamh agus cáilíocht an tarchur sonraí.</string>
-    <string name="rssi">RSSI</string>
     <string name="rssi_definition">Táscaire Cumhachta Athnuachana Aithint an Aoise, tomhas a úsáidtear chun leibhéal cumhachta atá faighte ag an antsnáithe a mheas. Léiríonn RSSI níos airde gnóthachtáil níos laige atá i gceangal seasmhach agus níos láidre.</string>
     <string name="iaq_definition">(Cáilíocht Aeir Inmheánach) scála ábhartha den luach QAÍ a thomhas ag Bosch BME680. Scála Luach 0–500.</string>
     <string name="device_metrics_log">Lógáil Táscairí Feiste</string>
@@ -279,4 +273,6 @@
         <item quantity="other">%d céimeanna</item>
     </plurals>
     <string name="traceroute_diff">Céimeanna i dtreo %1$d Céimeanna ar ais %2$d</string>
+    <string name="timeout">Am tráth</string>
+    <string name="distance">Sáth</string>
 </resources>

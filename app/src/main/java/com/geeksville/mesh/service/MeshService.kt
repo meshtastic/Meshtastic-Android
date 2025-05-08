@@ -106,6 +106,7 @@ import kotlin.math.absoluteValue
 
 sealed class ServiceAction {
     data class GetDeviceMetadata(val destNum: Int) : ServiceAction()
+    data class Favorite(val node: Node) : ServiceAction()
     data class Ignore(val node: Node) : ServiceAction()
     data class Reaction(val emoji: String, val replyId: Int, val contactKey: String) : ServiceAction()
 }
@@ -183,7 +184,7 @@ class MeshService : Service(), Logging {
         /** The minimum firmware version we know how to talk to. We'll still be able
          * to talk to 2.0 firmwares but only well enough to ask them to firmware update.
          */
-        val minDeviceVersion = DeviceVersion("2.3.2")
+        val minDeviceVersion = DeviceVersion("2.3.15")
     }
 
     enum class ConnectionState {
@@ -212,6 +213,13 @@ class MeshService : Service(), Logging {
     private var locationFlow: Job? = null
     private var mqttMessageFlow: Job? = null
 
+    private val batteryPercentUnsupported = 0.0
+    private val batteryPercentLowThreshold = 20
+    private val batteryPercentLowDivisor = 5
+    private val batteryPercentCriticalThreshold = 5
+    private val batteryPercentCooldownSeconds = 1500
+    private val batteryPercentCooldowns: HashMap<Int, Long> = HashMap()
+
     private fun getSenderName(packet: DataPacket?): String {
         val name = nodeDBbyID[packet?.from]?.user?.longName
         return name ?: getString(R.string.unknown_username)
@@ -220,8 +228,7 @@ class MeshService : Service(), Logging {
     private val notificationSummary
         get() = when (connectionState) {
             ConnectionState.CONNECTED -> getString(R.string.connected_count).format(
-                numOnlineNodes,
-                numNodes
+                numOnlineNodes
             )
             ConnectionState.DISCONNECTED -> getString(R.string.disconnected)
             ConnectionState.DEVICE_SLEEP -> getString(R.string.device_sleeping)
@@ -300,6 +307,14 @@ class MeshService : Service(), Logging {
         startPacketQueue()
     }
 
+    private fun showAlertNotification(contactKey: String, dataPacket: DataPacket) {
+        serviceNotifications.showAlertNotification(
+            contactKey,
+            getSenderName(dataPacket),
+            dataPacket.alert ?: getString(R.string.critical_alert)
+        )
+    }
+
     private fun updateMessageNotification(contactKey: String, dataPacket: DataPacket) {
         val message: String = when (dataPacket.dataType) {
             Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> dataPacket.text!!
@@ -316,7 +331,7 @@ class MeshService : Service(), Logging {
         super.onCreate()
 
         info("Creating mesh service")
-
+        serviceNotifications.initChannels()
         // Switch to the IO thread
         serviceScope.handledLaunch {
             radioInterfaceService.connect()
@@ -461,7 +476,7 @@ class MeshService : Service(), Logging {
         }
 
     // given a nodeNum, return a db entry - creating if necessary
-    private fun getOrCreateNodeInfo(n: Int) = nodeDBbyNodeNum.getOrPut(n) {
+    private fun getOrCreateNodeInfo(n: Int, channel: Int = 0) = nodeDBbyNodeNum.getOrPut(n) {
         val userId = DataPacket.nodeNumToDefaultId(n)
         val defaultUser = user {
             id = userId
@@ -474,6 +489,7 @@ class MeshService : Service(), Logging {
             num = n,
             user = defaultUser,
             longName = defaultUser.longName,
+            channel = channel,
         )
     }
 
@@ -515,9 +531,10 @@ class MeshService : Service(), Logging {
     private inline fun updateNodeInfo(
         nodeNum: Int,
         withBroadcast: Boolean = true,
+        channel: Int = 0,
         crossinline updateFn: (NodeEntity) -> Unit,
     ) {
-        val info = getOrCreateNodeInfo(nodeNum)
+        val info = getOrCreateNodeInfo(nodeNum, channel)
         updateFn(info)
 
         if (info.user.id.isNotEmpty() && haveNodeDB) {
@@ -637,6 +654,7 @@ class MeshService : Service(), Logging {
                 bytes = data.payload.toByteArray(),
                 hopLimit = packet.hopLimit,
                 channel = if (packet.pkiEncrypted) DataPacket.PKC_CHANNEL_INDEX else packet.channel,
+                wantAck = packet.wantAck,
             )
         }
     }
@@ -644,7 +662,7 @@ class MeshService : Service(), Logging {
     private fun toMeshPacket(p: DataPacket): MeshPacket {
         return newMeshPacketTo(p.to!!).buildMeshPacket(
             id = p.id,
-            wantAck = true,
+            wantAck = p.wantAck,
             hopLimit = p.hopLimit,
             channel = p.channel,
         ) {
@@ -655,6 +673,7 @@ class MeshService : Service(), Logging {
 
     private val rememberDataType = setOf(
         Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+        Portnums.PortNum.ALERT_APP_VALUE,
         Portnums.PortNum.WAYPOINT_APP_VALUE,
     )
 
@@ -691,7 +710,11 @@ class MeshService : Service(), Logging {
             packetRepository.get().apply {
                 insert(packetToSave)
                 val isMuted = getContactSettings(contactKey).isMuted
-                if (updateNotification && !isMuted) updateMessageNotification(contactKey, dataPacket)
+                if (packetToSave.port_num == Portnums.PortNum.ALERT_APP_VALUE && !isMuted) {
+                    showAlertNotification(contactKey, dataPacket)
+                } else if (updateNotification && !isMuted) {
+                    updateMessageNotification(contactKey, dataPacket)
+                }
             }
         }
     }
@@ -727,6 +750,11 @@ class MeshService : Service(), Logging {
                             debug("Received CLEAR_TEXT from $fromId")
                             rememberDataPacket(dataPacket)
                         }
+                    }
+
+                    Portnums.PortNum.ALERT_APP_VALUE -> {
+                        debug("Received ALERT_APP from $fromId")
+                        rememberDataPacket(dataPacket)
                     }
 
                     Portnums.PortNum.WAYPOINT_APP_VALUE -> {
@@ -875,9 +903,13 @@ class MeshService : Service(), Logging {
             val newNode = (it.isUnknownUser && p.hwModel != MeshProtos.HardwareModel.UNSET)
 
             val keyMatch = !it.hasPKC || it.user.publicKey == p.publicKey
-            it.user = if (keyMatch) p else p.copy {
-                warn("Public key mismatch from $longName ($shortName)")
-                publicKey = it.errorByteString
+            it.user = if (keyMatch) {
+                p
+            } else {
+                p.copy {
+                    warn("Public key mismatch from $longName ($shortName)")
+                    publicKey = NodeEntity.ERROR_BYTE_STRING
+                }
             }
             it.longName = p.longName
             it.shortName = p.shortName
@@ -920,11 +952,57 @@ class MeshService : Service(), Logging {
         }
         updateNodeInfo(fromNum) {
             when {
-                t.hasDeviceMetrics() -> it.deviceTelemetry = t
+                t.hasDeviceMetrics() -> {
+                    it.deviceTelemetry = t
+                    val isRemote = (fromNum != myNodeNum)
+                    if (fromNum == myNodeNum || (isRemote && it.isFavorite)) {
+                        if (t.deviceMetrics.voltage > batteryPercentUnsupported &&
+                            t.deviceMetrics.batteryLevel <= batteryPercentLowThreshold
+                        ) {
+                            if (shouldBatteryNotificationShow(fromNum, t)) {
+                                serviceNotifications.showOrUpdateLowBatteryNotification(
+                                    it,
+                                    isRemote
+                                )
+                            }
+                        } else {
+                            if (batteryPercentCooldowns.containsKey(fromNum)) {
+                                batteryPercentCooldowns.remove(fromNum)
+                            }
+                            serviceNotifications.cancelLowBatteryNotification(it)
+                        }
+                    }
+                }
                 t.hasEnvironmentMetrics() -> it.environmentTelemetry = t
                 t.hasPowerMetrics() -> it.powerTelemetry = t
             }
         }
+    }
+
+    private fun shouldBatteryNotificationShow(fromNum: Int, t: TelemetryProtos.Telemetry): Boolean {
+        val isRemote = (fromNum != myNodeNum)
+        var shouldDisplay = false
+        var forceDisplay = false
+        when {
+            t.deviceMetrics.batteryLevel <= batteryPercentCriticalThreshold -> {
+                shouldDisplay = true
+                forceDisplay = true
+            }
+            t.deviceMetrics.batteryLevel == batteryPercentLowThreshold -> shouldDisplay = true
+            t.deviceMetrics.batteryLevel.mod(batteryPercentLowDivisor) == 0 && !isRemote -> shouldDisplay = true
+            isRemote -> shouldDisplay = true
+        }
+        if (shouldDisplay) {
+            val now = System.currentTimeMillis() / 1000
+            if (!batteryPercentCooldowns.containsKey(fromNum)) batteryPercentCooldowns[fromNum] = 0
+            if ((now - batteryPercentCooldowns[fromNum]!!) >= batteryPercentCooldownSeconds ||
+                forceDisplay
+            ) {
+                batteryPercentCooldowns[fromNum] = now
+                return true
+            }
+        }
+        return false
     }
 
     private fun handleReceivedPaxcounter(fromNum: Int, p: PaxcountProtos.Paxcount) {
@@ -1141,7 +1219,7 @@ class MeshService : Service(), Logging {
 
             // Do not generate redundant broadcasts of node change for this bookkeeping updateNodeInfo call
             // because apps really only care about important updates of node state - which handledReceivedData will give them
-            updateNodeInfo(fromNum, withBroadcast = false) {
+            updateNodeInfo(fromNum, withBroadcast = false, channel = packet.channel) {
                 // Update our last seen based on any valid timestamps.  If the device didn't provide a timestamp make one
                 it.lastHeard = packet.rxTime
                 it.snr = packet.rxSnr
@@ -1499,7 +1577,7 @@ class MeshService : Service(), Logging {
         insertMeshLog(packetToSave)
 
         newNodes.add(info)
-        radioConfigRepository.setStatusMessage("Nodes (${newNodes.size} / 100)")
+        radioConfigRepository.setStatusMessage("Nodes (${newNodes.size})")
     }
 
     private var rawMyNodeInfo: MeshProtos.MyNodeInfo? = null
@@ -1791,6 +1869,7 @@ class MeshService : Service(), Logging {
     private fun onServiceAction(action: ServiceAction) {
         when (action) {
             is ServiceAction.GetDeviceMetadata -> getDeviceMetadata(action.destNum)
+            is ServiceAction.Favorite -> favoriteNode(action.node)
             is ServiceAction.Ignore -> ignoreNode(action.node)
             is ServiceAction.Reaction -> sendReaction(action)
         }
@@ -1800,6 +1879,21 @@ class MeshService : Service(), Logging {
         sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(wantResponse = true) {
             getDeviceMetadataRequest = true
         })
+    }
+
+    private fun favoriteNode(node: Node) = toRemoteExceptions {
+        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+            if (node.isFavorite) {
+                debug("removing node ${node.num} from favorite list")
+                removeFavoriteNode = node.num
+            } else {
+                debug("adding node ${node.num} to favorite list")
+                setFavoriteNode = node.num
+            }
+        })
+        updateNodeInfo(node.num) {
+            it.isFavorite = !node.isFavorite
+        }
     }
 
     private fun ignoreNode(node: Node) = toRemoteExceptions {

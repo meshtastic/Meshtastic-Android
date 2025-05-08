@@ -17,9 +17,8 @@
 
 package com.geeksville.mesh.ui.components
 
-import android.graphics.Paint
-import android.graphics.Typeface
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,8 +30,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Card
 import androidx.compose.material.Surface
@@ -46,11 +47,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -60,26 +58,23 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.MetricsViewModel
+import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
-import com.geeksville.mesh.ui.components.CommonCharts.LINE_LIMIT
-import com.geeksville.mesh.ui.components.CommonCharts.TEXT_PAINT_ALPHA
-import com.geeksville.mesh.ui.components.CommonCharts.LEFT_LABEL_SPACING
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
-
-private val METRICS_COLORS = listOf(Color.Green, Color.Blue)
+import com.geeksville.mesh.util.GraphUtil.plotPoint
 
 @Suppress("MagicNumber")
-private enum class Metric(val min: Float, val max: Float) {
-    SNR(-20f, 12f), /* Selected 12 as the max to get 4 equal vertical sections. */
-    RSSI(-140f, -20f);
+private enum class Metric(val color: Color, val min: Float, val max: Float) {
+    SNR(Color.Green, -20f, 12f), /* Selected 12 as the max to get 4 equal vertical sections. */
+    RSSI(Color.Blue, -140f, -20f);
     /**
      * Difference between the metrics `max` and `min` values.
      */
     fun difference() = max - min
 }
 private val LEGEND_DATA = listOf(
-    LegendData(nameRes = R.string.rssi, color = METRICS_COLORS[Metric.RSSI.ordinal]),
-    LegendData(nameRes = R.string.snr, color = METRICS_COLORS[Metric.SNR.ordinal])
+    LegendData(nameRes = R.string.rssi, color = Metric.RSSI.color),
+    LegendData(nameRes = R.string.snr, color = Metric.SNR.color)
 )
 
 @Composable
@@ -108,14 +103,16 @@ fun SignalMetricsScreen(
                 .fillMaxWidth()
                 .fillMaxHeight(fraction = 0.33f),
             meshPackets = data.reversed(),
+            selectedTimeFrame,
             promptInfoDialog = { displayInfoDialog = true }
         )
 
-        MetricsTimeSelector(
+        SlidingSelector(
+            TimeFrame.entries.toList(),
             selectedTimeFrame,
             onOptionSelected = { viewModel.setTimeFrame(it) }
         ) {
-            TimeLabel(stringResource(it.strRes))
+            OptionLabel(stringResource(it.strRes))
         }
 
         LazyColumn(
@@ -126,21 +123,30 @@ fun SignalMetricsScreen(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun SignalMetricsChart(
     modifier: Modifier = Modifier,
     meshPackets: List<MeshPacket>,
+    selectedTime: TimeFrame,
     promptInfoDialog: () -> Unit
 ) {
-
     ChartHeader(amount = meshPackets.size)
     if (meshPackets.isEmpty()) {
         return
     }
 
+    val (oldest, newest) = remember(key1 = meshPackets) {
+        Pair(
+            meshPackets.minBy { it.rxTime },
+            meshPackets.maxBy { it.rxTime }
+        )
+    }
+    val timeDiff = newest.rxTime - oldest.rxTime
+
     TimeLabels(
-        oldest = meshPackets.first().rxTime,
-        newest = meshPackets.last().rxTime
+        oldest = oldest.rxTime,
+        newest = newest.rxTime
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -149,100 +155,80 @@ private fun SignalMetricsChart(
     val snrDiff = Metric.SNR.difference()
     val rssiDiff = Metric.RSSI.difference()
 
-    Box(contentAlignment = Alignment.TopStart) {
+    val scrollState = rememberScrollState()
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp
+    val dp by remember(key1 = selectedTime) {
+        mutableStateOf(selectedTime.dp(screenWidth, time = (newest.rxTime - oldest.rxTime).toLong()))
+    }
 
-        ChartOverlay(
-            modifier = modifier,
-            lineColors = List(size = 5) { graphColor },
-            labelColor = METRICS_COLORS[Metric.SNR.ordinal],
+    Row {
+        YAxisLabels(
+            modifier = modifier.weight(weight = .1f),
+            Metric.RSSI.color,
+            minValue = Metric.RSSI.min,
+            maxValue = Metric.RSSI.max,
+        )
+        Box(
+            contentAlignment = Alignment.TopStart,
+            modifier = Modifier
+                .horizontalScroll(state = scrollState, reverseScrolling = true)
+                .weight(1f)
+        ) {
+            HorizontalLinesOverlay(
+                modifier.width(dp),
+                lineColors = List(size = 5) { graphColor },
+            )
+
+            TimeAxisOverlay(
+                modifier.width(dp),
+                oldest = oldest.rxTime,
+                newest = newest.rxTime,
+                selectedTime.lineInterval()
+            )
+
+            /* Plot SNR and RSSI */
+            Canvas(modifier = modifier.width(dp)) {
+                val width = size.width
+                /* Plot */
+                for (packet in meshPackets) {
+
+                    val xRatio = (packet.rxTime - oldest.rxTime).toFloat() / timeDiff
+                    val x = xRatio * width
+
+                    /* SNR */
+                    plotPoint(
+                        drawContext = drawContext,
+                        color = Metric.SNR.color,
+                        x = x,
+                        value = packet.rxSnr - Metric.SNR.min,
+                        divisor = snrDiff
+                    )
+
+                    /* RSSI */
+                    plotPoint(
+                        drawContext = drawContext,
+                        color = Metric.RSSI.color,
+                        x = x,
+                        value = packet.rxRssi - Metric.RSSI.min,
+                        divisor = rssiDiff
+                    )
+                }
+            }
+        }
+        YAxisLabels(
+            modifier = modifier.weight(weight = .1f),
+            Metric.SNR.color,
             minValue = Metric.SNR.min,
             maxValue = Metric.SNR.max,
-            leaveSpace = true
         )
-        LeftYLabels(modifier = modifier, labelColor = METRICS_COLORS[Metric.RSSI.ordinal])
-
-        /* Plot SNR and RSSI */
-        Canvas(modifier = modifier) {
-
-            val height = size.height
-            val width = size.width - 28.dp.toPx()
-            val spacing = LEFT_LABEL_SPACING.dp.toPx()
-            val spacePerEntry = (width - spacing) / meshPackets.size
-
-            /* Plot */
-            val dataPointRadius = 2.dp.toPx()
-            for ((i, packet) in meshPackets.withIndex()) {
-
-                val x = spacing + i * spacePerEntry
-
-                /* SNR */
-                val snrRatio = (packet.rxSnr - Metric.SNR.min) / snrDiff
-                val ySNR = height - (snrRatio * height)
-                drawCircle(
-                    color = METRICS_COLORS[Metric.SNR.ordinal],
-                    radius = dataPointRadius,
-                    center = Offset(x, ySNR)
-                )
-
-                /* RSSI */
-                val rssiRatio = (packet.rxRssi - Metric.RSSI.min) / rssiDiff
-                val yRssi = height - (rssiRatio * height)
-                drawCircle(
-                    color = METRICS_COLORS[Metric.RSSI.ordinal],
-                    radius = dataPointRadius,
-                    center = Offset(x, yRssi)
-                )
-            }
-        }
     }
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    Legend(legendData = LEGEND_DATA, promptInfoDialog)
+    Legend(legendData = LEGEND_DATA, promptInfoDialog = promptInfoDialog)
 
     Spacer(modifier = Modifier.height(16.dp))
-}
-
-/**
- * Draws a set of Y labels on the left side of the graph.
- * Currently only used for the RSSI labels.
- */
-@Composable
-private fun LeftYLabels(
-    modifier: Modifier,
-    labelColor: Color,
-) {
-    val range = Metric.RSSI.difference()
-    val verticalSpacing = range / LINE_LIMIT
-    val density = LocalDensity.current
-    Canvas(modifier = modifier) {
-
-        val height = size.height
-
-        /* Y Labels */
-
-        val textPaint = Paint().apply {
-            color = labelColor.toArgb()
-            textAlign = Paint.Align.LEFT
-            textSize = density.run { 12.dp.toPx() }
-            typeface = setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD))
-            alpha = TEXT_PAINT_ALPHA
-        }
-        drawContext.canvas.nativeCanvas.apply {
-            var label = Metric.RSSI.min
-            for (i in 0..LINE_LIMIT) {
-                val ratio = (label - Metric.RSSI.min) / range
-                val y = height - (ratio * height)
-                drawText(
-                    "${label.toInt()}",
-                    4.dp.toPx(),
-                    y + 4.dp.toPx(),
-                    textPaint
-                )
-                label += verticalSpacing
-            }
-        }
-    }
 }
 
 @Composable

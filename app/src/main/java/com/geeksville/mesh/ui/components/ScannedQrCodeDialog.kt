@@ -56,7 +56,7 @@ import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.components.config.ChannelSelection
+import com.geeksville.mesh.ui.radioconfig.components.ChannelSelection
 
 @Composable
 fun ScannedQrCodeDialog(

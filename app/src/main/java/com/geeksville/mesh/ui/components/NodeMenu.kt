@@ -47,8 +47,25 @@ fun NodeMenu(
     expanded: Boolean = false,
     onAction: (NodeMenuAction) -> Unit
 ) {
+    var displayFavoriteDialog by remember { mutableStateOf(false) }
     var displayIgnoreDialog by remember { mutableStateOf(false) }
     var displayRemoveDialog by remember { mutableStateOf(false) }
+    if (displayFavoriteDialog) {
+        SimpleAlertDialog(
+            title = R.string.favorite,
+            text = stringResource(
+                id = if (node.isFavorite) R.string.favorite_remove else R.string.favorite_add,
+                node.user.longName
+            ),
+            onConfirm = {
+                displayFavoriteDialog = false
+                onAction(NodeMenuAction.Favorite(node))
+            },
+            onDismiss = {
+                displayFavoriteDialog = false
+            }
+        )
+    }
     if (displayIgnoreDialog) {
         SimpleAlertDialog(
             title = R.string.ignore,
@@ -97,14 +114,14 @@ fun NodeMenu(
                     onDismissRequest()
                     onAction(NodeMenuAction.RequestUserInfo(node))
                 },
-                content = { Text(stringResource(R.string.request_userinfo)) }
+                content = { Text(stringResource(R.string.exchange_userinfo)) }
             )
             DropdownMenuItem(
                 onClick = {
                     onDismissRequest()
                     onAction(NodeMenuAction.RequestPosition(node))
                 },
-                content = { Text(stringResource(R.string.request_position)) }
+                content = { Text(stringResource(R.string.exchange_position)) }
             )
             DropdownMenuItem(
                 onClick = {
@@ -113,6 +130,25 @@ fun NodeMenu(
                 },
                 content = { Text(stringResource(R.string.traceroute)) }
             )
+            DropdownMenuItem(
+                onClick = {
+                    onDismissRequest()
+                    displayFavoriteDialog = true
+                },
+                enabled = !node.isIgnored,
+            ) {
+                Text(stringResource(R.string.favorite))
+                Spacer(Modifier.weight(1f))
+                Checkbox(
+                    checked = node.isFavorite,
+                    onCheckedChange = {
+                        onDismissRequest()
+                        displayFavoriteDialog = true
+                    },
+                    modifier = Modifier.size(24.dp),
+                    enabled = !node.isIgnored,
+                )
+            }
             DropdownMenuItem(
                 onClick = {
                     onDismissRequest()
@@ -152,6 +188,7 @@ fun NodeMenu(
 sealed class NodeMenuAction {
     data class Remove(val node: Node) : NodeMenuAction()
     data class Ignore(val node: Node) : NodeMenuAction()
+    data class Favorite(val node: Node) : NodeMenuAction()
     data class DirectMessage(val node: Node) : NodeMenuAction()
     data class RequestUserInfo(val node: Node) : NodeMenuAction()
     data class RequestPosition(val node: Node) : NodeMenuAction()

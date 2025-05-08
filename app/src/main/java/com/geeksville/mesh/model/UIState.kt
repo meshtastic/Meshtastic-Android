@@ -63,7 +63,6 @@ import com.geeksville.mesh.util.getShortDate
 import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -86,13 +85,13 @@ import javax.inject.Inject
 import kotlin.math.roundToInt
 
 // Given a human name, strip out the first letter of the first three words and return that as the initials for
-// that user. If the original name is only one word, strip vowels from the original name and if the result is
-// 3 or more characters, use the first three characters. If not, just take the first 3 characters of the
-// original name.
+// that user, ignoring emojis. If the original name is only one word, strip vowels from the original
+// name and if the result is 3 or more characters, use the first three characters. If not, just take
+// the first 3 characters of the original name.
 fun getInitials(nameIn: String): String {
     val nchars = 4
     val minchars = 2
-    val name = nameIn.trim()
+    val name = nameIn.trim().withoutEmojis()
     val words = name.split(Regex("\\s+")).filter { it.isNotEmpty() }
 
     val initials = when (words.size) {
@@ -108,6 +107,8 @@ fun getInitials(nameIn: String): String {
     }
     return initials.take(nchars)
 }
+
+private fun String.withoutEmojis(): String = filterNot { char -> char.isSurrogate() }
 
 /**
  * Builds a [Channel] list from the difference between two [ChannelSettings] lists.
@@ -231,9 +232,18 @@ class UIViewModel @Inject constructor(
         initialValue = NodesUiState.Empty,
     )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val nodeList: StateFlow<List<Node>> = nodesUiState.flatMapLatest { state ->
         nodeDB.getNodes(state.sort, state.filter, state.includeUnknown)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = emptyList(),
+    )
+
+    val filteredNodeList: StateFlow<List<Node>> = nodeList.mapLatest { list ->
+        list.filter { node ->
+            !node.isIgnored
+        }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -327,11 +337,9 @@ class UIViewModel @Inject constructor(
         initialValue = emptyList(),
     )
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey)
         .mapLatest { list -> list.map { it.toMessage(::getNode) } }
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     val waypoints = packetRepository.getWaypoints().mapLatest { list ->
         list.associateBy { packet -> packet.data.waypoint!!.id }
             .filterValues { it.data.waypoint!!.expire > System.currentTimeMillis() / 1000 }
@@ -472,6 +480,14 @@ class UIViewModel @Inject constructor(
         set(value) {
             updateLoraConfig { it.copy { region = value } }
         }
+
+    fun favoriteNode(node: Node) = viewModelScope.launch {
+        try {
+            radioConfigRepository.onServiceAction(ServiceAction.Favorite(node))
+        } catch (ex: RemoteException) {
+            errormsg("Favorite node error:", ex)
+        }
+    }
 
     fun ignoreNode(node: Node) = viewModelScope.launch {
         try {

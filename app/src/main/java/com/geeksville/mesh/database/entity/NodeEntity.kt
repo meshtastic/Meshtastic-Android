@@ -151,7 +151,7 @@ data class NodeEntity(
 
     val isUnknownUser get() = user.hwModel == MeshProtos.HardwareModel.UNSET
     val hasPKC get() = !user.publicKey.isEmpty
-    val errorByteString: ByteString get() = ByteString.copyFrom(ByteArray(32) { 0 })
+    val errorByteString: ByteString get() = ERROR_BYTE_STRING
 
     fun setPosition(p: MeshProtos.Position, defaultTime: Int = currentTime()) {
         position = p.copy { time = if (p.time != 0) p.time else defaultTime }
@@ -174,6 +174,7 @@ data class NodeEntity(
         fun degD(i: Int) = i * 1e-7
         fun degI(d: Double) = (d * 1e7).toInt()
 
+        val ERROR_BYTE_STRING: ByteString = ByteString.copyFrom(ByteArray(32) { 0 })
         fun currentTime() = (System.currentTimeMillis() / 1000).toInt()
     }
 

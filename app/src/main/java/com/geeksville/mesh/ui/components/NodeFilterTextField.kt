@@ -22,6 +22,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
@@ -43,19 +44,20 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.NodeSortOption
+import com.geeksville.mesh.ui.compose.preview.LargeFontPreview
 import com.geeksville.mesh.ui.theme.AppTheme
 
 @Composable
@@ -80,6 +82,7 @@ fun NodeFilterTextField(
         )
 
         NodeSortButton(
+            modifier = Modifier.align(Alignment.CenterVertically),
             currentSortOption = currentSortOption,
             onSortSelect = onSortSelect,
             includeUnknown = includeUnknown,
@@ -101,7 +104,7 @@ private fun NodeFilterTextField(
 
     OutlinedTextField(
         modifier = modifier
-            .heightIn(max = 48.dp)
+            .defaultMinSize(minHeight = 48.dp)
             .onFocusEvent { isFocused = it.isFocused },
         value = filterText,
         placeholder = {
@@ -130,7 +133,7 @@ private fun NodeFilterTextField(
                 )
             }
         },
-        textStyle = TextStyle(
+        textStyle = MaterialTheme.typography.body1.copy(
             color = MaterialTheme.colors.onBackground
         ),
         maxLines = 1,
@@ -159,7 +162,7 @@ private fun NodeSortButton(
     IconButton(onClick = { expanded = true }) {
         Icon(
             imageVector = ImageVector.vectorResource(id = R.drawable.ic_twotone_sort_24),
-            contentDescription = null,
+            contentDescription = stringResource(R.string.node_sort_button),
             modifier = Modifier.heightIn(max = 48.dp),
             tint = MaterialTheme.colors.onSurface
         )
@@ -223,6 +226,7 @@ private fun NodeSortButton(
 }
 
 @PreviewLightDark
+@LargeFontPreview
 @Composable
 private fun NodeFilterTextFieldPreview() {
     AppTheme {

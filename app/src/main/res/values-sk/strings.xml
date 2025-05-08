@@ -1,15 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="main_tab_messages">Správy</string>
+    <string name="main_tab_users">Používatelia</string>
+    <string name="main_tab_map">Mapa</string>
+    <string name="main_tab_channel">Kanál</string>
+    <string name="main_tab_settings">Nastavenia</string>
     <string name="node_filter_placeholder">Filter</string>
-    <string name="desc_node_filter_clear">vyčistiť filter uzlov</string>
+    <string name="desc_node_filter_clear">vymazať filter uzlov</string>
     <string name="node_filter_include_unknown">Vrátane neznámych</string>
     <string name="node_filter_show_details">Zobraziť detaily</string>
+    <string name="node_sort_button">Nastavenie triedenia uzlov</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Kanál</string>
     <string name="node_sort_distance">Vzdialenosť</string>
     <string name="node_sort_hops_away">Počet skokov</string>
     <string name="node_sort_last_heard">Posledný príjem</string>
     <string name="node_sort_via_mqtt">cez MQTT</string>
+    <string name="node_sort_via_favorite">Prostredníctvom obľúbených</string>
     <string name="unrecognized">Nerozoznaný</string>
     <string name="message_status_enroute">Čaká sa na potvrdenie</string>
     <string name="message_status_queued">Vo fronte na odoslanie</string>
@@ -40,12 +47,19 @@
     <string name="role_client_hidden">Zariadenie, ktoré vysiela len podľa potreby pre utajenie, alebo úsporu energie.</string>
     <string name="role_lost_and_found">Pravidelne vysiela polohu ako správu na predvolený kanál, aby pomohol pri obnove zariadenia.</string>
     <string name="role_tak_tracker">Umožňuje automatické vysielanie TAK PLI a znižuje rutinné vysielanie.</string>
+    <string name="role_router_late">Uzol infraštruktúry, ktorý vždy preposiela pakety raz, ale až po všetkých ostatných režimoch, čím zabezpečuje dodatočné pokrytie pre miestne zväzky. Viditeľný v zozname uzlov.</string>
     <string name="rebroadcast_mode_all">Preposiela akúkoľvek pozorovanú správu, ak bola na našom súkromnom kanáli alebo z inej siete s rovnakými parametrami lora.</string>
     <string name="rebroadcast_mode_all_skip_decoding">Rovnaké ako správanie ako ALL, ale preskočí dekódovanie paketov a jednoducho ich prepošle. Dostupné iba v úlohe Opakovača. Nastavenie tejto možnosti na akékoľvek iné roly bude mať za následok správania sa ako ALL.</string>
     <string name="rebroadcast_mode_local_only">Ignoruje pozorované správy z cudzích sietí, ktoré sú otvorené alebo tie, ktoré nedokáže dešifrovať. Opätovne vysiela správu iba na lokálnych primárnych / sekundárnych kanáloch uzlov.</string>
     <string name="rebroadcast_mode_known_only">Ignoruje pozorované správy z cudzích sietí, ako napríklad LOCAL ONLY, ale ide o krok ďalej tým, že ignoruje aj správy z uzlov, ktoré ešte nie sú v známom zozname uzla.</string>
     <string name="rebroadcast_mode_none">Povolené len pre role SENSOR, TRACKER a TAK_TRACKER, zamedzí to všetkým opätovným vysielaniam, na rozdiel od roly CLIENT_MUTE.</string>
     <string name="rebroadcast_mode_core_portnums_only">Ignoruje pakety z neštandardných portov, ako sú: TAK, RangeTest, PaxCounter atď. Opätovne vysiela iba pakety so štandardnými portami: NodeInfo, Text, Position, Telemetry a Routing.</string>
+    <string name="config_device_doubleTapAsButtonPress_summary">Vykoná dvojklepnutie na podporovaných akcelerometroch ako stlačenie užívateľského tlačidla.</string>
+    <string name="config_device_disableTripleClick_summary">Vypne trojité stlačenie užívateľského tlačidla pre zapnutie, alebo vypnutie GPS.</string>
+    <string name="config_device_ledHeartbeatDisabled_summary">Ovláda blikajúcu LED na zariadení. Pre väčšinu zariadení toto ovláda jednu zo štyroch LED, neovláda LED pre GPS a nabíjanie.</string>
+    <string name="config_device_transmitOverLora_summary">Okrem odoslania do MQTT a PhoneAPI je prenášanie informácii o susedoch prostredníctvom LoRa. Nedostupné na kanáli s predvoleným kľúčom a názvom.</string>
+    <string name="config_security_public_key">Verejný kľúč</string>
+    <string name="config_security_private_key">Súkromný kľúč</string>
     <string name="channel_name">Názov kanála</string>
     <string name="channel_options">Nastavenia kanála</string>
     <string name="qr_code">QR kód</string>
@@ -61,7 +75,7 @@
     <string name="analytics_okay">Anonymné štatistiky používania a správy o zlyhaní.</string>
     <string name="looking_for_meshtastic_devices">Vyhľadávam Meshtastic zariadenia…</string>
     <string name="starting_pairing">Spúšťam párovanie</string>
-    <string name="url_for_join">URL pre pripojenie sa do Meshtastic MESH siete</string>
+    <string name="url_for_join">URL pre pripojenie sa do siete Meshtastic</string>
     <string name="accept">Prijať</string>
     <string name="cancel">Odmietnuť</string>
     <string name="change_channel">Zmeniť kanál</string>
@@ -80,7 +94,6 @@
     <string name="share">Zdieľať</string>
     <string name="disconnected">Odpojené</string>
     <string name="device_sleeping">Vysielač uspaný</string>
-    <string name="connected_count">Pripojený: %1$s z %2$s je online</string>
     <string name="update_firmware">Aktualizácia firmvéru</string>
     <string name="ip_address">IP adresa:</string>
     <string name="connected">Pripojené k vysielaču</string>
@@ -113,6 +126,7 @@
     <string name="message_reception_state">stav prijatia správy</string>
     <string name="message_delivery_status">Stav doručenia správy</string>
     <string name="meshtastic_messages_notifications">Upozornenia na správy</string>
+    <string name="meshtastic_alerts_notifications">Notifikácie upozornení</string>
     <string name="protocol_stress_test">Test vyťaženia protokolu</string>
     <string name="firmware_too_old">Nutná aktualizácia firmvéru</string>
     <string name="firmware_old">Firmvér vysielača je príliš zastaralý, aby dokázal komunikovať s aplikáciou. Viac informácií nájdete na <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">našom sprievodcovi inštaláciou firmvéru</a>.</string>
@@ -195,7 +209,7 @@
     <string name="map_select_download_region">Vybrať oblasť na stiahnutie</string>
     <string name="map_tile_download_estimate">Odhad sťahovania dlaždíc:</string>
     <string name="map_start_download">Spustiť sťahovanie</string>
-    <string name="request_position">Požiadať o pozíciu</string>
+    <string name="exchange_position">Vymeniť si pozície</string>
     <string name="close">Zavrieť</string>
     <string name="device_settings">Konfigurácia vysielača</string>
     <string name="module_settings">Konfigurácia modulu</string>
@@ -247,7 +261,7 @@
     <string name="encryption_pkc_text">Priame správy využívajú na šifrovanie novú infraštruktúru verejného kľúča. Vyžaduje verziu firmvéru 2.5 alebo vyššiu.</string>
     <string name="encryption_error">Nezhoda verejného kľúča</string>
     <string name="encryption_error_text">Verejný kľúč sa nezhoduje so zaznamenaným kľúčom. Môžete odstrániť uzol a nechať ho znova vymeniť kľúče, ale to môže naznačovať vážnejší bezpečnostný problém. Kontaktujte používateľa prostredníctvom iného dôveryhodného kanála a zistite, či bola zmena kľúča spôsobená obnovením továrenských nastavení alebo inou úmyselnou akciou.</string>
-    <string name="request_userinfo">Požiadať o informácie o užívateľovi</string>
+    <string name="exchange_userinfo">Vymeniť si používateľské informácie</string>
     <string name="meshtastic_new_nodes_notifications">Notifikácie nových uzlov</string>
     <string name="more_details">Viac detailov</string>
     <string name="snr">SNR</string>
@@ -266,6 +280,8 @@
     <string name="fair">Primeraný</string>
     <string name="good">Dobrý</string>
     <string name="none_quality">Žiadny</string>
+    <string name="share_to">Zdieľať…</string>
+    <string name="share_message">Zdieľať správu</string>
     <string name="signal">Signál</string>
     <string name="signal_quality">Kvalita signálu</string>
     <string name="traceroute_log">Log trasovania</string>
@@ -277,4 +293,46 @@
         <item quantity="other">%d skokov</item>
     </plurals>
     <string name="traceroute_diff">Počet skokov smerom k %1$d Počet skokov späť %2$d</string>
+    <string name="twenty_four_hours">24 hodín</string>
+    <string name="forty_eight_hours">48 hodín</string>
+    <string name="one_week">1 týždeň</string>
+    <string name="two_weeks">2 týždne</string>
+    <string name="four_weeks">4 týždne</string>
+    <string name="max">Maximum</string>
+    <string name="unknown_age">Neznámy vek</string>
+    <string name="copy">Kopírovať</string>
+    <string name="alert_bell_text">Znak zvončeku upozornení!</string>
+    <string name="channel_settings">Nastavenie kanálu</string>
+    <string name="samsung_instructions">Inštrukcie pre Samsung</string>
+    <string name="alerts_dnd_request_title">Povoliť kritickým upozorneniam obísť režim nerušiť</string>
+    <string name="alerts_dnd_request_text"><![CDATA[Pre povolenie kritických upozornení počas režimu Nerušiť - povoľte prepisovanie režimu nerušiť pre Upozorňovací kanál v aplikácii Meshtastic v nastaveniach notifikácii.<br/><br/>Ak používate zariadenie samsung bude možno potrebné pridať výnimku v nastaveniach systému pred zapnutím funkcie upozorňovacieho kanálu. <a href="https://www.samsung.com/latin_en/support/mobile-devices/how-to-use-the-do-not-disturb-mode-on-your-galaxy-phone/">Pre pomoc navštívte podporu Samsung.</a>.]]></string>
+    <string name="critical_alert">Kritická výstraha!</string>
+    <string name="favorite">Obľúbený</string>
+    <string name="favorite_add">Pridať \'%s\', ako obľúbený uzol?</string>
+    <string name="favorite_remove">Odstrániť \'%s\' obľúbený uzol?</string>
+    <string name="power_metrics_log">Záznamník výkonu</string>
+    <string name="channel_1">Kanál 1</string>
+    <string name="channel_2">Kanál 2</string>
+    <string name="channel_3">Kanál 3</string>
+    <string name="current">Prúd</string>
+    <string name="voltage">Napätie</string>
+    <string name="are_you_sure">Si si istý?</string>
+    <string name="router_role_confirmation_text"><![CDATA[Prečítal som si <a href="https://meshtastic.org/docs/configuration/radio/device/#roles"> Dokumentáciu o úlohách zariadení</a> a blog o <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Výberaní správnej úlohy pre zariadenie </a>.]]></string>
+    <string name="i_know_what_i_m_doing">Viem čo robím.</string>
+    <string name="low_battery_message">Uzol %s má slabú batériu (%d%%)</string>
+    <string name="meshtastic_low_battery_notifications">Upozornenia o slabej batérii</string>
+    <string name="low_battery_title">Slabá batéria: %s</string>
+    <string name="meshtastic_low_battery_temporary_remote_notifications">Upozornenia o slabej batérii (obľúbene uzle)</string>
+    <string name="baro_pressure">Barometrický tlak</string>
+    <string name="mesh_via_udp_enabled">Sieť prostredníctvom UDP zapnutá</string>
+    <string name="udp_config">Konfigurácia UDP</string>
+    <string name="map_node_popup_details"><![CDATA[%s<br>Naposledy počutý: %s<br>Posledná pozícia: %s<br>Batéria: %s]]></string>
+    <string name="toggle_my_position">Zapnúť lokalizáciu</string>
+    <string name="device">Zariadenie</string>
+    <string name="environment">Prostredie</string>
+    <string name="messages">Správy</string>
+    <string name="public_key">Verejný kľúč</string>
+    <string name="private_key">Súkromný kľúč</string>
+    <string name="timeout">Časový limit</string>
+    <string name="distance">Vzdialenosť</string>
 </resources>

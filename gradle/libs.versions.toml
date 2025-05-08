@@ -1,0 +1,178 @@
+[versions]
+agp = "8.10.0"
+appcompat = "1.7.0"
+appintro = "6.3.1"
+awesome-app-rating = "2.8.0"
+cardview = "1.0.0"
+coil = "3.1.0"
+compose-bom = "2025.05.00"
+constraintlayout = "2.2.1"
+core-ktx = "1.16.0"
+core-location-altitude = "1.0.0-alpha03"
+core-splashscreen = "1.0.1"
+crashlytics = "3.0.3"
+datastore = "1.1.6"
+detekt = "1.23.8"
+devtools-ksp = "2.1.20-2.0.1"
+emoji2 = "1.5.0"
+espresso-core = "3.6.1"
+firebase-bom = "33.13.0"
+fragment-ktx = "1.8.6"
+google-services = "4.4.2"
+hilt = "2.56.2"
+hilt-navigation-compose = "1.2.0"
+junit = "4.13.2"
+junit-version = "1.2.1"
+kotlin = "2.1.20"
+kotlinx-collections-immutable = "0.3.8"
+kotlinx-coroutines-android = "1.10.2"
+kotlinx-serialization-json = "1.8.1"
+lifecycle = "2.9.0"
+material = "1.12.0"
+mgrs = "2.1.3"
+navigation = "2.9.0"
+org-eclipse-paho-client-mqttv3 = "1.2.5"
+osmbonuspack = "6.9.0"
+osmdroid-android = "6.1.14"
+protobuf-gradle-plugin = "0.9.5"
+protobuf-kotlin = "4.30.2"
+room = "2.7.1"
+streamsupport-minifuture = "1.7.4"
+usb-serial-android = "3.9.0"
+viewpager2 = "1.1.0"
+work-runtime-ktx = "2.10.1"
+zxing-android-embedded = "4.3.0"
+#noinspection GradleDependency
+zxing-core = "3.3.0" #do not update
+
+[libraries]
+agp = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
+activity-compose = { group = "androidx.activity", name = "activity-compose" }
+appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+appcompat-resources = { group = "androidx.appcompat", name = "appcompat-resources", version.ref = "appcompat" }
+appintro = { group = "com.github.AppIntro", name = "AppIntro", version.ref = "appintro" }
+awesome-app-rating = { group = "com.suddenh4x.ratingdialog", name = "awesome-app-rating", version.ref = "awesome-app-rating" }
+cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardview" }
+coil = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
+coil-svg = { group = "io.coil-kt.coil3", name = "coil-svg", version.ref = "coil" }
+compose-material = { group = "androidx.compose.material", name = "material" }
+compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
+compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
+compose-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata" }
+compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+compose-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "core-ktx" }
+core-location-altitude = { group = "androidx.core", name = "core-location-altitude", version.ref = "core-location-altitude" }
+core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "core-splashscreen" }
+datastore = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
+detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name = "detekt-formatting", version.ref = "detekt" }
+emoji2-emojipicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2" }
+espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
+ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junit-version" }
+firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
+firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics"}
+firebase-crashlytics-gradle = { group = "com.google.firebase", name ="firebase-crashlytics-gradle", version.ref = "crashlytics" }
+fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragment-ktx" }
+google-services = { group = "com.google.gms", name = "google-services", version.ref = "google-services" }
+hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
+hilt-android-gradle-plugin = { group = "com.google.dagger", name = "hilt-android-gradle-plugin", version.ref = "hilt" }
+hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
+hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
+hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version.ref = "hilt-navigation-compose" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+kotlin-gradle-plugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+kotlin-serialization = { group = "org.jetbrains.kotlin", name = "kotlin-serialization", version.ref = "kotlin" }
+kotlinx-collections-immutable = { group = "org.jetbrains.kotlinx", name = "kotlinx-collections-immutable", version.ref = "kotlinx-collections-immutable" }
+kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinx-coroutines-android" }
+kotlinx-coroutines-guava = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-guava", version.ref = "kotlinx-coroutines-android" }
+kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
+lifecycle-common-java8 = { group = "androidx.lifecycle", name = "lifecycle-common-java8", version.ref = "lifecycle" }
+lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycle" }
+lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycle" }
+lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "lifecycle" }
+lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
+lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+mgrs = { group = "mil.nga", name = "mgrs", version.ref = "mgrs" }
+navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
+navigation-testing = { group = "androidx.navigation", name = "navigation-testing", version.ref = "navigation" }
+org-eclipse-paho-client-mqttv3 = { group = "org.eclipse.paho", name = "org.eclipse.paho.client.mqttv3", version.ref = "org-eclipse-paho-client-mqttv3" }
+osmbonuspack = { group = "com.github.MKergall", name = "osmbonuspack", version.ref = "osmbonuspack" }
+osmdroid-android = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid-android" }
+osmdroid-geopackage = { group = "org.osmdroid", name = "osmdroid-geopackage", version.ref = "osmdroid-android" }
+osmdroid-wms = { group = "org.osmdroid", name = "osmdroid-wms", version.ref = "osmdroid-android" }
+protobuf-gradle-plugin = { group = "com.google.protobuf", name = "protobuf-gradle-plugin", version.ref = "protobuf-gradle-plugin" }
+protobuf-kotlin = { group = "com.google.protobuf", name = "protobuf-kotlin", version.ref = "protobuf-kotlin" }
+protobuf-protoc = { group = "com.google.protobuf", name ="protoc", version.ref = "protobuf-kotlin" }
+room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
+room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
+room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
+room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
+streamsupport-minifuture = { group = "net.sourceforge.streamsupport", name = "streamsupport-minifuture", version.ref = "streamsupport-minifuture" }
+usb-serial-android = { group = "com.github.mik3y", name = "usb-serial-for-android", version.ref = "usb-serial-android" }
+viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "viewpager2" }
+work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work-runtime-ktx" }
+zxing-android-embedded = { group = "com.journeyapps", name = "zxing-android-embedded", version.ref = "zxing-android-embedded" }
+zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing-core" }
+
+[bundles]
+# Core AndroidX
+androidx = ["core-ktx", "appcompat", "appcompat-resources", "cardview", "fragment-ktx", "activity-compose"]
+
+# UI
+ui = ["material", "constraintlayout", "viewpager2", "compose-material", "compose-material-icons-extended", "compose-ui-tooling-preview", "compose-runtime-livedata"]
+ui-tooling = ["compose-ui-tooling"] #Separate for debugImplementation
+
+# Lifecycle
+lifecycle = ["lifecycle-runtime-ktx", "lifecycle-livedata-ktx", "lifecycle-viewmodel-ktx", "lifecycle-common-java8", "lifecycle-process", "lifecycle-viewmodel-compose", "lifecycle-runtime-compose"]
+
+# Navigation
+navigation = ["navigation-compose"]
+
+# Coroutines
+coroutines = ["kotlinx-coroutines-android", "kotlinx-coroutines-guava"]
+
+# Data Storage
+datastore = ["datastore"]
+room = ["room-runtime", "room-ktx"]
+
+# Dependency Injection
+hilt = ["hilt-android", "hilt-navigation-compose"]
+
+# Testing
+testing = ["junit", "ext-junit"]
+testing-android = ["espresso-core", "compose-ui-test-junit4"]
+testing-android-manifest = ["compose-ui-test-manifest"]
+testing-hilt = ["hilt-android-testing"]
+testing-navigation = ["navigation-testing"]
+testing-room = ["room-testing"]
+
+# OSM
+osm = ["osmdroid-android", "osmdroid-wms", "osmbonuspack", "mgrs"]
+
+# Firebase
+firebase = ["firebase-analytics", "firebase-crashlytics"]
+
+#Protobuf
+protobuf = ["protobuf-kotlin"]
+
+# coil
+coil = ["coil", "coil-svg"]
+
+[plugins]
+android-application = { id = "com.android.application" }
+compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "devtools-ksp" }
+hilt = { id = "com.google.dagger.hilt.android" }
+kotlin-android = { id = "org.jetbrains.kotlin.android" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
+kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize" }
+kotlin-serialization = { id = "kotlinx-serialization" }
+protobuf = { id = "com.google.protobuf" }
+

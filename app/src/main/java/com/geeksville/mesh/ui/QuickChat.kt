@@ -52,12 +52,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
@@ -72,6 +75,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.ui.components.BaseScaffold
 import com.geeksville.mesh.ui.components.dragContainer
 import com.geeksville.mesh.ui.components.dragDropItemsIndexed
 import com.geeksville.mesh.ui.components.rememberDragDropState
@@ -80,7 +84,19 @@ import com.geeksville.mesh.ui.theme.AppTheme
 @Composable
 internal fun QuickChatScreen(
     viewModel: UIViewModel = hiltViewModel(),
-    modifier: Modifier = Modifier,
+    navigateUp: () -> Unit
+) {
+    BaseScaffold(
+        title = stringResource(id = R.string.quick_chat),
+        navigateUp = navigateUp,
+    ) {
+        QuickChatContent(viewModel)
+    }
+}
+
+@Composable
+private fun QuickChatContent(
+    viewModel: UIViewModel = hiltViewModel(),
 ) {
     val actions by viewModel.quickChatActions.collectAsStateWithLifecycle()
     var showActionDialog by remember { mutableStateOf<QuickChatAction?>(null) }
@@ -91,7 +107,7 @@ internal fun QuickChatScreen(
         viewModel.updateActionPositions(list)
     }
 
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxSize()) {
         if (showActionDialog != null) {
             val action = showActionDialog ?: return
             EditQuickChatDialog(
@@ -163,9 +179,16 @@ private fun EditQuickChatDialog(
     onDismiss: () -> Unit,
 ) {
     var actionInput by remember { mutableStateOf(action) }
-    val newQuickChat = action.uuid == 0L
+    val newQuickChat = remember { action.uuid == 0L }
     val isInstant = actionInput.mode == QuickChatAction.Mode.Instant
     val title = if (newQuickChat) R.string.quick_chat_new else R.string.quick_chat_edit
+
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        if (newQuickChat) {
+            focusRequester.requestFocus()
+        }
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -197,9 +220,11 @@ private fun EditQuickChatDialog(
                 OutlinedTextFieldWithCounter(
                     label = stringResource(id = R.string.message),
                     value = actionInput.message,
-                    maxSize = 235,
+                    maxSize = 200,
                     getSize = { it.toByteArray().size + 1 },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .focusRequester(focusRequester),
                 ) {
                     actionInput = actionInput.copy(message = it)
                     if (newQuickChat) {

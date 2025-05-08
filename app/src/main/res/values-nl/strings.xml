@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="main_tab_channel">Kanaal</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">wis node filter</string>
     <string name="node_filter_include_unknown">Include onbekend</string>
@@ -80,7 +81,6 @@
     <string name="share">Deel</string>
     <string name="disconnected">Niet verbonden</string>
     <string name="device_sleeping">Apparaat in slaapstand</string>
-    <string name="connected_count">Verbonden: %1$s van %2$s online</string>
     <string name="update_firmware">Programma Updaten</string>
     <string name="ip_address">IP-adres:</string>
     <string name="connected">Verbonden met radio</string>
@@ -193,7 +193,6 @@
     <string name="map_select_download_region">Selecteer regio om te downloaden</string>
     <string name="map_tile_download_estimate">Geschatte download tegels:</string>
     <string name="map_start_download">Download starten</string>
-    <string name="request_position">Positie aanvragen</string>
     <string name="close">Sluit</string>
     <string name="device_settings">Radioconfiguratie</string>
     <string name="module_settings">Module-configuratie</string>
@@ -245,7 +244,6 @@
     <string name="encryption_pkc_text">Directe berichten gebruiken de nieuwe openbare sleutel infrastructuur voor versleuteling. Vereist firmware versie 2.5 of hoger.</string>
     <string name="encryption_error">Publieke sleutel komt niet overeen</string>
     <string name="encryption_error_text">De publieke sleutel komt niet overeen met de opgenomen sleutel. Je kan de node verwijderen en opnieuw een sleutel laten uitwisselen, maar dit kan duiden op een ernstiger beveiligingsprobleem. Neem contact op met de gebruiker via een ander vertrouwd kanaal, om te bepalen of de sleutel gewijzigd is door een reset naar de fabrieksinstellingen of andere opzettelijke actie.</string>
-    <string name="request_userinfo">Gebruikergegevens opvragen</string>
     <string name="meshtastic_new_nodes_notifications">Nieuwe node meldingen</string>
     <string name="more_details">Meer details</string>
     <string name="snr">SNR</string>
@@ -273,4 +271,7 @@
         <item quantity="other">%d hops</item>
     </plurals>
     <string name="traceroute_diff">Sprongen richting %1$d Springt terug %2$d</string>
+    <string name="alert_bell_text">Melding Bell teken!</string>
+    <string name="timeout">Time-Out</string>
+    <string name="distance">Afstand</string>
 </resources>
