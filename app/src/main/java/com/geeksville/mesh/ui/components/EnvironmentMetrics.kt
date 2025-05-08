@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -58,6 +59,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Environment
+import com.geeksville.mesh.model.EnvironmentGraphingData
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
@@ -97,7 +99,8 @@ fun EnvironmentMetricsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
     val selectedTimeFrame by viewModel.timeFrame.collectAsState()
-    val (data, shouldPlot, minMaxes) = environmentState.environmentMetricsFiltered(selectedTimeFrame)
+    val graphData = environmentState.environmentMetricsFiltered(selectedTimeFrame)
+    val data = graphData.metrics
 
     /* Convert Celsius to Fahrenheit */
     @Suppress("MagicNumber")
@@ -136,8 +139,7 @@ fun EnvironmentMetricsScreen(
                 .fillMaxWidth()
                 .fillMaxHeight(fraction = 0.33f),
             telemetries = processedTelemetries.reversed(),
-            shouldPlot,
-            minMaxes,
+            graphData = graphData,
             selectedTimeFrame,
             promptInfoDialog = { displayInfoDialog = true }
         )
@@ -164,17 +166,14 @@ fun EnvironmentMetricsScreen(
     }
 }
 
-/**
- * @param minMaxes [Pair] containing two others with the first being the min and max of the right
- * side of the graph, the second are the left side of the graph.
- */
-@Suppress("LongMethod", "LongParameterList")
+/* TODO need to take the time to understand this. */
+@SuppressLint("ConfigurationScreenWidthHeight")
+@Suppress("LongMethod")
 @Composable
 private fun EnvironmentMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
-    shouldPlot: BooleanArray,
-    minMaxes: Pair<Pair<Float, Float>, Pair<Float, Float>>,
+    graphData: EnvironmentGraphingData,
     selectedTime: TimeFrame,
     promptInfoDialog: () -> Unit
 ) {
@@ -182,33 +181,29 @@ private fun EnvironmentMetricsChart(
     if (telemetries.isEmpty()) {
         return
     }
-    val (oldest, newest) = remember(key1 = telemetries) {
-        Pair(
-            telemetries.minBy { it.time },
-            telemetries.maxBy { it.time }
-        )
-    }
-    val timeDiff = newest.time - oldest.time
 
+    val (oldest, newest) = graphData.times
     TimeLabels(
-        oldest = oldest.time,
-        newest = newest.time
+        oldest = oldest,
+        newest = newest
     )
 
     Spacer(modifier = Modifier.height(16.dp))
 
     val graphColor = MaterialTheme.colors.onSurface
 
-    val (rightMin, rightMax) = minMaxes.first
-    val (pressureMin, pressureMax) = minMaxes.second
+    val (rightMin, rightMax) = graphData.rightMinMax
+    val (pressureMin, pressureMax) = graphData.leftMinMax
     var min = rightMin
     var diff = rightMax - rightMin
 
     val scrollState = rememberScrollState()
     val screenWidth = LocalConfiguration.current.screenWidthDp
+    val timeDiff = newest - oldest
     val dp by remember(key1 = selectedTime) {
         mutableStateOf(selectedTime.dp(screenWidth, time = timeDiff.toLong()))
     }
+    val shouldPlot = graphData.shouldPlot
 
     Row {
         if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
@@ -233,8 +228,8 @@ private fun EnvironmentMetricsChart(
 
             TimeAxisOverlay(
                 modifier = modifier.width(dp),
-                oldest = oldest.time,
-                newest = newest.time,
+                oldest = oldest,
+                newest = newest,
                 selectedTime.lineInterval()
             )
 
@@ -261,7 +256,7 @@ private fun EnvironmentMetricsChart(
                             telemetries = telemetries,
                             index = index,
                             path = path,
-                            oldestTime = oldest.time,
+                            oldestTime = oldest,
                             timeRange = timeDiff,
                             width = width,
                             timeThreshold = selectedTime.timeThreshold()
@@ -275,8 +270,8 @@ private fun EnvironmentMetricsChart(
                             path = path,
                             color = metric.color,
                             height = height,
-                            x1 = ((telemetries[index - 1].time - oldest.time).toFloat() / timeDiff) * width,
-                            x2 = ((telemetries[first].time - oldest.time).toFloat() / timeDiff) * width
+                            x1 = ((telemetries[index - 1].time - oldest).toFloat() / timeDiff) * width,
+                            x2 = ((telemetries[first].time - oldest).toFloat() / timeDiff) * width
                         )
                     }
                 }

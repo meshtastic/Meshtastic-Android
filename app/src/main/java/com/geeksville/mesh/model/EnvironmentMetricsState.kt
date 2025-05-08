@@ -47,6 +47,22 @@ enum class Environment(val color: Color) {
     abstract fun getValue(telemetry: Telemetry): Float
 }
 
+/**
+ * @param metrics the filtered [List]
+ * @param shouldPlot a [List] the size of [Environment] used to determine if a metric
+ * should be plotted
+ * @param leftMinMax [Pair] with the min and max of the barometric pressure
+ * @param rightMinMax [Pair] with the combined min and max of: the temperature, humidity, and IAQ
+ * @param times [Pair] with the oldest and newest times in that order
+ */
+data class EnvironmentGraphingData(
+    val metrics: List<Telemetry>,
+    val shouldPlot: List<Boolean>,
+    val leftMinMax: Pair<Float, Float> = Pair(0f, 0f),
+    val rightMinMax: Pair<Float, Float> = Pair(0f, 0f),
+    val times: Pair<Int, Int> = Pair(0, 0)
+)
+
 data class EnvironmentMetricsState(
     val environmentMetrics: List<Telemetry> = emptyList(),
 ) {
@@ -56,17 +72,16 @@ data class EnvironmentMetricsState(
      * Filters [environmentMetrics] based on a [TimeFrame].
      *
      * @param timeFrame used to filter
-     * @return a [Triple] with: the filtered [List], a [BooleanArray] the size of [Environment] used
-     * to determine if a metric should be plotted, and a [Pair] containing two others for which the
-     * first is the combined min and max of: the temperature, humidity, and IAq. The second being
-     * the min and max for the barometric pressure.
+     * @return [EnvironmentGraphingData]
      */
-    fun environmentMetricsFiltered(
-        timeFrame: TimeFrame
-    ): Triple<List<Telemetry>, BooleanArray, Pair<Pair<Float, Float>, Pair<Float, Float>>> {
+    @Suppress("LongMethod")
+    fun environmentMetricsFiltered(timeFrame: TimeFrame): EnvironmentGraphingData {
         val oldestTime = timeFrame.calculateOldestTime()
         val telemetries = environmentMetrics.filter { it.time >= oldestTime }
         val shouldPlot = BooleanArray(Environment.entries.size) { false }
+        if (telemetries.isEmpty()) {
+            return EnvironmentGraphingData(metrics = telemetries, shouldPlot = shouldPlot.toList())
+        }
 
         /* Grab the combined min and max for temp, humidity, and iaq. */
         val minValues = mutableListOf<Float>()
@@ -113,17 +128,20 @@ data class EnvironmentMetricsState(
             maxPressure.environmentMetrics.barometricPressure != 0.0F) {
             shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal] = true
         }
+        val (oldest, newest) = Pair(
+            telemetries.minBy { it.time },
+            telemetries.maxBy { it.time }
+        )
 
-        return Triple(
-            telemetries,
-            shouldPlot,
-            Pair(
-                Pair(min, max),
-                Pair(
-                    minPressure.environmentMetrics.barometricPressure,
-                    maxPressure.environmentMetrics.barometricPressure
-                )
-            )
+        return EnvironmentGraphingData(
+            metrics = telemetries,
+            shouldPlot = shouldPlot.toList(),
+            leftMinMax = Pair(
+                minPressure.environmentMetrics.barometricPressure,
+                maxPressure.environmentMetrics.barometricPressure
+            ),
+            rightMinMax = Pair(min, max),
+            times = Pair(oldest.time, newest.time)
         )
     }
 }
