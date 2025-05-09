@@ -75,7 +75,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.components.BaseScaffold
 import com.geeksville.mesh.ui.components.dragContainer
 import com.geeksville.mesh.ui.components.dragDropItemsIndexed
 import com.geeksville.mesh.ui.components.rememberDragDropState

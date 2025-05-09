@@ -294,7 +294,8 @@ fun MapView(
             ).apply {
                 id = u.id
                 title = u.longName
-                snippet = context.getString(R.string.map_node_popup_details,
+                snippet = context.getString(
+                    R.string.map_node_popup_details,
                     node.gpsString(gpsFormat),
                     formatAgo(node.lastHeard),
                     formatAgo(p.time),
@@ -341,7 +342,10 @@ fun MapView(
             androidx.appcompat.app.AlertDialog.BUTTON_NEUTRAL,
             androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE,
             androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE
-        )) with(dialog.getButton(button)) { textSize = 12F; isAllCaps = false }
+        )) with(dialog.getButton(button)) {
+            textSize = 12F
+            isAllCaps = false
+        }
     }
 
     fun showMarkerLongPressDialog(id: Int) {
@@ -417,9 +421,11 @@ fun MapView(
             performHapticFeedback()
             val enabled = model.isConnected() && downloadRegionBoundingBox == null
 
-            if (enabled) showEditWaypointDialog = waypoint {
+            if (enabled) {
+                showEditWaypointDialog = waypoint {
                 latitudeI = (p.latitude * 1e7).toInt()
                 longitudeI = (p.longitude * 1e7).toInt()
+            }
             }
             return true
         }
@@ -579,7 +585,8 @@ fun MapView(
                 modifier = Modifier.fillMaxSize(),
                 update = { map -> map.drawOverlays() },
             )
-            if (downloadRegionBoundingBox != null) CacheLayout(
+            if (downloadRegionBoundingBox != null) {
+                CacheLayout(
                 cacheEstimate = cacheEstimate,
                 onExecuteJob = { startDownload() },
                 onCancelDownload = {
@@ -588,7 +595,8 @@ fun MapView(
                     map.invalidate()
                 },
                 modifier = Modifier.align(Alignment.BottomCenter)
-            ) else {
+                )
+            } else {
                 Column(
                     modifier = Modifier
                         .padding(top = 16.dp, end = 16.dp)
@@ -626,11 +634,13 @@ fun MapView(
             onSendClicked = { waypoint ->
                 debug("User clicked send waypoint ${waypoint.id}")
                 showEditWaypointDialog = null
-                model.sendWaypoint(waypoint.copy {
+                model.sendWaypoint(
+                    waypoint.copy {
                     if (id == 0) id = model.generatePacketId() ?: return@EditWaypointDialog
                     expire = Int.MAX_VALUE // TODO add expire picker
                     lockedTo = if (waypoint.lockedTo != 0) model.myNodeNum ?: 0 else 0
-                })
+                    }
+                )
             },
             onDeleteClicked = { waypoint ->
                 debug("User clicked delete waypoint ${waypoint.id}")

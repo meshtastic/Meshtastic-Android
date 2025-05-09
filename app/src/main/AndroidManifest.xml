@@ -135,7 +135,7 @@
 
         <activity
             android:name="com.geeksville.mesh.MainActivity"
-            android:launchMode="singleInstance"
+            android:launchMode="standard"
             android:screenOrientation="unspecified"
             android:windowSoftInputMode="adjustResize"
             android:exported="true">
@@ -148,6 +148,19 @@
                 <action android:name="android.intent.action.SEND" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <data android:mimeType="text/plain" />
+            </intent-filter>
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data android:scheme="meshtastic" />
+                <data android:host="meshtastic" />
+                <data android:pathPrefix="/messages" />
+                <data android:pathPrefix="/share" />
+                <data android:pathPrefix="/settings" />
             </intent-filter>
 
             <intent-filter android:autoVerify="true">

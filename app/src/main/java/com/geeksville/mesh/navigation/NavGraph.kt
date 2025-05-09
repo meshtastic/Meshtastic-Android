@@ -53,6 +53,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import com.geeksville.mesh.MeshProtos.DeviceMetadata
 import com.geeksville.mesh.R
@@ -110,6 +111,9 @@ enum class AdminRoute(@StringRes val title: Int) {
 }
 
 sealed interface Route {
+    companion object {
+        const val URI = "meshtastic://meshtastic"
+    }
     @Serializable
     data object Contacts : Route
     @Serializable
@@ -325,13 +329,27 @@ fun NavGraph(
         composable<Route.Channels> {
             ChannelScreen(model)
         }
-        composable<Route.Settings> {
+        composable<Route.Settings>(
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "${Route.URI}/settings"
+                    action = "android.intent.action.VIEW"
+                }
+            )
+        ) {
             AndroidFragment<SettingsFragment>(Modifier.fillMaxSize())
         }
         composable<Route.DebugPanel> {
             DebugScreen()
         }
-        composable<Route.Messages> { backStackEntry ->
+        composable<Route.Messages>(
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "${Route.URI}/messages/{contactKey}?message={message}"
+                    action = "android.intent.action.VIEW"
+                },
+            )
+        ) { backStackEntry ->
             val args = backStackEntry.toRoute<Route.Messages>()
             MessageScreen(
                 contactKey = args.contactKey,
@@ -467,7 +485,14 @@ fun NavGraph(
             val parentEntry = remember { navController.getBackStackEntry<Route.RadioConfig>() }
             PaxcounterConfigScreen(hiltViewModel<RadioConfigViewModel>(parentEntry))
         }
-        composable<Route.Share> { backStackEntry ->
+        composable<Route.Share>(
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "${Route.URI}/share?message={message}"
+                    action = "android.intent.action.VIEW"
+                }
+            )
+        ) { backStackEntry ->
             val message = backStackEntry.toRoute<Route.Share>().message
             ShareScreen(model) {
                 navController.navigate(Route.Messages(it, message)) {

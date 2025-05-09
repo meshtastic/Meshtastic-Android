@@ -104,8 +104,12 @@ internal fun MessageScreen(
 
     val channelIndex = contactKey[0].digitToIntOrNull()
     val nodeId = contactKey.substring(1)
-    val channelName = channelIndex?.let { viewModel.channels.value.getChannel(it)?.name }
-        ?: "Unknown Channel"
+    val channels by viewModel.channels.collectAsStateWithLifecycle()
+    val channelName by remember(channelIndex) {
+        derivedStateOf {
+            channelIndex?.let { channels.getChannel(it)?.name } ?: "Unknown Channel"
+        }
+    }
 
     val title = when (nodeId) {
         DataPacket.ID_BROADCAST -> channelName

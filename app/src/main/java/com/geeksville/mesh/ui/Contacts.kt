@@ -62,7 +62,6 @@ import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.model.UIViewModel
 import java.util.concurrent.TimeUnit
 
-
 @Composable
 fun ContactsScreen(
     uiViewModel: UIViewModel = hiltViewModel(),
@@ -165,7 +164,6 @@ fun ContactsScreen(
     )
 }
 
-
 @OptIn(ExperimentalMaterialApi::class) // Required for AlertDialog in some cases, though often not strictly necessary now
 @Composable
 fun MuteNotificationsDialog(
@@ -239,7 +237,6 @@ fun MuteNotificationsDialog(
         )
     }
 }
-
 
 @OptIn(ExperimentalMaterialApi::class) // Not strictly needed for simple AlertDialog
 @Composable

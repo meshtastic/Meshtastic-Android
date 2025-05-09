@@ -18,6 +18,8 @@
 package com.geeksville.mesh
 
 import android.app.Activity
+import android.app.PendingIntent
+import android.app.TaskStackBuilder
 import android.bluetooth.BluetoothAdapter
 import android.content.Context
 import android.content.Intent
@@ -44,6 +46,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.ui.Modifier
 import androidx.core.content.edit
+import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.setPadding
 import com.geeksville.mesh.android.BindFailedException
@@ -62,8 +65,8 @@ import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.service.startService
 import com.geeksville.mesh.ui.MainMenuAction
@@ -164,16 +167,7 @@ class MainActivity : AppCompatActivity(), Logging {
             Intent.ACTION_VIEW -> {
                 debug("Asked to open a channel URL - ask user if they want to switch to that channel.  If so send the config to the radio")
                 appLinkData?.let(model::requestChannelUrl)
-
                 // We now wait for the device to connect, once connected, we ask the user if they want to switch to the new channel
-            }
-
-            MeshServiceNotifications.OPEN_MESSAGE_ACTION -> {
-                val contactKey =
-                    intent.getStringExtra(MeshServiceNotifications.OPEN_MESSAGE_EXTRA_CONTACT_KEY)
-                if (contactKey != null) {
-                    // showMessages(contactKey)
-                }
             }
 
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
@@ -186,7 +180,7 @@ class MainActivity : AppCompatActivity(), Logging {
             Intent.ACTION_SEND -> {
                 val text = intent.getStringExtra(Intent.EXTRA_TEXT)
                 if (text != null) {
-                    // shareMessages(text)
+                    createShareIntent(text).send()
                 }
             }
 
@@ -194,6 +188,34 @@ class MainActivity : AppCompatActivity(), Logging {
                 warn("Unexpected action $appLinkAction")
             }
         }
+    }
+
+    private fun createShareIntent(message: String): PendingIntent {
+        val deepLink = "${Route.URI}/share?message=$message"
+        val startActivityIntent = Intent(
+            Intent.ACTION_VIEW, deepLink.toUri(),
+            this, MainActivity::class.java
+        )
+
+        val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
+            addNextIntentWithParentStack(startActivityIntent)
+            getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE)
+        }
+        return resultPendingIntent!!
+    }
+
+    private fun createSettingsIntent(): PendingIntent {
+        val deepLink = "${Route.URI}/settings"
+        val startActivityIntent = Intent(
+            Intent.ACTION_VIEW, deepLink.toUri(),
+            this, MainActivity::class.java
+        )
+
+        val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
+            addNextIntentWithParentStack(startActivityIntent)
+            getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE)
+        }
+        return resultPendingIntent!!
     }
 
     private var requestedEnable = false
@@ -453,7 +475,7 @@ class MainActivity : AppCompatActivity(), Logging {
     }
 
     private fun showSettingsPage() {
-        // binding.pager.currentItem = 5
+        createSettingsIntent().send()
     }
 
     private fun onMainMenuAction(action: MainMenuAction) {
