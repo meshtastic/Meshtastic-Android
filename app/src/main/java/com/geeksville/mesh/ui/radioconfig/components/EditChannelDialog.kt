@@ -19,7 +19,6 @@ package com.geeksville.mesh.ui.radioconfig.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -55,7 +54,6 @@ import com.geeksville.mesh.ui.components.PositionPrecisionPreference
 import com.geeksville.mesh.ui.components.SwitchPreference
 
 @Suppress("LongMethod")
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun EditChannelDialog(
     channelSettings: ChannelProtos.ChannelSettings,

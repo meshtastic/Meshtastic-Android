@@ -23,7 +23,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -286,13 +285,13 @@ private fun DeviceDetailsContent(
         )
     }
     NodeDetailRow(
-        label = "Hardware",
+        label = stringResource(R.string.hardware),
         icon = Icons.Default.Router,
         value = hwModelName
     )
     if (isSupported) {
         NodeDetailRow(
-            label = "Supported",
+            label = stringResource(R.string.supported),
             icon = Icons.Default.Verified,
             value = "",
             iconTint = Color.Green
@@ -349,36 +348,36 @@ private fun NodeDetailsContent(
         Spacer(Modifier.height(16.dp))
     }
     NodeDetailRow(
-        label = "Node Number",
+        label = stringResource(R.string.node_number),
         icon = Icons.Default.Numbers,
         value = node.num.toUInt().toString()
     )
     NodeDetailRow(
-        label = "User Id",
+        label = stringResource(R.string.user_id),
         icon = Icons.Default.Person,
         value = node.user.id
     )
     NodeDetailRow(
-        label = "Role",
+        label = stringResource(R.string.role),
         icon = Icons.Default.Work,
         value = node.user.role.name
     )
     if (node.deviceMetrics.uptimeSeconds > 0) {
         NodeDetailRow(
-            label = "Uptime",
+            label = stringResource(R.string.uptime),
             icon = Icons.Default.CheckCircle,
             value = formatUptime(node.deviceMetrics.uptimeSeconds)
         )
     }
     if (node.metadata != null) {
         NodeDetailRow(
-            label = "Firmware version",
+            label = stringResource(R.string.firmware_version),
             icon = Icons.Default.Memory,
             value = node.metadata.firmwareVersion.substringBeforeLast(".")
         )
     }
     NodeDetailRow(
-        label = "Last heard",
+        label = stringResource(R.string.node_sort_last_heard),
         icon = Icons.Default.History,
         value = formatAgo(node.lastHeard)
     )
@@ -431,7 +430,6 @@ private fun InfoCard(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 private fun EnvironmentMetrics(
@@ -563,7 +561,6 @@ private fun calculateDewPoint(tempCelsius: Float, humidity: Float): Float {
     return (b * alpha) / (a - alpha)
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun PowerMetrics(node: Node) = with(node.powerMetrics) {
     FlowRow(
