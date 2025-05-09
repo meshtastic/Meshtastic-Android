@@ -83,19 +83,7 @@ import com.geeksville.mesh.ui.theme.AppTheme
 
 @Composable
 internal fun QuickChatScreen(
-    viewModel: UIViewModel = hiltViewModel(),
-    navigateUp: () -> Unit
-) {
-    BaseScaffold(
-        title = stringResource(id = R.string.quick_chat),
-        navigateUp = navigateUp,
-    ) {
-        QuickChatContent(viewModel)
-    }
-}
-
-@Composable
-private fun QuickChatContent(
+    modifier: Modifier = Modifier,
     viewModel: UIViewModel = hiltViewModel(),
 ) {
     val actions by viewModel.quickChatActions.collectAsStateWithLifecycle()
@@ -107,7 +95,7 @@ private fun QuickChatContent(
         viewModel.updateActionPositions(list)
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize()) {
         if (showActionDialog != null) {
             val action = showActionDialog ?: return
             EditQuickChatDialog(

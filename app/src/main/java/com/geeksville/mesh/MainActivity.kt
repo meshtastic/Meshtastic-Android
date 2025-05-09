@@ -40,7 +40,9 @@ import androidx.activity.viewModels
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.edit
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.setPadding
 import com.geeksville.mesh.android.BindFailedException
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
@@ -57,7 +59,6 @@ import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.navigation.navigateToNavGraph
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceRepository

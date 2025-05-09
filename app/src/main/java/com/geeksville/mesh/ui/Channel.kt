@@ -45,7 +45,6 @@ import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.ContentCopy
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -102,36 +101,9 @@ import com.geeksville.mesh.ui.components.rememberDragDropState
 import com.geeksville.mesh.ui.radioconfig.components.ChannelCard
 import com.geeksville.mesh.ui.radioconfig.components.ChannelSelection
 import com.geeksville.mesh.ui.radioconfig.components.EditChannelDialog
-import com.geeksville.mesh.ui.theme.AppTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
-import dagger.hilt.android.AndroidEntryPoint
-
-@AndroidEntryPoint
-class ChannelFragment : ScreenFragment("Channel"), Logging {
-
-    private val model: UIViewModel by activityViewModels()
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                AppTheme {
-                    CompositionLocalProvider(
-                        LocalContentColor provides MaterialTheme.colors.onSurface
-                    ) {
-                        ChannelScreen(model)
-                    }
-                }
-            }
-        }
-    }
-}
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable

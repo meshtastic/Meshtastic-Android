@@ -60,10 +60,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DebugViewModel
 import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
-import com.geeksville.mesh.ui.components.BaseScaffold
 import com.geeksville.mesh.ui.theme.AppTheme
-import java.text.DateFormat
-import java.util.Locale
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
 
@@ -88,7 +85,12 @@ internal fun DebugScreen(
             modifier = Modifier.fillMaxSize(),
             state = listState,
         ) {
-            items(logs, key = { it.uuid }) { log -> DebugItem(annotateMeshLog(log)) }
+            items(logs, key = { it.uuid }) { log ->
+                DebugItem(
+                    modifier = Modifier.animateItem(),
+                    log = log
+                )
+            }
         }
     }
 }

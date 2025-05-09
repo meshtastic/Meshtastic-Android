@@ -128,7 +128,7 @@ private enum class LogsType(
 fun NodeDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: MetricsViewModel = hiltViewModel(),
-    onNavigate: (Route) -> Unit,
+    onNavigate: (com.geeksville.mesh.navigation.Route) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
@@ -169,7 +169,7 @@ private fun NodeDetailList(
     modifier: Modifier = Modifier,
     node: Node,
     metricsState: MetricsState,
-    onNavigate: (Route) -> Unit = {},
+    onNavigate: (com.geeksville.mesh.navigation.Route) -> Unit = {},
     metricsAvailability: BooleanArray
 ) {
     LazyColumn(
@@ -227,7 +227,7 @@ private fun NodeDetailList(
                     icon = Icons.Default.Settings,
                     enabled = true
                 ) {
-                    onNavigate(Route.RadioConfig(node.num))
+                    onNavigate(com.geeksville.mesh.navigation.Route.RadioConfig(node.num))
                 }
             }
         }

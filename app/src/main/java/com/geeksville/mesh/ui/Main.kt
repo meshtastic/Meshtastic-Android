@@ -72,6 +72,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.navigation.NavGraph
+import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.components.ScannedQrCodeDialog
