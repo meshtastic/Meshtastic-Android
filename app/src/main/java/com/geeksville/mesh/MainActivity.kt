@@ -35,11 +35,14 @@ import android.view.MotionEvent
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.ui.Modifier
 import androidx.core.content.edit
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.setPadding
@@ -113,6 +116,7 @@ class MainActivity : AppCompatActivity(), Logging {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         installSplashScreen()
         super.onCreate(savedInstanceState)
 
@@ -135,8 +139,10 @@ class MainActivity : AppCompatActivity(), Logging {
         }
 
         setContent {
-            AppTheme {
-                MainScreen(model, ::onMainMenuAction)
+            Box(Modifier.safeDrawingPadding()) {
+                AppTheme {
+                    MainScreen(model, ::onMainMenuAction)
+                }
             }
         }
 

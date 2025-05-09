@@ -27,11 +27,11 @@ android {
             storePassword keystoreProperties['storePassword']
         }
     }
-    compileSdk 35
+    compileSdk 36
     defaultConfig {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
-        targetSdk 34
+        targetSdk 36
         versionCode 30525 // format is Mmmss (where M is 1+the numeric major number
         versionName "2.5.25"
         testInstrumentationRunner "com.geeksville.mesh.TestRunner"
@@ -145,10 +145,6 @@ androidComponents {
 dependencies {
 
     implementation(fileTree(dir: 'libs', include: ['*.jar']))
-
-    //fixme
-    implementation 'androidx.fragment:fragment-compose:1.8.5'
-
 
     // Bundles
     implementation(libs.bundles.androidx)
