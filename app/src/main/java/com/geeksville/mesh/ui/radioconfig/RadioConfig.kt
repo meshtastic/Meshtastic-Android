@@ -65,13 +65,15 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
-import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.navigation.AdminRoute
+import com.geeksville.mesh.navigation.ConfigRoute
+import com.geeksville.mesh.navigation.ModuleRoute
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.radioconfig.components.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
 import com.geeksville.mesh.ui.theme.AppTheme
 
-private fun getNavRouteFrom(routeName: String): Route? {
+private fun getNavRouteFrom(routeName: String): Any? {
     return ConfigRoute.entries.find { it.name == routeName }?.route
         ?: ModuleRoute.entries.find { it.name == routeName }?.route
 }
@@ -81,7 +83,7 @@ private fun getNavRouteFrom(routeName: String): Route? {
 fun RadioConfigScreen(
     viewModel: RadioConfigViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
-    onNavigate: (Route) -> Unit = {}
+    onNavigate: (Any) -> Unit = {}
 ) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     var isWaiting by remember { mutableStateOf(false) }

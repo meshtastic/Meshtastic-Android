@@ -18,10 +18,6 @@
 package com.geeksville.mesh.ui.map
 
 import android.content.Context
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
@@ -45,22 +41,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.getLocationPermissions
 import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.android.hasGps
@@ -72,8 +64,6 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.model.map.MarkerWithLabel
 import com.geeksville.mesh.model.map.clustering.RadiusMarkerClusterer
-import com.geeksville.mesh.ui.ScreenFragment
-import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.util.addCopyright
 import com.geeksville.mesh.util.addScaleBarOverlay
@@ -82,7 +72,6 @@ import com.geeksville.mesh.util.formatAgo
 import com.geeksville.mesh.util.zoomIn
 import com.geeksville.mesh.waypoint
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import dagger.hilt.android.AndroidEntryPoint
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
 import org.osmdroid.events.MapEventsReceiver
@@ -104,27 +93,6 @@ import org.osmdroid.views.overlay.infowindow.InfoWindow
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay
 import java.io.File
 import java.text.DateFormat
-
-@AndroidEntryPoint
-class MapFragment : ScreenFragment("Map Fragment"), Logging {
-
-    private val model: UIViewModel by activityViewModels()
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                AppTheme {
-                    MapView(model)
-                }
-            }
-        }
-    }
-}
 
 @Composable
 private fun MapView.UpdateMarkers(
@@ -326,7 +294,8 @@ fun MapView(
             ).apply {
                 id = u.id
                 title = u.longName
-                snippet = context.getString(R.string.map_node_popup_details,
+                snippet = context.getString(
+                    R.string.map_node_popup_details,
                     node.gpsString(gpsFormat),
                     formatAgo(node.lastHeard),
                     formatAgo(p.time),
@@ -373,7 +342,10 @@ fun MapView(
             androidx.appcompat.app.AlertDialog.BUTTON_NEUTRAL,
             androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE,
             androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE
-        )) with(dialog.getButton(button)) { textSize = 12F; isAllCaps = false }
+        )) with(dialog.getButton(button)) {
+            textSize = 12F
+            isAllCaps = false
+        }
     }
 
     fun showMarkerLongPressDialog(id: Int) {
@@ -449,9 +421,11 @@ fun MapView(
             performHapticFeedback()
             val enabled = model.isConnected() && downloadRegionBoundingBox == null
 
-            if (enabled) showEditWaypointDialog = waypoint {
+            if (enabled) {
+                showEditWaypointDialog = waypoint {
                 latitudeI = (p.latitude * 1e7).toInt()
                 longitudeI = (p.longitude * 1e7).toInt()
+            }
             }
             return true
         }
@@ -611,7 +585,8 @@ fun MapView(
                 modifier = Modifier.fillMaxSize(),
                 update = { map -> map.drawOverlays() },
             )
-            if (downloadRegionBoundingBox != null) CacheLayout(
+            if (downloadRegionBoundingBox != null) {
+                CacheLayout(
                 cacheEstimate = cacheEstimate,
                 onExecuteJob = { startDownload() },
                 onCancelDownload = {
@@ -620,7 +595,8 @@ fun MapView(
                     map.invalidate()
                 },
                 modifier = Modifier.align(Alignment.BottomCenter)
-            ) else {
+                )
+            } else {
                 Column(
                     modifier = Modifier
                         .padding(top = 16.dp, end = 16.dp)
@@ -658,11 +634,13 @@ fun MapView(
             onSendClicked = { waypoint ->
                 debug("User clicked send waypoint ${waypoint.id}")
                 showEditWaypointDialog = null
-                model.sendWaypoint(waypoint.copy {
+                model.sendWaypoint(
+                    waypoint.copy {
                     if (id == 0) id = model.generatePacketId() ?: return@EditWaypointDialog
                     expire = Int.MAX_VALUE // TODO add expire picker
                     lockedTo = if (waypoint.lockedTo != 0) model.myNodeNum ?: 0 else 0
-                })
+                    }
+                )
             },
             onDeleteClicked = { waypoint ->
                 debug("User clicked delete waypoint ${waypoint.id}")

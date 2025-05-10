@@ -17,10 +17,6 @@
 
 package com.geeksville.mesh.ui
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -34,68 +30,21 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.activityViewModels
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.DataPacket
-import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.navigation.navigateToNavGraph
 import com.geeksville.mesh.ui.components.NodeFilterTextField
 import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.components.rememberTimeTickWithLifecycle
-import com.geeksville.mesh.ui.message.navigateToMessages
-import com.geeksville.mesh.ui.theme.AppTheme
-import dagger.hilt.android.AndroidEntryPoint
-
-@AndroidEntryPoint
-class UsersFragment : ScreenFragment("Users"), Logging {
-
-    private val model: UIViewModel by activityViewModels()
-
-    private fun navigateToMessages(node: Node) = node.user.let { user ->
-        val hasPKC = model.ourNodeInfo.value?.hasPKC == true && node.hasPKC // TODO use meta.hasPKC
-        val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
-        val contactKey = "$channel${user.id}"
-        info("calling MessagesFragment filter: $contactKey")
-        parentFragmentManager.navigateToMessages(contactKey)
-    }
-
-    private fun navigateToNodeDetails(nodeNum: Int) {
-        info("calling NodeDetails --> destNum: $nodeNum")
-        parentFragmentManager.navigateToNavGraph(nodeNum, "NodeDetails")
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                AppTheme {
-                    NodesScreen(
-                        model = model,
-                        navigateToMessages = ::navigateToMessages,
-                        navigateToNodeDetails = ::navigateToNodeDetails,
-                    )
-                }
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalFoundationApi::class)
-@Composable
 @Suppress("LongMethod")
-fun NodesScreen(
+@Composable
+fun NodeScreen(
     model: UIViewModel = hiltViewModel(),
-    navigateToMessages: (Node) -> Unit,
+    navigateToMessages: (String) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
 ) {
     val state by model.nodesUiState.collectAsStateWithLifecycle()
@@ -142,7 +91,11 @@ fun NodesScreen(
                         is NodeMenuAction.Remove -> model.removeNode(node.num)
                         is NodeMenuAction.Ignore -> model.ignoreNode(node)
                         is NodeMenuAction.Favorite -> model.favoriteNode(node)
-                        is NodeMenuAction.DirectMessage -> navigateToMessages(node)
+                        is NodeMenuAction.DirectMessage -> {
+                            val hasPKC = model.ourNodeInfo.value?.hasPKC == true && node.hasPKC
+                            val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
+                            navigateToMessages("$channel${node.user.id}")
+                        }
                         is NodeMenuAction.RequestUserInfo -> model.requestUserInfo(node.num)
                         is NodeMenuAction.RequestPosition -> model.requestPosition(node.num)
                         is NodeMenuAction.TraceRoute -> model.requestTraceroute(node.num)
