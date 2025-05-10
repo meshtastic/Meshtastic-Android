@@ -43,5 +43,4 @@ object UnitConversions {
         val alpha = (a * tempCelsius) / (b + tempCelsius) + ln(humidity / 100f)
         return (b * alpha) / (a - alpha)
     }
-
 }
