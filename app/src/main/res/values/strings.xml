@@ -605,6 +605,4 @@
     <string name="heading">Heading</string>
     <string name="sats">Sats</string>
     <string name="alt">Alt</string>
-    <string name="latitude">Latitude</string>
-    <string name="longitude">Longitude</string>
 </resources>
