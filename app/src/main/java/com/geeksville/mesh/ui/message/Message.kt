@@ -17,6 +17,8 @@
 
 package com.geeksville.mesh.ui.message
 
+import android.content.LocusId
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -137,7 +139,10 @@ class MessagesFragment : Fragment(), Logging {
     ): View {
         val contactKey = arguments?.getString("contactKey").toString()
         val message = arguments?.getString("message").toString()
-
+        val shortcutId = "conv_$contactKey"
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            requireActivity().setLocusContext(LocusId(shortcutId), null)
+        }
         return ComposeView(requireContext()).apply {
             setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
             setContent {
