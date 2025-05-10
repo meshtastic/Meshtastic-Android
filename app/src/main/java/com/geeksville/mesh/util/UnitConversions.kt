@@ -17,6 +17,8 @@
 
 package com.geeksville.mesh.util
 
+import kotlin.math.ln
+
 object UnitConversions {
 
     @Suppress("MagicNumber")
@@ -29,6 +31,17 @@ object UnitConversions {
         "%.0f°F".format(fahrenheit)
     } else {
         "%.0f°C".format(this)
+    }
+
+    /**
+     * Calculated the dew point based on the Magnus-Tetens approximation which is a widely used
+     * formula for calculating dew point temperature.
+     */
+    @Suppress("MagicNumber")
+    fun calculateDewPoint(tempCelsius: Float, humidity: Float): Float {
+        val (a, b) = 17.27f to 237.7f
+        val alpha = (a * tempCelsius) / (b + tempCelsius) + ln(humidity / 100f)
+        return (b * alpha) / (a - alpha)
     }
 
 }

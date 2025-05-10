@@ -15,8 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-@file:Suppress("TooManyFunctions")
-
 package com.geeksville.mesh.ui
 
 import androidx.compose.foundation.background
@@ -92,7 +90,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DeviceHardware
 import com.geeksville.mesh.model.MetricsState
@@ -103,11 +100,12 @@ import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.radioconfig.NavCard
 import com.geeksville.mesh.ui.theme.AppTheme
-import com.geeksville.mesh.util.DistanceUnit
+import com.geeksville.mesh.util.UnitConversions.calculateDewPoint
+import com.geeksville.mesh.util.UnitConversions.toTempString
 import com.geeksville.mesh.util.formatAgo
 import com.geeksville.mesh.util.formatUptime
 import com.geeksville.mesh.util.thenIf
-import kotlin.math.ln
+import com.geeksville.mesh.util.toSpeedString
 
 private enum class LogsType(
     val titleRes: Int,
@@ -537,28 +535,6 @@ private fun EnvironmentMetrics(
             )
         }
     }
-}
-
-@Suppress("MagicNumber")
-private fun Float.toTempString(isFahrenheit: Boolean) = if (isFahrenheit) {
-    val fahrenheit = this * 1.8F + 32
-    "%.0f°F".format(fahrenheit)
-} else {
-    "%.0f°C".format(this)
-}
-
-@Suppress("MagicNumber")
-private fun Float.toSpeedString() = when (DistanceUnit.getFromLocale()) {
-    DisplayUnits.METRIC -> "%.0f km/h".format(this * 3.6)
-    else -> "%.0f mph".format(this * 2.23694f)
-}
-
-// Magnus-Tetens approximation
-@Suppress("MagicNumber")
-private fun calculateDewPoint(tempCelsius: Float, humidity: Float): Float {
-    val (a, b) = 17.27f to 237.7f
-    val alpha = (a * tempCelsius) / (b + tempCelsius) + ln(humidity / 100f)
-    return (b * alpha) / (a - alpha)
 }
 
 @Composable

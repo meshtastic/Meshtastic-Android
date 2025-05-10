@@ -19,7 +19,7 @@ package com.geeksville.mesh.util
 
 import android.icu.util.LocaleData
 import android.icu.util.ULocale
-import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
+import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import java.util.Locale
 
 enum class DistanceUnit(
@@ -27,23 +27,23 @@ enum class DistanceUnit(
     val multiplier: Float,
     val system: Int
 ) {
-    METER("m", multiplier = 1F, DisplayConfig.DisplayUnits.METRIC_VALUE),
-    KILOMETER("km", multiplier = 0.001F, DisplayConfig.DisplayUnits.METRIC_VALUE),
-    FOOT("ft", multiplier = 3.28084F, DisplayConfig.DisplayUnits.IMPERIAL_VALUE),
-    MILE("mi", multiplier = 0.000621371F, DisplayConfig.DisplayUnits.IMPERIAL_VALUE),
+    METER("m", multiplier = 1F, DisplayUnits.METRIC_VALUE),
+    KILOMETER("km", multiplier = 0.001F, DisplayUnits.METRIC_VALUE),
+    FOOT("ft", multiplier = 3.28084F, DisplayUnits.IMPERIAL_VALUE),
+    MILE("mi", multiplier = 0.000621371F, DisplayUnits.IMPERIAL_VALUE),
     ;
 
     companion object {
-        fun getFromLocale(locale: Locale = Locale.getDefault()): DisplayConfig.DisplayUnits {
+        fun getFromLocale(locale: Locale = Locale.getDefault()): DisplayUnits {
             return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
                 when (LocaleData.getMeasurementSystem(ULocale.forLocale(locale))) {
-                    LocaleData.MeasurementSystem.SI -> DisplayConfig.DisplayUnits.METRIC
-                    else -> DisplayConfig.DisplayUnits.IMPERIAL
+                    LocaleData.MeasurementSystem.SI -> DisplayUnits.METRIC
+                    else -> DisplayUnits.IMPERIAL
                 }
             } else {
                 when (locale.country.uppercase(locale)) {
-                    "US", "LR", "MM", "GB" -> DisplayConfig.DisplayUnits.IMPERIAL
-                    else -> DisplayConfig.DisplayUnits.METRIC
+                    "US", "LR", "MM", "GB" -> DisplayUnits.IMPERIAL
+                    else -> DisplayUnits.METRIC
                 }
             }
         }
@@ -54,9 +54,9 @@ fun Int.metersIn(unit: DistanceUnit): Float {
     return this * unit.multiplier
 }
 
-fun Int.metersIn(system: DisplayConfig.DisplayUnits): Float {
+fun Int.metersIn(system: DisplayUnits): Float {
     val unit = when (system.number) {
-        DisplayConfig.DisplayUnits.IMPERIAL_VALUE -> DistanceUnit.FOOT
+        DisplayUnits.IMPERIAL_VALUE -> DistanceUnit.FOOT
         else -> DistanceUnit.METER
     }
     return this.metersIn(unit)
@@ -70,9 +70,9 @@ fun Float.toString(unit: DistanceUnit): String {
     }.format(this, unit.symbol)
 }
 
-fun Float.toString(system: DisplayConfig.DisplayUnits): String {
+fun Float.toString(system: DisplayUnits): String {
     val unit = when (system.number) {
-        DisplayConfig.DisplayUnits.IMPERIAL_VALUE -> DistanceUnit.FOOT
+        DisplayUnits.IMPERIAL_VALUE -> DistanceUnit.FOOT
         else -> DistanceUnit.METER
     }
     return this.toString(unit)
@@ -80,12 +80,18 @@ fun Float.toString(system: DisplayConfig.DisplayUnits): String {
 
 private const val KILOMETER_THRESHOLD = 1000
 private const val MILE_THRESHOLD = 1609
-fun Int.toDistanceString(system: DisplayConfig.DisplayUnits): String {
-    val unit = if (system.number == DisplayConfig.DisplayUnits.METRIC_VALUE) {
+fun Int.toDistanceString(system: DisplayUnits): String {
+    val unit = if (system.number == DisplayUnits.METRIC_VALUE) {
         if (this < KILOMETER_THRESHOLD) DistanceUnit.METER else DistanceUnit.KILOMETER
     } else {
         if (this < MILE_THRESHOLD) DistanceUnit.FOOT else DistanceUnit.MILE
     }
     val valueInUnit = this * unit.multiplier
     return valueInUnit.toString(unit)
+}
+
+@Suppress("MagicNumber")
+fun Float.toSpeedString() = when (DistanceUnit.getFromLocale()) {
+    DisplayUnits.METRIC -> "%.0f km/h".format(this * 3.6)
+    else -> "%.0f mph".format(this * 2.23694f)
 }
