@@ -595,4 +595,14 @@
     <string name="backup_restore"><![CDATA[Backup & Restore]]></string>
     <string name="import_configuration">Import configuration</string>
     <string name="export_configuration">Export configuration</string>
+    <string name="hardware">Hardware</string>
+    <string name="supported">Supported</string>
+    <string name="node_number">Node Number</string>
+    <string name="user_id">User ID</string>
+    <string name="uptime">Uptime</string>
+    <string name="firmware_version">Firmware version</string>
+    <string name="timestamp">Timestamp</string>
+    <string name="heading">Heading</string>
+    <string name="sats">Sats</string>
+    <string name="alt">Alt</string>
 </resources>

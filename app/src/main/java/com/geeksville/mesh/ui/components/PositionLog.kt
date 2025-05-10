@@ -25,7 +25,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -98,15 +97,15 @@ private fun HeaderItem(compactWidth: Boolean) {
             .padding(8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        PositionText("Latitude", Weight20)
-        PositionText("Longitude", Weight20)
-        PositionText("Sats", Weight10)
-        PositionText("Alt", Weight15)
+        PositionText(stringResource(R.string.latitude), Weight20)
+        PositionText(stringResource(R.string.longitude), Weight20)
+        PositionText(stringResource(R.string.sats), Weight10)
+        PositionText(stringResource(R.string.alt), Weight15)
         if (!compactWidth) {
             PositionText("Speed", Weight15)
-            PositionText("Heading", Weight15)
+            PositionText(stringResource(R.string.heading), Weight15)
         }
-        PositionText("Timestamp", Weight40)
+        PositionText(stringResource(R.string.timestamp), Weight40)
     }
 }
 
@@ -155,7 +154,6 @@ private fun formatPositionTime(
     return timeText
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun ActionButtons(
     clearButtonEnabled: Boolean,
