@@ -100,7 +100,6 @@ import com.geeksville.mesh.ui.radioconfig.components.SerialConfigScreen
 import com.geeksville.mesh.ui.radioconfig.components.StoreForwardConfigScreen
 import com.geeksville.mesh.ui.radioconfig.components.TelemetryConfigScreen
 import com.geeksville.mesh.ui.radioconfig.components.UserConfigScreen
-import com.geeksville.mesh.util.UiText
 import kotlinx.serialization.Serializable
 
 enum class AdminRoute(@StringRes val title: Int) {
@@ -289,18 +288,6 @@ enum class ModuleRoute(
     }
 }
 
-/**
- * Generic sealed class defines each possible state of a response.
- */
-sealed class ResponseState<out T> {
-    data object Empty : ResponseState<Nothing>()
-    data class Loading(var total: Int = 1, var completed: Int = 0) : ResponseState<Nothing>()
-    data class Success<T>(val result: T) : ResponseState<T>()
-    data class Error(val error: UiText) : ResponseState<Nothing>()
-
-    fun isWaiting() = this !is Empty
-}
-
 @Suppress("LongMethod")
 @Composable
 fun NavGraph(
@@ -310,7 +297,11 @@ fun NavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Route.Contacts,
+        startDestination = if (model.bondedAddress.isNullOrBlank()) {
+            Route.Settings
+        } else {
+            Route.Contacts
+        },
         modifier = modifier,
     ) {
         composable<Route.Contacts> {

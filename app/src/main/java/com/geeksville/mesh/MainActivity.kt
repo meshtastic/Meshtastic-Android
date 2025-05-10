@@ -171,6 +171,7 @@ class MainActivity : AppCompatActivity(), Logging {
             }
 
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
+                debug("USB device attached")
                 showSettingsPage()
             }
 
@@ -259,6 +260,7 @@ class MainActivity : AppCompatActivity(), Logging {
         // Linkify.addLinks(view, Linkify.ALL) // not needed with this method
         view.movementMethod = LinkMovementMethod.getInstance()
 
+        debug("showAlert: $titleText")
         showSettingsPage() // Default to the settings page in this case
     }
 
@@ -470,8 +472,11 @@ class MainActivity : AppCompatActivity(), Logging {
             errormsg("Bind of MeshService failed")
         }
 
-        val bonded = model.bondedAddress != null
-        if (!bonded) showSettingsPage()
+//        val bonded = model.bondedAddress != null
+//        if (!bonded) {
+//            debug("No bonded address, so we are not connected to a device")
+//            showSettingsPage()
+//        }
     }
 
     private fun showSettingsPage() {
