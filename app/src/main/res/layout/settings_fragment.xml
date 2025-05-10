@@ -29,58 +29,8 @@
         android:layout_height="0dp"
         android:layout_marginTop="16dp">
 
-        <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/nodeSettings"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:layout_marginTop="16dp"
-        >
-
-        <com.google.android.material.textfield.TextInputLayout
-            android:id="@+id/usernameView"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="16dp"
-            android:hint="@string/your_name"
-            app:layout_constraintHorizontal_weight="2"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/regionSpinner"
-            app:layout_constraintTop_toTopOf="parent">
-
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/usernameEditText"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:imeOptions="actionDone"
-                android:singleLine="true" />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/regionLabel"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/region"
-            app:layout_constraintEnd_toEndOf="@+id/regionSpinner"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="Region" />
-
-        <Spinner
-            android:id="@+id/regionSpinner"
-            android:layout_width="120dp"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginEnd="16dp"
-            android:theme="@style/AppTheme.Spinner"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/regionLabel"
-            app:layout_constraintStart_toEndOf="@+id/usernameView"
-            />
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- Removed nodeSettings ConstraintLayout which contained username and region -->
+        <!-- We will keep the scanStatusText as the top element -->
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/scanStatusText"
@@ -92,7 +42,19 @@
             android:text="@string/looking_for_meshtastic_devices"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/nodeSettings"
+            app:layout_constraintTop_toTopOf="parent"
+            />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/setRegionButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/set_region"
+            android:visibility="gone" tools:visibility="visible"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/scanStatusText"
+            android:layout_marginStart="16dp"
             />
 
         <ProgressBar
@@ -113,7 +75,7 @@
             android:layout_marginStart="16dp"
             android:layout_marginTop="16dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/scanStatusText">
+            app:layout_constraintTop_toBottomOf="@+id/setRegionButton"> <!-- Adjusted constraint -->
 
             <RadioButton
                 android:id="@+id/radioButton2"

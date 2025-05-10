@@ -1,3 +1,5 @@
+package com.geeksville.mesh.ui
+
 /*
  * Copyright (c) 2025 Meshtastic LLC
  *
@@ -15,7 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui
 
 import android.net.InetAddresses
 import android.os.Build
@@ -27,11 +28,7 @@ import android.util.Patterns
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
 import android.widget.RadioButton
-import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.core.widget.doAfterTextChanged
@@ -39,16 +36,23 @@ import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.asLiveData
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
-import com.geeksville.mesh.android.*
+import com.geeksville.mesh.android.GeeksvilleApplication
+import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.android.getBluetoothPermissions
+import com.geeksville.mesh.android.getLocationPermissions
+import com.geeksville.mesh.android.gpsDisabled
+import com.geeksville.mesh.android.hasGps
+import com.geeksville.mesh.android.hasLocationPermission
+import com.geeksville.mesh.android.isGooglePlayAvailable
+import com.geeksville.mesh.android.permissionMissing
+import com.geeksville.mesh.android.rationaleDialog
+import com.geeksville.mesh.android.shouldShowRequestPermissionRationale
 import com.geeksville.mesh.databinding.SettingsFragmentBinding
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
-import com.geeksville.mesh.model.RegionInfo
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.util.exceptionToSnackbar
-import com.geeksville.mesh.util.onEditorAction
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
@@ -84,11 +88,11 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
     private fun updateNodeInfo() {
         val connectionState = model.connectionState.value
         val isConnected = connectionState == MeshService.ConnectionState.CONNECTED
-
-        binding.nodeSettings.visibility = if (isConnected) View.VISIBLE else View.GONE
-        binding.provideLocationCheckbox.visibility = if (isConnected) View.VISIBLE else View.GONE
-
-        binding.usernameEditText.isEnabled = isConnected && !model.isManaged
+        val region = model.region // Get the current region
+        // Show/hide the "Set Region" button based on connection and region state
+        val regionUnset = region == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET
+        binding.setRegionButton.visibility =
+            if (isConnected && regionUnset) View.VISIBLE else View.GONE
 
         if (hasGps) {
             binding.provideLocationCheckbox.isEnabled = true
@@ -97,59 +101,24 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
             binding.provideLocationCheckbox.isEnabled = false
         }
 
-        // update the region selection from the device
-        val region = model.region
-        val spinner = binding.regionSpinner
-        spinner.onItemSelectedListener = null
-
-        debug("current region is $region")
-        var regionIndex = regions.indexOfFirst { it.regionCode == region }
-        if (regionIndex == -1) { // Not found, probably because the device has a region our app doesn't yet understand.  Punt and say Unset
-            regionIndex = ConfigProtos.Config.LoRaConfig.RegionCode.UNSET_VALUE
-        }
-
-        // We don't want to be notified of our own changes, so turn off listener while making them
-        spinner.setSelection(regionIndex, false)
-        spinner.onItemSelectedListener = regionSpinnerListener
-        spinner.isEnabled = !model.isManaged
-
         // Update the status string (highest priority messages first)
-        val regionUnset = region == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET
         val info = model.myNodeInfo.value
         when (connectionState) {
             MeshService.ConnectionState.CONNECTED ->
+                // Include region unset warning in status string if applicable
                 if (regionUnset) R.string.must_set_region else R.string.connected_to
+
             MeshService.ConnectionState.DISCONNECTED -> R.string.not_connected
             MeshService.ConnectionState.DEVICE_SLEEP -> R.string.connected_sleeping
             else -> null
-        }?.let {
+        }.let {
             val firmwareString = info?.firmwareString ?: getString(R.string.unknown)
-            scanModel.setErrorText(getString(it, firmwareString))
-        }
-    }
-
-    private val regionSpinnerListener = object : AdapterView.OnItemSelectedListener {
-        override fun onItemSelected(
-            parent: AdapterView<*>,
-            view: View,
-            position: Int,
-            id: Long
-        ) {
-            val item = RegionInfo.entries[position]
-            val asProto = item.regionCode
-            exceptionToSnackbar(requireView()) {
-                debug("regionSpinner onItemSelected $asProto")
-                if (asProto != model.region) model.region = asProto
+            if (it != null) {
+                scanModel.setErrorText(getString(it, firmwareString))
             }
-            updateNodeInfo() // We might have just changed Unset to set
-        }
-
-        override fun onNothingSelected(parent: AdapterView<*>) {
-            // TODO("Not yet implemented")
         }
     }
 
-    private val regions = RegionInfo.entries
 
     private fun initCommonUI() {
 
@@ -165,41 +134,14 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
                 bluetoothViewModel.permissionsUpdated()
             }
 
-        // init our region spinner
-        val spinner = binding.regionSpinner
-        val regionAdapter = object : ArrayAdapter<RegionInfo>(
-            requireContext(),
-            android.R.layout.simple_spinner_item,
-            regions
-        ) {
-            override fun getView(position: Int, convertView: View?, parent: ViewGroup): View {
-                val view = super.getView(position, convertView, parent)
-                (view as? TextView)?.text = regions[position].name
-                return view
-            }
-
-            override fun getDropDownView(
-                position: Int,
-                convertView: View?,
-                parent: ViewGroup
-            ): View {
-                val view = super.getDropDownView(position, convertView, parent)
-                (view as? TextView)?.text = regions[position].description
-                return view
-            }
-        }
-        regionAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        spinner.adapter = regionAdapter
-
-        model.ourNodeInfo.asLiveData().observe(viewLifecycleOwner) { node ->
-            binding.usernameEditText.setText(node?.user?.longName.orEmpty())
+        binding.setRegionButton.setOnClickListener {
+            debug("User clicked Set Region button")
         }
 
         scanModel.devices.observe(viewLifecycleOwner) { devices ->
             updateDevicesButtons(devices)
         }
 
-        // Only let user edit their name or set software update while connected to a radio
         model.connectionState.asLiveData().observe(viewLifecycleOwner) {
             updateNodeInfo()
         }
@@ -247,13 +189,6 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
         scanModel.spinner.observe(viewLifecycleOwner) { show ->
             binding.changeRadioButton.isEnabled = !show
             binding.scanProgressBar.visibility = if (show) View.VISIBLE else View.GONE
-        }
-
-        binding.usernameEditText.onEditorAction(EditorInfo.IME_ACTION_DONE) {
-            debug("received IME_ACTION_DONE")
-            val n = binding.usernameEditText.text.toString().trim()
-            if (n.isNotEmpty()) model.setOwner(n)
-            requireActivity().hideKeyboard()
         }
 
         // Observe receivingLocationUpdates state and update provideLocationCheckbox
@@ -364,7 +299,13 @@ class SettingsFragment : ScreenFragment("Settings"), Logging {
 
         deviceSelectIPAddress.isEnabled = inputIPAddress.text.isIPAddress()
         deviceSelectIPAddress.setOnClickListener {
-            deviceSelectIPAddress.isChecked = scanModel.onSelected(BTScanModel.DeviceListEntry("", "t" + inputIPAddress.text, true))
+            deviceSelectIPAddress.isChecked = scanModel.onSelected(
+                BTScanModel.DeviceListEntry(
+                    "",
+                    "t" + inputIPAddress.text,
+                    true
+                )
+            )
         }
 
         binding.deviceRadioGroup.addView(deviceSelectIPAddress)
