@@ -15,15 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-@file:Suppress("TooManyFunctions")
-
 package com.geeksville.mesh.ui
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -93,7 +90,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
-import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DeviceHardware
 import com.geeksville.mesh.model.MetricsState
@@ -104,11 +100,12 @@ import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.radioconfig.NavCard
 import com.geeksville.mesh.ui.theme.AppTheme
-import com.geeksville.mesh.util.DistanceUnit
+import com.geeksville.mesh.util.UnitConversions.calculateDewPoint
+import com.geeksville.mesh.util.UnitConversions.toTempString
 import com.geeksville.mesh.util.formatAgo
 import com.geeksville.mesh.util.formatUptime
 import com.geeksville.mesh.util.thenIf
-import kotlin.math.ln
+import com.geeksville.mesh.util.toSpeedString
 
 private enum class LogsType(
     val titleRes: Int,
@@ -286,13 +283,13 @@ private fun DeviceDetailsContent(
         )
     }
     NodeDetailRow(
-        label = "Hardware",
+        label = stringResource(R.string.hardware),
         icon = Icons.Default.Router,
         value = hwModelName
     )
     if (isSupported) {
         NodeDetailRow(
-            label = "Supported",
+            label = stringResource(R.string.supported),
             icon = Icons.Default.Verified,
             value = "",
             iconTint = Color.Green
@@ -349,36 +346,36 @@ private fun NodeDetailsContent(
         Spacer(Modifier.height(16.dp))
     }
     NodeDetailRow(
-        label = "Node Number",
+        label = stringResource(R.string.node_number),
         icon = Icons.Default.Numbers,
         value = node.num.toUInt().toString()
     )
     NodeDetailRow(
-        label = "User Id",
+        label = stringResource(R.string.user_id),
         icon = Icons.Default.Person,
         value = node.user.id
     )
     NodeDetailRow(
-        label = "Role",
+        label = stringResource(R.string.role),
         icon = Icons.Default.Work,
         value = node.user.role.name
     )
     if (node.deviceMetrics.uptimeSeconds > 0) {
         NodeDetailRow(
-            label = "Uptime",
+            label = stringResource(R.string.uptime),
             icon = Icons.Default.CheckCircle,
             value = formatUptime(node.deviceMetrics.uptimeSeconds)
         )
     }
     if (node.metadata != null) {
         NodeDetailRow(
-            label = "Firmware version",
+            label = stringResource(R.string.firmware_version),
             icon = Icons.Default.Memory,
             value = node.metadata.firmwareVersion.substringBeforeLast(".")
         )
     }
     NodeDetailRow(
-        label = "Last heard",
+        label = stringResource(R.string.node_sort_last_heard),
         icon = Icons.Default.History,
         value = formatAgo(node.lastHeard)
     )
@@ -431,7 +428,6 @@ private fun InfoCard(
     }
 }
 
-@OptIn(ExperimentalLayoutApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 private fun EnvironmentMetrics(
@@ -541,29 +537,6 @@ private fun EnvironmentMetrics(
     }
 }
 
-@Suppress("MagicNumber")
-private fun Float.toTempString(isFahrenheit: Boolean) = if (isFahrenheit) {
-    val fahrenheit = this * 1.8F + 32
-    "%.0f°F".format(fahrenheit)
-} else {
-    "%.0f°C".format(this)
-}
-
-@Suppress("MagicNumber")
-private fun Float.toSpeedString() = when (DistanceUnit.getFromLocale()) {
-    DisplayUnits.METRIC -> "%.0f km/h".format(this * 3.6)
-    else -> "%.0f mph".format(this * 2.23694f)
-}
-
-// Magnus-Tetens approximation
-@Suppress("MagicNumber")
-private fun calculateDewPoint(tempCelsius: Float, humidity: Float): Float {
-    val (a, b) = 17.27f to 237.7f
-    val alpha = (a * tempCelsius) / (b + tempCelsius) + ln(humidity / 100f)
-    return (b * alpha) / (a - alpha)
-}
-
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun PowerMetrics(node: Node) = with(node.powerMetrics) {
     FlowRow(

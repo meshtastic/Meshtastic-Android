@@ -66,6 +66,7 @@ import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.drawPathWithGradient
+import com.geeksville.mesh.util.UnitConversions.celsiusToFahrenheit
 
 private val LEGEND_DATA_1 = listOf(
     LegendData(
@@ -101,12 +102,6 @@ fun EnvironmentMetricsScreen(
     val selectedTimeFrame by viewModel.timeFrame.collectAsState()
     val graphData = environmentState.environmentMetricsFiltered(selectedTimeFrame)
     val data = graphData.metrics
-
-    /* Convert Celsius to Fahrenheit */
-    @Suppress("MagicNumber")
-    fun celsiusToFahrenheit(celsius: Float): Float {
-        return (celsius * 1.8F) + 32
-    }
 
     val processedTelemetries: List<Telemetry> = if (state.isFahrenheit) {
         data.map { telemetry ->
