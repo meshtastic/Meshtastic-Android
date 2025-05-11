@@ -55,6 +55,7 @@ import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
+import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.ServiceAction
@@ -123,7 +124,9 @@ internal fun getChannelList(
     old: List<ChannelSettings>,
 ): List<ChannelProtos.Channel> = buildList {
     for (i in 0..maxOf(old.lastIndex, new.lastIndex)) {
-        if (old.getOrNull(i) != new.getOrNull(i)) add(channel {
+        if (old.getOrNull(i) != new.getOrNull(i)) {
+            add(
+                channel {
             role = when (i) {
                 0 -> ChannelProtos.Channel.Role.PRIMARY
                 in 1..new.lastIndex -> ChannelProtos.Channel.Role.SECONDARY
@@ -131,7 +134,9 @@ internal fun getChannelList(
             }
             index = i
             settings = new.getOrNull(i) ?: channelSettings { }
-        })
+        }
+            )
+        }
     }
 }
 
@@ -170,8 +175,11 @@ class UIViewModel @Inject constructor(
     private val meshLogRepository: MeshLogRepository,
     private val packetRepository: PacketRepository,
     private val quickChatActionRepository: QuickChatActionRepository,
+    private val locationRepository: LocationRepository,
     private val preferences: SharedPreferences
 ) : ViewModel(), Logging {
+
+    val receivingLocationUpdates: StateFlow<Boolean> get() = locationRepository.receivingLocationUpdates
     val meshService: IMeshService? get() = radioConfigRepository.meshService
 
     val bondedAddress get() = radioInterfaceService.getBondedDeviceAddress()

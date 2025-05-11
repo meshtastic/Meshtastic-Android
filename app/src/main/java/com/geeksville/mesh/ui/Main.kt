@@ -139,9 +139,9 @@ fun MainScreen(
         snackbarHost = { SnackbarHost(hostState = viewModel.snackbarState) }
     ) { innerPadding ->
         NavGraph(
+            modifier = Modifier.padding(innerPadding),
             model = viewModel,
             navController = navController,
-            modifier = Modifier.padding(innerPadding),
         )
     }
 }

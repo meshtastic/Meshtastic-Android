@@ -15,10 +15,26 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+/*
+ * Copyright (c) 2025 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 package com.geeksville.mesh.navigation
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Forward
 import androidx.compose.material.icons.automirrored.filled.List
@@ -47,7 +63,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.fragment.compose.AndroidFragment
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -65,7 +80,7 @@ import com.geeksville.mesh.ui.DebugScreen
 import com.geeksville.mesh.ui.NodeDetailScreen
 import com.geeksville.mesh.ui.NodeScreen
 import com.geeksville.mesh.ui.QuickChatScreen
-import com.geeksville.mesh.ui.SettingsFragment
+import com.geeksville.mesh.ui.SettingsScreen
 import com.geeksville.mesh.ui.ShareScreen
 import com.geeksville.mesh.ui.components.DeviceMetricsScreen
 import com.geeksville.mesh.ui.components.EnvironmentMetricsScreen
@@ -291,9 +306,9 @@ enum class ModuleRoute(
 @Suppress("LongMethod")
 @Composable
 fun NavGraph(
+    modifier: Modifier = Modifier,
     model: UIViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController(),
-    modifier: Modifier = Modifier,
 ) {
     NavHost(
         navController = navController,
@@ -328,7 +343,7 @@ fun NavGraph(
                 }
             )
         ) {
-            AndroidFragment<SettingsFragment>(Modifier.fillMaxSize())
+            SettingsScreen()
         }
         composable<Route.DebugPanel> {
             DebugScreen()

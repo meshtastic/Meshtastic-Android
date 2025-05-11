@@ -103,6 +103,7 @@ android {
     }
     lint {
         abortOnError false
+        disable += "MissingTranslation"
     }
     sourceSets {
         // Adds exported schema location as test app assets.
