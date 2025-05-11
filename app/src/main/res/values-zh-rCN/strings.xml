@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="main_tab_messages">消息</string>
+    <string name="main_tab_messages">消息设
+主
+主</string>
     <string name="main_tab_users">用户</string>
     <string name="main_tab_map">地图</string>
     <string name="main_tab_channel">频道</string>
@@ -94,7 +96,7 @@
     <string name="share">分享</string>
     <string name="disconnected">已断开连接</string>
     <string name="device_sleeping">设备休眠中</string>
-    <string name="connected_count">已连接：%1$s /  在线</string>
+    <string name="connected_count">已连接：%1$s / 在线</string>
     <string name="update_firmware">更新固件</string>
     <string name="ip_address">IP地址：</string>
     <string name="connected">已连接至设备</string>
@@ -103,8 +105,8 @@
     <string name="connected_sleeping">已连接至设备，但设备正在休眠中</string>
     <string name="update_to">更新到%s</string>
     <string name="app_too_old">需要更新应用程序</string>
-    <string name="must_update">您必须在应用商店（或 Github）上更新此应用程序。程序太旧了以至于无法与此装置进行通讯。 请阅读有关此主题的 <a href="https://meshtastic.org/docs/software/android/installation">文档</a>。</string>
-    <string name="none">无 （停用）</string>
+    <string name="must_update">您必须在应用商店或 Github上更新此应用程序。程序太旧了以至于无法与此装置进行通讯。 请阅读有关此主题的 <a href="https://meshtastic.org/docs/software/android/installation">文档</a>。</string>
+    <string name="none">无 (停用)</string>
     <string name="modem_config_turbo">短距离 / 高速模式</string>
     <string name="modem_config_short">短距离 / 快速模式</string>
     <string name="modem_config_medium">中距离 / 快速模式</string>
@@ -142,17 +144,17 @@
     <string name="reset_to_defaults">重置为默认设置</string>
     <string name="apply">申请</string>
     <string name="no_app_found">找不到可用于发送 URL 的应用程序。</string>
-    <string name="theme">主題</string>
+    <string name="theme">主题</string>
     <string name="theme_light">浅色</string>
     <string name="theme_dark">深色</string>
     <string name="theme_system">系统默认设置</string>
     <string name="choose_theme">选择主题</string>
-    <string name="background_required">背景定位</string>
+    <string name="background_required">后台定位</string>
     <string name="why_background_required">使用此功能，您必须授予「一直允许」的位置权限选项。\n这允许 Meshtastic 读取您的智能手机位置，并在应用程序关闭或未使用时，将位置发送给网状网络中的其他成员。</string>
     <string name="required_permissions">所需权限：</string>
     <string name="provide_location_to_mesh">向网格提供手机位置</string>
     <string name="camera_required">相机权限</string>
-    <string name="why_camera_required">我们必须获得访问摄像头的权限才能读取 QR 码。不会保存任何图片或影片。</string>
+    <string name="why_camera_required">我们必须有摄像头的权限才能扫二维码。应用不会保存任何图片或影片。</string>
     <string name="notification_required">通知权限</string>
     <string name="why_notification_required">Meshtastic 需要获得服务和消息通知的权限。</string>
     <string name="notification_denied">通知权限被拒绝。要打开通知权限，访问：系统设置 &gt; 应用程序 &gt; Meshtastic &gt; 通知。</string>
@@ -165,7 +167,7 @@
     </plurals>
     <string name="delete">删除</string>
     <string name="delete_for_everyone">也从所有人的聊天纪录中删除</string>
-    <string name="delete_for_me">從我的聊天紀錄中刪除</string>
+    <string name="delete_for_me">仅在我的设备中删除</string>
     <string name="select_all">选择全部</string>
     <string name="modem_config_slow_long">长距离（慢速）</string>
     <string name="map_style_selection">主题选择</string>
@@ -181,13 +183,14 @@
     <string name="cant_shutdown">此设备不支持关机</string>
     <string name="reboot">重启</string>
     <string name="traceroute">路由追踪</string>
-    <string name="intro_show">简要介绍</string>
-    <string name="intro_welcome">欢迎来到Meshtasc</string>
+    <string name="intro_show">显示简介</string>
+    <string name="intro_welcome">欢迎来到Meshtastic</string>
     <string name="intro_welcome_text">Meshtastic 是一个开源、离网、加密的通讯平台。Meshtastic 无线电组成网状网络，使用 LoRa 协议传送文字讯息进行通讯。</string>
     <string name="intro_started">…让我们开始吧！</string>
-    <string name="intro_started_text">使用藍牙、序列埠或 WiFi 連接您的 Meshtastic 設備。 \n\n您可以在 www.meshtastic.org/docs/hardware 查看兼容的設備</string>
+    <string name="intro_started_text">使用蓝牙、串行或WiFi连接您的 Meshtastic 设备。 \n\n您可以在www.meshtastic.org/docs/硬件上看到目前兼容的设备。
+Meshtastic中文社区 meshcn.net</string>
     <string name="intro_encryption">"设置加密"</string>
-    <string name="intro_encryption_text">作为标准，设置了默认加密密钥。 要启用您自己的频道和增强加密，请转到频道选项卡并更改频道名称，这将为 AES256 加密设置一个随机密钥。 \n\n要与其他设备通信，他们需要扫描您的二维码或点击共享链接来配置频道设置。</string>
+    <string name="intro_encryption_text">作为标准，已设置了默认加密密钥。 要启用您自己的频道和增强加密，请转到频道选项卡并更改频道名称，这将为 AES256 加密设置一个随机密钥。 \n\n要与其他设备通信，他们需要扫描您的二维码或点击共享链接来配置频道设置。</string>
     <string name="message">信息</string>
     <string name="quick_chat">快速聊天选项</string>
     <string name="quick_chat_new">新的快速聊天</string>
@@ -195,7 +198,7 @@
     <string name="quick_chat_append">附加到消息中</string>
     <string name="quick_chat_instant">立即发送</string>
     <string name="factory_reset">恢复出厂设置</string>
-    <string name="factory_reset_description">这将清除你已经完成的所有设备设定。</string>
+    <string name="factory_reset_description">这将清除你作出的所有设备设置。</string>
     <string name="bluetooth_disabled">蓝牙已禁用</string>
     <string name="permission_missing_31">Meshtastic 需要附近设备许可才能通过蓝牙查找和连接设备。 您可以在不使用时将其关闭。</string>
     <string name="direct_message">私信</string>
@@ -457,7 +460,7 @@
     <string name="pa_fan_disabled">PA风扇已禁用</string>
     <string name="ignore_mqtt">忽略 MQTT</string>
     <string name="ok_to_mqtt">使用MQTT</string>
-    <string name="mqtt_config">MQT设置</string>
+    <string name="mqtt_config">MQTT设置</string>
     <string name="mqtt_enabled">启用MQTT</string>
     <string name="address">地址</string>
     <string name="username">用户名</string>
@@ -560,7 +563,7 @@
     <string name="licensed_amateur_radio">持证业余台</string>
     <string name="dew_point">结露点</string>
     <string name="pressure">气压</string>
-    <string name="gas_resistance">气体抗性</string>
+    <string name="gas_resistance">气体电阻性</string>
     <string name="distance">距离</string>
     <string name="lux">照度</string>
     <string name="wind">风</string>

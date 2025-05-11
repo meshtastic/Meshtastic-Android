@@ -2,6 +2,7 @@
 <resources>
     <string name="main_tab_messages">Сообщения</string>
     <string name="main_tab_users">Пользователи</string>
+    <string name="main_tab_map">Карта</string>
     <string name="main_tab_channel">Канал</string>
     <string name="main_tab_settings">Настройки</string>
     <string name="node_filter_placeholder">Фильтр</string>
@@ -15,6 +16,8 @@
     <string name="node_sort_hops_away">Прыжков</string>
     <string name="node_sort_last_heard">Последний раз слышен</string>
     <string name="node_sort_via_mqtt">через MQTT</string>
+    <string name="node_sort_via_favorite">по фаворитам</string>
+    <string name="unrecognized">Нераспознанный</string>
     <string name="message_status_enroute">Ожидание подтверждения</string>
     <string name="message_status_queued">В очереди для отправки</string>
     <string name="routing_error_none">Принято</string>
@@ -27,6 +30,7 @@
     <string name="routing_error_too_large">Пакет слишком велик</string>
     <string name="routing_error_no_response">Нет ответа</string>
     <string name="routing_error_bad_request">Неверный запрос</string>
+    <string name="routing_error_duty_cycle_limit">Достигнут региональный предел рабочего цикла</string>
     <string name="routing_error_not_authorized">Не авторизован</string>
     <string name="routing_error_pki_failed">Ошибка шифрования отправки</string>
     <string name="routing_error_pki_unknown_pubkey">Неизвестный публичный ключ</string>
@@ -39,6 +43,10 @@
     <string name="role_repeater">Инфраструктурный узел для расширения покрытия сети путем передачи сообщений с минимальными накладными расходами. Не виден в списке узлов.</string>
     <string name="role_tracker">Транслирует пакеты позиций GPS в качестве приоритета.</string>
     <string name="role_sensor">Транслирует пакеты телеметрии в приоритетном порядке.</string>
+    <string name="role_tak">Оптимизировано для связи с системой ATAK, сокращает текущие передачи.</string>
+    <string name="role_client_hidden">Устройство, которое передает сигнал только при необходимости для скрытности или экономии энергии.</string>
+    <string name="role_lost_and_found">Регулярно передает местоположение в виде сообщения на канал по умолчанию для помощи в восстановлении устройства.</string>
+    <string name="role_tak_tracker">Включает автоматические трансляции TAK PLI и сокращает рутинные трансляции.</string>
     <string name="rebroadcast_mode_core_portnums_only">Игнорирует пакеты из нестандартных портов, таких как: TAK, RangeTest, PaxCounter и т. д. Только ретранслирует пакеты со стандартными номерами портов: NodeInfo, Text, Position, Telemetry, Routing.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">Рассматривать двойное нажатие на поддерживаемых акселерометрах как нажатие пользовательской кнопки.</string>
     <string name="config_device_disableTripleClick_summary">Отключает тройное нажатие кнопки пользователя, чтобы включить или отключить GPS.</string>
@@ -89,6 +97,7 @@
     <string name="app_too_old">Требуется обновление приложения</string>
     <string name="must_update">Вы должны обновить это приложение в магазине приложений app store (или Github). Приложение слишком старо, чтобы работать с этой прошивкой в радио. Пожалуйста, прочитайте нашу <a href="https://meshtastic.org/docs/software/android/installation">документацию</a> по этой теме.</string>
     <string name="none">Нет (выключить)</string>
+    <string name="modem_config_turbo">Малое расстояние / турбо</string>
     <string name="modem_config_short">Малое расстояние / Быстро</string>
     <string name="modem_config_medium">Среднее расстояние / Быстро</string>
     <string name="modem_config_long">Большое расстояние / Быстро</string>
@@ -229,6 +238,7 @@
     <string name="navigate_back">Вернуться</string>
     <string name="battery">Батарея</string>
     <string name="channel_utilization">Использование канала</string>
+    <string name="air_utilization">Использование эфира</string>
     <string name="temperature">Температура</string>
     <string name="humidity">Влажность</string>
     <string name="logs">Журналы</string>
@@ -242,6 +252,7 @@
     <string name="more_details">Подробнее</string>
     <string name="snr">Сигнал/шум</string>
     <string name="snr_definition">Соотношение сигнал/шум, мера, используемая в коммуникациях для количественной оценки уровня желаемого сигнала по отношению к уровню фонового шума. В Meshtastic и других беспроводных системах более высокий SNR указывает на более четкий сигнал, который может повысить надежность и качество передачи данных.</string>
+    <string name="rssi">RSSI</string>
     <string name="rssi_definition">Индикатор уровня принимаемого сигнала, измерение, используемое для определения уровня мощности, принимаемой антенной. Более высокое значение RSSI обычно указывает на более сильное и стабильное соединение.</string>
     <string name="iaq_definition">(Качество воздуха в помещении) Относительная шкала IAQ, измеренная Bosch BME680. Диапазон значений 0–500.</string>
     <string name="device_metrics_log">Журнал метрик устройства</string>
@@ -260,11 +271,14 @@
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Качество сигнала</string>
     <string name="traceroute_log">Журнал трассировок</string>
+    <string name="traceroute_direct">Прямой</string>
     <string name="twenty_four_hours">24ч</string>
     <string name="forty_eight_hours">48ч</string>
     <string name="one_week">1нед</string>
     <string name="two_weeks">2нед</string>
     <string name="four_weeks">4нед</string>
+    <string name="max">Макс</string>
+    <string name="samsung_instructions">Инструкции Samsung</string>
     <string name="critical_alert">Критическое оповещение!</string>
     <string name="favorite">Избранное</string>
     <string name="favorite_add">Добавить \'%s\' как избранный узел?</string>
@@ -277,7 +291,15 @@
     <string name="voltage">Напряжение</string>
     <string name="are_you_sure">Вы уверены?</string>
     <string name="i_know_what_i_m_doing">Я знаю, что я делаю.</string>
+    <string name="low_battery_title">Низкий заряд батареи: %s</string>
+    <string name="meshtastic_low_battery_temporary_remote_notifications">Уведомления о низком заряде батареи (Фаворитные узлы)</string>
     <string name="baro_pressure">Давление на барометре</string>
+    <string name="mesh_via_udp_enabled">Сеть через UDP включена</string>
+    <string name="udp_config">UDP Config</string>
+    <string name="toggle_my_position">Переключить мою позицию</string>
+    <string name="user">Пользователь</string>
+    <string name="channels">Каналы</string>
+    <string name="device">Устройство</string>
     <string name="messages">Сообщения</string>
     <string name="public_key">Публичный ключ</string>
     <string name="private_key">Закрытый ключ</string>
