@@ -105,7 +105,6 @@ fun SettingsScreen(
     uiViewModel: UIViewModel = hiltViewModel(),
     scanModel: BTScanModel = hiltViewModel(),
     bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
-    showSnackbar: (String) -> Unit = {},
 ) {
     val currentRegion = uiViewModel.region
     val regionUnset = currentRegion == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET
@@ -127,12 +126,12 @@ fun SettingsScreen(
     val isGpsDisabled = context.gpsDisabled()
     LaunchedEffect(isGpsDisabled) {
         if (isGpsDisabled) {
-            showSnackbar(context.getString(R.string.location_disabled))
+            uiViewModel.showSnackbar(context.getString(R.string.location_disabled))
         }
     }
     LaunchedEffect(bluetoothEnabled) {
         if (bluetoothEnabled == false) {
-            showSnackbar(context.getString(R.string.bluetooth_disabled))
+            uiViewModel.showSnackbar(context.getString(R.string.bluetooth_disabled))
         }
     }
     // when scanning is true - wait 10000ms and then stop scanning
@@ -168,7 +167,7 @@ fun SettingsScreen(
                 uiViewModel.meshService?.startProvideLocation()
             } else {
                 debug("User denied location permission")
-                showSnackbar(context.getString(R.string.why_background_required))
+                uiViewModel.showSnackbar(context.getString(R.string.why_background_required))
             }
             bluetoothViewModel.permissionsUpdated()
         }
@@ -188,7 +187,7 @@ fun SettingsScreen(
                 scanModel.startScan()
             } else {
                 warn("Bluetooth permissions denied")
-                showSnackbar(context.permissionMissing)
+                uiViewModel.showSnackbar(context.permissionMissing)
             }
             bluetoothViewModel.permissionsUpdated()
         }
@@ -274,7 +273,7 @@ fun SettingsScreen(
                                     }
                                     tapCount++
                                     if (tapCount >= TAP_TRIGGER) {
-                                        showSnackbar("Demo Mode enabled")
+                                        uiViewModel.showSnackbar("Demo Mode enabled")
                                         scanModel.showMockInterface()
                                     }
                                     // Reset tap count if a different device is selected
@@ -283,7 +282,7 @@ fun SettingsScreen(
                                     }
                                 }
                                 if (!device.bonded) {
-                                    showSnackbar(context.getString(R.string.starting_pairing))
+                                    uiViewModel.showSnackbar(context.getString(R.string.starting_pairing))
                                 }
                                 scanModel.onSelected(device)
                             }
@@ -302,7 +301,7 @@ fun SettingsScreen(
                                 }
                                 tapCount++
                                 if (tapCount >= TAP_TRIGGER) {
-                                    showSnackbar("Demo Mode enabled")
+                                    uiViewModel.showSnackbar("Demo Mode enabled")
                                     scanModel.showMockInterface()
                                 }
                                 // Reset tap count if a different device is selected
@@ -311,7 +310,7 @@ fun SettingsScreen(
                                 }
                             }
                             if (!device.bonded) {
-                                showSnackbar(context.getString(R.string.starting_pairing))
+                                uiViewModel.showSnackbar(context.getString(R.string.starting_pairing))
                             }
                             scanModel.onSelected(device)
                         }
@@ -612,7 +611,7 @@ fun SettingsScreen(
                 Button(onClick = {
                     showReportBugDialog = false
                     reportError("Clicked Report A Bug")
-                    showSnackbar("Bug report sent!")
+                    uiViewModel.showSnackbar("Bug report sent!")
                 }) {
                     Text(stringResource(R.string.report))
                 }
