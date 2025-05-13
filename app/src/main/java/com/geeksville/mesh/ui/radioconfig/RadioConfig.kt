@@ -63,8 +63,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.AdminRoute
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.ModuleRoute
@@ -81,13 +84,19 @@ private fun getNavRouteFrom(routeName: String): Any? {
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun RadioConfigScreen(
-    viewModel: RadioConfigViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
-    onNavigate: (Any) -> Unit = {}
+    viewModel: RadioConfigViewModel = hiltViewModel(),
+    uiViewModel: UIViewModel = hiltViewModel(),
+    navController: NavHostController = rememberNavController(),
 ) {
+    val node by viewModel.destNode.collectAsStateWithLifecycle()
+    val nodeName: String? = node?.user?.longName
+    nodeName?.let {
+        uiViewModel.setTitle(it)
+    }
+
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     var isWaiting by remember { mutableStateOf(false) }
-
     if (isWaiting) {
         PacketResponseStateDialog(
             state = state.responseState,
@@ -99,7 +108,7 @@ fun RadioConfigScreen(
                 getNavRouteFrom(state.route)?.let { route ->
                     isWaiting = false
                     viewModel.clearPacketResponse()
-                    onNavigate(route)
+                    navController.navigate(route)
                 }
             },
         )
@@ -157,8 +166,8 @@ fun RadioConfigScreen(
     }
 
     RadioConfigItemList(
-        state = state,
         modifier = modifier,
+        state = state,
         onRouteClick = { route ->
             isWaiting = true
             viewModel.setResponseStateLoading(route)
@@ -248,7 +257,8 @@ private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Un
                         modifier = Modifier.padding(end = 8.dp)
                     )
                     Text(
-                        text = "${stringResource(title)}?\n")
+                        text = "${stringResource(title)}?\n"
+                    )
                     Icon(
                         imageVector = Icons.TwoTone.Warning,
                         contentDescription = "warning",
@@ -307,12 +317,20 @@ private fun RadioConfigItemList(
     ) {
         item { PreferenceCategory(stringResource(R.string.device_settings)) }
         items(ConfigRoute.filterExcludedFrom(state.metadata)) {
-            NavCard(title = stringResource(it.title), icon = it.icon, enabled = enabled) { onRouteClick(it) }
+            NavCard(
+                title = stringResource(it.title),
+                icon = it.icon,
+                enabled = enabled
+            ) { onRouteClick(it) }
         }
 
         item { PreferenceCategory(stringResource(R.string.module_settings)) }
         items(ModuleRoute.filterExcludedFrom(state.metadata)) {
-            NavCard(title = stringResource(it.title), icon = it.icon, enabled = enabled) { onRouteClick(it) }
+            NavCard(
+                title = stringResource(it.title),
+                icon = it.icon,
+                enabled = enabled
+            ) { onRouteClick(it) }
         }
 
         if (state.isLocal) {

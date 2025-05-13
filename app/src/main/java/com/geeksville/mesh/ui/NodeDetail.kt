@@ -89,12 +89,14 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DeviceHardware
 import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
@@ -125,7 +127,8 @@ private enum class LogsType(
 fun NodeDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: MetricsViewModel = hiltViewModel(),
-    onNavigate: (com.geeksville.mesh.navigation.Route) -> Unit,
+    uiViewModel: UIViewModel = hiltViewModel(),
+    navController: NavHostController,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
@@ -139,15 +142,17 @@ fun NodeDetailScreen(
             environmentState.hasEnvironmentMetrics(),
             state.hasSignalMetrics(),
             state.hasPowerMetrics(),
-            state.hasTracerouteLogs())
+            state.hasTracerouteLogs()
+        )
     }
 
     if (state.node != null) {
         val node = state.node ?: return
+        uiViewModel.setTitle(node.user.longName)
         NodeDetailList(
             node = node,
             metricsState = state,
-            onNavigate = onNavigate,
+            onNavigate = navController::navigate,
             modifier = modifier,
             metricsAvailability = availabilities
         )
@@ -166,7 +171,7 @@ private fun NodeDetailList(
     modifier: Modifier = Modifier,
     node: Node,
     metricsState: MetricsState,
-    onNavigate: (com.geeksville.mesh.navigation.Route) -> Unit = {},
+    onNavigate: (Route) -> Unit = {},
     metricsAvailability: BooleanArray
 ) {
     LazyColumn(
@@ -224,7 +229,7 @@ private fun NodeDetailList(
                     icon = Icons.Default.Settings,
                     enabled = true
                 ) {
-                    onNavigate(com.geeksville.mesh.navigation.Route.RadioConfig(node.num))
+                    onNavigate(Route.RadioConfig(node.num))
                 }
             }
         }

@@ -17,11 +17,9 @@
 
 package com.geeksville.mesh
 
-import android.app.Activity
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.bluetooth.BluetoothAdapter
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -144,7 +142,7 @@ class MainActivity : AppCompatActivity(), Logging {
         setContent {
             Box(Modifier.safeDrawingPadding()) {
                 AppTheme {
-                    MainScreen(model, ::onMainMenuAction)
+                    MainScreen(viewModel = model, onAction = ::onMainMenuAction)
                 }
             }
         }
@@ -229,7 +227,7 @@ class MainActivity : AppCompatActivity(), Logging {
     private val createDocumentLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
-        if (it.resultCode == Activity.RESULT_OK) {
+        if (it.resultCode == RESULT_OK) {
             it.data?.data?.let { file_uri -> model.saveMessagesCSV(file_uri) }
         }
     }
@@ -413,7 +411,7 @@ class MainActivity : AppCompatActivity(), Logging {
         mesh.connect(
             this,
             MeshService.createIntent(),
-            Context.BIND_AUTO_CREATE + Context.BIND_ABOVE_CLIENT
+            BIND_AUTO_CREATE + BIND_ABOVE_CLIENT
         )
     }
 
@@ -469,14 +467,8 @@ class MainActivity : AppCompatActivity(), Logging {
             bindMeshService()
         } catch (ex: BindFailedException) {
             // App is probably shutting down, ignore
-            errormsg("Bind of MeshService failed")
+            errormsg("Bind of MeshService failed${ex.message}")
         }
-
-//        val bonded = model.bondedAddress != null
-//        if (!bonded) {
-//            debug("No bonded address, so we are not connected to a device")
-//            showSettingsPage()
-//        }
     }
 
     private fun showSettingsPage() {

@@ -67,6 +67,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -139,7 +140,6 @@ internal fun getChannelList(
         }
     }
 }
-
 data class NodesUiState(
     val sort: NodeSortOption = NodeSortOption.LAST_HEARD,
     val filter: String = "",
@@ -179,6 +179,11 @@ class UIViewModel @Inject constructor(
     private val preferences: SharedPreferences
 ) : ViewModel(), Logging {
 
+    private val _title = MutableStateFlow("")
+    val title: StateFlow<String> = _title.asStateFlow()
+    fun setTitle(title: String) {
+        _title.value = title
+    }
     val receivingLocationUpdates: StateFlow<Boolean> get() = locationRepository.receivingLocationUpdates
     val meshService: IMeshService? get() = radioConfigRepository.meshService
 

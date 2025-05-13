@@ -41,10 +41,10 @@ import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.Chat
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.twotone.CloudDone
 import androidx.compose.material.icons.twotone.CloudOff
 import androidx.compose.material.icons.twotone.CloudUpload
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.twotone.Contactless
 import androidx.compose.material.icons.twotone.Map
 import androidx.compose.material.icons.twotone.People
@@ -68,12 +68,14 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.NavGraph
 import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.navigation.showLongNameTitle
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.components.ScannedQrCodeDialog
@@ -100,9 +102,6 @@ fun MainScreen(
     onAction: (MainMenuAction) -> Unit
 ) {
     val navController = rememberNavController()
-    val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = backStackEntry?.destination
-
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val localConfig by viewModel.localConfig.collectAsStateWithLifecycle()
     val requestChannelSet by viewModel.requestChannelSet.collectAsStateWithLifecycle()
@@ -112,15 +111,15 @@ fun MainScreen(
             ScannedQrCodeDialog(viewModel, newChannelSet)
         }
     }
+    val title by viewModel.title.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
             MainAppBar(
+                title = title,
                 isManaged = localConfig.security.isManaged,
                 connectionState = connectionState,
-                currentDestination = currentDestination,
-                canNavigateBack = navController.previousBackStackEntry != null,
-                navigateUp = navController::navigateUp,
+                navController = navController,
             ) { action ->
                 when (action) {
                     MainMenuAction.DEBUG -> navController.navigate(Route.DebugPanel)
@@ -133,14 +132,13 @@ fun MainScreen(
         bottomBar = {
             BottomNavigation(
                 navController = navController,
-                currentDestination = currentDestination,
             )
         },
         snackbarHost = { SnackbarHost(hostState = viewModel.snackbarState) }
     ) { innerPadding ->
         NavGraph(
             modifier = Modifier.padding(innerPadding),
-            model = viewModel,
+            uIViewModel = viewModel,
             navController = navController,
         )
     }
@@ -159,19 +157,18 @@ enum class MainMenuAction(@StringRes val stringRes: Int) {
 
 @Composable
 private fun MainAppBar(
+    title: String,
     isManaged: Boolean,
     connectionState: MeshService.ConnectionState,
-    currentDestination: NavDestination?,
-    canNavigateBack: Boolean,
-    navigateUp: () -> Unit,
+    navController: NavHostController,
     modifier: Modifier = Modifier,
     onAction: (MainMenuAction) -> Unit
-) = AnimatedVisibility(
-    visible = currentDestination?.hasRoute<Route.Messages>() == false,
-    enter = slideInVertically(animationSpec = tween(durationMillis = 200)),
-    exit = slideOutVertically(animationSpec = tween(durationMillis = 200)),
 ) {
+    val backStackEntry by navController.currentBackStackEntryAsState()
+    val currentDestination = backStackEntry?.destination
+    val canNavigateBack = navController.previousBackStackEntry != null
     val isTopLevelRoute = currentDestination?.isTopLevel() == true
+    val navigateUp: () -> Unit = navController::navigateUp
     TopAppBar(
         title = {
             when {
@@ -198,7 +195,9 @@ private fun MainAppBar(
                 currentDestination.hasRoute<Route.Share>() ->
                     Text(stringResource(id = R.string.share_to))
 
-                else -> Text("Node name here") // TODO show destNode longName
+                currentDestination.showLongNameTitle() -> {
+                    Text(title)
+                }
             }
         },
         modifier = modifier,
@@ -282,8 +281,8 @@ private fun MainMenuActions(
 @Composable
 private fun BottomNavigation(
     navController: NavController,
-    currentDestination: NavDestination?,
 ) {
+    val currentDestination = navController.currentBackStackEntryAsState().value?.destination
     val topLevelDestination = TopLevelDestination.fromNavDestination(currentDestination)
 
     AnimatedVisibility(

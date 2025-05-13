@@ -64,6 +64,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -82,6 +84,7 @@ import com.geeksville.mesh.ui.NodeScreen
 import com.geeksville.mesh.ui.QuickChatScreen
 import com.geeksville.mesh.ui.SettingsScreen
 import com.geeksville.mesh.ui.ShareScreen
+import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.components.DeviceMetricsScreen
 import com.geeksville.mesh.ui.components.EnvironmentMetricsScreen
 import com.geeksville.mesh.ui.components.NodeMapScreen
@@ -128,14 +131,19 @@ sealed interface Route {
     companion object {
         const val URI = "meshtastic://meshtastic"
     }
+
     @Serializable
     data object Contacts : Route
+
     @Serializable
     data object Nodes : Route
+
     @Serializable
     data object Map : Route
+
     @Serializable
     data object Channels : Route
+
     @Serializable
     data object Settings : Route
 
@@ -144,6 +152,7 @@ sealed interface Route {
 
     @Serializable
     data class Messages(val contactKey: String, val message: String = "") : Route
+
     @Serializable
     data object QuickChat : Route
 
@@ -152,68 +161,97 @@ sealed interface Route {
 
     @Serializable
     data class RadioConfig(val destNum: Int? = null) : Route
+
     @Serializable
     data object User : Route
+
     @Serializable
     data object ChannelConfig : Route
+
     @Serializable
     data object Device : Route
+
     @Serializable
     data object Position : Route
+
     @Serializable
     data object Power : Route
+
     @Serializable
     data object Network : Route
+
     @Serializable
     data object Display : Route
+
     @Serializable
     data object LoRa : Route
+
     @Serializable
     data object Bluetooth : Route
+
     @Serializable
     data object Security : Route
 
     @Serializable
     data object MQTT : Route
+
     @Serializable
     data object Serial : Route
+
     @Serializable
     data object ExtNotification : Route
+
     @Serializable
     data object StoreForward : Route
+
     @Serializable
     data object RangeTest : Route
+
     @Serializable
     data object Telemetry : Route
+
     @Serializable
     data object CannedMessage : Route
+
     @Serializable
     data object Audio : Route
+
     @Serializable
     data object RemoteHardware : Route
+
     @Serializable
     data object NeighborInfo : Route
+
     @Serializable
     data object AmbientLighting : Route
+
     @Serializable
     data object DetectionSensor : Route
+
     @Serializable
     data object Paxcounter : Route
 
     @Serializable
     data class NodeDetail(val destNum: Int) : Route
+
     @Serializable
     data object DeviceMetrics : Route
+
     @Serializable
     data object NodeMap : Route
+
     @Serializable
     data object PositionLog : Route
+
     @Serializable
     data object EnvironmentMetrics : Route
+
     @Serializable
     data object SignalMetrics : Route
+
     @Serializable
     data object PowerMetrics : Route
+
     @Serializable
     data object TracerouteLog : Route
 }
@@ -303,16 +341,53 @@ enum class ModuleRoute(
     }
 }
 
+enum class NodeDetailRoute(
+    @StringRes val title: Int,
+    val route: Route,
+    val icon: ImageVector?,
+) {
+    DEVICE(R.string.device, Route.DeviceMetrics, Icons.Default.Router),
+    NODE_MAP(R.string.node_map, Route.NodeMap, Icons.Default.LocationOn),
+    POSITION_LOG(R.string.position_log, Route.PositionLog, Icons.Default.LocationOn),
+    ENVIRONMENT(R.string.environment, Route.EnvironmentMetrics, Icons.Default.LightMode),
+    SIGNAL(R.string.signal, Route.SignalMetrics, Icons.Default.CellTower),
+    TRACEROUTE(R.string.traceroute, Route.TracerouteLog, Icons.Default.PermScanWifi),
+    POWER(R.string.power, Route.PowerMetrics, Icons.Default.Power),
+}
+fun NavDestination.isConfigRoute(): Boolean {
+    return ConfigRoute.entries.any { hasRoute(it.route::class) }
+}
+
+fun NavDestination.isModuleRoute(): Boolean {
+    return ModuleRoute.entries.any { hasRoute(it.route::class) }
+}
+
+fun NavDestination.isNodeDetailRoute(): Boolean {
+    return NodeDetailRoute.entries.any { hasRoute(it.route::class) }
+}
+fun NavDestination.showLongNameTitle(): Boolean {
+    if (this.hasRoute<Route.NodeDetail>()) {
+        return true
+    }
+    return !this.isTopLevel() && (
+            this.hasRoute<Route.RadioConfig>() ||
+            this.hasRoute<Route.NodeDetail>() ||
+            this.isConfigRoute() ||
+                    this.isModuleRoute() ||
+                    this.isNodeDetailRoute()
+            )
+}
+
 @Suppress("LongMethod")
 @Composable
 fun NavGraph(
     modifier: Modifier = Modifier,
-    model: UIViewModel = hiltViewModel(),
+    uIViewModel: UIViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController(),
 ) {
     NavHost(
         navController = navController,
-        startDestination = if (model.bondedAddress.isNullOrBlank()) {
+        startDestination = if (uIViewModel.bondedAddress.isNullOrBlank()) {
             Route.Settings
         } else {
             Route.Contacts
@@ -320,20 +395,20 @@ fun NavGraph(
         modifier = modifier,
     ) {
         composable<Route.Contacts> {
-            ContactsScreen(model, onNavigate = { navController.navigate(Route.Messages(it)) })
+            ContactsScreen(uIViewModel, onNavigate = { navController.navigate(Route.Messages(it)) })
         }
         composable<Route.Nodes> {
             NodeScreen(
-                model = model,
+                model = uIViewModel,
                 navigateToMessages = { navController.navigate(Route.Messages(it)) },
                 navigateToNodeDetails = { navController.navigate(Route.NodeDetail(it)) },
             )
         }
         composable<Route.Map> {
-            MapView(model)
+            MapView(uIViewModel)
         }
         composable<Route.Channels> {
-            ChannelScreen(model)
+            ChannelScreen(uIViewModel)
         }
         composable<Route.Settings>(
             deepLinks = listOf(
@@ -360,7 +435,7 @@ fun NavGraph(
             MessageScreen(
                 contactKey = args.contactKey,
                 message = args.message,
-                viewModel = model,
+                viewModel = uIViewModel,
                 navigateToMessages = { navController.navigate(Route.Messages(it)) },
                 navigateToNodeDetails = { navController.navigate(Route.NodeDetail(it)) },
                 onNavigateBack = navController::navigateUp
@@ -370,7 +445,7 @@ fun NavGraph(
             QuickChatScreen()
         }
         composable<Route.NodeDetail> {
-            NodeDetailScreen { navController.navigate(route = it) }
+            NodeDetailScreen(uiViewModel = uIViewModel, navController = navController)
         }
         composable<Route.DeviceMetrics> {
             val parentEntry = remember { navController.getBackStackEntry<Route.NodeDetail>() }
@@ -384,7 +459,7 @@ fun NavGraph(
             val parentEntry = remember { navController.getBackStackEntry<Route.NodeDetail>() }
             PositionLogScreen(hiltViewModel<MetricsViewModel>(parentEntry))
         }
-        composable<Route.EnvironmentMetrics> {
+        composable<Route.EnvironmentMetrics> { backStackEntry ->
             val parentEntry = remember { navController.getBackStackEntry<Route.NodeDetail>() }
             EnvironmentMetricsScreen(hiltViewModel<MetricsViewModel>(parentEntry))
         }
@@ -397,7 +472,7 @@ fun NavGraph(
             TracerouteLogScreen(hiltViewModel<MetricsViewModel>(parentEntry))
         }
         composable<Route.RadioConfig> {
-            RadioConfigScreen { navController.navigate(route = it) }
+            RadioConfigScreen(uiViewModel = uIViewModel, navController = navController)
         }
         composable<Route.User> {
             val parentEntry = remember { navController.getBackStackEntry<Route.RadioConfig>() }
@@ -500,7 +575,7 @@ fun NavGraph(
             )
         ) { backStackEntry ->
             val message = backStackEntry.toRoute<Route.Share>().message
-            ShareScreen(model) {
+            ShareScreen(uIViewModel) {
                 navController.navigate(Route.Messages(it, message)) {
                     popUpTo<Route.Share> { inclusive = true }
                 }
