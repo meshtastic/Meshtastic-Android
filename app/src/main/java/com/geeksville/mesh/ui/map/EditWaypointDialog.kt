@@ -80,106 +80,109 @@ internal fun EditWaypointDialog(
     val emoji = if (waypointInput.icon == 0) 128205 else waypointInput.icon
     var showEmojiPickerView by remember { mutableStateOf(false) }
 
-    if (!showEmojiPickerView) AlertDialog(
-        onDismissRequest = onDismissRequest,
-        shape = RoundedCornerShape(16.dp),
-        backgroundColor = MaterialTheme.colors.background,
-        text = {
-            Column(modifier = modifier.fillMaxWidth()) {
-                Text(
-                    text = stringResource(title),
-                    style = MaterialTheme.typography.h6.copy(
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                    ),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                )
-                EditTextPreference(
-                    title = stringResource(R.string.name),
-                    value = waypointInput.name,
-                    maxSize = 29, // name max_size:30
-                    enabled = true,
-                    isError = false,
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(onDone = { /*TODO*/ }),
-                    onValueChanged = { waypointInput = waypointInput.copy { name = it } },
-                    trailingIcon = {
-                        IconButton(onClick = { showEmojiPickerView = true }) {
-                            Text(
-                                text = String(Character.toChars(emoji)),
-                                modifier = Modifier
-                                    .background(MaterialTheme.colors.background, CircleShape)
-                                    .padding(4.dp),
-                                fontSize = 24.sp,
-                                color = Color.Unspecified.copy(alpha = 1f),
-                            )
-                        }
-                    },
-                )
-                EditTextPreference(title = stringResource(R.string.description),
-                    value = waypointInput.description,
-                    maxSize = 99, // description max_size:100
-                    enabled = true,
-                    isError = false,
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(onDone = { /*TODO*/ }),
-                    onValueChanged = { waypointInput = waypointInput.copy { description = it } }
-                )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .size(48.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        imageVector = Icons.Default.Lock,
-                        contentDescription = stringResource(R.string.locked),
-                    )
-                    Text(stringResource(R.string.locked))
-                    Switch(
+    if (!showEmojiPickerView) {
+        AlertDialog(
+            onDismissRequest = onDismissRequest,
+            shape = RoundedCornerShape(16.dp),
+            backgroundColor = MaterialTheme.colors.background,
+            text = {
+                Column(modifier = modifier.fillMaxWidth()) {
+                    Text(
+                        text = stringResource(title),
+                        style = MaterialTheme.typography.h6.copy(
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                        ),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .wrapContentWidth(Alignment.End),
-                        checked = waypointInput.lockedTo != 0,
-                        onCheckedChange = {
-                            waypointInput =
-                                waypointInput.copy { lockedTo = if (it) 1 else 0 }
-                        }
+                            .padding(bottom = 16.dp),
                     )
+                    EditTextPreference(
+                        title = stringResource(R.string.name),
+                        value = waypointInput.name,
+                        maxSize = 29, // name max_size:30
+                        enabled = true,
+                        isError = false,
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(onDone = { }),
+                        onValueChanged = { waypointInput = waypointInput.copy { name = it } },
+                        trailingIcon = {
+                            IconButton(onClick = { showEmojiPickerView = true }) {
+                                Text(
+                                    text = String(Character.toChars(emoji)),
+                                    modifier = Modifier
+                                        .background(MaterialTheme.colors.background, CircleShape)
+                                        .padding(4.dp),
+                                    fontSize = 24.sp,
+                                    color = Color.Unspecified.copy(alpha = 1f),
+                                )
+                            }
+                        },
+                    )
+                    EditTextPreference(
+                        title = stringResource(R.string.description),
+                        value = waypointInput.description,
+                        maxSize = 99, // description max_size:100
+                        enabled = true,
+                        isError = false,
+                        keyboardOptions = KeyboardOptions.Default.copy(
+                            keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(onDone = { }),
+                        onValueChanged = { waypointInput = waypointInput.copy { description = it } }
+                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .size(48.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Image(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = stringResource(R.string.locked),
+                        )
+                        Text(stringResource(R.string.locked))
+                        Switch(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .wrapContentWidth(Alignment.End),
+                            checked = waypointInput.lockedTo != 0,
+                            onCheckedChange = {
+                                waypointInput =
+                                    waypointInput.copy { lockedTo = if (it) 1 else 0 }
+                            }
+                        )
+                    }
                 }
-            }
-        },
-        buttons = {
-            FlowRow(
-                modifier = modifier.padding(start = 20.dp, end = 20.dp, bottom = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.Center,
-            ) {
-                TextButton(
-                    modifier = modifier.weight(1f),
-                    onClick = onDismissRequest
-                ) { Text(stringResource(R.string.cancel)) }
-                if (waypoint.id != 0) {
+            },
+            buttons = {
+                FlowRow(
+                    modifier = modifier.padding(start = 20.dp, end = 20.dp, bottom = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    TextButton(
+                        modifier = modifier.weight(1f),
+                        onClick = onDismissRequest
+                    ) { Text(stringResource(R.string.cancel)) }
+                    if (waypoint.id != 0) {
+                        Button(
+                            modifier = modifier.weight(1f),
+                            onClick = { onDeleteClicked(waypointInput) },
+                            enabled = waypointInput.name.isNotEmpty(),
+                        ) { Text(stringResource(R.string.delete)) }
+                    }
                     Button(
                         modifier = modifier.weight(1f),
-                        onClick = { onDeleteClicked(waypointInput) },
+                        onClick = { onSendClicked(waypointInput) },
                         enabled = waypointInput.name.isNotEmpty(),
-                    ) { Text(stringResource(R.string.delete)) }
+                    ) { Text(stringResource(R.string.send)) }
                 }
-                Button(
-                    modifier = modifier.weight(1f),
-                    onClick = { onSendClicked(waypointInput) },
-                    enabled = waypointInput.name.isNotEmpty(),
-                ) { Text(stringResource(R.string.send)) }
-            }
-        },
-    ) else {
+            },
+        )
+    } else {
         EmojiPickerDialog(onDismiss = { showEmojiPickerView = false }) {
             showEmojiPickerView = false
             waypointInput = waypointInput.copy { icon = it.codePointAt(0) }
