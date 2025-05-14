@@ -91,7 +91,7 @@ fun NavGraphBuilder.radioConfigGraph(navController: NavHostController, uiViewMod
             ) {
                 navController.navigate(it) {
                     popUpTo(Route.RadioConfig()) {
-                        inclusive = true
+                        inclusive = false
                     }
                 }
             }
