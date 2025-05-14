@@ -82,9 +82,12 @@ fun NavGraphBuilder.radioConfigGraph(navController: NavHostController, uiViewMod
         startDestination = Route.RadioConfig(),
     ) {
         composable<Route.RadioConfig> { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry<Graph.RadioConfigGraph>()
+            }
             RadioConfigScreen(
                 uiViewModel = uiViewModel,
-                viewModel = hiltViewModel(backStackEntry)
+                viewModel = hiltViewModel(parentEntry)
             ) {
                 navController.navigate(it) {
                     popUpTo(Route.RadioConfig()) {

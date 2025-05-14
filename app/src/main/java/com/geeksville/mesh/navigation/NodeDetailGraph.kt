@@ -51,7 +51,10 @@ fun NavGraphBuilder.nodeDetailGraph(
         startDestination = Route.NodeDetail(),
     ) {
         composable<Route.NodeDetail> { backStackEntry ->
-            NodeDetailScreen(uiViewModel = uiViewModel, viewModel = hiltViewModel(backStackEntry)) {
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry<Graph.NodeDetailGraph>()
+            }
+            NodeDetailScreen(uiViewModel = uiViewModel, viewModel = hiltViewModel(parentEntry)) {
                 navController.navigate(it)
             }
         }
