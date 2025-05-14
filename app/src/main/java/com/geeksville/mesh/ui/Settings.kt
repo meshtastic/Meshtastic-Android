@@ -199,7 +199,7 @@ fun SettingsScreen(
         showScanDialog = true
     }
 
-    LaunchedEffect(connectionState) {
+    LaunchedEffect(connectionState, regionUnset) {
         when (connectionState) {
             MeshService.ConnectionState.CONNECTED ->
                 // Include region unset warning in status string if applicable
@@ -238,7 +238,9 @@ fun SettingsScreen(
         if (isConnected && regionUnset) {
             Button(
                 modifier = Modifier.fillMaxWidth(),
-                onClick = onSetRegion
+                onClick = {
+                    onSetRegion()
+                }
             ) {
                 Text(stringResource(R.string.set_region))
             }
@@ -400,7 +402,7 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(16.dp))
 
         // Warning Not Paired
-        val showWarningNotPaired = selectedDevice == "n" || selectedDevice == "m"
+        val showWarningNotPaired = !devices.any { it.value.bonded }
         if (showWarningNotPaired) {
             Text(
                 text = stringResource(R.string.warning_not_paired),

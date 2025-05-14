@@ -271,7 +271,7 @@ fun NavGraph(
             SettingsScreen {
                 navController.navigate(Route.RadioConfig()) {
                     popUpTo(Route.Settings) {
-                        inclusive = true
+                        inclusive = false
                     }
                 }
             }
