@@ -105,6 +105,7 @@ fun SettingsScreen(
     uiViewModel: UIViewModel = hiltViewModel(),
     scanModel: BTScanModel = hiltViewModel(),
     bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
+    onSetRegion: () -> Unit,
 ) {
     val currentRegion = uiViewModel.region
     val regionUnset = currentRegion == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET
@@ -235,8 +236,10 @@ fun SettingsScreen(
         // Set Region Button
         val isConnected = connectionState == MeshService.ConnectionState.CONNECTED
         if (isConnected && regionUnset) {
-            Button(onClick = {
-            }) { // Set state to show dialog
+            Button(
+                modifier = Modifier.fillMaxWidth(),
+                onClick = onSetRegion
+            ) {
                 Text(stringResource(R.string.set_region))
             }
             Spacer(modifier = Modifier.height(16.dp))
@@ -265,21 +268,8 @@ fun SettingsScreen(
                             selected = (device.fullAddress == selectedDevice),
                             onClick = {
                                 if (device.fullAddress == "n") {
-                                    // Handle demo mode tap logic here
-                                    // For now, just show Snackbar as in original code
-                                    val currentTapTime = System.currentTimeMillis()
-                                    if (currentTapTime - tapCount > TAP_THRESHOLD) {
-                                        tapCount = 0
-                                    }
-                                    tapCount++
-                                    if (tapCount >= TAP_TRIGGER) {
-                                        uiViewModel.showSnackbar("Demo Mode enabled")
-                                        scanModel.showMockInterface()
-                                    }
-                                    // Reset tap count if a different device is selected
-                                    if (selectedDevice != "n") {
-                                        tapCount = 0
-                                    }
+                                    uiViewModel.showSnackbar("Demo Mode enabled")
+                                    scanModel.showMockInterface()
                                 }
                                 if (!device.bonded) {
                                     uiViewModel.showSnackbar(context.getString(R.string.starting_pairing))
@@ -294,20 +284,8 @@ fun SettingsScreen(
                         selected = (device.fullAddress == selectedDevice),
                         onClick = {
                             if (device.fullAddress == "n") {
-                                // Handle demo mode tap logic here
-                                val currentTapTime = System.currentTimeMillis()
-                                if (currentTapTime - tapCount > TAP_THRESHOLD) {
-                                    tapCount = 0
-                                }
-                                tapCount++
-                                if (tapCount >= TAP_TRIGGER) {
-                                    uiViewModel.showSnackbar("Demo Mode enabled")
-                                    scanModel.showMockInterface()
-                                }
-                                // Reset tap count if a different device is selected
-                                if (selectedDevice != "n") {
-                                    tapCount = 0
-                                }
+                                uiViewModel.showSnackbar("Demo Mode enabled")
+                                scanModel.showMockInterface()
                             }
                             if (!device.bonded) {
                                 uiViewModel.showSnackbar(context.getString(R.string.starting_pairing))
@@ -635,6 +613,3 @@ private tailrec fun Context.findActivity(): Activity = when (this) {
 }
 
 private const val SCAN_PERIOD: Long = 10000 // 10 seconds
-private const val TAP_THRESHOLD = 1000L // Example value, adjust as needed
-private const val TAP_TRIGGER = 7 // Example value, adjust as needed
-private var tapCount = 0 // Keep tapCount at the Fragment level

@@ -63,20 +63,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.AdminRoute
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.ModuleRoute
+import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.radioconfig.components.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
 import com.geeksville.mesh.ui.theme.AppTheme
 
-private fun getNavRouteFrom(routeName: String): Any? {
+private fun getNavRouteFrom(routeName: String): Route? {
     return ConfigRoute.entries.find { it.name == routeName }?.route
         ?: ModuleRoute.entries.find { it.name == routeName }?.route
 }
@@ -87,7 +86,7 @@ fun RadioConfigScreen(
     modifier: Modifier = Modifier,
     viewModel: RadioConfigViewModel = hiltViewModel(),
     uiViewModel: UIViewModel = hiltViewModel(),
-    navController: NavHostController = rememberNavController(),
+    onNavigate: (Route) -> Unit = {}
 ) {
     val node by viewModel.destNode.collectAsStateWithLifecycle()
     val nodeName: String? = node?.user?.longName
@@ -108,7 +107,7 @@ fun RadioConfigScreen(
                 getNavRouteFrom(state.route)?.let { route ->
                     isWaiting = false
                     viewModel.clearPacketResponse()
-                    navController.navigate(route)
+                    onNavigate(route)
                 }
             },
         )

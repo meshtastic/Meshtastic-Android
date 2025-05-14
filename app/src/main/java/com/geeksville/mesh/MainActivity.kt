@@ -63,7 +63,7 @@ import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.navigation.DEEP_LINK_BASE_URI
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.service.startService
@@ -190,7 +190,7 @@ class MainActivity : AppCompatActivity(), Logging {
     }
 
     private fun createShareIntent(message: String): PendingIntent {
-        val deepLink = "${Route.URI}/share?message=$message"
+        val deepLink = "$DEEP_LINK_BASE_URI/share?message=$message"
         val startActivityIntent = Intent(
             Intent.ACTION_VIEW, deepLink.toUri(),
             this, MainActivity::class.java
@@ -204,7 +204,7 @@ class MainActivity : AppCompatActivity(), Logging {
     }
 
     private fun createSettingsIntent(): PendingIntent {
-        val deepLink = "${Route.URI}/settings"
+        val deepLink = "$DEEP_LINK_BASE_URI/settings"
         val startActivityIntent = Intent(
             Intent.ACTION_VIEW, deepLink.toUri(),
             this, MainActivity::class.java
@@ -324,6 +324,7 @@ class MainActivity : AppCompatActivity(), Logging {
                     intent.putExtra(Settings.EXTRA_CHANNEL_ID, "my_alerts")
                     startActivity(intent)
                 }
+
                 val message = Html.fromHtml(
                     getString(R.string.alerts_dnd_request_text),
                     Html.FROM_HTML_MODE_COMPACT
@@ -480,6 +481,7 @@ class MainActivity : AppCompatActivity(), Logging {
             MainMenuAction.ABOUT -> {
                 getVersionInfo()
             }
+
             MainMenuAction.EXPORT_MESSAGES -> {
                 val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
@@ -488,15 +490,19 @@ class MainActivity : AppCompatActivity(), Logging {
                 }
                 createDocumentLauncher.launch(intent)
             }
+
             MainMenuAction.THEME -> {
                 chooseThemeDialog()
             }
+
             MainMenuAction.LANGUAGE -> {
                 chooseLangDialog()
             }
+
             MainMenuAction.SHOW_INTRO -> {
                 startActivity(Intent(this, AppIntroduction::class.java))
             }
+
             else -> {}
         }
     }

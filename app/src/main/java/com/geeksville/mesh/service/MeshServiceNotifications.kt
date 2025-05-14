@@ -38,7 +38,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.android.notificationManager
 import com.geeksville.mesh.database.entity.NodeEntity
-import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.navigation.DEEP_LINK_BASE_URI
 import com.geeksville.mesh.util.formatUptime
 
 @Suppress("TooManyFunctions")
@@ -207,7 +207,8 @@ class MeshServiceNotifications(
     private fun createLowBatteryRemoteNotificationChannel(): String {
         val channelId = "low_battery_remote"
         if (notificationManager.getNotificationChannel(channelId) == null) {
-            val channelName = context.getString(R.string.meshtastic_low_battery_temporary_remote_notifications)
+            val channelName =
+                context.getString(R.string.meshtastic_low_battery_temporary_remote_notifications)
             val channel = NotificationChannel(
                 channelId,
                 channelName,
@@ -292,9 +293,9 @@ class MeshServiceNotifications(
             "air_util_tx" -> "AirUtilTX: %.2f%%".format(v)
             else ->
                 "${
-                k.name.replace('_', ' ').split(" ")
-                    .joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
-            }: $v"
+                    k.name.replace('_', ' ').split(" ")
+                        .joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
+                }: $v"
         }
     }?.joinToString("\n") ?: "No Local Stats"
 
@@ -354,7 +355,7 @@ class MeshServiceNotifications(
     }
 
     private fun createOpenMessageIntent(contactKey: String): PendingIntent {
-        val deepLink = "${Route.URI}/messages/$contactKey"
+        val deepLink = "$DEEP_LINK_BASE_URI/messages/$contactKey"
         val startActivityIntent = Intent(
             Intent.ACTION_VIEW,
             deepLink.toUri(),

@@ -89,7 +89,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import coil3.compose.AsyncImage
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DeviceHardware
@@ -128,7 +127,7 @@ fun NodeDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: MetricsViewModel = hiltViewModel(),
     uiViewModel: UIViewModel = hiltViewModel(),
-    navController: NavHostController,
+    onNavigate: (Route) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
@@ -152,7 +151,7 @@ fun NodeDetailScreen(
         NodeDetailList(
             node = node,
             metricsState = state,
-            onNavigate = navController::navigate,
+            onNavigate = onNavigate,
             modifier = modifier,
             metricsAvailability = availabilities
         )
