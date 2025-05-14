@@ -55,7 +55,7 @@ fun NavGraphBuilder.nodeDetailGraph(
                 navController.getBackStackEntry<Graph.NodeDetailGraph>()
             }
             NodeDetailScreen(uiViewModel = uiViewModel, viewModel = hiltViewModel(parentEntry)) {
-                navController.navigate(it){
+                navController.navigate(it) {
                     popUpTo(Route.NodeDetail()) {
                         inclusive = false
                     }
