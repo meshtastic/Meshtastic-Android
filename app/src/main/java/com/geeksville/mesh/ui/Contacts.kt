@@ -36,6 +36,8 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.twotone.VolumeMute
+import androidx.compose.material.icons.automirrored.twotone.VolumeUp
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.SelectAll
@@ -50,7 +52,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -175,6 +176,7 @@ fun MuteNotificationsDialog(
         // Options for mute duration
         val muteOptions = remember {
             listOf(
+                R.string.unmute to 0L,
                 R.string.mute_8_hours to TimeUnit.HOURS.toMillis(8),
                 R.string.mute_1_week to TimeUnit.DAYS.toMillis(7),
                 R.string.mute_always to Long.MAX_VALUE
@@ -305,14 +307,16 @@ fun SelectionToolbar(
         actions = {
             IconButton(onClick = onMuteSelected) {
                 Icon(
-                    painter = painterResource(
-                        id = if (isAllMuted) {
-                            R.drawable.ic_twotone_volume_up_24
-                        } else {
-                            R.drawable.ic_twotone_volume_off_24
-                        }
-                    ),
-                    contentDescription = if (isAllMuted) "Unmute selected" else "Mute selected"
+                    imageVector = if (isAllMuted) {
+                        Icons.AutoMirrored.TwoTone.VolumeUp
+                    } else {
+                        Icons.AutoMirrored.TwoTone.VolumeMute
+                    },
+                    contentDescription = if (isAllMuted) {
+                        "Unmute selected"
+                    } else {
+                        "Mute selected"
+                    }
                 )
             }
             IconButton(onClick = onDeleteSelected) {

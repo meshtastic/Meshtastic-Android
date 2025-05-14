@@ -50,6 +50,8 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -63,7 +65,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -360,12 +361,12 @@ private fun QuickChatItem(
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_baseline_edit_24),
+                            imageVector = Icons.Default.Edit,
                             contentDescription = stringResource(id = R.string.quick_chat_edit),
                         )
                     }
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_drag_handle_24),
+                        imageVector = Icons.Default.DragHandle,
                         contentDescription = stringResource(id = R.string.quick_chat),
                     )
                 }

@@ -606,4 +606,5 @@
     <string name="sats">Sats</string>
     <string name="alt">Alt</string>
     <string name="set_region">Set Region</string>
+    <string name="unmute">Unmute</string>
 </resources>
