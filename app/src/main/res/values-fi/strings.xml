@@ -57,7 +57,7 @@
     <string name="config_device_doubleTapAsButtonPress_summary">Käsittele tuetun kiihtyvyysanturin kaksoisnapautusta käyttäjäpainikkeella.</string>
     <string name="config_device_disableTripleClick_summary">Poista käytöstä kolmoisnapautuksen GPS:n käyttöönoton painike.</string>
     <string name="config_device_ledHeartbeatDisabled_summary">Hallitsee laitteen vilkkuvaa LED-valoa. Useimmissa laitteissa tällä voidaan ohjata yhtä neljästä LED-valosta, mutta latauksen tai GPS:n valoja ei voi hallita.</string>
-    <string name="config_device_transmitOverLora_summary">Pitäisikö NeighborInfon lähettää puhelinsovelluksessa MQTT-protokollalla myös LoRa-verkon kautta. Ei saatavilla oletusavaimella ja nimellä varustetulla kanavalla.</string>
+    <string name="config_device_transmitOverLora_summary">Lähetetäänkö naapuritiedot LoRa:n kautta sen lisäksi, että ne lähetetään MQTT:hen ja PhoneAPI:iin? Ei tuettu kanavalla, joka käyttää oletussalausavainta ja -nimeä.</string>
     <string name="config_security_public_key">Julkinen avain</string>
     <string name="config_security_private_key">Yksityinen avain</string>
     <string name="channel_name">Kanavan nimi</string>
@@ -248,7 +248,7 @@
     <string name="air_utilization">Ilmantien käyttöaste</string>
     <string name="temperature">Lämpötila</string>
     <string name="humidity">Kosteus</string>
-    <string name="logs">Lokitiedot</string>
+    <string name="logs">lokitietoa</string>
     <string name="hops_away">Hyppyjä</string>
     <string name="info">Tiedot</string>
     <string name="ch_util_definition">Nykyisen kanavan lähetyksen (TX) ja vastaanoton (RX) käyttöaste ja virheelliset lähetykset, eli häiriöt.</string>
@@ -494,7 +494,7 @@
     <string name="smart_broadcast_minimum_distance_meters">Älykkään sijainnin etäisyys (metriä)</string>
     <string name="smart_broadcast_minimum_interval_seconds">Älykkään sijainnin pienin päivitysväli (sekuntia)</string>
     <string name="use_fixed_position">Käytä kiinteää sijaintia</string>
-    <string name="latitude">Levyspiiri</string>
+    <string name="latitude">Leveyspiiri</string>
     <string name="longitude">Pituuspiiri</string>
     <string name="altitude_meters">Korkeus (metriä)</string>
     <string name="gps_mode">GSP tila</string>
@@ -572,4 +572,14 @@
     <string name="backup_restore"><![CDATA[Varmuuskopiointi ja palautus]]></string>
     <string name="import_configuration">Asetusten tuonti</string>
     <string name="export_configuration">Asetusten vienti</string>
+    <string name="hardware">Laite</string>
+    <string name="supported">Tuettu</string>
+    <string name="node_number">Laitteen numero</string>
+    <string name="user_id">Käyttäjän ID</string>
+    <string name="uptime">Käyttöaika</string>
+    <string name="firmware_version">Laiteohjelmistoversio</string>
+    <string name="timestamp">Aikaleima</string>
+    <string name="heading">Suunta</string>
+    <string name="sats">Sat</string>
+    <string name="alt">Kork</string>
 </resources>

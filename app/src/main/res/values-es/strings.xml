@@ -48,6 +48,8 @@
     <string name="role_tak_tracker">Permite la transmisión automática TAK PLI y reduce las transmisiones rutinarias.</string>
     <string name="role_router_late">Nodo de infraestructura que permite la retransmisión de paquetes una vez posterior a los demás modos, asegurando cobertura adicional a los grupos locales. Es visible en la lista de nodos.</string>
     <string name="rebroadcast_mode_all">Si está en nuestro canal privado o desde otra red con los mismos parámetros lora, retransmite cualquier mensaje observado.</string>
+    <string name="rebroadcast_mode_all_skip_decoding">Igual al comportamiento que TODOS pero omite la decodificación de paquetes y simplemente los retransmite. Sólo disponible en el rol repetidor. Establecer esto en cualquier otro rol dará como resultado TODOS los comportamientos.</string>
+    <string name="rebroadcast_mode_none">Solo permitido para los roles SENSOR, TRACKER y TAK_TRACKER, esto inhibirá todas las retransmisiones, no a diferencia del rol de CLIENT_MUTE.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">Trate un doble toque en acelerómetros soportados como una pulsación de botón de usuario.</string>
     <string name="config_device_disableTripleClick_summary">Deshabilita la triple pulsación del botón de usuario para activar o desactivar GPS.</string>
     <string name="config_device_ledHeartbeatDisabled_summary">Controla el LED parpadeante del dispositivo. Para la mayoría de los dispositivos esto controlará uno de los hasta 4 LEDs, el cargador y el GPS tienen LEDs no controlables.</string>
@@ -319,6 +321,7 @@ Rango de Valores 0 - 500.</string>
     <string name="bluetooth_config">Configuración Bluetooth</string>
     <string name="bluetooth_enabled">Bluetooth activado</string>
     <string name="pairing_mode">Modo de emparejamiento</string>
+    <string name="show_password">Mostrar contraseña</string>
     <string name="messages">Mensajes</string>
     <string name="public_key">Clave Pública</string>
     <string name="private_key">Clave privada</string>
