@@ -19,78 +19,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight">
-        <!-- Customize your theme here. -->
-        <item name="actionBarTheme">@style/MyActionBar</item>
-        <item name="materialButtonStyle">@style/Widget.App.Button</item>
-        <item name="materialAlertDialogTheme">@style/CustomMaterialDialog</item>
-
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-
-        <item name="windowNoTitle">true</item>
-        <item name="android:itemTextAppearance">@style/menu_item_color</item>
-        <item name="actionModeStyle">@style/MyActionMode</item>
-        <item name="windowActionModeOverlay">true</item>
-    </style>
-
-    <style name="AppTheme.Spinner">
-        <item name="android:spinnerItemStyle">@style/SpinnerItem</item>
-        <item name="android:spinnerDropDownItemStyle">@style/SpinnerDropDownItem</item>
-    </style>
-
-    <style name="SpinnerItem">
-        <item name="android:gravity">right|center_vertical</item>
-        <item name="android:paddingRight">16dp</item>
-    </style>
-
-    <style name="SpinnerDropDownItem">
-        <item name="android:gravity">right|center_vertical</item>
-        <item name="android:paddingRight">16dp</item>
-    </style>
-
-    <style name="menu_item_color">
-        <item name="android:textColor">@color/colorMenuItem</item>
-    </style>
-
-    <style name="Meshtastic.Button.Rounded" parent="">
-        <item name="cornerFamily">rounded</item>
-        <item name="cornerSize">50%</item>
-    </style>
-
-    <style name="Widget.App.Button" parent="Widget.MaterialComponents.Button">
-        <item name="backgroundTint">@color/buttonColor</item>
-    </style>
-
-    <style name="CustomMaterialDialog" parent="@style/ThemeOverlay.MaterialComponents.MaterialAlertDialog">
-        <!-- Background Color
-        <item name="android:background">#006db3</item> -->
-        <!-- Text Color for title and message
-        <item name="colorOnSurface">@color/unselectedColor</item> -->
-        <!-- Text Color for buttons -->
-        <item name="colorPrimary">@color/unselectedColor</item>
-    </style>
-
-    <style name="MyThemeOverlay_Toolbar" parent="">
-        <item name="android:textColorPrimary">@color/toolbarText</item>
-        <item name="tint">@color/toolbarText</item>
-    </style>
-
-    <style name="MyActionBar" parent="@style/ThemeOverlay.MaterialComponents.ActionBar">
-        <item name="background">@color/colorPrimary</item>
-        <item name="android:textColorPrimary">@color/colorOnPrimary</item>
-        <item name="tint">@color/colorOnPrimary</item>
-    </style>
-
-    <style name="MyToolbar" parent="Widget.MaterialComponents.Toolbar">
-        <item name="materialThemeOverlay">@style/MyThemeOverlay_Toolbar</item>
-    </style>
-
-    <style name="MyActionMode" parent="Base.Widget.AppCompat.ActionMode">
-        <item name="background">@color/colorPrimary</item>
-        <item name="android:textSize">16sp</item>
-        <item name="android:textColorPrimary">@color/colorOnPrimary</item>
-    </style>
+    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar"/>
 
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
         // Set the splash screen background, animated icon, and animation duration.

@@ -21,6 +21,7 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
+import android.app.TaskStackBuilder
 import android.content.ContentResolver
 import android.content.Context
 import android.content.Intent
@@ -37,6 +38,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.android.notificationManager
 import com.geeksville.mesh.database.entity.NodeEntity
+import com.geeksville.mesh.navigation.DEEP_LINK_BASE_URI
 import com.geeksville.mesh.util.formatUptime
 
 @Suppress("TooManyFunctions")
@@ -48,9 +50,6 @@ class MeshServiceNotifications(
 
     companion object {
         private const val FIFTEEN_MINUTES_IN_MILLIS = 15L * 60 * 1000
-        const val OPEN_MESSAGE_ACTION = "com.geeksville.mesh.OPEN_MESSAGE_ACTION"
-        const val OPEN_MESSAGE_EXTRA_CONTACT_KEY =
-            "com.geeksville.mesh.OPEN_MESSAGE_EXTRA_CONTACT_KEY"
         const val MAX_BATTERY_LEVEL = 100
     }
 
@@ -208,7 +207,8 @@ class MeshServiceNotifications(
     private fun createLowBatteryRemoteNotificationChannel(): String {
         val channelId = "low_battery_remote"
         if (notificationManager.getNotificationChannel(channelId) == null) {
-            val channelName = context.getString(R.string.meshtastic_low_battery_temporary_remote_notifications)
+            val channelName =
+                context.getString(R.string.meshtastic_low_battery_temporary_remote_notifications)
             val channel = NotificationChannel(
                 channelId,
                 channelName,
@@ -293,9 +293,9 @@ class MeshServiceNotifications(
             "air_util_tx" -> "AirUtilTX: %.2f%%".format(v)
             else ->
                 "${
-                k.name.replace('_', ' ').split(" ")
-                    .joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
-            }: $v"
+                    k.name.replace('_', ' ').split(" ")
+                        .joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
+                }: $v"
         }
     }?.joinToString("\n") ?: "No Local Stats"
 
@@ -354,18 +354,20 @@ class MeshServiceNotifications(
         )
     }
 
-    private fun openMessageIntent(contactKey: String): PendingIntent {
-        val intent = Intent(context, MainActivity::class.java)
-        intent.action = OPEN_MESSAGE_ACTION
-        intent.putExtra(OPEN_MESSAGE_EXTRA_CONTACT_KEY, contactKey)
-
-        val pendingIntent = PendingIntent.getActivity(
+    private fun createOpenMessageIntent(contactKey: String): PendingIntent {
+        val deepLink = "$DEEP_LINK_BASE_URI/messages/$contactKey"
+        val startActivityIntent = Intent(
+            Intent.ACTION_VIEW,
+            deepLink.toUri(),
             context,
-            0,
-            intent,
-            PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            MainActivity::class.java
         )
-        return pendingIntent
+
+        val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(context).run {
+            addNextIntentWithParentStack(startActivityIntent)
+            getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE)
+        }
+        return resultPendingIntent!!
     }
 
     private fun commonBuilder(channel: String): NotificationCompat.Builder {
@@ -437,7 +439,7 @@ class MeshServiceNotifications(
         }
         val person = Person.Builder().setName(name).build()
         with(messageNotificationBuilder) {
-            setContentIntent(openMessageIntent(contactKey))
+            setContentIntent(createOpenMessageIntent(contactKey))
             priority = NotificationCompat.PRIORITY_DEFAULT
             setCategory(Notification.CATEGORY_MESSAGE)
             setAutoCancel(true)
@@ -462,7 +464,7 @@ class MeshServiceNotifications(
         }
         val person = Person.Builder().setName(name).build()
         with(alertNotificationBuilder) {
-            setContentIntent(openMessageIntent(contactKey))
+            setContentIntent(createOpenMessageIntent(contactKey))
             priority = NotificationCompat.PRIORITY_HIGH
             setCategory(Notification.CATEGORY_ALARM)
             setAutoCancel(true)

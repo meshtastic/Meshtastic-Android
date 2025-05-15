@@ -17,21 +17,15 @@
 
 package com.geeksville.mesh.ui.message
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.content.ClipData
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.AlertDialog
@@ -40,9 +34,11 @@ import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.TextButton
-import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
@@ -62,13 +58,11 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -79,88 +73,20 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.core.os.bundleOf
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.activityViewModels
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.R
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.QuickChatAction
-import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannel
-import com.geeksville.mesh.navigation.navigateToNavGraph
-import com.geeksville.mesh.ui.components.BaseScaffold
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.message.components.MessageList
 import com.geeksville.mesh.ui.theme.AppTheme
-import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 private const val MESSAGE_CHARACTER_LIMIT = 200
-
-internal fun FragmentManager.navigateToMessages(contactKey: String, message: String = "") {
-    val messagesFragment = MessagesFragment().apply {
-        arguments = bundleOf("contactKey" to contactKey, "message" to message)
-    }
-    beginTransaction()
-        .add(R.id.mainActivityLayout, messagesFragment)
-        .addToBackStack(null)
-        .commit()
-}
-
-@AndroidEntryPoint
-class MessagesFragment : Fragment(), Logging {
-    private val model: UIViewModel by activityViewModels()
-
-    private fun navigateToMessages(node: Node) = node.user.let { user ->
-        val hasPKC = model.ourNodeInfo.value?.hasPKC == true && node.hasPKC // TODO use meta.hasPKC
-        val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
-        val contactKey = "$channel${user.id}"
-        info("calling MessagesFragment filter: $contactKey")
-        parentFragmentManager.navigateToMessages(contactKey)
-    }
-
-    private fun navigateToNodeDetails(nodeNum: Int) {
-        info("calling NodeDetails --> destNum: $nodeNum")
-        parentFragmentManager.navigateToNavGraph(nodeNum, "NodeDetails")
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        val contactKey = arguments?.getString("contactKey").toString()
-        val message = arguments?.getString("message").toString()
-
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                AppTheme {
-                    MessageScreen(
-                        contactKey = contactKey,
-                        message = message,
-                        viewModel = model,
-                        navigateToMessages = ::navigateToMessages,
-                        navigateToNodeDetails = ::navigateToNodeDetails,
-                    ) { parentFragmentManager.popBackStack() }
-                }
-            }
-        }
-    }
-}
-
-sealed class MessageMenuAction {
-    data object ClipboardCopy : MessageMenuAction()
-    data object Delete : MessageMenuAction()
-    data object Dismiss : MessageMenuAction()
-    data object SelectAll : MessageMenuAction()
-}
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -168,22 +94,27 @@ internal fun MessageScreen(
     contactKey: String,
     message: String,
     viewModel: UIViewModel = hiltViewModel(),
-    navigateToMessages: (Node) -> Unit,
+    navigateToMessages: (String) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
     onNavigateBack: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val clipboardManager = LocalClipboardManager.current
+    val clipboardManager = LocalClipboard.current
 
     val channelIndex = contactKey[0].digitToIntOrNull()
     val nodeId = contactKey.substring(1)
-    val channelName = channelIndex?.let { viewModel.channels.value.getChannel(it)?.name }
-        ?: "Unknown Channel"
+    val channels by viewModel.channels.collectAsStateWithLifecycle()
+    val channelName by remember(channelIndex) {
+        derivedStateOf {
+            channelIndex?.let { channels.getChannel(it)?.name } ?: "Unknown Channel"
+        }
+    }
 
     val title = when (nodeId) {
         DataPacket.ID_BROADCAST -> channelName
         else -> viewModel.getUser(nodeId).longName
     }
+    viewModel.setTitle(title)
     val mismatchKey =
         DataPacket.PKC_CHANNEL_INDEX == channelIndex && viewModel.getNode(nodeId).mismatchKey
 
@@ -215,7 +146,7 @@ internal fun MessageScreen(
         )
     }
 
-    BaseScaffold(
+    Scaffold(
         topBar = {
             if (inSelectionMode) {
                 ActionModeTopBar(selectedIds.value) { action ->
@@ -225,7 +156,8 @@ internal fun MessageScreen(
                                 .filter { it.uuid in selectedIds.value }
                                 .joinToString("\n") { it.text }
 
-                            clipboardManager.setText(AnnotatedString(copiedText))
+                            val clipData = ClipData.newPlainText("", AnnotatedString(copiedText))
+                            clipboardManager.setClipEntry(ClipEntry(clipData))
                             selectedIds.value = emptySet()
                         }
 
@@ -274,9 +206,10 @@ internal fun MessageScreen(
                 TextInput(isConnected, messageInput) { viewModel.sendMessage(it, contactKey) }
             }
         }
-    ) {
+    ) { padding ->
         if (messages.isNotEmpty()) {
             MessageList(
+                modifier = Modifier.padding(padding),
                 messages = messages,
                 selectedIds = selectedIds,
                 onUnreadChanged = { viewModel.clearUnreadCount(contactKey, it) },
@@ -286,7 +219,14 @@ internal fun MessageScreen(
                     is NodeMenuAction.Remove -> viewModel.removeNode(action.node.num)
                     is NodeMenuAction.Ignore -> viewModel.ignoreNode(action.node)
                     is NodeMenuAction.Favorite -> viewModel.favoriteNode(action.node)
-                    is NodeMenuAction.DirectMessage -> navigateToMessages(action.node)
+                    is NodeMenuAction.DirectMessage -> {
+                        val hasPKC =
+                            viewModel.ourNodeInfo.value?.hasPKC == true && action.node.hasPKC
+                        val channel =
+                            if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else action.node.channel
+                        navigateToMessages("$channel${action.node.user.id}")
+                    }
+
                     is NodeMenuAction.RequestUserInfo -> viewModel.requestUserInfo(action.node.num)
                     is NodeMenuAction.RequestPosition -> viewModel.requestPosition(action.node.num)
                     is NodeMenuAction.TraceRoute -> viewModel.requestTraceroute(action.node.num)
@@ -327,6 +267,13 @@ private fun DeleteMessageDialog(
             }
         }
     )
+}
+
+sealed class MessageMenuAction {
+    data object ClipboardCopy : MessageMenuAction()
+    data object Delete : MessageMenuAction()
+    data object Dismiss : MessageMenuAction()
+    data object SelectAll : MessageMenuAction()
 }
 
 @Composable
@@ -433,53 +380,48 @@ private fun TextInput(
 ) = Column(modifier) {
     val focusManager = LocalFocusManager.current
     var isFocused by remember { mutableStateOf(false) }
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        TextField(
-            value = message.value,
-            onValueChange = {
-                if (it.text.toByteArray().size <= maxSize) {
-                    message.value = it
-                }
-            },
-            modifier = Modifier
-                .weight(1f)
-                .onFocusEvent { isFocused = it.isFocused },
-            enabled = enabled,
-            placeholder = { Text(stringResource(id = R.string.send_text)) },
-            keyboardOptions = KeyboardOptions(
-                capitalization = KeyboardCapitalization.Sentences,
-            ),
-            maxLines = 3,
-            shape = RoundedCornerShape(24.dp),
-            colors = TextFieldDefaults.textFieldColors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-            )
-        )
-        Spacer(Modifier.width(8.dp))
-        Button(
-            onClick = {
-                val str = message.value.text.trim()
-                if (str.isNotEmpty()) {
-                    focusManager.clearFocus()
-                    onClick(str)
-                    message.value = TextFieldValue("")
-                }
-            },
-            modifier = Modifier.size(48.dp),
-            enabled = enabled,
-            shape = CircleShape,
-        ) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Default.Send,
-                contentDescription = stringResource(id = R.string.send_text),
-                modifier = Modifier.scale(scale = 1.5f),
-            )
+    OutlinedTextField(
+        value = message.value,
+        onValueChange = {
+            if (it.text.toByteArray().size <= maxSize) {
+                message.value = it
+            }
+        },
+        modifier = Modifier
+            .weight(1f)
+            .onFocusEvent { isFocused = it.isFocused },
+        enabled = enabled,
+        placeholder = { Text(stringResource(id = R.string.send_text)) },
+        keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.Sentences,
+        ),
+        maxLines = 3,
+        shape = RoundedCornerShape(24.dp),
+        colors = TextFieldDefaults.textFieldColors(
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+        ),
+        trailingIcon = {
+            IconButton(
+                onClick = {
+                    val str = message.value.text.trim()
+                    if (str.isNotEmpty()) {
+                        focusManager.clearFocus()
+                        onClick(str)
+                        message.value = TextFieldValue("")
+                    }
+                },
+                modifier = Modifier.size(48.dp),
+                enabled = enabled,
+            ) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Default.Send,
+                    contentDescription = stringResource(id = R.string.send_text),
+                    tint = MaterialTheme.colors.primary
+                )
+            }
         }
-    }
+    )
     if (isFocused) {
         Text(
             text = "${message.value.text.toByteArray().size}/$maxSize",
@@ -495,9 +437,18 @@ private fun TextInput(
 @Composable
 private fun TextInputPreview() {
     AppTheme {
-        TextInput(
-            enabled = true,
-            message = remember { mutableStateOf(TextFieldValue("")) },
-        )
+        Surface {
+            Column {
+                TextInput(
+                    enabled = true,
+                    message = remember { mutableStateOf(TextFieldValue("")) },
+                )
+                Spacer(Modifier.size(16.dp))
+                TextInput(
+                    enabled = true,
+                    message = remember { mutableStateOf(TextFieldValue("Hello")) },
+                )
+            }
+        }
     }
 }

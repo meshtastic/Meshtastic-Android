@@ -135,11 +135,14 @@ enum class TimeFrame(
         return when (this.ordinal) {
             TWENTY_FOUR_HOURS.ordinal ->
                 TimeUnit.HOURS.toSeconds(6)
+
             FORTY_EIGHT_HOURS.ordinal ->
                 TimeUnit.HOURS.toSeconds(12)
+
             ONE_WEEK.ordinal,
             TWO_WEEKS.ordinal ->
                 TimeUnit.DAYS.toSeconds(1)
+
             else ->
                 TimeUnit.DAYS.toSeconds(7)
         }
@@ -152,8 +155,10 @@ enum class TimeFrame(
         return when (this.ordinal) {
             TWENTY_FOUR_HOURS.ordinal ->
                 TimeUnit.HOURS.toSeconds(6)
+
             FORTY_EIGHT_HOURS.ordinal ->
                 TimeUnit.HOURS.toSeconds(12)
+
             else ->
                 TimeUnit.DAYS.toSeconds(1)
         }
@@ -204,7 +209,9 @@ class MetricsViewModel @Inject constructor(
     }
 
     fun clearPosition() = viewModelScope.launch(dispatchers.io) {
-        meshLogRepository.deleteLogs(destNum, PortNum.POSITION_APP_VALUE)
+        destNum?.let {
+            meshLogRepository.deleteLogs(it, PortNum.POSITION_APP_VALUE)
+        }
     }
 
     private val _state = MutableStateFlow(MetricsState.Empty)
@@ -219,79 +226,84 @@ class MetricsViewModel @Inject constructor(
     private var deviceHardwareList: List<DeviceHardware> = listOf()
 
     init {
-        radioConfigRepository.nodeDBbyNum
-            .mapLatest { nodes -> nodes[destNum] }
-            .distinctUntilChanged()
-            .onEach { node ->
-                _state.update { state -> state.copy(node = node) }
-                node?.user?.hwModel?.let { hwModel ->
-                    val deviceHardware = getDeviceHardwareFromHardwareModel(hwModel)
-                    deviceHardware?.let {
-                        _state.update { state ->
-                            state.copy(deviceHardware = it)
+        destNum?.let {
+            radioConfigRepository.nodeDBbyNum
+                .mapLatest { nodes -> nodes[destNum] }
+                .distinctUntilChanged()
+                .onEach { node ->
+                    _state.update { state -> state.copy(node = node) }
+                    node?.user?.hwModel?.let { hwModel ->
+                        val deviceHardware = getDeviceHardwareFromHardwareModel(hwModel)
+                        deviceHardware?.let {
+                            _state.update { state ->
+                                state.copy(deviceHardware = it)
+                            }
                         }
                     }
                 }
-            }
-            .launchIn(viewModelScope)
+                .launchIn(viewModelScope)
 
-        radioConfigRepository.deviceProfileFlow.onEach { profile ->
-            val moduleConfig = profile.moduleConfig
-            _state.update { state ->
-                state.copy(
-                    isManaged = profile.config.security.isManaged,
-                    isFahrenheit = moduleConfig.telemetry.environmentDisplayFahrenheit,
-                )
-            }
-        }.launchIn(viewModelScope)
+            radioConfigRepository.deviceProfileFlow.onEach { profile ->
+                val moduleConfig = profile.moduleConfig
+                _state.update { state ->
+                    state.copy(
+                        isManaged = profile.config.security.isManaged,
+                        isFahrenheit = moduleConfig.telemetry.environmentDisplayFahrenheit,
+                    )
+                }
+            }.launchIn(viewModelScope)
 
-        meshLogRepository.getTelemetryFrom(destNum).onEach { telemetry ->
-            _state.update { state ->
-                state.copy(
-                    deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
-                    powerMetrics = telemetry.filter { it.hasPowerMetrics() }
-                )
-            }
-            _envState.update { state ->
-                state.copy(
-                    environmentMetrics = telemetry.filter {
-                        it.hasEnvironmentMetrics() &&
-                        it.environmentMetrics.relativeHumidity >= 0f &&
-                        !it.environmentMetrics.temperature.isNaN()
-                    },
-                )
-            }
-        }.launchIn(viewModelScope)
+            meshLogRepository.getTelemetryFrom(destNum).onEach { telemetry ->
+                _state.update { state ->
+                    state.copy(
+                        deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
+                        powerMetrics = telemetry.filter { it.hasPowerMetrics() }
+                    )
+                }
+                _envState.update { state ->
+                    state.copy(
+                        environmentMetrics = telemetry.filter {
+                            it.hasEnvironmentMetrics() &&
+                                    it.environmentMetrics.relativeHumidity >= 0f &&
+                                    !it.environmentMetrics.temperature.isNaN()
+                        },
+                    )
+                }
+            }.launchIn(viewModelScope)
 
-        meshLogRepository.getMeshPacketsFrom(destNum).onEach { meshPackets ->
-            _state.update { state ->
-                state.copy(signalMetrics = meshPackets.filter { it.hasValidSignal() })
-            }
-        }.launchIn(viewModelScope)
+            meshLogRepository.getMeshPacketsFrom(destNum).onEach { meshPackets ->
+                _state.update { state ->
+                    state.copy(signalMetrics = meshPackets.filter { it.hasValidSignal() })
+                }
+            }.launchIn(viewModelScope)
 
-        combine(
-            meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.TRACEROUTE_APP_VALUE),
-            meshLogRepository.getMeshPacketsFrom(destNum, PortNum.TRACEROUTE_APP_VALUE),
-        ) { request, response ->
-            _state.update { state ->
-                state.copy(
-                    tracerouteRequests = request.filter { it.hasValidTraceroute() },
-                    tracerouteResults = response,
-                )
-            }
-        }.launchIn(viewModelScope)
+            combine(
+                meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.TRACEROUTE_APP_VALUE),
+                meshLogRepository.getMeshPacketsFrom(destNum, PortNum.TRACEROUTE_APP_VALUE),
+            ) { request, response ->
+                _state.update { state ->
+                    state.copy(
+                        tracerouteRequests = request.filter { it.hasValidTraceroute() },
+                        tracerouteResults = response,
+                    )
+                }
+            }.launchIn(viewModelScope)
 
-        meshLogRepository.getMeshPacketsFrom(destNum, PortNum.POSITION_APP_VALUE).onEach { packets ->
-            val distinctPositions =
-                packets.mapNotNull { it.toPosition() }.asFlow().distinctUntilChanged { old, new ->
-                    old.time == new.time || (old.latitudeI == new.latitudeI && old.longitudeI == new.longitudeI)
-                }.toList()
-            _state.update { state ->
-                state.copy(positionLogs = distinctPositions)
-            }
-        }.launchIn(viewModelScope)
+            meshLogRepository.getMeshPacketsFrom(destNum, PortNum.POSITION_APP_VALUE)
+                .onEach { packets ->
+                    val distinctPositions =
+                        packets.mapNotNull { it.toPosition() }.asFlow()
+                            .distinctUntilChanged { old, new ->
+                                old.time == new.time ||
+                                        (old.latitudeI == new.latitudeI && old.longitudeI == new.longitudeI)
+                            }.toList()
+                    _state.update { state ->
+                        state.copy(positionLogs = distinctPositions)
+                    }
+                }.launchIn(viewModelScope)
 
-        debug("MetricsViewModel created")
+            debug("MetricsViewModel created")
+        }
     }
 
     override fun onCleared() {

@@ -17,6 +17,7 @@ devtools-ksp = "2.1.21-2.0.1"
 emoji2 = "1.5.0"
 espresso-core = "3.6.1"
 firebase-bom = "33.13.0"
+fragment-compose = "1.8.6"
 fragment-ktx = "1.8.6"
 google-services = "4.4.2"
 hilt = "2.56.2"
@@ -47,6 +48,7 @@ zxing-core = "3.3.0" #do not update
 
 [libraries]
 agp = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
+actvity-ktx = { group = "androidx.activity", name = "activity-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 appcompat-resources = { group = "androidx.appcompat", name = "appcompat-resources", version.ref = "appcompat" }
@@ -76,6 +78,7 @@ firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics"}
 firebase-crashlytics-gradle = { group = "com.google.firebase", name ="firebase-crashlytics-gradle", version.ref = "crashlytics" }
+fragment-compose = { module = "androidx.fragment:fragment-compose", version.ref = "fragment-compose" }
 fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragment-ktx" }
 google-services = { group = "com.google.gms", name = "google-services", version.ref = "google-services" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
@@ -122,7 +125,7 @@ zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing-c
 
 [bundles]
 # Core AndroidX
-androidx = ["core-ktx", "appcompat", "appcompat-resources", "cardview", "fragment-ktx", "activity-compose"]
+androidx = ["core-ktx", "appcompat", "appcompat-resources", "cardview", "fragment-ktx", "actvity-ktx", "fragment-compose", "activity-compose"]
 
 # UI
 ui = ["material", "constraintlayout", "viewpager2", "compose-material", "compose-material-icons-extended", "compose-ui-tooling-preview", "compose-runtime-livedata"]

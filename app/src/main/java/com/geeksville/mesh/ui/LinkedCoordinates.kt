@@ -18,14 +18,17 @@
 package com.geeksville.mesh.ui
 
 import android.content.ActivityNotFoundException
+import android.content.ClipData
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ClipboardManager
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.Clipboard
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -39,6 +42,7 @@ import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.ui.theme.HyperlinkBlue
 import com.geeksville.mesh.util.GPSFormat
+import kotlinx.coroutines.launch
 import java.net.URLEncoder
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -77,7 +81,8 @@ fun LinkedCoordinates(
         }
         pop()
     }
-    val clipboardManager: ClipboardManager = LocalClipboardManager.current
+    val clipboard: Clipboard = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
     Text(
         modifier = modifier.combinedClickable(
             onClick = {
@@ -94,8 +99,10 @@ fun LinkedCoordinates(
                 }
             },
             onLongClick = {
-                clipboardManager.setText(annotatedString)
-                debug("Copied to clipboard")
+                coroutineScope.launch {
+                    clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("", annotatedString)))
+                    debug("Copied to clipboard")
+                }
             }
         ),
         text = annotatedString

@@ -17,10 +17,6 @@
 
 package com.geeksville.mesh.ui
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -54,6 +50,8 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -66,10 +64,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusEvent
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -79,49 +74,16 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.components.BaseScaffold
 import com.geeksville.mesh.ui.components.dragContainer
 import com.geeksville.mesh.ui.components.dragDropItemsIndexed
 import com.geeksville.mesh.ui.components.rememberDragDropState
 import com.geeksville.mesh.ui.theme.AppTheme
-import dagger.hilt.android.AndroidEntryPoint
-
-@AndroidEntryPoint
-class QuickChatSettingsFragment : ScreenFragment("Quick Chat Settings"), Logging {
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                AppTheme {
-                    QuickChatScreen { parentFragmentManager.popBackStack() }
-                }
-            }
-        }
-    }
-}
 
 @Composable
 internal fun QuickChatScreen(
-    viewModel: UIViewModel = hiltViewModel(),
-    navigateUp: () -> Unit
-) {
-    BaseScaffold(
-        title = stringResource(id = R.string.quick_chat),
-        navigateUp = navigateUp,
-    ) {
-        QuickChatContent(viewModel)
-    }
-}
-
-@Composable
-private fun QuickChatContent(
+    modifier: Modifier = Modifier,
     viewModel: UIViewModel = hiltViewModel(),
 ) {
     val actions by viewModel.quickChatActions.collectAsStateWithLifecycle()
@@ -133,7 +95,7 @@ private fun QuickChatContent(
         viewModel.updateActionPositions(list)
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize()) {
         if (showActionDialog != null) {
             val action = showActionDialog ?: return
             EditQuickChatDialog(
@@ -399,12 +361,12 @@ private fun QuickChatItem(
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_baseline_edit_24),
+                            imageVector = Icons.Default.Edit,
                             contentDescription = stringResource(id = R.string.quick_chat_edit),
                         )
                     }
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_drag_handle_24),
+                        imageVector = Icons.Default.DragHandle,
                         contentDescription = stringResource(id = R.string.quick_chat),
                     )
                 }
