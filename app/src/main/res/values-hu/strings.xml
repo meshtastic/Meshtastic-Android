@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="main_tab_messages">Üzenetek</string>
+    <string name="main_tab_users">Felhasználók</string>
+    <string name="main_tab_map">Térkép</string>
     <string name="main_tab_channel">Csatorna</string>
+    <string name="main_tab_settings">Beállítások</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">állomás filter törlése</string>
     <string name="node_filter_include_unknown">Ismeretlent tartalmaz</string>

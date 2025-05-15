@@ -317,6 +317,7 @@
     <string name="meshtastic_low_battery_notifications">Нотификације о ниском нивоу батерије</string>
     <string name="low_battery_title">Низак ниво батерије: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Нотификације о ниском нивоу батерије (омиљени чворови)</string>
+    <string name="udp_config">UDP конфигурација</string>
     <string name="messages">Поруке</string>
     <string name="public_key">Javni ključ</string>
     <string name="private_key">Privatni ključ</string>

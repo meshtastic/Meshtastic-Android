@@ -327,6 +327,7 @@
     <string name="baro_pressure">Barometrický tlak</string>
     <string name="udp_config">UDP Konfigurace</string>
     <string name="map_node_popup_details"><![CDATA[%s<br>Naposledy slyšen: %s<br>Poslední pozice: %s<br>Baterie: %s]]></string>
+    <string name="toggle_my_position">Zapnout/vypnout pozici</string>
     <string name="user">Uživatel</string>
     <string name="channels">Kanály</string>
     <string name="device">Zařízení</string>
@@ -357,6 +358,8 @@
     <string name="downlink_enabled">Stahování povoleno</string>
     <string name="default_">Výchozí</string>
     <string name="position_enabled">Pozice povolena</string>
+    <string name="hide_password">Skrýt heslo</string>
+    <string name="show_password">Zobrazit heslo</string>
     <string name="details">Podrobnosti</string>
     <string name="environment">Životní prostředí</string>
     <string name="ambient_lighting_config">Nastavení ambientního osvětlení</string>
@@ -366,6 +369,7 @@
     <string name="blue">Modrá</string>
     <string name="rotary_encoder_1_enabled">Rotační enkodér #1 povolen</string>
     <string name="gpio_pin_for_rotary_encoder_a_port">GPIO pin pro rotační enkodér A port</string>
+    <string name="send_bell">Odeslat zvonek</string>
     <string name="messages">Zprávy</string>
     <string name="friendly_name">Přezdívka</string>
     <string name="gpio_pin_to_monitor">GPIO pin ke sledování</string>
@@ -404,6 +408,7 @@
     <string name="lora_config">LoRa nastavení</string>
     <string name="use_modem_preset">Použít předvolbu modemu</string>
     <string name="modem_preset">Předvolba modemu</string>
+    <string name="bandwidth">Šířka pásma</string>
     <string name="region_frequency_plan">Region (plán frekvence)</string>
     <string name="hop_limit">Limit skoku</string>
     <string name="tx_enabled">TX povoleno</string>
@@ -454,7 +459,7 @@
     <string name="redefine_gps_rx_pin">Předefinovat GPS_RX_PIN</string>
     <string name="redefine_gps_tx_pin">Předefinovat GPS_TX_PIN</string>
     <string name="redefine_pin_gps_en">Předefinovat PIN_GPS_EN</string>
-    <string name="position_flags">Příznaky polohy</string>
+    <string name="position_flags">Příznaky pozice</string>
     <string name="power_config">Nastavení napájení</string>
     <string name="enable_power_saving_mode">Povolit úsporný režim</string>
     <string name="battery_ina_2xx_i2c_address">Adresa INA_2XX I2C baterie</string>
@@ -473,6 +478,7 @@
     <string name="timeout">Vypršel čas spojení</string>
     <string name="serial_mode">Sériový režim</string>
     <string name="override_console_serial_port">Přepsat sériový port konzole</string>
+    <string name="store_forward_enabled"><![CDATA[Uložit a přeposlat povoleno]]></string>
     <string name="number_of_records">Počet záznamů</string>
     <string name="server">Server</string>
     <string name="telemetry_config">Nastavení telemetrie</string>
@@ -506,4 +512,13 @@
     <string name="backup_restore"><![CDATA[Zálohování a obnovení]]></string>
     <string name="import_configuration">Importovat nastavení</string>
     <string name="export_configuration">Exportovat nastavení</string>
+    <string name="hardware">Hardware</string>
+    <string name="supported">Podporované</string>
+    <string name="node_number">Číslo uzlu</string>
+    <string name="user_id">Identifikátor uživatele</string>
+    <string name="uptime">Doba provozu</string>
+    <string name="firmware_version">Verze firmwaru</string>
+    <string name="timestamp">Časová značka</string>
+    <string name="sats">Satelitů</string>
+    <string name="alt">Výška</string>
 </resources>

@@ -57,7 +57,7 @@
     <string name="config_device_doubleTapAsButtonPress_summary">Käsittele tuetun kiihtyvyysanturin kaksoisnapautusta käyttäjäpainikkeella.</string>
     <string name="config_device_disableTripleClick_summary">Poista käytöstä kolmoisnapautuksen GPS:n käyttöönoton painike.</string>
     <string name="config_device_ledHeartbeatDisabled_summary">Hallitsee laitteen vilkkuvaa LED-valoa. Useimmissa laitteissa tällä voidaan ohjata yhtä neljästä LED-valosta, mutta latauksen tai GPS:n valoja ei voi hallita.</string>
-    <string name="config_device_transmitOverLora_summary">Lähetetäänkö naapuritiedot LoRa:n kautta sen lisäksi, että ne lähetetään MQTT:hen ja PhoneAPI:iin? Ei tuettu kanavalla, joka käyttää oletussalausavainta ja -nimeä.</string>
+    <string name="config_device_transmitOverLora_summary">Lähetetäänkö naapuritiedot LoRa:n kautta sen lisäksi, että ne lähetetään MQTT-protokollalla ja PhoneAPI sovellusrajapinnassa? Tämä ei ole tuettu kanavalla, joka käyttää oletussalausavainta ja nimeä.</string>
     <string name="config_security_public_key">Julkinen avain</string>
     <string name="config_security_private_key">Yksityinen avain</string>
     <string name="channel_name">Kanavan nimi</string>
@@ -314,7 +314,7 @@
     <string name="current">Virta</string>
     <string name="voltage">Jännite</string>
     <string name="are_you_sure">Oletko varma?</string>
-    <string name="router_role_confirmation_text"><![CDATA[Olen lukenut <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Laitteen roolit ohjeen</a> ja blogikirjoituksen <a href="http://meshtastic.org/blog/choosing-the-right-device-role"> valitakseni laitteelle oikean roolin.</a>.]]></string>
+    <string name="router_role_confirmation_text"><![CDATA[Olen lukenut <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Laitteen roolit ohjeen</a> ja blogikirjoituksen <a href="http://meshtastic.org/blog/choosing-the-right-device-role"> valitakseni laitteelle oikean roolin</a>.]]></string>
     <string name="i_know_what_i_m_doing">Tiedän mitä olen tekemässä.</string>
     <string name="low_battery_message">Laitteen %s akun varaustila on vähissä (%d%%)</string>
     <string name="meshtastic_low_battery_notifications">Akun vähäisen varauksen ilmoitukset</string>
@@ -350,7 +350,7 @@
     <string name="paxcounter">PAX-laskuri</string>
     <string name="audio_config">Ääniasetukset</string>
     <string name="codec_2_enabled">CODEC 2 käytössä</string>
-    <string name="ptt_pin">PTT pinni</string>
+    <string name="ptt_pin">PTT-pinni</string>
     <string name="codec2_sample_rate">CODEC2 näytteenottotaajuus</string>
     <string name="i2s_word_select">I2S-sanan valinta</string>
     <string name="i2s_data_in">I2S-datatulo</string>
@@ -419,7 +419,7 @@
     <string name="heading_bold">Lihavoitu otsikko</string>
     <string name="wake_screen_on_tap_or_motion">Herätä näyttö kosketuksella tai liikkeellä</string>
     <string name="compass_orientation">Kompassin suuntaus</string>
-    <string name="external_notification_config">Ulkoisien ilmoituksien asetukset</string>
+    <string name="external_notification_config">Ulkoisten ilmoituksien asetukset</string>
     <string name="external_notification_enabled">Ulkoiset ilmoitukset käytössä</string>
     <string name="notifications_on_message_receipt">Ilmoitukset saapuneesta viestistä</string>
     <string name="alert_message_led">Hälytysviestin LED</string>
@@ -438,7 +438,7 @@
     <string name="nag_timeout_seconds">Hälytysaikakatkaisu (sekuntia)</string>
     <string name="ringtone">Soittoääni</string>
     <string name="use_i2s_as_buzzer">Käytä I2S protokollaa äänimerkille</string>
-    <string name="lora_config">LoRa asetukset</string>
+    <string name="lora_config">LoRa:n asetukset</string>
     <string name="use_modem_preset">Käytä modeemin esiasetusta</string>
     <string name="modem_preset">Modeemin esiasetus</string>
     <string name="bandwidth">Kaistanlevyes</string>
@@ -452,7 +452,7 @@
     <string name="frequency_slot">Taajuuspaikka</string>
     <string name="override_duty_cycle">Ohita käyttöaste (Duty Cycle)</string>
     <string name="ignore_incoming">Ohita saapuvat</string>
-    <string name="sx126x_rx_boosted_gain">SX126X RX korotettu vahvistus</string>
+    <string name="sx126x_rx_boosted_gain">SX126X RX tehostettu vahvistus</string>
     <string name="override_frequency_mhz">Käytä mukautettua taajuutta (MHz)</string>
     <string name="pa_fan_disabled">PA tuuletin pois käytöstä</string>
     <string name="ignore_mqtt">Ohita MQTT</string>
@@ -472,7 +472,7 @@
     <string name="neighbor_info_config">Naapuritietojen asetukset</string>
     <string name="neighbor_info_enabled">Naapuritiedot käytössä</string>
     <string name="update_interval_seconds">Päivityksen aikaväli (sekuntia)</string>
-    <string name="transmit_over_lora">Lähetä LoRan kautta</string>
+    <string name="transmit_over_lora">Lähetä LoRa:n kautta</string>
     <string name="network_config">Verkon asetukset</string>
     <string name="wifi_enabled">WiFi käytössä</string>
     <string name="ssid">SSID</string>
@@ -503,7 +503,7 @@
     <string name="redefine_gps_tx_pin">Uudelleenmääritä GPS_TX_PIN</string>
     <string name="redefine_pin_gps_en">Uudelleenmääritä PIN_GPS_EN</string>
     <string name="position_flags">Sijaintimerkinnät</string>
-    <string name="power_config">Sijainnin asetukset</string>
+    <string name="power_config">Virran asetukset</string>
     <string name="enable_power_saving_mode">Ota virransäästötila käyttöön</string>
     <string name="shutdown_on_battery_delay_seconds">Akun viivästetty sammutus (sekuntia)</string>
     <string name="adc_multiplier_override_ratio">Korvaava AD-muuntimen kerroin</string>
@@ -514,7 +514,7 @@
     <string name="battery_ina_2xx_i2c_address">INA_2XX-akun valvontapiirin I2C-osoite</string>
     <string name="range_test_config">Kuuluvuustestin asetukset</string>
     <string name="range_test_enabled">Kuuluvuustesti käytössä</string>
-    <string name="sender_message_interval_seconds">Lähettäjän viestiväli (sekuntia)</string>
+    <string name="sender_message_interval_seconds">Viestien lähetyksen aikaväli (sekuntia)</string>
     <string name="save_csv_in_storage_esp32_only">Tallenna .CSV (ESP32 ainoastaan)</string>
     <string name="remote_hardware_config">Etälaitteen asetukset</string>
     <string name="remote_hardware_enabled">Etälaitteen ohjaus käytössä</string>
