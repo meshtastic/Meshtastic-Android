@@ -112,6 +112,7 @@ private fun ShareScreenPreview() {
                     unreadCount = 2,
                     messageCount = 10,
                     isMuted = true,
+                    isUnmessageable = false,
                 ),
             ),
             onConfirm = {},
