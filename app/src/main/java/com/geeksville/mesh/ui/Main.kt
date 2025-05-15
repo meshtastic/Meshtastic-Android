@@ -24,9 +24,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.BottomNavigation
 import androidx.compose.material.BottomNavigationItem
 import androidx.compose.material.DropdownMenu
@@ -54,13 +52,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
@@ -155,6 +151,7 @@ enum class MainMenuAction(@StringRes val stringRes: Int) {
     ABOUT(R.string.about),
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun MainAppBar(
     title: String,
@@ -173,29 +170,30 @@ private fun MainAppBar(
         title = {
             when {
                 currentDestination == null || isTopLevelRoute -> {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.app_icon),
-                            contentDescription = stringResource(id = R.string.application_icon),
-                            modifier = Modifier
-                                .size(36.dp)
-                                .padding(end = 8.dp)
-                        )
-                        Text(text = stringResource(id = R.string.app_name))
-                    }
+                    Text(
+                        text = stringResource(id = R.string.app_name),
+                    )
                 }
 
                 currentDestination.hasRoute<Route.DebugPanel>() ->
-                    Text(stringResource(id = R.string.debug_panel))
+                    Text(
+                        stringResource(id = R.string.debug_panel),
+                    )
 
                 currentDestination.hasRoute<Route.QuickChat>() ->
-                    Text(stringResource(id = R.string.quick_chat))
+                    Text(
+                        stringResource(id = R.string.quick_chat),
+                    )
 
                 currentDestination.hasRoute<Route.Share>() ->
-                    Text(stringResource(id = R.string.share_to))
+                    Text(
+                        stringResource(id = R.string.share_to),
+                    )
 
                 currentDestination.showLongNameTitle() -> {
-                    Text(title)
+                    Text(
+                        title,
+                    )
                 }
             }
         },
@@ -210,7 +208,17 @@ private fun MainAppBar(
                 }
             }
         } else {
-            null
+            {
+                IconButton(
+                    enabled = false,
+                    onClick = { },
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.app_icon),
+                        contentDescription = stringResource(id = R.string.application_icon),
+                    )
+                }
+            }
         },
         actions = {
             when {
