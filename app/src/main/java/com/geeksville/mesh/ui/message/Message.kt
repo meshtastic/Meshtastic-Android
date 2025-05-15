@@ -387,8 +387,7 @@ private fun TextInput(
                 message.value = it
             }
         },
-        modifier = Modifier
-            .weight(1f)
+        modifier = Modifier.fillMaxWidth()
             .onFocusEvent { isFocused = it.isFocused },
         enabled = enabled,
         placeholder = { Text(stringResource(id = R.string.send_text)) },
