@@ -21,3 +21,4 @@ jobs:
           days-before-stale: 30
           exempt-issue-labels: 'has sponsor,needs sponsor,help wanted,backlog,security issue,l10n,dependencies' 
           exempt-pr-labels: 'has sponsor,needs sponsor,help wanted,backlog,security issue,l10n,dependencies'
+          operations-per-run: 1000
