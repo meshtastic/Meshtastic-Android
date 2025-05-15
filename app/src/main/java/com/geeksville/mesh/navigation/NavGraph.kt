@@ -214,10 +214,9 @@ fun NavDestination.isNodeDetailRoute(): Boolean {
 }
 
 fun NavDestination.showLongNameTitle(): Boolean {
-    if (this.hasRoute<Route.NodeDetail>()) {
-        return true
-    }
+
     return !this.isTopLevel() && (
+            this.hasRoute<Route.Messages>() ||
             this.hasRoute<Route.RadioConfig>() ||
                     this.hasRoute<Route.NodeDetail>() ||
                     this.isConfigRoute() ||

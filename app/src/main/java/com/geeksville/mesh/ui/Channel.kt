@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui
 
+import android.content.ClipData
 import android.net.Uri
 import android.os.RemoteException
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -50,6 +51,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -59,13 +61,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
@@ -104,6 +106,8 @@ import com.geeksville.mesh.ui.radioconfig.components.EditChannelDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -138,7 +142,7 @@ fun ChannelScreen(
 
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
-            viewModel.requestChannelUrl(Uri.parse(result.contents))
+            viewModel.requestChannelUrl(result.contents.toUri())
         }
     }
 
@@ -333,7 +337,8 @@ fun ChannelScreen(
         }
 
         item {
-            DropDownPreference(title = stringResource(id = R.string.channel_options),
+            DropDownPreference(
+                title = stringResource(id = R.string.channel_options),
                 enabled = enabled,
                 items = ChannelOption.entries
                     .map { it.modemPreset to stringResource(it.configRes) },
@@ -341,7 +346,8 @@ fun ChannelScreen(
                 onItemSelected = {
                     val lora = channelSet.loraConfig.copy { modemPreset = it }
                     channelSet = channelSet.copy { loraConfig = lora }
-                })
+                }
+            )
         }
 
         item {
@@ -356,7 +362,8 @@ fun ChannelScreen(
                     onSaveClicked = {
                         focusManager.clearFocus()
                         sendButton()
-                    })
+                    }
+                )
             } else {
                 PreferenceFooter(
                     enabled = enabled,
@@ -369,7 +376,8 @@ fun ChannelScreen(
                     onPositiveClicked = {
                         focusManager.clearFocus()
                         if (context.hasCameraPermission()) zxingScan() else requestPermissionAndScan()
-                    })
+                    }
+                )
             }
         }
     }
@@ -384,7 +392,8 @@ private fun EditChannelUrl(
     onConfirm: (Uri) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
-    val clipboardManager = LocalClipboardManager.current
+    val clipboardManager = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
 
     var valueState by remember(channelUrl) { mutableStateOf(channelUrl) }
     var isError by remember { mutableStateOf(false) }
@@ -400,7 +409,7 @@ private fun EditChannelUrl(
         value = valueState.toString(),
         onValueChange = {
             isError = runCatching {
-                valueState = Uri.parse(it)
+                valueState = it.toUri()
                 valueState.toChannelSet()
             }.isFailure
         },
@@ -409,6 +418,7 @@ private fun EditChannelUrl(
         label = { Text(stringResource(R.string.url)) },
         isError = isError,
         trailingIcon = {
+            val label = stringResource(R.string.url)
             val isUrlEqual = valueState == channelUrl
             IconButton(onClick = {
                 when {
@@ -427,7 +437,16 @@ private fun EditChannelUrl(
                         GeeksvilleApplication.analytics.track(
                             "share", DataPair("content_type", "channel")
                         )
-                        clipboardManager.setText(AnnotatedString(valueState.toString()))
+                        coroutineScope.launch {
+                            clipboardManager.setClipEntry(
+                                ClipEntry(
+                                    ClipData.newPlainText(
+                                        label,
+                                        valueState.toString()
+                                    )
+                                )
+                            )
+                        }
                     }
                 }
             }) {

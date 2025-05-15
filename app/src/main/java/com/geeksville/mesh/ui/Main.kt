@@ -172,8 +172,7 @@ private fun MainAppBar(
     TopAppBar(
         title = {
             when {
-                currentDestination == null || isTopLevelRoute ||
-                        currentDestination.hasRoute<Route.Messages>() -> {
+                currentDestination == null || isTopLevelRoute -> {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.app_icon),
