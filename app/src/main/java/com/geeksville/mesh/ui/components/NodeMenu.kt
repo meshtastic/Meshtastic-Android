@@ -49,6 +49,7 @@ fun NodeMenu(
     onAction: (NodeMenuAction) -> Unit,
     firmwareVersion: String? = null,
 ) {
+    val isUnmessageable = node.user.isUnmessagable
     var displayFavoriteDialog by remember { mutableStateOf(false) }
     var displayIgnoreDialog by remember { mutableStateOf(false) }
     var displayRemoveDialog by remember { mutableStateOf(false) }
@@ -104,13 +105,15 @@ fun NodeMenu(
     ) {
 
         if (showFullMenu) {
-            DropdownMenuItem(
-                onClick = {
-                    onDismissRequest()
-                    onAction(NodeMenuAction.DirectMessage(node))
-                },
-                text = { Text(stringResource(R.string.direct_message)) }
-            )
+            if (!isUnmessageable) {
+                DropdownMenuItem(
+                    onClick = {
+                        onDismissRequest()
+                        onAction(NodeMenuAction.DirectMessage(node))
+                    },
+                    text = { Text(stringResource(R.string.direct_message)) }
+                )
+            }
             DropdownMenuItem(
                 onClick = {
                     onDismissRequest()
