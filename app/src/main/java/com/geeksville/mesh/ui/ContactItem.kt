@@ -165,6 +165,7 @@ private fun ContactItemPreview() {
                 unreadCount = 2,
                 messageCount = 10,
                 isMuted = true,
+                isUnmessageable = false,
             ),
             selected = false,
         )
