@@ -77,6 +77,7 @@
     <string name="message_reception_state">стан отримання повідомлення</string>
     <string name="message_delivery_status">Статус доставки повідомлень</string>
     <string name="meshtastic_messages_notifications">Сповіщення повідомлення</string>
+    <string name="meshtastic_alerts_notifications">Сповіщення про тривоги</string>
     <string name="protocol_stress_test">Стрес-тест протоколу</string>
     <string name="firmware_too_old">Потрібне оновлення прошивки</string>
     <string name="firmware_old">Прошивка радіо застаріла для зв’язку з цією програмою. Для отримання додаткової інформації дивіться <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">наш посібник із встановлення мікропрограми</a>.</string>
