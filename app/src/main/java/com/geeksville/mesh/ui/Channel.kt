@@ -17,12 +17,9 @@
 
 package com.geeksville.mesh.ui
 
+import android.content.ClipData
 import android.net.Uri
-import android.os.Bundle
 import android.os.RemoteException
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateDpAsState
@@ -49,12 +46,12 @@ import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.ContentCopy
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -64,20 +61,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.ClipEntry
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
-import androidx.fragment.app.activityViewModels
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
@@ -88,7 +82,6 @@ import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.errormsg
 import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.getCameraPermissions
 import com.geeksville.mesh.android.hasCameraPermission
 import com.geeksville.mesh.channelSet
@@ -110,36 +103,11 @@ import com.geeksville.mesh.ui.components.rememberDragDropState
 import com.geeksville.mesh.ui.radioconfig.components.ChannelCard
 import com.geeksville.mesh.ui.radioconfig.components.ChannelSelection
 import com.geeksville.mesh.ui.radioconfig.components.EditChannelDialog
-import com.geeksville.mesh.ui.theme.AppTheme
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
-import dagger.hilt.android.AndroidEntryPoint
-
-@AndroidEntryPoint
-class ChannelFragment : ScreenFragment("Channel"), Logging {
-
-    private val model: UIViewModel by activityViewModels()
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                AppTheme {
-                    CompositionLocalProvider(
-                        LocalContentColor provides MaterialTheme.colors.onSurface
-                    ) {
-                        ChannelScreen(model)
-                    }
-                }
-            }
-        }
-    }
-}
+import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -174,7 +142,7 @@ fun ChannelScreen(
 
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
-            viewModel.requestChannelUrl(Uri.parse(result.contents))
+            viewModel.requestChannelUrl(result.contents.toUri())
         }
     }
 
@@ -296,8 +264,11 @@ fun ChannelScreen(
             modemPresetName = modemPresetName,
             onAddClick = {
                 with(channelSet) {
-                    if (settingsCount > index) channelSet = copy { settings[index] = it }
-                    else channelSet = copy { settings.add(it) }
+                    if (settingsCount > index) {
+                        channelSet = copy { settings[index] = it }
+                    } else {
+                        channelSet = copy { settings.add(it) }
+                    }
                 }
                 showEditChannelDialog = null
             },
@@ -366,7 +337,8 @@ fun ChannelScreen(
         }
 
         item {
-            DropDownPreference(title = stringResource(id = R.string.channel_options),
+            DropDownPreference(
+                title = stringResource(id = R.string.channel_options),
                 enabled = enabled,
                 items = ChannelOption.entries
                     .map { it.modemPreset to stringResource(it.configRes) },
@@ -374,7 +346,8 @@ fun ChannelScreen(
                 onItemSelected = {
                     val lora = channelSet.loraConfig.copy { modemPreset = it }
                     channelSet = channelSet.copy { loraConfig = lora }
-                })
+                }
+            )
         }
 
         item {
@@ -389,7 +362,8 @@ fun ChannelScreen(
                     onSaveClicked = {
                         focusManager.clearFocus()
                         sendButton()
-                    })
+                    }
+                )
             } else {
                 PreferenceFooter(
                     enabled = enabled,
@@ -402,7 +376,8 @@ fun ChannelScreen(
                     onPositiveClicked = {
                         focusManager.clearFocus()
                         if (context.hasCameraPermission()) zxingScan() else requestPermissionAndScan()
-                    })
+                    }
+                )
             }
         }
     }
@@ -417,7 +392,8 @@ private fun EditChannelUrl(
     onConfirm: (Uri) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
-    val clipboardManager = LocalClipboardManager.current
+    val clipboardManager = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
 
     var valueState by remember(channelUrl) { mutableStateOf(channelUrl) }
     var isError by remember { mutableStateOf(false) }
@@ -433,7 +409,7 @@ private fun EditChannelUrl(
         value = valueState.toString(),
         onValueChange = {
             isError = runCatching {
-                valueState = Uri.parse(it)
+                valueState = it.toUri()
                 valueState.toChannelSet()
             }.isFailure
         },
@@ -442,6 +418,7 @@ private fun EditChannelUrl(
         label = { Text(stringResource(R.string.url)) },
         isError = isError,
         trailingIcon = {
+            val label = stringResource(R.string.url)
             val isUrlEqual = valueState == channelUrl
             IconButton(onClick = {
                 when {
@@ -460,7 +437,16 @@ private fun EditChannelUrl(
                         GeeksvilleApplication.analytics.track(
                             "share", DataPair("content_type", "channel")
                         )
-                        clipboardManager.setText(AnnotatedString(valueState.toString()))
+                        coroutineScope.launch {
+                            clipboardManager.setClipEntry(
+                                ClipEntry(
+                                    ClipData.newPlainText(
+                                        label,
+                                        valueState.toString()
+                                    )
+                                )
+                            )
+                        }
                     }
                 }
             }) {

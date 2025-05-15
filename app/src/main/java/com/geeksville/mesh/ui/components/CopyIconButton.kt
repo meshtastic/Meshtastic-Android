@@ -23,11 +23,13 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.ContentCopy
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipEntry
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
 import com.geeksville.mesh.R
+import kotlinx.coroutines.launch
 
 @Composable
 fun CopyIconButton(
@@ -35,13 +37,16 @@ fun CopyIconButton(
     modifier: Modifier = Modifier,
     label: String = stringResource(id = R.string.copy),
 ) {
-    val clipboardManager = LocalClipboardManager.current
+    val clipboardManager = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
     IconButton(
         modifier = modifier,
         onClick = {
-            val clipData = ClipData.newPlainText(label, valueToCopy)
-            val clipEntry = ClipEntry(clipData)
-            clipboardManager.setClip(clipEntry)
+            coroutineScope.launch {
+                val clipData = ClipData.newPlainText(label, valueToCopy)
+                val clipEntry = ClipEntry(clipData)
+                clipboardManager.setClipEntry(clipEntry)
+            }
         }
     ) {
         Icon(

@@ -95,6 +95,7 @@ import com.geeksville.mesh.model.DeviceHardware
 import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
@@ -125,7 +126,8 @@ private enum class LogsType(
 fun NodeDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: MetricsViewModel = hiltViewModel(),
-    onNavigate: (Route) -> Unit,
+    uiViewModel: UIViewModel = hiltViewModel(),
+    onNavigate: (Route) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
@@ -139,11 +141,13 @@ fun NodeDetailScreen(
             environmentState.hasEnvironmentMetrics(),
             state.hasSignalMetrics(),
             state.hasPowerMetrics(),
-            state.hasTracerouteLogs())
+            state.hasTracerouteLogs()
+        )
     }
 
     if (state.node != null) {
         val node = state.node ?: return
+        uiViewModel.setTitle(node.user.longName)
         NodeDetailList(
             node = node,
             metricsState = state,

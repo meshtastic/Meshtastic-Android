@@ -22,7 +22,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.RemoteException
-import android.view.Menu
+import androidx.compose.material.SnackbarHostState
 import androidx.core.content.edit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -55,6 +55,7 @@ import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
+import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.ServiceAction
@@ -66,6 +67,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
@@ -123,7 +125,9 @@ internal fun getChannelList(
     old: List<ChannelSettings>,
 ): List<ChannelProtos.Channel> = buildList {
     for (i in 0..maxOf(old.lastIndex, new.lastIndex)) {
-        if (old.getOrNull(i) != new.getOrNull(i)) add(channel {
+        if (old.getOrNull(i) != new.getOrNull(i)) {
+            add(
+                channel {
             role = when (i) {
                 0 -> ChannelProtos.Channel.Role.PRIMARY
                 in 1..new.lastIndex -> ChannelProtos.Channel.Role.SECONDARY
@@ -131,10 +135,11 @@ internal fun getChannelList(
             }
             index = i
             settings = new.getOrNull(i) ?: channelSettings { }
-        })
+        }
+            )
+        }
     }
 }
-
 data class NodesUiState(
     val sort: NodeSortOption = NodeSortOption.LAST_HEARD,
     val filter: String = "",
@@ -170,10 +175,16 @@ class UIViewModel @Inject constructor(
     private val meshLogRepository: MeshLogRepository,
     private val packetRepository: PacketRepository,
     private val quickChatActionRepository: QuickChatActionRepository,
+    private val locationRepository: LocationRepository,
     private val preferences: SharedPreferences
 ) : ViewModel(), Logging {
 
-    var actionBarMenu: Menu? = null
+    private val _title = MutableStateFlow("")
+    val title: StateFlow<String> = _title.asStateFlow()
+    fun setTitle(title: String) {
+        _title.value = title
+    }
+    val receivingLocationUpdates: StateFlow<Boolean> get() = locationRepository.receivingLocationUpdates
     val meshService: IMeshService? get() = radioConfigRepository.meshService
 
     val bondedAddress get() = radioInterfaceService.getBondedDeviceAddress()
@@ -265,12 +276,15 @@ class UIViewModel @Inject constructor(
     fun getNode(userId: String?) = nodeDB.getNode(userId ?: DataPacket.ID_BROADCAST)
     fun getUser(userId: String?) = nodeDB.getUser(userId ?: DataPacket.ID_BROADCAST)
 
-    private val _snackbarText = MutableLiveData<Any?>(null)
-    val snackbarText: LiveData<Any?> get() = _snackbarText
+    val snackbarState = SnackbarHostState()
+    fun showSnackbar(text: Int) = showSnackbar(app.getString(text))
+    fun showSnackbar(text: String) = viewModelScope.launch {
+        snackbarState.showSnackbar(text)
+    }
 
     init {
         radioConfigRepository.errorMessage.filterNotNull().onEach {
-            _snackbarText.value = it
+            showSnackbar(it)
             radioConfigRepository.clearErrorMessage()
         }.launchIn(viewModelScope)
 
@@ -466,17 +480,6 @@ class UIViewModel @Inject constructor(
      */
     fun clearRequestChannelUrl() {
         _requestChannelSet.value = null
-    }
-
-    fun showSnackbar(resString: Any) {
-        _snackbarText.value = resString
-    }
-
-    /**
-     * Called immediately after activity observes [snackbarText]
-     */
-    fun clearSnackbarText() {
-        _snackbarText.value = null
     }
 
     var txEnabled: Boolean
@@ -708,13 +711,6 @@ class UIViewModel @Inject constructor(
 
     fun clearTracerouteResponse() {
         radioConfigRepository.clearTracerouteResponse()
-    }
-
-    private val _currentTab = MutableLiveData(0)
-    val currentTab: LiveData<Int> get() = _currentTab
-
-    fun setCurrentTab(tab: Int) {
-        _currentTab.value = tab
     }
 
     fun setNodeFilterText(text: String) {

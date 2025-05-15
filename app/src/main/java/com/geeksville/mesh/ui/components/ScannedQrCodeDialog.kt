@@ -49,12 +49,29 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
 import com.geeksville.mesh.R
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
+import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.radioconfig.components.ChannelSelection
+
+@Composable
+fun ScannedQrCodeDialog(
+    viewModel: UIViewModel,
+    incoming: ChannelSet,
+) {
+    val channels by viewModel.channels.collectAsStateWithLifecycle()
+
+    ScannedQrCodeDialog(
+        channels = channels,
+        incoming = incoming,
+        onDismiss = viewModel::clearRequestChannelUrl,
+        onConfirm = viewModel::setChannels,
+    )
+}
 
 /**
  * Enables the user to select which channels to accept after scanning a QR code.
