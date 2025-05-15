@@ -166,6 +166,9 @@ private fun MainAppBar(
     val canNavigateBack = navController.previousBackStackEntry != null
     val isTopLevelRoute = currentDestination?.isTopLevel() == true
     val navigateUp: () -> Unit = navController::navigateUp
+    if (currentDestination?.hasRoute<Route.Messages>() == true) {
+        return
+    }
     TopAppBar(
         title = {
             when {
