@@ -72,7 +72,6 @@ import com.geeksville.mesh.ui.components.dragDropItemsIndexed
 import com.geeksville.mesh.ui.components.rememberDragDropState
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ChannelItem(
     index: Int,
