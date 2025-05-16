@@ -440,7 +440,7 @@ class MainActivity : AppCompatActivity(), Logging {
         model.tracerouteResponse.observe(this) { response ->
             model.showAlert(
                 title = getString(R.string.traceroute),
-                html = response ?: return@observe,
+                message = response ?: return@observe,
             )
             model.clearTracerouteResponse()
         }
