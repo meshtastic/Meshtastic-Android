@@ -58,7 +58,6 @@ awesome-app-rating = { group = "com.suddenh4x.ratingdialog", name = "awesome-app
 cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardview" }
 coil = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-svg = { group = "io.coil-kt.coil3", name = "coil-svg", version.ref = "coil" }
-compose-material = { group = "androidx.compose.material", name = "material" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3" }
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
 compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
@@ -130,7 +129,7 @@ zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing-c
 androidx = ["core-ktx", "appcompat", "appcompat-resources", "cardview", "fragment-ktx", "actvity-ktx", "fragment-compose", "activity-compose"]
 
 # UI
-ui = ["material", "constraintlayout", "viewpager2", "compose-material", "compose-material3", "compose-material-icons-extended", "compose-ui-tooling-preview", "compose-runtime-livedata"]
+ui = ["material", "constraintlayout", "viewpager2", "compose-material3", "compose-material-icons-extended", "compose-ui-tooling-preview", "compose-runtime-livedata"]
 ui-tooling = ["compose-ui-tooling"] #Separate for debugImplementation
 
 # Lifecycle

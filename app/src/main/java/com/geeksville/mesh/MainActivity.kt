@@ -37,8 +37,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.core.content.edit
 import androidx.core.net.toUri
@@ -64,6 +67,7 @@ import com.geeksville.mesh.service.startService
 import com.geeksville.mesh.ui.MainMenuAction
 import com.geeksville.mesh.ui.MainScreen
 import com.geeksville.mesh.ui.theme.AppTheme
+import com.geeksville.mesh.ui.theme.MODE_DYNAMIC
 import com.geeksville.mesh.util.Exceptions
 import com.geeksville.mesh.util.LanguageUtils
 import com.geeksville.mesh.util.getPackageInfoCompat
@@ -134,7 +138,19 @@ class MainActivity : AppCompatActivity(), Logging {
 
         setContent {
             Box(Modifier.safeDrawingPadding()) {
-                AppTheme {
+                val theme by model.theme.collectAsState()
+                val dynamic = theme == MODE_DYNAMIC
+                val dark = when (theme) {
+                    AppCompatDelegate.MODE_NIGHT_YES -> true
+                    AppCompatDelegate.MODE_NIGHT_NO -> false
+                    AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> isSystemInDarkTheme()
+                    else -> isSystemInDarkTheme()
+                }
+
+                AppTheme(
+                    dynamicColor = dynamic,
+                    darkTheme = dark,
+                ) {
                     MainScreen(viewModel = model, onAction = ::onMainMenuAction)
                 }
             }
@@ -460,9 +476,9 @@ class MainActivity : AppCompatActivity(), Logging {
                 createDocumentLauncher.launch(intent)
             }
 
-//            MainMenuAction.THEME -> {
-//               chooseThemeDialog()
-//            }
+            MainMenuAction.THEME -> {
+               chooseThemeDialog()
+            }
 
             MainMenuAction.LANGUAGE -> {
                 chooseLangDialog()
@@ -488,37 +504,29 @@ class MainActivity : AppCompatActivity(), Logging {
 
     // Theme functions
 
-//    private fun chooseThemeDialog() {
-//
-//        // Prepare dialog and its items
-//        val builder = MaterialAlertDialogBuilder(this)
-//        builder.setTitle(getString(R.string.choose_theme))
-//
-//        val styles = mapOf(
-//            getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
-//            getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
-//            getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-//        )
-//
-//        // Load preferences and its value
-//        val prefs = UIViewModel.getPreferences(this)
-//        val theme = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-//        debug("Theme from prefs: $theme")
-//
-//        builder.setSingleChoiceItems(
-//            styles.keys.toTypedArray(),
-//            styles.values.indexOf(theme)
-//        ) { dialog, position ->
-//            val selectedTheme = styles.values.elementAt(position)
-//            debug("Set theme pref to $selectedTheme")
-//            prefs.edit().putInt("theme", selectedTheme).apply()
-//            AppCompatDelegate.setDefaultNightMode(selectedTheme)
-//            dialog.dismiss()
-//        }
-//
-//        val dialog = builder.create()
-//        dialog.show()
-//    }
+    private fun chooseThemeDialog() {
+        val styles = mapOf(
+            getString(R.string.dynamic) to MODE_DYNAMIC,
+            getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
+            getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
+            getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+        )
+
+        // Load preferences and its value
+        val prefs = UIViewModel.getPreferences(this)
+        val theme = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        debug("Theme from prefs: $theme")
+        // map theme keys to function to set theme
+        model.showAlert(
+            title = getString(R.string.choose_theme),
+            message = "",
+            choices = styles.mapValues { (_, value) ->
+                {
+                   model.setTheme(value)
+                }
+            },
+        )
+    }
 
     private fun chooseLangDialog() {
         val languageTags = LanguageUtils.getLanguageTags(this)

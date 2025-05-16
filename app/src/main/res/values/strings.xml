@@ -607,4 +607,5 @@
     <string name="alt">Alt</string>
     <string name="set_region">Set Region</string>
     <string name="unmute">Unmute</string>
+    <string name="dynamic">Dynamic</string>
 </resources>

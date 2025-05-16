@@ -1,5 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
      Copyright (c) 2025 Meshtastic LLC
 
      This program is free software: you can redistribute it and/or modify
@@ -19,7 +18,11 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar"/>
+    <style name="AppTheme" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowTranslucentNavigation">true</item>
+    </style>
 
     <style name="Theme.App.Starting" parent="Theme.SplashScreen">
         // Set the splash screen background, animated icon, and animation duration.
@@ -28,11 +31,13 @@
         // Use windowSplashScreenAnimatedIcon to add either a drawable or an
         // animated drawable. One of these is required.
         <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher2_foreground</item>
-         <item name="windowSplashScreenAnimationDuration">1000</item>  # Required for
+        <item name="windowSplashScreenAnimationDuration">1000</item>
+        # Required for
         # animated icons
 
         // Set the theme of the Activity that directly follows your splash screen.
-        <item name="postSplashScreenTheme">@style/AppTheme</item>  # Required.
+        <item name="postSplashScreenTheme">@style/AppTheme</item>
+        # Required.
     </style>
 
 </resources>

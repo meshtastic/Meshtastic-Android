@@ -22,6 +22,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.RemoteException
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.material3.SnackbarHostState
 import androidx.core.content.edit
 import androidx.lifecycle.LiveData
@@ -180,6 +181,14 @@ class UIViewModel @Inject constructor(
     private val locationRepository: LocationRepository,
     private val preferences: SharedPreferences
 ) : ViewModel(), Logging {
+
+    private val _theme =
+        MutableStateFlow(preferences.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM))
+    val theme: StateFlow<Int> = _theme.asStateFlow()
+    fun setTheme(theme: Int) {
+        _theme.value = theme
+        preferences.edit { putInt("theme", theme) }
+    }
 
     data class AlertData(
         val title: String,

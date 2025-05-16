@@ -168,8 +168,7 @@ enum class MainMenuAction(@StringRes val stringRes: Int) {
     DEBUG(R.string.debug_panel),
     RADIO_CONFIG(R.string.device_settings),
     EXPORT_MESSAGES(R.string.save_messages),
-
-    //    THEME(R.string.theme),
+    THEME(R.string.theme),
     LANGUAGE(R.string.preferences_language),
     SHOW_INTRO(R.string.intro_show),
     QUICK_CHAT(R.string.quick_chat),
