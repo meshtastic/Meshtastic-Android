@@ -26,7 +26,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.VolumeMute
 import androidx.compose.material.icons.automirrored.twotone.VolumeUp
@@ -166,7 +165,6 @@ fun ContactsScreen(
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class) // Required for AlertDialog in some cases, though often not strictly necessary now
 @Composable
 fun MuteNotificationsDialog(
     showDialog: Boolean,
@@ -241,7 +239,6 @@ fun MuteNotificationsDialog(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class) // Not strictly needed for simple AlertDialog
 @Composable
 fun DeleteConfirmationDialog(
     showDialog: Boolean,

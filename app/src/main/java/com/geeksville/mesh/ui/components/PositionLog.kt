@@ -35,8 +35,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.LocalContentAlpha
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
@@ -191,9 +189,6 @@ private fun ActionButtons(
             modifier = Modifier.weight(1f),
             onClick = onSave,
             enabled = saveButtonEnabled,
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = ContentAlpha.medium),
-            )
         ) {
             Icon(
                 imageVector = Icons.Default.Save,
@@ -268,17 +263,16 @@ private fun ColumnScope.PositionList(
         DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
     }
 
-    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-        LazyColumn(
-            modifier = Modifier.weight(1f),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            items(positions) { position ->
-                PositionItem(compactWidth, position, dateFormat, displayUnits)
-            }
+    LazyColumn(
+        modifier = Modifier.weight(1f),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        items(positions) { position ->
+            PositionItem(compactWidth, position, dateFormat, displayUnits)
         }
     }
 }
+
 
 @Suppress("MagicNumber")
 private val testPosition = MeshProtos.Position.newBuilder().apply {
