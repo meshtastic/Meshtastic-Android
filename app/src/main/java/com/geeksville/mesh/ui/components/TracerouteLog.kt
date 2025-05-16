@@ -31,17 +31,17 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.Card
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Group
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.PersonOff
+import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -135,18 +135,20 @@ fun TracerouteLogScreen(
 
 @Composable
 private fun DeleteItem(onClick: () -> Unit) {
-    DropdownMenuItem(onClick = onClick) {
-        Icon(
-            imageVector = Icons.Default.Delete,
-            contentDescription = stringResource(id = R.string.delete),
-            tint = MaterialTheme.colors.error,
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(
-            text = stringResource(id = R.string.delete),
-            color = MaterialTheme.colors.error,
-        )
-    }
+    DropdownMenuItem(
+        onClick = onClick,
+        text = {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = stringResource(id = R.string.delete),
+                tint = MaterialTheme.colorScheme.error,
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = stringResource(id = R.string.delete),
+                color = MaterialTheme.colorScheme.error,
+            )
+        })
 }
 
 @Composable
@@ -160,7 +162,6 @@ private fun TracerouteItem(
             .fillMaxWidth()
             .heightIn(min = 56.dp)
             .padding(vertical = 2.dp),
-        elevation = 4.dp
     ) {
         Row(
             modifier = Modifier
@@ -174,7 +175,7 @@ private fun TracerouteItem(
             Spacer(modifier = Modifier.width(8.dp))
             Text(
                 text = text,
-                style = MaterialTheme.typography.body1,
+                style = MaterialTheme.typography.bodyLarge,
             )
         }
     }

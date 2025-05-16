@@ -22,7 +22,6 @@ import android.net.Uri
 import android.os.RemoteException
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,20 +30,18 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.ContentCopy
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -72,6 +69,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
@@ -107,7 +105,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
-import androidx.core.net.toUri
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -309,9 +306,7 @@ fun ChannelScreen(
                 items = channelSet.settingsList,
                 dragDropState = dragDropState,
             ) { index, channel, isDragging ->
-                val elevation by animateDpAsState(if (isDragging) 8.dp else 4.dp, label = "drag")
                 ChannelCard(
-                    elevation = elevation,
                     index = index,
                     title = channel.name.ifEmpty { modemPresetName },
                     enabled = enabled,
@@ -329,9 +324,6 @@ fun ChannelScreen(
                         showEditChannelDialog = channelSet.settingsList.lastIndex
                     },
                     enabled = enabled && viewModel.maxChannels > channelSet.settingsCount,
-                    colors = ButtonDefaults.buttonColors(
-                        disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
-                    )
                 ) { Text(text = stringResource(R.string.add)) }
             }
         }
@@ -462,9 +454,9 @@ private fun EditChannelUrl(
                         else -> stringResource(R.string.copy)
                     },
                     tint = if (isError) {
-                        MaterialTheme.colors.error
+                        MaterialTheme.colorScheme.error
                     } else {
-                        LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+                        LocalContentColor.current
                     }
                 )
             }
@@ -490,7 +482,7 @@ private fun QrCodeImage(
     contentDescription = stringResource(R.string.qr_code),
     modifier = modifier,
     contentScale = ContentScale.Inside,
-    alpha = if (enabled) 1.0f else ContentAlpha.disabled,
+    alpha = if (enabled) 1.0f else 0.7f
     // colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }),
 )
 
@@ -528,7 +520,7 @@ private fun ChannelListView(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = enabled,
                 colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colors.onSurface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
                 ),
             ) { Text(text = stringResource(R.string.edit)) }
         },

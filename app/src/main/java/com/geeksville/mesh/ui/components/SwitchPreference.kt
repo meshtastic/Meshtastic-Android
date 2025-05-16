@@ -23,12 +23,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.ContentAlpha
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.ListItem
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Switch
-import androidx.compose.material.Text
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -49,31 +48,32 @@ fun SwitchPreference(
     val color = if (enabled) {
         Color.Unspecified
     } else {
-        MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
     }
 
     ListItem(
         modifier = modifier,
-        trailing = {
+        trailingContent = {
             Switch(
                 enabled = enabled,
                 checked = checked,
                 onCheckedChange = onCheckedChange,
             )
         },
-        secondaryText = {
+        supportingContent = {
             Text(
                 text = summary,
                 modifier = Modifier.padding(bottom = 16.dp),
                 color = color,
             )
         },
-    ) {
-        Text(
-            text = title,
-            color = color,
-        )
-    }
+        headlineContent = {
+            Text(
+                text = title,
+                color = color,
+            )
+        }
+    )
 }
 
 @Composable
@@ -95,11 +95,11 @@ fun SwitchPreference(
     ) {
         Text(
             text = title,
-            style = MaterialTheme.typography.body1,
+            style = MaterialTheme.typography.bodyLarge,
             color = if (enabled) {
                 Color.Unspecified
             } else {
-                MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
             },
         )
         Switch(

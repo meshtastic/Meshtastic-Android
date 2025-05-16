@@ -26,15 +26,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.Button
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CloudDownload
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -80,17 +78,15 @@ internal fun DebugScreen(
         }
     }
 
-    SelectionContainer {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            state = listState,
-        ) {
-            items(logs, key = { it.uuid }) { log ->
-                DebugItem(
-                    modifier = Modifier.animateItem(),
-                    log = log
-                )
-            }
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        state = listState,
+    ) {
+        items(logs, key = { it.uuid }) { log ->
+            DebugItem(
+                modifier = Modifier.animateItem(),
+                log = log
+            )
         }
     }
 }
@@ -104,10 +100,8 @@ internal fun DebugItem(
         modifier = modifier
             .fillMaxWidth()
             .padding(4.dp),
-        elevation = 4.dp,
-        shape = RoundedCornerShape(12.dp),
     ) {
-        Surface {
+        SelectionContainer {
             Column(
                 modifier = Modifier.padding(8.dp)
             ) {

@@ -33,17 +33,16 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Badge
-import androidx.compose.material.BadgedBox
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Divider
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EmojiEmotions
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -83,7 +82,6 @@ fun ReactionButton(
             imageVector = Icons.Default.EmojiEmotions,
             contentDescription = "emoji",
             modifier = modifier.size(16.dp),
-            tint = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
         )
     }
 }
@@ -99,8 +97,8 @@ private fun ReactionItem(
         badge = {
             if (emojiCount > 1) {
                 Badge(
-                    backgroundColor = MaterialTheme.colors.onBackground,
-                    contentColor = MaterialTheme.colors.background,
+                    containerColor = MaterialTheme.colorScheme.onBackground,
+                    contentColor = MaterialTheme.colorScheme.background,
                 ) {
                     Text(
                         fontWeight = FontWeight.Bold,
@@ -113,9 +111,8 @@ private fun ReactionItem(
         Surface(
             modifier = Modifier
                 .clickable { onClick() },
-            color = MaterialTheme.colors.surface,
+            color = MaterialTheme.colorScheme.surface,
             shape = RoundedCornerShape(32.dp),
-            elevation = 4.dp,
         ) {
             Text(
                 text = emoji,
@@ -192,7 +189,7 @@ fun ReactionDialog(
                     .clickable {
                         selectedEmoji = if (selectedEmoji == emoji) null else emoji
                     },
-                style = MaterialTheme.typography.body2
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }
@@ -211,11 +208,11 @@ fun ReactionDialog(
             ) {
                 Text(
                     text = reaction.user.longName,
-                    style = MaterialTheme.typography.subtitle1
+                    style = MaterialTheme.typography.titleMedium
                 )
                 Text(
                     text = reaction.emoji,
-                    style = MaterialTheme.typography.h6
+                    style = MaterialTheme.typography.titleLarge
                 )
             }
         }
@@ -227,7 +224,7 @@ fun ReactionDialog(
 fun ReactionItemPreview() {
     AppTheme {
         Column(
-            modifier = Modifier.background(MaterialTheme.colors.background)
+            modifier = Modifier.background(MaterialTheme.colorScheme.background)
         ) {
             ReactionItem(emoji = "\uD83D\uDE42")
             ReactionItem(emoji = "\uD83D\uDE42", emojiCount = 2)

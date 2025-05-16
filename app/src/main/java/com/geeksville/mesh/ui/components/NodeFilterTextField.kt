@@ -27,19 +27,19 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Divider
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -72,7 +72,7 @@ fun NodeFilterTextField(
     onToggleShowDetails: () -> Unit,
 ) {
     Row(
-        modifier = modifier.background(MaterialTheme.colors.background),
+        modifier = modifier.background(MaterialTheme.colorScheme.background),
     ) {
         NodeFilterTextField(
             filterText = filterText,
@@ -109,8 +109,8 @@ private fun NodeFilterTextField(
         placeholder = {
             Text(
                 text = stringResource(id = R.string.node_filter_placeholder),
-                style = MaterialTheme.typography.body1,
-                color = MaterialTheme.colors.onBackground.copy(alpha = 0.35F)
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.35F)
             )
         },
         leadingIcon = {
@@ -132,8 +132,8 @@ private fun NodeFilterTextField(
                 )
             }
         },
-        textStyle = MaterialTheme.typography.body1.copy(
-            color = MaterialTheme.colors.onBackground
+        textStyle = MaterialTheme.typography.bodyLarge.copy(
+            color = MaterialTheme.colorScheme.onBackground
         ),
         maxLines = 1,
         keyboardOptions = KeyboardOptions(
@@ -163,14 +163,14 @@ private fun NodeSortButton(
             imageVector = Icons.AutoMirrored.Filled.Sort,
             contentDescription = stringResource(R.string.node_sort_button),
             modifier = Modifier.heightIn(max = 48.dp),
-            tint = MaterialTheme.colors.onSurface
+            tint = MaterialTheme.colorScheme.onSurface
         )
     }
 
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = { expanded = false },
-        modifier = Modifier.background(MaterialTheme.colors.background.copy(alpha = 1f))
+        modifier = Modifier.background(MaterialTheme.colorScheme.background.copy(alpha = 1f))
     ) {
         NodeSortOption.entries.forEach { sort ->
             DropdownMenuItem(
@@ -178,49 +178,52 @@ private fun NodeSortButton(
                     onSortSelect(sort)
                     expanded = false
                 },
-            ) {
-                Text(
-                    text = stringResource(id = sort.stringRes),
-                    fontWeight = if (sort == currentSortOption) FontWeight.Bold else null,
-                )
-            }
+                text = {
+                    Text(
+                        text = stringResource(id = sort.stringRes),
+                        fontWeight = if (sort == currentSortOption) FontWeight.Bold else null,
+                    )
+                }
+            )
         }
-        Divider()
+        HorizontalDivider()
         DropdownMenuItem(
             onClick = {
                 onToggleIncludeUnknown()
                 expanded = false
             },
-        ) {
-            Text(
-                text = stringResource(id = R.string.node_filter_include_unknown),
-            )
-            AnimatedVisibility(visible = includeUnknown) {
-                Icon(
-                    imageVector = Icons.Default.Done,
-                    contentDescription = null,
-                    modifier = Modifier.padding(start = 4.dp),
+            text = {
+                Text(
+                    text = stringResource(id = R.string.node_filter_include_unknown),
                 )
+                AnimatedVisibility(visible = includeUnknown) {
+                    Icon(
+                        imageVector = Icons.Default.Done,
+                        contentDescription = null,
+                        modifier = Modifier.padding(start = 4.dp),
+                    )
+                }
             }
-        }
-        Divider()
+        )
+        HorizontalDivider()
         DropdownMenuItem(
             onClick = {
                 onToggleShowDetails()
                 expanded = false
             },
-        ) {
-            Text(
-                text = stringResource(id = R.string.node_filter_show_details),
-            )
-            AnimatedVisibility(visible = showDetails) {
-                Icon(
-                    imageVector = Icons.Default.Done,
-                    contentDescription = null,
-                    modifier = Modifier.padding(start = 4.dp),
+            text = {
+                Text(
+                    text = stringResource(id = R.string.node_filter_show_details),
                 )
+                AnimatedVisibility(visible = showDetails) {
+                    Icon(
+                        imageVector = Icons.Default.Done,
+                        contentDescription = null,
+                        modifier = Modifier.padding(start = 4.dp),
+                    )
+                }
             }
-        }
+        )
     }
 }
 

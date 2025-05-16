@@ -35,10 +35,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -112,7 +112,10 @@ fun <T : Any> SlidingSelector(
     state.onOptionSelected = { onOptionSelected(options[it]) }
 
     /* Animate between whole-number indices so we don't need to do pixel calculations. */
-    val selectedIndexOffset by animateFloatAsState(state.selectedOption.toFloat(), label = "Selected Index Offset")
+    val selectedIndexOffset by animateFloatAsState(
+        state.selectedOption.toFloat(),
+        label = "Selected Index Offset"
+    )
 
     Layout(
         content = {
@@ -183,7 +186,7 @@ private fun SelectedIndicator(state: SelectorState) {
                 )
             )
             .shadow(4.dp, BACKGROUND_SHAPE)
-            .background(MaterialTheme.colors.background, BACKGROUND_SHAPE)
+            .background(MaterialTheme.colorScheme.background, BACKGROUND_SHAPE)
     )
 }
 
@@ -310,7 +313,10 @@ private class SelectorState {
         option: Int,
     ): Modifier = Modifier.composed {
         val scale by animateFloatAsState(if (pressed) pressedSelectedScale else 1f, label = "Scale")
-        val xOffset by animateDpAsState(if (pressed) PRESSED_TRACK_PADDING else 0.dp, label = "x Offset")
+        val xOffset by animateDpAsState(
+            if (pressed) PRESSED_TRACK_PADDING else 0.dp,
+            label = "x Offset"
+        )
 
         graphicsLayer {
             this.scaleX = scale

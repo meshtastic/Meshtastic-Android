@@ -31,13 +31,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -89,7 +89,7 @@ fun ChartHeader(amount: Int) {
             text = "$amount ${stringResource(R.string.logs)}",
             modifier = Modifier.wrapContentWidth(),
             style = TextStyle(fontWeight = FontWeight.Bold),
-            fontSize = MaterialTheme.typography.button.fontSize
+            fontSize = MaterialTheme.typography.labelLarge.fontSize
         )
     }
 }
@@ -185,7 +185,7 @@ fun TimeAxisOverlay(
 
     val range = newest - oldest
     val density = LocalDensity.current
-    val lineColor = MaterialTheme.colors.onSurface
+    val lineColor = MaterialTheme.colorScheme.onSurface
     Canvas(modifier = modifier) {
 
         val height = size.height
@@ -346,7 +346,6 @@ fun LegendInfoDialog(pairedRes: List<Pair<Int, Int>>, onDismiss: () -> Unit) {
             }
         },
         shape = RoundedCornerShape(16.dp),
-        backgroundColor = MaterialTheme.colors.background
     )
 }
 
@@ -372,8 +371,8 @@ private fun LegendLabel(text: String, color: Color, isLine: Boolean = false) {
     Spacer(modifier = Modifier.width(4.dp))
     Text(
         text = text,
-        color = MaterialTheme.colors.onSurface,
-        fontSize = MaterialTheme.typography.button.fontSize,
+        color = MaterialTheme.colorScheme.onSurface,
+        fontSize = MaterialTheme.typography.labelLarge.fontSize,
     )
 }
 

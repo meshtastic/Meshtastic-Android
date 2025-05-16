@@ -26,11 +26,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Scaffold
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationDisabled
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.MyLocation
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -423,9 +423,9 @@ fun MapView(
 
             if (enabled) {
                 showEditWaypointDialog = waypoint {
-                latitudeI = (p.latitude * 1e7).toInt()
-                longitudeI = (p.longitude * 1e7).toInt()
-            }
+                    latitudeI = (p.latitude * 1e7).toInt()
+                    longitudeI = (p.longitude * 1e7).toInt()
+                }
             }
             return true
         }
@@ -587,14 +587,14 @@ fun MapView(
             )
             if (downloadRegionBoundingBox != null) {
                 CacheLayout(
-                cacheEstimate = cacheEstimate,
-                onExecuteJob = { startDownload() },
-                onCancelDownload = {
-                    downloadRegionBoundingBox = null
-                    map.overlays.removeAll { it is Polygon }
-                    map.invalidate()
-                },
-                modifier = Modifier.align(Alignment.BottomCenter)
+                    cacheEstimate = cacheEstimate,
+                    onExecuteJob = { startDownload() },
+                    onCancelDownload = {
+                        downloadRegionBoundingBox = null
+                        map.overlays.removeAll { it is Polygon }
+                        map.invalidate()
+                    },
+                    modifier = Modifier.align(Alignment.BottomCenter)
                 )
             } else {
                 Column(
@@ -608,19 +608,20 @@ fun MapView(
                         icon = Icons.Outlined.Layers,
                         contentDescription = R.string.map_style_selection,
                     )
-                    MapButton(
-                        enabled = hasGps,
-                        icon = if (myLocationOverlay == null) {
-                            Icons.Outlined.MyLocation
-                        } else {
-                            Icons.Default.LocationDisabled
-                        },
-                        contentDescription = stringResource(R.string.toggle_my_position),
-                    ) {
-                        if (context.hasLocationPermission()) {
-                            map.toggleMyLocation()
-                        } else {
-                            requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
+                    if (hasGps) {
+                        MapButton(
+                            icon = if (myLocationOverlay == null) {
+                                Icons.Outlined.MyLocation
+                            } else {
+                                Icons.Default.LocationDisabled
+                            },
+                            contentDescription = stringResource(R.string.toggle_my_position),
+                        ) {
+                            if (context.hasLocationPermission()) {
+                                map.toggleMyLocation()
+                            } else {
+                                requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
+                            }
                         }
                     }
                 }
@@ -636,9 +637,9 @@ fun MapView(
                 showEditWaypointDialog = null
                 model.sendWaypoint(
                     waypoint.copy {
-                    if (id == 0) id = model.generatePacketId() ?: return@EditWaypointDialog
-                    expire = Int.MAX_VALUE // TODO add expire picker
-                    lockedTo = if (waypoint.lockedTo != 0) model.myNodeNum ?: 0 else 0
+                        if (id == 0) id = model.generatePacketId() ?: return@EditWaypointDialog
+                        expire = Int.MAX_VALUE // TODO add expire picker
+                        lockedTo = if (waypoint.lockedTo != 0) model.myNodeNum ?: 0 else 0
                     }
                 )
             },

@@ -22,7 +22,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.RemoteException
-import androidx.compose.material.SnackbarHostState
+import androidx.compose.material3.SnackbarHostState
 import androidx.core.content.edit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData

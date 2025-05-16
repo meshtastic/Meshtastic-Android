@@ -21,7 +21,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -87,7 +87,7 @@ fun UserConfigItemList(
                 onClick = {}
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             EditTextPreference(
@@ -128,7 +128,7 @@ fun UserConfigItemList(
                 onClick = {}
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             SwitchPreference(
@@ -138,7 +138,7 @@ fun UserConfigItemList(
                 onCheckedChange = { userInput = userInput.copy { isLicensed = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             PreferenceFooter(

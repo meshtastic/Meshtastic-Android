@@ -25,11 +25,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Checkbox
-import androidx.compose.material.Divider
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -207,7 +207,7 @@ fun DeviceConfigItemList(
                 },
                 summary = stringResource(id = deviceInput.role.stringRes),
             )
-            Divider()
+            HorizontalDivider()
         }
 
         item {
@@ -242,7 +242,7 @@ fun DeviceConfigItemList(
                 onItemSelected = { deviceInput = deviceInput.copy { rebroadcastMode = it } },
                 summary = stringResource(id = deviceInput.rebroadcastMode.stringRes),
             )
-            Divider()
+            HorizontalDivider()
         }
 
         item {
@@ -265,7 +265,7 @@ fun DeviceConfigItemList(
                 enabled = enabled,
                 onCheckedChange = { deviceInput = deviceInput.copy { doubleTapAsButtonPress = it } }
             )
-            Divider()
+            HorizontalDivider()
         }
 
         item {
@@ -276,7 +276,7 @@ fun DeviceConfigItemList(
                 enabled = enabled,
                 onCheckedChange = { deviceInput = deviceInput.copy { disableTripleClick = it } }
             )
-            Divider()
+            HorizontalDivider()
         }
 
         item {
@@ -304,7 +304,7 @@ fun DeviceConfigItemList(
                 enabled = enabled,
                 onCheckedChange = { deviceInput = deviceInput.copy { ledHeartbeatDisabled = it } }
             )
-            Divider()
+            HorizontalDivider()
         }
 
         item {

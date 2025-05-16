@@ -25,9 +25,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Button
-import androidx.compose.material.Divider
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -149,7 +149,7 @@ fun NetworkConfigItemList(
                 enabled = enabled && hasWifi,
                 onCheckedChange = { networkInput = networkInput.copy { wifiEnabled = it } }
             )
-            Divider()
+            HorizontalDivider()
         }
 
         item {
@@ -200,7 +200,7 @@ fun NetworkConfigItemList(
                 enabled = enabled && hasEthernet,
                 onCheckedChange = { networkInput = networkInput.copy { ethEnabled = it } }
             )
-            Divider()
+            HorizontalDivider()
         }
 
         item {
@@ -247,7 +247,7 @@ fun NetworkConfigItemList(
                 selectedItem = networkInput.addressMode,
                 onItemSelected = { networkInput = networkInput.copy { addressMode = it } }
             )
-            Divider()
+            HorizontalDivider()
         }
 
         item {
@@ -301,7 +301,7 @@ fun NetworkConfigItemList(
                 }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
         if (hasEthernet || hasWifi) {
             item {
                 PreferenceCategory(text = stringResource(R.string.udp_config))
@@ -321,7 +321,7 @@ fun NetworkConfigItemList(
                 )
             }
 
-            item { Divider() }
+            item { HorizontalDivider() }
         }
         item {
             PreferenceFooter(
