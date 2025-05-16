@@ -280,7 +280,7 @@ class MainActivity : AppCompatActivity(), Logging {
                                 val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
 
                                 if (curVer < MeshService.minDeviceVersion) {
-                                    showAlert(R.string.firmware_too_old, R.string.firmware_old)
+                                    model.showAlert(R.string.firmware_too_old, R.string.firmware_old)
                                 }
                             }
                         }

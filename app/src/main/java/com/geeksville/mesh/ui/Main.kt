@@ -76,6 +76,7 @@ import com.geeksville.mesh.navigation.showLongNameTitle
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.components.ScannedQrCodeDialog
+import com.geeksville.mesh.ui.components.SimpleAlertDialog
 
 enum class TopLevelDestination(val label: String, val icon: ImageVector, val route: Route) {
     Contacts("Contacts", Icons.AutoMirrored.TwoTone.Chat, Route.Contacts),
@@ -109,6 +110,15 @@ fun MainScreen(
         }
     }
     val title by viewModel.title.collectAsStateWithLifecycle()
+
+    val alertDialogState by viewModel.currentAlert.collectAsStateWithLifecycle()
+    alertDialogState?.let { state ->
+        SimpleAlertDialog(
+            title = stringResource(state.title),
+            message = stringResource(state.message),
+            onDismissRequest = { state.onDismiss() },
+        )
+    }
 
     Scaffold(
         topBar = {

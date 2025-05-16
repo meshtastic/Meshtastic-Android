@@ -165,6 +165,7 @@ fun ContactsScreen(
     )
 }
 
+@Suppress("LongMethod")
 @Composable
 fun MuteNotificationsDialog(
     showDialog: Boolean,

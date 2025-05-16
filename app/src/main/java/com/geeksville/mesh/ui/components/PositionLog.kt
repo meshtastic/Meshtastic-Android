@@ -273,7 +273,6 @@ private fun ColumnScope.PositionList(
     }
 }
 
-
 @Suppress("MagicNumber")
 private val testPosition = MeshProtos.Position.newBuilder().apply {
     latitudeI = 297604270
