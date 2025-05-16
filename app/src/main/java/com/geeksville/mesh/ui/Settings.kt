@@ -88,6 +88,7 @@ import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.repository.network.NetworkRepository
 import kotlinx.coroutines.delay
 
 fun String?.isIPAddress(): Boolean {
@@ -145,6 +146,7 @@ fun SettingsScreen(
 
     // State for manual IP address input
     var manualIpAddress by remember { mutableStateOf("") }
+    var manualIpPort by remember { mutableStateOf(NetworkRepository.SERVICE_PORT.toString()) }
 
     // State for the device scan dialog
     var showScanDialog by remember { mutableStateOf(false) }
@@ -314,7 +316,7 @@ fun SettingsScreen(
                                 scanModel.onSelected(
                                     BTScanModel.DeviceListEntry(
                                         "",
-                                        "t$manualIpAddress",
+                                        "t$manualIpAddress:$manualIpPort",
                                         true
                                     )
                                 )
@@ -327,13 +329,13 @@ fun SettingsScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 RadioButton(
-                    selected = ("t$manualIpAddress" == selectedDevice),
+                    selected = ("t$manualIpAddress:$manualIpPort" == selectedDevice),
                     onClick = {
                         if (manualIpAddress.isIPAddress()) {
                             scanModel.onSelected(
                                 BTScanModel.DeviceListEntry(
                                     "",
-                                    "t$manualIpAddress",
+                                    "t$manualIpAddress:$manualIpPort",
                                     true
                                 )
                             )
@@ -348,8 +350,22 @@ fun SettingsScreen(
                     label = { Text(stringResource(R.string.ip_address)) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     modifier = Modifier
-                        .weight(1f)
+                        .weight(0.7f)
                         .padding(start = 16.dp)
+                )
+                OutlinedTextField(
+                    value = manualIpPort,
+                    onValueChange = {
+                        // Only allow numeric input for port
+                        if (it.all { char -> char.isDigit() }) {
+                            manualIpPort = it
+                        }
+                    },
+                    label = { Text(stringResource(R.string.ip_port)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier
+                        .weight(0.3f)
+                        .padding(start = 8.dp)
                 )
             }
         }
