@@ -124,10 +124,6 @@ class MainActivity : AppCompatActivity(), Logging {
             val lang = prefs.getString("lang", LanguageUtils.SYSTEM_DEFAULT)
             if (lang != LanguageUtils.SYSTEM_MANAGED) LanguageUtils.migrateLanguagePrefs(prefs)
             info("in-app language is ${LanguageUtils.getLocale()}")
-            // Set theme
-            AppCompatDelegate.setDefaultNightMode(
-                prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-            )
             // First run: show AppIntroduction
             if (!prefs.getBoolean("app_intro_completed", false)) {
                 startActivity(Intent(this, AppIntroduction::class.java))
@@ -477,7 +473,7 @@ class MainActivity : AppCompatActivity(), Logging {
             }
 
             MainMenuAction.THEME -> {
-               chooseThemeDialog()
+                chooseThemeDialog()
             }
 
             MainMenuAction.LANGUAGE -> {
@@ -522,7 +518,7 @@ class MainActivity : AppCompatActivity(), Logging {
             message = "",
             choices = styles.mapValues { (_, value) ->
                 {
-                   model.setTheme(value)
+                    model.setTheme(value)
                 }
             },
         )
