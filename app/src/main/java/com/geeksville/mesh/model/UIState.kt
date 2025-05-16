@@ -22,7 +22,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.RemoteException
-import androidx.annotation.StringRes
 import androidx.compose.material3.SnackbarHostState
 import androidx.core.content.edit
 import androidx.lifecycle.LiveData
@@ -183,28 +182,43 @@ class UIViewModel @Inject constructor(
 ) : ViewModel(), Logging {
 
     data class AlertData(
-        @StringRes val title: Int,
-        @StringRes val message: Int,
-        val onDismiss: () -> Unit = {}
+        val title: String,
+        val message: String? = null,
+        val html: String? = null,
+        val onConfirm: (() -> Unit)? = null,
+        val onDismiss: (() -> Unit)? = null,
+        val choices: Map<String, () -> Unit> = emptyMap()
     )
 
     private val _currentAlert: MutableStateFlow<AlertData?> = MutableStateFlow(null)
     val currentAlert = _currentAlert.asStateFlow()
 
-    fun showAlert(@StringRes title: Int, @StringRes message: Int, onDismiss: () -> Unit = {}) {
-        _currentAlert.value = AlertData(title, message, onDismiss)
+    fun showAlert(
+        title: String,
+        message: String? = null,
+        html: String? = null,
+        onConfirm: (() -> Unit)? = {},
+        dismissable: Boolean = true,
+        choices: Map<String, () -> Unit> = emptyMap()
+    ) {
+        _currentAlert.value =
+            AlertData(
+                title = title,
+                message = message,
+                html = html,
+                onConfirm = {
+                    onConfirm?.invoke()
+                    if (dismissable) dismissAlert()
+                },
+                onDismiss = {
+                    if (dismissable) dismissAlert()
+                },
+                choices = choices
+            )
     }
 
-    fun dismissAlert() {
-        _currentAlert.value?.onDismiss?.invoke()
+    private fun dismissAlert() {
         _currentAlert.value = null
-    }
-
-    private val _showDndRationaleDialog: MutableStateFlow<Boolean> = MutableStateFlow(false)
-    val showDndRationaleDialog: StateFlow<Boolean> = _showDndRationaleDialog.asStateFlow()
-
-    fun setDndRationaleVisibility(visible: Boolean) {
-        _showDndRationaleDialog.value = visible
     }
 
     private val _title = MutableStateFlow("")

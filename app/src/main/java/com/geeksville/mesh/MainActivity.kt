@@ -29,10 +29,7 @@ import android.os.Build
 import android.os.Bundle
 import android.os.RemoteException
 import android.provider.Settings
-import android.text.Html
-import android.text.method.LinkMovementMethod
 import android.view.MotionEvent
-import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -46,18 +43,15 @@ import androidx.compose.ui.Modifier
 import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.setPadding
 import com.geeksville.mesh.android.BindFailedException
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.ServiceClient
-import com.geeksville.mesh.android.dpToPx
 import com.geeksville.mesh.android.getBluetoothPermissions
 import com.geeksville.mesh.android.getNotificationPermissions
 import com.geeksville.mesh.android.hasBluetoothPermission
 import com.geeksville.mesh.android.hasNotificationPermission
 import com.geeksville.mesh.android.permissionMissing
-import com.geeksville.mesh.android.rationaleDialog
 import com.geeksville.mesh.android.shouldShowRequestPermissionRationale
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.model.BluetoothViewModel
@@ -73,7 +67,6 @@ import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.Exceptions
 import com.geeksville.mesh.util.LanguageUtils
 import com.geeksville.mesh.util.getPackageInfoCompat
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -237,31 +230,6 @@ class MainActivity : AppCompatActivity(), Logging {
         super.onDestroy()
     }
 
-    /** Show an alert that may contain HTML */
-    private fun showAlert(titleText: Int, messageText: Int) {
-
-        // make links clickable per https://stackoverflow.com/a/62642807
-        // val messageStr = getText(messageText)
-
-        val builder = MaterialAlertDialogBuilder(this)
-            .setCancelable(false)
-            .setTitle(titleText)
-            .setMessage(messageText)
-            .setPositiveButton(R.string.okay) { _, _ ->
-                info("User acknowledged")
-            }
-
-        val dialog = builder.show()
-
-        // Make the textview clickable. Must be called after show()
-        val view = (dialog.findViewById(android.R.id.message) as TextView?)!!
-        // Linkify.addLinks(view, Linkify.ALL) // not needed with this method
-        view.movementMethod = LinkMovementMethod.getInstance()
-
-        debug("showAlert: $titleText")
-        showSettingsPage() // Default to the settings page in this case
-    }
-
     // Called when we gain/lose a connection to our mesh radio
     private fun onMeshConnectionChanged(newConnection: MeshService.ConnectionState) {
         if (newConnection == MeshService.ConnectionState.CONNECTED) {
@@ -272,15 +240,20 @@ class MainActivity : AppCompatActivity(), Logging {
                     if (info != null) {
                         val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
                         if (isOld) {
-                            showAlert(R.string.app_too_old, R.string.must_update)
+                            model.showAlert(
+                                getString(R.string.app_too_old),
+                                getString(R.string.must_update),
+                                dismissable = false,
+                            )
                         } else {
                             // If we are already doing an update don't put up a dialog or try to get device info
                             val isUpdating = service.updateStatus >= 0
                             if (!isUpdating) {
                                 val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
-
                                 if (curVer < MeshService.minDeviceVersion) {
-                                    model.showAlert(R.string.firmware_too_old, R.string.firmware_old)
+                                    val title = getString(R.string.firmware_too_old)
+                                    val message = getString(R.string.firmware_old)
+                                    model.showAlert(title, message, dismissable = false)
                                 }
                             }
                         }
@@ -300,11 +273,17 @@ class MainActivity : AppCompatActivity(), Logging {
     private fun checkNotificationPermissions() {
         if (!hasNotificationPermission()) {
             val notificationPermissions = getNotificationPermissions()
-            rationaleDialog(
-                shouldShowRequestPermissionRationale(notificationPermissions),
-                R.string.notification_required,
-                getString(R.string.why_notification_required),
-            ) {
+            if (shouldShowRequestPermissionRationale(notificationPermissions)) {
+                val title = getString(R.string.notification_required)
+                val message = getString(R.string.why_notification_required)
+                model.showAlert(
+                    title = title,
+                    message = message,
+                    onConfirm = {
+                        notificationPermissionsLauncher.launch(notificationPermissions)
+                    },
+                )
+            } else {
                 notificationPermissionsLauncher.launch(notificationPermissions)
             }
         }
@@ -324,29 +303,16 @@ class MainActivity : AppCompatActivity(), Logging {
                     intent.putExtra(Settings.EXTRA_CHANNEL_ID, "my_alerts")
                     startActivity(intent)
                 }
-
-                val message = Html.fromHtml(
-                    getString(R.string.alerts_dnd_request_text),
-                    Html.FROM_HTML_MODE_COMPACT
-                )
-                val messageTextView = TextView(this).also {
-                    it.text = message
-                    it.movementMethod = LinkMovementMethod.getInstance()
-                    it.setPadding(dpToPx(16f))
-                }
-                MaterialAlertDialogBuilder(this)
-                    .setTitle(R.string.alerts_dnd_request_title)
-                    .setView(messageTextView)
-                    .setNeutralButton(R.string.cancel) { dialog, _ ->
-                        prefs.edit { putBoolean("dnd_rationale_shown", true) }
-                        dialog.dismiss()
-                    }
-                    .setPositiveButton(R.string.channel_settings) { dialog, _ ->
+                model.showAlert(
+                    title = getString(R.string.alerts_dnd_request_title),
+                    html = getString(R.string.alerts_dnd_request_text),
+                    onConfirm = {
                         showAlertAppNotificationSettings()
-                        prefs.edit { putBoolean("dnd_rationale_shown", true) }
-                        dialog.dismiss()
-                    }
-                    .setCancelable(false).show()
+                    },
+                    dismissable = true
+                ).also {
+                    prefs.edit { putBoolean("dnd_rationale_shown", true) }
+                }
             }
         }
     }
@@ -446,21 +412,24 @@ class MainActivity : AppCompatActivity(), Logging {
                     bleRequestEnable.launch(enableBtIntent)
                 } else {
                     val bluetoothPermissions = getBluetoothPermissions()
-                    rationaleDialog(shouldShowRequestPermissionRationale(bluetoothPermissions)) {
-                        bluetoothPermissionsLauncher.launch(bluetoothPermissions)
-                    }
+                    val title = getString(R.string.required_permissions)
+                    val message = permissionMissing
+                    model.showAlert(
+                        title = title,
+                        message = message,
+                        onConfirm = {
+                            bluetoothPermissionsLauncher.launch(bluetoothPermissions)
+                        },
+                    )
                 }
             }
         }
 
         model.tracerouteResponse.observe(this) { response ->
-            MaterialAlertDialogBuilder(this)
-                .setCancelable(false)
-                .setTitle(R.string.traceroute)
-                .setMessage(response ?: return@observe)
-                .setPositiveButton(R.string.okay) { _, _ -> }
-                .show()
-
+            model.showAlert(
+                title = getString(R.string.traceroute),
+                html = response ?: return@observe,
+            )
             model.clearTracerouteResponse()
         }
 
@@ -491,9 +460,9 @@ class MainActivity : AppCompatActivity(), Logging {
                 createDocumentLauncher.launch(intent)
             }
 
-            MainMenuAction.THEME -> {
-                chooseThemeDialog()
-            }
+//            MainMenuAction.THEME -> {
+//               chooseThemeDialog()
+//            }
 
             MainMenuAction.LANGUAGE -> {
                 chooseLangDialog()
@@ -519,59 +488,54 @@ class MainActivity : AppCompatActivity(), Logging {
 
     // Theme functions
 
-    private fun chooseThemeDialog() {
-
-        // Prepare dialog and its items
-        val builder = MaterialAlertDialogBuilder(this)
-        builder.setTitle(getString(R.string.choose_theme))
-
-        val styles = mapOf(
-            getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
-            getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
-            getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-        )
-
-        // Load preferences and its value
-        val prefs = UIViewModel.getPreferences(this)
-        val theme = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-        debug("Theme from prefs: $theme")
-
-        builder.setSingleChoiceItems(
-            styles.keys.toTypedArray(),
-            styles.values.indexOf(theme)
-        ) { dialog, position ->
-            val selectedTheme = styles.values.elementAt(position)
-            debug("Set theme pref to $selectedTheme")
-            prefs.edit().putInt("theme", selectedTheme).apply()
-            AppCompatDelegate.setDefaultNightMode(selectedTheme)
-            dialog.dismiss()
-        }
-
-        val dialog = builder.create()
-        dialog.show()
-    }
+//    private fun chooseThemeDialog() {
+//
+//        // Prepare dialog and its items
+//        val builder = MaterialAlertDialogBuilder(this)
+//        builder.setTitle(getString(R.string.choose_theme))
+//
+//        val styles = mapOf(
+//            getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
+//            getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
+//            getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+//        )
+//
+//        // Load preferences and its value
+//        val prefs = UIViewModel.getPreferences(this)
+//        val theme = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+//        debug("Theme from prefs: $theme")
+//
+//        builder.setSingleChoiceItems(
+//            styles.keys.toTypedArray(),
+//            styles.values.indexOf(theme)
+//        ) { dialog, position ->
+//            val selectedTheme = styles.values.elementAt(position)
+//            debug("Set theme pref to $selectedTheme")
+//            prefs.edit().putInt("theme", selectedTheme).apply()
+//            AppCompatDelegate.setDefaultNightMode(selectedTheme)
+//            dialog.dismiss()
+//        }
+//
+//        val dialog = builder.create()
+//        dialog.show()
+//    }
 
     private fun chooseLangDialog() {
-        // Prepare dialog and its items
-        val builder = MaterialAlertDialogBuilder(this)
-        builder.setTitle(getString(R.string.preferences_language))
-
         val languageTags = LanguageUtils.getLanguageTags(this)
-
         // Load preferences and its value
         val lang = LanguageUtils.getLocale()
         debug("Lang from prefs: $lang")
-
-        builder.setSingleChoiceItems(
-            languageTags.keys.toTypedArray(),
-            languageTags.values.indexOf(lang)
-        ) { dialog, position ->
-            val selectedLang = languageTags.values.elementAt(position)
-            debug("Set lang pref to $selectedLang")
-            LanguageUtils.setLocale(selectedLang)
-            dialog.dismiss()
+        // map lang keys to function to set locale
+        val langMap = languageTags.mapValues { (_, value) ->
+            {
+                LanguageUtils.setLocale(value)
+            }
         }
-        val dialog = builder.create()
-        dialog.show()
+
+        model.showAlert(
+            title = getString(R.string.preferences_language),
+            message = "",
+            choices = langMap,
+        )
     }
 }

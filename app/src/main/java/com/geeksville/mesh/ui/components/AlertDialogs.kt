@@ -17,53 +17,106 @@
 
 package com.geeksville.mesh.ui.components
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import com.geeksville.mesh.R // Assuming R.string.okay
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.fromHtml
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.dp
+import com.geeksville.mesh.R
 
 @Composable
 fun SimpleAlertDialog(
     title: String,
-    message: String,
+    message: String?,
+    html: String? = null,
     onDismissRequest: () -> Unit,
-    onConfirm: () -> Unit = onDismissRequest // Default confirm to dismiss
+    onConfirmRequest: () -> Unit = onDismissRequest // Default confirm to dismiss
 ) {
+
+    val annotatedString = html?.let {
+        AnnotatedString.fromHtml(
+            html,
+            linkStyles = TextLinkStyles(
+                style = SpanStyle(
+                    textDecoration = TextDecoration.Underline,
+                    fontStyle = FontStyle.Italic,
+                    color = Color.Blue
+                )
+            )
+        )
+    }
     AlertDialog(
         onDismissRequest = onDismissRequest,
         title = { Text(text = title) },
-        text = { Text(text = message) }, // For HTML, you'll need an AndroidView with TextView or a library
+        text = {
+            if (annotatedString != null) {
+                Text(
+                    text = annotatedString,
+                )
+            } else {
+                Text(
+                    text = message.orEmpty()
+                )
+            }
+        },
         confirmButton = {
-            TextButton(onClick = onConfirm) {
+            TextButton(onClick = onConfirmRequest) {
                 Text(stringResource(id = R.string.okay))
             }
-        }
+        },
     )
 }
 
 // For Rationale Dialogs
 @Composable
-fun RationaleDialog(
+fun MultipleChoiceAlertDialog(
     title: String,
-    message: String,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit
+    message: String?,
+    choices: Map<String, () -> Unit>,
+    onDismissRequest: () -> Unit,
 ) {
     AlertDialog(
-        onDismissRequest = onDismiss,
+        onDismissRequest = onDismissRequest,
         title = { Text(text = title) },
-        text = { Text(text = message) },
-        confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text("Grant Permission") // Or customize
+        text = {
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState())
+            ) {
+                message?.let {
+                    Text(
+                        text = it,
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                }
+                choices.forEach { (choice, action) ->
+                    Button(
+                        modifier = Modifier.fillMaxWidth().padding(8.dp),
+                        onClick = {
+                            action()
+                            onDismissRequest()
+                        },
+                    ) {
+                        Text(text = choice)
+                    }
+                }
             }
         },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(id = android.R.string.cancel))
-            }
+        confirmButton = {
         }
     )
 }

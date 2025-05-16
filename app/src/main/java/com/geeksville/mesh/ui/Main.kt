@@ -75,6 +75,7 @@ import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.showLongNameTitle
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
+import com.geeksville.mesh.ui.components.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.components.SimpleAlertDialog
 
@@ -94,6 +95,7 @@ enum class TopLevelDestination(val label: String, val icon: ImageVector, val rou
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 fun MainScreen(
     viewModel: UIViewModel = hiltViewModel(),
@@ -113,11 +115,22 @@ fun MainScreen(
 
     val alertDialogState by viewModel.currentAlert.collectAsStateWithLifecycle()
     alertDialogState?.let { state ->
-        SimpleAlertDialog(
-            title = stringResource(state.title),
-            message = stringResource(state.message),
-            onDismissRequest = { state.onDismiss() },
-        )
+        if (state.choices.isNotEmpty()) {
+            MultipleChoiceAlertDialog(
+                title = state.title,
+                message = state.message,
+                choices = state.choices,
+                onDismissRequest = { state.onDismiss?.let { it() } },
+            )
+        } else {
+            SimpleAlertDialog(
+                title = state.title,
+                message = state.message,
+                html = state.html,
+                onConfirmRequest = { state.onConfirm?.let { it() } },
+                onDismissRequest = { state.onDismiss?.let { it() } },
+            )
+        }
     }
 
     Scaffold(
@@ -155,7 +168,8 @@ enum class MainMenuAction(@StringRes val stringRes: Int) {
     DEBUG(R.string.debug_panel),
     RADIO_CONFIG(R.string.device_settings),
     EXPORT_MESSAGES(R.string.save_messages),
-    THEME(R.string.theme),
+
+    //    THEME(R.string.theme),
     LANGUAGE(R.string.preferences_language),
     SHOW_INTRO(R.string.intro_show),
     QUICK_CHAT(R.string.quick_chat),
