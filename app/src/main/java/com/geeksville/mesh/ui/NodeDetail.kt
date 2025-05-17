@@ -390,14 +390,14 @@ private fun InfoCard(
     Card(
         modifier = Modifier
             .padding(4.dp)
-            .width(120.dp)
-            .height(120.dp),
+            .width(100.dp)
+            .height(100.dp),
     ) {
         Box(
             modifier = Modifier
                 .padding(4.dp)
-                .width(120.dp)
-                .height(120.dp),
+                .width(100.dp)
+                .height(100.dp),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -422,11 +422,7 @@ private fun InfoCard(
                     text = value,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    style = if (value.length < 7) {
-                        MaterialTheme.typography.headlineSmall
-                    } else {
-                        MaterialTheme.typography.titleLarge
-                    },
+                    style = MaterialTheme.typography.titleMedium,
                 )
             }
         }

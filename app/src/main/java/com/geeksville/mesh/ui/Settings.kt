@@ -269,10 +269,6 @@ fun SettingsScreen(
                         .selectable(
                             selected = (device.fullAddress == selectedDevice),
                             onClick = {
-                                if (device.fullAddress == "n") {
-                                    uiViewModel.showSnackbar("Demo Mode enabled")
-                                    scanModel.showMockInterface()
-                                }
                                 if (!device.bonded) {
                                     uiViewModel.showSnackbar(context.getString(R.string.starting_pairing))
                                 }
@@ -285,10 +281,6 @@ fun SettingsScreen(
                     RadioButton(
                         selected = (device.fullAddress == selectedDevice),
                         onClick = {
-                            if (device.fullAddress == "n") {
-                                uiViewModel.showSnackbar("Demo Mode enabled")
-                                scanModel.showMockInterface()
-                            }
                             if (!device.bonded) {
                                 uiViewModel.showSnackbar(context.getString(R.string.starting_pairing))
                             }

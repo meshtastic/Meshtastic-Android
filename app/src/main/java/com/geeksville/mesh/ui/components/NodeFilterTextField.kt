@@ -193,14 +193,16 @@ private fun NodeSortButton(
                 expanded = false
             },
             text = {
-                Text(
-                    text = stringResource(id = R.string.node_filter_include_unknown),
-                )
-                AnimatedVisibility(visible = includeUnknown) {
-                    Icon(
-                        imageVector = Icons.Default.Done,
-                        contentDescription = null,
-                        modifier = Modifier.padding(start = 4.dp),
+                Row {
+                    AnimatedVisibility(visible = includeUnknown) {
+                        Icon(
+                            imageVector = Icons.Default.Done,
+                            contentDescription = null,
+                            modifier = Modifier.padding(end = 4.dp),
+                        )
+                    }
+                    Text(
+                        text = stringResource(id = R.string.node_filter_include_unknown),
                     )
                 }
             }
@@ -212,14 +214,16 @@ private fun NodeSortButton(
                 expanded = false
             },
             text = {
-                Text(
-                    text = stringResource(id = R.string.node_filter_show_details),
-                )
-                AnimatedVisibility(visible = showDetails) {
-                    Icon(
-                        imageVector = Icons.Default.Done,
-                        contentDescription = null,
-                        modifier = Modifier.padding(start = 4.dp),
+                Row {
+                    AnimatedVisibility(visible = showDetails) {
+                        Icon(
+                            imageVector = Icons.Default.Done,
+                            contentDescription = null,
+                            modifier = Modifier.padding(end = 4.dp),
+                        )
+                    }
+                    Text(
+                        text = stringResource(id = R.string.node_filter_show_details),
                     )
                 }
             }

@@ -133,6 +133,7 @@ fun UserConfigItemList(
         item {
             SwitchPreference(
                 title = stringResource(R.string.licensed_amateur_radio),
+                summary = stringResource(R.string.licensed_amateur_radio_text),
                 checked = userInput.isLicensed,
                 enabled = enabled,
                 onCheckedChange = { userInput = userInput.copy { isLicensed = it } }
