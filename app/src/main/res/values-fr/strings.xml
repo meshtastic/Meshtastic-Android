@@ -8,7 +8,7 @@
     <string name="node_filter_placeholder">Filtrer</string>
     <string name="desc_node_filter_clear">effacer le filtre de nœud</string>
     <string name="node_filter_include_unknown">Inclure inconnus</string>
-    <string name="node_filter_show_details">Montre detay</string>
+    <string name="node_filter_show_details">Afficher les détails</string>
     <string name="node_sort_button">Options de tri des nœuds</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Chaîne</string>
@@ -404,6 +404,7 @@
     <string name="nodeinfo_broadcast_interval_seconds">Intervalle de diffusion de NodeInfo (secondes)</string>
     <string name="double_tap_as_button_press">Appuyer deux fois sur le bouton</string>
     <string name="disable_triple_click">Désactiver le triple-clic</string>
+    <string name="posix_timezone">Zone horaire POSIX</string>
     <string name="disable_led_heartbeat">Désactiver la LED de pulsation</string>
     <string name="display_config">Configuration de l\'affichage</string>
     <string name="screen_timeout_seconds">Délai de mise en veille de l\'écran (secondes)</string>
@@ -421,9 +422,17 @@
     <string name="notifications_on_message_receipt">Notifications à la réception d\'un message</string>
     <string name="alert_message_led">LED de message d\'alerte</string>
     <string name="alert_message_buzzer">Avertissement de message</string>
+    <string name="alert_message_vibra">Avertissement de message</string>
+    <string name="notifications_on_alert_bell_receipt">Notifications sur réception d\'alerte/cloche</string>
+    <string name="alert_bell_led">LED à la réception de la cloche d\'alerte</string>
+    <string name="alert_bell_buzzer">Buzzer à la réception de la cloche d\'alerte</string>
+    <string name="alert_bell_vibra">Vibreur à la réception de la cloche d\'alerte</string>
+    <string name="output_led_gpio">LED extérieure (GPIO)</string>
+    <string name="output_buzzer_gpio">Buzzer extérieur (GPIO)</string>
     <string name="use_pwm_buzzer">Utiliser le buzzer PWM</string>
     <string name="output_vibra_gpio">Sortie vibreur (GPIO)</string>
     <string name="output_duration_milliseconds">Durée de sortie (en millisecondes)</string>
+    <string name="nag_timeout_seconds">Délai d\'attente du nag</string>
     <string name="ringtone">Sonnerie</string>
     <string name="use_i2s_as_buzzer">Utiliser l\'I2S comme buzzer</string>
     <string name="lora_config">Configuration LoRa</string>
@@ -438,6 +447,7 @@
     <string name="tx_enabled">TX activé</string>
     <string name="tx_power_dbm">Puissance TX (dBM)</string>
     <string name="frequency_slot">Emplacement de fréquence</string>
+    <string name="override_duty_cycle">Ne pas prendre en compte la limite d\'utilisation</string>
     <string name="ignore_incoming">Ignorer les entrées</string>
     <string name="sx126x_rx_boosted_gain">Gain de SX126X RX augmenté</string>
     <string name="override_frequency_mhz">Remplacer la fréquence (MHz)</string>
@@ -452,6 +462,7 @@
     <string name="encryption_enabled">Chiffrement activé</string>
     <string name="json_output_enabled">Sortie JSON activée</string>
     <string name="tls_enabled">TLS activé</string>
+    <string name="root_topic">Sujet principal</string>
     <string name="proxy_to_client_enabled">Proxy pour le client activé</string>
     <string name="map_reporting">Rapport cartographique</string>
     <string name="map_reporting_interval_seconds">Interval de rapport cartographique (secondes)</string>
@@ -470,6 +481,8 @@
     <string name="ip">IP</string>
     <string name="gateway">Passerelle</string>
     <string name="subnet">Sous-réseau</string>
+    <string name="paxcounter_config">Configuration du Paxcounter</string>
+    <string name="paxcounter_enabled">Paxcounter activé</string>
     <string name="wifi_rssi_threshold_defaults_to_80">Seuil RSSI WiFi (par défaut -80)</string>
     <string name="ble_rssi_threshold_defaults_to_80">Seuil BLE RSSI (par défaut -80)</string>
     <string name="position_config">Configuration de la position</string>
@@ -486,6 +499,7 @@
     <string name="redefine_gps_rx_pin">Redéfinir GPS_RX_PIN</string>
     <string name="redefine_gps_tx_pin">Redéfinir GPS_TX_PIN</string>
     <string name="redefine_pin_gps_en">Redéfinir le code PIN_GPS_EN</string>
+    <string name="position_flags">Informations relatives à la position</string>
     <string name="power_config">Configuration de l\'alimentation</string>
     <string name="enable_power_saving_mode">Activer le mode économie d\'énergie</string>
     <string name="wait_for_bluetooth_duration_seconds">Temps d\'attente pour le Bluetooth</string>
@@ -494,9 +508,11 @@
     <string name="minimum_wake_time_seconds">Temps de réveil minimum (secondes)</string>
     <string name="range_test_config">Configuration des tests de portée</string>
     <string name="range_test_enabled">Test de portée activé</string>
+    <string name="sender_message_interval_seconds">Intervalle de message de l\'expéditeur (secondes)</string>
     <string name="save_csv_in_storage_esp32_only">Enregistrer .CSV dans le stockage (ESP32 seulement)</string>
     <string name="remote_hardware_config">Configuration du matériel distant</string>
     <string name="remote_hardware_enabled">Matériel distant activé</string>
+    <string name="allow_undefined_pin_access">Autoriser l\'accès non défini aux broches</string>
     <string name="available_pins">Broches disponibles</string>
     <string name="security_config">Configuration de sécurité</string>
     <string name="public_key">Clé publique</string>
@@ -525,12 +541,12 @@
     <string name="air_quality_metrics_update_interval_seconds">Interval de mise à jours des mesures de la qualité de l\'air (seconde)</string>
     <string name="power_metrics_module_enabled">Module de mesure de puissance activé</string>
     <string name="power_metrics_update_interval_seconds">Intervalle de mise à jour des mesures de puissance (secondes)</string>
+    <string name="power_metrics_on_screen_enabled">Indicateurs d\'alimentation à l\'écran activés</string>
     <string name="user_config">Configuration de l\'utilisateur</string>
     <string name="node_id">Identifiant (ID) du nœud</string>
     <string name="long_name">Nom long</string>
     <string name="short_name">Nom court</string>
     <string name="hardware_model">Modèle de matériel</string>
-    <string name="licensed_amateur_radio">Radio amateur licencié</string>
     <string name="dew_point"></string>
     <string name="pressure">Pression</string>
     <string name="gas_resistance">Résistance au gaz</string>
@@ -539,9 +555,20 @@
     <string name="wind">Vent</string>
     <string name="weight">Poids</string>
     <string name="radiation">Radiation</string>
+    <string name="store_forward_config"></string>
     <string name="indoor_air_quality_iaq">Qualité de l\'air intérieur (IAQ)</string>
     <string name="url">URL</string>
     <string name="backup_restore"><![CDATA[Sauvegarder & Restaurer]]></string>
     <string name="import_configuration">Importer la configuration</string>
     <string name="export_configuration">Exporter la configuration</string>
+    <string name="hardware">Matériel</string>
+    <string name="supported">Pris en charge</string>
+    <string name="node_number">Numéro de nœud</string>
+    <string name="user_id">ID utilisateur</string>
+    <string name="uptime">Durée de fonctionnement</string>
+    <string name="firmware_version">Version du microprogramme</string>
+    <string name="timestamp">Horodatage</string>
+    <string name="alt">Alt</string>
+    <string name="set_region">Définir la région</string>
+    <string name="unmute">Désactiver Muet</string>
 </resources>

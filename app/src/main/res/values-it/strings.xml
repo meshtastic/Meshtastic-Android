@@ -557,7 +557,6 @@
     <string name="long_name">Nome esteso</string>
     <string name="short_name">Nome breve</string>
     <string name="hardware_model">Modello hardware</string>
-    <string name="licensed_amateur_radio">Radioamatore con licenza</string>
     <string name="dew_point">Punto Di Rugiada</string>
     <string name="pressure">Pressione</string>
     <string name="gas_resistance">Resistenza Ai Gas</string>
