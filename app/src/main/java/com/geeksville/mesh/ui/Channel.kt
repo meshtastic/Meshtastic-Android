@@ -22,7 +22,6 @@ import android.net.Uri
 import android.os.RemoteException
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,20 +30,20 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.ContentCopy
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -72,6 +71,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
@@ -103,11 +103,9 @@ import com.geeksville.mesh.ui.components.rememberDragDropState
 import com.geeksville.mesh.ui.radioconfig.components.ChannelCard
 import com.geeksville.mesh.ui.radioconfig.components.ChannelSelection
 import com.geeksville.mesh.ui.radioconfig.components.EditChannelDialog
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
-import androidx.core.net.toUri
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -123,6 +121,9 @@ fun ChannelScreen(
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     var channelSet by remember(channels) { mutableStateOf(channels) }
     var showChannelEditor by rememberSaveable { mutableStateOf(false) }
+    var showSendDialog by remember { mutableStateOf(false) }
+    var showResetDialog by remember { mutableStateOf(false) }
+    var showScanDialog by remember { mutableStateOf(false) }
     val isEditing = channelSet != channels || showChannelEditor
 
     /* Holds selections made by the user for QR generation. */
@@ -174,23 +175,29 @@ fun ChannelScreen(
             if (permissions.entries.all { it.value }) zxingScan()
         }
 
-    fun requestPermissionAndScan() {
-        MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.camera_required)
-            .setMessage(R.string.why_camera_required)
-            .setNeutralButton(R.string.cancel) { _, _ ->
+    if (showScanDialog) {
+        AlertDialog(
+            onDismissRequest = {
                 debug("Camera permission denied")
+                showScanDialog = false
+            },
+            title = { Text(text = stringResource(id = R.string.camera_required)) },
+            text = { Text(text = stringResource(id = R.string.why_camera_required)) },
+            confirmButton = {
+                TextButton(onClick = { requestPermissionAndScanLauncher.launch(context.getCameraPermissions()) }) {
+                    Text(text = stringResource(id = R.string.accept))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { debug("Camera permission denied") }) {
+                    Text(text = stringResource(id = R.string.cancel))
+                }
             }
-            .setPositiveButton(R.string.accept) { _, _ ->
-                requestPermissionAndScanLauncher.launch(context.getCameraPermissions())
-            }
-            .show()
+        )
     }
 
     // Send new channel settings to the device
-    fun installSettings(
-        newChannelSet: ChannelSet
-    ) {
+    fun installSettings(newChannelSet: ChannelSet) {
         // Try to change the radio, if it fails, tell the user why and throw away their edits
         try {
             viewModel.setChannels(newChannelSet)
@@ -218,39 +225,53 @@ fun ChannelScreen(
         installSettings(newSet)
     }
 
-    fun resetButton() {
-        // User just locked it, we should warn and then apply changes to radio
-        MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.reset_to_defaults)
-            .setMessage(R.string.are_you_sure_change_default)
-            .setNeutralButton(R.string.cancel) { _, _ ->
+    if (showResetDialog) {
+        AlertDialog(
+            onDismissRequest = {
                 channelSet = channels // throw away any edits
+                showResetDialog = false
+            },
+            title = { Text(text = stringResource(id = R.string.reset_to_defaults)) },
+            text = { Text(text = stringResource(id = R.string.are_you_sure_change_default)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    debug("Switching back to default channel")
+                    installSettings(
+                        Channel.default.settings,
+                        Channel.default.loraConfig.copy {
+                            region = viewModel.region
+                            txEnabled = viewModel.txEnabled
+                        }
+                    )
+                    showResetDialog = false
+                }) { Text(text = stringResource(id = R.string.apply)) }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    channelSet = channels // throw away any edits
+                    showResetDialog = false
+                }) { Text(text = stringResource(id = R.string.cancel)) }
             }
-            .setPositiveButton(R.string.apply) { _, _ ->
-                debug("Switching back to default channel")
-                installSettings(
-                    Channel.default.settings,
-                    Channel.default.loraConfig.copy {
-                        region = viewModel.region
-                        txEnabled = viewModel.txEnabled
-                    }
-                )
-            }
-            .show()
+        )
     }
 
-    fun sendButton() {
-        MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.change_channel)
-            .setMessage(R.string.are_you_sure_channel)
-            .setNeutralButton(R.string.cancel) { _, _ ->
+    if (showSendDialog) {
+        AlertDialog(
+            onDismissRequest = {
+                showSendDialog = false
                 showChannelEditor = false
                 channelSet = channels
-            }
-            .setPositiveButton(R.string.accept) { _, _ ->
+            },
+            title = { Text(text = stringResource(id = R.string.change_channel)) },
+            text = { Text(text = stringResource(id = R.string.are_you_sure_channel)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    installSettings(channelSet)
+                    showSendDialog = false
+                }) { Text(text = stringResource(id = R.string.accept)) }
                 installSettings(channelSet)
             }
-            .show()
+        )
     }
 
     var showEditChannelDialog: Int? by remember { mutableStateOf(null) }
@@ -309,9 +330,7 @@ fun ChannelScreen(
                 items = channelSet.settingsList,
                 dragDropState = dragDropState,
             ) { index, channel, isDragging ->
-                val elevation by animateDpAsState(if (isDragging) 8.dp else 4.dp, label = "drag")
                 ChannelCard(
-                    elevation = elevation,
                     index = index,
                     title = channel.name.ifEmpty { modemPresetName },
                     enabled = enabled,
@@ -329,9 +348,6 @@ fun ChannelScreen(
                         showEditChannelDialog = channelSet.settingsList.lastIndex
                     },
                     enabled = enabled && viewModel.maxChannels > channelSet.settingsCount,
-                    colors = ButtonDefaults.buttonColors(
-                        disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
-                    )
                 ) { Text(text = stringResource(R.string.add)) }
             }
         }
@@ -361,7 +377,7 @@ fun ChannelScreen(
                     },
                     onSaveClicked = {
                         focusManager.clearFocus()
-                        sendButton()
+                        showSendDialog = true
                     }
                 )
             } else {
@@ -370,12 +386,12 @@ fun ChannelScreen(
                     negativeText = R.string.reset,
                     onNegativeClicked = {
                         focusManager.clearFocus()
-                        resetButton()
+                        showResetDialog = true
                     },
                     positiveText = R.string.scan,
                     onPositiveClicked = {
                         focusManager.clearFocus()
-                        if (context.hasCameraPermission()) zxingScan() else requestPermissionAndScan()
+                        if (context.hasCameraPermission()) zxingScan() else showScanDialog = true
                     }
                 )
             }
@@ -462,9 +478,9 @@ private fun EditChannelUrl(
                         else -> stringResource(R.string.copy)
                     },
                     tint = if (isError) {
-                        MaterialTheme.colors.error
+                        MaterialTheme.colorScheme.error
                     } else {
-                        LocalContentColor.current.copy(alpha = LocalContentAlpha.current)
+                        LocalContentColor.current
                     }
                 )
             }
@@ -490,7 +506,7 @@ private fun QrCodeImage(
     contentDescription = stringResource(R.string.qr_code),
     modifier = modifier,
     contentScale = ContentScale.Inside,
-    alpha = if (enabled) 1.0f else ContentAlpha.disabled,
+    alpha = if (enabled) 1.0f else 0.7f
     // colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }),
 )
 
@@ -528,7 +544,7 @@ private fun ChannelListView(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = enabled,
                 colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colors.onSurface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
                 ),
             ) { Text(text = stringResource(R.string.edit)) }
         },

@@ -18,7 +18,6 @@
 package com.geeksville.mesh.ui.message
 
 import android.content.ClipData
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -28,25 +27,24 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
-import androidx.compose.material.TextFieldDefaults
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
@@ -59,11 +57,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -183,7 +179,6 @@ internal fun MessageScreen(
             val isConnected = connState.isConnected()
             Column(
                 modifier = Modifier
-                    .background(MaterialTheme.colors.background)
                     .padding(start = 8.dp, end = 8.dp, bottom = 4.dp),
             ) {
                 QuickChatRow(isConnected, quickChat) { action ->
@@ -248,7 +243,6 @@ private fun DeleteMessageDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(16.dp),
-        backgroundColor = MaterialTheme.colors.background,
         text = {
             Text(
                 text = deleteMessagesString,
@@ -276,6 +270,7 @@ sealed class MessageMenuAction {
     data object SelectAll : MessageMenuAction()
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ActionModeTopBar(
     selectedList: Set<Long>,
@@ -310,9 +305,9 @@ private fun ActionModeTopBar(
             )
         }
     },
-    backgroundColor = MaterialTheme.colors.primary,
 )
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MessageTopBar(
     title: String,
@@ -358,9 +353,6 @@ private fun QuickChatRow(
                 onClick = { onClick(action) },
                 modifier = Modifier.padding(horizontal = 4.dp),
                 enabled = enabled,
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = colorResource(id = R.color.colorMyMsg),
-                )
             ) {
                 Text(
                     text = action.name,
@@ -396,10 +388,6 @@ private fun TextInput(
         ),
         maxLines = 3,
         shape = RoundedCornerShape(24.dp),
-        colors = TextFieldDefaults.textFieldColors(
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-        ),
         trailingIcon = {
             IconButton(
                 onClick = {
@@ -416,7 +404,6 @@ private fun TextInput(
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.Send,
                     contentDescription = stringResource(id = R.string.send_text),
-                    tint = MaterialTheme.colors.primary
                 )
             }
         }
@@ -424,7 +411,7 @@ private fun TextInput(
     if (isFocused) {
         Text(
             text = "${message.value.text.toByteArray().size}/$maxSize",
-            style = MaterialTheme.typography.caption,
+            style = MaterialTheme.typography.bodySmall,
             modifier = Modifier
                 .align(Alignment.End)
                 .padding(top = 4.dp, end = 72.dp)

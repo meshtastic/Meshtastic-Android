@@ -136,7 +136,6 @@
         <activity
             android:name="com.geeksville.mesh.MainActivity"
             android:launchMode="standard"
-            android:screenOrientation="unspecified"
             android:windowSoftInputMode="adjustResize"
             android:exported="true">
             <intent-filter>

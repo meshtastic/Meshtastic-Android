@@ -28,17 +28,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyOff
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -71,7 +70,7 @@ private fun KeyStatusDialog(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        color = MaterialTheme.colors.background
+        color = MaterialTheme.colorScheme.background
     ) {
         LazyColumn(
             contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
@@ -80,13 +79,11 @@ private fun KeyStatusDialog(
             item {
                 Text(
                     text = stringResource(id = title),
-                    color = MaterialTheme.colors.onBackground.copy(alpha = ContentAlpha.high),
                     textAlign = TextAlign.Center,
                 )
                 Spacer(Modifier.height(16.dp))
                 Text(
                     text = stringResource(id = text),
-                    color = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
                     textAlign = TextAlign.Center,
                 )
                 Spacer(Modifier.height(16.dp))
@@ -112,7 +109,7 @@ private fun KeyStatusDialog(
                     TextButton(
                         onClick = onDismiss,
                         colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colors.onSurface,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
                         ),
                     ) { Text(text = stringResource(id = R.string.close)) }
                 }

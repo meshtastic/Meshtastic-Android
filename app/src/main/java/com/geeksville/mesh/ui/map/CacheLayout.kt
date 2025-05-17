@@ -27,10 +27,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.material.Button
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Button
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -51,15 +50,14 @@ internal fun CacheLayout(
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .background(color = MaterialTheme.colors.background)
+            .background(color = MaterialTheme.colorScheme.background)
             .padding(8.dp),
     ) {
         Text(
             text = stringResource(id = R.string.map_select_download_region),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.h5,
-            color = MaterialTheme.colors.onBackground.copy(alpha = ContentAlpha.medium),
+            style = MaterialTheme.typography.headlineSmall,
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -68,8 +66,7 @@ internal fun CacheLayout(
             text = stringResource(R.string.map_tile_download_estimate) + " " + cacheEstimate,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.body1,
-            color = MaterialTheme.colors.onBackground.copy(alpha = ContentAlpha.medium),
+            style = MaterialTheme.typography.bodyLarge,
         )
 
         FlowRow(
@@ -84,7 +81,7 @@ internal fun CacheLayout(
             ) {
                 Text(
                     text = stringResource(id = R.string.cancel),
-                    color = MaterialTheme.colors.onPrimary,
+                    color = MaterialTheme.colorScheme.onPrimary,
                 )
             }
             Button(
@@ -93,7 +90,7 @@ internal fun CacheLayout(
             ) {
                 Text(
                     text = stringResource(id = R.string.map_start_download),
-                    color = MaterialTheme.colors.onPrimary,
+                    color = MaterialTheme.colorScheme.onPrimary,
                 )
             }
         }

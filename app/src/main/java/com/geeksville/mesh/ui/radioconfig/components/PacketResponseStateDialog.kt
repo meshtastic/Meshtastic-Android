@@ -24,11 +24,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -48,7 +47,6 @@ fun <T> PacketResponseStateDialog(
     AlertDialog(
         onDismissRequest = {},
         shape = RoundedCornerShape(16.dp),
-        backgroundColor = MaterialTheme.colors.background,
         title = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -65,7 +63,6 @@ fun <T> PacketResponseStateDialog(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(top = 8.dp),
-                        color = MaterialTheme.colors.onSurface,
                     )
                     if (state.total == state.completed) onComplete()
                 }
@@ -78,7 +75,7 @@ fun <T> PacketResponseStateDialog(
                 }
             }
         },
-        buttons = {
+        confirmButton = {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()

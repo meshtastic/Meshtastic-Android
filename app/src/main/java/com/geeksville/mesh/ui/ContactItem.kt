@@ -18,7 +18,6 @@
 package com.geeksville.mesh.ui
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,15 +28,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Chip
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.VolumeOff
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -53,7 +50,6 @@ import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.ui.theme.AppTheme
 
 @Suppress("LongMethod")
-@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun ContactItem(
     contact: Contact,
@@ -63,87 +59,88 @@ fun ContactItem(
     onLongClick: () -> Unit = {},
 ) = with(contact) {
     Card(
-        modifier = Modifier
-            .background(color = if (selected) Color.Gray else MaterialTheme.colors.background)
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 6.dp),
-        elevation = 4.dp,
-        shape = RoundedCornerShape(12.dp),
-    ) {
-        Surface(
-            modifier = modifier.combinedClickable(
+        modifier = modifier
+            .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick,
-            ),
+            )
+            .background(color = if (selected) Color.Gray else MaterialTheme.colorScheme.background)
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 6.dp),
+        shape = RoundedCornerShape(12.dp),
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
+            AssistChip(
+                onClick = { },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Chip(
-                    onClick = { },
-                    modifier = Modifier
-                        .padding(end = 8.dp)
-                        .width(72.dp),
-                ) {
+                    .padding(end = 8.dp)
+                    .width(72.dp),
+                label = {
                     Text(
                         text = shortName,
                         modifier = Modifier.fillMaxWidth(),
-                        fontSize = MaterialTheme.typography.button.fontSize,
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
                         fontWeight = FontWeight.Normal,
                         textAlign = TextAlign.Center,
                     )
                 }
-                Column(
-                    modifier = Modifier.weight(1f),
+            )
+            Column(
+                modifier = Modifier.weight(1f),
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text(
-                            text = longName,
-                            modifier = Modifier.weight(1f),
-                        )
-                        Text(
-                            text = lastMessageTime.orEmpty(),
-                            color = MaterialTheme.colors.onSurface,
-                            fontSize = MaterialTheme.typography.button.fontSize,
+                    Text(
+                        text = longName,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Text(
+                        text = lastMessageTime.orEmpty(),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    )
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = lastMessageText.orEmpty(),
+                        modifier = Modifier.weight(1f),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 2,
+                    )
+                    AnimatedVisibility(visible = isMuted) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.TwoTone.VolumeOff,
+                            contentDescription = null,
                         )
                     }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
+                    AnimatedVisibility(visible = unreadCount > 0) {
                         Text(
-                            text = lastMessageText.orEmpty(),
-                            modifier = Modifier.weight(1f),
-                            color = MaterialTheme.colors.onSurface,
-                            fontSize = MaterialTheme.typography.button.fontSize,
-                            overflow = TextOverflow.Ellipsis,
-                            maxLines = 2,
+                            text = unreadCount.toString(),
+                            modifier = Modifier
+                                .background(
+                                    MaterialTheme.colorScheme.primary,
+                                    shape = CircleShape
+                                )
+                                .padding(horizontal = 6.dp, vertical = 3.dp),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            style = MaterialTheme.typography.bodySmall,
                         )
-                        AnimatedVisibility(visible = isMuted) {
-                            Icon(
-                                imageVector = Icons.AutoMirrored.TwoTone.VolumeOff,
-                                contentDescription = null,
-                            )
-                        }
-                        AnimatedVisibility(visible = unreadCount > 0) {
-                            Text(
-                                text = unreadCount.toString(),
-                                modifier = Modifier
-                                    .background(MaterialTheme.colors.primary, shape = CircleShape)
-                                    .padding(horizontal = 6.dp, vertical = 3.dp),
-                                color = MaterialTheme.colors.onPrimary,
-                                style = MaterialTheme.typography.caption,
-                            )
-                        }
                     }
                 }
             }

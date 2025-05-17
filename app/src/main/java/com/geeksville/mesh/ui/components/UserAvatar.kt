@@ -22,8 +22,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -47,7 +47,7 @@ fun UserAvatar(
     onClick: () -> Unit = {}
 ) {
     val textMeasurer = rememberTextMeasurer()
-    val textStyle = MaterialTheme.typography.button.copy(
+    val textStyle = MaterialTheme.typography.labelLarge.copy(
         fontWeight = FontWeight.Normal,
     )
     val textLayoutResult = remember {

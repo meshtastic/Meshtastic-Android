@@ -18,8 +18,12 @@
 package com.geeksville.mesh.ui.components
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -67,13 +71,9 @@ fun PreferenceFooter(
                 .weight(1f),
             enabled = enabled,
             onClick = onNegativeClicked,
-            colors = ButtonDefaults.buttonColors(
-                disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
-            )
         ) {
             Text(
                 text = stringResource(id = negativeText),
-                style = MaterialTheme.typography.body1,
             )
         }
         OutlinedButton(
@@ -82,13 +82,9 @@ fun PreferenceFooter(
                 .weight(1f),
             enabled = enabled,
             onClick = onPositiveClicked,
-            colors = ButtonDefaults.buttonColors(
-                disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
-            )
         ) {
             Text(
                 text = stringResource(id = positiveText),
-                style = MaterialTheme.typography.body1,
             )
         }
     }

@@ -32,15 +32,15 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Switch
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -84,12 +84,11 @@ internal fun EditWaypointDialog(
         AlertDialog(
             onDismissRequest = onDismissRequest,
             shape = RoundedCornerShape(16.dp),
-            backgroundColor = MaterialTheme.colors.background,
             text = {
                 Column(modifier = modifier.fillMaxWidth()) {
                     Text(
                         text = stringResource(title),
-                        style = MaterialTheme.typography.h6.copy(
+                        style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
                         ),
@@ -113,7 +112,7 @@ internal fun EditWaypointDialog(
                                 Text(
                                     text = String(Character.toChars(emoji)),
                                     modifier = Modifier
-                                        .background(MaterialTheme.colors.background, CircleShape)
+                                        .background(MaterialTheme.colorScheme.background, CircleShape)
                                         .padding(4.dp),
                                     fontSize = 24.sp,
                                     color = Color.Unspecified.copy(alpha = 1f),
@@ -157,7 +156,7 @@ internal fun EditWaypointDialog(
                     }
                 }
             },
-            buttons = {
+            confirmButton = {
                 FlowRow(
                     modifier = modifier.padding(start = 20.dp, end = 20.dp, bottom = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),

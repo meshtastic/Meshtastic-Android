@@ -30,15 +30,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.Card
-import androidx.compose.material.Chip
-import androidx.compose.material.ChipDefaults
-import androidx.compose.material.Divider
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -71,7 +69,6 @@ import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.toDistanceString
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun NodeItem(
     thisNode: Node?,
@@ -119,173 +116,171 @@ fun NodeItem(
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp)
             .defaultMinSize(minHeight = 80.dp),
-        elevation = 4.dp,
         onClick = { showDetails(!detailsShown) },
     ) {
-        Surface {
-            Column(
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp),
+        ) {
+            Row(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp),
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
+                var menuExpanded by remember { mutableStateOf(false) }
+                Box(
+                    modifier = Modifier.wrapContentSize(Alignment.TopStart),
                 ) {
-                    var menuExpanded by remember { mutableStateOf(false) }
-                    Box(
-                        modifier = Modifier.wrapContentSize(Alignment.TopStart),
-                    ) {
-                        Chip(
-                            modifier = Modifier
-                                .width(IntrinsicSize.Min)
-                                .defaultMinSize(minHeight = 32.dp, minWidth = 72.dp),
-                            colors = ChipDefaults.chipColors(
-                                backgroundColor = Color(nodeColor),
-                                contentColor = Color(textColor),
-                            ),
-                            onClick = {
-                                menuExpanded = !menuExpanded
-                            },
-                        ) {
+                    AssistChip(
+                        modifier = Modifier
+                            .width(IntrinsicSize.Min)
+                            .defaultMinSize(minHeight = 32.dp, minWidth = 72.dp),
+                        colors = AssistChipDefaults.assistChipColors(
+                            containerColor = Color(nodeColor),
+                            labelColor = Color(textColor),
+                        ),
+                        label = {
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
                                 text = thatNode.user.shortName.ifEmpty { "???" },
                                 fontWeight = if (isFavorite) FontWeight.Bold else FontWeight.Normal,
-                                fontSize = MaterialTheme.typography.button.fontSize,
+                                fontSize = MaterialTheme.typography.labelLarge.fontSize,
                                 textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                                 textAlign = TextAlign.Center,
                             )
-                        }
-                        NodeMenu(
-                            node = thatNode,
-                            showFullMenu = !isThisNode && isConnected,
-                            onAction = onAction,
-                            expanded = menuExpanded,
-                            onDismissRequest = { menuExpanded = false },
-                        )
-                    }
-                    NodeKeyStatusIcon(
-                        hasPKC = thatNode.hasPKC,
-                        mismatchKey = thatNode.mismatchKey,
-                        publicKey = thatNode.user.publicKey,
-                        modifier = Modifier.size(32.dp)
+                        },
+                        onClick = {
+                            menuExpanded = !menuExpanded
+                        },
                     )
-                    Text(
-                        modifier = Modifier.weight(1f),
-                        text = longName,
-                        fontWeight = if (isFavorite) FontWeight.Bold else FontWeight.Normal,
-                        style = style,
-                        textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
-                        softWrap = true,
-                    )
-
-                    LastHeardInfo(
-                        lastHeard = thatNode.lastHeard,
-                        currentTimeMillis = currentTimeMillis
+                    NodeMenu(
+                        node = thatNode,
+                        showFullMenu = !isThisNode && isConnected,
+                        onAction = onAction,
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false },
                     )
                 }
+                NodeKeyStatusIcon(
+                    hasPKC = thatNode.hasPKC,
+                    mismatchKey = thatNode.mismatchKey,
+                    publicKey = thatNode.user.publicKey,
+                    modifier = Modifier.size(32.dp)
+                )
+                Text(
+                    modifier = Modifier.weight(1f),
+                    text = longName,
+                    fontWeight = if (isFavorite) FontWeight.Bold else FontWeight.Normal,
+                    style = style,
+                    textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
+                    softWrap = true,
+                )
+
+                LastHeardInfo(
+                    lastHeard = thatNode.lastHeard,
+                    currentTimeMillis = currentTimeMillis
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                if (distance != null) {
+                    Text(
+                        text = distance,
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    )
+                } else {
+                    Spacer(modifier = Modifier.width(16.dp))
+                }
+                BatteryInfo(
+                    batteryLevel = thatNode.batteryLevel,
+                    voltage = thatNode.voltage
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                SignalInfo(
+                    node = thatNode,
+                    isThisNode = isThisNode
+                )
+                thatNode.validPosition?.let { position ->
+                    val satCount = position.satsInView
+                    if (satCount > 0) {
+                        SatelliteCountInfo(satCount = satCount)
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
+                val telemetryString = thatNode.getTelemetryString(tempInFahrenheit)
+                if (telemetryString.isNotEmpty()) {
+                    Text(
+                        text = telemetryString,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    )
+                }
+            }
+
+            if (detailsShown || expanded) {
+                Spacer(modifier = Modifier.height(8.dp))
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(8.dp))
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    if (distance != null) {
-                        Text(
-                            text = distance,
-                            fontSize = MaterialTheme.typography.button.fontSize,
+                    thatNode.validPosition?.let {
+                        LinkedCoordinates(
+                            latitude = thatNode.latitude,
+                            longitude = thatNode.longitude,
+                            format = gpsFormat,
+                            nodeName = longName
                         )
-                    } else {
-                        Spacer(modifier = Modifier.width(16.dp))
                     }
-                    BatteryInfo(
-                        batteryLevel = thatNode.batteryLevel,
-                        voltage = thatNode.voltage
-                    )
-                }
-                Spacer(modifier = Modifier.height(4.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    SignalInfo(
-                        node = thatNode,
-                        isThisNode = isThisNode
-                    )
                     thatNode.validPosition?.let { position ->
-                        val satCount = position.satsInView
-                        if (satCount > 0) {
-                            SatelliteCountInfo(satCount = satCount)
-                        }
+                        ElevationInfo(
+                            altitude = position.altitude,
+                            system = system,
+                            suffix = stringResource(id = R.string.elevation_suffix)
+                        )
                     }
                 }
                 Spacer(modifier = Modifier.height(4.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    val telemetryString = thatNode.getTelemetryString(tempInFahrenheit)
-                    if (telemetryString.isNotEmpty()) {
-                        Text(
-                            text = telemetryString,
-                            color = MaterialTheme.colors.onSurface,
-                            fontSize = MaterialTheme.typography.button.fontSize,
-                        )
-                    }
-                }
-
-                if (detailsShown || expanded) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Divider()
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        thatNode.validPosition?.let {
-                            LinkedCoordinates(
-                                latitude = thatNode.latitude,
-                                longitude = thatNode.longitude,
-                                format = gpsFormat,
-                                nodeName = longName
-                            )
-                        }
-                        thatNode.validPosition?.let { position ->
-                            ElevationInfo(
-                                altitude = position.altitude,
-                                system = system,
-                                suffix = stringResource(id = R.string.elevation_suffix)
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = hwInfoString,
-                            fontSize = MaterialTheme.typography.button.fontSize,
-                            style = style,
-                        )
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = roleName,
-                            textAlign = TextAlign.Center,
-                            fontSize = MaterialTheme.typography.button.fontSize,
-                            style = style,
-                        )
-                        Text(
-                            modifier = Modifier.weight(1f),
-                            text = thatNode.user.id.ifEmpty { "???" },
-                            textAlign = TextAlign.End,
-                            fontSize = MaterialTheme.typography.button.fontSize,
-                            style = style,
-                        )
-                    }
+                    Text(
+                        modifier = Modifier.weight(1f),
+                        text = hwInfoString,
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        style = style,
+                    )
+                    Text(
+                        modifier = Modifier.weight(1f),
+                        text = roleName,
+                        textAlign = TextAlign.Center,
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        style = style,
+                    )
+                    Text(
+                        modifier = Modifier.weight(1f),
+                        text = thatNode.user.id.ifEmpty { "???" },
+                        textAlign = TextAlign.End,
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                        style = style,
+                    )
                 }
             }
         }
@@ -323,7 +318,7 @@ fun NodeInfoPreview(
         Column {
             Text(
                 text = "Details Collapsed",
-                color = MaterialTheme.colors.onBackground
+                color = MaterialTheme.colorScheme.onBackground
             )
             NodeItem(
                 thisNode = thisNode,
@@ -336,7 +331,7 @@ fun NodeInfoPreview(
             )
             Text(
                 text = "Details Shown",
-                color = MaterialTheme.colors.onBackground
+                color = MaterialTheme.colorScheme.onBackground
             )
             NodeItem(
                 thisNode = thisNode,

@@ -34,10 +34,10 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -62,13 +62,13 @@ import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.BatteryInfo
-import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.components.CommonCharts.MAX_PERCENT_VALUE
+import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.theme.Orange
 import com.geeksville.mesh.util.GraphUtil
-import com.geeksville.mesh.util.GraphUtil.plotPoint
 import com.geeksville.mesh.util.GraphUtil.createPath
+import com.geeksville.mesh.util.GraphUtil.plotPoint
 
 private enum class Device(val color: Color) {
     BATTERY(Color.Green),
@@ -155,7 +155,7 @@ private fun DeviceMetricsChart(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    val graphColor = MaterialTheme.colors.onSurface
+    val graphColor = MaterialTheme.colorScheme.onSurface
 
     val scrollState = rememberScrollState()
     val screenWidth = LocalConfiguration.current.screenWidthDp
@@ -287,7 +287,7 @@ private fun DeviceMetricsCard(telemetry: Telemetry) {
                         Text(
                             text = DATE_TIME_FORMAT.format(time),
                             style = TextStyle(fontWeight = FontWeight.Bold),
-                            fontSize = MaterialTheme.typography.button.fontSize
+                            fontSize = MaterialTheme.typography.labelLarge.fontSize
                         )
 
                         BatteryInfo(
@@ -309,8 +309,8 @@ private fun DeviceMetricsCard(telemetry: Telemetry) {
                         )
                         Text(
                             text = text,
-                            color = MaterialTheme.colors.onSurface,
-                            fontSize = MaterialTheme.typography.button.fontSize
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = MaterialTheme.typography.labelLarge.fontSize
                         )
                     }
                 }
