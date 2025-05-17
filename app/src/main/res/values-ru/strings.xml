@@ -561,7 +561,6 @@
     <string name="long_name">Полное имя</string>
     <string name="short_name">Короткое имя</string>
     <string name="hardware_model">Модель оборудования</string>
-    <string name="licensed_amateur_radio">Лицензированный радиолюбитель</string>
     <string name="dew_point">Точка росы</string>
     <string name="pressure">Давление</string>
     <string name="gas_resistance">Сопротивление газа</string>

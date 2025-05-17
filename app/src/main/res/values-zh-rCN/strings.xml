@@ -560,7 +560,6 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="long_name">全名</string>
     <string name="short_name">简称</string>
     <string name="hardware_model">硬件型号</string>
-    <string name="licensed_amateur_radio">持证业余台</string>
     <string name="dew_point">结露点</string>
     <string name="pressure">气压</string>
     <string name="gas_resistance">气体电阻性</string>

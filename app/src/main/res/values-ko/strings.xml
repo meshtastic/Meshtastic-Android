@@ -525,6 +525,5 @@
     <string name="long_name">긴 이름</string>
     <string name="short_name">짧은 이름</string>
     <string name="hardware_model">하드웨어 모델</string>
-    <string name="licensed_amateur_radio">아마추어무선 자격 보유</string>
     <string name="distance">거리</string>
 </resources>

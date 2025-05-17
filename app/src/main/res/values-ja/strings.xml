@@ -555,7 +555,6 @@
     <string name="long_name">長い名前</string>
     <string name="short_name">略称</string>
     <string name="hardware_model">ハードウェアのモデル</string>
-    <string name="licensed_amateur_radio">HAM</string>
     <string name="dew_point">露点</string>
     <string name="pressure">気圧</string>
     <string name="gas_resistance">ガス耐性</string>

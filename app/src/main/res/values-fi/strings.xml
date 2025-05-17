@@ -289,7 +289,7 @@
         <item quantity="one">1 hyppy</item>
         <item quantity="other">%d hyppyä</item>
     </plurals>
-    <string name="traceroute_diff">Edetyt hypyt %1$d hyppyjä takana %2$d</string>
+    <string name="traceroute_diff">Reititetyt hypyt %1$d hyppyjä takaisin %2$d</string>
     <string name="twenty_four_hours">24t</string>
     <string name="forty_eight_hours">48t</string>
     <string name="one_week">1vko</string>
@@ -557,7 +557,6 @@
     <string name="long_name">Pitkä nimi</string>
     <string name="short_name">Lyhytnimi</string>
     <string name="hardware_model">Laitteen malli</string>
-    <string name="licensed_amateur_radio">Luvallinen radioamatööri</string>
     <string name="dew_point">Kastepiste</string>
     <string name="pressure">Ilmanpaine</string>
     <string name="gas_resistance">Kaasun vastus</string>
@@ -580,6 +579,8 @@
     <string name="firmware_version">Laiteohjelmistoversio</string>
     <string name="timestamp">Aikaleima</string>
     <string name="heading">Suunta</string>
-    <string name="sats">Sat</string>
-    <string name="alt">Kork</string>
+    <string name="sats">Satelliitit</string>
+    <string name="alt">Korkeus </string>
+    <string name="set_region">Määritä alue</string>
+    <string name="unmute">Poista mykistys</string>
 </resources>
