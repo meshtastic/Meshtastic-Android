@@ -22,7 +22,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.RemoteException
-import androidx.compose.material.SnackbarHostState
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.material3.SnackbarHostState
 import androidx.core.content.edit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -105,6 +106,7 @@ fun getInitials(nameIn: String): String {
             }
             if (nm.length >= nchars) nm else name
         }
+
         else -> words.map { it.first() }.joinToString("")
     }
     return initials.take(nchars)
@@ -128,18 +130,19 @@ internal fun getChannelList(
         if (old.getOrNull(i) != new.getOrNull(i)) {
             add(
                 channel {
-            role = when (i) {
-                0 -> ChannelProtos.Channel.Role.PRIMARY
-                in 1..new.lastIndex -> ChannelProtos.Channel.Role.SECONDARY
-                else -> ChannelProtos.Channel.Role.DISABLED
-            }
-            index = i
-            settings = new.getOrNull(i) ?: channelSettings { }
-        }
+                    role = when (i) {
+                        0 -> ChannelProtos.Channel.Role.PRIMARY
+                        in 1..new.lastIndex -> ChannelProtos.Channel.Role.SECONDARY
+                        else -> ChannelProtos.Channel.Role.DISABLED
+                    }
+                    index = i
+                    settings = new.getOrNull(i) ?: channelSettings { }
+                }
             )
         }
     }
 }
+
 data class NodesUiState(
     val sort: NodeSortOption = NodeSortOption.LAST_HEARD,
     val filter: String = "",
@@ -179,11 +182,60 @@ class UIViewModel @Inject constructor(
     private val preferences: SharedPreferences
 ) : ViewModel(), Logging {
 
+    private val _theme =
+        MutableStateFlow(preferences.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM))
+    val theme: StateFlow<Int> = _theme.asStateFlow()
+    fun setTheme(theme: Int) {
+        _theme.value = theme
+        preferences.edit { putInt("theme", theme) }
+    }
+
+    data class AlertData(
+        val title: String,
+        val message: String? = null,
+        val html: String? = null,
+        val onConfirm: (() -> Unit)? = null,
+        val onDismiss: (() -> Unit)? = null,
+        val choices: Map<String, () -> Unit> = emptyMap()
+    )
+
+    private val _currentAlert: MutableStateFlow<AlertData?> = MutableStateFlow(null)
+    val currentAlert = _currentAlert.asStateFlow()
+
+    fun showAlert(
+        title: String,
+        message: String? = null,
+        html: String? = null,
+        onConfirm: (() -> Unit)? = {},
+        dismissable: Boolean = true,
+        choices: Map<String, () -> Unit> = emptyMap()
+    ) {
+        _currentAlert.value =
+            AlertData(
+                title = title,
+                message = message,
+                html = html,
+                onConfirm = {
+                    onConfirm?.invoke()
+                    if (dismissable) dismissAlert()
+                },
+                onDismiss = {
+                    if (dismissable) dismissAlert()
+                },
+                choices = choices
+            )
+    }
+
+    private fun dismissAlert() {
+        _currentAlert.value = null
+    }
+
     private val _title = MutableStateFlow("")
     val title: StateFlow<String> = _title.asStateFlow()
     fun setTitle(title: String) {
         _title.value = title
     }
+
     val receivingLocationUpdates: StateFlow<Boolean> get() = locationRepository.receivingLocationUpdates
     val meshService: IMeshService? get() = radioConfigRepository.meshService
 
@@ -194,15 +246,17 @@ class UIViewModel @Inject constructor(
     val localConfig: StateFlow<LocalConfig> = _localConfig
     val config get() = _localConfig.value
 
-    private val _moduleConfig = MutableStateFlow<LocalModuleConfig>(LocalModuleConfig.getDefaultInstance())
+    private val _moduleConfig =
+        MutableStateFlow<LocalModuleConfig>(LocalModuleConfig.getDefaultInstance())
     val moduleConfig: StateFlow<LocalModuleConfig> = _moduleConfig
     val module get() = _moduleConfig.value
 
     private val _channels = MutableStateFlow(channelSet {})
     val channels: StateFlow<AppOnlyProtos.ChannelSet> get() = _channels
 
-    val quickChatActions get() = quickChatActionRepository.getAllActions()
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    val quickChatActions
+        get() = quickChatActionRepository.getAllActions()
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val nodeFilterText = MutableStateFlow("")
     private val nodeSortOption = MutableStateFlow(NodeSortOption.LAST_HEARD)
@@ -554,15 +608,16 @@ class UIViewModel @Inject constructor(
         if (config.lora != newConfig.lora) setConfig(newConfig)
     }
 
-    val provideLocation = object : MutableLiveData<Boolean>(preferences.getBoolean("provide-location", false)) {
-        override fun setValue(value: Boolean) {
-            super.setValue(value)
+    val provideLocation =
+        object : MutableLiveData<Boolean>(preferences.getBoolean("provide-location", false)) {
+            override fun setValue(value: Boolean) {
+                super.setValue(value)
 
-            preferences.edit {
-                this.putBoolean("provide-location", value)
+                preferences.edit {
+                    this.putBoolean("provide-location", value)
+                }
             }
         }
-    }
 
     fun setOwner(name: String) {
         val user = ourNodeInfo.value?.user?.copy {
@@ -603,78 +658,86 @@ class UIViewModel @Inject constructor(
 
                 // Packets are ordered by time, we keep most recent position of
                 // our device in localNodePosition.
-                val dateFormat = SimpleDateFormat("\"yyyy-MM-dd\",\"HH:mm:ss\"", Locale.getDefault())
-                meshLogRepository.getAllLogsInReceiveOrder(Int.MAX_VALUE).first().forEach { packet ->
-                    // If we get a NodeInfo packet, use it to update our position data (if valid)
-                    packet.nodeInfo?.let { nodeInfo ->
-                        positionToPos.invoke(nodeInfo.position)?.let {
-                            nodePositions[nodeInfo.num] = nodeInfo.position
+                val dateFormat =
+                    SimpleDateFormat("\"yyyy-MM-dd\",\"HH:mm:ss\"", Locale.getDefault())
+                meshLogRepository.getAllLogsInReceiveOrder(Int.MAX_VALUE).first()
+                    .forEach { packet ->
+                        // If we get a NodeInfo packet, use it to update our position data (if valid)
+                        packet.nodeInfo?.let { nodeInfo ->
+                            positionToPos.invoke(nodeInfo.position)?.let {
+                                nodePositions[nodeInfo.num] = nodeInfo.position
+                            }
+                        }
+
+                        packet.meshPacket?.let { proto ->
+                            // If the packet contains position data then use it to update, if valid
+                            packet.position?.let { position ->
+                                positionToPos.invoke(position)?.let {
+                                    nodePositions[proto.from.takeIf { it != 0 } ?: myNodeNum] =
+                                        position
+                                }
+                            }
+
+                            // Filter out of our results any packet that doesn't report SNR.  This
+                            // is primarily ADMIN_APP.
+                            if (proto.rxSnr != 0.0f) {
+                                val rxDateTime = dateFormat.format(packet.received_date)
+                                val rxFrom = proto.from.toUInt()
+                                val senderName = nodes[proto.from]?.user?.longName ?: ""
+
+                                // sender lat & long
+                                val senderPosition = nodePositions[proto.from]
+                                val senderPos = positionToPos.invoke(senderPosition)
+                                val senderLat = senderPos?.latitude ?: ""
+                                val senderLong = senderPos?.longitude ?: ""
+
+                                // rx lat, long, and elevation
+                                val rxPosition = nodePositions[myNodeNum]
+                                val rxPos = positionToPos.invoke(rxPosition)
+                                val rxLat = rxPos?.latitude ?: ""
+                                val rxLong = rxPos?.longitude ?: ""
+                                val rxAlt = rxPos?.altitude ?: ""
+                                val rxSnr = proto.rxSnr
+
+                                // Calculate the distance if both positions are valid
+
+                                val dist = if (senderPos == null || rxPos == null) {
+                                    ""
+                                } else {
+                                    positionToMeter(
+                                        rxPosition!!, // Use rxPosition but only if rxPos was valid
+                                        senderPosition!! // Use senderPosition but only if senderPos was valid
+                                    ).roundToInt().toString()
+                                }
+
+                                val hopLimit = proto.hopLimit
+
+                                val payload = when {
+                                    proto.decoded.portnumValue !in setOf(
+                                        Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                                        Portnums.PortNum.RANGE_TEST_APP_VALUE,
+                                    ) -> "<${proto.decoded.portnum}>"
+
+                                    proto.hasDecoded() -> proto.decoded.payload.toStringUtf8()
+                                        .replace("\"", "\"\"")
+
+                                    proto.hasEncrypted() -> "${proto.encrypted.size()} encrypted bytes"
+                                    else -> ""
+                                }
+
+                                //  date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx elevation,rx snr,distance,hop limit,payload
+                                writer.appendLine("$rxDateTime,\"$rxFrom\",\"$senderName\",\"$senderLat\",\"$senderLong\",\"$rxLat\",\"$rxLong\",\"$rxAlt\",\"$rxSnr\",\"$dist\",\"$hopLimit\",\"$payload\"")
+                            }
                         }
                     }
-
-                    packet.meshPacket?.let { proto ->
-                        // If the packet contains position data then use it to update, if valid
-                        packet.position?.let { position ->
-                            positionToPos.invoke(position)?.let {
-                                nodePositions[proto.from.takeIf { it != 0 } ?: myNodeNum] = position
-                            }
-                        }
-
-                        // Filter out of our results any packet that doesn't report SNR.  This
-                        // is primarily ADMIN_APP.
-                        if (proto.rxSnr != 0.0f) {
-                            val rxDateTime = dateFormat.format(packet.received_date)
-                            val rxFrom = proto.from.toUInt()
-                            val senderName = nodes[proto.from]?.user?.longName ?: ""
-
-                            // sender lat & long
-                            val senderPosition = nodePositions[proto.from]
-                            val senderPos = positionToPos.invoke(senderPosition)
-                            val senderLat = senderPos?.latitude ?: ""
-                            val senderLong = senderPos?.longitude ?: ""
-
-                            // rx lat, long, and elevation
-                            val rxPosition = nodePositions[myNodeNum]
-                            val rxPos = positionToPos.invoke(rxPosition)
-                            val rxLat = rxPos?.latitude ?: ""
-                            val rxLong = rxPos?.longitude ?: ""
-                            val rxAlt = rxPos?.altitude ?: ""
-                            val rxSnr = proto.rxSnr
-
-                            // Calculate the distance if both positions are valid
-
-                            val dist = if (senderPos == null || rxPos == null) {
-                                ""
-                            } else {
-                                positionToMeter(
-                                    rxPosition!!, // Use rxPosition but only if rxPos was valid
-                                    senderPosition!! // Use senderPosition but only if senderPos was valid
-                                ).roundToInt().toString()
-                            }
-
-                            val hopLimit = proto.hopLimit
-
-                            val payload = when {
-                                proto.decoded.portnumValue !in setOf(
-                                    Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
-                                    Portnums.PortNum.RANGE_TEST_APP_VALUE,
-                                ) -> "<${proto.decoded.portnum}>"
-                                proto.hasDecoded() -> proto.decoded.payload.toStringUtf8()
-                                    .replace("\"", "\"\"")
-                                proto.hasEncrypted() -> "${proto.encrypted.size()} encrypted bytes"
-                                else -> ""
-                            }
-
-                            //  date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx elevation,rx snr,distance,hop limit,payload
-                            writer.appendLine("$rxDateTime,\"$rxFrom\",\"$senderName\",\"$senderLat\",\"$senderLong\",\"$rxLat\",\"$rxLong\",\"$rxAlt\",\"$rxSnr\",\"$dist\",\"$hopLimit\",\"$payload\"")
-                        }
-                    }
-                }
             }
         }
     }
 
-    private suspend inline fun writeToUri(uri: Uri, crossinline block: suspend (BufferedWriter) -> Unit) {
+    private suspend inline fun writeToUri(
+        uri: Uri,
+        crossinline block: suspend (BufferedWriter) -> Unit
+    ) {
         withContext(Dispatchers.IO) {
             try {
                 app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->

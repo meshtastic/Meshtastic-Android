@@ -31,16 +31,16 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.Icon
-import androidx.compose.material.LinearProgressIndicator
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ThumbUp
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -191,7 +191,6 @@ fun IndoorAirQuality(iaq: Int, displayMode: IaqDisplayMode = IaqDisplayMode.Pill
             AlertDialog(
                 onDismissRequest = { isLegendOpen = false },
                 shape = RoundedCornerShape(16.dp),
-                backgroundColor = MaterialTheme.colors.background,
                 text = {
                     IAQScale()
                 },
@@ -218,7 +217,7 @@ fun IAQScale(modifier: Modifier = Modifier) {
     ) {
         Text(
             text = stringResource(R.string.indoor_air_quality_iaq),
-            style = MaterialTheme.typography.h6.copy(
+            style = MaterialTheme.typography.titleLarge.copy(
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,
             ),
@@ -234,7 +233,7 @@ fun IAQScale(modifier: Modifier = Modifier) {
                         .background(iaq.color)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Text(getIaqDescriptionWithRange(iaq), style = MaterialTheme.typography.body2)
+                Text(getIaqDescriptionWithRange(iaq), style = MaterialTheme.typography.bodyMedium)
             }
             Spacer(modifier = Modifier.height(4.dp))
         }
@@ -256,7 +255,7 @@ private fun IndoorAirQualityPreview() {
         verticalArrangement = Arrangement.spacedBy(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text("Pill", style = MaterialTheme.typography.h6)
+        Text("Pill", style = MaterialTheme.typography.titleLarge)
         Row {
             IndoorAirQuality(iaq = 6)
             IndoorAirQuality(iaq = 51)
@@ -270,7 +269,7 @@ private fun IndoorAirQualityPreview() {
             IndoorAirQuality(iaq = 351)
         }
 
-        Text("Dot", style = MaterialTheme.typography.h6)
+        Text("Dot", style = MaterialTheme.typography.titleLarge)
         Row {
             IndoorAirQuality(iaq = 6, displayMode = IaqDisplayMode.Dot)
             IndoorAirQuality(iaq = 51, displayMode = IaqDisplayMode.Dot)
@@ -280,7 +279,7 @@ private fun IndoorAirQualityPreview() {
             IndoorAirQuality(iaq = 351, displayMode = IaqDisplayMode.Dot)
         }
 
-        Text("Text", style = MaterialTheme.typography.h6)
+        Text("Text", style = MaterialTheme.typography.titleLarge)
         Row {
             IndoorAirQuality(iaq = 6, displayMode = IaqDisplayMode.Text)
             IndoorAirQuality(iaq = 51, displayMode = IaqDisplayMode.Text)
@@ -292,7 +291,7 @@ private fun IndoorAirQualityPreview() {
             IndoorAirQuality(iaq = 500, displayMode = IaqDisplayMode.Text)
         }
 
-        Text("Gauge", style = MaterialTheme.typography.h6)
+        Text("Gauge", style = MaterialTheme.typography.titleLarge)
         Row {
             IndoorAirQuality(iaq = 6, displayMode = IaqDisplayMode.Gauge)
             IndoorAirQuality(iaq = 51, displayMode = IaqDisplayMode.Gauge)
@@ -310,7 +309,7 @@ private fun IndoorAirQualityPreview() {
             IndoorAirQuality(iaq = 500, displayMode = IaqDisplayMode.Gauge)
         }
 
-        Text("Gradient", style = MaterialTheme.typography.h6)
+        Text("Gradient", style = MaterialTheme.typography.titleLarge)
         IndoorAirQuality(iaq = 6, displayMode = IaqDisplayMode.Gradient)
         IndoorAirQuality(iaq = 51, displayMode = IaqDisplayMode.Gradient)
         IndoorAirQuality(iaq = 101, displayMode = IaqDisplayMode.Gradient)

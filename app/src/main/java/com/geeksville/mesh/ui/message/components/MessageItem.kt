@@ -27,13 +27,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Cloud
 import androidx.compose.material.icons.twotone.CloudDone
@@ -41,6 +34,11 @@ import androidx.compose.material.icons.twotone.CloudOff
 import androidx.compose.material.icons.twotone.CloudUpload
 import androidx.compose.material.icons.twotone.HowToReg
 import androidx.compose.material.icons.twotone.Warning
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,7 +48,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
@@ -76,9 +73,9 @@ internal fun MessageItem(
     onStatusClick: () -> Unit = {},
     onSendReaction: (String) -> Unit = {},
 ) = Row(
-    modifier = Modifier
+    modifier = modifier
         .fillMaxWidth()
-        .background(color = if (selected) Color.Gray else MaterialTheme.colors.background),
+        .background(color = if (selected) Color.Gray else MaterialTheme.colorScheme.background),
     verticalAlignment = Alignment.CenterVertically,
 ) {
     val fromLocal = node.user.id == DataPacket.ID_LOCAL
@@ -102,70 +99,61 @@ internal fun MessageItem(
     Card(
         modifier = Modifier
             .weight(1f)
-            .then(messageModifier),
-        elevation = 4.dp,
-        shape = RoundedCornerShape(topStart, topEnd, 12.dp, 12.dp),
-    ) {
-        Surface(
-            modifier = modifier.combinedClickable(
+            .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick,
-            ),
-            color = colorResource(id = messageColor),
+            )
+            .then(messageModifier),
+        colors = CardDefaults.cardColors(
+            containerColor = colorResource(messageColor)
+        )
+    ) {
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
+            Column(
+                modifier = Modifier.padding(top = 8.dp),
             ) {
-                Column(
-                    modifier = Modifier.padding(top = 8.dp),
-                ) {
-                    if (!fromLocal) {
-                        Text(
-                            text = with(node.user) { "$longName ($id)" },
-                            modifier = Modifier.padding(bottom = 4.dp),
-                            overflow = TextOverflow.Ellipsis,
-                            maxLines = 1,
-                            style = MaterialTheme.typography.button.copy(
-                                color = MaterialTheme.colors.onSurface,
-                                letterSpacing = 0.1.sp,
-                            )
-                        )
-                    }
-                    AutoLinkText(
-                        text = messageText.orEmpty(),
-                        style = LocalTextStyle.current.copy(
-                            color = MaterialTheme.colors.onBackground,
-                        ),
+                if (!fromLocal) {
+                    Text(
+                        text = with(node.user) { "$longName ($id)" },
+                        modifier = Modifier.padding(bottom = 4.dp),
+                        overflow = TextOverflow.Ellipsis,
+                        maxLines = 1,
+                        style = MaterialTheme.typography.labelLarge
                     )
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Text(
-                            text = messageTime,
-                            color = MaterialTheme.colors.onSurface,
-                            fontSize = MaterialTheme.typography.caption.fontSize,
+                }
+                AutoLinkText(
+                    text = messageText.orEmpty(),
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        text = messageTime,
+                        fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                    )
+                    AnimatedVisibility(visible = fromLocal) {
+                        Icon(
+                            imageVector = when (messageStatus) {
+                                MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
+                                MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
+                                MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
+                                MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
+                                MessageStatus.ERROR -> Icons.TwoTone.CloudOff
+                                else -> Icons.TwoTone.Warning
+                            },
+                            contentDescription = stringResource(R.string.message_delivery_status),
+                            modifier = Modifier
+                                .padding(start = 8.dp)
+                                .clickable { onStatusClick() },
                         )
-                        AnimatedVisibility(visible = fromLocal) {
-                            Icon(
-                                imageVector = when (messageStatus) {
-                                    MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
-                                    MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
-                                    MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
-                                    MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
-                                    MessageStatus.ERROR -> Icons.TwoTone.CloudOff
-                                    else -> Icons.TwoTone.Warning
-                                },
-                                contentDescription = stringResource(R.string.message_delivery_status),
-                                modifier = Modifier
-                                    .padding(start = 8.dp)
-                                    .clickable { onStatusClick() },
-                            )
-                        }
                     }
                 }
             }

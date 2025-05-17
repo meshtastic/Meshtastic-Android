@@ -22,11 +22,11 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -51,7 +51,7 @@ internal fun DownloadButton(
     ) {
         FloatingActionButton(
             onClick = onClick,
-            backgroundColor = MaterialTheme.colors.primary,
+            contentColor = MaterialTheme.colorScheme.primary,
         ) {
             Icon(
                 imageVector = Icons.Default.Download,

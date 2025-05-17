@@ -18,7 +18,6 @@ package com.geeksville.mesh.ui.components
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
 import androidx.compose.foundation.gestures.scrollBy
@@ -35,8 +34,8 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Card
-import androidx.compose.material.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -88,8 +87,7 @@ fun LazyColumnDragAndDropDemo() {
 
         itemsIndexed(list, key = { _, item -> item }) { index, item ->
             DraggableItem(dragDropState, index + 1) { isDragging ->
-                val elevation by animateDpAsState(if (isDragging) 4.dp else 1.dp)
-                Card(elevation = elevation) {
+                Card {
                     Text("Item $item", Modifier.fillMaxWidth().padding(20.dp))
                 }
             }

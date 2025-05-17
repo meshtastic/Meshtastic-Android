@@ -134,8 +134,8 @@ class RadioInterfaceService @Inject constructor(
         return interfaceFactory.toInterfaceAddress(interfaceId, rest)
     }
 
-    val isMockInterface: Boolean by lazy {
-        BuildUtils.isEmulator || (context as GeeksvilleApplication).isInTestLab
+    fun isMockInterface(): Boolean {
+        return BuildUtils.isEmulator || (context as GeeksvilleApplication).isInTestLab
     }
 
     /** Return the device we are configured to use, or null for none
@@ -151,7 +151,7 @@ class RadioInterfaceService @Inject constructor(
         var address = prefs.getString(DEVADDR_KEY, null)
 
         // If we are running on the emulator we default to the mock interface, so we can have some data to show to the user
-        if (address == null && isMockInterface) {
+        if (address == null && isMockInterface()) {
             address = mockInterfaceAddress
         }
 

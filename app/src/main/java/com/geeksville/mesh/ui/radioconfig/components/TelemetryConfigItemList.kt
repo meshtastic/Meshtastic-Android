@@ -20,7 +20,7 @@ package com.geeksville.mesh.ui.radioconfig.components
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -113,7 +113,7 @@ fun TelemetryConfigItemList(
                 }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             SwitchPreference(
@@ -125,7 +125,7 @@ fun TelemetryConfigItemList(
                 }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             SwitchPreference(
@@ -137,7 +137,7 @@ fun TelemetryConfigItemList(
                 }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             SwitchPreference(
@@ -149,7 +149,7 @@ fun TelemetryConfigItemList(
                 }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             EditTextPreference(
@@ -173,7 +173,7 @@ fun TelemetryConfigItemList(
                 }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             EditTextPreference(
@@ -197,7 +197,7 @@ fun TelemetryConfigItemList(
                 }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             PreferenceFooter(

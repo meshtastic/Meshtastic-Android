@@ -25,17 +25,6 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.BottomNavigation
-import androidx.compose.material.BottomNavigationItem
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Scaffold
-import androidx.compose.material.SnackbarHost
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.Chat
@@ -47,6 +36,18 @@ import androidx.compose.material.icons.twotone.Contactless
 import androidx.compose.material.icons.twotone.Map
 import androidx.compose.material.icons.twotone.People
 import androidx.compose.material.icons.twotone.Settings
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -74,7 +75,9 @@ import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.showLongNameTitle
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
+import com.geeksville.mesh.ui.components.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.components.ScannedQrCodeDialog
+import com.geeksville.mesh.ui.components.SimpleAlertDialog
 
 enum class TopLevelDestination(val label: String, val icon: ImageVector, val route: Route) {
     Contacts("Contacts", Icons.AutoMirrored.TwoTone.Chat, Route.Contacts),
@@ -92,6 +95,7 @@ enum class TopLevelDestination(val label: String, val icon: ImageVector, val rou
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 fun MainScreen(
     viewModel: UIViewModel = hiltViewModel(),
@@ -108,6 +112,26 @@ fun MainScreen(
         }
     }
     val title by viewModel.title.collectAsStateWithLifecycle()
+
+    val alertDialogState by viewModel.currentAlert.collectAsStateWithLifecycle()
+    alertDialogState?.let { state ->
+        if (state.choices.isNotEmpty()) {
+            MultipleChoiceAlertDialog(
+                title = state.title,
+                message = state.message,
+                choices = state.choices,
+                onDismissRequest = { state.onDismiss?.let { it() } },
+            )
+        } else {
+            SimpleAlertDialog(
+                title = state.title,
+                message = state.message,
+                html = state.html,
+                onConfirmRequest = { state.onConfirm?.let { it() } },
+                onDismissRequest = { state.onDismiss?.let { it() } },
+            )
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -151,6 +175,7 @@ enum class MainMenuAction(@StringRes val stringRes: Int) {
     ABOUT(R.string.about),
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("LongMethod")
 @Composable
 private fun MainAppBar(
@@ -271,10 +296,11 @@ private fun MainMenuActions(
     DropdownMenu(
         expanded = showMenu,
         onDismissRequest = { showMenu = false },
-        modifier = Modifier.background(MaterialTheme.colors.background.copy(alpha = 1f)),
+        modifier = Modifier.background(MaterialTheme.colorScheme.background.copy(alpha = 1f)),
     ) {
         MainMenuAction.entries.forEach { action ->
             DropdownMenuItem(
+                text = { Text(stringResource(id = action.stringRes)) },
                 onClick = {
                     onAction(action)
                     showMenu = false
@@ -283,7 +309,7 @@ private fun MainMenuActions(
                     MainMenuAction.RADIO_CONFIG -> !isManaged
                     else -> true
                 },
-            ) { Text(stringResource(id = action.stringRes)) }
+            )
         }
     }
 }
@@ -306,10 +332,10 @@ private fun BottomNavigation(
             animationSpec = tween(durationMillis = 200),
         ),
     ) {
-        BottomNavigation {
+        NavigationBar {
             TopLevelDestination.entries.forEach {
                 val isSelected = it == topLevelDestination
-                BottomNavigationItem(
+                NavigationBarItem(
                     icon = {
                         Icon(
                             imageVector = it.icon,

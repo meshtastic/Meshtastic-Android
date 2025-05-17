@@ -18,8 +18,8 @@
 package com.geeksville.mesh.ui.components
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -66,8 +66,8 @@ fun SignalInfo(
             Text(
                 modifier = modifier,
                 text = text,
-                color = MaterialTheme.colors.onSurface,
-                fontSize = MaterialTheme.typography.caption.fontSize
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = MaterialTheme.typography.bodySmall.fontSize
             )
         }
         /* We only know the Signal Quality from direct nodes aka 0 hop. */

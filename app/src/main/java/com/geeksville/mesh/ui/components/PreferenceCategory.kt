@@ -21,11 +21,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.ProvideTextStyle
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProvideTextStyle
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,13 +40,11 @@ fun PreferenceCategory(
     Text(
         text,
         modifier = modifier.padding(start = 16.dp, top = 24.dp, bottom = 8.dp, end = 16.dp),
-        style = MaterialTheme.typography.h6,
+        style = MaterialTheme.typography.titleLarge,
     )
     if (content != null) {
-        Surface(
+        Card(
             modifier = modifier.padding(bottom = 8.dp),
-            shape = RoundedCornerShape(12.dp),
-            elevation = 1.dp,
         ) {
             Column(
                 modifier = Modifier
@@ -55,7 +52,7 @@ fun PreferenceCategory(
                     .padding(horizontal = 16.dp, vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                ProvideTextStyle(MaterialTheme.typography.body1) {
+                ProvideTextStyle(MaterialTheme.typography.bodyLarge) {
                     content()
                 }
             }

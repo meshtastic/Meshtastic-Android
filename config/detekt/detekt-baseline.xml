@@ -91,7 +91,6 @@
     <ID>FinalNewline:BluetoothRepositoryModule.kt$com.geeksville.mesh.repository.bluetooth.BluetoothRepositoryModule.kt</ID>
     <ID>FinalNewline:BluetoothViewModel.kt$com.geeksville.mesh.model.BluetoothViewModel.kt</ID>
     <ID>FinalNewline:BootCompleteReceiver.kt$com.geeksville.mesh.service.BootCompleteReceiver.kt</ID>
-    <ID>FinalNewline:Color.kt$com.geeksville.mesh.ui.theme.Color.kt</ID>
     <ID>FinalNewline:CoroutineDispatchers.kt$com.geeksville.mesh.CoroutineDispatchers.kt</ID>
     <ID>FinalNewline:Coroutines.kt$com.geeksville.mesh.concurrent.Coroutines.kt</ID>
     <ID>FinalNewline:CustomTileSource.kt$com.geeksville.mesh.model.map.CustomTileSource.kt</ID>
@@ -111,7 +110,6 @@
     <ID>FinalNewline:NopInterface.kt$com.geeksville.mesh.repository.radio.NopInterface.kt</ID>
     <ID>FinalNewline:NopInterfaceFactory.kt$com.geeksville.mesh.repository.radio.NopInterfaceFactory.kt</ID>
     <ID>FinalNewline:OnlineTileSourceAuth.kt$com.geeksville.mesh.model.map.OnlineTileSourceAuth.kt</ID>
-    <ID>FinalNewline:PreferenceCategory.kt$com.geeksville.mesh.ui.components.PreferenceCategory.kt</ID>
     <ID>FinalNewline:PreviewParameterProviders.kt$com.geeksville.mesh.ui.preview.PreviewParameterProviders.kt</ID>
     <ID>FinalNewline:ProbeTableProvider.kt$com.geeksville.mesh.repository.usb.ProbeTableProvider.kt</ID>
     <ID>FinalNewline:QuickChatActionRepository.kt$com.geeksville.mesh.database.QuickChatActionRepository.kt</ID>
@@ -159,7 +157,6 @@
     <ID>LongMethod:PowerConfigItemList.kt$@Composable fun PowerConfigItemList( powerConfig: PowerConfig, enabled: Boolean, onSaveClicked: (PowerConfig) -&gt; Unit, )</ID>
     <ID>LongMethod:RadioConfigViewModel.kt$RadioConfigViewModel$private fun processPacketResponse(packet: MeshProtos.MeshPacket)</ID>
     <ID>LongMethod:SerialConfigItemList.kt$@Composable fun SerialConfigItemList( serialConfig: SerialConfig, enabled: Boolean, onSaveClicked: (SerialConfig) -&gt; Unit, )</ID>
-    <ID>LongMethod:SettingsFragment.kt$SettingsFragment$private fun initCommonUI()</ID>
     <ID>LongMethod:StoreForwardConfigItemList.kt$@Composable fun StoreForwardConfigItemList( storeForwardConfig: StoreForwardConfig, enabled: Boolean, onSaveClicked: (StoreForwardConfig) -&gt; Unit, )</ID>
     <ID>LongMethod:TelemetryConfigItemList.kt$@Composable fun TelemetryConfigItemList( telemetryConfig: TelemetryConfig, enabled: Boolean, onSaveClicked: (TelemetryConfig) -&gt; Unit, )</ID>
     <ID>LongMethod:UIState.kt$UIViewModel$fun saveMessagesCSV(uri: Uri)</ID>
@@ -291,21 +288,6 @@
     <ID>MagicNumber:NOAAWmsTileSource.kt$NOAAWmsTileSource$360.0</ID>
     <ID>MagicNumber:NOAAWmsTileSource.kt$NOAAWmsTileSource$4</ID>
     <ID>MagicNumber:NOAAWmsTileSource.kt$NOAAWmsTileSource$5</ID>
-    <ID>MagicNumber:NavGraph.kt$ConfigRoute.BLUETOOTH$6</ID>
-    <ID>MagicNumber:NavGraph.kt$ConfigRoute.DISPLAY$4</ID>
-    <ID>MagicNumber:NavGraph.kt$ConfigRoute.LORA$5</ID>
-    <ID>MagicNumber:NavGraph.kt$ConfigRoute.NETWORK$3</ID>
-    <ID>MagicNumber:NavGraph.kt$ConfigRoute.SECURITY$7</ID>
-    <ID>MagicNumber:NavGraph.kt$ModuleRoute.AMBIENT_LIGHTING$10</ID>
-    <ID>MagicNumber:NavGraph.kt$ModuleRoute.AUDIO$7</ID>
-    <ID>MagicNumber:NavGraph.kt$ModuleRoute.CANNED_MESSAGE$6</ID>
-    <ID>MagicNumber:NavGraph.kt$ModuleRoute.DETECTION_SENSOR$11</ID>
-    <ID>MagicNumber:NavGraph.kt$ModuleRoute.NEIGHBOR_INFO$9</ID>
-    <ID>MagicNumber:NavGraph.kt$ModuleRoute.PAXCOUNTER$12</ID>
-    <ID>MagicNumber:NavGraph.kt$ModuleRoute.RANGE_TEST$4</ID>
-    <ID>MagicNumber:NavGraph.kt$ModuleRoute.REMOTE_HARDWARE$8</ID>
-    <ID>MagicNumber:NavGraph.kt$ModuleRoute.STORE_FORWARD$3</ID>
-    <ID>MagicNumber:NavGraph.kt$ModuleRoute.TELEMETRY$5</ID>
     <ID>MagicNumber:NodeInfo.kt$DeviceMetrics.Companion$1000</ID>
     <ID>MagicNumber:NodeInfo.kt$EnvironmentMetrics.Companion$1000</ID>
     <ID>MagicNumber:NodeInfo.kt$NodeInfo$0.114</ID>
@@ -433,9 +415,6 @@
     <ID>MaxLineLength:SafeBluetooth.kt$SafeBluetooth.&lt;no name provided&gt;$// to do an autoconnection attempt. When that attempt succeeds/fails the normal callbacks will be called</ID>
     <ID>MaxLineLength:ServiceClient.kt$ServiceClient$// Some phones seem to ahve a race where if you unbind and quickly rebind bindService returns false. Try</ID>
     <ID>MaxLineLength:ServiceClient.kt$ServiceClient.&lt;no name provided&gt;$// If we start to close a service, it seems that there is a possibility a onServiceConnected event is the queue</ID>
-    <ID>MaxLineLength:SettingsFragment.kt$SettingsFragment$// Note: we pull this into a tempvar, because otherwise some other thread can change selectedAddress after our null check</ID>
-    <ID>MaxLineLength:SettingsFragment.kt$SettingsFragment$deviceSelectIPAddress.isChecked = scanModel.onSelected(BTScanModel.DeviceListEntry("", "t" + inputIPAddress.text, true))</ID>
-    <ID>MaxLineLength:SettingsFragment.kt$SettingsFragment$if</ID>
     <ID>MaxLineLength:SqlTileWriterExt.kt$SqlTileWriterExt$"select " + DatabaseFileArchive.COLUMN_KEY + "," + COLUMN_EXPIRES + "," + DatabaseFileArchive.COLUMN_PROVIDER + " from " + DatabaseFileArchive.TABLE + " limit ? offset ?"</ID>
     <ID>MaxLineLength:StreamInterface.kt$StreamInterface$*</ID>
     <ID>MaxLineLength:StreamInterface.kt$StreamInterface$* An interface that assumes we are talking to a meshtastic device over some sort of stream connection (serial or TCP probably)</ID>
@@ -443,7 +422,6 @@
     <ID>MaxLineLength:StreamInterface.kt$StreamInterface$deliverPacket()</ID>
     <ID>MaxLineLength:StreamInterface.kt$StreamInterface$lostSync()</ID>
     <ID>MaxLineLength:StreamInterface.kt$StreamInterface$service.onDisconnect(isPermanent = true)</ID>
-    <ID>MaxLineLength:TextDividerPreference.kt$color = if (!enabled) MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled) else Color.Unspecified</ID>
     <ID>MaxLineLength:UIState.kt$UIViewModel$// date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx elevation,rx snr,distance,hop limit,payload</ID>
     <ID>MaxLineLength:UIState.kt$UIViewModel$writer.appendLine("$rxDateTime,\"$rxFrom\",\"$senderName\",\"$senderLat\",\"$senderLong\",\"$rxLat\",\"$rxLong\",\"$rxAlt\",\"$rxSnr\",\"$dist\",\"$hopLimit\",\"$payload\"")</ID>
     <ID>MaxLineLength:UIState.kt$UIViewModel$writer.appendLine("\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"distance\",\"hop limit\",\"payload\"")</ID>
@@ -466,14 +444,11 @@
     <ID>MultiLineIfElse:ContextServices.kt$invokeFun()</ID>
     <ID>MultiLineIfElse:EditListPreference.kt$EditBase64Preference( title = "${index + 1}/$maxCount", value = value, enabled = enabled, keyboardActions = keyboardActions, onValueChange = { listState[index] = it as T onValuesChanged(listState) }, modifier = modifier.fillMaxWidth(), trailingIcon = trailingIcon, )</ID>
     <ID>MultiLineIfElse:EditListPreference.kt$EditTextPreference( title = "${index + 1}/$maxCount", value = value, enabled = enabled, keyboardActions = keyboardActions, onValueChanged = { listState[index] = it as T onValuesChanged(listState) }, modifier = modifier.fillMaxWidth(), trailingIcon = trailingIcon, )</ID>
-    <ID>MultiLineIfElse:EditPasswordPreference.kt$painterResource(R.drawable.ic_twotone_visibility_24)</ID>
-    <ID>MultiLineIfElse:EditPasswordPreference.kt$painterResource(R.drawable.ic_twotone_visibility_off_24)</ID>
     <ID>MultiLineIfElse:EditTextPreference.kt$it.toDoubleOrNull()?.let { double -&gt; valueState = it onValueChanged(double) }</ID>
     <ID>MultiLineIfElse:EditTextPreference.kt$it.toFloatOrNull()?.let { float -&gt; valueState = it onValueChanged(float) }</ID>
     <ID>MultiLineIfElse:EditTextPreference.kt$it.toUIntOrNull()?.toInt()?.let { int -&gt; valueState = it onValueChanged(int) }</ID>
     <ID>MultiLineIfElse:EditTextPreference.kt$onValueChanged(it)</ID>
     <ID>MultiLineIfElse:EditTextPreference.kt$valueState = it</ID>
-    <ID>MultiLineIfElse:EditWaypointDialog.kt$AlertDialog( onDismissRequest = onDismissRequest, shape = RoundedCornerShape(16.dp), backgroundColor = MaterialTheme.colors.background, text = { Column(modifier = modifier.fillMaxWidth()) { Text( text = stringResource(title), style = MaterialTheme.typography.h6.copy( fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, ), modifier = Modifier .fillMaxWidth() .padding(bottom = 16.dp), ) EditTextPreference( title = stringResource(R.string.name), value = waypointInput.name, maxSize = 29, // name max_size:30 enabled = true, isError = false, keyboardOptions = KeyboardOptions.Default.copy( keyboardType = KeyboardType.Text, imeAction = ImeAction.Done ), keyboardActions = KeyboardActions(onDone = { /*TODO*/ }), onValueChanged = { waypointInput = waypointInput.copy { name = it } }, trailingIcon = { IconButton(onClick = { showEmojiPickerView = true }) { Text( text = String(Character.toChars(emoji)), modifier = Modifier .background(MaterialTheme.colors.background, CircleShape) .padding(4.dp), fontSize = 24.sp, color = Color.Unspecified.copy(alpha = 1f), ) } }, ) EditTextPreference(title = stringResource(R.string.description), value = waypointInput.description, maxSize = 99, // description max_size:100 enabled = true, isError = false, keyboardOptions = KeyboardOptions.Default.copy( keyboardType = KeyboardType.Text, imeAction = ImeAction.Done ), keyboardActions = KeyboardActions(onDone = { /*TODO*/ }), onValueChanged = { waypointInput = waypointInput.copy { description = it } } ) Row( modifier = Modifier .fillMaxWidth() .size(48.dp), verticalAlignment = Alignment.CenterVertically ) { Image( painter = painterResource(R.drawable.ic_twotone_lock_24), contentDescription = stringResource(R.string.locked), ) Text(stringResource(R.string.locked)) Switch( modifier = Modifier .fillMaxWidth() .wrapContentWidth(Alignment.End), checked = waypointInput.lockedTo != 0, onCheckedChange = { waypointInput = waypointInput.copy { lockedTo = if (it) 1 else 0 } } ) } } }, buttons = { FlowRow( modifier = modifier.padding(start = 20.dp, end = 20.dp, bottom = 16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.Center, ) { TextButton( modifier = modifier.weight(1f), onClick = onDismissRequest ) { Text(stringResource(R.string.cancel)) } if (waypoint.id != 0) { Button( modifier = modifier.weight(1f), onClick = { onDeleteClicked(waypointInput) }, enabled = waypointInput.name.isNotEmpty(), ) { Text(stringResource(R.string.delete)) } } Button( modifier = modifier.weight(1f), onClick = { onSendClicked(waypointInput) }, enabled = waypointInput.name.isNotEmpty(), ) { Text(stringResource(R.string.send)) } } }, )</ID>
     <ID>MultiLineIfElse:Exceptions.kt$Exceptions.errormsg("ignoring exception", ex)</ID>
     <ID>MultiLineIfElse:ExpireChecker.kt$ExpireChecker$doExpire()</ID>
     <ID>MultiLineIfElse:Logging.kt$Logging$printlog(Log.ERROR, tag(), "$msg (exception ${ex.message})")</ID>
@@ -501,8 +476,6 @@
     <ID>MultiLineIfElse:SafeBluetooth.kt$SafeBluetooth.&lt;no name provided&gt;$if (!characteristic.value.contentEquals(reliable)) { errormsg("A reliable write failed!") gatt.abortReliableWrite() completeWork( STATUS_RELIABLE_WRITE_FAILED, characteristic ) // skanky code to indicate failure } else { logAssert(gatt.executeReliableWrite()) // After this execute reliable completes - we can continue with normal operations (see onReliableWriteCompleted) }</ID>
     <ID>MultiLineIfElse:SafeBluetooth.kt$SafeBluetooth.&lt;no name provided&gt;$lostConnection("lost connection")</ID>
     <ID>MultiLineIfElse:SafeBluetooth.kt$SafeBluetooth.&lt;no name provided&gt;$warn("Received notification from $characteristic, but no handler registered")</ID>
-    <ID>MultiLineIfElse:TextDividerPreference.kt$Icon( trailingIcon, "trailingIcon", modifier = modifier .fillMaxWidth() .wrapContentWidth(Alignment.End), )</ID>
-    <ID>MultiLineIfElse:UIState.kt$add(channel { role = when (i) { 0 -&gt; ChannelProtos.Channel.Role.PRIMARY in 1..new.lastIndex -&gt; ChannelProtos.Channel.Role.SECONDARY else -&gt; ChannelProtos.Channel.Role.DISABLED } index = i settings = new.getOrNull(i) ?: channelSettings { } })</ID>
     <ID>NestedBlockDepth:LanguageUtils.kt$LanguageUtils$fun getLanguageTags(context: Context): Map&lt;String, String&gt;</ID>
     <ID>NestedBlockDepth:MainActivity.kt$MainActivity$private fun onMeshConnectionChanged(newConnection: MeshService.ConnectionState)</ID>
     <ID>NestedBlockDepth:MeshService.kt$MeshService$private fun handleReceivedAdmin(fromNodeNum: Int, a: AdminProtos.AdminMessage)</ID>
@@ -516,7 +489,6 @@
     <ID>NewLineAtEndOfFile:BluetoothRepositoryModule.kt$com.geeksville.mesh.repository.bluetooth.BluetoothRepositoryModule.kt</ID>
     <ID>NewLineAtEndOfFile:BluetoothViewModel.kt$com.geeksville.mesh.model.BluetoothViewModel.kt</ID>
     <ID>NewLineAtEndOfFile:BootCompleteReceiver.kt$com.geeksville.mesh.service.BootCompleteReceiver.kt</ID>
-    <ID>NewLineAtEndOfFile:Color.kt$com.geeksville.mesh.ui.theme.Color.kt</ID>
     <ID>NewLineAtEndOfFile:CoroutineDispatchers.kt$com.geeksville.mesh.CoroutineDispatchers.kt</ID>
     <ID>NewLineAtEndOfFile:Coroutines.kt$com.geeksville.mesh.concurrent.Coroutines.kt</ID>
     <ID>NewLineAtEndOfFile:CustomTileSource.kt$com.geeksville.mesh.model.map.CustomTileSource.kt</ID>
@@ -536,7 +508,6 @@
     <ID>NewLineAtEndOfFile:NopInterface.kt$com.geeksville.mesh.repository.radio.NopInterface.kt</ID>
     <ID>NewLineAtEndOfFile:NopInterfaceFactory.kt$com.geeksville.mesh.repository.radio.NopInterfaceFactory.kt</ID>
     <ID>NewLineAtEndOfFile:OnlineTileSourceAuth.kt$com.geeksville.mesh.model.map.OnlineTileSourceAuth.kt</ID>
-    <ID>NewLineAtEndOfFile:PreferenceCategory.kt$com.geeksville.mesh.ui.components.PreferenceCategory.kt</ID>
     <ID>NewLineAtEndOfFile:PreviewParameterProviders.kt$com.geeksville.mesh.ui.preview.PreviewParameterProviders.kt</ID>
     <ID>NewLineAtEndOfFile:ProbeTableProvider.kt$com.geeksville.mesh.repository.usb.ProbeTableProvider.kt</ID>
     <ID>NewLineAtEndOfFile:QuickChatActionRepository.kt$com.geeksville.mesh.database.QuickChatActionRepository.kt</ID>
@@ -585,11 +556,8 @@
     <ID>NoWildcardImports:BluetoothInterface.kt$import com.geeksville.mesh.service.*</ID>
     <ID>NoWildcardImports:DeviceVersionTest.kt$import org.junit.Assert.*</ID>
     <ID>NoWildcardImports:MockInterface.kt$import com.geeksville.mesh.*</ID>
-    <ID>NoWildcardImports:PreferenceFooter.kt$import androidx.compose.foundation.layout.*</ID>
-    <ID>NoWildcardImports:PreferenceFooter.kt$import androidx.compose.material.*</ID>
     <ID>NoWildcardImports:SafeBluetooth.kt$import android.bluetooth.*</ID>
     <ID>NoWildcardImports:SafeBluetooth.kt$import kotlinx.coroutines.*</ID>
-    <ID>NoWildcardImports:SettingsFragment.kt$import com.geeksville.mesh.android.*</ID>
     <ID>NoWildcardImports:UsbRepository.kt$import kotlinx.coroutines.flow.*</ID>
     <ID>OptionalAbstractKeyword:SyncContinuation.kt$Continuation$abstract</ID>
     <ID>ParameterListWrapping:AppPrefs.kt$FloatPref$(thisRef: AppPrefs, prop: KProperty&lt;Float&gt;)</ID>
@@ -613,7 +581,6 @@
     <ID>SwallowedException:ChannelSet.kt$ex: Throwable</ID>
     <ID>SwallowedException:DeviceVersion.kt$DeviceVersion$e: Exception</ID>
     <ID>SwallowedException:Exceptions.kt$ex: Throwable</ID>
-    <ID>SwallowedException:MainActivity.kt$MainActivity$ex: BindFailedException</ID>
     <ID>SwallowedException:MeshLog.kt$MeshLog$e: IOException</ID>
     <ID>SwallowedException:MeshService.kt$MeshService$e: Exception</ID>
     <ID>SwallowedException:MeshService.kt$MeshService$e: TimeoutException</ID>
@@ -667,7 +634,6 @@
     <ID>TooManyFunctions:RadioConfigViewModel.kt$RadioConfigViewModel : ViewModelLogging</ID>
     <ID>TooManyFunctions:RadioInterfaceService.kt$RadioInterfaceService : Logging</ID>
     <ID>TooManyFunctions:SafeBluetooth.kt$SafeBluetooth : LoggingCloseable</ID>
-    <ID>TooManyFunctions:SettingsFragment.kt$SettingsFragment : ScreenFragmentLogging</ID>
     <ID>TooManyFunctions:UIState.kt$UIViewModel : ViewModelLogging</ID>
     <ID>TopLevelPropertyNaming:Constants.kt$const val prefix = "com.geeksville.mesh"</ID>
     <ID>UnusedPrivateMember:NOAAWmsTileSource.kt$NOAAWmsTileSource$private fun tile2lat(y: Int, z: Int): Double</ID>
@@ -695,11 +661,8 @@
     <ID>WildcardImport:BluetoothInterface.kt$import com.geeksville.mesh.service.*</ID>
     <ID>WildcardImport:DeviceVersionTest.kt$import org.junit.Assert.*</ID>
     <ID>WildcardImport:MockInterface.kt$import com.geeksville.mesh.*</ID>
-    <ID>WildcardImport:PreferenceFooter.kt$import androidx.compose.foundation.layout.*</ID>
-    <ID>WildcardImport:PreferenceFooter.kt$import androidx.compose.material.*</ID>
     <ID>WildcardImport:SafeBluetooth.kt$import android.bluetooth.*</ID>
     <ID>WildcardImport:SafeBluetooth.kt$import kotlinx.coroutines.*</ID>
-    <ID>WildcardImport:SettingsFragment.kt$import com.geeksville.mesh.android.*</ID>
     <ID>WildcardImport:UsbRepository.kt$import kotlinx.coroutines.flow.*</ID>
   </CurrentIssues>
 </SmellBaseline>

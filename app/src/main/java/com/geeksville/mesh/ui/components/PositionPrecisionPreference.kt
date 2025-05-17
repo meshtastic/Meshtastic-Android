@@ -21,9 +21,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Slider
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -95,7 +95,7 @@ fun PositionPrecisionPreference(
                 Text(
                     text = precisionMeters.toDistanceString(unit),
                     modifier = Modifier.padding(bottom = 16.dp),
-                    fontSize = MaterialTheme.typography.body1.fontSize,
+                    fontSize = MaterialTheme.typography.bodyLarge.fontSize,
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1,
                 )

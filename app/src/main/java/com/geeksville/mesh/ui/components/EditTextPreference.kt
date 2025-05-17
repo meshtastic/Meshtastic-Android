@@ -23,12 +23,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Info
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -224,7 +224,7 @@ fun EditTextPreference(
                 Icon(
                     imageVector = Icons.TwoTone.Info,
                     contentDescription = stringResource(id = R.string.error),
-                    tint = MaterialTheme.colors.error
+                    tint = MaterialTheme.colorScheme.error
                 )
             }
         },
@@ -237,8 +237,8 @@ fun EditTextPreference(
         ) {
             Text(
                 text = "${value.toByteArray().size}/$maxSize",
-                style = MaterialTheme.typography.caption,
-                color = if (isError) MaterialTheme.colors.error else MaterialTheme.colors.onBackground,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground,
                 modifier = Modifier.padding(end = 8.dp, bottom = 4.dp)
             )
         }

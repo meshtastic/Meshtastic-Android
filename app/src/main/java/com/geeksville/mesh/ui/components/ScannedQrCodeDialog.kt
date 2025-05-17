@@ -29,12 +29,12 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -122,7 +122,7 @@ fun ScannedQrCodeDialog(
         Surface(
             modifier = Modifier.widthIn(max = 600.dp),
             shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colors.background
+            color = MaterialTheme.colorScheme.background
         ) {
             LazyColumn(
                 contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
@@ -132,7 +132,7 @@ fun ScannedQrCodeDialog(
                     Text(
                         text = stringResource(id = R.string.new_channel_rcvd),
                         modifier = Modifier.padding(20.dp),
-                        style = MaterialTheme.typography.h6,
+                        style = MaterialTheme.typography.titleLarge,
                     )
                 }
                 itemsIndexed(channelSet.settingsList) { index, channel ->
@@ -155,7 +155,7 @@ fun ScannedQrCodeDialog(
                     ) {
                         val selectedColors = ButtonDefaults.buttonColors()
                         val unselectedColors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colors.onSurface,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
                         )
 
                         OutlinedButton(
@@ -192,10 +192,10 @@ fun ScannedQrCodeDialog(
                         ) {
                             Text(
                                 text = stringResource(id = R.string.cancel),
-                                color = MaterialTheme.colors.onSurface,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1,
-                                style = MaterialTheme.typography.body1,
+                                style = MaterialTheme.typography.bodyLarge,
                             )
                         }
 
@@ -208,10 +208,10 @@ fun ScannedQrCodeDialog(
                         ) {
                             Text(
                                 text = stringResource(id = R.string.accept),
-                                color = MaterialTheme.colors.onSurface,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 overflow = TextOverflow.Ellipsis,
                                 maxLines = 1,
-                                style = MaterialTheme.typography.body1,
+                                style = MaterialTheme.typography.bodyLarge,
                             )
                         }
                     }

@@ -26,7 +26,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -59,7 +59,7 @@ fun BottomSheetDialog(
             modifier = modifier
                 .align(Alignment.BottomCenter)
                 .background(
-                    color = MaterialTheme.colors.surface.copy(alpha = 1f),
+                    color = MaterialTheme.colorScheme.surface.copy(alpha = 1f),
                     shape = RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp)
                 )
                 .padding(16.dp),

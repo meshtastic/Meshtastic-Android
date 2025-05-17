@@ -21,8 +21,8 @@ import android.content.ActivityNotFoundException
 import android.content.ClipData
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -57,7 +57,7 @@ fun LinkedCoordinates(
     val uriHandler = LocalUriHandler.current
     val style = SpanStyle(
         color = HyperlinkBlue,
-        fontSize = MaterialTheme.typography.button.fontSize,
+        fontSize = MaterialTheme.typography.labelLarge.fontSize,
         textDecoration = TextDecoration.Underline
     )
     val annotatedString = buildAnnotatedString {

@@ -25,12 +25,12 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.remember
@@ -67,12 +67,11 @@ fun EditDeviceProfileDialog(
     AlertDialog(
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(16.dp),
-        backgroundColor = MaterialTheme.colors.background,
         text = {
             Column(modifier.fillMaxWidth()) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.h6.copy(
+                    style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold,
                         textAlign = TextAlign.Center,
                     ),
@@ -80,7 +79,7 @@ fun EditDeviceProfileDialog(
                         .fillMaxWidth()
                         .padding(bottom = 16.dp),
                 )
-                Divider()
+                HorizontalDivider()
                 state.keys.sortedBy { it.number }.forEach { field ->
                     SwitchPreference(
                         title = field.name,
@@ -90,10 +89,10 @@ fun EditDeviceProfileDialog(
                         padding = PaddingValues(0.dp)
                     )
                 }
-                Divider()
+                HorizontalDivider()
             }
         },
-        buttons = {
+        confirmButton = {
             FlowRow(
                 modifier = modifier
                     .fillMaxWidth()

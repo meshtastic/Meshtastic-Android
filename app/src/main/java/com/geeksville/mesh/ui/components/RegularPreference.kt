@@ -26,10 +26,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,9 +71,9 @@ fun RegularPreference(
     trailingIcon: ImageVector? = null,
 ) {
     val color = if (enabled) {
-        MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium)
+        MaterialTheme.colorScheme.onSurface
     } else {
-        MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
     }
 
     Column(
@@ -93,17 +92,17 @@ fun RegularPreference(
             ) {
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.body1,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = if (enabled) {
                         Color.Unspecified
                     } else {
-                        MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                     },
                 )
 
                 Text(
                     text = subtitle,
-                    style = MaterialTheme.typography.body1,
+                    style = MaterialTheme.typography.bodyLarge,
                     color = color,
                 )
             }
@@ -121,7 +120,7 @@ fun RegularPreference(
         if (summary != null) {
             Text(
                 text = summary,
-                style = MaterialTheme.typography.body2,
+                style = MaterialTheme.typography.bodyMedium,
                 color = color,
             )
         }

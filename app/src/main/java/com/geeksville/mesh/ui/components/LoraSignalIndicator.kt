@@ -27,14 +27,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.SignalCellular4Bar
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.SignalCellularAlt1Bar
 import androidx.compose.material.icons.filled.SignalCellularAlt2Bar
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -79,7 +79,7 @@ fun NodeSignalQuality(snr: Float, rssi: Int, modifier: Modifier = Modifier) {
         Spacer(Modifier.width(8.dp))
         Text(
             text = "${stringResource(R.string.signal)} ${stringResource(quality.nameRes)}",
-            fontSize = MaterialTheme.typography.button.fontSize,
+            fontSize = MaterialTheme.typography.labelLarge.fontSize,
             maxLines = 1,
         )
         Spacer(Modifier.width(8.dp))
@@ -142,7 +142,7 @@ private fun Snr(snr: Float) {
     Text(
         text = "%s %.2fdB".format(stringResource(id = R.string.snr), snr),
         color = color,
-        fontSize = MaterialTheme.typography.button.fontSize
+        fontSize = MaterialTheme.typography.labelLarge.fontSize
     )
 }
 
@@ -158,7 +158,7 @@ private fun Rssi(rssi: Int) {
     Text(
         text = "%s %ddBm".format(stringResource(id = R.string.rssi), rssi),
         color = color,
-        fontSize = MaterialTheme.typography.button.fontSize
+        fontSize = MaterialTheme.typography.labelLarge.fontSize
     )
 }
 

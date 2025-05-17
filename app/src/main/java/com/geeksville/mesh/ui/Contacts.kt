@@ -26,21 +26,21 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.RadioButton
-import androidx.compose.material.Scaffold
-import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.VolumeMute
 import androidx.compose.material.icons.automirrored.twotone.VolumeUp
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -121,10 +121,10 @@ fun ContactsScreen(
                     selectedCount = selectedContactKeys.size,
                     onCloseSelection = { selectedContactKeys.clear() },
                     onMuteSelected = {
-                       showMuteDialog = true
+                        showMuteDialog = true
                     },
                     onDeleteSelected = {
-                       showDeleteDialog = true
+                        showDeleteDialog = true
                     },
                     onSelectAll = {
                         selectedContactKeys.clear()
@@ -165,7 +165,7 @@ fun ContactsScreen(
     )
 }
 
-@OptIn(ExperimentalMaterialApi::class) // Required for AlertDialog in some cases, though often not strictly necessary now
+@Suppress("LongMethod")
 @Composable
 fun MuteNotificationsDialog(
     showDialog: Boolean,
@@ -240,7 +240,6 @@ fun MuteNotificationsDialog(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class) // Not strictly needed for simple AlertDialog
 @Composable
 fun DeleteConfirmationDialog(
     showDialog: Boolean,
@@ -288,6 +287,7 @@ fun DeleteConfirmationDialog(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SelectionToolbar(
     selectedCount: Int,

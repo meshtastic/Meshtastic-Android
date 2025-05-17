@@ -20,7 +20,7 @@ package com.geeksville.mesh.ui.radioconfig.components
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -101,7 +101,7 @@ fun DisplayConfigItemList(
                 onItemSelected = { displayInput = displayInput.copy { gpsFormat = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             EditTextPreference(
@@ -123,7 +123,7 @@ fun DisplayConfigItemList(
                 onCheckedChange = { displayInput = displayInput.copy { compassNorthTop = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             SwitchPreference(
@@ -133,7 +133,7 @@ fun DisplayConfigItemList(
                 onCheckedChange = { displayInput = displayInput.copy { flipScreen = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             DropDownPreference(
@@ -146,7 +146,7 @@ fun DisplayConfigItemList(
                 onItemSelected = { displayInput = displayInput.copy { units = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             DropDownPreference(
@@ -159,7 +159,7 @@ fun DisplayConfigItemList(
                 onItemSelected = { displayInput = displayInput.copy { oled = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             DropDownPreference(
@@ -172,7 +172,7 @@ fun DisplayConfigItemList(
                 onItemSelected = { displayInput = displayInput.copy { displaymode = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             SwitchPreference(
@@ -182,7 +182,7 @@ fun DisplayConfigItemList(
                 onCheckedChange = { displayInput = displayInput.copy { headingBold = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             SwitchPreference(
@@ -192,7 +192,7 @@ fun DisplayConfigItemList(
                 onCheckedChange = { displayInput = displayInput.copy { wakeOnTapOrMotion = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             DropDownPreference(
@@ -205,7 +205,7 @@ fun DisplayConfigItemList(
                 onItemSelected = { displayInput = displayInput.copy { compassOrientation = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             PreferenceFooter(

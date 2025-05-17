@@ -20,9 +20,9 @@ package com.geeksville.mesh.ui
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,12 +50,10 @@ fun LastHeardInfo(
             modifier = Modifier.height(18.dp),
             imageVector = ImageVector.vectorResource(id = R.drawable.ic_antenna_24),
             contentDescription = null,
-            tint = MaterialTheme.colors.onSurface,
         )
         Text(
             text = formatAgo(lastHeard, currentTimeMillis),
-            color = MaterialTheme.colors.onSurface,
-            fontSize = MaterialTheme.typography.button.fontSize
+            fontSize = MaterialTheme.typography.labelLarge.fontSize
         )
     }
 }

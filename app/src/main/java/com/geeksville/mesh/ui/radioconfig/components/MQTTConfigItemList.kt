@@ -22,7 +22,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -94,7 +94,7 @@ fun MQTTConfigItemList(
                 onCheckedChange = { mqttInput = mqttInput.copy { this.enabled = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             EditTextPreference(
@@ -145,7 +145,7 @@ fun MQTTConfigItemList(
                 onCheckedChange = { mqttInput = mqttInput.copy { encryptionEnabled = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             SwitchPreference(
@@ -155,7 +155,7 @@ fun MQTTConfigItemList(
                 onCheckedChange = { mqttInput = mqttInput.copy { jsonEnabled = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             SwitchPreference(
@@ -165,7 +165,7 @@ fun MQTTConfigItemList(
                 onCheckedChange = { mqttInput = mqttInput.copy { tlsEnabled = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             EditTextPreference(
@@ -190,7 +190,7 @@ fun MQTTConfigItemList(
                 onCheckedChange = { mqttInput = mqttInput.copy { proxyToClientEnabled = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             PositionPrecisionPreference(
@@ -207,7 +207,7 @@ fun MQTTConfigItemList(
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             EditTextPreference(
