@@ -325,11 +325,11 @@ private fun BottomNavigation(
         visible = topLevelDestination != null,
         enter = slideInVertically(
             initialOffsetY = { it / 2 },
-            animationSpec = tween(durationMillis = 200),
+            animationSpec = tween(durationMillis = 50),
         ),
         exit = slideOutVertically(
             targetOffsetY = { it / 2 },
-            animationSpec = tween(durationMillis = 200),
+            animationSpec = tween(durationMillis = 50),
         ),
     ) {
         NavigationBar {
