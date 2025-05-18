@@ -25,7 +25,6 @@ import android.os.Build
 import android.util.Patterns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,6 +36,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -65,12 +65,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
@@ -118,10 +120,7 @@ fun SettingsScreen(
     val receivingLocationUpdates by uiViewModel.receivingLocationUpdates.collectAsState(false)
     val context = LocalContext.current
     val app = (context.applicationContext as GeeksvilleApplication)
-    val isGooglePlayAvailable = context.isGooglePlayAvailable()
     val info by uiViewModel.myNodeInfo.collectAsState()
-
-    val isAnalyticsAllowed = app.isAnalyticsAllowed
     val selectedDevice = scanModel.selectedNotNull
     val bluetoothEnabled by bluetoothViewModel.enabled.observeAsState()
 
@@ -218,234 +217,166 @@ fun SettingsScreen(
             }
         }
     }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(scrollState)
-    ) {
-        // Scan Status Text
-        Text(
-            text = scanStatusText.orEmpty(),
-            fontSize = 14.sp,
-            textAlign = TextAlign.Start,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Set Region Button
-        val isConnected = connectionState == MeshService.ConnectionState.CONNECTED
-        if (isConnected && regionUnset) {
-            Button(
-                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    onSetRegion()
-                }
-            ) {
-                Text(stringResource(R.string.set_region))
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-        }
-
-        // Device List and Manual Input
-        Text(
-            text = stringResource(R.string.device),
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
-
-        // Progress bar while scanning
-        if (scanning) {
-            LinearProgressIndicator(
+    Box(modifier = Modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+                .verticalScroll(scrollState)
+        ) {
+            // Scan Status Text
+            Text(
+                text = scanStatusText.orEmpty(),
+                fontSize = 14.sp,
+                textAlign = TextAlign.Start,
                 modifier = Modifier.fillMaxWidth()
             )
-        }
 
-        Column(modifier = Modifier.selectableGroup()) {
-            devices.values.forEach { device ->
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Set Region Button
+            val isConnected = connectionState == MeshService.ConnectionState.CONNECTED
+            if (isConnected && regionUnset) {
+                Button(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        onSetRegion()
+                    }
+                ) {
+                    Text(stringResource(R.string.set_region))
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // Device List and Manual Input
+            Text(
+                text = stringResource(R.string.device),
+                style = MaterialTheme.typography.titleLarge,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+
+            // Progress bar while scanning
+            if (scanning) {
+                LinearProgressIndicator(
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+            Column(modifier = Modifier.selectableGroup()) {
+                devices.values.forEach { device ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .selectable(
+                                selected = (device.fullAddress == selectedDevice) ||
+                                        device.fullAddress == "n",
+                                onClick = {
+                                    if (!device.bonded) {
+                                        uiViewModel.showSnackbar(context.getString(R.string.starting_pairing))
+                                    }
+                                    scanModel.onSelected(device)
+                                },
+                                role = Role.RadioButton,
+                            )
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (device.fullAddress == selectedDevice),
+                            onClick = null
+                        )
+                        Text(
+                            text = device.name,
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
+                    }
+                }
+
+                // Manual IP Address Input
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .selectable(
-                            selected = (device.fullAddress == selectedDevice),
+                            selected = ("t$manualIpAddress:$manualIpPort" == selectedDevice),
                             onClick = {
-                                if (!device.bonded) {
-                                    uiViewModel.showSnackbar(context.getString(R.string.starting_pairing))
+                                if (manualIpAddress.isIPAddress()) {
+                                    scanModel.onSelected(
+                                        BTScanModel.DeviceListEntry(
+                                            "",
+                                            "t$manualIpAddress:$manualIpPort",
+                                            true
+                                        )
+                                    )
                                 }
-                                scanModel.onSelected(device)
-                            }
+                            },
+                            enabled = manualIpAddress.isIPAddress(),
+                            role = Role.RadioButton
                         )
-                        .padding(horizontal = 16.dp),
+                        .padding(8.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     RadioButton(
-                        selected = (device.fullAddress == selectedDevice),
-                        onClick = {
-                            if (!device.bonded) {
-                                uiViewModel.showSnackbar(context.getString(R.string.starting_pairing))
-                            }
-                            scanModel.onSelected(device)
-                        }
+                        selected = ("t$manualIpAddress:$manualIpPort" == selectedDevice),
+                        onClick = null,
+                        enabled = manualIpAddress.isIPAddress()
                     )
-                    Text(
-                        text = device.name,
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(start = 16.dp)
+                    OutlinedTextField(
+                        value = manualIpAddress,
+                        onValueChange = { manualIpAddress = it },
+                        label = { Text(stringResource(R.string.ip_address)) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier
+                            .weight(1f)
+                            .padding(start = 16.dp)
+                    )
+                    OutlinedTextField(
+                        value = manualIpPort,
+                        onValueChange = {
+                            // Only allow numeric input for port
+                            if (it.all { char -> char.isDigit() }) {
+                                manualIpPort = it
+                            }
+                        },
+                        label = { Text(stringResource(R.string.ip_port)) },
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        modifier = Modifier
+                            .weight(weight = 0.3f)
+                            .padding(start = 8.dp)
                     )
                 }
             }
 
-            // Manual IP Address Input
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .selectable(
-                        selected = ("t$manualIpAddress" == selectedDevice),
-                        onClick = {
-                            if (manualIpAddress.isIPAddress()) {
-                                scanModel.onSelected(
-                                    BTScanModel.DeviceListEntry(
-                                        "",
-                                        "t$manualIpAddress:$manualIpPort",
-                                        true
-                                    )
-                                )
-                            } else {
-                                // Optionally show a warning for invalid IP
-                            }
-                        }
-                    )
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                RadioButton(
-                    selected = ("t$manualIpAddress:$manualIpPort" == selectedDevice),
-                    onClick = {
-                        if (manualIpAddress.isIPAddress()) {
-                            scanModel.onSelected(
-                                BTScanModel.DeviceListEntry(
-                                    "",
-                                    "t$manualIpAddress:$manualIpPort",
-                                    true
-                                )
-                            )
-                        } else {
-                            // Optionally show a warning for invalid IP
-                        }
-                    }
-                )
-                OutlinedTextField(
-                    value = manualIpAddress,
-                    onValueChange = { manualIpAddress = it },
-                    label = { Text(stringResource(R.string.ip_address)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier
-                        .weight(weight = 0.7f)
-                        .padding(start = 16.dp)
-                )
-                OutlinedTextField(
-                    value = manualIpPort,
-                    onValueChange = {
-                        // Only allow numeric input for port
-                        if (it.all { char -> char.isDigit() }) {
-                            manualIpPort = it
-                        }
-                    },
-                    label = { Text(stringResource(R.string.ip_port)) },
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    modifier = Modifier
-                        .weight(weight = 0.3f)
-                        .padding(start = 8.dp)
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Provide Location Checkbox
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clickable(
-                    enabled = !isGpsDisabled
-                ) {
-                    val isChecked = !receivingLocationUpdates // Toggle the state
-                    uiViewModel.provideLocation.value = isChecked
-                    if (isChecked && !context.hasLocationPermission()) {
-                        showLocationRationaleDialog = true // Show the Compose dialog
-                    }
-                    if (isChecked) {
-                        uiViewModel.meshService?.startProvideLocation()
-                    } else {
-                        uiViewModel.meshService?.stopProvideLocation()
-                    }
-                }
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Checkbox(
-                checked = receivingLocationUpdates,
-                onCheckedChange = { isChecked ->
-                    uiViewModel.provideLocation.value = isChecked
-                    if (isChecked && !context.hasLocationPermission()) {
-                        showLocationRationaleDialog = true
-                    }
-                    if (isChecked) {
-                        uiViewModel.meshService?.startProvideLocation()
-                    } else {
-                        uiViewModel.meshService?.stopProvideLocation()
-                    }
-                },
-                enabled = !isGpsDisabled // Disable if GPS is disabled
-            )
-            Text(
-                text = stringResource(R.string.provide_location_to_mesh),
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.padding(start = 16.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Warning Not Paired
-        val showWarningNotPaired = !devices.any { it.value.bonded }
-        if (showWarningNotPaired) {
-            Text(
-                text = stringResource(R.string.warning_not_paired),
-                color = MaterialTheme.colorScheme.error,
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
             Spacer(modifier = Modifier.height(16.dp))
-        }
 
-        if (isAnalyticsAllowed) {
-            // Analytics Okay Checkbox
+            // Provide Location Checkbox
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable(
-                        enabled = isGooglePlayAvailable,
-                    ) {
-                        val app = (context.applicationContext as GeeksvilleApplication)
-                        app.isAnalyticsAllowed = !app.isAnalyticsAllowed // Toggle the MutableState
-                    }
+                    .toggleable(
+                        value = receivingLocationUpdates,
+                        onValueChange = { checked ->
+                            uiViewModel.provideLocation.value = checked
+                            if (checked && !context.hasLocationPermission()) {
+                                showLocationRationaleDialog = true // Show the Compose dialog
+                            }
+                            if (checked) {
+                                uiViewModel.meshService?.startProvideLocation()
+                            } else {
+                                uiViewModel.meshService?.stopProvideLocation()
+                            }
+                        },
+                        enabled = !isGpsDisabled
+                    )
                     .padding(horizontal = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Checkbox(
-                    checked = isAnalyticsAllowed,
-                    onCheckedChange = { isChecked ->
-                        debug("User changed analytics to $isChecked")
-                        (context.applicationContext as GeeksvilleApplication).isAnalyticsAllowed =
-                            isChecked
-                    },
-                    enabled = isGooglePlayAvailable
+                    checked = receivingLocationUpdates,
+                    onCheckedChange = null,
+                    enabled = !isGpsDisabled // Disable if GPS is disabled
                 )
                 Text(
-                    text = stringResource(R.string.analytics_okay),
+                    text = stringResource(R.string.provide_location_to_mesh),
                     style = MaterialTheme.typography.bodyLarge,
                     modifier = Modifier.padding(start = 16.dp)
                 )
@@ -453,42 +384,90 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Report Bug Button
-            Button(
-                onClick = { showReportBugDialog = true }, // Set state to show Report Bug dialog
-                enabled = isAnalyticsAllowed,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            ) {
-                Text(stringResource(R.string.report_bug))
+            // Warning Not Paired
+            val showWarningNotPaired = !devices.any { it.value.bonded }
+            if (showWarningNotPaired) {
+                Text(
+                    text = stringResource(R.string.warning_not_paired),
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(horizontal = 16.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
+            // Analytics Okay Checkbox
+
+            val isGooglePlayAvailable = app.isGooglePlayAvailable() || BuildConfig.DEBUG
+            val isAnalyticsAllowed = app.isAnalyticsAllowed && isGooglePlayAvailable
+            if (isGooglePlayAvailable) {
+                var loading by remember { mutableStateOf(false) }
+                LaunchedEffect(isAnalyticsAllowed) {
+                    loading = false
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .toggleable(
+                            value = isAnalyticsAllowed,
+                            onValueChange = {
+                                debug("User changed analytics to $it")
+                                app.isAnalyticsAllowed = it
+                                loading = true
+                            },
+                            role = Role.Checkbox,
+                            enabled = isGooglePlayAvailable && !loading
+                        )
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        enabled = isGooglePlayAvailable,
+                        checked = isAnalyticsAllowed,
+                        onCheckedChange = null
+                    )
+                    Text(
+                        text = stringResource(R.string.analytics_okay),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                // Report Bug Button
+                Button(
+                    onClick = { showReportBugDialog = true }, // Set state to show Report Bug dialog
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    enabled = isAnalyticsAllowed
+                ) {
+                    Text(stringResource(R.string.report_bug))
+                }
             }
         }
         // Floating Action Button (Change Radio)
-        Box(modifier = Modifier.fillMaxSize()) {
-            FloatingActionButton(
-                onClick = {
-                    val bluetoothPermissions = context.getBluetoothPermissions()
-                    if (bluetoothPermissions.isEmpty()) {
-                        // If no permissions needed, trigger the scan directly (or via ViewModel)
-                        scanModel.startScan()
+        FloatingActionButton(
+            onClick = {
+                val bluetoothPermissions = context.getBluetoothPermissions()
+                if (bluetoothPermissions.isEmpty()) {
+                    // If no permissions needed, trigger the scan directly (or via ViewModel)
+                    scanModel.startScan()
+                } else {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                        context.findActivity()
+                            .shouldShowRequestPermissionRationale(bluetoothPermissions.first())
+                    ) {
+                        showBluetoothRationaleDialog = true
                     } else {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                            context.findActivity()
-                                .shouldShowRequestPermissionRationale(bluetoothPermissions.first())
-                        ) {
-                            showBluetoothRationaleDialog = true
-                        } else {
-                            requestBluetoothPermissionLauncher.launch(bluetoothPermissions)
-                        }
+                        requestBluetoothPermissionLauncher.launch(bluetoothPermissions)
                     }
-                },
-                modifier = Modifier
-                    .align(Alignment.BottomEnd)
-                    .padding(16.dp)
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.change_radio))
-            }
+                }
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.change_radio))
         }
     }
 
