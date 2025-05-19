@@ -266,7 +266,9 @@ fun NavGraph(
                 }
             )
         ) { backStackEntry ->
-            SettingsScreen {
+            SettingsScreen(
+                uIViewModel,
+            ) {
                 navController.navigate(Route.RadioConfig()) {
                     popUpTo(Route.Settings) {
                         inclusive = false

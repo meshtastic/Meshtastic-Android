@@ -86,11 +86,12 @@ import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.android.isGooglePlayAvailable
 import com.geeksville.mesh.android.permissionMissing
+import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.repository.network.NetworkRepository
+import com.geeksville.mesh.service.MeshService
 import kotlinx.coroutines.delay
 
 fun String?.isIPAddress(): Boolean {
@@ -110,19 +111,21 @@ fun SettingsScreen(
     bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
     onSetRegion: () -> Unit,
 ) {
-    val currentRegion = uiViewModel.region
-    val regionUnset = currentRegion == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET
+    val config by uiViewModel.localConfig.collectAsState()
+    val currentRegion = config.lora.region
     val scrollState = rememberScrollState()
     val scanStatusText by scanModel.errorText.observeAsState("")
     val connectionState by uiViewModel.connectionState.collectAsState(MeshService.ConnectionState.DISCONNECTED)
     val devices by scanModel.devices.observeAsState(emptyMap())
     val scanning by scanModel.spinner.observeAsState(false)
-    val receivingLocationUpdates by uiViewModel.receivingLocationUpdates.collectAsState(false)
     val context = LocalContext.current
     val app = (context.applicationContext as GeeksvilleApplication)
     val info by uiViewModel.myNodeInfo.collectAsState()
+    var lastConnection: MyNodeEntity? by remember { mutableStateOf(null) }
     val selectedDevice = scanModel.selectedNotNull
     val bluetoothEnabled by bluetoothViewModel.enabled.observeAsState()
+    val regionUnset = currentRegion == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET &&
+            connectionState == MeshService.ConnectionState.CONNECTED
 
     val isGpsDisabled = context.gpsDisabled()
     LaunchedEffect(isGpsDisabled) {
@@ -165,10 +168,10 @@ fun SettingsScreen(
         contract = ActivityResultContracts.RequestMultiplePermissions(),
         onResult = { permissions ->
             if (permissions.entries.all { it.value }) {
-                uiViewModel.provideLocation.value = true
-                uiViewModel.meshService?.startProvideLocation()
+                uiViewModel.setProvideLocation(true)
             } else {
                 debug("User denied location permission")
+                uiViewModel.setProvideLocation(false)
                 uiViewModel.showSnackbar(context.getString(R.string.why_background_required))
             }
             bluetoothViewModel.permissionsUpdated()
@@ -200,11 +203,11 @@ fun SettingsScreen(
         showScanDialog = true
     }
 
-    LaunchedEffect(connectionState, regionUnset) {
+    LaunchedEffect(connectionState) {
         when (connectionState) {
-            MeshService.ConnectionState.CONNECTED ->
-                // Include region unset warning in status string if applicable
+            MeshService.ConnectionState.CONNECTED -> {
                 if (regionUnset) R.string.must_set_region else R.string.connected_to
+            }
 
             MeshService.ConnectionState.DISCONNECTED -> R.string.not_connected
             MeshService.ConnectionState.DEVICE_SLEEP -> R.string.connected_sleeping
@@ -215,6 +218,15 @@ fun SettingsScreen(
             if (it != null) {
                 scanModel.setErrorText(context.getString(it, firmwareString))
             }
+        }
+        when (connectionState) {
+            MeshService.ConnectionState.CONNECTED -> {
+                if (lastConnection != null && lastConnection?.myNodeNum != info?.myNodeNum) {
+                    uiViewModel.setProvideLocation(false)
+                }
+                lastConnection = info
+            }
+            else -> {}
         }
     }
     Box(modifier = Modifier.fillMaxSize()) {
@@ -349,20 +361,16 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             // Provide Location Checkbox
+            val checked by uiViewModel.provideLocation.collectAsState()
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .toggleable(
-                        value = receivingLocationUpdates,
+                        value = checked,
                         onValueChange = { checked ->
-                            uiViewModel.provideLocation.value = checked
+                            uiViewModel.setProvideLocation(checked)
                             if (checked && !context.hasLocationPermission()) {
                                 showLocationRationaleDialog = true // Show the Compose dialog
-                            }
-                            if (checked) {
-                                uiViewModel.meshService?.startProvideLocation()
-                            } else {
-                                uiViewModel.meshService?.stopProvideLocation()
                             }
                         },
                         enabled = !isGpsDisabled
@@ -371,7 +379,7 @@ fun SettingsScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Checkbox(
-                    checked = receivingLocationUpdates,
+                    checked = checked,
                     onCheckedChange = null,
                     enabled = !isGpsDisabled // Disable if GPS is disabled
                 )
