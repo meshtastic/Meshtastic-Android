@@ -17,114 +17,52 @@
 
 package com.geeksville.mesh.ui
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.Button
-import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
-import androidx.core.os.bundleOf
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.activityViewModels
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.components.BaseScaffold
-import com.geeksville.mesh.ui.message.navigateToMessages
 import com.geeksville.mesh.ui.theme.AppTheme
-import dagger.hilt.android.AndroidEntryPoint
-
-internal fun FragmentManager.navigateToShareMessage(message: String) {
-    val shareFragment = ShareFragment().apply {
-        arguments = bundleOf("message" to message)
-    }
-    beginTransaction()
-        .add(R.id.mainActivityLayout, shareFragment)
-        .addToBackStack(null)
-        .commit()
-}
-
-@AndroidEntryPoint
-class ShareFragment : ScreenFragment("ShareFragment"), Logging {
-    private val model: UIViewModel by activityViewModels()
-
-    private fun shareMessage(contactKey: String) {
-        debug("calling MessagesFragment filter:$contactKey")
-        parentFragmentManager.navigateToMessages(
-            contactKey,
-            arguments?.getString("message").toString()
-        )
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                AppTheme {
-                    ShareScreen(
-                        viewModel = model,
-                        navigateUp = parentFragmentManager::popBackStack,
-                        onConfirm = ::shareMessage
-                    )
-                }
-            }
-        }
-    }
-}
 
 @Composable
-internal fun ShareScreen(
+fun ShareScreen(
     viewModel: UIViewModel = hiltViewModel(),
-    navigateUp: () -> Unit,
     onConfirm: (String) -> Unit
 ) {
     val contactList by viewModel.contactList.collectAsStateWithLifecycle()
 
-    BaseScaffold(
-        title = stringResource(R.string.share_to),
-        canNavigateBack = true,
-        navigateUp = navigateUp,
-    ) {
-        ShareContent(
-            contacts = contactList,
-            onConfirm = onConfirm,
-        )
-    }
+    ShareScreen(
+        contacts = contactList,
+        onConfirm = onConfirm,
+    )
 }
 
 @Composable
-private fun ShareContent(
+fun ShareScreen(
     contacts: List<Contact>,
-    onConfirm: (String) -> Unit = {}
+    onConfirm: (String) -> Unit
 ) {
-    var selectedContact by rememberSaveable { mutableStateOf("") }
+    var selectedContact by remember { mutableStateOf("") }
 
     Column {
         LazyColumn(
@@ -161,9 +99,9 @@ private fun ShareContent(
 
 @PreviewScreenSizes
 @Composable
-private fun ShareContentPreview() {
+private fun ShareScreenPreview() {
     AppTheme {
-        ShareContent(
+        ShareScreen(
             contacts = listOf(
                 Contact(
                     contactKey = "0^all",
@@ -176,6 +114,7 @@ private fun ShareContentPreview() {
                     isMuted = true,
                 ),
             ),
+            onConfirm = {},
         )
     }
 }

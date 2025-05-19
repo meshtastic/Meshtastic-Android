@@ -413,7 +413,7 @@
     <string name="auto_screen_carousel_seconds">Cambia schermate automaticamente (secondi)</string>
     <string name="compass_north_top">Tieni in alto il nord della bussola</string>
     <string name="flip_screen">Capovolgi schermo</string>
-    <string name="display_units">Visualizza unità</string>
+    <string name="display_units">Unità di misura visualizzata</string>
     <string name="override_oled_auto_detect">Sovrascrivi rilevamento automatico OLED</string>
     <string name="display_mode">Modalità schermo</string>
     <string name="heading_bold">Titoli in grassetto</string>
@@ -440,7 +440,7 @@
     <string name="use_i2s_as_buzzer">Usa I2S come buzzer</string>
     <string name="lora_config">Configurazione LoRa</string>
     <string name="use_modem_preset">Usa preimpostazioni del modem</string>
-    <string name="modem_preset">Preimpostazioni modem</string>
+    <string name="modem_preset">Preimpostazione modem</string>
     <string name="bandwidth">Larghezza di banda</string>
     <string name="spread_factor">Fattore di spread</string>
     <string name="coding_rate">Velocità di codifica</string>
@@ -450,7 +450,7 @@
     <string name="tx_enabled">TX attivata</string>
     <string name="tx_power_dbm">Potenza TX (dBm)</string>
     <string name="frequency_slot">Slot di frequenza</string>
-    <string name="override_duty_cycle">Ignora limiti di Duty Cycle</string>
+    <string name="override_duty_cycle">Ignora limite di Duty Cycle</string>
     <string name="ignore_incoming">Ignora in arrivo</string>
     <string name="sx126x_rx_boosted_gain">Migliora guadagno in RX su SX126X</string>
     <string name="override_frequency_mhz">Sovrascrivi la frequenza (MHz)</string>
@@ -544,12 +544,12 @@
     <string name="telemetry_config">Configurazione Telemetria</string>
     <string name="device_metrics_update_interval_seconds">Intervallo aggiornamento metriche dispositivo (secondi)</string>
     <string name="environment_metrics_update_interval_seconds">Intervallo aggiornamento metriche ambientali (secondi)</string>
-    <string name="environment_metrics_module_enabled">Modulo delle metriche ambientali abilitato</string>
+    <string name="environment_metrics_module_enabled">Modulo metriche ambientali abilitato</string>
     <string name="environment_metrics_on_screen_enabled">Metriche ambientali visualizzate su schermo</string>
-    <string name="environment_metrics_use_fahrenheit">Usare i gradi Fahrenheit nelle metriche ambientali</string>
-    <string name="air_quality_metrics_module_enabled">Modulo delle metriche della qualità dell\'aria abilitato</string>
+    <string name="environment_metrics_use_fahrenheit">Usa i gradi Fahrenheit nelle metriche ambientali</string>
+    <string name="air_quality_metrics_module_enabled">Modulo metriche della qualità dell\'aria abilitato</string>
     <string name="air_quality_metrics_update_interval_seconds">Intervallo aggiornamento metriche qualità dell\'aria (secondi)</string>
-    <string name="power_metrics_module_enabled">Modulo delle metriche di alimentazione abilitato</string>
+    <string name="power_metrics_module_enabled">Modulo metriche di alimentazione abilitato</string>
     <string name="power_metrics_update_interval_seconds">Intervallo aggiornamento metriche alimentazione (secondi)</string>
     <string name="power_metrics_on_screen_enabled">Metriche di alimentazione visualizzate su schermo</string>
     <string name="user_config">Configurazione Utente</string>
@@ -557,7 +557,6 @@
     <string name="long_name">Nome esteso</string>
     <string name="short_name">Nome breve</string>
     <string name="hardware_model">Modello hardware</string>
-    <string name="licensed_amateur_radio">Radioamatore con licenza</string>
     <string name="dew_point">Punto Di Rugiada</string>
     <string name="pressure">Pressione</string>
     <string name="gas_resistance">Resistenza Ai Gas</string>

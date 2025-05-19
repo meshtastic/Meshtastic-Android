@@ -28,20 +28,11 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.BlurOn
@@ -69,6 +60,11 @@ import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material.icons.outlined.Navigation
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -95,6 +91,7 @@ import com.geeksville.mesh.model.DeviceHardware
 import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
@@ -125,7 +122,8 @@ private enum class LogsType(
 fun NodeDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: MetricsViewModel = hiltViewModel(),
-    onNavigate: (Route) -> Unit,
+    uiViewModel: UIViewModel = hiltViewModel(),
+    onNavigate: (Route) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
@@ -139,11 +137,13 @@ fun NodeDetailScreen(
             environmentState.hasEnvironmentMetrics(),
             state.hasSignalMetrics(),
             state.hasPowerMetrics(),
-            state.hasTracerouteLogs())
+            state.hasTracerouteLogs()
+        )
     }
 
     if (state.node != null) {
         val node = state.node ?: return
+        uiViewModel.setTitle(node.user.longName)
         NodeDetailList(
             node = node,
             metricsState = state,
@@ -236,7 +236,7 @@ private fun NodeDetailRow(
     label: String,
     icon: ImageVector,
     value: String,
-    iconTint: Color = MaterialTheme.colors.onSurface
+    iconTint: Color = MaterialTheme.colorScheme.onSurface
 ) {
     Row(
         modifier = Modifier
@@ -332,15 +332,14 @@ private fun NodeDetailsContent(
             Spacer(Modifier.width(12.dp))
             Text(
                 text = stringResource(id = R.string.encryption_error),
-                style = MaterialTheme.typography.h6.copy(color = Color.Red),
+                style = MaterialTheme.typography.titleLarge.copy(color = Color.Red),
                 textAlign = TextAlign.Center,
             )
         }
         Spacer(Modifier.height(16.dp))
         Text(
             text = stringResource(id = R.string.encryption_error_text),
-            style = MaterialTheme.typography.body2,
-            color = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
+            style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(16.dp))
@@ -389,41 +388,43 @@ private fun InfoCard(
     rotateIcon: Float = 0f,
 ) {
     Card(
-        shape = RoundedCornerShape(12.dp),
-        backgroundColor = MaterialTheme.colors.surface,
-        elevation = 4.dp,
         modifier = Modifier
             .padding(4.dp)
-            .widthIn(min = 100.dp, max = 150.dp)
-            .heightIn(min = 100.dp, max = 150.dp)
+            .width(100.dp)
+            .height(100.dp),
     ) {
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
+        Box(
+            modifier = Modifier
+                .padding(4.dp)
+                .width(100.dp)
+                .height(100.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = text,
-                modifier = Modifier
-                    .size(24.dp)
-                    .thenIf(rotateIcon != 0f) { rotate(rotateIcon) },
-            )
-            Text(
-                text = text,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.subtitle2
-            )
-            Text(
-                text = value,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = if (value.length < 7) {
-                    MaterialTheme.typography.h5
-                } else {
-                    MaterialTheme.typography.h6
-                },
-            )
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = text,
+                    modifier = Modifier
+                        .size(24.dp)
+                        .thenIf(rotateIcon != 0f) { rotate(rotateIcon) },
+                )
+                Text(
+                    textAlign = TextAlign.Center,
+                    text = text,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.labelSmall
+                )
+                Text(
+                    text = value,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleMedium,
+                )
+            }
         }
     }
 }
@@ -436,7 +437,7 @@ private fun EnvironmentMetrics(
 ) = with(node.environmentMetrics) {
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
+        horizontalArrangement = Arrangement.SpaceEvenly,
         verticalArrangement = Arrangement.SpaceEvenly,
     ) {
         if (hasTemperature()) {

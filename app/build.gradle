@@ -27,13 +27,13 @@ android {
             storePassword keystoreProperties['storePassword']
         }
     }
-    compileSdk 35
+    compileSdk 36
     defaultConfig {
         applicationId "com.geeksville.mesh"
         minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
-        targetSdk 34
-        versionCode 30525 // format is Mmmss (where M is 1+the numeric major number
-        versionName "2.5.25"
+        targetSdk 36
+        versionCode 30600 // format is Mmmss (where M is 1+the numeric major number
+        versionName "2.6.0"
         testInstrumentationRunner "com.geeksville.mesh.TestRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio
@@ -103,6 +103,7 @@ android {
     }
     lint {
         abortOnError false
+        disable += "MissingTranslation"
     }
     sourceSets {
         // Adds exported schema location as test app assets.

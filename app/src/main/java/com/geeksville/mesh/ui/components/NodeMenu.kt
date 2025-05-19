@@ -18,15 +18,14 @@
 package com.geeksville.mesh.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.Checkbox
-import androidx.compose.material.Divider
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -96,7 +95,7 @@ fun NodeMenu(
         )
     }
     DropdownMenu(
-        modifier = Modifier.background(MaterialTheme.colors.background.copy(alpha = 1f)),
+        modifier = Modifier.background(MaterialTheme.colorScheme.background.copy(alpha = 1f)),
         expanded = expanded,
         onDismissRequest = onDismissRequest,
     ) {
@@ -107,28 +106,28 @@ fun NodeMenu(
                     onDismissRequest()
                     onAction(NodeMenuAction.DirectMessage(node))
                 },
-                content = { Text(stringResource(R.string.direct_message)) }
+                text = { Text(stringResource(R.string.direct_message)) }
             )
             DropdownMenuItem(
                 onClick = {
                     onDismissRequest()
                     onAction(NodeMenuAction.RequestUserInfo(node))
                 },
-                content = { Text(stringResource(R.string.exchange_userinfo)) }
+                text = { Text(stringResource(R.string.exchange_userinfo)) }
             )
             DropdownMenuItem(
                 onClick = {
                     onDismissRequest()
                     onAction(NodeMenuAction.RequestPosition(node))
                 },
-                content = { Text(stringResource(R.string.exchange_position)) }
+                text = { Text(stringResource(R.string.exchange_position)) }
             )
             DropdownMenuItem(
                 onClick = {
                     onDismissRequest()
                     onAction(NodeMenuAction.TraceRoute(node))
                 },
-                content = { Text(stringResource(R.string.traceroute)) }
+                text = { Text(stringResource(R.string.traceroute)) }
             )
             DropdownMenuItem(
                 onClick = {
@@ -136,51 +135,56 @@ fun NodeMenu(
                     displayFavoriteDialog = true
                 },
                 enabled = !node.isIgnored,
-            ) {
-                Text(stringResource(R.string.favorite))
-                Spacer(Modifier.weight(1f))
-                Checkbox(
-                    checked = node.isFavorite,
-                    onCheckedChange = {
-                        onDismissRequest()
-                        displayFavoriteDialog = true
-                    },
-                    modifier = Modifier.size(24.dp),
-                    enabled = !node.isIgnored,
-                )
-            }
+                text = {
+                    Text(stringResource(R.string.favorite))
+                },
+                trailingIcon = {
+                    Checkbox(
+                        checked = node.isFavorite,
+                        onCheckedChange = {
+                            onDismissRequest()
+                            displayFavoriteDialog = true
+                        },
+                        modifier = Modifier.size(24.dp),
+                        enabled = !node.isIgnored,
+                    )
+                }
+            )
             DropdownMenuItem(
                 onClick = {
                     onDismissRequest()
                     displayIgnoreDialog = true
                 },
-            ) {
-                Text(stringResource(R.string.ignore))
-                Spacer(Modifier.weight(1f))
-                Checkbox(
-                    checked = node.isIgnored,
-                    onCheckedChange = {
-                        onDismissRequest()
-                        displayIgnoreDialog = true
-                    },
-                    modifier = Modifier.size(24.dp),
-                )
-            }
+                text = {
+                    Text(stringResource(R.string.ignore))
+                },
+                trailingIcon = {
+                    Checkbox(
+                        checked = node.isIgnored,
+                        onCheckedChange = {
+                            onDismissRequest()
+                            displayIgnoreDialog = true
+                        },
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
+            )
             DropdownMenuItem(
                 onClick = {
                     onDismissRequest()
                     displayRemoveDialog = true
                 },
                 enabled = !node.isIgnored,
-            ) { Text(stringResource(R.string.remove)) }
-            Divider(Modifier.padding(vertical = 8.dp))
+                text = { Text(stringResource(R.string.remove)) }
+            )
+            HorizontalDivider(Modifier.padding(vertical = 8.dp))
         }
         DropdownMenuItem(
             onClick = {
                 onDismissRequest()
                 onAction(NodeMenuAction.MoreDetails(node))
             },
-            content = { Text(stringResource(R.string.more_details)) }
+            text = { Text(stringResource(R.string.more_details)) }
         )
     }
 }

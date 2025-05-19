@@ -23,20 +23,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Close
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -67,12 +64,7 @@ inline fun <reified T> EditListPreference(
         Text(
             modifier = modifier.padding(16.dp),
             text = title,
-            style = MaterialTheme.typography.body2,
-            color = if (enabled) {
-                Color.Unspecified
-            } else {
-                MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
-            },
+            style = MaterialTheme.typography.bodyMedium,
         )
         listState.forEachIndexed { index, value ->
             val trailingIcon = @Composable {
@@ -176,9 +168,6 @@ inline fun <reified T> EditListPreference(
                 listState.add(listState.size, newElement)
             },
             enabled = maxCount > listState.size,
-            colors = ButtonDefaults.buttonColors(
-                disabledContentColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
-            )
         ) { Text(text = stringResource(R.string.add)) }
     }
 }

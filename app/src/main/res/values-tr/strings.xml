@@ -557,7 +557,6 @@
     <string name="long_name">Uzun ad</string>
     <string name="short_name">Kısa ad</string>
     <string name="hardware_model">Donanım modeli</string>
-    <string name="licensed_amateur_radio">Lisanslı amatör radyo</string>
     <string name="dew_point">Çiğ Noktası</string>
     <string name="pressure">Basınç</string>
     <string name="gas_resistance">Gaz Direnci</string>
@@ -569,4 +568,19 @@
     <string name="store_forward_config"><![CDATA[Kaydet & Yönlendir Ayarı]]></string>
     <string name="indoor_air_quality_iaq">İç Hava Kalitesi (IAQ)</string>
     <string name="url">URL</string>
+    <string name="backup_restore"><![CDATA[Yedekleme & Geri yükleme]]></string>
+    <string name="import_configuration">Ayarları içe aktar</string>
+    <string name="export_configuration">Ayarları dışa aktar</string>
+    <string name="hardware">Donanım</string>
+    <string name="supported">Desteklenen</string>
+    <string name="node_number">Düğüm Numarası</string>
+    <string name="user_id">Kullanıcı Kimliği</string>
+    <string name="uptime">Çalışma Süresi</string>
+    <string name="firmware_version">Yazılım sürümü</string>
+    <string name="timestamp">Zaman bilgisi</string>
+    <string name="heading">İstikamet</string>
+    <string name="sats">Uydular</string>
+    <string name="alt">Yükseklik</string>
+    <string name="set_region">Bölge Ayarla</string>
+    <string name="unmute">Sesi aç</string>
 </resources>

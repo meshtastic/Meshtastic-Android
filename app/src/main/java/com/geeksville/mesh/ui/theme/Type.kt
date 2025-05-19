@@ -15,14 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.radioconfig
+package com.geeksville.mesh.ui.theme
 
-import androidx.annotation.StringRes
-import com.geeksville.mesh.R
+import androidx.compose.material3.Typography
 
-enum class AdminRoute(@StringRes val title: Int) {
-    REBOOT(R.string.reboot),
-    SHUTDOWN(R.string.shutdown),
-    FACTORY_RESET(R.string.factory_reset),
-    NODEDB_RESET(R.string.nodedb_reset),
-}
+val AppTypography = Typography()

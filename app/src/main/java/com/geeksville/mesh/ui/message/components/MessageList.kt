@@ -50,6 +50,7 @@ import kotlinx.coroutines.flow.debounce
 @Suppress("LongMethod")
 @Composable
 internal fun MessageList(
+    modifier: Modifier = Modifier,
     messages: List<Message>,
     selectedIds: MutableState<Set<Long>>,
     onUnreadChanged: (Long) -> Unit,
@@ -84,7 +85,7 @@ internal fun MessageList(
     }
 
     LazyColumn(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         state = listState,
         reverseLayout = true,
     ) {

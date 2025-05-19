@@ -22,7 +22,6 @@ import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -37,19 +36,18 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.Card
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.twotone.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -65,6 +63,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.navigation.AdminRoute
+import com.geeksville.mesh.navigation.ConfigRoute
+import com.geeksville.mesh.navigation.ModuleRoute
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.radioconfig.components.EditDeviceProfileDialog
@@ -79,13 +81,19 @@ private fun getNavRouteFrom(routeName: String): Route? {
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun RadioConfigScreen(
-    viewModel: RadioConfigViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
+    viewModel: RadioConfigViewModel = hiltViewModel(),
+    uiViewModel: UIViewModel = hiltViewModel(),
     onNavigate: (Route) -> Unit = {}
 ) {
+    val node by viewModel.destNode.collectAsStateWithLifecycle()
+    val nodeName: String? = node?.user?.longName
+    nodeName?.let {
+        uiViewModel.setTitle(it)
+    }
+
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     var isWaiting by remember { mutableStateOf(false) }
-
     if (isWaiting) {
         PacketResponseStateDialog(
             state = state.responseState,
@@ -155,8 +163,8 @@ fun RadioConfigScreen(
     }
 
     RadioConfigItemList(
-        state = state,
         modifier = modifier,
+        state = state,
         onRouteClick = { route ->
             isWaiting = true
             viewModel.setResponseStateLoading(route)
@@ -185,18 +193,12 @@ fun NavCard(
     icon: ImageVector? = null,
     onClick: () -> Unit
 ) {
-    val color = if (enabled) {
-        MaterialTheme.colors.onSurface
-    } else {
-        MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
-    }
-
     Card(
+        onClick = onClick,
+        enabled = enabled,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 2.dp)
-            .clickable(enabled = enabled) { onClick() },
-        elevation = 4.dp
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -207,20 +209,17 @@ fun NavCard(
                     imageVector = icon,
                     contentDescription = title,
                     modifier = Modifier.size(24.dp),
-                    tint = color,
                 )
                 Spacer(modifier = Modifier.width(8.dp))
             }
             Text(
                 text = title,
-                style = MaterialTheme.typography.body1,
-                color = color,
+                style = MaterialTheme.typography.bodyLarge,
                 modifier = Modifier.weight(1f)
             )
             Icon(
                 Icons.AutoMirrored.TwoTone.KeyboardArrowRight, "trailingIcon",
                 modifier = Modifier.wrapContentSize(),
-                tint = color,
             )
         }
     }
@@ -234,7 +233,6 @@ private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Un
         AlertDialog(
             onDismissRequest = {},
             shape = RoundedCornerShape(16.dp),
-            backgroundColor = MaterialTheme.colors.background,
             title = {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -246,7 +244,8 @@ private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Un
                         modifier = Modifier.padding(end = 8.dp)
                     )
                     Text(
-                        text = "${stringResource(title)}?\n")
+                        text = "${stringResource(title)}?\n"
+                    )
                     Icon(
                         imageVector = Icons.TwoTone.Warning,
                         contentDescription = "warning",
@@ -254,7 +253,7 @@ private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Un
                     )
                 }
             },
-            buttons = {
+            confirmButton = {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -305,12 +304,20 @@ private fun RadioConfigItemList(
     ) {
         item { PreferenceCategory(stringResource(R.string.device_settings)) }
         items(ConfigRoute.filterExcludedFrom(state.metadata)) {
-            NavCard(title = stringResource(it.title), icon = it.icon, enabled = enabled) { onRouteClick(it) }
+            NavCard(
+                title = stringResource(it.title),
+                icon = it.icon,
+                enabled = enabled
+            ) { onRouteClick(it) }
         }
 
         item { PreferenceCategory(stringResource(R.string.module_settings)) }
         items(ModuleRoute.filterExcludedFrom(state.metadata)) {
-            NavCard(title = stringResource(it.title), icon = it.icon, enabled = enabled) { onRouteClick(it) }
+            NavCard(
+                title = stringResource(it.title),
+                icon = it.icon,
+                enabled = enabled
+            ) { onRouteClick(it) }
         }
 
         if (state.isLocal) {

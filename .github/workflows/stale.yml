@@ -1,0 +1,24 @@
+name: Close Stale Issues
+on:
+  schedule:
+    - cron: 0 6 * * *
+  workflow_dispatch: {}
+
+permissions:
+  issues: write
+  pull-requests: write
+  actions: write
+
+jobs:
+  stale_issues:
+    name: Close Stale Issues
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Stale PR+Issues
+        uses: actions/stale@v9.1.0
+        with:
+          days-before-stale: 30
+          exempt-issue-labels: 'has sponsor,needs sponsor,help wanted,backlog,security issue,l10n,dependencies' 
+          exempt-pr-labels: 'has sponsor,needs sponsor,help wanted,backlog,security issue,l10n,dependencies'
+          operations-per-run: 1000

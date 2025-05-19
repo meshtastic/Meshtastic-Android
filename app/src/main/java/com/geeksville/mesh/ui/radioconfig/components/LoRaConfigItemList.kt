@@ -20,7 +20,7 @@ package com.geeksville.mesh.ui.radioconfig.components
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -103,7 +103,7 @@ fun LoRaConfigItemList(
                 onCheckedChange = { loraInput = loraInput.copy { usePreset = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         if (loraInput.usePreset) {
             item {
@@ -117,7 +117,7 @@ fun LoRaConfigItemList(
                     onItemSelected = { loraInput = loraInput.copy { modemPreset = it } }
                 )
             }
-            item { Divider() }
+            item { HorizontalDivider() }
         } else {
             item {
                 EditTextPreference(
@@ -169,7 +169,7 @@ fun LoRaConfigItemList(
                 onItemSelected = { loraInput = loraInput.copy { region = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             EditTextPreference(
@@ -189,7 +189,7 @@ fun LoRaConfigItemList(
                 onCheckedChange = { loraInput = loraInput.copy { txEnabled = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             SignedIntegerEditTextPreference(
@@ -225,7 +225,7 @@ fun LoRaConfigItemList(
                 onCheckedChange = { loraInput = loraInput.copy { overrideDutyCycle = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             EditListPreference(
@@ -251,7 +251,7 @@ fun LoRaConfigItemList(
                 onCheckedChange = { loraInput = loraInput.copy { sx126XRxBoostedGain = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             var isFocused by remember { mutableStateOf(false) }
@@ -274,7 +274,7 @@ fun LoRaConfigItemList(
                     onCheckedChange = { loraInput = loraInput.copy { paFanDisabled = it } }
                 )
             }
-            item { Divider() }
+            item { HorizontalDivider() }
         }
 
         item {
@@ -285,7 +285,7 @@ fun LoRaConfigItemList(
                 onCheckedChange = { loraInput = loraInput.copy { ignoreMqtt = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             SwitchPreference(
@@ -295,7 +295,7 @@ fun LoRaConfigItemList(
                 onCheckedChange = { loraInput = loraInput.copy { configOkToMqtt = it } }
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             PreferenceFooter(

@@ -17,9 +17,9 @@
 
 package com.geeksville.mesh
 
-import android.app.Activity
+import android.app.PendingIntent
+import android.app.TaskStackBuilder
 import android.bluetooth.BluetoothAdapter
-import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -27,136 +27,59 @@ import android.hardware.usb.UsbManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.os.RemoteException
 import android.provider.Settings
-import android.text.Html
-import android.text.method.LinkMovementMethod
-import android.view.Menu
-import android.view.MenuItem
 import android.view.MotionEvent
-import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.appcompat.widget.Toolbar
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.core.content.ContextCompat
+import androidx.compose.ui.Modifier
 import androidx.core.content.edit
+import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import androidx.core.view.setPadding
-import androidx.fragment.app.Fragment
-import androidx.fragment.app.FragmentManager
-import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.asLiveData
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.geeksville.mesh.android.BindFailedException
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.ServiceClient
-import com.geeksville.mesh.android.dpToPx
 import com.geeksville.mesh.android.getBluetoothPermissions
 import com.geeksville.mesh.android.getNotificationPermissions
 import com.geeksville.mesh.android.hasBluetoothPermission
 import com.geeksville.mesh.android.hasNotificationPermission
 import com.geeksville.mesh.android.permissionMissing
-import com.geeksville.mesh.android.rationaleDialog
 import com.geeksville.mesh.android.shouldShowRequestPermissionRationale
 import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.databinding.ActivityMainBinding
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.navigation.navigateToNavGraph
+import com.geeksville.mesh.navigation.DEEP_LINK_BASE_URI
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.service.startService
-import com.geeksville.mesh.ui.ChannelFragment
-import com.geeksville.mesh.ui.ContactsFragment
-import com.geeksville.mesh.ui.DebugFragment
-import com.geeksville.mesh.ui.QuickChatSettingsFragment
-import com.geeksville.mesh.ui.SettingsFragment
-import com.geeksville.mesh.ui.UsersFragment
-import com.geeksville.mesh.ui.components.ScannedQrCodeDialog
-import com.geeksville.mesh.ui.map.MapFragment
-import com.geeksville.mesh.ui.message.navigateToMessages
-import com.geeksville.mesh.ui.navigateToShareMessage
+import com.geeksville.mesh.ui.MainMenuAction
+import com.geeksville.mesh.ui.MainScreen
 import com.geeksville.mesh.ui.theme.AppTheme
+import com.geeksville.mesh.ui.theme.MODE_DYNAMIC
 import com.geeksville.mesh.util.Exceptions
 import com.geeksville.mesh.util.LanguageUtils
 import com.geeksville.mesh.util.getPackageInfoCompat
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.snackbar.Snackbar
-import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
-import java.text.DateFormat
-import java.util.Date
 import javax.inject.Inject
-
-/*
-UI design
-
-material setup instructions: https://material.io/develop/android/docs/getting-started/
-dark theme (or use system eventually) https://material.io/develop/android/theming/dark/
-
-NavDrawer is a standard draw which can be dragged in from the left or the menu icon inside the app
-title.
-
-Fragments:
-
-SettingsFragment shows "Settings"
-  username
-  shortname
-  bluetooth pairing list
-  (eventually misc device settings that are not channel related)
-
-Channel fragment "Channel"
-  qr code, copy link button
-  ch number
-  misc other settings
-  (eventually a way of choosing between past channels)
-
-ChatFragment "Messages"
-  a text box to enter new texts
-  a scrolling list of rows.  each row is a text and a sender info layout
-
-NodeListFragment "Users"
-  a node info row for every node
-
-ViewModels:
-
-  BTScanModel starts/stops bt scan and provides list of devices (manages entire scan lifecycle)
-
-  MeshModel contains: (manages entire service relationship)
-  current received texts
-  current radio macaddr
-  current node infos (updated dynamically)
-
-eventually use bottom navigation bar to switch between, Members, Chat, Channel, Settings. https://material.io/develop/android/components/bottom-navigation-view/
-  use numbers of # chat messages and # of members in the badges.
-
-(per this recommendation to not use top tabs: https://ux.stackexchange.com/questions/102439/android-ux-when-to-use-bottom-navigation-and-when-to-use-tabs )
-
-
-eventually:
-  make a custom theme: https://github.com/material-components/material-components-android/tree/master/material-theme-builder
-*/
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), Logging {
-
-    private lateinit var binding: ActivityMainBinding
 
     // Used to schedule a coroutine in the GUI thread
     private val mainScope = CoroutineScope(Dispatchers.Main + Job())
@@ -173,7 +96,7 @@ class MainActivity : AppCompatActivity(), Logging {
                 info("Bluetooth permissions granted")
             } else {
                 warn("Bluetooth permissions denied")
-                showSnackbar(permissionMissing)
+                model.showSnackbar(permissionMissing)
             }
             requestedEnable = false
             bluetoothViewModel.permissionsUpdated()
@@ -186,46 +109,12 @@ class MainActivity : AppCompatActivity(), Logging {
                 checkAlertDnD()
             } else {
                 warn("Notification permissions denied")
-                showSnackbar(getString(R.string.notification_denied), Snackbar.LENGTH_SHORT)
+                model.showSnackbar(getString(R.string.notification_denied))
             }
         }
 
-    data class TabInfo(@StringRes val textResId: Int, val icon: Int, val content: Fragment)
-
-    private val tabInfos = arrayOf(
-        TabInfo(
-            R.string.main_tab_messages,
-            R.drawable.ic_twotone_message_24,
-            ContactsFragment()
-        ),
-        TabInfo(
-            R.string.main_tab_users,
-            R.drawable.ic_twotone_people_24,
-            UsersFragment()
-        ),
-        TabInfo(
-            R.string.main_tab_map,
-            R.drawable.ic_twotone_map_24,
-            MapFragment()
-        ),
-        TabInfo(
-            R.string.main_tab_channel,
-            R.drawable.ic_twotone_contactless_24,
-            ChannelFragment()
-        ),
-        TabInfo(
-            R.string.main_tab_settings,
-            R.drawable.ic_twotone_settings_applications_24,
-            SettingsFragment()
-        )
-    )
-
-    private val tabsAdapter = object : FragmentStateAdapter(supportFragmentManager, lifecycle) {
-        override fun getItemCount(): Int = tabInfos.size
-        override fun createFragment(position: Int): Fragment = tabInfos[position].content
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         installSplashScreen()
         super.onCreate(savedInstanceState)
 
@@ -235,10 +124,6 @@ class MainActivity : AppCompatActivity(), Logging {
             val lang = prefs.getString("lang", LanguageUtils.SYSTEM_DEFAULT)
             if (lang != LanguageUtils.SYSTEM_MANAGED) LanguageUtils.migrateLanguagePrefs(prefs)
             info("in-app language is ${LanguageUtils.getLocale()}")
-            // Set theme
-            AppCompatDelegate.setDefaultNightMode(
-                prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-            )
             // First run: show AppIntroduction
             if (!prefs.getBoolean("app_intro_completed", false)) {
                 startActivity(Intent(this, AppIntroduction::class.java))
@@ -247,72 +132,28 @@ class MainActivity : AppCompatActivity(), Logging {
             (application as GeeksvilleApplication).askToRate(this)
         }
 
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        setContent {
+            Box(Modifier.safeDrawingPadding()) {
+                val theme by model.theme.collectAsState()
+                val dynamic = theme == MODE_DYNAMIC
+                val dark = when (theme) {
+                    AppCompatDelegate.MODE_NIGHT_YES -> true
+                    AppCompatDelegate.MODE_NIGHT_NO -> false
+                    AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> isSystemInDarkTheme()
+                    else -> isSystemInDarkTheme()
+                }
 
-        initToolbar()
-
-        binding.pager.adapter = tabsAdapter
-        binding.pager.isUserInputEnabled =
-            false // Gestures for screen switching doesn't work so good with the map view
-        // pager.offscreenPageLimit = 0 // Don't keep any offscreen pages around, because we want to make sure our bluetooth scanning stops
-        TabLayoutMediator(binding.tabLayout, binding.pager, false, false) { tab, position ->
-            tab.icon = ContextCompat.getDrawable(this, tabInfos[position].icon)
-            tab.contentDescription = ContextCompat.getString(this, tabInfos[position].textResId)
-        }.attach()
-
-        binding.tabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-            override fun onTabSelected(tab: TabLayout.Tab?) {
-                val mainTab = tab?.position ?: 0
-                model.setCurrentTab(mainTab)
-            }
-            override fun onTabUnselected(tab: TabLayout.Tab?) { }
-            override fun onTabReselected(tab: TabLayout.Tab?) { }
-        })
-
-        binding.composeView.setContent {
-            val connState by model.connectionState.collectAsStateWithLifecycle()
-            val channels by model.channels.collectAsStateWithLifecycle()
-            val requestChannelSet by model.requestChannelSet.collectAsStateWithLifecycle()
-
-            AppTheme {
-                if (connState.isConnected()) {
-                    if (requestChannelSet != null) {
-                        ScannedQrCodeDialog(
-                            channels = channels,
-                            incoming = requestChannelSet!!,
-                            onDismiss = model::clearRequestChannelUrl,
-                            onConfirm = model::setChannels,
-                        )
-                    }
+                AppTheme(
+                    dynamicColor = dynamic,
+                    darkTheme = dark,
+                ) {
+                    MainScreen(viewModel = model, onAction = ::onMainMenuAction)
                 }
             }
         }
 
         // Handle any intent
         handleIntent(intent)
-    }
-
-    private fun initToolbar() {
-        val toolbar = binding.toolbar as Toolbar
-        setSupportActionBar(toolbar)
-        supportActionBar?.setDisplayShowTitleEnabled(false)
-    }
-
-    private fun updateConnectionStatusImage(connected: MeshService.ConnectionState) {
-        if (model.actionBarMenu == null) return
-
-        val (image, tooltip) = when (connected) {
-            MeshService.ConnectionState.CONNECTED -> R.drawable.cloud_on to R.string.connected
-            MeshService.ConnectionState.DEVICE_SLEEP -> R.drawable.ic_twotone_cloud_upload_24 to R.string.device_sleeping
-            MeshService.ConnectionState.DISCONNECTED -> R.drawable.cloud_off to R.string.disconnected
-        }
-
-        val item = model.actionBarMenu?.findItem(R.id.connectStatusImage)
-        if (item != null) {
-            item.setIcon(image)
-            item.setTitle(tooltip)
-        }
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -329,17 +170,11 @@ class MainActivity : AppCompatActivity(), Logging {
             Intent.ACTION_VIEW -> {
                 debug("Asked to open a channel URL - ask user if they want to switch to that channel.  If so send the config to the radio")
                 appLinkData?.let(model::requestChannelUrl)
-
                 // We now wait for the device to connect, once connected, we ask the user if they want to switch to the new channel
             }
 
-            MeshServiceNotifications.OPEN_MESSAGE_ACTION -> {
-                val contactKey =
-                    intent.getStringExtra(MeshServiceNotifications.OPEN_MESSAGE_EXTRA_CONTACT_KEY)
-                showMessages(contactKey)
-            }
-
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
+                debug("USB device attached")
                 showSettingsPage()
             }
 
@@ -349,7 +184,7 @@ class MainActivity : AppCompatActivity(), Logging {
             Intent.ACTION_SEND -> {
                 val text = intent.getStringExtra(Intent.EXTRA_TEXT)
                 if (text != null) {
-                    shareMessages(text)
+                    createShareIntent(text).send()
                 }
             }
 
@@ -357,6 +192,34 @@ class MainActivity : AppCompatActivity(), Logging {
                 warn("Unexpected action $appLinkAction")
             }
         }
+    }
+
+    private fun createShareIntent(message: String): PendingIntent {
+        val deepLink = "$DEEP_LINK_BASE_URI/share?message=$message"
+        val startActivityIntent = Intent(
+            Intent.ACTION_VIEW, deepLink.toUri(),
+            this, MainActivity::class.java
+        )
+
+        val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
+            addNextIntentWithParentStack(startActivityIntent)
+            getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE)
+        }
+        return resultPendingIntent!!
+    }
+
+    private fun createSettingsIntent(): PendingIntent {
+        val deepLink = "$DEEP_LINK_BASE_URI/settings"
+        val startActivityIntent = Intent(
+            Intent.ACTION_VIEW, deepLink.toUri(),
+            this, MainActivity::class.java
+        )
+
+        val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
+            addNextIntentWithParentStack(startActivityIntent)
+            getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE)
+        }
+        return resultPendingIntent!!
     }
 
     private var requestedEnable = false
@@ -369,7 +232,7 @@ class MainActivity : AppCompatActivity(), Logging {
     private val createDocumentLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
-        if (it.resultCode == Activity.RESULT_OK) {
+        if (it.resultCode == RESULT_OK) {
             it.data?.data?.let { file_uri -> model.saveMessagesCSV(file_uri) }
         }
     }
@@ -377,30 +240,6 @@ class MainActivity : AppCompatActivity(), Logging {
     override fun onDestroy() {
         mainScope.cancel("Activity going away")
         super.onDestroy()
-    }
-
-    /** Show an alert that may contain HTML */
-    private fun showAlert(titleText: Int, messageText: Int) {
-
-        // make links clickable per https://stackoverflow.com/a/62642807
-        // val messageStr = getText(messageText)
-
-        val builder = MaterialAlertDialogBuilder(this)
-            .setCancelable(false)
-            .setTitle(titleText)
-            .setMessage(messageText)
-            .setPositiveButton(R.string.okay) { _, _ ->
-                info("User acknowledged")
-            }
-
-        val dialog = builder.show()
-
-        // Make the textview clickable. Must be called after show()
-        val view = (dialog.findViewById(android.R.id.message) as TextView?)!!
-        // Linkify.addLinks(view, Linkify.ALL) // not needed with this method
-        view.movementMethod = LinkMovementMethod.getInstance()
-
-        showSettingsPage() // Default to the settings page in this case
     }
 
     // Called when we gain/lose a connection to our mesh radio
@@ -413,15 +252,20 @@ class MainActivity : AppCompatActivity(), Logging {
                     if (info != null) {
                         val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
                         if (isOld) {
-                            showAlert(R.string.app_too_old, R.string.must_update)
+                            model.showAlert(
+                                getString(R.string.app_too_old),
+                                getString(R.string.must_update),
+                                dismissable = false,
+                            )
                         } else {
                             // If we are already doing an update don't put up a dialog or try to get device info
                             val isUpdating = service.updateStatus >= 0
                             if (!isUpdating) {
                                 val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
-
                                 if (curVer < MeshService.minDeviceVersion) {
-                                    showAlert(R.string.firmware_too_old, R.string.firmware_old)
+                                    val title = getString(R.string.firmware_too_old)
+                                    val message = getString(R.string.firmware_old)
+                                    model.showAlert(title, message, dismissable = false)
                                 }
                             }
                         }
@@ -441,11 +285,17 @@ class MainActivity : AppCompatActivity(), Logging {
     private fun checkNotificationPermissions() {
         if (!hasNotificationPermission()) {
             val notificationPermissions = getNotificationPermissions()
-            rationaleDialog(
-                shouldShowRequestPermissionRationale(notificationPermissions),
-                R.string.notification_required,
-                getString(R.string.why_notification_required),
-            ) {
+            if (shouldShowRequestPermissionRationale(notificationPermissions)) {
+                val title = getString(R.string.notification_required)
+                val message = getString(R.string.why_notification_required)
+                model.showAlert(
+                    title = title,
+                    message = message,
+                    onConfirm = {
+                        notificationPermissionsLauncher.launch(notificationPermissions)
+                    },
+                )
+            } else {
                 notificationPermissionsLauncher.launch(notificationPermissions)
             }
         }
@@ -465,50 +315,17 @@ class MainActivity : AppCompatActivity(), Logging {
                     intent.putExtra(Settings.EXTRA_CHANNEL_ID, "my_alerts")
                     startActivity(intent)
                 }
-                val message = Html.fromHtml(
-                    getString(R.string.alerts_dnd_request_text),
-                    Html.FROM_HTML_MODE_COMPACT
-                )
-                val messageTextView = TextView(this).also {
-                    it.text = message
-                    it.movementMethod = LinkMovementMethod.getInstance()
-                    it.setPadding(dpToPx(16f))
-                }
-                MaterialAlertDialogBuilder(this)
-                    .setTitle(R.string.alerts_dnd_request_title)
-                    .setView(messageTextView)
-                    .setNeutralButton(R.string.cancel) { dialog, _ ->
-                        prefs.edit { putBoolean("dnd_rationale_shown", true) }
-                        dialog.dismiss()
-                    }
-                    .setPositiveButton(R.string.channel_settings) { dialog, _ ->
+                model.showAlert(
+                    title = getString(R.string.alerts_dnd_request_title),
+                    html = getString(R.string.alerts_dnd_request_text),
+                    onConfirm = {
                         showAlertAppNotificationSettings()
-                        prefs.edit { putBoolean("dnd_rationale_shown", true) }
-                        dialog.dismiss()
-                    }
-                    .setCancelable(false).show()
-            }
-        }
-    }
-
-    private fun showSnackbar(msgId: Int) {
-        try {
-            Snackbar.make(binding.root, msgId, Snackbar.LENGTH_LONG).show()
-        } catch (ex: IllegalStateException) {
-            errormsg("Snackbar couldn't find view for msgId $msgId")
-        }
-    }
-
-    private fun showSnackbar(msg: String, duration: Int = Snackbar.LENGTH_INDEFINITE) {
-        try {
-            Snackbar.make(binding.root, msg, duration)
-                .apply { view.findViewById<TextView>(R.id.snackbar_text).isSingleLine = false }
-                .setAction(R.string.okay) {
-                    // dismiss
+                    },
+                    dismissable = true
+                ).also {
+                    prefs.edit { putBoolean("dnd_rationale_shown", true) }
                 }
-                .show()
-        } catch (ex: IllegalStateException) {
-            errormsg("Snackbar couldn't find view for msgString $msg")
+            }
         }
     }
 
@@ -526,10 +343,7 @@ class MainActivity : AppCompatActivity(), Logging {
 
     private var connectionJob: Job? = null
 
-    private val mesh = object :
-        ServiceClient<IMeshService>({
-            IMeshService.Stub.asInterface(it)
-        }) {
+    private val mesh = object : ServiceClient<IMeshService>(IMeshService.Stub::asInterface) {
         override fun onConnected(service: IMeshService) {
             connectionJob = mainScope.handledLaunch {
                 serviceRepository.setMeshService(service)
@@ -576,7 +390,7 @@ class MainActivity : AppCompatActivity(), Logging {
         mesh.connect(
             this,
             MeshService.createIntent(),
-            Context.BIND_AUTO_CREATE + Context.BIND_ABOVE_CLIENT
+            BIND_AUTO_CREATE + BIND_ABOVE_CLIENT
         )
     }
 
@@ -602,11 +416,6 @@ class MainActivity : AppCompatActivity(), Logging {
     override fun onStart() {
         super.onStart()
 
-        model.connectionState.asLiveData().observe(this) { state ->
-            onMeshConnectionChanged(state)
-            updateConnectionStatusImage(state)
-        }
-
         bluetoothViewModel.enabled.observe(this) { enabled ->
             if (!enabled && !requestedEnable && model.selectedBluetooth) {
                 requestedEnable = true
@@ -615,32 +424,24 @@ class MainActivity : AppCompatActivity(), Logging {
                     bleRequestEnable.launch(enableBtIntent)
                 } else {
                     val bluetoothPermissions = getBluetoothPermissions()
-                    rationaleDialog(shouldShowRequestPermissionRationale(bluetoothPermissions)) {
-                        bluetoothPermissionsLauncher.launch(bluetoothPermissions)
-                    }
+                    val title = getString(R.string.required_permissions)
+                    val message = permissionMissing
+                    model.showAlert(
+                        title = title,
+                        message = message,
+                        onConfirm = {
+                            bluetoothPermissionsLauncher.launch(bluetoothPermissions)
+                        },
+                    )
                 }
             }
         }
 
-        // Call showSnackbar() whenever [snackbarText] updates with a non-null value
-        model.snackbarText.observe(this) { text ->
-            if (text is Int) showSnackbar(text)
-            if (text is String) showSnackbar(text)
-            if (text != null) model.clearSnackbarText()
-        }
-
-        model.currentTab.observe(this) {
-            binding.tabLayout.getTabAt(it)?.select()
-        }
-
         model.tracerouteResponse.observe(this) { response ->
-            MaterialAlertDialogBuilder(this)
-                .setCancelable(false)
-                .setTitle(R.string.traceroute)
-                .setMessage(response ?: return@observe)
-                .setPositiveButton(R.string.okay) { _, _ -> }
-                .show()
-
+            model.showAlert(
+                title = getString(R.string.traceroute),
+                message = response ?: return@observe,
+            )
             model.clearTracerouteResponse()
         }
 
@@ -648,126 +449,42 @@ class MainActivity : AppCompatActivity(), Logging {
             bindMeshService()
         } catch (ex: BindFailedException) {
             // App is probably shutting down, ignore
-            errormsg("Bind of MeshService failed")
+            errormsg("Bind of MeshService failed${ex.message}")
         }
-
-        val bonded = model.bondedAddress != null
-        if (!bonded) showSettingsPage()
     }
 
     private fun showSettingsPage() {
-        binding.pager.currentItem = 5
+        createSettingsIntent().send()
     }
 
-    private fun showMessages(contactKey: String?) {
-        model.setCurrentTab(0)
-        if (contactKey != null) {
-            supportFragmentManager.navigateToMessages(contactKey)
-        }
-    }
-
-    private fun shareMessages(message: String?) {
-        model.setCurrentTab(0)
-        if (message != null) {
-            supportFragmentManager.navigateToShareMessage(message)
-        }
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_main, menu)
-        model.actionBarMenu = menu
-
-        updateConnectionStatusImage(model.connectionState.value)
-
-        return true
-    }
-
-    private val handler: Handler by lazy {
-        Handler(Looper.getMainLooper())
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        menu.findItem(R.id.stress_test).isVisible =
-            BuildConfig.DEBUG // only show stress test for debug builds (for now)
-        menu.findItem(R.id.radio_config).isEnabled = !model.isManaged
-        return super.onPrepareOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.about -> {
+    private fun onMainMenuAction(action: MainMenuAction) {
+        when (action) {
+            MainMenuAction.ABOUT -> {
                 getVersionInfo()
-                return true
             }
-            R.id.connectStatusImage -> {
-                Toast.makeText(applicationContext, item.title, Toast.LENGTH_SHORT).show()
-                return true
-            }
-            R.id.debug -> {
-                val fragmentManager: FragmentManager = supportFragmentManager
-                val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
-                val nameFragment = DebugFragment()
-                fragmentTransaction.add(R.id.mainActivityLayout, nameFragment)
-                fragmentTransaction.addToBackStack(null)
-                fragmentTransaction.commit()
-                return true
-            }
-            R.id.stress_test -> {
-                fun postPing() {
-                    // Send ping message and arrange delayed recursion.
-                    debug("Sending ping")
-                    val str = "Ping " + DateFormat.getTimeInstance(DateFormat.MEDIUM)
-                        .format(Date(System.currentTimeMillis()))
-                    model.sendMessage(str)
-                    handler.postDelayed({ postPing() }, 30000)
-                }
-                item.isChecked = !item.isChecked // toggle ping test
-                if (item.isChecked) {
-                    postPing()
-                } else {
-                    handler.removeCallbacksAndMessages(null)
-                }
-                return true
-            }
-            R.id.radio_config -> {
-                supportFragmentManager.navigateToNavGraph()
-                return true
-            }
-            R.id.save_messages_csv -> {
+
+            MainMenuAction.EXPORT_MESSAGES -> {
                 val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                     addCategory(Intent.CATEGORY_OPENABLE)
                     type = "application/csv"
                     putExtra(Intent.EXTRA_TITLE, "rangetest.csv")
                 }
                 createDocumentLauncher.launch(intent)
-                return true
             }
-            R.id.theme -> {
+
+            MainMenuAction.THEME -> {
                 chooseThemeDialog()
-                return true
             }
-            R.id.preferences_language -> {
+
+            MainMenuAction.LANGUAGE -> {
                 chooseLangDialog()
-                return true
             }
-            R.id.show_intro -> {
+
+            MainMenuAction.SHOW_INTRO -> {
                 startActivity(Intent(this, AppIntroduction::class.java))
-                return true
             }
-            R.id.preferences_quick_chat -> {
-                val fragmentManager: FragmentManager = supportFragmentManager
-                val fragmentTransaction: FragmentTransaction = fragmentManager.beginTransaction()
-                val nameFragment = QuickChatSettingsFragment()
-                fragmentTransaction.add(R.id.mainActivityLayout, nameFragment)
-                fragmentTransaction.addToBackStack(null)
-                fragmentTransaction.commit()
-                return true
-            }
-            else -> super.onOptionsItemSelected(item)
+
+            else -> {}
         }
     }
 
@@ -784,12 +501,8 @@ class MainActivity : AppCompatActivity(), Logging {
     // Theme functions
 
     private fun chooseThemeDialog() {
-
-        // Prepare dialog and its items
-        val builder = MaterialAlertDialogBuilder(this)
-        builder.setTitle(getString(R.string.choose_theme))
-
         val styles = mapOf(
+            getString(R.string.dynamic) to MODE_DYNAMIC,
             getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
             getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
             getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
@@ -799,43 +512,34 @@ class MainActivity : AppCompatActivity(), Logging {
         val prefs = UIViewModel.getPreferences(this)
         val theme = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         debug("Theme from prefs: $theme")
-
-        builder.setSingleChoiceItems(
-            styles.keys.toTypedArray(),
-            styles.values.indexOf(theme)
-        ) { dialog, position ->
-            val selectedTheme = styles.values.elementAt(position)
-            debug("Set theme pref to $selectedTheme")
-            prefs.edit().putInt("theme", selectedTheme).apply()
-            AppCompatDelegate.setDefaultNightMode(selectedTheme)
-            dialog.dismiss()
-        }
-
-        val dialog = builder.create()
-        dialog.show()
+        // map theme keys to function to set theme
+        model.showAlert(
+            title = getString(R.string.choose_theme),
+            message = "",
+            choices = styles.mapValues { (_, value) ->
+                {
+                    model.setTheme(value)
+                }
+            },
+        )
     }
 
     private fun chooseLangDialog() {
-        // Prepare dialog and its items
-        val builder = MaterialAlertDialogBuilder(this)
-        builder.setTitle(getString(R.string.preferences_language))
-
         val languageTags = LanguageUtils.getLanguageTags(this)
-
         // Load preferences and its value
         val lang = LanguageUtils.getLocale()
         debug("Lang from prefs: $lang")
-
-        builder.setSingleChoiceItems(
-            languageTags.keys.toTypedArray(),
-            languageTags.values.indexOf(lang)
-        ) { dialog, position ->
-            val selectedLang = languageTags.values.elementAt(position)
-            debug("Set lang pref to $selectedLang")
-            LanguageUtils.setLocale(selectedLang)
-            dialog.dismiss()
+        // map lang keys to function to set locale
+        val langMap = languageTags.mapValues { (_, value) ->
+            {
+                LanguageUtils.setLocale(value)
+            }
         }
-        val dialog = builder.create()
-        dialog.show()
+
+        model.showAlert(
+            title = getString(R.string.preferences_language),
+            message = "",
+            choices = langMap,
+        )
     }
 }

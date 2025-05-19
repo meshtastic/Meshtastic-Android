@@ -19,7 +19,6 @@ package com.geeksville.mesh.ui.radioconfig.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -38,19 +37,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Card
-import androidx.compose.material.Checkbox
-import androidx.compose.material.Chip
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material.icons.twotone.Close
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,13 +58,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -85,14 +80,12 @@ import com.geeksville.mesh.ui.components.rememberDragDropState
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.ui.theme.MeshtasticGreen
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun ChannelItem(
     index: Int,
     title: String,
     enabled: Boolean,
     onClick: () -> Unit = {},
-    elevation: Dp = 4.dp,
     content: @Composable RowScope.() -> Unit,
 ) {
     Card(
@@ -100,31 +93,23 @@ private fun ChannelItem(
             .fillMaxWidth()
             .padding(vertical = 2.dp)
             .clickable(enabled = enabled) { onClick() },
-        elevation = elevation,
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(vertical = 4.dp, horizontal = 4.dp)
         ) {
-            val textColor = if (enabled) {
-                Color.Unspecified
-            } else {
-                MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.disabled)
-            }
 
-            Chip(onClick = onClick) {
+            AssistChip(onClick = onClick, label = {
                 Text(
                     text = "$index",
-                    color = textColor,
                 )
-            }
+            })
             Text(
                 text = title,
                 modifier = Modifier.weight(1f),
-                color = textColor,
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
-                style = MaterialTheme.typography.body1,
+                style = MaterialTheme.typography.bodyLarge,
             )
             content()
         }
@@ -138,13 +123,11 @@ fun ChannelCard(
     enabled: Boolean,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    elevation: Dp = 4.dp,
 ) = ChannelItem(
     index = index,
     title = title,
     enabled = enabled,
     onClick = onEditClick,
-    elevation = elevation,
 ) {
     IconButton(onClick = { onDeleteClick() }) {
         Icon(
@@ -291,9 +274,7 @@ fun ChannelSettingsItemList(
                     items = settingsListInput,
                     dragDropState = dragDropState,
                 ) { index, channel, isDragging ->
-                    val elevation by animateDpAsState(if (isDragging) 8.dp else 4.dp, label = "drag")
                     ChannelCard(
-                        elevation = elevation,
                         index = index,
                         title = channel.name.ifEmpty { primaryChannel.name },
                         enabled = enabled,

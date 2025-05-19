@@ -17,11 +17,6 @@
 
 package com.geeksville.mesh.ui
 
-import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,22 +34,23 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.Card
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.FloatingActionButton
-import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
-import androidx.compose.material.ListItem
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.Switch
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.FastForward
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -66,62 +62,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusEvent
-import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.platform.ViewCompositionStrategy
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.components.BaseScaffold
 import com.geeksville.mesh.ui.components.dragContainer
 import com.geeksville.mesh.ui.components.dragDropItemsIndexed
 import com.geeksville.mesh.ui.components.rememberDragDropState
 import com.geeksville.mesh.ui.theme.AppTheme
-import dagger.hilt.android.AndroidEntryPoint
-
-@AndroidEntryPoint
-class QuickChatSettingsFragment : ScreenFragment("Quick Chat Settings"), Logging {
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        return ComposeView(requireContext()).apply {
-            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
-            setContent {
-                AppTheme {
-                    QuickChatScreen { parentFragmentManager.popBackStack() }
-                }
-            }
-        }
-    }
-}
 
 @Composable
 internal fun QuickChatScreen(
-    viewModel: UIViewModel = hiltViewModel(),
-    navigateUp: () -> Unit
-) {
-    BaseScaffold(
-        title = stringResource(id = R.string.quick_chat),
-        navigateUp = navigateUp,
-    ) {
-        QuickChatContent(viewModel)
-    }
-}
-
-@Composable
-private fun QuickChatContent(
+    modifier: Modifier = Modifier,
     viewModel: UIViewModel = hiltViewModel(),
 ) {
     val actions by viewModel.quickChatActions.collectAsStateWithLifecycle()
@@ -133,7 +92,7 @@ private fun QuickChatContent(
         viewModel.updateActionPositions(list)
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = modifier.fillMaxSize()) {
         if (showActionDialog != null) {
             val action = showActionDialog ?: return
             EditQuickChatDialog(
@@ -170,12 +129,7 @@ private fun QuickChatContent(
                 dragDropState = dragDropState,
                 key = { _, item -> item.uuid },
             ) { _, action, isDragging ->
-                val elevation by animateDpAsState(
-                    targetValue = if (isDragging) 8.dp else 4.dp,
-                    label = "DragAndDropElevationAnimation",
-                )
                 QuickChatItem(
-                    elevation = elevation,
                     action = action,
                     onEdit = { showActionDialog = it },
                 )
@@ -218,116 +172,116 @@ private fun EditQuickChatDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        shape = RoundedCornerShape(16.dp),
-        backgroundColor = MaterialTheme.colors.background,
-        text = {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Text(
-                    text = stringResource(id = title),
-                    modifier = Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.h6.copy(
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                    ),
-                )
+        text =
+            {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Text(
+                        text = stringResource(id = title),
+                        modifier = Modifier.fillMaxWidth(),
+                        style = MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Center,
+                        ),
+                    )
 
-                Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                OutlinedTextFieldWithCounter(
-                    label = stringResource(R.string.name),
-                    value = actionInput.name,
-                    maxSize = 5,
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(),
-                ) { actionInput = actionInput.copy(name = it.uppercase()) }
+                    OutlinedTextFieldWithCounter(
+                        label = stringResource(R.string.name),
+                        value = actionInput.name,
+                        maxSize = 5,
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { actionInput = actionInput.copy(name = it.uppercase()) }
 
-                Spacer(modifier = Modifier.height(8.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                OutlinedTextFieldWithCounter(
-                    label = stringResource(id = R.string.message),
-                    value = actionInput.message,
-                    maxSize = 200,
-                    getSize = { it.toByteArray().size + 1 },
+                    OutlinedTextFieldWithCounter(
+                        label = stringResource(id = R.string.message),
+                        value = actionInput.message,
+                        maxSize = 200,
+                        getSize = { it.toByteArray().size + 1 },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester),
+                    ) {
+                        actionInput = actionInput.copy(message = it)
+                        if (newQuickChat) {
+                            actionInput = actionInput.copy(name = getMessageName(it))
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    val (text, icon) = if (isInstant) {
+                        R.string.quick_chat_instant to Icons.Default.FastForward
+                    } else {
+                        R.string.quick_chat_append to Icons.Default.Add
+                    }
+
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        if (isInstant) {
+                            Icon(
+                                imageVector = icon,
+                                contentDescription = stringResource(id = text),
+                            )
+                            Spacer(Modifier.width(12.dp))
+                        }
+
+                        Text(
+                            text = stringResource(text),
+                            modifier = Modifier.weight(1f),
+                        )
+
+                        Switch(
+                            checked = isInstant,
+                            onCheckedChange = { checked ->
+                                actionInput = actionInput.copy(
+                                    mode = when (checked) {
+                                        true -> QuickChatAction.Mode.Instant
+                                        false -> QuickChatAction.Mode.Append
+                                    }
+                                )
+                            },
+                        )
+                    }
+                }
+            },
+        confirmButton =
+            {
+                FlowRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .focusRequester(focusRequester),
+                        .padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
-                    actionInput = actionInput.copy(message = it)
-                    if (newQuickChat) {
-                        actionInput = actionInput.copy(name = getMessageName(it))
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                val (text, icon) = if (isInstant) {
-                    R.string.quick_chat_instant to Icons.Default.FastForward
-                } else {
-                    R.string.quick_chat_append to Icons.Default.Add
-                }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    if (isInstant) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = stringResource(id = text),
-                        )
-                        Spacer(Modifier.width(12.dp))
-                    }
-
-                    Text(
-                        text = stringResource(text),
+                    TextButton(
                         modifier = Modifier.weight(1f),
-                    )
+                        onClick = onDismiss,
+                    ) { Text(stringResource(R.string.cancel)) }
 
-                    Switch(
-                        checked = isInstant,
-                        onCheckedChange = { checked ->
-                            actionInput = actionInput.copy(
-                                mode = when (checked) {
-                                    true -> QuickChatAction.Mode.Instant
-                                    false -> QuickChatAction.Mode.Append
-                                }
-                            )
-                        },
-                    )
-                }
-            }
-        },
-        buttons = {
-            FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                TextButton(
-                    modifier = Modifier.weight(1f),
-                    onClick = onDismiss,
-                ) { Text(stringResource(R.string.cancel)) }
+                    if (!newQuickChat) {
+                        Button(
+                            modifier = Modifier.weight(1f),
+                            onClick = {
+                                onDelete(actionInput)
+                                onDismiss()
+                            },
+                        ) { Text(text = stringResource(R.string.delete)) }
+                    }
 
-                if (!newQuickChat) {
                     Button(
                         modifier = Modifier.weight(1f),
                         onClick = {
-                            onDelete(actionInput)
+                            onSave(actionInput)
                             onDismiss()
                         },
-                    ) { Text(text = stringResource(R.string.delete)) }
+                        enabled = actionInput.name.isNotEmpty() && actionInput.message.isNotEmpty(),
+                    ) { Text(text = stringResource(R.string.save)) }
                 }
-
-                Button(
-                    modifier = Modifier.weight(1f),
-                    onClick = {
-                        onSave(actionInput)
-                        onDismiss()
-                    },
-                    enabled = actionInput.name.isNotEmpty() && actionInput.message.isNotEmpty(),
-                ) { Text(text = stringResource(R.string.save)) }
-            }
-        },
+            },
     )
 }
 
@@ -356,7 +310,7 @@ private fun OutlinedTextFieldWithCounter(
     if (isFocused) {
         Text(
             text = "${getSize(value)}/$maxSize",
-            style = MaterialTheme.typography.caption,
+            style = MaterialTheme.typography.bodySmall,
             modifier = Modifier
                 .align(Alignment.End)
                 .padding(top = 4.dp, end = 16.dp)
@@ -364,23 +318,20 @@ private fun OutlinedTextFieldWithCounter(
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 private fun QuickChatItem(
     action: QuickChatAction,
     modifier: Modifier = Modifier,
     onEdit: (QuickChatAction) -> Unit = {},
-    elevation: Dp = 4.dp,
 ) {
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(8.dp),
-        elevation = elevation,
         shape = RoundedCornerShape(12.dp),
     ) {
         ListItem(
-            icon = {
+            leadingContent = {
                 if (action.mode == QuickChatAction.Mode.Instant) {
                     Icon(
                         imageVector = Icons.Default.FastForward,
@@ -388,9 +339,9 @@ private fun QuickChatItem(
                     )
                 }
             },
-            text = { Text(text = action.name) },
-            secondaryText = { Text(text = action.message) },
-            trailing = {
+            headlineContent = { Text(text = action.name) },
+            supportingContent = { Text(text = action.message) },
+            trailingContent = {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -399,12 +350,12 @@ private fun QuickChatItem(
                         modifier = Modifier.size(48.dp)
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_baseline_edit_24),
+                            imageVector = Icons.Default.Edit,
                             contentDescription = stringResource(id = R.string.quick_chat_edit),
                         )
                     }
                     Icon(
-                        painter = painterResource(id = R.drawable.ic_baseline_drag_handle_24),
+                        imageVector = Icons.Default.DragHandle,
                         contentDescription = stringResource(id = R.string.quick_chat),
                     )
                 }

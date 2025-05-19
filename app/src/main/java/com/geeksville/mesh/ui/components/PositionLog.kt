@@ -35,17 +35,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.LocalContentAlpha
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalTextStyle
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
@@ -174,7 +172,7 @@ private fun ActionButtons(
             onClick = onClear,
             enabled = clearButtonEnabled,
             colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = MaterialTheme.colors.error,
+                contentColor = MaterialTheme.colorScheme.error,
             )
         ) {
             Icon(
@@ -191,9 +189,6 @@ private fun ActionButtons(
             modifier = Modifier.weight(1f),
             onClick = onSave,
             enabled = saveButtonEnabled,
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = MaterialTheme.colors.onSurface.copy(alpha = ContentAlpha.medium),
-            )
         ) {
             Icon(
                 imageVector = Icons.Default.Save,
@@ -229,7 +224,7 @@ fun PositionLogScreen(
         val compactWidth = maxWidth < 600.dp
         Column {
             val textStyle = if (compactWidth) {
-                MaterialTheme.typography.caption
+                MaterialTheme.typography.bodySmall
             } else {
                 LocalTextStyle.current
             }
@@ -268,14 +263,12 @@ private fun ColumnScope.PositionList(
         DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
     }
 
-    CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-        LazyColumn(
-            modifier = Modifier.weight(1f),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            items(positions) { position ->
-                PositionItem(compactWidth, position, dateFormat, displayUnits)
-            }
+    LazyColumn(
+        modifier = Modifier.weight(1f),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        items(positions) { position ->
+            PositionItem(compactWidth, position, dateFormat, displayUnits)
         }
     }
 }

@@ -26,11 +26,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.AlertDialog
-import androidx.compose.material.Button
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,7 +69,6 @@ fun EditChannelDialog(
     AlertDialog(
         onDismissRequest = onDismissRequest,
         shape = RoundedCornerShape(16.dp),
-        backgroundColor = MaterialTheme.colors.background,
         text = {
             Column(modifier.fillMaxWidth()) {
                 EditTextPreference(
@@ -139,7 +137,7 @@ fun EditChannelDialog(
                 )
             }
         },
-        buttons = {
+        confirmButton = {
             FlowRow(
                 modifier = modifier
                     .fillMaxWidth()

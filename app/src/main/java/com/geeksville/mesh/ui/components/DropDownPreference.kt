@@ -19,13 +19,13 @@ package com.geeksville.mesh.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.KeyboardArrowDown
 import androidx.compose.material.icons.twotone.KeyboardArrowUp
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -116,12 +116,12 @@ fun <T> DropDownPreference(
                     modifier = modifier
                         .background(
                             color = if (selectedItem == item.first) {
-                                MaterialTheme.colors.primary.copy(alpha = 0.3f)
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
                             } else {
                                 Color.Unspecified
                             },
                         ),
-                    content = {
+                    text = {
                         Text(
                             text = item.second,
                             overflow = TextOverflow.Ellipsis,

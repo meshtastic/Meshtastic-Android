@@ -580,7 +580,8 @@
     <string name="long_name">Long name</string>
     <string name="short_name">Short name</string>
     <string name="hardware_model">Hardware model</string>
-    <string name="licensed_amateur_radio">Licensed amateur radio</string>
+    <string name="licensed_amateur_radio">Licensed amateur radio (HAM)</string>
+    <string name="licensed_amateur_radio_text">Enabling this option disables encryption and is not compatible with the default Meshtastic network.</string>
     <string name="dew_point">Dew Point</string>
     <string name="pressure">Pressure</string>
     <string name="gas_resistance">Gas Resistance</string>
@@ -613,4 +614,7 @@
     <string name="secondary_no_telemetry">No periodic telemetry broadcast</string>
     <string name="manuel_position_request">Manual position request required</string>
     <string name="press_and_drag">Press and drag to reorder</string>
+    <string name="set_region">Set Region</string>
+    <string name="unmute">Unmute</string>
+    <string name="dynamic">Dynamic</string>
 </resources>
