@@ -26,7 +26,6 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.material3.SnackbarHostState
 import androidx.core.content.edit
 import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
@@ -236,7 +235,6 @@ class UIViewModel @Inject constructor(
         _title.value = title
     }
 
-    val receivingLocationUpdates: StateFlow<Boolean> get() = locationRepository.receivingLocationUpdates
     val meshService: IMeshService? get() = radioConfigRepository.meshService
 
     val bondedAddress get() = radioInterfaceService.getBondedDeviceAddress()
@@ -608,16 +606,22 @@ class UIViewModel @Inject constructor(
         if (config.lora != newConfig.lora) setConfig(newConfig)
     }
 
-    val provideLocation =
-        object : MutableLiveData<Boolean>(preferences.getBoolean("provide-location", false)) {
-            override fun setValue(value: Boolean) {
-                super.setValue(value)
-
-                preferences.edit {
-                    this.putBoolean("provide-location", value)
-                }
+    private val _provideLocation = locationRepository.locationPreferencesFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = false
+    )
+    val provideLocation: StateFlow<Boolean> get() = _provideLocation
+    fun setProvideLocation(provideLocation: Boolean) {
+        viewModelScope.launch {
+            locationRepository.updateLocationPreferences(provideLocation)
+            if (provideLocation) {
+                meshService?.startProvideLocation()
+            } else {
+                meshService?.stopProvideLocation()
             }
         }
+    }
 
     fun setOwner(name: String) {
         val user = ourNodeInfo.value?.user?.copy {
