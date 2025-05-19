@@ -209,7 +209,9 @@ internal fun MessageScreen(
                 selectedIds = selectedIds,
                 onUnreadChanged = { viewModel.clearUnreadCount(contactKey, it) },
                 onSendReaction = { emoji, id -> viewModel.sendReaction(emoji, id, contactKey) },
-            ) { action ->
+                viewModel = viewModel,
+                contactKey = contactKey,
+                onNodeMenuAction = { action ->
                 when (action) {
                     is NodeMenuAction.Remove -> viewModel.removeNode(action.node.num)
                     is NodeMenuAction.Ignore -> viewModel.ignoreNode(action.node)
@@ -228,6 +230,7 @@ internal fun MessageScreen(
                     is NodeMenuAction.MoreDetails -> navigateToNodeDetails(action.node.num)
                 }
             }
+            )
         }
     }
 }

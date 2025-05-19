@@ -17,13 +17,21 @@
 
 package com.geeksville.mesh.ui.message.components
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -37,15 +45,65 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.MessageStatus
+import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.model.Message
+import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.components.NodeMenu
 import com.geeksville.mesh.ui.components.NodeMenuAction
-import com.geeksville.mesh.ui.components.SimpleAlertDialog
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
+
+@Composable
+fun DeliveryInfo(
+    @StringRes title: Int,
+    @StringRes text: Int? = null,
+    onConfirm: (() -> Unit) = {},
+    onDismiss: () -> Unit = {},
+    resendOption: Boolean,
+) = AlertDialog(
+    onDismissRequest = onDismiss,
+    dismissButton = {
+        FilledTonalButton(
+            onClick = onDismiss,
+            modifier = Modifier.padding(horizontal = 16.dp),
+        ) { Text(text = stringResource(id = R.string.close)) }
+    },
+    confirmButton = {
+        if (resendOption) {
+            FilledTonalButton(
+                onClick = onConfirm,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            ) { Text(text = stringResource(id = R.string.resend)) }
+        }
+    },
+    title = {
+        Text(
+            text = stringResource(id = title),
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.headlineSmall
+        )
+    },
+    text = {
+        text?.let {
+            Text(
+                text = stringResource(id = it),
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.bodyMedium
+            )
+        }
+    },
+    shape = RoundedCornerShape(16.dp),
+    containerColor = MaterialTheme.colorScheme.surface
+)
 
 @Suppress("LongMethod")
 @Composable
@@ -55,7 +113,9 @@ internal fun MessageList(
     selectedIds: MutableState<Set<Long>>,
     onUnreadChanged: (Long) -> Unit,
     onSendReaction: (String, Int) -> Unit,
-    onNodeMenuAction: (NodeMenuAction) -> Unit = {}
+    onNodeMenuAction: (NodeMenuAction) -> Unit = {},
+    viewModel: UIViewModel,
+    contactKey: String
 ) {
     val haptics = LocalHapticFeedback.current
     val inSelectionMode by remember { derivedStateOf { selectedIds.value.isNotEmpty() } }
@@ -69,7 +129,18 @@ internal fun MessageList(
     if (showStatusDialog != null) {
         val msg = showStatusDialog ?: return
         val (title, text) = msg.getStatusStringRes()
-        SimpleAlertDialog(title = title, text = text) { showStatusDialog = null }
+        DeliveryInfo(
+            title = title,
+            text = text,
+            onConfirm = {
+                val deleteList: List<Long> = listOf(msg.uuid)
+                viewModel.deleteMessages(deleteList)
+                showStatusDialog = null
+                viewModel.sendMessage(msg.text, contactKey)
+            },
+            onDismiss = { showStatusDialog = null },
+            resendOption = msg.status?.equals(MessageStatus.ERROR) ?: false
+        )
     }
 
     var showReactionDialog by remember { mutableStateOf<List<Reaction>?>(null) }
