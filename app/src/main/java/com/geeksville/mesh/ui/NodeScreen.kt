@@ -95,6 +95,8 @@ fun NodeScreen(
                     onToggleIncludeUnknown = model::toggleIncludeUnknown,
                     showDetails = state.showDetails,
                     onToggleShowDetails = model::toggleShowDetails,
+                    includeUnmessageable = state.includeUnmessageable,
+                    onToggleIncludeUnmessageable = model::toggleIncludeUnmessageable
                 )
             }
 

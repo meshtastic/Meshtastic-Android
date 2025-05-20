@@ -61,6 +61,7 @@ import androidx.compose.material.icons.filled.Verified
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material.icons.outlined.Navigation
+import androidx.compose.material.icons.outlined.NoCell
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -95,6 +96,7 @@ import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.model.isUnmessageableRole
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
@@ -341,6 +343,7 @@ fun DeviceHardwareImage(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun NodeDetailsContent(
     node: Node,
@@ -382,6 +385,18 @@ private fun NodeDetailsContent(
         icon = Icons.Default.Work,
         value = node.user.role.name
     )
+    val unmessageable = if (node.user.hasIsUnmessagable()) {
+        node.user.isUnmessagable
+    } else {
+        node.user.role?.isUnmessageableRole() == true
+    }
+    if (unmessageable) {
+        NodeDetailRow(
+            label = stringResource(R.string.unmonitored_or_infrastructure),
+            icon = Icons.Outlined.NoCell,
+            value = ""
+        )
+    }
     if (node.deviceMetrics.uptimeSeconds > 0) {
         NodeDetailRow(
             label = stringResource(R.string.uptime),
