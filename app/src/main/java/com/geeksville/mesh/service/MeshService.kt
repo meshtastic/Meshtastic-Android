@@ -1883,6 +1883,10 @@ class MeshService : Service(), Logging {
                 addContact = contact
             }
         )
+        handleReceivedUser(
+            contact.nodeNum,
+            contact.user
+        )
     }
 
     private fun getDeviceMetadata(destNum: Int) = toRemoteExceptions {
