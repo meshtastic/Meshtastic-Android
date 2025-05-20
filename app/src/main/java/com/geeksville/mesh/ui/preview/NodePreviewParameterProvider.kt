@@ -18,6 +18,7 @@
 package com.geeksville.mesh.ui.preview
 
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.DeviceMetrics.Companion.currentTime
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.deviceMetrics
@@ -37,6 +38,7 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
             longName = "Mickey Mouse"
             shortName = "MM"
             hwModel = MeshProtos.HardwareModel.TBEAM
+            role = ConfigProtos.Config.DeviceConfig.Role.ROUTER
         },
         position = position {
             latitudeI = 338125110

@@ -18,6 +18,7 @@
 package com.geeksville.mesh.model
 
 import android.graphics.Color
+import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.PaxcountProtos
@@ -143,3 +144,13 @@ data class Node(
         ).joinToString(" ")
     }
 }
+
+fun ConfigProtos.Config.DeviceConfig.Role?.isUnmessageableRole(): Boolean = this in listOf(
+    ConfigProtos.Config.DeviceConfig.Role.REPEATER,
+    ConfigProtos.Config.DeviceConfig.Role.ROUTER,
+    ConfigProtos.Config.DeviceConfig.Role.ROUTER_LATE,
+    ConfigProtos.Config.DeviceConfig.Role.SENSOR,
+    ConfigProtos.Config.DeviceConfig.Role.TRACKER,
+    ConfigProtos.Config.DeviceConfig.Role.TAK,
+    ConfigProtos.Config.DeviceConfig.Role.TAK_TRACKER,
+)

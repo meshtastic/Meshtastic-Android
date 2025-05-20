@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.model.isUnmessageableRole
 import com.geeksville.mesh.ui.supportsQrCodeSharing
 
 @Suppress("LongMethod")
@@ -49,6 +50,12 @@ fun NodeMenu(
     onAction: (NodeMenuAction) -> Unit,
     firmwareVersion: String? = null,
 ) {
+    val isUnmessageable = if (node.user.hasIsUnmessagable()) {
+        node.user.isUnmessagable
+    } else {
+        // for older firmwares
+        node.user.role?.isUnmessageableRole() == true
+    }
     var displayFavoriteDialog by remember { mutableStateOf(false) }
     var displayIgnoreDialog by remember { mutableStateOf(false) }
     var displayRemoveDialog by remember { mutableStateOf(false) }
@@ -104,13 +111,15 @@ fun NodeMenu(
     ) {
 
         if (showFullMenu) {
-            DropdownMenuItem(
-                onClick = {
-                    onDismissRequest()
-                    onAction(NodeMenuAction.DirectMessage(node))
-                },
-                text = { Text(stringResource(R.string.direct_message)) }
-            )
+            if (!isUnmessageable) {
+                DropdownMenuItem(
+                    onClick = {
+                        onDismissRequest()
+                        onAction(NodeMenuAction.DirectMessage(node))
+                    },
+                    text = { Text(stringResource(R.string.direct_message)) }
+                )
+            }
             DropdownMenuItem(
                 onClick = {
                     onDismissRequest()
