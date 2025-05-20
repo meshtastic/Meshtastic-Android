@@ -21,20 +21,25 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Build
+import android.util.Base64
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.Button
-import androidx.compose.material.ContentAlpha
-import androidx.compose.material.Icon
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.ContentCopy
+import androidx.compose.material.icons.twotone.QrCodeScanner
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
@@ -45,36 +50,62 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.errormsg
 import com.geeksville.mesh.android.getCameraPermissions
-import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.ui.components.CopyIconButton
+import com.geeksville.mesh.ui.components.SimpleAlertDialog
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
+import com.google.zxing.WriterException
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import java.net.MalformedURLException
 
 @RequiresApi(Build.VERSION_CODES.M)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-fun AddContact(
-    viewModel: UIViewModel = hiltViewModel(),
+fun AddContactFAB(
+    modifier: Modifier = Modifier.padding(16.dp),
+    onSharedContactImport: (AdminProtos.SharedContact) -> Unit = {},
 ) {
     val context = LocalContext.current
-
-    val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
-    val enabled = connectionState == MeshService.ConnectionState.CONNECTED && !viewModel.isManaged
+    var contactToImport: AdminProtos.SharedContact? by remember { mutableStateOf(null) }
 
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
-            viewModel.requestChannelUrl(result.contents.toUri())
+            val uri = result.contents.toUri()
+            val sharedContact = try {
+                uri.toSharedContact()
+            } catch (ex: MalformedURLException) {
+                errormsg("URL was malformed: ${ex.message}")
+                null
+            }
+            if (sharedContact != null) {
+                contactToImport = sharedContact
+            }
         }
+    }
+
+    if (contactToImport != null) {
+        SimpleAlertDialog(
+            title = R.string.import_shared_contact,
+            text = {
+                Text("$contactToImport")
+            },
+            onDismiss = {
+                contactToImport = null
+            },
+            onConfirm = {
+                onSharedContactImport(contactToImport!!)
+                contactToImport = null
+            }
+        )
     }
 
     fun zxingScan() {
@@ -105,7 +136,7 @@ fun AddContact(
             .show()
     }
 
-    Button(
+    FloatingActionButton(
         onClick = {
             if (context.getCameraPermissions().all {
                     context.checkSelfPermission(it) == PackageManager.PERMISSION_GRANTED
@@ -116,22 +147,17 @@ fun AddContact(
                 requestPermissionAndScan()
             }
         },
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        enabled = enabled,
+        modifier = modifier
     ) {
         Icon(
-            imageVector = Icons.TwoTone.ContentCopy,
+            imageVector = Icons.TwoTone.QrCodeScanner,
             contentDescription = stringResource(R.string.scan_qr_code),
         )
-        Text(text = stringResource(R.string.scan_qr_code))
     }
 }
 
 @Composable
 private fun QrCodeImage(
-    enabled: Boolean,
     uri: Uri,
     modifier: Modifier = Modifier,
 ) = Image(
@@ -141,38 +167,65 @@ private fun QrCodeImage(
     contentDescription = stringResource(R.string.qr_code),
     modifier = modifier,
     contentScale = ContentScale.Inside,
-    alpha = if (enabled) 1.0f else ContentAlpha.disabled,
-    // colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }),
 )
 
 @Composable
-private fun ShareContact(
-    enabled: Boolean,
+private fun SharedContact(
     contactUri: Uri,
 ) {
-    QrCodeImage(
-        enabled = enabled,
-        uri = contactUri,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-    )
+    Column {
+        QrCodeImage(
+            uri = contactUri,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp)
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp),
+            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+        ) {
+            Text(
+                text = contactUri.toString(),
+                modifier = Modifier
+                    .weight(1f)
+            )
+            CopyIconButton(
+                valueToCopy = contactUri.toString(),
+                modifier = Modifier.padding(start = 8.dp)
+            )
+        }
+    }
 }
 
-@RequiresApi(Build.VERSION_CODES.M)
-@Preview
 @Composable
-private fun AddContactPreview() {
-    AddContact(
-        viewModel = hiltViewModel(),
+fun SharedContactDialog(
+    contact: Node?,
+    onDismiss: () -> Unit,
+) {
+    if (contact == null) return
+    val sharedContact =
+        AdminProtos.SharedContact.newBuilder().setUser(contact.user).setNodeNum(contact.num).build()
+    val uri = sharedContact.getSharedContactUrl()
+    SimpleAlertDialog(
+        title = R.string.share_contact,
+        text = {
+            Column {
+                Text(contact.user.longName)
+                SharedContact(
+                    contactUri = uri,
+                )
+            }
+        },
+        onDismiss = onDismiss
     )
 }
 
 @Preview
 @Composable
 private fun ShareContactPreview() {
-    ShareContact(
-        enabled = true,
+    SharedContact(
         contactUri = "https://example.com".toUri(),
     )
 }
@@ -184,12 +237,38 @@ val Uri.qrCode: Bitmap?
             multiFormatWriter.encode(
                 this.toString(),
                 BarcodeFormat.QR_CODE,
-                960,
-                960
+                BARCODE_PIXEL_SIZE,
+                BARCODE_PIXEL_SIZE
             )
         val barcodeEncoder = BarcodeEncoder()
         barcodeEncoder.createBitmap(bitMatrix)
-    } catch (ex: Throwable) {
-        errormsg("URL was too complex to render as barcode")
+    } catch (ex: WriterException) {
+        errormsg("URL was too complex to render as barcode: ${ex.message}")
         null
     }
+
+private const val BARCODE_PIXEL_SIZE = 960
+
+private const val MESHTASTIC_HOST = "meshtastic.org"
+private const val MESHTASTIC_PATH = "/v/"
+internal const val URL_PREFIX = "https://$MESHTASTIC_HOST$MESHTASTIC_PATH#"
+private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
+
+@Throws(MalformedURLException::class)
+fun Uri.toSharedContact(): AdminProtos.SharedContact {
+    if (fragment.isNullOrBlank() ||
+        !host.equals(MESHTASTIC_HOST, true) ||
+        !path.equals(MESHTASTIC_PATH, true)
+    ) {
+        throw MalformedURLException("Not a valid Meshtastic URL: ${toString().take(40)}")
+    }
+        val url = AdminProtos.SharedContact.parseFrom(Base64.decode(fragment!!, BASE64FLAGS))
+        return url.toBuilder().build()
+    }
+
+fun AdminProtos.SharedContact.getSharedContactUrl(): Uri {
+    val bytes = this.toByteArray() ?: ByteArray(0)
+    val enc = Base64.encodeToString(bytes, BASE64FLAGS)
+    return "$URL_PREFIX$enc".toUri()
+}
+

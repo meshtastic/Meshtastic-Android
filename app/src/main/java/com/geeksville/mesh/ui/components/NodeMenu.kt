@@ -182,6 +182,13 @@ fun NodeMenu(
         DropdownMenuItem(
             onClick = {
                 onDismissRequest()
+                onAction(NodeMenuAction.Share(node))
+            },
+            text = { Text(stringResource(R.string.share_contact)) }
+        )
+        DropdownMenuItem(
+            onClick = {
+                onDismissRequest()
                 onAction(NodeMenuAction.MoreDetails(node))
             },
             text = { Text(stringResource(R.string.more_details)) }
@@ -198,4 +205,5 @@ sealed class NodeMenuAction {
     data class RequestPosition(val node: Node) : NodeMenuAction()
     data class TraceRoute(val node: Node) : NodeMenuAction()
     data class MoreDetails(val node: Node) : NodeMenuAction()
+    data class Share(val node: Node) : NodeMenuAction()
 }
