@@ -53,6 +53,7 @@ import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.Router
 import androidx.compose.material.icons.filled.Scale
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Thermostat
@@ -67,7 +68,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -144,12 +147,21 @@ fun NodeDetailScreen(
     if (state.node != null) {
         val node = state.node ?: return
         uiViewModel.setTitle(node.user.longName)
+        var share by remember { mutableStateOf<Boolean>(false) }
+        if (share) {
+            SharedContactDialog(node) {
+                share = false
+            }
+        }
         NodeDetailList(
             node = node,
             metricsState = state,
             onNavigate = onNavigate,
             modifier = modifier,
-            metricsAvailability = availabilities
+            metricsAvailability = availabilities,
+            onShared = {
+                share = true
+            }
         )
     } else {
         Box(
@@ -161,13 +173,15 @@ fun NodeDetailScreen(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun NodeDetailList(
     modifier: Modifier = Modifier,
     node: Node,
     metricsState: MetricsState,
     onNavigate: (Route) -> Unit = {},
-    metricsAvailability: BooleanArray
+    metricsAvailability: BooleanArray,
+    onShared: () -> Unit = {}
 ) {
     LazyColumn(
         modifier = modifier.fillMaxSize(),
@@ -184,6 +198,15 @@ private fun NodeDetailList(
             PreferenceCategory(stringResource(R.string.details)) {
                 NodeDetailsContent(node)
             }
+        }
+
+        item {
+            NavCard(
+                title = stringResource(id = R.string.share_contact),
+                icon = Icons.Default.Share,
+                enabled = true,
+                onClick = onShared
+            )
         }
 
         if (node.hasEnvironmentMetrics) {

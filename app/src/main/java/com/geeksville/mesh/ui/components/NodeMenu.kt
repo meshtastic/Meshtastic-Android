@@ -35,7 +35,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.ui.supportsQrCodeSharing
 
 @Suppress("LongMethod")
 @Composable
@@ -44,7 +46,8 @@ fun NodeMenu(
     showFullMenu: Boolean = false,
     onDismissRequest: () -> Unit,
     expanded: Boolean = false,
-    onAction: (NodeMenuAction) -> Unit
+    onAction: (NodeMenuAction) -> Unit,
+    firmwareVersion: String? = null,
 ) {
     var displayFavoriteDialog by remember { mutableStateOf(false) }
     var displayIgnoreDialog by remember { mutableStateOf(false) }
@@ -179,6 +182,15 @@ fun NodeMenu(
             )
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
         }
+        val firmware = DeviceVersion(firmwareVersion ?: "0.0.0")
+        if (firmware.supportsQrCodeSharing()) {
+        DropdownMenuItem(
+            onClick = {
+                onDismissRequest()
+                onAction(NodeMenuAction.Share(node))
+            },
+            text = { Text(stringResource(R.string.share_contact)) }
+        )
         DropdownMenuItem(
             onClick = {
                 onDismissRequest()
@@ -186,6 +198,7 @@ fun NodeMenu(
             },
             text = { Text(stringResource(R.string.more_details)) }
         )
+        }
     }
 }
 
@@ -198,4 +211,5 @@ sealed class NodeMenuAction {
     data class RequestPosition(val node: Node) : NodeMenuAction()
     data class TraceRoute(val node: Node) : NodeMenuAction()
     data class MoreDetails(val node: Node) : NodeMenuAction()
+    data class Share(val node: Node) : NodeMenuAction()
 }

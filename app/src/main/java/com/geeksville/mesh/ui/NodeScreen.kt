@@ -17,9 +17,12 @@
 
 package com.geeksville.mesh.ui
 
+import android.os.Build
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -29,18 +32,23 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.model.DeviceVersion
+import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.components.NodeFilterTextField
 import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.components.rememberTimeTickWithLifecycle
 
 @OptIn(ExperimentalFoundationApi::class)
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun NodeScreen(
     model: UIViewModel = hiltViewModel(),
@@ -57,54 +65,87 @@ fun NodeScreen(
     val currentTimeMillis = rememberTimeTickWithLifecycle()
     val connectionState by model.connectionState.collectAsStateWithLifecycle()
 
-    LazyColumn(
-        state = listState,
-        modifier = Modifier.fillMaxSize(),
+    var showSharedContact: Node? by remember { mutableStateOf(null) }
+    if (showSharedContact != null) {
+        SharedContactDialog(
+            contact = showSharedContact,
+            onDismiss = { showSharedContact = null }
+        )
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
     ) {
-        stickyHeader {
-            NodeFilterTextField(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.background)
-                    .padding(8.dp),
-                filterText = state.filter,
-                onTextChange = model::setNodeFilterText,
-                currentSortOption = state.sort,
-                onSortSelect = model::setSortOption,
-                includeUnknown = state.includeUnknown,
-                onToggleIncludeUnknown = model::toggleIncludeUnknown,
-                showDetails = state.showDetails,
-                onToggleShowDetails = model::toggleShowDetails,
-            )
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            stickyHeader {
+                NodeFilterTextField(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.background)
+                        .padding(8.dp),
+                    filterText = state.filter,
+                    onTextChange = model::setNodeFilterText,
+                    currentSortOption = state.sort,
+                    onSortSelect = model::setSortOption,
+                    includeUnknown = state.includeUnknown,
+                    onToggleIncludeUnknown = model::toggleIncludeUnknown,
+                    showDetails = state.showDetails,
+                    onToggleShowDetails = model::toggleShowDetails,
+                )
+            }
+
+            items(nodes, key = { it.num }) { node ->
+                NodeItem(
+                    modifier = Modifier.animateContentSize(),
+                    thisNode = ourNode,
+                    thatNode = node,
+                    gpsFormat = state.gpsFormat,
+                    distanceUnits = state.distanceUnits,
+                    tempInFahrenheit = state.tempInFahrenheit,
+                    onAction = { menuItem ->
+                        when (menuItem) {
+                            is NodeMenuAction.Remove -> model.removeNode(node.num)
+                            is NodeMenuAction.Ignore -> model.ignoreNode(node)
+                            is NodeMenuAction.Favorite -> model.favoriteNode(node)
+                            is NodeMenuAction.DirectMessage -> {
+                                val hasPKC = model.ourNodeInfo.value?.hasPKC == true && node.hasPKC
+                                val channel =
+                                    if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
+                                navigateToMessages("$channel${node.user.id}")
+                            }
+
+                            is NodeMenuAction.RequestUserInfo -> model.requestUserInfo(node.num)
+                            is NodeMenuAction.RequestPosition -> model.requestPosition(node.num)
+                            is NodeMenuAction.TraceRoute -> model.requestTraceroute(node.num)
+                            is NodeMenuAction.MoreDetails -> navigateToNodeDetails(node.num)
+                            is NodeMenuAction.Share -> showSharedContact = node
+                        }
+                    },
+                    expanded = state.showDetails,
+                    currentTimeMillis = currentTimeMillis,
+                    isConnected = connectionState.isConnected(),
+                )
+            }
         }
 
-        items(nodes, key = { it.num }) { node ->
-            NodeItem(
-                modifier = Modifier.animateContentSize(),
-                thisNode = ourNode,
-                thatNode = node,
-                gpsFormat = state.gpsFormat,
-                distanceUnits = state.distanceUnits,
-                tempInFahrenheit = state.tempInFahrenheit,
-                onAction = { menuItem ->
-                    when (menuItem) {
-                        is NodeMenuAction.Remove -> model.removeNode(node.num)
-                        is NodeMenuAction.Ignore -> model.ignoreNode(node)
-                        is NodeMenuAction.Favorite -> model.favoriteNode(node)
-                        is NodeMenuAction.DirectMessage -> {
-                            val hasPKC = model.ourNodeInfo.value?.hasPKC == true && node.hasPKC
-                            val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
-                            navigateToMessages("$channel${node.user.id}")
-                        }
-                        is NodeMenuAction.RequestUserInfo -> model.requestUserInfo(node.num)
-                        is NodeMenuAction.RequestPosition -> model.requestPosition(node.num)
-                        is NodeMenuAction.TraceRoute -> model.requestTraceroute(node.num)
-                        is NodeMenuAction.MoreDetails -> navigateToNodeDetails(node.num)
-                    }
-                },
-                expanded = state.showDetails,
-                currentTimeMillis = currentTimeMillis,
-                isConnected = connectionState.isConnected(),
+        val firmwareVersion = DeviceVersion(ourNode?.metadata?.firmwareVersion ?: "0.0.0")
+        val shareCapable = firmwareVersion.supportsQrCodeSharing()
+
+        AnimatedVisibility(
+            modifier = Modifier.align(androidx.compose.ui.Alignment.BottomEnd),
+            visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                    !listState.isScrollInProgress &&
+                    shareCapable
+        ) {
+            @Suppress("NewApi")
+            AddContactFAB(
+                onSharedContactImport = { contact ->
+                    model.addSharedContact(contact)
+                }
             )
         }
     }
