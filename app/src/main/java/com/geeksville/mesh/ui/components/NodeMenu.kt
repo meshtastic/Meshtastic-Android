@@ -37,7 +37,7 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
-import com.geeksville.mesh.ui.minFirmwareForQR
+import com.geeksville.mesh.ui.supportsQrCodeSharing
 
 @Suppress("LongMethod")
 @Composable
@@ -183,8 +183,7 @@ fun NodeMenu(
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
         }
         val firmware = DeviceVersion(firmwareVersion ?: "0.0.0")
-        val shareCapable = firmware >= minFirmwareForQR
-        if (shareCapable) {
+        if (firmware.supportsQrCodeSharing()) {
         DropdownMenuItem(
             onClick = {
                 onDismissRequest()

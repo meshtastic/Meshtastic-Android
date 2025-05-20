@@ -133,7 +133,7 @@ fun NodeScreen(
         }
 
         val firmwareVersion = DeviceVersion(ourNode?.metadata?.firmwareVersion ?: "0.0.0")
-        val shareCapable = firmwareVersion >= minFirmwareForQR
+        val shareCapable = firmwareVersion.supportsQrCodeSharing()
 
         AnimatedVisibility(
             modifier = Modifier.align(androidx.compose.ui.Alignment.BottomEnd),

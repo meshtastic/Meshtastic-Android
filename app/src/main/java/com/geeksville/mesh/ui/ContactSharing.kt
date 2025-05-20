@@ -59,7 +59,6 @@ import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.ui.components.CopyIconButton
 import com.geeksville.mesh.ui.components.SimpleAlertDialog
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.WriterException
@@ -72,7 +71,7 @@ import java.net.MalformedURLException
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun AddContactFAB(
-    modifier: Modifier = Modifier.padding(16.dp),
+    modifier: Modifier = Modifier,
     onSharedContactImport: (AdminProtos.SharedContact) -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -112,7 +111,7 @@ fun AddContactFAB(
     fun zxingScan() {
         debug("Starting zxing QR code scanner")
         val zxingScan = ScanOptions()
-        zxingScan.setCameraId(0)
+        zxingScan.setCameraId(CAMERA_ID)
         zxingScan.setPrompt("")
         zxingScan.setBeepEnabled(false)
         zxingScan.setDesiredBarcodeFormats(ScanOptions.QR_CODE)
@@ -124,17 +123,23 @@ fun AddContactFAB(
             if (permissions.entries.all { it.value }) zxingScan()
         }
 
-    fun requestPermissionAndScan() {
-        MaterialAlertDialogBuilder(context)
-            .setTitle(R.string.camera_required)
-            .setMessage(R.string.why_camera_required)
-            .setNeutralButton(R.string.cancel) { _, _ ->
+    var showPermissionRationale by remember { mutableStateOf(false) }
+    if (showPermissionRationale) {
+        SimpleAlertDialog(
+            title = R.string.camera_required,
+            text = R.string.why_camera_required,
+            onDismiss = {
                 debug("Camera permission denied")
-            }
-            .setPositiveButton(R.string.accept) { _, _ ->
+                showPermissionRationale = false
+            },
+            onConfirm = {
                 requestPermissionAndScanLauncher.launch(context.getCameraPermissions())
+                showPermissionRationale = false
             }
-            .show()
+        )
+    }
+    fun requestPermissionAndScan() {
+        showPermissionRationale = true
     }
 
     FloatingActionButton(
@@ -148,7 +153,7 @@ fun AddContactFAB(
                 requestPermissionAndScan()
             }
         },
-        modifier = modifier
+        modifier = modifier.padding(16.dp)
     ) {
         Icon(
             imageVector = Icons.TwoTone.QrCodeScanner,
@@ -248,19 +253,23 @@ val Uri.qrCode: Bitmap?
         null
     }
 
-val minFirmwareForQR = DeviceVersion("2.6.8")
+private const val REQUIRED_MIN_FIRMWARE = "2.6.8"
 private const val BARCODE_PIXEL_SIZE = 960
 private const val MESHTASTIC_HOST = "meshtastic.org"
-private const val MESHTASTIC_PATH = "/v/"
-internal const val URL_PREFIX = "https://$MESHTASTIC_HOST$MESHTASTIC_PATH#"
+private const val CONTACT_SHARE_PATH = "/v/"
+internal const val URL_PREFIX = "https://$MESHTASTIC_HOST$CONTACT_SHARE_PATH#"
 private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
+private const val CAMERA_ID = 0
+
+fun DeviceVersion.supportsQrCodeSharing(): Boolean =
+    this >= DeviceVersion(REQUIRED_MIN_FIRMWARE)
 
 @Suppress("MagicNumber")
 @Throws(MalformedURLException::class)
 fun Uri.toSharedContact(): AdminProtos.SharedContact {
     if (fragment.isNullOrBlank() ||
         !host.equals(MESHTASTIC_HOST, true) ||
-        !path.equals(MESHTASTIC_PATH, true)
+        !path.equals(CONTACT_SHARE_PATH, true)
     ) {
         throw MalformedURLException("Not a valid Meshtastic URL: ${toString().take(40)}")
     }
