@@ -18,7 +18,6 @@
 package com.geeksville.mesh.ui
 
 import android.os.Build
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -139,7 +138,7 @@ fun NodeScreen(
             @Suppress("NewApi")
             AddContactFAB(
                 onSharedContactImport = { contact ->
-                    Log.d("NodeScreen", "Adding contact: $contact")
+                    model.addSharedContact(contact)
                 }
             )
         }

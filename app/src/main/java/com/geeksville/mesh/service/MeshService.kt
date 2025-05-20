@@ -109,6 +109,7 @@ sealed class ServiceAction {
     data class Favorite(val node: Node) : ServiceAction()
     data class Ignore(val node: Node) : ServiceAction()
     data class Reaction(val emoji: String, val replyId: Int, val contactKey: String) : ServiceAction()
+    data class AddSharedContact(val contact: AdminProtos.SharedContact) : ServiceAction()
 }
 
 /**
@@ -1872,7 +1873,16 @@ class MeshService : Service(), Logging {
             is ServiceAction.Favorite -> favoriteNode(action.node)
             is ServiceAction.Ignore -> ignoreNode(action.node)
             is ServiceAction.Reaction -> sendReaction(action)
+            is ServiceAction.AddSharedContact -> importContact(action.contact)
         }
+    }
+
+    private fun importContact(contact: AdminProtos.SharedContact) {
+        sendToRadio(
+            newMeshPacketTo(myNodeNum).buildAdminPacket {
+                addContact = contact
+            }
+        )
     }
 
     private fun getDeviceMetadata(destNum: Int) = toRemoteExceptions {

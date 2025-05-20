@@ -29,6 +29,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
@@ -447,6 +448,10 @@ class UIViewModel @Inject constructor(
 
     fun sendReaction(emoji: String, replyId: Int, contactKey: String) = viewModelScope.launch {
         radioConfigRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey))
+    }
+
+    fun addSharedContact(sharedContact: AdminProtos.SharedContact) = viewModelScope.launch {
+        radioConfigRepository.onServiceAction(ServiceAction.AddSharedContact(sharedContact))
     }
 
     fun requestTraceroute(destNum: Int) {

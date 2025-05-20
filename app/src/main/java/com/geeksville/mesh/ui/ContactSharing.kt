@@ -254,6 +254,7 @@ private const val MESHTASTIC_PATH = "/v/"
 internal const val URL_PREFIX = "https://$MESHTASTIC_HOST$MESHTASTIC_PATH#"
 private const val BASE64FLAGS = Base64.URL_SAFE + Base64.NO_WRAP + Base64.NO_PADDING
 
+@Suppress("MagicNumber")
 @Throws(MalformedURLException::class)
 fun Uri.toSharedContact(): AdminProtos.SharedContact {
     if (fragment.isNullOrBlank() ||
@@ -271,4 +272,3 @@ fun AdminProtos.SharedContact.getSharedContactUrl(): Uri {
     val enc = Base64.encodeToString(bytes, BASE64FLAGS)
     return "$URL_PREFIX$enc".toUri()
 }
-
