@@ -160,6 +160,7 @@ fun NodeItem(
                         onAction = onAction,
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false },
+                        firmwareVersion = thisNode?.metadata?.firmwareVersion
                     )
                 }
                 NodeKeyStatusIcon(

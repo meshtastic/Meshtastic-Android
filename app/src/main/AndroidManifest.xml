@@ -181,6 +181,15 @@
                     android:scheme="https"
                     android:host="meshtastic.org"
                     android:pathPrefix="/E/" />
+
+                <data
+                    android:scheme="https"
+                    android:host="meshtastic.org"
+                    android:pathPrefix="/v/" />
+                <data
+                    android:scheme="https"
+                    android:host="meshtastic.org"
+                    android:pathPrefix="/V/" />
             </intent-filter>
 
             <intent-filter>

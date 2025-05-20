@@ -55,6 +55,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.errormsg
 import com.geeksville.mesh.android.getCameraPermissions
+import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.ui.components.CopyIconButton
 import com.geeksville.mesh.ui.components.SimpleAlertDialog
@@ -247,8 +248,8 @@ val Uri.qrCode: Bitmap?
         null
     }
 
+val minFirmwareForQR = DeviceVersion("2.6.8")
 private const val BARCODE_PIXEL_SIZE = 960
-
 private const val MESHTASTIC_HOST = "meshtastic.org"
 private const val MESHTASTIC_PATH = "/v/"
 internal const val URL_PREFIX = "https://$MESHTASTIC_HOST$MESHTASTIC_PATH#"

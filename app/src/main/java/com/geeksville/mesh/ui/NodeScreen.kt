@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.components.NodeFilterTextField
@@ -47,7 +48,7 @@ import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.components.rememberTimeTickWithLifecycle
 
 @OptIn(ExperimentalFoundationApi::class)
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun NodeScreen(
     model: UIViewModel = hiltViewModel(),
@@ -131,9 +132,14 @@ fun NodeScreen(
             }
         }
 
+        val firmwareVersion = DeviceVersion(ourNode?.metadata?.firmwareVersion ?: "0.0.0")
+        val shareCapable = firmwareVersion >= minFirmwareForQR
+
         AnimatedVisibility(
             modifier = Modifier.align(androidx.compose.ui.Alignment.BottomEnd),
-            visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && !listState.isScrollInProgress
+            visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                    !listState.isScrollInProgress &&
+                    shareCapable
         ) {
             @Suppress("NewApi")
             AddContactFAB(
