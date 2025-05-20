@@ -58,6 +58,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -182,7 +183,7 @@ fun ChannelConfigScreen(
     )
 }
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun ChannelSettingsItemList(
     settingsList: List<ChannelSettings>,
@@ -241,14 +242,16 @@ fun ChannelSettingsItemList(
         Column {
 
             ChannelsConfigHeader(
-                frequency = if (loraConfig.overrideFrequency != 0f)
+                frequency = if (loraConfig.overrideFrequency != 0f) {
                     loraConfig.overrideFrequency
-                else
-                    primaryChannel.radioFreq,
-                slot = if (loraConfig.channelNum != 0)
+                } else {
+                    primaryChannel.radioFreq
+                },
+                slot = if (loraConfig.channelNum != 0) {
                     loraConfig.channelNum
-                else
+                } else {
                     primaryChannel.channelNum
+                }
             )
             Text(
                 text = stringResource(R.string.press_and_drag),
