@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Cloud
 import androidx.compose.material.icons.twotone.CloudDone
@@ -43,7 +44,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -79,7 +79,11 @@ internal fun MessageItem(
     verticalAlignment = Alignment.CenterVertically,
 ) {
     val fromLocal = node.user.id == DataPacket.ID_LOCAL
-    val messageColor = if (fromLocal) R.color.colorMyMsg else R.color.colorMsg
+    val messageColor = if (fromLocal) {
+        MaterialTheme.colorScheme.secondaryContainer
+    } else {
+        MaterialTheme.colorScheme.tertiaryContainer
+    }
     val (topStart, topEnd) = if (fromLocal) 12.dp to 4.dp else 4.dp to 12.dp
     val messageModifier = if (fromLocal) {
         Modifier.padding(start = 48.dp, top = 8.dp, end = 8.dp, bottom = 6.dp)
@@ -105,8 +109,9 @@ internal fun MessageItem(
             )
             .then(messageModifier),
         colors = CardDefaults.cardColors(
-            containerColor = colorResource(messageColor)
-        )
+            containerColor = messageColor
+        ),
+        shape = RoundedCornerShape(topStart, topEnd, bottomStart = 12.dp, bottomEnd = 12.dp)
     ) {
 
         Row(

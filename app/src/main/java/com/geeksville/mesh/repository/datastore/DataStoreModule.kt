@@ -22,9 +22,13 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.dataStoreFile
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStoreFile
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
+import com.geeksville.mesh.repository.location.LOCATION_PREFERNCES_NAME
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -77,4 +81,11 @@ object DataStoreModule {
             scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
         )
     }
+
+    @Singleton
+    @Provides
+    fun provideLocationPreferencesDataStore(@ApplicationContext appContext: Context): DataStore<Preferences> =
+        PreferenceDataStoreFactory.create(
+            produceFile = { appContext.preferencesDataStoreFile(LOCATION_PREFERNCES_NAME) }
+        )
 }

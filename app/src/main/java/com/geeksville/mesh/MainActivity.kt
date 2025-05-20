@@ -276,6 +276,8 @@ class MainActivity : AppCompatActivity(), Logging {
                 // if provideLocation enabled: Start providing location (from phone GPS) to mesh
                 if (model.provideLocation.value == true) {
                     service.startProvideLocation()
+                } else {
+                    service.stopProvideLocation()
                 }
             }
             checkNotificationPermissions()
