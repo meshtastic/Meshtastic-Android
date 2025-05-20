@@ -34,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
@@ -49,7 +50,21 @@ fun NodeMenu(
     onAction: (NodeMenuAction) -> Unit,
     firmwareVersion: String? = null,
 ) {
-    val isUnmessageable = node.user.isUnmessagable
+    val unmessageableRoles = listOf(
+        ConfigProtos.Config.DeviceConfig.Role.REPEATER,
+        ConfigProtos.Config.DeviceConfig.Role.ROUTER,
+        ConfigProtos.Config.DeviceConfig.Role.ROUTER_LATE,
+        ConfigProtos.Config.DeviceConfig.Role.SENSOR,
+        ConfigProtos.Config.DeviceConfig.Role.TRACKER,
+        ConfigProtos.Config.DeviceConfig.Role.TAK,
+        ConfigProtos.Config.DeviceConfig.Role.TAK_TRACKER,
+    )
+    val isUnmessageable = if (node.user.hasIsUnmessagable()) {
+        node.user.isUnmessagable
+    } else {
+        // for older firmwares
+        unmessageableRoles.contains(node.metadata?.role)
+    }
     var displayFavoriteDialog by remember { mutableStateOf(false) }
     var displayIgnoreDialog by remember { mutableStateOf(false) }
     var displayRemoveDialog by remember { mutableStateOf(false) }
