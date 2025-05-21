@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui
 
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,14 +27,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.NoCell
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -119,12 +123,17 @@ fun NodeItem(
     } else {
         thatNode.user.role?.isUnmessageableRole() == true
     }
+    var menuExpanded by remember { mutableStateOf(false) }
+
     Card(
         modifier = modifier
+            .combinedClickable(
+                onClick = { showDetails(!detailsShown) },
+                onLongClick = { menuExpanded = !expanded },
+            )
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp)
             .defaultMinSize(minHeight = 80.dp),
-        onClick = { showDetails(!detailsShown) },
     ) {
         Column(
             modifier = Modifier
@@ -136,10 +145,10 @@ fun NodeItem(
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                var menuExpanded by remember { mutableStateOf(false) }
                 Box(
                     modifier = Modifier.wrapContentSize(Alignment.TopStart),
                 ) {
+                    Box{
                     AssistChip(
                         modifier = Modifier
                             .width(IntrinsicSize.Min)
@@ -152,16 +161,35 @@ fun NodeItem(
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
                                 text = thatNode.user.shortName.ifEmpty { "???" },
-                                fontWeight = if (isFavorite) FontWeight.Bold else FontWeight.Normal,
+                                fontWeight = FontWeight.Normal,
                                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
                                 textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                                 textAlign = TextAlign.Center,
                             )
                         },
                         onClick = {
-                            menuExpanded = !menuExpanded
+                            onAction(NodeMenuAction.MoreDetails(thatNode))
                         },
                     )
+                        if (isFavorite) {
+                            Badge(
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .offset(x = 20.dp, y = -2.dp),
+                                containerColor = Color.Black,
+                                contentColor = MaterialTheme.colorScheme.onPrimary,
+                            ) {
+                                    Icon(
+                                        imageVector = Icons.Filled.Star,
+                                        contentDescription = "Favorite",
+                                        modifier = Modifier.padding(2.dp)
+                                            .padding(4.dp).size(17.dp), // Smaller size for badge
+                                        tint = Color.Yellow
+                                    )
+                                }
+                        }
+
+                    }
                     NodeMenu(
                         node = thatNode,
                         showFullMenu = !isThisNode && isConnected,
@@ -170,6 +198,9 @@ fun NodeItem(
                         onDismissRequest = { menuExpanded = false },
                         firmwareVersion = thisNode?.metadata?.firmwareVersion
                     )
+                }
+                if (isFavorite ) {
+                    Spacer(modifier = Modifier.width(16.dp))
                 }
                 NodeKeyStatusIcon(
                     hasPKC = thatNode.hasPKC,
@@ -180,12 +211,11 @@ fun NodeItem(
                 Text(
                     modifier = Modifier.weight(1f),
                     text = longName,
-                    fontWeight = if (isFavorite) FontWeight.Bold else FontWeight.Normal,
+                    fontWeight = FontWeight.Normal,
                     style = style,
                     textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                     softWrap = true,
                 )
-
                 LastHeardInfo(
                     lastHeard = thatNode.lastHeard,
                     currentTimeMillis = currentTimeMillis
