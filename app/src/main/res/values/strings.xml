@@ -607,6 +607,14 @@
     <string name="heading">Heading</string>
     <string name="sats">Sats</string>
     <string name="alt">Alt</string>
+    <string name="freq">Freq</string>
+    <string name="slot">Slot</string>
+    <string name="primary">Primary</string>
+    <string name="primary_channel_feature">Periodic position and telemetry broadcast</string>
+    <string name="secondary">Secondary</string>
+    <string name="secondary_no_telemetry">No periodic telemetry broadcast</string>
+    <string name="manuel_position_request">Manual position request required</string>
+    <string name="press_and_drag">Press and drag to reorder</string>
     <string name="set_region">Set Region</string>
     <string name="unmute">Unmute</string>
     <string name="dynamic">Dynamic</string>
