@@ -2,6 +2,7 @@
 <SmellBaseline>
   <ManuallySuppressedIssues>
     <ID>TooManyFunctions:ContactSharing.kt$com.geeksville.mesh.ui.ContactSharing.kt</ID>
+    <ID>TooManyFunctions:NodeDetail.kt$com.geeksville.mesh.ui.NodeDetail.kt</ID>
   </ManuallySuppressedIssues>
   <CurrentIssues>
     <ID>AbsentOrWrongFileLicense:LazyColumnDragAndDropDemo.kt$com.geeksville.mesh.ui.components.LazyColumnDragAndDropDemo.kt</ID>
