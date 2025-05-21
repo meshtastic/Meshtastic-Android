@@ -167,6 +167,7 @@ data class Contact(
     val messageCount: Int,
     val isMuted: Boolean,
     val isUnmessageable: Boolean,
+    val nodeColors: Pair<Int, Int>? = null,
 )
 
 @Suppress("LongParameterList")
@@ -385,6 +386,7 @@ class UIViewModel @Inject constructor(
 
             // grab usernames from NodeInfo
             val user = getUser(if (fromLocal) data.to else data.from)
+            val node = getNode(if (fromLocal) data.to else data.from)
 
             val shortName = user.shortName
             val longName = if (toBroadcast) {
@@ -403,6 +405,11 @@ class UIViewModel @Inject constructor(
                 messageCount = packetRepository.getMessageCount(contactKey),
                 isMuted = settings[contactKey]?.isMuted == true,
                 isUnmessageable = user.isUnmessagable,
+                nodeColors = if (!toBroadcast) {
+                    node.colors
+                } else {
+                    null
+                },
             )
         }
     }.stateIn(
