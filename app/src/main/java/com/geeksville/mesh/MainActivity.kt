@@ -168,9 +168,17 @@ class MainActivity : AppCompatActivity(), Logging {
 
         when (appLinkAction) {
             Intent.ACTION_VIEW -> {
-                debug("Asked to open a channel URL - ask user if they want to switch to that channel.  If so send the config to the radio")
-                appLinkData?.let(model::requestChannelUrl)
-                // We now wait for the device to connect, once connected, we ask the user if they want to switch to the new channel
+                appLinkData?.let {
+                    debug("App link data: $it")
+                    if (it.path?.startsWith("/e/") == true ||
+                        it.path?.startsWith("/E/") == true
+                    ) {
+                        debug("App link data is a channel set")
+                        model.requestChannelUrl(it)
+                    } else {
+                        debug("App link data is not a channel set")
+                    }
+                }
             }
 
             UsbManager.ACTION_USB_DEVICE_ATTACHED -> {
