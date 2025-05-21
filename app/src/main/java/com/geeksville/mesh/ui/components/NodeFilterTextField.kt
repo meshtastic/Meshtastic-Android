@@ -70,8 +70,6 @@ fun NodeFilterTextField(
     onToggleIncludeUnknown: () -> Unit,
     showDetails: Boolean,
     onToggleShowDetails: () -> Unit,
-    includeUnmessageable: Boolean,
-    onToggleIncludeUnmessageable: () -> Unit,
 ) {
     Row(
         modifier = modifier.background(MaterialTheme.colorScheme.background),
@@ -90,8 +88,6 @@ fun NodeFilterTextField(
             onToggleIncludeUnknown = onToggleIncludeUnknown,
             showDetails = showDetails,
             onToggleShowDetails = onToggleShowDetails,
-            includeUnmessageable = includeUnmessageable,
-            onToggleIncludeUnmessageable = onToggleIncludeUnmessageable
         )
     }
 }
@@ -158,8 +154,6 @@ private fun NodeSortButton(
     onToggleIncludeUnknown: () -> Unit,
     showDetails: Boolean,
     onToggleShowDetails: () -> Unit,
-    onToggleIncludeUnmessageable: () -> Unit,
-    includeUnmessageable: Boolean,
     modifier: Modifier = Modifier,
 ) = Box(modifier) {
     var expanded by remember { mutableStateOf(false) }
@@ -234,27 +228,6 @@ private fun NodeSortButton(
                 }
             }
         )
-        HorizontalDivider()
-        DropdownMenuItem(
-            onClick = {
-                onToggleIncludeUnmessageable()
-                expanded = false
-            },
-            text = {
-                Row {
-                    AnimatedVisibility(visible = includeUnmessageable) {
-                        Icon(
-                            imageVector = Icons.Default.Done,
-                            contentDescription = null,
-                            modifier = Modifier.padding(end = 4.dp),
-                        )
-                    }
-                    Text(
-                        text = stringResource(id = R.string.node_filter_include_unmessageable),
-                    )
-                }
-            }
-        )
     }
 }
 
@@ -272,8 +245,6 @@ private fun NodeFilterTextFieldPreview() {
             onToggleIncludeUnknown = {},
             showDetails = false,
             onToggleShowDetails = {},
-            includeUnmessageable = false,
-            onToggleIncludeUnmessageable = {}
         )
     }
 }
