@@ -23,7 +23,10 @@ import android.os.RemoteException
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -96,6 +99,7 @@ import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.components.AdaptiveTwoPane
 import com.geeksville.mesh.ui.components.DropDownPreference
+import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
 import com.geeksville.mesh.ui.components.dragContainer
 import com.geeksville.mesh.ui.components.dragDropItemsIndexed
@@ -112,6 +116,7 @@ import kotlinx.coroutines.launch
 fun ChannelScreen(
     viewModel: UIViewModel = hiltViewModel(),
 ) {
+
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
 
@@ -301,99 +306,102 @@ fun ChannelScreen(
     val dragDropState = rememberDragDropState(listState) { fromIndex, toIndex ->
         updateSettingsList { add(toIndex, removeAt(fromIndex)) }
     }
-
-    LazyColumn(
-        modifier = Modifier.dragContainer(
-            dragDropState = dragDropState,
-            haptics = LocalHapticFeedback.current,
-        ),
-        state = listState,
-        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.Top,
     ) {
-        if (!showChannelEditor) {
-            item {
-                ChannelListView(
-                    enabled = enabled,
-                    channelSet = channelSet,
-                    modemPresetName = modemPresetName,
-                    channelSelections = channelSelections,
-                    onClick = { showChannelEditor = true }
-                )
-                EditChannelUrl(
-                    enabled = enabled,
-                    channelUrl = selectedChannelSet.getChannelUrl(),
-                    onConfirm = viewModel::requestChannelUrl
-                )
-            }
-        } else {
-            dragDropItemsIndexed(
-                items = channelSet.settingsList,
-                dragDropState = dragDropState,
-            ) { index, channel, isDragging ->
-                ChannelCard(
-                    index = index,
-                    title = channel.name.ifEmpty { modemPresetName },
-                    enabled = enabled,
-                    onEditClick = { showEditChannelDialog = index },
-                    onDeleteClick = { updateSettingsList { removeAt(index) } }
-                )
-            }
-            item {
-                OutlinedButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        channelSet = channelSet.copy {
-                            settings.add(channelSettings { psk = Channel.default.settings.psk })
-                        }
-                        showEditChannelDialog = channelSet.settingsList.lastIndex
-                    },
-                    enabled = enabled && viewModel.maxChannels > channelSet.settingsCount,
-                ) { Text(text = stringResource(R.string.add)) }
-            }
-        }
-
-        item {
-            DropDownPreference(
-                title = stringResource(id = R.string.channel_options),
-                enabled = enabled,
-                items = ChannelOption.entries
-                    .map { it.modemPreset to stringResource(it.configRes) },
-                selectedItem = channelSet.loraConfig.modemPreset,
-                onItemSelected = {
-                    val lora = channelSet.loraConfig.copy { modemPreset = it }
-                    channelSet = channelSet.copy { loraConfig = lora }
+        PreferenceCategory(text = stringResource(R.string.channels))
+        LazyColumn(
+            modifier = Modifier.fillMaxWidth(),
+            state = listState,
+            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+        ) {
+            if (!showChannelEditor) {
+                item {
+                    ChannelListView(
+                        enabled = enabled,
+                        channelSet = channelSet,
+                        modemPresetName = modemPresetName,
+                        channelSelections = channelSelections,
+                        onClick = { showChannelEditor = true }
+                    )
+                    EditChannelUrl(
+                        enabled = enabled,
+                        channelUrl = selectedChannelSet.getChannelUrl(),
+                        onConfirm = viewModel::requestChannelUrl
+                    )
                 }
-            )
-        }
-
-        item {
-            if (isEditing) {
-                PreferenceFooter(
-                    enabled = enabled,
-                    onCancelClicked = {
-                        focusManager.clearFocus()
-                        showChannelEditor = false
-                        channelSet = channels
-                    },
-                    onSaveClicked = {
-                        focusManager.clearFocus()
-                        showSendDialog = true
-                    }
-                )
             } else {
-                PreferenceFooter(
+                dragDropItemsIndexed(
+                    items = channelSet.settingsList,
+                    dragDropState = dragDropState,
+                ) { index, channel, isDragging ->
+                    ChannelCard(
+                        index = index,
+                        title = channel.name.ifEmpty { modemPresetName },
+                        enabled = enabled,
+                        onEditClick = { showEditChannelDialog = index },
+                        onDeleteClick = { updateSettingsList { removeAt(index) } }
+                    )
+                }
+                item {
+                    OutlinedButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            channelSet = channelSet.copy {
+                                settings.add(channelSettings { psk = Channel.default.settings.psk })
+                            }
+                            showEditChannelDialog = channelSet.settingsList.lastIndex
+                        },
+                        enabled = enabled && viewModel.maxChannels > channelSet.settingsCount,
+                    ) { Text(text = stringResource(R.string.add)) }
+                }
+            }
+
+            item {
+                DropDownPreference(
+                    title = stringResource(id = R.string.channel_options),
                     enabled = enabled,
-                    negativeText = R.string.reset,
-                    onNegativeClicked = {
-                        focusManager.clearFocus()
-                        showResetDialog = true
-                    },
-                    positiveText = R.string.scan,
-                    onPositiveClicked = {
-                        focusManager.clearFocus()
-                        if (context.hasCameraPermission()) zxingScan() else showScanDialog = true
+                    items = ChannelOption.entries
+                        .map { it.modemPreset to stringResource(it.configRes) },
+                    selectedItem = channelSet.loraConfig.modemPreset,
+                    onItemSelected = {
+                        val lora = channelSet.loraConfig.copy { modemPreset = it }
+                        channelSet = channelSet.copy { loraConfig = lora }
                     }
                 )
+            }
+
+            item {
+                if (isEditing) {
+                    PreferenceFooter(
+                        enabled = enabled,
+                        onCancelClicked = {
+                            focusManager.clearFocus()
+                            showChannelEditor = false
+                            channelSet = channels
+                        },
+                        onSaveClicked = {
+                            focusManager.clearFocus()
+                            showSendDialog = true
+                        }
+                    )
+                } else {
+                    PreferenceFooter(
+                        enabled = enabled,
+                        negativeText = R.string.reset,
+                        onNegativeClicked = {
+                            focusManager.clearFocus()
+                            showResetDialog = true
+                        },
+                        positiveText = R.string.scan,
+                        onPositiveClicked = {
+                            focusManager.clearFocus()
+                            if (context.hasCameraPermission()) zxingScan() else showScanDialog =
+                                true
+                        }
+                    )
+                }
             }
         }
     }

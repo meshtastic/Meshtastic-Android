@@ -93,7 +93,7 @@ sealed interface Route {
     data object Channels : Route
 
     @Serializable
-    data object Settings : Route
+    data object Connect : Route
 
     @Serializable
     data object DebugPanel : Route
@@ -233,7 +233,7 @@ fun NavGraph(
     NavHost(
         navController = navController,
         startDestination = if (uIViewModel.bondedAddress.isNullOrBlank()) {
-            Route.Settings
+            Route.Connect
         } else {
             Route.Contacts
         },
@@ -258,7 +258,7 @@ fun NavGraph(
         composable<Route.Channels> {
             ChannelScreen(uIViewModel)
         }
-        composable<Route.Settings>(
+        composable<Route.Connect>(
             deepLinks = listOf(
                 navDeepLink {
                     uriPattern = "$DEEP_LINK_BASE_URI/settings"
@@ -270,7 +270,7 @@ fun NavGraph(
                 uIViewModel,
             ) {
                 navController.navigate(Route.RadioConfig()) {
-                    popUpTo(Route.Settings) {
+                    popUpTo(Route.Connect) {
                         inclusive = false
                     }
                 }
