@@ -1,4 +1,4 @@
-name: Make Release
+name: Make Releases in Parallel
 
 on:
   workflow_dispatch:
