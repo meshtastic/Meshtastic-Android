@@ -31,6 +31,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.VolumeOff
 import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -69,6 +70,14 @@ fun ContactItem(
             .padding(horizontal = 8.dp, vertical = 6.dp),
         shape = RoundedCornerShape(12.dp),
     ) {
+        val colors = if (contact.nodeColors != null) {
+            AssistChipDefaults.assistChipColors(
+                labelColor = Color(contact.nodeColors.first),
+                containerColor = Color(contact.nodeColors.second),
+            )
+        } else {
+            AssistChipDefaults.assistChipColors()
+        }
 
         Row(
             modifier = Modifier
@@ -89,7 +98,8 @@ fun ContactItem(
                         fontWeight = FontWeight.Normal,
                         textAlign = TextAlign.Center,
                     )
-                }
+                },
+                colors = colors
             )
             Column(
                 modifier = Modifier.weight(1f),
