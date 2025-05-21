@@ -33,9 +33,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.QrCodeScanner
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,15 +53,19 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.geeksville.mesh.AdminProtos
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.errormsg
 import com.geeksville.mesh.android.getCameraPermissions
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.components.CopyIconButton
 import com.geeksville.mesh.ui.components.SimpleAlertDialog
+import com.google.protobuf.Descriptors
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.google.zxing.WriterException
@@ -72,6 +79,7 @@ import java.net.MalformedURLException
 @Composable
 fun AddContactFAB(
     modifier: Modifier = Modifier,
+    model: UIViewModel = hiltViewModel(),
     onSharedContactImport: (AdminProtos.SharedContact) -> Unit = {},
 ) {
     val context = LocalContext.current
@@ -93,14 +101,43 @@ fun AddContactFAB(
     }
 
     if (contactToImport != null) {
+        val nodeNum = contactToImport?.nodeNum
+        val nodes by model.unfilteredNodeList.collectAsState()
+        val node = nodes.find { it.num == nodeNum }
         SimpleAlertDialog(
             title = R.string.import_shared_contact,
             text = {
-                Text("$contactToImport")
+                Column {
+                    if (node != null) {
+                        Text(
+                            text = stringResource(
+                                R.string.import_known_shared_contact_text
+                            )
+                        )
+                        if (node.user.publicKey.size() > 0 && node.user.publicKey != contactToImport?.user?.publicKey) {
+                            Text(
+                                text = stringResource(
+                                    R.string.public_key_changed
+                                ),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                        HorizontalDivider()
+                        Text(
+                            text = compareUsers(node.user, contactToImport!!.user)
+                        )
+                    } else {
+                        Text(
+                            text = userFieldsToString(contactToImport!!.user)
+                        )
+                    }
+                }
             },
+            dismissText = stringResource(R.string.cancel),
             onDismiss = {
                 contactToImport = null
             },
+            confirmText = stringResource(R.string.import_label),
             onConfirm = {
                 onSharedContactImport(contactToImport!!)
                 contactToImport = null
@@ -281,4 +318,81 @@ fun AdminProtos.SharedContact.getSharedContactUrl(): Uri {
     val bytes = this.toByteArray() ?: ByteArray(0)
     val enc = Base64.encodeToString(bytes, BASE64FLAGS)
     return "$URL_PREFIX$enc".toUri()
+}
+
+fun compareUsers(oldUser: MeshProtos.User, newUser: MeshProtos.User): String {
+    val changes = mutableListOf<String>()
+
+    // Iterate over all fields in the User message descriptor
+    for (fieldDescriptor: Descriptors.FieldDescriptor in MeshProtos.User.getDescriptor().fields) {
+        val fieldName = fieldDescriptor.name
+        val oldValue =
+            if (oldUser.hasField(fieldDescriptor)) oldUser.getField(fieldDescriptor) else null
+        val newValue =
+            if (newUser.hasField(fieldDescriptor)) newUser.getField(fieldDescriptor) else null
+
+        if (oldValue != newValue) {
+            val oldValueString = valueToString(oldValue, fieldDescriptor)
+            val newValueString = valueToString(newValue, fieldDescriptor)
+            changes.add("$fieldName: $oldValueString -> $newValueString")
+        }
+    }
+
+    return if (changes.isEmpty()) {
+        "No changes detected."
+    } else {
+        "Changes:\n" + changes.joinToString("\n")
+    }
+}
+
+fun userFieldsToString(user: MeshProtos.User): String {
+    val fieldLines = mutableListOf<String>()
+
+    for (fieldDescriptor: Descriptors.FieldDescriptor in MeshProtos.User.getDescriptor().fields) {
+        val fieldName = fieldDescriptor.name
+        if (user.hasField(fieldDescriptor)) {
+            val value = user.getField(fieldDescriptor)
+            val valueString =
+                valueToString(value, fieldDescriptor) // Using the helper from previous example
+            fieldLines.add("$fieldName: $valueString")
+        } else if (fieldDescriptor.isRepeated || fieldDescriptor.hasDefaultValue() || fieldDescriptor.isOptional) {
+            val defaultValue = fieldDescriptor.defaultValue
+            val valueString = if (fieldDescriptor.isRepeated) {
+                "[]" // Empty list
+            } else if (user.hasField(fieldDescriptor)) {
+                valueToString(
+                user.getField(fieldDescriptor),
+                fieldDescriptor
+            )
+            } else {
+                valueToString(defaultValue, fieldDescriptor)
+            }
+
+            fieldLines.add("$fieldName: $valueString")
+        }
+    }
+    return if (fieldLines.isEmpty()) {
+        "User object has no fields set."
+    } else {
+        fieldLines.joinToString("\n")
+    }
+}
+
+private fun valueToString(value: Any?, fieldDescriptor: Descriptors.FieldDescriptor): String {
+    if (value == null) {
+        return "null"
+    }
+    return when (fieldDescriptor.type) {
+        Descriptors.FieldDescriptor.Type.BYTES -> {
+            // For ByteString, you might want to display it as hex or Base64
+            // For simplicity, here we'll just show its size.
+            if (value is com.google.protobuf.ByteString) {
+                Base64.encodeToString(value.toByteArray(), Base64.DEFAULT).trim()
+            } else {
+                value.toString().trim()
+            }
+        }
+        // Add more custom formatting for other types if needed
+        else -> value.toString().trim()
+    }
 }

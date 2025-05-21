@@ -309,6 +309,12 @@ class UIViewModel @Inject constructor(
         initialValue = NodesUiState.Empty,
     )
 
+    val unfilteredNodeList: StateFlow<List<Node>> = nodeDB.getNodes().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = emptyList(),
+    )
+
     val nodeList: StateFlow<List<Node>> = nodesUiState.flatMapLatest { state ->
         nodeDB.getNodes(state.sort, state.filter, state.includeUnknown, state.includeUnmessageable)
     }.stateIn(

@@ -39,7 +39,9 @@ import com.geeksville.mesh.ui.theme.AppTheme
 fun SimpleAlertDialog(
     @StringRes title: Int,
     text: @Composable (() -> Unit)? = null,
+    confirmText: String? = null,
     onConfirm: (() -> Unit)? = null,
+    dismissText: String? = null,
     onDismiss: () -> Unit = {},
 ) = AlertDialog(
     onDismissRequest = onDismiss,
@@ -51,7 +53,7 @@ fun SimpleAlertDialog(
             colors = ButtonDefaults.textButtonColors(
                 contentColor = MaterialTheme.colorScheme.onSurface,
             ),
-        ) { Text(text = stringResource(id = R.string.close)) }
+        ) { Text(text = dismissText ?: stringResource(id = R.string.cancel)) }
     },
     confirmButton = {
         onConfirm?.let {
@@ -62,7 +64,7 @@ fun SimpleAlertDialog(
             colors = ButtonDefaults.textButtonColors(
                 contentColor = MaterialTheme.colorScheme.onSurface,
             ),
-        ) { Text(text = stringResource(id = R.string.okay)) }
+        ) { Text(text = confirmText ?: stringResource(id = R.string.okay)) }
         }
     },
     title = {
