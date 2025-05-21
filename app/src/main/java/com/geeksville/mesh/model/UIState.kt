@@ -147,7 +147,6 @@ data class NodesUiState(
     val sort: NodeSortOption = NodeSortOption.LAST_HEARD,
     val filter: String = "",
     val includeUnknown: Boolean = false,
-    val includeUnmessageable: Boolean = true,
     val gpsFormat: Int = 0,
     val distanceUnits: Int = 0,
     val tempInFahrenheit: Boolean = false,
@@ -263,8 +262,6 @@ class UIViewModel @Inject constructor(
     private val nodeSortOption = MutableStateFlow(NodeSortOption.LAST_HEARD)
     private val includeUnknown = MutableStateFlow(preferences.getBoolean("include-unknown", false))
     private val showDetails = MutableStateFlow(preferences.getBoolean("show-details", false))
-    private val includeUnmessageable =
-        MutableStateFlow(preferences.getBoolean("include-unmessageable", true))
 
     fun setSortOption(sort: NodeSortOption) {
         nodeSortOption.value = sort
@@ -273,11 +270,6 @@ class UIViewModel @Inject constructor(
     fun toggleShowDetails() {
         showDetails.value = !showDetails.value
         preferences.edit { putBoolean("show-details", showDetails.value) }
-    }
-
-    fun toggleIncludeUnmessageable() {
-        includeUnmessageable.value = !includeUnmessageable.value
-        preferences.edit { putBoolean("include-unmessageable", includeUnmessageable.value) }
     }
 
     fun toggleIncludeUnknown() {
@@ -301,8 +293,6 @@ class UIViewModel @Inject constructor(
             tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
             showDetails = showDetails,
         )
-    }.combine(includeUnmessageable) { state, includeUnmessageable ->
-        state.copy(includeUnmessageable = includeUnmessageable)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -316,7 +306,7 @@ class UIViewModel @Inject constructor(
     )
 
     val nodeList: StateFlow<List<Node>> = nodesUiState.flatMapLatest { state ->
-        nodeDB.getNodes(state.sort, state.filter, state.includeUnknown, state.includeUnmessageable)
+        nodeDB.getNodes(state.sort, state.filter, state.includeUnknown)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
