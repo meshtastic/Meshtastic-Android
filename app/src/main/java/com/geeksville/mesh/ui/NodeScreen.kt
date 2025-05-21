@@ -145,6 +145,7 @@ fun NodeScreen(
         ) {
             @Suppress("NewApi")
             AddContactFAB(
+                model = model,
                 onSharedContactImport = { contact ->
                     model.addSharedContact(contact)
                 }

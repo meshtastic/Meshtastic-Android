@@ -624,4 +624,7 @@
     <string name="node_filter_include_unmessageable">Include Unmessageable</string>
     <string name="unmessageable">Unmessageable</string>
     <string name="unmonitored_or_infrastructure">Unmonitored or Infrastructure</string>
+    <string name="import_known_shared_contact_text">Warning: This contact is known, importing will overwrite the previous contact information.</string>
+    <string name="public_key_changed">Public Key Changed</string>
+    <string name="import_label">Import</string>
 </resources>
