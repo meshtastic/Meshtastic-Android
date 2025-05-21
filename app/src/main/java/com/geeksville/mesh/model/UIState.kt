@@ -440,6 +440,14 @@ class UIViewModel @Inject constructor(
         val channel = contactKey[0].digitToIntOrNull()
         val dest = if (channel != null) contactKey.substring(1) else contactKey
 
+        // if the destination is a node, we need to ensure it's a
+        // favorite so it does not get removed from the on-device node database.
+        if (channel == null) { // no channel specified, so we assume it's a direct message
+            val node = nodeDB.getNode(dest)
+            if (!node.isFavorite) {
+                favoriteNode(nodeDB.getNode(dest))
+            }
+        }
         val p = DataPacket(dest, channel ?: 0, str)
         sendDataPacket(p)
     }
