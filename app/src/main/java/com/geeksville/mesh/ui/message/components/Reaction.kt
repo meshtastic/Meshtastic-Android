@@ -37,7 +37,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EmojiEmotions
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -77,11 +77,13 @@ fun ReactionButton(
             onDismiss = { showEmojiPickerDialog = false }
         )
     }
-    IconButton(onClick = { showEmojiPickerDialog = true }) {
+    IconButton(
+        modifier = modifier.size(48.dp),
+        onClick = { showEmojiPickerDialog = true }
+    ) {
         Icon(
             imageVector = Icons.Default.EmojiEmotions,
             contentDescription = "emoji",
-            modifier = modifier.size(16.dp),
         )
     }
 }
@@ -93,13 +95,10 @@ private fun ReactionItem(
     onClick: () -> Unit = {},
 ) {
     BadgedBox(
-        modifier = Modifier.padding(start = 2.dp, top = 8.dp, end = 2.dp, bottom = 4.dp),
+        modifier = Modifier.padding(start = 2.dp, top = 2.dp, end = 2.dp, bottom = 4.dp),
         badge = {
             if (emojiCount > 1) {
-                Badge(
-                    containerColor = MaterialTheme.colorScheme.onBackground,
-                    contentColor = MaterialTheme.colorScheme.background,
-                ) {
+                Badge {
                     Text(
                         fontWeight = FontWeight.Bold,
                         text = emojiCount.toString()
@@ -111,7 +110,7 @@ private fun ReactionItem(
         Surface(
             modifier = Modifier
                 .clickable { onClick() },
-            color = MaterialTheme.colorScheme.surface,
+            color = MaterialTheme.colorScheme.primaryContainer,
             shape = RoundedCornerShape(32.dp),
         ) {
             Text(
@@ -194,7 +193,7 @@ fun ReactionDialog(
         }
     }
 
-    Divider(Modifier.padding(vertical = 8.dp))
+    HorizontalDivider(Modifier.padding(vertical = 8.dp))
 
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
@@ -238,7 +237,8 @@ fun ReactionItemPreview() {
 fun ReactionRowPreview() {
     AppTheme {
         ReactionRow(
-            fromLocal = true, reactions = listOf(
+            fromLocal = true,
+            reactions = listOf(
                 Reaction(
                     replyId = 1,
                     user = MeshProtos.User.getDefaultInstance(),

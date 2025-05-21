@@ -90,7 +90,6 @@ internal fun MessageItem(
     } else {
         Modifier.padding(start = 8.dp, top = 8.dp, end = 0.dp, bottom = 6.dp)
     }
-
     if (!fromLocal) {
         UserAvatar(
             node = node,
@@ -99,7 +98,6 @@ internal fun MessageItem(
                 .align(Alignment.Top),
         ) { onChipClick() }
     }
-
     Card(
         modifier = Modifier
             .weight(1f)
@@ -113,7 +111,6 @@ internal fun MessageItem(
         ),
         shape = RoundedCornerShape(topStart, topEnd, bottomStart = 12.dp, bottomEnd = 12.dp)
     ) {
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -165,7 +162,7 @@ internal fun MessageItem(
         }
     }
     if (!fromLocal) {
-        ReactionButton(Modifier.padding(16.dp), onSendReaction)
+        ReactionButton(Modifier.padding(4.dp), onSendReaction)
     }
 }
 
