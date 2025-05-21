@@ -29,6 +29,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
 import androidx.lifecycle.viewModelScope
+import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
@@ -146,6 +147,7 @@ data class NodesUiState(
     val sort: NodeSortOption = NodeSortOption.LAST_HEARD,
     val filter: String = "",
     val includeUnknown: Boolean = false,
+    val includeUnmessageable: Boolean = true,
     val gpsFormat: Int = 0,
     val distanceUnits: Int = 0,
     val tempInFahrenheit: Boolean = false,
@@ -165,6 +167,7 @@ data class Contact(
     val unreadCount: Int,
     val messageCount: Int,
     val isMuted: Boolean,
+    val isUnmessageable: Boolean,
 )
 
 @Suppress("LongParameterList")
@@ -260,6 +263,8 @@ class UIViewModel @Inject constructor(
     private val nodeSortOption = MutableStateFlow(NodeSortOption.LAST_HEARD)
     private val includeUnknown = MutableStateFlow(preferences.getBoolean("include-unknown", false))
     private val showDetails = MutableStateFlow(preferences.getBoolean("show-details", false))
+    private val includeUnmessageable =
+        MutableStateFlow(preferences.getBoolean("include-unmessageable", true))
 
     fun setSortOption(sort: NodeSortOption) {
         nodeSortOption.value = sort
@@ -268,6 +273,11 @@ class UIViewModel @Inject constructor(
     fun toggleShowDetails() {
         showDetails.value = !showDetails.value
         preferences.edit { putBoolean("show-details", showDetails.value) }
+    }
+
+    fun toggleIncludeUnmessageable() {
+        includeUnmessageable.value = !includeUnmessageable.value
+        preferences.edit { putBoolean("include-unmessageable", includeUnmessageable.value) }
     }
 
     fun toggleIncludeUnknown() {
@@ -291,6 +301,8 @@ class UIViewModel @Inject constructor(
             tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
             showDetails = showDetails,
         )
+    }.combine(includeUnmessageable) { state, includeUnmessageable ->
+        state.copy(includeUnmessageable = includeUnmessageable)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -298,7 +310,7 @@ class UIViewModel @Inject constructor(
     )
 
     val nodeList: StateFlow<List<Node>> = nodesUiState.flatMapLatest { state ->
-        nodeDB.getNodes(state.sort, state.filter, state.includeUnknown)
+        nodeDB.getNodes(state.sort, state.filter, state.includeUnknown, state.includeUnmessageable)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -394,6 +406,7 @@ class UIViewModel @Inject constructor(
                 unreadCount = packetRepository.getUnreadCount(contactKey),
                 messageCount = packetRepository.getMessageCount(contactKey),
                 isMuted = settings[contactKey]?.isMuted == true,
+                isUnmessageable = user.isUnmessagable,
             )
         }
     }.stateIn(
@@ -447,6 +460,10 @@ class UIViewModel @Inject constructor(
 
     fun sendReaction(emoji: String, replyId: Int, contactKey: String) = viewModelScope.launch {
         radioConfigRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey))
+    }
+
+    fun addSharedContact(sharedContact: AdminProtos.SharedContact) = viewModelScope.launch {
+        radioConfigRepository.onServiceAction(ServiceAction.AddSharedContact(sharedContact))
     }
 
     fun requestTraceroute(destNum: Int) {

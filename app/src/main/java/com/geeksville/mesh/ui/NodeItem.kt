@@ -30,10 +30,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.NoCell
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -58,6 +61,7 @@ import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.model.isUnmessageableRole
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.components.NodeMenu
 import com.geeksville.mesh.ui.components.NodeMenuAction
@@ -110,7 +114,11 @@ fun NodeItem(
     }
 
     val (detailsShown, showDetails) = remember { mutableStateOf(expanded) }
-
+    val unmessageable = if (thatNode.user.hasIsUnmessagable()) {
+        thatNode.user.isUnmessagable
+    } else {
+        thatNode.user.role?.isUnmessageableRole() == true
+    }
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -160,6 +168,7 @@ fun NodeItem(
                         onAction = onAction,
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false },
+                        firmwareVersion = thisNode?.metadata?.firmwareVersion
                     )
                 }
                 NodeKeyStatusIcon(
@@ -181,6 +190,21 @@ fun NodeItem(
                     lastHeard = thatNode.lastHeard,
                     currentTimeMillis = currentTimeMillis
                 )
+            }
+            if (unmessageable) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Icon(
+                        imageVector = Icons.Outlined.NoCell,
+                        contentDescription = stringResource(R.string.unmessageable),
+                        tint = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Text(
+                        stringResource(R.string.unmonitored_or_infrastructure)
+                    )
+                }
             }
             Row(
                 modifier = Modifier

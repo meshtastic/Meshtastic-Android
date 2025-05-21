@@ -74,8 +74,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.QuickChatAction
+import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannel
+import com.geeksville.mesh.ui.SharedContactDialog
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.message.components.MessageList
@@ -203,6 +205,14 @@ internal fun MessageScreen(
         }
     ) { padding ->
         if (messages.isNotEmpty()) {
+            var sharedContact: Node? by remember { mutableStateOf(null) }
+            if (sharedContact != null) {
+                SharedContactDialog(
+                    contact = sharedContact,
+                    onDismiss = { sharedContact = null }
+                )
+            }
+
             MessageList(
                 modifier = Modifier.padding(padding),
                 messages = messages,
@@ -228,6 +238,7 @@ internal fun MessageScreen(
                     is NodeMenuAction.RequestPosition -> viewModel.requestPosition(action.node.num)
                     is NodeMenuAction.TraceRoute -> viewModel.requestTraceroute(action.node.num)
                     is NodeMenuAction.MoreDetails -> navigateToNodeDetails(action.node.num)
+                    is NodeMenuAction.Share -> sharedContact = action.node
                 }
             }
             )

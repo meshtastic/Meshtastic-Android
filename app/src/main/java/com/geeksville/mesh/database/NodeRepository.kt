@@ -28,6 +28,7 @@ import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.NodeSortOption
+import com.geeksville.mesh.model.isUnmessageableRole
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -96,11 +97,22 @@ class NodeRepository @Inject constructor(
         sort: NodeSortOption = NodeSortOption.LAST_HEARD,
         filter: String = "",
         includeUnknown: Boolean = true,
+        includeUnmessageable: Boolean = true,
     ) = nodeInfoDao.getNodes(
         sort = sort.sqlValue,
         filter = filter,
         includeUnknown = includeUnknown,
-    ).mapLatest { list -> list.map { it.toModel() } }.flowOn(dispatchers.io).conflate()
+    ).mapLatest { list ->
+        list.map { it.toModel() }.filter { node ->
+            val isUnmessageable: Boolean = if (node.user.hasIsUnmessagable()) {
+                node.user.isUnmessagable
+            } else {
+                // for older firmwares
+                node.user.role?.isUnmessageableRole() == true
+            }
+            return@filter includeUnmessageable || !isUnmessageable
+        }
+    }.flowOn(dispatchers.io).conflate()
 
     suspend fun upsert(node: NodeEntity) = withContext(dispatchers.io) {
         nodeInfoDao.upsert(node)
