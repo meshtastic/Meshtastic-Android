@@ -103,7 +103,7 @@
     <string name="connected_sleeping">Connecté à la radio, mais il dort</string>
     <string name="update_to">Mettre à jour vers %s</string>
     <string name="app_too_old">Mise à jour de l\'application requise</string>
-    <string name="must_update">Vous devez mettre à jour cette application sur l\'app store (ou Github). Il est trop vieux pour parler à ce microprogramme radio. Veuillez lire nos docs <a href="https://meshtastic.org/docs/software/android/installation"></a> sur ce sujet.</string>
+    <string name="must_update">Vous devez mettre à jour cette application sur l\'app store (ou Github). Il est trop vieux pour parler à ce microprogramme radio. Veuillez lire nos docs <a href="https://meshtastic.org/docs/software/android/installation"/> sur ce sujet.</string>
     <string name="none">Aucun (désactivé)</string>
     <string name="modem_config_turbo">Courte portée / Turbo</string>
     <string name="modem_config_short">Courte portée / Rapide</string>
@@ -569,6 +569,8 @@
     <string name="firmware_version">Version du microprogramme</string>
     <string name="timestamp">Horodatage</string>
     <string name="alt">Alt</string>
+    <string name="primary">Principal</string>
+    <string name="secondary">Secondaire</string>
     <string name="set_region">Définir la région</string>
     <string name="unmute">Désactiver Muet</string>
 </resources>

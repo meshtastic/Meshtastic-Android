@@ -323,4 +323,6 @@
     <string name="private_key">Privatni ključ</string>
     <string name="timeout">Isteklo vreme</string>
     <string name="distance">Udaljenost</string>
+    <string name="primary">Примарни</string>
+    <string name="secondary">Секундарни</string>
 </resources>
