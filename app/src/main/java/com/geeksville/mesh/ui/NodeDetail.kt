@@ -98,6 +98,7 @@ import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.isUnmessageableRole
 import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.radioconfig.NavCard
@@ -158,7 +159,12 @@ fun NodeDetailScreen(
         NodeDetailList(
             node = node,
             metricsState = state,
-            onNavigate = onNavigate,
+            onAction = { action ->
+                when (action) {
+                    is Route -> onNavigate(action)
+                    is ServiceAction -> viewModel.onServiceAction(action)
+                }
+            },
             modifier = modifier,
             metricsAvailability = availabilities,
             onShared = {
@@ -181,7 +187,7 @@ private fun NodeDetailList(
     modifier: Modifier = Modifier,
     node: Node,
     metricsState: MetricsState,
-    onNavigate: (Route) -> Unit = {},
+    onAction: (Any) -> Unit = {},
     metricsAvailability: BooleanArray,
     onShared: () -> Unit = {}
 ) {
@@ -203,11 +209,11 @@ private fun NodeDetailList(
         }
 
         item {
-            NavCard(
-                title = stringResource(id = R.string.share_contact),
-                icon = Icons.Default.Share,
-                enabled = true,
-                onClick = onShared
+            DeviceActions(
+                isLocal = metricsState.isLocal,
+                node = node,
+                onShared = onShared,
+                onAction = onAction
             )
         }
 
@@ -236,7 +242,7 @@ private fun NodeDetailList(
                     icon = type.icon,
                     enabled = metricsAvailability[type.ordinal]
                 ) {
-                    onNavigate(type.route)
+                    onAction(type.route)
                 }
             }
         }
@@ -249,7 +255,7 @@ private fun NodeDetailList(
                     icon = Icons.Default.Settings,
                     enabled = true
                 ) {
-                    onNavigate(Route.RadioConfig(node.num))
+                    onAction(Route.RadioConfig(node.num))
                 }
             }
         }
@@ -279,6 +285,31 @@ private fun NodeDetailRow(
         Text(label)
         Spacer(modifier = Modifier.weight(1f))
         Text(textAlign = TextAlign.End, text = value)
+    }
+}
+
+@Composable
+private fun DeviceActions(
+    isLocal: Boolean = false,
+    node: Node,
+    onShared: () -> Unit,
+    onAction: (ServiceAction) -> Unit,
+) {
+    PreferenceCategory(text = stringResource(R.string.actions))
+    NavCard(
+        title = stringResource(id = R.string.share_contact),
+        icon = Icons.Default.Share,
+        enabled = true,
+        onClick = onShared
+    )
+
+    if (!isLocal) {
+        NavCard(
+            title = stringResource(id = R.string.request_metadata),
+            icon = Icons.Default.Memory,
+            enabled = true,
+            onClick = { onAction(ServiceAction.GetDeviceMetadata(node.num)) }
+        )
     }
 }
 
