@@ -193,13 +193,14 @@ fun NodeMenu(
         }
         val firmware = DeviceVersion(firmwareVersion ?: "0.0.0")
         if (firmware.supportsQrCodeSharing()) {
-        DropdownMenuItem(
-            onClick = {
-                onDismissRequest()
-                onAction(NodeMenuAction.Share(node))
-            },
-            text = { Text(stringResource(R.string.share_contact)) }
-        )
+            DropdownMenuItem(
+                onClick = {
+                    onDismissRequest()
+                    onAction(NodeMenuAction.Share(node))
+                },
+                text = { Text(stringResource(R.string.share_contact)) }
+            )
+        }
         DropdownMenuItem(
             onClick = {
                 onDismissRequest()
@@ -207,7 +208,6 @@ fun NodeMenu(
             },
             text = { Text(stringResource(R.string.more_details)) }
         )
-        }
     }
 }
 
