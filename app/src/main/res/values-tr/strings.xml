@@ -557,6 +557,7 @@
     <string name="long_name">Uzun ad</string>
     <string name="short_name">Kısa ad</string>
     <string name="hardware_model">Donanım modeli</string>
+    <string name="licensed_amateur_radio_text">Bu seçeneği aktif etmek şifrelemeyi devre dışı bırakır ve bu varsayılan Meshtastic ağı ile uyumsuzdur.</string>
     <string name="dew_point">Çiğ Noktası</string>
     <string name="pressure">Basınç</string>
     <string name="gas_resistance">Gaz Direnci</string>
@@ -583,4 +584,5 @@
     <string name="alt">Yükseklik</string>
     <string name="set_region">Bölge Ayarla</string>
     <string name="unmute">Sesi aç</string>
+    <string name="dynamic">Dinamik</string>
 </resources>

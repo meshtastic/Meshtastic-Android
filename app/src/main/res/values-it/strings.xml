@@ -97,6 +97,7 @@
     <string name="connected_count">Connesso: %1$s online</string>
     <string name="update_firmware">Aggiorna Firmware</string>
     <string name="ip_address">Indirizzo IP:</string>
+    <string name="ip_port">Porta:</string>
     <string name="connected">Connesso alla radio</string>
     <string name="connected_to">Connesso alla radio (%s)</string>
     <string name="not_connected">Non connesso</string>
@@ -568,4 +569,5 @@
     <string name="store_forward_config"><![CDATA[Configurazione Salva & Inoltra]]></string>
     <string name="indoor_air_quality_iaq">Qualità dell\'Aria Interna (IAQ)</string>
     <string name="url">URL</string>
+    <string name="dynamic">Dinamico</string>
 </resources>

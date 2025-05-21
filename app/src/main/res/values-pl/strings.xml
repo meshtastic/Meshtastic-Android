@@ -383,4 +383,6 @@
     <string name="uptime">Czas pracy</string>
     <string name="firmware_version">Wersja firmware</string>
     <string name="heading">Kierunek</string>
+    <string name="primary">Podstawowy</string>
+    <string name="secondary">Wtórny</string>
 </resources>

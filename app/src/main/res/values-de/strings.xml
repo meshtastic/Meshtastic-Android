@@ -329,4 +329,6 @@
     <string name="private_key">Privater Schlüssel</string>
     <string name="timeout">Zeitüberschreitung</string>
     <string name="distance">Entfernung</string>
+    <string name="primary">Primär</string>
+    <string name="secondary">Sekundär</string>
 </resources>

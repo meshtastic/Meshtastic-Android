@@ -584,4 +584,6 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="heading">航向</string>
     <string name="sats">卫星</string>
     <string name="alt">海拔</string>
+    <string name="primary">主要</string>
+    <string name="secondary">次要</string>
 </resources>

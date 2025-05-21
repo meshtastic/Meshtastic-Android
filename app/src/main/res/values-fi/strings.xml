@@ -97,6 +97,7 @@
     <string name="connected_count">Yhdistetty: %1$s verkossa</string>
     <string name="update_firmware">Päivitä laiteohjelmisto</string>
     <string name="ip_address">IP-osoite:</string>
+    <string name="ip_port">Portti:</string>
     <string name="connected">Yhdistetty radioon</string>
     <string name="connected_to">Yhdistetty radioon (%s)</string>
     <string name="not_connected">Ei yhdistetty</string>
@@ -557,6 +558,8 @@
     <string name="long_name">Pitkä nimi</string>
     <string name="short_name">Lyhytnimi</string>
     <string name="hardware_model">Laitteen malli</string>
+    <string name="licensed_amateur_radio">Lisensoitu radioamatööri (HAM)</string>
+    <string name="licensed_amateur_radio_text">Jos otat tämän asetuksen käyttöön, salaus poistetaan käytöstä, eikä laite ole enää yhteensopiva oletusasetuksilla toimivan Meshtastic-verkon kanssa.</string>
     <string name="dew_point">Kastepiste</string>
     <string name="pressure">Ilmanpaine</string>
     <string name="gas_resistance">Kaasun vastus</string>
@@ -583,4 +586,5 @@
     <string name="alt">Korkeus </string>
     <string name="set_region">Määritä alue</string>
     <string name="unmute">Poista mykistys</string>
+    <string name="dynamic">Dynaaminen</string>
 </resources>
