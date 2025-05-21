@@ -58,7 +58,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -79,7 +78,6 @@ import com.geeksville.mesh.ui.components.dragContainer
 import com.geeksville.mesh.ui.components.dragDropItemsIndexed
 import com.geeksville.mesh.ui.components.rememberDragDropState
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
-import com.geeksville.mesh.ui.theme.MeshtasticGreen
 
 @Composable
 private fun ChannelItem(
@@ -255,7 +253,6 @@ fun ChannelSettingsItemList(
             )
             Text(
                 text = stringResource(R.string.press_and_drag),
-                color = Color.LightGray,
                 fontSize = 11.sp,
                 modifier = Modifier.padding(start = 16.dp)
             )
@@ -270,7 +267,7 @@ fun ChannelSettingsItemList(
                 item {
                     Text(
                         text = stringResource(R.string.primary),
-                        color = MeshtasticGreen
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
                 dragDropItemsIndexed(
@@ -287,13 +284,13 @@ fun ChannelSettingsItemList(
                     if (index == 0 && !isDragging) {
                         Text(
                             text = stringResource(R.string.primary_channel_feature),
-                            color = MeshtasticGreen,
+                            color = MaterialTheme.colorScheme.primary,
                             fontSize = 10.sp,
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             text = stringResource(R.string.secondary),
-                            color = Color.Gray
+                            color = MaterialTheme.colorScheme.onBackground
                         )
                     }
                 }
@@ -301,12 +298,12 @@ fun ChannelSettingsItemList(
                     Column {
                         Text(
                             text = stringResource(R.string.secondary_no_telemetry),
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.onBackground,
                             fontSize = 10.sp,
                         )
                         Text(
                             text = stringResource(R.string.manuel_position_request),
-                            color = Color.Gray,
+                            color = MaterialTheme.colorScheme.onBackground,
                             fontSize = 10.sp,
                         )
                     }
@@ -373,12 +370,10 @@ private fun ChannelsConfigHeader(
         Column {
             Text(
                 text = "${stringResource(R.string.freq)}: ${frequency}MHz",
-                color = Color.LightGray,
                 fontSize = 11.sp,
             )
             Text(
                 text = "${stringResource(R.string.slot)}: $slot",
-                color = Color.LightGray,
                 fontSize = 11.sp,
             )
         }
