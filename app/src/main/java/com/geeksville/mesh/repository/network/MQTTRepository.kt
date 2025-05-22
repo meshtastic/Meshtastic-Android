@@ -74,7 +74,7 @@ class MQTTRepository @Inject constructor(
     }
 
     val proxyMessageFlow: Flow<MqttClientProxyMessage> = callbackFlow {
-        val ownerId = radioConfigRepository.myId.value ?: generateClientId()
+        val ownerId = "MeshtasticAndroidMqttProxy-${radioConfigRepository.myId.value ?: generateClientId()}"
         val channelSet = radioConfigRepository.channelSetFlow.first()
         val mqttConfig = radioConfigRepository.moduleConfigFlow.first().mqtt
 
