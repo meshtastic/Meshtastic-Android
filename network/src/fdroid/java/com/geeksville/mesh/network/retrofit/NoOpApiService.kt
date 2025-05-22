@@ -20,12 +20,16 @@ package com.geeksville.mesh.network.retrofit
 import com.geeksville.mesh.network.model.NetworkDeviceHardware
 import com.geeksville.mesh.network.model.NetworkFirmwareReleases
 import retrofit2.Response
-import retrofit2.http.GET
+import javax.inject.Inject
+import javax.inject.Singleton
 
-interface ApiService {
-    @GET("resource/deviceHardware")
-    suspend fun getDeviceHardware(): Response<List<NetworkDeviceHardware>>
+@Singleton
+class NoOpApiService@Inject constructor() : ApiService {
+    override suspend fun getDeviceHardware(): Response<List<NetworkDeviceHardware>> {
+        return Response.success(emptyList())
+    }
 
-    @GET("/github/firmware/list")
-    suspend fun getFirmwareReleases(): Response<NetworkFirmwareReleases>
+    override suspend fun getFirmwareReleases(): Response<NetworkFirmwareReleases> {
+        return Response.success(NetworkFirmwareReleases(emptyList()))
+    }
 }

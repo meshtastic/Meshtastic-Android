@@ -384,7 +384,7 @@ fun DeviceHardwareImage(
     deviceHardware: DeviceHardware,
     modifier: Modifier = Modifier,
 ) {
-    val hwImg = deviceHardware.images?.get(1) ?: deviceHardware.images?.get(0) ?: "unknown.svg"
+    val hwImg = deviceHardware.images?.getOrNull(1) ?: deviceHardware.images?.getOrNull(0) ?: "unknown.svg"
     val imageUrl = "https://flasher.meshtastic.org/img/devices/$hwImg"
     val listener = object : ImageRequest.Listener {
         override fun onStart(request: ImageRequest) {
