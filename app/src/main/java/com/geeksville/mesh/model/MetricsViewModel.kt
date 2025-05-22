@@ -80,7 +80,6 @@ data class MetricsState(
     val positionLogs: List<Position> = emptyList(),
     val deviceHardware: DeviceHardware? = null,
     val isLocalDevice: Boolean = false,
-    val isRegistered: Boolean = false,
     val latestStableFirmware: FirmwareRelease? = null,
     val latestAlphaFirmware: FirmwareRelease? = null,
 ) {
