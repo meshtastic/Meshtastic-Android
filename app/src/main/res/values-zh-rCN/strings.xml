@@ -586,4 +586,5 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="alt">海拔</string>
     <string name="primary">主要</string>
     <string name="secondary">次要</string>
+    <string name="firmware">固件</string>
 </resources>
