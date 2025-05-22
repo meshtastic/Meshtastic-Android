@@ -25,6 +25,10 @@ import com.geeksville.mesh.android.Logging
 
 class BootCompleteReceiver : BroadcastReceiver(), Logging {
     override fun onReceive(mContext: Context, intent: Intent) {
+        // Verify the intent action
+        if (Intent.ACTION_BOOT_COMPLETED != intent.action) {
+            return
+        }
         // start listening for bluetooth messages from our device
         MeshService.startServiceLater(mContext)
     }
