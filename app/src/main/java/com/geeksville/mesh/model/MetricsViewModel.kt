@@ -41,7 +41,6 @@ import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.repository.api.DeviceHardwareRepository
-import com.geeksville.mesh.repository.api.DeviceRegistrationRepository
 import com.geeksville.mesh.repository.api.FirmwareReleaseRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.ServiceAction
@@ -53,7 +52,6 @@ import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.toList
@@ -202,7 +200,6 @@ class MetricsViewModel @Inject constructor(
     private val dispatchers: CoroutineDispatchers,
     private val meshLogRepository: MeshLogRepository,
     private val radioConfigRepository: RadioConfigRepository,
-    private val deviceRegistrationRepository: DeviceRegistrationRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val preferences: SharedPreferences,
@@ -245,29 +242,14 @@ class MetricsViewModel @Inject constructor(
                 .mapLatest { nodes -> nodes[destNum] }
                 .distinctUntilChanged()
                 .onEach { node ->
-                    val isLocalDevice = node?.user?.id == radioConfigRepository.myId.value
-                    _state.update { state -> state.copy(isLocalDevice = isLocalDevice) }
-                    if (isLocalDevice) {
-                        radioConfigRepository.myNodeInfo.value?.deviceId?.let { deviceId ->
-                            _state.update { state ->
-                                state.copy(
-                                    isRegistered = deviceRegistrationRepository.isDeviceRegistered(
-                                        deviceId
-                                    )?.isRegistered ?: false
-                                )
-                            }
-                        }
-                    }
-                    _state.update { state -> state.copy(node = node) }
-                }.map { node ->
-                    node?.user?.hwModel?.let { hwModel ->
-                        _state.update { state ->
-                            state.copy(
-                                deviceHardware = deviceHardwareRepository.getDeviceHardwareByModel(
-                                    hwModel.number
-                                )
-                            )
-                        }
+                    val hwModel = node?.user?.hwModel
+                    val deviceHardware =
+                        hwModel?.let { deviceHardwareRepository.getDeviceHardwareByModel(it.number) }
+                    _state.update { state ->
+                        state.copy(
+                            node = node,
+                            deviceHardware = deviceHardware
+                        )
                     }
                 }
                 .launchIn(viewModelScope)

@@ -61,12 +61,12 @@ import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material.icons.outlined.Navigation
 import androidx.compose.material.icons.outlined.NoCell
+import androidx.compose.material.icons.twotone.Verified
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material.icons.twotone.Verified
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -353,8 +353,6 @@ private fun DeviceDetailsContent(
     val deviceHardware = state.deviceHardware ?: return
     val hwModelName = deviceHardware.displayName
     val isSupported = deviceHardware.activelySupported
-    val isLocalDevice = state.isLocalDevice
-    val isRegistered = state.isRegistered
     Box(
         modifier = Modifier
             .size(100.dp)
@@ -379,14 +377,6 @@ private fun DeviceDetailsContent(
         value = "",
         iconTint = if (isSupported) Color.Green else Color.Red
     )
-    if (isLocalDevice) {
-        NodeDetailRow(
-            label = if (isRegistered) "Registered by Backer" else "Not Registered",
-            icon = if (isRegistered) Icons.TwoTone.Verified else ImageVector.vectorResource(R.drawable.unverified),
-            value = "",
-            iconTint = if (isRegistered) Color.Green else Color.Red
-        )
-    }
 }
 
 @Composable
