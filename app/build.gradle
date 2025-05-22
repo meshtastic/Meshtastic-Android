@@ -153,7 +153,6 @@ dependencies {
     debugImplementation(libs.bundles.ui.tooling)
     implementation(libs.bundles.lifecycle)
     implementation(libs.bundles.navigation)
-    implementation(libs.bundles.coil)
     implementation(libs.bundles.coroutines)
     implementation(libs.bundles.datastore)
     implementation(libs.bundles.room)
