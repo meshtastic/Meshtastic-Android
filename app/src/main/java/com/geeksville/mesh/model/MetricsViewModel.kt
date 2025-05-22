@@ -239,20 +239,20 @@ class MetricsViewModel @Inject constructor(
     init {
         destNum?.let {
             radioConfigRepository.nodeDBbyNum
-                .mapLatest { nodes -> nodes[destNum] }
+                .mapLatest { nodes -> nodes[destNum] to nodes.keys.firstOrNull() }
                 .distinctUntilChanged()
-                .onEach { node ->
-                    val hwModel = node?.user?.hwModel
-                    val deviceHardware =
-                        hwModel?.let { deviceHardwareRepository.getDeviceHardwareByModel(it.number) }
+                .onEach { (node, ourNode) ->
+                    val deviceHardware = node?.user?.hwModel?.number?.let {
+                        deviceHardwareRepository.getDeviceHardwareByModel(it)
+                    }
                     _state.update { state ->
                         state.copy(
                             node = node,
+                            isLocal = destNum == ourNode,
                             deviceHardware = deviceHardware
                         )
                     }
-                }
-                .launchIn(viewModelScope)
+                }.launchIn(viewModelScope)
 
             radioConfigRepository.deviceProfileFlow.onEach { profile ->
                 val moduleConfig = profile.moduleConfig
