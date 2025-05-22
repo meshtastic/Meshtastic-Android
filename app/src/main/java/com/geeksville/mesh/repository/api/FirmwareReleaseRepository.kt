@@ -41,7 +41,6 @@ class FirmwareReleaseRepository @Inject constructor(
 
     val stableRelease: Flow<FirmwareRelease?> = getLatestFirmware(FirmwareReleaseType.STABLE)
 
-
     val alphaRelease: Flow<FirmwareRelease?> = getLatestFirmware(FirmwareReleaseType.ALPHA)
 
     private fun getLatestFirmware(

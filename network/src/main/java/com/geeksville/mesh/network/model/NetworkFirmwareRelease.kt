@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.network.model
 
-
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 

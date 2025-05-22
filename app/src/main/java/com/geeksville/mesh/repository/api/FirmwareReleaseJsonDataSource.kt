@@ -36,4 +36,3 @@ class FirmwareReleaseJsonDataSource @Inject constructor(
         return result
     }
 }
-

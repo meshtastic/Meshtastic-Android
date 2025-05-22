@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.network
 
-import com.geeksville.mesh.network.model.NetworkFirmwareRelease
 import com.geeksville.mesh.network.model.NetworkFirmwareReleases
 import com.geeksville.mesh.network.retrofit.ApiService
 import kotlinx.coroutines.Dispatchers
