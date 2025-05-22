@@ -35,7 +35,8 @@ data class MyNodeInfo(
     val maxChannels: Int,
     val hasWifi: Boolean,
     val channelUtilization: Float,
-    val airUtilTx: Float
+    val airUtilTx: Float,
+    val deviceId: String?,
 ) : Parcelable {
     /** A human readable description of the software/hardware version */
     val firmwareString: String get() = "$model $firmwareVersion"

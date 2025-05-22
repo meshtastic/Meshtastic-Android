@@ -144,7 +144,7 @@ androidComponents {
 }
 
 dependencies {
-
+    implementation project(":network")
     implementation(fileTree(dir: 'libs', include: ['*.jar']))
 
     // Bundles
@@ -159,6 +159,7 @@ dependencies {
     implementation(libs.bundles.hilt)
     implementation(libs.bundles.protobuf)
     implementation(libs.bundles.coil)
+
     //OSM
     implementation(libs.bundles.osm)
     implementation(libs.osmdroid.geopackage){ exclude group: "com.j256.ormlite" }

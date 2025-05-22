@@ -628,4 +628,5 @@
     <string name="import_label">Import</string>
     <string name="request_metadata">Request Metadata</string>
     <string name="actions">Actions</string>
+    <string name="firmware">Firmware</string>
 </resources>

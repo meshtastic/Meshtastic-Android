@@ -29,7 +29,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.CoroutineDispatchers
-import com.geeksville.mesh.MeshProtos.HardwareModel
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.Position
 import com.geeksville.mesh.Portnums.PortNum
@@ -37,9 +36,12 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.MeshLogRepository
+import com.geeksville.mesh.database.entity.FirmwareRelease
 import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.repository.api.DeviceHardwareRepository
+import com.geeksville.mesh.repository.api.FirmwareReleaseRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.map.MAP_STYLE_ID
@@ -56,11 +58,9 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
-import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.TimeUnit
@@ -79,6 +79,9 @@ data class MetricsState(
     val tracerouteResults: List<MeshPacket> = emptyList(),
     val positionLogs: List<Position> = emptyList(),
     val deviceHardware: DeviceHardware? = null,
+    val isLocalDevice: Boolean = false,
+    val latestStableFirmware: FirmwareRelease? = null,
+    val latestAlphaFirmware: FirmwareRelease? = null,
 ) {
     fun hasDeviceMetrics() = deviceMetrics.isNotEmpty()
     fun hasSignalMetrics() = signalMetrics.isNotEmpty()
@@ -188,6 +191,7 @@ private fun MeshPacket.toPosition(): Position? = if (!decoded.wantResponse) {
     null
 }
 
+@Suppress("LongParameterList")
 @HiltViewModel
 class MetricsViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
@@ -195,6 +199,8 @@ class MetricsViewModel @Inject constructor(
     private val dispatchers: CoroutineDispatchers,
     private val meshLogRepository: MeshLogRepository,
     private val radioConfigRepository: RadioConfigRepository,
+    private val deviceHardwareRepository: DeviceHardwareRepository,
+    private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val preferences: SharedPreferences,
 ) : ViewModel(), Logging {
     private val destNum = savedStateHandle.toRoute<Route.NodeDetail>().destNum
@@ -229,25 +235,23 @@ class MetricsViewModel @Inject constructor(
     private val _timeFrame = MutableStateFlow(TimeFrame.TWENTY_FOUR_HOURS)
     val timeFrame: StateFlow<TimeFrame> = _timeFrame
 
-    private var deviceHardwareList: List<DeviceHardware> = listOf()
-
     init {
         destNum?.let {
             radioConfigRepository.nodeDBbyNum
                 .mapLatest { nodes -> nodes[destNum] to nodes.keys.firstOrNull() }
                 .distinctUntilChanged()
                 .onEach { (node, ourNode) ->
-                    _state.update { state -> state.copy(node = node, isLocal = destNum == ourNode) }
-                    node?.user?.hwModel?.let { hwModel ->
-                        val deviceHardware = getDeviceHardwareFromHardwareModel(hwModel)
-                        deviceHardware?.let {
-                            _state.update { state ->
-                                state.copy(deviceHardware = it)
-                            }
-                        }
+                    val deviceHardware = node?.user?.hwModel?.number?.let {
+                        deviceHardwareRepository.getDeviceHardwareByModel(it)
                     }
-                }
-                .launchIn(viewModelScope)
+                    _state.update { state ->
+                        state.copy(
+                            node = node,
+                            isLocal = destNum == ourNode,
+                            deviceHardware = deviceHardware
+                        )
+                    }
+                }.launchIn(viewModelScope)
 
             radioConfigRepository.deviceProfileFlow.onEach { profile ->
                 val moduleConfig = profile.moduleConfig
@@ -308,6 +312,18 @@ class MetricsViewModel @Inject constructor(
                     }
                 }.launchIn(viewModelScope)
 
+            firmwareReleaseRepository.stableRelease.onEach { latestStable ->
+                _state.update { state ->
+                    state.copy(latestStableFirmware = latestStable)
+                }
+            }.launchIn(viewModelScope)
+
+            firmwareReleaseRepository.alphaRelease.onEach { latestAlpha ->
+                _state.update { state ->
+                    state.copy(latestAlphaFirmware = latestAlpha)
+                }
+            }.launchIn(viewModelScope)
+
             debug("MetricsViewModel created")
         }
     }
@@ -360,23 +376,5 @@ class MetricsViewModel @Inject constructor(
         } catch (ex: FileNotFoundException) {
             errormsg("Can't write file error: ${ex.message}")
         }
-    }
-
-    private fun getDeviceHardwareFromHardwareModel(
-        hwModel: HardwareModel
-    ): DeviceHardware? {
-        if (deviceHardwareList.isEmpty()) {
-            try {
-                val json =
-                    app.assets.open("device_hardware.json").bufferedReader().use { it.readText() }
-                deviceHardwareList = Json.decodeFromString<List<DeviceHardware>>(json)
-                return deviceHardwareList.find { it.hwModel == hwModel.number }
-            } catch (ex: IOException) {
-                errormsg("Can't read device_hardware.json error: ${ex.message}")
-            } catch (ex: IllegalArgumentException) {
-                errormsg(ex.message.toString())
-            }
-        }
-        return null
     }
 }
