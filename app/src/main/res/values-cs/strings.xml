@@ -341,7 +341,7 @@
     <string name="bluetooth">Bluetooth</string>
     <string name="security">Zabezpečení</string>
     <string name="mqtt">MQTT</string>
-    <string name="serial">Sériový</string>
+    <string name="serial">Sériová komunikace</string>
     <string name="external_notification">Externí oznámení</string>
     <string name="store_forward"><![CDATA[Uložit a přeposlat]]></string>
     <string name="range_test">Zkouška dosahu</string>
@@ -513,7 +513,7 @@
     <string name="public_key">Veřejný klíč</string>
     <string name="private_key">Soukromý klíč</string>
     <string name="admin_key">Administrátorský klíč</string>
-    <string name="serial_console">Sériová konzole</string>
+    <string name="serial_console">Sériová komunikace</string>
     <string name="debug_log_api_enabled">Ladící protokol API povolen</string>
     <string name="legacy_admin_channel">Starý kanál správce</string>
     <string name="serial_config">Konfigurace sériové komunikace</string>
@@ -521,7 +521,7 @@
     <string name="serial_baud_rate">Rychlost sériového přenosu</string>
     <string name="timeout">Vypršel čas spojení</string>
     <string name="serial_mode">Sériový režim</string>
-    <string name="override_console_serial_port">Přepsat sériový port konzole</string>
+    <string name="override_console_serial_port">Přepsat sériový port komunikace</string>
     <string name="store_forward_enabled"><![CDATA[Uložit a přeposlat povoleno]]></string>
     <string name="heartbeat">Pulzující LED</string>
     <string name="number_of_records">Počet záznamů</string>
@@ -542,6 +542,7 @@
     <string name="long_name">Dlouhé jméno</string>
     <string name="short_name">Krátké jméno</string>
     <string name="hardware_model">Hardwarový model</string>
+    <string name="licensed_amateur_radio">Licencované amatérské rádio (HAM)</string>
     <string name="licensed_amateur_radio_text">Povolení této možnosti zruší šifrování a není kompatibilní se základním nastavením Meshtastic sítě.</string>
     <string name="dew_point">Rosný bod</string>
     <string name="pressure">Tlak</string>
@@ -566,6 +567,17 @@
     <string name="timestamp">Časová značka</string>
     <string name="sats">Satelitů</string>
     <string name="alt">Výška</string>
+    <string name="primary">Primární</string>
+    <string name="secondary">Sekundární</string>
     <string name="set_region">Nastavit oblast</string>
     <string name="unmute">Zrušit ztlumení</string>
+    <string name="dynamic">Dynamický</string>
+    <string name="scan_qr_code">Naskenovat QR kód</string>
+    <string name="share_contact">Sdílet kontakt</string>
+    <string name="import_shared_contact">Importovat sdílený kontakt?</string>
+    <string name="unmonitored_or_infrastructure">Nesledované nebo infrastruktura</string>
+    <string name="import_known_shared_contact_text">Upozornění: Tento kontakt je znám, import přepíše předchozí kontaktní informace.</string>
+    <string name="public_key_changed">Veřejný klíč změněn</string>
+    <string name="request_metadata">Vyžádat metadata</string>
+    <string name="actions">Akce</string>
 </resources>

@@ -290,7 +290,7 @@
         <item quantity="one">1 hyppy</item>
         <item quantity="other">%d hyppyä</item>
     </plurals>
-    <string name="traceroute_diff">Reititetyt hypyt %1$d hyppyjä takaisin %2$d</string>
+    <string name="traceroute_diff">Reititettyjä hyppyjä %1$d, joista %2$d hyppyä takaisin</string>
     <string name="twenty_four_hours">24t</string>
     <string name="forty_eight_hours">48t</string>
     <string name="one_week">1vko</string>
@@ -584,7 +584,26 @@
     <string name="heading">Suunta</string>
     <string name="sats">Satelliitit</string>
     <string name="alt">Korkeus </string>
+    <string name="freq">Taajuus</string>
+    <string name="slot">Paikka</string>
+    <string name="primary">Ensisijainen</string>
+    <string name="primary_channel_feature">Säännöllinen sijainti- ja telemetrialähetys</string>
+    <string name="secondary">Toissijainen</string>
+    <string name="secondary_no_telemetry">Telemetriatietoja ei lähetetä säännöllisesti</string>
+    <string name="manuel_position_request">Manuaalinen sijaintipyyntö vaaditaan</string>
+    <string name="press_and_drag">Paina ja raahaa järjestääksesi uudelleen</string>
     <string name="set_region">Määritä alue</string>
     <string name="unmute">Poista mykistys</string>
     <string name="dynamic">Dynaaminen</string>
+    <string name="scan_qr_code">Skannaa QR-koodi</string>
+    <string name="share_contact">Jaa yhteystieto</string>
+    <string name="import_shared_contact">Tuo jaettu yhteystieto?</string>
+    <string name="unmessageable">Ei vastaanota viestejä</string>
+    <string name="unmonitored_or_infrastructure">Ei seurannassa tai toimii infrastruktuurilaitteena</string>
+    <string name="import_known_shared_contact_text">Varoitus: Kontakti on jo olemassa, tuonti ylikirjoittaa aiemmat tiedot.</string>
+    <string name="public_key_changed">Julkinen avain vaihdettu</string>
+    <string name="import_label">Tuo</string>
+    <string name="request_metadata">Pyydä metatiedot</string>
+    <string name="actions">Toiminnot</string>
+    <string name="firmware">Laiteohjelmisto</string>
 </resources>

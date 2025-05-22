@@ -331,4 +331,6 @@
     <string name="distance">Entfernung</string>
     <string name="primary">Primär</string>
     <string name="secondary">Sekundär</string>
+    <string name="actions">Aktionen</string>
+    <string name="firmware">Firmware</string>
 </resources>

@@ -325,4 +325,6 @@
     <string name="distance">Udaljenost</string>
     <string name="primary">Примарни</string>
     <string name="secondary">Секундарни</string>
+    <string name="actions">Акције</string>
+    <string name="firmware">Фирмвер</string>
 </resources>

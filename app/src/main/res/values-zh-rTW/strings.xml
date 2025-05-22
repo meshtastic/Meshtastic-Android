@@ -457,4 +457,5 @@
     <string name="private_key">私鑰</string>
     <string name="timeout">逾時</string>
     <string name="distance">距離</string>
+    <string name="firmware">韌體</string>
 </resources>
