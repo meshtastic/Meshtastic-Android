@@ -30,9 +30,9 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.android.BuildUtils.errormsg
 import com.geeksville.mesh.util.requiredZoomLevel
@@ -67,13 +67,18 @@ const val MAP_STYLE_ID = "map_style_id"
 
 private const val MinZoomLevel = 1.5
 private const val MaxZoomLevel = 20.0
+private const val DefaultZoomLevel = 15.0
 
 @Composable
 internal fun rememberMapViewWithLifecycle(
     box: BoundingBox,
     tileSource: ITileSource = TileSourceFactory.DEFAULT_TILE_SOURCE,
 ): MapView {
-    val zoom = box.requiredZoomLevel()
+    val zoom = if (box.requiredZoomLevel().isFinite()) {
+        box.requiredZoomLevel()
+    } else {
+        DefaultZoomLevel
+    }
     val center = GeoPoint(box.centerLatitude, box.centerLongitude)
     return rememberMapViewWithLifecycle(zoom, center, tileSource)
 }
@@ -108,7 +113,7 @@ internal fun rememberMapViewWithLifecycle(
             minZoomLevel = MinZoomLevel
             maxZoomLevel = MaxZoomLevel
             // Disables default +/- button for zooming
-            zoomController.setVisibility(CustomZoomButtonsController.Visibility.NEVER)
+            zoomController.setVisibility(CustomZoomButtonsController.Visibility.SHOW_AND_FADEOUT)
 
             controller.setZoom(savedZoom)
             controller.setCenter(savedCenter)
