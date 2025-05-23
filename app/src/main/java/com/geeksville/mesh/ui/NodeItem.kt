@@ -48,7 +48,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -137,7 +136,6 @@ fun NodeItem(
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-
                 val inputChipInteractionSource = remember { MutableInteractionSource() }
                 Box {
                     AssistChip(
@@ -172,14 +170,14 @@ fun NodeItem(
                     )
                 }
 
-                    NodeMenu(
-                        node = thatNode,
-                        showFullMenu = !isThisNode && isConnected,
-                        onAction = onAction,
-                        expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false },
-                        firmwareVersion = thisNode?.metadata?.firmwareVersion
-                    )
+                NodeMenu(
+                    node = thatNode,
+                    showFullMenu = !isThisNode && isConnected,
+                    onAction = onAction,
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false },
+                    firmwareVersion = thisNode?.metadata?.firmwareVersion
+                )
 
                 NodeKeyStatusIcon(
                     hasPKC = thatNode.hasPKC,
