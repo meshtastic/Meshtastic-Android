@@ -208,6 +208,17 @@ fun DisplayConfigItemList(
         item { HorizontalDivider() }
 
         item {
+            SwitchPreference(
+                title = stringResource(R.string.use_12h_format),
+                summary = stringResource(R.string.display_time_in_12h_format),
+                enabled = enabled,
+                checked = displayInput.use12HClock,
+                onCheckedChange = { displayInput = displayInput.copy { use12HClock = it } }
+            )
+        }
+        item { HorizontalDivider() }
+
+        item {
             PreferenceFooter(
                 enabled = enabled && displayInput != displayConfig,
                 onCancelClicked = {
