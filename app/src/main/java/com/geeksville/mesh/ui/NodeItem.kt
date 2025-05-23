@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui
 
+import android.content.res.Configuration
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -57,13 +58,14 @@ import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.isUnmessageableRole
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.components.NodeMenu
 import com.geeksville.mesh.ui.components.NodeMenuAction
+import com.geeksville.mesh.ui.components.NodeStatusIcons
 import com.geeksville.mesh.ui.components.SignalInfo
-import com.geeksville.mesh.ui.components.StatusIcons
 import com.geeksville.mesh.ui.compose.ElevationInfo
 import com.geeksville.mesh.ui.compose.SatelliteCountInfo
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
@@ -84,11 +86,11 @@ fun NodeItem(
     currentTimeMillis: Long,
     isConnected: Boolean = false,
 ) {
-    val isFavorite = thatNode.isFavorite
+    val isFavorite = remember(thatNode) { thatNode.isFavorite }
     val isIgnored = thatNode.isIgnored
     val longName = thatNode.user.longName.ifEmpty { stringResource(id = R.string.unknown_username) }
 
-    val isThisNode = thisNode?.num == thatNode.num
+    val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
     val system = remember(distanceUnits) { DisplayConfig.DisplayUnits.forNumber(distanceUnits) }
     val distance = remember(thisNode, thatNode) {
         thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system)
@@ -112,10 +114,13 @@ fun NodeItem(
     }
 
     val (detailsShown, showDetails) = remember { mutableStateOf(expanded) }
-    val unmessageable = if (thatNode.user.hasIsUnmessagable()) {
-        thatNode.user.isUnmessagable
-    } else {
-        thatNode.user.role?.isUnmessageableRole() == true
+    val unmessageable = remember(thatNode) {
+        val firmwareVersion = DeviceVersion(thatNode.metadata?.firmwareVersion ?: "")
+        if (firmwareVersion >= DeviceVersion("2.6.8")) {
+            thatNode.user.isUnmessagable
+        } else {
+            thatNode.user.role?.isUnmessageableRole() == true
+        }
     }
     var menuExpanded by remember { mutableStateOf(false) }
 
@@ -193,7 +198,11 @@ fun NodeItem(
                     lastHeard = thatNode.lastHeard,
                     currentTimeMillis = currentTimeMillis
                 )
-                StatusIcons(isFavorite = isFavorite, unmessageable = unmessageable)
+                NodeStatusIcons(
+                    isThisNode = isThisNode,
+                    isFavorite = isFavorite,
+                    isUnmessageable = unmessageable
+                )
             }
             Row(
                 modifier = Modifier
@@ -320,7 +329,7 @@ fun NodeInfoSimplePreview() {
 @Composable
 @Preview(
     showBackground = true,
-    uiMode = android.content.res.Configuration.UI_MODE_NIGHT_YES,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
 )
 fun NodeInfoPreview(
     @PreviewParameter(NodePreviewParameterProvider::class)

@@ -260,7 +260,7 @@ class UIViewModel @Inject constructor(
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val nodeFilterText = MutableStateFlow("")
-    private val nodeSortOption = MutableStateFlow(NodeSortOption.LAST_HEARD)
+    private val nodeSortOption = MutableStateFlow(NodeSortOption.VIA_FAVORITE)
     private val includeUnknown = MutableStateFlow(preferences.getBoolean("include-unknown", false))
     private val showDetails = MutableStateFlow(preferences.getBoolean("show-details", false))
 
