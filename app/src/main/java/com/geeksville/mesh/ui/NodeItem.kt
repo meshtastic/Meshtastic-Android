@@ -152,7 +152,6 @@ fun NodeItem(
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
                                 text = thatNode.user.shortName.ifEmpty { "???" },
-                                fontWeight = FontWeight.Normal,
                                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
                                 textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                                 textAlign = TextAlign.Center,
@@ -191,7 +190,6 @@ fun NodeItem(
                 Text(
                     modifier = Modifier.weight(1f),
                     text = longName,
-                    fontWeight = FontWeight.Normal,
                     style = style,
                     textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                     softWrap = true,
