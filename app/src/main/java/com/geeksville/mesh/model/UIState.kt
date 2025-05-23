@@ -432,7 +432,7 @@ class UIViewModel @Inject constructor(
                 val nodesById = nodes.values.associateBy { it.num }.toMutableMap()
                 val nodePositions = mutableMapOf<Int, MeshProtos.Position?>()
 
-                writer.appendLine("\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"distance\",\"hop limit\",\"payload\"")
+                writer.appendLine("\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"rx rssi\",\"distance\",\"hop limit\",\"payload\"")
 
                 // Packets are ordered by time, we keep most recent position of
                 // our device in localNodePosition.
@@ -473,6 +473,7 @@ class UIViewModel @Inject constructor(
                             val rxLong = rxPos?.longitude ?: ""
                             val rxAlt = rxPos?.altitude ?: ""
                             val rxSnr = "%f".format(proto.rxSnr)
+                            val rxRssi = "%d".format(proto.rxRssi)
 
                             // Calculate the distance if both positions are valid
 
@@ -499,7 +500,7 @@ class UIViewModel @Inject constructor(
                             }
 
                             //  date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx elevation,rx snr,distance,hop limit,payload
-                            writer.appendLine("$rxDateTime,\"$rxFrom\",\"$senderName\",\"$senderLat\",\"$senderLong\",\"$rxLat\",\"$rxLong\",\"$rxAlt\",\"$rxSnr\",\"$dist\",\"$hopLimit\",\"$payload\"")
+                            writer.appendLine("$rxDateTime,\"$rxFrom\",\"$senderName\",\"$senderLat\",\"$senderLong\",\"$rxLat\",\"$rxLong\",\"$rxAlt\",\"$rxSnr\",\"$rxRssi\",\"$dist\",\"$hopLimit\",\"$payload\"")
                         }
                     }
                 }
