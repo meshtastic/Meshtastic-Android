@@ -154,7 +154,7 @@ fun NodeMenu(
                 trailingIcon = {
                     Icon(
                         imageVector = if (node.isFavorite) Icons.Filled.Star else Icons.TwoTone.StarBorder,
-                        contentDescription = "Favorite",
+                        contentDescription = stringResource(R.string.favorite),
                     )
                 }
             )
