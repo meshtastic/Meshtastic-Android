@@ -20,10 +20,14 @@ package com.geeksville.mesh.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.twotone.StarBorder
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -148,14 +152,9 @@ fun NodeMenu(
                     Text(stringResource(R.string.favorite))
                 },
                 trailingIcon = {
-                    Checkbox(
-                        checked = node.isFavorite,
-                        onCheckedChange = {
-                            onDismissRequest()
-                            displayFavoriteDialog = true
-                        },
-                        modifier = Modifier.size(24.dp),
-                        enabled = !node.isIgnored,
+                    Icon(
+                        imageVector = if (node.isFavorite) Icons.Filled.Star else Icons.TwoTone.StarBorder,
+                        contentDescription = stringResource(R.string.favorite),
                     )
                 }
             )

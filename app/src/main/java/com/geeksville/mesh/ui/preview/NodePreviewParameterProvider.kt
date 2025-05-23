@@ -57,6 +57,7 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
             voltage = 3.7F
             uptimeSeconds = 3600
         },
+        isFavorite = true,
         hopsAway = 0
     )
 
@@ -114,6 +115,7 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
             ble = 39
             uptime = 420
         },
+        isFavorite = true,
         hopsAway = 2
     )
 

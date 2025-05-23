@@ -17,6 +17,8 @@
 
 package com.geeksville.mesh.ui
 
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,14 +31,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.NoCell
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -50,7 +48,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -66,6 +63,7 @@ import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.components.NodeMenu
 import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.components.SignalInfo
+import com.geeksville.mesh.ui.components.StatusIcons
 import com.geeksville.mesh.ui.compose.ElevationInfo
 import com.geeksville.mesh.ui.compose.SatelliteCountInfo
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
@@ -119,6 +117,8 @@ fun NodeItem(
     } else {
         thatNode.user.role?.isUnmessageableRole() == true
     }
+    var menuExpanded by remember { mutableStateOf(false) }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -136,10 +136,8 @@ fun NodeItem(
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                var menuExpanded by remember { mutableStateOf(false) }
-                Box(
-                    modifier = Modifier.wrapContentSize(Alignment.TopStart),
-                ) {
+                val inputChipInteractionSource = remember { MutableInteractionSource() }
+                Box {
                     AssistChip(
                         modifier = Modifier
                             .width(IntrinsicSize.Min)
@@ -152,24 +150,32 @@ fun NodeItem(
                             Text(
                                 modifier = Modifier.fillMaxWidth(),
                                 text = thatNode.user.shortName.ifEmpty { "???" },
-                                fontWeight = if (isFavorite) FontWeight.Bold else FontWeight.Normal,
                                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
                                 textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                                 textAlign = TextAlign.Center,
                             )
                         },
-                        onClick = {
-                            menuExpanded = !menuExpanded
-                        },
+                        onClick = {},
+                        interactionSource = inputChipInteractionSource,
                     )
-                    NodeMenu(
-                        node = thatNode,
-                        showFullMenu = !isThisNode && isConnected,
-                        onAction = onAction,
-                        expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false },
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .combinedClickable(
+                                onClick = { onAction(NodeMenuAction.MoreDetails(thatNode)) },
+                                onLongClick = { menuExpanded = true },
+                                interactionSource = inputChipInteractionSource,
+                                indication = null,
+                            )
                     )
                 }
+                NodeMenu(
+                    node = thatNode,
+                    showFullMenu = !isThisNode && isConnected,
+                    onAction = onAction,
+                    expanded = menuExpanded,
+                    onDismissRequest = { menuExpanded = false },
+                )
                 NodeKeyStatusIcon(
                     hasPKC = thatNode.hasPKC,
                     mismatchKey = thatNode.mismatchKey,
@@ -179,31 +185,15 @@ fun NodeItem(
                 Text(
                     modifier = Modifier.weight(1f),
                     text = longName,
-                    fontWeight = if (isFavorite) FontWeight.Bold else FontWeight.Normal,
                     style = style,
                     textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                     softWrap = true,
                 )
-
                 LastHeardInfo(
                     lastHeard = thatNode.lastHeard,
                     currentTimeMillis = currentTimeMillis
                 )
-            }
-            if (unmessageable) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.NoCell,
-                        contentDescription = stringResource(R.string.unmessageable),
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Text(
-                        stringResource(R.string.unmonitored_or_infrastructure)
-                    )
-                }
+                StatusIcons(isFavorite = isFavorite, unmessageable = unmessageable)
             }
             Row(
                 modifier = Modifier
