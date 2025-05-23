@@ -132,6 +132,16 @@ fun UserConfigItemList(
 
         item {
             SwitchPreference(
+                title = stringResource(R.string.unmessageable),
+                summary = stringResource(R.string.unmonitored_or_infrastructure),
+                checked = userInput.isUnmessagable,
+                enabled = userInput.hasIsUnmessagable(),
+                onCheckedChange = { userInput = userInput.copy { isUnmessagable = it } }
+            )
+        }
+
+        item {
+            SwitchPreference(
                 title = stringResource(R.string.licensed_amateur_radio),
                 summary = stringResource(R.string.licensed_amateur_radio_text),
                 checked = userInput.isLicensed,
