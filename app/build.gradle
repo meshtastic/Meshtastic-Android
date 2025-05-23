@@ -32,8 +32,8 @@ android {
         applicationId "com.geeksville.mesh"
         minSdkVersion 23
         targetSdk 36
-        versionCode 30602 // format is Mmmss (where M is 1+the numeric major number
-        versionName "2.6.2"
+        versionCode 30603 // format is Mmmss (where M is 1+the numeric major number
+        versionName "2.6.3"
         testInstrumentationRunner "com.geeksville.mesh.TestRunner"
 
         // per https://developer.android.com/studio/write/vector-asset-studio
