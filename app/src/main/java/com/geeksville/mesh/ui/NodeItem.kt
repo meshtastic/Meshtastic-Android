@@ -18,6 +18,7 @@
 package com.geeksville.mesh.ui
 
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,20 +28,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.NoCell
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.Badge
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -70,6 +64,7 @@ import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.components.NodeMenu
 import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.components.SignalInfo
+import com.geeksville.mesh.ui.components.StatusIcons
 import com.geeksville.mesh.ui.compose.ElevationInfo
 import com.geeksville.mesh.ui.compose.SatelliteCountInfo
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
@@ -127,13 +122,10 @@ fun NodeItem(
 
     Card(
         modifier = modifier
-            .combinedClickable(
-                onClick = { showDetails(!detailsShown) },
-                onLongClick = { menuExpanded = !expanded },
-            )
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 4.dp)
             .defaultMinSize(minHeight = 80.dp),
+        onClick = { showDetails(!detailsShown) },
     ) {
         Column(
             modifier = Modifier
@@ -145,10 +137,9 @@ fun NodeItem(
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                Box(
-                    modifier = Modifier.wrapContentSize(Alignment.TopStart),
-                ) {
-                    Box{
+
+                val inputChipInteractionSource = remember { MutableInteractionSource() }
+                Box {
                     AssistChip(
                         modifier = Modifier
                             .width(IntrinsicSize.Min)
@@ -167,29 +158,21 @@ fun NodeItem(
                                 textAlign = TextAlign.Center,
                             )
                         },
-                        onClick = {
-                            onAction(NodeMenuAction.MoreDetails(thatNode))
-                        },
+                        onClick = {},
+                        interactionSource = inputChipInteractionSource,
                     )
-                        if (isFavorite) {
-                            Badge(
-                                modifier = Modifier
-                                    .align(Alignment.TopEnd)
-                                    .offset(x = 20.dp, y = -2.dp),
-                                containerColor = Color.Black,
-                                contentColor = MaterialTheme.colorScheme.onPrimary,
-                            ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Star,
-                                        contentDescription = "Favorite",
-                                        modifier = Modifier.padding(2.dp)
-                                            .padding(4.dp).size(17.dp), // Smaller size for badge
-                                        tint = Color.Yellow
-                                    )
-                                }
-                        }
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .combinedClickable(
+                                onClick = { onAction(NodeMenuAction.MoreDetails(thatNode)) },
+                                onLongClick = { menuExpanded = true },
+                                interactionSource = inputChipInteractionSource,
+                                indication = null,
+                            )
+                    )
+                }
 
-                    }
                     NodeMenu(
                         node = thatNode,
                         showFullMenu = !isThisNode && isConnected,
@@ -198,10 +181,7 @@ fun NodeItem(
                         onDismissRequest = { menuExpanded = false },
                         firmwareVersion = thisNode?.metadata?.firmwareVersion
                     )
-                }
-                if (isFavorite ) {
-                    Spacer(modifier = Modifier.width(16.dp))
-                }
+
                 NodeKeyStatusIcon(
                     hasPKC = thatNode.hasPKC,
                     mismatchKey = thatNode.mismatchKey,
@@ -220,21 +200,7 @@ fun NodeItem(
                     lastHeard = thatNode.lastHeard,
                     currentTimeMillis = currentTimeMillis
                 )
-            }
-            if (unmessageable) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    Icon(
-                        imageVector = Icons.Outlined.NoCell,
-                        contentDescription = stringResource(R.string.unmessageable),
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Text(
-                        stringResource(R.string.unmonitored_or_infrastructure)
-                    )
-                }
+                StatusIcons(isFavorite = isFavorite, unmessageable = unmessageable)
             }
             Row(
                 modifier = Modifier
