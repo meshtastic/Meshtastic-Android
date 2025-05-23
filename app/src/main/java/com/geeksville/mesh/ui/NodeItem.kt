@@ -58,6 +58,7 @@ import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.isUnmessageableRole
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
@@ -114,7 +115,8 @@ fun NodeItem(
 
     val (detailsShown, showDetails) = remember { mutableStateOf(expanded) }
     val unmessageable = remember(thatNode) {
-        if (thatNode.user.hasIsUnmessagable()) {
+        val firmwareVersion = DeviceVersion(thatNode.metadata?.firmwareVersion ?: "")
+        if (firmwareVersion >= DeviceVersion("2.6.8")) {
             thatNode.user.isUnmessagable
         } else {
             thatNode.user.role?.isUnmessageableRole() == true

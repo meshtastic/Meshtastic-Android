@@ -38,6 +38,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
+import com.geeksville.mesh.deviceMetadata
+import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.ui.components.EditTextPreference
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.components.PreferenceFooter
@@ -63,17 +65,21 @@ fun UserConfigScreen(
         userConfig = state.userConfig,
         enabled = true,
         onSaveClicked = viewModel::setOwner,
+        metadata = state.metadata,
     )
 }
 
+@Suppress("LongMethod")
 @Composable
 fun UserConfigItemList(
+    metadata: MeshProtos.DeviceMetadata?,
     userConfig: MeshProtos.User,
     enabled: Boolean,
     onSaveClicked: (MeshProtos.User) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     var userInput by rememberSaveable { mutableStateOf(userConfig) }
+    val firmwareVersion = DeviceVersion(metadata?.firmwareVersion ?: "")
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -135,10 +141,12 @@ fun UserConfigItemList(
                 title = stringResource(R.string.unmessageable),
                 summary = stringResource(R.string.unmonitored_or_infrastructure),
                 checked = userInput.isUnmessagable,
-                enabled = userInput.hasIsUnmessagable(),
+                enabled = firmwareVersion >= DeviceVersion("2.6.8"),
                 onCheckedChange = { userInput = userInput.copy { isUnmessagable = it } }
             )
         }
+
+        item { HorizontalDivider() }
 
         item {
             SwitchPreference(
@@ -179,5 +187,8 @@ private fun UserConfigPreview() {
         },
         enabled = true,
         onSaveClicked = { },
+        metadata = deviceMetadata {
+            firmwareVersion = "2.8.0"
+        }
     )
 }
