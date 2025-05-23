@@ -35,10 +35,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
-import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.isUnmessageableRole
-import com.geeksville.mesh.ui.supportsQrCodeSharing
 
 @Suppress("LongMethod")
 @Composable
@@ -48,7 +46,6 @@ fun NodeMenu(
     onDismissRequest: () -> Unit,
     expanded: Boolean = false,
     onAction: (NodeMenuAction) -> Unit,
-    firmwareVersion: String? = null,
 ) {
     val isUnmessageable = if (node.user.hasIsUnmessagable()) {
         node.user.isUnmessagable
@@ -191,16 +188,14 @@ fun NodeMenu(
             )
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
         }
-        val firmware = DeviceVersion(firmwareVersion ?: "0.0.0")
-        if (firmware.supportsQrCodeSharing()) {
-            DropdownMenuItem(
-                onClick = {
-                    onDismissRequest()
-                    onAction(NodeMenuAction.Share(node))
-                },
-                text = { Text(stringResource(R.string.share_contact)) }
-            )
-        }
+        DropdownMenuItem(
+            onClick = {
+                onDismissRequest()
+                onAction(NodeMenuAction.Share(node))
+            },
+            text = { Text(stringResource(R.string.share_contact)) }
+        )
+
         DropdownMenuItem(
             onClick = {
                 onDismissRequest()

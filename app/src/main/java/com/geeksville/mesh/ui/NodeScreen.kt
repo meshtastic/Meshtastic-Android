@@ -20,6 +20,7 @@ package com.geeksville.mesh.ui
 import android.os.Build
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -36,6 +37,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -82,10 +84,15 @@ fun NodeScreen(
             modifier = Modifier.fillMaxSize(),
         ) {
             stickyHeader {
+                val animatedAlpha by animateFloatAsState(
+                    targetValue = if (!listState.isScrollInProgress) 1.0f else 0f,
+                    label = "alpha"
+                )
                 NodeFilterTextField(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.background)
+                        .background(MaterialTheme.colorScheme.surfaceDim.copy(alpha = animatedAlpha))
+                        .graphicsLayer(alpha = animatedAlpha)
                         .padding(8.dp),
                     filterText = state.filter,
                     onTextChange = model::setNodeFilterText,
@@ -139,6 +146,7 @@ fun NodeScreen(
             modifier = Modifier.align(androidx.compose.ui.Alignment.BottomEnd),
             visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
                     !listState.isScrollInProgress &&
+                    connectionState.isConnected() &&
                     shareCapable
         ) {
             @Suppress("NewApi")
