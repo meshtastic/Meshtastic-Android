@@ -97,6 +97,7 @@
     <string name="connected_count">Bağlı: %1$s çevrimiçi</string>
     <string name="update_firmware">Yazılım güncelle</string>
     <string name="ip_address">IP Adresi:</string>
+    <string name="ip_port">Bağlantı noktası:</string>
     <string name="connected">Cihaza bağlandı</string>
     <string name="connected_to">(%s) telsizine bağlandı </string>
     <string name="not_connected">Bağlı değil</string>
@@ -557,6 +558,7 @@
     <string name="long_name">Uzun ad</string>
     <string name="short_name">Kısa ad</string>
     <string name="hardware_model">Donanım modeli</string>
+    <string name="licensed_amateur_radio">Lisanslı amatör radyo</string>
     <string name="licensed_amateur_radio_text">Bu seçeneği aktif etmek şifrelemeyi devre dışı bırakır ve bu varsayılan Meshtastic ağı ile uyumsuzdur.</string>
     <string name="dew_point">Çiğ Noktası</string>
     <string name="pressure">Basınç</string>
@@ -582,7 +584,24 @@
     <string name="heading">İstikamet</string>
     <string name="sats">Uydular</string>
     <string name="alt">Yükseklik</string>
+    <string name="freq">Frekans</string>
+    <string name="slot">Yuva</string>
+    <string name="primary">Birincil</string>
+    <string name="primary_channel_feature">Periyodik konum ve telemetri yayını</string>
+    <string name="secondary">İkincil</string>
+    <string name="secondary_no_telemetry">Periyodik telemetri yayını yok</string>
+    <string name="manuel_position_request">Manuel konum isteği gerekli</string>
+    <string name="press_and_drag">Yeniden sıralamak için basılı tutup sürükleyin</string>
     <string name="set_region">Bölge Ayarla</string>
     <string name="unmute">Sesi aç</string>
     <string name="dynamic">Dinamik</string>
+    <string name="scan_qr_code">QR Kodu Tara</string>
+    <string name="share_contact">Kişiyi paylaş</string>
+    <string name="import_shared_contact">Paylaşılan kişiyi içe aktar?</string>
+    <string name="unmessageable">Mesaj gönderilemez</string>
+    <string name="unmonitored_or_infrastructure">İzlenmeyen veya Altyapı</string>
+    <string name="import_known_shared_contact_text">Uyarı: Bu kişi biliniyor, içe aktarma işlemi önceki kişi bilgilerini üzerine yazacaktır.</string>
+    <string name="public_key_changed">Açık Anahtar Değiştirildi</string>
+    <string name="import_label">İçeri aktar</string>
+    <string name="firmware">Aygıt Yazılımı</string>
 </resources>

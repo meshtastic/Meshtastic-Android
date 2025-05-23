@@ -1604,6 +1604,7 @@ class MeshService : Service(), Logging {
                     minAppVersion = minAppVersion,
                     maxChannels = 8,
                     hasWifi = metadata.hasWifi,
+                    deviceId = deviceId.toStringUtf8(),
                 )
             }
             serviceScope.handledLaunch {
@@ -1827,10 +1828,18 @@ class MeshService : Service(), Logging {
         val dest = nodeDBbyID[id]
             ?: throw Exception("Can't set user without a NodeInfo") // this shouldn't happen
         val old = dest.user
-        if (longName == old.longName && shortName == old.shortName && isLicensed == old.isLicensed) {
+
+        @Suppress("ComplexCondition")
+        if (
+            user == old
+        ) {
             debug("Ignoring nop owner change")
         } else {
-            debug("setOwner Id: $id longName: ${longName.anonymize} shortName: $shortName isLicensed: $isLicensed")
+            debug(
+                "setOwner Id: $id longName: ${longName.anonymize}" +
+                        " shortName: $shortName isLicensed: $isLicensed" +
+                        " isUnmessagable: $isUnmessagable"
+            )
 
             // Also update our own map for our nodeNum, by handling the packet just like packets from other users
             handleReceivedUser(dest.num, user)

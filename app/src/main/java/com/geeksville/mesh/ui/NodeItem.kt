@@ -169,16 +169,13 @@ fun NodeItem(
                             )
                     )
                 }
-
                 NodeMenu(
                     node = thatNode,
                     showFullMenu = !isThisNode && isConnected,
                     onAction = onAction,
                     expanded = menuExpanded,
                     onDismissRequest = { menuExpanded = false },
-                    firmwareVersion = thisNode?.metadata?.firmwareVersion
                 )
-
                 NodeKeyStatusIcon(
                     hasPKC = thatNode.hasPKC,
                     mismatchKey = thatNode.mismatchKey,

@@ -35,7 +35,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -156,9 +155,6 @@ internal fun MessageList(
         value += uuid
     }
 
-    val ourNode by viewModel.ourNodeInfo.collectAsState()
-    val firmwareVersion = ourNode?.metadata?.firmwareVersion
-
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         state = listState,
@@ -196,7 +192,6 @@ internal fun MessageList(
                     onDismissRequest = { expandedNodeMenu = false },
                     expanded = expandedNodeMenu,
                     onAction = onNodeMenuAction,
-                    firmwareVersion = firmwareVersion
                 )
             }
         }

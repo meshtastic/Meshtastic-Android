@@ -30,7 +30,7 @@ android {
     compileSdk 36
     defaultConfig {
         applicationId "com.geeksville.mesh"
-        minSdkVersion 21 // The oldest emulator image I have tried is 22 (though 21 probably works)
+        minSdkVersion 23
         targetSdk 36
         versionCode 30602 // format is Mmmss (where M is 1+the numeric major number
         versionName "2.6.2"
@@ -144,7 +144,7 @@ androidComponents {
 }
 
 dependencies {
-
+    implementation project(":network")
     implementation(fileTree(dir: 'libs', include: ['*.jar']))
 
     // Bundles
@@ -159,6 +159,7 @@ dependencies {
     implementation(libs.bundles.hilt)
     implementation(libs.bundles.protobuf)
     implementation(libs.bundles.coil)
+
     //OSM
     implementation(libs.bundles.osm)
     implementation(libs.osmdroid.geopackage){ exclude group: "com.j256.ormlite" }

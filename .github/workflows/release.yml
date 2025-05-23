@@ -3,6 +3,8 @@ name: Make Release
 on:
   workflow_dispatch:
 
+permissions: write-all
+
 jobs:
 
   release-build:

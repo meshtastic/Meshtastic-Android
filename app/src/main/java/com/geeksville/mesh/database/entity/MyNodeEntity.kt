@@ -34,6 +34,7 @@ data class MyNodeEntity(
     val minAppVersion: Int,
     val maxChannels: Int,
     val hasWifi: Boolean,
+    val deviceId: String? = "unknown",
 ) {
     /** A human readable description of the software/hardware version */
     val firmwareString: String get() = "$model $firmwareVersion"
@@ -52,5 +53,6 @@ data class MyNodeEntity(
         hasWifi = hasWifi,
         channelUtilization = 0f,
         airUtilTx = 0f,
+        deviceId = deviceId,
     )
 }

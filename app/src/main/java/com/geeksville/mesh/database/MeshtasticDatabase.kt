@@ -25,11 +25,15 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
-import com.geeksville.mesh.database.dao.PacketDao
+import com.geeksville.mesh.database.dao.DeviceHardwareDao
+import com.geeksville.mesh.database.dao.FirmwareReleaseDao
 import com.geeksville.mesh.database.dao.MeshLogDao
 import com.geeksville.mesh.database.dao.NodeInfoDao
+import com.geeksville.mesh.database.dao.PacketDao
 import com.geeksville.mesh.database.dao.QuickChatActionDao
 import com.geeksville.mesh.database.entity.ContactSettings
+import com.geeksville.mesh.database.entity.DeviceHardwareEntity
+import com.geeksville.mesh.database.entity.FirmwareReleaseEntity
 import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.database.entity.MetadataEntity
 import com.geeksville.mesh.database.entity.MyNodeEntity
@@ -48,6 +52,8 @@ import com.geeksville.mesh.database.entity.ReactionEntity
         QuickChatAction::class,
         ReactionEntity::class,
         MetadataEntity::class,
+        DeviceHardwareEntity::class,
+        FirmwareReleaseEntity::class,
     ],
     autoMigrations = [
         AutoMigration(from = 3, to = 4),
@@ -63,8 +69,9 @@ import com.geeksville.mesh.database.entity.ReactionEntity
         AutoMigration(from = 13, to = 14),
         AutoMigration(from = 14, to = 15),
         AutoMigration(from = 15, to = 16),
+        AutoMigration(from = 16, to = 17),
     ],
-    version = 16,
+    version = 17,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -73,6 +80,8 @@ abstract class MeshtasticDatabase : RoomDatabase() {
     abstract fun packetDao(): PacketDao
     abstract fun meshLogDao(): MeshLogDao
     abstract fun quickChatActionDao(): QuickChatActionDao
+    abstract fun deviceHardwareDao(): DeviceHardwareDao
+    abstract fun firmwareReleaseDao(): FirmwareReleaseDao
 
     companion object {
         fun getDatabase(context: Context): MeshtasticDatabase {
@@ -82,7 +91,7 @@ abstract class MeshtasticDatabase : RoomDatabase() {
                 MeshtasticDatabase::class.java,
                 "meshtastic_database"
             )
-                .fallbackToDestructiveMigration()
+                .fallbackToDestructiveMigration(false)
                 .build()
         }
     }
