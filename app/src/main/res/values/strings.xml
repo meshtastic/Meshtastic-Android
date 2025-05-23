@@ -629,4 +629,6 @@
     <string name="request_metadata">Request Metadata</string>
     <string name="actions">Actions</string>
     <string name="firmware">Firmware</string>
+    <string name="use_12h_format">Use 12h clock format</string>
+    <string name="display_time_in_12h_format">When enabled, the device will display the time in 12-hour format on screen.</string>
 </resources>
