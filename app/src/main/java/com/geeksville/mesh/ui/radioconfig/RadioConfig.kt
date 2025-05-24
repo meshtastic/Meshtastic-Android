@@ -40,6 +40,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.materialIcon
+import androidx.compose.material.icons.twotone.Contactless
+import androidx.compose.material.icons.twotone.QrCode
 import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -78,6 +81,7 @@ private fun getNavRouteFrom(routeName: String): Route? {
         ?: ModuleRoute.entries.find { it.name == routeName }?.route
 }
 
+@JvmOverloads
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun RadioConfigScreen(
@@ -183,7 +187,9 @@ fun RadioConfigScreen(
             deviceProfile = null
             showEditDeviceProfileDialog = true
         },
+        onNavigate = onNavigate
     )
+
 }
 
 @Composable
@@ -296,12 +302,14 @@ private fun RadioConfigItemList(
     onRouteClick: (Enum<*>) -> Unit = {},
     onImport: () -> Unit = {},
     onExport: () -> Unit = {},
+    onNavigate: (Route) -> Unit = {}
 ) {
     val enabled = state.connected && !state.responseState.isWaiting()
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = 16.dp),
     ) {
+
         item { PreferenceCategory(stringResource(R.string.device_settings)) }
         items(ConfigRoute.filterExcludedFrom(state.metadata)) {
             NavCard(
@@ -310,7 +318,13 @@ private fun RadioConfigItemList(
                 enabled = enabled
             ) { onRouteClick(it) }
         }
-
+        item {
+            NavCard(
+                title = stringResource(R.string.qr_code),
+                icon = Icons.TwoTone.QrCode,
+                enabled = enabled
+            ) {        onNavigate(Route.Channels)              }
+        }
         item { PreferenceCategory(stringResource(R.string.module_settings)) }
         items(ModuleRoute.filterExcludedFrom(state.metadata)) {
             NavCard(

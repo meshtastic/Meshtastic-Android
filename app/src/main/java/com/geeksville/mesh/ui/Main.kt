@@ -33,6 +33,7 @@ import androidx.compose.material.icons.twotone.CloudDone
 import androidx.compose.material.icons.twotone.CloudOff
 import androidx.compose.material.icons.twotone.CloudUpload
 import androidx.compose.material.icons.twotone.Contactless
+import androidx.compose.material.icons.twotone.Devices
 import androidx.compose.material.icons.twotone.Map
 import androidx.compose.material.icons.twotone.People
 import androidx.compose.material.icons.twotone.Settings
@@ -83,8 +84,8 @@ enum class TopLevelDestination(val label: String, val icon: ImageVector, val rou
     Contacts("Contacts", Icons.AutoMirrored.TwoTone.Chat, Route.Contacts),
     Nodes("Nodes", Icons.TwoTone.People, Route.Nodes),
     Map("Map", Icons.TwoTone.Map, Route.Map),
-    Channels("Channels", Icons.TwoTone.Contactless, Route.Channels),
-    Settings("Settings", Icons.TwoTone.Settings, Route.Settings),
+    Channels("Connect", Icons.TwoTone.Devices, Route.Connect),
+    Settings("Settings", Icons.TwoTone.Settings, Route.RadioConfig()),
     ;
 
     companion object {
