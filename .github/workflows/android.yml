@@ -2,7 +2,7 @@ name: Android CI
 
 on:
   push:
-    branches: [ master ]
+    branches: [ main ]
     paths-ignore:
       - "**.md"
       - ".idea/**"
@@ -10,7 +10,7 @@ on:
       - ".gitmodules"
 
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 
 concurrency:
   group: build-${{ github.ref }}
