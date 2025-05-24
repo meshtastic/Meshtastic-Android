@@ -96,7 +96,7 @@ jobs:
         asset_name: googleRelease-${{ env.versionName }}.apk
         asset_content_type: application/zip
 
-    # https://github.com/f-droid/fdroiddata/blob/master/metadata/com.geeksville.mesh.yml#L34
+    # https://github.com/f-droid/fdroiddata/blob/main/metadata/com.geeksville.mesh.yml#L34
     - name: Add `version_info.txt` to release
       uses: actions/upload-release-asset@v1
       env:
