@@ -86,6 +86,14 @@
         android:name="android.hardware.usb.host"
         android:required="false" />
 
+    <!-- Declare geo: intent visibility for Android 11+ (needed for resolveActivity with map apps) -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="geo" />
+        </intent>
+    </queries>
+
     <!-- hardware acceleration is required for zxing barcode lib -->
     <application
         android:name="com.geeksville.mesh.MeshUtilApplication"

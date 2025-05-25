@@ -17,8 +17,9 @@
 
 package com.geeksville.mesh.ui
 
-import android.content.ActivityNotFoundException
 import android.content.ClipData
+import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.material3.MaterialTheme
@@ -29,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.Clipboard
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
@@ -37,6 +38,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.core.net.toUri
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.GpsCoordinateFormat
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.ui.theme.AppTheme
@@ -54,7 +56,9 @@ fun LinkedCoordinates(
     format: Int,
     nodeName: String,
 ) {
-    val uriHandler = LocalUriHandler.current
+    val context = LocalContext.current
+    val clipboard: Clipboard = LocalClipboard.current
+    val coroutineScope = rememberCoroutineScope()
     val style = SpanStyle(
         color = HyperlinkBlue,
         fontSize = MaterialTheme.typography.labelLarge.fontSize,
@@ -63,8 +67,6 @@ fun LinkedCoordinates(
     val annotatedString = buildAnnotatedString {
         pushStringAnnotation(
             tag = "gps",
-            // URI scheme is defined at:
-            //  https://developer.android.com/guide/components/intents-common#Maps
             annotation = "geo:0,0?q=$latitude,$longitude&z=17&label=${
                 URLEncoder.encode(nodeName, "utf-8")
             }"
@@ -81,8 +83,7 @@ fun LinkedCoordinates(
         }
         pop()
     }
-    val clipboard: Clipboard = LocalClipboard.current
-    val coroutineScope = rememberCoroutineScope()
+
     Text(
         modifier = modifier.combinedClickable(
             onClick = {
@@ -91,10 +92,19 @@ fun LinkedCoordinates(
                     start = 0,
                     end = annotatedString.length
                 ).firstOrNull()?.let {
+                    val uri = it.item.toUri()
+                    val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+
                     try {
-                        uriHandler.openUri(it.item)
-                    } catch (ex: ActivityNotFoundException) {
-                        debug("No application found: $ex")
+                        if (intent.resolveActivity(context.packageManager) != null) {
+                            context.startActivity(intent)
+                        } else {
+                            Toast.makeText(context, "No application available to open this location!", Toast.LENGTH_LONG).show()
+                        }
+                    } catch (ex: Exception) {
+                        debug("Failed to open geo intent: $ex")
                     }
                 }
             },
