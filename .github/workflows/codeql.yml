@@ -83,8 +83,8 @@ jobs:
       with:
         cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
-    # - name: Build debug artifacts
-    #   run: ./gradlew assembleDebug
+    - name: Build debug artifacts
+      run: ./gradlew assembleDebug
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -107,7 +107,7 @@ jobs:
     # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
     - if: matrix.build-mode == 'manual'
       shell: bash
-      run: ./gradlew assembleDebug
+      run: wxit 0
 
       # run: |
       #   echo 'If you are using a "manual" build mode for one or more of the' \
