@@ -17,7 +17,9 @@ on:
   # pull_request:
   #   branches: [ "main" ]
   schedule:
-    - cron: '0 0 * * *'
+    - cron: '0 0 * * 0'
+  workflow_dispatch:
+  
 
 jobs:
   analyze:
@@ -46,7 +48,7 @@ jobs:
         - language: actions
           build-mode: none
         - language: java-kotlin
-          build-mode: manual
+          build-mode: none
         # CodeQL supports the following values keywords for 'language': 'actions', 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift'
         # Use `c-cpp` to analyze code written in C, C++ or both
         # Use 'java-kotlin' to analyze code written in Java, Kotlin or both
@@ -81,6 +83,8 @@ jobs:
       with:
         cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
+    - name: Build debug artifacts
+      run: ./gradlew assembleDebug
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -103,14 +107,13 @@ jobs:
     # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
     - if: matrix.build-mode == 'manual'
       shell: bash
-      run: ./gradlew assembleDebug
-      # run: |
-      #   echo 'If you are using a "manual" build mode for one or more of the' \
-      #     'languages you are analyzing, replace this with the commands to build' \
-      #     'your code, for example:'
-      #   echo '  make bootstrap'
-      #   echo '  make release'
-      #   exit 1
+      run: |
+        echo 'If you are using a "manual" build mode for one or more of the' \
+          'languages you are analyzing, replace this with the commands to build' \
+          'your code, for example:'
+        echo '  make bootstrap'
+        echo '  make release'
+        exit 1
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
