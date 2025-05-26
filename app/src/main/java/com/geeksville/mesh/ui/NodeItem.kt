@@ -18,12 +18,11 @@
 package com.geeksville.mesh.ui
 
 import android.content.res.Configuration
-import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -32,21 +31,16 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -62,16 +56,16 @@ import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.isUnmessageableRole
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
-import com.geeksville.mesh.ui.components.NodeMenu
 import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.components.NodeStatusIcons
+import com.geeksville.mesh.ui.components.SharedTransitionPreview
 import com.geeksville.mesh.ui.components.SignalInfo
 import com.geeksville.mesh.ui.compose.ElevationInfo
 import com.geeksville.mesh.ui.compose.SatelliteCountInfo
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
-import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.toDistanceString
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun NodeItem(
@@ -85,17 +79,17 @@ fun NodeItem(
     expanded: Boolean = false,
     currentTimeMillis: Long,
     isConnected: Boolean = false,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
 ) {
     val isFavorite = remember(thatNode) { thatNode.isFavorite }
     val isIgnored = thatNode.isIgnored
     val longName = thatNode.user.longName.ifEmpty { stringResource(id = R.string.unknown_username) }
-
     val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
     val system = remember(distanceUnits) { DisplayConfig.DisplayUnits.forNumber(distanceUnits) }
     val distance = remember(thisNode, thatNode) {
         thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system)
     }
-    val (textColor, nodeColor) = thatNode.colors
 
     val hwInfoString = when (val hwModel = thatNode.user.hwModel) {
         MeshProtos.HardwareModel.UNSET -> MeshProtos.HardwareModel.UNSET.name
@@ -122,7 +116,6 @@ fun NodeItem(
             thatNode.user.role?.isUnmessageableRole() == true
         }
     }
-    var menuExpanded by remember { mutableStateOf(false) }
 
     Card(
         modifier = modifier
@@ -141,46 +134,15 @@ fun NodeItem(
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                val inputChipInteractionSource = remember { MutableInteractionSource() }
-                Box {
-                    AssistChip(
-                        modifier = Modifier
-                            .width(IntrinsicSize.Min)
-                            .defaultMinSize(minHeight = 32.dp, minWidth = 72.dp),
-                        colors = AssistChipDefaults.assistChipColors(
-                            containerColor = Color(nodeColor),
-                            labelColor = Color(textColor),
-                        ),
-                        label = {
-                            Text(
-                                modifier = Modifier.fillMaxWidth(),
-                                text = thatNode.user.shortName.ifEmpty { "???" },
-                                fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                                textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
-                                textAlign = TextAlign.Center,
-                            )
-                        },
-                        onClick = {},
-                        interactionSource = inputChipInteractionSource,
-                    )
-                    Box(
-                        modifier = Modifier
-                            .matchParentSize()
-                            .combinedClickable(
-                                onClick = { onAction(NodeMenuAction.MoreDetails(thatNode)) },
-                                onLongClick = { menuExpanded = true },
-                                interactionSource = inputChipInteractionSource,
-                                indication = null,
-                            )
-                    )
-                }
-                NodeMenu(
+                NodeChip(
                     node = thatNode,
-                    showFullMenu = !isThisNode && isConnected,
+                    isThisNode = isThisNode,
+                    isConnected = isConnected,
                     onAction = onAction,
-                    expanded = menuExpanded,
-                    onDismissRequest = { menuExpanded = false },
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedContentScope = animatedContentScope,
                 )
+
                 NodeKeyStatusIcon(
                     hasPKC = thatNode.hasPKC,
                     mismatchKey = thatNode.mismatchKey,
@@ -309,10 +271,11 @@ fun NodeItem(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Preview(showBackground = false)
 fun NodeInfoSimplePreview() {
-    AppTheme {
+    SharedTransitionPreview { sharedTransitionScope, animatedContentScope ->
         val thisNode = NodePreviewParameterProvider().values.first()
         val thatNode = NodePreviewParameterProvider().values.last()
         NodeItem(
@@ -321,11 +284,14 @@ fun NodeInfoSimplePreview() {
             1,
             0,
             true,
-            currentTimeMillis = System.currentTimeMillis()
+            currentTimeMillis = System.currentTimeMillis(),
+            sharedTransitionScope = sharedTransitionScope,
+            animatedContentScope = animatedContentScope,
         )
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Preview(
     showBackground = true,
@@ -335,7 +301,7 @@ fun NodeInfoPreview(
     @PreviewParameter(NodePreviewParameterProvider::class)
     thatNode: Node
 ) {
-    AppTheme {
+    SharedTransitionPreview { sharedTransitionScope, animatedContentScope ->
         val thisNode = NodePreviewParameterProvider().values.first()
         Column {
             Text(
@@ -349,7 +315,9 @@ fun NodeInfoPreview(
                 distanceUnits = 1,
                 tempInFahrenheit = true,
                 expanded = false,
-                currentTimeMillis = System.currentTimeMillis()
+                currentTimeMillis = System.currentTimeMillis(),
+                sharedTransitionScope = sharedTransitionScope,
+                animatedContentScope = animatedContentScope,
             )
             Text(
                 text = "Details Shown",
@@ -362,7 +330,9 @@ fun NodeInfoPreview(
                 distanceUnits = 1,
                 tempInFahrenheit = true,
                 expanded = true,
-                currentTimeMillis = System.currentTimeMillis()
+                currentTimeMillis = System.currentTimeMillis(),
+                sharedTransitionScope = sharedTransitionScope,
+                animatedContentScope = animatedContentScope,
             )
         }
     }

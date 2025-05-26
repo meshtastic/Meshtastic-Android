@@ -18,6 +18,9 @@
 package com.geeksville.mesh.ui.message
 
 import android.content.ClipData
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -86,6 +89,7 @@ import kotlinx.coroutines.launch
 
 private const val MESSAGE_CHARACTER_LIMIT = 200
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 internal fun MessageScreen(
@@ -94,7 +98,9 @@ internal fun MessageScreen(
     viewModel: UIViewModel = hiltViewModel(),
     navigateToMessages: (String) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val clipboardManager = LocalClipboard.current
@@ -222,25 +228,21 @@ internal fun MessageScreen(
                 viewModel = viewModel,
                 contactKey = contactKey,
                 onNodeMenuAction = { action ->
-                when (action) {
-                    is NodeMenuAction.Remove -> viewModel.removeNode(action.node.num)
-                    is NodeMenuAction.Ignore -> viewModel.ignoreNode(action.node)
-                    is NodeMenuAction.Favorite -> viewModel.favoriteNode(action.node)
-                    is NodeMenuAction.DirectMessage -> {
-                        val hasPKC =
-                            viewModel.ourNodeInfo.value?.hasPKC == true && action.node.hasPKC
-                        val channel =
-                            if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else action.node.channel
-                        navigateToMessages("$channel${action.node.user.id}")
+                    when (action) {
+                        is NodeMenuAction.DirectMessage -> {
+                            val hasPKC =
+                                viewModel.ourNodeInfo.value?.hasPKC == true && action.node.hasPKC
+                            val channel =
+                                if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else action.node.channel
+                            navigateToMessages("$channel${action.node.user.id}")
+                        }
+                        is NodeMenuAction.MoreDetails -> navigateToNodeDetails(action.node.num)
+                        is NodeMenuAction.Share -> sharedContact = action.node
+                        else -> viewModel.handleNodeMenuAction(action)
                     }
-
-                    is NodeMenuAction.RequestUserInfo -> viewModel.requestUserInfo(action.node.num)
-                    is NodeMenuAction.RequestPosition -> viewModel.requestPosition(action.node.num)
-                    is NodeMenuAction.TraceRoute -> viewModel.requestTraceroute(action.node.num)
-                    is NodeMenuAction.MoreDetails -> navigateToNodeDetails(action.node.num)
-                    is NodeMenuAction.Share -> sharedContact = action.node
-                }
-            }
+                },
+                sharedTransitionScope = sharedTransitionScope,
+                animatedContentScope = animatedContentScope,
             )
         }
     }
@@ -393,7 +395,8 @@ private fun TextInput(
                 message.value = it
             }
         },
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier
+            .fillMaxWidth()
             .onFocusEvent { isFocused = it.isFocused },
         enabled = enabled,
         placeholder = { Text(stringResource(id = R.string.send_text)) },

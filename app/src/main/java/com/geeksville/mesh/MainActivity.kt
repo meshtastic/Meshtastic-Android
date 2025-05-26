@@ -142,7 +142,6 @@ class MainActivity : AppCompatActivity(), Logging {
                     AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> isSystemInDarkTheme()
                     else -> isSystemInDarkTheme()
                 }
-
                 AppTheme(
                     dynamicColor = dynamic,
                     darkTheme = dark,
@@ -445,14 +444,6 @@ class MainActivity : AppCompatActivity(), Logging {
                     )
                 }
             }
-        }
-
-        model.tracerouteResponse.observe(this) { response ->
-            model.showAlert(
-                title = getString(R.string.traceroute),
-                message = response ?: return@observe,
-            )
-            model.clearTracerouteResponse()
         }
 
         try {
