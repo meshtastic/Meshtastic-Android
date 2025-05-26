@@ -26,7 +26,7 @@ import javax.inject.Inject
 class DeviceHardwareRemoteDataSource @Inject constructor(
     private val apiService: ApiService,
 ) {
-    suspend fun getAllDeviceHardware(): List<NetworkDeviceHardware> = withContext(Dispatchers.IO) {
-        apiService.getDeviceHardware().body() ?: emptyList()
+    suspend fun getAllDeviceHardware(): List<NetworkDeviceHardware>? = withContext(Dispatchers.IO) {
+        apiService.getDeviceHardware().body()
     }
 }
