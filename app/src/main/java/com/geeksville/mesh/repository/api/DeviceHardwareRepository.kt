@@ -52,7 +52,9 @@ class DeviceHardwareRepository @Inject constructor(
             }
             try {
                 debug("Fetching device hardware from server")
-                localDataSource.insertAllDeviceHardware(apiDataSource.getAllDeviceHardware())
+                val deviceHardware = apiDataSource.getAllDeviceHardware()
+                    ?: throw IOException("empty response from server")
+                localDataSource.insertAllDeviceHardware(deviceHardware)
                 val cachedHardware = localDataSource.getByHwModel(hwModel)
                 val externalModel = cachedHardware?.asExternalModel()
                 return@withContext externalModel
