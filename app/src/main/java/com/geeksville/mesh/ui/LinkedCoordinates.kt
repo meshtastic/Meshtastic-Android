@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui
 
+import android.content.ActivityNotFoundException
 import android.content.ClipData
 import android.content.Intent
 import android.widget.Toast
@@ -64,59 +65,81 @@ fun LinkedCoordinates(
         fontSize = MaterialTheme.typography.labelLarge.fontSize,
         textDecoration = TextDecoration.Underline
     )
-    val annotatedString = buildAnnotatedString {
-        pushStringAnnotation(
-            tag = "gps",
-            annotation = "geo:0,0?q=$latitude,$longitude&z=17&label=${
-                URLEncoder.encode(nodeName, "utf-8")
-            }"
-        )
-        withStyle(style = style) {
-            val gpsString = when (format) {
-                GpsCoordinateFormat.DEC_VALUE -> GPSFormat.toDEC(latitude, longitude)
-                GpsCoordinateFormat.DMS_VALUE -> GPSFormat.toDMS(latitude, longitude)
-                GpsCoordinateFormat.UTM_VALUE -> GPSFormat.toUTM(latitude, longitude)
-                GpsCoordinateFormat.MGRS_VALUE -> GPSFormat.toMGRS(latitude, longitude)
-                else -> GPSFormat.toDEC(latitude, longitude)
-            }
-            append(gpsString)
-        }
-        pop()
-    }
+
+    val annotatedString = rememberAnnotatedString(latitude, longitude, format, nodeName, style)
 
     Text(
         modifier = modifier.combinedClickable(
             onClick = {
-                annotatedString.getStringAnnotations(
-                    tag = "gps",
-                    start = 0,
-                    end = annotatedString.length
-                ).firstOrNull()?.let {
-                    val uri = it.item.toUri()
-                    val intent = Intent(Intent.ACTION_VIEW, uri).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    }
-
-                    try {
-                        if (intent.resolveActivity(context.packageManager) != null) {
-                            context.startActivity(intent)
-                        } else {
-                            Toast.makeText(context, "No application available to open this location!", Toast.LENGTH_LONG).show()
-                        }
-                    } catch (ex: Exception) {
-                        debug("Failed to open geo intent: $ex")
-                    }
-                }
+                handleClick(context, annotatedString)
             },
             onLongClick = {
                 coroutineScope.launch {
-                    clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("", annotatedString)))
+                    clipboard.setClipEntry(
+                        ClipEntry(
+                            ClipData.newPlainText("", annotatedString)
+                        )
+                    )
                     debug("Copied to clipboard")
                 }
             }
         ),
         text = annotatedString
     )
+}
+
+@Composable
+private fun rememberAnnotatedString(
+    latitude: Double,
+    longitude: Double,
+    format: Int,
+    nodeName: String,
+    style: SpanStyle
+) = buildAnnotatedString {
+    pushStringAnnotation(
+        tag = "gps",
+        annotation = "geo:0,0?q=$latitude,$longitude&z=17&label=${
+            URLEncoder.encode(nodeName, "utf-8")
+        }"
+    )
+    withStyle(style = style) {
+        val gpsString = when (format) {
+            GpsCoordinateFormat.DEC_VALUE -> GPSFormat.toDEC(latitude, longitude)
+            GpsCoordinateFormat.DMS_VALUE -> GPSFormat.toDMS(latitude, longitude)
+            GpsCoordinateFormat.UTM_VALUE -> GPSFormat.toUTM(latitude, longitude)
+            GpsCoordinateFormat.MGRS_VALUE -> GPSFormat.toMGRS(latitude, longitude)
+            else -> GPSFormat.toDEC(latitude, longitude)
+        }
+        append(gpsString)
+    }
+    pop()
+}
+
+private fun handleClick(context: android.content.Context, annotatedString: androidx.compose.ui.text.AnnotatedString) {
+    annotatedString.getStringAnnotations(
+        tag = "gps",
+        start = 0,
+        end = annotatedString.length
+    ).firstOrNull()?.let {
+        val uri = it.item.toUri()
+        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+
+        try {
+            if (intent.resolveActivity(context.packageManager) != null) {
+                context.startActivity(intent)
+            } else {
+                Toast.makeText(
+                    context,
+                    "No application available to open this location!",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        } catch (ex: ActivityNotFoundException) {
+            debug("Failed to open geo intent: $ex")
+        }
+    }
 }
 
 @PreviewLightDark
