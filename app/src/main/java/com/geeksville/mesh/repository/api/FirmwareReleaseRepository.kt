@@ -61,6 +61,7 @@ class FirmwareReleaseRepository @Inject constructor(
         try {
             debug("Fetching firmware releases from server")
             val networkFirmwareReleases = apiDataSource.getFirmwareReleases()
+                ?: throw IOException("empty response from server")
             val releases = when (releaseType) {
                 FirmwareReleaseType.STABLE -> networkFirmwareReleases.releases.stable
                 FirmwareReleaseType.ALPHA -> networkFirmwareReleases.releases.alpha
