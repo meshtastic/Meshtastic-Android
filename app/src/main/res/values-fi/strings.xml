@@ -606,4 +606,6 @@
     <string name="request_metadata">Pyydä metatiedot</string>
     <string name="actions">Toiminnot</string>
     <string name="firmware">Laiteohjelmisto</string>
+    <string name="use_12h_format">Käytä 12 tunnin kelloa</string>
+    <string name="display_time_in_12h_format">Kun asetus on käytössä, laite näyttää 12 tunnin ajan näytössä.</string>
 </resources>

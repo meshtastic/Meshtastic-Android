@@ -547,6 +547,7 @@
     <string name="long_name">Nom long</string>
     <string name="short_name">Nom court</string>
     <string name="hardware_model">Modèle de matériel</string>
+    <string name="licensed_amateur_radio_text"></string>
     <string name="dew_point"></string>
     <string name="pressure">Pression</string>
     <string name="gas_resistance">Résistance au gaz</string>
