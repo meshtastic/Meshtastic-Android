@@ -15,9 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+@file:OptIn(ExperimentalSharedTransitionApi::class)
+
 package com.geeksville.mesh.ui
 
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,13 +38,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.automirrored.outlined.VolumeMute
 import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.ChargingStation
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Height
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.KeyOff
@@ -56,16 +66,23 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Speed
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.StarBorder
 import androidx.compose.material.icons.filled.Thermostat
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.Work
 import androidx.compose.material.icons.outlined.Navigation
 import androidx.compose.material.icons.outlined.NoCell
+import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.twotone.Person
 import androidx.compose.material.icons.twotone.Verified
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -83,6 +100,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -104,10 +122,12 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.isUnmessageableRole
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.service.ServiceAction
+import com.geeksville.mesh.ui.components.NodeActionDialogs
+import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.components.PreferenceCategory
+import com.geeksville.mesh.ui.components.SharedTransitionPreview
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.radioconfig.NavCard
-import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.UnitConversions.calculateDewPoint
 import com.geeksville.mesh.util.UnitConversions.toTempString
 import com.geeksville.mesh.util.formatAgo
@@ -129,11 +149,14 @@ private enum class LogsType(
     TRACEROUTE(R.string.traceroute_log, Icons.Default.Route, Route.TracerouteLog)
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun NodeDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: MetricsViewModel = hiltViewModel(),
     uiViewModel: UIViewModel = hiltViewModel(),
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
     onNavigate: (Route) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -168,10 +191,17 @@ fun NodeDetailScreen(
                 when (action) {
                     is Route -> onNavigate(action)
                     is ServiceAction -> viewModel.onServiceAction(action)
+                    is NodeMenuAction -> {
+                        uiViewModel.handleNodeMenuAction(action)
+                    }
+
+                    else -> debug("Unhandled action: $action")
                 }
             },
             modifier = modifier,
             metricsAvailability = availabilities,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedContentScope = animatedContentScope,
             onShared = {
                 share = true
             }
@@ -194,6 +224,8 @@ private fun NodeDetailList(
     metricsState: MetricsState,
     onAction: (Any) -> Unit = {},
     metricsAvailability: BooleanArray,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
     onShared: () -> Unit = {}
 ) {
     LazyColumn(
@@ -203,13 +235,13 @@ private fun NodeDetailList(
         if (metricsState.deviceHardware != null) {
             item {
                 PreferenceCategory(stringResource(R.string.device)) {
-                    DeviceDetailsContent(metricsState)
+                    DeviceDetailsContent(metricsState, sharedTransitionScope, animatedContentScope)
                 }
             }
         }
         item {
             PreferenceCategory(stringResource(R.string.details)) {
-                NodeDetailsContent(node)
+                NodeDetailsContent(node, sharedTransitionScope, animatedContentScope)
             }
         }
         node.metadata?.firmwareVersion?.let { firmwareVersion ->
@@ -296,13 +328,14 @@ private fun NodeDetailList(
 
 @Composable
 private fun NodeDetailRow(
+    modifier: Modifier = Modifier,
     label: String,
     icon: ImageVector,
     value: String,
     iconTint: Color = MaterialTheme.colorScheme.onSurface
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -320,15 +353,31 @@ private fun NodeDetailRow(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun DeviceActions(
     isLocal: Boolean = false,
     node: Node,
     onShared: () -> Unit,
-    onAction: (ServiceAction) -> Unit,
+    onAction: (Any) -> Unit,
 ) {
+    var displayFavoriteDialog by remember { mutableStateOf(false) }
+    var displayIgnoreDialog by remember { mutableStateOf(false) }
+    var displayRemoveDialog by remember { mutableStateOf(false) }
+    NodeActionDialogs(
+        node = node,
+        displayFavoriteDialog = displayFavoriteDialog,
+        displayIgnoreDialog = displayIgnoreDialog,
+        displayRemoveDialog = displayRemoveDialog,
+        onDismissMenuRequest = {
+            displayFavoriteDialog = false
+            displayIgnoreDialog = false
+            displayRemoveDialog = false
+        },
+        onAction = onAction,
+    )
     PreferenceCategory(text = stringResource(R.string.actions))
-    NavCard(
+    NodeActionButton(
         title = stringResource(id = R.string.share_contact),
         icon = Icons.Default.Share,
         enabled = true,
@@ -336,11 +385,62 @@ private fun DeviceActions(
     )
 
     if (!isLocal) {
-        NavCard(
+        NodeActionButton(
             title = stringResource(id = R.string.request_metadata),
             icon = Icons.Default.Memory,
             enabled = true,
             onClick = { onAction(ServiceAction.GetDeviceMetadata(node.num)) }
+        )
+        NodeActionButton(
+            title = stringResource(id = R.string.exchange_position),
+            icon = Icons.Default.LocationOn,
+            enabled = true,
+            onClick = { onAction(NodeMenuAction.RequestPosition(node)) }
+        )
+        NodeActionButton(
+            title = stringResource(id = R.string.exchange_userinfo),
+            icon = Icons.Default.Person,
+            enabled = true,
+            onClick = { onAction(NodeMenuAction.RequestUserInfo(node)) }
+        )
+        NodeActionButton(
+            title = stringResource(id = R.string.traceroute),
+            icon = Icons.Default.Route,
+            enabled = true,
+            onClick = { onAction(NodeMenuAction.TraceRoute(node)) }
+        )
+        NodeActionSwitch(
+            title = stringResource(R.string.favorite),
+            icon = if (node.isFavorite) {
+                Icons.Default.Star
+            } else {
+                Icons.Default.StarBorder
+            },
+            iconTint = if (node.isFavorite) {
+                Color.Yellow
+            } else {
+                LocalContentColor.current
+            },
+            enabled = true,
+            checked = node.isFavorite,
+            onClick = { displayFavoriteDialog = true }
+        )
+        NodeActionSwitch(
+            title = stringResource(R.string.ignore),
+            icon = if (node.isIgnored) {
+                Icons.AutoMirrored.Outlined.VolumeMute
+            } else {
+                Icons.AutoMirrored.Default.VolumeUp
+            },
+            enabled = true,
+            checked = node.isIgnored,
+            onClick = { displayIgnoreDialog = true }
+        )
+        NodeActionButton(
+            title = stringResource(id = R.string.remove),
+            icon = Icons.Default.Delete,
+            enabled = true,
+            onClick = { displayRemoveDialog = true }
         )
     }
 }
@@ -348,23 +448,31 @@ private fun DeviceActions(
 @Composable
 private fun DeviceDetailsContent(
     state: MetricsState,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
 ) {
     val node = state.node ?: return
     val deviceHardware = state.deviceHardware ?: return
     val hwModelName = deviceHardware.displayName
     val isSupported = deviceHardware.activelySupported
-    Box(
-        modifier = Modifier
-            .size(100.dp)
-            .padding(4.dp)
-            .clip(CircleShape)
-            .background(
-                color = Color(node.colors.second).copy(alpha = .5f),
-                shape = CircleShape
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        DeviceHardwareImage(deviceHardware, Modifier.fillMaxSize())
+    with(sharedTransitionScope) {
+        Box(
+            modifier = Modifier
+                .size(100.dp)
+                .padding(4.dp)
+                .clip(CircleShape)
+                .background(
+                    color = Color(node.colors.second).copy(alpha = .5f),
+                    shape = CircleShape
+                )
+                .sharedElement(
+                    rememberSharedContentState("node_chip_${node.num}"),
+                    animatedContentScope
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            DeviceHardwareImage(deviceHardware, Modifier.fillMaxSize())
+        }
     }
     NodeDetailRow(
         label = stringResource(R.string.hardware),
@@ -384,7 +492,9 @@ fun DeviceHardwareImage(
     deviceHardware: DeviceHardware,
     modifier: Modifier = Modifier,
 ) {
-    val hwImg = deviceHardware.images?.getOrNull(1) ?: deviceHardware.images?.getOrNull(0) ?: "unknown.svg"
+    val hwImg =
+        deviceHardware.images?.getOrNull(1) ?: deviceHardware.images?.getOrNull(0)
+        ?: "unknown.svg"
     val imageUrl = "https://flasher.meshtastic.org/img/devices/$hwImg"
     val listener = object : ImageRequest.Listener {
         override fun onStart(request: ImageRequest) {
@@ -421,6 +531,8 @@ fun DeviceHardwareImage(
 @Composable
 private fun NodeDetailsContent(
     node: Node,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
 ) {
     if (node.mismatchKey) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -443,6 +555,22 @@ private fun NodeDetailsContent(
             textAlign = TextAlign.Center,
         )
         Spacer(Modifier.height(16.dp))
+    }
+    NodeDetailRow(
+        label = stringResource(R.string.long_name),
+        icon = Icons.TwoTone.Person,
+        value = node.user.longName.ifEmpty { "???" }
+    )
+    with(sharedTransitionScope) {
+        NodeDetailRow(
+            modifier = Modifier.sharedElement(
+                rememberSharedContentState("node_shortname_${node.num}"),
+                animatedContentScope
+            ),
+            label = stringResource(R.string.short_name),
+            icon = Icons.Outlined.Person,
+            value = node.user.shortName.ifEmpty { "???" }
+        )
     }
     NodeDetailRow(
         label = stringResource(R.string.node_number),
@@ -695,17 +823,109 @@ private fun PowerMetrics(node: Node) = with(node.powerMetrics) {
     }
 }
 
+@Composable
+fun NodeActionButton(
+    title: String,
+    enabled: Boolean,
+    icon: ImageVector? = null,
+    iconTint: Color? = null,
+    onClick: () -> Unit
+) {
+    Button(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .height(48.dp),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    modifier = Modifier.size(24.dp),
+                    tint = iconTint ?: LocalContentColor.current,
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Composable
+fun NodeActionSwitch(
+    title: String,
+    enabled: Boolean,
+    checked: Boolean,
+    icon: ImageVector? = null,
+    iconTint: Color? = null,
+    onClick: () -> Unit,
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .height(48.dp)
+            .toggleable(
+                value = checked,
+                enabled = enabled,
+                role = Role.Switch,
+                onValueChange = { onClick() }
+            ),
+        shape = MaterialTheme.shapes.large,
+        interactionSource = interactionSource,
+        onClick = onClick,
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp, horizontal = 16.dp)
+        ) {
+            if (icon != null) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    modifier = Modifier.size(24.dp),
+                    tint = iconTint ?: LocalContentColor.current,
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f)
+            )
+            Switch(
+                checked = checked,
+                onCheckedChange = null,
+            )
+        }
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun NodeDetailsPreview(
     @PreviewParameter(NodePreviewParameterProvider::class)
     node: Node
 ) {
-    AppTheme {
+    SharedTransitionPreview { sharedTransitionScope, animatedContentScope ->
         NodeDetailList(
             node = node,
             metricsState = MetricsState.Empty,
-            metricsAvailability = BooleanArray(LogsType.entries.size) { false }
+            metricsAvailability = BooleanArray(LogsType.entries.size) { false },
+            sharedTransitionScope = sharedTransitionScope,
+            animatedContentScope = animatedContentScope,
         )
     }
 }

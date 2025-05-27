@@ -18,6 +18,8 @@
 package com.geeksville.mesh.navigation
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CellTower
 import androidx.compose.material.icons.filled.LightMode
@@ -43,9 +45,11 @@ import com.geeksville.mesh.ui.components.PowerMetricsScreen
 import com.geeksville.mesh.ui.components.SignalMetricsScreen
 import com.geeksville.mesh.ui.components.TracerouteLogScreen
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.nodeDetailGraph(
     navController: NavHostController,
-    uiViewModel: UIViewModel
+    uiViewModel: UIViewModel,
+    sharedTransitionScope: SharedTransitionScope,
 ) {
     navigation<Graph.NodeDetailGraph>(
         startDestination = Route.NodeDetail(),
@@ -54,7 +58,12 @@ fun NavGraphBuilder.nodeDetailGraph(
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry<Graph.NodeDetailGraph>()
             }
-            NodeDetailScreen(uiViewModel = uiViewModel, viewModel = hiltViewModel(parentEntry)) {
+            NodeDetailScreen(
+                uiViewModel = uiViewModel,
+                viewModel = hiltViewModel(parentEntry),
+                sharedTransitionScope = sharedTransitionScope,
+                animatedContentScope = this@composable,
+            ) {
                 navController.navigate(it) {
                     popUpTo(Route.NodeDetail()) {
                         inclusive = false
@@ -71,7 +80,12 @@ fun NavGraphBuilder.nodeDetailGraph(
                     NodeDetailRoute.DEVICE -> DeviceMetricsScreen(hiltViewModel(parentEntry))
                     NodeDetailRoute.NODE_MAP -> NodeMapScreen(hiltViewModel(parentEntry))
                     NodeDetailRoute.POSITION_LOG -> PositionLogScreen(hiltViewModel(parentEntry))
-                    NodeDetailRoute.ENVIRONMENT -> EnvironmentMetricsScreen(hiltViewModel(parentEntry))
+                    NodeDetailRoute.ENVIRONMENT -> EnvironmentMetricsScreen(
+                        hiltViewModel(
+                            parentEntry
+                        )
+                    )
+
                     NodeDetailRoute.SIGNAL -> SignalMetricsScreen(hiltViewModel(parentEntry))
                     NodeDetailRoute.TRACEROUTE -> TracerouteLogScreen(hiltViewModel(parentEntry))
                     NodeDetailRoute.POWER -> PowerMetricsScreen(hiltViewModel(parentEntry))

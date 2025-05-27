@@ -60,6 +60,7 @@ import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.ServiceAction
+import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.map.MAP_STYLE_ID
 import com.geeksville.mesh.util.getShortDate
 import com.geeksville.mesh.util.positionToMeter
@@ -74,6 +75,7 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -544,6 +546,7 @@ class UIViewModel @Inject constructor(
     // Connection state to our radio device
     val connectionState get() = radioConfigRepository.connectionState
     fun isConnected() = connectionState.value != MeshService.ConnectionState.DISCONNECTED
+    val isConnected = radioConfigRepository.connectionState.map { it == MeshService.ConnectionState.CONNECTED }
 
     private val _requestChannelSet = MutableStateFlow<AppOnlyProtos.ChannelSet?>(null)
     val requestChannelSet: StateFlow<AppOnlyProtos.ChannelSet?> get() = _requestChannelSet
@@ -587,6 +590,20 @@ class UIViewModel @Inject constructor(
             radioConfigRepository.onServiceAction(ServiceAction.Ignore(node))
         } catch (ex: RemoteException) {
             errormsg("Ignore node error:", ex)
+        }
+    }
+
+    fun handleNodeMenuAction(
+        action: NodeMenuAction,
+    ) {
+        when (action) {
+            is NodeMenuAction.Remove -> removeNode(action.node.num)
+            is NodeMenuAction.Ignore -> ignoreNode(action.node)
+            is NodeMenuAction.Favorite -> favoriteNode(action.node)
+            is NodeMenuAction.RequestUserInfo -> requestUserInfo(action.node.num)
+            is NodeMenuAction.RequestPosition -> requestPosition(action.node.num)
+            is NodeMenuAction.TraceRoute -> requestTraceroute(action.node.num)
+            else -> {}
         }
     }
 

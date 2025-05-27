@@ -302,7 +302,7 @@ fun ChannelSettingsItemList(
                             fontSize = 10.sp,
                         )
                         Text(
-                            text = stringResource(R.string.manuel_position_request),
+                            text = stringResource(R.string.manual_position_request),
                             color = MaterialTheme.colorScheme.onBackground,
                             fontSize = 10.sp,
                         )

@@ -17,7 +17,10 @@
 
 package com.geeksville.mesh.ui.message.components
 
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -52,13 +55,14 @@ import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.ui.NodeChip
 import com.geeksville.mesh.ui.components.AutoLinkText
-import com.geeksville.mesh.ui.components.UserAvatar
+import com.geeksville.mesh.ui.components.NodeMenuAction
+import com.geeksville.mesh.ui.components.SharedTransitionPreview
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
-import com.geeksville.mesh.ui.theme.AppTheme
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalSharedTransitionApi::class)
 @Composable
 internal fun MessageItem(
     node: Node,
@@ -69,9 +73,12 @@ internal fun MessageItem(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
-    onChipClick: () -> Unit = {},
+    onAction: (NodeMenuAction) -> Unit = {},
     onStatusClick: () -> Unit = {},
     onSendReaction: (String) -> Unit = {},
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
+    isConnected: Boolean,
 ) = Row(
     modifier = modifier
         .fillMaxWidth()
@@ -91,12 +98,16 @@ internal fun MessageItem(
         Modifier.padding(start = 8.dp, top = 8.dp, end = 0.dp, bottom = 6.dp)
     }
     if (!fromLocal) {
-        UserAvatar(
+        NodeChip(
             node = node,
             modifier = Modifier
-                .padding(start = 8.dp, top = 8.dp)
-                .align(Alignment.Top),
-        ) { onChipClick() }
+                .padding(start = 8.dp, end = 4.dp),
+            onAction = onAction,
+            isConnected = isConnected,
+            isThisNode = false,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedContentScope = animatedContentScope,
+        )
     }
     Card(
         modifier = Modifier
@@ -166,16 +177,20 @@ internal fun MessageItem(
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @PreviewLightDark
 @Composable
 private fun MessageItemPreview() {
-    AppTheme {
+    SharedTransitionPreview { sharedTransitionScope, animatedContentScope ->
         MessageItem(
             node = NodePreviewParameterProvider().values.first(),
             messageText = stringResource(R.string.sample_message),
             messageTime = "10:00",
             messageStatus = MessageStatus.DELIVERED,
             selected = false,
+            sharedTransitionScope = sharedTransitionScope,
+            animatedContentScope = animatedContentScope,
+            isConnected = true,
         )
     }
 }

@@ -45,10 +45,10 @@ import com.geeksville.mesh.model.isUnmessageableRole
 @Suppress("LongMethod")
 @Composable
 fun NodeMenu(
+    expanded: Boolean,
     node: Node,
     showFullMenu: Boolean = false,
-    onDismissRequest: () -> Unit,
-    expanded: Boolean = false,
+    onDismissMenuRequest: () -> Unit,
     onAction: (NodeMenuAction) -> Unit,
 ) {
     val isUnmessageable = if (node.user.hasIsUnmessagable()) {
@@ -57,94 +57,69 @@ fun NodeMenu(
         // for older firmwares
         node.user.role?.isUnmessageableRole() == true
     }
+
     var displayFavoriteDialog by remember { mutableStateOf(false) }
     var displayIgnoreDialog by remember { mutableStateOf(false) }
     var displayRemoveDialog by remember { mutableStateOf(false) }
-    if (displayFavoriteDialog) {
-        SimpleAlertDialog(
-            title = R.string.favorite,
-            text = stringResource(
-                id = if (node.isFavorite) R.string.favorite_remove else R.string.favorite_add,
-                node.user.longName
-            ),
-            onConfirm = {
-                displayFavoriteDialog = false
-                onAction(NodeMenuAction.Favorite(node))
-            },
-            onDismiss = {
-                displayFavoriteDialog = false
-            }
-        )
+    val dialogDismissRequest = {
+        displayFavoriteDialog = false
+        displayIgnoreDialog = false
+        displayRemoveDialog = false
+        onDismissMenuRequest()
     }
-    if (displayIgnoreDialog) {
-        SimpleAlertDialog(
-            title = R.string.ignore,
-            text = stringResource(
-                id = if (node.isIgnored) R.string.ignore_remove else R.string.ignore_add,
-                node.user.longName
-            ),
-            onConfirm = {
-                displayIgnoreDialog = false
-                onAction(NodeMenuAction.Ignore(node))
-            },
-            onDismiss = {
-                displayIgnoreDialog = false
-            }
-        )
+    val onMenuAction: (NodeMenuAction) -> Unit = {
+        dialogDismissRequest()
+        onDismissMenuRequest()
+        onAction(it)
     }
-    if (displayRemoveDialog) {
-        SimpleAlertDialog(
-            title = R.string.remove,
-            text = R.string.remove_node_text,
-            onConfirm = {
-                displayRemoveDialog = false
-                onAction(NodeMenuAction.Remove(node))
-            },
-            onDismiss = {
-                displayRemoveDialog = false
-            }
-        )
-    }
+    NodeActionDialogs(
+        node = node,
+        displayFavoriteDialog = displayFavoriteDialog,
+        displayIgnoreDialog = displayIgnoreDialog,
+        displayRemoveDialog = displayRemoveDialog,
+        onDismissMenuRequest = dialogDismissRequest,
+        onAction = onMenuAction
+    )
     DropdownMenu(
         modifier = Modifier.background(MaterialTheme.colorScheme.background.copy(alpha = 1f)),
         expanded = expanded,
-        onDismissRequest = onDismissRequest,
+        onDismissRequest = onDismissMenuRequest,
     ) {
 
         if (showFullMenu) {
             if (!isUnmessageable) {
                 DropdownMenuItem(
                     onClick = {
-                        onDismissRequest()
-                        onAction(NodeMenuAction.DirectMessage(node))
+                        dialogDismissRequest()
+                        onMenuAction(NodeMenuAction.DirectMessage(node))
                     },
                     text = { Text(stringResource(R.string.direct_message)) }
                 )
             }
             DropdownMenuItem(
                 onClick = {
-                    onDismissRequest()
-                    onAction(NodeMenuAction.RequestUserInfo(node))
+                    dialogDismissRequest()
+                    onMenuAction(NodeMenuAction.RequestUserInfo(node))
                 },
                 text = { Text(stringResource(R.string.exchange_userinfo)) }
             )
             DropdownMenuItem(
                 onClick = {
-                    onDismissRequest()
-                    onAction(NodeMenuAction.RequestPosition(node))
+                    dialogDismissRequest()
+                    onMenuAction(NodeMenuAction.RequestPosition(node))
                 },
                 text = { Text(stringResource(R.string.exchange_position)) }
             )
             DropdownMenuItem(
                 onClick = {
-                    onDismissRequest()
-                    onAction(NodeMenuAction.TraceRoute(node))
+                    dialogDismissRequest()
+                    onMenuAction(NodeMenuAction.TraceRoute(node))
                 },
                 text = { Text(stringResource(R.string.traceroute)) }
             )
             DropdownMenuItem(
                 onClick = {
-                    onDismissRequest()
+                    dialogDismissRequest()
                     displayFavoriteDialog = true
                 },
                 enabled = !node.isIgnored,
@@ -160,7 +135,7 @@ fun NodeMenu(
             )
             DropdownMenuItem(
                 onClick = {
-                    onDismissRequest()
+                    dialogDismissRequest()
                     displayIgnoreDialog = true
                 },
                 text = {
@@ -170,7 +145,7 @@ fun NodeMenu(
                     Checkbox(
                         checked = node.isIgnored,
                         onCheckedChange = {
-                            onDismissRequest()
+                            dialogDismissRequest()
                             displayIgnoreDialog = true
                         },
                         modifier = Modifier.size(24.dp),
@@ -179,7 +154,7 @@ fun NodeMenu(
             )
             DropdownMenuItem(
                 onClick = {
-                    onDismissRequest()
+                    dialogDismissRequest()
                     displayRemoveDialog = true
                 },
                 enabled = !node.isIgnored,
@@ -189,18 +164,68 @@ fun NodeMenu(
         }
         DropdownMenuItem(
             onClick = {
-                onDismissRequest()
-                onAction(NodeMenuAction.Share(node))
+                dialogDismissRequest()
+                onMenuAction(NodeMenuAction.Share(node))
             },
             text = { Text(stringResource(R.string.share_contact)) }
         )
 
         DropdownMenuItem(
             onClick = {
-                onDismissRequest()
-                onAction(NodeMenuAction.MoreDetails(node))
+                dialogDismissRequest()
+                onMenuAction(NodeMenuAction.MoreDetails(node))
             },
             text = { Text(stringResource(R.string.more_details)) }
+        )
+    }
+}
+
+@Composable
+fun NodeActionDialogs(
+    node: Node,
+    displayFavoriteDialog: Boolean,
+    displayIgnoreDialog: Boolean,
+    displayRemoveDialog: Boolean,
+    onDismissMenuRequest: () -> Unit,
+    onAction: (NodeMenuAction) -> Unit
+) {
+    if (displayFavoriteDialog) {
+        SimpleAlertDialog(
+            title = R.string.favorite,
+            text = stringResource(
+                id = if (node.isFavorite) R.string.favorite_remove else R.string.favorite_add,
+                node.user.longName
+            ),
+            onConfirm = {
+                onDismissMenuRequest()
+                onAction(NodeMenuAction.Favorite(node))
+            },
+            onDismiss = onDismissMenuRequest
+        )
+    }
+    if (displayIgnoreDialog) {
+        SimpleAlertDialog(
+            title = R.string.ignore,
+            text = stringResource(
+                id = if (node.isIgnored) R.string.ignore_remove else R.string.ignore_add,
+                node.user.longName
+            ),
+            onConfirm = {
+                onDismissMenuRequest()
+                onAction(NodeMenuAction.Ignore(node))
+            },
+            onDismiss = onDismissMenuRequest
+        )
+    }
+    if (displayRemoveDialog) {
+        SimpleAlertDialog(
+            title = R.string.remove,
+            text = R.string.remove_node_text,
+            onConfirm = {
+                onDismissMenuRequest()
+                onAction(NodeMenuAction.Remove(node))
+            },
+            onDismiss = onDismissMenuRequest
         )
     }
 }

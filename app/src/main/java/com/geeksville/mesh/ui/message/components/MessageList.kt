@@ -18,6 +18,9 @@
 package com.geeksville.mesh.ui.message.components
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -48,13 +51,13 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.components.NodeMenu
 import com.geeksville.mesh.ui.components.NodeMenuAction
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
@@ -105,6 +108,7 @@ fun DeliveryInfo(
     containerColor = MaterialTheme.colorScheme.surface
 )
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Suppress("LongMethod")
 @Composable
 internal fun MessageList(
@@ -113,9 +117,11 @@ internal fun MessageList(
     selectedIds: MutableState<Set<Long>>,
     onUnreadChanged: (Long) -> Unit,
     onSendReaction: (String, Int) -> Unit,
-    onNodeMenuAction: (NodeMenuAction) -> Unit = {},
+    onNodeMenuAction: (NodeMenuAction) -> Unit,
     viewModel: UIViewModel,
-    contactKey: String
+    contactKey: String,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
 ) {
     val haptics = LocalHapticFeedback.current
     val inSelectionMode by remember { derivedStateOf { selectedIds.value.isNotEmpty() } }
@@ -155,6 +161,9 @@ internal fun MessageList(
         value += uuid
     }
 
+    val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
+    val isConnected by viewModel.isConnected.collectAsStateWithLifecycle(false)
+
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         state = listState,
@@ -163,12 +172,16 @@ internal fun MessageList(
         items(messages, key = { it.uuid }) { msg ->
             val fromLocal = msg.node.user.id == DataPacket.ID_LOCAL
             val selected by remember { derivedStateOf { selectedIds.value.contains(msg.uuid) } }
-
+            var node by remember {
+                mutableStateOf(nodes.find { it.num == msg.node.num } ?: msg.node)
+            }
+            LaunchedEffect(nodes) {
+                node = nodes.find { it.num == msg.node.num } ?: msg.node
+            }
             ReactionRow(fromLocal, msg.emojis) { showReactionDialog = msg.emojis }
             Box(Modifier.wrapContentSize(Alignment.TopStart)) {
-                var expandedNodeMenu by remember { mutableStateOf(false) }
                 MessageItem(
-                    node = msg.node,
+                    node = node,
                     messageText = msg.text,
                     messageTime = msg.time,
                     messageStatus = msg.status,
@@ -178,20 +191,12 @@ internal fun MessageList(
                         selectedIds.toggle(msg.uuid)
                         haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                     },
-                    onChipClick = {
-                        if (msg.node.num != 0) {
-                            expandedNodeMenu = true
-                        }
-                    },
+                    onAction = onNodeMenuAction,
                     onStatusClick = { showStatusDialog = msg },
                     onSendReaction = { onSendReaction(it, msg.packetId) },
-                )
-                NodeMenu(
-                    node = msg.node,
-                    showFullMenu = true,
-                    onDismissRequest = { expandedNodeMenu = false },
-                    expanded = expandedNodeMenu,
-                    onAction = onNodeMenuAction,
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedContentScope = animatedContentScope,
+                    isConnected = isConnected
                 )
             }
         }

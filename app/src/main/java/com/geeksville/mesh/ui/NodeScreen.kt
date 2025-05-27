@@ -17,8 +17,10 @@
 
 package com.geeksville.mesh.ui
 
-import android.os.Build
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -49,13 +51,15 @@ import com.geeksville.mesh.ui.components.NodeFilterTextField
 import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.components.rememberTimeTickWithLifecycle
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalSharedTransitionApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun NodeScreen(
     model: UIViewModel = hiltViewModel(),
     navigateToMessages: (String) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
 ) {
     val state by model.nodesUiState.collectAsStateWithLifecycle()
 
@@ -135,6 +139,8 @@ fun NodeScreen(
                     expanded = state.showDetails,
                     currentTimeMillis = currentTimeMillis,
                     isConnected = connectionState.isConnected(),
+                    sharedTransitionScope = sharedTransitionScope,
+                    animatedContentScope = animatedContentScope
                 )
             }
         }
@@ -144,8 +150,7 @@ fun NodeScreen(
 
         AnimatedVisibility(
             modifier = Modifier.align(androidx.compose.ui.Alignment.BottomEnd),
-            visible = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                    !listState.isScrollInProgress &&
+            visible = !listState.isScrollInProgress &&
                     connectionState.isConnected() &&
                     shareCapable
         ) {
