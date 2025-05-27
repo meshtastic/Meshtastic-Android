@@ -1,3 +1,0 @@
-include ':app'
-rootProject.name='Meshtastic Android'
-include ':network'

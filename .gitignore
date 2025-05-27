@@ -15,6 +15,7 @@
 .externalNativeBuild
 .cxx
 /app/release
+/buildSrc/build
 
 # Java KeyStore certificates
 *.jks

@@ -48,7 +48,7 @@ jobs:
       run: ./gradlew assembleFdroidRelease
 
     - name: Enable Crashlytics
-      run: sed -i 's/useCrashlytics = false/useCrashlytics = true/g' ./build.gradle
+      run: sed -i 's/USE_CRASHLYTICS = false/USE_CRASHLYTICS = true/g' ./buildSrc/src/main/kotlin/Configs.kt
 
     - name: Build Play Store release
       run: ./gradlew bundleGoogleRelease assembleGoogleRelease
