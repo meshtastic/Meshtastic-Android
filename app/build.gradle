@@ -35,7 +35,7 @@ android {
         versionCode Configs.VERSION_CODE // format is Mmmss (where M is 1+the numeric major number
         versionName Configs.VERSION_NAME
         testInstrumentationRunner "com.geeksville.mesh.TestRunner"
-
+        buildConfigField("String", "MIN_DEVICE_VERSION", "\"${Configs.MIN_DEVICE_VERSION}\"")
         // per https://developer.android.com/studio/write/vector-asset-studio
         vectorDrawables.useSupportLibrary = true
     }
