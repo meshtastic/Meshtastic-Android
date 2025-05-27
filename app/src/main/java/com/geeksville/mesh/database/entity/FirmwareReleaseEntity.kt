@@ -20,6 +20,7 @@ package com.geeksville.mesh.database.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.network.model.NetworkFirmwareRelease
 import kotlinx.serialization.Serializable
 
@@ -72,6 +73,12 @@ data class FirmwareRelease(
     val lastUpdated: Long = System.currentTimeMillis(),
     val releaseType: FirmwareReleaseType = FirmwareReleaseType.STABLE,
 )
+
+fun FirmwareReleaseEntity.asDeviceVersion(): DeviceVersion {
+    return DeviceVersion(
+        id.substringBeforeLast(".").replace("v", "")
+    )
+}
 
 enum class FirmwareReleaseType {
     STABLE,
