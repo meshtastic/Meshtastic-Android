@@ -22,6 +22,6 @@ object Configs {
     const val COMPILE_SDK = 36
     const val VERSION_CODE = 30604 // format is Mmmss (where M is 1+the numeric major number
     const val VERSION_NAME = "2.6.4"
-    const val USE_CRASHLYTICS = true // Set to false if you don't want to use Firebase Crashlytics
+    const val USE_CRASHLYTICS = false // Set to true if you want to use Firebase Crashlytics
     const val MIN_DEVICE_VERSION = "2.5.14" // Minimum device firmware version supported by this app
 }
