@@ -18,8 +18,8 @@ jobs:
 
     - name: Get `versionCode` & `versionName`
       run: |
-        echo "versionCode=$(grep -oP 'versionCode \K\d+' ./app/build.gradle)" >> $GITHUB_ENV
-        echo "versionName=$(grep -oP 'versionName \"\K[^\"]+' ./app/build.gradle)" >> $GITHUB_ENV
+        echo "versionCode=$(grep -oP 'VERSION_CODE = \K\d+' ./buildSrc/src/main/kotlin/Configs.kt)" >> $GITHUB_ENV
+        echo "versionName=$(grep -oP 'VERSION_NAME = \"\K[^\"]+' ./buildSrc/src/main/kotlin/Configs.kt)" >> $GITHUB_ENV
 
     - name: Validate Gradle wrapper
       uses: gradle/actions/wrapper-validation@v4
@@ -48,7 +48,7 @@ jobs:
       run: ./gradlew assembleFdroidRelease
 
     - name: Enable Crashlytics
-      run: sed -i 's/useCrashlytics = false/useCrashlytics = true/g' ./build.gradle
+      run: sed -i 's/USE_CRASHLYTICS = false/USE_CRASHLYTICS = true/g' ./buildSrc/src/main/kotlin/Configs.kt
 
     - name: Build Play Store release
       run: ./gradlew bundleGoogleRelease assembleGoogleRelease
