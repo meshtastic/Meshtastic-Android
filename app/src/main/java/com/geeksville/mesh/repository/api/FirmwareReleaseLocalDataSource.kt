@@ -20,6 +20,7 @@ package com.geeksville.mesh.repository.api
 import com.geeksville.mesh.database.dao.FirmwareReleaseDao
 import com.geeksville.mesh.database.entity.FirmwareReleaseEntity
 import com.geeksville.mesh.database.entity.FirmwareReleaseType
+import com.geeksville.mesh.database.entity.asDeviceVersion
 import com.geeksville.mesh.database.entity.asEntity
 import com.geeksville.mesh.network.model.NetworkFirmwareRelease
 import dagger.Lazy
@@ -52,7 +53,7 @@ class FirmwareReleaseLocalDataSource @Inject constructor(
         withContext(Dispatchers.IO) {
             val releases = firmwareReleaseDao.getReleasesByType(releaseType)
             val latestRelease =
-                releases?.firstOrNull()
+                releases?.maxBy { it.asDeviceVersion() }
             return@withContext latestRelease
         }
 }
