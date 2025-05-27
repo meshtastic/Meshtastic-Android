@@ -571,7 +571,7 @@
     <string name="primary_channel_feature">Pravidelné vysílání pozice a telemetrie</string>
     <string name="secondary">Sekundární</string>
     <string name="secondary_no_telemetry">Žádné pravidelné telemetrické vysílání</string>
-    <string name="manuel_position_request">Je vyžadován manuální požadavek na pozici</string>
+    <string name="manual_position_request">Je vyžadován manuální požadavek na pozici</string>
     <string name="press_and_drag">Stiskněte a přetáhněte pro změnu pořadí</string>
     <string name="set_region">Nastavit oblast</string>
     <string name="unmute">Zrušit ztlumení</string>

@@ -590,7 +590,7 @@
     <string name="primary_channel_feature">Säännöllinen sijainti- ja telemetrialähetys</string>
     <string name="secondary">Toissijainen</string>
     <string name="secondary_no_telemetry">Telemetriatietoja ei lähetetä säännöllisesti</string>
-    <string name="manuel_position_request">Manuaalinen sijaintipyyntö vaaditaan</string>
+    <string name="manual_position_request">Manuaalinen sijaintipyyntö vaaditaan</string>
     <string name="press_and_drag">Paina ja raahaa järjestääksesi uudelleen</string>
     <string name="set_region">Määritä alue</string>
     <string name="unmute">Poista mykistys</string>
