@@ -13,7 +13,7 @@
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Kanal</string>
     <string name="node_sort_distance">Mesafe</string>
-    <string name="node_sort_hops_away">Atlama mesafesi</string>
+    <string name="node_sort_hops_away">Atlama üzerinden</string>
     <string name="node_sort_last_heard">Son duyulma</string>
     <string name="node_sort_via_mqtt">MQTT yoluyla</string>
     <string name="node_sort_via_favorite">Favorilerden</string>
@@ -580,7 +580,7 @@
     <string name="user_id">Kullanıcı Kimliği</string>
     <string name="uptime">Çalışma Süresi</string>
     <string name="firmware_version">Yazılım sürümü</string>
-    <string name="timestamp">Zaman bilgisi</string>
+    <string name="timestamp">Zaman Damgası</string>
     <string name="heading">İstikamet</string>
     <string name="sats">Uydular</string>
     <string name="alt">Yükseklik</string>
@@ -590,7 +590,7 @@
     <string name="primary_channel_feature">Periyodik konum ve telemetri yayını</string>
     <string name="secondary">İkincil</string>
     <string name="secondary_no_telemetry">Periyodik telemetri yayını yok</string>
-    <string name="manuel_position_request">Manuel konum isteği gerekli</string>
+    <string name="manual_position_request">Manuel konum isteği gerekli</string>
     <string name="press_and_drag">Yeniden sıralamak için basılı tutup sürükleyin</string>
     <string name="set_region">Bölge Ayarla</string>
     <string name="unmute">Sesi aç</string>
@@ -606,4 +606,6 @@
     <string name="request_metadata">İstek Meta Verisi</string>
     <string name="actions">işlemler</string>
     <string name="firmware">Aygıt Yazılımı</string>
+    <string name="use_12h_format">12h saat formatını kullan</string>
+    <string name="display_time_in_12h_format">Aktif edildiğinde, cihaz ekranda saati 12 saat formatında gösterecek</string>
 </resources>

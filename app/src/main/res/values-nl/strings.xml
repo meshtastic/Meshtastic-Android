@@ -490,7 +490,7 @@
     <string name="slot">Slot</string>
     <string name="primary">Primair</string>
     <string name="secondary">Secundair</string>
-    <string name="manuel_position_request">Handmatige positieaanvraag vereist</string>
+    <string name="manual_position_request">Handmatige positieaanvraag vereist</string>
     <string name="set_region">Regio Instellen</string>
     <string name="unmute">Dempen opheffen</string>
     <string name="dynamic">Dynamisch</string>
