@@ -57,6 +57,7 @@ import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.theme.AppTheme
+import com.geeksville.mesh.util.formatUptime
 import java.text.DecimalFormat
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -120,7 +121,7 @@ fun HostMetricsItem(
                     )
                     LogLine(
                         label = stringResource(R.string.uptime),
-                        value = hostMetrics.uptimeSeconds.toString(),
+                        value = formatUptime(hostMetrics.uptimeSeconds),
                         modifier = Modifier.fillMaxWidth(),
                     )
                     LogLine(
