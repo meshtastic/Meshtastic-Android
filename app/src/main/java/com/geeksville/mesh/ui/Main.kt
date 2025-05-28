@@ -178,7 +178,7 @@ fun MainScreen(
 
 enum class MainMenuAction(@StringRes val stringRes: Int) {
     DEBUG(R.string.debug_panel),
-    RADIO_CONFIG(R.string.device_settings),
+    RADIO_CONFIG(R.string.radio_configuration),
     EXPORT_MESSAGES(R.string.save_messages),
     THEME(R.string.theme),
     LANGUAGE(R.string.preferences_language),

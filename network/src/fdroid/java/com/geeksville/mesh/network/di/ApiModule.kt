@@ -29,7 +29,6 @@ import coil3.util.Logger
 import com.geeksville.mesh.network.BuildConfig
 import com.geeksville.mesh.network.retrofit.ApiService
 import com.geeksville.mesh.network.retrofit.NoOpApiService
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

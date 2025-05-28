@@ -302,7 +302,7 @@ private fun RadioConfigItemList(
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = 16.dp),
     ) {
-        item { PreferenceCategory(stringResource(R.string.device_settings)) }
+        item { PreferenceCategory(stringResource(R.string.radio_configuration)) }
         items(ConfigRoute.filterExcludedFrom(state.metadata)) {
             NavCard(
                 title = stringResource(it.title),
