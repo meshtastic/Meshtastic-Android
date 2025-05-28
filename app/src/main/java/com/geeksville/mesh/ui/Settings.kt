@@ -25,9 +25,6 @@ import android.os.Build
 import android.util.Patterns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -109,15 +106,12 @@ fun String?.isIPAddress(): Boolean {
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 fun SettingsScreen(
     uiViewModel: UIViewModel = hiltViewModel(),
     scanModel: BTScanModel = hiltViewModel(),
     bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope,
     onNavigateToRadioConfig: () -> Unit,
     onNavigateToNodeDetails: (Int) -> Unit,
 ) {
@@ -233,6 +227,7 @@ fun SettingsScreen(
                 }
                 lastConnection = info
             }
+
             else -> {}
         }
     }
@@ -284,8 +279,6 @@ fun SettingsScreen(
                                     else -> {}
                                 }
                             },
-                            sharedTransitionScope = sharedTransitionScope,
-                            animatedContentScope = animatedContentScope
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(

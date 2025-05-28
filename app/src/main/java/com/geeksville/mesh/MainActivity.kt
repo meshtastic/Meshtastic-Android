@@ -38,11 +38,10 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -133,24 +132,31 @@ class MainActivity : AppCompatActivity(), Logging {
         }
 
         setContent {
-            Box(Modifier.safeDrawingPadding()) {
-                val theme by model.theme.collectAsState()
-                val dynamic = theme == MODE_DYNAMIC
-                val dark = when (theme) {
-                    AppCompatDelegate.MODE_NIGHT_YES -> true
-                    AppCompatDelegate.MODE_NIGHT_NO -> false
-                    AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> isSystemInDarkTheme()
-                    else -> isSystemInDarkTheme()
+            val theme by model.theme.collectAsState()
+            val dynamic = theme == MODE_DYNAMIC
+            val dark = when (theme) {
+                AppCompatDelegate.MODE_NIGHT_YES -> true
+                AppCompatDelegate.MODE_NIGHT_NO -> false
+                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> isSystemInDarkTheme()
+                else -> isSystemInDarkTheme()
+            }
+
+            AppTheme(
+                dynamicColor = dynamic,
+                darkTheme = dark,
+            ) {
+                val view = LocalView.current
+                if (!view.isInEditMode) {
+                    SideEffect {
+                        AppCompatDelegate.setDefaultNightMode(theme)
+                    }
                 }
-                AppTheme(
-                    dynamicColor = dynamic,
-                    darkTheme = dark,
-                ) {
-                    MainScreen(viewModel = model, onAction = ::onMainMenuAction)
-                }
+                MainScreen(
+                    viewModel = model,
+                    onAction = ::onMainMenuAction
+                )
             }
         }
-
         // Handle any intent
         handleIntent(intent)
     }
