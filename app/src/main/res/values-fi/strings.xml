@@ -608,4 +608,10 @@
     <string name="firmware">Laiteohjelmisto</string>
     <string name="use_12h_format">Käytä 12 tunnin kelloa</string>
     <string name="display_time_in_12h_format">Kun asetus on käytössä, laite näyttää 12 tunnin ajan näytössä.</string>
+    <string name="host_metrics_log">Isäntälaitteen lokitiedot</string>
+    <string name="host">Isäntälaite</string>
+    <string name="host_metrics">Isäntälaitteen mittausarvot</string>
+    <string name="free_memory">Vapaa muisti</string>
+    <string name="disk_free">Vapaa levytila</string>
+    <string name="load">Lataa</string>
 </resources>
