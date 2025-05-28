@@ -185,7 +185,7 @@
     <string name="map_tile_download_estimate">Paanide allalaadimise prognoos:</string>
     <string name="map_start_download">Alusta allalaadimist</string>
     <string name="close">Sule</string>
-    <string name="device_settings">Raadio sätted</string>
+    <string name="radio_configuration">Raadio sätted</string>
     <string name="module_settings">Mooduli sätted</string>
     <string name="add">Lisa</string>
     <string name="edit">Muuda</string>

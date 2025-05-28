@@ -204,7 +204,7 @@
     <string name="map_start_download">Comenzar Descarga</string>
     <string name="exchange_position">Intercambiar Posición</string>
     <string name="close">Cerrar</string>
-    <string name="device_settings">Configuración de radio</string>
+    <string name="radio_configuration">Configuración de radio</string>
     <string name="module_settings">Configuración de módulo</string>
     <string name="add">Añadir</string>
     <string name="edit">Editar</string>

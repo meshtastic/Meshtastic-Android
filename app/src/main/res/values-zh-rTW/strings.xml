@@ -209,7 +209,7 @@
     <string name="map_start_download">開始下載</string>
     <string name="exchange_position">交換位置</string>
     <string name="close">關閉</string>
-    <string name="device_settings">裝置設定</string>
+    <string name="radio_configuration">設備設定</string>
     <string name="module_settings">模組設定</string>
     <string name="add">新增</string>
     <string name="edit">編輯</string>

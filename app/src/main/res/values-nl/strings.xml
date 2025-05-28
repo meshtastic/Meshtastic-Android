@@ -210,7 +210,7 @@
     <string name="map_start_download">Download starten</string>
     <string name="exchange_position">Positie uitwisselen</string>
     <string name="close">Sluit</string>
-    <string name="device_settings">Radioconfiguratie</string>
+    <string name="radio_configuration">Radioconfiguratie</string>
     <string name="module_settings">Module-configuratie</string>
     <string name="add">Voeg toe</string>
     <string name="edit">Wijzig</string>

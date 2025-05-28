@@ -210,7 +210,7 @@
     <string name="map_start_download">Commencer le téléchargement</string>
     <string name="exchange_position">Échanger la position</string>
     <string name="close">Fermer</string>
-    <string name="device_settings">Réglages de l\'appareil</string>
+    <string name="radio_configuration">Réglages de l\'appareil</string>
     <string name="module_settings">Réglages du module</string>
     <string name="add">Ajouter</string>
     <string name="edit">Editer</string>

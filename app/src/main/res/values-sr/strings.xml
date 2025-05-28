@@ -207,7 +207,7 @@
     <string name="map_tile_download_estimate">Процена преузимања плочица:</string>
     <string name="map_start_download">Започни преузимање</string>
     <string name="close">Затвори</string>
-    <string name="device_settings">Конфигурација радио уређаја</string>
+    <string name="radio_configuration">Конфигурација радио уређаја</string>
     <string name="module_settings">Конфигурација модула</string>
     <string name="add">Додај</string>
     <string name="edit">Измени</string>

@@ -214,7 +214,7 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="map_start_download">开始下载</string>
     <string name="exchange_position">交换位置</string>
     <string name="close">关闭</string>
-    <string name="device_settings">设备配置</string>
+    <string name="radio_configuration">设备配置</string>
     <string name="module_settings">模块设定</string>
     <string name="add">新增</string>
     <string name="edit">编辑</string>

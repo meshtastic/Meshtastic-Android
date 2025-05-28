@@ -155,7 +155,7 @@
     <string name="map_tile_download_estimate">Estimació de descàrrega de tessel·les:</string>
     <string name="map_start_download">Iniciar descarrega</string>
     <string name="close">Tancar</string>
-    <string name="device_settings">Configuració de ràdio</string>
+    <string name="radio_configuration">Configuració de ràdio</string>
     <string name="module_settings">Configuració de mòdul</string>
     <string name="add">Afegir</string>
     <string name="edit">Editar</string>

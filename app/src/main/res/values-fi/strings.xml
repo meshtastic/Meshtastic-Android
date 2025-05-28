@@ -211,7 +211,7 @@
     <string name="map_start_download">Aloita Lataus</string>
     <string name="exchange_position">Tarkastele sijaintia</string>
     <string name="close">Sulje</string>
-    <string name="device_settings">Radion asetukset</string>
+    <string name="radio_configuration">Radion asetukset</string>
     <string name="module_settings">Moduulin asetukset</string>
     <string name="add">Lisää</string>
     <string name="edit">Muokkaa</string>

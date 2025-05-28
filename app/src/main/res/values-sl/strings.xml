@@ -203,7 +203,7 @@
     <string name="map_tile_download_estimate">Ocena prenosa plošče:</string>
     <string name="map_start_download">Začni prenos</string>
     <string name="close">Zapri</string>
-    <string name="device_settings">Nastavitev radia</string>
+    <string name="radio_configuration">Nastavitev radia</string>
     <string name="module_settings">Nastavitev modula</string>
     <string name="add">Dodaj</string>
     <string name="edit">Uredi</string>

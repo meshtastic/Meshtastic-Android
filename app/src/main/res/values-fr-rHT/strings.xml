@@ -192,7 +192,7 @@
     <string name="map_tile_download_estimate">Estimasyon telechajman tèk</string>
     <string name="map_start_download">Kòmanse telechajman</string>
     <string name="close">Fèmen</string>
-    <string name="device_settings">Konfigirasyon radyo</string>
+    <string name="radio_configuration">Konfigirasyon radyo</string>
     <string name="module_settings">Konfigirasyon modil</string>
     <string name="add">Ajoute</string>
     <string name="edit">Modifye</string>

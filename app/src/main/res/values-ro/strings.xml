@@ -146,7 +146,7 @@
     <string name="map_tile_download_estimate">Estimare descărcare secțiuni:</string>
     <string name="map_start_download">Pornește descărcarea</string>
     <string name="close">Închide</string>
-    <string name="device_settings">Configurare radio</string>
+    <string name="radio_configuration">Configurare radio</string>
     <string name="module_settings">Configurare modul</string>
     <string name="add">Adaugă</string>
     <string name="calculating">Calculare…</string>

@@ -156,7 +156,7 @@
     <string name="map_tile_download_estimate">Procjena preuzimanja:</string>
     <string name="map_start_download">Pokreni Preuzimanje</string>
     <string name="close">Zatvori</string>
-    <string name="device_settings">Konfiguracija uređaja</string>
+    <string name="radio_configuration">Konfiguracija uređaja</string>
     <string name="module_settings">Konfiguracija modula</string>
     <string name="add">Dodaj</string>
     <string name="edit">Uredi</string>

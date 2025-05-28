@@ -192,7 +192,7 @@
     <string name="map_tile_download_estimate">Parashikimi i shkarkimit të pllakatës:</string>
     <string name="map_start_download">Filloni shkarkimin</string>
     <string name="close">Mbylle</string>
-    <string name="device_settings">Konfigurimi i radios</string>
+    <string name="radio_configuration">Konfigurimi i radios</string>
     <string name="module_settings">Konfigurimi i modulit</string>
     <string name="add">Shto</string>
     <string name="edit">Redakto</string>

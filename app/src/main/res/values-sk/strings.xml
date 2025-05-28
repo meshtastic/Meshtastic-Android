@@ -212,7 +212,7 @@
     <string name="map_start_download">Spustiť sťahovanie</string>
     <string name="exchange_position">Vymeniť si pozície</string>
     <string name="close">Zavrieť</string>
-    <string name="device_settings">Konfigurácia vysielača</string>
+    <string name="radio_configuration">Konfigurácia vysielača</string>
     <string name="module_settings">Konfigurácia modulu</string>
     <string name="add">Pridať</string>
     <string name="edit">Upraviť</string>
