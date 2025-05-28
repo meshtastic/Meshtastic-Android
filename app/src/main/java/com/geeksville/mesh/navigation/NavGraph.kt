@@ -274,13 +274,17 @@ fun NavGraph(
             ) { backStackEntry ->
                 SettingsScreen(
                     uIViewModel,
-                ) {
-                    navController.navigate(Route.RadioConfig()) {
-                        popUpTo(Route.Settings) {
-                            inclusive = false
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedContentScope = this@composable,
+                    onNavigateToRadioConfig = {
+                        navController.navigate(Route.RadioConfig()) {
+                            popUpTo(Route.Settings) {
+                                inclusive = false
+                            }
                         }
-                    }
-                }
+                    },
+                    onNavigateToNodeDetails = { navController.navigate(Route.NodeDetail(it)) }
+                )
             }
             composable<Route.DebugPanel> {
                 DebugScreen()

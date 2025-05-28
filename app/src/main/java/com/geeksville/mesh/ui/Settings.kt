@@ -25,6 +25,9 @@ import android.os.Build
 import android.util.Patterns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,6 +36,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -72,7 +76,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.geeksville.mesh.BuildConfig
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
@@ -89,9 +93,11 @@ import com.geeksville.mesh.android.permissionMissing
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
+import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.ui.components.NodeMenuAction
 import kotlinx.coroutines.delay
 
 fun String?.isIPAddress(): Boolean {
@@ -103,13 +109,17 @@ fun String?.isIPAddress(): Boolean {
     }
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 fun SettingsScreen(
     uiViewModel: UIViewModel = hiltViewModel(),
     scanModel: BTScanModel = hiltViewModel(),
     bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
-    onSetRegion: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
+    onNavigateToRadioConfig: () -> Unit,
+    onNavigateToNodeDetails: (Int) -> Unit,
 ) {
     val config by uiViewModel.localConfig.collectAsState()
     val currentRegion = config.lora.region
@@ -211,13 +221,10 @@ fun SettingsScreen(
 
             MeshService.ConnectionState.DISCONNECTED -> R.string.not_connected
             MeshService.ConnectionState.DEVICE_SLEEP -> R.string.connected_sleeping
-            else -> null
         }.let {
             val firmwareString =
                 info?.firmwareString ?: context.getString(R.string.unknown)
-            if (it != null) {
-                scanModel.setErrorText(context.getString(it, firmwareString))
-            }
+            scanModel.setErrorText(context.getString(it, firmwareString))
         }
         when (connectionState) {
             MeshService.ConnectionState.CONNECTED -> {
@@ -228,6 +235,13 @@ fun SettingsScreen(
             }
             else -> {}
         }
+    }
+    var showSharedContact by remember { mutableStateOf<Node?>(null) }
+    if (showSharedContact != null) {
+        SharedContactDialog(
+            contact = showSharedContact,
+            onDismiss = { showSharedContact = null }
+        )
     }
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
@@ -246,18 +260,60 @@ fun SettingsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            // Set Region Button
-            val isConnected = connectionState == MeshService.ConnectionState.CONNECTED
-            if (isConnected && regionUnset) {
+            val isConnected by uiViewModel.isConnected.collectAsStateWithLifecycle(false)
+            val ourNode by uiViewModel.ourNodeInfo.collectAsState()
+            if (isConnected) {
+                ourNode?.let { node ->
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        NodeChip(
+                            node = node,
+                            isThisNode = true,
+                            isConnected = true,
+                            onAction = { action ->
+                                when (action) {
+                                    is NodeMenuAction.MoreDetails -> {
+                                        onNavigateToNodeDetails(node.num)
+                                    }
+
+                                    is NodeMenuAction.Share -> {
+                                        showSharedContact = node
+                                    }
+
+                                    else -> {}
+                                }
+                            },
+                            sharedTransitionScope = sharedTransitionScope,
+                            animatedContentScope = animatedContentScope
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "${node.user.longName}",
+                            style = MaterialTheme.typography.titleLarge
+                        )
+                    }
+                }
                 Button(
                     modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        onSetRegion()
-                    }
+                    onClick = onNavigateToRadioConfig
+
                 ) {
-                    Text(stringResource(R.string.set_region))
+                    Text(stringResource(R.string.radio_configuration))
                 }
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
+                if (regionUnset && selectedDevice != "m") {
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp),
+                        text = stringResource(R.string.must_set_region),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.titleLarge,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
             }
 
             // Device List and Manual Input
@@ -406,7 +462,7 @@ fun SettingsScreen(
 
             // Analytics Okay Checkbox
 
-            val isGooglePlayAvailable = app.isGooglePlayAvailable() || BuildConfig.DEBUG
+            val isGooglePlayAvailable = app.isGooglePlayAvailable()
             val isAnalyticsAllowed = app.isAnalyticsAllowed && isGooglePlayAvailable
             if (isGooglePlayAvailable) {
                 var loading by remember { mutableStateOf(false) }
@@ -461,7 +517,7 @@ fun SettingsScreen(
                     // If no permissions needed, trigger the scan directly (or via ViewModel)
                     scanModel.startScan()
                 } else {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                    if (
                         context.findActivity()
                             .shouldShowRequestPermissionRationale(bluetoothPermissions.first())
                     ) {
