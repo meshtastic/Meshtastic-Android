@@ -274,8 +274,6 @@ fun NavGraph(
             ) { backStackEntry ->
                 SettingsScreen(
                     uIViewModel,
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    animatedContentScope = this@composable,
                     onNavigateToRadioConfig = {
                         navController.navigate(Route.RadioConfig()) {
                             popUpTo(Route.Settings) {

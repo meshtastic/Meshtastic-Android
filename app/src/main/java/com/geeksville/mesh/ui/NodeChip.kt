@@ -17,9 +17,6 @@
 
 package com.geeksville.mesh.ui
 
-import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -27,8 +24,8 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
+import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -45,7 +42,6 @@ import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.ui.components.NodeMenu
 import com.geeksville.mesh.ui.components.NodeMenuAction
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun NodeChip(
     modifier: Modifier = Modifier,
@@ -53,43 +49,33 @@ fun NodeChip(
     isThisNode: Boolean,
     isConnected: Boolean,
     onAction: (NodeMenuAction) -> Unit,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope,
 ) {
     val isIgnored = node.isIgnored
     val (textColor, nodeColor) = node.colors
     var menuExpanded by remember { mutableStateOf(false) }
     val inputChipInteractionSource = remember { MutableInteractionSource() }
     Box {
-        with(sharedTransitionScope) {
-            ElevatedAssistChip(
-                modifier = modifier
-                    .width(IntrinsicSize.Min)
-                    .defaultMinSize(minHeight = 32.dp, minWidth = 72.dp)
-                    .sharedElement(
-                        rememberSharedContentState("node_chip_${node.num}"),
-                        animatedContentScope
-                    ),
-                colors = AssistChipDefaults.assistChipColors(
-                    containerColor = Color(nodeColor),
-                    labelColor = Color(textColor),
-                ),
-                label = {
-                    Text(
-                        modifier = Modifier.Companion.fillMaxWidth().sharedElement(
-                            rememberSharedContentState("node_shortname_${node.num}"),
-                            animatedContentScope
-                        ),
-                        text = node.user.shortName.ifEmpty { "???" },
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                        textDecoration = TextDecoration.Companion.LineThrough.takeIf { isIgnored },
-                        textAlign = TextAlign.Companion.Center,
-                    )
-                },
-                onClick = {},
-                interactionSource = inputChipInteractionSource,
-            )
-        }
+        AssistChip(
+            modifier = modifier
+                .width(IntrinsicSize.Min)
+                .defaultMinSize(minHeight = 32.dp, minWidth = 72.dp),
+            colors = AssistChipDefaults.assistChipColors(
+                containerColor = Color(nodeColor),
+                labelColor = Color(textColor),
+            ),
+            label = {
+                Text(
+                    modifier = Modifier.Companion
+                        .fillMaxWidth(),
+                    text = node.user.shortName.ifEmpty { "???" },
+                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                    textDecoration = TextDecoration.Companion.LineThrough.takeIf { isIgnored },
+                    textAlign = TextAlign.Companion.Center,
+                )
+            },
+            onClick = {},
+            interactionSource = inputChipInteractionSource,
+        )
         Box(
             modifier = Modifier.Companion
                 .matchParentSize()

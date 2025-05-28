@@ -18,9 +18,7 @@
 package com.geeksville.mesh.ui
 
 import android.content.res.Configuration
-import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -63,9 +61,9 @@ import com.geeksville.mesh.ui.components.SignalInfo
 import com.geeksville.mesh.ui.compose.ElevationInfo
 import com.geeksville.mesh.ui.compose.SatelliteCountInfo
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
+import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.toDistanceString
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun NodeItem(
@@ -79,8 +77,6 @@ fun NodeItem(
     expanded: Boolean = false,
     currentTimeMillis: Long,
     isConnected: Boolean = false,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope,
 ) {
     val isFavorite = remember(thatNode) { thatNode.isFavorite }
     val isIgnored = thatNode.isIgnored
@@ -139,8 +135,6 @@ fun NodeItem(
                     isThisNode = isThisNode,
                     isConnected = isConnected,
                     onAction = onAction,
-                    sharedTransitionScope = sharedTransitionScope,
-                    animatedContentScope = animatedContentScope,
                 )
 
                 NodeKeyStatusIcon(
@@ -285,8 +279,6 @@ fun NodeInfoSimplePreview() {
             0,
             true,
             currentTimeMillis = System.currentTimeMillis(),
-            sharedTransitionScope = sharedTransitionScope,
-            animatedContentScope = animatedContentScope,
         )
     }
 }
@@ -301,7 +293,7 @@ fun NodeInfoPreview(
     @PreviewParameter(NodePreviewParameterProvider::class)
     thatNode: Node
 ) {
-    SharedTransitionPreview { sharedTransitionScope, animatedContentScope ->
+    AppTheme {
         val thisNode = NodePreviewParameterProvider().values.first()
         Column {
             Text(
@@ -316,8 +308,6 @@ fun NodeInfoPreview(
                 tempInFahrenheit = true,
                 expanded = false,
                 currentTimeMillis = System.currentTimeMillis(),
-                sharedTransitionScope = sharedTransitionScope,
-                animatedContentScope = animatedContentScope,
             )
             Text(
                 text = "Details Shown",
@@ -331,8 +321,6 @@ fun NodeInfoPreview(
                 tempInFahrenheit = true,
                 expanded = true,
                 currentTimeMillis = System.currentTimeMillis(),
-                sharedTransitionScope = sharedTransitionScope,
-                animatedContentScope = animatedContentScope,
             )
         }
     }

@@ -99,6 +99,7 @@ enum class TopLevelDestination(val label: String, val icon: ImageVector, val rou
 @Suppress("LongMethod")
 @Composable
 fun MainScreen(
+    modifier: Modifier = Modifier,
     viewModel: UIViewModel = hiltViewModel(),
     onAction: (MainMenuAction) -> Unit
 ) {
@@ -146,6 +147,7 @@ fun MainScreen(
     }
 
     Scaffold(
+        modifier = modifier,
         topBar = {
             MainAppBar(
                 title = title,

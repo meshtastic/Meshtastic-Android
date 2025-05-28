@@ -17,10 +17,7 @@
 
 package com.geeksville.mesh.ui.message.components
 
-import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -58,11 +55,11 @@ import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.ui.NodeChip
 import com.geeksville.mesh.ui.components.AutoLinkText
 import com.geeksville.mesh.ui.components.NodeMenuAction
-import com.geeksville.mesh.ui.components.SharedTransitionPreview
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
+import com.geeksville.mesh.ui.theme.AppTheme
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
-@OptIn(ExperimentalFoundationApi::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 internal fun MessageItem(
     node: Node,
@@ -76,8 +73,6 @@ internal fun MessageItem(
     onAction: (NodeMenuAction) -> Unit = {},
     onStatusClick: () -> Unit = {},
     onSendReaction: (String) -> Unit = {},
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope,
     isConnected: Boolean,
 ) = Row(
     modifier = modifier
@@ -105,8 +100,6 @@ internal fun MessageItem(
             onAction = onAction,
             isConnected = isConnected,
             isThisNode = false,
-            sharedTransitionScope = sharedTransitionScope,
-            animatedContentScope = animatedContentScope,
         )
     }
     Card(
@@ -177,19 +170,16 @@ internal fun MessageItem(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @PreviewLightDark
 @Composable
 private fun MessageItemPreview() {
-    SharedTransitionPreview { sharedTransitionScope, animatedContentScope ->
+    AppTheme {
         MessageItem(
             node = NodePreviewParameterProvider().values.first(),
             messageText = stringResource(R.string.sample_message),
             messageTime = "10:00",
             messageStatus = MessageStatus.DELIVERED,
             selected = false,
-            sharedTransitionScope = sharedTransitionScope,
-            animatedContentScope = animatedContentScope,
             isConnected = true,
         )
     }
