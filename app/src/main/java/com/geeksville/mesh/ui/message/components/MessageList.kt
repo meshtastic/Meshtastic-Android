@@ -18,9 +18,7 @@
 package com.geeksville.mesh.ui.message.components
 
 import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -120,8 +118,6 @@ internal fun MessageList(
     onNodeMenuAction: (NodeMenuAction) -> Unit,
     viewModel: UIViewModel,
     contactKey: String,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope,
 ) {
     val haptics = LocalHapticFeedback.current
     val inSelectionMode by remember { derivedStateOf { selectedIds.value.isNotEmpty() } }
@@ -194,8 +190,6 @@ internal fun MessageList(
                     onAction = onNodeMenuAction,
                     onStatusClick = { showStatusDialog = msg },
                     onSendReaction = { onSendReaction(it, msg.packetId) },
-                    sharedTransitionScope = sharedTransitionScope,
-                    animatedContentScope = animatedContentScope,
                     isConnected = isConnected
                 )
             }
