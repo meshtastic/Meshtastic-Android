@@ -35,8 +35,6 @@
 package com.geeksville.mesh.navigation
 
 import androidx.annotation.StringRes
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -204,6 +202,9 @@ sealed interface Route {
 
     @Serializable
     data object TracerouteLog : Route
+
+    @Serializable
+    data object HostMetricsLog : Route
 }
 
 fun NavDestination.isConfigRoute(): Boolean {
@@ -225,7 +226,6 @@ fun NavDestination.showLongNameTitle(): Boolean {
             )
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Suppress("LongMethod")
 @Composable
 fun NavGraph(
@@ -233,98 +233,95 @@ fun NavGraph(
     uIViewModel: UIViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController(),
 ) {
-    SharedTransitionLayout {
-        NavHost(
-            navController = navController,
-            startDestination = if (uIViewModel.bondedAddress.isNullOrBlank()) {
-                Route.Settings
-            } else {
-                Route.Contacts
-            },
-            modifier = modifier,
-        ) {
-            composable<Route.Contacts> {
-                ContactsScreen(
-                    uIViewModel,
-                    onNavigate = { navController.navigate(Route.Messages(it)) }
-                )
-            }
-            composable<Route.Nodes> {
-                NodeScreen(
-                    model = uIViewModel,
-                    navigateToMessages = { navController.navigate(Route.Messages(it)) },
-                    navigateToNodeDetails = { navController.navigate(Route.NodeDetail(it)) },
-                )
-            }
-            composable<Route.Map> {
-                MapView(uIViewModel)
-            }
-            composable<Route.Channels> {
-                ChannelScreen(uIViewModel)
-            }
-            composable<Route.Settings>(
-                deepLinks = listOf(
-                    navDeepLink {
-                        uriPattern = "$DEEP_LINK_BASE_URI/settings"
-                        action = "android.intent.action.VIEW"
-                    }
-                )
-            ) { backStackEntry ->
-                SettingsScreen(
-                    uIViewModel,
-                    onNavigateToRadioConfig = {
-                        navController.navigate(Route.RadioConfig()) {
-                            popUpTo(Route.Settings) {
-                                inclusive = false
-                            }
-                        }
-                    },
-                    onNavigateToNodeDetails = { navController.navigate(Route.NodeDetail(it)) }
-                )
-            }
-            composable<Route.DebugPanel> {
-                DebugScreen()
-            }
-            composable<Route.Messages>(
-                deepLinks = listOf(
-                    navDeepLink {
-                        uriPattern = "$DEEP_LINK_BASE_URI/messages/{contactKey}?message={message}"
-                        action = "android.intent.action.VIEW"
-                    },
-                )
-            ) { backStackEntry ->
-                val args = backStackEntry.toRoute<Route.Messages>()
-                MessageScreen(
-                    contactKey = args.contactKey,
-                    message = args.message,
-                    viewModel = uIViewModel,
-                    navigateToMessages = { navController.navigate(Route.Messages(it)) },
-                    navigateToNodeDetails = { navController.navigate(Route.NodeDetail(it)) },
-                    onNavigateBack = navController::navigateUp,
-                )
-            }
-            composable<Route.QuickChat> {
-                QuickChatScreen()
-            }
-            nodeDetailGraph(
-                navController,
+    NavHost(
+        navController = navController,
+        startDestination = if (uIViewModel.bondedAddress.isNullOrBlank()) {
+            Route.Settings
+        } else {
+            Route.Contacts
+        },
+        modifier = modifier,
+    ) {
+        composable<Route.Contacts> {
+            ContactsScreen(
                 uIViewModel,
-                sharedTransitionScope = this@SharedTransitionLayout
+                onNavigate = { navController.navigate(Route.Messages(it)) }
             )
-            radioConfigGraph(navController, uIViewModel)
-            composable<Route.Share>(
-                deepLinks = listOf(
-                    navDeepLink {
-                        uriPattern = "$DEEP_LINK_BASE_URI/share?message={message}"
-                        action = "android.intent.action.VIEW"
+        }
+        composable<Route.Nodes> {
+            NodeScreen(
+                model = uIViewModel,
+                navigateToMessages = { navController.navigate(Route.Messages(it)) },
+                navigateToNodeDetails = { navController.navigate(Route.NodeDetail(it)) },
+            )
+        }
+        composable<Route.Map> {
+            MapView(uIViewModel)
+        }
+        composable<Route.Channels> {
+            ChannelScreen(uIViewModel)
+        }
+        composable<Route.Settings>(
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "$DEEP_LINK_BASE_URI/settings"
+                    action = "android.intent.action.VIEW"
+                }
+            )
+        ) { backStackEntry ->
+            SettingsScreen(
+                uIViewModel,
+                onNavigateToRadioConfig = {
+                    navController.navigate(Route.RadioConfig()) {
+                        popUpTo(Route.Settings) {
+                            inclusive = false
+                        }
                     }
-                )
-            ) { backStackEntry ->
-                val message = backStackEntry.toRoute<Route.Share>().message
-                ShareScreen(uIViewModel) {
-                    navController.navigate(Route.Messages(it, message)) {
-                        popUpTo<Route.Share> { inclusive = true }
-                    }
+                },
+                onNavigateToNodeDetails = { navController.navigate(Route.NodeDetail(it)) }
+            )
+        }
+        composable<Route.DebugPanel> {
+            DebugScreen()
+        }
+        composable<Route.Messages>(
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "$DEEP_LINK_BASE_URI/messages/{contactKey}?message={message}"
+                    action = "android.intent.action.VIEW"
+                },
+            )
+        ) { backStackEntry ->
+            val args = backStackEntry.toRoute<Route.Messages>()
+            MessageScreen(
+                contactKey = args.contactKey,
+                message = args.message,
+                viewModel = uIViewModel,
+                navigateToMessages = { navController.navigate(Route.Messages(it)) },
+                navigateToNodeDetails = { navController.navigate(Route.NodeDetail(it)) },
+                onNavigateBack = navController::navigateUp,
+            )
+        }
+        composable<Route.QuickChat> {
+            QuickChatScreen()
+        }
+        nodeDetailGraph(
+            navController,
+            uIViewModel,
+        )
+        radioConfigGraph(navController, uIViewModel)
+        composable<Route.Share>(
+            deepLinks = listOf(
+                navDeepLink {
+                    uriPattern = "$DEEP_LINK_BASE_URI/share?message={message}"
+                    action = "android.intent.action.VIEW"
+                }
+            )
+        ) { backStackEntry ->
+            val message = backStackEntry.toRoute<Route.Share>().message
+            ShareScreen(uIViewModel) {
+                navController.navigate(Route.Messages(it, message)) {
+                    popUpTo<Route.Share> { inclusive = true }
                 }
             }
         }

@@ -18,7 +18,6 @@
 package com.geeksville.mesh.ui
 
 import android.content.res.Configuration
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -56,7 +55,6 @@ import com.geeksville.mesh.model.isUnmessageableRole
 import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.components.NodeStatusIcons
-import com.geeksville.mesh.ui.components.SharedTransitionPreview
 import com.geeksville.mesh.ui.components.SignalInfo
 import com.geeksville.mesh.ui.compose.ElevationInfo
 import com.geeksville.mesh.ui.compose.SatelliteCountInfo
@@ -267,11 +265,10 @@ fun NodeItem(
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Preview(showBackground = false)
 fun NodeInfoSimplePreview() {
-    SharedTransitionPreview { sharedTransitionScope, animatedContentScope ->
+    AppTheme {
         val thisNode = NodePreviewParameterProvider().values.first()
         val thatNode = NodePreviewParameterProvider().values.last()
         NodeItem(
@@ -285,7 +282,6 @@ fun NodeInfoSimplePreview() {
     }
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 @Preview(
     showBackground = true,

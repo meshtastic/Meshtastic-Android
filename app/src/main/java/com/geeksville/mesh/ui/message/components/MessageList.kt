@@ -18,7 +18,6 @@
 package com.geeksville.mesh.ui.message.components
 
 import androidx.annotation.StringRes
-import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -106,7 +105,6 @@ fun DeliveryInfo(
     containerColor = MaterialTheme.colorScheme.surface
 )
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Suppress("LongMethod")
 @Composable
 internal fun MessageList(
