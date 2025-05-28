@@ -197,7 +197,7 @@ Suderinamus įrenginius galite pamatyti apsilankę adresu www.meshtastic.org/doc
     <string name="map_tile_download_estimate">Plytelių atsisiuntimo apskaičiavimas:</string>
     <string name="map_start_download">Pradėti atsiuntimą</string>
     <string name="close">Uždaryti</string>
-    <string name="device_settings">Įrenginio konfigūracija</string>
+    <string name="radio_configuration">Radijo modulio konfigūracija</string>
     <string name="module_settings">Modulių konfigūracija</string>
     <string name="add">Pridėti</string>
     <string name="edit">Redaguoti</string>

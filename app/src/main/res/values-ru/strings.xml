@@ -212,7 +212,7 @@
     <string name="map_start_download">Начать скачивание</string>
     <string name="exchange_position">Обменяться местоположением</string>
     <string name="close">Закрыть</string>
-    <string name="device_settings">Настройки устройства</string>
+    <string name="radio_configuration">Настройки устройства</string>
     <string name="module_settings">Настройки модуля</string>
     <string name="add">Добавить</string>
     <string name="edit">Редактировать</string>

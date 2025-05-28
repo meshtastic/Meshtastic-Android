@@ -195,7 +195,7 @@
     <string name="map_tile_download_estimate">Meastachán íoslódála tile:</string>
     <string name="map_start_download">Tosaigh íoslódáil</string>
     <string name="close">Dún</string>
-    <string name="device_settings">Cumraíocht raidió</string>
+    <string name="radio_configuration">Cumraíocht raidió</string>
     <string name="module_settings">Cumraíocht an mhódule</string>
     <string name="add">Cuir leis</string>
     <string name="edit">Cuir in eagar</string>

@@ -143,7 +143,7 @@
     <string name="map_tile_download_estimate">Áætlaður niðurhalstími reits:</string>
     <string name="map_start_download">Hefja niðurhal</string>
     <string name="close">Loka</string>
-    <string name="device_settings">Stillingar radíós</string>
+    <string name="radio_configuration">Stillingar radíós</string>
     <string name="module_settings">Stillingar aukaeininga</string>
     <string name="add">Bæta við</string>
     <string name="calculating">Reiknar…</string>

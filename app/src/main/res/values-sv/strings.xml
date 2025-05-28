@@ -201,7 +201,7 @@
     <string name="map_tile_download_estimate">Kartdelar estimat:</string>
     <string name="map_start_download">Starta Hämtning</string>
     <string name="close">Stäng</string>
-    <string name="device_settings">Konfiguration av radioenhet</string>
+    <string name="radio_configuration">Konfiguration av radioenhet</string>
     <string name="module_settings">Modul konfiguration</string>
     <string name="add">Lägg till</string>
     <string name="edit">Ändra</string>

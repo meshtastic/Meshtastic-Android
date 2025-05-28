@@ -210,7 +210,7 @@
     <string name="map_start_download">ダウンロード開始</string>
     <string name="exchange_position">位置交換</string>
     <string name="close">終了</string>
-    <string name="device_settings">デバイスの設定</string>
+    <string name="radio_configuration">デバイスの設定</string>
     <string name="module_settings">追加機能の設定</string>
     <string name="add">追加</string>
     <string name="edit">編集</string>

@@ -211,7 +211,7 @@
     <string name="map_start_download">Iniciar download</string>
     <string name="exchange_position">Intercâmbio de posições</string>
     <string name="close">Fechar</string>
-    <string name="device_settings">Configurações do dispositivo</string>
+    <string name="radio_configuration">Configurações do dispositivo</string>
     <string name="module_settings">Configurações dos módulos</string>
     <string name="add">Adicionar</string>
     <string name="edit">Editar</string>

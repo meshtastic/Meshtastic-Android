@@ -201,7 +201,7 @@
     <string name="map_tile_download_estimate">Tile nedlastingsestimat:</string>
     <string name="map_start_download">Start nedlasting</string>
     <string name="close">Lukk</string>
-    <string name="device_settings">Radiokonfigurasjon</string>
+    <string name="radio_configuration">Radiokonfigurasjon</string>
     <string name="module_settings">Modul konfigurasjon</string>
     <string name="add">Legg til</string>
     <string name="edit">Rediger</string>

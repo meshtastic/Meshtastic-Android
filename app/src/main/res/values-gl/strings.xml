@@ -155,7 +155,7 @@
     <string name="map_tile_download_estimate">Descarga de \'tile\' estimada:</string>
     <string name="map_start_download">Comezar a descarga</string>
     <string name="close">Pechar</string>
-    <string name="device_settings">Configuración de radio</string>
+    <string name="radio_configuration">Configuración de radio</string>
     <string name="module_settings">Configuración de módulo</string>
     <string name="add">Engadir</string>
     <string name="edit">Editar</string>

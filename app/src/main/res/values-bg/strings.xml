@@ -155,7 +155,7 @@
     <string name="map_tile_download_estimate">Прогноза за изтегляне на картинки:</string>
     <string name="map_start_download">Започни свалянето</string>
     <string name="close">Затвори</string>
-    <string name="device_settings">Конфигурация на радиото</string>
+    <string name="radio_configuration">Конфигурация на радиото</string>
     <string name="module_settings">Конфигурация на модула</string>
     <string name="add">Добавяне</string>
     <string name="edit">Редактирай</string>

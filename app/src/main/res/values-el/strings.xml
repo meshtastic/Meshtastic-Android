@@ -140,7 +140,7 @@
     <string name="map_select_download_region">Επιλογή περιοχής λήψης</string>
     <string name="map_start_download">Εκκίνηση Λήψης</string>
     <string name="close">Κλείσιμο</string>
-    <string name="device_settings">Ρυθμίσεις συσκευής</string>
+    <string name="radio_configuration">Ρυθμίσεις συσκευής</string>
     <string name="module_settings">Ρυθμίσεις πρόσθετου</string>
     <string name="add">Προσθήκη</string>
     <string name="edit">Επεξεργασία</string>

@@ -211,7 +211,7 @@
     <string name="map_start_download">Rozpocznij pobieranie</string>
     <string name="exchange_position">Poproś o pozycję</string>
     <string name="close">Zamknij</string>
-    <string name="device_settings">Ustawienia urządzenia</string>
+    <string name="radio_configuration">Ustawienia urządzenia</string>
     <string name="module_settings">Ustawienia modułu</string>
     <string name="add">Dodaj</string>
     <string name="edit">Edytuj</string>

@@ -209,7 +209,7 @@
     <string name="map_start_download">다운로드 시작</string>
     <string name="exchange_position">위치 교환</string>
     <string name="close">닫기</string>
-    <string name="device_settings">장치 설정</string>
+    <string name="radio_configuration">장치 설정</string>
     <string name="module_settings">모듈 설정</string>
     <string name="add">추가</string>
     <string name="edit">편집</string>

@@ -1,5 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="main_tab_messages">הודעות</string>
+    <string name="main_tab_users">משתמשים</string>
+    <string name="main_tab_map">מפה</string>
+    <string name="main_tab_channel">ערוץ</string>
+    <string name="main_tab_settings">הגדרות</string>
+    <string name="node_filter_placeholder">פילטר</string>
+    <string name="node_filter_include_unknown">כלול לא ידועים</string>
+    <string name="node_filter_show_details">הצג פרטים</string>
+    <string name="node_sort_alpha">א-ת</string>
+    <string name="node_sort_channel">ערוץ</string>
+    <string name="node_sort_distance">מרחק</string>
+    <string name="node_sort_hops_away">דלג קדימה</string>
     <string name="channel_name">שם הערוץ</string>
     <string name="channel_options">הגדרות ערוץ</string>
     <string name="qr_code">קוד QR</string>
@@ -36,6 +48,7 @@
     <string name="device_sleeping">מכשיר במצב שינה</string>
     <string name="update_firmware">עדכן קושחה</string>
     <string name="ip_address">‏כתובת IP:</string>
+    <string name="ip_port">פורט:</string>
     <string name="connected">מחובר למכשיר</string>
     <string name="connected_to">מחובר למכשיר (%s)</string>
     <string name="not_connected">לא מחובר</string>
@@ -65,6 +78,7 @@
     <string name="message_reception_state">מצב קבלת הודעה</string>
     <string name="message_delivery_status">מצב שליחת הודעה</string>
     <string name="meshtastic_messages_notifications">התראות על הודעות</string>
+    <string name="meshtastic_alerts_notifications">התראות</string>
     <string name="protocol_stress_test">בדיקת קיבולת רשת (stress test)</string>
     <string name="firmware_too_old">נדרש עדכון קושחה</string>
     <string name="firmware_old">קושחת המכשיר ישנה מידי בכדי לתקשר עם האפליקציה. למידע נוסף בקר ב<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">מדריך התקנת קושחה</a>.</string>
@@ -116,6 +130,7 @@
     <string name="preferences_system_default">ברירות מחדל</string>
     <string name="resend">שליחה מחדש</string>
     <string name="shutdown">כיבוי</string>
+    <string name="cant_shutdown">כיבוי אינו נתמך במכשיר זה</string>
     <string name="reboot">אתחול מחדש</string>
     <string name="traceroute">בדיקת מסלול</string>
     <string name="intro_show">הראה מקדמה</string>
@@ -138,6 +153,7 @@
     <string name="direct_message">הודעה ישירה</string>
     <string name="nodedb_reset">איפוס NodeDB</string>
     <string name="nodedb_reset_description">זה ימחק את כל המכשירים מרשימה זו.</string>
+    <string name="error">שגיאה</string>
     <string name="ignore">התעלם</string>
     <string name="ignore_add">הוסף \'%s\' לרשימת ההתעלמות? המכשיר יתחיל מחדש.</string>
     <string name="ignore_remove">הורד \'%s\' מרשימת ההתעלמות? המכשיר יתחיל מחדש.</string>
@@ -145,7 +161,7 @@
     <string name="map_tile_download_estimate">הערכת זמן להורדה:</string>
     <string name="map_start_download">התחל הורדה</string>
     <string name="close">סגור</string>
-    <string name="device_settings">הגדרות רדיו</string>
+    <string name="radio_configuration">הגדרות רדיו</string>
     <string name="module_settings">הגדרות מודולות</string>
     <string name="add">הוסף</string>
     <string name="calculating">מחשב…</string>

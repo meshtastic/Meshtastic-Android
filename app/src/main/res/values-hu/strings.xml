@@ -176,7 +176,7 @@
     <string name="map_tile_download_estimate">Csempe letöltés számítása:</string>
     <string name="map_start_download">Letöltés indítása</string>
     <string name="close">Bezárás</string>
-    <string name="device_settings">Eszköz beállítások</string>
+    <string name="radio_configuration">Eszköz beállítások</string>
     <string name="module_settings">Modul beállítások</string>
     <string name="add">Új hozzáadása</string>
     <string name="edit">Szerkesztés</string>

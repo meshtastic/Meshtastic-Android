@@ -160,7 +160,7 @@
     <string name="map_tile_download_estimate">Час завантаження фрагментів:</string>
     <string name="map_start_download">Почати завантаження</string>
     <string name="close">Закрити</string>
-    <string name="device_settings">Налаштування пристрою</string>
+    <string name="radio_configuration">Налаштування пристрою</string>
     <string name="module_settings">Налаштування модуля</string>
     <string name="add">Додати</string>
     <string name="edit">Редагувати</string>

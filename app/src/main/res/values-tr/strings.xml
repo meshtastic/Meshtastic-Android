@@ -211,7 +211,7 @@
     <string name="map_start_download">İndirmeye başla</string>
     <string name="exchange_position">Konum takas et</string>
     <string name="close">Kapat</string>
-    <string name="device_settings">Cihaz ayarları</string>
+    <string name="radio_configuration">Cihaz ayarları</string>
     <string name="module_settings">Modül ayarları</string>
     <string name="add">Ekle</string>
     <string name="edit">Düzenle</string>
