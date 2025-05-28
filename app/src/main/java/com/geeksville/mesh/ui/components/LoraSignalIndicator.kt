@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+@file:Suppress("MagicNumber")
 package com.geeksville.mesh.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
@@ -58,7 +59,7 @@ private enum class Quality(
     NONE(R.string.none_quality, Icons.Default.SignalCellularAlt1Bar, Color.Red),
     BAD(R.string.bad, Icons.Default.SignalCellularAlt2Bar, Color(red = 247, green = 147, blue = 26)),
     FAIR(R.string.fair, Icons.Default.SignalCellularAlt, Color(red = 255, green = 230, blue = 0)),
-    GOOD(R.string.good, Icons.Default.SignalCellular4Bar, Color.Green)
+    GOOD(R.string.good, Icons.Default.SignalCellular4Bar, Color(0xFF30C047))
 }
 
 /**
