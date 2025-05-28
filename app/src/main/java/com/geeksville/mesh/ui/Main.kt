@@ -25,6 +25,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.Chat
@@ -147,7 +148,7 @@ fun MainScreen(
     }
 
     Scaffold(
-        modifier = modifier,
+        modifier = modifier.safeDrawingPadding(),
         topBar = {
             MainAppBar(
                 title = title,

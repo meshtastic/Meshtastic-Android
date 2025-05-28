@@ -37,14 +37,20 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
 import com.geeksville.mesh.android.BindFailedException
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
@@ -131,6 +137,7 @@ class MainActivity : AppCompatActivity(), Logging {
             (application as GeeksvilleApplication).askToRate(this)
         }
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             val theme by model.theme.collectAsState()
             val dynamic = theme == MODE_DYNAMIC
@@ -151,10 +158,16 @@ class MainActivity : AppCompatActivity(), Logging {
                         AppCompatDelegate.setDefaultNightMode(theme)
                     }
                 }
-                MainScreen(
-                    viewModel = model,
-                    onAction = ::onMainMenuAction
-                )
+                Box(
+                    modifier = Modifier
+                        .background(MaterialTheme.colorScheme.background)
+                        .systemBarsPadding()
+                ) {
+                    MainScreen(
+                        viewModel = model,
+                        onAction = ::onMainMenuAction
+                    )
+                }
             }
         }
         // Handle any intent
