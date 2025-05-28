@@ -152,6 +152,7 @@ fun MainScreen(
                 isManaged = localConfig.security.isManaged,
                 connectionState = connectionState,
                 navController = navController,
+                viewModel = viewModel
             ) { action ->
                 when (action) {
                     MainMenuAction.DEBUG -> navController.navigate(Route.DebugPanel)
@@ -196,19 +197,25 @@ private fun MainAppBar(
     connectionState: MeshService.ConnectionState,
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    onAction: (MainMenuAction) -> Unit
+    viewModel: UIViewModel,
+    onAction: (MainMenuAction) -> Unit,
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
     val canNavigateBack = navController.previousBackStackEntry != null
     val isTopLevelRoute = currentDestination?.isTopLevel() == true
     val navigateUp: () -> Unit = navController::navigateUp
+    val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
     if (currentDestination?.hasRoute<Route.Messages>() == true) {
         return
     }
     TopAppBar(
         title = {
             when {
+                currentDestination?.hasRoute<Route.Nodes>() ?: false ->
+                    Text(
+                        stringResource(id = R.string.app_name) + " " + "(${nodes.size})",
+                    )
                 currentDestination == null || isTopLevelRoute -> {
                     Text(
                         text = stringResource(id = R.string.app_name),
