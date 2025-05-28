@@ -637,4 +637,5 @@
     <string name="free_memory">Free Memory</string>
     <string name="disk_free">Disk Free</string>
     <string name="load">Load</string>
+    <string name="user_string">User String</string>
 </resources>

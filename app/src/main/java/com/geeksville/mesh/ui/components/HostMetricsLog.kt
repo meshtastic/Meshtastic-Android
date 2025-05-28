@@ -134,16 +134,20 @@ fun HostMetricsItem(
                         value = formatBytes(hostMetrics.diskfree1Bytes),
                         modifier = Modifier.fillMaxWidth(),
                     )
-                    LogLine(
-                        label = stringResource(R.string.disk_free) + " 2",
-                        value = formatBytes(hostMetrics.diskfree2Bytes),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-                    LogLine(
-                        label = stringResource(R.string.disk_free) + " 3",
-                        value = formatBytes(hostMetrics.diskfree3Bytes),
-                        modifier = Modifier.fillMaxWidth(),
-                    )
+                    if (hostMetrics.hasDiskfree2Bytes()) {
+                        LogLine(
+                            label = stringResource(R.string.disk_free) + " 2",
+                            value = formatBytes(hostMetrics.diskfree2Bytes),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
+                    if (hostMetrics.hasDiskfree3Bytes()) {
+                        LogLine(
+                            label = stringResource(R.string.disk_free) + " 3",
+                            value = formatBytes(hostMetrics.diskfree3Bytes),
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
                     LogLine(
                         label = stringResource(R.string.load) + " 1",
                         value = (hostMetrics.load1 / 100.0).toString(),
@@ -186,6 +190,13 @@ fun HostMetricsItem(
                         trackColor = ProgressIndicatorDefaults.linearTrackColor,
                         strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
                     )
+                    if (hostMetrics.hasUserString()) {
+                        LogLine(
+                            label = stringResource(R.string.user_string),
+                            value = hostMetrics.userString,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                    }
                 }
             }
         }
@@ -241,11 +252,12 @@ private fun HostMetricsItemPreview() {
         .setUptimeSeconds(3600)
         .setFreememBytes(2048000)
         .setDiskfree1Bytes(104857600)
-        .setDiskfree2Bytes(209715200)
+        .setDiskfree2Bytes(2097915200)
         .setDiskfree3Bytes(44444)
         .setLoad1(30)
         .setLoad5(75)
         .setLoad15(19)
+        .setUserString("test")
         .build()
     val logs = TelemetryProtos.Telemetry.newBuilder()
         .setTime((System.currentTimeMillis() / 1000L).toInt())
