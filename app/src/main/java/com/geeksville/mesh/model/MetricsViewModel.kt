@@ -75,6 +75,7 @@ data class MetricsState(
     val deviceMetrics: List<Telemetry> = emptyList(),
     val signalMetrics: List<MeshPacket> = emptyList(),
     val powerMetrics: List<Telemetry> = emptyList(),
+    val hostMetrics: List<Telemetry> = emptyList(),
     val tracerouteRequests: List<MeshLog> = emptyList(),
     val tracerouteResults: List<MeshPacket> = emptyList(),
     val positionLogs: List<Position> = emptyList(),
@@ -88,6 +89,7 @@ data class MetricsState(
     fun hasPowerMetrics() = powerMetrics.isNotEmpty()
     fun hasTracerouteLogs() = tracerouteRequests.isNotEmpty()
     fun hasPositionLogs() = positionLogs.isNotEmpty()
+    fun hasHostMetrics() = hostMetrics.isNotEmpty()
 
     fun deviceMetricsFiltered(timeFrame: TimeFrame): List<Telemetry> {
         val oldestTime = timeFrame.calculateOldestTime()
@@ -267,7 +269,8 @@ class MetricsViewModel @Inject constructor(
                 _state.update { state ->
                     state.copy(
                         deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
-                        powerMetrics = telemetry.filter { it.hasPowerMetrics() }
+                        powerMetrics = telemetry.filter { it.hasPowerMetrics() },
+                        hostMetrics = telemetry.filter { it.hasHostMetrics() },
                     )
                 }
                 _envState.update { state ->

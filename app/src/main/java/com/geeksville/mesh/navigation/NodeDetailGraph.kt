@@ -18,12 +18,11 @@
 package com.geeksville.mesh.navigation
 
 import androidx.annotation.StringRes
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CellTower
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PermScanWifi
 import androidx.compose.material.icons.filled.Power
 import androidx.compose.material.icons.filled.Router
@@ -39,17 +38,16 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.NodeDetailScreen
 import com.geeksville.mesh.ui.components.DeviceMetricsScreen
 import com.geeksville.mesh.ui.components.EnvironmentMetricsScreen
+import com.geeksville.mesh.ui.components.HostMetricsLogScreen
 import com.geeksville.mesh.ui.components.NodeMapScreen
 import com.geeksville.mesh.ui.components.PositionLogScreen
 import com.geeksville.mesh.ui.components.PowerMetricsScreen
 import com.geeksville.mesh.ui.components.SignalMetricsScreen
 import com.geeksville.mesh.ui.components.TracerouteLogScreen
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 fun NavGraphBuilder.nodeDetailGraph(
     navController: NavHostController,
     uiViewModel: UIViewModel,
-    sharedTransitionScope: SharedTransitionScope,
 ) {
     navigation<Graph.NodeDetailGraph>(
         startDestination = Route.NodeDetail(),
@@ -61,8 +59,6 @@ fun NavGraphBuilder.nodeDetailGraph(
             NodeDetailScreen(
                 uiViewModel = uiViewModel,
                 viewModel = hiltViewModel(parentEntry),
-                sharedTransitionScope = sharedTransitionScope,
-                animatedContentScope = this@composable,
             ) {
                 navController.navigate(it) {
                     popUpTo(Route.NodeDetail()) {
@@ -89,6 +85,7 @@ fun NavGraphBuilder.nodeDetailGraph(
                     NodeDetailRoute.SIGNAL -> SignalMetricsScreen(hiltViewModel(parentEntry))
                     NodeDetailRoute.TRACEROUTE -> TracerouteLogScreen(hiltViewModel(parentEntry))
                     NodeDetailRoute.POWER -> PowerMetricsScreen(hiltViewModel(parentEntry))
+                    NodeDetailRoute.HOST -> HostMetricsLogScreen(hiltViewModel(parentEntry))
                 }
             }
         }
@@ -107,4 +104,5 @@ enum class NodeDetailRoute(
     SIGNAL(R.string.signal, Route.SignalMetrics, Icons.Default.CellTower),
     TRACEROUTE(R.string.traceroute, Route.TracerouteLog, Icons.Default.PermScanWifi),
     POWER(R.string.power, Route.PowerMetrics, Icons.Default.Power),
+    HOST(R.string.host, Route.HostMetricsLog, Icons.Default.Memory),
 }

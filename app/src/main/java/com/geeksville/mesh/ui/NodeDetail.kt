@@ -15,13 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-@file:OptIn(ExperimentalSharedTransitionApi::class)
-
 package com.geeksville.mesh.ui
 
-import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.background
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
@@ -125,9 +120,9 @@ import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.components.NodeActionDialogs
 import com.geeksville.mesh.ui.components.NodeMenuAction
 import com.geeksville.mesh.ui.components.PreferenceCategory
-import com.geeksville.mesh.ui.components.SharedTransitionPreview
 import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.radioconfig.NavCard
+import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.UnitConversions.calculateDewPoint
 import com.geeksville.mesh.util.UnitConversions.toTempString
 import com.geeksville.mesh.util.formatAgo
@@ -146,17 +141,15 @@ private enum class LogsType(
     ENVIRONMENT(R.string.env_metrics_log, Icons.Default.Thermostat, Route.EnvironmentMetrics),
     SIGNAL(R.string.sig_metrics_log, Icons.Default.SignalCellularAlt, Route.SignalMetrics),
     POWER(R.string.power_metrics_log, Icons.Default.Power, Route.PowerMetrics),
-    TRACEROUTE(R.string.traceroute_log, Icons.Default.Route, Route.TracerouteLog)
+    TRACEROUTE(R.string.traceroute_log, Icons.Default.Route, Route.TracerouteLog),
+    HOST(R.string.host_metrics_log, Icons.Default.Memory, Route.HostMetricsLog),
 }
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun NodeDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: MetricsViewModel = hiltViewModel(),
     uiViewModel: UIViewModel = hiltViewModel(),
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope,
     onNavigate: (Route) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -171,7 +164,8 @@ fun NodeDetailScreen(
             environmentState.hasEnvironmentMetrics(),
             state.hasSignalMetrics(),
             state.hasPowerMetrics(),
-            state.hasTracerouteLogs()
+            state.hasTracerouteLogs(),
+            state.hasHostMetrics(),
         )
     }
 
@@ -200,8 +194,6 @@ fun NodeDetailScreen(
             },
             modifier = modifier,
             metricsAvailability = availabilities,
-            sharedTransitionScope = sharedTransitionScope,
-            animatedContentScope = animatedContentScope,
             onShared = {
                 share = true
             }
@@ -224,8 +216,6 @@ private fun NodeDetailList(
     metricsState: MetricsState,
     onAction: (Any) -> Unit = {},
     metricsAvailability: BooleanArray,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope,
     onShared: () -> Unit = {}
 ) {
     LazyColumn(
@@ -235,13 +225,13 @@ private fun NodeDetailList(
         if (metricsState.deviceHardware != null) {
             item {
                 PreferenceCategory(stringResource(R.string.device)) {
-                    DeviceDetailsContent(metricsState, sharedTransitionScope, animatedContentScope)
+                    DeviceDetailsContent(metricsState)
                 }
             }
         }
         item {
             PreferenceCategory(stringResource(R.string.details)) {
-                NodeDetailsContent(node, sharedTransitionScope, animatedContentScope)
+                NodeDetailsContent(node)
             }
         }
         node.metadata?.firmwareVersion?.let { firmwareVersion ->
@@ -447,32 +437,24 @@ private fun DeviceActions(
 
 @Composable
 private fun DeviceDetailsContent(
-    state: MetricsState,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope,
+    state: MetricsState
 ) {
     val node = state.node ?: return
     val deviceHardware = state.deviceHardware ?: return
     val hwModelName = deviceHardware.displayName
     val isSupported = deviceHardware.activelySupported
-    with(sharedTransitionScope) {
-        Box(
-            modifier = Modifier
-                .size(100.dp)
-                .padding(4.dp)
-                .clip(CircleShape)
-                .background(
-                    color = Color(node.colors.second).copy(alpha = .5f),
-                    shape = CircleShape
-                )
-                .sharedElement(
-                    rememberSharedContentState("node_chip_${node.num}"),
-                    animatedContentScope
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            DeviceHardwareImage(deviceHardware, Modifier.fillMaxSize())
-        }
+    Box(
+        modifier = Modifier
+            .size(100.dp)
+            .padding(4.dp)
+            .clip(CircleShape)
+            .background(
+                color = Color(node.colors.second).copy(alpha = .5f),
+                shape = CircleShape
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        DeviceHardwareImage(deviceHardware, Modifier.fillMaxSize())
     }
     NodeDetailRow(
         label = stringResource(R.string.hardware),
@@ -531,8 +513,6 @@ fun DeviceHardwareImage(
 @Composable
 private fun NodeDetailsContent(
     node: Node,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope,
 ) {
     if (node.mismatchKey) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -561,17 +541,11 @@ private fun NodeDetailsContent(
         icon = Icons.TwoTone.Person,
         value = node.user.longName.ifEmpty { "???" }
     )
-    with(sharedTransitionScope) {
-        NodeDetailRow(
-            modifier = Modifier.sharedElement(
-                rememberSharedContentState("node_shortname_${node.num}"),
-                animatedContentScope
-            ),
-            label = stringResource(R.string.short_name),
-            icon = Icons.Outlined.Person,
-            value = node.user.shortName.ifEmpty { "???" }
-        )
-    }
+    NodeDetailRow(
+        label = stringResource(R.string.short_name),
+        icon = Icons.Outlined.Person,
+        value = node.user.shortName.ifEmpty { "???" }
+    )
     NodeDetailRow(
         label = stringResource(R.string.node_number),
         icon = Icons.Default.Numbers,
@@ -919,13 +893,11 @@ private fun NodeDetailsPreview(
     @PreviewParameter(NodePreviewParameterProvider::class)
     node: Node
 ) {
-    SharedTransitionPreview { sharedTransitionScope, animatedContentScope ->
+    AppTheme {
         NodeDetailList(
             node = node,
             metricsState = MetricsState.Empty,
             metricsAvailability = BooleanArray(LogsType.entries.size) { false },
-            sharedTransitionScope = sharedTransitionScope,
-            animatedContentScope = animatedContentScope,
         )
     }
 }

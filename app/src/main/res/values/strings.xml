@@ -631,4 +631,10 @@
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Use 12h clock format</string>
     <string name="display_time_in_12h_format">When enabled, the device will display the time in 12-hour format on screen.</string>
+    <string name="host_metrics_log">Host Metrics Log</string>
+    <string name="host">Host</string>
+    <string name="host_metrics">Host Metrics</string>
+    <string name="free_memory">Free Memory</string>
+    <string name="disk_free">Disk Free</string>
+    <string name="load">Load</string>
 </resources>
