@@ -254,8 +254,6 @@ fun NavGraph(
                     model = uIViewModel,
                     navigateToMessages = { navController.navigate(Route.Messages(it)) },
                     navigateToNodeDetails = { navController.navigate(Route.NodeDetail(it)) },
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    this@composable,
                 )
             }
             composable<Route.Map> {
@@ -303,14 +301,16 @@ fun NavGraph(
                     navigateToMessages = { navController.navigate(Route.Messages(it)) },
                     navigateToNodeDetails = { navController.navigate(Route.NodeDetail(it)) },
                     onNavigateBack = navController::navigateUp,
-                    sharedTransitionScope = this@SharedTransitionLayout,
-                    animatedContentScope = this@composable,
                 )
             }
             composable<Route.QuickChat> {
                 QuickChatScreen()
             }
-            nodeDetailGraph(navController, uIViewModel, sharedTransitionScope = this@SharedTransitionLayout)
+            nodeDetailGraph(
+                navController,
+                uIViewModel,
+                sharedTransitionScope = this@SharedTransitionLayout
+            )
             radioConfigGraph(navController, uIViewModel)
             composable<Route.Share>(
                 deepLinks = listOf(
