@@ -105,11 +105,13 @@ fun NodeItem(
 
     val (detailsShown, showDetails) = remember { mutableStateOf(expanded) }
     val unmessageable = remember(thatNode) {
-        val firmwareVersion = DeviceVersion(thatNode.metadata?.firmwareVersion ?: "")
-        if (firmwareVersion >= DeviceVersion("2.6.8")) {
-            thatNode.user.isUnmessagable
-        } else {
-            thatNode.user.role?.isUnmessageableRole() == true
+        when {
+            thatNode.user.hasIsUnmessagable() -> thatNode.user.isUnmessagable
+            thatNode.user.role.isUnmessageableRole() ->
+                thatNode.metadata?.firmwareVersion?.let {
+                    DeviceVersion(it) < DeviceVersion("2.6.8")
+                } ?: true
+            else -> false
         }
     }
 
