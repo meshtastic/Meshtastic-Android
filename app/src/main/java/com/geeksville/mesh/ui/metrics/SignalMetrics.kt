@@ -59,12 +59,12 @@ import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
+import com.geeksville.mesh.ui.common.components.LoraSignalIndicator
+import com.geeksville.mesh.ui.common.components.OptionLabel
+import com.geeksville.mesh.ui.common.components.SlidingSelector
+import com.geeksville.mesh.ui.common.components.SnrAndRssi
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
-import com.geeksville.mesh.ui.components.LoraSignalIndicator
-import com.geeksville.mesh.ui.components.OptionLabel
-import com.geeksville.mesh.ui.components.SlidingSelector
-import com.geeksville.mesh.ui.components.SnrAndRssi
 import com.geeksville.mesh.util.GraphUtil.plotPoint
 
 @Suppress("MagicNumber")

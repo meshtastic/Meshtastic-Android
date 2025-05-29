@@ -77,11 +77,10 @@ import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannel
-import com.geeksville.mesh.ui.SharedContactDialog
-import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
-import com.geeksville.mesh.ui.components.NodeMenuAction
-import com.geeksville.mesh.ui.message.components.MessageList
-import com.geeksville.mesh.ui.theme.AppTheme
+import com.geeksville.mesh.ui.common.theme.AppTheme
+import com.geeksville.mesh.ui.node.components.NodeKeyStatusIcon
+import com.geeksville.mesh.ui.node.components.NodeMenuAction
+import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import kotlinx.coroutines.launch
 
 private const val MESSAGE_CHARACTER_LIMIT = 200

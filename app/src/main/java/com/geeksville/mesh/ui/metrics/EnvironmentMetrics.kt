@@ -62,12 +62,12 @@ import com.geeksville.mesh.model.Environment
 import com.geeksville.mesh.model.EnvironmentGraphingData
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
+import com.geeksville.mesh.ui.common.components.IaqDisplayMode
+import com.geeksville.mesh.ui.common.components.IndoorAirQuality
+import com.geeksville.mesh.ui.common.components.OptionLabel
+import com.geeksville.mesh.ui.common.components.SlidingSelector
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
-import com.geeksville.mesh.ui.components.IaqDisplayMode
-import com.geeksville.mesh.ui.components.IndoorAirQuality
-import com.geeksville.mesh.ui.components.OptionLabel
-import com.geeksville.mesh.ui.components.SlidingSelector
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.drawPathWithGradient
 import com.geeksville.mesh.util.UnitConversions.celsiusToFahrenheit

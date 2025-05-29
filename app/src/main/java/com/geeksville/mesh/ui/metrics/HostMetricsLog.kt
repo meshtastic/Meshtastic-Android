@@ -55,8 +55,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.model.MetricsViewModel
+import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
-import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.formatUptime
 import java.text.DecimalFormat
 

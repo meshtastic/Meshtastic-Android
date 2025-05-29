@@ -61,13 +61,13 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
-import com.geeksville.mesh.ui.BatteryInfo
-import com.geeksville.mesh.ui.components.OptionLabel
-import com.geeksville.mesh.ui.components.SlidingSelector
+import com.geeksville.mesh.ui.common.components.BatteryInfo
+import com.geeksville.mesh.ui.common.components.OptionLabel
+import com.geeksville.mesh.ui.common.components.SlidingSelector
+import com.geeksville.mesh.ui.common.theme.Orange
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MAX_PERCENT_VALUE
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
-import com.geeksville.mesh.ui.theme.Orange
 import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.plotPoint

@@ -65,7 +65,7 @@ import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.MetricsViewModel
-import com.geeksville.mesh.ui.theme.AppTheme
+import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.util.metersIn
 import com.geeksville.mesh.util.toString
 import java.text.DateFormat

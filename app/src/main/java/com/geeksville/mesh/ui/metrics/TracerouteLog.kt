@@ -61,8 +61,8 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.fullRouteDiscovery
 import com.geeksville.mesh.model.getTracerouteResponse
-import com.geeksville.mesh.ui.components.SimpleAlertDialog
-import com.geeksville.mesh.ui.theme.AppTheme
+import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
+import com.geeksville.mesh.ui.common.theme.AppTheme
 import java.text.DateFormat
 
 @OptIn(ExperimentalFoundationApi::class)

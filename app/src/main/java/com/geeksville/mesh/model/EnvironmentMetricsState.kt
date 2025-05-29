@@ -19,8 +19,8 @@ package com.geeksville.mesh.model
 
 import androidx.compose.ui.graphics.Color
 import com.geeksville.mesh.TelemetryProtos.Telemetry
-import com.geeksville.mesh.ui.theme.InfantryBlue
-import com.geeksville.mesh.ui.theme.Orange
+import com.geeksville.mesh.ui.common.theme.InfantryBlue
+import com.geeksville.mesh.ui.common.theme.Orange
 
 enum class Environment(val color: Color) {
     TEMPERATURE(Color.Red) {

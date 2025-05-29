@@ -52,11 +52,11 @@ import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Node
-import com.geeksville.mesh.ui.NodeChip
-import com.geeksville.mesh.ui.components.AutoLinkText
-import com.geeksville.mesh.ui.components.NodeMenuAction
-import com.geeksville.mesh.ui.preview.NodePreviewParameterProvider
-import com.geeksville.mesh.ui.theme.AppTheme
+import com.geeksville.mesh.ui.common.components.AutoLinkText
+import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
+import com.geeksville.mesh.ui.common.theme.AppTheme
+import com.geeksville.mesh.ui.node.components.NodeChip
+import com.geeksville.mesh.ui.node.components.NodeMenuAction
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @OptIn(ExperimentalFoundationApi::class)

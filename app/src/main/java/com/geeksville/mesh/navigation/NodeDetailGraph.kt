@@ -35,15 +35,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.NodeDetailScreen
 import com.geeksville.mesh.ui.metrics.DeviceMetricsScreen
 import com.geeksville.mesh.ui.metrics.EnvironmentMetricsScreen
 import com.geeksville.mesh.ui.metrics.HostMetricsLogScreen
-import com.geeksville.mesh.ui.components.NodeMapScreen
 import com.geeksville.mesh.ui.metrics.PositionLogScreen
 import com.geeksville.mesh.ui.metrics.PowerMetricsScreen
 import com.geeksville.mesh.ui.metrics.SignalMetricsScreen
 import com.geeksville.mesh.ui.metrics.TracerouteLogScreen
+import com.geeksville.mesh.ui.node.NodeDetailScreen
+import com.geeksville.mesh.ui.node.NodeMapScreen
 
 fun NavGraphBuilder.nodeDetailGraph(
     navController: NavHostController,
