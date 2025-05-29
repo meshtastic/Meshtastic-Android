@@ -48,7 +48,6 @@ import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.ChannelScreen
 import com.geeksville.mesh.ui.ContactsScreen
 import com.geeksville.mesh.ui.DebugScreen
 import com.geeksville.mesh.ui.NodeScreen
@@ -71,6 +70,9 @@ const val DEEP_LINK_BASE_URI = "meshtastic://meshtastic"
 
 @Serializable
 sealed interface Graph : Route {
+    @Serializable
+    data class ChannelsGraph(val destNum: Int?)
+
     @Serializable
     data class NodeDetailGraph(val destNum: Int) : Graph
 
@@ -258,9 +260,9 @@ fun NavGraph(
         composable<Route.Map> {
             MapView(uIViewModel)
         }
-        composable<Route.Channels> {
-            ChannelScreen(uIViewModel)
-        }
+
+        channelsGraph(navController, uIViewModel)
+
         composable<Route.Settings>(
             deepLinks = listOf(
                 navDeepLink {

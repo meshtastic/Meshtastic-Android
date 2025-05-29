@@ -68,15 +68,12 @@ import com.geeksville.mesh.navigation.AdminRoute
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.ModuleRoute
 import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.components.PreferenceCategory
 import com.geeksville.mesh.ui.radioconfig.components.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
 import com.geeksville.mesh.ui.theme.AppTheme
 
-private fun getNavRouteFrom(routeName: String): Route? {
-    return ConfigRoute.entries.find { it.name == routeName }?.route
-        ?: ModuleRoute.entries.find { it.name == routeName }?.route
-}
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable

@@ -64,7 +64,6 @@ import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -85,46 +84,67 @@ import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.getCameraPermissions
 import com.geeksville.mesh.android.hasCameraPermission
 import com.geeksville.mesh.channelSet
-import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
-import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannelUrl
 import com.geeksville.mesh.model.qrCode
 import com.geeksville.mesh.model.toChannelSet
+import com.geeksville.mesh.navigation.ConfigRoute
+import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.components.AdaptiveTwoPane
-import com.geeksville.mesh.ui.components.DropDownPreference
 import com.geeksville.mesh.ui.components.PreferenceFooter
-import com.geeksville.mesh.ui.components.dragContainer
-import com.geeksville.mesh.ui.components.dragDropItemsIndexed
-import com.geeksville.mesh.ui.components.rememberDragDropState
-import com.geeksville.mesh.ui.radioconfig.components.ChannelCard
+import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.ui.radioconfig.components.ChannelSelection
-import com.geeksville.mesh.ui.radioconfig.components.EditChannelDialog
+import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
 
+// TODO add the modem preset at the top
+// TODO figure out why those functions are declared inside the composables
+
+// TODO do we still need the these suppressions
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun ChannelScreen(
     viewModel: UIViewModel = hiltViewModel(),
+    radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
+    onNavigate: (Route) -> Unit
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
 
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
+    val radioConfigState by radioConfigViewModel.radioConfigState.collectAsStateWithLifecycle()
+
     val enabled = connectionState == MeshService.ConnectionState.CONNECTED && !viewModel.isManaged
 
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     var channelSet by remember(channels) { mutableStateOf(channels) }
-    var showChannelEditor by rememberSaveable { mutableStateOf(false) }
-    var showSendDialog by remember { mutableStateOf(false) }
     var showResetDialog by remember { mutableStateOf(false) }
     var showScanDialog by remember { mutableStateOf(false) }
-    val isEditing = channelSet != channels || showChannelEditor
+
+    /* Animate waiting for the channel configurations */
+    var isWaiting by remember { mutableStateOf(false) }
+    if (isWaiting) {
+        PacketResponseStateDialog(
+            state = radioConfigState.responseState,
+            onDismiss = {
+                isWaiting = false
+                radioConfigViewModel.clearPacketResponse()
+            },
+            onComplete = {
+                getNavRouteFrom(radioConfigState.route)?.let { route ->
+                    isWaiting = false
+                    radioConfigViewModel.clearPacketResponse()
+                    onNavigate(route)
+                }
+            },
+        )
+    }
 
     /* Holds selections made by the user for QR generation. */
     val channelSelections = rememberSaveable(
@@ -144,19 +164,6 @@ fun ChannelScreen(
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
             viewModel.requestChannelUrl(result.contents.toUri())
-        }
-    }
-
-    fun updateSettingsList(update: MutableList<ChannelProtos.ChannelSettings>.() -> Unit) {
-        try {
-            val list = channelSet.settingsList.toMutableList()
-            list.update()
-            channelSet = channelSet.copy {
-                settings.clear()
-                settings.addAll(list)
-            }
-        } catch (ex: Exception) {
-            errormsg("Error updating ChannelSettings list:", ex)
         }
     }
 
@@ -209,8 +216,6 @@ fun ChannelScreen(
 
             // Tell the user to try again
             viewModel.showSnackbar(R.string.cant_change_no_radio)
-        } finally {
-            showChannelEditor = false
         }
     }
 
@@ -255,146 +260,45 @@ fun ChannelScreen(
         )
     }
 
-    if (showSendDialog) {
-        AlertDialog(
-            onDismissRequest = {
-                showSendDialog = false
-                showChannelEditor = false
-                channelSet = channels
-            },
-            title = { Text(text = stringResource(id = R.string.change_channel)) },
-            text = { Text(text = stringResource(id = R.string.are_you_sure_channel)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    installSettings(channelSet)
-                    showSendDialog = false
-                }) { Text(text = stringResource(id = R.string.accept)) }
-                installSettings(channelSet)
-            }
-        )
-    }
-
-    var showEditChannelDialog: Int? by remember { mutableStateOf(null) }
-
-    if (showEditChannelDialog != null) {
-        val index = showEditChannelDialog ?: return
-        EditChannelDialog(
-            channelSettings = with(channelSet) {
-                if (settingsCount > index) getSettings(index) else channelSettings { }
-            },
-            modemPresetName = modemPresetName,
-            onAddClick = {
-                with(channelSet) {
-                    if (settingsCount > index) {
-                        channelSet = copy { settings[index] = it }
-                    } else {
-                        channelSet = copy { settings.add(it) }
-                    }
-                }
-                showEditChannelDialog = null
-            },
-            onDismissRequest = { showEditChannelDialog = null }
-        )
-    }
-
+    // TODO need to display this to let the user know what they are on
+    //  - Might want to provide nav to where to edit it.
+//    selectedItem = channelSet.loraConfig.modemPreset,
     val listState = rememberLazyListState()
-    val dragDropState = rememberDragDropState(listState) { fromIndex, toIndex ->
-        updateSettingsList { add(toIndex, removeAt(fromIndex)) }
-    }
-
     LazyColumn(
-        modifier = Modifier.dragContainer(
-            dragDropState = dragDropState,
-            haptics = LocalHapticFeedback.current,
-        ),
         state = listState,
         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
     ) {
-        if (!showChannelEditor) {
-            item {
-                ChannelListView(
-                    enabled = enabled,
-                    channelSet = channelSet,
-                    modemPresetName = modemPresetName,
-                    channelSelections = channelSelections,
-                    onClick = { showChannelEditor = true }
-                )
-                EditChannelUrl(
-                    enabled = enabled,
-                    channelUrl = selectedChannelSet.getChannelUrl(),
-                    onConfirm = viewModel::requestChannelUrl
-                )
-            }
-        } else {
-            dragDropItemsIndexed(
-                items = channelSet.settingsList,
-                dragDropState = dragDropState,
-            ) { index, channel, isDragging ->
-                ChannelCard(
-                    index = index,
-                    title = channel.name.ifEmpty { modemPresetName },
-                    enabled = enabled,
-                    onEditClick = { showEditChannelDialog = index },
-                    onDeleteClick = { updateSettingsList { removeAt(index) } }
-                )
-            }
-            item {
-                OutlinedButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        channelSet = channelSet.copy {
-                            settings.add(channelSettings { psk = Channel.default.settings.psk })
-                        }
-                        showEditChannelDialog = channelSet.settingsList.lastIndex
-                    },
-                    enabled = enabled && viewModel.maxChannels > channelSet.settingsCount,
-                ) { Text(text = stringResource(R.string.add)) }
-            }
-        }
-
         item {
-            DropDownPreference(
-                title = stringResource(id = R.string.channel_options),
+            ChannelListView(
                 enabled = enabled,
-                items = ChannelOption.entries
-                    .map { it.modemPreset to stringResource(it.configRes) },
-                selectedItem = channelSet.loraConfig.modemPreset,
-                onItemSelected = {
-                    val lora = channelSet.loraConfig.copy { modemPreset = it }
-                    channelSet = channelSet.copy { loraConfig = lora }
+                channelSet = channelSet,
+                modemPresetName = modemPresetName,
+                channelSelections = channelSelections,
+                onClick = {
+                    isWaiting = true
+                    radioConfigViewModel.setResponseStateLoading(ConfigRoute.CHANNELS)
                 }
             )
+            EditChannelUrl(
+                enabled = enabled,
+                channelUrl = selectedChannelSet.getChannelUrl(),
+                onConfirm = viewModel::requestChannelUrl
+            )
         }
-
         item {
-            if (isEditing) {
-                PreferenceFooter(
-                    enabled = enabled,
-                    onCancelClicked = {
-                        focusManager.clearFocus()
-                        showChannelEditor = false
-                        channelSet = channels
-                    },
-                    onSaveClicked = {
-                        focusManager.clearFocus()
-                        showSendDialog = true
-                    }
-                )
-            } else {
-                PreferenceFooter(
-                    enabled = enabled,
-                    negativeText = R.string.reset,
-                    onNegativeClicked = {
-                        focusManager.clearFocus()
-                        showResetDialog = true
-                    },
-                    positiveText = R.string.scan,
-                    onPositiveClicked = {
-                        focusManager.clearFocus()
-                        if (context.hasCameraPermission()) zxingScan() else showScanDialog = true
-                    }
-                )
-            }
+            PreferenceFooter(
+                enabled = enabled,
+                negativeText = R.string.reset,
+                onNegativeClicked = {
+                    focusManager.clearFocus()
+                    showResetDialog = true
+                },
+                positiveText = R.string.scan,
+                onPositiveClicked = {
+                    focusManager.clearFocus()
+                    if (context.hasCameraPermission()) zxingScan() else showScanDialog = true
+                }
+            )
         }
     }
 }
@@ -542,6 +446,7 @@ private fun ChannelListView(
             OutlinedButton(
                 onClick = onClick,
                 modifier = Modifier.fillMaxWidth(),
+                // TODO having trouble with the pre existing mechanism working
                 enabled = enabled,
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.onSurface,
