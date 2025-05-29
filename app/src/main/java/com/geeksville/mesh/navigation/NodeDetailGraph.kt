@@ -35,15 +35,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.NodeDetailScreen
-import com.geeksville.mesh.ui.components.DeviceMetricsScreen
-import com.geeksville.mesh.ui.components.EnvironmentMetricsScreen
-import com.geeksville.mesh.ui.components.HostMetricsLogScreen
-import com.geeksville.mesh.ui.components.NodeMapScreen
-import com.geeksville.mesh.ui.components.PositionLogScreen
-import com.geeksville.mesh.ui.components.PowerMetricsScreen
-import com.geeksville.mesh.ui.components.SignalMetricsScreen
-import com.geeksville.mesh.ui.components.TracerouteLogScreen
+import com.geeksville.mesh.ui.metrics.DeviceMetricsScreen
+import com.geeksville.mesh.ui.metrics.EnvironmentMetricsScreen
+import com.geeksville.mesh.ui.metrics.HostMetricsLogScreen
+import com.geeksville.mesh.ui.metrics.PositionLogScreen
+import com.geeksville.mesh.ui.metrics.PowerMetricsScreen
+import com.geeksville.mesh.ui.metrics.SignalMetricsScreen
+import com.geeksville.mesh.ui.metrics.TracerouteLogScreen
+import com.geeksville.mesh.ui.node.NodeDetailScreen
+import com.geeksville.mesh.ui.node.NodeMapScreen
 
 fun NavGraphBuilder.nodeDetailGraph(
     navController: NavHostController,
@@ -83,7 +83,7 @@ fun NavGraphBuilder.nodeDetailGraph(
                     )
 
                     NodeDetailRoute.SIGNAL -> SignalMetricsScreen(hiltViewModel(parentEntry))
-                    NodeDetailRoute.TRACEROUTE -> TracerouteLogScreen(hiltViewModel(parentEntry))
+                    NodeDetailRoute.TRACEROUTE -> TracerouteLogScreen(viewModel = hiltViewModel(parentEntry))
                     NodeDetailRoute.POWER -> PowerMetricsScreen(hiltViewModel(parentEntry))
                     NodeDetailRoute.HOST -> HostMetricsLogScreen(hiltViewModel(parentEntry))
                 }

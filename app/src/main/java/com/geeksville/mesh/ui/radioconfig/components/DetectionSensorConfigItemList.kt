@@ -39,11 +39,11 @@ import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.moduleConfig
-import com.geeksville.mesh.ui.components.DropDownPreference
-import com.geeksville.mesh.ui.components.EditTextPreference
-import com.geeksville.mesh.ui.components.PreferenceCategory
-import com.geeksville.mesh.ui.components.PreferenceFooter
-import com.geeksville.mesh.ui.components.SwitchPreference
+import com.geeksville.mesh.ui.common.components.DropDownPreference
+import com.geeksville.mesh.ui.common.components.EditTextPreference
+import com.geeksville.mesh.ui.common.components.PreferenceCategory
+import com.geeksville.mesh.ui.common.components.PreferenceFooter
+import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 
 @Composable

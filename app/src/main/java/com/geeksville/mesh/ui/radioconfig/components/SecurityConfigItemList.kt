@@ -36,12 +36,12 @@ import com.geeksville.mesh.ConfigProtos.Config.SecurityConfig
 import com.geeksville.mesh.R
 import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.ui.components.CopyIconButton
-import com.geeksville.mesh.ui.components.EditBase64Preference
-import com.geeksville.mesh.ui.components.EditListPreference
-import com.geeksville.mesh.ui.components.PreferenceCategory
-import com.geeksville.mesh.ui.components.PreferenceFooter
-import com.geeksville.mesh.ui.components.SwitchPreference
+import com.geeksville.mesh.ui.common.components.CopyIconButton
+import com.geeksville.mesh.ui.common.components.EditBase64Preference
+import com.geeksville.mesh.ui.common.components.EditListPreference
+import com.geeksville.mesh.ui.common.components.PreferenceCategory
+import com.geeksville.mesh.ui.common.components.PreferenceFooter
+import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.util.encodeToString
 

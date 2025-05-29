@@ -72,11 +72,11 @@ import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig
 import com.geeksville.mesh.R
 import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.model.Channel
-import com.geeksville.mesh.ui.components.PreferenceCategory
-import com.geeksville.mesh.ui.components.PreferenceFooter
-import com.geeksville.mesh.ui.components.dragContainer
-import com.geeksville.mesh.ui.components.dragDropItemsIndexed
-import com.geeksville.mesh.ui.components.rememberDragDropState
+import com.geeksville.mesh.ui.common.components.PreferenceCategory
+import com.geeksville.mesh.ui.common.components.PreferenceFooter
+import com.geeksville.mesh.ui.common.components.dragContainer
+import com.geeksville.mesh.ui.common.components.dragDropItemsIndexed
+import com.geeksville.mesh.ui.common.components.rememberDragDropState
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 
 @Composable

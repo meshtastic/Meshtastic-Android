@@ -15,23 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-/*
- * Copyright (c) 2025 Meshtastic LLC
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
- */
-
 package com.geeksville.mesh.navigation
 
 import androidx.annotation.StringRes
@@ -48,16 +31,16 @@ import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.ChannelScreen
-import com.geeksville.mesh.ui.ContactsScreen
-import com.geeksville.mesh.ui.DebugScreen
-import com.geeksville.mesh.ui.NodeScreen
-import com.geeksville.mesh.ui.QuickChatScreen
-import com.geeksville.mesh.ui.SettingsScreen
-import com.geeksville.mesh.ui.ShareScreen
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
+import com.geeksville.mesh.ui.contact.ContactsScreen
+import com.geeksville.mesh.ui.debug.DebugScreen
 import com.geeksville.mesh.ui.map.MapView
 import com.geeksville.mesh.ui.message.MessageScreen
+import com.geeksville.mesh.ui.message.QuickChatScreen
+import com.geeksville.mesh.ui.node.NodeScreen
+import com.geeksville.mesh.ui.settings.SettingsScreen
+import com.geeksville.mesh.ui.sharing.ChannelScreen
+import com.geeksville.mesh.ui.sharing.ShareScreen
 import kotlinx.serialization.Serializable
 
 enum class AdminRoute(@StringRes val title: Int) {

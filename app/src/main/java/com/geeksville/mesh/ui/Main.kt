@@ -77,9 +77,10 @@ import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.showLongNameTitle
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
-import com.geeksville.mesh.ui.components.MultipleChoiceAlertDialog
-import com.geeksville.mesh.ui.components.ScannedQrCodeDialog
-import com.geeksville.mesh.ui.components.SimpleAlertDialog
+import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
+import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
+import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
+import com.geeksville.mesh.ui.debug.DebugMenuActions
 
 enum class TopLevelDestination(val label: String, val icon: ImageVector, val route: Route) {
     Contacts("Contacts", Icons.AutoMirrored.TwoTone.Chat, Route.Contacts),

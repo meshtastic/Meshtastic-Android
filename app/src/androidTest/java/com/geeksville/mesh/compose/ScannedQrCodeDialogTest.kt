@@ -30,7 +30,7 @@ import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
-import com.geeksville.mesh.ui.components.ScannedQrCodeDialog
+import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test

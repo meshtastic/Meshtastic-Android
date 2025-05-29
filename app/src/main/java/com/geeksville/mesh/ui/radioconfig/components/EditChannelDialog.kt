@@ -47,10 +47,10 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
-import com.geeksville.mesh.ui.components.EditBase64Preference
-import com.geeksville.mesh.ui.components.EditTextPreference
-import com.geeksville.mesh.ui.components.PositionPrecisionPreference
-import com.geeksville.mesh.ui.components.SwitchPreference
+import com.geeksville.mesh.ui.common.components.EditBase64Preference
+import com.geeksville.mesh.ui.common.components.EditTextPreference
+import com.geeksville.mesh.ui.common.components.PositionPrecisionPreference
+import com.geeksville.mesh.ui.common.components.SwitchPreference
 
 @Suppress("LongMethod")
 @Composable
