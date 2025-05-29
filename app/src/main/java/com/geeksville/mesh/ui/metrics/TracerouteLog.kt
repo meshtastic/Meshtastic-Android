@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.components
+package com.geeksville.mesh.ui.metrics
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -61,14 +61,15 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.fullRouteDiscovery
 import com.geeksville.mesh.model.getTracerouteResponse
+import com.geeksville.mesh.ui.components.SimpleAlertDialog
 import com.geeksville.mesh.ui.theme.AppTheme
 import java.text.DateFormat
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TracerouteLogScreen(
-    viewModel: MetricsViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
+    viewModel: MetricsViewModel = hiltViewModel(),
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val dateFormat = remember {
@@ -148,7 +149,8 @@ private fun DeleteItem(onClick: () -> Unit) {
                 text = stringResource(id = R.string.delete),
                 color = MaterialTheme.colorScheme.error,
             )
-        })
+        }
+    )
 }
 
 @Composable

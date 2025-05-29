@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.components
+package com.geeksville.mesh.ui.metrics
 
 import android.graphics.Paint
 import android.graphics.Typeface
@@ -57,13 +57,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.R
-import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
-import com.geeksville.mesh.ui.components.CommonCharts.MAX_PERCENT_VALUE
-import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
+import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
+import com.geeksville.mesh.ui.metrics.CommonCharts.MAX_PERCENT_VALUE
+import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import java.text.DateFormat
 
 object CommonCharts {
-    val DATE_TIME_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
+    val DATE_TIME_FORMAT: DateFormat =
+        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
     const val MS_PER_SEC = 1000L
     const val MAX_PERCENT_VALUE = 100f
 }
@@ -157,7 +158,7 @@ fun YAxisLabels(
 
         drawContext.canvas.nativeCanvas.apply {
             var label = minValue
-            for (i in 0..LINE_LIMIT) {
+            repeat(LINE_LIMIT + 1) {
                 val ratio = (label - minValue) / range
                 val y = height - (ratio * height)
                 drawText(

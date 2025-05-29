@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.components
+package com.geeksville.mesh.ui.metrics
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.Canvas
@@ -51,7 +51,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -62,8 +62,10 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
-import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
-import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
+import com.geeksville.mesh.ui.components.OptionLabel
+import com.geeksville.mesh.ui.components.SlidingSelector
+import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
+import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.theme.InfantryBlue
 import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.createPath
@@ -72,16 +74,19 @@ import com.geeksville.mesh.util.GraphUtil.createPath
 private enum class Power(val color: Color, val min: Float, val max: Float) {
     CURRENT(InfantryBlue, -500f, 500f),
     VOLTAGE(Color.Red, 0f, 20f);
+
     /**
      * Difference between the metrics `max` and `min` values.
      */
     fun difference() = max - min
 }
+
 private enum class PowerChannel(@StringRes val strRes: Int) {
     ONE(R.string.channel_1),
     TWO(R.string.channel_2),
     THREE(R.string.channel_3)
 }
+
 private val LEGEND_DATA = listOf(
     LegendData(nameRes = R.string.current, color = Power.CURRENT.color, isLine = true),
     LegendData(nameRes = R.string.voltage, color = Power.VOLTAGE.color, isLine = true),
@@ -164,8 +169,7 @@ private fun PowerMetricsChart(
     val voltageDiff = Power.VOLTAGE.difference()
 
     val scrollState = rememberScrollState()
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp
+    val screenWidth = LocalWindowInfo.current.containerSize.width
     val dp by remember(key1 = selectedTime) {
         mutableStateOf(selectedTime.dp(screenWidth, time = (newest.time - oldest.time).toLong()))
     }
@@ -240,7 +244,10 @@ private fun PowerMetricsChart(
                         timeThreshold = selectedTime.timeThreshold()
                     ) { i ->
                         val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
-                        val ratio = (retrieveCurrent(selectedChannel, telemetry) - Power.CURRENT.min) / currentDiff
+                        val ratio = (retrieveCurrent(
+                            selectedChannel,
+                            telemetry
+                        ) - Power.CURRENT.min) / currentDiff
                         val y = height - (ratio * height)
                         return@createPath y
                     }

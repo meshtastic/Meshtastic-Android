@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.components
+package com.geeksville.mesh.ui.metrics
 
 import android.app.Activity
 import android.content.Intent

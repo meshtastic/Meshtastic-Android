@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.components
+package com.geeksville.mesh.ui.metrics
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
@@ -55,7 +55,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.model.MetricsViewModel
-import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
+import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.theme.AppTheme
 import com.geeksville.mesh.util.formatUptime
 import java.text.DecimalFormat

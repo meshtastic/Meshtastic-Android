@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.components
+package com.geeksville.mesh.ui.metrics
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
@@ -50,7 +50,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -62,9 +62,11 @@ import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.BatteryInfo
-import com.geeksville.mesh.ui.components.CommonCharts.DATE_TIME_FORMAT
-import com.geeksville.mesh.ui.components.CommonCharts.MAX_PERCENT_VALUE
-import com.geeksville.mesh.ui.components.CommonCharts.MS_PER_SEC
+import com.geeksville.mesh.ui.components.OptionLabel
+import com.geeksville.mesh.ui.components.SlidingSelector
+import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
+import com.geeksville.mesh.ui.metrics.CommonCharts.MAX_PERCENT_VALUE
+import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.theme.Orange
 import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.createPath
@@ -75,6 +77,7 @@ private enum class Device(val color: Color) {
     CH_UTIL(Color.Magenta),
     AIR_UTIL(Color.Cyan)
 }
+
 private val LEGEND_DATA = listOf(
     LegendData(nameRes = R.string.battery, color = Device.BATTERY.color, isLine = true),
     LegendData(nameRes = R.string.channel_utilization, color = Device.CH_UTIL.color),
@@ -158,7 +161,7 @@ private fun DeviceMetricsChart(
     val graphColor = MaterialTheme.colorScheme.onSurface
 
     val scrollState = rememberScrollState()
-    val screenWidth = LocalConfiguration.current.screenWidthDp
+    val screenWidth = LocalWindowInfo.current.containerSize.width
     val dp by remember(key1 = selectedTime) {
         mutableStateOf(selectedTime.dp(screenWidth, time = timeDiff.toLong()))
     }
