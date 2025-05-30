@@ -141,6 +141,7 @@ fun MainScreen(
             text = {
                 Text(text = response)
             },
+            dismissText = stringResource(id = R.string.okay),
             onDismiss = { viewModel.clearTracerouteResponse() }
         )
     }

@@ -77,9 +77,11 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -130,6 +132,9 @@ import com.geeksville.mesh.util.formatAgo
 import com.geeksville.mesh.util.formatUptime
 import com.geeksville.mesh.util.thenIf
 import com.geeksville.mesh.util.toSpeedString
+import kotlinx.coroutines.delay
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 private enum class LogsType(
     val titleRes: Int,
@@ -394,11 +399,15 @@ private fun DeviceActions(
             enabled = true,
             onClick = { onAction(NodeMenuAction.RequestUserInfo(node)) }
         )
+
         NodeActionButton(
             title = stringResource(id = R.string.traceroute),
             icon = Icons.Default.Route,
             enabled = true,
-            onClick = { onAction(NodeMenuAction.TraceRoute(node)) }
+            coolDownTime = 30.seconds,
+            onClick = {
+                onAction(NodeMenuAction.TraceRoute(node))
+            }
         )
         NodeActionSwitch(
             title = stringResource(R.string.favorite),
@@ -798,17 +807,41 @@ private fun PowerMetrics(node: Node) = with(node.powerMetrics) {
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 fun NodeActionButton(
     title: String,
     enabled: Boolean,
+    coolDownTime: Duration = 0.seconds,
     icon: ImageVector? = null,
     iconTint: Color? = null,
     onClick: () -> Unit
 ) {
+    val useCoolDown = coolDownTime > 0.seconds
+    var coolDown by remember { mutableStateOf(false) }
+    var coolDownProgress: Float by remember { mutableStateOf(0f) }
+    LaunchedEffect(coolDown) {
+        coolDownProgress = 0f
+        var timeLeft = coolDownTime
+        while (coolDown) {
+            if (timeLeft > 0.seconds) {
+                coolDownProgress =
+                    ((coolDownTime - timeLeft) / coolDownTime).toFloat()
+                timeLeft -= 0.05.seconds
+            } else {
+                coolDown = false
+            }
+            delay(0.05.seconds)
+        }
+    }
     Button(
-        onClick = onClick,
-        enabled = enabled,
+        onClick = {
+            if (useCoolDown) {
+                coolDown = true
+            }
+            onClick()
+        },
+        enabled = enabled && !coolDown,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
@@ -817,7 +850,17 @@ fun NodeActionButton(
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (icon != null) {
+            if (coolDown) {
+                CircularProgressIndicator(
+                    progress = { coolDownProgress },
+                    modifier = Modifier.size(24.dp),
+                    color = iconTint ?: LocalContentColor.current,
+                    strokeWidth = 2.dp,
+                    trackColor = ProgressIndicatorDefaults.circularDeterminateTrackColor,
+                    strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+            } else if (icon != null) {
                 Icon(
                     imageVector = icon,
                     contentDescription = title,
