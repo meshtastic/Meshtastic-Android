@@ -95,10 +95,6 @@ class MeshLogRepository @Inject constructor(
         meshLogDao.deleteLogs(nodeNum, portNum)
     }
 
-    suspend fun clearLogDB() = withContext(dispatchers.io) {
-        meshLogDao.deleteAll()
-    }
-
     companion object {
         private const val MAX_ITEMS = 500
         private const val MAX_MESH_PACKETS = 10000
