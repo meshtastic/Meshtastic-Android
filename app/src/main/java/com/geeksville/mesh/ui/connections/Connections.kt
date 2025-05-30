@@ -90,6 +90,7 @@ import com.geeksville.mesh.android.permissionMissing
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
+import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.repository.network.NetworkRepository
@@ -331,7 +332,7 @@ fun ConnectionsScreen(
                             .fillMaxWidth()
                             .selectable(
                                 selected = (device.fullAddress == selectedDevice) ||
-                                        device.fullAddress == "n",
+                                        device.fullAddress == NO_DEVICE_SELECTED,
                                 onClick = {
                                     if (!device.bonded) {
                                         uiViewModel.showSnackbar(context.getString(R.string.starting_pairing))

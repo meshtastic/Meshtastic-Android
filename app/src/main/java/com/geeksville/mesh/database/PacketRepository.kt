@@ -107,4 +107,8 @@ class PacketRepository @Inject constructor(private val packetDaoLazy: dagger.Laz
     suspend fun insertReaction(reaction: ReactionEntity) = withContext(Dispatchers.IO) {
         packetDao.insert(reaction)
     }
+
+    suspend fun clearPacketDB() = withContext(Dispatchers.IO) {
+        packetDao.deleteAll()
+    }
 }
