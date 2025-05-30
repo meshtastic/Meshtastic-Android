@@ -71,8 +71,8 @@ import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.service.startService
 import com.geeksville.mesh.ui.MainMenuAction
 import com.geeksville.mesh.ui.MainScreen
-import com.geeksville.mesh.ui.theme.AppTheme
-import com.geeksville.mesh.ui.theme.MODE_DYNAMIC
+import com.geeksville.mesh.ui.common.theme.AppTheme
+import com.geeksville.mesh.ui.common.theme.MODE_DYNAMIC
 import com.geeksville.mesh.util.Exceptions
 import com.geeksville.mesh.util.LanguageUtils
 import com.geeksville.mesh.util.getPackageInfoCompat

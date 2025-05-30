@@ -42,7 +42,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
-import com.geeksville.mesh.ui.components.SwitchPreference
+import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.google.protobuf.Descriptors
 
 private const val SupportedFields = 7

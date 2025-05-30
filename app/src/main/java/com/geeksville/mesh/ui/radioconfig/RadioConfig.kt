@@ -69,10 +69,10 @@ import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.ModuleRoute
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
-import com.geeksville.mesh.ui.components.PreferenceCategory
+import com.geeksville.mesh.ui.common.components.PreferenceCategory
+import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.radioconfig.components.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
-import com.geeksville.mesh.ui.theme.AppTheme
 
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
