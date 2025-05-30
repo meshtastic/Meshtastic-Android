@@ -32,13 +32,13 @@ import androidx.navigation.toRoute
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
+import com.geeksville.mesh.ui.connections.ConnectionsScreen
 import com.geeksville.mesh.ui.contact.ContactsScreen
 import com.geeksville.mesh.ui.debug.DebugScreen
 import com.geeksville.mesh.ui.map.MapView
 import com.geeksville.mesh.ui.message.MessageScreen
 import com.geeksville.mesh.ui.message.QuickChatScreen
 import com.geeksville.mesh.ui.node.NodeScreen
-import com.geeksville.mesh.ui.settings.SettingsScreen
 import com.geeksville.mesh.ui.sharing.ChannelScreen
 import com.geeksville.mesh.ui.sharing.ShareScreen
 import kotlinx.serialization.Serializable
@@ -76,7 +76,7 @@ sealed interface Route {
     data object Channels : Route
 
     @Serializable
-    data object Settings : Route
+    data object Connections : Route
 
     @Serializable
     data object DebugPanel : Route
@@ -219,7 +219,7 @@ fun NavGraph(
     NavHost(
         navController = navController,
         startDestination = if (uIViewModel.bondedAddress.isNullOrBlank()) {
-            Route.Settings
+            Route.Connections
         } else {
             Route.Contacts
         },
@@ -244,19 +244,19 @@ fun NavGraph(
         composable<Route.Channels> {
             ChannelScreen(uIViewModel)
         }
-        composable<Route.Settings>(
+        composable<Route.Connections>(
             deepLinks = listOf(
                 navDeepLink {
-                    uriPattern = "$DEEP_LINK_BASE_URI/settings"
+                    uriPattern = "$DEEP_LINK_BASE_URI/connections"
                     action = "android.intent.action.VIEW"
                 }
             )
         ) { backStackEntry ->
-            SettingsScreen(
+            ConnectionsScreen(
                 uIViewModel,
                 onNavigateToRadioConfig = {
                     navController.navigate(Route.RadioConfig()) {
-                        popUpTo(Route.Settings) {
+                        popUpTo(Route.Connections) {
                             inclusive = false
                         }
                     }
