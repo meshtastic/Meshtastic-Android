@@ -24,6 +24,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -113,9 +114,6 @@ import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
 
-// TODO figure out why those functions are declared inside the composables
-
-// TODO do we still need the these suppressions
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun ChannelScreen(
@@ -296,7 +294,11 @@ fun ChannelScreen(
         }
         item {
            ModemPresetInfo(
-               modemPresetName = modemPresetName
+               modemPresetName = modemPresetName,
+               onClick = {
+                   isWaiting = true
+                   radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
+               }
            )
         }
         item {
@@ -482,11 +484,13 @@ private fun ChannelListView(
 @Composable
 private fun ModemPresetInfo(
     modemPresetName: String,
+    onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .padding(top = 12.dp)
             .fillMaxWidth()
+            .clickable(onClick = onClick)
             .border(
                 1.dp,
                 MaterialTheme.colorScheme.onBackground,
@@ -523,6 +527,7 @@ private fun ModemPresetInfo(
 fun ModemPresetInfoPreview() {
     ModemPresetInfo(
         modemPresetName = "Long Fast",
+        onClick = {}
     )
 }
 
