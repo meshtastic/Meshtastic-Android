@@ -39,7 +39,6 @@ import com.geeksville.mesh.ui.message.MessageScreen
 import com.geeksville.mesh.ui.message.QuickChatScreen
 import com.geeksville.mesh.ui.node.NodeScreen
 import com.geeksville.mesh.ui.settings.SettingsScreen
-import com.geeksville.mesh.ui.sharing.ChannelScreen
 import com.geeksville.mesh.ui.sharing.ShareScreen
 import kotlinx.serialization.Serializable
 

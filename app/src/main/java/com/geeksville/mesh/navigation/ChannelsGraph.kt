@@ -24,7 +24,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.ChannelScreen
+import com.geeksville.mesh.ui.sharing.ChannelScreen
 import com.geeksville.mesh.ui.radioconfig.components.ChannelConfigScreen
 import com.geeksville.mesh.ui.radioconfig.components.LoRaConfigScreen
 

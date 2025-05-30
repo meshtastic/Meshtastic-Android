@@ -107,12 +107,7 @@ import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.ui.common.components.AdaptiveTwoPane
-import com.geeksville.mesh.ui.common.components.DropDownPreference
 import com.geeksville.mesh.ui.common.components.PreferenceFooter
-import com.geeksville.mesh.ui.common.components.dragContainer
-import com.geeksville.mesh.ui.common.components.dragDropItemsIndexed
-import com.geeksville.mesh.ui.common.components.rememberDragDropState
-import com.geeksville.mesh.ui.radioconfig.components.ChannelCard
 import com.geeksville.mesh.ui.radioconfig.components.ChannelSelection
 import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
 import com.journeyapps.barcodescanner.ScanContract
