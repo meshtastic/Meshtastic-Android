@@ -396,7 +396,7 @@ private fun TopLevelNavIcon(
     dest: TopLevelDestination,
     connectionState: MeshService.ConnectionState
 ) {
-    return when (dest) {
+    when (dest) {
         TopLevelDestination.Connections -> Icon(
             imageVector = connectionState.getConnectionIcon(),
             contentDescription = stringResource(id = dest.label),
