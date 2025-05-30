@@ -69,6 +69,7 @@ import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.ReactionEntity
 import com.geeksville.mesh.fromRadio
 import com.geeksville.mesh.model.DeviceVersion
+import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.getTracerouteResponse
 import com.geeksville.mesh.position
@@ -343,7 +344,7 @@ class MeshService : Service(), Logging {
     override fun onCreate() {
         super.onCreate()
         sharedPreferences = getSharedPreferences("mesh-prefs", Context.MODE_PRIVATE)
-        _lastAddress.value = sharedPreferences.getString("device_address", null) ?: "n"
+        _lastAddress.value = sharedPreferences.getString("device_address", null) ?: NO_DEVICE_SELECTED
 
         info("Creating mesh service")
         serviceNotifications.initChannels()
@@ -381,7 +382,7 @@ class MeshService : Service(), Logging {
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         val a = radioInterfaceService.getBondedDeviceAddress()
-        val wantForeground = a != null && a != "n"
+        val wantForeground = a != null && a != NO_DEVICE_SELECTED
 
         info("Requesting foreground service=$wantForeground")
 
@@ -1835,8 +1836,12 @@ class MeshService : Service(), Logging {
 
                 sendToRadio(
                     newMeshPacketTo(idNum).buildMeshPacket(
-                        channel = if (destNum == null) 0 else nodeDBbyNodeNum[destNum]?.channel
-                            ?: 0,
+                        channel = if (destNum == null) {
+                            0
+                        } else {
+                            nodeDBbyNodeNum[destNum]?.channel
+                                ?: 0
+                        },
                         priority = MeshPacket.Priority.BACKGROUND,
                     ) {
                         portnumValue = Portnums.PortNum.POSITION_APP_VALUE
@@ -2004,7 +2009,7 @@ class MeshService : Service(), Logging {
                 }
             }
 
-            lastAddress.value, "n" -> {
+            lastAddress.value, NO_DEVICE_SELECTED -> {
                 debug("SetDeviceAddress: Device address is the none or same, ignoring")
             }
 

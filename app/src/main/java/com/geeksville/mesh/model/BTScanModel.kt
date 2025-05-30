@@ -81,7 +81,7 @@ class BTScanModel @Inject constructor(
                 }
 
                 // Include a placeholder for "None"
-                addDevice(DeviceListEntry(context.getString(R.string.none), "n", true))
+                addDevice(DeviceListEntry(context.getString(R.string.none), NO_DEVICE_SELECTED, true))
 
                 if (showMockInterface) {
                     addDevice(DeviceListEntry("Demo Mode", "m", true))
@@ -158,7 +158,7 @@ class BTScanModel @Inject constructor(
     val selectedBluetooth: Boolean get() = selectedAddress?.getOrNull(0) == 'x'
 
     // / Use the string for the NopInterface
-    val selectedNotNull: String get() = selectedAddress ?: "n"
+    val selectedNotNull: String get() = selectedAddress ?: NO_DEVICE_SELECTED
 
     val scanResult = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
 
@@ -280,3 +280,5 @@ class BTScanModel @Inject constructor(
     private val _spinner = MutableLiveData(false)
     val spinner: LiveData<Boolean> get() = _spinner
 }
+
+const val NO_DEVICE_SELECTED = "n"
