@@ -885,6 +885,9 @@
     "tags": [
       "Heltec"
     ],
+    "images": [
+      "heltec_mesh_pocket.svg"
+    ],
     "requiresDfu": true
   },
   {
@@ -892,11 +895,14 @@
     "hwModelSlug": "SEEED_SOLAR_NODE",
     "platformioTarget": "seeed_solar_node",
     "architecture": "nrf52840",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
-    "displayName": "SenseCAP Solar Node",
+    "displayName": "Seeed SenseCAP Solar Node",
     "tags": [
       "Seeed"
+    ],
+    "images": [
+      "seeed_solar.svg"
     ],
     "requiresDfu": true
   },
@@ -910,6 +916,10 @@
     "displayName": "Seeed Wio Tracker L1",
     "tags": [
       "Seeed"
+    ],
+    "images": [
+      "wio_tracker_l1.svg",
+      "wio_tracker_l1_case.svg"
     ],
     "requiresDfu": true
   }
