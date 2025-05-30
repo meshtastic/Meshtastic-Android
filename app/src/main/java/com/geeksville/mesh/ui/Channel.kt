@@ -23,14 +23,21 @@ import android.os.RemoteException
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.ContentCopy
@@ -56,6 +63,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
@@ -68,8 +76,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -103,7 +113,6 @@ import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
 
-// TODO add the modem preset at the top
 // TODO figure out why those functions are declared inside the composables
 
 // TODO do we still need the these suppressions
@@ -124,6 +133,10 @@ fun ChannelScreen(
 
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     var channelSet by remember(channels) { mutableStateOf(channels) }
+    val modemPresetName by remember(channels) {
+        mutableStateOf(Channel(loraConfig = channels.loraConfig).name)
+    }
+
     var showResetDialog by remember { mutableStateOf(false) }
     var showScanDialog by remember { mutableStateOf(false) }
 
@@ -159,7 +172,6 @@ fun ChannelScreen(
         settings.clear()
         settings.addAll(result)
     }
-    val modemPresetName = Channel(loraConfig = channelSet.loraConfig).name
 
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
@@ -260,9 +272,6 @@ fun ChannelScreen(
         )
     }
 
-    // TODO need to display this to let the user know what they are on
-    //  - Might want to provide nav to where to edit it.
-//    selectedItem = channelSet.loraConfig.modemPreset,
     val listState = rememberLazyListState()
     LazyColumn(
         state = listState,
@@ -284,6 +293,11 @@ fun ChannelScreen(
                 channelUrl = selectedChannelSet.getChannelUrl(),
                 onConfirm = viewModel::requestChannelUrl
             )
+        }
+        item {
+           ModemPresetInfo(
+               modemPresetName = modemPresetName
+           )
         }
         item {
             PreferenceFooter(
@@ -337,6 +351,7 @@ private fun EditChannelUrl(
         enabled = enabled,
         label = { Text(stringResource(R.string.url)) },
         isError = isError,
+        shape = RoundedCornerShape(8.dp),
         trailingIcon = {
             val label = stringResource(R.string.url)
             val isUrlEqual = valueState == channelUrl
@@ -446,7 +461,6 @@ private fun ChannelListView(
             OutlinedButton(
                 onClick = onClick,
                 modifier = Modifier.fillMaxWidth(),
-                // TODO having trouble with the pre existing mechanism working
                 enabled = enabled,
                 colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.onSurface,
@@ -462,6 +476,53 @@ private fun ChannelListView(
                     .padding(vertical = 4.dp)
             )
         },
+    )
+}
+
+@Composable
+private fun ModemPresetInfo(
+    modemPresetName: String,
+) {
+    Row(
+        modifier = Modifier
+            .padding(top = 12.dp)
+            .fillMaxWidth()
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.onBackground,
+                RoundedCornerShape(8.dp)
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(16.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.modem_preset),
+                fontSize = 16.sp,
+            )
+            Text(
+                text = modemPresetName,
+                fontSize = 14.sp,
+            )
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Icon(
+            imageVector = Icons.Default.ChevronRight,
+            contentDescription = stringResource(R.string.navigate_into),
+            tint = LocalContentColor.current,
+            modifier = Modifier.padding(end = 16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ModemPresetInfoPreview() {
+    ModemPresetInfo(
+        modemPresetName = "Long Fast",
     )
 }
 
