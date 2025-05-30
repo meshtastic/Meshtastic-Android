@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.settings
+package com.geeksville.mesh.ui.connections
 
 import android.app.Activity
 import android.content.Context
@@ -108,9 +108,9 @@ fun String?.isIPAddress(): Boolean {
     }
 }
 
-@Suppress("CyclomaticComplexMethod", "LongMethod")
+@Suppress("CyclomaticComplexMethod", "LongMethod", "MagicNumber")
 @Composable
-fun SettingsScreen(
+fun ConnectionsScreen(
     uiViewModel: UIViewModel = hiltViewModel(),
     scanModel: BTScanModel = hiltViewModel(),
     bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
@@ -389,7 +389,7 @@ fun SettingsScreen(
                         label = { Text(stringResource(R.string.ip_address)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier
-                            .weight(1f)
+                            .weight(0.7f)
                             .padding(start = 16.dp)
                     )
                     OutlinedTextField(
