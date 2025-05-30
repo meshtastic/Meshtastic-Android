@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_messages">Messaggi</string>
     <string name="main_tab_users">Utenti</string>
@@ -558,6 +574,8 @@
     <string name="long_name">Nome esteso</string>
     <string name="short_name">Nome breve</string>
     <string name="hardware_model">Modello hardware</string>
+    <string name="licensed_amateur_radio">Radioamatori con licenza (HAM)</string>
+    <string name="licensed_amateur_radio_text">Abilitare questa opzione disabilita la crittografia e non è compatibile con la rete Meshtastic predefinita.</string>
     <string name="dew_point">Punto Di Rugiada</string>
     <string name="pressure">Pressione</string>
     <string name="gas_resistance">Resistenza Ai Gas</string>
@@ -569,5 +587,49 @@
     <string name="store_forward_config"><![CDATA[Configurazione Salva & Inoltra]]></string>
     <string name="indoor_air_quality_iaq">Qualità dell\'Aria Interna (IAQ)</string>
     <string name="url">URL</string>
+    <string name="backup_restore"><![CDATA[Backup & Ripristino]]></string>
+    <string name="import_configuration">Importa configurazione</string>
+    <string name="export_configuration">Esporta configurazione</string>
+    <string name="hardware">Hardware</string>
+    <string name="supported">Supportato</string>
+    <string name="node_number">Numero Nodo</string>
+    <string name="user_id">ID utente</string>
+    <string name="uptime">Tempo di attività</string>
+    <string name="firmware_version">Versione firmware</string>
+    <string name="timestamp">Data e ora</string>
+    <string name="heading">Direzione</string>
+    <string name="sats">Sat</string>
+    <string name="alt">Alt</string>
+    <string name="freq">Freq</string>
+    <string name="slot">Slot</string>
+    <string name="primary">Principale</string>
+    <string name="primary_channel_feature">Diffusione periodica di posizione e telemetria</string>
+    <string name="secondary">Secondario</string>
+    <string name="secondary_no_telemetry">Nessuna trasmissione telemetria periodica</string>
+    <string name="manual_position_request">Richiesta posizione manuale mandatoria</string>
+    <string name="press_and_drag">Premi e trascina per riordinare</string>
+    <string name="set_region">Imposta Regione</string>
+    <string name="unmute">Riattiva l\'audio</string>
     <string name="dynamic">Dinamico</string>
+    <string name="scan_qr_code">Scansiona codice QR</string>
+    <string name="share_contact">Condividi contatto</string>
+    <string name="import_shared_contact">Importare Contatto Condiviso?</string>
+    <string name="unmessageable">Non messaggabile</string>
+    <string name="unmonitored_or_infrastructure">Non monitorato o Infrastruttura</string>
+    <string name="import_known_shared_contact_text">Attenzione: Questo contatto è noto, l\'importazione sovrascriverà le informazioni di contatto precedenti.</string>
+    <string name="public_key_changed">Chiave Pubblica Modificata</string>
+    <string name="import_label">Importa</string>
+    <string name="request_metadata">Richiedi Metadati</string>
+    <string name="actions">Azioni</string>
+    <string name="firmware">Firmware</string>
+    <string name="use_12h_format">Usa formato orologio 12h</string>
+    <string name="display_time_in_12h_format">Se abilitato, il dispositivo visualizzerà il tempo in formato 12 ore sullo schermo.</string>
+    <string name="host_metrics_log">Registro Metriche Host</string>
+    <string name="host">Host</string>
+    <string name="host_metrics">Metriche Host</string>
+    <string name="free_memory">Memoria libera</string>
+    <string name="disk_free">Spazio disco libero</string>
+    <string name="load">Carico</string>
+    <string name="user_string">Stringa Utente</string>
+    <string name="map">Mappa</string>
 </resources>

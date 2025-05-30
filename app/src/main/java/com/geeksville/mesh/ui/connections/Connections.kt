@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.settings
+package com.geeksville.mesh.ui.connections
 
 import android.app.Activity
 import android.content.Context
@@ -90,6 +90,7 @@ import com.geeksville.mesh.android.permissionMissing
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
+import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.repository.network.NetworkRepository
@@ -108,9 +109,9 @@ fun String?.isIPAddress(): Boolean {
     }
 }
 
-@Suppress("CyclomaticComplexMethod", "LongMethod")
+@Suppress("CyclomaticComplexMethod", "LongMethod", "MagicNumber")
 @Composable
-fun SettingsScreen(
+fun ConnectionsScreen(
     uiViewModel: UIViewModel = hiltViewModel(),
     scanModel: BTScanModel = hiltViewModel(),
     bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
@@ -331,7 +332,7 @@ fun SettingsScreen(
                             .fillMaxWidth()
                             .selectable(
                                 selected = (device.fullAddress == selectedDevice) ||
-                                        device.fullAddress == "n",
+                                        device.fullAddress == NO_DEVICE_SELECTED,
                                 onClick = {
                                     if (!device.bonded) {
                                         uiViewModel.showSnackbar(context.getString(R.string.starting_pairing))
@@ -389,7 +390,7 @@ fun SettingsScreen(
                         label = { Text(stringResource(R.string.ip_address)) },
                         keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                         modifier = Modifier
-                            .weight(1f)
+                            .weight(0.7f)
                             .padding(start = 16.dp)
                     )
                     OutlinedTextField(

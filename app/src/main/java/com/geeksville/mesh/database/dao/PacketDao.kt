@@ -214,4 +214,7 @@ interface PacketDao {
 
     @Upsert
     suspend fun insert(reaction: ReactionEntity)
+
+    @Query("DELETE FROM packet")
+    suspend fun deleteAll()
 }

@@ -17,12 +17,7 @@
 
 package com.geeksville.mesh.ui
 
-import android.widget.Toast
 import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
@@ -36,7 +31,6 @@ import androidx.compose.material.icons.twotone.CloudUpload
 import androidx.compose.material.icons.twotone.Contactless
 import androidx.compose.material.icons.twotone.Map
 import androidx.compose.material.icons.twotone.People
-import androidx.compose.material.icons.twotone.Settings
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -45,10 +39,14 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
+import androidx.compose.material3.TooltipBox
+import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -56,8 +54,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -82,12 +80,12 @@ import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
 import com.geeksville.mesh.ui.debug.DebugMenuActions
 
-enum class TopLevelDestination(val label: String, val icon: ImageVector, val route: Route) {
-    Contacts("Contacts", Icons.AutoMirrored.TwoTone.Chat, Route.Contacts),
-    Nodes("Nodes", Icons.TwoTone.People, Route.Nodes),
-    Map("Map", Icons.TwoTone.Map, Route.Map),
-    Channels("Channels", Icons.TwoTone.Contactless, Route.Channels),
-    Settings("Settings", Icons.TwoTone.Settings, Route.Settings),
+enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
+    Contacts(R.string.contacts, Icons.AutoMirrored.TwoTone.Chat, Route.Contacts),
+    Nodes(R.string.nodes, Icons.TwoTone.People, Route.Nodes),
+    Map(R.string.map, Icons.TwoTone.Map, Route.Map),
+    Channels(R.string.channels, Icons.TwoTone.Contactless, Route.Channels),
+    Connections(R.string.connections, Icons.TwoTone.CloudOff, Route.Connections),
     ;
 
     companion object {
@@ -109,7 +107,6 @@ fun MainScreen(
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val localConfig by viewModel.localConfig.collectAsStateWithLifecycle()
     val requestChannelSet by viewModel.requestChannelSet.collectAsStateWithLifecycle()
-
     if (connectionState.isConnected()) {
         requestChannelSet?.let { newChannelSet ->
             ScannedQrCodeDialog(viewModel, newChannelSet)
@@ -144,6 +141,7 @@ fun MainScreen(
             text = {
                 Text(text = response)
             },
+            dismissText = stringResource(id = R.string.okay),
             onDismiss = { viewModel.clearTracerouteResponse() }
         )
     }
@@ -154,7 +152,6 @@ fun MainScreen(
             MainAppBar(
                 title = title,
                 isManaged = localConfig.security.isManaged,
-                connectionState = connectionState,
                 navController = navController,
             ) { action ->
                 when (action) {
@@ -167,6 +164,7 @@ fun MainScreen(
         },
         bottomBar = {
             BottomNavigation(
+                connectionState = connectionState,
                 navController = navController,
             )
         },
@@ -197,7 +195,6 @@ enum class MainMenuAction(@StringRes val stringRes: Int) {
 private fun MainAppBar(
     title: String,
     isManaged: Boolean,
-    connectionState: MeshService.ConnectionState,
     navController: NavHostController,
     modifier: Modifier = Modifier,
     onAction: (MainMenuAction) -> Unit
@@ -267,7 +264,7 @@ private fun MainAppBar(
         actions = {
             when {
                 currentDestination == null || isTopLevelRoute ->
-                    MainMenuActions(isManaged, connectionState, onAction)
+                    MainMenuActions(isManaged, onAction)
 
                 currentDestination.hasRoute<Route.DebugPanel>() ->
                     DebugMenuActions()
@@ -278,30 +275,13 @@ private fun MainAppBar(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MainMenuActions(
     isManaged: Boolean,
-    connectionState: MeshService.ConnectionState,
     onAction: (MainMenuAction) -> Unit
 ) {
-    val context = LocalContext.current
-    val (image, tooltip) = when (connectionState) {
-        MeshService.ConnectionState.CONNECTED -> Icons.TwoTone.CloudDone to R.string.connected
-        MeshService.ConnectionState.DEVICE_SLEEP -> Icons.TwoTone.CloudUpload to R.string.device_sleeping
-        MeshService.ConnectionState.DISCONNECTED -> Icons.TwoTone.CloudOff to R.string.disconnected
-    }
-
     var showMenu by remember { mutableStateOf(false) }
-    IconButton(
-        onClick = {
-            Toast.makeText(context, tooltip, Toast.LENGTH_SHORT).show()
-        },
-    ) {
-        Icon(
-            imageVector = image,
-            contentDescription = stringResource(id = tooltip),
-        )
-    }
     IconButton(onClick = { showMenu = true }) {
         Icon(
             imageVector = Icons.Default.MoreVert,
@@ -330,55 +310,103 @@ private fun MainMenuActions(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun BottomNavigation(
+    connectionState: MeshService.ConnectionState,
     navController: NavController,
 ) {
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
     val topLevelDestination = TopLevelDestination.fromNavDestination(currentDestination)
 
-    AnimatedVisibility(
-        visible = topLevelDestination != null,
-        enter = slideInVertically(
-            initialOffsetY = { it / 2 },
-            animationSpec = tween(durationMillis = 50),
-        ),
-        exit = slideOutVertically(
-            targetOffsetY = { it / 2 },
-            animationSpec = tween(durationMillis = 50),
-        ),
-    ) {
-        NavigationBar {
-            TopLevelDestination.entries.forEach {
-                val isSelected = it == topLevelDestination
-                NavigationBarItem(
-                    icon = {
-                        Icon(
-                            imageVector = it.icon,
-                            contentDescription = it.name,
-                        )
-                    },
-                    // label = { Text(it.label) },
-                    selected = isSelected,
-                    onClick = {
-                        if (!isSelected) {
-                            navController.navigate(it.route) {
-                                // Pop up to the start destination of the graph to
-                                // avoid building up a large stack of destinations
-                                // on the back stack as users select items
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                // Avoid multiple copies of the same destination when
-                                // reselecting the same item
-                                launchSingleTop = true
-                                // Restore state when reselecting a previously selected item
-                                restoreState = true
+    NavigationBar {
+        TopLevelDestination.entries.forEach { destination ->
+            val isSelected = destination == topLevelDestination
+            val isConnectionsRoute = destination == TopLevelDestination.Connections
+            NavigationBarItem(
+                icon = {
+                    TooltipBox(
+                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
+                        tooltip = {
+                            PlainTooltip {
+                                Text(
+                                    if (isConnectionsRoute) {
+                                        connectionState.getTooltipString()
+                                    } else {
+                                        stringResource(id = destination.label)
+                                    },
+                                )
                             }
+                        },
+                        state = rememberTooltipState()
+                    ) {
+                        TopLevelNavIcon(destination, connectionState)
+                    }
+                },
+                selected = isSelected,
+                onClick = {
+                    if (!isSelected) {
+                        navController.navigate(destination.route) {
+                            // Pop up to the start destination of the graph to
+                            // avoid building up a large stack of destinations
+                            // on the back stack as users select items
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
+                            }
+                            // Avoid multiple copies of the same destination when
+                            // reselecting the same item
+                            launchSingleTop = true
+                            // Restore state when reselecting a previously selected item
+                            restoreState = true
                         }
                     }
-                )
-            }
+                }
+            )
         }
+    }
+}
+
+@Composable
+private fun MeshService.ConnectionState.getConnectionColor(): Color {
+    return when (this) {
+        MeshService.ConnectionState.CONNECTED -> Color(color = 0xFF30C047)
+        MeshService.ConnectionState.DEVICE_SLEEP -> MaterialTheme.colorScheme.tertiary
+        MeshService.ConnectionState.DISCONNECTED -> MaterialTheme.colorScheme.error
+    }
+}
+
+private fun MeshService.ConnectionState.getConnectionIcon(): ImageVector {
+    return when (this) {
+        MeshService.ConnectionState.CONNECTED -> Icons.TwoTone.CloudDone
+        MeshService.ConnectionState.DEVICE_SLEEP -> Icons.TwoTone.CloudUpload
+        MeshService.ConnectionState.DISCONNECTED -> Icons.TwoTone.CloudOff
+    }
+}
+
+@Composable
+private fun MeshService.ConnectionState.getTooltipString(): String {
+    return when (this) {
+        MeshService.ConnectionState.CONNECTED -> stringResource(R.string.connected)
+        MeshService.ConnectionState.DEVICE_SLEEP -> stringResource(R.string.device_sleeping)
+        MeshService.ConnectionState.DISCONNECTED -> stringResource(R.string.disconnected)
+    }
+}
+
+@Composable
+private fun TopLevelNavIcon(
+    dest: TopLevelDestination,
+    connectionState: MeshService.ConnectionState
+) {
+    when (dest) {
+        TopLevelDestination.Connections -> Icon(
+            imageVector = connectionState.getConnectionIcon(),
+            contentDescription = stringResource(id = dest.label),
+            tint = connectionState.getConnectionColor(),
+        )
+
+        else -> Icon(
+            imageVector = dest.icon,
+            contentDescription = stringResource(id = dest.label),
+        )
     }
 }
