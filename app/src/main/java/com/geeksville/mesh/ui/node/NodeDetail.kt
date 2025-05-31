@@ -372,6 +372,12 @@ private fun DeviceActions(
     var displayFavoriteDialog by remember { mutableStateOf(false) }
     var displayIgnoreDialog by remember { mutableStateOf(false) }
     var displayRemoveDialog by remember { mutableStateOf(false) }
+    val isUnmessageable = if (node.user.hasIsUnmessagable()) {
+        node.user.isUnmessagable
+    } else {
+        // for older firmwares
+        node.user.role?.isUnmessageableRole() == true
+    }
     NodeActionDialogs(
         node = node,
         displayFavoriteDialog = displayFavoriteDialog,
@@ -393,14 +399,16 @@ private fun DeviceActions(
     )
 
     if (!isLocal) {
-        NodeActionButton(
-            title = stringResource(id = R.string.direct_message),
-            icon = Icons.AutoMirrored.TwoTone.Message,
-            enabled = true,
-            onClick = {
-                onAction(NodeMenuAction.DirectMessage(node))
-            }
-        )
+        if (!isUnmessageable) {
+            NodeActionButton(
+                title = stringResource(id = R.string.direct_message),
+                icon = Icons.AutoMirrored.TwoTone.Message,
+                enabled = true,
+                onClick = {
+                    onAction(NodeMenuAction.DirectMessage(node))
+                }
+            )
+        }
         NodeActionButton(
             title = stringResource(id = R.string.request_metadata),
             icon = Icons.Default.Memory,
