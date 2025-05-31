@@ -52,7 +52,7 @@ class FirmwareReleaseLocalDataSource @Inject constructor(
     suspend fun getLatestRelease(releaseType: FirmwareReleaseType): FirmwareReleaseEntity? =
         withContext(Dispatchers.IO) {
             val releases = firmwareReleaseDao.getReleasesByType(releaseType)
-            if (releases.isNullOrEmpty()) {
+            if (releases.isEmpty()) {
                 return@withContext null
             } else {
                 val latestRelease =
