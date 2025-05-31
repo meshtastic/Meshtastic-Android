@@ -40,6 +40,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.deviceMetadata
 import com.geeksville.mesh.model.DeviceVersion
+import com.geeksville.mesh.model.isUnmessageableRole
 import com.geeksville.mesh.ui.common.components.EditTextPreference
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
 import com.geeksville.mesh.ui.common.components.PreferenceFooter
@@ -140,8 +141,11 @@ fun UserConfigItemList(
             SwitchPreference(
                 title = stringResource(R.string.unmessageable),
                 summary = stringResource(R.string.unmonitored_or_infrastructure),
-                checked = userInput.isUnmessagable,
-                enabled = firmwareVersion >= DeviceVersion("2.6.8"),
+                checked = userInput.isUnmessagable || (
+                        firmwareVersion < DeviceVersion("2.6.9") &&
+                                userInput.role.isUnmessageableRole()
+                        ),
+                enabled = userInput.hasIsUnmessagable(),
                 onCheckedChange = { userInput = userInput.copy { isUnmessagable = it } }
             )
         }
