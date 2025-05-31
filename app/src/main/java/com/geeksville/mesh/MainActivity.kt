@@ -422,25 +422,6 @@ class MainActivity : AppCompatActivity(), Logging {
         )
     }
 
-    private fun unbindMeshService() {
-        // If we have received the service, and hence registered with
-        // it, then now is the time to unregister.
-        // if we never connected, do nothing
-        debug("Unbinding from mesh service!")
-        connectionJob?.let { job ->
-            connectionJob = null
-            warn("We had a pending onConnection job, so we are cancelling it")
-            job.cancel("unbinding")
-        }
-        mesh.close()
-        serviceRepository.setMeshService(null)
-    }
-
-    override fun onStop() {
-        unbindMeshService()
-        super.onStop()
-    }
-
     override fun onStart() {
         super.onStart()
 

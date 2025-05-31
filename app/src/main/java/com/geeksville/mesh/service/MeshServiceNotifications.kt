@@ -356,40 +356,37 @@ class MeshServiceNotifications(
 
     private fun createOpenMessageIntent(contactKey: String): PendingIntent {
         val deepLink = "$DEEP_LINK_BASE_URI/messages/$contactKey"
-        val startActivityIntent = Intent(
+        val deepLinkIntent = Intent(
             Intent.ACTION_VIEW,
             deepLink.toUri(),
             context,
             MainActivity::class.java
         )
 
-        val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(context).run {
-            addNextIntentWithParentStack(startActivityIntent)
-            getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE)
+        val deepLinkPendingIntent: PendingIntent = TaskStackBuilder.create(context).run {
+            addNextIntentWithParentStack(deepLinkIntent)
+            getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         }
-        return resultPendingIntent!!
+
+        return deepLinkPendingIntent
     }
 
-    private fun commonBuilder(channel: String): NotificationCompat.Builder {
+    private fun commonBuilder(
+        channel: String,
+        contentIntent: PendingIntent? = null
+    ): NotificationCompat.Builder {
         val builder = NotificationCompat.Builder(context, channel)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setContentIntent(openAppIntent)
+            .setContentIntent(contentIntent ?: openAppIntent)
 
-        // Set the notification icon
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            // If running on really old versions of android (<= 5.1.1) (possibly only cyanogen) we might encounter a bug with setting application specific icons
-            // so punt and stay with just the bluetooth icon - see https://meshtastic.discourse.group/t/android-1-1-42-ready-for-alpha-testing/2399/3?u=geeksville
-            builder.setSmallIcon(android.R.drawable.stat_sys_data_bluetooth)
-        } else {
-            builder.setSmallIcon(
-                // vector form icons don't work reliably on older androids
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                    R.drawable.app_icon_novect
-                } else {
-                    R.drawable.app_icon
-                }
-            )
-        }
+        builder.setSmallIcon(
+            // vector form icons don't work reliably on older androids
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                R.drawable.app_icon_novect
+            } else {
+                R.drawable.app_icon
+            }
+        )
         return builder
     }
 
@@ -435,11 +432,11 @@ class MeshServiceNotifications(
         message: String
     ): Notification {
         if (!::messageNotificationBuilder.isInitialized) {
-            messageNotificationBuilder = commonBuilder(messageChannelId)
+            messageNotificationBuilder =
+                commonBuilder(messageChannelId, createOpenMessageIntent(contactKey))
         }
         val person = Person.Builder().setName(name).build()
         with(messageNotificationBuilder) {
-            setContentIntent(createOpenMessageIntent(contactKey))
             priority = NotificationCompat.PRIORITY_DEFAULT
             setCategory(Notification.CATEGORY_MESSAGE)
             setAutoCancel(true)
