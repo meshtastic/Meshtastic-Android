@@ -38,6 +38,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.automirrored.outlined.VolumeMute
+import androidx.compose.material.icons.automirrored.twotone.Message
 import androidx.compose.material.icons.filled.Air
 import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.Bolt
@@ -109,6 +110,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ErrorResult
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
+import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.model.DeviceHardware
@@ -151,11 +153,13 @@ private enum class LogsType(
     HOST(R.string.host_metrics_log, Icons.Default.Memory, Route.HostMetricsLog),
 }
 
+@Suppress("LongMethod")
 @Composable
 fun NodeDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: MetricsViewModel = hiltViewModel(),
     uiViewModel: UIViewModel = hiltViewModel(),
+    navigateToMessages: (String) -> Unit,
     onNavigate: (Route) -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -191,8 +195,16 @@ fun NodeDetailScreen(
                 when (action) {
                     is Route -> onNavigate(action)
                     is ServiceAction -> viewModel.onServiceAction(action)
+
                     is NodeMenuAction -> {
-                        uiViewModel.handleNodeMenuAction(action)
+                        if (action is NodeMenuAction.DirectMessage) {
+                            val hasPKC = uiViewModel.ourNodeInfo.value?.hasPKC == true
+                            val channel =
+                                if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
+                            navigateToMessages("$channel${node.user.id}")
+                        } else {
+                            uiViewModel.handleNodeMenuAction(action)
+                        }
                     }
 
                     else -> debug("Unhandled action: $action")
@@ -381,6 +393,14 @@ private fun DeviceActions(
     )
 
     if (!isLocal) {
+        NodeActionButton(
+            title = stringResource(id = R.string.direct_message),
+            icon = Icons.AutoMirrored.TwoTone.Message,
+            enabled = true,
+            onClick = {
+                onAction(NodeMenuAction.DirectMessage(node))
+            }
+        )
         NodeActionButton(
             title = stringResource(id = R.string.request_metadata),
             icon = Icons.Default.Memory,

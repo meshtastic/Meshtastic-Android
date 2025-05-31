@@ -58,14 +58,22 @@ fun NavGraphBuilder.nodeDetailGraph(
             }
             NodeDetailScreen(
                 uiViewModel = uiViewModel,
-                viewModel = hiltViewModel(parentEntry),
-            ) {
-                navController.navigate(it) {
-                    popUpTo(Route.NodeDetail()) {
-                        inclusive = false
+                navigateToMessages = {
+                    navController.navigate(Route.Messages(it)) {
+                        popUpTo(Route.NodeDetail()) {
+                            inclusive = false
+                        }
                     }
-                }
-            }
+                },
+                onNavigate = {
+                    navController.navigate(it) {
+                        popUpTo(Route.NodeDetail()) {
+                            inclusive = false
+                        }
+                    }
+                },
+                viewModel = hiltViewModel(parentEntry),
+            )
         }
         NodeDetailRoute.entries.forEach { nodeDetailRoute ->
             composable(nodeDetailRoute.route::class) { backStackEntry ->
