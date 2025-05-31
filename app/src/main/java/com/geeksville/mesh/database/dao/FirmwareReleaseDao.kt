@@ -33,8 +33,8 @@ interface FirmwareReleaseDao {
     suspend fun deleteAll()
 
     @Query("SELECT * FROM firmware_release")
-    suspend fun getAllReleases(): List<FirmwareReleaseEntity>?
+    suspend fun getAllReleases(): List<FirmwareReleaseEntity>
 
     @Query("SELECT * FROM firmware_release WHERE release_type = :releaseType")
-    suspend fun getReleasesByType(releaseType: FirmwareReleaseType): List<FirmwareReleaseEntity>?
+    suspend fun getReleasesByType(releaseType: FirmwareReleaseType): List<FirmwareReleaseEntity>
 }
