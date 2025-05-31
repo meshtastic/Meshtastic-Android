@@ -455,7 +455,6 @@
     <string name="use_i2s_as_buzzer">Usar I2S como buzzer</string>
     <string name="lora_config">Configuração de LoRa</string>
     <string name="use_modem_preset">Usar predefinição do modem</string>
-    <string name="modem_preset">Predefinição de modem</string>
     <string name="bandwidth">Largura de banda</string>
     <string name="spread_factor">Fator de difusão</string>
     <string name="coding_rate">Índice de codificação</string>
