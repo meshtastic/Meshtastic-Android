@@ -39,7 +39,6 @@ import com.geeksville.mesh.ui.map.MapView
 import com.geeksville.mesh.ui.message.MessageScreen
 import com.geeksville.mesh.ui.message.QuickChatScreen
 import com.geeksville.mesh.ui.node.NodeScreen
-import com.geeksville.mesh.ui.sharing.ChannelScreen
 import com.geeksville.mesh.ui.sharing.ShareScreen
 import kotlinx.serialization.Serializable
 
@@ -54,6 +53,9 @@ const val DEEP_LINK_BASE_URI = "meshtastic://meshtastic"
 
 @Serializable
 sealed interface Graph : Route {
+    @Serializable
+    data class ChannelsGraph(val destNum: Int?)
+
     @Serializable
     data class NodeDetailGraph(val destNum: Int) : Graph
 
@@ -241,9 +243,9 @@ fun NavGraph(
         composable<Route.Map> {
             MapView(uIViewModel)
         }
-        composable<Route.Channels> {
-            ChannelScreen(uIViewModel)
-        }
+
+        channelsGraph(navController, uIViewModel)
+
         composable<Route.Connections>(
             deepLinks = listOf(
                 navDeepLink {

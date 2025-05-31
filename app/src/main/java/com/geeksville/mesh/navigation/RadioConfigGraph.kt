@@ -77,6 +77,11 @@ import com.geeksville.mesh.ui.radioconfig.components.StoreForwardConfigScreen
 import com.geeksville.mesh.ui.radioconfig.components.TelemetryConfigScreen
 import com.geeksville.mesh.ui.radioconfig.components.UserConfigScreen
 
+fun getNavRouteFrom(routeName: String): Route? {
+    return ConfigRoute.entries.find { it.name == routeName }?.route
+        ?: ModuleRoute.entries.find { it.name == routeName }?.route
+}
+
 fun NavGraphBuilder.radioConfigGraph(navController: NavHostController, uiViewModel: UIViewModel) {
     navigation<Graph.RadioConfigGraph>(
         startDestination = Route.RadioConfig(),

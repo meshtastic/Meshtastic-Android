@@ -23,14 +23,22 @@ import android.os.RemoteException
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.twotone.Check
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material.icons.twotone.ContentCopy
@@ -56,6 +64,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.runtime.toMutableStateList
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
@@ -64,13 +73,14 @@ import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -85,24 +95,21 @@ import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.getCameraPermissions
 import com.geeksville.mesh.android.hasCameraPermission
 import com.geeksville.mesh.channelSet
-import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
-import com.geeksville.mesh.model.ChannelOption
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannelUrl
 import com.geeksville.mesh.model.qrCode
 import com.geeksville.mesh.model.toChannelSet
+import com.geeksville.mesh.navigation.ConfigRoute
+import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.ui.common.components.AdaptiveTwoPane
-import com.geeksville.mesh.ui.common.components.DropDownPreference
 import com.geeksville.mesh.ui.common.components.PreferenceFooter
-import com.geeksville.mesh.ui.common.components.dragContainer
-import com.geeksville.mesh.ui.common.components.dragDropItemsIndexed
-import com.geeksville.mesh.ui.common.components.rememberDragDropState
-import com.geeksville.mesh.ui.radioconfig.components.ChannelCard
 import com.geeksville.mesh.ui.radioconfig.components.ChannelSelection
-import com.geeksville.mesh.ui.radioconfig.components.EditChannelDialog
+import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
@@ -111,20 +118,44 @@ import kotlinx.coroutines.launch
 @Composable
 fun ChannelScreen(
     viewModel: UIViewModel = hiltViewModel(),
+    radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
+    onNavigate: (Route) -> Unit
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
 
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
+    val radioConfigState by radioConfigViewModel.radioConfigState.collectAsStateWithLifecycle()
+
     val enabled = connectionState == MeshService.ConnectionState.CONNECTED && !viewModel.isManaged
 
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     var channelSet by remember(channels) { mutableStateOf(channels) }
-    var showChannelEditor by rememberSaveable { mutableStateOf(false) }
-    var showSendDialog by remember { mutableStateOf(false) }
+    val modemPresetName by remember(channels) {
+        mutableStateOf(Channel(loraConfig = channels.loraConfig).name)
+    }
+
     var showResetDialog by remember { mutableStateOf(false) }
     var showScanDialog by remember { mutableStateOf(false) }
-    val isEditing = channelSet != channels || showChannelEditor
+
+    /* Animate waiting for the channel configurations */
+    var isWaiting by remember { mutableStateOf(false) }
+    if (isWaiting) {
+        PacketResponseStateDialog(
+            state = radioConfigState.responseState,
+            onDismiss = {
+                isWaiting = false
+                radioConfigViewModel.clearPacketResponse()
+            },
+            onComplete = {
+                getNavRouteFrom(radioConfigState.route)?.let { route ->
+                    isWaiting = false
+                    radioConfigViewModel.clearPacketResponse()
+                    onNavigate(route)
+                }
+            },
+        )
+    }
 
     /* Holds selections made by the user for QR generation. */
     val channelSelections = rememberSaveable(
@@ -139,24 +170,10 @@ fun ChannelScreen(
         settings.clear()
         settings.addAll(result)
     }
-    val modemPresetName = Channel(loraConfig = channelSet.loraConfig).name
 
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
             viewModel.requestChannelUrl(result.contents.toUri())
-        }
-    }
-
-    fun updateSettingsList(update: MutableList<ChannelProtos.ChannelSettings>.() -> Unit) {
-        try {
-            val list = channelSet.settingsList.toMutableList()
-            list.update()
-            channelSet = channelSet.copy {
-                settings.clear()
-                settings.addAll(list)
-            }
-        } catch (ex: Exception) {
-            errormsg("Error updating ChannelSettings list:", ex)
         }
     }
 
@@ -209,8 +226,6 @@ fun ChannelScreen(
 
             // Tell the user to try again
             viewModel.showSnackbar(R.string.cant_change_no_radio)
-        } finally {
-            showChannelEditor = false
         }
     }
 
@@ -255,146 +270,51 @@ fun ChannelScreen(
         )
     }
 
-    if (showSendDialog) {
-        AlertDialog(
-            onDismissRequest = {
-                showSendDialog = false
-                showChannelEditor = false
-                channelSet = channels
-            },
-            title = { Text(text = stringResource(id = R.string.change_channel)) },
-            text = { Text(text = stringResource(id = R.string.are_you_sure_channel)) },
-            confirmButton = {
-                TextButton(onClick = {
-                    installSettings(channelSet)
-                    showSendDialog = false
-                }) { Text(text = stringResource(id = R.string.accept)) }
-                installSettings(channelSet)
-            }
-        )
-    }
-
-    var showEditChannelDialog: Int? by remember { mutableStateOf(null) }
-
-    if (showEditChannelDialog != null) {
-        val index = showEditChannelDialog ?: return
-        EditChannelDialog(
-            channelSettings = with(channelSet) {
-                if (settingsCount > index) getSettings(index) else channelSettings { }
-            },
-            modemPresetName = modemPresetName,
-            onAddClick = {
-                with(channelSet) {
-                    if (settingsCount > index) {
-                        channelSet = copy { settings[index] = it }
-                    } else {
-                        channelSet = copy { settings.add(it) }
-                    }
-                }
-                showEditChannelDialog = null
-            },
-            onDismissRequest = { showEditChannelDialog = null }
-        )
-    }
-
     val listState = rememberLazyListState()
-    val dragDropState = rememberDragDropState(listState) { fromIndex, toIndex ->
-        updateSettingsList { add(toIndex, removeAt(fromIndex)) }
-    }
-
     LazyColumn(
-        modifier = Modifier.dragContainer(
-            dragDropState = dragDropState,
-            haptics = LocalHapticFeedback.current,
-        ),
         state = listState,
         contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
     ) {
-        if (!showChannelEditor) {
-            item {
-                ChannelListView(
-                    enabled = enabled,
-                    channelSet = channelSet,
-                    modemPresetName = modemPresetName,
-                    channelSelections = channelSelections,
-                    onClick = { showChannelEditor = true }
-                )
-                EditChannelUrl(
-                    enabled = enabled,
-                    channelUrl = selectedChannelSet.getChannelUrl(),
-                    onConfirm = viewModel::requestChannelUrl
-                )
-            }
-        } else {
-            dragDropItemsIndexed(
-                items = channelSet.settingsList,
-                dragDropState = dragDropState,
-            ) { index, channel, isDragging ->
-                ChannelCard(
-                    index = index,
-                    title = channel.name.ifEmpty { modemPresetName },
-                    enabled = enabled,
-                    onEditClick = { showEditChannelDialog = index },
-                    onDeleteClick = { updateSettingsList { removeAt(index) } }
-                )
-            }
-            item {
-                OutlinedButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        channelSet = channelSet.copy {
-                            settings.add(channelSettings { psk = Channel.default.settings.psk })
-                        }
-                        showEditChannelDialog = channelSet.settingsList.lastIndex
-                    },
-                    enabled = enabled && viewModel.maxChannels > channelSet.settingsCount,
-                ) { Text(text = stringResource(R.string.add)) }
-            }
-        }
-
         item {
-            DropDownPreference(
-                title = stringResource(id = R.string.channel_options),
+            ChannelListView(
                 enabled = enabled,
-                items = ChannelOption.entries
-                    .map { it.modemPreset to stringResource(it.configRes) },
-                selectedItem = channelSet.loraConfig.modemPreset,
-                onItemSelected = {
-                    val lora = channelSet.loraConfig.copy { modemPreset = it }
-                    channelSet = channelSet.copy { loraConfig = lora }
+                channelSet = channelSet,
+                modemPresetName = modemPresetName,
+                channelSelections = channelSelections,
+                onClick = {
+                    isWaiting = true
+                    radioConfigViewModel.setResponseStateLoading(ConfigRoute.CHANNELS)
                 }
             )
+            EditChannelUrl(
+                enabled = enabled,
+                channelUrl = selectedChannelSet.getChannelUrl(),
+                onConfirm = viewModel::requestChannelUrl
+            )
         }
-
         item {
-            if (isEditing) {
-                PreferenceFooter(
-                    enabled = enabled,
-                    onCancelClicked = {
-                        focusManager.clearFocus()
-                        showChannelEditor = false
-                        channelSet = channels
-                    },
-                    onSaveClicked = {
-                        focusManager.clearFocus()
-                        showSendDialog = true
-                    }
-                )
-            } else {
-                PreferenceFooter(
-                    enabled = enabled,
-                    negativeText = R.string.reset,
-                    onNegativeClicked = {
-                        focusManager.clearFocus()
-                        showResetDialog = true
-                    },
-                    positiveText = R.string.scan,
-                    onPositiveClicked = {
-                        focusManager.clearFocus()
-                        if (context.hasCameraPermission()) zxingScan() else showScanDialog = true
-                    }
-                )
-            }
+           ModemPresetInfo(
+               modemPresetName = modemPresetName,
+               onClick = {
+                   isWaiting = true
+                   radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
+               }
+           )
+        }
+        item {
+            PreferenceFooter(
+                enabled = enabled,
+                negativeText = R.string.reset,
+                onNegativeClicked = {
+                    focusManager.clearFocus()
+                    showResetDialog = true
+                },
+                positiveText = R.string.scan,
+                onPositiveClicked = {
+                    focusManager.clearFocus()
+                    if (context.hasCameraPermission()) zxingScan() else showScanDialog = true
+                }
+            )
         }
     }
 }
@@ -433,6 +353,7 @@ private fun EditChannelUrl(
         enabled = enabled,
         label = { Text(stringResource(R.string.url)) },
         isError = isError,
+        shape = RoundedCornerShape(8.dp),
         trailingIcon = {
             val label = stringResource(R.string.url)
             val isUrlEqual = valueState == channelUrl
@@ -557,6 +478,55 @@ private fun ChannelListView(
                     .padding(vertical = 4.dp)
             )
         },
+    )
+}
+
+@Composable
+private fun ModemPresetInfo(
+    modemPresetName: String,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .padding(top = 12.dp)
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .border(
+                1.dp,
+                MaterialTheme.colorScheme.onBackground,
+                RoundedCornerShape(8.dp)
+            ),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(16.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.modem_preset),
+                fontSize = 16.sp,
+            )
+            Text(
+                text = modemPresetName,
+                fontSize = 14.sp,
+            )
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Icon(
+            imageVector = Icons.Default.ChevronRight,
+            contentDescription = stringResource(R.string.navigate_into_label),
+            modifier = Modifier.padding(end = 16.dp)
+        )
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun ModemPresetInfoPreview() {
+    ModemPresetInfo(
+        modemPresetName = "Long Fast",
+        onClick = {}
     )
 }
 

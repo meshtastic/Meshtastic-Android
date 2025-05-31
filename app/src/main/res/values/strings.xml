@@ -481,7 +481,7 @@
     <string name="use_i2s_as_buzzer">Use I2S as buzzer</string>
     <string name="lora_config">LoRa Config</string>
     <string name="use_modem_preset">Use modem preset</string>
-    <string name="modem_preset">Modem preset</string>
+    <string name="modem_preset">Modem Preset</string>
     <string name="bandwidth">Bandwidth</string>
     <string name="spread_factor">Spread factor</string>
     <string name="coding_rate">Coding rate</string>
@@ -655,6 +655,7 @@
     <string name="disk_free">Disk Free</string>
     <string name="load">Load</string>
     <string name="user_string">User String</string>
+    <string name="navigate_into_label">Navigate Into</string>
     <string name="connections">Connections</string>
     <string name="map">Map</string>
     <string name="contacts">Contacts</string>
