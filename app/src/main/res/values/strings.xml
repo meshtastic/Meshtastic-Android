@@ -655,7 +655,7 @@
     <string name="disk_free">Disk Free</string>
     <string name="load">Load</string>
     <string name="user_string">User String</string>
-    <string name="navigate_into">Navigate Into</string>
+    <string name="navigate_into_label">Navigate Into</string>
     <string name="connections">Connections</string>
     <string name="map">Map</string>
     <string name="contacts">Contacts</string>

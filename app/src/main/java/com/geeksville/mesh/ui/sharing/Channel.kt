@@ -515,8 +515,7 @@ private fun ModemPresetInfo(
         Spacer(modifier = Modifier.width(16.dp))
         Icon(
             imageVector = Icons.Default.ChevronRight,
-            contentDescription = stringResource(R.string.navigate_into),
-            tint = LocalContentColor.current,
+            contentDescription = stringResource(R.string.navigate_into_label),
             modifier = Modifier.padding(end = 16.dp)
         )
     }
