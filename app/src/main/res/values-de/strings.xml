@@ -446,7 +446,6 @@
     <string name="use_i2s_as_buzzer">I2S als Buzzer verwenden</string>
     <string name="lora_config">LoRa Einstellungen</string>
     <string name="use_modem_preset">Modem Vorlage verwenden</string>
-    <string name="modem_preset">Modem Voreinstellungen</string>
     <string name="bandwidth">Bandbreite</string>
     <string name="spread_factor">Spreizfaktor</string>
     <string name="coding_rate">Fehlerkorrektur</string>

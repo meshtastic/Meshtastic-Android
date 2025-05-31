@@ -631,5 +631,9 @@
     <string name="disk_free">Vapaa levytila</string>
     <string name="load">Lataa</string>
     <string name="user_string">Käyttäjän syöte</string>
+    <string name="navigate_into_label">Siirry kohtaan</string>
+    <string name="connections">Yhteydet</string>
     <string name="map">Kartta</string>
+    <string name="contacts">Yhteystiedot</string>
+    <string name="nodes">Laitteet</string>
 </resources>

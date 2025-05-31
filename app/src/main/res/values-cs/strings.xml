@@ -451,7 +451,6 @@
     <string name="use_i2s_as_buzzer">Použít I2S jako bzučák</string>
     <string name="lora_config">LoRa nastavení</string>
     <string name="use_modem_preset">Použít předvolbu modemu</string>
-    <string name="modem_preset">Předvolba modemu</string>
     <string name="bandwidth">Šířka pásma</string>
     <string name="frequency_offset_mhz">Posun frekvence (MHz)</string>
     <string name="region_frequency_plan">Region (plán frekvence)</string>

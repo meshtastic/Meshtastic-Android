@@ -457,7 +457,6 @@
     <string name="use_i2s_as_buzzer">I2S\'yi zırnı olarak kullan</string>
     <string name="lora_config">LoRa Ayarı</string>
     <string name="use_modem_preset">Modem ön ayarını kullan</string>
-    <string name="modem_preset">Modem ön ayarı</string>
     <string name="bandwidth">Bant genişliği</string>
     <string name="spread_factor">Yayılma faktörü</string>
     <string name="coding_rate">Kodlama oranı</string>

@@ -446,7 +446,6 @@
     <string name="use_i2s_as_buzzer">I2S 부저 사용</string>
     <string name="lora_config">LoRa 설정</string>
     <string name="use_modem_preset">모뎀 프리셋 사용</string>
-    <string name="modem_preset">모뎀 프리셋</string>
     <string name="bandwidth">대역폭</string>
     <string name="spread_factor">Spread factor</string>
     <string name="coding_rate">Coding rate</string>

@@ -408,7 +408,6 @@
     <string name="ringtone">Beltoon</string>
     <string name="lora_config">LoRa Configuratie</string>
     <string name="use_modem_preset">Gebruik modem preset</string>
-    <string name="modem_preset">Modem preset</string>
     <string name="bandwidth">Bandbreedte</string>
     <string name="spread_factor">Spread factor</string>
     <string name="coding_rate">Codering ratio</string>

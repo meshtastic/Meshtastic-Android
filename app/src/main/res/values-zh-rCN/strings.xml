@@ -459,7 +459,6 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="use_i2s_as_buzzer">使用 I2S 作为蜂鸣器</string>
     <string name="lora_config">LoRa 配置</string>
     <string name="use_modem_preset">使用调制解调器预设</string>
-    <string name="modem_preset">调制解调器预设</string>
     <string name="bandwidth">带宽</string>
     <string name="spread_factor">传播因子</string>
     <string name="coding_rate">编码速率</string>

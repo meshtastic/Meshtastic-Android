@@ -460,7 +460,6 @@
     <string name="use_i2s_as_buzzer">Использовать I2S как буззер</string>
     <string name="lora_config">Настройка LoRa</string>
     <string name="use_modem_preset">Использовать шаблон модема</string>
-    <string name="modem_preset">Шаблон модема</string>
     <string name="bandwidth">Ширина канала</string>
     <string name="spread_factor">Коэффициент распространения</string>
     <string name="coding_rate">Частота кодирования</string>
