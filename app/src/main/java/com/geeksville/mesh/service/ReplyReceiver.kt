@@ -49,7 +49,7 @@ class ReplyReceiver : BroadcastReceiver() {
             val contactKey = intent.getStringExtra(CONTACT_KEY) ?: ""
             val message = remoteInput.getCharSequence(
                 KEY_TEXT_REPLY
-            ).toString()
+            )?.toString() ?: ""
             sendMessage(message, contactKey)
             MeshServiceNotifications(context).cancelMessageNotification(contactKey)
         }
