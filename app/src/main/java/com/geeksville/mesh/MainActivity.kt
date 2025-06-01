@@ -63,7 +63,6 @@ import com.geeksville.mesh.android.permissionMissing
 import com.geeksville.mesh.android.shouldShowRequestPermissionRationale
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.model.BluetoothViewModel
-import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.DEEP_LINK_BASE_URI
 import com.geeksville.mesh.service.MeshService
@@ -272,33 +271,6 @@ class MainActivity : AppCompatActivity(), Logging {
     private fun onMeshConnectionChanged(newConnection: MeshService.ConnectionState) {
         if (newConnection == MeshService.ConnectionState.CONNECTED) {
             serviceRepository.meshService?.let { service ->
-                try {
-                    val info: MyNodeInfo? = service.myNodeInfo // this can be null
-
-                    if (info != null) {
-                        val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
-                        if (isOld) {
-                            model.showAlert(
-                                getString(R.string.app_too_old),
-                                getString(R.string.must_update),
-                                dismissable = false,
-                            )
-                        } else {
-                            // If we are already doing an update don't put up a dialog or try to get device info
-                            val isUpdating = service.updateStatus >= 0
-                            if (!isUpdating) {
-                                val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
-                                if (curVer < MeshService.minDeviceVersion) {
-                                    val title = getString(R.string.firmware_too_old)
-                                    val message = getString(R.string.firmware_old)
-                                    model.showAlert(title, message, dismissable = false)
-                                }
-                            }
-                        }
-                    }
-                } catch (ex: RemoteException) {
-                    warn("Abandoning connect $ex, because we probably just lost device connection")
-                }
                 // if provideLocation enabled: Start providing location (from phone GPS) to mesh
                 if (model.provideLocation.value == true) {
                     service.startProvideLocation()
@@ -349,7 +321,6 @@ class MainActivity : AppCompatActivity(), Logging {
                     onConfirm = {
                         showAlertAppNotificationSettings()
                     },
-                    dismissable = true
                 ).also {
                     prefs.edit { putBoolean("dnd_rationale_shown", true) }
                 }

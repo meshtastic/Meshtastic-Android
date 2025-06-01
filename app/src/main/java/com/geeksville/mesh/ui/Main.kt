@@ -48,6 +48,7 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -56,6 +57,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -68,7 +70,9 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.NavGraph
 import com.geeksville.mesh.navigation.Route
@@ -112,6 +116,9 @@ fun MainScreen(
             ScannedQrCodeDialog(viewModel, newChannelSet)
         }
     }
+
+    VersionChecks(viewModel)
+
     val title by viewModel.title.collectAsStateWithLifecycle()
 
     val alertDialogState by viewModel.currentAlert.collectAsStateWithLifecycle()
@@ -175,6 +182,47 @@ fun MainScreen(
             uIViewModel = viewModel,
             navController = navController,
         )
+    }
+}
+
+@Composable
+private fun VersionChecks(
+    viewModel: UIViewModel,
+) {
+    val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
+    val myNodeInfo by viewModel.myNodeInfo.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    // Check if the device is running an old app version or firmware version
+    LaunchedEffect(connectionState, myNodeInfo) {
+        if (connectionState == MeshService.ConnectionState.CONNECTED) {
+            myNodeInfo?.let { info ->
+                val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
+                val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
+                if (isOld) {
+                    viewModel.showAlert(
+                        context.getString(R.string.app_too_old),
+                        context.getString(R.string.must_update),
+                        dismissable = false,
+                        onConfirm = {
+                            val service = viewModel.meshService ?: return@showAlert
+                            MeshService.changeDeviceAddress(context, service, "n")
+                        }
+                    )
+                } else if (curVer < MeshService.minDeviceVersion) {
+                    val title = context.getString(R.string.firmware_too_old)
+                    val message = context.getString(R.string.firmware_old)
+                    viewModel.showAlert(
+                        title = title,
+                        message = message,
+                        dismissable = false,
+                        onConfirm = {
+                            val service = viewModel.meshService ?: return@showAlert
+                            MeshService.changeDeviceAddress(context, service, "n")
+                        }
+                    )
+                }
+            }
+        }
     }
 }
 
