@@ -42,6 +42,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -318,13 +319,12 @@ fun ConnectionsScreen(
                         )
                     }
                 }
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
+                NodeActionButton(
+                    title = stringResource(id = R.string.radio_configuration),
+                    icon = Icons.Default.Settings,
+                    enabled = true,
                     onClick = onNavigateToRadioConfig
-
-                ) {
-                    Text(stringResource(R.string.radio_configuration))
-                }
+                )
                 Spacer(modifier = Modifier.height(8.dp))
                 if (regionUnset && selectedDevice != "m") {
                     NodeActionButton(
