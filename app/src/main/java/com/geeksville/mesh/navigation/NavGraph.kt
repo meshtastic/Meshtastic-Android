@@ -32,7 +32,6 @@ import androidx.navigation.toRoute
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
-import com.geeksville.mesh.ui.connections.ConnectionsScreen
 import com.geeksville.mesh.ui.contact.ContactsScreen
 import com.geeksville.mesh.ui.debug.DebugScreen
 import com.geeksville.mesh.ui.map.MapView
@@ -55,6 +54,9 @@ const val DEEP_LINK_BASE_URI = "meshtastic://meshtastic"
 sealed interface Graph : Route {
     @Serializable
     data class ChannelsGraph(val destNum: Int?)
+
+    @Serializable
+    data class ConnectionsGraph(val destNum: Int?)
 
     @Serializable
     data class NodeDetailGraph(val destNum: Int) : Graph
@@ -246,26 +248,8 @@ fun NavGraph(
 
         channelsGraph(navController, uIViewModel)
 
-        composable<Route.Connections>(
-            deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "$DEEP_LINK_BASE_URI/connections"
-                    action = "android.intent.action.VIEW"
-                }
-            )
-        ) { backStackEntry ->
-            ConnectionsScreen(
-                uIViewModel,
-                onNavigateToRadioConfig = {
-                    navController.navigate(Route.RadioConfig()) {
-                        popUpTo(Route.Connections) {
-                            inclusive = false
-                        }
-                    }
-                },
-                onNavigateToNodeDetails = { navController.navigate(Route.NodeDetail(it)) }
-            )
-        }
+        connectionsGraph(navController, uIViewModel)
+
         composable<Route.DebugPanel> {
             DebugScreen()
         }
