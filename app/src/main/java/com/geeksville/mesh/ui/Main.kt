@@ -197,7 +197,7 @@ private fun VersionChecks(
         if (connectionState == MeshService.ConnectionState.CONNECTED) {
             myNodeInfo?.let { info ->
                 val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
-                val curVer = DeviceVersion(BuildConfig.MIN_DEVICE_VERSION)
+                val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
                 if (isOld) {
                     viewModel.showAlert(
                         context.getString(R.string.app_too_old),
