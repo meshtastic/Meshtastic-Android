@@ -23,6 +23,13 @@ import com.geeksville.mesh.DataPacket
 import dagger.hilt.android.AndroidEntryPoint
 import jakarta.inject.Inject
 
+/**
+ * A [BroadcastReceiver] that handles inline replies from notifications.
+ *
+ * This receiver is triggered when a user replies to a message directly from a notification.
+ * It extracts the reply text and the contact key from the intent, sends the message
+ * using the [ServiceRepository], and then cancels the original notification.
+ */
 @AndroidEntryPoint
 class ReplyReceiver : BroadcastReceiver() {
     @Inject
@@ -34,7 +41,7 @@ class ReplyReceiver : BroadcastReceiver() {
         const val KEY_TEXT_REPLY = "key_text_reply"
     }
 
-    fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
+    private fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
         // contactKey: unique contact key filter (channel)+(nodeId)
         val channel = contactKey[0].digitToIntOrNull()
         val dest = if (channel != null) contactKey.substring(1) else contactKey

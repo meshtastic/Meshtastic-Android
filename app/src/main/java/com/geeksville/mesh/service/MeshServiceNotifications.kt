@@ -319,6 +319,7 @@ class MeshServiceNotifications(
     fun cancelMessageNotification(contactKey: String) {
         notificationManager.cancel(contactKey.hashCode())
     }
+
     fun updateMessageNotification(contactKey: String, name: String, message: String) =
         notificationManager.notify(
             contactKey.hashCode(), // show unique notifications,
@@ -388,7 +389,7 @@ class MeshServiceNotifications(
         contentIntent: PendingIntent? = null
     ): NotificationCompat.Builder {
         val builder = NotificationCompat.Builder(context, channel)
-            .setDefaults(Notification.DEFAULT_ALL)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(contentIntent ?: openAppIntent)
 
