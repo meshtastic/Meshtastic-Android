@@ -68,10 +68,9 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    //Protobuf
+    implementation(libs.bundles.androidx)
     implementation(libs.bundles.protobuf)
 
-    //Serialization
     implementation(libs.kotlinx.serialization.json)
 
     //OSM

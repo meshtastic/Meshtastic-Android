@@ -10,6 +10,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.RequiresApi;
@@ -19,6 +22,7 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
 import com.geeksville.mesh.IMeshService;
+import com.geeksville.mesh.MessageStatus;
 import com.geeksville.mesh.NodeInfo;
 
 import java.util.Objects;
@@ -43,6 +47,9 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        TextView mainTextView = findViewById(R.id.mainTextView);
+        ImageView statusImageView = findViewById(R.id.statusImageView);
+
         // Now you can call methods on meshService
         serviceConnection = new ServiceConnection() {
             @Override
@@ -50,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
                 meshService = IMeshService.Stub.asInterface(service);
                 Log.i(TAG, "Connected to MeshService");
                 isMeshServiceBound = true;
+                statusImageView.setImageResource(android.R.color.holo_green_light);
             }
 
             @Override
@@ -76,11 +84,47 @@ public class MainActivity extends AppCompatActivity {
                         try {
                             NodeInfo ni = intent.getParcelableExtra("com.geeksville.mesh.NodeInfo");
                             Log.d(TAG, "NodeInfo: " + ni);
+                            mainTextView.setText("NodeInfo: " + ni);
                         } catch (Exception e) {
                             e.printStackTrace();
                             return;
                         }
                         break;
+                    case "com.geeksville.mesh.MESSAGE_STATUS":
+                        int id = intent.getIntExtra("com.geeksville.mesh.PacketId", 0);
+                        MessageStatus status = intent.getParcelableExtra("com.geeksville.mesh.Status");
+                        Log.d(TAG, "Message Status ID: " + id + " Status: " + status);
+                        break;
+                    case "com.geeksville.mesh.MESH_CONNECTED": {
+                        String extraConnected = intent.getStringExtra("com.geeksville.mesh.Connected");
+                        boolean connected = extraConnected.equals("CONNECTED");
+                        Log.d(TAG, "Received ACTION_MESH_CONNECTED: " + extraConnected);
+                        if (connected) {
+                            statusImageView.setImageResource(android.R.color.holo_green_light);
+                        }
+                        break;
+                    }
+                    case "com.geeksville.mesh.MESH_DISCONNECTED": {
+                        String extraConnected = intent.getStringExtra("com.geeksville.mesh.Disconnected");
+                        boolean disconnected = extraConnected.equals("DISCONNECTED");
+                        Log.d(TAG, "Received ACTION_MESH_DISTCONNECTED: " + extraConnected);
+                        if (disconnected) {
+                            statusImageView.setImageResource(android.R.color.holo_red_light);
+                        }
+                        break;
+                    }
+                    case "com.geeksville.mesh.RECEIVED.POSITION_APP": {
+                        // handle position app data
+                        try {
+                            NodeInfo ni = intent.getParcelableExtra("com.geeksville.mesh.NodeInfo");
+                            Log.d(TAG, "Position App NodeInfo: " + ni);
+                            mainTextView.setText("Position App NodeInfo: " + ni);
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            return;
+                        }
+                        break;
+                    }
                     default:
                         Log.w(TAG, "Unknown action: " + action);
                 }
@@ -88,7 +132,11 @@ public class MainActivity extends AppCompatActivity {
         };
 
         IntentFilter filter = new IntentFilter();
+        filter.addAction("com.geeksville.mesh.NODE_CHANGE");
         filter.addAction("com.geeksville.mesh.RECEIVED.NODEINFO_APP");
+        filter.addAction("com.geeksville.mesh.RECEIVED.POSITION_APP");
+        filter.addAction("com.geeksville.mesh.MESH_CONNECTED");
+        filter.addAction("com.geeksville.mesh.MESH_DISCONNECTED");
         registerReceiver(meshtasticReceiver, filter, Context.RECEIVER_EXPORTED);
         Log.d(TAG, "Registered meshtasticPacketReceiver");
 
