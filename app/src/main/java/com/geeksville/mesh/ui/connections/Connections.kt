@@ -98,9 +98,9 @@ import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.ui.node.NodeActionButton
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
-import com.geeksville.mesh.ui.radioconfig.NavCard
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
@@ -313,7 +313,7 @@ fun ConnectionsScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "${node.user.longName}",
+                            text = node.user.longName,
                             style = MaterialTheme.typography.titleLarge
                         )
                     }
@@ -327,14 +327,15 @@ fun ConnectionsScreen(
                 }
                 Spacer(modifier = Modifier.height(8.dp))
                 if (regionUnset && selectedDevice != "m") {
-                    NavCard(
-                        title = stringResource(R.string.set_your_region),
+                    NodeActionButton(
+                        title = stringResource(id = R.string.set_your_region),
                         icon = ConfigRoute.LORA.icon,
-                        enabled = true
-                    ) {
-                        isWaiting = true
-                        radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
-                    }
+                        enabled = true,
+                        onClick = {
+                            isWaiting = true
+                            radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
+                        }
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
                 }
             }
