@@ -221,7 +221,7 @@ class UIViewModel @Inject constructor(
                 html = html,
                 onConfirm = {
                     onConfirm?.invoke()
-                    if (dismissable) dismissAlert()
+                    dismissAlert()
                 },
                 onDismiss = {
                     if (dismissable) dismissAlert()

@@ -604,4 +604,5 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="firmware">固件</string>
     <string name="map">地图</string>
     <string name="nodes">节点</string>
+    <string name="reply">回复</string>
 </resources>
