@@ -87,7 +87,7 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
     Nodes(R.string.nodes, Icons.TwoTone.People, Route.Nodes),
     Map(R.string.map, Icons.TwoTone.Map, Route.Map),
     Channels(R.string.channels, Icons.TwoTone.Contactless, ChannelsRoutes.Channels),
-    Connections(R.string.connections, Icons.TwoTone.CloudOff, ConnectionsRoutes.ConnectionsGraph),
+    Connections(R.string.connections, Icons.TwoTone.CloudOff, ConnectionsRoutes.Connections),
     ;
 
     companion object {
