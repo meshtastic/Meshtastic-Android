@@ -19,6 +19,7 @@ package com.geeksville.mesh.ui.common.components
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Switch
@@ -54,12 +55,16 @@ fun SwitchPreference(
             },
             containerColor = containerColor ?: ListItemDefaults.colors().containerColor,
         ),
-        modifier = padding?.let { Modifier.padding(it) } ?: modifier,
+        modifier = (padding?.let { Modifier.padding(it) } ?: modifier).toggleable(
+            value = checked,
+            enabled = enabled,
+            onValueChange = onCheckedChange,
+        ),
         trailingContent = {
             Switch(
                 enabled = enabled,
                 checked = checked,
-                onCheckedChange = onCheckedChange,
+                onCheckedChange = null,
             )
         },
         supportingContent = {
