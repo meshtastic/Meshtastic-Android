@@ -27,15 +27,25 @@ import androidx.navigation.navigation
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.connections.ConnectionsScreen
 import com.geeksville.mesh.ui.radioconfig.components.LoRaConfigScreen
+import kotlinx.serialization.Serializable
+
+@Serializable
+sealed interface ConnectionsRoutes {
+    @Serializable
+    data object ConnectionsGraph : Graph
+
+    @Serializable
+    data object Connections : Route
+}
 
 /**
- * Navigation graph for for the top level ConnectionsScreen - [Route.Connections].
+ * Navigation graph for for the top level ConnectionsScreen - [ConnectionsRoutes.Connections].
  */
 fun NavGraphBuilder.connectionsGraph(navController: NavHostController, uiViewModel: UIViewModel) {
-    navigation<Graph.ConnectionsGraph>(
-        startDestination = Route.Connections,
+    navigation<ConnectionsRoutes.ConnectionsGraph>(
+        startDestination = ConnectionsRoutes.Connections,
     ) {
-        composable<Route.Connections>(
+        composable<ConnectionsRoutes.Connections>(
             deepLinks = listOf(
                 navDeepLink {
                     uriPattern = "$DEEP_LINK_BASE_URI/connections"
@@ -44,14 +54,14 @@ fun NavGraphBuilder.connectionsGraph(navController: NavHostController, uiViewMod
             )
         ) { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<Graph.ConnectionsGraph>()
+                navController.getBackStackEntry<ConnectionsRoutes.ConnectionsGraph>()
             }
             ConnectionsScreen(
                 uiViewModel,
                 radioConfigViewModel = hiltViewModel(parentEntry),
                 onNavigateToRadioConfig = {
                     navController.navigate(Route.RadioConfig()) {
-                        popUpTo(Route.Connections) {
+                        popUpTo(ConnectionsRoutes.Connections) {
                             inclusive = false
                         }
                     }
@@ -70,7 +80,7 @@ private fun NavGraphBuilder.configRoutes(
     ConfigRoute.entries.forEach { configRoute ->
         composable(configRoute.route::class) { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<Graph.ConnectionsGraph>()
+                navController.getBackStackEntry<ConnectionsRoutes.ConnectionsGraph>()
             }
             when (configRoute) {
                 ConfigRoute.LORA -> LoRaConfigScreen(hiltViewModel(parentEntry))

@@ -52,11 +52,9 @@ const val DEEP_LINK_BASE_URI = "meshtastic://meshtastic"
 
 @Serializable
 sealed interface Graph : Route {
+    // TODO perhaps this needs to not be in here either
     @Serializable
-    data class ChannelsGraph(val destNum: Int?)
-
-    @Serializable
-    data class ConnectionsGraph(val destNum: Int?)
+    data class ChannelsGraph(val destNum: Int?) : Graph
 
     @Serializable
     data class NodeDetailGraph(val destNum: Int) : Graph
@@ -78,9 +76,6 @@ sealed interface Route {
 
     @Serializable
     data object Channels : Route
-
-    @Serializable
-    data object Connections : Route
 
     @Serializable
     data object DebugPanel : Route
@@ -223,7 +218,7 @@ fun NavGraph(
     NavHost(
         navController = navController,
         startDestination = if (uIViewModel.bondedAddress.isNullOrBlank()) {
-            Route.Connections
+            ConnectionsRoutes.ConnectionsGraph
         } else {
             Route.Contacts
         },
