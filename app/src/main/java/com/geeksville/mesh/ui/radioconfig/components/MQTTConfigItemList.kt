@@ -15,10 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+@file:Suppress("LongMethod")
+
 package com.geeksville.mesh.ui.radioconfig.components
 
+import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -27,18 +29,17 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -46,6 +47,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.content.edit
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.MQTTConfig
@@ -65,11 +67,15 @@ import com.geeksville.mesh.util.DistanceUnit
 import com.geeksville.mesh.util.toDistanceString
 import kotlin.math.roundToInt
 
+const val MapConsentPreferencesKey = "map_consent_preferences"
+
 @Composable
 fun MQTTConfigScreen(
     viewModel: RadioConfigViewModel = hiltViewModel(),
 ) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val destNode by viewModel.destNode.collectAsStateWithLifecycle()
+    val destNum = destNode?.num
 
     if (state.responseState.isWaiting()) {
         PacketResponseStateDialog(
@@ -79,6 +85,7 @@ fun MQTTConfigScreen(
     }
 
     MQTTConfigItemList(
+        nodeNum = destNum,
         mqttConfig = state.moduleConfig.mqtt,
         enabled = state.connected,
         onSaveClicked = { mqttInput ->
@@ -90,13 +97,13 @@ fun MQTTConfigScreen(
 
 @Composable
 fun MQTTConfigItemList(
+    nodeNum: Int? = 0,
     mqttConfig: MQTTConfig,
     enabled: Boolean,
     onSaveClicked: (MQTTConfig) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     var mqttInput by rememberSaveable { mutableStateOf(mqttConfig) }
-    var showMapReportingWarning by rememberSaveable { mutableStateOf(true) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -212,27 +219,37 @@ fun MQTTConfigItemList(
         item { PreferenceCategory(text = stringResource(R.string.map_reporting)) }
 
         item {
-            SwitchPreference(
-                title = stringResource(R.string.map_reporting),
-                summary = stringResource(R.string.map_reporting_summary),
-                checked = showMapReportingWarning,
+            val sharedPrefs = LocalContext.current.getSharedPreferences(
+                MapConsentPreferencesKey,
+                Context.MODE_PRIVATE
+            )
+            MapReporting(
+                mapReportingEnabled = mqttInput.mapReportingEnabled,
+                onMapReportingEnabledChanged = {
+                    mqttInput = mqttInput.copy { mapReportingEnabled = it }
+                },
+                shouldReportLocation = mqttInput.mapReportSettings.shouldReportLocation ||
+                        sharedPrefs.getBoolean(
+                            nodeNum.toString(),
+                            false
+                        ),
+                onShouldReportLocationChanged = {
+                    sharedPrefs.edit { putBoolean(nodeNum.toString(), it) }
+                    mqttInput = mqttInput.copy {
+                        mapReportSettings = mapReportSettings.copy { shouldReportLocation = it }
+                    }
+                },
+                positionPrecision = mqttInput.mapReportSettings.positionPrecision,
+                onPositionPrecisionChanged = {
+                    mqttInput = mqttInput.copy {
+                        mapReportSettings = mapReportSettings.copy { positionPrecision = it }
+                    }
+                },
                 enabled = enabled,
-                onCheckedChange = { checked ->
-                    showMapReportingWarning = checked
-                }
+                focusManager = focusManager
             )
         }
-        if (showMapReportingWarning || mqttInput.mapReportingEnabled) {
-            item {
-                MapReporting(
-                    mqttConfig = mqttInput,
-                    onMQTTConfigChanged = { mqttInput = it },
-                    enabled = enabled,
-                    focusManager = focusManager
-                )
-            }
-            item { HorizontalDivider() }
-        }
+        item { HorizontalDivider() }
 
         item {
             PreferenceFooter(
@@ -252,81 +269,92 @@ fun MQTTConfigItemList(
 
 @Composable
 private fun MapReporting(
-    mqttConfig: MQTTConfig,
-    onMQTTConfigChanged: (MQTTConfig) -> Unit,
+    mapReportingEnabled: Boolean = false,
+    onMapReportingEnabledChanged: (Boolean) -> Unit = {},
+    shouldReportLocation: Boolean = false,
+    onShouldReportLocationChanged: (Boolean) -> Unit = {},
+    positionPrecision: Int = 0,
+    onPositionPrecisionChanged: (Int) -> Unit = {},
+    publishIntervalSecs: Int = 3600,
+    onPublishIntervalSecsChanged: (Int) -> Unit = {},
     enabled: Boolean,
     focusManager: FocusManager
 ) {
-    var mqttInput by remember { mutableStateOf(mqttConfig) }
-    Card(
-        modifier = Modifier.padding(16.dp),
-    ) {
-        Text(
-            text = stringResource(R.string.map_reporting_consent_header),
-            modifier = Modifier.padding(16.dp),
-        )
-        HorizontalDivider()
-        Text(
-            stringResource(R.string.map_reporting_consent_text),
-            modifier = Modifier.padding(16.dp)
-        )
 
-        SwitchPreference(
-            title = stringResource(R.string.i_agree),
-            summary = stringResource(R.string.i_agree_to_share_my_location),
-            checked = mqttInput.mapReportSettings.shouldReportLocation,
-            enabled = enabled,
-            onCheckedChange = { checked ->
-                val settings = mqttInput.mapReportSettings.copy { shouldReportLocation = checked }
-                mqttInput = mqttInput.copy {
-                    mapReportingEnabled = checked
-                    mapReportSettings = settings
-                }
-                onMQTTConfigChanged(
-                    mqttInput
-                )
-            },
-            containerColor = CardDefaults.cardColors().containerColor,
-        )
-        val unit = remember { DistanceUnit.getFromLocale() }
-        val value = mqttInput.mapReportSettings.positionPrecision
-        val onValueChanged = { newValue: Int ->
-            val settings = mqttInput.mapReportSettings.copy { positionPrecision = newValue }
-            mqttInput = mqttInput.copy { mapReportSettings = settings }
-            onMQTTConfigChanged(mqttInput)
+    var showMapReportingWarning by rememberSaveable { mutableStateOf(mapReportingEnabled) }
+    SwitchPreference(
+        title = stringResource(R.string.map_reporting),
+        summary = stringResource(R.string.map_reporting_summary),
+        checked = showMapReportingWarning,
+        enabled = enabled,
+        onCheckedChange = { checked ->
+            showMapReportingWarning = checked
+            if (checked && shouldReportLocation) {
+                onMapReportingEnabledChanged(true)
+            } else if (!checked) {
+                onMapReportingEnabledChanged(false)
+            }
         }
-        if(mqttInput.mapReportSettings.shouldReportLocation && mqttInput.mapReportingEnabled) {
-
-            Slider(
-                modifier = Modifier.padding(horizontal = 16.dp),
-                value = value.toFloat(),
-                onValueChange = { onValueChanged(it.roundToInt()) },
-                enabled = enabled,
-                valueRange = PositionPrecisionMin.toFloat()..PositionPrecisionMax.toFloat(),
-                steps = PositionPrecisionMax - PositionPrecisionMin - 1,
-            )
-
-            val precisionMeters = precisionBitsToMeters(value).toInt()
+    )
+    AnimatedVisibility(showMapReportingWarning) {
+        Card(
+            modifier = Modifier.padding(16.dp),
+        ) {
             Text(
-                text = precisionMeters.toDistanceString(unit),
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1,
+                text = stringResource(R.string.map_reporting_consent_header),
+                modifier = Modifier.padding(16.dp),
             )
-            EditTextPreference(
-                title = stringResource(R.string.map_reporting_interval_seconds),
-                value = mqttInput.mapReportSettings.publishIntervalSecs,
-                enabled = enabled && mqttConfig.mapReportingEnabled,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = {
-                    val settings = mqttInput.mapReportSettings.copy { publishIntervalSecs = it }
-                    mqttInput = mqttInput.copy {
-                        mapReportSettings = settings
+            HorizontalDivider()
+            Text(
+                stringResource(R.string.map_reporting_consent_text),
+                modifier = Modifier.padding(16.dp)
+            )
+
+            SwitchPreference(
+                title = stringResource(R.string.i_agree),
+                summary = stringResource(R.string.i_agree_to_share_my_location),
+                checked = shouldReportLocation,
+                enabled = enabled,
+                onCheckedChange = { checked ->
+                    if (checked) {
+                        // If the user agrees, we enable map reporting
+                        onMapReportingEnabledChanged(true)
+                        onShouldReportLocationChanged(true)
+                    } else {
+                        // If the user disagrees, we disable map reporting
+                        onMapReportingEnabledChanged(false)
+                        onShouldReportLocationChanged(false)
                     }
-                    onMQTTConfigChanged(mqttInput)
                 },
+                containerColor = CardDefaults.cardColors().containerColor,
             )
+            if (shouldReportLocation && mapReportingEnabled) {
+                Slider(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    value = positionPrecision.toFloat(),
+                    onValueChange = { onPositionPrecisionChanged(it.roundToInt()) },
+                    enabled = enabled,
+                    valueRange = PositionPrecisionMin.toFloat()..PositionPrecisionMax.toFloat(),
+                    steps = PositionPrecisionMax - PositionPrecisionMin - 1,
+                )
+                val precisionMeters = precisionBitsToMeters(positionPrecision).toInt()
+                val unit = DistanceUnit.getFromLocale()
+                Text(
+                    text = precisionMeters.toDistanceString(unit),
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                    fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                )
+                EditTextPreference(
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    title = stringResource(R.string.map_reporting_interval_seconds),
+                    value = publishIntervalSecs,
+                    enabled = enabled,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = onPublishIntervalSecsChanged,
+                )
+            }
         }
     }
 }

@@ -42,9 +42,9 @@ fun SwitchPreference(
 ) {
     ListItem(
         colors = ListItemDefaults.colors().copy(
-            headlineColor = if(enabled){
+            headlineColor = if (enabled) {
                 ListItemDefaults.colors().headlineColor
-            }else{
+            } else {
                 ListItemDefaults.colors().headlineColor.copy(alpha = 0.5f)
             },
             supportingTextColor = if (enabled) {
