@@ -52,10 +52,6 @@ const val DEEP_LINK_BASE_URI = "meshtastic://meshtastic"
 
 @Serializable
 sealed interface Graph : Route {
-    // TODO perhaps this needs to not be in here either
-    @Serializable
-    data class ChannelsGraph(val destNum: Int?) : Graph
-
     @Serializable
     data class NodeDetailGraph(val destNum: Int) : Graph
 
@@ -73,9 +69,6 @@ sealed interface Route {
 
     @Serializable
     data object Map : Route
-
-    @Serializable
-    data object Channels : Route
 
     @Serializable
     data object DebugPanel : Route

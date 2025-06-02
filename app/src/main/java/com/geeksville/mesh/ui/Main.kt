@@ -70,6 +70,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.navigation.ChannelsRoutes
 import com.geeksville.mesh.navigation.ConnectionsRoutes
 import com.geeksville.mesh.navigation.NavGraph
 import com.geeksville.mesh.navigation.Route
@@ -85,7 +86,7 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
     Contacts(R.string.contacts, Icons.AutoMirrored.TwoTone.Chat, Route.Contacts),
     Nodes(R.string.nodes, Icons.TwoTone.People, Route.Nodes),
     Map(R.string.map, Icons.TwoTone.Map, Route.Map),
-    Channels(R.string.channels, Icons.TwoTone.Contactless, Route.Channels), // TODO should this be the Graph???
+    Channels(R.string.channels, Icons.TwoTone.Contactless, ChannelsRoutes.Channels),
     Connections(R.string.connections, Icons.TwoTone.CloudOff, ConnectionsRoutes.ConnectionsGraph),
     ;
 
