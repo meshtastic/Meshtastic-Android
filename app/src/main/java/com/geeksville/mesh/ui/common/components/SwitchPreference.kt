@@ -17,18 +17,13 @@
 
 package com.geeksville.mesh.ui.common.components
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
@@ -36,21 +31,30 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun SwitchPreference(
+    modifier: Modifier = Modifier,
     title: String,
-    summary: String,
+    summary: String = "",
     checked: Boolean,
     enabled: Boolean,
     onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier,
+    padding: PaddingValues? = null,
+    containerColor: Color? = null,
 ) {
-    val color = if (enabled) {
-        Color.Unspecified
-    } else {
-        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-    }
-
     ListItem(
-        modifier = modifier,
+        colors = ListItemDefaults.colors().copy(
+            headlineColor = if(enabled){
+                ListItemDefaults.colors().headlineColor
+            }else{
+                ListItemDefaults.colors().headlineColor.copy(alpha = 0.5f)
+            },
+            supportingTextColor = if (enabled) {
+                ListItemDefaults.colors().supportingTextColor
+            } else {
+                ListItemDefaults.colors().supportingTextColor.copy(alpha = 0.5f)
+            },
+            containerColor = containerColor ?: ListItemDefaults.colors().containerColor,
+        ),
+        modifier = padding?.let { Modifier.padding(it) } ?: modifier,
         trailingContent = {
             Switch(
                 enabled = enabled,
@@ -59,53 +63,19 @@ fun SwitchPreference(
             )
         },
         supportingContent = {
-            Text(
-                text = summary,
-                modifier = Modifier.padding(bottom = 16.dp),
-                color = color,
-            )
+            if (summary.isNotEmpty()) {
+                Text(
+                    text = summary,
+                    modifier = Modifier.padding(bottom = 16.dp),
+                )
+            }
         },
         headlineContent = {
             Text(
                 text = title,
-                color = color,
             )
         }
     )
-}
-
-@Composable
-fun SwitchPreference(
-    title: String,
-    checked: Boolean,
-    enabled: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    modifier: Modifier = Modifier,
-    padding: PaddingValues = PaddingValues(horizontal = 16.dp),
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .size(48.dp)
-            .padding(padding),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.bodyLarge,
-            color = if (enabled) {
-                Color.Unspecified
-            } else {
-                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-            },
-        )
-        Switch(
-            enabled = enabled,
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-        )
-    }
 }
 
 @Preview(showBackground = true)

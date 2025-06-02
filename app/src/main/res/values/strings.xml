@@ -662,4 +662,9 @@
     <string name="nodes">Nodes</string>
     <string name="set_your_region">Set your region</string>
     <string name="reply">Reply</string>
+    <string name="map_reporting_summary">Your node will periodically send an unencrypted map report packet to the configured MQTT server, this includes id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset and primary channel name.</string>
+    <string name="map_reporting_consent_header">Consent to Share Unencrypted Node Data via MQTT</string>
+    <string name="map_reporting_consent_text">By enabling this feature, you acknowledge and expressly consent to the transmission of your device’s real-time geographic location over the MQTT protocol without encryption. This location data may be used for purposes such as live map reporting, device tracking, and related telemetry functions.</string>
+    <string name="i_agree_to_share_my_location">I have read and understand the above. I voluntarily consent to the unencrypted transmission of my node data via MQTT</string>
+    <string name="i_agree">I agree.</string>
 </resources>
