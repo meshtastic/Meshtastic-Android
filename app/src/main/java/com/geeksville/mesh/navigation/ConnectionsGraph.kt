@@ -59,13 +59,7 @@ fun NavGraphBuilder.connectionsGraph(navController: NavHostController, uiViewMod
             ConnectionsScreen(
                 uiViewModel,
                 radioConfigViewModel = hiltViewModel(parentEntry),
-                onNavigateToRadioConfig = {
-                    navController.navigate(Route.RadioConfig()) {
-                        popUpTo(ConnectionsRoutes.Connections) {
-                            inclusive = false
-                        }
-                    }
-                },
+                onNavigateToRadioConfig = { navController.navigate(Route.RadioConfig()) },
                 onNavigateToNodeDetails = { navController.navigate(Route.NodeDetail(it)) },
                 onConfigNavigate = { route -> navController.navigate(route) }
             )
