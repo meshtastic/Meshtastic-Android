@@ -363,6 +363,8 @@
     <string name="remote_hardware">Entfernte Hardware</string>
     <string name="neighbor_info">Nachbarinformation</string>
     <string name="ambient_lighting">Umgebungslicht</string>
+    <string name="detection_sensor">Erkennungssensor</string>
+    <string name="paxcounter">Pax Zähler</string>
     <string name="audio_config">Audioeinstellungen</string>
     <string name="codec2_sample_rate">CODEC2 Abtastrate</string>
     <string name="i2s_word_select">I2S Wortauswahl</string>
@@ -503,6 +505,7 @@
     <string name="redefine_gps_rx_pin">GPS RX PIN neu definieren</string>
     <string name="redefine_gps_tx_pin">GPS TX PIN neu definieren</string>
     <string name="redefine_pin_gps_en">GPS EN PIN neu definieren</string>
+    <string name="power_config">Power Konfiguration</string>
     <string name="enable_power_saving_mode">Energiesparmodus aktivieren</string>
     <string name="adc_multiplier_override_ratio">ADC Multiplikator Überschreibungsverhältnis</string>
     <string name="wait_for_bluetooth_duration_seconds">Warte auf Bluetooth (Sekunden)</string>
@@ -589,4 +592,5 @@
     <string name="display_time_in_12h_format">Wenn aktiviert, zeigt das Gerät die Uhrzeit im 12-Stunden-Format auf dem Bildschirm an.</string>
     <string name="map">Karte</string>
     <string name="nodes">Knoten</string>
+    <string name="reply">Antworten</string>
 </resources>

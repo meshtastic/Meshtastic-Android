@@ -32,6 +32,7 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
+import androidx.core.app.RemoteInput
 import androidx.core.net.toUri
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.R
@@ -39,6 +40,7 @@ import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.android.notificationManager
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.navigation.DEEP_LINK_BASE_URI
+import com.geeksville.mesh.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
 import com.geeksville.mesh.util.formatUptime
 
 @Suppress("TooManyFunctions")
@@ -314,6 +316,10 @@ class MeshServiceNotifications(
         )
     }
 
+    fun cancelMessageNotification(contactKey: String) {
+        notificationManager.cancel(contactKey.hashCode())
+    }
+
     fun updateMessageNotification(contactKey: String, name: String, message: String) =
         notificationManager.notify(
             contactKey.hashCode(), // show unique notifications,
@@ -354,6 +360,13 @@ class MeshServiceNotifications(
         )
     }
 
+    private fun createMessageReplyIntent(contactKey: String): Intent {
+        return Intent(context, ReplyReceiver::class.java).apply {
+            action = ReplyReceiver.REPLY_ACTION
+            putExtra(ReplyReceiver.CONTACT_KEY, contactKey)
+        }
+    }
+
     private fun createOpenMessageIntent(contactKey: String): PendingIntent {
         val deepLink = "$DEEP_LINK_BASE_URI/messages/$contactKey"
         val deepLinkIntent = Intent(
@@ -365,7 +378,7 @@ class MeshServiceNotifications(
 
         val deepLinkPendingIntent: PendingIntent = TaskStackBuilder.create(context).run {
             addNextIntentWithParentStack(deepLinkIntent)
-            getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+            getPendingIntent(0, PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
         }
 
         return deepLinkPendingIntent
@@ -376,6 +389,7 @@ class MeshServiceNotifications(
         contentIntent: PendingIntent? = null
     ): NotificationCompat.Builder {
         val builder = NotificationCompat.Builder(context, channel)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setContentIntent(contentIntent ?: openAppIntent)
 
@@ -425,17 +439,37 @@ class MeshServiceNotifications(
         return serviceNotificationBuilder.build()
     }
 
-    lateinit var messageNotificationBuilder: NotificationCompat.Builder
     private fun createMessageNotification(
         contactKey: String,
         name: String,
         message: String
     ): Notification {
-        if (!::messageNotificationBuilder.isInitialized) {
-            messageNotificationBuilder =
-                commonBuilder(messageChannelId, createOpenMessageIntent(contactKey))
-        }
+        val messageNotificationBuilder: NotificationCompat.Builder =
+            commonBuilder(messageChannelId, createOpenMessageIntent(contactKey))
+
         val person = Person.Builder().setName(name).build()
+        // Key for the string that's delivered in the action's intent.
+        val replyLabel: String = context.getString(R.string.reply)
+        val remoteInput: RemoteInput = RemoteInput.Builder(KEY_TEXT_REPLY).run {
+            setLabel(replyLabel)
+            build()
+        }
+
+        // Build a PendingIntent for the reply action to trigger.
+        val replyPendingIntent: PendingIntent =
+            PendingIntent.getBroadcast(
+                context,
+                contactKey.hashCode(),
+                createMessageReplyIntent(contactKey),
+                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        // Create the reply action and add the remote input.
+        val action: NotificationCompat.Action = NotificationCompat.Action.Builder(
+            android.R.drawable.ic_menu_send,
+            replyLabel,
+            replyPendingIntent
+        ).addRemoteInput(remoteInput).build()
+
         with(messageNotificationBuilder) {
             priority = NotificationCompat.PRIORITY_DEFAULT
             setCategory(Notification.CATEGORY_MESSAGE)
@@ -444,6 +478,7 @@ class MeshServiceNotifications(
                 NotificationCompat.MessagingStyle(person)
                     .addMessage(message, System.currentTimeMillis(), person)
             )
+            addAction(action)
             setWhen(System.currentTimeMillis())
             setShowWhen(true)
         }
@@ -457,11 +492,11 @@ class MeshServiceNotifications(
         alert: String
     ): Notification {
         if (!::alertNotificationBuilder.isInitialized) {
-            alertNotificationBuilder = commonBuilder(alertChannelId)
+            alertNotificationBuilder =
+                commonBuilder(alertChannelId, createOpenMessageIntent(contactKey))
         }
         val person = Person.Builder().setName(name).build()
         with(alertNotificationBuilder) {
-            setContentIntent(createOpenMessageIntent(contactKey))
             priority = NotificationCompat.PRIORITY_HIGH
             setCategory(Notification.CATEGORY_ALARM)
             setAutoCancel(true)
