@@ -15,10 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+@file:Suppress("LongMethod")
+
 package com.geeksville.mesh.ui.radioconfig.components
 
+import android.content.Context
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -29,12 +31,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
+import androidx.core.content.edit
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.MQTTConfig
@@ -43,17 +46,20 @@ import com.geeksville.mesh.copy
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.ui.common.components.EditPasswordPreference
 import com.geeksville.mesh.ui.common.components.EditTextPreference
-import com.geeksville.mesh.ui.common.components.PositionPrecisionPreference
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
 import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
+
+const val MapConsentPreferencesKey = "map_consent_preferences"
 
 @Composable
 fun MQTTConfigScreen(
     viewModel: RadioConfigViewModel = hiltViewModel(),
 ) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val destNode by viewModel.destNode.collectAsStateWithLifecycle()
+    val destNum = destNode?.num
 
     if (state.responseState.isWaiting()) {
         PacketResponseStateDialog(
@@ -63,6 +69,7 @@ fun MQTTConfigScreen(
     }
 
     MQTTConfigItemList(
+        nodeNum = destNum,
         mqttConfig = state.moduleConfig.mqtt,
         enabled = state.connected,
         onSaveClicked = { mqttInput ->
@@ -74,12 +81,22 @@ fun MQTTConfigScreen(
 
 @Composable
 fun MQTTConfigItemList(
+    nodeNum: Int? = 0,
     mqttConfig: MQTTConfig,
     enabled: Boolean,
     onSaveClicked: (MQTTConfig) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
     var mqttInput by rememberSaveable { mutableStateOf(mqttConfig) }
+    val sharedPrefs = LocalContext.current.getSharedPreferences(
+        MapConsentPreferencesKey, Context.MODE_PRIVATE
+    )
+    if (!mqttInput.mapReportSettings.shouldReportLocation) {
+        val settings = mqttInput.mapReportSettings.copy {
+            this.shouldReportLocation = sharedPrefs.getBoolean(nodeNum.toString(), false)
+        }
+        mqttInput = mqttInput.copy { mapReportSettings = settings }
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -191,40 +208,45 @@ fun MQTTConfigItemList(
             )
         }
         item { HorizontalDivider() }
+        // mqtt map reporting opt in
+        item { PreferenceCategory(text = stringResource(R.string.map_reporting)) }
 
         item {
-            PositionPrecisionPreference(
-                title = stringResource(R.string.map_reporting),
-                enabled = enabled,
-                value = mqttInput.mapReportSettings.positionPrecision,
-                onValueChanged = {
-                    val settings = mqttInput.mapReportSettings.copy { positionPrecision = it }
+            MapReportingPreference(
+                mapReportingEnabled = mqttInput.mapReportingEnabled,
+                onMapReportingEnabledChanged = {
+                    mqttInput = mqttInput.copy { mapReportingEnabled = it }
+                },
+                shouldReportLocation = mqttInput.mapReportSettings.shouldReportLocation,
+                onShouldReportLocationChanged = {
+                    sharedPrefs.edit { putBoolean(nodeNum.toString(), it) }
+                    val settings =
+                        mqttInput.mapReportSettings.copy { this.shouldReportLocation = it }
                     mqttInput = mqttInput.copy {
-                        mapReportingEnabled = settings.positionPrecision > 0
                         mapReportSettings = settings
                     }
                 },
-                modifier = Modifier.padding(horizontal = 16.dp)
+                positionPrecision = mqttInput.mapReportSettings.positionPrecision,
+                onPositionPrecisionChanged = {
+                    val settings = mqttInput.mapReportSettings.copy { positionPrecision = it }
+                    mqttInput = mqttInput.copy {
+                        mapReportSettings = settings
+                    }
+                },
+                enabled = enabled,
+                focusManager = focusManager
             )
         }
         item { HorizontalDivider() }
 
         item {
-            EditTextPreference(
-                title = stringResource(R.string.map_reporting_interval_seconds),
-                value = mqttInput.mapReportSettings.publishIntervalSecs,
-                enabled = enabled && mqttInput.mapReportingEnabled,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = {
-                    val settings = mqttInput.mapReportSettings.copy { publishIntervalSecs = it }
-                    mqttInput = mqttInput.copy { mapReportSettings = settings }
-                },
-            )
-        }
-
-        item {
+            val consentValid = if (mqttInput.mapReportingEnabled) {
+                mqttInput.mapReportSettings.shouldReportLocation
+            } else {
+                true
+            }
             PreferenceFooter(
-                enabled = enabled && mqttInput != mqttConfig,
+                enabled = enabled && mqttInput != mqttConfig && consentValid,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     mqttInput = mqttConfig
