@@ -1991,7 +1991,7 @@ class MeshService : Service(), Logging {
 
     lateinit var sharedPreferences: SharedPreferences
 
-    fun clearNodeDB() = serviceScope.handledLaunch {
+    fun clearDatabases() = serviceScope.handledLaunch {
         debug("Clearing nodeDB")
         radioConfigRepository.clearNodeDB()
     }
