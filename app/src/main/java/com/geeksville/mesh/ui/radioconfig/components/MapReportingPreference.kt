@@ -28,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -64,8 +65,10 @@ fun MapReportingPreference(
     focusManager: FocusManager
 ) {
     Column {
-        var showMapReportingWarning
-                by rememberSaveable { mutableStateOf(mapReportingEnabled) }
+        var showMapReportingWarning by rememberSaveable { mutableStateOf(mapReportingEnabled) }
+        LaunchedEffect(mapReportingEnabled) {
+            showMapReportingWarning = mapReportingEnabled
+        }
         SwitchPreference(
             title = stringResource(R.string.map_reporting),
             summary = stringResource(R.string.map_reporting_summary),
