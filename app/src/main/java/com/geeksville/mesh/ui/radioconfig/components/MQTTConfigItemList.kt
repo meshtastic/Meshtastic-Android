@@ -88,6 +88,15 @@ fun MQTTConfigItemList(
 ) {
     val focusManager = LocalFocusManager.current
     var mqttInput by rememberSaveable { mutableStateOf(mqttConfig) }
+    val sharedPrefs = LocalContext.current.getSharedPreferences(
+        MapConsentPreferencesKey, Context.MODE_PRIVATE
+    )
+    if (!mqttInput.mapReportSettings.shouldReportLocation) {
+        val settings = mqttInput.mapReportSettings.copy {
+            this.shouldReportLocation = sharedPrefs.getBoolean(nodeNum.toString(), false)
+        }
+        mqttInput = mqttInput.copy { mapReportSettings = settings }
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -203,23 +212,16 @@ fun MQTTConfigItemList(
         item { PreferenceCategory(text = stringResource(R.string.map_reporting)) }
 
         item {
-            val sharedPrefs = LocalContext.current.getSharedPreferences(
-                MapConsentPreferencesKey,
-                Context.MODE_PRIVATE
-            )
             MapReportingPreference(
                 mapReportingEnabled = mqttInput.mapReportingEnabled,
                 onMapReportingEnabledChanged = {
                     mqttInput = mqttInput.copy { mapReportingEnabled = it }
                 },
-                shouldReportLocation = mqttInput.mapReportSettings.shouldReportLocation ||
-                        sharedPrefs.getBoolean(
-                            nodeNum.toString(),
-                            false
-                        ),
+                shouldReportLocation = mqttInput.mapReportSettings.shouldReportLocation,
                 onShouldReportLocationChanged = {
                     sharedPrefs.edit { putBoolean(nodeNum.toString(), it) }
-                    val settings = mqttInput.mapReportSettings.copy { shouldReportLocation = it }
+                    val settings =
+                        mqttInput.mapReportSettings.copy { this.shouldReportLocation = it }
                     mqttInput = mqttInput.copy {
                         mapReportSettings = settings
                     }

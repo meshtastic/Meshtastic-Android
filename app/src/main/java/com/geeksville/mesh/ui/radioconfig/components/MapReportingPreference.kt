@@ -56,16 +56,14 @@ fun MapReportingPreference(
     onMapReportingEnabledChanged: (Boolean) -> Unit = {},
     shouldReportLocation: Boolean = false,
     onShouldReportLocationChanged: (Boolean) -> Unit = {},
-    positionPrecision: Int = 0,
+    positionPrecision: Int = 14,
     onPositionPrecisionChanged: (Int) -> Unit = {},
     publishIntervalSecs: Int = 3600,
     onPublishIntervalSecsChanged: (Int) -> Unit = {},
     enabled: Boolean,
     focusManager: FocusManager
 ) {
-
     Column {
-
         var showMapReportingWarning
                 by rememberSaveable { mutableStateOf(mapReportingEnabled) }
         SwitchPreference(
