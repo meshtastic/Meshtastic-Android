@@ -660,5 +660,6 @@
     <string name="map">Map</string>
     <string name="contacts">Contacts</string>
     <string name="nodes">Nodes</string>
+    <string name="set_your_region">Set your region</string>
     <string name="reply">Reply</string>
 </resources>

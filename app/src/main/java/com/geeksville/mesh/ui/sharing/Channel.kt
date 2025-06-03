@@ -138,7 +138,7 @@ fun ChannelScreen(
     var showResetDialog by remember { mutableStateOf(false) }
     var showScanDialog by remember { mutableStateOf(false) }
 
-    /* Animate waiting for the channel configurations */
+    /* Animate waiting for the configurations */
     var isWaiting by remember { mutableStateOf(false) }
     if (isWaiting) {
         PacketResponseStateDialog(

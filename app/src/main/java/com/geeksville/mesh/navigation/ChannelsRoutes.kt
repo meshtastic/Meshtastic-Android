@@ -27,17 +27,27 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.sharing.ChannelScreen
 import com.geeksville.mesh.ui.radioconfig.components.ChannelConfigScreen
 import com.geeksville.mesh.ui.radioconfig.components.LoRaConfigScreen
+import kotlinx.serialization.Serializable
+
+@Serializable
+sealed interface ChannelsRoutes {
+    @Serializable
+    data object ChannelsGraph : Graph
+
+    @Serializable
+    data object Channels : Route
+}
 
 /**
- * Navigation graph for for the top level ChannelScreen - [Route.Channels].
+ * Navigation graph for for the top level ChannelScreen - [ChannelsRoutes.Channels].
  */
 fun NavGraphBuilder.channelsGraph(navController: NavHostController, uiViewModel: UIViewModel) {
-    navigation<Graph.ChannelsGraph>(
-        startDestination = Route.Channels,
+    navigation<ChannelsRoutes.ChannelsGraph>(
+        startDestination = ChannelsRoutes.Channels,
     ) {
-        composable<Route.Channels> { backStackEntry ->
+        composable<ChannelsRoutes.Channels> { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<Graph.ChannelsGraph>()
+                navController.getBackStackEntry<ChannelsRoutes.ChannelsGraph>()
             }
             ChannelScreen(
                 viewModel = uiViewModel,
@@ -55,7 +65,7 @@ private fun NavGraphBuilder.configRoutes(
     ConfigRoute.entries.forEach { configRoute ->
         composable(configRoute.route::class) { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<Graph.ChannelsGraph>()
+                navController.getBackStackEntry<ChannelsRoutes.ChannelsGraph>()
             }
             when (configRoute) {
                 ConfigRoute.CHANNELS -> ChannelConfigScreen(hiltViewModel(parentEntry))

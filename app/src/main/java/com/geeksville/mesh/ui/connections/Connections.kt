@@ -42,6 +42,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
@@ -93,10 +94,16 @@ import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.navigation.ConfigRoute
+import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.ui.node.NodeActionButton
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
+import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
+import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import kotlinx.coroutines.delay
 
@@ -115,9 +122,12 @@ fun ConnectionsScreen(
     uiViewModel: UIViewModel = hiltViewModel(),
     scanModel: BTScanModel = hiltViewModel(),
     bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
+    radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
     onNavigateToRadioConfig: () -> Unit,
     onNavigateToNodeDetails: (Int) -> Unit,
+    onConfigNavigate: (Route) -> Unit
 ) {
+    val radioConfigState by radioConfigViewModel.radioConfigState.collectAsStateWithLifecycle()
     val config by uiViewModel.localConfig.collectAsState()
     val currentRegion = config.lora.region
     val scrollState = rememberScrollState()
@@ -133,6 +143,25 @@ fun ConnectionsScreen(
     val bluetoothEnabled by bluetoothViewModel.enabled.observeAsState()
     val regionUnset = currentRegion == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET &&
             connectionState == MeshService.ConnectionState.CONNECTED
+
+    /* Animate waiting for the configurations */
+    var isWaiting by remember { mutableStateOf(false) }
+    if (isWaiting) {
+        PacketResponseStateDialog(
+            state = radioConfigState.responseState,
+            onDismiss = {
+                isWaiting = false
+                radioConfigViewModel.clearPacketResponse()
+            },
+            onComplete = {
+                getNavRouteFrom(radioConfigState.route)?.let { route ->
+                    isWaiting = false
+                    radioConfigViewModel.clearPacketResponse()
+                    onConfigNavigate(route)
+                }
+            },
+        )
+    }
 
     val isGpsDisabled = context.gpsDisabled()
     LaunchedEffect(isGpsDisabled) {
@@ -285,28 +314,27 @@ fun ConnectionsScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "${node.user.longName}",
+                            text = node.user.longName,
                             style = MaterialTheme.typography.titleLarge
                         )
                     }
                 }
-                Button(
-                    modifier = Modifier.fillMaxWidth(),
+                NodeActionButton(
+                    title = stringResource(id = R.string.radio_configuration),
+                    icon = Icons.Default.Settings,
+                    enabled = true,
                     onClick = onNavigateToRadioConfig
-
-                ) {
-                    Text(stringResource(R.string.radio_configuration))
-                }
+                )
                 Spacer(modifier = Modifier.height(8.dp))
                 if (regionUnset && selectedDevice != "m") {
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp),
-                        text = stringResource(R.string.must_set_region),
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.titleLarge,
-                        textAlign = TextAlign.Center
+                    NodeActionButton(
+                        title = stringResource(id = R.string.set_your_region),
+                        icon = ConfigRoute.LORA.icon,
+                        enabled = true,
+                        onClick = {
+                            isWaiting = true
+                            radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
+                        }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                 }

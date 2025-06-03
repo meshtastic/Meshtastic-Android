@@ -74,6 +74,8 @@ import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.navigation.ChannelsRoutes
+import com.geeksville.mesh.navigation.ConnectionsRoutes
 import com.geeksville.mesh.navigation.NavGraph
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.showLongNameTitle
@@ -88,8 +90,8 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
     Contacts(R.string.contacts, Icons.AutoMirrored.TwoTone.Chat, Route.Contacts),
     Nodes(R.string.nodes, Icons.TwoTone.People, Route.Nodes),
     Map(R.string.map, Icons.TwoTone.Map, Route.Map),
-    Channels(R.string.channels, Icons.TwoTone.Contactless, Route.Channels),
-    Connections(R.string.connections, Icons.TwoTone.CloudOff, Route.Connections),
+    Channels(R.string.channels, Icons.TwoTone.Contactless, ChannelsRoutes.Channels),
+    Connections(R.string.connections, Icons.TwoTone.CloudOff, ConnectionsRoutes.Connections),
     ;
 
     companion object {
@@ -323,7 +325,6 @@ private fun MainAppBar(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MainMenuActions(
     isManaged: Boolean,
