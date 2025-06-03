@@ -27,16 +27,14 @@ import androidx.core.location.LocationListenerCompat
 import androidx.core.location.LocationManagerCompat
 import androidx.core.location.LocationRequestCompat
 import androidx.core.location.altitude.AltitudeConverterCompat
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.booleanPreferencesKey
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.asExecutor
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -44,22 +42,13 @@ import javax.inject.Singleton
 class LocationRepository @Inject constructor(
     private val context: Application,
     private val locationManager: dagger.Lazy<LocationManager>,
-    private val locationPreferencesDataStore: DataStore<Preferences>,
 ) : Logging {
 
     /**
      * Status of whether the app is actively subscribed to location changes.
      */
-    val locationPreferencesFlow = locationPreferencesDataStore.data.map {
-        it[PreferencesKeys.PROVIDE_LOCATION] == true
-    }
-
-    suspend fun updateLocationPreferences(provideLocation: Boolean) =
-        locationPreferencesDataStore.updateData { preferences ->
-            preferences.toMutablePreferences().apply {
-                set(PreferencesKeys.PROVIDE_LOCATION, provideLocation)
-            }
-        }
+    private val _receivingLocationUpdates: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    val receivingLocationUpdates: StateFlow<Boolean> get() = _receivingLocationUpdates
 
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
     private fun LocationManager.requestLocationUpdates() = callbackFlow {
@@ -95,8 +84,7 @@ class LocationRepository @Inject constructor(
         }
 
         info("Starting location updates with $providerList intervalMs=${intervalMs}ms and minDistanceM=${minDistanceM}m")
-//        _receivingLocationUpdates.value = true
-        updateLocationPreferences(true)
+        _receivingLocationUpdates.value = true
         GeeksvilleApplication.analytics.track("location_start") // Figure out how many users needed to use the phone GPS
 
         try {
@@ -115,7 +103,7 @@ class LocationRepository @Inject constructor(
 
         awaitClose {
             info("Stopping location requests")
-//            _receivingLocationUpdates.value = false
+            _receivingLocationUpdates.value = false
             GeeksvilleApplication.analytics.track("location_stop")
 
             LocationManagerCompat.removeUpdates(this@requestLocationUpdates, locationListener)
@@ -128,9 +116,3 @@ class LocationRepository @Inject constructor(
     @RequiresPermission(anyOf = [ACCESS_COARSE_LOCATION, ACCESS_FINE_LOCATION])
     fun getLocations() = locationManager.get().requestLocationUpdates()
 }
-
-private object PreferencesKeys {
-    val PROVIDE_LOCATION = booleanPreferencesKey("provide_location")
-}
-
-const val LOCATION_PREFERNCES_NAME = "location_preferences"

@@ -25,6 +25,7 @@ import android.os.Build
 import android.util.Patterns
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -88,7 +89,6 @@ import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.android.isGooglePlayAvailable
 import com.geeksville.mesh.android.permissionMissing
-import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.NO_DEVICE_SELECTED
@@ -135,10 +135,10 @@ fun ConnectionsScreen(
     val connectionState by uiViewModel.connectionState.collectAsState(MeshService.ConnectionState.DISCONNECTED)
     val devices by scanModel.devices.observeAsState(emptyMap())
     val scanning by scanModel.spinner.observeAsState(false)
+    val receivingLocationUpdates by uiViewModel.receivingLocationUpdates.collectAsState(false)
     val context = LocalContext.current
     val app = (context.applicationContext as GeeksvilleApplication)
     val info by uiViewModel.myNodeInfo.collectAsState()
-    var lastConnection: MyNodeEntity? by remember { mutableStateOf(null) }
     val selectedDevice = scanModel.selectedNotNull
     val bluetoothEnabled by bluetoothViewModel.enabled.observeAsState()
     val regionUnset = currentRegion == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET &&
@@ -205,9 +205,9 @@ fun ConnectionsScreen(
         onResult = { permissions ->
             if (permissions.entries.all { it.value }) {
                 uiViewModel.setProvideLocation(true)
+                uiViewModel.meshService?.startProvideLocation()
             } else {
                 debug("User denied location permission")
-                uiViewModel.setProvideLocation(false)
                 uiViewModel.showSnackbar(context.getString(R.string.why_background_required))
             }
             bluetoothViewModel.permissionsUpdated()
@@ -239,7 +239,7 @@ fun ConnectionsScreen(
         showScanDialog = true
     }
 
-    LaunchedEffect(connectionState) {
+    LaunchedEffect(connectionState, regionUnset) {
         when (connectionState) {
             MeshService.ConnectionState.CONNECTED -> {
                 if (regionUnset) R.string.must_set_region else R.string.connected_to
@@ -251,16 +251,6 @@ fun ConnectionsScreen(
             val firmwareString =
                 info?.firmwareString ?: context.getString(R.string.unknown)
             scanModel.setErrorText(context.getString(it, firmwareString))
-        }
-        when (connectionState) {
-            MeshService.ConnectionState.CONNECTED -> {
-                if (lastConnection != null && lastConnection?.myNodeNum != info?.myNodeNum) {
-                    uiViewModel.setProvideLocation(false)
-                }
-                lastConnection = info
-            }
-
-            else -> {}
         }
     }
     var showSharedContact by remember { mutableStateOf<Node?>(null) }
@@ -287,7 +277,7 @@ fun ConnectionsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            val isConnected by uiViewModel.isConnected.collectAsStateWithLifecycle(false)
+            val isConnected by uiViewModel.isConnected.collectAsState(false)
             val ourNode by uiViewModel.ourNodeInfo.collectAsState()
             if (isConnected) {
                 ourNode?.let { node ->
@@ -440,35 +430,39 @@ fun ConnectionsScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Provide Location Checkbox
-            val checked by uiViewModel.provideLocation.collectAsState()
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .toggleable(
-                        value = checked,
-                        onValueChange = { checked ->
-                            uiViewModel.setProvideLocation(checked)
-                            if (checked && !context.hasLocationPermission()) {
-                                showLocationRationaleDialog = true // Show the Compose dialog
-                            }
-                        },
-                        enabled = !isGpsDisabled
-                    )
-                    .padding(horizontal = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Checkbox(
-                    checked = checked,
-                    onCheckedChange = null,
-                    enabled = !isGpsDisabled // Disable if GPS is disabled
-                )
-                Text(
-                    text = stringResource(R.string.provide_location_to_mesh),
-                    style = MaterialTheme.typography.bodyLarge,
-                    modifier = Modifier.padding(start = 16.dp)
-                )
+            LaunchedEffect(ourNode) {
+                if (ourNode != null) {
+                    uiViewModel.refreshProvideLocation()
+                }
             }
+            AnimatedVisibility(isConnected) {
+                val provideLocation by uiViewModel.provideLocation.collectAsState(false)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .toggleable(
+                            value = provideLocation,
+                            onValueChange = { checked ->
+                                uiViewModel.setProvideLocation(checked)
+                            },
+                            enabled = !isGpsDisabled
+                        )
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = receivingLocationUpdates,
+                        onCheckedChange = null,
+                        enabled = !isGpsDisabled // Disable if GPS is disabled
+                    )
+                    Text(
+                        text = stringResource(R.string.provide_location_to_mesh),
+                        style = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.padding(start = 16.dp)
+                    )
+                }
+            }
+            // Provide Location Checkbox
 
             Spacer(modifier = Modifier.height(16.dp))
 
@@ -559,7 +553,7 @@ fun ConnectionsScreen(
         }
     }
 
-    // Compose Device Scan Dialog
+// Compose Device Scan Dialog
     if (showScanDialog) {
         Dialog(onDismissRequest = {
             showScanDialog = false
@@ -604,7 +598,7 @@ fun ConnectionsScreen(
         }
     }
 
-    // Compose Location Permission Rationale Dialog
+// Compose Location Permission Rationale Dialog
     if (showLocationRationaleDialog) {
         AlertDialog(
             onDismissRequest = { showLocationRationaleDialog = false },
@@ -628,7 +622,7 @@ fun ConnectionsScreen(
         )
     }
 
-    // Compose Bluetooth Permission Rationale Dialog
+// Compose Bluetooth Permission Rationale Dialog
     if (showBluetoothRationaleDialog) {
         val bluetoothPermissions = context.getBluetoothPermissions()
         AlertDialog(
@@ -656,7 +650,7 @@ fun ConnectionsScreen(
         )
     }
 
-    // Compose Report Bug Dialog
+// Compose Report Bug Dialog
     if (showReportBugDialog) {
         AlertDialog(
             onDismissRequest = { showReportBugDialog = false },
