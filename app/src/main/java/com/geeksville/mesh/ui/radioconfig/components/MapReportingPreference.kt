@@ -82,16 +82,16 @@ fun MapReportingPreference(
         )
         AnimatedVisibility(showMapReportingWarning) {
             Card(
-                modifier = Modifier.Companion.padding(16.dp),
+                modifier = Modifier.padding(16.dp),
             ) {
                 Text(
                     text = stringResource(R.string.map_reporting_consent_header),
-                    modifier = Modifier.Companion.padding(16.dp),
+                    modifier = Modifier.padding(16.dp),
                 )
                 HorizontalDivider()
                 Text(
                     stringResource(R.string.map_reporting_consent_text),
-                    modifier = Modifier.Companion.padding(16.dp)
+                    modifier = Modifier.padding(16.dp)
                 )
 
                 SwitchPreference(
