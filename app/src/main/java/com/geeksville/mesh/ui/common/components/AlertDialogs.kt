@@ -55,7 +55,7 @@ fun SimpleAlertDialog(
                 style = SpanStyle(
                     textDecoration = TextDecoration.Underline,
                     fontStyle = FontStyle.Italic,
-                    color = MaterialTheme.colorScheme.tertiary
+                    color = MaterialTheme.colorScheme.primary
                 )
             )
         )
