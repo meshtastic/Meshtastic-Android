@@ -37,7 +37,6 @@ import com.geeksville.mesh.ui.debug.DebugScreen
 import com.geeksville.mesh.ui.map.MapView
 import com.geeksville.mesh.ui.message.MessageScreen
 import com.geeksville.mesh.ui.message.QuickChatScreen
-import com.geeksville.mesh.ui.node.NodeScreen
 import com.geeksville.mesh.ui.sharing.ShareScreen
 import kotlinx.serialization.Serializable
 
@@ -53,9 +52,6 @@ const val DEEP_LINK_BASE_URI = "meshtastic://meshtastic"
 @Serializable
 sealed interface Graph : Route {
     @Serializable
-    data class NodeDetailGraph(val destNum: Int) : Graph
-
-    @Serializable
     data class RadioConfigGraph(val destNum: Int? = null) : Graph
 }
 
@@ -63,9 +59,6 @@ sealed interface Graph : Route {
 sealed interface Route {
     @Serializable
     data object Contacts : Route
-
-    @Serializable
-    data object Nodes : Route
 
     @Serializable
     data object Map : Route
@@ -223,13 +216,6 @@ fun NavGraph(
                 onNavigate = { navController.navigate(Route.Messages(it)) }
             )
         }
-        composable<Route.Nodes> {
-            NodeScreen(
-                model = uIViewModel,
-                navigateToMessages = { navController.navigate(Route.Messages(it)) },
-                navigateToNodeDetails = { navController.navigate(Route.NodeDetail(it)) },
-            )
-        }
         composable<Route.Map> {
             MapView(uIViewModel)
         }
@@ -262,7 +248,7 @@ fun NavGraph(
         composable<Route.QuickChat> {
             QuickChatScreen()
         }
-        nodeDetailGraph(
+        nodesGraph(
             navController,
             uIViewModel,
         )

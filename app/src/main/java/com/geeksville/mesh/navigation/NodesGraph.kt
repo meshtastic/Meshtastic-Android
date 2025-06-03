@@ -32,7 +32,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
-import androidx.navigation.navigation
+import androidx.navigation.compose.navigation
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.metrics.DeviceMetricsScreen
@@ -44,57 +44,78 @@ import com.geeksville.mesh.ui.metrics.SignalMetricsScreen
 import com.geeksville.mesh.ui.metrics.TracerouteLogScreen
 import com.geeksville.mesh.ui.node.NodeDetailScreen
 import com.geeksville.mesh.ui.node.NodeMapScreen
+import com.geeksville.mesh.ui.node.NodeScreen
+import kotlinx.serialization.Serializable
 
-fun NavGraphBuilder.nodeDetailGraph(
+sealed class NodesRoutes {
+    @Serializable
+    data object Nodes : Route
+    @Serializable
+    data object NodesGraph : Graph
+}
+
+fun NavGraphBuilder.nodesGraph(
     navController: NavHostController,
     uiViewModel: UIViewModel,
 ) {
-    navigation<Graph.NodeDetailGraph>(
-        startDestination = Route.NodeDetail(),
+    navigation<NodesRoutes.NodesGraph>(
+        startDestination = NodesRoutes.Nodes,
     ) {
-        composable<Route.NodeDetail> { backStackEntry ->
-            val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<Graph.NodeDetailGraph>()
-            }
-            NodeDetailScreen(
-                uiViewModel = uiViewModel,
+        composable<NodesRoutes.Nodes> {
+            NodeScreen(
+                model = uiViewModel,
                 navigateToMessages = {
-                    navController.navigate(Route.Messages(it)) {
-                        popUpTo(Route.NodeDetail()) {
-                            inclusive = false
-                        }
-                    }
+                    navController.navigate(Route.Messages(it))
                 },
-                onNavigate = {
-                    navController.navigate(it) {
-                        popUpTo(Route.NodeDetail()) {
-                            inclusive = false
-                        }
-                    }
+                navigateToNodeDetails = {
+                    navController.navigate(Route.NodeDetail(it))
                 },
-                viewModel = hiltViewModel(parentEntry),
             )
         }
-        NodeDetailRoute.entries.forEach { nodeDetailRoute ->
-            composable(nodeDetailRoute.route::class) { backStackEntry ->
-                val parentEntry = remember(backStackEntry) {
-                    navController.getBackStackEntry<Graph.NodeDetailGraph>()
-                }
-                when (nodeDetailRoute) {
-                    NodeDetailRoute.DEVICE -> DeviceMetricsScreen(hiltViewModel(parentEntry))
-                    NodeDetailRoute.NODE_MAP -> NodeMapScreen(hiltViewModel(parentEntry))
-                    NodeDetailRoute.POSITION_LOG -> PositionLogScreen(hiltViewModel(parentEntry))
-                    NodeDetailRoute.ENVIRONMENT -> EnvironmentMetricsScreen(
-                        hiltViewModel(
-                            parentEntry
-                        )
-                    )
+        nodeDetailRoutes(navController, uiViewModel)
+    }
+}
 
-                    NodeDetailRoute.SIGNAL -> SignalMetricsScreen(hiltViewModel(parentEntry))
-                    NodeDetailRoute.TRACEROUTE -> TracerouteLogScreen(viewModel = hiltViewModel(parentEntry))
-                    NodeDetailRoute.POWER -> PowerMetricsScreen(hiltViewModel(parentEntry))
-                    NodeDetailRoute.HOST -> HostMetricsLogScreen(hiltViewModel(parentEntry))
-                }
+fun NavGraphBuilder.nodeDetailRoutes(
+    navController: NavHostController,
+    uiViewModel: UIViewModel,
+) {
+    composable<Route.NodeDetail> {
+        NodeDetailScreen(
+            uiViewModel = uiViewModel,
+            navigateToMessages = {
+                navController.navigate(Route.Messages(it))
+            },
+            onNavigate = {
+                navController.navigate(it)
+            },
+            viewModel = hiltViewModel(),
+        )
+    }
+    NodeDetailRoute.entries.forEach { nodeDetailRoute ->
+        composable(nodeDetailRoute.route::class) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) {
+                navController.getBackStackEntry<NodesRoutes.NodesGraph>()
+            }
+            when (nodeDetailRoute) {
+                NodeDetailRoute.DEVICE -> DeviceMetricsScreen(hiltViewModel(parentEntry))
+                NodeDetailRoute.NODE_MAP -> NodeMapScreen(hiltViewModel(parentEntry))
+                NodeDetailRoute.POSITION_LOG -> PositionLogScreen(hiltViewModel(parentEntry))
+                NodeDetailRoute.ENVIRONMENT -> EnvironmentMetricsScreen(
+                    hiltViewModel(
+                        parentEntry
+                    )
+                )
+
+                NodeDetailRoute.SIGNAL -> SignalMetricsScreen(hiltViewModel(parentEntry))
+                NodeDetailRoute.TRACEROUTE -> TracerouteLogScreen(
+                    viewModel = hiltViewModel(
+                        parentEntry
+                    )
+                )
+
+                NodeDetailRoute.POWER -> PowerMetricsScreen(hiltViewModel(parentEntry))
+                NodeDetailRoute.HOST -> HostMetricsLogScreen(hiltViewModel(parentEntry))
             }
         }
     }
