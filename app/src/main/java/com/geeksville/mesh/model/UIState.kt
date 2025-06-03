@@ -240,6 +240,7 @@ class UIViewModel @Inject constructor(
         _title.value = title
     }
 
+    val receivingLocationUpdates: StateFlow<Boolean> get() = locationRepository.receivingLocationUpdates
     val meshService: IMeshService? get() = radioConfigRepository.meshService
 
     val bondedAddress get() = radioInterfaceService.getBondedDeviceAddress()
@@ -546,7 +547,8 @@ class UIViewModel @Inject constructor(
     // Connection state to our radio device
     val connectionState get() = radioConfigRepository.connectionState
     fun isConnected() = connectionState.value != MeshService.ConnectionState.DISCONNECTED
-    val isConnected = radioConfigRepository.connectionState.map { it == MeshService.ConnectionState.CONNECTED }
+    val isConnected =
+        radioConfigRepository.connectionState.map { it == MeshService.ConnectionState.CONNECTED }
 
     private val _requestChannelSet = MutableStateFlow<AppOnlyProtos.ChannelSet?>(null)
     val requestChannelSet: StateFlow<AppOnlyProtos.ChannelSet?> get() = _requestChannelSet
@@ -651,16 +653,26 @@ class UIViewModel @Inject constructor(
         if (config.lora != newConfig.lora) setConfig(newConfig)
     }
 
-    private val _provideLocation = locationRepository.locationPreferencesFlow.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = false
-    )
-    val provideLocation: StateFlow<Boolean> get() = _provideLocation
-    fun setProvideLocation(provideLocation: Boolean) {
+    fun refreshProvideLocation() {
         viewModelScope.launch {
-            locationRepository.updateLocationPreferences(provideLocation)
-            if (provideLocation) {
+            setProvideLocation(getProvidePref())
+        }
+    }
+
+    private fun getProvidePref(): Boolean {
+        val value = preferences.getBoolean("provide-location-$myNodeNum", false)
+        return value
+    }
+
+    private val _provideLocation =
+        MutableStateFlow(getProvidePref())
+    val provideLocation: StateFlow<Boolean> get() = _provideLocation.asStateFlow()
+
+    fun setProvideLocation(value: Boolean) {
+        viewModelScope.launch {
+            preferences.edit { putBoolean("provide-location-$myNodeNum", value) }
+            _provideLocation.value = value
+            if (value) {
                 meshService?.startProvideLocation()
             } else {
                 meshService?.stopProvideLocation()

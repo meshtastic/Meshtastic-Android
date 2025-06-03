@@ -270,14 +270,6 @@ class MainActivity : AppCompatActivity(), Logging {
     // Called when we gain/lose a connection to our mesh radio
     private fun onMeshConnectionChanged(newConnection: MeshService.ConnectionState) {
         if (newConnection == MeshService.ConnectionState.CONNECTED) {
-            serviceRepository.meshService?.let { service ->
-                // if provideLocation enabled: Start providing location (from phone GPS) to mesh
-                if (model.provideLocation.value == true) {
-                    service.startProvideLocation()
-                } else {
-                    service.stopProvideLocation()
-                }
-            }
             checkNotificationPermissions()
         }
     }
