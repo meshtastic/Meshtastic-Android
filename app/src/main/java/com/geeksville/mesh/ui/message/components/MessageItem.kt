@@ -35,6 +35,7 @@ import androidx.compose.material.icons.twotone.CloudDone
 import androidx.compose.material.icons.twotone.CloudOff
 import androidx.compose.material.icons.twotone.CloudUpload
 import androidx.compose.material.icons.twotone.HowToReg
+import androidx.compose.material.icons.twotone.Schedule
 import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -157,6 +158,13 @@ internal fun MessageItem(
                             fontSize = MaterialTheme.typography.bodySmall.fontSize,
                         ) }
                         Spacer(Modifier.weight(1f))
+                    if (fromLocal && messageStatus == MessageStatus.QUEUED_FOR_RETRY) {
+                        Text(
+                            text = stringResource(R.string.message_status_queued_retry),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.tertiary,
+                            modifier = Modifier.padding(end = 4.dp)
+                        )
                     }
                     Text(
                         text = messageTime,
@@ -170,9 +178,27 @@ internal fun MessageItem(
                                 MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
                                 MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
                                 MessageStatus.ERROR -> Icons.TwoTone.CloudOff
+                                MessageStatus.QUEUED_FOR_RETRY -> Icons.TwoTone.Schedule
                                 else -> Icons.TwoTone.Warning
                             },
-                            contentDescription = stringResource(R.string.message_delivery_status),
+                            contentDescription = when (messageStatus) {
+                                MessageStatus.RECEIVED -> stringResource(R.string.routing_error_none)
+                                MessageStatus.QUEUED -> stringResource(R.string.message_status_queued)
+                                MessageStatus.DELIVERED -> stringResource(R.string.delivery_confirmed)
+                                MessageStatus.ENROUTE -> stringResource(R.string.message_status_enroute)
+                                MessageStatus.ERROR -> stringResource(R.string.error)
+                                MessageStatus.QUEUED_FOR_RETRY -> stringResource(R.string.message_status_queued_retry_detail)
+                                else -> stringResource(R.string.message_delivery_status)
+                            },
+                            tint = when (messageStatus) {
+                                MessageStatus.RECEIVED -> MaterialTheme.colorScheme.primary
+                                MessageStatus.QUEUED -> MaterialTheme.colorScheme.secondary
+                                MessageStatus.DELIVERED -> MaterialTheme.colorScheme.primary
+                                MessageStatus.ENROUTE -> MaterialTheme.colorScheme.secondary
+                                MessageStatus.ERROR -> MaterialTheme.colorScheme.error
+                                MessageStatus.QUEUED_FOR_RETRY -> MaterialTheme.colorScheme.tertiary
+                                else -> MaterialTheme.colorScheme.onSurface
+                            },
                             modifier = Modifier
                                 .padding(start = 8.dp)
                                 .clickable { onStatusClick() },

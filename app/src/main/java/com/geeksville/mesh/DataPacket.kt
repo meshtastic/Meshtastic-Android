@@ -41,7 +41,8 @@ enum class MessageStatus : Parcelable {
     QUEUED, // Waiting to send to the mesh as soon as we connect to the device
     ENROUTE, // Delivered to the radio, but no ACK or NAK received
     DELIVERED, // We received an ack
-    ERROR // We received back a nak, message not delivered
+    ERROR, // We received back a nak, message not delivered
+    QUEUED_FOR_RETRY // New status for messages queued for automatic retry
 }
 
 /**

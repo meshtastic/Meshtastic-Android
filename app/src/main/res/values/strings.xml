@@ -53,6 +53,7 @@
     <string name="unrecognized">Unrecognized</string>
     <string name="message_status_enroute">Waiting to be acknowledged</string>
     <string name="message_status_queued">Queued for sending</string>
+    <string name="message_status_queued_retry">Queued for retry</string>
     <string name="routing_error_none">Acknowledged</string>
     <string name="routing_error_no_route">No route</string>
     <string name="routing_error_got_nak">Received a negative acknowledgment</string>
@@ -672,4 +673,24 @@
     <string name="expires">Expires</string>
     <string name="time">Time</string>
     <string name="date">Date</string>
+    <string name="message_queue_enabled">Enable Message Queue</string>
+    <string name="message_queue_summary">Automatically retry failed messages when target devices come online or conditions improve. Queued messages are held until recipients are detected on the mesh network.</string>
+    <string name="message_queue_settings">Message Queue</string>
+    <string name="message_queue_description">The message queue feature automatically retries failed messages when network conditions improve or when target devices become reachable. Failed messages are stored locally and retried using exponential backoff (30s, 1m, 2m, 4m, 8m intervals).\n\nThis is especially useful for:\n• Mobile devices passing through connectivity zones\n• Power-saving nodes that come online periodically\n• Temporary network interruptions</string>
+    <string name="message_queue_currently_enabled">Currently: ENABLED</string>
+    <string name="message_queue_currently_disabled">Currently: DISABLED</string>
+    <string name="message_status_queued_retry_detail">Message failed to send and is queued for automatic retry when recipient is reachable</string>
+    <string name="message_queue_retry_details">This message is in the retry queue and will be automatically sent when the recipient device comes online or network conditions improve.\n\nThe queue uses exponential backoff with retry intervals: 30s, 1m, 2m, 4m, 8m (maximum 30 minutes between attempts).\n\nMessages remain queued for up to 24 hours or until 5 retry attempts are exhausted.</string>
+    <string name="message_queue_manual_retry">Retry Now</string>
+    <string name="message_queue_cancel_retry">Remove from Queue</string>
+    <string name="queued_messages">Queued Messages</string>
+    <string name="retry_message">Retry Now</string>
+    <string name="cancel_queued_message">Cancel</string>
+    <!-- Basic action strings -->
+    <string name="enable">Enable</string>
+    <string name="disable">Disable</string>
+    <string name="enabled">Enabled</string>
+    <string name="disabled">Disabled</string>
+    <string name="keep_enabled">Keep Enabled</string>
+    <string name="keep_disabled">Keep Disabled</string>
 </resources>

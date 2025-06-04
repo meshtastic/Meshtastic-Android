@@ -21,6 +21,7 @@ import android.app.Application
 import com.geeksville.mesh.database.dao.DeviceHardwareDao
 import com.geeksville.mesh.database.dao.FirmwareReleaseDao
 import com.geeksville.mesh.database.dao.MeshLogDao
+import com.geeksville.mesh.database.dao.MessageQueueDao
 import com.geeksville.mesh.database.dao.NodeInfoDao
 import com.geeksville.mesh.database.dao.PacketDao
 import com.geeksville.mesh.database.dao.QuickChatActionDao
@@ -66,5 +67,10 @@ class DatabaseModule {
     @Provides
     fun provideFirmwareReleaseDao(database: MeshtasticDatabase): FirmwareReleaseDao {
         return database.firmwareReleaseDao()
+    }
+
+    @Provides
+    fun provideMessageQueueDao(database: MeshtasticDatabase): MessageQueueDao {
+        return database.messageQueueDao()
     }
 }

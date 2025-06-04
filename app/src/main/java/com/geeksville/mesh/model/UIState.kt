@@ -66,6 +66,7 @@ import com.geeksville.mesh.ui.map.MAP_STYLE_ID
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.util.getShortDate
 import com.geeksville.mesh.util.positionToMeter
+import com.geeksville.mesh.MessageStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -533,6 +534,41 @@ class UIViewModel @Inject constructor(
 
     fun deleteMessages(uuidList: List<Long>) = viewModelScope.launch(Dispatchers.IO) {
         packetRepository.deleteMessages(uuidList)
+    }
+
+    /**
+     * Manually retry a queued message immediately
+     */
+    fun retryQueuedMessage(messageUuid: Long, contactKey: String) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            // Get the message from the database
+            val packet = packetRepository.getPacketById(messageUuid.toInt())
+            if (packet != null && packet.data.status == MessageStatus.QUEUED_FOR_RETRY) {
+                // Resend the message immediately
+                val messageText = packet.data.text ?: return@launch
+                sendMessage(messageText, contactKey)
+                // The queue will be cleaned up automatically when the message succeeds or fails
+            }
+        } catch (ex: Exception) {
+            errormsg("Error retrying queued message: ${ex.message}")
+        }
+    }
+
+    /**
+     * Remove a message from the retry queue and mark it as failed
+     */
+    fun cancelQueuedMessage(messageUuid: Long) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            // Update the message status to ERROR to remove it from queue
+            val packet = packetRepository.getPacketById(messageUuid.toInt())
+            if (packet != null && packet.data.status == MessageStatus.QUEUED_FOR_RETRY) {
+                packetRepository.updateMessageStatus(packet.data, MessageStatus.ERROR)
+                // Also remove from the actual message queue
+                meshService?.cancelQueuedMessage(messageUuid.toInt())
+            }
+        } catch (ex: Exception) {
+            errormsg("Error canceling queued message: ${ex.message}")
+        }
     }
 
     fun deleteWaypoint(id: Int) = viewModelScope.launch(Dispatchers.IO) {

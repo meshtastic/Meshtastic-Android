@@ -458,6 +458,10 @@ class MainActivity : AppCompatActivity(), Logging {
                 createDocumentLauncher.launch(intent)
             }
 
+            MainMenuAction.MESSAGE_QUEUE -> {
+                showMessageQueueSettings()
+            }
+
             MainMenuAction.THEME -> {
                 chooseThemeDialog()
             }
@@ -526,6 +530,47 @@ class MainActivity : AppCompatActivity(), Logging {
             title = getString(R.string.preferences_language),
             message = "",
             choices = langMap,
+        )
+    }
+
+    /**
+     * Show message queue settings dialog
+     */
+    private fun showMessageQueueSettings() {
+        val prefs = UIViewModel.getPreferences(this)
+        val currentlyEnabled = prefs.getBoolean("message_queue_enabled", false)
+        
+        // Current state and detailed description
+        val currentStateText = if (currentlyEnabled) {
+            getString(R.string.message_queue_currently_enabled)
+        } else {
+            getString(R.string.message_queue_currently_disabled)
+        }
+        
+        val fullDescription = "$currentStateText\n\n${getString(R.string.message_queue_description)}"
+        
+        val options = if (currentlyEnabled) {
+            mapOf(
+                getString(R.string.disable) + " (Turn OFF message queue)" to false,
+                getString(R.string.keep_enabled) + " (Leave ON)" to true
+            )
+        } else {
+            mapOf(
+                getString(R.string.enable) + " (Turn ON message queue)" to true,
+                getString(R.string.keep_disabled) + " (Leave OFF)" to false
+            )
+        }
+        
+        model.showAlert(
+            title = getString(R.string.message_queue_settings),
+            message = fullDescription,
+            choices = options.mapValues { (_, enabled) ->
+                {
+                    prefs.edit().putBoolean("message_queue_enabled", enabled).apply()
+                    val status = if (enabled) getString(R.string.enabled) else getString(R.string.disabled)
+                    Toast.makeText(this, getString(R.string.message_queue_enabled) + ": $status", Toast.LENGTH_SHORT).show()
+                }
+            }
         )
     }
 }

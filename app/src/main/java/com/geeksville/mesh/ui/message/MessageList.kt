@@ -18,10 +18,16 @@
 package com.geeksville.mesh.ui.message
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -67,9 +73,11 @@ import kotlinx.coroutines.flow.debounce
 fun DeliveryInfo(
     @StringRes title: Int,
     @StringRes text: Int? = null,
+    message: Message,
     onConfirm: (() -> Unit) = {},
     onDismiss: () -> Unit = {},
-    resendOption: Boolean,
+    onRetryNow: (() -> Unit) = {},
+    onCancelQueue: (() -> Unit) = {},
 ) = AlertDialog(
     onDismissRequest = onDismiss,
     dismissButton = {
@@ -79,11 +87,33 @@ fun DeliveryInfo(
         ) { Text(text = stringResource(id = R.string.close)) }
     },
     confirmButton = {
-        if (resendOption) {
-            FilledTonalButton(
-                onClick = onConfirm,
-                modifier = Modifier.padding(horizontal = 16.dp),
-            ) { Text(text = stringResource(id = R.string.resend)) }
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            when (message.status) {
+                MessageStatus.QUEUED_FOR_RETRY -> {
+                    // For queued messages, show retry now and cancel queue options
+                    FilledTonalButton(
+                        onClick = onRetryNow,
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                    ) { Text(text = stringResource(id = R.string.message_queue_manual_retry)) }
+                    
+                    FilledTonalButton(
+                        onClick = onCancelQueue,
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                    ) { Text(text = stringResource(id = R.string.message_queue_cancel_retry)) }
+                }
+                MessageStatus.ERROR -> {
+                    // For failed messages, show resend option
+                    FilledTonalButton(
+                        onClick = onConfirm,
+                        modifier = Modifier.padding(horizontal = 4.dp),
+                    ) { Text(text = stringResource(id = R.string.resend)) }
+                }
+                else -> {
+                    // For other statuses, no action buttons needed
+                }
+            }
         }
     },
     title = {
@@ -95,13 +125,26 @@ fun DeliveryInfo(
         )
     },
     text = {
-        text?.let {
-            Text(
-                text = stringResource(id = it),
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyMedium
-            )
+        Column {
+            text?.let {
+                Text(
+                    text = stringResource(id = it),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+            
+            // Show additional details for queued messages
+            if (message.status == MessageStatus.QUEUED_FOR_RETRY) {
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = stringResource(id = R.string.message_queue_retry_details),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Start,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
         }
     },
     shape = RoundedCornerShape(16.dp),
@@ -135,6 +178,7 @@ internal fun MessageList(
         DeliveryInfo(
             title = title,
             text = text,
+            message = msg,
             onConfirm = {
                 val deleteList: List<Long> = listOf(msg.uuid)
                 viewModel.deleteMessages(deleteList)
@@ -142,7 +186,14 @@ internal fun MessageList(
                 viewModel.sendMessage(msg.text, contactKey)
             },
             onDismiss = { showStatusDialog = null },
-            resendOption = msg.status?.equals(MessageStatus.ERROR) ?: false
+            onRetryNow = {
+                viewModel.retryQueuedMessage(msg.uuid, contactKey)
+                showStatusDialog = null
+            },
+            onCancelQueue = {
+                viewModel.cancelQueuedMessage(msg.uuid)
+                showStatusDialog = null
+            }
         )
     }
 

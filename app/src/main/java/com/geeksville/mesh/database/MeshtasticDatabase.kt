@@ -28,6 +28,7 @@ import androidx.room.migration.AutoMigrationSpec
 import com.geeksville.mesh.database.dao.DeviceHardwareDao
 import com.geeksville.mesh.database.dao.FirmwareReleaseDao
 import com.geeksville.mesh.database.dao.MeshLogDao
+import com.geeksville.mesh.database.dao.MessageQueueDao
 import com.geeksville.mesh.database.dao.NodeInfoDao
 import com.geeksville.mesh.database.dao.PacketDao
 import com.geeksville.mesh.database.dao.QuickChatActionDao
@@ -39,6 +40,7 @@ import com.geeksville.mesh.database.entity.MetadataEntity
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.database.entity.Packet
+import com.geeksville.mesh.database.entity.QueuedMessage
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.database.entity.ReactionEntity
 
@@ -54,6 +56,7 @@ import com.geeksville.mesh.database.entity.ReactionEntity
         MetadataEntity::class,
         DeviceHardwareEntity::class,
         FirmwareReleaseEntity::class,
+        QueuedMessage::class,
     ],
     autoMigrations = [
         AutoMigration(from = 3, to = 4),
@@ -83,6 +86,7 @@ abstract class MeshtasticDatabase : RoomDatabase() {
     abstract fun quickChatActionDao(): QuickChatActionDao
     abstract fun deviceHardwareDao(): DeviceHardwareDao
     abstract fun firmwareReleaseDao(): FirmwareReleaseDao
+    abstract fun messageQueueDao(): MessageQueueDao
 
     companion object {
         fun getDatabase(context: Context): MeshtasticDatabase {

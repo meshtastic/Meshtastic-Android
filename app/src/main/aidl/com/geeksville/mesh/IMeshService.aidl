@@ -171,4 +171,7 @@ interface IMeshService {
 
     /// Send request for node UserInfo
     void requestUserInfo(in int destNum);
+
+    /// Cancel a queued message and remove it from the retry queue
+    void cancelQueuedMessage(in int messageId);
 }
