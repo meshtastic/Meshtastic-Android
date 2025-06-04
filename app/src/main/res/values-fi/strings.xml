@@ -295,7 +295,7 @@
     <string name="bad">huono</string>
     <string name="fair">kohtalainen</string>
     <string name="good">hyvä</string>
-    <string name="none_quality">Ei mitään</string>
+    <string name="none_quality">ei mitään</string>
     <string name="share_to">Jaa…</string>
     <string name="share_message">Jaa viesti</string>
     <string name="signal">Signaali </string>
@@ -636,4 +636,11 @@
     <string name="map">Kartta</string>
     <string name="contacts">Yhteystiedot</string>
     <string name="nodes">Laitteet</string>
+    <string name="set_your_region">Määritä alue</string>
+    <string name="reply">Vastaa</string>
+    <string name="map_reporting_summary">Laitteesi lähettää määräajoin salaamattoman karttaraporttipaketin määritettyyn MQTT-palvelimeen. Tämä paketti sisältää seuraavat tiedot: tunnisteen, pitkän ja lyhyen nimen, likimääräisen sijainnin, laitemallin, roolin, laiteohjelmiston version, LoRa-alueen, modeemiesiasetuksen ja ensisijaisen kanavan nimen.</string>
+    <string name="map_reporting_consent_header">Salli salaamattomien laitetietojen jakaminen MQTT:n kautta</string>
+    <string name="map_reporting_consent_text">Ottamalla tämän ominaisuuden käyttöön hyväksyt ja annat suostumuksen siihen, että laitteesi reaaliaikainen sijaintitieto lähetetään MQTT-protokollan kautta ilman salausta. Näitä sijaintitietoja voidaan käyttää esimerkiksi reaaliaikaiseen karttaraportointiin, laitteen seurantaan ja muihin vastaaviin telemetriatoimintoihin.</string>
+    <string name="i_agree_to_share_my_location">Olen lukenut ja ymmärtänyt yllä olevan. Annan suostumuksen laitetietojeni salaamattomaan lähettämiseen MQTT:n kautta</string>
+    <string name="i_agree">Hyväksyn.</string>
 </resources>
