@@ -63,19 +63,19 @@ fun NodeChip(
             ),
             label = {
                 Text(
-                    modifier = Modifier.Companion
+                    modifier = Modifier
                         .fillMaxWidth(),
                     text = node.user.shortName.ifEmpty { "???" },
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                    textDecoration = TextDecoration.Companion.LineThrough.takeIf { isIgnored },
-                    textAlign = TextAlign.Companion.Center,
+                    textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
+                    textAlign = TextAlign.Center,
                 )
             },
             onClick = {},
             interactionSource = inputChipInteractionSource,
         )
         Box(
-            modifier = Modifier.Companion
+            modifier = Modifier
                 .matchParentSize()
                 .combinedClickable(
                     onClick = { onAction(NodeMenuAction.MoreDetails(node)) },
