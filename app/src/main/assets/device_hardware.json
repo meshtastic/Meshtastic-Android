@@ -911,14 +911,13 @@
     "hwModelSlug": "SEEED_WIO_TRACKER_L1",
     "platformioTarget": "seeed_wio_tracker_L1",
     "architecture": "nrf52840",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "Seeed Wio Tracker L1",
     "tags": [
       "Seeed"
     ],
     "images": [
-      "wio_tracker_l1.svg",
       "wio_tracker_l1_case.svg"
     ],
     "requiresDfu": true
