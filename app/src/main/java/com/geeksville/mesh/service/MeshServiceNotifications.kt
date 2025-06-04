@@ -355,7 +355,9 @@ class MeshServiceNotifications(
         PendingIntent.getActivity(
             context,
             0,
-            Intent(context, MainActivity::class.java),
+            Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            },
             PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
     }
@@ -368,13 +370,16 @@ class MeshServiceNotifications(
     }
 
     private fun createOpenMessageIntent(contactKey: String): PendingIntent {
+        val intentFlags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         val deepLink = "$DEEP_LINK_BASE_URI/messages/$contactKey"
         val deepLinkIntent = Intent(
             Intent.ACTION_VIEW,
             deepLink.toUri(),
             context,
             MainActivity::class.java
-        )
+        ).apply {
+            flags = intentFlags
+        }
 
         val deepLinkPendingIntent: PendingIntent = TaskStackBuilder.create(context).run {
             addNextIntentWithParentStack(deepLinkIntent)
