@@ -49,6 +49,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -195,6 +196,8 @@ private fun VersionChecks(
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val myNodeInfo by viewModel.myNodeInfo.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val latestStableFirmwareRelease by
+    viewModel.latestStableFirmwareRelease.collectAsState(DeviceVersion("2.6.4"))
     // Check if the device is running an old app version or firmware version
     LaunchedEffect(connectionState, myNodeInfo) {
         if (connectionState == MeshService.ConnectionState.CONNECTED) {
@@ -211,17 +214,30 @@ private fun VersionChecks(
                             MeshService.changeDeviceAddress(context, service, "n")
                         }
                     )
-                } else if (curVer < MeshService.minDeviceVersion) {
+                } else if (curVer < MeshService.absoluteMinDeviceVersion) {
                     val title = context.getString(R.string.firmware_too_old)
                     val message = context.getString(R.string.firmware_old)
                     viewModel.showAlert(
                         title = title,
-                        message = message,
+                        html = message,
                         dismissable = false,
                         onConfirm = {
                             val service = viewModel.meshService ?: return@showAlert
                             MeshService.changeDeviceAddress(context, service, "n")
                         }
+                    )
+                } else if (curVer < MeshService.minDeviceVersion) {
+                    val title = context.getString(R.string.should_update_firmware)
+                    val message =
+                        context.getString(
+                            R.string.should_update,
+                            latestStableFirmwareRelease.asString
+                        )
+                    viewModel.showAlert(
+                        title = title,
+                        message = message,
+                        dismissable = false,
+                        onConfirm = {}
                     )
                 }
             }

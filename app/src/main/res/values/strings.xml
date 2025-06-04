@@ -170,7 +170,7 @@
     <string name="meshtastic_messages_notifications">Message notifications</string>
     <string name="meshtastic_alerts_notifications">Alert notifications</string>
     <string name="protocol_stress_test">Protocol stress test</string>
-    <string name="firmware_too_old">Firmware update required</string>
+    <string name="firmware_too_old">Firmware update required.</string>
     <string name="firmware_old">The radio firmware is too old to talk to this application. For more information on this see <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">You must set a region!</string>
@@ -667,4 +667,6 @@
     <string name="map_reporting_consent_text">By enabling this feature, you acknowledge and expressly consent to the transmission of your device’s real-time geographic location over the MQTT protocol without encryption. This location data may be used for purposes such as live map reporting, device tracking, and related telemetry functions.</string>
     <string name="i_agree_to_share_my_location">I have read and understand the above. I voluntarily consent to the unencrypted transmission of my node data via MQTT</string>
     <string name="i_agree">I agree.</string>
+    <string name="should_update_firmware">Firmware Update Recommended.</string>
+    <string name="should_update">To benefit from the latest fixes and features, please update your node firmware.\n\nLatest stable firmware version: %1$s</string>
 </resources>

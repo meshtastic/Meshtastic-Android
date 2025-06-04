@@ -80,6 +80,12 @@ fun FirmwareReleaseEntity.asDeviceVersion(): DeviceVersion {
     )
 }
 
+fun FirmwareRelease.asDeviceVersion(): DeviceVersion {
+    return DeviceVersion(
+        id.substringBeforeLast(".").replace("v", "")
+    )
+}
+
 enum class FirmwareReleaseType {
     STABLE,
     ALPHA
