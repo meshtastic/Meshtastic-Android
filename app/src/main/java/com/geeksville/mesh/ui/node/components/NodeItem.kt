@@ -49,7 +49,6 @@ import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
-import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.isUnmessageableRole
 import com.geeksville.mesh.ui.common.components.BatteryInfo
@@ -101,11 +100,7 @@ fun NodeItem(
     val unmessageable = remember(thatNode) {
         when {
             thatNode.user.hasIsUnmessagable() -> thatNode.user.isUnmessagable
-            thatNode.user.role.isUnmessageableRole() ->
-                thatNode.metadata?.firmwareVersion?.let {
-                    DeviceVersion(it) < DeviceVersion("2.6.8")
-                } ?: true
-            else -> false
+            else -> thatNode.user.role.isUnmessageableRole()
         }
     }
 

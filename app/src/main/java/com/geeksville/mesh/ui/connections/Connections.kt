@@ -39,6 +39,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -406,7 +407,22 @@ fun ConnectionsScreen(
                         value = manualIpAddress,
                         onValueChange = { manualIpAddress = it },
                         label = { Text(stringResource(R.string.ip_address)) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = androidx.compose.ui.text.input.ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions {
+                            if (manualIpAddress.isIPAddress()) {
+                                scanModel.onSelected(
+                                    BTScanModel.DeviceListEntry(
+                                        "",
+                                        "t$manualIpAddress:$manualIpPort",
+                                        true
+                                    )
+                                )
+                            }
+                        },
                         modifier = Modifier
                             .weight(0.7f)
                             .padding(start = 16.dp)
@@ -420,7 +436,22 @@ fun ConnectionsScreen(
                             }
                         },
                         label = { Text(stringResource(R.string.ip_port)) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = androidx.compose.ui.text.input.ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions {
+                            if (manualIpAddress.isIPAddress()) {
+                                scanModel.onSelected(
+                                    BTScanModel.DeviceListEntry(
+                                        "",
+                                        "t$manualIpAddress:$manualIpPort",
+                                        true
+                                    )
+                                )
+                            }
+                        },
                         modifier = Modifier
                             .weight(weight = 0.3f)
                             .padding(start = 8.dp)

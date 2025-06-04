@@ -552,7 +552,7 @@ class UIViewModel @Inject constructor(
     val connectionState get() = radioConfigRepository.connectionState
     fun isConnected() = connectionState.value != MeshService.ConnectionState.DISCONNECTED
     val isConnected =
-        radioConfigRepository.connectionState.map { it == MeshService.ConnectionState.CONNECTED }
+        radioConfigRepository.connectionState.map { it != MeshService.ConnectionState.DISCONNECTED }
 
     private val _requestChannelSet = MutableStateFlow<AppOnlyProtos.ChannelSet?>(null)
     val requestChannelSet: StateFlow<AppOnlyProtos.ChannelSet?> get() = _requestChannelSet
