@@ -1993,10 +1993,8 @@ class MeshService : Service(), Logging {
     lateinit var sharedPreferences: SharedPreferences
 
     fun clearDatabases() = serviceScope.handledLaunch {
-        debug("Clearing all databases")
+        debug("Clearing nodeDB")
         radioConfigRepository.clearNodeDB()
-        packetRepository.get().clearPacketDB()
-        meshLogRepository.get().deleteAll()
     }
 
     private fun updateLastAddress(deviceAddr: String?) {
