@@ -146,7 +146,6 @@
     <string name="meshtastic_messages_notifications">メッセージ通知</string>
     <string name="meshtastic_alerts_notifications">アラート通知</string>
     <string name="protocol_stress_test">プロトコルストレステスト</string>
-    <string name="firmware_too_old">ファームウェアの更新が必要です。</string>
     <string name="firmware_old">デバイスのファームウェアが古く、アプリと通信ができません。詳細は<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Firmware Installation guide</a> に記載されています。</string>
     <string name="okay">OK</string>
     <string name="must_set_region">リージョンを指定する必要があります。</string>

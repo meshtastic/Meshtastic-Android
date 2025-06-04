@@ -139,7 +139,6 @@
     <string name="meshtastic_messages_notifications">Notificaciones de mensajes</string>
     <string name="meshtastic_alerts_notifications">Notificaciones de alerta</string>
     <string name="protocol_stress_test">Protocolo de prueba de esfuerzo</string>
-    <string name="firmware_too_old">Es necesario actualizar el firmware</string>
     <string name="firmware_old">El firmware de radio es demasiado viejo para comunicar con esta aplicación. Para obtener más información sobre esto consulte <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">nuestra guía de instalación de Firmware</a>.</string>
     <string name="okay">Vale</string>
     <string name="must_set_region">¡Debe establecer una región!</string>

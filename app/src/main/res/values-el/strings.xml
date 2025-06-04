@@ -88,7 +88,6 @@
     <string name="message_delivery_status">Κατάσταση παράδοσης μηνύματος</string>
     <string name="meshtastic_messages_notifications">Ειδοποιήσεις μηνυμάτων εφαρμογής</string>
     <string name="protocol_stress_test">Δοκιμή αντοχής πρωτοκόλλου</string>
-    <string name="firmware_too_old">Απαιτείται ενημέρωση υλικολογισμικού</string>
     <string name="firmware_old">Το λογισμικό του πομποδεκτη είναι πολύ παλιό για να μιλήσει σε αυτήν την εφαρμογή. Για περισσότερες πληροφορίες σχετικά με αυτό ανατρέξτε στον <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">οδηγό εγκατάστασης του Firmware</a>.</string>
     <string name="okay">Εντάξει</string>
     <string name="must_set_region">Πρέπει να ορίσετε μια περιοχή!</string>

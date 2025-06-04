@@ -146,7 +146,7 @@
     <string name="meshtastic_messages_notifications">Viesti-ilmoitukset</string>
     <string name="meshtastic_alerts_notifications">Hälytysilmoitukset</string>
     <string name="protocol_stress_test">Protokollan kuormitustesti</string>
-    <string name="firmware_too_old">Laiteohjelmistopäivitys vaaditaan</string>
+    <string name="firmware_too_old">Laiteohjelmistopäivitys vaaditaan.</string>
     <string name="firmware_old">Radion laiteohjelmisto on liian vanha toimiakseen tämän sovelluksen kanssa. Lisätietoja löydät <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">ohjelmiston asennusoppaasta</a>.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">Sinun täytyy määrittää alue!</string>
@@ -643,4 +643,6 @@
     <string name="map_reporting_consent_text">Ottamalla tämän ominaisuuden käyttöön hyväksyt ja annat suostumuksen siihen, että laitteesi reaaliaikainen sijaintitieto lähetetään MQTT-protokollan kautta ilman salausta. Näitä sijaintitietoja voidaan käyttää esimerkiksi reaaliaikaiseen karttaraportointiin, laitteen seurantaan ja muihin vastaaviin telemetriatoimintoihin.</string>
     <string name="i_agree_to_share_my_location">Olen lukenut ja ymmärtänyt yllä olevan. Annan suostumuksen laitetietojeni salaamattomaan lähettämiseen MQTT:n kautta</string>
     <string name="i_agree">Hyväksyn.</string>
+    <string name="should_update_firmware">Laiteohjelmistopäivitystä suositellaan.</string>
+    <string name="should_update">Hyötyäksesi uusimmista korjauksista ja ominaisuuksista, päivitä firmware laiteohjelmistosi.\n\nUusin vakaa laiteohjelmistoversio: %1$s</string>
 </resources>
