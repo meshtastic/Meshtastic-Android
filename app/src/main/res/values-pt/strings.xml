@@ -561,6 +561,8 @@
     <string name="power_metrics_module_enabled">Módulo de métricas de energia ativado</string>
     <string name="power_metrics_update_interval_seconds">Intervalo de atualização de métricas de energia (segundos)</string>
     <string name="power_metrics_on_screen_enabled">Mostrar métricas de energia no ecrã</string>
+    <string name="user_config">Configuração do Utilizador</string>
+    <string name="node_id">ID do Node</string>
     <string name="long_name">Nome longo</string>
     <string name="short_name">Nome curto</string>
     <string name="hardware_model">Modelo de hardware</string>
@@ -613,5 +615,8 @@
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Usar formato de relógio 12h</string>
     <string name="display_time_in_12h_format">Quando ativado, o dispositivo exibirá o tempo em formato de 12 horas no ecrã.</string>
+    <string name="connections">Ligações</string>
     <string name="map">Mapa</string>
+    <string name="contacts">Contactos</string>
+    <string name="nodes">Nodes</string>
 </resources>
