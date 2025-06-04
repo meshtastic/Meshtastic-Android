@@ -50,8 +50,12 @@ import kotlinx.serialization.Serializable
 sealed class NodesRoutes {
     @Serializable
     data object Nodes : Route
+
     @Serializable
     data object NodesGraph : Graph
+
+    @Serializable
+    data object NodeDetailGraph : Graph
 }
 
 fun NavGraphBuilder.nodesGraph(
@@ -72,50 +76,57 @@ fun NavGraphBuilder.nodesGraph(
                 },
             )
         }
-        nodeDetailRoutes(navController, uiViewModel)
+        nodeDetailGraph(navController, uiViewModel)
     }
 }
 
-fun NavGraphBuilder.nodeDetailRoutes(
+fun NavGraphBuilder.nodeDetailGraph(
     navController: NavHostController,
     uiViewModel: UIViewModel,
 ) {
-    composable<Route.NodeDetail> {
-        NodeDetailScreen(
-            uiViewModel = uiViewModel,
-            navigateToMessages = {
-                navController.navigate(Route.Messages(it))
-            },
-            onNavigate = {
-                navController.navigate(it)
-            },
-            viewModel = hiltViewModel(),
-        )
-    }
-    NodeDetailRoute.entries.forEach { nodeDetailRoute ->
-        composable(nodeDetailRoute.route::class) { backStackEntry ->
+    navigation<NodesRoutes.NodeDetailGraph>(
+        startDestination = Route.NodeDetail()
+    ) {
+        composable<Route.NodeDetail> { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<NodesRoutes.NodesGraph>()
+                navController.getBackStackEntry<NodesRoutes.NodeDetailGraph>()
             }
-            when (nodeDetailRoute) {
-                NodeDetailRoute.DEVICE -> DeviceMetricsScreen(hiltViewModel(parentEntry))
-                NodeDetailRoute.NODE_MAP -> NodeMapScreen(hiltViewModel(parentEntry))
-                NodeDetailRoute.POSITION_LOG -> PositionLogScreen(hiltViewModel(parentEntry))
-                NodeDetailRoute.ENVIRONMENT -> EnvironmentMetricsScreen(
-                    hiltViewModel(
-                        parentEntry
+            NodeDetailScreen(
+                uiViewModel = uiViewModel,
+                navigateToMessages = {
+                    navController.navigate(Route.Messages(it))
+                },
+                onNavigate = {
+                    navController.navigate(it)
+                },
+                viewModel = hiltViewModel(parentEntry),
+            )
+        }
+        NodeDetailRoute.entries.forEach { nodeDetailRoute ->
+            composable(nodeDetailRoute.route::class) { backStackEntry ->
+                val parentEntry = remember(backStackEntry) {
+                    navController.getBackStackEntry<NodesRoutes.NodeDetailGraph>()
+                }
+                when (nodeDetailRoute) {
+                    NodeDetailRoute.DEVICE -> DeviceMetricsScreen(hiltViewModel(parentEntry))
+                    NodeDetailRoute.NODE_MAP -> NodeMapScreen(hiltViewModel(parentEntry))
+                    NodeDetailRoute.POSITION_LOG -> PositionLogScreen(hiltViewModel(parentEntry))
+                    NodeDetailRoute.ENVIRONMENT -> EnvironmentMetricsScreen(
+                        hiltViewModel(
+                            parentEntry
+                        )
                     )
-                )
 
-                NodeDetailRoute.SIGNAL -> SignalMetricsScreen(hiltViewModel(parentEntry))
-                NodeDetailRoute.TRACEROUTE -> TracerouteLogScreen(
-                    viewModel = hiltViewModel(
-                        parentEntry
+                    NodeDetailRoute.SIGNAL -> SignalMetricsScreen(hiltViewModel(parentEntry))
+                    NodeDetailRoute.TRACEROUTE -> TracerouteLogScreen(
+                        viewModel = hiltViewModel(
+                            parentEntry
+                        )
                     )
-                )
 
-                NodeDetailRoute.POWER -> PowerMetricsScreen(hiltViewModel(parentEntry))
-                NodeDetailRoute.HOST -> HostMetricsLogScreen(hiltViewModel(parentEntry))
+                    NodeDetailRoute.POWER -> PowerMetricsScreen(hiltViewModel(parentEntry))
+                    NodeDetailRoute.HOST -> HostMetricsLogScreen(hiltViewModel(parentEntry))
+                }
             }
         }
     }
