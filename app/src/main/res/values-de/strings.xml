@@ -146,7 +146,6 @@
     <string name="meshtastic_messages_notifications">Nachrichten-Benachrichtigungen</string>
     <string name="meshtastic_alerts_notifications">Benachrichtigungen</string>
     <string name="protocol_stress_test">Protokollstress-Test</string>
-    <string name="firmware_too_old">Firmware-Aktualisierung erforderlich</string>
     <string name="firmware_old">Die Funkgerät-Firmware ist zu alt, um mit dieser App kommunizieren zu können. Für mehr Informationen darüber besuchen Sie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">unsere Firmware-Installationsanleitung</a>.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">Sie müssen eine Region festlegen!</string>

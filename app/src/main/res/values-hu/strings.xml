@@ -116,7 +116,6 @@
     <string name="message_delivery_status">Üzenet kézbesítésének állapota</string>
     <string name="meshtastic_messages_notifications">Üzenet értesítések</string>
     <string name="protocol_stress_test">Protokoll stressz teszt</string>
-    <string name="firmware_too_old">Firmware frissítés szükséges</string>
     <string name="firmware_old">A rádió firmware túl régi ahhoz, hogy a programmal kommunikálni tudjon. További tudnivalókat a <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">firmware frissítés leírásában</a> talál, a Github-on.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">Be kell állítania egy régiót</string>

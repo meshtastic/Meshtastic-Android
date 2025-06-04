@@ -92,7 +92,6 @@
     <string name="message_delivery_status">Състояние на доставка на съобщението</string>
     <string name="meshtastic_messages_notifications">Известия за съобщения</string>
     <string name="protocol_stress_test">Протоколен стрес тест</string>
-    <string name="firmware_too_old">Изисква се актуализация на фърмуера</string>
     <string name="firmware_old">Фърмуерът на радиото е твърде стар, за да общува с това приложение. За повече информация относно това вижте <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">нашето ръководство за инсталиране на фърмуер</a>.</string>
     <string name="okay">Добре</string>
     <string name="must_set_region">Трябва да зададете регион!</string>

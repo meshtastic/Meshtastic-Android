@@ -79,7 +79,6 @@
     <string name="updating_firmware">التحديث جاري، قد يستغرق 8 دقائق…</string>
     <string name="update_successful">تم التحديث</string>
     <string name="update_failed">التحديث فشل</string>
-    <string name="firmware_too_old">يجب عليك التحديث</string>
     <string name="okay">حسنا</string>
     <string name="must_set_region">واجب إدخال المنطقة!</string>
     <string name="region">الجهة</string>
