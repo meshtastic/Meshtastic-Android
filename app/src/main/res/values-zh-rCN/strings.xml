@@ -146,6 +146,7 @@
     <string name="meshtastic_messages_notifications">消息通知</string>
     <string name="meshtastic_alerts_notifications">提醒通知</string>
     <string name="protocol_stress_test">协议压力测试</string>
+    <string name="firmware_too_old">需要固件更新。</string>
     <string name="firmware_old">版本过旧，无法与此应用程序通讯。欲了解更多信息，请参阅 Meshtastic 网站上的<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">韧体安装指南</a>。</string>
     <string name="okay">好的</string>
     <string name="must_set_region">您必须先选择一个地区</string>
@@ -636,5 +637,8 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="map">地图</string>
     <string name="contacts">联系人</string>
     <string name="nodes">节点</string>
+    <string name="set_your_region">设置您的地区</string>
     <string name="reply">回复</string>
+    <string name="i_agree">我同意。</string>
+    <string name="should_update_firmware">推荐固件更新。</string>
 </resources>
