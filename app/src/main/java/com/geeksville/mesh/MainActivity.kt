@@ -224,7 +224,9 @@ class MainActivity : AppCompatActivity(), Logging {
         val startActivityIntent = Intent(
             Intent.ACTION_VIEW, deepLink.toUri(),
             this, MainActivity::class.java
-        )
+        ).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
 
         val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
             addNextIntentWithParentStack(startActivityIntent)
@@ -234,11 +236,13 @@ class MainActivity : AppCompatActivity(), Logging {
     }
 
     private fun createSettingsIntent(): PendingIntent {
-        val deepLink = "$DEEP_LINK_BASE_URI/settings"
+        val deepLink = "$DEEP_LINK_BASE_URI/connections"
         val startActivityIntent = Intent(
             Intent.ACTION_VIEW, deepLink.toUri(),
             this, MainActivity::class.java
-        )
+        ).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
 
         val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
             addNextIntentWithParentStack(startActivityIntent)
@@ -387,7 +391,6 @@ class MainActivity : AppCompatActivity(), Logging {
 
     override fun onStart() {
         super.onStart()
-
         bluetoothViewModel.enabled.observe(this) { enabled ->
             if (!enabled && !requestedEnable && model.selectedBluetooth) {
                 requestedEnable = true
