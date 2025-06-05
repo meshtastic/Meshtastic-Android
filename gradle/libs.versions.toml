@@ -50,6 +50,7 @@ zxing-core = "3.5.3"
 
 [libraries]
 agp = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
+activity = { group = "androidx.activity", name = "activity" }
 actvity-ktx = { group = "androidx.activity", name = "activity-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
