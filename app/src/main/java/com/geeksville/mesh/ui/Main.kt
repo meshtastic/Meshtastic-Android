@@ -189,7 +189,7 @@ enum class MainMenuAction(@StringRes val stringRes: Int) {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("LongMethod")
+@Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 private fun MainAppBar(
     title: String,
