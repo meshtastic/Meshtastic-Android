@@ -50,6 +50,7 @@ zxing-core = "3.5.3"
 
 [libraries]
 agp = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
+activity = { group = "androidx.activity", name = "activity"}
 actvity-ktx = { group = "androidx.activity", name = "activity-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
@@ -131,6 +132,7 @@ viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref =
 work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work-runtime-ktx" }
 zxing-android-embedded = { group = "com.journeyapps", name = "zxing-android-embedded", version.ref = "zxing-android-embedded" }
 zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing-core" }
+
 
 [bundles]
 # Core AndroidX
