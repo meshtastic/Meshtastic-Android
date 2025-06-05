@@ -1,3 +1,20 @@
+/*
+ * Copyright (c) 2025 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -5,17 +22,17 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.compose)
     alias(libs.plugins.protobuf)
+    alias(libs.plugins.detekt)
 }
-
 
 android {
     namespace = "com.meshtastic.android.meshserviceexample"
-    compileSdk = 35
+    compileSdk = Configs.COMPILE_SDK
 
     defaultConfig {
         applicationId = "com.meshtastic.android.meshserviceexample"
-        minSdk = 26
-        targetSdk = 35
+        minSdk = Configs.MIN_SDK_VERSION
+        targetSdk = Configs.TARGET_SDK
         versionCode = 1
         versionName = "1.0"
 
@@ -58,7 +75,6 @@ protobuf {
     }
 }
 
-
 dependencies {
     implementation(libs.appcompat)
     implementation(libs.material)
@@ -73,9 +89,15 @@ dependencies {
 
     implementation(libs.kotlinx.serialization.json)
 
-    //OSM
+    // OSM
     implementation(libs.bundles.osm)
     implementation(libs.osmdroid.geopackage) {
         exclude(group = "com.j256.ormlite")
     }
+    detektPlugins(libs.detekt.formatting)
+}
+
+detekt {
+    config.setFrom("../config/detekt/detekt.yml")
+    baseline = file("../config/detekt/detekt-baseline-meshserviceexample.xml")
 }

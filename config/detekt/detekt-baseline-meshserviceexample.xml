@@ -1,0 +1,102 @@
+<?xml version="1.0" ?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
+<SmellBaseline>
+  <ManuallySuppressedIssues/>
+  <CurrentIssues>
+    <ID>CommentSpacing:NodeInfo.kt$NodeInfo$/// @return a nice human readable string for the distance, or null for unknown</ID>
+    <ID>CommentSpacing:NodeInfo.kt$NodeInfo$/// @return bearing to the other position in degrees</ID>
+    <ID>CommentSpacing:NodeInfo.kt$NodeInfo$/// @return distance in meters to some other node (or null if unknown)</ID>
+    <ID>CommentSpacing:NodeInfo.kt$NodeInfo$/// return the position if it is valid, else null</ID>
+    <ID>CommentSpacing:NodeInfo.kt$Position$/// @return bearing to the other position in degrees</ID>
+    <ID>CommentSpacing:NodeInfo.kt$Position$/// @return distance in meters to some other node (or null if unknown)</ID>
+    <ID>CommentSpacing:NodeInfo.kt$Position.Companion$/// Convert to a double representation of degrees</ID>
+    <ID>FinalNewline:DataPacket.kt$com.geeksville.mesh.DataPacket.kt</ID>
+    <ID>FinalNewline:MyNodeInfo.kt$com.geeksville.mesh.MyNodeInfo.kt</ID>
+    <ID>FinalNewline:NodeInfo.kt$com.geeksville.mesh.NodeInfo.kt</ID>
+    <ID>FunctionParameterNaming:LocationUtils.kt$_degIn: Double</ID>
+    <ID>FunctionParameterNaming:LocationUtils.kt$lat_a: Double</ID>
+    <ID>FunctionParameterNaming:LocationUtils.kt$lat_b: Double</ID>
+    <ID>FunctionParameterNaming:LocationUtils.kt$lng_a: Double</ID>
+    <ID>FunctionParameterNaming:LocationUtils.kt$lng_b: Double</ID>
+    <ID>ImplicitDefaultLocale:LocationUtils.kt$GPSFormat$String.format( "%s%s %.6s %.7s", UTM.zone, UTM.toMGRS().band, UTM.easting, UTM.northing )</ID>
+    <ID>ImplicitDefaultLocale:LocationUtils.kt$GPSFormat$String.format( "%s%s %s%s %05d %05d", MGRS.zone, MGRS.band, MGRS.column, MGRS.row, MGRS.easting, MGRS.northing )</ID>
+    <ID>ImplicitDefaultLocale:LocationUtils.kt$GPSFormat$String.format("%.5f %.5f", p.latitude, p.longitude)</ID>
+    <ID>ImplicitDefaultLocale:LocationUtils.kt$GPSFormat$String.format("%s°%s'%.5s\"%s", a[0], a[1], a[2], a[3])</ID>
+    <ID>ImplicitDefaultLocale:NodeInfo.kt$NodeInfo$String.format("%d%%", batteryLevel)</ID>
+    <ID>MagicNumber:DataPacket.kt$DataPacket.CREATOR$16</ID>
+    <ID>MagicNumber:Extensions.kt$1000</ID>
+    <ID>MagicNumber:Extensions.kt$1440000</ID>
+    <ID>MagicNumber:Extensions.kt$24</ID>
+    <ID>MagicNumber:Extensions.kt$2880</ID>
+    <ID>MagicNumber:Extensions.kt$60</ID>
+    <ID>MagicNumber:LocationUtils.kt$0.8</ID>
+    <ID>MagicNumber:LocationUtils.kt$110540</ID>
+    <ID>MagicNumber:LocationUtils.kt$111320</ID>
+    <ID>MagicNumber:LocationUtils.kt$180</ID>
+    <ID>MagicNumber:LocationUtils.kt$1e-7</ID>
+    <ID>MagicNumber:LocationUtils.kt$360</ID>
+    <ID>MagicNumber:LocationUtils.kt$360.0</ID>
+    <ID>MagicNumber:LocationUtils.kt$3600.0</ID>
+    <ID>MagicNumber:LocationUtils.kt$60</ID>
+    <ID>MagicNumber:LocationUtils.kt$60.0</ID>
+    <ID>MagicNumber:LocationUtils.kt$6366000</ID>
+    <ID>MagicNumber:LocationUtils.kt$GPSFormat$3</ID>
+    <ID>MagicNumber:NodeInfo.kt$DeviceMetrics.Companion$1000</ID>
+    <ID>MagicNumber:NodeInfo.kt$EnvironmentMetrics.Companion$1000</ID>
+    <ID>MagicNumber:NodeInfo.kt$NodeInfo$0.114</ID>
+    <ID>MagicNumber:NodeInfo.kt$NodeInfo$0.299</ID>
+    <ID>MagicNumber:NodeInfo.kt$NodeInfo$0.587</ID>
+    <ID>MagicNumber:NodeInfo.kt$NodeInfo$0x0000FF</ID>
+    <ID>MagicNumber:NodeInfo.kt$NodeInfo$0x00FF00</ID>
+    <ID>MagicNumber:NodeInfo.kt$NodeInfo$0xFF0000</ID>
+    <ID>MagicNumber:NodeInfo.kt$NodeInfo$1000</ID>
+    <ID>MagicNumber:NodeInfo.kt$NodeInfo$1000.0</ID>
+    <ID>MagicNumber:NodeInfo.kt$NodeInfo$15</ID>
+    <ID>MagicNumber:NodeInfo.kt$NodeInfo$16</ID>
+    <ID>MagicNumber:NodeInfo.kt$NodeInfo$1609</ID>
+    <ID>MagicNumber:NodeInfo.kt$NodeInfo$1609.34</ID>
+    <ID>MagicNumber:NodeInfo.kt$NodeInfo$255</ID>
+    <ID>MagicNumber:NodeInfo.kt$NodeInfo$3.281</ID>
+    <ID>MagicNumber:NodeInfo.kt$NodeInfo$60</ID>
+    <ID>MagicNumber:NodeInfo.kt$NodeInfo$8</ID>
+    <ID>MagicNumber:NodeInfo.kt$Position$180</ID>
+    <ID>MagicNumber:NodeInfo.kt$Position$90</ID>
+    <ID>MagicNumber:NodeInfo.kt$Position$90.0</ID>
+    <ID>MagicNumber:NodeInfo.kt$Position.Companion$1000</ID>
+    <ID>MagicNumber:NodeInfo.kt$Position.Companion$1e-7</ID>
+    <ID>MagicNumber:NodeInfo.kt$Position.Companion$1e7</ID>
+    <ID>MatchingDeclarationName:LocationUtils.kt$GPSFormat</ID>
+    <ID>MaxLineLength:DataPacket.kt$DataPacket$val dataType: Int</ID>
+    <ID>MaxLineLength:NodeInfo.kt$NodeInfo$prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.IMPERIAL_VALUE &amp;&amp; dist &lt; 1609 -&gt; "%.0f ft".format(dist.toDouble()*3.281)</ID>
+    <ID>MaxLineLength:NodeInfo.kt$NodeInfo$prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.IMPERIAL_VALUE &amp;&amp; dist &gt;= 1609 -&gt; "%.1f mi".format(dist / 1609.34)</ID>
+    <ID>MaxLineLength:NodeInfo.kt$NodeInfo$prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC_VALUE &amp;&amp; dist &lt; 1000 -&gt; "%.0f m".format(dist.toDouble())</ID>
+    <ID>MaxLineLength:NodeInfo.kt$NodeInfo$prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC_VALUE &amp;&amp; dist &gt;= 1000 -&gt; "%.1f km".format(dist / 1000.0)</ID>
+    <ID>MaxLineLength:NodeInfo.kt$Position$/**</ID>
+    <ID>MaxLineLength:NodeInfo.kt$Position$return "Position(lat=${latitude.anonymize}, lon=${longitude.anonymize}, alt=${altitude.anonymize}, time=${time})"</ID>
+    <ID>MultiLineIfElse:NodeInfo.kt$MeshUser$hwModel.name.replace('_', '-').replace('p', '.').lowercase()</ID>
+    <ID>MultiLineIfElse:NodeInfo.kt$MeshUser$null</ID>
+    <ID>NewLineAtEndOfFile:DataPacket.kt$com.geeksville.mesh.DataPacket.kt</ID>
+    <ID>NewLineAtEndOfFile:MyNodeInfo.kt$com.geeksville.mesh.MyNodeInfo.kt</ID>
+    <ID>NewLineAtEndOfFile:NodeInfo.kt$com.geeksville.mesh.NodeInfo.kt</ID>
+    <ID>NoConsecutiveBlankLines:NodeInfo.kt$ </ID>
+    <ID>SpacingAroundOperators:NodeInfo.kt$NodeInfo$*</ID>
+    <ID>StringTemplate:NodeInfo.kt$Position$${time}</ID>
+    <ID>TooManyFunctions:LocationUtils.kt$com.geeksville.mesh.util.LocationUtils.kt</ID>
+  </CurrentIssues>
+</SmellBaseline>
