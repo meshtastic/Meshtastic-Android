@@ -616,7 +616,7 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="share_contact">分享联系人</string>
     <string name="import_shared_contact">导入分享的联系人？</string>
     <string name="unmessageable">无法发送消息</string>
-    <string name="unmonitored_or_infrastructure">未受监测或基础设施</string>
+    <string name="unmonitored_or_infrastructure">不受监测或基础设施</string>
     <string name="import_known_shared_contact_text">警告：此联系人已知，导入将覆盖之前的联系人信息。</string>
     <string name="public_key_changed">公钥已更改</string>
     <string name="import_label">导入</string>
@@ -639,6 +639,11 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="nodes">节点</string>
     <string name="set_your_region">设置您的地区</string>
     <string name="reply">回复</string>
+    <string name="map_reporting_summary">您的节点将定期向配置的MQTT服务器发送一个未加密的地图报告数据包，这包括id、长和短的名称， 大致位置、硬件型号、角色、固件版本、LoRa区域、调制解调器预设和主频道名称。</string>
+    <string name="map_reporting_consent_header">同意通过 MQTT 分享未加密的节点数据</string>
+    <string name="map_reporting_consent_text">通过启用此功能，您确认并明确同意通过MQTT协议不加密地传输您设备的实时地理位置。 这一位置数据可用于现场地图报告、设备跟踪和相关的遥测功能。</string>
+    <string name="i_agree_to_share_my_location">我已阅读并理解以上内容。我自愿同意通过MQTT未加密地传输我的节点数据。</string>
     <string name="i_agree">我同意。</string>
     <string name="should_update_firmware">推荐固件更新。</string>
+    <string name="should_update">为了获得最新的修复和功能，请更新您的节点固件。\n\n最新稳定固件版本：%1$s</string>
 </resources>

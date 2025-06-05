@@ -146,6 +146,7 @@
     <string name="meshtastic_messages_notifications">Notifiche messaggio</string>
     <string name="meshtastic_alerts_notifications">Notifiche di allarme</string>
     <string name="protocol_stress_test">Stress test del protocollo</string>
+    <string name="firmware_too_old">È necessario aggiornare il firmware.</string>
     <string name="firmware_old">Il firmware radio è troppo vecchio per parlare con questa applicazione. Per ulteriori informazioni su questo vedi <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">la nostra guida all\'installazione del firmware</a>.</string>
     <string name="okay">Ok</string>
     <string name="must_set_region">Devi impostare una regione!</string>
@@ -635,5 +636,13 @@
     <string name="map">Mappa</string>
     <string name="contacts">Contatti</string>
     <string name="nodes">Nodi</string>
+    <string name="set_your_region">Imposta la tua regione</string>
     <string name="reply">Rispondi</string>
+    <string name="map_reporting_summary">Il nodo invierà periodicamente un pacchetto di report mappa non cifrato al server MQTT configurato, questo include il nome id lungo e breve, posizione approssimativa, modello hardware, ruolo, versione firmware, regione LoRa, configurazione modem e nome del canale primario.</string>
+    <string name="map_reporting_consent_header">Do il consenso a condividere i dati non cifrati del nodo tramite MQTT</string>
+    <string name="map_reporting_consent_text">Abilitando questa funzione, l\'utente riconosce e acconsente espressamente alla trasmissione della posizione geografica in tempo reale del suo dispositivo su protocollo MQTT senza crittografia. Questi dati di localizzazione possono essere utilizzati per scopi quali la compilazione di mappe in tempo reale, il tracking del dispositivo e le relative funzioni di telemetria.</string>
+    <string name="i_agree_to_share_my_location">Ho letto e accetto quanto sopra. Acconsento volontariamente alla trasmissione non crittografata dei dati del mio nodo tramite MQTT</string>
+    <string name="i_agree">Sono d’accordo.</string>
+    <string name="should_update_firmware">Aggiornamento Firmware Consigliato.</string>
+    <string name="should_update">Per usufruire delle ultime correzioni e funzionalità, aggiorna il firmware del tuo nodo.\n\nVersione stabile più recente del firmware: %1$s</string>
 </resources>
