@@ -77,8 +77,10 @@ import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.ChannelsRoutes
 import com.geeksville.mesh.navigation.ConnectionsRoutes
+import com.geeksville.mesh.navigation.ContactsRoutes
 import com.geeksville.mesh.navigation.NavGraph
 import com.geeksville.mesh.navigation.NodesRoutes
+import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.showLongNameTitle
 import com.geeksville.mesh.service.MeshService
@@ -89,7 +91,7 @@ import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
 import com.geeksville.mesh.ui.debug.DebugMenuActions
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
-    Contacts(R.string.contacts, Icons.AutoMirrored.TwoTone.Chat, Route.Contacts),
+    Contacts(R.string.contacts, Icons.AutoMirrored.TwoTone.Chat, ContactsRoutes.Contacts),
     Nodes(R.string.nodes, Icons.TwoTone.People, NodesRoutes.Nodes),
     Map(R.string.map, Icons.TwoTone.Map, Route.Map),
     Channels(R.string.channels, Icons.TwoTone.Contactless, ChannelsRoutes.Channels),
@@ -167,8 +169,8 @@ fun MainScreen(
             ) { action ->
                 when (action) {
                     MainMenuAction.DEBUG -> navController.navigate(Route.DebugPanel)
-                    MainMenuAction.RADIO_CONFIG -> navController.navigate(Route.RadioConfig())
-                    MainMenuAction.QUICK_CHAT -> navController.navigate(Route.QuickChat)
+                    MainMenuAction.RADIO_CONFIG -> navController.navigate(RadioConfigRoutes.RadioConfig())
+                    MainMenuAction.QUICK_CHAT -> navController.navigate(ContactsRoutes.QuickChat)
                     else -> onAction(action)
                 }
             }
@@ -271,7 +273,7 @@ private fun MainAppBar(
     val canNavigateBack = navController.previousBackStackEntry != null
     val isTopLevelRoute = currentDestination?.isTopLevel() == true
     val navigateUp: () -> Unit = navController::navigateUp
-    if (currentDestination?.hasRoute<Route.Messages>() == true) {
+    if (currentDestination?.hasRoute<ContactsRoutes.Messages>() == true) {
         return
     }
     TopAppBar(
@@ -288,12 +290,12 @@ private fun MainAppBar(
                         stringResource(id = R.string.debug_panel),
                     )
 
-                currentDestination.hasRoute<Route.QuickChat>() ->
+                currentDestination.hasRoute<ContactsRoutes.QuickChat>() ->
                     Text(
                         stringResource(id = R.string.quick_chat),
                     )
 
-                currentDestination.hasRoute<Route.Share>() ->
+                currentDestination.hasRoute<ContactsRoutes.Share>() ->
                     Text(
                         stringResource(id = R.string.share_to),
                     )

@@ -119,6 +119,8 @@ import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.isUnmessageableRole
+import com.geeksville.mesh.navigation.NodeDetailRoutes
+import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
@@ -143,14 +145,14 @@ private enum class LogsType(
     val icon: ImageVector,
     val route: Route
 ) {
-    DEVICE(R.string.device_metrics_log, Icons.Default.ChargingStation, Route.DeviceMetrics),
-    NODE_MAP(R.string.node_map, Icons.Default.Map, Route.NodeMap),
-    POSITIONS(R.string.position_log, Icons.Default.LocationOn, Route.PositionLog),
-    ENVIRONMENT(R.string.env_metrics_log, Icons.Default.Thermostat, Route.EnvironmentMetrics),
-    SIGNAL(R.string.sig_metrics_log, Icons.Default.SignalCellularAlt, Route.SignalMetrics),
-    POWER(R.string.power_metrics_log, Icons.Default.Power, Route.PowerMetrics),
-    TRACEROUTE(R.string.traceroute_log, Icons.Default.Route, Route.TracerouteLog),
-    HOST(R.string.host_metrics_log, Icons.Default.Memory, Route.HostMetricsLog),
+    DEVICE(R.string.device_metrics_log, Icons.Default.ChargingStation, NodeDetailRoutes.DeviceMetrics),
+    NODE_MAP(R.string.node_map, Icons.Default.Map, NodeDetailRoutes.NodeMap),
+    POSITIONS(R.string.position_log, Icons.Default.LocationOn, NodeDetailRoutes.PositionLog),
+    ENVIRONMENT(R.string.env_metrics_log, Icons.Default.Thermostat, NodeDetailRoutes.EnvironmentMetrics),
+    SIGNAL(R.string.sig_metrics_log, Icons.Default.SignalCellularAlt, NodeDetailRoutes.SignalMetrics),
+    POWER(R.string.power_metrics_log, Icons.Default.Power, NodeDetailRoutes.PowerMetrics),
+    TRACEROUTE(R.string.traceroute_log, Icons.Default.Route, NodeDetailRoutes.TracerouteLog),
+    HOST(R.string.host_metrics_log, Icons.Default.Memory, NodeDetailRoutes.HostMetricsLog),
 }
 
 @Suppress("LongMethod")
@@ -327,7 +329,7 @@ private fun NodeDetailList(
                     icon = Icons.Default.Settings,
                     enabled = true
                 ) {
-                    onAction(Route.RadioConfig(node.num))
+                    onAction(RadioConfigRoutes.RadioConfig(node.num))
                 }
             }
         }

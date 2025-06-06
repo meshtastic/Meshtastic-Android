@@ -76,6 +76,83 @@ import com.geeksville.mesh.ui.radioconfig.components.SerialConfigScreen
 import com.geeksville.mesh.ui.radioconfig.components.StoreForwardConfigScreen
 import com.geeksville.mesh.ui.radioconfig.components.TelemetryConfigScreen
 import com.geeksville.mesh.ui.radioconfig.components.UserConfigScreen
+import kotlinx.serialization.Serializable
+
+sealed class RadioConfigRoutes {
+    @Serializable
+    data class RadioConfigGraph(val destNum: Int? = null) : Graph
+
+    @Serializable
+    data class RadioConfig(val destNum: Int? = null) : Route
+
+    @Serializable
+    data object User : Route
+    @Serializable
+    data object ChannelConfig : Route
+
+    @Serializable
+    data object Device : Route
+
+    @Serializable
+    data object Position : Route
+
+    @Serializable
+    data object Power : Route
+
+    @Serializable
+    data object Network : Route
+
+    @Serializable
+    data object Display : Route
+
+    @Serializable
+    data object LoRa : Route
+
+    @Serializable
+    data object Bluetooth : Route
+
+    @Serializable
+    data object Security : Route
+
+    @Serializable
+    data object MQTT : Route
+
+    @Serializable
+    data object Serial : Route
+
+    @Serializable
+    data object ExtNotification : Route
+
+    @Serializable
+    data object StoreForward : Route
+
+    @Serializable
+    data object RangeTest : Route
+
+    @Serializable
+    data object Telemetry : Route
+
+    @Serializable
+    data object CannedMessage : Route
+
+    @Serializable
+    data object Audio : Route
+
+    @Serializable
+    data object RemoteHardware : Route
+
+    @Serializable
+    data object NeighborInfo : Route
+
+    @Serializable
+    data object AmbientLighting : Route
+
+    @Serializable
+    data object DetectionSensor : Route
+
+    @Serializable
+    data object Paxcounter : Route
+}
 
 fun getNavRouteFrom(routeName: String): Route? {
     return ConfigRoute.entries.find { it.name == routeName }?.route
@@ -83,19 +160,19 @@ fun getNavRouteFrom(routeName: String): Route? {
 }
 
 fun NavGraphBuilder.radioConfigGraph(navController: NavHostController, uiViewModel: UIViewModel) {
-    navigation<Graph.RadioConfigGraph>(
-        startDestination = Route.RadioConfig(),
+    navigation<RadioConfigRoutes.RadioConfigGraph>(
+        startDestination = RadioConfigRoutes.RadioConfig(),
     ) {
-        composable<Route.RadioConfig> { backStackEntry ->
+        composable<RadioConfigRoutes.RadioConfig> { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<Graph.RadioConfigGraph>()
+                navController.getBackStackEntry<RadioConfigRoutes.RadioConfigGraph>()
             }
             RadioConfigScreen(
                 uiViewModel = uiViewModel,
                 viewModel = hiltViewModel(parentEntry)
             ) {
                 navController.navigate(it) {
-                    popUpTo(Route.RadioConfig()) {
+                    popUpTo(RadioConfigRoutes.RadioConfig()) {
                         inclusive = false
                     }
                 }
@@ -112,7 +189,7 @@ private fun NavGraphBuilder.configRoutes(
     ConfigRoute.entries.forEach { configRoute ->
         composable(configRoute.route::class) { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<Graph.RadioConfigGraph>()
+                navController.getBackStackEntry<RadioConfigRoutes.RadioConfigGraph>()
             }
             when (configRoute) {
                 ConfigRoute.USER -> UserConfigScreen(hiltViewModel(parentEntry))
@@ -137,7 +214,7 @@ private fun NavGraphBuilder.moduleRoutes(
     ModuleRoute.entries.forEach { moduleRoute ->
         composable(moduleRoute.route::class) { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<Graph.RadioConfigGraph>()
+                navController.getBackStackEntry<RadioConfigRoutes.RadioConfigGraph>()
             }
             when (moduleRoute) {
                 ModuleRoute.MQTT -> MQTTConfigScreen(hiltViewModel(parentEntry))
@@ -181,16 +258,16 @@ enum class ConfigRoute(
     val icon: ImageVector?,
     val type: Int = 0
 ) {
-    USER(R.string.user, Route.User, Icons.Default.Person, 0),
-    CHANNELS(R.string.channels, Route.ChannelConfig, Icons.AutoMirrored.Default.List, 0),
-    DEVICE(R.string.device, Route.Device, Icons.Default.Router, 0),
-    POSITION(R.string.position, Route.Position, Icons.Default.LocationOn, 1),
-    POWER(R.string.power, Route.Power, Icons.Default.Power, 2),
-    NETWORK(R.string.network, Route.Network, Icons.Default.Wifi, 3),
-    DISPLAY(R.string.display, Route.Display, Icons.Default.DisplaySettings, 4),
-    LORA(R.string.lora, Route.LoRa, Icons.Default.CellTower, 5),
-    BLUETOOTH(R.string.bluetooth, Route.Bluetooth, Icons.Default.Bluetooth, 6),
-    SECURITY(R.string.security, Route.Security, Icons.Default.Security, 7),
+    USER(R.string.user, RadioConfigRoutes.User, Icons.Default.Person, 0),
+    CHANNELS(R.string.channels, RadioConfigRoutes.ChannelConfig, Icons.AutoMirrored.Default.List, 0),
+    DEVICE(R.string.device, RadioConfigRoutes.Device, Icons.Default.Router, 0),
+    POSITION(R.string.position, RadioConfigRoutes.Position, Icons.Default.LocationOn, 1),
+    POWER(R.string.power, RadioConfigRoutes.Power, Icons.Default.Power, 2),
+    NETWORK(R.string.network, RadioConfigRoutes.Network, Icons.Default.Wifi, 3),
+    DISPLAY(R.string.display, RadioConfigRoutes.Display, Icons.Default.DisplaySettings, 4),
+    LORA(R.string.lora, RadioConfigRoutes.LoRa, Icons.Default.CellTower, 5),
+    BLUETOOTH(R.string.bluetooth, RadioConfigRoutes.Bluetooth, Icons.Default.Bluetooth, 6),
+    SECURITY(R.string.security, RadioConfigRoutes.Security, Icons.Default.Security, 7),
     ;
 
     companion object {
@@ -213,39 +290,39 @@ enum class ModuleRoute(
     val icon: ImageVector?,
     val type: Int = 0
 ) {
-    MQTT(R.string.mqtt, Route.MQTT, Icons.Default.Cloud, 0),
-    SERIAL(R.string.serial, Route.Serial, Icons.Default.Usb, 1),
+    MQTT(R.string.mqtt, RadioConfigRoutes.MQTT, Icons.Default.Cloud, 0),
+    SERIAL(R.string.serial, RadioConfigRoutes.Serial, Icons.Default.Usb, 1),
     EXT_NOTIFICATION(
         R.string.external_notification,
-        Route.ExtNotification,
+        RadioConfigRoutes.ExtNotification,
         Icons.Default.Notifications,
         2
     ),
     STORE_FORWARD(
         R.string.store_forward,
-        Route.StoreForward,
+        RadioConfigRoutes.StoreForward,
         Icons.AutoMirrored.Default.Forward,
         3
     ),
-    RANGE_TEST(R.string.range_test, Route.RangeTest, Icons.Default.Speed, 4),
-    TELEMETRY(R.string.telemetry, Route.Telemetry, Icons.Default.DataUsage, 5),
+    RANGE_TEST(R.string.range_test, RadioConfigRoutes.RangeTest, Icons.Default.Speed, 4),
+    TELEMETRY(R.string.telemetry, RadioConfigRoutes.Telemetry, Icons.Default.DataUsage, 5),
     CANNED_MESSAGE(
         R.string.canned_message,
-        Route.CannedMessage,
+        RadioConfigRoutes.CannedMessage,
         Icons.AutoMirrored.Default.Message,
         6
     ),
-    AUDIO(R.string.audio, Route.Audio, Icons.AutoMirrored.Default.VolumeUp, 7),
+    AUDIO(R.string.audio, RadioConfigRoutes.Audio, Icons.AutoMirrored.Default.VolumeUp, 7),
     REMOTE_HARDWARE(
         R.string.remote_hardware,
-        Route.RemoteHardware,
+        RadioConfigRoutes.RemoteHardware,
         Icons.Default.SettingsRemote,
         8
     ),
-    NEIGHBOR_INFO(R.string.neighbor_info, Route.NeighborInfo, Icons.Default.People, 9),
-    AMBIENT_LIGHTING(R.string.ambient_lighting, Route.AmbientLighting, Icons.Default.LightMode, 10),
-    DETECTION_SENSOR(R.string.detection_sensor, Route.DetectionSensor, Icons.Default.Sensors, 11),
-    PAXCOUNTER(R.string.paxcounter, Route.Paxcounter, Icons.Default.PermScanWifi, 12),
+    NEIGHBOR_INFO(R.string.neighbor_info, RadioConfigRoutes.NeighborInfo, Icons.Default.People, 9),
+    AMBIENT_LIGHTING(R.string.ambient_lighting, RadioConfigRoutes.AmbientLighting, Icons.Default.LightMode, 10),
+    DETECTION_SENSOR(R.string.detection_sensor, RadioConfigRoutes.DetectionSensor, Icons.Default.Sensors, 11),
+    PAXCOUNTER(R.string.paxcounter, RadioConfigRoutes.Paxcounter, Icons.Default.PermScanWifi, 12),
     ;
 
     val bitfield: Int get() = 1 shl ordinal

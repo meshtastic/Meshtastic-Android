@@ -56,6 +56,36 @@ sealed class NodesRoutes {
 
     @Serializable
     data object NodeDetailGraph : Graph
+
+    @Serializable
+    data class NodeDetail(val destNum: Int? = null) : Route
+}
+
+sealed class NodeDetailRoutes {
+
+    @Serializable
+    data object DeviceMetrics : Route
+
+    @Serializable
+    data object NodeMap : Route
+
+    @Serializable
+    data object PositionLog : Route
+
+    @Serializable
+    data object EnvironmentMetrics : Route
+
+    @Serializable
+    data object SignalMetrics : Route
+
+    @Serializable
+    data object PowerMetrics : Route
+
+    @Serializable
+    data object TracerouteLog : Route
+
+    @Serializable
+    data object HostMetricsLog : Route
 }
 
 fun NavGraphBuilder.nodesGraph(
@@ -69,10 +99,10 @@ fun NavGraphBuilder.nodesGraph(
             NodeScreen(
                 model = uiViewModel,
                 navigateToMessages = {
-                    navController.navigate(Route.Messages(it))
+                    navController.navigate(ContactsRoutes.Messages(it))
                 },
                 navigateToNodeDetails = {
-                    navController.navigate(Route.NodeDetail(it))
+                    navController.navigate(NodesRoutes.NodeDetail(it))
                 },
             )
         }
@@ -85,16 +115,16 @@ fun NavGraphBuilder.nodeDetailGraph(
     uiViewModel: UIViewModel,
 ) {
     navigation<NodesRoutes.NodeDetailGraph>(
-        startDestination = Route.NodeDetail()
+        startDestination = NodesRoutes.NodeDetail()
     ) {
-        composable<Route.NodeDetail> { backStackEntry ->
+        composable<NodesRoutes.NodeDetail> { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
                 navController.getBackStackEntry<NodesRoutes.NodeDetailGraph>()
             }
             NodeDetailScreen(
                 uiViewModel = uiViewModel,
                 navigateToMessages = {
-                    navController.navigate(Route.Messages(it))
+                    navController.navigate(ContactsRoutes.Messages(it))
                 },
                 onNavigate = {
                     navController.navigate(it)
@@ -137,12 +167,12 @@ enum class NodeDetailRoute(
     val route: Route,
     val icon: ImageVector?,
 ) {
-    DEVICE(R.string.device, Route.DeviceMetrics, Icons.Default.Router),
-    NODE_MAP(R.string.node_map, Route.NodeMap, Icons.Default.LocationOn),
-    POSITION_LOG(R.string.position_log, Route.PositionLog, Icons.Default.LocationOn),
-    ENVIRONMENT(R.string.environment, Route.EnvironmentMetrics, Icons.Default.LightMode),
-    SIGNAL(R.string.signal, Route.SignalMetrics, Icons.Default.CellTower),
-    TRACEROUTE(R.string.traceroute, Route.TracerouteLog, Icons.Default.PermScanWifi),
-    POWER(R.string.power, Route.PowerMetrics, Icons.Default.Power),
-    HOST(R.string.host, Route.HostMetricsLog, Icons.Default.Memory),
+    DEVICE(R.string.device, NodeDetailRoutes.DeviceMetrics, Icons.Default.Router),
+    NODE_MAP(R.string.node_map, NodeDetailRoutes.NodeMap, Icons.Default.LocationOn),
+    POSITION_LOG(R.string.position_log, NodeDetailRoutes.PositionLog, Icons.Default.LocationOn),
+    ENVIRONMENT(R.string.environment, NodeDetailRoutes.EnvironmentMetrics, Icons.Default.LightMode),
+    SIGNAL(R.string.signal, NodeDetailRoutes.SignalMetrics, Icons.Default.CellTower),
+    TRACEROUTE(R.string.traceroute, NodeDetailRoutes.TracerouteLog, Icons.Default.PermScanWifi),
+    POWER(R.string.power, NodeDetailRoutes.PowerMetrics, Icons.Default.Power),
+    HOST(R.string.host, NodeDetailRoutes.HostMetricsLog, Icons.Default.Memory),
 }

@@ -21,6 +21,7 @@ import android.app.Application
 import android.net.Uri
 import android.os.RemoteException
 import androidx.annotation.StringRes
+import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -44,12 +45,12 @@ import com.geeksville.mesh.model.getChannelList
 import com.geeksville.mesh.model.getStringResFrom
 import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.moduleConfig
-import com.geeksville.mesh.repository.datastore.RadioConfigRepository
-import com.geeksville.mesh.service.MeshService.ConnectionState
 import com.geeksville.mesh.navigation.AdminRoute
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.ModuleRoute
-import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.navigation.RadioConfigRoutes
+import com.geeksville.mesh.repository.datastore.RadioConfigRepository
+import com.geeksville.mesh.service.MeshService.ConnectionState
 import com.geeksville.mesh.util.UiText
 import com.google.protobuf.MessageLite
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -93,7 +94,7 @@ class RadioConfigViewModel @Inject constructor(
 ) : ViewModel(), Logging {
     private val meshService: IMeshService? get() = radioConfigRepository.meshService
 
-    private val destNum = savedStateHandle.toRoute<Route.RadioConfig>().destNum
+    private val destNum = savedStateHandle.toRoute<RadioConfigRoutes.RadioConfig>().destNum
     private val _destNode = MutableStateFlow<Node?>(null)
     val destNode: StateFlow<Node?> get() = _destNode
 
@@ -214,7 +215,7 @@ class RadioConfigViewModel @Inject constructor(
     }
 
     private fun setChannels(channelUrl: String) = viewModelScope.launch {
-        val new = Uri.parse(channelUrl).toChannelSet()
+        val new = channelUrl.toUri().toChannelSet()
         val old = radioConfigRepository.channelSetFlow.firstOrNull() ?: return@launch
         updateChannels(new.settingsList, old.settingsList)
     }
@@ -568,9 +569,11 @@ class RadioConfigViewModel @Inject constructor(
                     // Stop once we get to the first disabled entry
                     if (response.role != ChannelProtos.Channel.Role.DISABLED) {
                         _radioConfigState.update { state ->
-                            state.copy(channelList = state.channelList.toMutableList().apply {
-                                add(response.index, response.settings)
-                            })
+                            state.copy(
+                                channelList = state.channelList.toMutableList().apply {
+                                    add(response.index, response.settings)
+                                }
+                            )
                         }
                         incrementCompleted()
                         if (response.index + 1 < maxChannels && route == ConfigRoute.CHANNELS.name) {

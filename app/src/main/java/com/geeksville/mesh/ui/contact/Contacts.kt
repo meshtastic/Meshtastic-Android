@@ -66,7 +66,7 @@ import java.util.concurrent.TimeUnit
 @Composable
 fun ContactsScreen(
     uiViewModel: UIViewModel = hiltViewModel(),
-    onNavigate: (String) -> Unit = {}
+    onNavigateToMessages: (String) -> Unit = {}
 ) {
     var showMuteDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -96,7 +96,7 @@ fun ContactsScreen(
             }
         } else {
             // If not in selection mode, navigate to messages
-            onNavigate(contact.contactKey)
+            onNavigateToMessages(contact.contactKey)
         }
     }
 

@@ -96,6 +96,7 @@ import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.ConfigRoute
+import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.repository.network.NetworkRepository
@@ -158,7 +159,9 @@ fun ConnectionsScreen(
                 getNavRouteFrom(radioConfigState.route)?.let { route ->
                     isWaiting = false
                     radioConfigViewModel.clearPacketResponse()
-                    onConfigNavigate(route)
+                    if (route == RadioConfigRoutes.LoRa) {
+                        onConfigNavigate(RadioConfigRoutes.LoRa)
+                    }
                 }
             },
         )
