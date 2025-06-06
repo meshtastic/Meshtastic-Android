@@ -322,8 +322,8 @@
     <string name="alerts_dnd_request_text"><![CDATA[Per consentire gli avvisi critici mentre il telefono è in modalità Non disturbare, attivare la funzione di annullamento della modalità Non disturbare per il canale degli avvisi nelle impostazioni di notifica dell\'app Meshtastic.<br/><br/>Gli utenti Samsung potrebbero dover aggiungere un\'eccezione nelle impostazioni di sistema prima di attivarla per il canale degli avvisi. <a href="https://www.samsung.com/latin_en/support/mobile-devices/how-to-use-the-do-not-disturb-mode-on-your-galaxy-phone/">Visitare il Supporto Samsung per assistenza.</a>.]]></string>
     <string name="critical_alert">Avvisi critici</string>
     <string name="favorite">Preferito</string>
-    <string name="favorite_add">Aggiungi \'%s\' come nodo preferito?</string>
-    <string name="favorite_remove">Rimuovi \'%s\' come nodo preferito?</string>
+    <string name="favorite_add">Aggiungere \'%s\' ai nodi preferiti?</string>
+    <string name="favorite_remove">Rimuovere \'%s\' dai nodi preferiti?</string>
     <string name="power_metrics_log">Registri delle metriche di potenza</string>
     <string name="channel_1">Canale 1</string>
     <string name="channel_2">Canale 2</string>
