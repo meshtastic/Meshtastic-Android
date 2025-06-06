@@ -53,7 +53,6 @@ sealed interface Route {
 
     @Serializable
     data object DebugPanel : Route
-
 }
 
 fun NavDestination.isConfigRoute(): Boolean {
@@ -98,6 +97,5 @@ fun NavGraph(
         connectionsGraph(navController, uIViewModel)
         composable<Route.DebugPanel> { DebugScreen() }
         radioConfigGraph(navController, uIViewModel)
-
     }
 }
