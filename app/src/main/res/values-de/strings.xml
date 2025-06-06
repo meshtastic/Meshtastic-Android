@@ -146,6 +146,7 @@
     <string name="meshtastic_messages_notifications">Nachrichten-Benachrichtigungen</string>
     <string name="meshtastic_alerts_notifications">Benachrichtigungen</string>
     <string name="protocol_stress_test">Protokollstress-Test</string>
+    <string name="firmware_too_old">Firmware-Aktualisierung erforderlich.</string>
     <string name="firmware_old">Die Funkgerät-Firmware ist zu alt, um mit dieser App kommunizieren zu können. Für mehr Informationen darüber besuchen Sie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">unsere Firmware-Installationsanleitung</a>.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">Sie müssen eine Region festlegen!</string>
@@ -365,13 +366,14 @@
     <string name="detection_sensor">Erkennungssensor</string>
     <string name="paxcounter">Pax Zähler</string>
     <string name="audio_config">Audioeinstellungen</string>
+    <string name="codec_2_enabled">CODEC 2 aktiviert</string>
     <string name="codec2_sample_rate">CODEC2 Abtastrate</string>
     <string name="i2s_word_select">I2S Wortauswahl</string>
     <string name="i2s_data_in">I2S Daten Eingang</string>
     <string name="i2s_data_out">I2S Daten Ausgang</string>
     <string name="i2s_clock">I2S Takt</string>
     <string name="bluetooth_config">Bluetooth Einstellungen</string>
-    <string name="bluetooth_enabled">Bluetooth deaktiviert</string>
+    <string name="bluetooth_enabled">Bluetooth aktiviert</string>
     <string name="pairing_mode">Kopplungsmodus</string>
     <string name="fixed_pin">Festgelegter Pin</string>
     <string name="uplink_enabled">Uplink aktiviert</string>
@@ -414,6 +416,7 @@
     <string name="nodeinfo_broadcast_interval_seconds">NodeInfo Übertragungsintervall (Sekunden)</string>
     <string name="double_tap_as_button_press">Doppeltes Tippen als Knopfdruck</string>
     <string name="disable_triple_click">Dreifachklicken deaktivieren</string>
+    <string name="posix_timezone">POSIX Zeitzone</string>
     <string name="disable_led_heartbeat">Heartbeat-LED deaktivieren</string>
     <string name="display_config">Anzeigeeinstellungen</string>
     <string name="screen_timeout_seconds">Bildschirm Timeout (Sekunden)</string>
@@ -452,7 +455,7 @@
     <string name="coding_rate">Fehlerkorrektur</string>
     <string name="frequency_offset_mhz">Frequenzversatz (MHz)</string>
     <string name="region_frequency_plan">Region (Frequenzplan)</string>
-    <string name="hop_limit">Sprung Limite</string>
+    <string name="hop_limit">Sprung-Limit</string>
     <string name="tx_enabled">TX aktiviert</string>
     <string name="tx_power_dbm">TX-Leistung (dBm)</string>
     <string name="frequency_slot">Frequenz Slot</string>
@@ -536,6 +539,7 @@
     <string name="store_forward_enabled"><![CDATA[Speichern & Weiterleiten aktiviert]]></string>
     <string name="heartbeat">Puls</string>
     <string name="number_of_records">Anzahl Einträge</string>
+    <string name="server">Server</string>
     <string name="user_config">Benutzer Einstellungen</string>
     <string name="node_id">Knoten ID</string>
     <string name="long_name">Vollständiger Name</string>
@@ -589,7 +593,16 @@
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">12h Uhrformat verwenden</string>
     <string name="display_time_in_12h_format">Wenn aktiviert, zeigt das Gerät die Uhrzeit im 12-Stunden-Format auf dem Bildschirm an.</string>
+    <string name="free_memory">Freier Speicher</string>
+    <string name="connections">Verbindungen</string>
     <string name="map">Karte</string>
+    <string name="contacts">Kontakte</string>
     <string name="nodes">Knoten</string>
+    <string name="set_your_region">Region festlegen</string>
     <string name="reply">Antworten</string>
+    <string name="map_reporting_consent_header">Einwilligung zum Teilen von unverschlüsselten Node-Daten über MQTT</string>
+    <string name="i_agree_to_share_my_location">Ich habe das oben stehende gelesen und verstanden. Ich willige ein in die unverschlüsselte Übertragung der Daten meines Nodes.</string>
+    <string name="i_agree">Ich stimme zu.</string>
+    <string name="should_update_firmware">Firmware-Update empfohlen.</string>
+    <string name="should_update">Um von den neuesten Fehlerkorrekturen und Funktionen zu profitieren, aktualisieren Sie bitte Ihre Node-Firmware.\n\nneueste stabile Firmware-Version: %1$s</string>
 </resources>
