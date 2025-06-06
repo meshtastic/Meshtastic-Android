@@ -15,5 +15,5 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-include(":app", ":network")
+include(":app", ":network", ":mesh_service_example")
 rootProject.name = "Meshtastic Android"
