@@ -31,7 +31,7 @@ android {
 
     defaultConfig {
         applicationId = "com.meshtastic.android.meshserviceexample"
-        minSdk = Configs.MIN_SDK_VERSION
+        minSdk = 26
         targetSdk = Configs.TARGET_SDK
         versionCode = 1
         versionName = "1.0"
