@@ -705,7 +705,13 @@ class MeshService : Service(), Logging {
         packetRepository.get().insertReaction(reaction)
     }
 
-    private fun rememberDataPacket(dataPacket: DataPacket, updateNotification: Boolean = true) {
+    private fun rememberDataPacket(
+        dataPacket: DataPacket,
+        updateNotification: Boolean = true,
+        snr: Float = 0f,
+        rssi: Int = 0,
+        hopsAway: Int = -1
+    ) {
         if (dataPacket.dataType !in rememberDataType) return
         val fromLocal = dataPacket.from == DataPacket.ID_LOCAL
         val toBroadcast = dataPacket.to == DataPacket.ID_BROADCAST
@@ -722,7 +728,10 @@ class MeshService : Service(), Logging {
             contact_key = contactKey,
             received_time = System.currentTimeMillis(),
             read = fromLocal,
-            data = dataPacket
+            data = dataPacket,
+            snr = snr,
+            rssi = rssi,
+            hopsAway = hopsAway
         )
         serviceScope.handledLaunch {
             packetRepository.get().apply {
@@ -744,6 +753,13 @@ class MeshService : Service(), Logging {
             val bytes = data.payload.toByteArray()
             val fromId = toNodeID(packet.from)
             val dataPacket = toDataPacket(packet)
+            val hopsAway = if (packet.hopStart == 0 || packet.hopLimit > packet.hopStart) {
+                -1
+            } else {
+                packet.hopStart - packet.hopLimit;
+            }
+            val snr = packet.rxSnr
+            val rssi = packet.rxRssi
 
             if (dataPacket != null) {
 
@@ -766,20 +782,20 @@ class MeshService : Service(), Logging {
                             rememberReaction(packet)
                         } else {
                             debug("Received CLEAR_TEXT from $fromId")
-                            rememberDataPacket(dataPacket)
+                            rememberDataPacket(dataPacket, snr = snr, rssi = rssi, hopsAway = hopsAway)
                         }
                     }
 
                     Portnums.PortNum.ALERT_APP_VALUE -> {
                         debug("Received ALERT_APP from $fromId")
-                        rememberDataPacket(dataPacket)
+                        rememberDataPacket(dataPacket, snr = snr, rssi = rssi, hopsAway = hopsAway)
                     }
 
                     Portnums.PortNum.WAYPOINT_APP_VALUE -> {
                         val u = MeshProtos.Waypoint.parseFrom(data.payload)
                         // Validate locked Waypoints from the original sender
                         if (u.lockedTo != 0 && u.lockedTo != packet.from) return
-                        rememberDataPacket(dataPacket, u.expire > currentSecond())
+                        rememberDataPacket(dataPacket, u.expire > currentSecond(), snr, rssi, hopsAway)
                     }
 
                     Portnums.PortNum.POSITION_APP_VALUE -> {
@@ -842,12 +858,12 @@ class MeshService : Service(), Logging {
                     Portnums.PortNum.RANGE_TEST_APP_VALUE -> {
                         if (!moduleConfig.rangeTest.enabled) return
                         val u = dataPacket.copy(dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
-                        rememberDataPacket(u)
+                        rememberDataPacket(u, snr = snr, rssi = rssi, hopsAway = hopsAway)
                     }
 
                     Portnums.PortNum.DETECTION_SENSOR_APP_VALUE -> {
                         val u = dataPacket.copy(dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE)
-                        rememberDataPacket(u)
+                        rememberDataPacket(u, snr = snr, rssi = rssi, hopsAway = hopsAway)
                     }
 
                     Portnums.PortNum.TRACEROUTE_APP_VALUE -> {

@@ -23,6 +23,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -65,6 +66,7 @@ internal fun MessageItem(
     node: Node,
     messageText: String?,
     messageTime: String,
+    messageReception: String,
     messageStatus: MessageStatus?,
     selected: Boolean,
     modifier: Modifier = Modifier,
@@ -141,6 +143,15 @@ internal fun MessageItem(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    if (!fromLocal) {
+                        Text(
+                            text = messageReception,
+                            fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                        )
+                        Box(
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
                     Text(
                         text = messageTime,
                         fontSize = MaterialTheme.typography.bodySmall.fontSize,
@@ -178,6 +189,7 @@ private fun MessageItemPreview() {
             node = NodePreviewParameterProvider().values.first(),
             messageText = stringResource(R.string.sample_message),
             messageTime = "10:00",
+            messageReception = "SNR 20.5dB, RSSI -90dBm",
             messageStatus = MessageStatus.DELIVERED,
             selected = false,
             isConnected = true,
