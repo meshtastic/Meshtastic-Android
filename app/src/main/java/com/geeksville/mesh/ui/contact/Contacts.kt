@@ -63,6 +63,7 @@ import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.model.UIViewModel
 import java.util.concurrent.TimeUnit
 
+@Suppress("LongMethod")
 @Composable
 fun ContactsScreen(
     uiViewModel: UIViewModel = hiltViewModel(),
