@@ -54,6 +54,8 @@ import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.ui.common.components.AutoLinkText
+import com.geeksville.mesh.ui.common.components.Rssi
+import com.geeksville.mesh.ui.common.components.Snr
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.node.components.NodeChip
@@ -66,7 +68,6 @@ internal fun MessageItem(
     node: Node,
     messageText: String?,
     messageTime: String,
-    messageReception: String,
     messageStatus: MessageStatus?,
     selected: Boolean,
     modifier: Modifier = Modifier,
@@ -76,6 +77,9 @@ internal fun MessageItem(
     onStatusClick: () -> Unit = {},
     onSendReaction: (String) -> Unit = {},
     isConnected: Boolean,
+    snr: Float,
+    rssi: Int,
+    hopsAway: String?,
 ) = Row(
     modifier = modifier
         .fillMaxWidth()
@@ -144,10 +148,14 @@ internal fun MessageItem(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (!fromLocal) {
-                        Text(
-                            text = messageReception,
+                        if (hopsAway == null) {
+                            Snr(snr, fontSize = MaterialTheme.typography.bodySmall.fontSize)
+                            Spacer(Modifier.weight(1f))
+                            Rssi(rssi, fontSize = MaterialTheme.typography.bodySmall.fontSize)
+                        } else { Text(
+                            text = hopsAway,
                             fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                        )
+                        ) }
                         Spacer(Modifier.weight(1f))
                     }
                     Text(
@@ -187,10 +195,12 @@ private fun MessageItemPreview() {
             node = NodePreviewParameterProvider().values.first(),
             messageText = stringResource(R.string.sample_message),
             messageTime = "10:00",
-            messageReception = "SNR 20.5dB, RSSI -90dBm",
             messageStatus = MessageStatus.DELIVERED,
             selected = false,
             isConnected = true,
+            snr = 20.5f,
+            rssi = 90,
+            hopsAway = null
         )
     }
 }

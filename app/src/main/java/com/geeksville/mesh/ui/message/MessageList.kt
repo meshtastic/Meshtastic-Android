@@ -181,19 +181,6 @@ internal fun MessageList(
                     node = node,
                     messageText = msg.text,
                     messageTime = msg.time,
-                    messageReception = when (msg.hopsAway) {
-                        -1 -> ""
-                        0 -> "%s %.2fdB, %s %ddBm".format(
-                            stringResource(id = R.string.snr),
-                            msg.snr,
-                            stringResource(id = R.string.rssi),
-                            msg.rssi
-                        )
-                        else -> "%s: %d".format(
-                            stringResource(id = R.string.hops_away),
-                            msg.hopsAway
-                        )
-                    },
                     messageStatus = msg.status,
                     selected = selected,
                     onClick = { if (inSelectionMode) selectedIds.toggle(msg.uuid) },
@@ -204,7 +191,15 @@ internal fun MessageList(
                     onAction = onNodeMenuAction,
                     onStatusClick = { showStatusDialog = msg },
                     onSendReaction = { onSendReaction(it, msg.packetId) },
-                    isConnected = isConnected
+                    isConnected = isConnected,
+                    snr = msg.snr,
+                    rssi = msg.rssi,
+                    hopsAway = if (msg.hopsAway > 0) { "%s: %d".format(
+                            stringResource(id = R.string.hops_away),
+                            msg.hopsAway
+                        ) } else {
+                            null
+                        }
                 )
             }
         }
