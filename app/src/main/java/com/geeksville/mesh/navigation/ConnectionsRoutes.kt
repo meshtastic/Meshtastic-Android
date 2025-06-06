@@ -30,7 +30,7 @@ import com.geeksville.mesh.ui.radioconfig.components.LoRaConfigScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed interface ConnectionsRoutes {
+sealed class ConnectionsRoutes {
     @Serializable
     data object ConnectionsGraph : Graph
 
@@ -59,8 +59,8 @@ fun NavGraphBuilder.connectionsGraph(navController: NavHostController, uiViewMod
             ConnectionsScreen(
                 uiViewModel,
                 radioConfigViewModel = hiltViewModel(parentEntry),
-                onNavigateToRadioConfig = { navController.navigate(Route.RadioConfig()) },
-                onNavigateToNodeDetails = { navController.navigate(Route.NodeDetail(it)) },
+                onNavigateToRadioConfig = { navController.navigate(RadioConfigRoutes.RadioConfig()) },
+                onNavigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetail(it)) },
                 onConfigNavigate = { route -> navController.navigate(route) }
             )
         }
@@ -71,15 +71,10 @@ fun NavGraphBuilder.connectionsGraph(navController: NavHostController, uiViewMod
 private fun NavGraphBuilder.configRoutes(
     navController: NavHostController,
 ) {
-    ConfigRoute.entries.forEach { configRoute ->
-        composable(configRoute.route::class) { backStackEntry ->
-            val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<ConnectionsRoutes.ConnectionsGraph>()
-            }
-            when (configRoute) {
-                ConfigRoute.LORA -> LoRaConfigScreen(hiltViewModel(parentEntry))
-                else -> Unit
-            }
+    composable<RadioConfigRoutes.LoRa> { backStackEntry ->
+        val parentEntry = remember(backStackEntry) {
+            navController.getBackStackEntry<ConnectionsRoutes.ConnectionsGraph>()
         }
+        LoRaConfigScreen(hiltViewModel(parentEntry))
     }
 }

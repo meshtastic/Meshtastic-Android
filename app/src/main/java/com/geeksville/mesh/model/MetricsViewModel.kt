@@ -39,7 +39,7 @@ import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.entity.FirmwareRelease
 import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.model.map.CustomTileSource
-import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.navigation.NodesRoutes
 import com.geeksville.mesh.repository.api.DeviceHardwareRepository
 import com.geeksville.mesh.repository.api.FirmwareReleaseRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
@@ -205,7 +205,7 @@ class MetricsViewModel @Inject constructor(
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val preferences: SharedPreferences,
 ) : ViewModel(), Logging {
-    private val destNum = savedStateHandle.toRoute<Route.NodeDetail>().destNum
+    private val destNum = savedStateHandle.toRoute<NodesRoutes.NodeDetail>().destNum
 
     private fun MeshLog.hasValidTraceroute(): Boolean = with(fromRadio.packet) {
         hasDecoded() && decoded.wantResponse && from == 0 && to == destNum
