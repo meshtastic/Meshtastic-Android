@@ -673,6 +673,9 @@ class MeshService : Service(), Logging {
                 hopLimit = packet.hopLimit,
                 channel = if (packet.pkiEncrypted) DataPacket.PKC_CHANNEL_INDEX else packet.channel,
                 wantAck = packet.wantAck,
+                hopStart = packet.hopStart,
+                snr = packet.rxSnr,
+                rssi = packet.rxRssi
             )
         }
     }
@@ -705,7 +708,10 @@ class MeshService : Service(), Logging {
         packetRepository.get().insertReaction(reaction)
     }
 
-    private fun rememberDataPacket(dataPacket: DataPacket, updateNotification: Boolean = true) {
+    private fun rememberDataPacket(
+        dataPacket: DataPacket,
+        updateNotification: Boolean = true,
+    ) {
         if (dataPacket.dataType !in rememberDataType) return
         val fromLocal = dataPacket.from == DataPacket.ID_LOCAL
         val toBroadcast = dataPacket.to == DataPacket.ID_BROADCAST
@@ -722,7 +728,10 @@ class MeshService : Service(), Logging {
             contact_key = contactKey,
             received_time = System.currentTimeMillis(),
             read = fromLocal,
-            data = dataPacket
+            data = dataPacket,
+            snr = dataPacket.snr,
+            rssi = dataPacket.rssi,
+            hopsAway = dataPacket.hopsAway
         )
         serviceScope.handledLaunch {
             packetRepository.get().apply {

@@ -56,6 +56,9 @@ data class Message(
     val routingError: Int,
     val packetId: Int,
     val emojis: List<Reaction>,
+    val snr: Float,
+    val rssi: Int,
+    val hopsAway: Int,
 ) {
     fun getStatusStringRes(): Pair<Int, Int> {
         val title = if (routingError > 0) R.string.error else R.string.message_delivery_status

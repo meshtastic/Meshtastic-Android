@@ -25,6 +25,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -53,6 +54,8 @@ import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.ui.common.components.AutoLinkText
+import com.geeksville.mesh.ui.common.components.Rssi
+import com.geeksville.mesh.ui.common.components.Snr
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.node.components.NodeChip
@@ -74,6 +77,9 @@ internal fun MessageItem(
     onStatusClick: () -> Unit = {},
     onSendReaction: (String) -> Unit = {},
     isConnected: Boolean,
+    snr: Float,
+    rssi: Int,
+    hopsAway: String?,
 ) = Row(
     modifier = modifier
         .fillMaxWidth()
@@ -141,6 +147,17 @@ internal fun MessageItem(
                     horizontalArrangement = Arrangement.End,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
+                    if (!fromLocal) {
+                        if (hopsAway == null) {
+                            Snr(snr, fontSize = MaterialTheme.typography.bodySmall.fontSize)
+                            Spacer(Modifier.weight(1f))
+                            Rssi(rssi, fontSize = MaterialTheme.typography.bodySmall.fontSize)
+                        } else { Text(
+                            text = hopsAway,
+                            fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                        ) }
+                        Spacer(Modifier.weight(1f))
+                    }
                     Text(
                         text = messageTime,
                         fontSize = MaterialTheme.typography.bodySmall.fontSize,
@@ -181,6 +198,9 @@ private fun MessageItemPreview() {
             messageStatus = MessageStatus.DELIVERED,
             selected = false,
             isConnected = true,
+            snr = 20.5f,
+            rssi = 90,
+            hopsAway = null
         )
     }
 }

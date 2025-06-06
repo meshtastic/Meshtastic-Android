@@ -191,7 +191,15 @@ internal fun MessageList(
                     onAction = onNodeMenuAction,
                     onStatusClick = { showStatusDialog = msg },
                     onSendReaction = { onSendReaction(it, msg.packetId) },
-                    isConnected = isConnected
+                    isConnected = isConnected,
+                    snr = msg.snr,
+                    rssi = msg.rssi,
+                    hopsAway = if (msg.hopsAway > 0) { "%s: %d".format(
+                            stringResource(id = R.string.hops_away),
+                            msg.hopsAway
+                        ) } else {
+                            null
+                        }
                 )
             }
         }

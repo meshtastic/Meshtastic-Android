@@ -44,6 +44,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.TextUnit
 import com.geeksville.mesh.R
 
 private const val SNR_GOOD_THRESHOLD = -7f
@@ -132,7 +133,7 @@ fun LoraSignalIndicator(snr: Float, rssi: Int) {
 }
 
 @Composable
-private fun Snr(snr: Float) {
+fun Snr(snr: Float, fontSize: TextUnit = MaterialTheme.typography.labelLarge.fontSize) {
     val color: Color = if (snr > SNR_GOOD_THRESHOLD) {
         Quality.GOOD.color
     } else if (snr > SNR_FAIR_THRESHOLD) {
@@ -144,12 +145,12 @@ private fun Snr(snr: Float) {
     Text(
         text = "%s %.2fdB".format(stringResource(id = R.string.snr), snr),
         color = color,
-        fontSize = MaterialTheme.typography.labelLarge.fontSize
+        fontSize = fontSize
     )
 }
 
 @Composable
-private fun Rssi(rssi: Int) {
+fun Rssi(rssi: Int, fontSize: TextUnit = MaterialTheme.typography.labelLarge.fontSize) {
     val color: Color = if (rssi > RSSI_GOOD_THRESHOLD) {
         Quality.GOOD.color
     } else if (rssi > RSSI_FAIR_THRESHOLD) {
@@ -160,7 +161,7 @@ private fun Rssi(rssi: Int) {
     Text(
         text = "%s %ddBm".format(stringResource(id = R.string.rssi), rssi),
         color = color,
-        fontSize = MaterialTheme.typography.labelLarge.fontSize
+        fontSize = fontSize
     )
 }
 
