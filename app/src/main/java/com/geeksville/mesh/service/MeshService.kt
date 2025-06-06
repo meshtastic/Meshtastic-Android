@@ -756,7 +756,7 @@ class MeshService : Service(), Logging {
             val hopsAway = if (packet.hopStart == 0 || packet.hopLimit > packet.hopStart) {
                 -1
             } else {
-                packet.hopStart - packet.hopLimit;
+                packet.hopStart - packet.hopLimit
             }
             val snr = packet.rxSnr
             val rssi = packet.rxRssi

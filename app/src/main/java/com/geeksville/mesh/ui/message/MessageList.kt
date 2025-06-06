@@ -181,21 +181,19 @@ internal fun MessageList(
                     node = node,
                     messageText = msg.text,
                     messageTime = msg.time,
-                    messageReception = if (msg.hopsAway == -1) {
-                        ""
-                        } else if (msg.hopsAway == 0) {
-                            "%s %.2fdB, %s %ddBm".format(
-                                stringResource(id = R.string.snr),
-                                msg.snr,
-                                stringResource(id = R.string.rssi),
-                                msg.rssi
-                            )
-                        } else {
-                            "%s: %d".format(
-                                stringResource(id = R.string.hops_away),
-                                msg.hopsAway
-                            )
-                        },
+                    messageReception = when (msg.hopsAway) {
+                        -1 -> ""
+                        0 -> "%s %.2fdB, %s %ddBm".format(
+                            stringResource(id = R.string.snr),
+                            msg.snr,
+                            stringResource(id = R.string.rssi),
+                            msg.rssi
+                        )
+                        else -> "%s: %d".format(
+                            stringResource(id = R.string.hops_away),
+                            msg.hopsAway
+                        )
+                    },
                     messageStatus = msg.status,
                     selected = selected,
                     onClick = { if (inSelectionMode) selectedIds.toggle(msg.uuid) },
