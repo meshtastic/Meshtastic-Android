@@ -28,6 +28,7 @@ import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.NodeSortOption
+import com.geeksville.mesh.util.onlineTimeThreshold
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -96,10 +97,14 @@ class NodeRepository @Inject constructor(
         sort: NodeSortOption = NodeSortOption.LAST_HEARD,
         filter: String = "",
         includeUnknown: Boolean = true,
+        onlyOnline: Boolean = false,
+        onlyDirect: Boolean = false,
     ) = nodeInfoDao.getNodes(
         sort = sort.sqlValue,
         filter = filter,
         includeUnknown = includeUnknown,
+        hopsAwayMax = if (onlyDirect) 0 else -1,
+        lastHeardMin = if (onlyOnline) onlineTimeThreshold() else -1,
     ).mapLatest { list ->
         list.map {
             it.toModel()

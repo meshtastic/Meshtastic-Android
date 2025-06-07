@@ -59,6 +59,7 @@ import com.geeksville.mesh.model.NodeSortOption
 import com.geeksville.mesh.ui.common.preview.LargeFontPreview
 import com.geeksville.mesh.ui.common.theme.AppTheme
 
+@Suppress("LongParameterList")
 @Composable
 fun NodeFilterTextField(
     modifier: Modifier = Modifier,
@@ -68,6 +69,10 @@ fun NodeFilterTextField(
     onSortSelect: (NodeSortOption) -> Unit,
     includeUnknown: Boolean,
     onToggleIncludeUnknown: () -> Unit,
+    onlyOnline: Boolean,
+    onToggleOnlyOnline: () -> Unit,
+    onlyDirect: Boolean,
+    onToggleOnlyDirect: () -> Unit,
     showDetails: Boolean,
     onToggleShowDetails: () -> Unit,
 ) {
@@ -86,6 +91,10 @@ fun NodeFilterTextField(
             onSortSelect = onSortSelect,
             includeUnknown = includeUnknown,
             onToggleIncludeUnknown = onToggleIncludeUnknown,
+            onlyOnline = onlyOnline,
+            onToggleOnlyOnline = onToggleOnlyOnline,
+            onlyDirect = onlyDirect,
+            onToggleOnlyDirect = onToggleOnlyDirect,
             showDetails = showDetails,
             onToggleShowDetails = onToggleShowDetails,
         )
@@ -152,6 +161,10 @@ private fun NodeSortButton(
     onSortSelect: (NodeSortOption) -> Unit,
     includeUnknown: Boolean,
     onToggleIncludeUnknown: () -> Unit,
+    onlyOnline: Boolean,
+    onToggleOnlyOnline: () -> Unit,
+    onlyDirect: Boolean,
+    onToggleOnlyDirect: () -> Unit,
     showDetails: Boolean,
     onToggleShowDetails: () -> Unit,
     modifier: Modifier = Modifier,
@@ -207,6 +220,46 @@ private fun NodeSortButton(
                 }
             }
         )
+        DropdownMenuItem(
+            onClick = {
+                onToggleOnlyOnline()
+                expanded = false
+            },
+            text = {
+                Row {
+                    AnimatedVisibility(visible = onlyOnline) {
+                        Icon(
+                            imageVector = Icons.Default.Done,
+                            contentDescription = null,
+                            modifier = Modifier.padding(end = 4.dp),
+                        )
+                    }
+                    Text(
+                        text = stringResource(id = R.string.node_filter_only_online),
+                    )
+                }
+            }
+        )
+        DropdownMenuItem(
+            onClick = {
+                onToggleOnlyDirect()
+                expanded = false
+            },
+            text = {
+                Row {
+                    AnimatedVisibility(visible = onlyDirect) {
+                        Icon(
+                            imageVector = Icons.Default.Done,
+                            contentDescription = null,
+                            modifier = Modifier.padding(end = 4.dp),
+                        )
+                    }
+                    Text(
+                        text = stringResource(id = R.string.node_filter_only_direct),
+                    )
+                }
+            }
+        )
         HorizontalDivider()
         DropdownMenuItem(
             onClick = {
@@ -243,6 +296,10 @@ private fun NodeFilterTextFieldPreview() {
             onSortSelect = {},
             includeUnknown = false,
             onToggleIncludeUnknown = {},
+            onlyOnline = false,
+            onToggleOnlyOnline = {},
+            onlyDirect = false,
+            onToggleOnlyDirect = {},
             showDetails = false,
             onToggleShowDetails = {},
         )
