@@ -182,27 +182,20 @@ internal fun EditWaypointDialog(
                             }
                         )
                     }
-                    // Date Picker Dialog
                     val datePickerDialog = DatePickerDialog(
                         context,
                         { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
-                            // Format date as string for display
                             selectedDate = "$selectedDay/${selectedMonth + 1}/$selectedYear"
-                            // Update calendar with selected date
                             calendar.set(selectedYear, selectedMonth, selectedDay)
                         }, year, month, day
                     )
 
-                    // Time Picker Dialog
                     val timePickerDialog = android.app.TimePickerDialog(
                         context,
                         { _: TimePicker, selectedHour: Int, selectedMinute: Int ->
-                            // Format time as string for display
                             selectedTime = String.format(Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute)
-                            // Update calendar with selected time
                             calendar.set(Calendar.HOUR_OF_DAY, selectedHour)
                             calendar.set(Calendar.MINUTE, selectedMinute)
-                            // Convert to epoch time
                             epochTime = calendar.timeInMillis
                         }, hour, minute, true
                     )
@@ -255,12 +248,10 @@ internal fun EditWaypointDialog(
                                 .padding(start = 20.dp, end = 20.dp, bottom = 16.dp),
                             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                             ) {
-                        // Date Picker Button
                         Button(onClick = { datePickerDialog.show() }) {
                             Text(stringResource(R.string.date))
                         }
 
-                        // Time Picker Button
                         Button(onClick = { timePickerDialog.show() }) {
                             Text(stringResource(R.string.time))
                         }
