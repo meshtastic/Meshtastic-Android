@@ -324,7 +324,7 @@
     <string name="favorite">Preferito</string>
     <string name="favorite_add">Aggiungere \'%s\' ai nodi preferiti?</string>
     <string name="favorite_remove">Rimuovere \'%s\' dai nodi preferiti?</string>
-    <string name="power_metrics_log">Registri delle metriche di potenza</string>
+    <string name="power_metrics_log">Registro delle metriche di potenza</string>
     <string name="channel_1">Canale 1</string>
     <string name="channel_2">Canale 2</string>
     <string name="channel_3">Canale 3</string>

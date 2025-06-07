@@ -95,7 +95,6 @@
     <string name="intro_welcome">مرحبا بكم في Meshtastic</string>
     <string name="intro_encryption">"إعدادات التشفير"</string>
     <string name="message">رسالة</string>
-    <string name="bluetooth_disabled"></string>
     <string name="direct_message">رسالة مباشره</string>
     <string name="error">غلط</string>
     <string name="ignore">تجاهل</string>

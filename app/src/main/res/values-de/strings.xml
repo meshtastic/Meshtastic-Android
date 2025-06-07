@@ -22,7 +22,7 @@
     <string name="main_tab_channel">Kanal</string>
     <string name="main_tab_settings">Einstellungen</string>
     <string name="node_filter_placeholder">Filter</string>
-    <string name="desc_node_filter_clear">Node-Filter löschen</string>
+    <string name="desc_node_filter_clear">Node Filter löschen</string>
     <string name="node_filter_include_unknown">Unbekannte Stationen einbeziehen</string>
     <string name="node_filter_show_details">Details anzeigen</string>
     <string name="node_sort_button">Sortieroptionen</string>
@@ -35,13 +35,13 @@
     <string name="node_sort_via_favorite">über Favorit</string>
     <string name="unrecognized">Unbekannt</string>
     <string name="message_status_enroute">Warte auf Bestätigung</string>
-    <string name="message_status_queued">Zur Sende-Warteschlange hinzugefügt</string>
+    <string name="message_status_queued">zur Warteschlange für das Senden hinzugefügt</string>
     <string name="routing_error_none">Bestätigt</string>
     <string name="routing_error_no_route">Keine Route</string>
-    <string name="routing_error_got_nak">Negative Bestätigung erhalten</string>
+    <string name="routing_error_got_nak">negative Bestätigung erhalten</string>
     <string name="routing_error_timeout">Zeitüberschreitung</string>
     <string name="routing_error_no_interface">Keine Schnittstelle</string>
-    <string name="routing_error_max_retransmit">Maximale Weiterleitungen erreicht</string>
+    <string name="routing_error_max_retransmit">Maximale Anzahl Weiterleitungen erreicht</string>
     <string name="routing_error_no_channel">Kein Kanal</string>
     <string name="routing_error_too_large">Paket zu groß</string>
     <string name="routing_error_no_response">Keine Reaktion</string>
@@ -54,9 +54,9 @@
     <string name="routing_error_admin_public_key_unauthorized">Öffentlicher Schlüssel nicht autorisiert</string>
     <string name="role_client">Mit der App verbundenes oder eigenständiges Messaging-Gerät.</string>
     <string name="role_client_mute">Gerät, welches keine Pakete von anderen Geräten weiterleitet.</string>
-    <string name="role_router">Node zur Erweiterung des Abdeckungsgebiets durch Weiterleiten von Nachrichten. In Knotenliste sichtbar.</string>
+    <string name="role_router">Node zur Erweiterung der Netzabdeckung durch Weiterleiten von Nachrichten. In Knotenliste sichtbar.</string>
     <string name="role_router_client">Kombination von ROUTER und CLIENT. Nicht für mobile Endgeräte.</string>
-    <string name="role_repeater">Infrastruktur-Node zur Erweiterung der Netzabdeckung durch Weiterleitung von Nachrichten mit minimalem Overhead. In der Knotenliste nicht sichtbar.</string>
+    <string name="role_repeater">Infrastrukturknoten zur Erweiterung der Netzabdeckung durch Weiterleitung von Nachrichten mit minimalem Overhead. In der Knotenliste nicht sichtbar.</string>
     <string name="role_tracker">GPS-Positionspakete mit Priorität gesendet.</string>
     <string name="role_sensor">Telemetrie-Pakete mit Priorität gesendet.</string>
     <string name="role_tak">Optimiert für Kommunikation des ATAK Systems, reduziert Routineübertragungen.</string>
@@ -90,7 +90,7 @@
     <string name="your_name">Dein Name</string>
     <string name="analytics_okay">Anonyme Nutzungsstatistiken und Absturzberichte.</string>
     <string name="looking_for_meshtastic_devices">Suche nach Meshtastic Geräten …</string>
-    <string name="starting_pairing">Koppelung beginnen</string>
+    <string name="starting_pairing">Kopplung beginnen</string>
     <string name="url_for_join">URL zum Beitritt zu einem Meshtastic-Netzwerk</string>
     <string name="accept">Akzeptieren</string>
     <string name="cancel">Abbrechen</string>
@@ -216,7 +216,7 @@
     <string name="permission_missing_31">Meshtastic benötigt die Berechtigung „Geräte in der Nähe“, um über Bluetooth Geräte zu finden und zu verbinden. Sie können es deaktivieren, wenn es nicht verwendet wird.</string>
     <string name="direct_message">Direktnachricht</string>
     <string name="nodedb_reset">Node-Datenbank zurücksetzen</string>
-    <string name="nodedb_reset_description">Dies löscht alle Nodes von dieser Liste.</string>
+    <string name="nodedb_reset_description">Dies löscht alle Knoten von dieser Liste.</string>
     <string name="delivery_confirmed">Zustellung Bestätigt</string>
     <string name="error">Fehler</string>
     <string name="ignore">Ignorieren</string>
@@ -278,7 +278,7 @@
     <string name="encryption_error">Public-Key Fehler</string>
     <string name="encryption_error_text">Der öffentliche Schlüssel stimmt nicht mit dem aufgezeichneten Schlüssel überein. Sie können den Knoten entfernen und ihn erneut Schlüssel austauschen lassen, dies kann jedoch auf ein schwerwiegenderes Sicherheitsproblem hinweisen. Kontaktieren Sie den Benutzer über einen anderen vertrauenswürdigen Kanal, um festzustellen, ob die Schlüsseländerung auf eine Zurücksetzung auf die Werkseinstellungen oder eine andere absichtliche Aktion zurückzuführen ist.</string>
     <string name="exchange_userinfo">Exchange Benutzer Informationen</string>
-    <string name="meshtastic_new_nodes_notifications">Neue Node Benachrichtigung</string>
+    <string name="meshtastic_new_nodes_notifications">Neue Node Benachrichtigungen</string>
     <string name="more_details">Mehr Details</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Signal-Rausch-Verhältnis, ein in der Kommunikation verwendetes Maß, um den Pegel eines gewünschten Signals im Verhältnis zum Pegel des Hintergrundrauschens zu quantifizieren. Bei Meshtastic und anderen drahtlosen Systemen weist ein höheres SNR auf ein klareres Signal hin, das die Zuverlässigkeit und Qualität der Datenübertragung verbessern kann.</string>
@@ -355,7 +355,7 @@
     <string name="mqtt">MQTT</string>
     <string name="serial">Seriell</string>
     <string name="external_notification">Externe Benachrichtigung</string>
-    <string name="store_forward"><![CDATA[Speichern & weiterleiten]]></string>
+    <string name="store_forward"><![CDATA[Speichern & Weiterleiten]]></string>
     <string name="range_test">Reichweitentest</string>
     <string name="telemetry">Telemetrie</string>
     <string name="canned_message">Nachrichten-Vorlage</string>
@@ -412,7 +412,7 @@
     <string name="role">Rolle</string>
     <string name="redefine_pin_button">PIN_BUTTON neu definieren</string>
     <string name="redefine_pin_buzzer">PIN-SUMMER neu definieren</string>
-    <string name="rebroadcast_mode">Widerholtesübertragen Modus</string>
+    <string name="rebroadcast_mode">Übertragungsmodus</string>
     <string name="nodeinfo_broadcast_interval_seconds">NodeInfo Übertragungsintervall (Sekunden)</string>
     <string name="double_tap_as_button_press">Doppeltes Tippen als Knopfdruck</string>
     <string name="disable_triple_click">Dreifachklicken deaktivieren</string>
@@ -535,11 +535,12 @@
     <string name="serial_enabled">Serielleschnittstelle aktiviert</string>
     <string name="echo_enabled">Echo aktiviert</string>
     <string name="serial_baud_rate">Serielle Baudrate</string>
-    <string name="timeout">Zeitüberschreitung</string>
+    <string name="timeout">Zeitlimit erreicht</string>
     <string name="store_forward_enabled"><![CDATA[Speichern & Weiterleiten aktiviert]]></string>
     <string name="heartbeat">Puls</string>
     <string name="number_of_records">Anzahl Einträge</string>
     <string name="server">Server</string>
+    <string name="telemetry_config">Telemetrie Einstellungen</string>
     <string name="user_config">Benutzer Einstellungen</string>
     <string name="node_id">Knoten ID</string>
     <string name="long_name">Vollständiger Name</string>
@@ -548,7 +549,7 @@
     <string name="licensed_amateur_radio">Amateurfunk lizenziert</string>
     <string name="dew_point">Taupunkt</string>
     <string name="pressure">Druck</string>
-    <string name="distance">Entfernung</string>
+    <string name="distance">Distanz</string>
     <string name="lux">Lux</string>
     <string name="wind">Wind</string>
     <string name="weight">Gewicht</string>
@@ -605,4 +606,6 @@
     <string name="i_agree">Ich stimme zu.</string>
     <string name="should_update_firmware">Firmware-Update empfohlen.</string>
     <string name="should_update">Um von den neuesten Fehlerkorrekturen und Funktionen zu profitieren, aktualisieren Sie bitte Ihre Node-Firmware.\n\nneueste stabile Firmware-Version: %1$s</string>
+    <string name="time">Zeit</string>
+    <string name="date">Datum</string>
 </resources>

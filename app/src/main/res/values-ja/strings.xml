@@ -147,7 +147,6 @@
     <string name="meshtastic_alerts_notifications">アラート通知</string>
     <string name="protocol_stress_test">プロトコルストレステスト</string>
     <string name="firmware_old">デバイスのファームウェアが古く、アプリと通信ができません。詳細は<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Firmware Installation guide</a> に記載されています。</string>
-    <string name="okay">OK</string>
     <string name="must_set_region">リージョンを指定する必要があります。</string>
     <string name="region">リージョン</string>
     <string name="cant_change_no_radio">デバイスが未接続のため、チャンネルが変更できませんでした。もう一度やり直してください。</string>
@@ -161,7 +160,7 @@
     <string name="theme">テーマ</string>
     <string name="theme_light">ライト</string>
     <string name="theme_dark">ダーク</string>
-    <string name="theme_system">システム既定</string>
+    <string name="theme_system">システムのデフォルト</string>
     <string name="choose_theme">テーマを選択</string>
     <string name="background_required">バックグラウンド位置情報</string>
     <string name="why_background_required">この機能を利用するには、位置情報の権限オプションで「常に許可」を選択する必要があります。\nこの設定により、アプリが閉じている状態でも、Meshtasticがスマホの位置情報をメッシュネットワーク内の他のメンバーに送信できるようになります。</string>
