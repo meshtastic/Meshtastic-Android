@@ -471,6 +471,16 @@ fun ConnectionsScreen(
             }
             AnimatedVisibility(isConnected) {
                 val provideLocation by uiViewModel.provideLocation.collectAsState(false)
+                LaunchedEffect(provideLocation) {
+                    if (provideLocation) {
+                        if (!context.hasLocationPermission()) {
+                            debug("Requesting location permission for providing location")
+                            showLocationRationaleDialog = true
+                        } else if (isGpsDisabled) {
+                            uiViewModel.showSnackbar(context.getString(R.string.location_disabled))
+                        }
+                    }
+                }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
