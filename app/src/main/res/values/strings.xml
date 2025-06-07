@@ -671,4 +671,7 @@
     <string name="i_agree">I agree.</string>
     <string name="should_update_firmware">Firmware Update Recommended.</string>
     <string name="should_update">To benefit from the latest fixes and features, please update your node firmware.\n\nLatest stable firmware version: %1$s</string>
+    <string name="expires">Expires</string>
+    <string name="time">Time</string>
+    <string name="date">Date</string>
 </resources>
