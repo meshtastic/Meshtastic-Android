@@ -28,17 +28,12 @@ plugins {
     alias(libs.plugins.protobuf)
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.detekt)
-
-    if (Configs.USE_CRASHLYTICS) {
-        id("com.google.gms.google-services") // Apply false initially, then apply if needed
-        id("com.google.firebase.crashlytics") // Apply false initially
-    }
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
 val keystoreProperties = Properties()
 if (keystorePropertiesFile.exists()) {
-    keystoreProperties.load(FileInputStream(keystorePropertiesFile))
+    FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
 }
 
 android {
@@ -76,12 +71,17 @@ android {
         }
         create("google") {
             dimension = "default"
+            if (Configs.USE_CRASHLYTICS) {
+                // Enable Firebase Crashlytics for Google Play builds
+                apply(plugin = libs.plugins.google.services.get().pluginId)
+                apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
+            }
         }
     }
     buildTypes {
-        getByName("release") {
+        named("release") {
             if (keystoreProperties["storeFile"] != null) {
-                signingConfig = signingConfigs.getByName("release")
+                signingConfig = signingConfigs.named("release").get()
             }
             isMinifyEnabled = true
             isShrinkResources = true
@@ -90,7 +90,7 @@ android {
                 "proguard-rules.pro"
             )
         }
-        getByName("debug") {
+        named("debug") {
             isPseudoLocalesEnabled = true
         }
     }
@@ -144,7 +144,7 @@ android {
     }
     sourceSets {
         // Adds exported schema location as test app assets.
-        getByName("androidTest").assets.srcDirs(files("$projectDir/schemas"))
+        named("androidTest") { assets.srcDirs(files("$projectDir/schemas")) }
     }
 }
 
@@ -168,7 +168,7 @@ androidComponents {
     onVariants(selector().all()) { variant ->
         project.afterEvaluate {
             val capName = variant.name.replaceFirstChar { it.uppercase() }
-            tasks.getByName("ksp${capName}Kotlin") {
+            tasks.named("ksp${capName}Kotlin") {
                 dependsOn("generate${capName}Proto")
             }
         }
