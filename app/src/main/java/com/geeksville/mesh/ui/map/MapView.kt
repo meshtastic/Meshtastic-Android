@@ -370,6 +370,8 @@ fun MapView(
         model.getUser(id).longName
     }
 
+    @Composable
+    @Suppress("MagicNumber")
     fun MapView.onWaypointChanged(waypoints: Collection<Packet>): List<MarkerWithLabel> {
         val dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
         return waypoints.mapNotNull { waypoint ->
@@ -378,10 +380,29 @@ fun MapView(
             val time = dateFormat.format(waypoint.received_time)
             val label = pt.name + " " + formatAgo((waypoint.received_time / 1000).toInt())
             val emoji = String(Character.toChars(if (pt.icon == 0) 128205 else pt.icon))
+            val timeLeft = pt.expire * 1000L - System.currentTimeMillis()
+            val expireTimeStr = when {
+                pt.expire == 0 || pt.expire == Int.MAX_VALUE -> "Never"
+                timeLeft <= 0 -> "Expired"
+                timeLeft < 60_000 -> "${timeLeft / 1000} seconds"
+                timeLeft < 3_600_000 -> "${timeLeft / 60_000} minute${if (timeLeft / 60_000 != 1L) "s" else ""}"
+                timeLeft < 86_400_000 -> {
+                    val hours = (timeLeft / 3_600_000).toInt()
+                    val minutes = ((timeLeft % 3_600_000) / 60_000).toInt()
+                    if (minutes >= 30) {
+                        "${hours + 1} hour${if (hours + 1 != 1) "s" else ""}"
+                    } else if (minutes > 0) {
+                        "$hours hour${if (hours != 1) "s" else ""}, $minutes minute${if (minutes != 1) "s" else ""}"
+                    } else {
+                        "$hours hour${if (hours != 1) "s" else ""}"
+                    }
+                }
+                else -> "${timeLeft / 86_400_000} day${if (timeLeft / 86_400_000 != 1L) "s" else ""}"
+            }
             MarkerWithLabel(this, label, emoji).apply {
                 id = "${pt.id}"
                 title = "${pt.name} (${getUsername(waypoint.data.from)}$lock)"
-                snippet = "[$time] " + pt.description
+                snippet = "[$time] ${pt.description}  " + stringResource(R.string.expires) + ": $expireTimeStr"
                 position = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
                 setVisible(false)
                 setOnLongClickListener {
@@ -642,7 +663,8 @@ fun MapView(
                 model.sendWaypoint(
                     waypoint.copy {
                         if (id == 0) id = model.generatePacketId() ?: return@EditWaypointDialog
-                        expire = Int.MAX_VALUE // TODO add expire picker
+                        if (name == "") name = "Dropped Pin"
+                        if (expire == 0) expire = Int.MAX_VALUE
                         lockedTo = if (waypoint.lockedTo != 0) model.myNodeNum ?: 0 else 0
                     }
                 )
