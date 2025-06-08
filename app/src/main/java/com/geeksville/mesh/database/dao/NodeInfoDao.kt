@@ -71,7 +71,7 @@ interface NodeInfoDao {
             OR (long_name LIKE '%' || :filter || '%'
             OR short_name LIKE '%' || :filter || '%'))
         AND (:lastHeardMin = -1 OR last_heard >= :lastHeardMin)
-        AND (:hopsAwayMax = -1 OR (hops_away <= :hopsAwayMax AND hops_away >= 0))
+        AND (:hopsAwayMax = -1 OR (hops_away <= :hopsAwayMax AND hops_away >= 0) OR num = (SELECT myNodeNum FROM my_node LIMIT 1))
     ORDER BY CASE
         WHEN num = (SELECT myNodeNum FROM my_node LIMIT 1) THEN 0
         ELSE 1
