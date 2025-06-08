@@ -33,7 +33,6 @@ import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
-import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.IMeshService
@@ -69,6 +68,7 @@ import com.geeksville.mesh.util.getShortDate
 import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -300,27 +300,38 @@ class UIViewModel @Inject constructor(
         preferences.edit { putBoolean("only-direct", onlyDirect.value) }
     }
 
-    @Suppress("MagicNumber")
-    val nodesUiState: StateFlow<NodesUiState> = combine(
+    data class NodeFilterState(
+        val filterText: String,
+        val includeUnknown: Boolean,
+        val onlyOnline: Boolean,
+        val onlyDirect: Boolean,
+    )
+
+    val nodeFilterStateFlow: Flow<NodeFilterState> = combine(
         nodeFilterText,
-        nodeSortOption,
         includeUnknown,
         onlyOnline,
         onlyDirect,
+    ) { filterText, includeUnknown, onlyOnline, onlyDirect ->
+        NodeFilterState(filterText, includeUnknown, onlyOnline, onlyDirect)
+    }
+
+    val nodesUiState: StateFlow<NodesUiState> = combine(
+        nodeFilterStateFlow,
+        nodeSortOption,
         showDetails,
         radioConfigRepository.deviceProfileFlow,
-    ) { flows ->
-        val profile = flows[6] as DeviceProfile
+    ) { filterFlow, sort, showDetails, profile ->
         NodesUiState(
-            sort = flows[1] as NodeSortOption,
-            filter = flows[0] as String,
-            includeUnknown = flows[2] as Boolean,
-            onlyOnline = flows[3] as Boolean,
-            onlyDirect = flows[4] as Boolean,
+            sort = sort,
+            filter = filterFlow.filterText,
+            includeUnknown = filterFlow.includeUnknown,
+            onlyOnline = filterFlow.onlyOnline,
+            onlyDirect = filterFlow.onlyDirect,
             gpsFormat = profile.config.display.gpsFormat.number,
             distanceUnits = profile.config.display.units.number,
             tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
-            showDetails = flows[5] as Boolean,
+            showDetails = showDetails,
         )
     }.stateIn(
         scope = viewModelScope,
