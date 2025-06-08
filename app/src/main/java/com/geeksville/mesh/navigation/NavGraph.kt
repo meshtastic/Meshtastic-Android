@@ -84,9 +84,9 @@ fun NavGraph(
     NavHost(
         navController = navController,
         startDestination = if (uIViewModel.isConnected()) {
-            ConnectionsRoutes.ConnectionsGraph
+            NodesRoutes.NodesGraph
         } else {
-            ContactsRoutes.ContactsGraph
+            ConnectionsRoutes.ConnectionsGraph
         },
         modifier = modifier,
     ) {
