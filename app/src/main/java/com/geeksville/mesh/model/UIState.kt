@@ -536,6 +536,15 @@ class UIViewModel @Inject constructor(
     }
 
     fun deleteMessages(uuidList: List<Long>) = viewModelScope.launch(Dispatchers.IO) {
+        // Remove from queue first if any of these messages are queued
+        uuidList.forEach { uuid ->
+            try {
+                meshService?.cancelQueuedMessage(uuid.toInt())
+            } catch (ex: Exception) {
+                debug("Message $uuid was not in queue or error removing: ${ex.message}")
+            }
+        }
+        // Then delete the messages from the database
         packetRepository.deleteMessages(uuidList)
     }
 

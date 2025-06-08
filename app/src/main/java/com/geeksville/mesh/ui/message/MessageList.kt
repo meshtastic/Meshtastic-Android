@@ -104,7 +104,7 @@ fun DeliveryInfo(
                     FilledTonalButton(
                         onClick = onCancelQueue,
                         modifier = Modifier.fillMaxWidth(),
-                    ) { Text(text = stringResource(id = R.string.message_queue_cancel_retry)) }
+                    ) { Text(text = stringResource(id = R.string.delete)) }
                     
                     FilledTonalButton(
                         onClick = onDismiss,
@@ -199,7 +199,8 @@ internal fun MessageList(
                 showStatusDialog = null
             },
             onCancelQueue = {
-                viewModel.cancelQueuedMessage(msg.uuid)
+                val deleteList: List<Long> = listOf(msg.uuid)
+                viewModel.deleteMessages(deleteList)
                 showStatusDialog = null
             }
         )
