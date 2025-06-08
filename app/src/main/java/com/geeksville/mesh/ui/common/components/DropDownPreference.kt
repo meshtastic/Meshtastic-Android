@@ -18,7 +18,6 @@
 package com.geeksville.mesh.ui.common.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.KeyboardArrowDown
 import androidx.compose.material.icons.twotone.KeyboardArrowUp
@@ -85,7 +84,6 @@ fun <T> DropDownPreference(
             emptyList()
         }
     }
-
     RegularPreference(
         title = title,
         subtitle = items.find { it.first == selectedItem }?.second
@@ -100,38 +98,37 @@ fun <T> DropDownPreference(
             Icons.TwoTone.KeyboardArrowDown
         },
         summary = summary,
-    )
-
-    Box {
-        DropdownMenu(
-            expanded = dropDownExpanded,
-            onDismissRequest = { dropDownExpanded = !dropDownExpanded },
-        ) {
-            items.filterNot { it.first in deprecatedItems }.forEach { item ->
-                DropdownMenuItem(
-                    onClick = {
-                        dropDownExpanded = false
-                        onItemSelected(item.first)
-                    },
-                    modifier = modifier
-                        .background(
-                            color = if (selectedItem == item.first) {
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                            } else {
-                                Color.Unspecified
-                            },
-                        ),
-                    text = {
-                        Text(
-                            text = item.second,
-                            overflow = TextOverflow.Ellipsis,
-                            maxLines = 1,
-                        )
-                    }
-                )
+        dropdownMenu = {
+            DropdownMenu(
+                expanded = dropDownExpanded,
+                onDismissRequest = { dropDownExpanded = !dropDownExpanded },
+            ) {
+                items.filterNot { it.first in deprecatedItems }.forEach { item ->
+                    DropdownMenuItem(
+                        onClick = {
+                            dropDownExpanded = false
+                            onItemSelected(item.first)
+                        },
+                        modifier = modifier
+                            .background(
+                                color = if (selectedItem == item.first) {
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
+                                } else {
+                                    Color.Unspecified
+                                },
+                            ),
+                        text = {
+                            Text(
+                                text = item.second,
+                                overflow = TextOverflow.Ellipsis,
+                                maxLines = 1,
+                            )
+                        }
+                    )
+                }
             }
         }
-    }
+    )
 }
 
 @Preview(showBackground = true)
