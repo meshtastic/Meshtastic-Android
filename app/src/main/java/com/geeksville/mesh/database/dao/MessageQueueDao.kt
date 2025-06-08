@@ -120,5 +120,5 @@ interface MessageQueueDao {
      * Delete a message by its original packet ID
      */
     @Query("DELETE FROM message_queue WHERE original_packet_id = :packetId")
-    suspend fun deleteByPacketId(packetId: String): Int
+    suspend fun deleteByPacketId(packetId: Int): Int
 } 

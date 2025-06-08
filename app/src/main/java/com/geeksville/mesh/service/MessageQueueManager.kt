@@ -20,6 +20,7 @@ package com.geeksville.mesh.service
 import android.content.SharedPreferences
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
+import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.dao.MessageQueueDao
 import com.geeksville.mesh.database.entity.QueuedMessage
@@ -53,6 +54,31 @@ class MessageQueueManager @Inject constructor(
      */
     private fun isQueueEnabled(): Boolean {
         return preferences.getBoolean(PREF_MESSAGE_QUEUE_ENABLED, false)
+    }
+    
+    /**
+     * Check if a message should be enqueued without actually enqueueing it.
+     * Used to determine the appropriate status before setting ERROR.
+     */
+    suspend fun shouldEnqueueMessage(dataPacket: DataPacket, routingError: Int): Boolean {
+        if (!isQueueEnabled()) {
+            return false
+        }
+        
+        // Only queue text messages for MVP
+        if (dataPacket.text == null) {
+            return false
+        }
+        
+        // Check if queue has space (don't queue if full and can't be cleaned)
+        val currentQueueSize = queueDao.getQueuedCount()
+        if (currentQueueSize >= MAX_QUEUE_SIZE) {
+            // We could potentially clean up, but for this check we'll be conservative
+            // and assume the queue is full. The actual enqueue will try cleanup.
+            return false
+        }
+        
+        return true
     }
     
     /**
@@ -132,6 +158,32 @@ class MessageQueueManager @Inject constructor(
     }
     
     /**
+     * Process all queued messages immediately when connection is re-established,
+     * bypassing normal backoff timing
+     */
+    suspend fun processAllQueuedImmediately(): List<QueuedMessage> {
+        if (!isQueueEnabled()) return emptyList()
+        
+        try {
+            val allQueued = queueDao.getAllQueuedList()
+            val currentTime = System.currentTimeMillis()
+            val readyForRetry = mutableListOf<QueuedMessage>()
+            
+            for (queuedMessage in allQueued) {
+                if (retryStrategy.shouldRetryImmediately(queuedMessage, currentTime)) {
+                    readyForRetry.add(queuedMessage)
+                }
+            }
+            
+            debug("Found ${readyForRetry.size} messages ready for immediate retry out of ${allQueued.size} total queued")
+            return readyForRetry
+        } catch (ex: Exception) {
+            errormsg("Error processing all queued messages for immediate retry", ex)
+            return emptyList()
+        }
+    }
+    
+    /**
      * Process queued messages for a specific destination
      */
     suspend fun processQueueForDestination(destinationId: String): List<QueuedMessage> {
@@ -143,12 +195,14 @@ class MessageQueueManager @Inject constructor(
             val readyForRetry = mutableListOf<QueuedMessage>()
             
             for (queuedMessage in queuedForDest) {
-                if (retryStrategy.shouldRetry(queuedMessage, currentTime)) {
+                // Use immediate retry logic when processing for a specific destination
+                // This bypasses backoff timing since we detected the node is reachable
+                if (retryStrategy.shouldRetryImmediately(queuedMessage, currentTime)) {
                     readyForRetry.add(queuedMessage)
                 }
             }
             
-            debug("Found ${readyForRetry.size} messages ready for retry for destination $destinationId")
+            debug("Found ${readyForRetry.size} messages ready for immediate retry for destination $destinationId")
             return readyForRetry
         } catch (ex: Exception) {
             errormsg("Error processing queued messages for destination $destinationId", ex)
@@ -202,7 +256,7 @@ class MessageQueueManager @Inject constructor(
     /**
      * Remove a message from queue by its original packet ID
      */
-    suspend fun removeFromQueue(packetId: String): Boolean {
+    suspend fun removeFromQueue(packetId: Int): Boolean {
         return try {
             val deletedCount = queueDao.deleteByPacketId(packetId)
             if (deletedCount > 0) {
@@ -294,11 +348,14 @@ class MessageQueueManager @Inject constructor(
      * Create a DataPacket for retry from a QueuedMessage
      */
     suspend fun createDataPacketForRetry(queuedMessage: QueuedMessage): DataPacket {
-        // Use the simple text constructor
+        // Create a retry packet with a new ID to avoid conflicts
+        // The original message will be updated when the retry succeeds
         return DataPacket(
             to = queuedMessage.destinationId,
-            channel = queuedMessage.channelIndex,
-            text = queuedMessage.messageText
+            bytes = queuedMessage.messageText.encodeToByteArray(),
+            dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+            id = generatePacketId(), // Generate new ID for retry
+            channel = queuedMessage.channelIndex
         )
     }
     

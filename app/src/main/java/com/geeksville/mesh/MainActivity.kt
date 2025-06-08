@@ -502,6 +502,10 @@ class MainActivity : AppCompatActivity(), Logging {
         val prefs = UIViewModel.getPreferences(this)
         val theme = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         debug("Theme from prefs: $theme")
+        
+        // Find the current theme choice
+        val currentChoice = styles.entries.find { it.value == theme }?.key
+        
         // map theme keys to function to set theme
         model.showAlert(
             title = getString(R.string.choose_theme),
@@ -511,6 +515,7 @@ class MainActivity : AppCompatActivity(), Logging {
                     model.setTheme(value)
                 }
             },
+            currentChoice = currentChoice
         )
     }
 
@@ -519,6 +524,10 @@ class MainActivity : AppCompatActivity(), Logging {
         // Load preferences and its value
         val lang = LanguageUtils.getLocale()
         debug("Lang from prefs: $lang")
+        
+        // Find the current language choice
+        val currentChoice = languageTags.entries.find { it.value == lang }?.key
+        
         // map lang keys to function to set locale
         val langMap = languageTags.mapValues { (_, value) ->
             {
@@ -530,6 +539,7 @@ class MainActivity : AppCompatActivity(), Logging {
             title = getString(R.string.preferences_language),
             message = "",
             choices = langMap,
+            currentChoice = currentChoice
         )
     }
 
@@ -551,14 +561,21 @@ class MainActivity : AppCompatActivity(), Logging {
         
         val options = if (currentlyEnabled) {
             mapOf(
-                getString(R.string.disable) + " (Turn OFF message queue)" to false,
-                getString(R.string.keep_enabled) + " (Leave ON)" to true
+                getString(R.string.disable) to false,
+                getString(R.string.keep_enabled) to true
             )
         } else {
             mapOf(
-                getString(R.string.enable) + " (Turn ON message queue)" to true,
-                getString(R.string.keep_disabled) + " (Leave OFF)" to false
+                getString(R.string.enable) to true,
+                getString(R.string.keep_disabled) to false
             )
+        }
+        
+        // Determine which option represents the current state
+        val currentChoice = if (currentlyEnabled) {
+            getString(R.string.keep_enabled)
+        } else {
+            getString(R.string.keep_disabled)
         }
         
         model.showAlert(
@@ -570,7 +587,8 @@ class MainActivity : AppCompatActivity(), Logging {
                     val status = if (enabled) getString(R.string.enabled) else getString(R.string.disabled)
                     Toast.makeText(this, getString(R.string.message_queue_enabled) + ": $status", Toast.LENGTH_SHORT).show()
                 }
-            }
+            },
+            currentChoice = currentChoice
         )
     }
 }

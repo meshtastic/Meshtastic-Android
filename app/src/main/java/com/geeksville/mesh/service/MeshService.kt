@@ -956,6 +956,13 @@ class MeshService : Service(), Logging {
                 serviceNotifications.showNewNodeSeenNotification(it)
             }
         }
+        
+        // Trigger message queue processing when we receive user info from a node
+        // This indicates the node is reachable and we should retry any queued messages for it
+        if (myNodeNum != fromNum) {
+            val nodeId = toNodeID(fromNum)
+            onNodeDetected(nodeId)
+        }
     }
 
     /** Update our DB of users based on someone sending out a Position subpacket
@@ -975,6 +982,13 @@ class MeshService : Service(), Logging {
             updateNodeInfo(fromNum) {
                 debug("update position: ${it.longName?.toPIIString()} with ${p.toPIIString()}")
                 it.setPosition(p, (defaultTime / 1000L).toInt())
+            }
+            
+            // Trigger message queue processing when we receive a position update from a node
+            // This indicates the node is reachable and we should retry any queued messages for it
+            if (myNodeNum != fromNum) {
+                val nodeId = toNodeID(fromNum)
+                onNodeDetected(nodeId)
             }
         }
     }
@@ -1015,6 +1029,13 @@ class MeshService : Service(), Logging {
                 t.hasEnvironmentMetrics() -> it.environmentTelemetry = t
                 t.hasPowerMetrics() -> it.powerTelemetry = t
             }
+        }
+        
+        // Trigger message queue processing when we receive telemetry from a node
+        // This indicates the node is reachable and we should retry any queued messages for it
+        if (myNodeNum != fromNum) {
+            val nodeId = toNodeID(fromNum)
+            onNodeDetected(nodeId)
         }
     }
 
@@ -1096,6 +1117,9 @@ class MeshService : Service(), Logging {
     // If apps try to send packets when our radio is sleeping, we queue them here instead
     private val offlineSentPackets = mutableListOf<DataPacket>()
     
+    // Track mapping between retry packet IDs and original queued messages
+    private val retryPacketToQueuedMessage = mutableMapOf<Int, QueuedMessage>()
+    
     /**
      * Handle message failure by potentially queueing it for retry.
      * Part of the intelligent message queue system.
@@ -1122,8 +1146,14 @@ class MeshService : Service(), Logging {
         if (connectionState == ConnectionState.CONNECTED) {
             serviceScope.handledLaunch {
                 try {
-                    val readyMessages = messageQueueManager.processAllQueued()
-                    processQueuedMessagesForRetry(readyMessages)
+                    // Use immediate retry when connection is re-established
+                    val readyMessages = messageQueueManager.processAllQueuedImmediately()
+                    if (readyMessages.isNotEmpty()) {
+                        info("Connection re-established - immediately retrying ${readyMessages.size} queued messages")
+                        processQueuedMessagesForRetry(readyMessages)
+                    } else {
+                        debug("Connection re-established - no queued messages to retry")
+                    }
                 } catch (ex: Exception) {
                     errormsg("Error processing message queue on network change", ex)
                 }
@@ -1139,7 +1169,12 @@ class MeshService : Service(), Logging {
         serviceScope.handledLaunch {
             try {
                 val readyMessages = messageQueueManager.processQueueForDestination(nodeId)
-                processQueuedMessagesForRetry(readyMessages)
+                if (readyMessages.isNotEmpty()) {
+                    info("Node $nodeId detected - immediately retrying ${readyMessages.size} queued messages")
+                    processQueuedMessagesForRetry(readyMessages)
+                } else {
+                    debug("Node $nodeId detected - no queued messages to retry")
+                }
             } catch (ex: Exception) {
                 errormsg("Error processing message queue for node $nodeId", ex)
             }
@@ -1156,14 +1191,17 @@ class MeshService : Service(), Logging {
                 
                 if (connectionState == ConnectionState.CONNECTED) {
                     try {
+                        // Store the mapping between retry packet ID and original queued message
+                        retryPacketToQueuedMessage[dataPacket.id] = queuedMessage
+                        
                         sendNow(dataPacket)
-                        // Update queue on successful send
-                        messageQueueManager.updateAfterRetry(queuedMessage, true)
-                        info("Successfully retried queued message ${queuedMessage.originalPacketId}")
+                        info("Sent retry for queued message ${queuedMessage.originalPacketId} with new ID ${dataPacket.id}, attempt ${queuedMessage.attemptCount + 1}")
                     } catch (ex: Exception) {
-                        // Update queue on failed retry
+                        // Remove the mapping if send failed
+                        retryPacketToQueuedMessage.remove(dataPacket.id)
+                        // Update queue on failed send
                         messageQueueManager.updateAfterRetry(queuedMessage, false)
-                        errormsg("Failed to retry queued message ${queuedMessage.originalPacketId}", ex)
+                        errormsg("Failed to send retry for queued message ${queuedMessage.originalPacketId}", ex)
                     }
                 } else {
                     debug("Skipping queued message retry - not connected")
@@ -1289,43 +1327,81 @@ class MeshService : Service(), Logging {
     private fun handleAckNak(requestId: Int, fromId: String, routingError: Int) {
         serviceScope.handledLaunch {
             val isAck = routingError == MeshProtos.Routing.Error.NONE_VALUE
-            val p = packetRepository.get().getPacketById(requestId)
-            // distinguish real ACKs coming from the intended receiver
-            val m = when {
-                isAck && fromId == p?.data?.to -> MessageStatus.RECEIVED
-                isAck -> MessageStatus.DELIVERED
-                else -> MessageStatus.ERROR
+            
+            // Check if this is a retry packet
+            val queuedMessage = retryPacketToQueuedMessage.remove(requestId)
+            if (queuedMessage != null) {
+                // This is a retry packet - handle it specially
+                if (isAck) {
+                    // Retry succeeded - update original message and remove from queue
+                    val originalPacket = packetRepository.get().getPacketById(queuedMessage.originalPacketId)
+                    if (originalPacket != null) {
+                        val finalStatus = if (fromId == originalPacket.data.to) MessageStatus.RECEIVED else MessageStatus.DELIVERED
+                        originalPacket.data.status = finalStatus
+                        originalPacket.routingError = routingError
+                        packetRepository.get().update(originalPacket)
+                        serviceBroadcasts.broadcastMessageStatus(queuedMessage.originalPacketId, finalStatus)
+                        info("Retry succeeded for message ${queuedMessage.originalPacketId}, updated to $finalStatus")
+                    }
+                    // Remove from queue
+                    messageQueueManager.removeFromQueue(queuedMessage.originalPacketId)
+                } else {
+                    // Retry failed - update attempt count
+                    messageQueueManager.updateAfterRetry(queuedMessage, false)
+                    info("Retry failed for message ${queuedMessage.originalPacketId}, routing error: $routingError")
+                }
+                return@handledLaunch
             }
+            
+            // Handle normal (non-retry) packets
+            val p = packetRepository.get().getPacketById(requestId)
+            
             if (p != null && p.data.status != MessageStatus.RECEIVED) {
                 val wasSuccessful = isAck
-                p.data.status = m
+                
+                // Determine the appropriate status
+                val finalStatus = when {
+                    isAck && fromId == p.data.to -> MessageStatus.RECEIVED
+                    isAck -> MessageStatus.DELIVERED
+                    else -> {
+                        // Message failed - check if it should be queued before setting ERROR status
+                        val shouldQueue = !wasSuccessful && messageQueueManager.shouldEnqueueMessage(p.data, routingError)
+                        if (shouldQueue) {
+                            MessageStatus.QUEUED_FOR_RETRY
+                        } else {
+                            MessageStatus.ERROR
+                        }
+                    }
+                }
+                
+                p.data.status = finalStatus
                 p.routingError = routingError
                 packetRepository.get().update(p)
                 
-                // Handle message queue for failed messages
-                if (!wasSuccessful && p.data.status == MessageStatus.ERROR) {
+                // Handle message queue for failed messages that should be queued
+                if (!wasSuccessful && finalStatus == MessageStatus.QUEUED_FOR_RETRY) {
                     val wasQueued = messageQueueManager.enqueueMessage(p.data, routingError)
-                    if (wasQueued) {
-                        // Update status to queued and broadcast queued status instead of error
-                        p.data.status = MessageStatus.QUEUED_FOR_RETRY
-                        packetRepository.get().updateMessageStatus(p.data, MessageStatus.QUEUED_FOR_RETRY)
-                        serviceBroadcasts.broadcastMessageStatus(requestId, MessageStatus.QUEUED_FOR_RETRY)
+                    if (!wasQueued) {
+                        // If enqueueing failed unexpectedly, fall back to ERROR status
+                        p.data.status = MessageStatus.ERROR
+                        packetRepository.get().updateMessageStatus(p.data, MessageStatus.ERROR)
+                        warn("Failed to enqueue message ${requestId} despite shouldEnqueueMessage returning true")
+                    } else {
                         info("Message ${requestId} queued for retry due to routing error $routingError")
-                        return@handledLaunch // Exit early to avoid broadcasting ERROR status
                     }
                 }
                 
-                // Update queued message if this was a retry attempt
-                if (p.data.status == MessageStatus.RECEIVED || p.data.status == MessageStatus.DELIVERED) {
-                    // Message was successful - remove from queue if it was there
-                    serviceScope.handledLaunch {
-                        // We don't have direct access to the QueuedMessage UUID here,
-                        // but successful delivery means we can clean up based on packet ID
-                        // This will be handled in the queue processing logic
-                    }
+                // Broadcast the final status
+                serviceBroadcasts.broadcastMessageStatus(requestId, p.data.status)
+            } else {
+                // If packet is null or already received, broadcast the original status
+                val m = when {
+                    isAck && fromId == p?.data?.to -> MessageStatus.RECEIVED
+                    isAck -> MessageStatus.DELIVERED
+                    else -> MessageStatus.ERROR
                 }
+                serviceBroadcasts.broadcastMessageStatus(requestId, m)
             }
-            serviceBroadcasts.broadcastMessageStatus(requestId, m)
         }
     }
 
@@ -1488,6 +1564,9 @@ class MeshService : Service(), Logging {
             stopPacketQueue()
             stopLocationRequests()
             stopMqttClientProxy()
+            
+            // Clear retry packet mappings on disconnect
+            retryPacketToQueuedMessage.clear()
 
             GeeksvilleApplication.analytics.track(
                 "mesh_disconnect",
@@ -2461,7 +2540,7 @@ class MeshService : Service(), Logging {
         override fun cancelQueuedMessage(messageId: Int) = toRemoteExceptions {
             serviceScope.handledLaunch {
                 try {
-                    messageQueueManager.removeFromQueue(messageId.toString())
+                    messageQueueManager.removeFromQueue(messageId)
                     debug("Cancelled queued message $messageId")
                 } catch (ex: Exception) {
                     errormsg("Error cancelling queued message $messageId", ex)
@@ -2493,6 +2572,13 @@ class MeshService : Service(), Logging {
                     // Perform cleanup every 10 cycles (5 minutes)
                     if (cycleCount % 10 == 0) {
                         messageQueueManager.cleanupQueue()
+                        
+                        // Clean up stale retry packet mappings (older than 10 minutes)
+                        // This prevents memory leaks if ACK/NAK packets are lost
+                        if (retryPacketToQueuedMessage.isNotEmpty()) {
+                            debug("Cleaning up ${retryPacketToQueuedMessage.size} stale retry packet mappings")
+                            retryPacketToQueuedMessage.clear()
+                        }
                         
                         // Log queue stats for monitoring
                         val stats = messageQueueManager.getQueueStats()

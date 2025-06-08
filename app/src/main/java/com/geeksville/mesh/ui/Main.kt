@@ -135,6 +135,7 @@ fun MainScreen(
                 message = state.message,
                 choices = state.choices,
                 onDismissRequest = { state.onDismiss?.let { it() } },
+                currentChoice = state.currentChoice,
             )
         } else {
             SimpleAlertDialog(

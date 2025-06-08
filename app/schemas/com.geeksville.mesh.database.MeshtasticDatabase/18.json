@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 18,
-    "identityHash": "ebaac561066a33f7018bd9c945a4e5ac",
+    "identityHash": "392aa109253babf20bb5d00542798669",
     "entities": [
       {
         "tableName": "my_node",
@@ -74,7 +74,9 @@
         ],
         "primaryKey": {
           "autoGenerate": false,
-          "columnNames": ["myNodeNum"]
+          "columnNames": [
+            "myNodeNum"
+          ]
         }
       },
       {
@@ -197,7 +199,9 @@
         ],
         "primaryKey": {
           "autoGenerate": false,
-          "columnNames": ["num"]
+          "columnNames": [
+            "num"
+          ]
         }
       },
       {
@@ -293,27 +297,35 @@
         ],
         "primaryKey": {
           "autoGenerate": true,
-          "columnNames": ["uuid"]
+          "columnNames": [
+            "uuid"
+          ]
         },
         "indices": [
           {
             "name": "index_packet_myNodeNum",
             "unique": false,
-            "columnNames": ["myNodeNum"],
+            "columnNames": [
+              "myNodeNum"
+            ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_packet_myNodeNum` ON `${TABLE_NAME}` (`myNodeNum`)"
           },
           {
             "name": "index_packet_port_num",
             "unique": false,
-            "columnNames": ["port_num"],
+            "columnNames": [
+              "port_num"
+            ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_packet_port_num` ON `${TABLE_NAME}` (`port_num`)"
           },
           {
             "name": "index_packet_contact_key",
             "unique": false,
-            "columnNames": ["contact_key"],
+            "columnNames": [
+              "contact_key"
+            ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_packet_contact_key` ON `${TABLE_NAME}` (`contact_key`)"
           }
@@ -338,7 +350,9 @@
         ],
         "primaryKey": {
           "autoGenerate": false,
-          "columnNames": ["contact_key"]
+          "columnNames": [
+            "contact_key"
+          ]
         }
       },
       {
@@ -393,20 +407,26 @@
         ],
         "primaryKey": {
           "autoGenerate": false,
-          "columnNames": ["uuid"]
+          "columnNames": [
+            "uuid"
+          ]
         },
         "indices": [
           {
             "name": "index_log_from_num",
             "unique": false,
-            "columnNames": ["from_num"],
+            "columnNames": [
+              "from_num"
+            ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_log_from_num` ON `${TABLE_NAME}` (`from_num`)"
           },
           {
             "name": "index_log_port_num",
             "unique": false,
-            "columnNames": ["port_num"],
+            "columnNames": [
+              "port_num"
+            ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_log_port_num` ON `${TABLE_NAME}` (`port_num`)"
           }
@@ -449,7 +469,9 @@
         ],
         "primaryKey": {
           "autoGenerate": true,
-          "columnNames": ["uuid"]
+          "columnNames": [
+            "uuid"
+          ]
         }
       },
       {
@@ -483,13 +505,19 @@
         ],
         "primaryKey": {
           "autoGenerate": false,
-          "columnNames": ["reply_id", "user_id", "emoji"]
+          "columnNames": [
+            "reply_id",
+            "user_id",
+            "emoji"
+          ]
         },
         "indices": [
           {
             "name": "index_reactions_reply_id",
             "unique": false,
-            "columnNames": ["reply_id"],
+            "columnNames": [
+              "reply_id"
+            ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_reactions_reply_id` ON `${TABLE_NAME}` (`reply_id`)"
           }
@@ -520,13 +548,17 @@
         ],
         "primaryKey": {
           "autoGenerate": false,
-          "columnNames": ["num"]
+          "columnNames": [
+            "num"
+          ]
         },
         "indices": [
           {
             "name": "index_metadata_num",
             "unique": false,
-            "columnNames": ["num"],
+            "columnNames": [
+              "num"
+            ],
             "orders": [],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_metadata_num` ON `${TABLE_NAME}` (`num`)"
           }
@@ -616,7 +648,9 @@
         ],
         "primaryKey": {
           "autoGenerate": false,
-          "columnNames": ["hwModel"]
+          "columnNames": [
+            "hwModel"
+          ]
         }
       },
       {
@@ -668,13 +702,87 @@
         ],
         "primaryKey": {
           "autoGenerate": false,
-          "columnNames": ["id"]
+          "columnNames": [
+            "id"
+          ]
+        }
+      },
+      {
+        "tableName": "message_queue",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uuid` INTEGER NOT NULL, `original_packet_id` INTEGER NOT NULL, `destination_id` TEXT NOT NULL, `message_text` TEXT NOT NULL, `channel_index` INTEGER NOT NULL, `queued_time` INTEGER NOT NULL, `attempt_count` INTEGER NOT NULL, `last_attempt_time` INTEGER NOT NULL, `max_retries` INTEGER NOT NULL, `routing_error` INTEGER NOT NULL, PRIMARY KEY(`uuid`))",
+        "fields": [
+          {
+            "fieldPath": "uuid",
+            "columnName": "uuid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "originalPacketId",
+            "columnName": "original_packet_id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "destinationId",
+            "columnName": "destination_id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "messageText",
+            "columnName": "message_text",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "channelIndex",
+            "columnName": "channel_index",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "queuedTime",
+            "columnName": "queued_time",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "attemptCount",
+            "columnName": "attempt_count",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "lastAttemptTime",
+            "columnName": "last_attempt_time",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxRetries",
+            "columnName": "max_retries",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "routingError",
+            "columnName": "routing_error",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "uuid"
+          ]
         }
       }
     ],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ebaac561066a33f7018bd9c945a4e5ac')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '392aa109253babf20bb5d00542798669')"
     ]
   }
 }

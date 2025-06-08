@@ -80,39 +80,47 @@ fun DeliveryInfo(
     onCancelQueue: (() -> Unit) = {},
 ) = AlertDialog(
     onDismissRequest = onDismiss,
-    dismissButton = {
-        FilledTonalButton(
-            onClick = onDismiss,
-            modifier = Modifier.padding(horizontal = 16.dp),
-        ) { Text(text = stringResource(id = R.string.close)) }
-    },
+    dismissButton = if (message.status != MessageStatus.QUEUED_FOR_RETRY) {
+        {
+            FilledTonalButton(
+                onClick = onDismiss,
+                modifier = Modifier.padding(horizontal = 16.dp),
+            ) { Text(text = stringResource(id = R.string.close)) }
+        }
+    } else null,
     confirmButton = {
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            when (message.status) {
-                MessageStatus.QUEUED_FOR_RETRY -> {
-                    // For queued messages, show retry now and cancel queue options
+        when (message.status) {
+            MessageStatus.QUEUED_FOR_RETRY -> {
+                // For queued messages, show retry now and cancel queue options vertically stacked
+                Column(
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
                     FilledTonalButton(
                         onClick = onRetryNow,
-                        modifier = Modifier.padding(horizontal = 4.dp),
+                        modifier = Modifier.fillMaxWidth(),
                     ) { Text(text = stringResource(id = R.string.message_queue_manual_retry)) }
                     
                     FilledTonalButton(
                         onClick = onCancelQueue,
-                        modifier = Modifier.padding(horizontal = 4.dp),
+                        modifier = Modifier.fillMaxWidth(),
                     ) { Text(text = stringResource(id = R.string.message_queue_cancel_retry)) }
-                }
-                MessageStatus.ERROR -> {
-                    // For failed messages, show resend option
+                    
                     FilledTonalButton(
-                        onClick = onConfirm,
-                        modifier = Modifier.padding(horizontal = 4.dp),
-                    ) { Text(text = stringResource(id = R.string.resend)) }
+                        onClick = onDismiss,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) { Text(text = stringResource(id = R.string.close)) }
                 }
-                else -> {
-                    // For other statuses, no action buttons needed
-                }
+            }
+            MessageStatus.ERROR -> {
+                // For failed messages, show resend option
+                FilledTonalButton(
+                    onClick = onConfirm,
+                    modifier = Modifier.padding(horizontal = 4.dp),
+                ) { Text(text = stringResource(id = R.string.resend)) }
+            }
+            else -> {
+                // For other statuses, no action buttons needed
             }
         }
     },

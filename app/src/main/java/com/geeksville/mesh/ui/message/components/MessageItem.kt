@@ -153,11 +153,14 @@ internal fun MessageItem(
                             Snr(snr, fontSize = MaterialTheme.typography.bodySmall.fontSize)
                             Spacer(Modifier.weight(1f))
                             Rssi(rssi, fontSize = MaterialTheme.typography.bodySmall.fontSize)
-                        } else { Text(
-                            text = hopsAway,
-                            fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                        ) }
+                        } else { 
+                            Text(
+                                text = hopsAway,
+                                fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                            ) 
+                        }
                         Spacer(Modifier.weight(1f))
+                    }
                     if (fromLocal && messageStatus == MessageStatus.QUEUED_FOR_RETRY) {
                         Text(
                             text = stringResource(R.string.message_status_queued_retry),

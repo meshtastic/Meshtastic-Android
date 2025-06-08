@@ -205,7 +205,8 @@ class UIViewModel @Inject constructor(
         val html: String? = null,
         val onConfirm: (() -> Unit)? = null,
         val onDismiss: (() -> Unit)? = null,
-        val choices: Map<String, () -> Unit> = emptyMap()
+        val choices: Map<String, () -> Unit> = emptyMap(),
+        val currentChoice: String? = null
     )
 
     private val _currentAlert: MutableStateFlow<AlertData?> = MutableStateFlow(null)
@@ -217,7 +218,8 @@ class UIViewModel @Inject constructor(
         html: String? = null,
         onConfirm: (() -> Unit)? = {},
         dismissable: Boolean = true,
-        choices: Map<String, () -> Unit> = emptyMap()
+        choices: Map<String, () -> Unit> = emptyMap(),
+        currentChoice: String? = null
     ) {
         _currentAlert.value =
             AlertData(
@@ -231,7 +233,8 @@ class UIViewModel @Inject constructor(
                 onDismiss = {
                     if (dismissable) dismissAlert()
                 },
-                choices = choices
+                choices = choices,
+                currentChoice = currentChoice
             )
     }
 
