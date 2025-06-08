@@ -228,6 +228,10 @@ class MeshService : Service(), Logging {
     private var mqttMessageFlow: Job? = null
     private var queueProcessingJob: Job? = null
 
+    // Rate limiting for queue processing to prevent rapid-fire retries
+    private var lastQueueProcessTime = 0L
+    private val queueProcessCooldownMs = 10000L // 10 second cooldown between queue processing
+
     private val batteryPercentUnsupported = 0.0
     private val batteryPercentLowThreshold = 20
     private val batteryPercentLowDivisor = 5
@@ -1146,6 +1150,14 @@ class MeshService : Service(), Logging {
         if (connectionState == ConnectionState.CONNECTED) {
             serviceScope.handledLaunch {
                 try {
+                    // Rate limit queue processing to prevent rapid-fire retries
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - lastQueueProcessTime < queueProcessCooldownMs) {
+                        debug("Queue processing rate limited - skipping (last processed ${currentTime - lastQueueProcessTime}ms ago)")
+                        return@handledLaunch
+                    }
+                    lastQueueProcessTime = currentTime
+                    
                     // Use immediate retry when connection is re-established
                     val readyMessages = messageQueueManager.processAllQueuedImmediately()
                     if (readyMessages.isNotEmpty()) {
@@ -1168,6 +1180,14 @@ class MeshService : Service(), Logging {
     private fun onNodeDetected(nodeId: String) {
         serviceScope.handledLaunch {
             try {
+                // Rate limit queue processing to prevent rapid-fire retries
+                val currentTime = System.currentTimeMillis()
+                if (currentTime - lastQueueProcessTime < queueProcessCooldownMs) {
+                    debug("Queue processing rate limited for node $nodeId - skipping (last processed ${currentTime - lastQueueProcessTime}ms ago)")
+                    return@handledLaunch
+                }
+                lastQueueProcessTime = currentTime
+                
                 val readyMessages = messageQueueManager.processQueueForDestination(nodeId)
                 if (readyMessages.isNotEmpty()) {
                     info("Node $nodeId detected - immediately retrying ${readyMessages.size} queued messages")
@@ -1183,33 +1203,42 @@ class MeshService : Service(), Logging {
     
     /**
      * Process a list of queued messages for retry attempts.
+     * Sends messages one at a time with proper spacing to follow Meshtastic protocol.
      */
     private suspend fun processQueuedMessagesForRetry(queuedMessages: List<QueuedMessage>) {
-        for (queuedMessage in queuedMessages) {
-            try {
-                val dataPacket = messageQueueManager.createDataPacketForRetry(queuedMessage)
-                
-                if (connectionState == ConnectionState.CONNECTED) {
-                    try {
-                        // Store the mapping between retry packet ID and original queued message
-                        retryPacketToQueuedMessage[dataPacket.id] = queuedMessage
-                        
-                        sendNow(dataPacket)
-                        info("Sent retry for queued message ${queuedMessage.originalPacketId} with new ID ${dataPacket.id}, attempt ${queuedMessage.attemptCount + 1}")
-                    } catch (ex: Exception) {
-                        // Remove the mapping if send failed
-                        retryPacketToQueuedMessage.remove(dataPacket.id)
-                        // Update queue on failed send
-                        messageQueueManager.updateAfterRetry(queuedMessage, false)
-                        errormsg("Failed to send retry for queued message ${queuedMessage.originalPacketId}", ex)
+        if (queuedMessages.isEmpty()) return
+        
+        // Only send the first message to avoid flooding the network
+        // The queue will be processed again later for remaining messages
+        val queuedMessage = queuedMessages.first()
+        
+        try {
+            val dataPacket = messageQueueManager.createDataPacketForRetry(queuedMessage)
+            
+            if (connectionState == ConnectionState.CONNECTED) {
+                try {
+                    // Store the mapping between retry packet ID and original queued message
+                    retryPacketToQueuedMessage[dataPacket.id] = queuedMessage
+                    
+                    sendNow(dataPacket)
+                    info("Sent retry for queued message ${queuedMessage.originalPacketId} with new ID ${dataPacket.id}, attempt ${queuedMessage.attemptCount + 1}")
+                    
+                    // Log if there are more messages waiting
+                    if (queuedMessages.size > 1) {
+                        debug("${queuedMessages.size - 1} more queued messages will be processed in subsequent cycles")
                     }
-                } else {
-                    debug("Skipping queued message retry - not connected")
-                    break // Don't try more messages if we're not connected
+                } catch (ex: Exception) {
+                    // Remove the mapping if send failed
+                    retryPacketToQueuedMessage.remove(dataPacket.id)
+                    // Update queue on failed send
+                    messageQueueManager.updateAfterRetry(queuedMessage, false)
+                    errormsg("Failed to send retry for queued message ${queuedMessage.originalPacketId}", ex)
                 }
-            } catch (ex: Exception) {
-                errormsg("Error processing queued message ${queuedMessage.uuid}", ex)
+            } else {
+                debug("Skipping queued message retry - not connected")
             }
+        } catch (ex: Exception) {
+            errormsg("Error processing queued message ${queuedMessage.uuid}", ex)
         }
     }
 
