@@ -19,6 +19,7 @@ package com.geeksville.mesh.ui.common.components
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -47,6 +48,7 @@ fun RegularPreference(
     enabled: Boolean = true,
     summary: String? = null,
     trailingIcon: ImageVector? = null,
+    dropdownMenu: @Composable () -> Unit = {},
 ) {
     RegularPreference(
         title = title,
@@ -56,6 +58,7 @@ fun RegularPreference(
         enabled = enabled,
         summary = summary,
         trailingIcon = trailingIcon,
+        dropdownMenu = dropdownMenu,
     )
 }
 
@@ -69,6 +72,7 @@ fun RegularPreference(
     enabled: Boolean = true,
     summary: String? = null,
     trailingIcon: ImageVector? = null,
+    dropdownMenu: @Composable () -> Unit = {},
 ) {
     val color = if (enabled) {
         MaterialTheme.colorScheme.onSurface
@@ -107,14 +111,17 @@ fun RegularPreference(
                 )
             }
             if (trailingIcon != null) {
-                Icon(
-                    imageVector = trailingIcon,
-                    contentDescription = "trailingIcon",
-                    modifier = Modifier
-                        .padding(start = 8.dp)
-                        .wrapContentWidth(Alignment.End),
-                    tint = color,
-                )
+                Box {
+                    Icon(
+                        imageVector = trailingIcon,
+                        contentDescription = "trailingIcon",
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .wrapContentWidth(Alignment.End),
+                        tint = color,
+                    )
+                    dropdownMenu()
+                }
             }
         }
         if (summary != null) {
