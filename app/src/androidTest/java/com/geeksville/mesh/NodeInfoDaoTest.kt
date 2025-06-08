@@ -26,6 +26,7 @@ import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.NodeSortOption
+import com.geeksville.mesh.util.onlineTimeThreshold
 import com.google.protobuf.ByteString
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -42,6 +43,10 @@ import org.junit.runner.RunWith
 class NodeInfoDaoTest {
     private lateinit var database: MeshtasticDatabase
     private lateinit var nodeInfoDao: NodeInfoDao
+
+    private val onlineThreshold = onlineTimeThreshold()
+    private val offlineNodeLastHeard = onlineThreshold - 30
+    private val onlineNodeLastHeard = onlineThreshold + 20
 
     private val unknownNode = NodeEntity(
         num = 7,
@@ -65,7 +70,64 @@ class NodeInfoDaoTest {
             isLicensed = false
         },
         longName = "Kevin Mester", shortName = "KLO",
-        latitude = 30.267153, longitude = -97.743057 // Austin
+        latitude = 30.267153, longitude = -97.743057, // Austin
+        hopsAway = 0,
+    )
+
+    private val onlineNode = NodeEntity(
+        num = 9,
+        user = user {
+            id = "!25060801"
+            longName = "Meshtastic 0801"
+            shortName = "0801"
+            hwModel = MeshProtos.HardwareModel.UNSET
+        },
+        longName = "Meshtastic 0801",
+        shortName = "0801",
+        hopsAway = 0,
+        lastHeard = onlineNodeLastHeard
+    )
+
+    private val offlineNode = NodeEntity(
+        num = 10,
+        user = user {
+            id = "!25060802"
+            longName = "Meshtastic 0802"
+            shortName = "0802"
+            hwModel = MeshProtos.HardwareModel.UNSET
+        },
+        longName = "Meshtastic 0802",
+        shortName = "0802",
+        hopsAway = 0,
+        lastHeard = offlineNodeLastHeard
+    )
+
+    private val directNode = NodeEntity(
+        num = 11,
+        user = user {
+            id = "!25060803"
+            longName = "Meshtastic 0803"
+            shortName = "0803"
+            hwModel = MeshProtos.HardwareModel.UNSET
+        },
+        longName = "Meshtastic 0803",
+        shortName = "0803",
+        hopsAway = 0,
+        lastHeard = onlineNodeLastHeard
+    )
+
+    private val relayedNode = NodeEntity(
+        num = 12,
+        user = user {
+            id = "!25060804"
+            longName = "Meshtastic 0804"
+            shortName = "0804"
+            hwModel = MeshProtos.HardwareModel.UNSET
+        },
+        longName = "Meshtastic 0804",
+        shortName = "0804",
+        hopsAway = 3,
+        lastHeard = onlineNodeLastHeard
     )
 
     private val myNodeInfo: MyNodeEntity = MyNodeEntity(
@@ -93,9 +155,9 @@ class NodeInfoDaoTest {
         41.878113 to -87.629799,  // Chicago
         39.952583 to -75.165222,  // Philadelphia
     )
-    private val testNodes = listOf(ourNode, unknownNode) + testPositions.mapIndexed { index, pos ->
+    private val testNodes = listOf(ourNode, unknownNode, onlineNode, offlineNode, directNode, relayedNode) + testPositions.mapIndexed { index, pos ->
         NodeEntity(
-            num = 9 + index,
+            num = 1000 + index,
             user = user {
                 id = "+165087653%02d".format(9 + index)
                 longName = "Kevin Mester$index"
@@ -135,16 +197,20 @@ class NodeInfoDaoTest {
         sort: NodeSortOption = NodeSortOption.LAST_HEARD,
         filter: String = "",
         includeUnknown: Boolean = true,
+        onlyOnline: Boolean = false,
+        onlyDirect: Boolean = false,
     ) = nodeInfoDao.getNodes(
         sort = sort.sqlValue,
         filter = filter,
         includeUnknown = includeUnknown,
+        hopsAwayMax = if (onlyDirect) 0 else -1,
+        lastHeardMin = if (onlyOnline) onlineTimeThreshold() else -1,
     ).map { list -> list.map { it.toModel() } }.first().filter { it.num != ourNode.num }
 
     @Test // node list size
     fun testNodeListSize() = runBlocking {
         val nodes = nodeInfoDao.nodeDBbyNum().first()
-        assertEquals(12, nodes.size)
+        assertEquals(6 + testPositions.size, nodes.size)
     }
 
     @Test // nodeDBbyNum() re-orders our node at the top of the list
@@ -203,6 +269,30 @@ class NodeInfoDaoTest {
         val nodes = getNodes(includeUnknown = true)
         val containsUnsetNode = nodes.any { it.isUnknownUser }
         assertTrue(containsUnsetNode)
+    }
+
+    @Test
+    fun testOfflineNodesIncludedByDefault() = runBlocking {
+        val nodes = getNodes()
+        assertTrue(nodes.any { it.lastHeard < onlineTimeThreshold() })
+    }
+
+    @Test
+    fun testOnlyOnlineExcludesOffline() = runBlocking {
+        val nodes = getNodes(onlyOnline = true)
+        assertFalse(nodes.any { it.lastHeard < onlineTimeThreshold() })
+    }
+
+    @Test
+    fun testRelayedNodesIncludedByDefault() = runBlocking {
+        val nodes = getNodes()
+        assertTrue(nodes.any { it.hopsAway > 0 })
+    }
+
+    @Test
+    fun testOnlyDirectExcludesRelayed() = runBlocking {
+        val nodes = getNodes(onlyDirect = true)
+        assertFalse(nodes.any { it.hopsAway > 0 })
     }
 
     @Test
