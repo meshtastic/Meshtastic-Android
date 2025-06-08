@@ -62,4 +62,4 @@ private fun formatUptime(seconds: Long): String {
 }
 
 @Suppress("MagicNumber")
-fun onlineTimeThreshold() = (System.currentTimeMillis() / 1000 - 15 * 60).toInt()
+fun onlineTimeThreshold() = (System.currentTimeMillis() / 1000 - 2 * 60 * 60).toInt()
