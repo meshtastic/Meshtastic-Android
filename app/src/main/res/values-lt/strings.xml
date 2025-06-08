@@ -296,4 +296,8 @@ Suderinamus įrenginius galite pamatyti apsilankę adresu www.meshtastic.org/doc
     <string name="max">Max</string>
     <string name="copy">Kopijuoti</string>
     <string name="alert_bell_text">Skambučio simbolis!</string>
+    <string name="public_key">Viešasis raktas</string>
+    <string name="private_key">Privatus raktas</string>
+    <string name="timeout">Baigėsi laikas</string>
+    <string name="distance">Atstumas</string>
 </resources>
