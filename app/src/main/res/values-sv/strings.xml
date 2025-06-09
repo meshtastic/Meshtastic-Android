@@ -16,9 +16,11 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <string name="main_tab_messages">Meddelanden</string>
+    <string name="main_tab_map">Karta</string>
     <string name="main_tab_channel">Kanal</string>
     <string name="node_filter_placeholder">Filter</string>
-    <string name="desc_node_filter_clear">Rensa filtrering av noder</string>
+    <string name="desc_node_filter_clear">rensa filtrering av noder</string>
     <string name="node_filter_include_unknown">Inkludera okända</string>
     <string name="node_filter_show_details">Visa detaljer</string>
     <string name="node_sort_alpha">A-Ö</string>
@@ -122,7 +124,7 @@
     <string name="modem_config_very_long">Väldigt lång räckvidd / Långsam</string>
     <string name="modem_config_unrecognized">OKÄND</string>
     <string name="meshtastic_service_notifications">Tjänsteaviseringar</string>
-    <string name="location_disabled_warning">Plats måste vara påslagen för att hitta nya enheter via Bluetooth. Du kan stänga av plats igen efteråt.</string>
+    <string name="location_disabled_warning">Plats måste vara påslagen för att hitta nya enheter via bluetooth. Du kan stänga av plats igen efteråt.</string>
     <string name="about">Om</string>
     <string name="text_messages">Textmeddelanden</string>
     <string name="channel_invalid">Denna kanal-URL är ogiltig och kan inte användas</string>
@@ -164,7 +166,7 @@
     <string name="why_notification_required">Meshtastic behöver tillstånd för service- och meddelandeaviseringar.</string>
     <string name="notification_denied">Behörighet för aviseringar nekat. För att aktivera aviseringar, åtkomst: Android Inställningar &gt; Appar &gt; Meshtastic &gt; Notifieringar.</string>
     <string name="modem_config_slow_short">Kort räckvidd / Långsam</string>
-    <string name="modem_config_slow_medium">Medium räckvidd / Långsam</string>
+    <string name="modem_config_slow_medium">Medium Räckvidd / Långsam</string>
     <plurals name="delete_messages">
         <item quantity="one">Ta bort meddelande?</item>
         <item quantity="other">Ta bort %s meddelanden?</item>
@@ -200,7 +202,7 @@
     <string name="quick_chat_edit">Redigera snabbchatt</string>
     <string name="quick_chat_append">Lägg till i meddelandet</string>
     <string name="quick_chat_instant">Skicka direkt</string>
-    <string name="factory_reset">Fabriksåterställning</string>
+    <string name="factory_reset">Återställ till standardinställningar</string>
     <string name="factory_reset_description">Detta kommer att rensa all enhetskonfiguration som du har gjort.</string>
     <string name="bluetooth_disabled">Bluetooth är inaktiverad</string>
     <string name="permission_missing_31">Meshtastic behöver åtkomst till enheter i närheten för att hitta och ansluta till enheter via Bluetooth. Du kan stänga av det när den inte används.</string>
@@ -241,7 +243,7 @@
     <string name="remove">Ta bort</string>
     <string name="remove_node_text">Denna nod kommer att tas bort från din lista till dess att din nod tar emot data från den igen.</string>
     <string name="mute">Tysta</string>
-    <string name="mute_notifications">Tysta aviseringar</string>
+    <string name="mute_notifications">Tysta notifieringar</string>
     <string name="mute_8_hours">8 timmar</string>
     <string name="mute_1_week">1 vecka</string>
     <string name="mute_always">Alltid</string>
@@ -303,8 +305,46 @@
     <string name="max">Max</string>
     <string name="copy">Kopiera</string>
     <string name="alert_bell_text">Varningsklocka!</string>
+    <string name="channel_settings">Kanalinställningar</string>
+    <string name="favorite">Favorit</string>
+    <string name="voltage">Spänning</string>
+    <string name="are_you_sure">Är du säker?</string>
+    <string name="udp_config">UDP-konfiguration</string>
+    <string name="channels">Kanaler</string>
+    <string name="position">Plats</string>
+    <string name="power">Ström</string>
+    <string name="network">Nätverk</string>
+    <string name="display">Display</string>
+    <string name="lora">LoRa</string>
+    <string name="bluetooth">Bluetooth</string>
+    <string name="security">Säkerhet</string>
+    <string name="mqtt">MQTT</string>
+    <string name="serial">Seriell kommunikation</string>
+    <string name="pairing_mode">Parkopplingsläge</string>
+    <string name="hide_password">Dölj lösenord</string>
+    <string name="show_password">Visa lösenord</string>
+    <string name="messages">Meddelanden</string>
+    <string name="role">Roll</string>
+    <string name="posix_timezone">POSIX-tidszon</string>
+    <string name="modem_preset">Modem-förinställningar</string>
+    <string name="bandwidth">Bandbredd</string>
+    <string name="override_duty_cycle">Ersätt gräns för driftsperiod</string>
+    <string name="ignore_mqtt">Ignorera MQTT</string>
+    <string name="ok_to_mqtt">OK till MQTT</string>
+    <string name="ssid">SSID</string>
+    <string name="psk">PSK</string>
+    <string name="ip">Ip-adress</string>
+    <string name="gateway">Gateway</string>
+    <string name="subnet">Subnät</string>
     <string name="public_key">Publik nyckel</string>
     <string name="private_key">Privat nyckel</string>
     <string name="timeout">Timeout</string>
     <string name="distance">Avstånd</string>
+    <string name="hardware">Hårdvara</string>
+    <string name="primary">Primär</string>
+    <string name="scan_qr_code">Skanna QR-kod</string>
+    <string name="import_label">Importera</string>
+    <string name="map">Karta</string>
+    <string name="nodes">Noder</string>
+    <string name="reply">Svara</string>
 </resources>

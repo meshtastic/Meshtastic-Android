@@ -21,7 +21,7 @@
     <string name="main_tab_map">地图</string>
     <string name="main_tab_channel">频道</string>
     <string name="main_tab_settings">设置</string>
-    <string name="node_filter_placeholder">筛选</string>
+    <string name="node_filter_placeholder">筛选器csvfganw</string>
     <string name="desc_node_filter_clear">清除筛选</string>
     <string name="node_filter_include_unknown">包括未知内容</string>
     <string name="node_filter_show_details">显示详细信息</string>
@@ -62,7 +62,7 @@
     <string name="role_tak">优化ATAK系统通讯，减少常规广播。</string>
     <string name="role_client_hidden">仅在需要时广播的设备，用于隐蔽或节能模式</string>
     <string name="role_lost_and_found">定期向默认频道广播位置，以协助设备恢复。</string>
-    <string name="role_tak_tracker">启用自动 TAK PLI 广播并减少常规广播。</string>
+    <string name="role_tak_tracker">启用自动TAKPLI广播并减少常规广播。</string>
     <string name="role_router_late">基础设施节点，总是在所有其他模式之后重新广播数据包一次，以确保本地集群的额外覆盖范围。会在节点列表中显示。</string>
     <string name="rebroadcast_mode_all">重新广播任何观察到的消息，无论是来自我们的私有频道还是具有相同 LoRa 参数的其他网状网络。</string>
     <string name="rebroadcast_mode_all_skip_decoding">与 ALL 模式的行为相同，但跳过数据包解码，仅简单地重新广播它们。仅适用于中继器角色。在其他角色中设置此选项将表现为 ALL 模式。</string>
@@ -102,7 +102,7 @@
     <string name="report_a_bug">报告 Bug 详细信息</string>
     <string name="report_bug_text">您确定要报告错误吗？报告后，请在 https://github.com/orgs/meshtastic/discussions 上贴文，以便我们可以将报告与您发现的问题匹配。</string>
     <string name="report">报告</string>
-    <string name="not_paired_yet">您还没有配对。</string>
+    <string name="not_paired_yet">您还没有配对.</string>
     <string name="change_radio">换设备</string>
     <string name="pairing_completed">配对完成，启动服务</string>
     <string name="pairing_failed_try_again">配对失败，请重新选择</string>
@@ -197,7 +197,7 @@
     <string name="shutdown">关机</string>
     <string name="cant_shutdown">此设备不支持关机</string>
     <string name="reboot">重启</string>
-    <string name="traceroute">路由追踪</string>
+    <string name="traceroute">追踪器</string>
     <string name="intro_show">显示简介</string>
     <string name="intro_welcome">欢迎来到Meshtastic</string>
     <string name="intro_welcome_text">Meshtastic 是一个开源、离网、加密的通讯平台。Meshtastic 无线电组成网状网络，使用 LoRa 协议传送文字讯息进行通讯。</string>
@@ -302,7 +302,7 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="share_message">分享消息</string>
     <string name="signal">信号</string>
     <string name="signal_quality">信号质量</string>
-    <string name="traceroute_log">路由追踪日志</string>
+    <string name="traceroute_log">路由追踪</string>
     <string name="traceroute_direct">直连</string>
     <plurals name="traceroute_hops">
         <item quantity="other">%d 跳数</item>

@@ -40,7 +40,7 @@
     <string name="routing_error_too_large">Pakken er for stor</string>
     <string name="routing_error_no_response">Ingen respons</string>
     <string name="routing_error_bad_request">Ugyldig Forespørsel</string>
-    <string name="routing_error_duty_cycle_limit">Regional Syklusgrense Nådd</string>
+    <string name="routing_error_duty_cycle_limit">Regional Arbeidssyklusgrense Nådd</string>
     <string name="routing_error_not_authorized">Ikke Autorisert</string>
     <string name="routing_error_pki_failed">Kryptert sending mislyktes</string>
     <string name="routing_error_pki_unknown_pubkey">Ukjent Offentlig Nøkkel</string>
@@ -73,7 +73,7 @@
     <string name="channel_name">Kanal Navn</string>
     <string name="channel_options">Kanal valg</string>
     <string name="qr_code">QR kode</string>
-    <string name="unset">Ikke satt</string>
+    <string name="unset">Lås opp</string>
     <string name="connection_status">Tilkoblingsstatus</string>
     <string name="application_icon">applikasjon ikon</string>
     <string name="unknown_username">Ukjent Brukernavn</string>

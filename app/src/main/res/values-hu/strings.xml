@@ -117,7 +117,6 @@
     <string name="meshtastic_messages_notifications">Üzenet értesítések</string>
     <string name="protocol_stress_test">Protokoll stressz teszt</string>
     <string name="firmware_old">A rádió firmware túl régi ahhoz, hogy a programmal kommunikálni tudjon. További tudnivalókat a <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">firmware frissítés leírásában</a> talál, a Github-on.</string>
-    <string name="okay">OK</string>
     <string name="must_set_region">Be kell állítania egy régiót</string>
     <string name="region">Régió</string>
     <string name="cant_change_no_radio">Nem lehet csatornát váltani, mert a rádió nincs csatlakoztatva. Kérem próbálja meg újra.</string>
@@ -256,6 +255,7 @@
         <item quantity="other">%d ugrások</item>
     </plurals>
     <string name="traceroute_diff">Ugrások oda %1$d Vissza %2$d</string>
+    <string name="messages">Üzenetek</string>
     <string name="timeout">Időtúllépés</string>
     <string name="distance">Távolság</string>
     <string name="map">Térkép</string>

@@ -461,7 +461,6 @@
     <string name="region_frequency_plan">Região (plano de frequências)</string>
     <string name="hop_limit">Limite de saltos</string>
     <string name="tx_enabled">Ativar TX</string>
-    <string name="tx_power_dbm"></string>
     <string name="frequency_slot">Intervalo de frequência</string>
     <string name="override_duty_cycle">Ignorar ciclo de trabalho</string>
     <string name="ignore_incoming">Ignorar entrada</string>
