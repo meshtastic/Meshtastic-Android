@@ -69,7 +69,6 @@ fun PreferenceFooter(
             modifier = modifier
                 .height(48.dp)
                 .weight(1f),
-            enabled = enabled,
             onClick = onNegativeClicked,
         ) {
             Text(

@@ -82,6 +82,9 @@ fun UserConfigItemList(
     var userInput by rememberSaveable { mutableStateOf(userConfig) }
     val firmwareVersion = DeviceVersion(metadata?.firmwareVersion ?: "")
 
+    val validLongName = userInput.longName.isNotBlank()
+    val validShortName = userInput.shortName.isNotBlank()
+    val validNames = validLongName && validShortName
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -102,7 +105,7 @@ fun UserConfigItemList(
                 value = userInput.longName,
                 maxSize = 39, // long_name max_size:40
                 enabled = enabled,
-                isError = userInput.longName.isEmpty(),
+                isError = !validLongName,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
                 ),
@@ -119,7 +122,7 @@ fun UserConfigItemList(
                 value = userInput.shortName,
                 maxSize = 4, // short_name max_size:5
                 enabled = enabled,
-                isError = userInput.shortName.isEmpty(),
+                isError = !validShortName,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
                 ),
@@ -165,7 +168,7 @@ fun UserConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = enabled && userInput != userConfig,
+                enabled = enabled && userInput != userConfig && validNames,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     userInput = userConfig
