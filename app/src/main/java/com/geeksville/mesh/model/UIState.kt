@@ -68,6 +68,7 @@ import com.geeksville.mesh.util.getShortDate
 import com.geeksville.mesh.util.positionToMeter
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -152,6 +153,8 @@ data class NodesUiState(
     val sort: NodeSortOption = NodeSortOption.LAST_HEARD,
     val filter: String = "",
     val includeUnknown: Boolean = false,
+    val onlyOnline: Boolean = false,
+    val onlyDirect: Boolean = false,
     val gpsFormat: Int = 0,
     val distanceUnits: Int = 0,
     val tempInFahrenheit: Boolean = false,
@@ -270,6 +273,8 @@ class UIViewModel @Inject constructor(
     private val nodeSortOption = MutableStateFlow(NodeSortOption.VIA_FAVORITE)
     private val includeUnknown = MutableStateFlow(preferences.getBoolean("include-unknown", false))
     private val showDetails = MutableStateFlow(preferences.getBoolean("show-details", false))
+    private val onlyOnline = MutableStateFlow(preferences.getBoolean("only-online", false))
+    private val onlyDirect = MutableStateFlow(preferences.getBoolean("only-direct", false))
 
     fun setSortOption(sort: NodeSortOption) {
         nodeSortOption.value = sort
@@ -285,17 +290,44 @@ class UIViewModel @Inject constructor(
         preferences.edit { putBoolean("include-unknown", includeUnknown.value) }
     }
 
-    val nodesUiState: StateFlow<NodesUiState> = combine(
+    fun toggleOnlyOnline() {
+        onlyOnline.value = !onlyOnline.value
+        preferences.edit { putBoolean("only-online", onlyOnline.value) }
+    }
+
+    fun toggleOnlyDirect() {
+        onlyDirect.value = !onlyDirect.value
+        preferences.edit { putBoolean("only-direct", onlyDirect.value) }
+    }
+
+    data class NodeFilterState(
+        val filterText: String,
+        val includeUnknown: Boolean,
+        val onlyOnline: Boolean,
+        val onlyDirect: Boolean,
+    )
+
+    val nodeFilterStateFlow: Flow<NodeFilterState> = combine(
         nodeFilterText,
-        nodeSortOption,
         includeUnknown,
+        onlyOnline,
+        onlyDirect,
+    ) { filterText, includeUnknown, onlyOnline, onlyDirect ->
+        NodeFilterState(filterText, includeUnknown, onlyOnline, onlyDirect)
+    }
+
+    val nodesUiState: StateFlow<NodesUiState> = combine(
+        nodeFilterStateFlow,
+        nodeSortOption,
         showDetails,
         radioConfigRepository.deviceProfileFlow,
-    ) { filter, sort, includeUnknown, showDetails, profile ->
+    ) { filterFlow, sort, showDetails, profile ->
         NodesUiState(
             sort = sort,
-            filter = filter,
-            includeUnknown = includeUnknown,
+            filter = filterFlow.filterText,
+            includeUnknown = filterFlow.includeUnknown,
+            onlyOnline = filterFlow.onlyOnline,
+            onlyDirect = filterFlow.onlyDirect,
             gpsFormat = profile.config.display.gpsFormat.number,
             distanceUnits = profile.config.display.units.number,
             tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
@@ -314,7 +346,7 @@ class UIViewModel @Inject constructor(
     )
 
     val nodeList: StateFlow<List<Node>> = nodesUiState.flatMapLatest { state ->
-        nodeDB.getNodes(state.sort, state.filter, state.includeUnknown)
+        nodeDB.getNodes(state.sort, state.filter, state.includeUnknown, state.onlyOnline, state.onlyDirect)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),

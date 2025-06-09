@@ -104,6 +104,10 @@ fun NodeScreen(
                     onSortSelect = model::setSortOption,
                     includeUnknown = state.includeUnknown,
                     onToggleIncludeUnknown = model::toggleIncludeUnknown,
+                    onlyOnline = state.onlyOnline,
+                    onToggleOnlyOnline = model::toggleOnlyOnline,
+                    onlyDirect = state.onlyDirect,
+                    onToggleOnlyDirect = model::toggleOnlyDirect,
                     showDetails = state.showDetails,
                     onToggleShowDetails = model::toggleShowDetails,
                 )

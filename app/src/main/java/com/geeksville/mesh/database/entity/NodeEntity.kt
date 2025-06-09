@@ -33,6 +33,7 @@ import com.geeksville.mesh.Position
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.util.onlineTimeThreshold
 import com.google.protobuf.ByteString
 
 data class NodeWithRelations(
@@ -164,9 +165,7 @@ data class NodeEntity(
      */
     val isOnline: Boolean
         get() {
-            val now = System.currentTimeMillis() / 1000
-            val timeout = 2 * 60 * 60
-            return (now - lastHeard <= timeout)
+            return lastHeard > onlineTimeThreshold()
         }
 
     companion object {
