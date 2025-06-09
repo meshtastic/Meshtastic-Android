@@ -2327,5 +2327,9 @@ class MeshService : Service(), Logging {
                 nodedbReset = 1
             })
         }
+
+        override fun cancelMessageNotification(contactKey: String) = toRemoteExceptions {
+            serviceNotifications.cancelMessageNotification(contactKey)
+        }
     }
 }

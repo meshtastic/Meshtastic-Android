@@ -61,7 +61,6 @@ import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.map.MAP_STYLE_ID
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
@@ -190,8 +189,6 @@ class UIViewModel @Inject constructor(
     firmwareReleaseRepository: FirmwareReleaseRepository,
     private val preferences: SharedPreferences
 ) : ViewModel(), Logging {
-
-    private val notifications = MeshServiceNotifications(app)
 
     private val _theme =
         MutableStateFlow(preferences.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM))
@@ -545,7 +542,7 @@ class UIViewModel @Inject constructor(
     fun clearUnreadCount(contact: String, timestamp: Long) = viewModelScope.launch(Dispatchers.IO) {
         packetRepository.clearUnreadCount(contact, timestamp)
         val unreadCount = packetRepository.getUnreadCount(contact)
-        if (unreadCount == 0) notifications.cancelMessageNotification(contact)
+        if (unreadCount == 0) meshService?.cancelMessageNotification(contact)
     }
 
     companion object {
