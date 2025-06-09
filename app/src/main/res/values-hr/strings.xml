@@ -92,6 +92,7 @@
     <string name="message_delivery_status">Status isporuke poruke</string>
     <string name="meshtastic_messages_notifications">Obavijest o poruci</string>
     <string name="protocol_stress_test">Test otpornosti na stres</string>
+    <string name="firmware_too_old">Potrebno ažuriranje firmwarea.</string>
     <string name="firmware_old">Firmware radija je prestar za komunikaciju s ovom aplikacijom. Za više informacija posjetite <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">naš vodič za instalaciju firmwarea</a>.</string>
     <string name="okay">U redu</string>
     <string name="must_set_region">Potrebno je postaviti regiju!</string>

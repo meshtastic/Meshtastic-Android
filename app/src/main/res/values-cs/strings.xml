@@ -146,6 +146,7 @@
     <string name="meshtastic_messages_notifications">Upozornění na zprávy</string>
     <string name="meshtastic_alerts_notifications">Upozornění na varování</string>
     <string name="protocol_stress_test">Protokol zátěžového testu</string>
+    <string name="firmware_too_old">Je vyžadována aktualizace firmwaru.</string>
     <string name="firmware_old">Firmware rádia je příliš starý na to, aby mohl komunikovat s touto aplikací. Více informací o tomto naleznete v <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">naší firmware instalační příručce</a>.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">Musíte specifikovat region!</string>
@@ -603,4 +604,11 @@
     <string name="use_12h_format">Použít 12h formát hodin</string>
     <string name="display_time_in_12h_format">Pokud je povoleno, zařízení bude na obrazovce zobrazovat čas ve 12 hodinovém formátu.</string>
     <string name="map">Mapa</string>
+    <string name="contacts">Kontakty</string>
+    <string name="nodes">Uzly (Nody)</string>
+    <string name="set_your_region">Nastavte svůj region</string>
+    <string name="should_update_firmware">Doporučena aktualizace firmwaru.</string>
+    <string name="should_update">Chcete-li využít nejnovějších oprav a funkcí, aktualizujte firmware vašeho uzlu.\n\nPoslední stabilní verze firmwaru: %1$s</string>
+    <string name="time">Čas</string>
+    <string name="date">Datum</string>
 </resources>

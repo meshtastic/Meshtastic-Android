@@ -128,6 +128,7 @@
     <string name="message_delivery_status">Stádas seachadta teachtaireachta</string>
     <string name="meshtastic_messages_notifications">Fógraí teachtaireachtaí</string>
     <string name="protocol_stress_test">Tástáil strus prótacail</string>
+    <string name="firmware_too_old">Nuashonrú teastaíonn ar an gcórais.</string>
     <string name="firmware_old">Tá an firmware raidió ró-aoiseach chun cumarsáid a dhéanamh leis an aip seo. Chun tuilleadh eolais a fháil, féach <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">ár gCúnamh Suiteála Firmware</a>.</string>
     <string name="okay">Ceadaigh</string>
     <string name="must_set_region">Caithfidh tú réigiún a shocrú!</string>

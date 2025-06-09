@@ -145,6 +145,7 @@
     <string name="meshtastic_messages_notifications">Berichtmeldingen</string>
     <string name="meshtastic_alerts_notifications">Waarschuwingsmeldingen</string>
     <string name="protocol_stress_test">Protocol stresstest</string>
+    <string name="firmware_too_old">Firmware-update vereist.</string>
     <string name="firmware_old">De radio firmware is te oud om met deze applicatie te praten. Voor meer informatie over deze zaak, zie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">onze Firmware Installation gids</a>.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">Je moet een regio instellen!</string>
