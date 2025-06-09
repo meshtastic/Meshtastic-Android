@@ -80,7 +80,7 @@ class NodeInfoDaoTest {
             id = "!25060801"
             longName = "Meshtastic 0801"
             shortName = "0801"
-            hwModel = MeshProtos.HardwareModel.UNSET
+            hwModel = MeshProtos.HardwareModel.ANDROID_SIM
         },
         longName = "Meshtastic 0801",
         shortName = "0801",
@@ -94,7 +94,7 @@ class NodeInfoDaoTest {
             id = "!25060802"
             longName = "Meshtastic 0802"
             shortName = "0802"
-            hwModel = MeshProtos.HardwareModel.UNSET
+            hwModel = MeshProtos.HardwareModel.ANDROID_SIM
         },
         longName = "Meshtastic 0802",
         shortName = "0802",
@@ -108,7 +108,7 @@ class NodeInfoDaoTest {
             id = "!25060803"
             longName = "Meshtastic 0803"
             shortName = "0803"
-            hwModel = MeshProtos.HardwareModel.UNSET
+            hwModel = MeshProtos.HardwareModel.ANDROID_SIM
         },
         longName = "Meshtastic 0803",
         shortName = "0803",
@@ -122,7 +122,7 @@ class NodeInfoDaoTest {
             id = "!25060804"
             longName = "Meshtastic 0804"
             shortName = "0804"
-            hwModel = MeshProtos.HardwareModel.UNSET
+            hwModel = MeshProtos.HardwareModel.ANDROID_SIM
         },
         longName = "Meshtastic 0804",
         shortName = "0804",
