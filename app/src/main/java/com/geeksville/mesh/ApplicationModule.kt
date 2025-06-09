@@ -23,6 +23,7 @@ import android.content.SharedPreferences
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
+import com.geeksville.mesh.service.MeshServiceNotifications
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -44,5 +45,10 @@ object ApplicationModule {
     @Provides
     fun provideProcessLifecycle(processLifecycleOwner: LifecycleOwner): Lifecycle {
         return processLifecycleOwner.lifecycle
+    }
+
+    @Provides
+    fun providesMeshServiceNotifications(application: Application): MeshServiceNotifications {
+        return MeshServiceNotifications(application)
     }
 }

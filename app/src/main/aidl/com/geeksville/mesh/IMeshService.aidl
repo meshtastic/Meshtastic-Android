@@ -171,7 +171,4 @@ interface IMeshService {
 
     /// Send request for node UserInfo
     void requestUserInfo(in int destNum);
-
-    /// Cancels a new message notification for a given channel/contact
-    void cancelMessageNotification(String contactKey);
 }
