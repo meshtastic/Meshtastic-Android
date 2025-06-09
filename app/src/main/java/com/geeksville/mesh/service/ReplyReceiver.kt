@@ -35,6 +35,9 @@ class ReplyReceiver : BroadcastReceiver() {
     @Inject
     lateinit var serviceRepository: ServiceRepository
 
+    @Inject
+    lateinit var meshServiceNotifications: MeshServiceNotifications
+
     companion object {
         const val REPLY_ACTION = "com.geeksville.mesh.REPLY_ACTION"
         const val CONTACT_KEY = "contactKey"

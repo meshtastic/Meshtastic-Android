@@ -150,6 +150,9 @@ class MeshService : Service(), Logging {
     @Inject
     lateinit var mqttRepository: MQTTRepository
 
+    @Inject
+    lateinit var serviceNotifications: MeshServiceNotifications
+
     companion object : Logging {
 
         // Intents broadcast by MeshService
@@ -212,7 +215,6 @@ class MeshService : Service(), Logging {
 
     // A mapping of receiver class name to package name - used for explicit broadcasts
     private val clientPackages = mutableMapOf<String, String>()
-    private val serviceNotifications = MeshServiceNotifications(this)
     private val serviceBroadcasts = MeshServiceBroadcasts(this, clientPackages) {
         connectionState.also { radioConfigRepository.setConnectionState(it) }
     }
