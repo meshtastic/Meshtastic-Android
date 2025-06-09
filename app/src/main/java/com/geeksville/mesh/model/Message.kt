@@ -61,11 +61,18 @@ data class Message(
     val hopsAway: Int,
 ) {
     fun getStatusStringRes(): Pair<Int, Int> {
-        val title = if (routingError > 0) R.string.error else R.string.message_delivery_status
+        val title = when (status) {
+            MessageStatus.QUEUED_FOR_RETRY -> R.string.message_status_queued_retry
+            MessageStatus.ERROR -> if (routingError > 0) R.string.error else R.string.message_delivery_status
+            else -> R.string.message_delivery_status
+        }
         val text = when (status) {
             MessageStatus.RECEIVED -> R.string.delivery_confirmed
             MessageStatus.QUEUED -> R.string.message_status_queued
+            MessageStatus.DELIVERED -> R.string.routing_error_none
             MessageStatus.ENROUTE -> R.string.message_status_enroute
+            MessageStatus.QUEUED_FOR_RETRY -> R.string.message_status_queued_retry_detail
+            MessageStatus.ERROR -> getStringResFrom(routingError)
             else -> getStringResFrom(routingError)
         }
         return title to text

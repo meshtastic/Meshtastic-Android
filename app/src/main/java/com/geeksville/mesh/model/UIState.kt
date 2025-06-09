@@ -66,6 +66,7 @@ import com.geeksville.mesh.ui.map.MAP_STYLE_ID
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.util.getShortDate
 import com.geeksville.mesh.util.positionToMeter
+import com.geeksville.mesh.MessageStatus
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -207,7 +208,8 @@ class UIViewModel @Inject constructor(
         val html: String? = null,
         val onConfirm: (() -> Unit)? = null,
         val onDismiss: (() -> Unit)? = null,
-        val choices: Map<String, () -> Unit> = emptyMap()
+        val choices: Map<String, () -> Unit> = emptyMap(),
+        val currentChoice: String? = null
     )
 
     private val _currentAlert: MutableStateFlow<AlertData?> = MutableStateFlow(null)
@@ -219,7 +221,8 @@ class UIViewModel @Inject constructor(
         html: String? = null,
         onConfirm: (() -> Unit)? = {},
         dismissable: Boolean = true,
-        choices: Map<String, () -> Unit> = emptyMap()
+        choices: Map<String, () -> Unit> = emptyMap(),
+        currentChoice: String? = null
     ) {
         _currentAlert.value =
             AlertData(
@@ -233,7 +236,8 @@ class UIViewModel @Inject constructor(
                 onDismiss = {
                     if (dismissable) dismissAlert()
                 },
-                choices = choices
+                choices = choices,
+                currentChoice = currentChoice
             )
     }
 
@@ -564,7 +568,51 @@ class UIViewModel @Inject constructor(
     }
 
     fun deleteMessages(uuidList: List<Long>) = viewModelScope.launch(Dispatchers.IO) {
+        // Remove from queue first if any of these messages are queued
+        uuidList.forEach { uuid ->
+            try {
+                meshService?.cancelQueuedMessage(uuid.toInt())
+            } catch (ex: Exception) {
+                debug("Message $uuid was not in queue or error removing: ${ex.message}")
+            }
+        }
+        // Then delete the messages from the database
         packetRepository.deleteMessages(uuidList)
+    }
+
+    /**
+     * Manually retry a queued message immediately
+     */
+    fun retryQueuedMessage(messageUuid: Long, contactKey: String) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            // Get the message from the database
+            val packet = packetRepository.getPacketById(messageUuid.toInt())
+            if (packet != null && packet.data.status == MessageStatus.QUEUED_FOR_RETRY) {
+                // Resend the message immediately
+                val messageText = packet.data.text ?: return@launch
+                sendMessage(messageText, contactKey)
+                // The queue will be cleaned up automatically when the message succeeds or fails
+            }
+        } catch (ex: Exception) {
+            errormsg("Error retrying queued message: ${ex.message}")
+        }
+    }
+
+    /**
+     * Remove a message from the retry queue and mark it as failed
+     */
+    fun cancelQueuedMessage(messageUuid: Long) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            // Update the message status to ERROR to remove it from queue
+            val packet = packetRepository.getPacketById(messageUuid.toInt())
+            if (packet != null && packet.data.status == MessageStatus.QUEUED_FOR_RETRY) {
+                packetRepository.updateMessageStatus(packet.data, MessageStatus.ERROR)
+                // Also remove from the actual message queue
+                meshService?.cancelQueuedMessage(messageUuid.toInt())
+            }
+        } catch (ex: Exception) {
+            errormsg("Error canceling queued message: ${ex.message}")
+        }
     }
 
     fun deleteWaypoint(id: Int) = viewModelScope.launch(Dispatchers.IO) {

@@ -135,6 +135,7 @@ fun MainScreen(
                 message = state.message,
                 choices = state.choices,
                 onDismissRequest = { state.onDismiss?.let { it() } },
+                currentChoice = state.currentChoice,
             )
         } else {
             SimpleAlertDialog(
@@ -251,6 +252,7 @@ enum class MainMenuAction(@StringRes val stringRes: Int) {
     DEBUG(R.string.debug_panel),
     RADIO_CONFIG(R.string.radio_configuration),
     EXPORT_MESSAGES(R.string.save_messages),
+    MESSAGE_QUEUE(R.string.message_queue_settings),
     THEME(R.string.theme),
     LANGUAGE(R.string.preferences_language),
     SHOW_INTRO(R.string.intro_show),

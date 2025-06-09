@@ -89,6 +89,7 @@ fun MultipleChoiceAlertDialog(
     message: String?,
     choices: Map<String, () -> Unit>,
     onDismissRequest: () -> Unit,
+    currentChoice: String? = null, // Add parameter to indicate current active choice
 ) {
     AlertDialog(
         onDismissRequest = onDismissRequest,
@@ -104,12 +105,14 @@ fun MultipleChoiceAlertDialog(
                     )
                 }
                 choices.forEach { (choice, action) ->
+                    val isCurrentChoice = choice == currentChoice
                     Button(
                         modifier = Modifier.fillMaxWidth().padding(8.dp),
                         onClick = {
                             action()
                             onDismissRequest()
                         },
+                        enabled = !isCurrentChoice, // Disable button if it's the current choice
                     ) {
                         Text(text = choice)
                     }
