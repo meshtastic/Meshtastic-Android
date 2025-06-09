@@ -46,7 +46,6 @@ data class NodeWithRelations(
             num = num,
             metadata = metadata?.proto,
             user = user,
-            shortName = shortName,
             position = position,
             snr = snr,
             rssi = rssi,
@@ -151,7 +150,7 @@ data class NodeEntity(
     val environmentMetrics: TelemetryProtos.EnvironmentMetrics
         get() = environmentTelemetry.environmentMetrics
 
-    val isUnknownUser get() = shortName == null
+    val isUnknownUser get() = user.hwModel == MeshProtos.HardwareModel.UNSET
     val hasPKC get() = !user.publicKey.isEmpty
     val errorByteString: ByteString get() = ERROR_BYTE_STRING
 

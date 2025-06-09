@@ -35,7 +35,6 @@ data class Node(
     val num: Int,
     val metadata: MeshProtos.DeviceMetadata? = null,
     val user: MeshProtos.User = MeshProtos.User.getDefaultInstance(),
-    var shortName: String? = null,
     val position: MeshProtos.Position = MeshProtos.Position.getDefaultInstance(),
     val snr: Float = Float.MAX_VALUE,
     val rssi: Int = Int.MAX_VALUE,
@@ -59,7 +58,7 @@ data class Node(
             return (if (brightness > 0.5) Color.BLACK else Color.WHITE) to Color.rgb(r, g, b)
         }
 
-    val isUnknownUser get() = shortName == null
+    val isUnknownUser get() = user.hwModel == MeshProtos.HardwareModel.UNSET
     val hasPKC get() = !user.publicKey.isEmpty
     val mismatchKey get() = user.publicKey == NodeEntity.ERROR_BYTE_STRING
 
