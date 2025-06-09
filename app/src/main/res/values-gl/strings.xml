@@ -92,6 +92,7 @@
     <string name="message_delivery_status">Estado de envío de mensaxe</string>
     <string name="meshtastic_messages_notifications">Notificacións de mensaxe</string>
     <string name="protocol_stress_test">Protocolo de proba de esforzo</string>
+    <string name="firmware_too_old">Actualización de firmware necesaria.</string>
     <string name="firmware_old">O firmware de radio é moi vello para falar con esta aplicación. Para máis información nisto visita <a href="https://meshtastic.org/docs/getting-started/flashing-firmware"> a nosa guía de instalación de Firmware</a>.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">Tes que seleccionar rexión!</string>

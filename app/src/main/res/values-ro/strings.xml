@@ -84,6 +84,7 @@
     <string name="message_delivery_status">Status livrare mesaj</string>
     <string name="meshtastic_messages_notifications">Notificări mesaje</string>
     <string name="protocol_stress_test">Stres test protocol</string>
+    <string name="firmware_too_old">Este necesară actualizarea firmware-ului.</string>
     <string name="firmware_old">Firmware-ul radioului este prea vechi pentru a putea comunica cu această aplicație. Pentru mai multe informații despre acest proces, consultați <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Ghidul nostru de instalare pentru firmware</a>.</string>
     <string name="okay">Ok</string>
     <string name="must_set_region">Trebuie să alegeți o regiune!</string>
