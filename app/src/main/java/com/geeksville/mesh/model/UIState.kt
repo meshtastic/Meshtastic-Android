@@ -278,6 +278,11 @@ class UIViewModel @Inject constructor(
     private val onlyOnline = MutableStateFlow(preferences.getBoolean("only-online", false))
     private val onlyDirect = MutableStateFlow(preferences.getBoolean("only-direct", false))
 
+    private val onlyFavorites = MutableStateFlow(preferences.getBoolean("only-favorites", false))
+    private val showWaypointsOnMap = MutableStateFlow(preferences.getBoolean("show-waypoints-on-map", true))
+    private val showPrecisionCircleOnMap =
+        MutableStateFlow(preferences.getBoolean("show-precision-circle-on-map", true))
+
     fun setSortOption(sort: NodeSortOption) {
         nodeSortOption.value = sort
     }
@@ -300,6 +305,21 @@ class UIViewModel @Inject constructor(
     fun toggleOnlyDirect() {
         onlyDirect.value = !onlyDirect.value
         preferences.edit { putBoolean("only-direct", onlyDirect.value) }
+    }
+
+    fun setOnlyFavorites(value: Boolean) {
+        onlyFavorites.value = value
+        preferences.edit { putBoolean("only-favorites", onlyFavorites.value) }
+    }
+
+    fun setShowWaypointsOnMap(value: Boolean) {
+        showWaypointsOnMap.value = value
+        preferences.edit { putBoolean("show-waypoints-on-map", value) }
+    }
+
+    fun setShowPrecisionCircleOnMap(value: Boolean) {
+        showPrecisionCircleOnMap.value = value
+        preferences.edit { putBoolean("show-precision-circle-on-map", value) }
     }
 
     data class NodeFilterState(
@@ -363,6 +383,24 @@ class UIViewModel @Inject constructor(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = emptyList(),
+    )
+
+    data class MapFilterState(
+        val onlyFavorites: Boolean,
+        val showWaypoints: Boolean,
+        val showPrecisionCircle: Boolean,
+    )
+
+    val mapFilterStateFlow: StateFlow<MapFilterState> = combine(
+        onlyFavorites,
+        showWaypointsOnMap,
+        showPrecisionCircleOnMap,
+    ) { favoritesOnly, showWaypoints, showPrecisionCircle ->
+        MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = MapFilterState(false, true, true)
     )
 
     // hardware info about our local device (can be null)

@@ -24,15 +24,25 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lens
 import androidx.compose.material.icons.filled.LocationDisabled
+import androidx.compose.material.icons.filled.PinDrop
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.MyLocation
+import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +50,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.background
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Text
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -201,6 +215,10 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
 fun MapView(
     model: UIViewModel = viewModel(),
 ) {
+    var mapFilterExpanded by remember { mutableStateOf(false) }
+
+    val mapFilterState by model.mapFilterStateFlow.collectAsState()
+
     // UI Elements
     var cacheEstimate by remember { mutableStateOf("") }
 
@@ -289,7 +307,12 @@ fun MapView(
         val ourNode = model.ourNodeInfo.value
         val gpsFormat = model.config.display.gpsFormat.number
         val displayUnits = model.config.display.units.number
-        return nodesWithPosition.map { node ->
+        val mapFilterState = model.mapFilterStateFlow.value // Access mapFilterState directly
+        return nodesWithPosition.mapNotNull { node ->
+            if (mapFilterState.onlyFavorites && !node.isFavorite && !node.equals(ourNode)) {
+                return@mapNotNull null
+            }
+
             val (p, u) = node.position to node.user
             val nodePosition = GeoPoint(node.latitude, node.longitude)
             MarkerWithLabel(
@@ -306,20 +329,21 @@ fun MapView(
                     if (node.batteryStr != "") node.batteryStr else "?"
                 )
                 ourNode?.distanceStr(node, displayUnits)?.let { dist ->
-                    subDescription =
-                        context.getString(R.string.map_subDescription, ourNode.bearing(node), dist)
+                    subDescription = context.getString(
+                        R.string.map_subDescription,
+                        ourNode.bearing(node),
+                        dist
+                    )
                 }
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 position = nodePosition
                 icon = markerIcon
-
-//                setOnLongClickListener {
-//                    performHapticFeedback()
-//                    TODO NodeMenu?
-//                    true
-//                }
                 setNodeColors(node.colors)
-                setPrecisionBits(p.precisionBits)
+                if (!mapFilterState.showPrecisionCircle) {
+                    setPrecisionBits(0)
+                } else {
+                    setPrecisionBits(p.precisionBits)
+                }
             }
         }
     }
@@ -376,6 +400,7 @@ fun MapView(
         val dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
         return waypoints.mapNotNull { waypoint ->
             val pt = waypoint.data.waypoint ?: return@mapNotNull null
+            if (!mapFilterState.showWaypoints) return@mapNotNull null
             val lock = if (pt.lockedTo != 0) "\uD83D\uDD12" else ""
             val time = dateFormat.format(waypoint.received_time)
             val label = pt.name + " " + formatAgo((waypoint.received_time / 1000).toInt())
@@ -633,6 +658,105 @@ fun MapView(
                         icon = Icons.Outlined.Layers,
                         contentDescription = R.string.map_style_selection,
                     )
+                    Box(modifier = Modifier) {
+                        MapButton(
+                            onClick = { mapFilterExpanded = true },
+                            icon = Icons.Outlined.Tune,
+                            contentDescription = R.string.map_filter,
+                        )
+                        DropdownMenu(
+                            expanded = mapFilterExpanded,
+                            onDismissRequest = { mapFilterExpanded = false },
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                        ) {
+                            // Only Favorites toggle
+                            DropdownMenuItem(
+                                text = {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Star,
+                                            contentDescription = null,
+                                            modifier = Modifier.padding(end = 8.dp),
+                                            tint = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.only_favorites),
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        Checkbox(
+                                            checked = mapFilterState.onlyFavorites,
+                                            onCheckedChange = { enabled ->
+                                                model.setOnlyFavorites(enabled)
+                                            },
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    model.setOnlyFavorites(!mapFilterState.onlyFavorites)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.PinDrop,
+                                            contentDescription = null,
+                                            modifier = Modifier.padding(end = 8.dp),
+                                            tint = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.show_waypoints),
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        Checkbox(
+                                            checked = mapFilterState.showWaypoints,
+                                            onCheckedChange = model::setShowWaypointsOnMap,
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    model.setShowWaypointsOnMap(!mapFilterState.showWaypoints)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Lens,
+                                            contentDescription = null,
+                                            modifier = Modifier.padding(end = 8.dp),
+                                            tint = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.show_precision_circle),
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        Checkbox(
+                                            checked = mapFilterState.showPrecisionCircle,
+                                            onCheckedChange = { enabled ->
+                                                model.setShowPrecisionCircleOnMap(enabled)
+                                            },
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    model.setShowPrecisionCircleOnMap(!mapFilterState.showPrecisionCircle)
+                                }
+                            )
+                        }
+                    }
                     if (hasGps) {
                         MapButton(
                             icon = if (myLocationOverlay == null) {
@@ -666,6 +790,7 @@ fun MapView(
                         if (name == "") name = "Dropped Pin"
                         if (expire == 0) expire = Int.MAX_VALUE
                         lockedTo = if (waypoint.lockedTo != 0) model.myNodeNum ?: 0 else 0
+                        if (waypoint.icon == 0) icon = 128205
                     }
                 )
             },

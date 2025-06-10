@@ -674,4 +674,8 @@
     <string name="expires">Expires</string>
     <string name="time">Time</string>
     <string name="date">Date</string>
+    <string name="map_filter">Map Filter\n</string>
+    <string name="only_favorites">Only Favorites</string>
+    <string name="show_waypoints">Show Waypoints</string>
+    <string name="show_precision_circle">Show Precision Circles</string>
 </resources>
