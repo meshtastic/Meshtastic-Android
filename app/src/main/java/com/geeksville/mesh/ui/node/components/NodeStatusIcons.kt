@@ -26,6 +26,7 @@ import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
@@ -69,6 +70,7 @@ fun NodeStatusIcons(
                         contentDescription = stringResource(R.string.unmessageable),
                         modifier = Modifier
                             .size(24.dp), // Smaller size for badge
+                        tint = MaterialTheme.colorScheme.error
                     )
                 }
             }
