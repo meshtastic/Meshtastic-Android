@@ -23,6 +23,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.NoCell
 import androidx.compose.material.icons.rounded.Star
+import androidx.compose.material.icons.twotone.CloudOff
+import androidx.compose.material.icons.twotone.CloudDone
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -40,16 +42,60 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 
+@Suppress("LongMethod")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NodeStatusIcons(
     isThisNode: Boolean,
     isUnmessageable: Boolean,
     isFavorite: Boolean,
+    isConnected: Boolean
 ) {
     Row(
         modifier = Modifier.padding(4.dp)
     ) {
+        if (isThisNode) {
+            TooltipBox(
+                positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
+                tooltip = {
+                    PlainTooltip {
+                        Text(
+                            stringResource(
+                                if (isConnected) {
+                                    R.string.connected_to
+                                } else {
+                                    R.string.disconnected
+                                }
+                            )
+                        )
+                    }
+                },
+                state = rememberTooltipState()
+            ) {
+                IconButton(
+                    onClick = {},
+                    modifier = Modifier.size(24.dp),
+                ) {
+                    if (isConnected) {
+                        @Suppress("MagicNumber")
+                        Icon(
+                            imageVector = Icons.TwoTone.CloudDone,
+                            contentDescription = stringResource(R.string.connected),
+                            modifier = Modifier.size(24.dp), // Smaller size for badge
+                            tint = Color(0xFF4CAF50)
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.TwoTone.CloudOff,
+                            contentDescription = stringResource(R.string.not_connected),
+                            modifier = Modifier.size(24.dp), // Smaller size for badge
+                            tint = MaterialTheme.colorScheme.error
+                        )
+                    }
+                }
+            }
+        }
+
         if (isUnmessageable) {
             TooltipBox(
                 positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
@@ -70,7 +116,6 @@ fun NodeStatusIcons(
                         contentDescription = stringResource(R.string.unmessageable),
                         modifier = Modifier
                             .size(24.dp), // Smaller size for badge
-                        tint = MaterialTheme.colorScheme.error,
                     )
                 }
             }
@@ -107,8 +152,9 @@ fun NodeStatusIcons(
 @Composable
 fun StatusIconsPreview() {
     NodeStatusIcons(
-        isThisNode = false,
+        isThisNode = true,
         isUnmessageable = true,
         isFavorite = true,
+        isConnected = true,
     )
 }

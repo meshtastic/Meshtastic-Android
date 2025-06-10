@@ -148,7 +148,8 @@ fun NodeItem(
                 NodeStatusIcons(
                     isThisNode = isThisNode,
                     isFavorite = isFavorite,
-                    isUnmessageable = unmessageable
+                    isUnmessageable = unmessageable,
+                    isConnected = isConnected
                 )
             }
             Row(
