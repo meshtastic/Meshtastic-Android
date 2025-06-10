@@ -650,4 +650,8 @@
     <string name="expires">Päättyy</string>
     <string name="time">Aika</string>
     <string name="date">Päivä</string>
+    <string name="map_filter">Karttasuodatin\n</string>
+    <string name="only_favorites">Vain suosikit</string>
+    <string name="show_waypoints">Näytä reittipisteet</string>
+    <string name="show_precision_circle">Näytä tarkkuuspiirit</string>
 </resources>
