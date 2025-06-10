@@ -95,7 +95,7 @@ fun NodeStatusIcons(
                         contentDescription = stringResource(R.string.favorite),
                         modifier = Modifier
                             .size(24.dp), // Smaller size for badge
-                        tint = Color(color = 0xFFFEC30A)
+                        tint = Color(color = 0xFFFEC30A),
                     )
                 }
             }
