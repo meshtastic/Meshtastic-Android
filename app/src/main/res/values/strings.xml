@@ -678,4 +678,5 @@
     <string name="only_favorites">Only Favorites</string>
     <string name="show_waypoints">Show Waypoints</string>
     <string name="show_precision_circle">Show Precision Circles</string>
+    <string name="client_notification">Client Notification</string>
 </resources>

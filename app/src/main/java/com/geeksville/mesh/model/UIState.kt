@@ -424,8 +424,14 @@ class UIViewModel @Inject constructor(
 
     init {
         radioConfigRepository.errorMessage.filterNotNull().onEach {
-            showSnackbar(it)
-            radioConfigRepository.clearErrorMessage()
+            showAlert(
+                title = app.getString(R.string.client_notification),
+                message = it,
+                onConfirm = {
+                    radioConfigRepository.clearErrorMessage()
+                },
+                dismissable = false
+            )
         }.launchIn(viewModelScope)
 
         radioConfigRepository.localConfigFlow.onEach { config ->
