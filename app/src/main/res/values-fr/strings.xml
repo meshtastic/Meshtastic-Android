@@ -145,6 +145,7 @@
     <string name="meshtastic_messages_notifications">Notifications de message</string>
     <string name="meshtastic_alerts_notifications">Notifications d\'alerte</string>
     <string name="protocol_stress_test">Test de contrainte de protocole</string>
+    <string name="firmware_too_old">Mise à jour du micrologiciel requise.</string>
     <string name="firmware_old">Le micrologiciel de la radio est trop ancien pour communiquer avec cette application. Pour des informations, voir <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Guide d\'installation du micrologiciel</a>.</string>
     <string name="okay">D\'accord</string>
     <string name="must_set_region">Vous devez définir une région !</string>

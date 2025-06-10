@@ -96,6 +96,7 @@
     <string name="meshtastic_messages_notifications">התראות על הודעות</string>
     <string name="meshtastic_alerts_notifications">התראות</string>
     <string name="protocol_stress_test">בדיקת קיבולת רשת (stress test)</string>
+    <string name="firmware_too_old">נדרש עדכון קושחה.</string>
     <string name="firmware_old">קושחת המכשיר ישנה מידי בכדי לתקשר עם האפליקציה. למידע נוסף בקר ב<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">מדריך התקנת קושחה</a>.</string>
     <string name="okay">אישור</string>
     <string name="must_set_region">חובה לבחור אזור!</string>

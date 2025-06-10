@@ -139,6 +139,7 @@
     <string name="message_delivery_status">Meddelandets leveransstatus</string>
     <string name="meshtastic_messages_notifications">Meddelandeaviseringar</string>
     <string name="protocol_stress_test">Stresstest för protokoll</string>
+    <string name="firmware_too_old">Uppdatering av firmware krävs.</string>
     <string name="firmware_old">Radiomodulens firmware är för gammal för att prata med denna applikation. För mer information om detta se <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">vår installationsguide för Firmware</a>.</string>
     <string name="okay">Okej</string>
     <string name="must_set_region">Du måste ställa in en region!</string>
@@ -323,6 +324,7 @@
     <string name="pairing_mode">Parkopplingsläge</string>
     <string name="hide_password">Dölj lösenord</string>
     <string name="show_password">Visa lösenord</string>
+    <string name="details">Detaljer</string>
     <string name="messages">Meddelanden</string>
     <string name="role">Roll</string>
     <string name="posix_timezone">POSIX-tidszon</string>
@@ -341,6 +343,8 @@
     <string name="timeout">Timeout</string>
     <string name="distance">Avstånd</string>
     <string name="hardware">Hårdvara</string>
+    <string name="node_number">Nodnummer</string>
+    <string name="uptime">Drifttid</string>
     <string name="primary">Primär</string>
     <string name="scan_qr_code">Skanna QR-kod</string>
     <string name="import_label">Importera</string>

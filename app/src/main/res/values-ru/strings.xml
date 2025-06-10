@@ -145,6 +145,7 @@
     <string name="meshtastic_messages_notifications">Уведомления о сообщениях</string>
     <string name="meshtastic_alerts_notifications">Служебные уведомления</string>
     <string name="protocol_stress_test">Испытание протокола на нагрузку</string>
+    <string name="firmware_too_old">Требуется обновление прошивки.</string>
     <string name="firmware_old">Слишком старая микропрограмма в радио для общения с этим приложением. Более подробную информацию об этом можно найти в <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">нашем руководстве по установке прошивки</a>.</string>
     <string name="okay">Лады</string>
     <string name="must_set_region">Вы должны задать регион!</string>
