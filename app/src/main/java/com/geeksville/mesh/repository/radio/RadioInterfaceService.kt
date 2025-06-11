@@ -75,6 +75,7 @@ class RadioInterfaceService @Inject constructor(
     private val _receivedData = MutableSharedFlow<ByteArray>()
     val receivedData: SharedFlow<ByteArray> = _receivedData
 
+    // Thread-safe StateFlow for tracking device address changes
     private val _currentDeviceAddressFlow = MutableStateFlow<String?>(prefs.getString(DEVADDR_KEY, null))
     val currentDeviceAddressFlow: StateFlow<String?> = _currentDeviceAddressFlow.asStateFlow()
 
