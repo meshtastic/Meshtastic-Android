@@ -47,7 +47,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
@@ -158,7 +160,13 @@ class BTScanModel @Inject constructor(
     val selectedBluetooth: Boolean get() = selectedAddress?.getOrNull(0) == 'x'
 
     // / Use the string for the NopInterface
-    val selectedNotNull: String get() = selectedAddress ?: NO_DEVICE_SELECTED
+    // val selectedNotNull: String get() = selectedAddress ?: NO_DEVICE_SELECTED
+    val selectedAddressFlow: StateFlow<String?> = radioInterfaceService.currentDeviceAddressFlow
+        .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), radioInterfaceService.getDeviceAddress())
+
+    val selectedNotNullFlow: StateFlow<String> = selectedAddressFlow
+        .mapLatest { it ?: NO_DEVICE_SELECTED }
+        .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), radioInterfaceService.getDeviceAddress() ?: NO_DEVICE_SELECTED)
 
     val scanResult = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
 

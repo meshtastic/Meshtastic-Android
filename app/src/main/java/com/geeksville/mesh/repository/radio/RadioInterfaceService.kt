@@ -41,6 +41,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -73,6 +74,9 @@ class RadioInterfaceService @Inject constructor(
 
     private val _receivedData = MutableSharedFlow<ByteArray>()
     val receivedData: SharedFlow<ByteArray> = _receivedData
+
+    private val _currentDeviceAddressFlow = MutableStateFlow<String?>(prefs.getString(DEVADDR_KEY, null))
+    val currentDeviceAddressFlow: StateFlow<String?> = _currentDeviceAddressFlow.asStateFlow()
 
     private val logSends = false
     private val logReceives = false
@@ -301,6 +305,7 @@ class RadioInterfaceService @Inject constructor(
                     putString(DEVADDR_KEY, address)
                 }
             }
+            _currentDeviceAddressFlow.value = address
 
             // Force the service to reconnect
             startInterface()
