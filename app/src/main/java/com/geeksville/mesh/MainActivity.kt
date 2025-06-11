@@ -37,15 +37,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.systemBarsPadding
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.core.content.edit
 import androidx.core.net.toUri
@@ -157,16 +152,10 @@ class MainActivity : AppCompatActivity(), Logging {
                         AppCompatDelegate.setDefaultNightMode(theme)
                     }
                 }
-                Box(
-                    modifier = Modifier
-                        .background(MaterialTheme.colorScheme.background)
-                        .systemBarsPadding()
-                ) {
-                    MainScreen(
-                        viewModel = model,
-                        onAction = ::onMainMenuAction
-                    )
-                }
+                MainScreen(
+                    viewModel = model,
+                    onAction = ::onMainMenuAction,
+                )
             }
         }
         // Handle any intent
