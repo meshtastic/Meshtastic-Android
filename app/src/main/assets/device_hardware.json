@@ -877,9 +877,9 @@
   {
     "hwModel": 94,
     "hwModelSlug": "HELTEC_MESH_POCKET",
-    "platformioTarget": "heltec_mesh_pocket",
+    "platformioTarget": "heltec-mesh-pocket-10000",
     "architecture": "nrf52840",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "Heltec MeshPocket",
     "tags": [
@@ -888,7 +888,8 @@
     "images": [
       "heltec_mesh_pocket.svg"
     ],
-    "requiresDfu": true
+    "requiresDfu": true,
+    "hasInkHud": true
   },
   {
     "hwModel": 95,
@@ -921,5 +922,61 @@
       "wio_tracker_l1_case.svg"
     ],
     "requiresDfu": true
+  },
+  {
+    "hwModel": 97,
+    "hwModelSlug": "CROWPANEL",
+    "platformioTarget": "elecrow-adv1-43-50-70-tft",
+    "architecture": "esp32-s3",
+    "activelySupported": true,
+    "supportLevel": 1,
+    "displayName": "Crowpanel Adv 4.3/5.0/7.0 TFT",
+    "tags": [
+      "Elecrow"
+    ],
+    "requiresDfu": true,
+    "images": [
+      "crowpanel_5_0.svg",
+      "crowpanel_7_0.svg"
+    ],
+    "partitionScheme": "16MB",
+    "hasMui": true
+  },
+  {
+    "hwModel": 97,
+    "hwModelSlug": "CROWPANEL",
+    "platformioTarget": "elecrow-adv-24-28-tft",
+    "architecture": "esp32-s3",
+    "activelySupported": true,
+    "supportLevel": 1,
+    "displayName": "Crowpanel Adv 2.4/2.8 TFT",
+    "tags": [
+      "Elecrow"
+    ],
+    "requiresDfu": true,
+    "images": [
+      "crowpanel_2_4.svg",
+      "crowpanel_2_8.svg"
+    ],
+    "partitionScheme": "16MB",
+    "hasMui": true
+  },
+  {
+    "hwModel": 97,
+    "hwModelSlug": "CROWPANEL",
+    "platformioTarget": "elecrow-adv-35-tft",
+    "architecture": "esp32-s3",
+    "activelySupported": true,
+    "supportLevel": 1,
+    "displayName": "Crowpanel Adv 3.5 TFT",
+    "tags": [
+      "Elecrow"
+    ],
+    "requiresDfu": true,
+    "images": [
+      "crowpanel_3_5.svg"
+    ],
+    "partitionScheme": "16MB",
+    "hasMui": true
   }
 ]
