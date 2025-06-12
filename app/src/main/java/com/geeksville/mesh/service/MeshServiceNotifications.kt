@@ -35,6 +35,7 @@ import androidx.core.app.Person
 import androidx.core.app.RemoteInput
 import androidx.core.net.toUri
 import com.geeksville.mesh.MainActivity
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.android.notificationManager
@@ -69,6 +70,7 @@ class MeshServiceNotifications(
             createNewNodeNotificationChannel()
             createLowBatteryNotificationChannel()
             createLowBatteryRemoteNotificationChannel()
+            createClientNotificationChannel()
         }
     }
 
@@ -233,6 +235,25 @@ class MeshServiceNotifications(
         return channelId
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createClientNotificationChannel(): String {
+        val channelId = "client_notifications"
+        if (notificationManager.getNotificationChannel(channelId) == null) {
+            val channelName = context.getString(R.string.client_notification)
+            val channel = NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                lightColor = notificationLightColor
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                setShowBadge(true)
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+        return channelId
+    }
+
     private val channelId: String by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel()
@@ -282,6 +303,14 @@ class MeshServiceNotifications(
     private val lowBatteryRemoteChannelId: String by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createLowBatteryRemoteNotificationChannel()
+        } else {
+            ""
+        }
+    }
+
+    private val clientNotificationChannelId: String by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createClientNotificationChannel()
         } else {
             ""
         }
@@ -349,6 +378,16 @@ class MeshServiceNotifications(
 
     fun cancelLowBatteryNotification(node: NodeEntity) {
         notificationManager.cancel(node.num)
+    }
+
+    fun showClientNotification(notification: MeshProtos.ClientNotification) {
+        notificationManager.notify(
+            notification.toString().hashCode(), // show unique notifications
+            createClientNotification(context.getString(R.string.client_notification), notification.message)
+        )
+    }
+    fun clearClientNotification(notification: MeshProtos.ClientNotification) {
+        notificationManager.cancel(notification.toString().hashCode())
     }
 
     private val openAppIntent: PendingIntent by lazy {
@@ -582,5 +621,27 @@ class MeshServiceNotifications(
             lowBatteryNotificationBuilder = tempNotificationBuilder
             return lowBatteryNotificationBuilder.build()
         }
+    }
+
+    lateinit var clientNotificationBuilder: NotificationCompat.Builder
+
+    private fun createClientNotification(name: String, message: String? = null): Notification {
+        if (!::clientNotificationBuilder.isInitialized) {
+            clientNotificationBuilder = commonBuilder(clientNotificationChannelId)
+        }
+        with(clientNotificationBuilder) {
+            priority = NotificationCompat.PRIORITY_DEFAULT
+            setCategory(Notification.CATEGORY_ERROR)
+            setAutoCancel(true)
+            setContentTitle(name)
+            message?.let {
+                setContentText(it)
+                setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .bigText(message),
+                )
+            }
+        }
+        return clientNotificationBuilder.build()
     }
 }

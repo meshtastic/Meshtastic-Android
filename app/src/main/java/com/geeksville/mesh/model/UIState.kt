@@ -434,6 +434,18 @@ class UIViewModel @Inject constructor(
             )
         }.launchIn(viewModelScope)
 
+        radioConfigRepository.clientNotification.filterNotNull().onEach { notification ->
+            showAlert(
+                title = app.getString(R.string.client_notification),
+                message = notification.message,
+                onConfirm = {
+                    radioConfigRepository.clearClientNotification()
+                    meshServiceNotifications.clearClientNotification(notification)
+                },
+                dismissable = false
+            )
+        }.launchIn(viewModelScope)
+
         radioConfigRepository.localConfigFlow.onEach { config ->
             _localConfig.value = config
         }.launchIn(viewModelScope)
