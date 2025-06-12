@@ -35,6 +35,7 @@ buildscript {
             classpath(libs.firebase.crashlytics.gradle)
         }
 
+        classpath(libs.secrets)
         classpath(libs.protobuf.gradle.plugin)
         classpath(libs.hilt.android.gradle.plugin)
     }

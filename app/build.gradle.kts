@@ -28,6 +28,7 @@ plugins {
     alias(libs.plugins.protobuf)
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.secrets)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -194,8 +195,10 @@ dependencies {
     implementation(libs.bundles.coil)
 
     // OSM
-    implementation(libs.bundles.osm)
-    implementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
+    "fdroidImplementation"(libs.bundles.osm)
+    "fdroidImplementation"(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
+
+    "googleImplementation"(libs.bundles.maps.compose)
 
     // ZXing
     implementation(libs.zxing.android.embedded) { isTransitive = false }
@@ -250,4 +253,9 @@ repositories {
 detekt {
     config.setFrom("../config/detekt/detekt.yml")
     baseline = file("../config/detekt/detekt-baseline.xml")
+}
+
+secrets {
+    propertiesFileName = "secrets.properties"
+    defaultPropertiesFileName = "local.defaults.properties"
 }
