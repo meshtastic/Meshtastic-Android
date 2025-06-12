@@ -62,7 +62,7 @@ fun NodeStatusIcons(
                         Text(
                             stringResource(
                                 if (isConnected) {
-                                    R.string.connected_to
+                                    R.string.connected
                                 } else {
                                     R.string.disconnected
                                 }
