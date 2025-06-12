@@ -63,7 +63,6 @@ private fun PowerManager.WakeLock.safeRelease() {
     }
 }
 
-const val MAP_STYLE_ID = "map_style_id"
 
 private const val MinZoomLevel = 1.5
 private const val MaxZoomLevel = 20.0
