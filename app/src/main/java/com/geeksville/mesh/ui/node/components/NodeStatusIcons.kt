@@ -72,26 +72,21 @@ fun NodeStatusIcons(
                 },
                 state = rememberTooltipState()
             ) {
-                IconButton(
-                    onClick = {},
-                    modifier = Modifier.size(24.dp),
-                ) {
-                    if (isConnected) {
-                        @Suppress("MagicNumber")
-                        Icon(
-                            imageVector = Icons.TwoTone.CloudDone,
-                            contentDescription = stringResource(R.string.connected),
-                            modifier = Modifier.size(24.dp), // Smaller size for badge
-                            tint = Color(0xFF4CAF50)
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.TwoTone.CloudOff,
-                            contentDescription = stringResource(R.string.not_connected),
-                            modifier = Modifier.size(24.dp), // Smaller size for badge
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                    }
+                if (isConnected) {
+                    @Suppress("MagicNumber")
+                    Icon(
+                        imageVector = Icons.TwoTone.CloudDone,
+                        contentDescription = stringResource(R.string.connected),
+                        modifier = Modifier.size(24.dp), // Smaller size for badge
+                        tint = Color(0xFF4CAF50)
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.TwoTone.CloudOff,
+                        contentDescription = stringResource(R.string.not_connected),
+                        modifier = Modifier.size(24.dp), // Smaller size for badge
+                        tint = MaterialTheme.colorScheme.error
+                    )
                 }
             }
         }
