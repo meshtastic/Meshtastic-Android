@@ -654,4 +654,5 @@
     <string name="only_favorites">Vain suosikit</string>
     <string name="show_waypoints">Näytä reittipisteet</string>
     <string name="show_precision_circle">Näytä tarkkuuspiirit</string>
+    <string name="client_notification">Sovellusilmoitukset</string>
 </resources>
