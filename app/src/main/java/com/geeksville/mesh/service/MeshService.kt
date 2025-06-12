@@ -2317,14 +2317,12 @@ class MeshService : Service(), Logging {
         }
 
         override fun requestFactoryReset(requestId: Int, destNum: Int) = toRemoteExceptions {
-            clearDatabases()
             sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
                 factoryResetDevice = 1
             })
         }
 
         override fun requestNodedbReset(requestId: Int, destNum: Int) = toRemoteExceptions {
-            clearDatabases()
             sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
                 nodedbReset = 1
             })
