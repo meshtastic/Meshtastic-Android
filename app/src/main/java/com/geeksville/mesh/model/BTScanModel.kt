@@ -164,7 +164,7 @@ class BTScanModel @Inject constructor(
 
     val selectedNotNullFlow: StateFlow<String> = selectedAddressFlow
         .map { it ?: NO_DEVICE_SELECTED }
-        .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), radioInterfaceService.getDeviceAddress() ?: NO_DEVICE_SELECTED)
+        .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), selectedAddressFlow.value ?: NO_DEVICE_SELECTED)
 
     val scanResult = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
 
