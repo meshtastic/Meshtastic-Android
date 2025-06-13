@@ -1723,7 +1723,8 @@ class MeshService : Service(), Logging {
 
     private fun handleClientNotification(notification: MeshProtos.ClientNotification) {
         debug("Received clientNotification ${notification.toOneLineString()}")
-        radioConfigRepository.setErrorMessage(notification.message)
+        radioConfigRepository.setClientNotification(notification)
+        serviceNotifications.showClientNotification(notification)
         // if the future for the originating request is still in the queue, complete as unsuccessful for now
         queueResponse.remove(notification.replyId)?.complete(false)
     }
@@ -2317,14 +2318,12 @@ class MeshService : Service(), Logging {
         }
 
         override fun requestFactoryReset(requestId: Int, destNum: Int) = toRemoteExceptions {
-            clearDatabases()
             sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
                 factoryResetDevice = 1
             })
         }
 
         override fun requestNodedbReset(requestId: Int, destNum: Int) = toRemoteExceptions {
-            clearDatabases()
             sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
                 nodedbReset = 1
             })

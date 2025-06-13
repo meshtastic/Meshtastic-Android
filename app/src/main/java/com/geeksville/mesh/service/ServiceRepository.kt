@@ -18,6 +18,7 @@
 package com.geeksville.mesh.service
 
 import com.geeksville.mesh.IMeshService
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.android.Logging
 import kotlinx.coroutines.channels.Channel
@@ -32,6 +33,7 @@ import javax.inject.Singleton
 /**
  * Repository class for managing the [IMeshService] instance and connection state
  */
+@Suppress("TooManyFunctions")
 @Singleton
 class ServiceRepository @Inject constructor() : Logging {
     var meshService: IMeshService? = null
@@ -47,6 +49,18 @@ class ServiceRepository @Inject constructor() : Logging {
 
     fun setConnectionState(connectionState: MeshService.ConnectionState) {
         _connectionState.value = connectionState
+    }
+
+    private val _clientNotification = MutableStateFlow<MeshProtos.ClientNotification?>(null)
+    val clientNotification: StateFlow<MeshProtos.ClientNotification?> get() = _clientNotification
+    fun setClientNotification(notification: MeshProtos.ClientNotification?) {
+        errormsg(notification?.message.orEmpty())
+
+        _clientNotification.value = notification
+    }
+
+    fun clearClientNotification() {
+        _clientNotification.value = null
     }
 
     private val _errorMessage = MutableStateFlow<String?>(null)

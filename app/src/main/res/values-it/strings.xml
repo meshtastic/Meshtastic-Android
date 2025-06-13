@@ -645,4 +645,7 @@
     <string name="i_agree">Sono d’accordo.</string>
     <string name="should_update_firmware">Aggiornamento Firmware Consigliato.</string>
     <string name="should_update">Per usufruire delle ultime correzioni e funzionalità, aggiorna il firmware del tuo nodo.\n\nVersione stabile più recente del firmware: %1$s</string>
+    <string name="expires">Scade</string>
+    <string name="show_precision_circle"></string>
+    <string name="client_notification">Notifiche Client</string>
 </resources>
