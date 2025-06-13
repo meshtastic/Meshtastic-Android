@@ -211,9 +211,11 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
     builder.show()
 }
 
+@Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 fun MapView(
     model: UIViewModel = viewModel(),
+    navigateToNodeDetails: (Int) -> Unit,
 ) {
     var mapFilterExpanded by remember { mutableStateOf(false) }
 
@@ -343,6 +345,10 @@ fun MapView(
                     setPrecisionBits(0)
                 } else {
                     setPrecisionBits(p.precisionBits)
+                }
+                setOnLongClickListener {
+                    navigateToNodeDetails(node.num)
+                    true
                 }
             }
         }

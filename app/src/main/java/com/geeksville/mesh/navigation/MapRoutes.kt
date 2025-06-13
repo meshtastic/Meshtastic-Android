@@ -18,6 +18,7 @@
 package com.geeksville.mesh.navigation
 
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import com.geeksville.mesh.model.UIViewModel
@@ -33,6 +34,7 @@ sealed class MapRoutes {
 }
 
 fun NavGraphBuilder.mapGraph(
+    navController: NavHostController,
     uiViewModel: UIViewModel,
 ) {
     navigation<MapRoutes.MapGraph>(
@@ -41,6 +43,9 @@ fun NavGraphBuilder.mapGraph(
         composable<MapRoutes.Map> {
             MapView(
                 model = uiViewModel,
+                navigateToNodeDetails = {
+                    navController.navigate(NodesRoutes.NodeDetail(it))
+                },
             )
         }
     }

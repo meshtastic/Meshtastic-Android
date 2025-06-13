@@ -87,7 +87,7 @@ fun NavGraph(
     ) {
         contactsGraph(navController, uIViewModel)
         nodesGraph(navController, uIViewModel,)
-        mapGraph(uIViewModel)
+        mapGraph(navController, uIViewModel)
         channelsGraph(navController, uIViewModel)
         connectionsGraph(navController, uIViewModel)
         composable<Route.DebugPanel> { DebugScreen() }
