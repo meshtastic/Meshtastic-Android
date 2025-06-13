@@ -183,6 +183,7 @@ dependencies {
     implementation(libs.bundles.androidx)
     implementation(libs.bundles.ui)
     debugImplementation(libs.bundles.ui.tooling)
+    implementation(libs.bundles.adaptive)
     implementation(libs.bundles.lifecycle)
     implementation(libs.bundles.navigation)
     implementation(libs.bundles.coroutines)

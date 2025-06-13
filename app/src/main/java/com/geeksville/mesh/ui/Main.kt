@@ -19,7 +19,8 @@ package com.geeksville.mesh.ui
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -37,15 +38,15 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.PlainTooltip
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -63,11 +64,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -106,12 +105,12 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
     }
 }
 
-@Suppress("LongMethod")
+@OptIn(ExperimentalMaterial3Api::class)
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun MainScreen(
-    modifier: Modifier = Modifier,
     viewModel: UIViewModel = hiltViewModel(),
-    onAction: (MainMenuAction) -> Unit
+    onAction: (MainMenuAction) -> Unit,
 ) {
     val navController = rememberNavController()
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
@@ -158,36 +157,84 @@ fun MainScreen(
             onDismiss = { viewModel.clearTracerouteResponse() }
         )
     }
-
-    Scaffold(
-        modifier = modifier.safeDrawingPadding(),
-        topBar = {
+    val navSuiteType =
+        NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())
+    val currentDestination = navController.currentBackStackEntryAsState().value?.destination
+    val topLevelDestination = TopLevelDestination.fromNavDestination(currentDestination)
+    NavigationSuiteScaffold(
+        modifier = Modifier.safeDrawingPadding(),
+        navigationSuiteItems = {
+            TopLevelDestination.entries.forEach { destination ->
+                val isSelected = destination == topLevelDestination
+                val isConnectionsRoute = destination == TopLevelDestination.Connections
+                item(
+                    icon = {
+                        TooltipBox(
+                            positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
+                            tooltip = {
+                                PlainTooltip {
+                                    Text(
+                                        if (isConnectionsRoute) {
+                                            connectionState.getTooltipString()
+                                        } else {
+                                            stringResource(id = destination.label)
+                                        },
+                                    )
+                                }
+                            },
+                            state = rememberTooltipState()
+                        ) {
+                            TopLevelNavIcon(destination, connectionState)
+                        }
+                    },
+                    selected = isSelected,
+                    label = {
+                        if (navSuiteType != NavigationSuiteType.ShortNavigationBarCompact) {
+                            Text(stringResource(id = destination.label))
+                        }
+                    },
+                    onClick = {
+                        navController.navigate(destination.route) {
+                            // Pop up to the start destination of the graph to
+                            // avoid building up a large stack of destinations
+                            // on the back stack as users select items
+//                            destination.route
+//                            popUpTo(navController.graph.findStartDestination().id) {
+//                                saveState = true
+//                            }
+                            // Avoid multiple copies of the same destination when
+                            // reselecting the same item
+                            launchSingleTop = true
+                            // Restore state when reselecting a previously selected item
+                            restoreState = true
+                        }
+                    }
+                )
+            }
+        }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
             MainAppBar(
                 title = title,
                 isManaged = localConfig.security.isManaged,
                 navController = navController,
-            ) { action ->
-                when (action) {
-                    MainMenuAction.DEBUG -> navController.navigate(Route.DebugPanel)
-                    MainMenuAction.RADIO_CONFIG -> navController.navigate(RadioConfigRoutes.RadioConfig())
-                    MainMenuAction.QUICK_CHAT -> navController.navigate(ContactsRoutes.QuickChat)
-                    else -> onAction(action)
-                }
-            }
-        },
-        bottomBar = {
-            BottomNavigation(
-                connectionState = connectionState,
+                onAction = { action ->
+                    when (action) {
+                        MainMenuAction.DEBUG -> navController.navigate(Route.DebugPanel)
+                        MainMenuAction.RADIO_CONFIG -> navController.navigate(RadioConfigRoutes.RadioConfig())
+                        MainMenuAction.QUICK_CHAT -> navController.navigate(ContactsRoutes.QuickChat)
+                        else -> onAction(action)
+                    }
+                },
+            )
+            NavGraph(
+                uIViewModel = viewModel,
                 navController = navController,
             )
-        },
-        snackbarHost = { SnackbarHost(hostState = viewModel.snackbarState) }
-    ) { innerPadding ->
-        NavGraph(
-            modifier = Modifier.padding(innerPadding),
-            uIViewModel = viewModel,
-            navController = navController,
-        )
+        }
     }
 }
 
@@ -373,62 +420,6 @@ private fun MainMenuActions(
                     MainMenuAction.RADIO_CONFIG -> !isManaged
                     else -> true
                 },
-            )
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun BottomNavigation(
-    connectionState: MeshService.ConnectionState,
-    navController: NavController,
-) {
-    val currentDestination = navController.currentBackStackEntryAsState().value?.destination
-    val topLevelDestination = TopLevelDestination.fromNavDestination(currentDestination)
-
-    NavigationBar {
-        TopLevelDestination.entries.forEach { destination ->
-            val isSelected = destination == topLevelDestination
-            val isConnectionsRoute = destination == TopLevelDestination.Connections
-            NavigationBarItem(
-                icon = {
-                    TooltipBox(
-                        positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
-                        tooltip = {
-                            PlainTooltip {
-                                Text(
-                                    if (isConnectionsRoute) {
-                                        connectionState.getTooltipString()
-                                    } else {
-                                        stringResource(id = destination.label)
-                                    },
-                                )
-                            }
-                        },
-                        state = rememberTooltipState()
-                    ) {
-                        TopLevelNavIcon(destination, connectionState)
-                    }
-                },
-                selected = isSelected,
-                onClick = {
-                    if (!isSelected) {
-                        navController.navigate(destination.route) {
-                            // Pop up to the start destination of the graph to
-                            // avoid building up a large stack of destinations
-                            // on the back stack as users select items
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
-                            // Avoid multiple copies of the same destination when
-                            // reselecting the same item
-                            launchSingleTop = true
-                            // Restore state when reselecting a previously selected item
-                            restoreState = true
-                        }
-                    }
-                }
             )
         }
     }
