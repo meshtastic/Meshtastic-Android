@@ -17,10 +17,25 @@
 
 package com.geeksville.mesh.ui.map
 
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import com.geeksville.mesh.model.UIViewModel
+import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.rememberCameraPositionState
 
 @Composable
 fun MapView(
     uiViewModel: UIViewModel,
-) { }
+) {
+    // Gold Bluffs Beach
+    val latLng = LatLng(41.39705659162212, -124.06814862271001)
+    val cameraPositionState =
+        rememberCameraPositionState { position = CameraPosition.fromLatLngZoom(latLng, 10f) }
+    GoogleMap(
+        modifier = Modifier.fillMaxSize(),
+        cameraPositionState = cameraPositionState
+    )
+}
