@@ -26,3 +26,6 @@ keystore.properties
 
 # Kotlin compiler
 .kotlin
+
+#project secrets
+/secrets.properties
