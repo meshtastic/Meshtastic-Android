@@ -276,6 +276,7 @@
     <string name="type">Тип</string>
     <string name="hide_password">Скриване на паролата</string>
     <string name="show_password">Показване на паролата</string>
+    <string name="details">Подробности</string>
     <string name="led_state">Състояние на LED</string>
     <string name="red">Червен</string>
     <string name="green">Зелен</string>
