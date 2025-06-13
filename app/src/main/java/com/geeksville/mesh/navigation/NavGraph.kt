@@ -31,7 +31,6 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.debug.DebugScreen
-import com.geeksville.mesh.ui.map.MapView
 import kotlinx.serialization.Serializable
 
 enum class AdminRoute(@StringRes val title: Int) {
@@ -47,10 +46,6 @@ const val DEEP_LINK_BASE_URI = "meshtastic://meshtastic"
 sealed interface Graph : Route
 @Serializable
 sealed interface Route {
-
-    @Serializable
-    data object Map : Route
-
     @Serializable
     data object DebugPanel : Route
 }
@@ -92,7 +87,7 @@ fun NavGraph(
     ) {
         contactsGraph(navController, uIViewModel)
         nodesGraph(navController, uIViewModel,)
-        composable<Route.Map> { MapView(uIViewModel) }
+        mapGraph(navController, uIViewModel)
         channelsGraph(navController, uIViewModel)
         connectionsGraph(navController, uIViewModel)
         composable<Route.DebugPanel> { DebugScreen() }
