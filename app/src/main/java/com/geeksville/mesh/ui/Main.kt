@@ -43,7 +43,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -64,7 +67,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
@@ -77,6 +79,7 @@ import com.geeksville.mesh.navigation.ConnectionsRoutes
 import com.geeksville.mesh.navigation.ContactsRoutes
 import com.geeksville.mesh.navigation.NavGraph
 import com.geeksville.mesh.navigation.NodesRoutes
+import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.showLongNameTitle
 import com.geeksville.mesh.service.MeshService
@@ -103,7 +106,7 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun MainScreen(
     viewModel: UIViewModel = hiltViewModel(),
@@ -154,10 +157,12 @@ fun MainScreen(
             onDismiss = { viewModel.clearTracerouteResponse() }
         )
     }
-
+    val navSuiteType =
+        NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
     val topLevelDestination = TopLevelDestination.fromNavDestination(currentDestination)
     NavigationSuiteScaffold(
+        modifier = Modifier.safeDrawingPadding(),
         navigationSuiteItems = {
             TopLevelDestination.entries.forEach { destination ->
                 val isSelected = destination == topLevelDestination
@@ -183,15 +188,20 @@ fun MainScreen(
                         }
                     },
                     selected = isSelected,
-                    label = { Text(stringResource(id = destination.label)) },
+                    label = {
+                        if (navSuiteType != NavigationSuiteType.ShortNavigationBarCompact) {
+                            Text(stringResource(id = destination.label))
+                        }
+                    },
                     onClick = {
                         navController.navigate(destination.route) {
                             // Pop up to the start destination of the graph to
                             // avoid building up a large stack of destinations
                             // on the back stack as users select items
-                            popUpTo(navController.graph.findStartDestination().id) {
-                                saveState = true
-                            }
+//                            destination.route
+//                            popUpTo(navController.graph.findStartDestination().id) {
+//                                saveState = true
+//                            }
                             // Avoid multiple copies of the same destination when
                             // reselecting the same item
                             launchSingleTop = true
@@ -206,13 +216,19 @@ fun MainScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .safeDrawingPadding()
         ) {
             MainAppBar(
                 title = title,
                 isManaged = localConfig.security.isManaged,
                 navController = navController,
-                onAction = onAction,
+                onAction = { action ->
+                    when (action) {
+                        MainMenuAction.DEBUG -> navController.navigate(Route.DebugPanel)
+                        MainMenuAction.RADIO_CONFIG -> navController.navigate(RadioConfigRoutes.RadioConfig())
+                        MainMenuAction.QUICK_CHAT -> navController.navigate(ContactsRoutes.QuickChat)
+                        else -> onAction(action)
+                    }
+                },
             )
             NavGraph(
                 uIViewModel = viewModel,
