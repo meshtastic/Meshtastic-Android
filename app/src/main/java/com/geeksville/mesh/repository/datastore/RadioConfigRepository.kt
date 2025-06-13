@@ -25,6 +25,7 @@ import com.geeksville.mesh.ConfigProtos.Config
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.DeviceMetadata
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
@@ -85,6 +86,7 @@ class RadioConfigRepository @Inject constructor(
     suspend fun installNodeDB(mi: MyNodeEntity, nodes: List<NodeEntity>) {
         nodeDB.installNodeDB(mi, nodes)
     }
+
     suspend fun insertMetadata(fromNum: Int, metadata: DeviceMetadata) {
         nodeDB.insertMetadata(MetadataEntity(fromNum, metadata))
     }
@@ -185,6 +187,16 @@ class RadioConfigRepository @Inject constructor(
                 fixedPosition = node.position
             }
         }
+    }
+
+    val clientNotification = serviceRepository.clientNotification
+
+    fun setClientNotification(notification: MeshProtos.ClientNotification?) {
+        serviceRepository.setClientNotification(notification)
+    }
+
+    fun clearClientNotification() {
+        serviceRepository.clearClientNotification()
     }
 
     val errorMessage: StateFlow<String?> get() = serviceRepository.errorMessage
