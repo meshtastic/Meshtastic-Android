@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -57,6 +58,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
@@ -64,6 +71,7 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -370,6 +378,7 @@ private fun QuickChatRow(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun TextInput(
     enabled: Boolean,
@@ -389,11 +398,36 @@ private fun TextInput(
         },
         modifier = Modifier
             .fillMaxWidth()
-            .onFocusEvent { isFocused = it.isFocused },
+            .onFocusEvent { isFocused = it.isFocused }
+            .onKeyEvent { event ->
+                if (event.type == KeyEventType.KeyDown &&
+                    event.key == Key.Enter &&
+                    event.isAltPressed
+                ) {
+                    val str = message.value.text.trim()
+                    if (str.isNotEmpty()) {
+                        onClick(str)
+                        message.value = TextFieldValue("")
+                    }
+                    true // Consume the event
+                } else {
+                    false // Do not consume other key events
+                }
+            },
         enabled = enabled,
         placeholder = { Text(stringResource(id = R.string.send_text)) },
         keyboardOptions = KeyboardOptions(
             capitalization = KeyboardCapitalization.Sentences,
+            imeAction = ImeAction.Send
+        ),
+        keyboardActions = KeyboardActions(
+            onSend = {
+                val str = message.value.text.trim()
+                if (str.isNotEmpty()) {
+                    onClick(str)
+                    message.value = TextFieldValue("")
+                }
+            }
         ),
         maxLines = 3,
         shape = RoundedCornerShape(24.dp),
@@ -402,9 +436,9 @@ private fun TextInput(
                 onClick = {
                     val str = message.value.text.trim()
                     if (str.isNotEmpty()) {
-                        focusManager.clearFocus()
                         onClick(str)
                         message.value = TextFieldValue("")
+                        focusManager.clearFocus()
                     }
                 },
                 modifier = Modifier.size(48.dp),
