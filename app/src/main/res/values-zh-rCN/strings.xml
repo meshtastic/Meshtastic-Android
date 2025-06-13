@@ -24,6 +24,8 @@
     <string name="node_filter_placeholder">筛选器csvfganw</string>
     <string name="desc_node_filter_clear">清除筛选</string>
     <string name="node_filter_include_unknown">包括未知内容</string>
+    <string name="node_filter_only_online">隐藏离线节点</string>
+    <string name="node_filter_only_direct">仅显示直连节点</string>
     <string name="node_filter_show_details">显示详细信息</string>
     <string name="node_sort_button">节点排序选项</string>
     <string name="node_sort_alpha">字母顺序</string>
@@ -646,4 +648,12 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="i_agree">我同意。</string>
     <string name="should_update_firmware">推荐固件更新。</string>
     <string name="should_update">为了获得最新的修复和功能，请更新您的节点固件。\n\n最新稳定固件版本：%1$s</string>
+    <string name="expires">有效期</string>
+    <string name="time">时间</string>
+    <string name="date">日期</string>
+    <string name="map_filter">地图过滤器\n</string>
+    <string name="only_favorites">仅收藏的</string>
+    <string name="show_waypoints">显示航点</string>
+    <string name="show_precision_circle">显示精度圈</string>
+    <string name="client_notification">客户端通知</string>
 </resources>

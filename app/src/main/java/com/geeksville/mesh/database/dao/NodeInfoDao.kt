@@ -69,7 +69,9 @@ interface NodeInfoDao {
     WHERE (:includeUnknown = 1 OR short_name IS NOT NULL)
         AND (:filter = ''
             OR (long_name LIKE '%' || :filter || '%'
-            OR short_name LIKE '%' || :filter || '%'))
+            OR short_name LIKE '%' || :filter || '%'
+            OR printf('!%08x', CASE WHEN num < 0 THEN num + 4294967296 ELSE num END) LIKE '%' || :filter || '%'
+            OR CAST(CASE WHEN num < 0 THEN num + 4294967296 ELSE num END AS TEXT) LIKE '%' || :filter || '%'))
         AND (:lastHeardMin = -1 OR last_heard >= :lastHeardMin)
         AND (:hopsAwayMax = -1 OR (hops_away <= :hopsAwayMax AND hops_away >= 0) OR num = (SELECT myNodeNum FROM my_node LIMIT 1))
     ORDER BY CASE
