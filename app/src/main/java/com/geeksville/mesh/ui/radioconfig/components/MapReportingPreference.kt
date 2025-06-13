@@ -42,14 +42,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.common.components.EditTextPreference
-import com.geeksville.mesh.ui.common.components.PositionPrecisionMax
-import com.geeksville.mesh.ui.common.components.PositionPrecisionMin
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.common.components.precisionBitsToMeters
 import com.geeksville.mesh.util.DistanceUnit
 import com.geeksville.mesh.util.toDistanceString
 import kotlin.math.roundToInt
 
+private const val PositionPrecisionMin = 12
+private const val PositionPrecisionMax = 15
 @Suppress("LongMethod")
 @Composable
 fun MapReportingPreference(

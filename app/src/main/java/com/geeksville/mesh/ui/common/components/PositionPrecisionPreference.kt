@@ -39,9 +39,9 @@ import kotlin.math.roundToInt
 private const val PositionEnabled = 32
 private const val PositionDisabled = 0
 
-const val PositionPrecisionMin = 12
-const val PositionPrecisionMax = 15
-const val PositionPrecisionDefault = 14
+private const val PositionPrecisionMin = 10
+private const val PositionPrecisionMax = 19
+private const val PositionPrecisionDefault = 13
 
 @Suppress("MagicNumber")
 fun precisionBitsToMeters(bits: Int): Double = 23905787.925008 * 0.5.pow(bits.toDouble())
