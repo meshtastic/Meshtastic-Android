@@ -77,6 +77,7 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.ChannelsRoutes
 import com.geeksville.mesh.navigation.ConnectionsRoutes
 import com.geeksville.mesh.navigation.ContactsRoutes
+import com.geeksville.mesh.navigation.MapRoutes
 import com.geeksville.mesh.navigation.NavGraph
 import com.geeksville.mesh.navigation.NodesRoutes
 import com.geeksville.mesh.navigation.RadioConfigRoutes
@@ -92,7 +93,7 @@ import com.geeksville.mesh.ui.debug.DebugMenuActions
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
     Contacts(R.string.contacts, Icons.AutoMirrored.TwoTone.Chat, ContactsRoutes.Contacts),
     Nodes(R.string.nodes, Icons.TwoTone.People, NodesRoutes.Nodes),
-    Map(R.string.map, Icons.TwoTone.Map, Route.Map),
+    Map(R.string.map, Icons.TwoTone.Map, MapRoutes.Map),
     Channels(R.string.channels, Icons.TwoTone.Contactless, ChannelsRoutes.Channels),
     Connections(R.string.connections, Icons.TwoTone.CloudOff, ConnectionsRoutes.Connections),
     ;
