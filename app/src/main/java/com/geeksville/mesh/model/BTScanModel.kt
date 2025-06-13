@@ -49,6 +49,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
@@ -164,7 +165,11 @@ class BTScanModel @Inject constructor(
 
     val selectedNotNullFlow: StateFlow<String> = selectedAddressFlow
         .map { it ?: NO_DEVICE_SELECTED }
-        .stateIn(viewModelScope, kotlinx.coroutines.flow.SharingStarted.WhileSubscribed(5000), selectedAddressFlow.value ?: NO_DEVICE_SELECTED)
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(SHARING_STARTED_TIMEOUT_MS),
+            selectedAddressFlow.value ?: NO_DEVICE_SELECTED
+        )
 
     val scanResult = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
 
@@ -288,3 +293,4 @@ class BTScanModel @Inject constructor(
 }
 
 const val NO_DEVICE_SELECTED = "n"
+private const val SHARING_STARTED_TIMEOUT_MS = 5000L
