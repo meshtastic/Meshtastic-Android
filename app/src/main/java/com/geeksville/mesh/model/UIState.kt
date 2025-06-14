@@ -272,7 +272,10 @@ class UIViewModel @Inject constructor(
             .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val nodeFilterText = MutableStateFlow("")
-    private val nodeSortOption = MutableStateFlow(NodeSortOption.VIA_FAVORITE)
+    private val nodeSortOption = MutableStateFlow(
+        NodeSortOption.entries.find { it.name == preferences.getString("node-sort-option", null) }
+            ?: NodeSortOption.VIA_FAVORITE
+    )
     private val includeUnknown = MutableStateFlow(preferences.getBoolean("include-unknown", false))
     private val showDetails = MutableStateFlow(preferences.getBoolean("show-details", false))
     private val onlyOnline = MutableStateFlow(preferences.getBoolean("only-online", false))
@@ -285,6 +288,7 @@ class UIViewModel @Inject constructor(
 
     fun setSortOption(sort: NodeSortOption) {
         nodeSortOption.value = sort
+        preferences.edit { putString("node-sort-option", sort.name) }
     }
 
     fun toggleShowDetails() {
