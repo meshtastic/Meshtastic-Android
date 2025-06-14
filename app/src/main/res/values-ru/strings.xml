@@ -600,5 +600,7 @@
     <string name="heading">Курс</string>
     <string name="sats">Количество спутников</string>
     <string name="alt">Уровень моря</string>
+    <string name="primary"></string>
+    <string name="host_metrics_log"></string>
     <string name="map">Карта</string>
 </resources>
