@@ -273,8 +273,9 @@ class UIViewModel @Inject constructor(
 
     private val nodeFilterText = MutableStateFlow("")
     private val nodeSortOption = MutableStateFlow(
-        NodeSortOption.entries.find { it.name == preferences.getString("node-sort-option", null) }
-            ?: NodeSortOption.VIA_FAVORITE
+        NodeSortOption.entries.getOrElse(
+            preferences.getInt("node-sort-option", NodeSortOption.VIA_FAVORITE.ordinal)
+        ) { NodeSortOption.VIA_FAVORITE }
     )
     private val includeUnknown = MutableStateFlow(preferences.getBoolean("include-unknown", false))
     private val showDetails = MutableStateFlow(preferences.getBoolean("show-details", false))
@@ -288,7 +289,7 @@ class UIViewModel @Inject constructor(
 
     fun setSortOption(sort: NodeSortOption) {
         nodeSortOption.value = sort
-        preferences.edit { putString("node-sort-option", sort.name) }
+        preferences.edit { putInt("node-sort-option", sort.ordinal) }
     }
 
     fun toggleShowDetails() {
