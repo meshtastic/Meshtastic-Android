@@ -5,7 +5,6 @@ agp = "8.10.1"
 appcompat = "1.7.1"
 appintro = "6.3.1"
 awesome-app-rating = "2.8.0"
-cardview = "1.0.0"
 coil = "3.2.0"
 compose-bom = "2025.06.00"
 constraintlayout = "2.2.1"
@@ -45,7 +44,6 @@ retrofit = "3.0.0"
 room = "2.7.1"
 streamsupport-minifuture = "1.7.4"
 usb-serial-android = "3.9.0"
-viewpager2 = "1.1.0"
 work-runtime-ktx = "2.10.1"
 zxing-android-embedded = "4.3.0"
 zxing-core = "3.5.3"
@@ -64,7 +62,6 @@ appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "a
 appcompat-resources = { group = "androidx.appcompat", name = "appcompat-resources", version.ref = "appcompat" }
 appintro = { group = "com.github.AppIntro", name = "AppIntro", version.ref = "appintro" }
 awesome-app-rating = { group = "com.suddenh4x.ratingdialog", name = "awesome-app-rating", version.ref = "awesome-app-rating" }
-cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardview" }
 coil = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network-core = { group = "io.coil-kt.coil3", name = "coil-network-core", version.ref = "coil" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
@@ -123,7 +120,6 @@ org-eclipse-paho-client-mqttv3 = { group = "org.eclipse.paho", name = "org.eclip
 osmbonuspack = { group = "com.github.MKergall", name = "osmbonuspack", version.ref = "osmbonuspack" }
 osmdroid-android = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid-android" }
 osmdroid-geopackage = { group = "org.osmdroid", name = "osmdroid-geopackage", version.ref = "osmdroid-android" }
-osmdroid-wms = { group = "org.osmdroid", name = "osmdroid-wms", version.ref = "osmdroid-android" }
 protobuf-gradle-plugin = { group = "com.google.protobuf", name = "protobuf-gradle-plugin", version.ref = "protobuf-gradle-plugin" }
 protobuf-kotlin = { group = "com.google.protobuf", name = "protobuf-kotlin", version.ref = "protobuf-kotlin" }
 protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf-kotlin" }
@@ -135,17 +131,16 @@ room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "
 room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
 streamsupport-minifuture = { group = "net.sourceforge.streamsupport", name = "streamsupport-minifuture", version.ref = "streamsupport-minifuture" }
 usb-serial-android = { group = "com.github.mik3y", name = "usb-serial-for-android", version.ref = "usb-serial-android" }
-viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "viewpager2" }
 work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work-runtime-ktx" }
 zxing-android-embedded = { group = "com.journeyapps", name = "zxing-android-embedded", version.ref = "zxing-android-embedded" }
 zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing-core" }
 
 [bundles]
 # Core AndroidX
-androidx = ["core-ktx", "appcompat", "appcompat-resources", "cardview", "fragment-ktx", "actvity-ktx", "fragment-compose", "activity-compose"]
+androidx = ["core-ktx", "appcompat", "appcompat-resources", "fragment-ktx", "actvity-ktx", "fragment-compose", "activity-compose"]
 
 # UI
-ui = ["material", "constraintlayout", "viewpager2", "compose-material3", "compose-material-icons-extended", "compose-ui-tooling-preview", "compose-runtime-livedata"]
+ui = ["material", "constraintlayout", "compose-material3", "compose-material-icons-extended", "compose-ui-tooling-preview", "compose-runtime-livedata"]
 adaptive = ["adaptive", "adaptive-layout", "adaptive-navigation", "adaptive-navigation-android", "adaptive-navigation-suite"]
 ui-tooling = ["compose-ui-tooling"] #Separate for debugImplementation
 
@@ -174,7 +169,7 @@ testing-navigation = ["navigation-testing"]
 testing-room = ["room-testing"]
 
 # OSM
-osm = ["osmdroid-android", "osmdroid-wms", "osmbonuspack", "mgrs"]
+osm = ["osmdroid-android", "osmbonuspack", "mgrs"]
 
 # Firebase
 firebase = ["firebase-analytics", "firebase-crashlytics"]
