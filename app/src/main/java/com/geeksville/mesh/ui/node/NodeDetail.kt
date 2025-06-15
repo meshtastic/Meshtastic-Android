@@ -61,6 +61,7 @@ import androidx.compose.material.icons.filled.Scale
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SignalCellularAlt
+import androidx.compose.material.icons.filled.SocialDistance
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarBorder
@@ -111,6 +112,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ErrorResult
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
+import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
@@ -141,6 +143,7 @@ import com.geeksville.mesh.util.UnitConversions.toTempString
 import com.geeksville.mesh.util.formatAgo
 import com.geeksville.mesh.util.formatUptime
 import com.geeksville.mesh.util.thenIf
+import com.geeksville.mesh.util.toDistanceString
 import com.geeksville.mesh.util.toSpeedString
 import kotlinx.coroutines.delay
 import kotlin.time.Duration
@@ -210,6 +213,7 @@ fun NodeDetailScreen(
         }
         NodeDetailList(
             node = node,
+            ourNode = uiViewModel.ourNodeInfo.value,
             metricsState = state,
             onAction = { action ->
                 when (action) {
@@ -251,6 +255,7 @@ fun NodeDetailScreen(
 private fun NodeDetailList(
     modifier: Modifier = Modifier,
     node: Node,
+    ourNode: Node?,
     metricsState: MetricsState,
     onAction: (Any) -> Unit = {},
     metricsAvailability: BooleanArray,
@@ -268,7 +273,7 @@ private fun NodeDetailList(
             }
         }
         PreferenceCategory(stringResource(R.string.details)) {
-            NodeDetailsContent(node)
+            NodeDetailsContent(node, ourNode, metricsState.displayUnits)
         }
 
         DeviceActions(
@@ -577,6 +582,8 @@ fun DeviceHardwareImage(
 @Composable
 private fun NodeDetailsContent(
     node: Node,
+    ourNode: Node?,
+    displayUnits: DisplayUnits,
 ) {
     if (node.mismatchKey) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -649,6 +656,19 @@ private fun NodeDetailsContent(
         icon = Icons.Default.History,
         value = formatAgo(node.lastHeard)
     )
+    val distance = ourNode?.distance(node)?.toDistanceString(displayUnits)
+    if (node != ourNode && distance != null) {
+        NodeDetailRow(
+            label = stringResource(R.string.node_sort_distance),
+            icon = Icons.Default.SocialDistance,
+            value = distance
+        )
+        NodeDetailRow(
+            label = stringResource(R.string.last_position_update),
+            icon = Icons.Default.LocationOn,
+            value = formatAgo(node.position.time)
+        )
+    }
 }
 
 @Composable
@@ -989,11 +1009,13 @@ fun NodeActionSwitch(
 @Composable
 private fun NodeDetailsPreview(
     @PreviewParameter(NodePreviewParameterProvider::class)
-    node: Node
+    node: Node,
+    ourNode: Node,
 ) {
     AppTheme {
         NodeDetailList(
             node = node,
+            ourNode = ourNode,
             metricsState = MetricsState.Empty,
             metricsAvailability = BooleanArray(LogsType.entries.size) { false },
         )
