@@ -680,4 +680,8 @@
     <string name="show_precision_circle">Show Precision Circles</string>
     <string name="client_notification">Client Notification</string>
     <string name="unknown">Unknown</string>
+    <string name="map_type_normal">Normal</string>
+    <string name="map_type_satellite">Satellite</string>
+    <string name="map_type_terrain">Terrain</string>
+    <string name="map_type_hybrid">Hybrid</string>
 </resources>
