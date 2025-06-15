@@ -16,13 +16,18 @@
  */
 
 package com.geeksville.mesh.ui.common.theme
+
 import androidx.compose.ui.graphics.Color
 
 val MeshtasticGreen = Color(0xFF67EA94)
 val MeshtasticAlt = Color(0xFF2C2D3C)
+
+val Yellow = Color(red = 255, green = 230, blue = 0)
+val Orange = Color(red = 247, green = 147, blue = 26)
+val Green = Color(0xFF30C047)
+
 val HyperlinkBlue = Color(0xFF43C3B0)
 val InfantryBlue = Color(red = 75, green = 119, blue = 190)
-val Orange = Color(red = 247, green = 147, blue = 26)
 
 val primaryLight = Color(0xFF306A42)
 val onPrimaryLight = Color(0xFFFFFFFF)
