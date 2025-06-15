@@ -40,8 +40,11 @@ class FirmwareReleaseLocalDataSource @Inject constructor(
         releaseType: FirmwareReleaseType
     ) =
         withContext(Dispatchers.IO) {
-            firmwareReleases.forEach { firmwareRelease ->
-                firmwareReleaseDao.insert(firmwareRelease.asEntity(releaseType))
+            if (firmwareReleases.isNotEmpty()) {
+                firmwareReleaseDao.deleteAll()
+                firmwareReleases.forEach { firmwareRelease ->
+                    firmwareReleaseDao.insert(firmwareRelease.asEntity(releaseType))
+                }
             }
         }
 

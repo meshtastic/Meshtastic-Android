@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,9 +31,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.automirrored.outlined.VolumeMute
@@ -75,6 +75,7 @@ import androidx.compose.material.icons.twotone.Verified
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -113,7 +114,9 @@ import coil3.request.SuccessResult
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
+import com.geeksville.mesh.database.entity.asDeviceVersion
 import com.geeksville.mesh.model.DeviceHardware
+import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.Node
@@ -126,6 +129,9 @@ import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.common.theme.AppTheme
+import com.geeksville.mesh.ui.common.theme.Green
+import com.geeksville.mesh.ui.common.theme.Orange
+import com.geeksville.mesh.ui.common.theme.Yellow
 import com.geeksville.mesh.ui.node.components.NodeActionDialogs
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.radioconfig.NavCard
@@ -145,11 +151,23 @@ private enum class LogsType(
     val icon: ImageVector,
     val route: Route
 ) {
-    DEVICE(R.string.device_metrics_log, Icons.Default.ChargingStation, NodeDetailRoutes.DeviceMetrics),
+    DEVICE(
+        R.string.device_metrics_log,
+        Icons.Default.ChargingStation,
+        NodeDetailRoutes.DeviceMetrics
+    ),
     NODE_MAP(R.string.node_map, Icons.Default.Map, NodeDetailRoutes.NodeMap),
     POSITIONS(R.string.position_log, Icons.Default.LocationOn, NodeDetailRoutes.PositionLog),
-    ENVIRONMENT(R.string.env_metrics_log, Icons.Default.Thermostat, NodeDetailRoutes.EnvironmentMetrics),
-    SIGNAL(R.string.sig_metrics_log, Icons.Default.SignalCellularAlt, NodeDetailRoutes.SignalMetrics),
+    ENVIRONMENT(
+        R.string.env_metrics_log,
+        Icons.Default.Thermostat,
+        NodeDetailRoutes.EnvironmentMetrics
+    ),
+    SIGNAL(
+        R.string.sig_metrics_log,
+        Icons.Default.SignalCellularAlt,
+        NodeDetailRoutes.SignalMetrics
+    ),
     POWER(R.string.power_metrics_log, Icons.Default.Power, NodeDetailRoutes.PowerMetrics),
     TRACEROUTE(R.string.traceroute_log, Icons.Default.Route, NodeDetailRoutes.TracerouteLog),
     HOST(R.string.host_metrics_log, Icons.Default.Memory, NodeDetailRoutes.HostMetricsLog),
@@ -238,78 +256,42 @@ private fun NodeDetailList(
     metricsAvailability: BooleanArray,
     onShared: () -> Unit = {}
 ) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 16.dp),
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
+            .verticalScroll(rememberScrollState()),
     ) {
         if (metricsState.deviceHardware != null) {
-            item {
-                PreferenceCategory(stringResource(R.string.device)) {
-                    DeviceDetailsContent(metricsState)
-                }
+            PreferenceCategory(stringResource(R.string.device)) {
+                DeviceDetailsContent(metricsState)
             }
         }
-        item {
-            PreferenceCategory(stringResource(R.string.details)) {
-                NodeDetailsContent(node)
-            }
-        }
-        node.metadata?.firmwareVersion?.let { firmwareVersion ->
-            item {
-                PreferenceCategory(stringResource(R.string.firmware)) {
-                    val latestStableFirmware = metricsState.latestStableFirmware
-                    val latestAlphaFirmware = metricsState.latestAlphaFirmware
-                    NodeDetailRow(
-                        label = "Installed",
-                        icon = Icons.Default.Memory,
-                        value = firmwareVersion.substringBeforeLast(".")
-                    )
-                    latestStableFirmware?.let { stable ->
-                        NodeDetailRow(
-                            label = "Latest stable",
-                            icon = Icons.Default.Memory,
-                            value = stable.id.substringBeforeLast(".").replace("v", "")
-                        )
-                    }
-                    latestAlphaFirmware?.let { alpha ->
-                        NodeDetailRow(
-                            label = "Latest alpha",
-                            icon = Icons.Default.Memory,
-                            value = alpha.id.substringBeforeLast(".").replace("v", "")
-                        )
-                    }
-                }
-            }
+        PreferenceCategory(stringResource(R.string.details)) {
+            NodeDetailsContent(node)
         }
 
-        item {
-            DeviceActions(
-                isLocal = metricsState.isLocal,
-                node = node,
-                onShared = onShared,
-                onAction = onAction
-            )
-        }
+        DeviceActions(
+            isLocal = metricsState.isLocal,
+            node = node,
+            onShared = onShared,
+            onAction = onAction
+        )
 
         if (node.hasEnvironmentMetrics) {
-            item {
-                PreferenceCategory(stringResource(R.string.environment))
-                EnvironmentMetrics(node, metricsState.isFahrenheit)
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+            PreferenceCategory(stringResource(R.string.environment))
+            EnvironmentMetrics(node, metricsState.isFahrenheit)
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
         if (node.hasPowerMetrics) {
-            item {
-                PreferenceCategory(stringResource(R.string.power))
-                PowerMetrics(node)
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+            PreferenceCategory(stringResource(R.string.power))
+            PowerMetrics(node)
+            Spacer(modifier = Modifier.height(8.dp))
         }
 
         /* Metric Logs Navigation */
-        item {
-            PreferenceCategory(stringResource(id = R.string.logs))
+        PreferenceCategory(stringResource(id = R.string.logs)) {
             for (type in LogsType.entries) {
                 NavCard(
                     title = stringResource(type.titleRes),
@@ -322,14 +304,61 @@ private fun NodeDetailList(
         }
 
         if (!metricsState.isManaged) {
-            item {
-                PreferenceCategory(stringResource(id = R.string.administration))
+            PreferenceCategory(stringResource(id = R.string.administration)) {
+                NodeActionButton(
+                    title = stringResource(id = R.string.request_metadata),
+                    icon = Icons.Default.Memory,
+                    enabled = true,
+                    onClick = { onAction(ServiceAction.GetDeviceMetadata(node.num)) }
+                )
                 NavCard(
                     title = stringResource(id = R.string.remote_admin),
                     icon = Icons.Default.Settings,
-                    enabled = true
+                    enabled = metricsState.isLocal || node.metadata != null
                 ) {
                     onAction(RadioConfigRoutes.RadioConfig(node.num))
+                }
+            }
+
+            node.metadata?.firmwareVersion?.let { firmwareVersion ->
+                val deviceVersion = DeviceVersion(firmwareVersion.substringBeforeLast("."))
+                PreferenceCategory(stringResource(R.string.firmware)) {
+                    val latestStableFirmware = metricsState.latestStableFirmware
+                    val latestAlphaFirmware = metricsState.latestAlphaFirmware
+                    NodeDetailRow(
+                        label = "Installed",
+                        icon = Icons.Default.Memory,
+                        value = firmwareVersion.substringBeforeLast("."),
+                        iconTint = if (deviceVersion < latestStableFirmware.asDeviceVersion()) {
+                            MaterialTheme.colorScheme.error
+                        } else if (deviceVersion == latestStableFirmware.asDeviceVersion()) {
+                            Green
+                        } else if (deviceVersion in
+                            latestStableFirmware.asDeviceVersion()..latestAlphaFirmware.asDeviceVersion()
+                        ) {
+                            Yellow
+                        } else if (deviceVersion >= latestAlphaFirmware.asDeviceVersion()) {
+                            Orange
+                        } else {
+                            MaterialTheme.colorScheme.onSurface
+                        }
+                    )
+
+                    HorizontalDivider()
+
+                    NodeDetailRow(
+                        label = "Latest stable",
+                        icon = Icons.Default.Memory,
+                        value = latestStableFirmware.id.substringBeforeLast(".").replace("v", ""),
+                        iconTint = Green
+                    )
+
+                    NodeDetailRow(
+                        label = "Latest alpha",
+                        icon = Icons.Default.Memory,
+                        value = latestAlphaFirmware.id.substringBeforeLast(".").replace("v", ""),
+                        iconTint = Yellow
+                    )
                 }
             }
         }
@@ -392,86 +421,81 @@ private fun DeviceActions(
         },
         onAction = onAction,
     )
-    PreferenceCategory(text = stringResource(R.string.actions))
-    NodeActionButton(
-        title = stringResource(id = R.string.share_contact),
-        icon = Icons.Default.Share,
-        enabled = true,
-        onClick = onShared
-    )
+    PreferenceCategory(text = stringResource(R.string.actions)) {
+        NodeActionButton(
+            title = stringResource(id = R.string.share_contact),
+            icon = Icons.Default.Share,
+            enabled = true,
+            onClick = onShared
+        )
 
-    if (!isLocal) {
-        if (!isUnmessageable) {
+        if (!isLocal) {
+            if (!isUnmessageable) {
+                NodeActionButton(
+                    title = stringResource(id = R.string.direct_message),
+                    icon = Icons.AutoMirrored.TwoTone.Message,
+                    enabled = true,
+                    onClick = {
+                        onAction(NodeMenuAction.DirectMessage(node))
+                    }
+                )
+            }
             NodeActionButton(
-                title = stringResource(id = R.string.direct_message),
-                icon = Icons.AutoMirrored.TwoTone.Message,
+                title = stringResource(id = R.string.exchange_position),
+                icon = Icons.Default.LocationOn,
                 enabled = true,
+                onClick = { onAction(NodeMenuAction.RequestPosition(node)) }
+            )
+            NodeActionButton(
+                title = stringResource(id = R.string.exchange_userinfo),
+                icon = Icons.Default.Person,
+                enabled = true,
+                onClick = { onAction(NodeMenuAction.RequestUserInfo(node)) }
+            )
+
+            NodeActionButton(
+                title = stringResource(id = R.string.traceroute),
+                icon = Icons.Default.Route,
+                enabled = true,
+                coolDownTime = 30.seconds,
                 onClick = {
-                    onAction(NodeMenuAction.DirectMessage(node))
+                    onAction(NodeMenuAction.TraceRoute(node))
                 }
             )
+            NodeActionSwitch(
+                title = stringResource(R.string.favorite),
+                icon = if (node.isFavorite) {
+                    Icons.Default.Star
+                } else {
+                    Icons.Default.StarBorder
+                },
+                iconTint = if (node.isFavorite) {
+                    Color.Yellow
+                } else {
+                    LocalContentColor.current
+                },
+                enabled = true,
+                checked = node.isFavorite,
+                onClick = { displayFavoriteDialog = true }
+            )
+            NodeActionSwitch(
+                title = stringResource(R.string.ignore),
+                icon = if (node.isIgnored) {
+                    Icons.AutoMirrored.Outlined.VolumeMute
+                } else {
+                    Icons.AutoMirrored.Default.VolumeUp
+                },
+                enabled = true,
+                checked = node.isIgnored,
+                onClick = { displayIgnoreDialog = true }
+            )
+            NodeActionButton(
+                title = stringResource(id = R.string.remove),
+                icon = Icons.Default.Delete,
+                enabled = true,
+                onClick = { displayRemoveDialog = true }
+            )
         }
-        NodeActionButton(
-            title = stringResource(id = R.string.request_metadata),
-            icon = Icons.Default.Memory,
-            enabled = true,
-            onClick = { onAction(ServiceAction.GetDeviceMetadata(node.num)) }
-        )
-        NodeActionButton(
-            title = stringResource(id = R.string.exchange_position),
-            icon = Icons.Default.LocationOn,
-            enabled = true,
-            onClick = { onAction(NodeMenuAction.RequestPosition(node)) }
-        )
-        NodeActionButton(
-            title = stringResource(id = R.string.exchange_userinfo),
-            icon = Icons.Default.Person,
-            enabled = true,
-            onClick = { onAction(NodeMenuAction.RequestUserInfo(node)) }
-        )
-
-        NodeActionButton(
-            title = stringResource(id = R.string.traceroute),
-            icon = Icons.Default.Route,
-            enabled = true,
-            coolDownTime = 30.seconds,
-            onClick = {
-                onAction(NodeMenuAction.TraceRoute(node))
-            }
-        )
-        NodeActionSwitch(
-            title = stringResource(R.string.favorite),
-            icon = if (node.isFavorite) {
-                Icons.Default.Star
-            } else {
-                Icons.Default.StarBorder
-            },
-            iconTint = if (node.isFavorite) {
-                Color.Yellow
-            } else {
-                LocalContentColor.current
-            },
-            enabled = true,
-            checked = node.isFavorite,
-            onClick = { displayFavoriteDialog = true }
-        )
-        NodeActionSwitch(
-            title = stringResource(R.string.ignore),
-            icon = if (node.isIgnored) {
-                Icons.AutoMirrored.Outlined.VolumeMute
-            } else {
-                Icons.AutoMirrored.Default.VolumeUp
-            },
-            enabled = true,
-            checked = node.isIgnored,
-            onClick = { displayIgnoreDialog = true }
-        )
-        NodeActionButton(
-            title = stringResource(id = R.string.remove),
-            icon = Icons.Default.Delete,
-            enabled = true,
-            onClick = { displayRemoveDialog = true }
-        )
     }
 }
 

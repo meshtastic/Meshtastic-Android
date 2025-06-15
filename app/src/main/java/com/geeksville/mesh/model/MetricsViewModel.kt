@@ -51,6 +51,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
@@ -81,8 +82,8 @@ data class MetricsState(
     val positionLogs: List<Position> = emptyList(),
     val deviceHardware: DeviceHardware? = null,
     val isLocalDevice: Boolean = false,
-    val latestStableFirmware: FirmwareRelease? = null,
-    val latestAlphaFirmware: FirmwareRelease? = null,
+    val latestStableFirmware: FirmwareRelease = FirmwareRelease(),
+    val latestAlphaFirmware: FirmwareRelease = FirmwareRelease(),
 ) {
     fun hasDeviceMetrics() = deviceMetrics.isNotEmpty()
     fun hasSignalMetrics() = signalMetrics.isNotEmpty()
@@ -315,13 +316,13 @@ class MetricsViewModel @Inject constructor(
                     }
                 }.launchIn(viewModelScope)
 
-            firmwareReleaseRepository.stableRelease.onEach { latestStable ->
+            firmwareReleaseRepository.stableRelease.filterNotNull().onEach { latestStable ->
                 _state.update { state ->
                     state.copy(latestStableFirmware = latestStable)
                 }
             }.launchIn(viewModelScope)
 
-            firmwareReleaseRepository.alphaRelease.onEach { latestAlpha ->
+            firmwareReleaseRepository.alphaRelease.filterNotNull().onEach { latestAlpha ->
                 _state.update { state ->
                     state.copy(latestAlphaFirmware = latestAlpha)
                 }
