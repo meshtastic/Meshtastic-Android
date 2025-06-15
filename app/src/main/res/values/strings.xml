@@ -702,4 +702,8 @@
     <string name="no_network_devices">No Network devices found.</string>
     <string name="no_usb_devices">No USB Serial devices found.</string>
     <string name="unknown">Unknown</string>
+    <string name="map_type_normal">Normal</string>
+    <string name="map_type_satellite">Satellite</string>
+    <string name="map_type_terrain">Terrain</string>
+    <string name="map_type_hybrid">Hybrid</string>
 </resources>

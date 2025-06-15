@@ -30,6 +30,7 @@ kotlinx-collections-immutable = "0.4.0"
 kotlinx-coroutines-android = "1.10.2"
 kotlinx-serialization-json = "1.8.1"
 lifecycle = "2.9.1"
+location-services = "21.3.0"
 maps-compose = "6.6.0"
 material = "1.12.0"
 material3 = "1.4.0-alpha16"
@@ -112,6 +113,10 @@ lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-ru
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+location-services = { group = "com.google.android.gms", name = "play-services-location", version.ref = "location-services" }
+maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "maps-compose" }
+maps-compose-utils = { group = "com.google.maps.android", name = "maps-compose-utils", version.ref = "maps-compose" }
+maps-compose-widgets = { group = "com.google.maps.android", name = "maps-compose-widgets", version.ref = "maps-compose" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 mgrs = { group = "mil.nga", name = "mgrs", version.ref = "mgrs" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
@@ -119,9 +124,6 @@ navigation-testing = { group = "androidx.navigation", name = "navigation-testing
 okhttp3 = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
 okhttp3-logging-interceptor = { group = "com.squareup.okhttp3", name = "logging-interceptor", version.ref = "okhttp" }
 org-eclipse-paho-client-mqttv3 = { group = "org.eclipse.paho", name = "org.eclipse.paho.client.mqttv3", version.ref = "org-eclipse-paho-client-mqttv3" }
-maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "maps-compose" }
-maps-compose-utils = { group = "com.google.maps.android", name = "maps-compose-utils", version.ref = "maps-compose" }
-maps-compose-widgets = { group = "com.google.maps.android", name = "maps-compose-widgets", version.ref = "maps-compose" }
 osmbonuspack = { group = "com.github.MKergall", name = "osmbonuspack", version.ref = "osmbonuspack" }
 osmdroid-android = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid-android" }
 osmdroid-geopackage = { group = "org.osmdroid", name = "osmdroid-geopackage", version.ref = "osmdroid-android" }
@@ -178,7 +180,7 @@ testing-room = ["room-testing"]
 osm = ["osmdroid-android", "osmbonuspack", "mgrs"]
 
 # Google Maps (Compose)
-maps-compose = ["maps-compose", "maps-compose-utils", "maps-compose-widgets", "mgrs"]
+maps-compose = ["location-services", "maps-compose", "maps-compose-utils", "maps-compose-widgets", "mgrs"]
 
 # Firebase
 firebase = ["firebase-analytics", "firebase-crashlytics"]
