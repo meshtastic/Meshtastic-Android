@@ -656,4 +656,7 @@
     <string name="show_waypoints">Zeige Wegpunkte</string>
     <string name="show_precision_circle">Präzisionskreise anzeigen</string>
     <string name="client_notification">Kundenbenachrichtigung</string>
+    <string name="compromised_keys">Kompromittierte Schlüssel erkannt, wählen Sie OK, um diese neu zu erstellen.</string>
+    <string name="regenerate_private_key">Privaten Schlüssel neu erstellen</string>
+    <string name="regenerate_keys_confirmation">Sind Sie sicher, dass Sie Ihren privaten Schlüssel neu erstellen möchten?</string>
 </resources>
