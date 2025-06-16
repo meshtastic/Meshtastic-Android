@@ -52,6 +52,8 @@ import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.node.NodeActionButton
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.util.encodeToString
+import com.google.protobuf.ByteString
+import java.security.SecureRandom
 
 @Composable
 fun SecurityConfigScreen(
@@ -249,6 +251,12 @@ fun PrivateKeyRegenerateDialog(
                     onClick = {
                         securityInput = securityInput.copy {
                             clearPrivateKey()
+                            @Suppress("MagicNumber")
+                            privateKey = ByteString.copyFrom(
+                                ByteArray(32).apply {
+                                    SecureRandom().nextBytes(this)
+                                }
+                            )
                         }
                         onConfirm(securityInput)
                     },
