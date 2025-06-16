@@ -233,6 +233,13 @@ fun MQTTConfigItemList(
                         mapReportSettings = settings
                     }
                 },
+                publishIntervalSecs = mqttInput.mapReportSettings.publishIntervalSecs,
+                onPublishIntervalSecsChanged = {
+                    val settings = mqttInput.mapReportSettings.copy { publishIntervalSecs = it }
+                    mqttInput = mqttInput.copy {
+                        mapReportSettings = settings
+                    }
+                },
                 enabled = enabled,
                 focusManager = focusManager
             )
@@ -241,7 +248,8 @@ fun MQTTConfigItemList(
 
         item {
             val consentValid = if (mqttInput.mapReportingEnabled) {
-                mqttInput.mapReportSettings.shouldReportLocation
+                mqttInput.mapReportSettings.shouldReportLocation &&
+                        mqttConfig.mapReportSettings.publishIntervalSecs >= MinIntervalSecs
             } else {
                 true
             }
@@ -259,6 +267,8 @@ fun MQTTConfigItemList(
         }
     }
 }
+
+private const val MinIntervalSecs = 3600
 
 @Preview(showBackground = true)
 @Composable

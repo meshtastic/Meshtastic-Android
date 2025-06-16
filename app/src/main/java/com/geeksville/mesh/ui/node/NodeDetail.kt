@@ -184,6 +184,7 @@ fun NodeDetailScreen(
     uiViewModel: UIViewModel = hiltViewModel(),
     navigateToMessages: (String) -> Unit,
     onNavigate: (Route) -> Unit = {},
+    onNavigateUp: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
@@ -229,6 +230,9 @@ fun NodeDetailScreen(
                             val channel =
                                 if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
                             navigateToMessages("$channel${node.user.id}")
+                        } else if (action is NodeMenuAction.Remove) {
+                            uiViewModel.handleNodeMenuAction(action)
+                            onNavigateUp()
                         } else {
                             uiViewModel.handleNodeMenuAction(action)
                         }

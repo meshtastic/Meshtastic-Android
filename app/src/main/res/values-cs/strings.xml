@@ -24,6 +24,8 @@
     <string name="node_filter_placeholder">Filtr</string>
     <string name="desc_node_filter_clear">vyčistit filtr uzlů</string>
     <string name="node_filter_include_unknown">Včetně neznámých</string>
+    <string name="node_filter_only_online">Skrýt offline uzly</string>
+    <string name="node_filter_only_direct">Zobrazit jen přímé uzly</string>
     <string name="node_filter_show_details">Zobrazit detaily</string>
     <string name="node_sort_button">Možnosti řazení uzlů</string>
     <string name="node_sort_alpha">A-Z</string>
@@ -451,6 +453,7 @@
     <string name="use_i2s_as_buzzer">Použít I2S jako bzučák</string>
     <string name="lora_config">LoRa nastavení</string>
     <string name="use_modem_preset">Použít předvolbu modemu</string>
+    <string name="modem_preset">Předvolba modemu</string>
     <string name="bandwidth">Šířka pásma</string>
     <string name="frequency_offset_mhz">Posun frekvence (MHz)</string>
     <string name="region_frequency_plan">Region (plán frekvence)</string>
@@ -605,10 +608,19 @@
     <string name="display_time_in_12h_format">Pokud je povoleno, zařízení bude na obrazovce zobrazovat čas ve 12 hodinovém formátu.</string>
     <string name="map">Mapa</string>
     <string name="contacts">Kontakty</string>
-    <string name="nodes">Uzly (Nody)</string>
+    <string name="nodes">Uzly</string>
     <string name="set_your_region">Nastavte svůj region</string>
+    <string name="map_reporting_summary">Váš uzel bude pravidelně odesílat nešifrovaný mapový paket na konfigurovaný MQTT server, který zahrnuje id, dlouhé a krátké jméno. přibližné umístění, hardwarový model, role, verze firmwaru, region LoRa, předvolba modemu a název primárního kanálu.</string>
+    <string name="map_reporting_consent_header">Souhlas se sdílením nešifrovaných dat uzlu prostřednictvím MQTT</string>
+    <string name="map_reporting_consent_text">Povolením této funkce potvrzujete a výslovně souhlasíte s přenosem zeměpisné polohy vašeho zařízení v reálném čase přes MQTT protokol bez šifrování. Tato lokalizační data mohou být použita pro účely, jako je hlášení živých map, sledování zařízení a související telemetrické funkce.</string>
+    <string name="i_agree_to_share_my_location">Četl jsem a rozumím výše uvedenému. Dobrovolně souhlasím s nešifrovaným přenosem dat svého uzlu přes MQTT</string>
+    <string name="i_agree">Souhlasím.</string>
     <string name="should_update_firmware">Doporučena aktualizace firmwaru.</string>
     <string name="should_update">Chcete-li využít nejnovějších oprav a funkcí, aktualizujte firmware vašeho uzlu.\n\nPoslední stabilní verze firmwaru: %1$s</string>
     <string name="time">Čas</string>
     <string name="date">Datum</string>
+    <string name="only_favorites">Pouze oblíbené</string>
+    <string name="show_waypoints">Zobrazit trasové body</string>
+    <string name="show_precision_circle">Zobrazit kruhy přesnosti</string>
+    <string name="client_notification">Oznámení klienta</string>
 </resources>
