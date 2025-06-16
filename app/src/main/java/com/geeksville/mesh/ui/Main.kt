@@ -142,7 +142,14 @@ fun MainScreen(
                 title = state.title,
                 message = state.message,
                 html = state.html,
-                onConfirmRequest = { state.onConfirm?.let { it() } },
+                onConfirmRequest = {
+                    state.onConfirm?.let { it() }
+                    state.clientNotification?.let {
+                        if (it.hasDuplicatedPublicKey() || it.hasLowEntropyKey()) {
+                            navController.navigate(RadioConfigRoutes.Security)
+                        }
+                    }
+                },
                 onDismissRequest = { state.onDismiss?.let { it() } },
             )
         }
