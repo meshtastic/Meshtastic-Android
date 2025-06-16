@@ -206,6 +206,12 @@ class UIViewModel @Inject constructor(
     private val _lastTraceRouteTime = MutableStateFlow<Long?>(null)
     val lastTraceRouteTime: StateFlow<Long?> = _lastTraceRouteTime.asStateFlow()
 
+    val clientNotification: StateFlow<MeshProtos.ClientNotification?> = radioConfigRepository.clientNotification
+    fun clearClientNotification(notification: MeshProtos.ClientNotification) {
+        radioConfigRepository.clearClientNotification()
+        meshServiceNotifications.clearClientNotification(notification)
+    }
+
     data class AlertData(
         val title: String,
         val message: String? = null,
@@ -213,7 +219,6 @@ class UIViewModel @Inject constructor(
         val onConfirm: (() -> Unit)? = null,
         val onDismiss: (() -> Unit)? = null,
         val choices: Map<String, () -> Unit> = emptyMap(),
-        val clientNotification: MeshProtos.ClientNotification? = null,
     )
 
     private val _currentAlert: MutableStateFlow<AlertData?> = MutableStateFlow(null)
@@ -226,7 +231,6 @@ class UIViewModel @Inject constructor(
         onConfirm: (() -> Unit)? = {},
         dismissable: Boolean = true,
         choices: Map<String, () -> Unit> = emptyMap(),
-        clientNotification: MeshProtos.ClientNotification? = null,
     ) {
         _currentAlert.value =
             AlertData(
@@ -241,7 +245,6 @@ class UIViewModel @Inject constructor(
                     if (dismissable) dismissAlert()
                 },
                 choices = choices,
-                clientNotification = clientNotification
             )
     }
 
@@ -441,27 +444,6 @@ class UIViewModel @Inject constructor(
                 onConfirm = {
                     radioConfigRepository.clearErrorMessage()
                 },
-                dismissable = false
-            )
-        }.launchIn(viewModelScope)
-
-        radioConfigRepository.clientNotification.filterNotNull().onEach { notification ->
-            val (message, onConfirm) = if (notification.hasDuplicatedPublicKey() || notification.hasLowEntropyKey()) {
-               app.getString(R.string.compromised_keys) to {
-                   radioConfigRepository.clearClientNotification()
-                   meshServiceNotifications.clearClientNotification(notification)
-               }
-            } else {
-                notification.message to {
-                    radioConfigRepository.clearClientNotification()
-                    meshServiceNotifications.clearClientNotification(notification)
-                }
-            }
-
-            showAlert(
-                title = app.getString(R.string.client_notification),
-                message = message,
-                onConfirm = onConfirm,
                 dismissable = false
             )
         }.launchIn(viewModelScope)

@@ -142,17 +142,34 @@ fun MainScreen(
                 title = state.title,
                 message = state.message,
                 html = state.html,
-                onConfirmRequest = {
-                    state.onConfirm?.let { it() }
-                    state.clientNotification?.let {
-                        if (it.hasDuplicatedPublicKey() || it.hasLowEntropyKey()) {
-                            navController.navigate(RadioConfigRoutes.Security)
-                        }
-                    }
-                },
+                onConfirmRequest = { state.onConfirm?.let { it() } },
                 onDismissRequest = { state.onDismiss?.let { it() } },
             )
         }
+    }
+
+    val clientNotification by viewModel.clientNotification.collectAsStateWithLifecycle()
+    clientNotification?.let { notification ->
+        var message = notification.message
+        val compromisedKeys =
+            if (notification.hasLowEntropyKey() || notification.hasDuplicatedPublicKey()) {
+                message = stringResource(R.string.compromised_keys)
+                true
+            } else {
+                false
+            }
+        SimpleAlertDialog(
+            title = R.string.client_notification,
+            text = {
+                Text(text = message)
+            },
+            onConfirm = {
+                if (compromisedKeys) {
+                    navController.navigate(RadioConfigRoutes.Security)
+                }
+                viewModel.clearClientNotification(notification)
+            },
+        )
     }
 
     val traceRouteResponse by viewModel.tracerouteResponse.observeAsState()

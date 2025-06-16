@@ -87,33 +87,14 @@ fun SecurityConfigItemList(
     var securityInput by rememberSaveable { mutableStateOf(securityConfig) }
 
     var showKeyGenerationDialog by rememberSaveable { mutableStateOf(false) }
-    if (showKeyGenerationDialog) {
-        AlertDialog(
-            onDismissRequest = { showKeyGenerationDialog = false },
-            title = { Text(text = stringResource(R.string.regenerate_private_key)) },
-            text = { Text(text = stringResource(R.string.regenerate_keys_confirmation)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showKeyGenerationDialog = false
-                        securityInput = securityInput.copy {
-                            clearPrivateKey()
-                        }
-                        onConfirm(securityInput)
-                    },
-                ) {
-                    Text(stringResource(R.string.okay))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { showKeyGenerationDialog = false },
-                ) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        )
-    }
+    PrivateKeyRegenerateDialog(
+        show = showKeyGenerationDialog,
+        config = securityInput,
+        onConfirm = { newConfig ->
+            securityInput = newConfig
+            showKeyGenerationDialog = false
+        }
+    )
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -246,6 +227,43 @@ fun SecurityConfigItemList(
                 }
             )
         }
+    }
+}
+
+@Composable
+fun PrivateKeyRegenerateDialog(
+    show: Boolean,
+    config: SecurityConfig,
+    onConfirm: (SecurityConfig) -> Unit,
+) {
+    var showKeyGenerationDialog by rememberSaveable { mutableStateOf(show) }
+    var securityInput by rememberSaveable { mutableStateOf(config) }
+    if (showKeyGenerationDialog) {
+        AlertDialog(
+            onDismissRequest = { showKeyGenerationDialog = false },
+            title = { Text(text = stringResource(R.string.regenerate_private_key)) },
+            text = { Text(text = stringResource(R.string.regenerate_keys_confirmation)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showKeyGenerationDialog = false
+                        securityInput = securityInput.copy {
+                            clearPrivateKey()
+                        }
+                        onConfirm(securityInput)
+                    },
+                ) {
+                    Text(stringResource(R.string.okay))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = { showKeyGenerationDialog = false },
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
     }
 }
 
