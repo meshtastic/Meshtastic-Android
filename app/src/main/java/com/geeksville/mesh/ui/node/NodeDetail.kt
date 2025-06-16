@@ -948,6 +948,7 @@ fun TracerouteActionButton(
 @Suppress("LongMethod")
 @Composable
 fun NodeActionButton(
+    modifier: Modifier = Modifier,
     title: String,
     enabled: Boolean,
     icon: ImageVector? = null,
@@ -960,7 +961,7 @@ fun NodeActionButton(
             onClick()
         },
         enabled = enabled,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
             .height(48.dp),
