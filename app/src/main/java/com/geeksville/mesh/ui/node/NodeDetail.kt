@@ -184,10 +184,18 @@ fun NodeDetailScreen(
     uiViewModel: UIViewModel = hiltViewModel(),
     navigateToMessages: (String) -> Unit,
     onNavigate: (Route) -> Unit = {},
+    onNavigateUp: () -> Unit = {},
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
     val lastTracerouteTime by uiViewModel.lastTraceRouteTime.collectAsStateWithLifecycle()
+
+    // Navigate back when node is removed
+    LaunchedEffect(state.node) {
+        if (state.node == null) {
+            onNavigateUp()
+        }
+    }
 
     /* The order is with respect to the enum above: LogsType */
     val availabilities = remember(key1 = state, key2 = environmentState) {
