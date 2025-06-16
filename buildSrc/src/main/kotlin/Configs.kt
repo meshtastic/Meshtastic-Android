@@ -17,7 +17,7 @@
 
 object Configs {
     const val APPLICATION_ID = "com.geeksville.mesh"
-    const val MIN_SDK_VERSION = 23
+    const val MIN_SDK_VERSION = 26
     const val TARGET_SDK = 36
     const val COMPILE_SDK = 36
     const val VERSION_CODE = 30616 // format is Mmmss (where M is 1+the numeric major number
