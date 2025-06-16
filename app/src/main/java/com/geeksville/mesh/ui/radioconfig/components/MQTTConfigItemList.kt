@@ -249,7 +249,7 @@ fun MQTTConfigItemList(
         item {
             val consentValid = if (mqttInput.mapReportingEnabled) {
                 mqttInput.mapReportSettings.shouldReportLocation &&
-                        mqttConfig.mapReportSettings.publishIntervalSecs >= 3600
+                        mqttConfig.mapReportSettings.publishIntervalSecs >= MinIntervalSecs
             } else {
                 true
             }
@@ -267,6 +267,8 @@ fun MQTTConfigItemList(
         }
     }
 }
+
+private const val MinIntervalSecs = 3600
 
 @Preview(showBackground = true)
 @Composable
