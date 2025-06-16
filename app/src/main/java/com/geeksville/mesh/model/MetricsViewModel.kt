@@ -214,6 +214,10 @@ class MetricsViewModel @Inject constructor(
         hasDecoded() && decoded.wantResponse && from == 0 && to == destNum
     }
 
+    /**
+     * Creates a fallback node for hidden clients or nodes not yet in the database.
+     * This prevents the detail screen from freezing when viewing unknown nodes.
+     */
     private fun createFallbackNode(nodeNum: Int): Node {
         val userId = DataPacket.nodeNumToDefaultId(nodeNum)
         val defaultUser = MeshProtos.User.newBuilder()
