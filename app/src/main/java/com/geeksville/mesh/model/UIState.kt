@@ -179,7 +179,7 @@ data class Contact(
     val nodeColors: Pair<Int, Int>? = null,
 )
 
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "LargeClass")
 @HiltViewModel
 class UIViewModel @Inject constructor(
     private val app: Application,
@@ -202,6 +202,9 @@ class UIViewModel @Inject constructor(
         _theme.value = theme
         preferences.edit { putInt("theme", theme) }
     }
+
+    private val _lastTraceRouteTime = MutableStateFlow<Long?>(null)
+    val lastTraceRouteTime: StateFlow<Long?> = _lastTraceRouteTime.asStateFlow()
 
     data class AlertData(
         val title: String,
@@ -252,7 +255,6 @@ class UIViewModel @Inject constructor(
     val receivingLocationUpdates: StateFlow<Boolean> get() = locationRepository.receivingLocationUpdates
     val meshService: IMeshService? get() = radioConfigRepository.meshService
 
-    val bondedAddress get() = radioInterfaceService.getBondedDeviceAddress()
     val selectedBluetooth get() = radioInterfaceService.getDeviceAddress()?.getOrNull(0) == 'x'
 
     private val _localConfig = MutableStateFlow<LocalConfig>(LocalConfig.getDefaultInstance())
@@ -707,7 +709,11 @@ class UIViewModel @Inject constructor(
             is NodeMenuAction.Favorite -> favoriteNode(action.node)
             is NodeMenuAction.RequestUserInfo -> requestUserInfo(action.node.num)
             is NodeMenuAction.RequestPosition -> requestPosition(action.node.num)
-            is NodeMenuAction.TraceRoute -> requestTraceroute(action.node.num)
+            is NodeMenuAction.TraceRoute -> {
+                requestTraceroute(action.node.num)
+                _lastTraceRouteTime.value = System.currentTimeMillis()
+            }
+
             else -> {}
         }
     }

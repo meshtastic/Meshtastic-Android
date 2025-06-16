@@ -86,6 +86,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -146,8 +147,7 @@ import com.geeksville.mesh.util.thenIf
 import com.geeksville.mesh.util.toDistanceString
 import com.geeksville.mesh.util.toSpeedString
 import kotlinx.coroutines.delay
-import kotlin.time.Duration
-import kotlin.time.Duration.Companion.seconds
+import kotlin.time.Duration.Companion.milliseconds
 
 private enum class LogsType(
     val titleRes: Int,
@@ -187,6 +187,7 @@ fun NodeDetailScreen(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
+    val lastTracerouteTime by uiViewModel.lastTraceRouteTime.collectAsStateWithLifecycle()
 
     /* The order is with respect to the enum above: LogsType */
     val availabilities = remember(key1 = state, key2 = environmentState) {
@@ -201,6 +202,7 @@ fun NodeDetailScreen(
             state.hasHostMetrics(),
         )
     }
+    val ourNode by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
 
     if (state.node != null) {
         val node = state.node ?: return
@@ -213,7 +215,8 @@ fun NodeDetailScreen(
         }
         NodeDetailList(
             node = node,
-            ourNode = uiViewModel.ourNodeInfo.value,
+            lastTracerouteTime = lastTracerouteTime,
+            ourNode = ourNode,
             metricsState = state,
             onAction = { action ->
                 when (action) {
@@ -255,6 +258,7 @@ fun NodeDetailScreen(
 private fun NodeDetailList(
     modifier: Modifier = Modifier,
     node: Node,
+    lastTracerouteTime: Long? = null,
     ourNode: Node?,
     metricsState: MetricsState,
     onAction: (Any) -> Unit = {},
@@ -278,6 +282,7 @@ private fun NodeDetailList(
 
         DeviceActions(
             isLocal = metricsState.isLocal,
+            lastTracerouteTime = lastTracerouteTime,
             node = node,
             onShared = onShared,
             onAction = onAction
@@ -402,6 +407,7 @@ private fun NodeDetailRow(
 private fun DeviceActions(
     isLocal: Boolean = false,
     node: Node,
+    lastTracerouteTime: Long? = null,
     onShared: () -> Unit,
     onAction: (Any) -> Unit,
 ) {
@@ -457,12 +463,9 @@ private fun DeviceActions(
                 enabled = true,
                 onClick = { onAction(NodeMenuAction.RequestUserInfo(node)) }
             )
-
-            NodeActionButton(
+            TracerouteActionButton(
                 title = stringResource(id = R.string.traceroute),
-                icon = Icons.Default.Route,
-                enabled = true,
-                coolDownTime = 30.seconds,
+                lastTracerouteTime = lastTracerouteTime,
                 onClick = {
                     onAction(NodeMenuAction.TraceRoute(node))
                 }
@@ -881,41 +884,34 @@ private fun PowerMetrics(node: Node) = with(node.powerMetrics) {
     }
 }
 
-@Suppress("LongMethod")
+private const val CoolDownTime = 30000f
+
 @Composable
-fun NodeActionButton(
+fun TracerouteActionButton(
     title: String,
-    enabled: Boolean,
-    coolDownTime: Duration = 0.seconds,
-    icon: ImageVector? = null,
-    iconTint: Color? = null,
+    lastTracerouteTime: Long?,
     onClick: () -> Unit
 ) {
-    val useCoolDown = coolDownTime > 0.seconds
-    var coolDown by remember { mutableStateOf(false) }
-    var coolDownProgress: Float by remember { mutableStateOf(0f) }
-    LaunchedEffect(coolDown) {
-        coolDownProgress = 0f
-        var timeLeft = coolDownTime
-        while (coolDown) {
-            if (timeLeft > 0.seconds) {
-                coolDownProgress =
-                    ((coolDownTime - timeLeft) / coolDownTime).toFloat()
-                timeLeft -= 0.05.seconds
-            } else {
-                coolDown = false
+    var coolDownProgress by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(lastTracerouteTime) {
+        while (true) {
+            val timeSinceLast = (
+                    System.currentTimeMillis() -
+                            (lastTracerouteTime ?: 0)
+                    )
+            val progress = 1f - (timeSinceLast / CoolDownTime)
+            coolDownProgress = progress.coerceIn(0f, 1f)
+            if (progress <= 0f) {
+                break
             }
-            delay(0.05.seconds)
+            delay(10.milliseconds)
         }
     }
     Button(
         onClick = {
-            if (useCoolDown) {
-                coolDown = true
-            }
             onClick()
         },
-        enabled = enabled && !coolDown,
+        enabled = coolDownProgress <= 0f,
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 4.dp)
@@ -924,17 +920,55 @@ fun NodeActionButton(
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            if (coolDown) {
+            if (coolDownProgress > 0f) {
                 CircularProgressIndicator(
                     progress = { coolDownProgress },
                     modifier = Modifier.size(24.dp),
-                    color = iconTint ?: LocalContentColor.current,
                     strokeWidth = 2.dp,
                     trackColor = ProgressIndicatorDefaults.circularDeterminateTrackColor,
                     strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
                 )
-                Spacer(modifier = Modifier.width(8.dp))
-            } else if (icon != null) {
+            } else {
+                Icon(
+                    imageVector = Icons.Default.Route,
+                    contentDescription = stringResource(R.string.traceroute),
+                    modifier = Modifier.size(24.dp),
+                )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.weight(1f)
+            )
+        }
+    }
+}
+
+@Suppress("LongMethod")
+@Composable
+fun NodeActionButton(
+    title: String,
+    enabled: Boolean,
+    icon: ImageVector? = null,
+    iconTint: Color? = null,
+    onClick: () -> Unit
+) {
+
+    Button(
+        onClick = {
+            onClick()
+        },
+        enabled = enabled,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
+            .height(48.dp),
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            if (icon != null) {
                 Icon(
                     imageVector = icon,
                     contentDescription = title,
@@ -1010,12 +1044,12 @@ fun NodeActionSwitch(
 private fun NodeDetailsPreview(
     @PreviewParameter(NodePreviewParameterProvider::class)
     node: Node,
-    ourNode: Node,
 ) {
     AppTheme {
         NodeDetailList(
             node = node,
-            ourNode = ourNode,
+            ourNode = node,
+            lastTracerouteTime = null,
             metricsState = MetricsState.Empty,
             metricsAvailability = BooleanArray(LogsType.entries.size) { false },
         )
