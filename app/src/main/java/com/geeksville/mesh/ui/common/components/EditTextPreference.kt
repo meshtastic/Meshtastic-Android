@@ -85,6 +85,7 @@ fun EditTextPreference(
     title: String,
     value: Int,
     enabled: Boolean,
+    isError: Boolean = false,
     keyboardActions: KeyboardActions,
     onValueChanged: (Int) -> Unit,
     modifier: Modifier = Modifier,
@@ -97,7 +98,7 @@ fun EditTextPreference(
         title = title,
         value = valueState,
         enabled = enabled,
-        isError = value.toUInt().toString() != valueState,
+        isError = value.toUInt().toString() != valueState || isError,
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = KeyboardType.Number, imeAction = ImeAction.Done
         ),

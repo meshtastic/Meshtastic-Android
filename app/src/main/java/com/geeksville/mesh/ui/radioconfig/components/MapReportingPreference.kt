@@ -138,6 +138,7 @@ fun MapReportingPreference(
                         modifier = Modifier.Companion.padding(bottom = 16.dp),
                         title = stringResource(R.string.map_reporting_interval_seconds),
                         value = publishIntervalSecs,
+                        isError = publishIntervalSecs < 3600,
                         enabled = enabled,
                         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                         onValueChanged = onPublishIntervalSecsChanged,
