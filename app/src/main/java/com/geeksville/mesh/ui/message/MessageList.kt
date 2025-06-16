@@ -49,7 +49,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.Reaction
@@ -57,7 +56,6 @@ import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.message.components.MessageItem
 import com.geeksville.mesh.ui.message.components.ReactionDialog
-import com.geeksville.mesh.ui.message.components.ReactionRow
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
@@ -167,7 +165,6 @@ internal fun MessageList(
         reverseLayout = true,
     ) {
         items(messages, key = { it.uuid }) { msg ->
-            val fromLocal = msg.node.user.id == DataPacket.ID_LOCAL
             val selected by remember { derivedStateOf { selectedIds.value.contains(msg.uuid) } }
             var node by remember {
                 mutableStateOf(nodes.find { it.num == msg.node.num } ?: msg.node)
@@ -175,7 +172,6 @@ internal fun MessageList(
             LaunchedEffect(nodes) {
                 node = nodes.find { it.num == msg.node.num } ?: msg.node
             }
-            ReactionRow(fromLocal, msg.emojis) { showReactionDialog = msg.emojis }
             Box(Modifier.wrapContentSize(Alignment.TopStart)) {
                 MessageItem(
                     node = node,
@@ -190,16 +186,20 @@ internal fun MessageList(
                     },
                     onAction = onNodeMenuAction,
                     onStatusClick = { showStatusDialog = msg },
-                    onSendReaction = { onSendReaction(it, msg.packetId) },
+                    emojis = msg.emojis,
+                    sendReaction = { onSendReaction(it, msg.packetId) },
+                    onShowReactions = { showReactionDialog = msg.emojis },
                     isConnected = isConnected,
                     snr = msg.snr,
                     rssi = msg.rssi,
-                    hopsAway = if (msg.hopsAway > 0) { "%s: %d".format(
+                    hopsAway = if (msg.hopsAway > 0) {
+                        "%s: %d".format(
                             stringResource(id = R.string.hops_away),
                             msg.hopsAway
-                        ) } else {
-                            null
-                        }
+                        )
+                    } else {
+                        null
+                    }
                 )
             }
         }
