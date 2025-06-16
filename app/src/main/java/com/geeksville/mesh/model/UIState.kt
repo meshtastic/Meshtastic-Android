@@ -203,6 +203,9 @@ class UIViewModel @Inject constructor(
         preferences.edit { putInt("theme", theme) }
     }
 
+    private val _lastTraceRouteTime = MutableStateFlow<Long?>(null)
+    val lastTraceRouteTime: StateFlow<Long?> = _lastTraceRouteTime.asStateFlow()
+
     data class AlertData(
         val title: String,
         val message: String? = null,
@@ -707,7 +710,11 @@ class UIViewModel @Inject constructor(
             is NodeMenuAction.Favorite -> favoriteNode(action.node)
             is NodeMenuAction.RequestUserInfo -> requestUserInfo(action.node.num)
             is NodeMenuAction.RequestPosition -> requestPosition(action.node.num)
-            is NodeMenuAction.TraceRoute -> requestTraceroute(action.node.num)
+            is NodeMenuAction.TraceRoute -> {
+                requestTraceroute(action.node.num)
+                _lastTraceRouteTime.value = System.currentTimeMillis()
+            }
+
             else -> {}
         }
     }
