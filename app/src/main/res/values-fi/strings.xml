@@ -290,6 +290,7 @@
     <string name="device_metrics_log">Laitteen mittausloki</string>
     <string name="node_map">Solmukartta</string>
     <string name="position_log">Sijainnin Loki</string>
+    <string name="last_position_update">Viimeisin sijainnin päivitys</string>
     <string name="env_metrics_log">Ympäristöanturit</string>
     <string name="sig_metrics_log">Signaalin voimakkuudet</string>
     <string name="administration">Ylläpito</string>
