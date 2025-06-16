@@ -38,6 +38,7 @@ import androidx.compose.material.icons.twotone.HowToReg
 import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -64,7 +65,7 @@ import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun MessageItem(
     node: Node,
@@ -141,6 +142,7 @@ internal fun MessageItem(
                     .fillMaxWidth()
                     .padding(4.dp),
                 text = messageText.orEmpty(),
+                style = MaterialTheme.typography.bodyMedium,
             )
             Row(
                 modifier = Modifier
@@ -151,18 +153,22 @@ internal fun MessageItem(
             ) {
                 if (!fromLocal) {
                     if (hopsAway == null) {
-                        Snr(snr, fontSize = MaterialTheme.typography.bodySmall.fontSize)
-                        Rssi(rssi, fontSize = MaterialTheme.typography.bodySmall.fontSize)
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Snr(snr, fontSize = MaterialTheme.typography.labelSmall.fontSize)
+                            Rssi(rssi, fontSize = MaterialTheme.typography.labelSmall.fontSize)
+                        }
                     } else {
                         Text(
                             text = hopsAway,
-                            fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                            style = MaterialTheme.typography.labelSmall,
                         )
                     }
                 }
                 Text(
                     text = messageTime,
-                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                    style = MaterialTheme.typography.labelSmall,
                 )
                 AnimatedVisibility(visible = fromLocal) {
                     Icon(
