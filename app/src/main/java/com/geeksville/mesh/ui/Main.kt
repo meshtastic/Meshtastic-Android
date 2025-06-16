@@ -201,7 +201,6 @@ fun MainScreen(
                                 // Pop up to the start destination of the graph to
                                 // avoid building up a large stack of destinations
                                 // on the back stack as users select items
-                                destination.route
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }
