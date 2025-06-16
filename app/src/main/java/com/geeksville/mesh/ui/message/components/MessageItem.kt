@@ -28,7 +28,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Cloud
 import androidx.compose.material.icons.twotone.CloudDone
@@ -41,6 +41,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -52,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
+import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.ui.common.components.AutoLinkText
 import com.geeksville.mesh.ui.common.components.Rssi
@@ -69,68 +71,62 @@ internal fun MessageItem(
     messageText: String?,
     messageTime: String,
     messageStatus: MessageStatus?,
+    emojis: List<Reaction> = emptyList(),
+    sendReaction: (String) -> Unit = {},
+    onShowReactions: () -> Unit = {},
     selected: Boolean,
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
     onAction: (NodeMenuAction) -> Unit = {},
     onStatusClick: () -> Unit = {},
-    onSendReaction: (String) -> Unit = {},
     isConnected: Boolean,
     snr: Float,
     rssi: Int,
     hopsAway: String?,
-) = Row(
+) = Column(
     modifier = modifier
         .fillMaxWidth()
         .background(color = if (selected) Color.Gray else MaterialTheme.colorScheme.background),
-    verticalAlignment = Alignment.CenterVertically,
 ) {
     val fromLocal = node.user.id == DataPacket.ID_LOCAL
     val messageColor = if (fromLocal) {
         MaterialTheme.colorScheme.secondaryContainer
     } else {
-        MaterialTheme.colorScheme.tertiaryContainer
+        Color(node.colors.second).copy(alpha = 0.25f)
     }
-    val (topStart, topEnd) = if (fromLocal) 12.dp to 4.dp else 4.dp to 12.dp
-    val messageModifier = if (fromLocal) {
-        Modifier.padding(start = 48.dp, top = 8.dp, end = 8.dp, bottom = 6.dp)
-    } else {
-        Modifier.padding(start = 8.dp, top = 8.dp, end = 0.dp, bottom = 6.dp)
-    }
-    if (!fromLocal) {
-        NodeChip(
-            node = node,
-            modifier = Modifier
-                .padding(start = 8.dp, end = 4.dp),
-            onAction = onAction,
-            isConnected = isConnected,
-            isThisNode = false,
-        )
-    }
+    val messageModifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
+
     Card(
         modifier = Modifier
-            .weight(1f)
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick,
             )
             .then(messageModifier),
         colors = CardDefaults.cardColors(
-            containerColor = messageColor
+            containerColor = messageColor,
+            contentColor = contentColorFor(messageColor),
         ),
-        shape = RoundedCornerShape(topStart, topEnd, bottomStart = 12.dp, bottomEnd = 12.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+                .padding(8.dp),
         ) {
-            Column(
-                modifier = Modifier.padding(top = 8.dp),
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (!fromLocal) {
+                    NodeChip(
+                        node = node,
+                        onAction = onAction,
+                        isConnected = isConnected,
+                        isThisNode = false,
+                    )
+                    Spacer(Modifier.width(4.dp))
                     Text(
                         text = with(node.user) { "$longName ($id)" },
                         modifier = Modifier.padding(bottom = 4.dp),
@@ -139,52 +135,61 @@ internal fun MessageItem(
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
-                AutoLinkText(
-                    text = messageText.orEmpty(),
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    if (!fromLocal) {
-                        if (hopsAway == null) {
-                            Snr(snr, fontSize = MaterialTheme.typography.bodySmall.fontSize)
-                            Spacer(Modifier.weight(1f))
-                            Rssi(rssi, fontSize = MaterialTheme.typography.bodySmall.fontSize)
-                        } else { Text(
+            }
+            AutoLinkText(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp),
+                text = messageText.orEmpty(),
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (!fromLocal) {
+                    if (hopsAway == null) {
+                        Snr(snr, fontSize = MaterialTheme.typography.bodySmall.fontSize)
+                        Rssi(rssi, fontSize = MaterialTheme.typography.bodySmall.fontSize)
+                    } else {
+                        Text(
                             text = hopsAway,
                             fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                        ) }
-                        Spacer(Modifier.weight(1f))
-                    }
-                    Text(
-                        text = messageTime,
-                        fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                    )
-                    AnimatedVisibility(visible = fromLocal) {
-                        Icon(
-                            imageVector = when (messageStatus) {
-                                MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
-                                MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
-                                MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
-                                MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
-                                MessageStatus.ERROR -> Icons.TwoTone.CloudOff
-                                else -> Icons.TwoTone.Warning
-                            },
-                            contentDescription = stringResource(R.string.message_delivery_status),
-                            modifier = Modifier
-                                .padding(start = 8.dp)
-                                .clickable { onStatusClick() },
                         )
                     }
+                }
+                Text(
+                    text = messageTime,
+                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
+                )
+                AnimatedVisibility(visible = fromLocal) {
+                    Icon(
+                        imageVector = when (messageStatus) {
+                            MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
+                            MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
+                            MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
+                            MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
+                            MessageStatus.ERROR -> Icons.TwoTone.CloudOff
+                            else -> Icons.TwoTone.Warning
+                        },
+                        contentDescription = stringResource(R.string.message_delivery_status),
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .clickable { onStatusClick() },
+                    )
                 }
             }
         }
     }
-    if (!fromLocal) {
-        ReactionButton(Modifier.padding(4.dp), onSendReaction)
-    }
+    ReactionRow(
+        modifier = Modifier
+            .fillMaxWidth(),
+        reactions = emojis,
+        onSendReaction = sendReaction,
+        onShowReactions = onShowReactions
+    )
 }
 
 @PreviewLightDark
@@ -200,7 +205,15 @@ private fun MessageItemPreview() {
             isConnected = true,
             snr = 20.5f,
             rssi = 90,
-            hopsAway = null
+            hopsAway = null,
+            emojis = listOf(
+                Reaction(
+                    emoji = "\uD83D\uDE42",
+                    user = NodePreviewParameterProvider().values.first().user,
+                    replyId = 0,
+                    timestamp = 0L
+                ),
+            )
         )
     }
 }
