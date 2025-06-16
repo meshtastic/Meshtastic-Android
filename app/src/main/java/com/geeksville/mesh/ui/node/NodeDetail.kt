@@ -190,13 +190,6 @@ fun NodeDetailScreen(
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
     val lastTracerouteTime by uiViewModel.lastTraceRouteTime.collectAsStateWithLifecycle()
 
-    // Navigate back when node is removed
-    LaunchedEffect(state.node) {
-        if (state.node == null) {
-            onNavigateUp()
-        }
-    }
-
     /* The order is with respect to the enum above: LogsType */
     val availabilities = remember(key1 = state, key2 = environmentState) {
         booleanArrayOf(
@@ -237,6 +230,9 @@ fun NodeDetailScreen(
                             val channel =
                                 if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
                             navigateToMessages("$channel${node.user.id}")
+                        } else if (action is NodeMenuAction.Remove) {
+                            uiViewModel.handleNodeMenuAction(action)
+                            onNavigateUp()
                         } else {
                             uiViewModel.handleNodeMenuAction(action)
                         }
