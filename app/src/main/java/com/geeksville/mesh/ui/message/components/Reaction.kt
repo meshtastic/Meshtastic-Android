@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -108,7 +109,11 @@ private fun ReactionItem(
         }
     ) {
         Surface(
-            modifier = Modifier.combinedClickable(onClick = onClick, onLongClick = onLongClick),
+            modifier = Modifier
+                .combinedClickable(
+                    onClick = onClick,
+                    onLongClick = onLongClick
+                ),
             color = MaterialTheme.colorScheme.primaryContainer,
             shape = CircleShape,
         ) {
@@ -136,7 +141,7 @@ fun ReactionRow(
         ).entries
 
     LazyRow(
-        modifier = modifier,
+        modifier = modifier.height(48.dp).padding(bottom = 8.dp),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically,
         reverseLayout = true
