@@ -202,6 +202,7 @@ fun NodeDetailScreen(
             state.hasHostMetrics(),
         )
     }
+    val ourNode by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
 
     if (state.node != null) {
         val node = state.node ?: return
@@ -215,7 +216,7 @@ fun NodeDetailScreen(
         NodeDetailList(
             node = node,
             lastTracerouteTime = lastTracerouteTime,
-            ourNode = uiViewModel.ourNodeInfo.value,
+            ourNode = ourNode,
             metricsState = state,
             onAction = { action ->
                 when (action) {
@@ -439,69 +440,70 @@ private fun DeviceActions(
             onClick = onShared
         )
 
-    if (!isLocal) {
-        if (!isUnmessageable) {
+        if (!isLocal) {
+            if (!isUnmessageable) {
+                NodeActionButton(
+                    title = stringResource(id = R.string.direct_message),
+                    icon = Icons.AutoMirrored.TwoTone.Message,
+                    enabled = true,
+                    onClick = {
+                        onAction(NodeMenuAction.DirectMessage(node))
+                    }
+                )
+            }
             NodeActionButton(
-                title = stringResource(id = R.string.direct_message),
-                icon = Icons.AutoMirrored.TwoTone.Message,
+                title = stringResource(id = R.string.exchange_position),
+                icon = Icons.Default.LocationOn,
                 enabled = true,
+                onClick = { onAction(NodeMenuAction.RequestPosition(node)) }
+            )
+            NodeActionButton(
+                title = stringResource(id = R.string.exchange_userinfo),
+                icon = Icons.Default.Person,
+                enabled = true,
+                onClick = { onAction(NodeMenuAction.RequestUserInfo(node)) }
+            )
+            TracerouteActionButton(
+                title = stringResource(id = R.string.traceroute),
+                lastTracerouteTime = lastTracerouteTime,
                 onClick = {
-                    onAction(NodeMenuAction.DirectMessage(node))
+                    onAction(NodeMenuAction.TraceRoute(node))
                 }
             )
+            NodeActionSwitch(
+                title = stringResource(R.string.favorite),
+                icon = if (node.isFavorite) {
+                    Icons.Default.Star
+                } else {
+                    Icons.Default.StarBorder
+                },
+                iconTint = if (node.isFavorite) {
+                    Color.Yellow
+                } else {
+                    LocalContentColor.current
+                },
+                enabled = true,
+                checked = node.isFavorite,
+                onClick = { displayFavoriteDialog = true }
+            )
+            NodeActionSwitch(
+                title = stringResource(R.string.ignore),
+                icon = if (node.isIgnored) {
+                    Icons.AutoMirrored.Outlined.VolumeMute
+                } else {
+                    Icons.AutoMirrored.Default.VolumeUp
+                },
+                enabled = true,
+                checked = node.isIgnored,
+                onClick = { displayIgnoreDialog = true }
+            )
+            NodeActionButton(
+                title = stringResource(id = R.string.remove),
+                icon = Icons.Default.Delete,
+                enabled = true,
+                onClick = { displayRemoveDialog = true }
+            )
         }
-        NodeActionButton(
-            title = stringResource(id = R.string.exchange_position),
-            icon = Icons.Default.LocationOn,
-            enabled = true,
-            onClick = { onAction(NodeMenuAction.RequestPosition(node)) }
-        )
-        NodeActionButton(
-            title = stringResource(id = R.string.exchange_userinfo),
-            icon = Icons.Default.Person,
-            enabled = true,
-            onClick = { onAction(NodeMenuAction.RequestUserInfo(node)) }
-        )
-        TracerouteActionButton(
-            title = stringResource(id = R.string.traceroute),
-            lastTracerouteTime = lastTracerouteTime,
-            onClick = {
-                onAction(NodeMenuAction.TraceRoute(node))
-            }
-        )
-        NodeActionSwitch(
-            title = stringResource(R.string.favorite),
-            icon = if (node.isFavorite) {
-                Icons.Default.Star
-            } else {
-                Icons.Default.StarBorder
-            },
-            iconTint = if (node.isFavorite) {
-                Color.Yellow
-            } else {
-                LocalContentColor.current
-            },
-            enabled = true,
-            checked = node.isFavorite,
-            onClick = { displayFavoriteDialog = true }
-        )
-        NodeActionSwitch(
-            title = stringResource(R.string.ignore),
-            icon = if (node.isIgnored) {
-                Icons.AutoMirrored.Outlined.VolumeMute
-            } else {
-                Icons.AutoMirrored.Default.VolumeUp
-            },
-            enabled = true,
-            checked = node.isIgnored,
-            onClick = { displayIgnoreDialog = true }
-        )
-        NodeActionButton(
-            title = stringResource(id = R.string.remove),
-            icon = Icons.Default.Delete,
-            enabled = true,
-            onClick = { displayRemoveDialog = true }
-        )
     }
 }
 
@@ -882,7 +884,8 @@ private fun PowerMetrics(node: Node) = with(node.powerMetrics) {
     }
 }
 
-private const val CoolDownTime = 30f
+private const val CoolDownTime = 30000f
+
 @Composable
 fun TracerouteActionButton(
     title: String,
@@ -895,13 +898,13 @@ fun TracerouteActionButton(
             val timeSinceLast = (
                     System.currentTimeMillis() -
                             (lastTracerouteTime ?: 0)
-                    ).milliseconds
-            val progress = 1f - (timeSinceLast.inWholeSeconds / CoolDownTime)
+                    )
+            val progress = 1f - (timeSinceLast / CoolDownTime)
             coolDownProgress = progress.coerceIn(0f, 1f)
             if (progress <= 0f) {
                 break
             }
-            delay(50.milliseconds)
+            delay(10.milliseconds)
         }
     }
     Button(
@@ -917,7 +920,6 @@ fun TracerouteActionButton(
         Row(
             verticalAlignment = Alignment.CenterVertically,
         ) {
-
             if (coolDownProgress > 0f) {
                 CircularProgressIndicator(
                     progress = { coolDownProgress },
@@ -1042,12 +1044,12 @@ fun NodeActionSwitch(
 private fun NodeDetailsPreview(
     @PreviewParameter(NodePreviewParameterProvider::class)
     node: Node,
-    ourNode: Node,
 ) {
     AppTheme {
         NodeDetailList(
             node = node,
-            ourNode = ourNode,
+            ourNode = node,
+            lastTracerouteTime = null,
             metricsState = MetricsState.Empty,
             metricsAvailability = BooleanArray(LogsType.entries.size) { false },
         )
