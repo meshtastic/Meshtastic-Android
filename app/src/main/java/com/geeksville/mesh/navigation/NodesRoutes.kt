@@ -129,6 +129,9 @@ fun NavGraphBuilder.nodeDetailGraph(
                 onNavigate = {
                     navController.navigate(it)
                 },
+                onNavigateUp = {
+                    navController.navigateUp()
+                },
                 viewModel = hiltViewModel(parentEntry),
             )
         }
