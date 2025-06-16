@@ -88,12 +88,13 @@ fun SecurityConfigItemList(
 
     var showKeyGenerationDialog by rememberSaveable { mutableStateOf(false) }
     PrivateKeyRegenerateDialog(
-        show = showKeyGenerationDialog,
+        showKeyGenerationDialog = showKeyGenerationDialog,
         config = securityInput,
         onConfirm = { newConfig ->
             securityInput = newConfig
             showKeyGenerationDialog = false
-        }
+        },
+        onDismiss = { showKeyGenerationDialog = false }
     )
 
     LazyColumn(
@@ -232,21 +233,20 @@ fun SecurityConfigItemList(
 
 @Composable
 fun PrivateKeyRegenerateDialog(
-    show: Boolean,
+    showKeyGenerationDialog: Boolean,
     config: SecurityConfig,
     onConfirm: (SecurityConfig) -> Unit,
+    onDismiss: () -> Unit = {},
 ) {
-    var showKeyGenerationDialog by rememberSaveable { mutableStateOf(show) }
     var securityInput by rememberSaveable { mutableStateOf(config) }
     if (showKeyGenerationDialog) {
         AlertDialog(
-            onDismissRequest = { showKeyGenerationDialog = false },
+            onDismissRequest = onDismiss,
             title = { Text(text = stringResource(R.string.regenerate_private_key)) },
             text = { Text(text = stringResource(R.string.regenerate_keys_confirmation)) },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        showKeyGenerationDialog = false
                         securityInput = securityInput.copy {
                             clearPrivateKey()
                         }
@@ -258,7 +258,7 @@ fun PrivateKeyRegenerateDialog(
             },
             dismissButton = {
                 TextButton(
-                    onClick = { showKeyGenerationDialog = false },
+                    onClick = onDismiss,
                 ) {
                     Text(stringResource(R.string.cancel))
                 }
