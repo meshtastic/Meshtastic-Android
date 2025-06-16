@@ -59,6 +59,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DebugViewModel
 import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
 import com.geeksville.mesh.ui.common.theme.AppTheme
+import com.geeksville.mesh.ui.common.components.CopyIconButton
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
 
@@ -116,6 +117,10 @@ internal fun DebugItem(
                         text = log.messageType,
                         modifier = Modifier.weight(1f),
                         style = TextStyle(fontWeight = FontWeight.Bold),
+                    )
+                    CopyIconButton(
+                        valueToCopy = log.logMessage,
+                        modifier = Modifier.padding(start = 8.dp)
                     )
                     Icon(
                         imageVector = Icons.Outlined.CloudDownload,
@@ -198,6 +203,13 @@ fun DebugMenuActions(
     viewModel: DebugViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
 ) {
+    // Button(
+    //     // FIXME: needs to do what it says on the label 
+    //     onClick = viewModel::deleteAllLogs,
+    //     modifier = modifier,
+    // ) {
+    //     Text(text = stringResource(R.string.map_start_download)) // should rename to be generic 
+    // }
     Button(
         onClick = viewModel::deleteAllLogs,
         modifier = modifier,
