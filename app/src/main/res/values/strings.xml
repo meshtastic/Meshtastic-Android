@@ -680,4 +680,7 @@
     <string name="show_waypoints">Show Waypoints</string>
     <string name="show_precision_circle">Show Precision Circles</string>
     <string name="client_notification">Client Notification</string>
+    <string name="compromised_keys">Compromised keys detected, select OK to regenerate.</string>
+    <string name="regenerate_private_key">Regenerate Private Key</string>
+    <string name="regenerate_keys_confirmation">Are you sure you want to regenerate your Private Key?</string>
 </resources>

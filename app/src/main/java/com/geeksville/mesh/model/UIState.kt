@@ -206,13 +206,19 @@ class UIViewModel @Inject constructor(
     private val _lastTraceRouteTime = MutableStateFlow<Long?>(null)
     val lastTraceRouteTime: StateFlow<Long?> = _lastTraceRouteTime.asStateFlow()
 
+    val clientNotification: StateFlow<MeshProtos.ClientNotification?> = radioConfigRepository.clientNotification
+    fun clearClientNotification(notification: MeshProtos.ClientNotification) {
+        radioConfigRepository.clearClientNotification()
+        meshServiceNotifications.clearClientNotification(notification)
+    }
+
     data class AlertData(
         val title: String,
         val message: String? = null,
         val html: String? = null,
         val onConfirm: (() -> Unit)? = null,
         val onDismiss: (() -> Unit)? = null,
-        val choices: Map<String, () -> Unit> = emptyMap()
+        val choices: Map<String, () -> Unit> = emptyMap(),
     )
 
     private val _currentAlert: MutableStateFlow<AlertData?> = MutableStateFlow(null)
@@ -224,7 +230,7 @@ class UIViewModel @Inject constructor(
         html: String? = null,
         onConfirm: (() -> Unit)? = {},
         dismissable: Boolean = true,
-        choices: Map<String, () -> Unit> = emptyMap()
+        choices: Map<String, () -> Unit> = emptyMap(),
     ) {
         _currentAlert.value =
             AlertData(
@@ -238,7 +244,7 @@ class UIViewModel @Inject constructor(
                 onDismiss = {
                     if (dismissable) dismissAlert()
                 },
-                choices = choices
+                choices = choices,
             )
     }
 
@@ -285,7 +291,8 @@ class UIViewModel @Inject constructor(
     private val onlyDirect = MutableStateFlow(preferences.getBoolean("only-direct", false))
 
     private val onlyFavorites = MutableStateFlow(preferences.getBoolean("only-favorites", false))
-    private val showWaypointsOnMap = MutableStateFlow(preferences.getBoolean("show-waypoints-on-map", true))
+    private val showWaypointsOnMap =
+        MutableStateFlow(preferences.getBoolean("show-waypoints-on-map", true))
     private val showPrecisionCircleOnMap =
         MutableStateFlow(preferences.getBoolean("show-precision-circle-on-map", true))
 
@@ -436,18 +443,6 @@ class UIViewModel @Inject constructor(
                 message = it,
                 onConfirm = {
                     radioConfigRepository.clearErrorMessage()
-                },
-                dismissable = false
-            )
-        }.launchIn(viewModelScope)
-
-        radioConfigRepository.clientNotification.filterNotNull().onEach { notification ->
-            showAlert(
-                title = app.getString(R.string.client_notification),
-                message = notification.message,
-                onConfirm = {
-                    radioConfigRepository.clearClientNotification()
-                    meshServiceNotifications.clearClientNotification(notification)
                 },
                 dismissable = false
             )
@@ -663,7 +658,8 @@ class UIViewModel @Inject constructor(
         showSnackbar(R.string.channel_invalid)
     }
 
-    val latestStableFirmwareRelease = firmwareReleaseRepository.stableRelease.mapNotNull { it?.asDeviceVersion() }
+    val latestStableFirmwareRelease =
+        firmwareReleaseRepository.stableRelease.mapNotNull { it?.asDeviceVersion() }
 
     /**
      * Called immediately after activity observes requestChannelUrl

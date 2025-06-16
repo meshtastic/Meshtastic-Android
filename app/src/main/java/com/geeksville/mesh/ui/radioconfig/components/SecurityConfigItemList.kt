@@ -18,9 +18,15 @@
 package com.geeksville.mesh.ui.radioconfig.components
 
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.twotone.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +36,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos.Config.SecurityConfig
@@ -42,6 +49,7 @@ import com.geeksville.mesh.ui.common.components.EditListPreference
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
 import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.common.components.SwitchPreference
+import com.geeksville.mesh.ui.node.NodeActionButton
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.util.encodeToString
 
@@ -77,6 +85,17 @@ fun SecurityConfigItemList(
 ) {
     val focusManager = LocalFocusManager.current
     var securityInput by rememberSaveable { mutableStateOf(securityConfig) }
+
+    var showKeyGenerationDialog by rememberSaveable { mutableStateOf(false) }
+    PrivateKeyRegenerateDialog(
+        showKeyGenerationDialog = showKeyGenerationDialog,
+        config = securityInput,
+        onConfirm = { newConfig ->
+            securityInput = newConfig
+            showKeyGenerationDialog = false
+        },
+        onDismiss = { showKeyGenerationDialog = false }
+    )
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -118,6 +137,18 @@ fun SecurityConfigItemList(
                     CopyIconButton(
                         valueToCopy = securityInput.privateKey.encodeToString(),
                     )
+                }
+            )
+        }
+
+        item {
+            NodeActionButton(
+                modifier = Modifier.padding(16.dp),
+                title = stringResource(R.string.regenerate_private_key),
+                enabled = enabled,
+                icon = Icons.TwoTone.Warning,
+                onClick = {
+                    showKeyGenerationDialog = true
                 }
             )
         }
@@ -197,6 +228,42 @@ fun SecurityConfigItemList(
                 }
             )
         }
+    }
+}
+
+@Composable
+fun PrivateKeyRegenerateDialog(
+    showKeyGenerationDialog: Boolean,
+    config: SecurityConfig,
+    onConfirm: (SecurityConfig) -> Unit,
+    onDismiss: () -> Unit = {},
+) {
+    var securityInput by rememberSaveable { mutableStateOf(config) }
+    if (showKeyGenerationDialog) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            title = { Text(text = stringResource(R.string.regenerate_private_key)) },
+            text = { Text(text = stringResource(R.string.regenerate_keys_confirmation)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        securityInput = securityInput.copy {
+                            clearPrivateKey()
+                        }
+                        onConfirm(securityInput)
+                    },
+                ) {
+                    Text(stringResource(R.string.okay))
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = onDismiss,
+                ) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
     }
 }
 
