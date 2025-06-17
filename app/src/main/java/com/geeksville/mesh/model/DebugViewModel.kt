@@ -36,6 +36,8 @@ import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.Locale
 import javax.inject.Inject
+import com.geeksville.mesh.Portnums.PortNum
+
 
 @HiltViewModel
 class DebugViewModel @Inject constructor(
@@ -134,4 +136,9 @@ class DebugViewModel @Inject constructor(
     companion object {
         private val TIME_FORMAT = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
     }
+
+    val presetFilters = arrayOf(
+        "own 0x", // will need to get that from connected nodes??
+        "0xffffffff",     // broadcast
+    ) + PortNum.entries.map { it.name } // all apps
 }
