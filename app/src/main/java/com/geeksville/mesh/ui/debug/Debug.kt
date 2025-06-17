@@ -80,6 +80,8 @@ import com.geeksville.mesh.ui.common.components.CopyIconButton
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
@@ -94,12 +96,16 @@ internal fun DebugScreen(
     var filterTexts by remember { mutableStateOf(listOf<String>()) }
     var customFilterText by remember { mutableStateOf("") }
     var showFilterMenu by remember { mutableStateOf(false) }
+    var searchText by remember { mutableStateOf("") }
+    var currentMatchIndex by remember { mutableStateOf(-1) }
     
     val filteredLogs by remember(logs) {
         derivedStateOf {
             logs.filter { log ->
                 filterTexts.isEmpty() || filterTexts.any { filterText ->
-                    log.logMessage.contains(filterText, ignoreCase = true)
+                    log.logMessage.contains(filterText, ignoreCase = true) ||
+                    log.messageType.contains(filterText, ignoreCase = true) ||
+                    log.formattedReceivedDate.contains(filterText, ignoreCase = true)
                 }
             }
         }
@@ -114,11 +120,62 @@ internal fun DebugScreen(
         }
     }
 
+    data class SearchMatch(
+        val logIndex: Int,
+        val start: Int,
+        val end: Int,
+        val field: String
+    )
+    
+    val allMatches = remember(searchText, filteredLogs) {
+        if (searchText.isEmpty()) emptyList()
+        else filteredLogs.flatMapIndexed { logIndex, log ->
+            searchText.split(" ").flatMap { term ->
+                val messageMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.logMessage)
+                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "message") }
+                val typeMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.messageType)
+                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "type") }
+                val dateMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.formattedReceivedDate)
+                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "date") }
+                messageMatches + typeMatches + dateMatches
+            }
+        }.sortedBy { it.start }
+    }
+
+    val hasMatches = allMatches.isNotEmpty()
+    
+    fun scrollToMatch(index: Int) {
+        if (index in allMatches.indices) {
+            currentMatchIndex = index
+            val match = allMatches[index]
+            listState.requestScrollToItem(match.logIndex)
+        }
+    }
+
+    fun goToNextMatch() {
+        if (hasMatches) {
+            val nextIndex = if (currentMatchIndex < allMatches.lastIndex) currentMatchIndex + 1 else 0
+            scrollToMatch(nextIndex)
+        }
+    }
+
+    fun goToPreviousMatch() {
+        if (hasMatches) {
+            val prevIndex = if (currentMatchIndex > 0) currentMatchIndex - 1 else allMatches.lastIndex
+            scrollToMatch(prevIndex)
+        }
+    }
+
+    // Reset current match when search text changes
+    LaunchedEffect(searchText) {
+        currentMatchIndex = -1
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         state = listState,
     ) {
-        item {
+        stickyHeader {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -133,10 +190,64 @@ internal fun DebugScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.weight(1f),
                             horizontalArrangement = Arrangement.Start,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            OutlinedTextField(
+                                value = searchText,
+                                onValueChange = { searchText = it },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(end = 8.dp),
+                                placeholder = { Text("Search in logs...") },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                                keyboardActions = KeyboardActions(
+                                    onSearch = {
+                                        // Clear focus when search is performed
+                                    }
+                                ),
+                                trailingIcon = {
+                                    Row {
+                                        if (hasMatches) {
+                                            Text(
+                                                text = "${currentMatchIndex + 1}/${allMatches.size}",
+                                                modifier = Modifier.padding(end = 8.dp),
+                                                style = TextStyle(fontSize = 12.sp)
+                                            )
+                                            IconButton(
+                                                onClick = { goToPreviousMatch() },
+                                                enabled = hasMatches
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.KeyboardArrowUp,
+                                                    contentDescription = "Previous match"
+                                                )
+                                            }
+                                            IconButton(
+                                                onClick = { goToNextMatch() },
+                                                enabled = hasMatches
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.KeyboardArrowDown,
+                                                    contentDescription = "Next match"
+                                                )
+                                            }
+                                        }
+                                        if (searchText.isNotEmpty()) {
+                                            IconButton(
+                                                onClick = { searchText = "" }
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Clear,
+                                                    contentDescription = "Clear search"
+                                                )
+                                            }
+                                        }
+                                    }
+                                }
+                            )
                             Box {
                                 TextButton(
                                     onClick = { showFilterMenu = !showFilterMenu }
@@ -288,7 +399,8 @@ internal fun DebugScreen(
         items(filteredLogs, key = { it.uuid }) { log ->
             DebugItem(
                 modifier = Modifier.animateItem(),
-                log = log
+                log = log,
+                searchText = searchText
             )
         }
     }
@@ -298,6 +410,7 @@ internal fun DebugScreen(
 internal fun DebugItem(
     log: UiMeshLog,
     modifier: Modifier = Modifier,
+    searchText: String = "",
 ) {
     Card(
         modifier = modifier
@@ -315,8 +428,12 @@ internal fun DebugItem(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text(
+                    val typeAnnotatedString = rememberAnnotatedString(
                         text = log.messageType,
+                        searchText = searchText
+                    )
+                    Text(
+                        text = typeAnnotatedString,
                         modifier = Modifier.weight(1f),
                         style = TextStyle(fontWeight = FontWeight.Bold),
                     )
@@ -330,15 +447,19 @@ internal fun DebugItem(
                         tint = Color.Gray.copy(alpha = 0.6f),
                         modifier = Modifier.padding(end = 8.dp),
                     )
-                    Text(
+                    val dateAnnotatedString = rememberAnnotatedString(
                         text = log.formattedReceivedDate,
+                        searchText = searchText
+                    )
+                    Text(
+                        text = dateAnnotatedString,
                         style = TextStyle(fontWeight = FontWeight.Bold),
                     )
                 }
 
-                val annotatedString = rememberAnnotatedLogMessage(log)
+                val messageAnnotatedString = rememberAnnotatedLogMessage(log, searchText)
                 Text(
-                    text = annotatedString,
+                    text = messageAnnotatedString,
                     softWrap = false,
                     style = TextStyle(
                         fontSize = 9.sp,
@@ -351,14 +472,50 @@ internal fun DebugItem(
 }
 
 @Composable
-private fun rememberAnnotatedLogMessage(log: UiMeshLog): AnnotatedString {
+private fun rememberAnnotatedString(
+    text: String,
+    searchText: String
+): AnnotatedString {
+    val highlightStyle = SpanStyle(
+        background = Color.Yellow.copy(alpha = 0.3f),
+        color = Color.Black
+    )
+    
+    return remember(text, searchText) {
+        buildAnnotatedString {
+            append(text)
+            
+            if (searchText.isNotEmpty()) {
+                searchText.split(" ").forEach { term ->
+                    term.toRegex(RegexOption.IGNORE_CASE).findAll(text).forEach { match ->
+                        addStyle(
+                            style = highlightStyle,
+                            start = match.range.first,
+                            end = match.range.last + 1
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun rememberAnnotatedLogMessage(log: UiMeshLog, searchText: String): AnnotatedString {
     val style = SpanStyle(
         color = colorResource(id = R.color.colorAnnotation),
         fontStyle = FontStyle.Italic,
     )
-    return remember(log.uuid) {
+    val highlightStyle = SpanStyle(
+        background = Color.Yellow.copy(alpha = 0.3f),
+        color = Color.Black
+    )
+    
+    return remember(log.uuid, searchText) {
         buildAnnotatedString {
             append(log.logMessage)
+            
+            // Add node ID annotations
             REGEX_ANNOTATED_NODE_ID.findAll(log.logMessage).toList().reversed()
                 .forEach {
                     addStyle(
@@ -367,6 +524,19 @@ private fun rememberAnnotatedLogMessage(log: UiMeshLog): AnnotatedString {
                         end = it.range.last + 1
                     )
                 }
+            
+            // Add search highlight annotations
+            if (searchText.isNotEmpty()) {
+                searchText.split(" ").forEach { term ->
+                    term.toRegex(RegexOption.IGNORE_CASE).findAll(log.logMessage).forEach { match ->
+                        addStyle(
+                            style = highlightStyle,
+                            start = match.range.first,
+                            end = match.range.last + 1
+                        )
+                    }
+                }
+            }
         }
     }
 }
