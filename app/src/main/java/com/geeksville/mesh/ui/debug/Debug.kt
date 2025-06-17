@@ -171,7 +171,7 @@ private fun rememberAnnotatedLogMessage(log: UiMeshLog): AnnotatedString {
 
 @PreviewLightDark
 @Composable
-private fun DebugScreenPreview() {
+private fun DebugPacketPreview() {
     AppTheme {
         DebugItem(
             UiMeshLog(
