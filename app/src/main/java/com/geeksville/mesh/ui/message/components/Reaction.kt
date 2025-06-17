@@ -35,6 +35,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EmojiEmotions
+import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.HorizontalDivider
@@ -90,6 +91,22 @@ fun ReactionButton(
 }
 
 @Composable
+fun ReplyButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+) = IconButton(
+    modifier = modifier
+        .size(48.dp),
+    onClick = onClick,
+    content = {
+        Icon(
+            imageVector = Icons.Default.Reply,
+            contentDescription = "reply",
+        )
+    }
+)
+
+@Composable
 private fun ReactionItem(
     emoji: String,
     emojiCount: Int = 1,
@@ -133,7 +150,8 @@ fun ReactionRow(
     modifier: Modifier = Modifier,
     reactions: List<Reaction> = emptyList(),
     onSendReaction: (String) -> Unit = {},
-    onShowReactions: () -> Unit = {}
+    onShowReactions: () -> Unit = {},
+    onSendReply: () -> Unit = {},
 ) {
     val emojiList =
         reduceEmojis(
@@ -141,11 +159,18 @@ fun ReactionRow(
         ).entries
 
     LazyRow(
-        modifier = modifier.height(48.dp).padding(bottom = 8.dp),
+        modifier = modifier
+            .height(48.dp)
+            .padding(bottom = 8.dp),
         horizontalArrangement = Arrangement.End,
         verticalAlignment = Alignment.CenterVertically,
         reverseLayout = true
     ) {
+        item {
+            ReplyButton {
+                onSendReply()
+            }
+        }
         item {
             ReactionButton(
                 onSendReaction = onSendReaction,

@@ -18,11 +18,15 @@
 package com.geeksville.mesh.ui.message
 
 import android.content.ClipData
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -30,7 +34,9 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.SelectAll
@@ -57,6 +63,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusEvent
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
@@ -75,6 +82,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -82,6 +90,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.QuickChatAction
+import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannel
@@ -137,6 +146,7 @@ internal fun MessageScreen(
     val messageInput = rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(message))
     }
+    var replyingTo by remember { mutableStateOf<Message?>(null) }
 
     var showDeleteDialog by remember { mutableStateOf(false) }
     if (showDeleteDialog) {
@@ -207,7 +217,53 @@ internal fun MessageScreen(
                         viewModel.sendMessage(action.message, contactKey)
                     }
                 }
-                TextInput(isConnected, messageInput) { viewModel.sendMessage(it, contactKey) }
+
+                AnimatedVisibility(visible = replyingTo != null) {
+                    val fromLocal = replyingTo?.node?.user?.id == DataPacket.ID_LOCAL
+
+                    val replyingToNode = if(fromLocal) {
+                        viewModel.ourNodeInfo.value
+                    } else {
+                        replyingTo?.node
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Default.Reply,
+                            contentDescription = stringResource(R.string.reply)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                "Replying to ${replyingToNode?.user?.shortName ?: stringResource(R.string.unknown)}",
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                            Text(
+                                replyingTo?.text?.take(50)
+                                    ?.let { if (it.length == 50) "$it…" else it } ?: "", // Snippet
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        IconButton(onClick = {
+                            replyingTo = null
+                        }) { // ViewModel function to set replyingToMessageState to null
+                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.cancel))
+                        }
+                    }
+                }
+                TextInput(isConnected, messageInput) { message ->
+                    replyingTo?.let {
+                        viewModel.sendMessage(message, contactKey, it.packetId)
+                        replyingTo = null
+                    } ?: viewModel.sendMessage(message, contactKey)
+                }
             }
         }
     ) { padding ->
@@ -228,6 +284,7 @@ internal fun MessageScreen(
                 onSendReaction = { emoji, id -> viewModel.sendReaction(emoji, id, contactKey) },
                 viewModel = viewModel,
                 contactKey = contactKey,
+                onReply = { replyingTo = it },
                 onNodeMenuAction = { action ->
                     when (action) {
                         is NodeMenuAction.DirectMessage -> {
