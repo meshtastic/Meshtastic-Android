@@ -101,6 +101,7 @@ import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import kotlinx.coroutines.launch
 
 private const val MESSAGE_CHARACTER_LIMIT = 200
+private const val SNIPPET_CHARACTER_LIMIT = 50
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -221,7 +222,7 @@ internal fun MessageScreen(
                 AnimatedVisibility(visible = replyingTo != null) {
                     val fromLocal = replyingTo?.node?.user?.id == DataPacket.ID_LOCAL
 
-                    val replyingToNode = if(fromLocal) {
+                    val replyingToNode = if (fromLocal) {
                         viewModel.ourNodeInfo.value
                     } else {
                         replyingTo?.node
@@ -244,8 +245,8 @@ internal fun MessageScreen(
                                 style = MaterialTheme.typography.labelMedium
                             )
                             Text(
-                                replyingTo?.text?.take(50)
-                                    ?.let { if (it.length == 50) "$it…" else it } ?: "", // Snippet
+                                replyingTo?.text?.take(SNIPPET_CHARACTER_LIMIT)
+                                    ?.let { if (it.length == SNIPPET_CHARACTER_LIMIT) "$it…" else it } ?: "", // Snippet
                                 style = MaterialTheme.typography.bodySmall,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis

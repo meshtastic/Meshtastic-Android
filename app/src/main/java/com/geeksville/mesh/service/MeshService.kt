@@ -774,7 +774,7 @@ class MeshService : Service(), Logging {
 
                 when (data.portnumValue) {
                     Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
-                        if(data.replyId != 0 &&data.emoji == 0) {
+                        if (data.replyId != 0 && data.emoji == 0) {
                             debug("Received REPLY from $fromId")
                             rememberDataPacket(dataPacket)
                         } else if (data.replyId != 0 && data.emoji != 0) {
