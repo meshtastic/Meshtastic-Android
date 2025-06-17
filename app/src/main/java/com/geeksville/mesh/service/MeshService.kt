@@ -735,7 +735,7 @@ class MeshService : Service(), Logging {
             snr = dataPacket.snr,
             rssi = dataPacket.rssi,
             hopsAway = dataPacket.hopsAway,
-            replyId = dataPacket.replyId ?: -1
+            replyId = dataPacket.replyId ?: 0
         )
         serviceScope.handledLaunch {
             packetRepository.get().apply {

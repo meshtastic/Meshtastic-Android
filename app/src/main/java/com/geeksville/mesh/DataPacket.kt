@@ -62,7 +62,7 @@ data class DataPacket(
     var hopStart: Int = 0,
     var snr: Float = 0f,
     var rssi: Int = 0,
-    var replyId: Int? = null,
+    var replyId: Int? = null // If this is a reply to a previous message, this is the ID of that message
 ) : Parcelable {
 
     /**
@@ -78,7 +78,7 @@ data class DataPacket(
         bytes = text.encodeToByteArray(),
         dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
         channel = channel,
-        replyId = replyId
+        replyId = replyId ?: 0
     )
 
     /**
@@ -102,7 +102,7 @@ data class DataPacket(
         to = to,
         bytes = waypoint.toByteArray(),
         dataType = Portnums.PortNum.WAYPOINT_APP_VALUE,
-        channel = channel
+        channel = channel,
     )
 
     val waypoint: MeshProtos.Waypoint?
@@ -131,7 +131,7 @@ data class DataPacket(
         parcel.readInt(),
         parcel.readFloat(),
         parcel.readInt(),
-        parcel.readInt()
+        if (parcel.readInt() == 0) null else parcel.readInt()
     )
 
     @Suppress("CyclomaticComplexMethod")
@@ -191,7 +191,7 @@ data class DataPacket(
         parcel.writeInt(hopStart)
         parcel.writeFloat(snr)
         parcel.writeInt(rssi)
-        parcel.writeInt(replyId ?: -1)
+        parcel.writeInt(replyId ?: 0)
     }
 
     override fun describeContents(): Int {
@@ -213,7 +213,7 @@ data class DataPacket(
         hopStart = parcel.readInt()
         snr = parcel.readFloat()
         rssi = parcel.readInt()
-        replyId = if (parcel.readInt() == -1) null else parcel.readInt()
+        replyId = if (parcel.readInt() == 0) null else parcel.readInt()
     }
 
     companion object CREATOR : Parcelable.Creator<DataPacket> {

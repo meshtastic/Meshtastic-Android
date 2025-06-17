@@ -73,7 +73,7 @@ data class Packet(
     @ColumnInfo(name = "data") val data: DataPacket,
     @ColumnInfo(name = "packet_id", defaultValue = "0") val packetId: Int = 0,
     @ColumnInfo(name = "routing_error", defaultValue = "-1") var routingError: Int = -1,
-    @ColumnInfo(name = "reply_id", defaultValue = "-1") val replyId: Int = -1,
+    @ColumnInfo(name = "reply_id", defaultValue = "0") val replyId: Int = 0,
     @ColumnInfo(name = "snr", defaultValue = "0") val snr: Float = 0f,
     @ColumnInfo(name = "rssi", defaultValue = "0") val rssi: Int = 0,
     @ColumnInfo(name = "hopsAway", defaultValue = "-1") val hopsAway: Int = -1,
