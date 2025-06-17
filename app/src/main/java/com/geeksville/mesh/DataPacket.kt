@@ -213,7 +213,7 @@ data class DataPacket(
         hopStart = parcel.readInt()
         snr = parcel.readFloat()
         rssi = parcel.readInt()
-        replyId = if (parcel.readInt() == 0) null else parcel.readInt()
+        replyId = parcel.readInt().let { if (it == 0) null else it }
     }
 
     companion object CREATOR : Parcelable.Creator<DataPacket> {
