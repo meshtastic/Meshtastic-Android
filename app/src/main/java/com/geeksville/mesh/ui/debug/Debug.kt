@@ -16,7 +16,6 @@
  */
 @file:Suppress("detekt:TooManyFunctions") // Lots of necessary previews
 
-
 package com.geeksville.mesh.ui.debug
 
 import android.content.Context
@@ -994,6 +993,7 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
                 "Permission denied: Cannot write to Downloads folder",
                 Toast.LENGTH_LONG
             ).show()
+            debug(e)
         }
     } catch (e: IOException) {
         withContext(Dispatchers.Main) {
@@ -1003,13 +1003,6 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
                 Toast.LENGTH_LONG
             ).show()
         }
-    } catch (e: Exception) {
-        withContext(Dispatchers.Main) {
-            Toast.makeText(
-                context,
-                "Failed to export logs: ${e.message}",
-                Toast.LENGTH_LONG
-            ).show()
-        }
+        debug(e)
     }
 }

@@ -137,7 +137,7 @@ class DebugViewModel @Inject constructor(
     }
 
     val presetFilters = arrayOf(
-        // "!xxxxxxxx", // TODO: Dynamically determine the address of the connected node (i.e., messages to us).
+        // "!xxxxxxxx", // Dynamically determine the address of the connected node (i.e., messages to us).
         "!ffffffff", // broadcast
     ) + PortNum.entries.map { it.name } // all apps
 }
