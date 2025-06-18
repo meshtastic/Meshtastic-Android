@@ -24,6 +24,8 @@
     <string name="node_filter_placeholder">Filtro</string>
     <string name="desc_node_filter_clear">elimina filtro nodi</string>
     <string name="node_filter_include_unknown">Includi sconosciuti</string>
+    <string name="node_filter_only_online">Nascondi i nodi offline</string>
+    <string name="node_filter_only_direct">Mostra solamente i nodi diretti</string>
     <string name="node_filter_show_details">Mostra dettagli</string>
     <string name="node_sort_button">Opzioni ordinamento nodi</string>
     <string name="node_sort_alpha">A-Z</string>
@@ -288,6 +290,7 @@
     <string name="device_metrics_log">Registro Metriche Dispositivo</string>
     <string name="node_map">Mappa Dei Nodi</string>
     <string name="position_log">Registro Posizione</string>
+    <string name="last_position_update">Aggiornamento ultima posizione</string>
     <string name="env_metrics_log">Registro Metriche Ambientali</string>
     <string name="sig_metrics_log">Registro Metriche Segnale</string>
     <string name="administration">Amministrazione</string>
@@ -646,6 +649,14 @@
     <string name="should_update_firmware">Aggiornamento Firmware Consigliato.</string>
     <string name="should_update">Per usufruire delle ultime correzioni e funzionalità, aggiorna il firmware del tuo nodo.\n\nVersione stabile più recente del firmware: %1$s</string>
     <string name="expires">Scade</string>
+    <string name="time">Ora</string>
+    <string name="date">Data</string>
+    <string name="map_filter">Filtro mappa\n</string>
+    <string name="only_favorites">Solo preferiti</string>
+    <string name="show_waypoints">Mostra Waypoint</string>
     <string name="show_precision_circle"></string>
     <string name="client_notification">Notifiche Client</string>
+    <string name="compromised_keys">Rilevate chiavi compromesse, seleziona OK per rigenerarle.</string>
+    <string name="regenerate_private_key">Rigenera Chiavi Private</string>
+    <string name="regenerate_keys_confirmation">Sei sicuro di voler rigenerare la tua Chiave Privata?</string>
 </resources>
