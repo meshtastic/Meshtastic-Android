@@ -74,7 +74,6 @@
     <string name="text_messages">Mesaje Text</string>
     <string name="channel_invalid">Acest URL de canal este invalid și nu poate fi folosit</string>
     <string name="debug_panel">Panou debug</string>
-
     <string name="debug_last_messages">Ultimele 500 mesaje</string>
     <string name="clear">Șterge</string>
     <string name="updating_firmware">Se actualizează firmware-ul, așteptați până la opt minute…</string>

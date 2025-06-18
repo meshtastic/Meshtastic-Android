@@ -134,7 +134,6 @@
     <string name="text_messages">Текстовые сообщения</string>
     <string name="channel_invalid">Этот URL-адрес канала недействителен и не может быть использован</string>
     <string name="debug_panel">Панель отладки</string>
-
     <string name="debug_last_messages">500 последних сообщений</string>
     <string name="clear">Очистить</string>
     <string name="updating_firmware">Обновление прошивки, подождите до восьми минут…</string>

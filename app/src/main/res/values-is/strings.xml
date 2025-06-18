@@ -72,7 +72,6 @@
     <string name="text_messages">Textaskilaboð</string>
     <string name="channel_invalid">Þetta rásar URL er ógilt og ónothæft</string>
     <string name="debug_panel">Villuleitarborð</string>
-
     <string name="debug_last_messages">Síðustu 500 skilaboð</string>
     <string name="clear">Hreinsa</string>
     <string name="updating_firmware">Uppfæri fastbúnað, hinkrið allt að átta mínútum…</string>

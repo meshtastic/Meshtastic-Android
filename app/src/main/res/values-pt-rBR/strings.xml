@@ -127,7 +127,6 @@
     <string name="text_messages">Mensagens de texto</string>
     <string name="channel_invalid">Este link de canal é inválido e não pode ser usado</string>
     <string name="debug_panel">Painel de depuração</string>
-
     <string name="debug_last_messages">500 últimas mensagens</string>
     <string name="clear">Limpar</string>
     <string name="updating_firmware">Atualizando firmware, aguarde até 8 minutos…</string>

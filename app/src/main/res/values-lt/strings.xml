@@ -120,7 +120,6 @@
     <string name="text_messages">Teksto žinutės</string>
     <string name="channel_invalid">Šio kanalo URL yra neteisingas ir negali būti naudojamas</string>
     <string name="debug_panel">Derinimo skydelis</string>
-
     <string name="debug_last_messages">Paskutiniai 500 pranešimų</string>
     <string name="clear">Išvalyti</string>
     <string name="updating_firmware">Atnaujinama programinė įranga, palaukite iki aštuonių minučių…</string>

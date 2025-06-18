@@ -133,7 +133,6 @@
     <string name="text_messages">Wiadomości tekstowe</string>
     <string name="channel_invalid">Ten adres URL kanału jest nieprawidłowy i nie można go użyć</string>
     <string name="debug_panel">Panel debugowania</string>
-
     <string name="debug_last_messages">Ostatnie 500 zdarzeń</string>
     <string name="clear">Czyść</string>
     <string name="updating_firmware">Aktualizuję oprogramowanie, poczekaj chwilę…</string>

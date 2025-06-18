@@ -82,7 +82,6 @@
     <string name="text_messages">Mensaxes de texto</string>
     <string name="channel_invalid">A ligazón desta canle non é válida e non pode usarse</string>
     <string name="debug_panel">Panel de depuración</string>
-    <string name="debug_logs_export">Export Logs</string>
     <string name="debug_last_messages">Últimas 500 mensaxes</string>
     <string name="clear">Limpar</string>
     <string name="updating_firmware">Actualizando firmware, espera ata oito minutos…</string>
