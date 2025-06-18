@@ -526,7 +526,7 @@ private fun rememberAnnotatedString(
     val theme = androidx.compose.material3.MaterialTheme.colorScheme
     val highlightStyle = SpanStyle(
         background = theme.primary.copy(alpha = 0.3f),
-        color = theme.onPrimary
+        color = theme.onSurface
     )
     
     return remember(text, searchText) {
@@ -557,7 +557,7 @@ private fun rememberAnnotatedLogMessage(log: UiMeshLog, searchText: String): Ann
     )
     val highlightStyle = SpanStyle(
         background = theme.primary.copy(alpha = 0.3f),
-        color = theme.onPrimary
+        color = theme.onSurface
     )
     
     return remember(log.uuid, searchText) {
