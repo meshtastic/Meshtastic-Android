@@ -37,6 +37,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -93,13 +95,15 @@ import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.components.CopyIconButton
 import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import android.widget.Toast
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.draw.alpha
 import androidx.datastore.core.IOException
 import com.geeksville.mesh.android.BuildUtils.warn
 import kotlinx.collections.immutable.toImmutableList
@@ -122,6 +126,48 @@ data class SearchState(
 )
 
 @Composable
+internal fun DebugSearchNavigation(
+    searchState: SearchState,
+    onNextMatch: () -> Unit,
+    onPreviousMatch: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.width(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "${searchState.currentMatchIndex + 1}/${searchState.allMatches.size}",
+            modifier = Modifier.padding(end = 4.dp),
+            style = TextStyle(fontSize = 12.sp)
+        )
+        IconButton(
+            onClick = onPreviousMatch,
+            enabled = searchState.hasMatches,
+            modifier = Modifier.size(32.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowUp,
+                contentDescription = "Previous match",
+                modifier = Modifier.size(16.dp)
+            )
+        }
+        IconButton(
+            onClick = onNextMatch,
+            enabled = searchState.hasMatches,
+            modifier = Modifier.size(32.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowDown,
+                contentDescription = "Next match",
+                modifier = Modifier.size(16.dp)
+            )
+        }
+    }
+}
+
+@Composable
 internal fun DebugSearchBar(
     searchState: SearchState,
     onSearchTextChange: (String) -> Unit,
@@ -134,8 +180,8 @@ internal fun DebugSearchBar(
         value = searchState.searchText,
         onValueChange = onSearchTextChange,
         modifier = modifier
-//            .weight(1f)
             .padding(end = 8.dp),
+
         placeholder = { Text(stringResource(R.string.debug_default_search)) },
         singleLine = true,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
@@ -145,37 +191,27 @@ internal fun DebugSearchBar(
             }
         ),
         trailingIcon = {
-            Row {
+            Row(
+                modifier = Modifier.width(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 if (searchState.hasMatches) {
-                    Text(
-                        text = "${searchState.currentMatchIndex + 1}/${searchState.allMatches.size}",
-                        modifier = Modifier.padding(end = 8.dp),
-                        style = TextStyle(fontSize = 12.sp)
+                    DebugSearchNavigation(
+                        searchState = searchState,
+                        onNextMatch = onNextMatch,
+                        onPreviousMatch = onPreviousMatch
                     )
-                    IconButton(
-                        onClick = onPreviousMatch,
-                        enabled = searchState.hasMatches
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowUp,
-                            contentDescription = "Previous match"
-                        )
-                    }
-                    IconButton(
-                        onClick = onNextMatch,
-                        enabled = searchState.hasMatches
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.KeyboardArrowDown,
-                            contentDescription = "Next match"
-                        )
-                    }
                 }
                 if (searchState.searchText.isNotEmpty()) {
-                    IconButton(onClick = onClearSearch) {
+                    IconButton(
+                        onClick = onClearSearch,
+                        modifier = Modifier.size(32.dp)
+                    ) {
                         Icon(
                             imageVector = Icons.Default.Clear,
-                            contentDescription = "Clear search"
+                            contentDescription = "Clear search",
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                 }
@@ -402,6 +438,7 @@ internal fun DebugSearchState(
     var searchText by remember { mutableStateOf("") }
     var currentMatchIndex by remember { mutableStateOf(-1) }
     var selectedLogId by remember { mutableStateOf<String?>(null) }
+    val theme = androidx.compose.material3.MaterialTheme.colorScheme
 
     fun findSearchMatches(searchText: String, filteredLogs: List<UiMeshLog>): List<SearchMatch> {
         if (searchText.isEmpty()) {
@@ -473,8 +510,10 @@ internal fun DebugSearchState(
     Column(
         modifier = Modifier.padding(8.dp)
     ) {
+
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth()
+                .background(theme.background.copy(alpha = 1.0f)),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
