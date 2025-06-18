@@ -400,6 +400,7 @@ class RadioConfigViewModel @Inject constructor(
         writeSecurityKeysJsonToUri(uri, securityConfig)
     }
 
+    private val indentSpaces = 4
     private suspend fun writeSecurityKeysJsonToUri(uri: Uri, securityConfig: SecurityConfig) =
         withContext(Dispatchers.IO) {
             try {
@@ -407,7 +408,6 @@ class RadioConfigViewModel @Inject constructor(
                     securityConfig.publicKey.toByteArray()
                 val privateKeyBytes =
                     securityConfig.privateKey.toByteArray()
-
 
                 // Convert byte arrays to Base64 strings for human readability in JSON
                 val publicKeyBase64 = Base64.encodeToString(publicKeyBytes, Base64.NO_WRAP)
@@ -422,7 +422,7 @@ class RadioConfigViewModel @Inject constructor(
 
                 // Convert JSON object to a string
                 val jsonString =
-                    jsonObject.toString(4)
+                    jsonObject.toString(indentSpaces)
 
                 app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
                     FileOutputStream(parcelFileDescriptor.fileDescriptor).use { outputStream ->
@@ -430,15 +430,12 @@ class RadioConfigViewModel @Inject constructor(
                     }
                 }
                 setResponseStateSuccess()
-
             } catch (ex: Exception) {
                 val errorMessage = "Can't write security keys JSON error: ${ex.message}"
                 errormsg(errorMessage)
                 sendError(ex.customMessage)
             }
         }
-
-
     fun installProfile(protobuf: DeviceProfile) = with(protobuf) {
         meshService?.beginEditSettings()
         if (hasLongName() || hasShortName()) {
