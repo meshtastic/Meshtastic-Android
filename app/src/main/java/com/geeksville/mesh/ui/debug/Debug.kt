@@ -42,6 +42,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.CloudDownload
@@ -113,6 +115,7 @@ internal fun DebugScreen(
     var showFilterMenu by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
     var currentMatchIndex by remember { mutableStateOf(-1) }
+    var selectedLogId by remember { mutableStateOf<String?>(null) }
     
     val filteredLogs by remember(logs) {
         derivedStateOf {
@@ -415,7 +418,11 @@ internal fun DebugScreen(
             DebugItem(
                 modifier = Modifier.animateItem(),
                 log = log,
-                searchText = searchText
+                searchText = searchText,
+                isSelected = selectedLogId == log.uuid,
+                onLogClick = { 
+                    selectedLogId = if (selectedLogId == log.uuid) null else log.uuid
+                }
             )
         }
     }
@@ -426,20 +433,36 @@ internal fun DebugItem(
     log: UiMeshLog,
     modifier: Modifier = Modifier,
     searchText: String = "",
+    isSelected: Boolean = false,
+    onLogClick: () -> Unit = {}
 ) {
+    val theme = androidx.compose.material3.MaterialTheme.colorScheme
+    
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(4.dp),
+        colors = androidx.compose.material3.CardDefaults.cardColors(
+            containerColor = if (isSelected) 
+                theme.primary.copy(alpha = 0.1f) 
+            else 
+                theme.surface
+        ),
+        border = if (isSelected) {
+            androidx.compose.foundation.BorderStroke(2.dp, theme.primary)
+        } else null
     ) {
         SelectionContainer {
             Column(
-                modifier = Modifier.padding(8.dp)
+                modifier = Modifier
+                    .padding(if (isSelected) 12.dp else 8.dp)
+                    .fillMaxWidth()
+                    .clickable { onLogClick() }
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp),
+                        .padding(bottom = if (isSelected) 12.dp else 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -450,7 +473,11 @@ internal fun DebugItem(
                     Text(
                         text = typeAnnotatedString,
                         modifier = Modifier.weight(1f),
-                        style = TextStyle(fontWeight = FontWeight.Bold),
+                        style = TextStyle(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = if (isSelected) 16.sp else 14.sp,
+                            color = theme.onSurface
+                        ),
                     )
                     CopyIconButton(
                         valueToCopy = log.logMessage,
@@ -468,7 +495,11 @@ internal fun DebugItem(
                     )
                     Text(
                         text = dateAnnotatedString,
-                        style = TextStyle(fontWeight = FontWeight.Bold),
+                        style = TextStyle(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = if (isSelected) 14.sp else 12.sp,
+                            color = theme.onSurface
+                        ),
                     )
                 }
 
@@ -477,8 +508,9 @@ internal fun DebugItem(
                     text = messageAnnotatedString,
                     softWrap = false,
                     style = TextStyle(
-                        fontSize = 9.sp,
+                        fontSize = if (isSelected) 12.sp else 9.sp,
                         fontFamily = FontFamily.Monospace,
+                        color = theme.onSurface
                     )
                 )
             }
@@ -491,9 +523,10 @@ private fun rememberAnnotatedString(
     text: String,
     searchText: String
 ): AnnotatedString {
+    val theme = androidx.compose.material3.MaterialTheme.colorScheme
     val highlightStyle = SpanStyle(
-        background = Color.Yellow.copy(alpha = 0.3f),
-        color = Color.Black
+        background = theme.primary.copy(alpha = 0.3f),
+        color = theme.onPrimary
     )
     
     return remember(text, searchText) {
@@ -517,13 +550,14 @@ private fun rememberAnnotatedString(
 
 @Composable
 private fun rememberAnnotatedLogMessage(log: UiMeshLog, searchText: String): AnnotatedString {
+    val theme = androidx.compose.material3.MaterialTheme.colorScheme
     val style = SpanStyle(
         color = colorResource(id = R.color.colorAnnotation),
         fontStyle = FontStyle.Italic,
     )
     val highlightStyle = SpanStyle(
-        background = Color.Yellow.copy(alpha = 0.3f),
-        color = Color.Black
+        background = theme.primary.copy(alpha = 0.3f),
+        color = theme.onPrimary
     )
     
     return remember(log.uuid, searchText) {
@@ -582,6 +616,295 @@ private fun DebugPacketPreview() {
                         "to: -1409790708",
             )
         )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun DebugItemWithSearchHighlightPreview() {
+    AppTheme {
+        DebugItem(
+            UiMeshLog(
+                uuid = "1",
+                messageType = "TextMessage",
+                formattedReceivedDate = "9/27/20, 8:00:58 PM",
+                logMessage = "Hello world! This is a test message with some keywords to search for."
+            ),
+            searchText = "test message"
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun DebugItemPositionPreview() {
+    AppTheme {
+        DebugItem(
+            UiMeshLog(
+                uuid = "2",
+                messageType = "Position",
+                formattedReceivedDate = "9/27/20, 8:01:15 PM",
+                logMessage = "Position update from node (!a1b2c3d4) at coordinates 40.7128, -74.0060"
+            )
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun DebugItemErrorPreview() {
+    AppTheme {
+        DebugItem(
+            UiMeshLog(
+                uuid = "3",
+                messageType = "Error",
+                formattedReceivedDate = "9/27/20, 8:02:30 PM",
+                logMessage = "Connection failed: timeout after 30 seconds\n" +
+                        "Retry attempt: 3/5\n" +
+                        "Last known position: 40.7128, -74.0060"
+            )
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun DebugItemLongMessagePreview() {
+    AppTheme {
+        DebugItem(
+            UiMeshLog(
+                uuid = "4",
+                messageType = "Waypoint",
+                formattedReceivedDate = "9/27/20, 8:03:45 PM",
+                logMessage = "Waypoint created:\n" +
+                        "  Name: Home Base\n" +
+                        "  Description: Primary meeting location\n" +
+                        "  Latitude: 40.7128\n" +
+                        "  Longitude: -74.0060\n" +
+                        "  Altitude: 100m\n" +
+                        "  Icon: 🏠\n" +
+                        "  Created by: (!a1b2c3d4)\n" +
+                        "  Expires: 2025-12-31 23:59:59"
+            )
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun DebugItemSelectedPreview() {
+    AppTheme {
+        DebugItem(
+            UiMeshLog(
+                uuid = "5",
+                messageType = "TextMessage",
+                formattedReceivedDate = "9/27/20, 8:04:20 PM",
+                logMessage = "This is a selected log item with larger font sizes for better readability."
+            ),
+            isSelected = true
+        )
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun DebugMenuActionsPreview() {
+    AppTheme {
+        Row(
+            modifier = Modifier.padding(16.dp)
+        ) {
+            Button(
+                onClick = { /* Preview only */ },
+                modifier = Modifier.padding(4.dp)
+            ) {
+                Text(text = "Export Logs")
+            }
+            Button(
+                onClick = { /* Preview only */ },
+                modifier = Modifier.padding(4.dp)
+            ) {
+                Text(text = "Clear All")
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun DebugScreenEmptyPreview() {
+    AppTheme {
+        Surface {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                stickyHeader {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(8.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Row(
+                                    modifier = Modifier.weight(1f),
+                                    horizontalArrangement = Arrangement.Start,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    OutlinedTextField(
+                                        value = "",
+                                        onValueChange = { },
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(end = 8.dp),
+                                        placeholder = { Text("Search in logs...") },
+                                        singleLine = true
+                                    )
+                                    TextButton(
+                                        onClick = { }
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Text(
+                                                text = "Filters",
+                                                style = TextStyle(fontWeight = FontWeight.Bold)
+                                            )
+                                            Icon(
+                                                imageVector = Icons.TwoTone.FilterAltOff,
+                                                contentDescription = "Filter"
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                // Empty state
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(
+                                text = "No Debug Logs",
+                                style = TextStyle(
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            )
+                            Text(
+                                text = "Debug logs will appear here when available",
+                                style = TextStyle(
+                                    fontSize = 14.sp,
+                                    color = Color.Gray
+                                ),
+                                modifier = Modifier.padding(top = 8.dp)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun DebugScreenWithSampleDataPreview() {
+    AppTheme {
+        val sampleLogs = listOf(
+            UiMeshLog(
+                uuid = "1",
+                messageType = "NodeInfo",
+                formattedReceivedDate = "9/27/20, 8:00:58 PM",
+                logMessage = "from: 2885173132\n" +
+                        "decoded {\n" +
+                        "   position {\n" +
+                        "       altitude: 60\n" +
+                        "       battery_level: 81\n" +
+                        "       latitude_i: 411111136\n" +
+                        "       longitude_i: -711111805\n" +
+                        "       time: 1600390966\n" +
+                        "   }\n" +
+                        "}\n" +
+                        "hop_limit: 3\n" +
+                        "id: 1737414295\n" +
+                        "rx_snr: 9.5\n" +
+                        "rx_time: 316400569\n" +
+                        "to: -1409790708"
+            ),
+            UiMeshLog(
+                uuid = "2",
+                messageType = "TextMessage",
+                formattedReceivedDate = "9/27/20, 8:01:15 PM",
+                logMessage = "Hello from node (!a1b2c3d4)! How's the weather today?"
+            ),
+            UiMeshLog(
+                uuid = "3",
+                messageType = "Position",
+                formattedReceivedDate = "9/27/20, 8:02:30 PM",
+                logMessage = "Position update: 40.7128, -74.0060, altitude: 100m, battery: 85%"
+            ),
+            UiMeshLog(
+                uuid = "4",
+                messageType = "Waypoint",
+                formattedReceivedDate = "9/27/20, 8:03:45 PM",
+                logMessage = "New waypoint created: 'Meeting Point' at 40.7589, -73.9851"
+            ),
+            UiMeshLog(
+                uuid = "5",
+                messageType = "Error",
+                formattedReceivedDate = "9/27/20, 8:04:20 PM",
+                logMessage = "Connection timeout - retrying in 5 seconds..."
+            )
+        )
+        
+        // Note: This preview shows the UI structure but won't have actual data
+        // since the ViewModel isn't injected in previews
+        Surface {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                stickyHeader {
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier.padding(8.dp)
+                        ) {
+                            Text(
+                                text = "Debug Screen Preview",
+                                style = TextStyle(fontWeight = FontWeight.Bold),
+                                modifier = Modifier.padding(bottom = 8.dp)
+                            )
+                            Text(
+                                text = "Search and filter controls would appear here",
+                                style = TextStyle(fontSize = 12.sp, color = Color.Gray)
+                            )
+                        }
+                    }
+                }
+                
+                items(sampleLogs) { log ->
+                    DebugItem(log = log)
+                }
+            }
+        }
     }
 }
 
