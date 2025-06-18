@@ -62,6 +62,7 @@ data class DataPacket(
     var hopStart: Int = 0,
     var snr: Float = 0f,
     var rssi: Int = 0,
+    var replyId: Int? = null // If this is a reply to a previous message, this is the ID of that message
 ) : Parcelable {
 
     /**
@@ -72,11 +73,12 @@ data class DataPacket(
     /**
      * Syntactic sugar to make it easy to create text messages
      */
-    constructor(to: String?, channel: Int, text: String) : this(
+    constructor(to: String?, channel: Int, text: String, replyId: Int? = null) : this(
         to = to,
         bytes = text.encodeToByteArray(),
         dataType = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
-        channel = channel
+        channel = channel,
+        replyId = replyId ?: 0
     )
 
     /**
@@ -100,7 +102,7 @@ data class DataPacket(
         to = to,
         bytes = waypoint.toByteArray(),
         dataType = Portnums.PortNum.WAYPOINT_APP_VALUE,
-        channel = channel
+        channel = channel,
     )
 
     val waypoint: MeshProtos.Waypoint?
@@ -129,6 +131,7 @@ data class DataPacket(
         parcel.readInt(),
         parcel.readFloat(),
         parcel.readInt(),
+        if (parcel.readInt() == 0) null else parcel.readInt()
     )
 
     @Suppress("CyclomaticComplexMethod")
@@ -151,6 +154,7 @@ data class DataPacket(
         if (hopStart != other.hopStart) return false
         if (snr != other.snr) return false
         if (rssi != other.rssi) return false
+        if (replyId != other.replyId) return false
 
         return true
     }
@@ -169,6 +173,7 @@ data class DataPacket(
         result = 31 * result + hopStart
         result = 31 * result + snr.hashCode()
         result = 31 * result + rssi
+        result = 31 * result + replyId.hashCode()
         return result
     }
 
@@ -186,6 +191,7 @@ data class DataPacket(
         parcel.writeInt(hopStart)
         parcel.writeFloat(snr)
         parcel.writeInt(rssi)
+        parcel.writeInt(replyId ?: 0)
     }
 
     override fun describeContents(): Int {
@@ -207,6 +213,7 @@ data class DataPacket(
         hopStart = parcel.readInt()
         snr = parcel.readFloat()
         rssi = parcel.readInt()
+        replyId = parcel.readInt().let { if (it == 0) null else it }
     }
 
     companion object CREATOR : Parcelable.Creator<DataPacket> {

@@ -517,8 +517,20 @@ class UIViewModel @Inject constructor(
         initialValue = emptyList(),
     )
 
-    fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey)
-        .mapLatest { list -> list.map { it.toMessage(::getNode) } }
+    fun getMessagesFrom(contactKey: String): StateFlow<List<Message>> {
+        _contactKeyForMessages.value = contactKey
+        return messagesForContactKey
+    }
+
+    private val _contactKeyForMessages: MutableStateFlow<String?> = MutableStateFlow(null)
+    private val messagesForContactKey: StateFlow<List<Message>> =
+        _contactKeyForMessages.filterNotNull().flatMapLatest { contactKey ->
+            packetRepository.getMessagesFrom(contactKey, ::getNode)
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList(),
+        )
 
     val waypoints = packetRepository.getWaypoints().mapLatest { list ->
         list.associateBy { packet -> packet.data.waypoint!!.id }
@@ -534,7 +546,7 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
+    fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}", replyId: Int? = null) {
         // contactKey: unique contact key filter (channel)+(nodeId)
         val channel = contactKey[0].digitToIntOrNull()
         val dest = if (channel != null) contactKey.substring(1) else contactKey
@@ -547,7 +559,7 @@ class UIViewModel @Inject constructor(
                 favoriteNode(nodeDB.getNode(dest))
             }
         }
-        val p = DataPacket(dest, channel ?: 0, str)
+        val p = DataPacket(dest, channel ?: 0, str, replyId)
         sendDataPacket(p)
     }
 

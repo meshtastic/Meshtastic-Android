@@ -25,7 +25,6 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.hardware.usb.UsbManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.RemoteException
 import android.provider.Settings
@@ -46,6 +45,7 @@ import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
 import com.geeksville.mesh.android.BindFailedException
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
@@ -71,18 +71,11 @@ import com.geeksville.mesh.util.Exceptions
 import com.geeksville.mesh.util.LanguageUtils
 import com.geeksville.mesh.util.getPackageInfoCompat
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), Logging {
-
-    // Used to schedule a coroutine in the GUI thread
-    private val mainScope = CoroutineScope(Dispatchers.Main + Job())
-
     private val bluetoothViewModel: BluetoothViewModel by viewModels()
     private val model: UIViewModel by viewModels()
 
@@ -255,11 +248,6 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
-    override fun onDestroy() {
-        mainScope.cancel("Activity going away")
-        super.onDestroy()
-    }
-
     // Called when we gain/lose a connection to our mesh radio
     private fun onMeshConnectionChanged(newConnection: MeshService.ConnectionState) {
         if (newConnection == MeshService.ConnectionState.CONNECTED) {
@@ -288,27 +276,23 @@ class MainActivity : AppCompatActivity(), Logging {
 
     @Suppress("MagicNumber")
     private fun checkAlertDnD() {
-        if (
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-        ) {
-            val prefs = UIViewModel.getPreferences(this)
-            val rationaleShown = prefs.getBoolean("dnd_rationale_shown", false)
-            if (!rationaleShown && hasNotificationPermission()) {
-                fun showAlertAppNotificationSettings() {
-                    val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
-                    intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-                    intent.putExtra(Settings.EXTRA_CHANNEL_ID, "my_alerts")
-                    startActivity(intent)
-                }
-                model.showAlert(
-                    title = getString(R.string.alerts_dnd_request_title),
-                    html = getString(R.string.alerts_dnd_request_text),
-                    onConfirm = {
-                        showAlertAppNotificationSettings()
-                    },
-                ).also {
-                    prefs.edit { putBoolean("dnd_rationale_shown", true) }
-                }
+        val prefs = UIViewModel.getPreferences(this)
+        val rationaleShown = prefs.getBoolean("dnd_rationale_shown", false)
+        if (!rationaleShown && hasNotificationPermission()) {
+            fun showAlertAppNotificationSettings() {
+                val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                intent.putExtra(Settings.EXTRA_CHANNEL_ID, "my_alerts")
+                startActivity(intent)
+            }
+            model.showAlert(
+                title = getString(R.string.alerts_dnd_request_title),
+                html = getString(R.string.alerts_dnd_request_text),
+                onConfirm = {
+                    showAlertAppNotificationSettings()
+                },
+            ).also {
+                prefs.edit { putBoolean("dnd_rationale_shown", true) }
             }
         }
     }
@@ -325,11 +309,12 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
-    private var connectionJob: Job? = null
+    private var serviceSetupJob: Job? = null
 
     private val mesh = object : ServiceClient<IMeshService>(IMeshService.Stub::asInterface) {
         override fun onConnected(service: IMeshService) {
-            connectionJob = mainScope.handledLaunch {
+            serviceSetupJob?.cancel()
+            serviceSetupJob = lifecycleScope.handledLaunch {
                 serviceRepository.setMeshService(service)
 
                 try {
@@ -340,8 +325,6 @@ class MainActivity : AppCompatActivity(), Logging {
                     onMeshConnectionChanged(connectionState)
                 } catch (ex: RemoteException) {
                     errormsg("Device error during init ${ex.message}")
-                } finally {
-                    connectionJob = null
                 }
 
                 debug("connected to mesh service, connectionState=${model.connectionState.value}")
@@ -349,20 +332,13 @@ class MainActivity : AppCompatActivity(), Logging {
         }
 
         override fun onDisconnected() {
+            serviceSetupJob?.cancel()
             serviceRepository.setMeshService(null)
         }
     }
 
     private fun bindMeshService() {
         debug("Binding to mesh service!")
-        // we bind using the well known name, to make sure 3rd party apps could also
-        if (serviceRepository.meshService != null) {
-            /* This problem can occur if we unbind, but there is already an onConnected job waiting to run.  That job runs and then makes meshService != null again
-            I think I've fixed this by cancelling connectionJob.  We'll see!
-             */
-            Exceptions.reportError("meshService was supposed to be null, ignoring (but reporting a bug)")
-        }
-
         try {
             MeshService.startService(this) // Start the service so it stays running even after we unbind
         } catch (ex: Exception) {
@@ -376,25 +352,6 @@ class MainActivity : AppCompatActivity(), Logging {
             MeshService.createIntent(),
             BIND_AUTO_CREATE + BIND_ABOVE_CLIENT
         )
-    }
-
-    private fun unbindMeshService() {
-        // If we have received the service, and hence registered with
-        // it, then now is the time to unregister.
-        // if we never connected, do nothing
-        debug("Unbinding from mesh service!")
-        connectionJob?.let { job ->
-            connectionJob = null
-            warn("We had a pending onConnection job, so we are cancelling it")
-            job.cancel("unbinding")
-        }
-        mesh.close()
-        serviceRepository.setMeshService(null)
-    }
-
-    override fun onStop() {
-        unbindMeshService()
-        super.onStop()
     }
 
     override fun onStart() {

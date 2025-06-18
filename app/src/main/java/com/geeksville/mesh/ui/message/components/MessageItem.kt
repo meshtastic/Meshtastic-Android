@@ -27,9 +27,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.twotone.Cloud
 import androidx.compose.material.icons.twotone.CloudDone
 import androidx.compose.material.icons.twotone.CloudOff
@@ -38,20 +41,26 @@ import androidx.compose.material.icons.twotone.HowToReg
 import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
+import com.geeksville.mesh.database.entity.Reaction
+import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.ui.common.components.AutoLinkText
 import com.geeksville.mesh.ui.common.components.Rssi
@@ -60,77 +69,119 @@ import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
+import kotlin.uuid.ExperimentalUuidApi
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 internal fun MessageItem(
-    node: Node,
-    messageText: String?,
-    messageTime: String,
-    messageStatus: MessageStatus?,
-    selected: Boolean,
     modifier: Modifier = Modifier,
+    node: Node,
+    ourNode: Node,
+    message: Message,
+    selected: Boolean,
+    onReply: () -> Unit = {},
+    sendReaction: (String) -> Unit = {},
+    onShowReactions: () -> Unit = {},
+    emojis: List<Reaction> = emptyList(),
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
     onAction: (NodeMenuAction) -> Unit = {},
     onStatusClick: () -> Unit = {},
-    onSendReaction: (String) -> Unit = {},
     isConnected: Boolean,
-    snr: Float,
-    rssi: Int,
-    hopsAway: String?,
-) = Row(
+    onNavigateToOriginalMessage: (Int) -> Unit = {},
+) = Column(
     modifier = modifier
         .fillMaxWidth()
         .background(color = if (selected) Color.Gray else MaterialTheme.colorScheme.background),
-    verticalAlignment = Alignment.CenterVertically,
 ) {
     val fromLocal = node.user.id == DataPacket.ID_LOCAL
     val messageColor = if (fromLocal) {
-        MaterialTheme.colorScheme.secondaryContainer
+        Color(ourNode.colors.second).copy(alpha = 0.25f)
     } else {
-        MaterialTheme.colorScheme.tertiaryContainer
+        Color(node.colors.second).copy(alpha = 0.25f)
     }
-    val (topStart, topEnd) = if (fromLocal) 12.dp to 4.dp else 4.dp to 12.dp
-    val messageModifier = if (fromLocal) {
-        Modifier.padding(start = 48.dp, top = 8.dp, end = 8.dp, bottom = 6.dp)
-    } else {
-        Modifier.padding(start = 8.dp, top = 8.dp, end = 0.dp, bottom = 6.dp)
-    }
-    if (!fromLocal) {
-        NodeChip(
-            node = node,
-            modifier = Modifier
-                .padding(start = 8.dp, end = 4.dp),
-            onAction = onAction,
-            isConnected = isConnected,
-            isThisNode = false,
-        )
-    }
+    val messageModifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
+
     Card(
         modifier = Modifier
-            .weight(1f)
+            .padding(
+                start = if (fromLocal) 0.dp else 8.dp,
+                end = if (!fromLocal) 0.dp else 8.dp,
+            )
             .combinedClickable(
                 onClick = onClick,
                 onLongClick = onLongClick,
             )
             .then(messageModifier),
         colors = CardDefaults.cardColors(
-            containerColor = messageColor
+            containerColor = messageColor,
+            contentColor = contentColorFor(messageColor),
         ),
-        shape = RoundedCornerShape(topStart, topEnd, bottomStart = 12.dp, bottomEnd = 12.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
+                .fillMaxWidth(),
         ) {
-            Column(
-                modifier = Modifier.padding(top = 8.dp),
+            message.originalMessage?.let { originalMessage ->
+                val originalMessageIsFromLocal = originalMessage.node.user.id == DataPacket.ID_LOCAL
+                val originalMessageNode =
+                    if (originalMessageIsFromLocal) ourNode else originalMessage.node
+                OutlinedCard(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(4.dp)
+                        .clickable { onNavigateToOriginalMessage(originalMessage.packetId) },
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(originalMessageNode.colors.second).copy(alpha = 0.8f),
+                        contentColor = Color(originalMessageNode.colors.first),
+                    ),
+                ) {
+                    Row(
+                        modifier = Modifier.padding(4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.FormatQuote,
+                            contentDescription = stringResource(R.string.reply), // Add to strings.xml
+                            modifier = Modifier.size(14.dp), // Smaller icon
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Column {
+                            Text(
+                                text = "${originalMessageNode.user.shortName} ${originalMessageNode.user.longName
+                                    ?: stringResource(R.string.unknown_username)}",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Spacer(Modifier.height(1.dp))
+                            Text(
+                                text = originalMessage.text, // Should not be null if isAReply is true
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 2, // Keep snippet brief
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                }
+            }
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp),
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 if (!fromLocal) {
+                    NodeChip(
+                        node = node,
+                        onAction = onAction,
+                        isConnected = isConnected,
+                        isThisNode = false,
+                    )
+                    Spacer(Modifier.width(4.dp))
                     Text(
                         text = with(node.user) { "$longName ($id)" },
                         modifier = Modifier.padding(bottom = 4.dp),
@@ -139,68 +190,105 @@ internal fun MessageItem(
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
-                AutoLinkText(
-                    text = messageText.orEmpty(),
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    if (!fromLocal) {
-                        if (hopsAway == null) {
-                            Snr(snr, fontSize = MaterialTheme.typography.bodySmall.fontSize)
-                            Spacer(Modifier.weight(1f))
-                            Rssi(rssi, fontSize = MaterialTheme.typography.bodySmall.fontSize)
-                        } else { Text(
-                            text = hopsAway,
-                            fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                        ) }
-                        Spacer(Modifier.weight(1f))
-                    }
-                    Text(
-                        text = messageTime,
-                        fontSize = MaterialTheme.typography.bodySmall.fontSize,
-                    )
-                    AnimatedVisibility(visible = fromLocal) {
-                        Icon(
-                            imageVector = when (messageStatus) {
-                                MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
-                                MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
-                                MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
-                                MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
-                                MessageStatus.ERROR -> Icons.TwoTone.CloudOff
-                                else -> Icons.TwoTone.Warning
-                            },
-                            contentDescription = stringResource(R.string.message_delivery_status),
-                            modifier = Modifier
-                                .padding(start = 8.dp)
-                                .clickable { onStatusClick() },
+            }
+            AutoLinkText(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(4.dp),
+                text = message.text,
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (!fromLocal) {
+                    if (message.hopsAway == 0) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        ) {
+                            Snr(
+                                message.snr,
+                                fontSize = MaterialTheme.typography.labelSmall.fontSize
+                            )
+                            Rssi(
+                                message.rssi,
+                                fontSize = MaterialTheme.typography.labelSmall.fontSize
+                            )
+                        }
+                    } else {
+                        Text(
+                            text = "${message.hopsAway}",
+                            style = MaterialTheme.typography.labelSmall,
                         )
                     }
+                }
+                Text(
+                    text = message.time,
+                    style = MaterialTheme.typography.labelSmall,
+                )
+                AnimatedVisibility(visible = fromLocal) {
+                    Icon(
+                        imageVector = when (message.status) {
+                            MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
+                            MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
+                            MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
+                            MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
+                            MessageStatus.ERROR -> Icons.TwoTone.CloudOff
+                            else -> Icons.TwoTone.Warning
+                        },
+                        contentDescription = stringResource(R.string.message_delivery_status),
+                        modifier = Modifier
+                            .padding(start = 8.dp)
+                            .clickable { onStatusClick() },
+                    )
                 }
             }
         }
     }
-    if (!fromLocal) {
-        ReactionButton(Modifier.padding(4.dp), onSendReaction)
-    }
+    ReactionRow(
+        modifier = Modifier
+            .fillMaxWidth(),
+        reactions = emojis,
+        onSendReaction = sendReaction,
+        onShowReactions = onShowReactions,
+        onSendReply = onReply
+    )
 }
 
+@OptIn(ExperimentalUuidApi::class)
 @PreviewLightDark
 @Composable
 private fun MessageItemPreview() {
+    val message = Message(
+        text = stringResource(R.string.sample_message),
+        time = "10:00",
+        status = MessageStatus.DELIVERED,
+        snr = 20.5f,
+        rssi = 90,
+        hopsAway = 0,
+        uuid = 1L,
+        receivedTime = System.currentTimeMillis(),
+        node = NodePreviewParameterProvider().values.first(),
+        read = false,
+        routingError = 0,
+        packetId = 4545,
+        emojis = listOf(),
+        replyId = null,
+    )
     AppTheme {
         MessageItem(
-            node = NodePreviewParameterProvider().values.first(),
-            messageText = stringResource(R.string.sample_message),
-            messageTime = "10:00",
-            messageStatus = MessageStatus.DELIVERED,
+            message = message,
+            node = message.node,
             selected = false,
+            onClick = {},
+            onLongClick = {},
+            onStatusClick = {},
             isConnected = true,
-            snr = 20.5f,
-            rssi = 90,
-            hopsAway = null
+            ourNode = message.node,
         )
     }
 }

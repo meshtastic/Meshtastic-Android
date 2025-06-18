@@ -151,6 +151,5 @@ fun ConfigProtos.Config.DeviceConfig.Role?.isUnmessageableRole(): Boolean = this
     ConfigProtos.Config.DeviceConfig.Role.ROUTER_LATE,
     ConfigProtos.Config.DeviceConfig.Role.SENSOR,
     ConfigProtos.Config.DeviceConfig.Role.TRACKER,
-    ConfigProtos.Config.DeviceConfig.Role.TAK,
     ConfigProtos.Config.DeviceConfig.Role.TAK_TRACKER,
 )

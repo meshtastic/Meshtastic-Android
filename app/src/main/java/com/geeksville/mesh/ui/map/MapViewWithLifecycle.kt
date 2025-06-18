@@ -90,10 +90,12 @@ internal fun rememberMapViewWithLifecycle(
     tileSource: ITileSource = TileSourceFactory.DEFAULT_TILE_SOURCE,
 ): MapView {
     var savedZoom by rememberSaveable { mutableDoubleStateOf(zoomLevel) }
-    var savedCenter by rememberSaveable(stateSaver = Saver(
-        save = { mapOf("latitude" to it.latitude, "longitude" to it.longitude) },
-        restore = { GeoPoint(it["latitude"] ?: 0.0, it["longitude"] ?: .0) }
-    )) { mutableStateOf(mapCenter) }
+    var savedCenter by rememberSaveable(
+        stateSaver = Saver(
+            save = { mapOf("latitude" to it.latitude, "longitude" to it.longitude) },
+            restore = { GeoPoint(it["latitude"] ?: 0.0, it["longitude"] ?: .0) }
+        )
+    ) { mutableStateOf(mapCenter) }
 
     val context = LocalContext.current
     val mapView = remember {
@@ -155,7 +157,6 @@ internal fun rememberMapViewWithLifecycle(
         onDispose {
             lifecycle.removeObserver(observer)
             wakeLock.safeRelease()
-            mapView.onDetach()
         }
     }
     return mapView

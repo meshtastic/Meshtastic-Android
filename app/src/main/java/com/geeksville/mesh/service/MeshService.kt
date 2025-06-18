@@ -677,7 +677,8 @@ class MeshService : Service(), Logging {
                 wantAck = packet.wantAck,
                 hopStart = packet.hopStart,
                 snr = packet.rxSnr,
-                rssi = packet.rxRssi
+                rssi = packet.rxRssi,
+                replyId = data.replyId,
             )
         }
     }
@@ -733,7 +734,8 @@ class MeshService : Service(), Logging {
             data = dataPacket,
             snr = dataPacket.snr,
             rssi = dataPacket.rssi,
-            hopsAway = dataPacket.hopsAway
+            hopsAway = dataPacket.hopsAway,
+            replyId = dataPacket.replyId ?: 0
         )
         serviceScope.handledLaunch {
             packetRepository.get().apply {
@@ -772,7 +774,10 @@ class MeshService : Service(), Logging {
 
                 when (data.portnumValue) {
                     Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> {
-                        if (data.emoji != 0) {
+                        if (data.replyId != 0 && data.emoji == 0) {
+                            debug("Received REPLY from $fromId")
+                            rememberDataPacket(dataPacket)
+                        } else if (data.replyId != 0 && data.emoji != 0) {
                             debug("Received EMOJI from $fromId")
                             rememberReaction(packet)
                         } else {
