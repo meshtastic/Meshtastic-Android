@@ -290,6 +290,7 @@
     <string name="device_metrics_log">Laitteen mittausloki</string>
     <string name="node_map">Solmukartta</string>
     <string name="position_log">Sijainnin Loki</string>
+    <string name="last_position_update">Viimeisin sijainnin päivitys</string>
     <string name="env_metrics_log">Ympäristöanturit</string>
     <string name="sig_metrics_log">Signaalin voimakkuudet</string>
     <string name="administration">Ylläpito</string>
@@ -655,4 +656,7 @@
     <string name="show_waypoints">Näytä reittipisteet</string>
     <string name="show_precision_circle">Näytä tarkkuuspiirit</string>
     <string name="client_notification">Sovellusilmoitukset</string>
+    <string name="compromised_keys">Turvallisuusriski havaittu: avaimet ovat vaarantuneet. Valitse OK luodaksesi uudet.</string>
+    <string name="regenerate_private_key">Luo uusi yksityinen avain</string>
+    <string name="regenerate_keys_confirmation">Oletko varma, että haluat luoda uuden yksityisen avaimen?</string>
 </resources>

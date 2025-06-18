@@ -21,7 +21,7 @@
     <string name="main_tab_map">地图</string>
     <string name="main_tab_channel">频道</string>
     <string name="main_tab_settings">设置</string>
-    <string name="node_filter_placeholder">筛选器csvfganw</string>
+    <string name="node_filter_placeholder">筛选</string>
     <string name="desc_node_filter_clear">清除筛选</string>
     <string name="node_filter_include_unknown">包括未知内容</string>
     <string name="node_filter_only_online">隐藏离线节点</string>
@@ -64,7 +64,7 @@
     <string name="role_tak">优化ATAK系统通讯，减少常规广播。</string>
     <string name="role_client_hidden">仅在需要时广播的设备，用于隐蔽或节能模式</string>
     <string name="role_lost_and_found">定期向默认频道广播位置，以协助设备恢复。</string>
-    <string name="role_tak_tracker">启用自动TAKPLI广播并减少常规广播。</string>
+    <string name="role_tak_tracker">启用自动 TAK PLI 广播并减少常规广播。</string>
     <string name="role_router_late">基础设施节点，总是在所有其他模式之后重新广播数据包一次，以确保本地集群的额外覆盖范围。会在节点列表中显示。</string>
     <string name="rebroadcast_mode_all">重新广播任何观察到的消息，无论是来自我们的私有频道还是具有相同 LoRa 参数的其他网状网络。</string>
     <string name="rebroadcast_mode_all_skip_decoding">与 ALL 模式的行为相同，但跳过数据包解码，仅简单地重新广播它们。仅适用于中继器角色。在其他角色中设置此选项将表现为 ALL 模式。</string>
@@ -104,7 +104,7 @@
     <string name="report_a_bug">报告 Bug 详细信息</string>
     <string name="report_bug_text">您确定要报告错误吗？报告后，请在 https://github.com/orgs/meshtastic/discussions 上贴文，以便我们可以将报告与您发现的问题匹配。</string>
     <string name="report">报告</string>
-    <string name="not_paired_yet">您还没有配对.</string>
+    <string name="not_paired_yet">您还没有配对。</string>
     <string name="change_radio">换设备</string>
     <string name="pairing_completed">配对完成，启动服务</string>
     <string name="pairing_failed_try_again">配对失败，请重新选择</string>
@@ -150,7 +150,7 @@
     <string name="protocol_stress_test">协议压力测试</string>
     <string name="firmware_too_old">需要固件更新。</string>
     <string name="firmware_old">版本过旧，无法与此应用程序通讯。欲了解更多信息，请参阅 Meshtastic 网站上的<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">韧体安装指南</a>。</string>
-    <string name="okay">好的</string>
+    <string name="okay">确定</string>
     <string name="must_set_region">您必须先选择一个地区</string>
     <string name="region">地区</string>
     <string name="cant_change_no_radio">无法更改频道，因为装置尚未连接。请再试一次。</string>
@@ -199,7 +199,7 @@
     <string name="shutdown">关机</string>
     <string name="cant_shutdown">此设备不支持关机</string>
     <string name="reboot">重启</string>
-    <string name="traceroute">追踪器</string>
+    <string name="traceroute">路由追踪</string>
     <string name="intro_show">显示简介</string>
     <string name="intro_welcome">欢迎来到Meshtastic</string>
     <string name="intro_welcome_text">Meshtastic 是一个开源、离网、加密的通讯平台。Meshtastic 无线电组成网状网络，使用 LoRa 协议传送文字讯息进行通讯。</string>
@@ -284,14 +284,15 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="exchange_userinfo">交换用户信息</string>
     <string name="meshtastic_new_nodes_notifications">新节点通知</string>
     <string name="more_details">查看更多</string>
-    <string name="snr">SNR（信噪比）</string>
+    <string name="snr">SNR</string>
     <string name="snr_definition">信噪比（Signal-to-Noise Ratio, SNR）是一种用于通信领域的测量指标，用于量化目标信号与背景噪声的比例。在 Meshtastic 及其他无线系统中，较高的信噪比表示信号更加清晰，从而能够提升数据传输的可靠性和质量。</string>
-    <string name="rssi">RSSI（接收信号强度指示）</string>
+    <string name="rssi">RSSI</string>
     <string name="rssi_definition">接收信号强度指示（Received Signal Strength Indicator, RSSI）是一种用于测量天线接收到的信号功率的指标。较高的 RSSI 值通常表示更强、更稳定的连接。</string>
     <string name="iaq_definition">室内空气质量（Indoor Air Quality, IAQ）：由 Bosch BME680 传感器测量的相对标尺 IAQ 值，取值范围为 0–500。</string>
     <string name="device_metrics_log">设备测量日志</string>
     <string name="node_map">节点地图</string>
     <string name="position_log">定位日志</string>
+    <string name="last_position_update">最后位置更新</string>
     <string name="env_metrics_log">环境测量日志</string>
     <string name="sig_metrics_log">信号测量日志</string>
     <string name="administration">管理</string>
@@ -304,7 +305,7 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="share_message">分享消息</string>
     <string name="signal">信号</string>
     <string name="signal_quality">信号质量</string>
-    <string name="traceroute_log">路由追踪</string>
+    <string name="traceroute_log">路由追踪日志</string>
     <string name="traceroute_direct">直连</string>
     <plurals name="traceroute_hops">
         <item quantity="other">%d 跳数</item>
@@ -535,7 +536,7 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="range_test_config">范围测试设置</string>
     <string name="range_test_enabled">启用范围测试</string>
     <string name="sender_message_interval_seconds">发件人消息间隔(秒)</string>
-    <string name="save_csv_in_storage_esp32_only">保存 CSV 于存储 (仅ESP32 )</string>
+    <string name="save_csv_in_storage_esp32_only">保存 CSV 到存储 (仅ESP32)</string>
     <string name="remote_hardware_config">远程硬件设置</string>
     <string name="remote_hardware_enabled">启用远程硬件</string>
     <string name="allow_undefined_pin_access">允许未定义的引脚访问</string>
@@ -656,4 +657,7 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="show_waypoints">显示航点</string>
     <string name="show_precision_circle">显示精度圈</string>
     <string name="client_notification">客户端通知</string>
+    <string name="compromised_keys">检测到密钥泄漏，请点击 确定 进行重新生成。</string>
+    <string name="regenerate_private_key">重新生成私钥</string>
+    <string name="regenerate_keys_confirmation">您确定要重新生成您的私钥吗？</string>
 </resources>

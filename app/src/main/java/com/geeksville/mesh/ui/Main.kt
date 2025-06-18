@@ -148,6 +148,30 @@ fun MainScreen(
         }
     }
 
+    val clientNotification by viewModel.clientNotification.collectAsStateWithLifecycle()
+    clientNotification?.let { notification ->
+        var message = notification.message
+        val compromisedKeys =
+            if (notification.hasLowEntropyKey() || notification.hasDuplicatedPublicKey()) {
+                message = stringResource(R.string.compromised_keys)
+                true
+            } else {
+                false
+            }
+        SimpleAlertDialog(
+            title = R.string.client_notification,
+            text = {
+                Text(text = message)
+            },
+            onConfirm = {
+                if (compromisedKeys) {
+                    navController.navigate(RadioConfigRoutes.Security)
+                }
+                viewModel.clearClientNotification(notification)
+            },
+        )
+    }
+
     val traceRouteResponse by viewModel.tracerouteResponse.observeAsState()
     traceRouteResponse?.let { response ->
         SimpleAlertDialog(
@@ -201,7 +225,6 @@ fun MainScreen(
                                 // Pop up to the start destination of the graph to
                                 // avoid building up a large stack of destinations
                                 // on the back stack as users select items
-                                destination.route
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     saveState = true
                                 }

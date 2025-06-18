@@ -179,7 +179,7 @@ data class Contact(
     val nodeColors: Pair<Int, Int>? = null,
 )
 
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "LargeClass")
 @HiltViewModel
 class UIViewModel @Inject constructor(
     private val app: Application,
@@ -203,13 +203,22 @@ class UIViewModel @Inject constructor(
         preferences.edit { putInt("theme", theme) }
     }
 
+    private val _lastTraceRouteTime = MutableStateFlow<Long?>(null)
+    val lastTraceRouteTime: StateFlow<Long?> = _lastTraceRouteTime.asStateFlow()
+
+    val clientNotification: StateFlow<MeshProtos.ClientNotification?> = radioConfigRepository.clientNotification
+    fun clearClientNotification(notification: MeshProtos.ClientNotification) {
+        radioConfigRepository.clearClientNotification()
+        meshServiceNotifications.clearClientNotification(notification)
+    }
+
     data class AlertData(
         val title: String,
         val message: String? = null,
         val html: String? = null,
         val onConfirm: (() -> Unit)? = null,
         val onDismiss: (() -> Unit)? = null,
-        val choices: Map<String, () -> Unit> = emptyMap()
+        val choices: Map<String, () -> Unit> = emptyMap(),
     )
 
     private val _currentAlert: MutableStateFlow<AlertData?> = MutableStateFlow(null)
@@ -221,7 +230,7 @@ class UIViewModel @Inject constructor(
         html: String? = null,
         onConfirm: (() -> Unit)? = {},
         dismissable: Boolean = true,
-        choices: Map<String, () -> Unit> = emptyMap()
+        choices: Map<String, () -> Unit> = emptyMap(),
     ) {
         _currentAlert.value =
             AlertData(
@@ -235,7 +244,7 @@ class UIViewModel @Inject constructor(
                 onDismiss = {
                     if (dismissable) dismissAlert()
                 },
-                choices = choices
+                choices = choices,
             )
     }
 
@@ -252,7 +261,6 @@ class UIViewModel @Inject constructor(
     val receivingLocationUpdates: StateFlow<Boolean> get() = locationRepository.receivingLocationUpdates
     val meshService: IMeshService? get() = radioConfigRepository.meshService
 
-    val bondedAddress get() = radioInterfaceService.getBondedDeviceAddress()
     val selectedBluetooth get() = radioInterfaceService.getDeviceAddress()?.getOrNull(0) == 'x'
 
     private val _localConfig = MutableStateFlow<LocalConfig>(LocalConfig.getDefaultInstance())
@@ -283,7 +291,8 @@ class UIViewModel @Inject constructor(
     private val onlyDirect = MutableStateFlow(preferences.getBoolean("only-direct", false))
 
     private val onlyFavorites = MutableStateFlow(preferences.getBoolean("only-favorites", false))
-    private val showWaypointsOnMap = MutableStateFlow(preferences.getBoolean("show-waypoints-on-map", true))
+    private val showWaypointsOnMap =
+        MutableStateFlow(preferences.getBoolean("show-waypoints-on-map", true))
     private val showPrecisionCircleOnMap =
         MutableStateFlow(preferences.getBoolean("show-precision-circle-on-map", true))
 
@@ -439,18 +448,6 @@ class UIViewModel @Inject constructor(
             )
         }.launchIn(viewModelScope)
 
-        radioConfigRepository.clientNotification.filterNotNull().onEach { notification ->
-            showAlert(
-                title = app.getString(R.string.client_notification),
-                message = notification.message,
-                onConfirm = {
-                    radioConfigRepository.clearClientNotification()
-                    meshServiceNotifications.clearClientNotification(notification)
-                },
-                dismissable = false
-            )
-        }.launchIn(viewModelScope)
-
         radioConfigRepository.localConfigFlow.onEach { config ->
             _localConfig.value = config
         }.launchIn(viewModelScope)
@@ -537,7 +534,7 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
+    fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}", replyId: Int? = null) {
         // contactKey: unique contact key filter (channel)+(nodeId)
         val channel = contactKey[0].digitToIntOrNull()
         val dest = if (channel != null) contactKey.substring(1) else contactKey
@@ -550,7 +547,7 @@ class UIViewModel @Inject constructor(
                 favoriteNode(nodeDB.getNode(dest))
             }
         }
-        val p = DataPacket(dest, channel ?: 0, str)
+        val p = DataPacket(dest, channel ?: 0, str, replyId)
         sendDataPacket(p)
     }
 
@@ -661,7 +658,8 @@ class UIViewModel @Inject constructor(
         showSnackbar(R.string.channel_invalid)
     }
 
-    val latestStableFirmwareRelease = firmwareReleaseRepository.stableRelease.mapNotNull { it?.asDeviceVersion() }
+    val latestStableFirmwareRelease =
+        firmwareReleaseRepository.stableRelease.mapNotNull { it?.asDeviceVersion() }
 
     /**
      * Called immediately after activity observes requestChannelUrl
@@ -707,7 +705,11 @@ class UIViewModel @Inject constructor(
             is NodeMenuAction.Favorite -> favoriteNode(action.node)
             is NodeMenuAction.RequestUserInfo -> requestUserInfo(action.node.num)
             is NodeMenuAction.RequestPosition -> requestPosition(action.node.num)
-            is NodeMenuAction.TraceRoute -> requestTraceroute(action.node.num)
+            is NodeMenuAction.TraceRoute -> {
+                requestTraceroute(action.node.num)
+                _lastTraceRouteTime.value = System.currentTimeMillis()
+            }
+
             else -> {}
         }
     }

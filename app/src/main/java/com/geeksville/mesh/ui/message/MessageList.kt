@@ -18,11 +18,9 @@
 package com.geeksville.mesh.ui.message
 
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
@@ -39,9 +37,9 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -49,7 +47,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.Reaction
@@ -57,11 +54,11 @@ import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.message.components.MessageItem
 import com.geeksville.mesh.ui.message.components.ReactionDialog
-import com.geeksville.mesh.ui.message.components.ReactionRow
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.launch
 
 @Composable
 fun DeliveryInfo(
@@ -119,6 +116,7 @@ internal fun MessageList(
     onNodeMenuAction: (NodeMenuAction) -> Unit,
     viewModel: UIViewModel,
     contactKey: String,
+    onReply: (Message?) -> Unit,
 ) {
     val haptics = LocalHapticFeedback.current
     val inSelectionMode by remember { derivedStateOf { selectedIds.value.isNotEmpty() } }
@@ -159,29 +157,28 @@ internal fun MessageList(
     }
 
     val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
+    val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isConnected by viewModel.isConnected.collectAsStateWithLifecycle(false)
-
+    val coroutineScope = rememberCoroutineScope()
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         state = listState,
         reverseLayout = true,
     ) {
         items(messages, key = { it.uuid }) { msg ->
-            val fromLocal = msg.node.user.id == DataPacket.ID_LOCAL
-            val selected by remember { derivedStateOf { selectedIds.value.contains(msg.uuid) } }
-            var node by remember {
-                mutableStateOf(nodes.find { it.num == msg.node.num } ?: msg.node)
-            }
-            LaunchedEffect(nodes) {
-                node = nodes.find { it.num == msg.node.num } ?: msg.node
-            }
-            ReactionRow(fromLocal, msg.emojis) { showReactionDialog = msg.emojis }
-            Box(Modifier.wrapContentSize(Alignment.TopStart)) {
+            if (ourNode != null) {
+                val selected by remember { derivedStateOf { selectedIds.value.contains(msg.uuid) } }
+                var node by remember {
+                    mutableStateOf(nodes.find { it.num == msg.node.num } ?: msg.node)
+                }
+                val originalMessage = messages.find { it.packetId == msg.replyId }
+                LaunchedEffect(nodes, messages) {
+                    node = nodes.find { it.num == msg.node.num } ?: msg.node
+                }
                 MessageItem(
                     node = node,
-                    messageText = msg.text,
-                    messageTime = msg.time,
-                    messageStatus = msg.status,
+                    ourNode = ourNode!!,
+                    message = msg,
                     selected = selected,
                     onClick = { if (inSelectionMode) selectedIds.toggle(msg.uuid) },
                     onLongClick = {
@@ -190,16 +187,19 @@ internal fun MessageList(
                     },
                     onAction = onNodeMenuAction,
                     onStatusClick = { showStatusDialog = msg },
-                    onSendReaction = { onSendReaction(it, msg.packetId) },
+                    onReply = { onReply(msg) },
+                    emojis = msg.emojis,
+                    sendReaction = { onSendReaction(it, msg.packetId) },
+                    onShowReactions = { showReactionDialog = msg.emojis },
                     isConnected = isConnected,
-                    snr = msg.snr,
-                    rssi = msg.rssi,
-                    hopsAway = if (msg.hopsAway > 0) { "%s: %d".format(
-                            stringResource(id = R.string.hops_away),
-                            msg.hopsAway
-                        ) } else {
-                            null
+                    originalMessage = originalMessage,
+                    onNavigateToOriginalMessage = {
+                        coroutineScope.launch {
+                            listState.animateScrollToItem(
+                                index = messages.indexOfFirst { it.packetId == msg.replyId }
+                            )
                         }
+                    }
                 )
             }
         }
