@@ -138,7 +138,7 @@ class DebugViewModel @Inject constructor(
     }
 
     val presetFilters = arrayOf(
-        "own 0x", // will need to get that from connected nodes??
-        "0xffffffff",     // broadcast
+        // "!xxxxxxxx", // Should be able to get the address of the connected node. ie. messages to us.
+        "!ffffffff",     // broadcast
     ) + PortNum.entries.map { it.name } // all apps
 }
