@@ -148,9 +148,7 @@ internal fun DebugScreen(
     val allMatches = remember(searchText, filteredLogs) {
         if (searchText.isEmpty()) {
             emptyList()
-        } 
-        else 
-        {
+        } else {
             filteredLogs.flatMapIndexed { logIndex, log ->
             searchText.split(" ").flatMap { term ->
                 val messageMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.logMessage)
@@ -283,8 +281,11 @@ internal fun DebugScreen(
                                             style = TextStyle(fontWeight = FontWeight.Bold)
                                         )
                                         Icon(
-                                            imageVector = if (filterTexts.isNotEmpty()) 
-                                                Icons.TwoTone.FilterAlt else Icons.TwoTone.FilterAltOff,
+                                            imageVector = if (filterTexts.isNotEmpty()) {
+                                                Icons.TwoTone.FilterAlt
+                                            } else {
+                                                Icons.TwoTone.FilterAltOff
+                                            },
                                             contentDescription = "Filter"
                                         )
                                     }
@@ -450,14 +451,15 @@ internal fun DebugItem(
         colors = androidx.compose.material3.CardDefaults.cardColors(
             containerColor = if (isSelected) {
                 theme.primary.copy(alpha = 0.1f)
-            }
-            else {
+            } else {
                 theme.surface
             }
         ),
         border = if (isSelected) {
             androidx.compose.foundation.BorderStroke(2.dp, theme.primary)
-        } else null
+        } else {
+            null
+        }
     ) {
         SelectionContainer {
             Column(
@@ -509,7 +511,6 @@ internal fun DebugItem(
                         ),
                     )
                 }
-
                 val messageAnnotatedString = rememberAnnotatedLogMessage(log, searchText)
                 Text(
                     text = messageAnnotatedString,
@@ -579,7 +580,7 @@ private fun rememberAnnotatedLogMessage(log: UiMeshLog, searchText: String): Ann
                         end = it.range.last + 1
                     )
                 }
-            
+
             // Add search highlight annotations
             if (searchText.isNotEmpty()) {
                 searchText.split(" ").forEach { term ->
@@ -829,6 +830,7 @@ private fun DebugScreenEmptyPreview() {
 
 @PreviewLightDark
 @Composable
+@Suppress("detekt:LongMethod") // big preview
 private fun DebugScreenWithSampleDataPreview() {
     AppTheme {
         val sampleLogs = listOf(
@@ -877,7 +879,7 @@ private fun DebugScreenWithSampleDataPreview() {
                 logMessage = "Connection timeout - retrying in 5 seconds..."
             )
         )
-        
+
         // Note: This preview shows the UI structure but won't have actual data
         // since the ViewModel isn't injected in previews
         Surface {
@@ -905,7 +907,6 @@ private fun DebugScreenWithSampleDataPreview() {
                         }
                     }
                 }
-                
                 items(sampleLogs) { log ->
                     DebugItem(log = log)
                 }
@@ -922,7 +923,7 @@ fun DebugMenuActions(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val logs by viewModel.meshLog.collectAsStateWithLifecycle()
-    
+
     Button(
         onClick = { 
             scope.launch {
@@ -945,11 +946,11 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
     try {
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
         val fileName = "meshtastic_debug_$timestamp.log"
-        
+
         // Get the Downloads directory
         val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         val logFile = File(downloadsDir, fileName)
-        
+
         // Create the file and write logs
         OutputStreamWriter(FileOutputStream(logFile), StandardCharsets.UTF_8).use { writer ->
             logs.forEach { log ->
@@ -958,7 +959,7 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
                 writer.write("\n\n")
             }
         }
-        
+
         // Notify user of success
         withContext(Dispatchers.Main) {
             Toast.makeText(
