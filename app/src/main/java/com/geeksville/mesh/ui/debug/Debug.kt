@@ -426,7 +426,7 @@ internal fun DebugScreen(
                 log = log,
                 searchText = searchText,
                 isSelected = selectedLogId == log.uuid,
-                onLogClick = { 
+                onLogClick = {
                     selectedLogId = if (selectedLogId == log.uuid) null else log.uuid
                 }
             )
@@ -738,6 +738,7 @@ private fun DebugMenuActionsPreview() {
 
 @PreviewLightDark
 @Composable
+@Suppress("detekt:LongMethod") // big preview
 private fun DebugScreenEmptyPreview() {
     AppTheme {
         Surface {
@@ -793,7 +794,6 @@ private fun DebugScreenEmptyPreview() {
                         }
                     }
                 }
-                
                 // Empty state
                 item {
                     Box(
@@ -925,7 +925,7 @@ fun DebugMenuActions(
     val logs by viewModel.meshLog.collectAsStateWithLifecycle()
 
     Button(
-        onClick = { 
+        onClick = {
             scope.launch {
                 exportAllLogs(context, logs)
             }
@@ -965,6 +965,22 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
             Toast.makeText(
                 context,
                 "Logs exported to ${logFile.absolutePath}",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    } catch (e: SecurityException) {
+        withContext(Dispatchers.Main) {
+            Toast.makeText(
+                context,
+                "Permission denied: Cannot write to Downloads folder",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    } catch (e: IOException) {
+        withContext(Dispatchers.Main) {
+            Toast.makeText(
+                context,
+                "Failed to write log file: ${e.message}",
                 Toast.LENGTH_LONG
             ).show()
         }
