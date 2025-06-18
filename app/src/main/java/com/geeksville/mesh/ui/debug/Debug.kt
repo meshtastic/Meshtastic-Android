@@ -116,7 +116,7 @@ internal fun DebugScreen(
     var searchText by remember { mutableStateOf("") }
     var currentMatchIndex by remember { mutableStateOf(-1) }
     var selectedLogId by remember { mutableStateOf<String?>(null) }
-    
+
     val filteredLogs by remember(logs) {
         derivedStateOf {
             logs.filter { log ->
@@ -144,10 +144,14 @@ internal fun DebugScreen(
         val end: Int,
         val field: String
     )
-    
+
     val allMatches = remember(searchText, filteredLogs) {
-        if (searchText.isEmpty()) emptyList()
-        else filteredLogs.flatMapIndexed { logIndex, log ->
+        if (searchText.isEmpty()) {
+            emptyList()
+        } 
+        else 
+        {
+            filteredLogs.flatMapIndexed { logIndex, log ->
             searchText.split(" ").flatMap { term ->
                 val messageMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.logMessage)
                     .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "message") }
@@ -158,10 +162,11 @@ internal fun DebugScreen(
                 messageMatches + typeMatches + dateMatches
             }
         }.sortedBy { it.start }
+        }
     }
 
     val hasMatches = allMatches.isNotEmpty()
-    
+
     fun scrollToMatch(index: Int) {
         if (index in allMatches.indices) {
             currentMatchIndex = index
@@ -437,16 +442,18 @@ internal fun DebugItem(
     onLogClick: () -> Unit = {}
 ) {
     val theme = androidx.compose.material3.MaterialTheme.colorScheme
-    
+
     Card(
         modifier = modifier
             .fillMaxWidth()
             .padding(4.dp),
         colors = androidx.compose.material3.CardDefaults.cardColors(
-            containerColor = if (isSelected) 
-                theme.primary.copy(alpha = 0.1f) 
-            else 
+            containerColor = if (isSelected) {
+                theme.primary.copy(alpha = 0.1f)
+            }
+            else {
                 theme.surface
+            }
         ),
         border = if (isSelected) {
             androidx.compose.foundation.BorderStroke(2.dp, theme.primary)
@@ -528,11 +535,10 @@ private fun rememberAnnotatedString(
         background = theme.primary.copy(alpha = 0.3f),
         color = theme.onSurface
     )
-    
+
     return remember(text, searchText) {
         buildAnnotatedString {
             append(text)
-            
             if (searchText.isNotEmpty()) {
                 searchText.split(" ").forEach { term ->
                     term.toRegex(RegexOption.IGNORE_CASE).findAll(text).forEach { match ->
@@ -559,11 +565,11 @@ private fun rememberAnnotatedLogMessage(log: UiMeshLog, searchText: String): Ann
         background = theme.primary.copy(alpha = 0.3f),
         color = theme.onSurface
     )
-    
+
     return remember(log.uuid, searchText) {
         buildAnnotatedString {
             append(log.logMessage)
-            
+
             // Add node ID annotations
             REGEX_ANNOTATED_NODE_ID.findAll(log.logMessage).toList().reversed()
                 .forEach {
