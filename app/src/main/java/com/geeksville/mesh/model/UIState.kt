@@ -518,7 +518,15 @@ class UIViewModel @Inject constructor(
     )
 
     fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey)
-        .mapLatest { list -> list.map { it.toMessage(::getNode) } }
+        .mapLatest { packets ->
+            packets.map { packet ->
+                val message = packet.toMessage(::getNode)
+                message.replyId.takeIf { it != null && it != 0 }
+                    ?.let { packetRepository.getPacketByPacketId(it) }
+                    ?.toMessage(::getNode)
+                    ?.let { originalMessage -> message.copy(originalMessage = originalMessage) } ?: message
+            }
+        }
 
     val waypoints = packetRepository.getWaypoints().mapLatest { list ->
         list.associateBy { packet -> packet.data.waypoint!!.id }

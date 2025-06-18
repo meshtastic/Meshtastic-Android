@@ -89,7 +89,6 @@ internal fun MessageItem(
     onAction: (NodeMenuAction) -> Unit = {},
     onStatusClick: () -> Unit = {},
     isConnected: Boolean,
-    originalMessage: Message? = null,
     onNavigateToOriginalMessage: (Int) -> Unit = {},
 ) = Column(
     modifier = modifier
@@ -124,7 +123,7 @@ internal fun MessageItem(
             modifier = Modifier
                 .fillMaxWidth(),
         ) {
-            if (originalMessage != null) {
+            message.originalMessage?.let { originalMessage ->
                 val originalMessageIsFromLocal = originalMessage.node.user.id == DataPacket.ID_LOCAL
                 val originalMessageNode =
                     if (originalMessageIsFromLocal) ourNode else originalMessage.node

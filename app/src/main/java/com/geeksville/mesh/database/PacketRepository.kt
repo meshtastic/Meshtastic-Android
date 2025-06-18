@@ -72,6 +72,10 @@ class PacketRepository @Inject constructor(private val packetDaoLazy: dagger.Laz
         packetDao.getPacketById(requestId)
     }
 
+    suspend fun getPacketByPacketId(packetId: Int) = withContext(Dispatchers.IO) {
+        packetDao.getPacketByPacketId(packetId)
+    }
+
     suspend fun deleteMessages(uuidList: List<Long>) = withContext(Dispatchers.IO) {
         for (chunk in uuidList.chunked(500)) { // limit number of UUIDs per query
             packetDao.deleteMessages(chunk)

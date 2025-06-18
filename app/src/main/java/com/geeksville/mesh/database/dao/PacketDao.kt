@@ -19,15 +19,15 @@ package com.geeksville.mesh.database.dao
 
 import androidx.room.Dao
 import androidx.room.MapColumn
-import androidx.room.Update
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import androidx.room.Upsert
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.database.entity.ContactSettings
-import com.geeksville.mesh.database.entity.PacketEntity
 import com.geeksville.mesh.database.entity.Packet
+import com.geeksville.mesh.database.entity.PacketEntity
 import com.geeksville.mesh.database.entity.ReactionEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -173,6 +173,9 @@ interface PacketDao {
     """
     )
     suspend fun getPacketById(requestId: Int): Packet?
+
+    @Query("SELECT * FROM packet WHERE packet_id = :packetId LIMIT 1")
+    suspend fun getPacketByPacketId(packetId: Int): PacketEntity?
 
     @Transaction
     suspend fun getQueuedPackets(): List<DataPacket>? =

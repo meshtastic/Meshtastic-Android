@@ -171,10 +171,6 @@ internal fun MessageList(
                 var node by remember {
                     mutableStateOf(nodes.find { it.num == msg.node.num } ?: msg.node)
                 }
-                val originalMessage = messages.find { it.packetId == msg.replyId }
-                LaunchedEffect(nodes, messages) {
-                    node = nodes.find { it.num == msg.node.num } ?: msg.node
-                }
                 MessageItem(
                     node = node,
                     ourNode = ourNode!!,
@@ -192,7 +188,6 @@ internal fun MessageList(
                     sendReaction = { onSendReaction(it, msg.packetId) },
                     onShowReactions = { showReactionDialog = msg.emojis },
                     isConnected = isConnected,
-                    originalMessage = originalMessage,
                     onNavigateToOriginalMessage = {
                         coroutineScope.launch {
                             listState.animateScrollToItem(
