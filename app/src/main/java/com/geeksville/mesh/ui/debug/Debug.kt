@@ -507,7 +507,6 @@ internal fun DebugScreen(
 ) {
     val listState = rememberLazyListState()
     val logs by viewModel.meshLog.collectAsStateWithLifecycle()
-
     var filterTexts by remember { mutableStateOf(listOf<String>()) }
     var filteredLogs by remember { mutableStateOf(logs) }
     var searchState by remember { mutableStateOf(SearchState()) }
@@ -532,7 +531,6 @@ internal fun DebugScreen(
             }
         }
     }
-
     // Handle search result navigation
     LaunchedEffect(searchState) {
         if (searchState.currentMatchIndex >= 0 && searchState.currentMatchIndex < searchState.allMatches.size) {
@@ -546,11 +544,6 @@ internal fun DebugScreen(
         state = listState,
     ) {
         stickyHeader {
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(8.dp)
-            ) {
                 DebugSearchState(
                     filteredLogs = filteredLogs,
                     filterTexts = filterTexts,
@@ -559,7 +552,6 @@ internal fun DebugScreen(
                     onFilterTextsChange = { filterTexts = it },
                     onSelectedLogIdChange = { selectedLogId = it }
                 )
-            }
         }
 
         items(filteredLogs, key = { it.uuid }) { log ->
