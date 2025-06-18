@@ -1087,7 +1087,7 @@ fun DebugMenuActions(
         onClick = viewModel::deleteAllLogs,
         modifier = modifier,
     ) {
-        Text(text = stringResource(R.string.clear))
+        Text(text = stringResource(R.string.debug_clear))
     }
 }
 
