@@ -44,7 +44,7 @@ retrofit = "3.0.0"
 room = "2.7.1"
 streamsupport-minifuture = "1.7.4"
 usb-serial-android = "3.9.0"
-work-runtime-ktx = "2.10.1"
+work-runtime-ktx = "2.10.2"
 zxing-android-embedded = "4.3.0"
 zxing-core = "3.5.3"
 
