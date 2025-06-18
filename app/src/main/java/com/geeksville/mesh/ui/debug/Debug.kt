@@ -14,8 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-@file:Suppress("detekt:TooManyFunctions") // Lots of necessary previews
-
+ 
 package com.geeksville.mesh.ui.debug
 
 import android.content.Context
@@ -96,6 +95,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+// import com.geeksville.mesh.android.Logging
 
 import android.widget.Toast
 import androidx.compose.material3.ColorScheme
@@ -105,6 +105,83 @@ import androidx.datastore.core.IOException
 import kotlinx.coroutines.launch
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
+
+data class SearchMatch(
+    val logIndex: Int,
+    val start: Int,
+    val end: Int,
+    val field: String
+)
+
+data class SearchState(
+    val searchText: String = "",
+    val currentMatchIndex: Int = -1,
+    val allMatches: List<SearchMatch> = emptyList(),
+    val hasMatches: Boolean = false
+)
+
+@Composable
+internal fun DebugSearchBar(
+    searchState: SearchState,
+    onSearchTextChange: (String) -> Unit,
+    onNextMatch: () -> Unit,
+    onPreviousMatch: () -> Unit,
+    onClearSearch: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = searchState.searchText,
+        onValueChange = onSearchTextChange,
+        modifier = modifier
+//            .weight(1f)
+            .padding(end = 8.dp),
+        placeholder = { Text(R.string.debug_default_search) },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        keyboardActions = KeyboardActions(
+            onSearch = {
+                // Clear focus when search is performed
+            }
+        ),
+        trailingIcon = {
+            Row {
+                if (searchState.hasMatches) {
+                    Text(
+                        text = "${searchState.currentMatchIndex + 1}/${searchState.allMatches.size}",
+                        modifier = Modifier.padding(end = 8.dp),
+                        style = TextStyle(fontSize = 12.sp)
+                    )
+                    IconButton(
+                        onClick = onPreviousMatch,
+                        enabled = searchState.hasMatches
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowUp,
+                            contentDescription = "Previous match"
+                        )
+                    }
+                    IconButton(
+                        onClick = onNextMatch,
+                        enabled = searchState.hasMatches
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.KeyboardArrowDown,
+                            contentDescription = "Next match"
+                        )
+                    }
+                }
+                if (searchState.searchText.isNotEmpty()) {
+                    IconButton(onClick = onClearSearch) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = "Clear search"
+                        )
+                    }
+                }
+            }
+        }
+    )
+}
 
 @Composable
 internal fun DebugScreen(
@@ -141,28 +218,21 @@ internal fun DebugScreen(
         }
     }
 
-    data class SearchMatch(
-        val logIndex: Int,
-        val start: Int,
-        val end: Int,
-        val field: String
-    )
-
     val allMatches = remember(searchText, filteredLogs) {
         if (searchText.isEmpty()) {
             emptyList()
         } else {
             filteredLogs.flatMapIndexed { logIndex, log ->
-            searchText.split(" ").flatMap { term ->
-                val messageMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.logMessage)
-                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "message") }
-                val typeMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.messageType)
-                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "type") }
-                val dateMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.formattedReceivedDate)
-                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "date") }
-                messageMatches + typeMatches + dateMatches
-            }
-        }.sortedBy { it.start }
+                searchText.split(" ").flatMap { term ->
+                    val messageMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.logMessage)
+                        .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "message") }
+                    val typeMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.messageType)
+                        .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "type") }
+                    val dateMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.formattedReceivedDate)
+                        .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "date") }
+                    messageMatches + typeMatches + dateMatches
+                }
+            }.sortedBy { it.start }
         }
     }
 
@@ -195,6 +265,13 @@ internal fun DebugScreen(
         currentMatchIndex = -1
     }
 
+    val searchState = SearchState(
+        searchText = searchText,
+        currentMatchIndex = currentMatchIndex,
+        allMatches = allMatches,
+        hasMatches = hasMatches
+    )
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         state = listState,
@@ -218,59 +295,12 @@ internal fun DebugScreen(
                             horizontalArrangement = Arrangement.Start,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            OutlinedTextField(
-                                value = searchText,
-                                onValueChange = { searchText = it },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(end = 8.dp),
-                                placeholder = { Text("Search in logs...") },
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                                keyboardActions = KeyboardActions(
-                                    onSearch = {
-                                        // Clear focus when search is performed
-                                    }
-                                ),
-                                trailingIcon = {
-                                    Row {
-                                        if (hasMatches) {
-                                            Text(
-                                                text = "${currentMatchIndex + 1}/${allMatches.size}",
-                                                modifier = Modifier.padding(end = 8.dp),
-                                                style = TextStyle(fontSize = 12.sp)
-                                            )
-                                            IconButton(
-                                                onClick = { goToPreviousMatch() },
-                                                enabled = hasMatches
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.KeyboardArrowUp,
-                                                    contentDescription = "Previous match"
-                                                )
-                                            }
-                                            IconButton(
-                                                onClick = { goToNextMatch() },
-                                                enabled = hasMatches
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.KeyboardArrowDown,
-                                                    contentDescription = "Next match"
-                                                )
-                                            }
-                                        }
-                                        if (searchText.isNotEmpty()) {
-                                            IconButton(
-                                                onClick = { searchText = "" }
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Clear,
-                                                    contentDescription = "Clear search"
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
+                            DebugSearchBar(
+                                searchState = searchState,
+                                onSearchTextChange = { searchText = it },
+                                onNextMatch = { goToNextMatch() },
+                                onPreviousMatch = { goToPreviousMatch() },
+                                onClearSearch = { searchText = "" }
                             )
                             Box {
                                 TextButton(
@@ -993,7 +1023,7 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
                 "Permission denied: Cannot write to Downloads folder",
                 Toast.LENGTH_LONG
             ).show()
-            debug(e)
+            warn(e)
         }
     } catch (e: IOException) {
         withContext(Dispatchers.Main) {
@@ -1003,6 +1033,87 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
                 Toast.LENGTH_LONG
             ).show()
         }
-        debug(e)
+        warn(e)
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun DebugSearchBarEmptyPreview() {
+    AppTheme {
+        Surface {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                DebugSearchBar(
+                    searchState = SearchState(),
+                    onSearchTextChange = { },
+                    onNextMatch = { },
+                    onPreviousMatch = { },
+                    onClearSearch = { }
+                )
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+@Suppress("detekt:MagicNumber") // fake data
+private fun DebugSearchBarWithTextPreview() {
+    AppTheme {
+        Surface {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                DebugSearchBar(
+                    searchState = SearchState(
+                        searchText = "test message",
+                        currentMatchIndex = 2,
+                        allMatches = List(5) { SearchMatch(it, 0, 10, "message") },
+                        hasMatches = true
+                    ),
+                    onSearchTextChange = { },
+                    onNextMatch = { },
+                    onPreviousMatch = { },
+                    onClearSearch = { }
+                )
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+@Suppress("detekt:MagicNumber") // fake data
+private fun DebugSearchBarWithMatchesPreview() {
+    AppTheme {
+        Surface {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                DebugSearchBar(
+                    searchState = SearchState(
+                        searchText = "error",
+                        currentMatchIndex = 0,
+                        allMatches = List(3) { SearchMatch(it, 0, 5, "message") },
+                        hasMatches = true
+                    ),
+                    onSearchTextChange = { },
+                    onNextMatch = { },
+                    onPreviousMatch = { },
+                    onClearSearch = { }
+                )
+            }
+        }
     }
 }
