@@ -135,6 +135,7 @@
     <string name="text_messages">Messaggi di testo</string>
     <string name="channel_invalid">L\'URL di questo Canale non è valida e non può essere usata</string>
     <string name="debug_panel">Pannello Di Debug</string>
+
     <string name="debug_last_messages">Ultimi 500 messaggi</string>
     <string name="clear">Svuota</string>
     <string name="updating_firmware">Aggiornamento del firmware in corso, attendere fino a otto minuti…</string>

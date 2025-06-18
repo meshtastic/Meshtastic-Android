@@ -134,6 +134,7 @@
     <string name="text_messages">Tekstberichten</string>
     <string name="channel_invalid">Deze Kanaal URL is ongeldig en kan niet worden gebruikt</string>
     <string name="debug_panel">Debug-paneel</string>
+
     <string name="debug_last_messages">500 laatste berichten</string>
     <string name="clear">Wis</string>
     <string name="updating_firmware">Firmware wordt bijgewerkt, wacht tot acht minuten…</string>

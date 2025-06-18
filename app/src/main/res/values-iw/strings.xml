@@ -85,6 +85,7 @@
     <string name="text_messages">הודעות טקסט</string>
     <string name="channel_invalid">כתובת ערוץ זה אינו תקין ולא ניתן לעשות בו שימוש</string>
     <string name="debug_panel">פאנל דיבאג</string>
+
     <string name="debug_last_messages">500 ההודעות האחרונות</string>
     <string name="clear">נקה</string>
     <string name="updating_firmware">מעדכן קושחה, המתן עד ל-8 דקות…</string>

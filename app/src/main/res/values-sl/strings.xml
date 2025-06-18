@@ -127,6 +127,7 @@
     <string name="text_messages">Sporočila</string>
     <string name="channel_invalid">Neveljaven kanal</string>
     <string name="debug_panel">Plošča za odpravljanje napak</string>
+
     <string name="debug_last_messages">Odpravi napake zadnjih sporočil</string>
     <string name="clear">Počisti</string>
     <string name="updating_firmware">Posodobitev programske opreme…</string>

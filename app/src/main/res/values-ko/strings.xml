@@ -134,6 +134,7 @@
     <string name="text_messages">문자 메시지</string>
     <string name="channel_invalid">이 채널 URL은 잘못 되었습니다. 따라서 사용할 수 없습니다.</string>
     <string name="debug_panel">디버그 패널</string>
+
     <string name="debug_last_messages">500개의 마지막 메시지</string>
     <string name="clear">초기화</string>
     <string name="updating_firmware">펌웨어 업데이트 중, 최대 8분 소요 예정…</string>

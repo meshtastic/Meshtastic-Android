@@ -127,6 +127,7 @@
     <string name="text_messages">Tekstmeldinger</string>
     <string name="channel_invalid">Denne kanall URL er ugyldig og kan ikke benyttes</string>
     <string name="debug_panel">Feilsøkningspanel</string>
+
     <string name="debug_last_messages">500 siste meldinger</string>
     <string name="clear">Tøm</string>
     <string name="updating_firmware">Oppdaterer firmware, vent opptil åtte minutter…</string>

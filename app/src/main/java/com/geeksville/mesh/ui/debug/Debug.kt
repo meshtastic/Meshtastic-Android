@@ -17,6 +17,17 @@
 
 package com.geeksville.mesh.ui.debug
 
+import android.content.Context
+import android.os.Environment
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
+import java.nio.charset.StandardCharsets
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -83,6 +94,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
 
@@ -575,18 +590,61 @@ fun DebugMenuActions(
     viewModel: DebugViewModel = hiltViewModel(),
     modifier: Modifier = Modifier,
 ) {
-
-    // Button(
-    //     // FIXME: needs to do what it says on the label 
-    //     onClick = viewModel::deleteAllLogs,
-    //     modifier = modifier,
-    // ) {
-    //     Text(text = stringResource(R.string.map_start_download)) // should rename to be generic 
-    // }
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val logs by viewModel.meshLog.collectAsStateWithLifecycle()
+    
+    Button(
+        onClick = { 
+            scope.launch {
+                exportAllLogs(context, logs)
+            }
+        },
+        modifier = modifier,
+    ) {
+        Text(text = stringResource(R.string.debug_logs_export))
+    }
     Button(
         onClick = viewModel::deleteAllLogs,
         modifier = modifier,
     ) {
         Text(text = stringResource(R.string.clear))
+    }
+}
+
+private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = withContext(Dispatchers.IO) {
+    try {
+        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+        val fileName = "meshtastic_debug_$timestamp.log"
+        
+        // Get the Downloads directory
+        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        val logFile = File(downloadsDir, fileName)
+        
+        // Create the file and write logs
+        OutputStreamWriter(FileOutputStream(logFile), StandardCharsets.UTF_8).use { writer ->
+            logs.forEach { log ->
+                writer.write("${log.formattedReceivedDate} [${log.messageType}]\n")
+                writer.write(log.logMessage)
+                writer.write("\n\n")
+            }
+        }
+        
+        // Notify user of success
+        withContext(Dispatchers.Main) {
+            Toast.makeText(
+                context,
+                "Logs exported to ${logFile.absolutePath}",
+                Toast.LENGTH_LONG
+            ).show()
+        }
+    } catch (e: Exception) {
+        withContext(Dispatchers.Main) {
+            Toast.makeText(
+                context,
+                "Failed to export logs: ${e.message}",
+                Toast.LENGTH_LONG
+            ).show()
+        }
     }
 }

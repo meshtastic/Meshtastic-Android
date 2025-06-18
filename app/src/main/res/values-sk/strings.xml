@@ -134,6 +134,7 @@
     <string name="text_messages">Textové správy</string>
     <string name="channel_invalid">URL adresa tohoto kanála nie je platná a nedá sa použiť</string>
     <string name="debug_panel">Debug okno</string>
+
     <string name="debug_last_messages">500 posledných správ</string>
     <string name="clear">Zmazať</string>
     <string name="updating_firmware">Aktualizácia firmvéru, môže to trvať do 8 minút…</string>

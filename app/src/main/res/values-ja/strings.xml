@@ -135,6 +135,7 @@
     <string name="text_messages">メッセージ</string>
     <string name="channel_invalid">このチャンネルURLは無効なため使用できません。</string>
     <string name="debug_panel">デバッグ</string>
+
     <string name="debug_last_messages">最新500件のメッセージ</string>
     <string name="clear">削除</string>
     <string name="updating_firmware">ファームウェア更新中．．．最大８分お待ちください。</string>
