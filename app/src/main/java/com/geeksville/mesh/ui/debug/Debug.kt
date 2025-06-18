@@ -14,6 +14,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+// @Suppress("detekt:TooManyFunctions") // Lots of necessary previews
+
 
 package com.geeksville.mesh.ui.debug
 
@@ -97,8 +99,10 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 
 import android.widget.Toast
+import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.datastore.core.IOException
 import kotlinx.coroutines.launch
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
@@ -468,49 +472,12 @@ internal fun DebugItem(
                     .fillMaxWidth()
                     .clickable { onLogClick() }
             ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = if (isSelected) 12.dp else 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    val typeAnnotatedString = rememberAnnotatedString(
-                        text = log.messageType,
-                        searchText = searchText
-                    )
-                    Text(
-                        text = typeAnnotatedString,
-                        modifier = Modifier.weight(1f),
-                        style = TextStyle(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = if (isSelected) 16.sp else 14.sp,
-                            color = theme.onSurface
-                        ),
-                    )
-                    CopyIconButton(
-                        valueToCopy = log.logMessage,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
-                    Icon(
-                        imageVector = Icons.Outlined.CloudDownload,
-                        contentDescription = stringResource(id = R.string.logs),
-                        tint = Color.Gray.copy(alpha = 0.6f),
-                        modifier = Modifier.padding(end = 8.dp),
-                    )
-                    val dateAnnotatedString = rememberAnnotatedString(
-                        text = log.formattedReceivedDate,
-                        searchText = searchText
-                    )
-                    Text(
-                        text = dateAnnotatedString,
-                        style = TextStyle(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = if (isSelected) 14.sp else 12.sp,
-                            color = theme.onSurface
-                        ),
-                    )
-                }
+                DebugItemHeader(
+                    log = log,
+                    searchText = searchText,
+                    isSelected = isSelected,
+                    theme = theme
+                )
                 val messageAnnotatedString = rememberAnnotatedLogMessage(log, searchText)
                 Text(
                     text = messageAnnotatedString,
@@ -523,6 +490,58 @@ internal fun DebugItem(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun DebugItemHeader(
+    log: UiMeshLog,
+    searchText: String,
+    isSelected: Boolean,
+    theme: ColorScheme
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = if (isSelected) 12.dp else 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        val typeAnnotatedString = rememberAnnotatedString(
+            text = log.messageType,
+            searchText = searchText
+        )
+        Text(
+            text = typeAnnotatedString,
+            modifier = Modifier.weight(1f),
+            style = TextStyle(
+                fontWeight = FontWeight.Bold,
+                fontSize = if (isSelected) 16.sp else 14.sp,
+                color = theme.onSurface
+            ),
+        )
+        CopyIconButton(
+            valueToCopy = log.logMessage,
+            modifier = Modifier.padding(start = 8.dp)
+        )
+        Icon(
+            imageVector = Icons.Outlined.CloudDownload,
+            contentDescription = stringResource(id = R.string.logs),
+            tint = Color.Gray.copy(alpha = 0.6f),
+            modifier = Modifier.padding(end = 8.dp),
+        )
+        val dateAnnotatedString = rememberAnnotatedString(
+            text = log.formattedReceivedDate,
+            searchText = searchText
+        )
+        Text(
+            text = dateAnnotatedString,
+            style = TextStyle(
+                fontWeight = FontWeight.Bold,
+                fontSize = if (isSelected) 14.sp else 12.sp,
+                color = theme.onSurface
+            ),
+        )
     }
 }
 
