@@ -1,0 +1,361 @@
+/*
+ * Copyright (c) 2025 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.geeksville.mesh.ui.debug
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.geeksville.mesh.R
+import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
+import com.geeksville.mesh.ui.common.theme.AppTheme
+
+data class SearchMatch(
+    val logIndex: Int,
+    val start: Int,
+    val end: Int,
+    val field: String
+)
+
+data class SearchState(
+    val searchText: String = "",
+    val currentMatchIndex: Int = -1,
+    val allMatches: List<SearchMatch> = emptyList(),
+    val hasMatches: Boolean = false
+)
+
+@Composable
+internal fun DebugSearchNavigation(
+    searchState: SearchState,
+    onNextMatch: () -> Unit,
+    onPreviousMatch: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier.width(IntrinsicSize.Min),
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = "${searchState.currentMatchIndex + 1}/${searchState.allMatches.size}",
+            modifier = Modifier.padding(end = 4.dp),
+            style = TextStyle(fontSize = 12.sp)
+        )
+        IconButton(
+            onClick = onPreviousMatch,
+            enabled = searchState.hasMatches,
+            modifier = Modifier.size(32.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowUp,
+                contentDescription = "Previous match",
+                modifier = Modifier.size(16.dp)
+            )
+        }
+        IconButton(
+            onClick = onNextMatch,
+            enabled = searchState.hasMatches,
+            modifier = Modifier.size(32.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.KeyboardArrowDown,
+                contentDescription = "Next match",
+                modifier = Modifier.size(16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+internal fun DebugSearchBar(
+    searchState: SearchState,
+    onSearchTextChange: (String) -> Unit,
+    onNextMatch: () -> Unit,
+    onPreviousMatch: () -> Unit,
+    onClearSearch: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    OutlinedTextField(
+        value = searchState.searchText,
+        onValueChange = onSearchTextChange,
+        modifier = modifier
+            .padding(end = 8.dp),
+
+        placeholder = { Text(stringResource(R.string.debug_default_search)) },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+        keyboardActions = KeyboardActions(
+            onSearch = {
+                // Clear focus when search is performed
+            }
+        ),
+        trailingIcon = {
+            Row(
+                modifier = Modifier.width(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                if (searchState.hasMatches) {
+                    DebugSearchNavigation(
+                        searchState = searchState,
+                        onNextMatch = onNextMatch,
+                        onPreviousMatch = onPreviousMatch
+                    )
+                }
+                if (searchState.searchText.isNotEmpty()) {
+                    IconButton(
+                        onClick = onClearSearch,
+                        modifier = Modifier.size(32.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = "Clear search",
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+        }
+    )
+}
+
+@Composable
+internal fun DebugSearchState(
+    filteredLogs: List<UiMeshLog>,
+    filterTexts: List<String>,
+    presetFilters: List<String>,
+    onSearchStateChange: (SearchState) -> Unit,
+    onFilterTextsChange: (List<String>) -> Unit,
+    onSelectedLogIdChange: (String?) -> Unit
+) {
+    var customFilterText by remember { mutableStateOf("") }
+    var searchText by remember { mutableStateOf("") }
+    var currentMatchIndex by remember { mutableStateOf(-1) }
+    var selectedLogId by remember { mutableStateOf<String?>(null) }
+    val theme = androidx.compose.material3.MaterialTheme.colorScheme
+
+    fun findSearchMatches(searchText: String, filteredLogs: List<UiMeshLog>): List<SearchMatch> {
+        if (searchText.isEmpty()) {
+            return emptyList()
+        }
+        return filteredLogs.flatMapIndexed { logIndex, log ->
+            searchText.split(" ").flatMap { term ->
+                val messageMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.logMessage)
+                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "message") }
+                val typeMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.messageType)
+                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "type") }
+                val dateMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.formattedReceivedDate)
+                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "date") }
+                messageMatches + typeMatches + dateMatches
+            }
+        }.sortedBy { it.start }
+    }
+
+    val allMatches = remember(searchText, filteredLogs) {
+        findSearchMatches(searchText, filteredLogs)
+    }
+
+    val hasMatches = allMatches.isNotEmpty()
+
+    fun scrollToMatch(index: Int) {
+        if (index in allMatches.indices) {
+            currentMatchIndex = index
+            val match = allMatches[index]
+            // This will be handled by the parent component
+        }
+    }
+
+    fun goToNextMatch() {
+        if (hasMatches) {
+            val nextIndex = if (currentMatchIndex < allMatches.lastIndex) currentMatchIndex + 1 else 0
+            scrollToMatch(nextIndex)
+        }
+    }
+
+    fun goToPreviousMatch() {
+        if (hasMatches) {
+            val prevIndex = if (currentMatchIndex > 0) currentMatchIndex - 1 else allMatches.lastIndex
+            scrollToMatch(prevIndex)
+        }
+    }
+
+    // Reset current match when search text changes
+    LaunchedEffect(searchText) {
+        currentMatchIndex = -1
+    }
+
+    val searchState = SearchState(
+        searchText = searchText,
+        currentMatchIndex = currentMatchIndex,
+        allMatches = allMatches,
+        hasMatches = hasMatches
+    )
+
+    // Notify parent of state changes
+    LaunchedEffect(searchState) {
+        onSearchStateChange(searchState)
+    }
+
+    LaunchedEffect(selectedLogId) {
+        onSelectedLogIdChange(selectedLogId)
+    }
+
+    // Search UI components
+    Column(
+        modifier = Modifier.padding(8.dp)
+    ) {
+
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .background(theme.background.copy(alpha = 1.0f)),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+                DebugSearchBar(
+                    searchState = searchState,
+                    onSearchTextChange = { searchText = it },
+                    onNextMatch = { goToNextMatch() },
+                    onPreviousMatch = { goToPreviousMatch() },
+                    onClearSearch = { searchText = "" }
+                )
+                DebugFilterBar(
+                    filterTexts = filterTexts,
+                    onFilterTextsChange = onFilterTextsChange,
+                    customFilterText = customFilterText,
+                    onCustomFilterTextChange = { customFilterText = it },
+                    presetFilters = presetFilters
+                )
+            }
+        }
+
+        DebugActiveFilters(
+            filterTexts = filterTexts,
+            onFilterTextsChange = onFilterTextsChange
+        )
+}
+
+@PreviewLightDark
+@Composable
+private fun DebugSearchBarEmptyPreview() {
+    AppTheme {
+        Surface {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                DebugSearchBar(
+                    searchState = SearchState(),
+                    onSearchTextChange = { },
+                    onNextMatch = { },
+                    onPreviousMatch = { },
+                    onClearSearch = { }
+                )
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+@Suppress("detekt:MagicNumber") // fake data
+private fun DebugSearchBarWithTextPreview() {
+    AppTheme {
+        Surface {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                DebugSearchBar(
+                    searchState = SearchState(
+                        searchText = "test message",
+                        currentMatchIndex = 2,
+                        allMatches = List(5) { SearchMatch(it, 0, 10, "message") },
+                        hasMatches = true
+                    ),
+                    onSearchTextChange = { },
+                    onNextMatch = { },
+                    onPreviousMatch = { },
+                    onClearSearch = { }
+                )
+            }
+        }
+    }
+}
+
+@PreviewLightDark
+@Composable
+@Suppress("detekt:MagicNumber") // fake data
+private fun DebugSearchBarWithMatchesPreview() {
+    AppTheme {
+        Surface {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                DebugSearchBar(
+                    searchState = SearchState(
+                        searchText = "error",
+                        currentMatchIndex = 0,
+                        allMatches = List(3) { SearchMatch(it, 0, 5, "message") },
+                        hasMatches = true
+                    ),
+                    onSearchTextChange = { },
+                    onNextMatch = { },
+                    onPreviousMatch = { },
+                    onClearSearch = { }
+                )
+            }
+        }
+    }
+}

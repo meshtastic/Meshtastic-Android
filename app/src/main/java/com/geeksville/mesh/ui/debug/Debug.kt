@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-@file:Suppress("TooManyFunctions") // Needs a lot of them - at least until I pull filters or search into their own files
+@file:Suppress("TooManyFunctions") // A lot of previews.
 package com.geeksville.mesh.ui.debug
 
 import android.content.Context
@@ -33,32 +33,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.CloudDownload
-import androidx.compose.material.icons.twotone.FilterAlt
 import androidx.compose.material.icons.twotone.FilterAltOff
-import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -81,9 +69,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -94,451 +80,16 @@ import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.components.CopyIconButton
 import androidx.compose.runtime.setValue
-import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import android.widget.Toast
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.draw.alpha
 import androidx.datastore.core.IOException
 import com.geeksville.mesh.android.BuildUtils.warn
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
-
-data class SearchMatch(
-    val logIndex: Int,
-    val start: Int,
-    val end: Int,
-    val field: String
-)
-
-data class SearchState(
-    val searchText: String = "",
-    val currentMatchIndex: Int = -1,
-    val allMatches: List<SearchMatch> = emptyList(),
-    val hasMatches: Boolean = false
-)
-
-@Composable
-internal fun DebugSearchNavigation(
-    searchState: SearchState,
-    onNextMatch: () -> Unit,
-    onPreviousMatch: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier.width(IntrinsicSize.Min),
-        horizontalArrangement = Arrangement.spacedBy(2.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "${searchState.currentMatchIndex + 1}/${searchState.allMatches.size}",
-            modifier = Modifier.padding(end = 4.dp),
-            style = TextStyle(fontSize = 12.sp)
-        )
-        IconButton(
-            onClick = onPreviousMatch,
-            enabled = searchState.hasMatches,
-            modifier = Modifier.size(32.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.KeyboardArrowUp,
-                contentDescription = "Previous match",
-                modifier = Modifier.size(16.dp)
-            )
-        }
-        IconButton(
-            onClick = onNextMatch,
-            enabled = searchState.hasMatches,
-            modifier = Modifier.size(32.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.KeyboardArrowDown,
-                contentDescription = "Next match",
-                modifier = Modifier.size(16.dp)
-            )
-        }
-    }
-}
-
-@Composable
-internal fun DebugSearchBar(
-    searchState: SearchState,
-    onSearchTextChange: (String) -> Unit,
-    onNextMatch: () -> Unit,
-    onPreviousMatch: () -> Unit,
-    onClearSearch: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    OutlinedTextField(
-        value = searchState.searchText,
-        onValueChange = onSearchTextChange,
-        modifier = modifier
-            .padding(end = 8.dp),
-
-        placeholder = { Text(stringResource(R.string.debug_default_search)) },
-        singleLine = true,
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(
-            onSearch = {
-                // Clear focus when search is performed
-            }
-        ),
-        trailingIcon = {
-            Row(
-                modifier = Modifier.width(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (searchState.hasMatches) {
-                    DebugSearchNavigation(
-                        searchState = searchState,
-                        onNextMatch = onNextMatch,
-                        onPreviousMatch = onPreviousMatch
-                    )
-                }
-                if (searchState.searchText.isNotEmpty()) {
-                    IconButton(
-                        onClick = onClearSearch,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = "Clear search",
-                            modifier = Modifier.size(16.dp)
-                        )
-                    }
-                }
-            }
-        }
-    )
-}
-
-@Composable
-internal fun DebugCustomFilterInput(
-    customFilterText: String,
-    onCustomFilterTextChange: (String) -> Unit,
-    filterTexts: List<String>,
-    onFilterTextsChange: (List<String>) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(bottom = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        OutlinedTextField(
-            value = customFilterText,
-            onValueChange = onCustomFilterTextChange,
-            modifier = Modifier.weight(1f),
-            placeholder = { Text("Add custom filter") },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-            keyboardActions = KeyboardActions(
-                onDone = {
-                    if (customFilterText.isNotBlank()) {
-                        onFilterTextsChange(filterTexts + customFilterText)
-                        onCustomFilterTextChange("")
-                    }
-                }
-            )
-        )
-        Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-        IconButton(
-            onClick = {
-                if (customFilterText.isNotBlank()) {
-                    onFilterTextsChange(filterTexts + customFilterText)
-                    onCustomFilterTextChange("")
-                }
-            },
-            enabled = customFilterText.isNotBlank()
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = "Add filter"
-            )
-        }
-    }
-}
-
-@Composable
-internal fun DebugPresetFilters(
-    presetFilters: List<String>,
-    filterTexts: List<String>,
-    onFilterTextsChange: (List<String>) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Column(modifier = modifier) {
-        Text(
-            text = "Preset Filters",
-            style = TextStyle(fontWeight = FontWeight.Bold),
-            modifier = Modifier.padding(vertical = 4.dp)
-        )
-        FlowRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 0.dp),
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
-            verticalArrangement = Arrangement.spacedBy(0.dp)
-        ) {
-            for (filter in presetFilters) {
-                FilterChip(
-                    selected = filter in filterTexts,
-                    onClick = {
-                        onFilterTextsChange(
-                            if (filter in filterTexts) {
-                                filterTexts - filter
-                            } else {
-                                filterTexts + filter
-                            }
-                        )
-                    },
-                    label = { Text(filter) }
-                )
-            }
-        }
-    }
-}
-
-@Composable
-internal fun DebugFilterBar(
-    filterTexts: List<String>,
-    onFilterTextsChange: (List<String>) -> Unit,
-    customFilterText: String,
-    onCustomFilterTextChange: (String) -> Unit,
-    presetFilters: List<String>,
-    modifier: Modifier = Modifier
-) {
-    var showFilterMenu by remember { mutableStateOf(false) }
-    Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box {
-            TextButton(
-                onClick = { showFilterMenu = !showFilterMenu }
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = stringResource(R.string.debug_filters),
-                        style = TextStyle(fontWeight = FontWeight.Bold)
-                    )
-                    Icon(
-                        imageVector = if (filterTexts.isNotEmpty()) {
-                            Icons.TwoTone.FilterAlt
-                        } else {
-                            Icons.TwoTone.FilterAltOff
-                        },
-                        contentDescription = "Filter"
-                    )
-                }
-            }
-            DropdownMenu(
-                expanded = showFilterMenu,
-                onDismissRequest = { showFilterMenu = false },
-                offset = DpOffset(0.dp, 8.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .padding(8.dp)
-                        .width(300.dp)
-                ) {
-                    DebugCustomFilterInput(
-                        customFilterText = customFilterText,
-                        onCustomFilterTextChange = onCustomFilterTextChange,
-                        filterTexts = filterTexts,
-                        onFilterTextsChange = onFilterTextsChange
-                    )
-                    DebugPresetFilters(
-                        presetFilters = presetFilters,
-                        filterTexts = filterTexts,
-                        onFilterTextsChange = onFilterTextsChange
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-internal fun DebugActiveFilters(
-    filterTexts: List<String>,
-    onFilterTextsChange: (List<String>) -> Unit,
-    modifier: Modifier = Modifier
-) {
-    if (filterTexts.isNotEmpty()) {
-        Column(modifier = modifier) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 2.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.debug_active_filters),
-                    style = TextStyle(fontWeight = FontWeight.Bold)
-                )
-                IconButton(
-                    onClick = { onFilterTextsChange(emptyList()) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = "Clear all filters"
-                    )
-                }
-            }
-            FlowRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 0.dp),
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                verticalArrangement = Arrangement.spacedBy(0.dp)
-            ) {
-                for (filter in filterTexts) {
-                    FilterChip(
-                        selected = true,
-                        onClick = {
-                            onFilterTextsChange(filterTexts - filter)
-                        },
-                        label = { Text(filter) },
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.TwoTone.FilterAlt,
-                                contentDescription = null
-                            )
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-internal fun DebugSearchState(
-    filteredLogs: List<UiMeshLog>,
-    filterTexts: List<String>,
-    presetFilters: List<String>,
-    onSearchStateChange: (SearchState) -> Unit,
-    onFilterTextsChange: (List<String>) -> Unit,
-    onSelectedLogIdChange: (String?) -> Unit
-) {
-    var customFilterText by remember { mutableStateOf("") }
-    var searchText by remember { mutableStateOf("") }
-    var currentMatchIndex by remember { mutableStateOf(-1) }
-    var selectedLogId by remember { mutableStateOf<String?>(null) }
-    val theme = androidx.compose.material3.MaterialTheme.colorScheme
-
-    fun findSearchMatches(searchText: String, filteredLogs: List<UiMeshLog>): List<SearchMatch> {
-        if (searchText.isEmpty()) {
-            return emptyList()
-        }
-        return filteredLogs.flatMapIndexed { logIndex, log ->
-            searchText.split(" ").flatMap { term ->
-                val messageMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.logMessage)
-                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "message") }
-                val typeMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.messageType)
-                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "type") }
-                val dateMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.formattedReceivedDate)
-                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "date") }
-                messageMatches + typeMatches + dateMatches
-            }
-        }.sortedBy { it.start }
-    }
-
-    val allMatches = remember(searchText, filteredLogs) {
-        findSearchMatches(searchText, filteredLogs)
-    }
-
-    val hasMatches = allMatches.isNotEmpty()
-
-    fun scrollToMatch(index: Int) {
-        if (index in allMatches.indices) {
-            currentMatchIndex = index
-            val match = allMatches[index]
-            // This will be handled by the parent component
-        }
-    }
-
-    fun goToNextMatch() {
-        if (hasMatches) {
-            val nextIndex = if (currentMatchIndex < allMatches.lastIndex) currentMatchIndex + 1 else 0
-            scrollToMatch(nextIndex)
-        }
-    }
-
-    fun goToPreviousMatch() {
-        if (hasMatches) {
-            val prevIndex = if (currentMatchIndex > 0) currentMatchIndex - 1 else allMatches.lastIndex
-            scrollToMatch(prevIndex)
-        }
-    }
-
-    // Reset current match when search text changes
-    LaunchedEffect(searchText) {
-        currentMatchIndex = -1
-    }
-
-    val searchState = SearchState(
-        searchText = searchText,
-        currentMatchIndex = currentMatchIndex,
-        allMatches = allMatches,
-        hasMatches = hasMatches
-    )
-
-    // Notify parent of state changes
-    LaunchedEffect(searchState) {
-        onSearchStateChange(searchState)
-    }
-
-    LaunchedEffect(selectedLogId) {
-        onSelectedLogIdChange(selectedLogId)
-    }
-
-    // Search UI components
-    Column(
-        modifier = Modifier.padding(8.dp)
-    ) {
-
-        Row(
-            modifier = Modifier.fillMaxWidth()
-                .background(theme.background.copy(alpha = 1.0f)),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-                DebugSearchBar(
-                    searchState = searchState,
-                    onSearchTextChange = { searchText = it },
-                    onNextMatch = { goToNextMatch() },
-                    onPreviousMatch = { goToPreviousMatch() },
-                    onClearSearch = { searchText = "" }
-                )
-                DebugFilterBar(
-                    filterTexts = filterTexts,
-                    onFilterTextsChange = onFilterTextsChange,
-                    customFilterText = customFilterText,
-                    onCustomFilterTextChange = { customFilterText = it },
-                    presetFilters = presetFilters
-                )
-            }
-
-        DebugActiveFilters(
-            filterTexts = filterTexts,
-            onFilterTextsChange = onFilterTextsChange
-        )
-    }
-}
 
 @Composable
 internal fun DebugScreen(
@@ -1174,86 +725,5 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
             ).show()
         }
         warn("Error:IOException: " + e.toString())
-    }
-}
-
-@PreviewLightDark
-@Composable
-private fun DebugSearchBarEmptyPreview() {
-    AppTheme {
-        Surface {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                DebugSearchBar(
-                    searchState = SearchState(),
-                    onSearchTextChange = { },
-                    onNextMatch = { },
-                    onPreviousMatch = { },
-                    onClearSearch = { }
-                )
-            }
-        }
-    }
-}
-
-@PreviewLightDark
-@Composable
-@Suppress("detekt:MagicNumber") // fake data
-private fun DebugSearchBarWithTextPreview() {
-    AppTheme {
-        Surface {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                DebugSearchBar(
-                    searchState = SearchState(
-                        searchText = "test message",
-                        currentMatchIndex = 2,
-                        allMatches = List(5) { SearchMatch(it, 0, 10, "message") },
-                        hasMatches = true
-                    ),
-                    onSearchTextChange = { },
-                    onNextMatch = { },
-                    onPreviousMatch = { },
-                    onClearSearch = { }
-                )
-            }
-        }
-    }
-}
-
-@PreviewLightDark
-@Composable
-@Suppress("detekt:MagicNumber") // fake data
-private fun DebugSearchBarWithMatchesPreview() {
-    AppTheme {
-        Surface {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                DebugSearchBar(
-                    searchState = SearchState(
-                        searchText = "error",
-                        currentMatchIndex = 0,
-                        allMatches = List(3) { SearchMatch(it, 0, 5, "message") },
-                        hasMatches = true
-                    ),
-                    onSearchTextChange = { },
-                    onNextMatch = { },
-                    onPreviousMatch = { },
-                    onClearSearch = { }
-                )
-            }
-        }
     }
 }
