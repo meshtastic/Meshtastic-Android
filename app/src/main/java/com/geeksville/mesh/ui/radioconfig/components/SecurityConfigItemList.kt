@@ -294,6 +294,7 @@ fun SecurityConfigItemList(
     }
 }
 
+@Suppress("MagicNumber")
 @Composable
 fun PrivateKeyRegenerateDialog(
     showKeyGenerationDialog: Boolean,
@@ -312,12 +313,17 @@ fun PrivateKeyRegenerateDialog(
                     onClick = {
                         securityInput = securityInput.copy {
                             clearPrivateKey()
-                            @Suppress("MagicNumber")
-                            privateKey = ByteString.copyFrom(
-                                ByteArray(32).apply {
-                                    SecureRandom().nextBytes(this)
-                                }
-                            )
+                            // Generate a random "f" value
+                            val f = ByteArray(32).apply {
+                                SecureRandom().nextBytes(this)
+                            }
+                            // Adjust the value to make it valid as an "s" value for eval().
+                            // According to the specification we need to mask off the 3
+                            // right-most bits of f[0], mask off the left-most bit of f[31],
+                            // and set the second to left-most bit of f[31].
+                            f[0] = (f[0].toInt() and 0xF8).toByte()
+                            f[31] = ((f[31].toInt() and 0x7F) or 0x40).toByte()
+                            privateKey = ByteString.copyFrom(f)
                         }
                         onConfirm(securityInput)
                     },
