@@ -95,13 +95,14 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-// import com.geeksville.mesh.android.Logging
 
 import android.widget.Toast
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.datastore.core.IOException
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.geeksville.mesh.android.BuildUtils.warn
 import kotlinx.coroutines.launch
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
@@ -135,7 +136,7 @@ internal fun DebugSearchBar(
         modifier = modifier
 //            .weight(1f)
             .padding(end = 8.dp),
-        placeholder = { Text(R.string.debug_default_search) },
+        placeholder = { Text(stringResource(R.string.debug_default_search)) },
         singleLine = true,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions = KeyboardActions(
@@ -184,6 +185,181 @@ internal fun DebugSearchBar(
 }
 
 @Composable
+internal fun DebugFilterBar(
+    filterTexts: List<String>,
+    onFilterTextsChange: (List<String>) -> Unit,
+    customFilterText: String,
+    onCustomFilterTextChange: (String) -> Unit,
+    presetFilters: List<String>,
+    modifier: Modifier = Modifier
+) {
+    var showFilterMenu by remember { mutableStateOf(false) }
+
+    Row(
+        modifier = modifier,
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box {
+            TextButton(
+                onClick = { showFilterMenu = !showFilterMenu }
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.debug_filters),
+                        style = TextStyle(fontWeight = FontWeight.Bold)
+                    )
+                    Icon(
+                        imageVector = if (filterTexts.isNotEmpty()) {
+                            Icons.TwoTone.FilterAlt
+                        } else {
+                            Icons.TwoTone.FilterAltOff
+                        },
+                        contentDescription = "Filter"
+                    )
+                }
+            }
+            DropdownMenu(
+                expanded = showFilterMenu,
+                onDismissRequest = { showFilterMenu = false },
+                offset = DpOffset(0.dp, 8.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .width(300.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = customFilterText,
+                            onValueChange = onCustomFilterTextChange,
+                            modifier = Modifier.weight(1f),
+                            placeholder = { Text("Add custom filter") },
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                            keyboardActions = KeyboardActions(
+                                onDone = {
+                                    if (customFilterText.isNotBlank()) {
+                                        onFilterTextsChange(filterTexts + customFilterText)
+                                        onCustomFilterTextChange("")
+                                    }
+                                }
+                            )
+                        )
+                        Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+                        IconButton(
+                            onClick = {
+                                if (customFilterText.isNotBlank()) {
+                                    onFilterTextsChange(filterTexts + customFilterText)
+                                    onCustomFilterTextChange("")
+                                }
+                            },
+                            enabled = customFilterText.isNotBlank()
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Add,
+                                contentDescription = "Add filter"
+                            )
+                        }
+                    }
+
+                    Text(
+                        text = "Preset Filters",
+                        style = TextStyle(fontWeight = FontWeight.Bold),
+                        modifier = Modifier.padding(vertical = 4.dp)
+                    )
+                    FlowRow(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 0.dp),
+                        horizontalArrangement = Arrangement.spacedBy(2.dp),
+                        verticalArrangement = Arrangement.spacedBy(0.dp)
+                    ) {
+                        for (filter in presetFilters) {
+                            FilterChip(
+                                selected = filter in filterTexts,
+                                onClick = {
+                                    onFilterTextsChange(
+                                        if (filter in filterTexts) {
+                                            filterTexts - filter
+                                        } else {
+                                            filterTexts + filter
+                                        }
+                                    )
+                                },
+                                label = { Text(filter) }
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun DebugActiveFilters(
+    filterTexts: List<String>,
+    onFilterTextsChange: (List<String>) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (filterTexts.isNotEmpty()) {
+        Column(modifier = modifier) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 2.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.debug_active_filters),
+                    style = TextStyle(fontWeight = FontWeight.Bold)
+                )
+                IconButton(
+                    onClick = { onFilterTextsChange(emptyList()) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = "Clear all filters"
+                    )
+                }
+            }
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 0.dp),
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                verticalArrangement = Arrangement.spacedBy(0.dp)
+            ) {
+                for (filter in filterTexts) {
+                    FilterChip(
+                        selected = true,
+                        onClick = {
+                            onFilterTextsChange(filterTexts - filter)
+                        },
+                        label = { Text(filter) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.TwoTone.FilterAlt,
+                                contentDescription = null
+                            )
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
 internal fun DebugScreen(
     viewModel: DebugViewModel = hiltViewModel(),
 ) {
@@ -192,7 +368,6 @@ internal fun DebugScreen(
 
     var filterTexts by remember { mutableStateOf(listOf<String>()) }
     var customFilterText by remember { mutableStateOf("") }
-    var showFilterMenu by remember { mutableStateOf(false) }
     var searchText by remember { mutableStateOf("") }
     var currentMatchIndex by remember { mutableStateOf(-1) }
     var selectedLogId by remember { mutableStateOf<String?>(null) }
@@ -302,153 +477,20 @@ internal fun DebugScreen(
                                 onPreviousMatch = { goToPreviousMatch() },
                                 onClearSearch = { searchText = "" }
                             )
-                            Box {
-                                TextButton(
-                                    onClick = { showFilterMenu = !showFilterMenu }
-                                ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Text(
-                                            text = stringResource(R.string.debug_filters),
-                                            style = TextStyle(fontWeight = FontWeight.Bold)
-                                        )
-                                        Icon(
-                                            imageVector = if (filterTexts.isNotEmpty()) {
-                                                Icons.TwoTone.FilterAlt
-                                            } else {
-                                                Icons.TwoTone.FilterAltOff
-                                            },
-                                            contentDescription = "Filter"
-                                        )
-                                    }
-                                }
-                                DropdownMenu(
-                                    expanded = showFilterMenu,
-                                    onDismissRequest = { showFilterMenu = false },
-                                    offset = DpOffset(0.dp, 8.dp)
-                                ) {
-                                    Column(
-                                        modifier = Modifier
-                                            .padding(8.dp)
-                                            .width(300.dp)
-                                    ) {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(bottom = 4.dp),
-                                            verticalAlignment = Alignment.CenterVertically
-                                        ) {
-                                            OutlinedTextField(
-                                                value = customFilterText,
-                                                onValueChange = { customFilterText = it },
-                                                modifier = Modifier.weight(1f),
-                                                placeholder = { Text("Add custom filter") },
-                                                singleLine = true,
-                                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                                                keyboardActions = KeyboardActions(
-                                                    onDone = {
-                                                        if (customFilterText.isNotBlank()) {
-                                                            filterTexts = filterTexts + customFilterText
-                                                            customFilterText = ""
-                                                        }
-                                                    }
-                                                )
-                                            )
-                                            Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-                                            IconButton(
-                                                onClick = {
-                                                    if (customFilterText.isNotBlank()) {
-                                                        filterTexts = filterTexts + customFilterText
-                                                        customFilterText = ""
-                                                    }
-                                                },
-                                                enabled = customFilterText.isNotBlank()
-                                            ) {
-                                                Icon(
-                                                    imageVector = Icons.Default.Add,
-                                                    contentDescription = "Add filter"
-                                                )
-                                            }
-                                        }
-
-                                        Text(
-                                            text = "Preset Filters",
-                                            style = TextStyle(fontWeight = FontWeight.Bold),
-                                            modifier = Modifier.padding(vertical = 4.dp)
-                                        )
-                                        FlowRow(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(bottom = 0.dp),
-                                            horizontalArrangement = Arrangement.spacedBy(2.dp),
-                                            verticalArrangement = Arrangement.spacedBy(0.dp)
-                                        ) {
-                                            for (filter in viewModel.presetFilters) {
-                                                FilterChip(
-                                                    selected = filter in filterTexts,
-                                                    onClick = {
-                                                        filterTexts = if (filter in filterTexts) {
-                                                            filterTexts - filter
-                                                        } else {
-                                                            filterTexts + filter
-                                                        }
-                                                    },
-                                                    label = { Text(filter) }
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    if (filterTexts.isNotEmpty()) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 2.dp),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(
-                                text = stringResource(R.string.debug_active_filters),
-                                style = TextStyle(fontWeight = FontWeight.Bold)
+                            DebugFilterBar(
+                                filterTexts = filterTexts,
+                                onFilterTextsChange = { filterTexts = it },
+                                customFilterText = customFilterText,
+                                onCustomFilterTextChange = { customFilterText = it },
+                                presetFilters = viewModel.presetFilters.asList()
                             )
-                            IconButton(
-                                onClick = { filterTexts = emptyList() }
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Clear,
-                                    contentDescription = "Clear all filters"
-                                )
-                            }
-                        }
-                        FlowRow(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 0.dp),
-                            horizontalArrangement = Arrangement.spacedBy(2.dp),
-                            verticalArrangement = Arrangement.spacedBy(0.dp)
-                        ) {
-                            for (filter in filterTexts) {
-                                FilterChip(
-                                    selected = true,
-                                    onClick = {
-                                        filterTexts = filterTexts - filter
-                                    },
-                                    label = { Text(filter) },
-                                    leadingIcon = {
-                                        Icon(
-                                            imageVector = Icons.TwoTone.FilterAlt,
-                                            contentDescription = null
-                                        )
-                                    }
-                                )
-                            }
                         }
                     }
+
+                    DebugActiveFilters(
+                        filterTexts = filterTexts,
+                        onFilterTextsChange = { filterTexts = it }
+                    )
                 }
             }
         }
@@ -1023,7 +1065,7 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
                 "Permission denied: Cannot write to Downloads folder",
                 Toast.LENGTH_LONG
             ).show()
-            warn(e)
+            warn("Error:SecurityException: " + e.toString())
         }
     } catch (e: IOException) {
         withContext(Dispatchers.Main) {
@@ -1033,7 +1075,7 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
                 Toast.LENGTH_LONG
             ).show()
         }
-        warn(e)
+        warn("Error:IOException: " + e.toString())
     }
 }
 

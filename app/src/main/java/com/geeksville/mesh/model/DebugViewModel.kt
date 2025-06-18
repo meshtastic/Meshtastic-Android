@@ -124,6 +124,10 @@ class DebugViewModel @Inject constructor(
         meshLogRepository.deleteAll()
     }
 
+//    fun warn(str: String) {
+//        warn(str)
+//    }
+
     @Immutable
     data class UiMeshLog(
         val uuid: String,
