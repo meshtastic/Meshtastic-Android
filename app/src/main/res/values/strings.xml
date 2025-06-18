@@ -163,7 +163,7 @@
     <string name="debug_panel">Debug Panel</string>
     <string name="debug_logs_export">Export Logs</string>
     <string name="debug_last_messages">500 last messages</string>
-    <string name="debug_filters">filters</string>
+    <string name="debug_filters">Filters</string>
     <string name="debug_active_filters">Active filters</string>
     <string name="clear">Clear Logs</string>
     <string name="updating_firmware">Updating firmware, wait up to eight minutes…</string>

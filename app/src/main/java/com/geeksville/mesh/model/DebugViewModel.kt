@@ -38,7 +38,6 @@ import java.util.Locale
 import javax.inject.Inject
 import com.geeksville.mesh.Portnums.PortNum
 
-
 @HiltViewModel
 class DebugViewModel @Inject constructor(
     private val meshLogRepository: MeshLogRepository,
