@@ -96,14 +96,13 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
-
 import android.widget.Toast
 import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.datastore.core.IOException
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.android.BuildUtils.warn
+import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
@@ -391,55 +390,38 @@ internal fun DebugActiveFilters(
 }
 
 @Composable
-internal fun DebugScreen(
-    viewModel: DebugViewModel = hiltViewModel(),
+internal fun DebugSearchState(
+    filteredLogs: List<UiMeshLog>,
+    filterTexts: List<String>,
+    presetFilters: List<String>,
+    onSearchStateChange: (SearchState) -> Unit,
+    onFilterTextsChange: (List<String>) -> Unit,
+    onSelectedLogIdChange: (String?) -> Unit
 ) {
-    val listState = rememberLazyListState()
-    val logs by viewModel.meshLog.collectAsStateWithLifecycle()
-
-    var filterTexts by remember { mutableStateOf(listOf<String>()) }
     var customFilterText by remember { mutableStateOf("") }
     var searchText by remember { mutableStateOf("") }
     var currentMatchIndex by remember { mutableStateOf(-1) }
     var selectedLogId by remember { mutableStateOf<String?>(null) }
 
-    val filteredLogs by remember(logs) {
-        derivedStateOf {
-            logs.filter { log ->
-                filterTexts.isEmpty() || filterTexts.any { filterText ->
-                    log.logMessage.contains(filterText, ignoreCase = true) ||
-                    log.messageType.contains(filterText, ignoreCase = true) ||
-                    log.formattedReceivedDate.contains(filterText, ignoreCase = true)
-                }
-            }
+    fun findSearchMatches(searchText: String, filteredLogs: List<UiMeshLog>): List<SearchMatch> {
+        if (searchText.isEmpty()) {
+            return emptyList()
         }
-    }
-
-    val shouldAutoScroll by remember { derivedStateOf { listState.firstVisibleItemIndex < 3 } }
-    if (shouldAutoScroll) {
-        LaunchedEffect(filteredLogs) {
-            if (!listState.isScrollInProgress) {
-                listState.animateScrollToItem(0)
+        return filteredLogs.flatMapIndexed { logIndex, log ->
+            searchText.split(" ").flatMap { term ->
+                val messageMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.logMessage)
+                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "message") }
+                val typeMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.messageType)
+                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "type") }
+                val dateMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.formattedReceivedDate)
+                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "date") }
+                messageMatches + typeMatches + dateMatches
             }
-        }
+        }.sortedBy { it.start }
     }
 
     val allMatches = remember(searchText, filteredLogs) {
-        if (searchText.isEmpty()) {
-            emptyList()
-        } else {
-            filteredLogs.flatMapIndexed { logIndex, log ->
-                searchText.split(" ").flatMap { term ->
-                    val messageMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.logMessage)
-                        .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "message") }
-                    val typeMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.messageType)
-                        .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "type") }
-                    val dateMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.formattedReceivedDate)
-                        .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "date") }
-                    messageMatches + typeMatches + dateMatches
-                }
-            }.sortedBy { it.start }
-        }
+        findSearchMatches(searchText, filteredLogs)
     }
 
     val hasMatches = allMatches.isNotEmpty()
@@ -448,7 +430,7 @@ internal fun DebugScreen(
         if (index in allMatches.indices) {
             currentMatchIndex = index
             val match = allMatches[index]
-            listState.requestScrollToItem(match.logIndex)
+            // This will be handled by the parent component
         }
     }
 
@@ -478,6 +460,87 @@ internal fun DebugScreen(
         hasMatches = hasMatches
     )
 
+    // Notify parent of state changes
+    LaunchedEffect(searchState) {
+        onSearchStateChange(searchState)
+    }
+
+    LaunchedEffect(selectedLogId) {
+        onSelectedLogIdChange(selectedLogId)
+    }
+
+    // Search UI components
+    Column(
+        modifier = Modifier.padding(8.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+                DebugSearchBar(
+                    searchState = searchState,
+                    onSearchTextChange = { searchText = it },
+                    onNextMatch = { goToNextMatch() },
+                    onPreviousMatch = { goToPreviousMatch() },
+                    onClearSearch = { searchText = "" }
+                )
+                DebugFilterBar(
+                    filterTexts = filterTexts,
+                    onFilterTextsChange = onFilterTextsChange,
+                    customFilterText = customFilterText,
+                    onCustomFilterTextChange = { customFilterText = it },
+                    presetFilters = presetFilters
+                )
+            }
+
+        DebugActiveFilters(
+            filterTexts = filterTexts,
+            onFilterTextsChange = onFilterTextsChange
+        )
+    }
+}
+
+@Composable
+internal fun DebugScreen(
+    viewModel: DebugViewModel = hiltViewModel(),
+) {
+    val listState = rememberLazyListState()
+    val logs by viewModel.meshLog.collectAsStateWithLifecycle()
+
+    var filterTexts by remember { mutableStateOf(listOf<String>()) }
+    var filteredLogs by remember { mutableStateOf(logs) }
+    var searchState by remember { mutableStateOf(SearchState()) }
+    var selectedLogId by remember { mutableStateOf<String?>(null) }
+
+    // Update filtered logs when logs or filter texts change
+    LaunchedEffect(logs, filterTexts) {
+        filteredLogs = logs.filter { log ->
+            filterTexts.isEmpty() || filterTexts.any { filterText ->
+                log.logMessage.contains(filterText, ignoreCase = true) ||
+                        log.messageType.contains(filterText, ignoreCase = true) ||
+                        log.formattedReceivedDate.contains(filterText, ignoreCase = true)
+            }
+        }.toImmutableList()
+    }
+
+    val shouldAutoScroll by remember { derivedStateOf { listState.firstVisibleItemIndex < 3 } }
+    if (shouldAutoScroll) {
+        LaunchedEffect(filteredLogs) {
+            if (!listState.isScrollInProgress) {
+                listState.animateScrollToItem(0)
+            }
+        }
+    }
+
+    // Handle search result navigation
+    LaunchedEffect(searchState) {
+        if (searchState.currentMatchIndex >= 0 && searchState.currentMatchIndex < searchState.allMatches.size) {
+            val match = searchState.allMatches[searchState.currentMatchIndex]
+            listState.requestScrollToItem(match.logIndex)
+        }
+    }
+
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
         state = listState,
@@ -488,41 +551,14 @@ internal fun DebugScreen(
                     .fillMaxWidth()
                     .padding(8.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(8.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Row(
-                            modifier = Modifier.weight(1f),
-                            horizontalArrangement = Arrangement.Start,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            DebugSearchBar(
-                                searchState = searchState,
-                                onSearchTextChange = { searchText = it },
-                                onNextMatch = { goToNextMatch() },
-                                onPreviousMatch = { goToPreviousMatch() },
-                                onClearSearch = { searchText = "" }
-                            )
-                            DebugFilterBar(
-                                filterTexts = filterTexts,
-                                onFilterTextsChange = { filterTexts = it },
-                                customFilterText = customFilterText,
-                                onCustomFilterTextChange = { customFilterText = it },
-                                presetFilters = viewModel.presetFilters.asList()
-                            )
-                        }
-                    }
-
-                    DebugActiveFilters(
-                        filterTexts = filterTexts,
-                        onFilterTextsChange = { filterTexts = it }
-                    )
-                }
+                DebugSearchState(
+                    filteredLogs = filteredLogs,
+                    filterTexts = filterTexts,
+                    presetFilters = viewModel.presetFilters.asList(),
+                    onSearchStateChange = { searchState = it },
+                    onFilterTextsChange = { filterTexts = it },
+                    onSelectedLogIdChange = { selectedLogId = it }
+                )
             }
         }
 
@@ -530,7 +566,7 @@ internal fun DebugScreen(
             DebugItem(
                 modifier = Modifier.animateItem(),
                 log = log,
-                searchText = searchText,
+                searchText = searchState.searchText,
                 isSelected = selectedLogId == log.uuid,
                 onLogClick = {
                     selectedLogId = if (selectedLogId == log.uuid) null else log.uuid
