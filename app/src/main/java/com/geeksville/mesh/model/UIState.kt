@@ -517,16 +517,21 @@ class UIViewModel @Inject constructor(
         initialValue = emptyList(),
     )
 
-    fun getMessagesFrom(contactKey: String) = packetRepository.getMessagesFrom(contactKey)
-        .mapLatest { packets ->
-            packets.map { packet ->
-                val message = packet.toMessage(::getNode)
-                message.replyId.takeIf { it != null && it != 0 }
-                    ?.let { packetRepository.getPacketByPacketId(it) }
-                    ?.toMessage(::getNode)
-                    ?.let { originalMessage -> message.copy(originalMessage = originalMessage) } ?: message
-            }
-        }
+    fun getMessagesFrom(contactKey: String): StateFlow<List<Message>> {
+        _contactKeyForMessages.value = contactKey
+        return messagesForContactKey
+    }
+
+    private val _contactKeyForMessages: MutableStateFlow<String?> = MutableStateFlow(null)
+    private val messagesForContactKey: StateFlow<List<Message>> =
+        _contactKeyForMessages.filterNotNull().flatMapLatest { contactKey ->
+            packetRepository.getMessagesFrom(contactKey, ::getNode)
+        }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList(),
+        )
+
 
     val waypoints = packetRepository.getWaypoints().mapLatest { list ->
         list.associateBy { packet -> packet.data.waypoint!!.id }
