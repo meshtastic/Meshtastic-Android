@@ -532,7 +532,6 @@ class UIViewModel @Inject constructor(
             initialValue = emptyList(),
         )
 
-
     val waypoints = packetRepository.getWaypoints().mapLatest { list ->
         list.associateBy { packet -> packet.data.waypoint!!.id }
             .filterValues { it.data.waypoint!!.expire > System.currentTimeMillis() / 1000 }
