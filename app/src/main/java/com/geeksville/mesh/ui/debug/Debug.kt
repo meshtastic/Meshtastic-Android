@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+@file:Suppress("TooManyFunctions") // Needs a lot of them - at least until I pull filters or search into their own files
 package com.geeksville.mesh.ui.debug
 
 import android.content.Context
@@ -185,6 +186,93 @@ internal fun DebugSearchBar(
 }
 
 @Composable
+internal fun DebugCustomFilterInput(
+    customFilterText: String,
+    onCustomFilterTextChange: (String) -> Unit,
+    filterTexts: List<String>,
+    onFilterTextsChange: (List<String>) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        OutlinedTextField(
+            value = customFilterText,
+            onValueChange = onCustomFilterTextChange,
+            modifier = Modifier.weight(1f),
+            placeholder = { Text("Add custom filter") },
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+            keyboardActions = KeyboardActions(
+                onDone = {
+                    if (customFilterText.isNotBlank()) {
+                        onFilterTextsChange(filterTexts + customFilterText)
+                        onCustomFilterTextChange("")
+                    }
+                }
+            )
+        )
+        Spacer(modifier = Modifier.padding(horizontal = 8.dp))
+        IconButton(
+            onClick = {
+                if (customFilterText.isNotBlank()) {
+                    onFilterTextsChange(filterTexts + customFilterText)
+                    onCustomFilterTextChange("")
+                }
+            },
+            enabled = customFilterText.isNotBlank()
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Add filter"
+            )
+        }
+    }
+}
+
+@Composable
+internal fun DebugPresetFilters(
+    presetFilters: List<String>,
+    filterTexts: List<String>,
+    onFilterTextsChange: (List<String>) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(modifier = modifier) {
+        Text(
+            text = "Preset Filters",
+            style = TextStyle(fontWeight = FontWeight.Bold),
+            modifier = Modifier.padding(vertical = 4.dp)
+        )
+        FlowRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 0.dp),
+            horizontalArrangement = Arrangement.spacedBy(2.dp),
+            verticalArrangement = Arrangement.spacedBy(0.dp)
+        ) {
+            for (filter in presetFilters) {
+                FilterChip(
+                    selected = filter in filterTexts,
+                    onClick = {
+                        onFilterTextsChange(
+                            if (filter in filterTexts) {
+                                filterTexts - filter
+                            } else {
+                                filterTexts + filter
+                            }
+                        )
+                    },
+                    label = { Text(filter) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
 internal fun DebugFilterBar(
     filterTexts: List<String>,
     onFilterTextsChange: (List<String>) -> Unit,
@@ -194,7 +282,6 @@ internal fun DebugFilterBar(
     modifier: Modifier = Modifier
 ) {
     var showFilterMenu by remember { mutableStateOf(false) }
-
     Row(
         modifier = modifier,
         horizontalArrangement = Arrangement.Start,
@@ -231,73 +318,17 @@ internal fun DebugFilterBar(
                         .padding(8.dp)
                         .width(300.dp)
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        OutlinedTextField(
-                            value = customFilterText,
-                            onValueChange = onCustomFilterTextChange,
-                            modifier = Modifier.weight(1f),
-                            placeholder = { Text("Add custom filter") },
-                            singleLine = true,
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
-                            keyboardActions = KeyboardActions(
-                                onDone = {
-                                    if (customFilterText.isNotBlank()) {
-                                        onFilterTextsChange(filterTexts + customFilterText)
-                                        onCustomFilterTextChange("")
-                                    }
-                                }
-                            )
-                        )
-                        Spacer(modifier = Modifier.padding(horizontal = 8.dp))
-                        IconButton(
-                            onClick = {
-                                if (customFilterText.isNotBlank()) {
-                                    onFilterTextsChange(filterTexts + customFilterText)
-                                    onCustomFilterTextChange("")
-                                }
-                            },
-                            enabled = customFilterText.isNotBlank()
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.Add,
-                                contentDescription = "Add filter"
-                            )
-                        }
-                    }
-
-                    Text(
-                        text = "Preset Filters",
-                        style = TextStyle(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(vertical = 4.dp)
+                    DebugCustomFilterInput(
+                        customFilterText = customFilterText,
+                        onCustomFilterTextChange = onCustomFilterTextChange,
+                        filterTexts = filterTexts,
+                        onFilterTextsChange = onFilterTextsChange
                     )
-                    FlowRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 0.dp),
-                        horizontalArrangement = Arrangement.spacedBy(2.dp),
-                        verticalArrangement = Arrangement.spacedBy(0.dp)
-                    ) {
-                        for (filter in presetFilters) {
-                            FilterChip(
-                                selected = filter in filterTexts,
-                                onClick = {
-                                    onFilterTextsChange(
-                                        if (filter in filterTexts) {
-                                            filterTexts - filter
-                                        } else {
-                                            filterTexts + filter
-                                        }
-                                    )
-                                },
-                                label = { Text(filter) }
-                            )
-                        }
-                    }
+                    DebugPresetFilters(
+                        presetFilters = presetFilters,
+                        filterTexts = filterTexts,
+                        onFilterTextsChange = onFilterTextsChange
+                    )
                 }
             }
         }
