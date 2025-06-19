@@ -112,6 +112,10 @@ internal fun DebugScreen(
         }.toImmutableList()
     }
 
+    LaunchedEffect(filteredLogs) {
+        viewModel.updateFilteredLogs(filteredLogs)
+    }
+
     val shouldAutoScroll by remember { derivedStateOf { listState.firstVisibleItemIndex < 3 } }
     if (shouldAutoScroll) {
         LaunchedEffect(filteredLogs) {
@@ -142,7 +146,6 @@ internal fun DebugScreen(
                 onPreviousMatch = viewModel::goToPreviousMatch,
                 onClearSearch = viewModel::clearSearch,
                 onFilterTextsChange = viewModel::setFilterTexts,
-                onSelectedLogIdChange = viewModel::setSelectedLogId
             )
         }
 

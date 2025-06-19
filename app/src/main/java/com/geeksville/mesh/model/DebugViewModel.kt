@@ -31,6 +31,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.text.DateFormat
@@ -39,9 +40,6 @@ import javax.inject.Inject
 import com.geeksville.mesh.Portnums.PortNum
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.collect
 
 data class SearchMatch(
     val logIndex: Int,
@@ -82,10 +80,17 @@ class DebugViewModel @Inject constructor(
     private val _searchState = MutableStateFlow(SearchState())
     val searchState = _searchState.asStateFlow()
 
+    private val _filteredLogs = MutableStateFlow<List<UiMeshLog>>(emptyList())
+    val filteredLogs = _filteredLogs.asStateFlow()
+
+    fun updateFilteredLogs(logs: List<UiMeshLog>) {
+        _filteredLogs.value = logs
+    }
+
     init {
         debug("DebugViewModel created")
         viewModelScope.launch {
-            combine(_searchText, meshLog) { searchText, logs ->
+            combine(_searchText, _filteredLogs) { searchText, logs ->
                 findSearchMatches(searchText, logs)
             }.collect { matches ->
                 val hasMatches = matches.isNotEmpty()

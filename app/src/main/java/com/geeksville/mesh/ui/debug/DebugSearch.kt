@@ -157,7 +157,6 @@ internal fun DebugSearchState(
     onPreviousMatch: () -> Unit,
     onClearSearch: () -> Unit,
     onFilterTextsChange: (List<String>) -> Unit,
-    onSelectedLogIdChange: (String?) -> Unit
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -180,7 +179,7 @@ internal fun DebugSearchState(
             DebugFilterBar(
                 filterTexts = filterTexts,
                 onFilterTextsChange = onFilterTextsChange,
-                customFilterText = "", // Optionally, you can add custom filter state to ViewModel if needed
+                customFilterText = "",
                 onCustomFilterTextChange = {},
                 presetFilters = presetFilters
             )
