@@ -2285,7 +2285,7 @@ class MeshService : Service(), Logging {
                     latitudeI = Position.degI(currentPosition.latitude)
                     longitudeI = Position.degI(currentPosition.longitude)
                     altitude = currentPosition.altitude
-                    time = (System.currentTimeMillis() / 1000).toInt()
+                    time = currentSecond()
                 }
 
                 sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(
