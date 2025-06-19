@@ -659,4 +659,6 @@
     <string name="compromised_keys">Turvallisuusriski havaittu: avaimet ovat vaarantuneet. Valitse OK luodaksesi uudet.</string>
     <string name="regenerate_private_key">Luo uusi yksityinen avain</string>
     <string name="regenerate_keys_confirmation">Oletko varma, että haluat luoda uuden yksityisen avaimen?</string>
+    <string name="export_keys">Vie avaimet</string>
+    <string name="export_keys_confirmation">Vie julkiset ja yksityiset avaimet tiedostoon. Säilytä tiedosto turvallisessa paikassa.</string>
 </resources>

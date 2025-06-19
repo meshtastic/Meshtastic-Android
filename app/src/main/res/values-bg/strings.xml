@@ -266,6 +266,8 @@
     <string name="mqtt">MQTT</string>
     <string name="external_notification">Външно известие</string>
     <string name="telemetry">Телеметрия</string>
+    <string name="audio">Аудио</string>
+    <string name="audio_config">Конфигурация на аудиото</string>
     <string name="codec_2_enabled">CODEC 2 е активиран</string>
     <string name="bluetooth_config">Конфигурация на Bluetooth</string>
     <string name="bluetooth_enabled">Bluetooth е включен</string>
@@ -312,6 +314,8 @@
     <string name="rsyslog_server">rsyslog сървър</string>
     <string name="ip">IP</string>
     <string name="gateway">Шлюз</string>
+    <string name="paxcounter_config">Конфигурация на Paxcounter</string>
+    <string name="paxcounter_enabled">Paxcounter е активиран</string>
     <string name="position_config">Конфигурация на позицията</string>
     <string name="use_fixed_position">Използване на фиксирана позиция</string>
     <string name="latitude">Геогр. ширина</string>
@@ -360,6 +364,7 @@
     <string name="firmware">Фърмуер</string>
     <string name="use_12h_format">Използване на 12ч формат</string>
     <string name="display_time_in_12h_format">Когато е активирано, устройството ще показва времето на екрана в 12-часов формат.</string>
+    <string name="host">Хост</string>
     <string name="free_memory">Свободна памет</string>
     <string name="disk_free">Свободен диск</string>
     <string name="connections">Връзки</string>
@@ -371,4 +376,7 @@
     <string name="should_update_firmware">Препоръчва се актуализация на фърмуера.</string>
     <string name="time">Време</string>
     <string name="date">Дата</string>
+    <string name="regenerate_keys_confirmation">Сигурни ли сте, че искате да регенерирате Вашия личен ключ?</string>
+    <string name="export_keys">Експортиране на ключовете</string>
+    <string name="export_keys_confirmation">Експортира публичния и частния ключове във файл. Моля, съхранявайте го на сигурно място.</string>
 </resources>

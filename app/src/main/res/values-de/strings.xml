@@ -659,4 +659,6 @@
     <string name="compromised_keys">Kompromittierte Schlüssel erkannt, wählen Sie OK, um diese neu zu erstellen.</string>
     <string name="regenerate_private_key">Privaten Schlüssel neu erstellen</string>
     <string name="regenerate_keys_confirmation">Sind Sie sicher, dass Sie Ihren privaten Schlüssel neu erstellen möchten?</string>
+    <string name="export_keys">Schlüssel exportieren</string>
+    <string name="export_keys_confirmation">Exportiert den öffentlichen und privaten Schlüssel in eine Datei. Bitte speichern Sie diese an einem sicheren Ort.</string>
 </resources>
