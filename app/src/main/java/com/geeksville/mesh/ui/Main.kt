@@ -248,6 +248,7 @@ fun MainScreen(
                 title = title,
                 isManaged = localConfig.security.isManaged,
                 navController = navController,
+                viewModel = viewModel,
                 onAction = { action ->
                     when (action) {
                         MainMenuAction.DEBUG -> navController.navigate(Route.DebugPanel)
@@ -354,10 +355,15 @@ private fun MainAppBar(
     }
     TopAppBar(
         title = {
+            val numNodes = nodes.size
+            val numOnlineNodes = viewModel.meshService?.nodes?.filter { it.isOnline }?.size ?: 0
             when {
-                currentDestination?.hasRoute<Route.Nodes>() ?: false ->
+                currentDestination?.hasRoute<NodesRoutes.Nodes>() ?: false ->
                     Text(
-                        stringResource(id = R.string.app_name) + " " + "(${nodes.size})",
+                        stringResource(id = R.string.app_name) + " " + when (numNodes) {
+                            0 -> "(0)"
+                            else -> "($numOnlineNodes/$numNodes)"
+                        },
                     )
                 currentDestination == null || isTopLevelRoute -> {
                     Text(
