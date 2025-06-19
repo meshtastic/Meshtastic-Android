@@ -24,8 +24,10 @@ import com.geeksville.mesh.database.dao.PacketDao
 import com.geeksville.mesh.database.entity.ContactSettings
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.ReactionEntity
+import com.geeksville.mesh.model.Node
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
@@ -58,7 +60,19 @@ class PacketRepository @Inject constructor(private val packetDaoLazy: dagger.Laz
         packetDao.insert(packet)
     }
 
-    fun getMessagesFrom(contact: String) = packetDao.getMessagesFrom(contact)
+    suspend fun getMessagesFrom(contact: String, getNode: suspend (String?) -> Node) =
+        withContext(Dispatchers.IO) {
+            packetDao.getMessagesFrom(contact).mapLatest { packets ->
+                packets.map { packet ->
+                    val message = packet.toMessage(getNode)
+                    message.replyId.takeIf { it != null && it != 0 }
+                        ?.let { getPacketByPacketId(it) }
+                        ?.toMessage(getNode)
+                        ?.let { originalMessage -> message.copy(originalMessage = originalMessage) }
+                        ?: message
+                }
+            }
+        }
 
     suspend fun updateMessageStatus(d: DataPacket, m: MessageStatus) = withContext(Dispatchers.IO) {
         packetDao.updateMessageStatus(d, m)
@@ -70,6 +84,10 @@ class PacketRepository @Inject constructor(private val packetDaoLazy: dagger.Laz
 
     suspend fun getPacketById(requestId: Int) = withContext(Dispatchers.IO) {
         packetDao.getPacketById(requestId)
+    }
+
+    suspend fun getPacketByPacketId(packetId: Int) = withContext(Dispatchers.IO) {
+        packetDao.getPacketByPacketId(packetId)
     }
 
     suspend fun deleteMessages(uuidList: List<Long>) = withContext(Dispatchers.IO) {

@@ -17,6 +17,11 @@
 
 package com.geeksville.mesh.ui.radioconfig.components
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,6 +29,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -40,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos.Config.SecurityConfig
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
@@ -60,6 +67,7 @@ fun SecurityConfigScreen(
     viewModel: RadioConfigViewModel = hiltViewModel(),
 ) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val node by viewModel.destNode.collectAsStateWithLifecycle()
 
     if (state.responseState.isWaiting()) {
         PacketResponseStateDialog(
@@ -69,24 +77,39 @@ fun SecurityConfigScreen(
     }
 
     SecurityConfigItemList(
+        user = node?.user,
         securityConfig = state.radioConfig.security,
         enabled = state.connected,
         onConfirm = { securityInput ->
             val config = config { security = securityInput }
             viewModel.setConfig(config)
-        }
+        },
+        onExport = { uri, securityConfig ->
+            viewModel.exportSecurityConfig(uri, securityConfig)
+        },
     )
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod")
 @Composable
 fun SecurityConfigItemList(
+    user: MeshProtos.User? = null,
     securityConfig: SecurityConfig,
     enabled: Boolean,
     onConfirm: (config: SecurityConfig) -> Unit,
+    onExport: (uri: Uri, securityConfig: SecurityConfig) -> Unit = { _, _ -> },
 ) {
     val focusManager = LocalFocusManager.current
     var securityInput by rememberSaveable { mutableStateOf(securityConfig) }
+
+    val exportConfigLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) {
+        if (it.resultCode == Activity.RESULT_OK) {
+            it.data?.data?.let { uri -> onExport(uri, securityConfig) }
+        }
+    }
 
     var showKeyGenerationDialog by rememberSaveable { mutableStateOf(false) }
     PrivateKeyRegenerateDialog(
@@ -95,9 +118,36 @@ fun SecurityConfigItemList(
         onConfirm = { newConfig ->
             securityInput = newConfig
             showKeyGenerationDialog = false
+            onConfirm(securityInput)
         },
         onDismiss = { showKeyGenerationDialog = false }
     )
+    var showEditSecurityConfigDialog by rememberSaveable { mutableStateOf(false) }
+    if (showEditSecurityConfigDialog) {
+        AlertDialog(
+            title = { Text(text = stringResource(R.string.export_keys)) },
+            text = { Text(text = stringResource(R.string.export_keys_confirmation)) },
+            onDismissRequest = { showEditSecurityConfigDialog = false },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showEditSecurityConfigDialog = false
+                        val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            type = "application/*"
+                            putExtra(
+                                Intent.EXTRA_TITLE,
+                                "${user?.shortName}_keys_${System.currentTimeMillis()}.json"
+                            )
+                        }
+                        exportConfigLauncher.launch(intent)
+                    },
+                ) {
+                    Text(stringResource(R.string.okay))
+                }
+            },
+        )
+    }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize()
@@ -145,12 +195,24 @@ fun SecurityConfigItemList(
 
         item {
             NodeActionButton(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(horizontal = 8.dp),
                 title = stringResource(R.string.regenerate_private_key),
                 enabled = enabled,
                 icon = Icons.TwoTone.Warning,
                 onClick = {
                     showKeyGenerationDialog = true
+                }
+            )
+        }
+
+        item {
+            NodeActionButton(
+                modifier = Modifier.padding(horizontal = 8.dp),
+                title = stringResource(R.string.export_keys),
+                enabled = enabled,
+                icon = Icons.TwoTone.Warning,
+                onClick = {
+                    showEditSecurityConfigDialog = true
                 }
             )
         }
@@ -233,6 +295,7 @@ fun SecurityConfigItemList(
     }
 }
 
+@Suppress("MagicNumber")
 @Composable
 fun PrivateKeyRegenerateDialog(
     showKeyGenerationDialog: Boolean,
@@ -251,12 +314,17 @@ fun PrivateKeyRegenerateDialog(
                     onClick = {
                         securityInput = securityInput.copy {
                             clearPrivateKey()
-                            @Suppress("MagicNumber")
-                            privateKey = ByteString.copyFrom(
-                                ByteArray(32).apply {
-                                    SecureRandom().nextBytes(this)
-                                }
-                            )
+                            // Generate a random "f" value
+                            val f = ByteArray(32).apply {
+                                SecureRandom().nextBytes(this)
+                            }
+                            // Adjust the value to make it valid as an "s" value for eval().
+                            // According to the specification we need to mask off the 3
+                            // right-most bits of f[0], mask off the left-most bit of f[31],
+                            // and set the second to left-most bit of f[31].
+                            f[0] = (f[0].toInt() and 0xF8).toByte()
+                            f[31] = ((f[31].toInt() and 0x7F) or 0x40).toByte()
+                            privateKey = ByteString.copyFrom(f)
                         }
                         onConfirm(securityInput)
                     },

@@ -20,6 +20,7 @@ package com.geeksville.mesh.ui.radioconfig
 import android.app.Application
 import android.net.Uri
 import android.os.RemoteException
+import android.util.Base64
 import androidx.annotation.StringRes
 import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
@@ -30,6 +31,7 @@ import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.ConfigProtos
+import com.geeksville.mesh.ConfigProtos.Config.SecurityConfig
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.ModuleConfigProtos
@@ -66,6 +68,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.json.JSONObject
 import java.io.FileOutputStream
 import javax.inject.Inject
 
@@ -379,7 +382,6 @@ class RadioConfigViewModel @Inject constructor(
     fun exportProfile(uri: Uri, profile: DeviceProfile) = viewModelScope.launch {
         writeToUri(uri, profile)
     }
-
     private suspend fun writeToUri(uri: Uri, message: MessageLite) = withContext(Dispatchers.IO) {
         try {
             app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
@@ -394,6 +396,46 @@ class RadioConfigViewModel @Inject constructor(
         }
     }
 
+    fun exportSecurityConfig(uri: Uri, securityConfig: SecurityConfig) = viewModelScope.launch {
+        writeSecurityKeysJsonToUri(uri, securityConfig)
+    }
+
+    private val indentSpaces = 4
+    private suspend fun writeSecurityKeysJsonToUri(uri: Uri, securityConfig: SecurityConfig) =
+        withContext(Dispatchers.IO) {
+            try {
+                val publicKeyBytes =
+                    securityConfig.publicKey.toByteArray()
+                val privateKeyBytes =
+                    securityConfig.privateKey.toByteArray()
+
+                // Convert byte arrays to Base64 strings for human readability in JSON
+                val publicKeyBase64 = Base64.encodeToString(publicKeyBytes, Base64.NO_WRAP)
+                val privateKeyBase64 = Base64.encodeToString(privateKeyBytes, Base64.NO_WRAP)
+
+                // Create a JSON object
+                val jsonObject = JSONObject().apply {
+                    put("timestamp", System.currentTimeMillis())
+                    put("public_key", publicKeyBase64)
+                    put("private_key", privateKeyBase64)
+                }
+
+                // Convert JSON object to a string
+                val jsonString =
+                    jsonObject.toString(indentSpaces)
+
+                app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
+                    FileOutputStream(parcelFileDescriptor.fileDescriptor).use { outputStream ->
+                        outputStream.write(jsonString.toByteArray(Charsets.UTF_8))
+                    }
+                }
+                setResponseStateSuccess()
+            } catch (ex: Exception) {
+                val errorMessage = "Can't write security keys JSON error: ${ex.message}"
+                errormsg(errorMessage)
+                sendError(ex.customMessage)
+            }
+        }
     fun installProfile(protobuf: DeviceProfile) = with(protobuf) {
         meshService?.beginEditSettings()
         if (hasLongName() || hasShortName()) {

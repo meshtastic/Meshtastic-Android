@@ -143,7 +143,7 @@
 
         <activity
             android:name="com.geeksville.mesh.MainActivity"
-            android:launchMode="standard"
+            android:launchMode="singleTop"
             android:windowSoftInputMode="adjustResize"
             android:exported="true">
             <intent-filter>
