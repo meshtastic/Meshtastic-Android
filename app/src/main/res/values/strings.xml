@@ -37,6 +37,7 @@
     <string name="main_tab_settings">Settings</string>
 
     <string name="unknown_node_short_name" translatable="false">\???</string>
+    <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">clear node filter</string>
     <string name="node_filter_include_unknown">Include unknown</string>

@@ -69,6 +69,8 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
+private const val DEFAULT_ID_SUFFIX_LENGTH = 4
+
 data class MetricsState(
     val isLocal: Boolean = false,
     val isManaged: Boolean = true,
@@ -220,10 +222,12 @@ class MetricsViewModel @Inject constructor(
      */
     private fun createFallbackNode(nodeNum: Int): Node {
         val userId = DataPacket.nodeNumToDefaultId(nodeNum)
+        val safeUserId = userId.padStart(DEFAULT_ID_SUFFIX_LENGTH, '0').takeLast(DEFAULT_ID_SUFFIX_LENGTH)
+        val longName = app.getString(R.string.fallback_node_name, safeUserId)
         val defaultUser = MeshProtos.User.newBuilder()
             .setId(userId)
-            .setLongName("Meshtastic ${userId.takeLast(n = 4)}")
-            .setShortName(userId.takeLast(n = 4))
+            .setLongName(longName)
+            .setShortName(safeUserId)
             .setHwModel(MeshProtos.HardwareModel.UNSET)
             .build()
 
