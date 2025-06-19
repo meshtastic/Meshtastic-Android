@@ -41,11 +41,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.CloudDownload
 import androidx.compose.material.icons.twotone.FilterAltOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -82,7 +85,6 @@ import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.components.CopyIconButton
 import androidx.compose.runtime.setValue
 import android.widget.Toast
-import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.datastore.core.IOException
@@ -173,7 +175,7 @@ internal fun DebugItem(
         modifier = modifier
             .fillMaxWidth()
             .padding(4.dp),
-        colors = androidx.compose.material3.CardDefaults.cardColors(
+        colors = CardDefaults.cardColors(
             containerColor = if (isSelected) {
                 colorScheme.primary.copy(alpha = 0.1f)
             } else {
@@ -181,7 +183,7 @@ internal fun DebugItem(
             }
         ),
         border = if (isSelected) {
-            androidx.compose.foundation.BorderStroke(2.dp, colorScheme.primary)
+            BorderStroke(2.dp, colorScheme.primary)
         } else {
             null
         }

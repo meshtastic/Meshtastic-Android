@@ -141,7 +141,6 @@ internal fun DebugPresetFilters(
                         Icon(
                             imageVector = Icons.Filled.Done,
                             contentDescription = "Done icon",
-//                            modifier = Modifier.size(FilterChipDefaults.IconSize)
                         )
                         }
                     }
