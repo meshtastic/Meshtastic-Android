@@ -316,10 +316,7 @@ class MeshService : Service(), Logging {
      * Send a mesh packet to the radio, if the radio is not currently connected this function will throw NotConnectedException
      */
     private fun sendToRadio(packet: MeshPacket) {
-        debug("sendToRadio: Adding packet id=${packet.id} to queue, connectionState=$connectionState")
-        debug("sendToRadio: Queue size before add: ${queuedPackets.size}")
         queuedPackets.add(packet)
-        debug("sendToRadio: Queue size after add: ${queuedPackets.size}")
         startPacketQueue()
     }
 
@@ -1132,9 +1129,8 @@ class MeshService : Service(), Logging {
 
     private fun startPacketQueue() {
         if (queueJob?.isActive == true) return
-        debug("startPacketQueue: connectionState=$connectionState, queue size=${queuedPackets.size}")
         queueJob = serviceScope.handledLaunch {
-            debug("packet queueJob started, connectionState=$connectionState")
+            debug("packet queueJob started")
             while (connectionState == ConnectionState.CONNECTED) {
                 // take the first packet from the queue head
                 val packet = queuedPackets.poll() ?: break
@@ -1150,7 +1146,6 @@ class MeshService : Service(), Logging {
                     debug("queueJob packet id=${packet.id.toUInt()} failed")
                 }
             }
-            debug("packet queueJob ended, connectionState=$connectionState, remaining queue size=${queuedPackets.size}")
         }
     }
 
@@ -2277,50 +2272,31 @@ class MeshService : Service(), Logging {
             }
         }
         override fun requestPosition(destNum: Int, position: Position) = toRemoteExceptions {
-            debug("MeshService.requestPosition called: destNum=$destNum, position=$position")
-            debug("myNodeNum=$myNodeNum, connectionState=$connectionState")
+            if (destNum != myNodeNum) {
+                // Use our current position from nodeDB if the provided position is empty/invalid
+                val currentPosition = if (position.latitude == 0.0 && position.longitude == 0.0) {
+                    nodeDBbyNodeNum[myNodeNum]?.position?.let { Position(it) } ?: position
+                } else {
+                    position
+                }
 
-            // Check if we have a valid destination
-            if (destNum == myNodeNum) {
-                debug("Skipping position request to self (destNum=$destNum == myNodeNum=$myNodeNum)")
-                return@toRemoteExceptions
+                // Convert Position to MeshProtos.Position for the payload
+                val meshPosition = position {
+                    latitudeI = Position.degI(currentPosition.latitude)
+                    longitudeI = Position.degI(currentPosition.longitude)
+                    altitude = currentPosition.altitude
+                    time = (System.currentTimeMillis() / 1000).toInt()
+                }
+
+                sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(
+                    channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
+                    priority = MeshPacket.Priority.BACKGROUND,
+                ) {
+                    portnumValue = Portnums.PortNum.POSITION_APP_VALUE
+                    payload = meshPosition.toByteString()
+                    wantResponse = true
+                })
             }
-
-            // Use our current position from nodeDB if the provided position is empty/invalid
-            val currentPosition = if (position.latitude == 0.0 && position.longitude == 0.0) {
-                val nodePosition = nodeDBbyNodeNum[myNodeNum]?.position?.let { Position(it) }
-                debug("Using nodeDB position: $nodePosition")
-                nodePosition ?: position
-            } else {
-                debug("Using provided position: $position")
-                position
-            }
-
-            debug("Final position to send: $currentPosition")
-
-            // Convert Position to MeshProtos.Position for the payload
-            val meshPosition = position {
-                latitudeI = Position.degI(currentPosition.latitude)
-                longitudeI = Position.degI(currentPosition.longitude)
-                altitude = currentPosition.altitude
-                time = (System.currentTimeMillis() / 1000).toInt()
-            }
-
-            debug("Requesting position from destNum=$destNum with our position: $currentPosition")
-            debug("Channel for destNum=$destNum: ${nodeDBbyNodeNum[destNum]?.channel ?: 0}")
-
-            val packet = newMeshPacketTo(destNum).buildMeshPacket(
-                channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
-                priority = MeshPacket.Priority.BACKGROUND,
-            ) {
-                portnumValue = Portnums.PortNum.POSITION_APP_VALUE
-                payload = meshPosition.toByteString()
-                wantResponse = true
-            }
-
-            debug("Built position request packet: id=${packet.id}, to=$destNum, payload size=${packet.decoded.payload.size()}")
-            sendToRadio(packet)
-            debug("Position request packet sent successfully")
         }
 
         override fun setFixedPosition(destNum: Int, position: Position) = toRemoteExceptions {
