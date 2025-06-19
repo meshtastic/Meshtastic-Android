@@ -48,9 +48,9 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.LogSearchManager.SearchMatch
+import com.geeksville.mesh.model.LogSearchManager.SearchState
 import com.geeksville.mesh.ui.common.theme.AppTheme
-import com.geeksville.mesh.model.SearchMatch
-import com.geeksville.mesh.model.SearchState
 
 @Composable
 internal fun DebugSearchNavigation(
@@ -149,7 +149,7 @@ internal fun DebugSearchBar(
 
 @Composable
 internal fun DebugSearchState(
-    searchState: com.geeksville.mesh.model.SearchState,
+    searchState: SearchState,
     filterTexts: List<String>,
     presetFilters: List<String>,
     onSearchTextChange: (String) -> Unit,
