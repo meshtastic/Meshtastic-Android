@@ -13,6 +13,7 @@ jobs:
   stale_issues:
     name: Close Stale Issues
     runs-on: ubuntu-latest
+    if: github.repository == 'meshtastic/Meshtastic-Android'
 
     steps:
       - name: Stale PR+Issues

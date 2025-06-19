@@ -20,6 +20,7 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    if: github.repository == 'meshtastic/Meshtastic-Android'
     timeout-minutes: 30
 
     steps:
