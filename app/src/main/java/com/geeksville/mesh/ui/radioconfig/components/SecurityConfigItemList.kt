@@ -118,6 +118,7 @@ fun SecurityConfigItemList(
         onConfirm = { newConfig ->
             securityInput = newConfig
             showKeyGenerationDialog = false
+            onConfirm(securityInput)
         },
         onDismiss = { showKeyGenerationDialog = false }
     )
