@@ -51,6 +51,8 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.model.LogSearchManager.SearchMatch
 import com.geeksville.mesh.model.LogSearchManager.SearchState
 import com.geeksville.mesh.ui.common.theme.AppTheme
+import com.geeksville.mesh.model.DebugViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 internal fun DebugSearchNavigation(
@@ -189,6 +191,25 @@ internal fun DebugSearchState(
     DebugActiveFilters(
         filterTexts = filterTexts,
         onFilterTextsChange = onFilterTextsChange
+    )
+}
+
+@Composable
+fun DebugSearchState_viewModelDefaults(
+    searchState: SearchState,
+    filterTexts: List<String>,
+    presetFilters: List<String>,
+) {
+    val viewModel: DebugViewModel = hiltViewModel()
+    DebugSearchState(
+        searchState = searchState,
+        filterTexts = filterTexts,
+        presetFilters = presetFilters,
+        onSearchTextChange = viewModel.searchManager::setSearchText,
+        onNextMatch = viewModel.searchManager::goToNextMatch,
+        onPreviousMatch = viewModel.searchManager::goToPreviousMatch,
+        onClearSearch = viewModel.searchManager::clearSearch,
+        onFilterTextsChange = viewModel.filterManager::setFilterTexts,
     )
 }
 

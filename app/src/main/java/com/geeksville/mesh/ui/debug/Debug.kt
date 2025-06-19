@@ -136,15 +136,10 @@ internal fun DebugScreen(
         state = listState,
     ) {
         stickyHeader {
-            DebugSearchState(
+            DebugSearchState_viewModelDefaults(
                 searchState = searchState,
                 filterTexts = filterTexts,
                 presetFilters = viewModel.presetFilters.asList(),
-                onSearchTextChange = viewModel.searchManager::setSearchText,
-                onNextMatch = viewModel.searchManager::goToNextMatch,
-                onPreviousMatch = viewModel.searchManager::goToPreviousMatch,
-                onClearSearch = viewModel.searchManager::clearSearch,
-                onFilterTextsChange = viewModel.filterManager::setFilterTexts,
             )
         }
 
