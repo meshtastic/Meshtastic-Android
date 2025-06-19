@@ -2272,11 +2272,29 @@ class MeshService : Service(), Logging {
             }
         }
         override fun requestPosition(destNum: Int, position: Position) = toRemoteExceptions {
+            // Use our current position from nodeDB if the provided position is empty/invalid
+            val currentPosition = if (position.latitude == 0.0 && position.longitude == 0.0) {
+                nodeDBbyNodeNum[myNodeNum]?.position?.let { Position(it) } ?: position
+            } else {
+                position
+            }
+
+            // Convert Position to MeshProtos.Position for the payload
+            val meshPosition = position {
+                latitudeI = Position.degI(currentPosition.latitude)
+                longitudeI = Position.degI(currentPosition.longitude)
+                altitude = currentPosition.altitude
+                time = (System.currentTimeMillis() / 1000).toInt()
+            }
+
+            debug("Requesting position from destNum=$destNum with our position: $currentPosition")
+
             sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(
                 channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
                 priority = MeshPacket.Priority.BACKGROUND,
             ) {
                 portnumValue = Portnums.PortNum.POSITION_APP_VALUE
+                payload = meshPosition.toByteString()
                 wantResponse = true
             })
         }
