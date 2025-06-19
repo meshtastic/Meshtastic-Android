@@ -280,10 +280,5 @@ class DebugViewModel @Inject constructor(
         "!ffffffff", // broadcast
     ) + PortNum.entries.map { it.name } // all apps
 
-    fun setSearchText(text: String) = searchManager.setSearchText(text)
-    fun setFilterTexts(filters: List<String>) = filterManager.setFilterTexts(filters)
     fun setSelectedLogId(id: String?) { _selectedLogId.value = id }
-    fun goToNextMatch() = searchManager.goToNextMatch()
-    fun goToPreviousMatch() = searchManager.goToPreviousMatch()
-    fun clearSearch() = searchManager.clearSearch()
 }

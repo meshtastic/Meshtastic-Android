@@ -127,8 +127,7 @@ internal fun DebugScreen(
     // Handle search result navigation
     LaunchedEffect(searchState) {
         if (searchState.currentMatchIndex >= 0 && searchState.currentMatchIndex < searchState.allMatches.size) {
-            val match = searchState.allMatches[searchState.currentMatchIndex]
-            listState.requestScrollToItem(match.logIndex)
+            listState.requestScrollToItem(searchState.allMatches[searchState.currentMatchIndex].logIndex)
         }
     }
 
@@ -141,11 +140,11 @@ internal fun DebugScreen(
                 searchState = searchState,
                 filterTexts = filterTexts,
                 presetFilters = viewModel.presetFilters.asList(),
-                onSearchTextChange = viewModel::setSearchText,
-                onNextMatch = viewModel::goToNextMatch,
-                onPreviousMatch = viewModel::goToPreviousMatch,
-                onClearSearch = viewModel::clearSearch,
-                onFilterTextsChange = viewModel::setFilterTexts,
+                onSearchTextChange = viewModel.searchManager::setSearchText,
+                onNextMatch = viewModel.searchManager::goToNextMatch,
+                onPreviousMatch = viewModel.searchManager::goToPreviousMatch,
+                onClearSearch = viewModel.searchManager::clearSearch,
+                onFilterTextsChange = viewModel.filterManager::setFilterTexts,
             )
         }
 
