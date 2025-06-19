@@ -21,6 +21,7 @@
     <string name="main_tab_map">Kartta</string>
     <string name="main_tab_channel">Kanava</string>
     <string name="main_tab_settings">Asetukset</string>
+    <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Suodatus</string>
     <string name="desc_node_filter_clear">tyhjennä suodatukset</string>
     <string name="node_filter_include_unknown">Näytä tuntemattomat</string>
