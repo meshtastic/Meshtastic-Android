@@ -619,9 +619,12 @@ class UIViewModel @Inject constructor(
     }
 
     fun requestPosition(destNum: Int, position: Position = Position(0.0, 0.0, 0)) {
-        info("Requesting position for '$destNum'")
+        info("UIState.requestPosition called for destNum=$destNum, position=$position")
+        info("meshService is ${if (meshService != null) "available" else "null"}")
+        info("connectionState=${connectionState.value}")
         try {
             meshService?.requestPosition(destNum, position)
+            info("meshService.requestPosition call completed successfully")
         } catch (ex: RemoteException) {
             errormsg("Request position error: ${ex.message}")
         }

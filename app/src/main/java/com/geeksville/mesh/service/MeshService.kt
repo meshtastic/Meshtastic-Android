@@ -2272,12 +2272,26 @@ class MeshService : Service(), Logging {
             }
         }
         override fun requestPosition(destNum: Int, position: Position) = toRemoteExceptions {
+            debug("MeshService.requestPosition called: destNum=$destNum, position=$position")
+            debug("myNodeNum=$myNodeNum, connectionState=$connectionState")
+
+            // Check if we have a valid destination
+            if (destNum == myNodeNum) {
+                debug("Skipping position request to self (destNum=$destNum == myNodeNum=$myNodeNum)")
+                return@toRemoteExceptions
+            }
+
             // Use our current position from nodeDB if the provided position is empty/invalid
             val currentPosition = if (position.latitude == 0.0 && position.longitude == 0.0) {
-                nodeDBbyNodeNum[myNodeNum]?.position?.let { Position(it) } ?: position
+                val nodePosition = nodeDBbyNodeNum[myNodeNum]?.position?.let { Position(it) }
+                debug("Using nodeDB position: $nodePosition")
+                nodePosition ?: position
             } else {
+                debug("Using provided position: $position")
                 position
             }
+
+            debug("Final position to send: $currentPosition")
 
             // Convert Position to MeshProtos.Position for the payload
             val meshPosition = position {
@@ -2288,15 +2302,20 @@ class MeshService : Service(), Logging {
             }
 
             debug("Requesting position from destNum=$destNum with our position: $currentPosition")
+            debug("Channel for destNum=$destNum: ${nodeDBbyNodeNum[destNum]?.channel ?: 0}")
 
-            sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(
+            val packet = newMeshPacketTo(destNum).buildMeshPacket(
                 channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
                 priority = MeshPacket.Priority.BACKGROUND,
             ) {
                 portnumValue = Portnums.PortNum.POSITION_APP_VALUE
                 payload = meshPosition.toByteString()
                 wantResponse = true
-            })
+            }
+
+            debug("Built position request packet: id=${packet.id}, to=$destNum, payload size=${packet.decoded.payload.size()}")
+            sendToRadio(packet)
+            debug("Position request packet sent successfully")
         }
 
         override fun setFixedPosition(destNum: Int, position: Position) = toRemoteExceptions {
