@@ -59,7 +59,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -83,7 +82,6 @@ import com.geeksville.mesh.model.DebugViewModel
 import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.components.CopyIconButton
-import androidx.compose.runtime.setValue
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.rememberCoroutineScope
@@ -100,14 +98,12 @@ internal fun DebugScreen(
 ) {
     val listState = rememberLazyListState()
     val logs by viewModel.meshLog.collectAsStateWithLifecycle()
-    var filterTexts by remember { mutableStateOf(listOf<String>()) }
-    var filteredLogs by remember { mutableStateOf(logs) }
-    var searchState by remember { mutableStateOf(SearchState()) }
-    var selectedLogId by remember { mutableStateOf<String?>(null) }
+    val searchState by viewModel.searchState.collectAsStateWithLifecycle()
+    val filterTexts by viewModel.filterTexts.collectAsStateWithLifecycle()
+    val selectedLogId by viewModel.selectedLogId.collectAsStateWithLifecycle()
 
-    // Update filtered logs when logs or filter texts change
-    LaunchedEffect(logs, filterTexts) {
-        filteredLogs = logs.filter { log ->
+    val filteredLogs = remember(logs, filterTexts) {
+        logs.filter { log ->
             filterTexts.isEmpty() || filterTexts.any { filterText ->
                 log.logMessage.contains(filterText, ignoreCase = true) ||
                         log.messageType.contains(filterText, ignoreCase = true) ||
@@ -137,14 +133,17 @@ internal fun DebugScreen(
         state = listState,
     ) {
         stickyHeader {
-                DebugSearchState(
-                    filteredLogs = filteredLogs,
-                    filterTexts = filterTexts,
-                    presetFilters = viewModel.presetFilters.asList(),
-                    onSearchStateChange = { searchState = it },
-                    onFilterTextsChange = { filterTexts = it },
-                    onSelectedLogIdChange = { selectedLogId = it }
-                )
+            DebugSearchState(
+                searchState = searchState,
+                filterTexts = filterTexts,
+                presetFilters = viewModel.presetFilters.asList(),
+                onSearchTextChange = viewModel::setSearchText,
+                onNextMatch = viewModel::goToNextMatch,
+                onPreviousMatch = viewModel::goToPreviousMatch,
+                onClearSearch = viewModel::clearSearch,
+                onFilterTextsChange = viewModel::setFilterTexts,
+                onSelectedLogIdChange = viewModel::setSelectedLogId
+            )
         }
 
         items(filteredLogs, key = { it.uuid }) { log ->
@@ -154,7 +153,7 @@ internal fun DebugScreen(
                 searchText = searchState.searchText,
                 isSelected = selectedLogId == log.uuid,
                 onLogClick = {
-                    selectedLogId = if (selectedLogId == log.uuid) null else log.uuid
+                    viewModel.setSelectedLogId(if (selectedLogId == log.uuid) null else log.uuid)
                 }
             )
         }

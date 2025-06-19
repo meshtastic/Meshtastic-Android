@@ -39,11 +39,6 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -53,22 +48,9 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.R
-import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
 import com.geeksville.mesh.ui.common.theme.AppTheme
-
-data class SearchMatch(
-    val logIndex: Int,
-    val start: Int,
-    val end: Int,
-    val field: String
-)
-
-data class SearchState(
-    val searchText: String = "",
-    val currentMatchIndex: Int = -1,
-    val allMatches: List<SearchMatch> = emptyList(),
-    val hasMatches: Boolean = false
-)
+import com.geeksville.mesh.model.SearchMatch
+import com.geeksville.mesh.model.SearchState
 
 @Composable
 internal fun DebugSearchNavigation(
@@ -167,117 +149,48 @@ internal fun DebugSearchBar(
 
 @Composable
 internal fun DebugSearchState(
-    filteredLogs: List<UiMeshLog>,
+    searchState: com.geeksville.mesh.model.SearchState,
     filterTexts: List<String>,
     presetFilters: List<String>,
-    onSearchStateChange: (SearchState) -> Unit,
+    onSearchTextChange: (String) -> Unit,
+    onNextMatch: () -> Unit,
+    onPreviousMatch: () -> Unit,
+    onClearSearch: () -> Unit,
     onFilterTextsChange: (List<String>) -> Unit,
     onSelectedLogIdChange: (String?) -> Unit
 ) {
-    var customFilterText by remember { mutableStateOf("") }
-    var searchText by remember { mutableStateOf("") }
-    var currentMatchIndex by remember { mutableStateOf(-1) }
-    var selectedLogId by remember { mutableStateOf<String?>(null) }
     val colorScheme = MaterialTheme.colorScheme
 
-    fun findSearchMatches(searchText: String, filteredLogs: List<UiMeshLog>): List<SearchMatch> {
-        if (searchText.isEmpty()) {
-            return emptyList()
-        }
-        return filteredLogs.flatMapIndexed { logIndex, log ->
-            searchText.split(" ").flatMap { term ->
-                val messageMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.logMessage)
-                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "message") }
-                val typeMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.messageType)
-                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "type") }
-                val dateMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.formattedReceivedDate)
-                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "date") }
-                messageMatches + typeMatches + dateMatches
-            }
-        }.sortedBy { it.start }
-    }
-
-    val allMatches = remember(searchText, filteredLogs) {
-        findSearchMatches(searchText, filteredLogs)
-    }
-
-    val hasMatches = allMatches.isNotEmpty()
-
-    fun scrollToMatch(index: Int) {
-        if (index in allMatches.indices) {
-            currentMatchIndex = index
-            val match = allMatches[index]
-            // This will be handled by the parent component
-        }
-    }
-
-    fun goToNextMatch() {
-        if (hasMatches) {
-            val nextIndex = if (currentMatchIndex < allMatches.lastIndex) currentMatchIndex + 1 else 0
-            scrollToMatch(nextIndex)
-        }
-    }
-
-    fun goToPreviousMatch() {
-        if (hasMatches) {
-            val prevIndex = if (currentMatchIndex > 0) currentMatchIndex - 1 else allMatches.lastIndex
-            scrollToMatch(prevIndex)
-        }
-    }
-
-    // Reset current match when search text changes
-    LaunchedEffect(searchText) {
-        currentMatchIndex = -1
-    }
-
-    val searchState = SearchState(
-        searchText = searchText,
-        currentMatchIndex = currentMatchIndex,
-        allMatches = allMatches,
-        hasMatches = hasMatches
-    )
-
-    // Notify parent of state changes
-    LaunchedEffect(searchState) {
-        onSearchStateChange(searchState)
-    }
-
-    LaunchedEffect(selectedLogId) {
-        onSelectedLogIdChange(selectedLogId)
-    }
-
-    // Search UI components
     Column(
         modifier = Modifier.padding(8.dp)
     ) {
-
         Row(
             modifier = Modifier.fillMaxWidth()
                 .background(colorScheme.background.copy(alpha = 1.0f)),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-                DebugSearchBar(
-                    searchState = searchState,
-                    onSearchTextChange = { searchText = it },
-                    onNextMatch = { goToNextMatch() },
-                    onPreviousMatch = { goToPreviousMatch() },
-                    onClearSearch = { searchText = "" }
-                )
-                DebugFilterBar(
-                    filterTexts = filterTexts,
-                    onFilterTextsChange = onFilterTextsChange,
-                    customFilterText = customFilterText,
-                    onCustomFilterTextChange = { customFilterText = it },
-                    presetFilters = presetFilters
-                )
-            }
+            DebugSearchBar(
+                searchState = searchState,
+                onSearchTextChange = onSearchTextChange,
+                onNextMatch = onNextMatch,
+                onPreviousMatch = onPreviousMatch,
+                onClearSearch = onClearSearch
+            )
+            DebugFilterBar(
+                filterTexts = filterTexts,
+                onFilterTextsChange = onFilterTextsChange,
+                customFilterText = "", // Optionally, you can add custom filter state to ViewModel if needed
+                onCustomFilterTextChange = {},
+                presetFilters = presetFilters
+            )
         }
+    }
 
-        DebugActiveFilters(
-            filterTexts = filterTexts,
-            onFilterTextsChange = onFilterTextsChange
-        )
+    DebugActiveFilters(
+        filterTexts = filterTexts,
+        onFilterTextsChange = onFilterTextsChange
+    )
 }
 
 @PreviewLightDark
