@@ -692,6 +692,9 @@ class MeshService : Service(), Logging {
         ) {
             portnumValue = p.dataType
             payload = ByteString.copyFrom(p.bytes)
+            if (p.replyId != null && p.replyId != 0) {
+                this.replyId = p.replyId!!
+            }
         }
     }
 
