@@ -29,6 +29,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.CoroutineDispatchers
+import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.Position
 import com.geeksville.mesh.Portnums.PortNum
@@ -66,6 +68,8 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+
+private const val DEFAULT_ID_SUFFIX_LENGTH = 4
 
 data class MetricsState(
     val isLocal: Boolean = false,
@@ -212,6 +216,27 @@ class MetricsViewModel @Inject constructor(
         hasDecoded() && decoded.wantResponse && from == 0 && to == destNum
     }
 
+    /**
+     * Creates a fallback node for hidden clients or nodes not yet in the database.
+     * This prevents the detail screen from freezing when viewing unknown nodes.
+     */
+    private fun createFallbackNode(nodeNum: Int): Node {
+        val userId = DataPacket.nodeNumToDefaultId(nodeNum)
+        val safeUserId = userId.padStart(DEFAULT_ID_SUFFIX_LENGTH, '0').takeLast(DEFAULT_ID_SUFFIX_LENGTH)
+        val longName = app.getString(R.string.fallback_node_name, safeUserId)
+        val defaultUser = MeshProtos.User.newBuilder()
+            .setId(userId)
+            .setLongName(longName)
+            .setShortName(safeUserId)
+            .setHwModel(MeshProtos.HardwareModel.UNSET)
+            .build()
+
+        return Node(
+            num = nodeNum,
+            user = defaultUser,
+        )
+    }
+
     fun getUser(nodeNum: Int) = radioConfigRepository.getUser(nodeNum)
     val tileSource get() = CustomTileSource.getTileSource(preferences.getInt(MAP_STYLE_ID, 0))
 
@@ -244,12 +269,14 @@ class MetricsViewModel @Inject constructor(
                 .mapLatest { nodes -> nodes[destNum] to nodes.keys.firstOrNull() }
                 .distinctUntilChanged()
                 .onEach { (node, ourNode) ->
-                    val deviceHardware = node?.user?.hwModel?.number?.let {
+                    // Create a fallback node if not found in database (for hidden clients, etc.)
+                    val actualNode = node ?: createFallbackNode(destNum)
+                    val deviceHardware = actualNode.user.hwModel.number.let {
                         deviceHardwareRepository.getDeviceHardwareByModel(it)
                     }
                     _state.update { state ->
                         state.copy(
-                            node = node,
+                            node = actualNode,
                             isLocal = destNum == ourNode,
                             deviceHardware = deviceHardware
                         )
