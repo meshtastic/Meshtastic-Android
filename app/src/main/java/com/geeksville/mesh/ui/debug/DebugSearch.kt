@@ -110,7 +110,6 @@ internal fun DebugSearchBar(
         onValueChange = onSearchTextChange,
         modifier = modifier
             .padding(end = 8.dp),
-
         placeholder = { Text(stringResource(R.string.debug_default_search)) },
         singleLine = true,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
@@ -195,7 +194,7 @@ internal fun DebugSearchState(
 }
 
 @Composable
-fun DebugSearchState_viewModelDefaults(
+fun DebugSearchStateviewModelDefaults(
     searchState: SearchState,
     filterTexts: List<String>,
     presetFilters: List<String>,
