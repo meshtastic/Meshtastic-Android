@@ -316,7 +316,10 @@ class MeshService : Service(), Logging {
      * Send a mesh packet to the radio, if the radio is not currently connected this function will throw NotConnectedException
      */
     private fun sendToRadio(packet: MeshPacket) {
+        debug("sendToRadio: Adding packet id=${packet.id} to queue, connectionState=$connectionState")
+        debug("sendToRadio: Queue size before add: ${queuedPackets.size}")
         queuedPackets.add(packet)
+        debug("sendToRadio: Queue size after add: ${queuedPackets.size}")
         startPacketQueue()
     }
 
@@ -1129,8 +1132,9 @@ class MeshService : Service(), Logging {
 
     private fun startPacketQueue() {
         if (queueJob?.isActive == true) return
+        debug("startPacketQueue: connectionState=$connectionState, queue size=${queuedPackets.size}")
         queueJob = serviceScope.handledLaunch {
-            debug("packet queueJob started")
+            debug("packet queueJob started, connectionState=$connectionState")
             while (connectionState == ConnectionState.CONNECTED) {
                 // take the first packet from the queue head
                 val packet = queuedPackets.poll() ?: break
@@ -1146,6 +1150,7 @@ class MeshService : Service(), Logging {
                     debug("queueJob packet id=${packet.id.toUInt()} failed")
                 }
             }
+            debug("packet queueJob ended, connectionState=$connectionState, remaining queue size=${queuedPackets.size}")
         }
     }
 

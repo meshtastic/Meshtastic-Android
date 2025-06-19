@@ -622,6 +622,12 @@ class UIViewModel @Inject constructor(
         info("UIState.requestPosition called for destNum=$destNum, position=$position")
         info("meshService is ${if (meshService != null) "available" else "null"}")
         info("connectionState=${connectionState.value}")
+        info("myNodeNum=${myNodeNum}")
+
+        if (destNum == myNodeNum) {
+            info("WARNING: Attempting to request position from self (destNum=$destNum == myNodeNum=$myNodeNum)")
+        }
+
         try {
             meshService?.requestPosition(destNum, position)
             info("meshService.requestPosition call completed successfully")
