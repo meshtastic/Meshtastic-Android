@@ -31,11 +31,126 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.text.DateFormat
 import java.util.Locale
 import javax.inject.Inject
+import com.geeksville.mesh.Portnums.PortNum
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+
+data class SearchMatch(
+    val logIndex: Int,
+    val start: Int,
+    val end: Int,
+    val field: String
+)
+
+data class SearchState(
+    val searchText: String = "",
+    val currentMatchIndex: Int = -1,
+    val allMatches: List<SearchMatch> = emptyList(),
+    val hasMatches: Boolean = false
+)
+
+// --- Search and Filter Managers ---
+class LogSearchManager {
+    data class SearchMatch(
+        val logIndex: Int,
+        val start: Int,
+        val end: Int,
+        val field: String
+    )
+
+    data class SearchState(
+        val searchText: String = "",
+        val currentMatchIndex: Int = -1,
+        val allMatches: List<SearchMatch> = emptyList(),
+        val hasMatches: Boolean = false
+    )
+
+    private val _searchText = MutableStateFlow("")
+    val searchText = _searchText.asStateFlow()
+
+    private val _currentMatchIndex = MutableStateFlow(-1)
+    val currentMatchIndex = _currentMatchIndex.asStateFlow()
+
+    private val _searchState = MutableStateFlow(SearchState())
+    val searchState = _searchState.asStateFlow()
+
+    fun setSearchText(text: String) {
+        _searchText.value = text
+        _currentMatchIndex.value = -1
+    }
+
+    fun goToNextMatch() {
+        val matches = _searchState.value.allMatches
+        if (matches.isNotEmpty()) {
+            val nextIndex = if (_currentMatchIndex.value < matches.lastIndex) _currentMatchIndex.value + 1 else 0
+            _currentMatchIndex.value = nextIndex
+            _searchState.value = _searchState.value.copy(currentMatchIndex = nextIndex)
+        }
+    }
+
+    fun goToPreviousMatch() {
+        val matches = _searchState.value.allMatches
+        if (matches.isNotEmpty()) {
+            val prevIndex = if (_currentMatchIndex.value > 0) _currentMatchIndex.value - 1 else matches.lastIndex
+            _currentMatchIndex.value = prevIndex
+            _searchState.value = _searchState.value.copy(currentMatchIndex = prevIndex)
+        }
+    }
+
+    fun clearSearch() {
+        setSearchText("")
+    }
+
+    fun updateMatches(searchText: String, filteredLogs: List<DebugViewModel.UiMeshLog>) {
+        val matches = findSearchMatches(searchText, filteredLogs)
+        val hasMatches = matches.isNotEmpty()
+        _searchState.value = _searchState.value.copy(
+            searchText = searchText,
+            allMatches = matches,
+            hasMatches = hasMatches,
+            currentMatchIndex = if (hasMatches) _currentMatchIndex.value.coerceIn(0, matches.lastIndex) else -1
+        )
+    }
+
+    fun findSearchMatches(searchText: String, filteredLogs: List<DebugViewModel.UiMeshLog>): List<SearchMatch> {
+        if (searchText.isEmpty()) {
+            return emptyList()
+        }
+        return filteredLogs.flatMapIndexed { logIndex, log ->
+            searchText.split(" ").flatMap { term ->
+                val messageMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.logMessage)
+                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "message") }
+                val typeMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.messageType)
+                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "type") }
+                val dateMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.formattedReceivedDate)
+                    .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "date") }
+                messageMatches + typeMatches + dateMatches
+            }
+        }.sortedBy { it.start }
+    }
+}
+
+class LogFilterManager {
+    private val _filterTexts = MutableStateFlow<List<String>>(emptyList())
+    val filterTexts = _filterTexts.asStateFlow()
+
+    private val _filteredLogs = MutableStateFlow<List<DebugViewModel.UiMeshLog>>(emptyList())
+    val filteredLogs = _filteredLogs.asStateFlow()
+
+    fun setFilterTexts(filters: List<String>) {
+        _filterTexts.value = filters
+    }
+
+    fun updateFilteredLogs(logs: List<DebugViewModel.UiMeshLog>) {
+        _filteredLogs.value = logs
+    }
+}
 
 @HiltViewModel
 class DebugViewModel @Inject constructor(
@@ -46,8 +161,33 @@ class DebugViewModel @Inject constructor(
         .map(::toUiState)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), persistentListOf())
 
+    // --- Managers ---
+    val searchManager = LogSearchManager()
+    val filterManager = LogFilterManager()
+
+    val searchText get() = searchManager.searchText
+    val currentMatchIndex get() = searchManager.currentMatchIndex
+    val searchState get() = searchManager.searchState
+    val filterTexts get() = filterManager.filterTexts
+    val filteredLogs get() = filterManager.filteredLogs
+
+    private val _selectedLogId = MutableStateFlow<String?>(null)
+    val selectedLogId = _selectedLogId.asStateFlow()
+
+    fun updateFilteredLogs(logs: List<UiMeshLog>) {
+        filterManager.updateFilteredLogs(logs)
+        searchManager.updateMatches(searchManager.searchText.value, logs)
+    }
+
     init {
         debug("DebugViewModel created")
+        viewModelScope.launch {
+            combine(searchManager.searchText, filterManager.filteredLogs) { searchText, logs ->
+                searchManager.findSearchMatches(searchText, logs)
+            }.collect { matches ->
+                searchManager.updateMatches(searchManager.searchText.value, filterManager.filteredLogs.value)
+            }
+        }
     }
 
     override fun onCleared() {
@@ -134,4 +274,11 @@ class DebugViewModel @Inject constructor(
     companion object {
         private val TIME_FORMAT = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
     }
+
+    val presetFilters = arrayOf(
+        // "!xxxxxxxx", // Dynamically determine the address of the connected node (i.e., messages to us).
+        "!ffffffff", // broadcast
+    ) + PortNum.entries.map { it.name } // all apps
+
+    fun setSelectedLogId(id: String?) { _selectedLogId.value = id }
 }
