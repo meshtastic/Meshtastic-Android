@@ -135,7 +135,7 @@ internal fun DebugScreen(
         state = listState,
     ) {
         stickyHeader {
-            DebugSearchState_viewModelDefaults(
+            DebugSearchStateviewModelDefaults(
                 searchState = searchState,
                 filterTexts = filterTexts,
                 presetFilters = viewModel.presetFilters.asList(),
