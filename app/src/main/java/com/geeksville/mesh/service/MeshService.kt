@@ -2273,8 +2273,15 @@ class MeshService : Service(), Logging {
         }
         override fun requestPosition(destNum: Int, position: Position) = toRemoteExceptions {
             if (destNum != myNodeNum) {
-                // Use our current position from nodeDB if the provided position is empty/invalid
-                val currentPosition = if (position.latitude == 0.0 && position.longitude == 0.0) {
+                // Check if user has enabled phone location sharing
+                val provideLocation = sharedPreferences.getBoolean("provide-location-$myNodeNum", false)
+                if (!provideLocation) {
+                    debug("Position request skipped - user has not enabled location sharing")
+                    return@toRemoteExceptions
+                }
+
+                // Use our current position from nodeDB if the provided position is invalid
+                val currentPosition = if (!position.isValid()) {
                     nodeDBbyNodeNum[myNodeNum]?.position?.let { Position(it) } ?: position
                 } else {
                     position
