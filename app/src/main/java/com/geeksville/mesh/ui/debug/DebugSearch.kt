@@ -34,6 +34,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -177,7 +178,7 @@ internal fun DebugSearchState(
     var searchText by remember { mutableStateOf("") }
     var currentMatchIndex by remember { mutableStateOf(-1) }
     var selectedLogId by remember { mutableStateOf<String?>(null) }
-    val theme = androidx.compose.material3.MaterialTheme.colorScheme
+    val colorScheme = MaterialTheme.colorScheme
 
     fun findSearchMatches(searchText: String, filteredLogs: List<UiMeshLog>): List<SearchMatch> {
         if (searchText.isEmpty()) {
@@ -252,7 +253,7 @@ internal fun DebugSearchState(
 
         Row(
             modifier = Modifier.fillMaxWidth()
-                .background(theme.background.copy(alpha = 1.0f)),
+                .background(colorScheme.background.copy(alpha = 1.0f)),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {

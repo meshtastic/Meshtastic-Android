@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.twotone.FilterAlt
 import androidx.compose.material.icons.twotone.FilterAltOff
 import androidx.compose.material3.DropdownMenu
@@ -135,7 +136,15 @@ internal fun DebugPresetFilters(
                             }
                         )
                     },
-                    label = { Text(filter) }
+                    label = { Text(filter) },
+                    leadingIcon = { if (filter in filterTexts) {
+                        Icon(
+                            imageVector = Icons.Filled.Done,
+                            contentDescription = "Done icon",
+//                            modifier = Modifier.size(FilterChipDefaults.IconSize)
+                        )
+                        }
+                    }
                 )
             }
         }
@@ -250,6 +259,12 @@ internal fun DebugActiveFilters(
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.TwoTone.FilterAlt,
+                                contentDescription = null
+                            )
+                        },
+                        trailingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.Clear,
                                 contentDescription = null
                             )
                         }

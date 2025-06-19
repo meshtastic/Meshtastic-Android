@@ -47,6 +47,7 @@ import androidx.compose.material.icons.twotone.FilterAltOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -166,7 +167,7 @@ internal fun DebugItem(
     isSelected: Boolean = false,
     onLogClick: () -> Unit = {}
 ) {
-    val theme = androidx.compose.material3.MaterialTheme.colorScheme
+    val colorScheme = MaterialTheme.colorScheme
 
     Card(
         modifier = modifier
@@ -174,13 +175,13 @@ internal fun DebugItem(
             .padding(4.dp),
         colors = androidx.compose.material3.CardDefaults.cardColors(
             containerColor = if (isSelected) {
-                theme.primary.copy(alpha = 0.1f)
+                colorScheme.primary.copy(alpha = 0.1f)
             } else {
-                theme.surface
+                colorScheme.surface
             }
         ),
         border = if (isSelected) {
-            androidx.compose.foundation.BorderStroke(2.dp, theme.primary)
+            androidx.compose.foundation.BorderStroke(2.dp, colorScheme.primary)
         } else {
             null
         }
@@ -196,7 +197,7 @@ internal fun DebugItem(
                     log = log,
                     searchText = searchText,
                     isSelected = isSelected,
-                    theme = theme
+                    theme = colorScheme
                 )
                 val messageAnnotatedString = rememberAnnotatedLogMessage(log, searchText)
                 Text(
@@ -205,7 +206,7 @@ internal fun DebugItem(
                     style = TextStyle(
                         fontSize = if (isSelected) 12.sp else 9.sp,
                         fontFamily = FontFamily.Monospace,
-                        color = theme.onSurface
+                        color = colorScheme.onSurface
                     )
                 )
             }
@@ -270,7 +271,7 @@ private fun rememberAnnotatedString(
     text: String,
     searchText: String
 ): AnnotatedString {
-    val theme = androidx.compose.material3.MaterialTheme.colorScheme
+    val theme = MaterialTheme.colorScheme
     val highlightStyle = SpanStyle(
         background = theme.primary.copy(alpha = 0.3f),
         color = theme.onSurface
@@ -296,7 +297,7 @@ private fun rememberAnnotatedString(
 
 @Composable
 private fun rememberAnnotatedLogMessage(log: UiMeshLog, searchText: String): AnnotatedString {
-    val theme = androidx.compose.material3.MaterialTheme.colorScheme
+    val theme = MaterialTheme.colorScheme
     val style = SpanStyle(
         color = colorResource(id = R.color.colorAnnotation),
         fontStyle = FontStyle.Italic,
