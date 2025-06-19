@@ -1,12 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_messages">الرسائل</string>
     <string name="main_tab_users">المستخدمين</string>
     <string name="main_tab_map">الخريطة</string>
     <string name="main_tab_channel">القناة</string>
     <string name="main_tab_settings">الإعدادات</string>
+    <string name="node_filter_placeholder">عربي</string>
+    <string name="desc_node_filter_clear">عربي</string>
+    <string name="node_filter_include_unknown">عربي</string>
     <string name="node_filter_show_details">المزيد</string>
+    <string name="node_sort_button">عربي</string>
+    <string name="node_sort_alpha">عربي</string>
+    <string name="node_sort_channel">عربي</string>
     <string name="node_sort_distance">المسافة</string>
+    <string name="node_sort_hops_away">عربي</string>
     <string name="channel_name">اسم القناة</string>
     <string name="channel_options">خيارات القناة</string>
     <string name="qr_code">رمز الاستجابة السريع</string>
@@ -56,7 +79,7 @@
     <string name="updating_firmware">التحديث جاري، قد يستغرق 8 دقائق…</string>
     <string name="update_successful">تم التحديث</string>
     <string name="update_failed">التحديث فشل</string>
-    <string name="firmware_too_old">يجب عليك التحديث</string>
+    <string name="firmware_too_old">يجب عليك التحديث.</string>
     <string name="okay">حسنا</string>
     <string name="must_set_region">واجب إدخال المنطقة!</string>
     <string name="region">الجهة</string>
@@ -73,7 +96,6 @@
     <string name="intro_welcome">مرحبا بكم في Meshtastic</string>
     <string name="intro_encryption">"إعدادات التشفير"</string>
     <string name="message">رسالة</string>
-    <string name="bluetooth_disabled"></string>
     <string name="direct_message">رسالة مباشره</string>
     <string name="error">غلط</string>
     <string name="ignore">تجاهل</string>
@@ -143,4 +165,5 @@
     <string name="baro_pressure">الضغط الجوي</string>
     <string name="messages">الرسائل</string>
     <string name="distance">المسافة</string>
+    <string name="map">الخريطة</string>
 </resources>

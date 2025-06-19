@@ -1,13 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_messages">Viestit</string>
     <string name="main_tab_users">Käyttäjät</string>
     <string name="main_tab_map">Kartta</string>
     <string name="main_tab_channel">Kanava</string>
     <string name="main_tab_settings">Asetukset</string>
+    <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Suodatus</string>
     <string name="desc_node_filter_clear">tyhjennä suodatukset</string>
     <string name="node_filter_include_unknown">Näytä tuntemattomat</string>
+    <string name="node_filter_only_online">Piilota ei yhteydessä olevat laitteet</string>
+    <string name="node_filter_only_direct">Näytä vain suorat yhteydet</string>
     <string name="node_filter_show_details">Näytä lisätiedot</string>
     <string name="node_sort_button">Lajitteluvaihtoehdot</string>
     <string name="node_sort_alpha">A-Ö</string>
@@ -68,7 +87,7 @@
     <string name="application_icon">Sovelluskuvake</string>
     <string name="unknown_username">Tuntematon käyttäjänimi</string>
     <string name="send">Lähetä</string>
-    <string name="send_text">Kirjoita viesti</string>
+    <string name="send_text">Lähetä teksti</string>
     <string name="warning_not_paired">Et ole vielä yhdistänyt Meshtastic -yhteensopivaa radiota tähän puhelimeen. Muodosta laitepari puhelimen kanssa ja aseta käyttäjänimesi.\n\nTämä avoimen lähdekoodin sovellus on vielä kehitysvaiheessa. Jos löydät virheen, lähetä siitä viesti foorumillemme: https://github.com/orgs/meshtastic/discussions\n\nLisätietoja saat verkkosivuiltamme - www.meshtastic.org.</string>
     <string name="you">Sinä</string>
     <string name="your_name">Oma nimi</string>
@@ -106,31 +125,36 @@
     <string name="app_too_old">Sovelluspäivitys vaaditaan</string>
     <string name="must_update">Sinun täytyy päivittää tämä sovellus sovelluskaupassa (tai Githubissa). Sovelluksen versio on liian vanha toimimaan tämän radion ohjelmiston kanssa. Ole hyvä ja lue lisää aiheesta <a href="https://meshtastic.org/docs/software/android/installation">dokumenteistamme</a>.</string>
     <string name="none">Ei mitään (ei käytössä)</string>
-    <string name="modem_config_turbo">Lyhyt kantama / turbo</string>
-    <string name="modem_config_short">Lyhyt kantama / nopea</string>
-    <string name="modem_config_medium">Keskipitkä kantama / nopea</string>
-    <string name="modem_config_long">Pitkä kantama / nopea</string>
-    <string name="modem_config_mod_long">Pitkä kantama / kohtalainen</string>
-    <string name="modem_config_very_long">Erittäin pitkä kantama / hidas</string>
+    <string name="modem_config_turbo">Lyhyt Kantama / Turbo</string>
+    <string name="modem_config_short">Lyhyt Kantama / Nopea</string>
+    <string name="modem_config_medium">Keskipitkä Kantama / Nopea</string>
+    <string name="modem_config_long">Pitkä Kantama / Nopea</string>
+    <string name="modem_config_mod_long">Pitkä Kantama / Kohtalainen</string>
+    <string name="modem_config_very_long">Erittäin Pitkä Kantama / Hidas</string>
     <string name="modem_config_unrecognized">TUNTEMATON</string>
-    <string name="meshtastic_service_notifications">Palveluviestit</string>
+    <string name="meshtastic_service_notifications">Palveluilmoitukset</string>
     <string name="location_disabled_warning">Sijainnin on oltava päällä, jotta voit löytää uusia laitteita Bluetoothin kautta. Voit kytkeä sijainnin pois käytöstä myöhemmin.</string>
     <string name="about">Tietoja</string>
     <string name="text_messages">Tekstiviestit</string>
     <string name="channel_invalid">Kanavan URL-osoite on virheellinen, eikä sitä voida käyttää</string>
     <string name="debug_panel">Vianetsintäpaneeli</string>
+    <string name="debug_logs_export">Vie lokitiedot</string>
     <string name="debug_last_messages">500 viimeisintä viestiä</string>
+    <string name="debug_filters">Suodattimet</string>
+    <string name="debug_active_filters">Aktiiviset suodattimet</string>
+    <string name="debug_default_search">Hae lokitiedoista...</string>
+    <string name="debug_clear">Tyhjennä lokit</string>
     <string name="clear">Tyhjennä</string>
-    <string name="updating_firmware">Laiteohjelmistoa päivitetään, prosessi voi kestää jopa kahdeksan minuuttia…</string>
+    <string name="updating_firmware">Päivitetään laiteohjelmistoa, tämä voi kestää jopa kahdeksan minuuttia…</string>
     <string name="update_successful">Päivitys onnistui</string>
     <string name="update_failed">Päivitys epäonnistui</string>
-    <string name="message_reception_time">viestin vastaanottoaika</string>
+    <string name="message_reception_time">viestien vastaanottoaika</string>
     <string name="message_reception_state">viestin vastaanottotila</string>
     <string name="message_delivery_status">Viestin toimitustila</string>
     <string name="meshtastic_messages_notifications">Viesti-ilmoitukset</string>
     <string name="meshtastic_alerts_notifications">Hälytysilmoitukset</string>
     <string name="protocol_stress_test">Protokollan kuormitustesti</string>
-    <string name="firmware_too_old">Laiteohjelmistopäivitys vaaditaan</string>
+    <string name="firmware_too_old">Laiteohjelmistopäivitys vaaditaan.</string>
     <string name="firmware_old">Radion laiteohjelmisto on liian vanha toimiakseen tämän sovelluksen kanssa. Lisätietoja löydät <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">ohjelmiston asennusoppaasta</a>.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">Sinun täytyy määrittää alue!</string>
@@ -151,14 +175,14 @@
     <string name="background_required">Taustasijainti</string>
     <string name="why_background_required">Tätä ominaisuutta varten sinun täytyy myöntää sijaintilupa \"Salli aina\".\nTämä sallii Meshtasticin hakea älypuhelimen sijainnin ja lähettää sen muille jäsenille mesh-verkkoon, jopa silloin kun sovellus on suljettu tai sitä ei käytetä.</string>
     <string name="required_permissions">Vaaditut käyttöoikeudet</string>
-    <string name="provide_location_to_mesh">Jaa puhelimen sijaintitiedot mesh-verkkoon</string>
+    <string name="provide_location_to_mesh">Jaa puhelimen sijaintitietoa mesh-verkkoon</string>
     <string name="camera_required">Kameran käyttöoikeudet</string>
-    <string name="why_camera_required">Tarvitsemme pääsyoikeuden kameraan QR-koodien lukemista varten. Kuvia tai videoita ei tallenneta.</string>
+    <string name="why_camera_required">Tarvitsemme pääsyn kameraan QR-koodien lukemista varten. Kuvia tai videoita ei tallenneta.</string>
     <string name="notification_required">Ilmoitusten käyttöoikeus</string>
     <string name="why_notification_required">Meshtastic sovellus tarvitsee luvan palvelu- ja viesti-ilmoituksille.</string>
     <string name="notification_denied">Ilmoitusten käyttöoikeus evätty. Ota ilmoitukset käyttöön Androidin asetuksista &gt; Sovellukset &gt; Meshtastic &gt; Ilmoitukset.</string>
-    <string name="modem_config_slow_short">Lyhyt kantama / hidas</string>
-    <string name="modem_config_slow_medium">Keskipitkä kantama / hidas</string>
+    <string name="modem_config_slow_short">Lyhyt Kantama / Hidas</string>
+    <string name="modem_config_slow_medium">Keskipitkä Kantama / Hidas</string>
     <plurals name="delete_messages">
         <item quantity="one">Poistetaanko viesti?</item>
         <item quantity="other">Poistetaanko %s viestiä?</item>
@@ -167,8 +191,8 @@
     <string name="delete_for_everyone">Poista kaikilta</string>
     <string name="delete_for_me">Poista minulta</string>
     <string name="select_all">Valitse kaikki</string>
-    <string name="modem_config_slow_long">Pitkä kantama / hidas</string>
-    <string name="map_style_selection">Tyylin valinta</string>
+    <string name="modem_config_slow_long">Pitkä Kantama / Hidas</string>
+    <string name="map_style_selection">Tyylin Valinta</string>
     <string name="map_download_region">Lataa alue</string>
     <string name="name">Nimi</string>
     <string name="description">Kuvaus</string>
@@ -178,7 +202,7 @@
     <string name="preferences_system_default">Järjestelmän oletus</string>
     <string name="resend">Lähetä uudestaan</string>
     <string name="shutdown">Sammuta</string>
-    <string name="cant_shutdown">Laite ei tue sammutusta</string>
+    <string name="cant_shutdown">Sammutusta ei tueta tällä laitteella</string>
     <string name="reboot">Käynnistä uudelleen</string>
     <string name="traceroute">Reitinselvitys</string>
     <string name="intro_show">Näytä esittely</string>
@@ -193,7 +217,7 @@
     <string name="quick_chat_new">Uusi pikakeskustelu</string>
     <string name="quick_chat_edit">Muokkaa pikaviestiä</string>
     <string name="quick_chat_append">Lisää viestiin</string>
-    <string name="quick_chat_instant">Lähetä heti</string>
+    <string name="quick_chat_instant">Lähetä välittömästi</string>
     <string name="factory_reset">Palauta tehdasasetukset</string>
     <string name="factory_reset_description">Tämä tyhjentää kaikki laitteesi asetukset.</string>
     <string name="bluetooth_disabled">Bluetooth ei ole käytössä</string>
@@ -211,7 +235,7 @@
     <string name="map_start_download">Aloita Lataus</string>
     <string name="exchange_position">Tarkastele sijaintia</string>
     <string name="close">Sulje</string>
-    <string name="device_settings">Radion asetukset</string>
+    <string name="radio_configuration">Radion asetukset</string>
     <string name="module_settings">Moduulin asetukset</string>
     <string name="add">Lisää</string>
     <string name="edit">Muokkaa</string>
@@ -222,8 +246,8 @@
     <string name="map_clear_tiles">Tyhjennä kartan laatat</string>
     <string name="map_tile_source">Laatatietolähde</string>
     <string name="map_purge_success">SQL-välimuisti tyhjennetty %s: lle</string>
-    <string name="map_purge_fail">SQL-välimuistin tyhjennys epäonnistui, selaa lokitietoja saadaksesi lisätietoja ongelmasta</string>
-    <string name="map_cache_manager">Välimuistin hallinta</string>
+    <string name="map_purge_fail">SQL-välimuistin tyhjennys epäonnistui, katso logcat saadaksesi lisätietoja</string>
+    <string name="map_cache_manager">Välimuistin Hallinta</string>
     <string name="map_download_complete">Lataus on valmis!</string>
     <string name="map_download_errors">Lataus valmis %d virheellä</string>
     <string name="map_cache_tiles">%d Laattaa</string>
@@ -245,7 +269,7 @@
     <string name="wifi_qr_code_error">WiFi-verkon käyttöoikeustiedoissa on virheellinen QR-koodin muoto</string>
     <string name="navigate_back">Siirry takaisin</string>
     <string name="battery">Akku</string>
-    <string name="channel_utilization">Kanavan käyttö</string>
+    <string name="channel_utilization">Kanavan Käyttö</string>
     <string name="air_utilization">Ilmantien käyttöaste</string>
     <string name="temperature">Lämpötila</string>
     <string name="humidity">Kosteus</string>
@@ -269,22 +293,23 @@
     <string name="rssi">RSSI</string>
     <string name="rssi_definition">Vastaanotetun signaalin voimakkuusindikaattori (RSSI) on mittari, jota käytetään määrittämään antennilla vastaanotetun signaalin voimakkuus. Korkeampi RSSI-arvo yleensä osoittaa vahvemman ja vakaamman yhteyden.</string>
     <string name="iaq_definition">Sisäilman laatu (IAQ) on suhteellinen asteikko, jota voidaan mitata mm. Bosch BME680 anturilla ja sen arvoväli on 0–500.</string>
-    <string name="device_metrics_log">Laitteen mittauslokit</string>
+    <string name="device_metrics_log">Laitteen mittausloki</string>
     <string name="node_map">Solmukartta</string>
-    <string name="position_log">Sijainnin loki</string>
+    <string name="position_log">Sijainnin Loki</string>
+    <string name="last_position_update">Viimeisin sijainnin päivitys</string>
     <string name="env_metrics_log">Ympäristöanturit</string>
     <string name="sig_metrics_log">Signaalin voimakkuudet</string>
     <string name="administration">Ylläpito</string>
     <string name="remote_admin">Etähallinta</string>
-    <string name="bad">huono</string>
-    <string name="fair">kohtalainen</string>
-    <string name="good">hyvä</string>
-    <string name="none_quality">Ei mitään</string>
+    <string name="bad">Huono</string>
+    <string name="fair">Kohtalainen</string>
+    <string name="good">Hyvä</string>
+    <string name="none_quality">ei mitään</string>
     <string name="share_to">Jaa…</string>
     <string name="share_message">Jaa viesti</string>
-    <string name="signal">Signaali:</string>
+    <string name="signal">Signaali </string>
     <string name="signal_quality">Signaalin laatu</string>
-    <string name="traceroute_log">Reitinselvityksen loki</string>
+    <string name="traceroute_log">Reitinselvitys loki</string>
     <string name="traceroute_direct">Suora</string>
     <plurals name="traceroute_hops">
         <item quantity="one">1 hyppy</item>
@@ -590,7 +615,7 @@
     <string name="primary_channel_feature">Säännöllinen sijainti- ja telemetrialähetys</string>
     <string name="secondary">Toissijainen</string>
     <string name="secondary_no_telemetry">Telemetriatietoja ei lähetetä säännöllisesti</string>
-    <string name="manuel_position_request">Manuaalinen sijaintipyyntö vaaditaan</string>
+    <string name="manual_position_request">Manuaalinen sijaintipyyntö vaaditaan</string>
     <string name="press_and_drag">Paina ja raahaa järjestääksesi uudelleen</string>
     <string name="set_region">Määritä alue</string>
     <string name="unmute">Poista mykistys</string>
@@ -608,4 +633,38 @@
     <string name="firmware">Laiteohjelmisto</string>
     <string name="use_12h_format">Käytä 12 tunnin kelloa</string>
     <string name="display_time_in_12h_format">Kun asetus on käytössä, laite näyttää 12 tunnin ajan näytössä.</string>
+    <string name="host_metrics_log">Isäntälaitteen lokitiedot</string>
+    <string name="host">Isäntälaite</string>
+    <string name="host_metrics">Isäntälaitteen mittausarvot</string>
+    <string name="free_memory">Vapaa muisti</string>
+    <string name="disk_free">Vapaa levytila</string>
+    <string name="load">Lataa</string>
+    <string name="user_string">Käyttäjän syöte</string>
+    <string name="navigate_into_label">Siirry kohtaan</string>
+    <string name="connections">Yhteydet</string>
+    <string name="map">Kartta</string>
+    <string name="contacts">Yhteystiedot</string>
+    <string name="nodes">Laitteet</string>
+    <string name="set_your_region">Määritä alue</string>
+    <string name="reply">Vastaa</string>
+    <string name="map_reporting_summary">Laitteesi lähettää määräajoin salaamattoman karttaraporttipaketin määritettyyn MQTT-palvelimeen. Tämä paketti sisältää seuraavat tiedot: tunnisteen, pitkän ja lyhyen nimen, likimääräisen sijainnin, laitemallin, roolin, laiteohjelmiston version, LoRa-alueen, modeemiesiasetuksen ja ensisijaisen kanavan nimen.</string>
+    <string name="map_reporting_consent_header">Salli salaamattomien laitetietojen jakaminen MQTT:n kautta</string>
+    <string name="map_reporting_consent_text">Ottamalla tämän ominaisuuden käyttöön hyväksyt ja annat suostumuksen siihen, että laitteesi reaaliaikainen sijaintitieto lähetetään MQTT-protokollan kautta ilman salausta. Näitä sijaintitietoja voidaan käyttää esimerkiksi reaaliaikaiseen karttaraportointiin, laitteen seurantaan ja muihin vastaaviin telemetriatoimintoihin.</string>
+    <string name="i_agree_to_share_my_location">Olen lukenut ja ymmärtänyt yllä olevan. Annan suostumuksen laitetietojeni salaamattomaan lähettämiseen MQTT:n kautta</string>
+    <string name="i_agree">Hyväksyn.</string>
+    <string name="should_update_firmware">Laiteohjelmistopäivitystä suositellaan.</string>
+    <string name="should_update">Hyötyäksesi uusimmista korjauksista ja ominaisuuksista, päivitä firmware laiteohjelmistosi.\n\nUusin vakaa laiteohjelmistoversio: %1$s</string>
+    <string name="expires">Päättyy</string>
+    <string name="time">Aika</string>
+    <string name="date">Päivä</string>
+    <string name="map_filter">Karttasuodatin\n</string>
+    <string name="only_favorites">Vain suosikit</string>
+    <string name="show_waypoints">Näytä reittipisteet</string>
+    <string name="show_precision_circle">Näytä tarkkuuspiirit</string>
+    <string name="client_notification">Sovellusilmoitukset</string>
+    <string name="compromised_keys">Turvallisuusriski havaittu: avaimet ovat vaarantuneet. Valitse OK luodaksesi uudet.</string>
+    <string name="regenerate_private_key">Luo uusi yksityinen avain</string>
+    <string name="regenerate_keys_confirmation">Oletko varma, että haluat luoda uuden yksityisen avaimen?</string>
+    <string name="export_keys">Vie avaimet</string>
+    <string name="export_keys_confirmation">Vie julkiset ja yksityiset avaimet tiedostoon. Säilytä tiedosto turvallisessa paikassa.</string>
 </resources>

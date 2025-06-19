@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_channel">Kanal</string>
     <string name="node_filter_placeholder">Filtriraj</string>
@@ -76,7 +92,7 @@
     <string name="message_delivery_status">Status isporuke poruke</string>
     <string name="meshtastic_messages_notifications">Obavijest o poruci</string>
     <string name="protocol_stress_test">Test otpornosti na stres</string>
-    <string name="firmware_too_old">Potrebno ažuriranje firmwarea</string>
+    <string name="firmware_too_old">Potrebno ažuriranje firmwarea.</string>
     <string name="firmware_old">Firmware radija je prestar za komunikaciju s ovom aplikacijom. Za više informacija posjetite <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">naš vodič za instalaciju firmwarea</a>.</string>
     <string name="okay">U redu</string>
     <string name="must_set_region">Potrebno je postaviti regiju!</string>
@@ -156,7 +172,7 @@
     <string name="map_tile_download_estimate">Procjena preuzimanja:</string>
     <string name="map_start_download">Pokreni Preuzimanje</string>
     <string name="close">Zatvori</string>
-    <string name="device_settings">Konfiguracija uređaja</string>
+    <string name="radio_configuration">Konfiguracija uređaja</string>
     <string name="module_settings">Konfiguracija modula</string>
     <string name="add">Dodaj</string>
     <string name="edit">Uredi</string>

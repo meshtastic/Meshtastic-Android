@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_messages">Поруке</string>
     <string name="main_tab_users">Корисници</string>
@@ -100,7 +116,7 @@
     <string name="connected_sleeping">Повезан на радио уређај, али уређај је у стању спавања</string>
     <string name="update_to">Ажурирај до %s</string>
     <string name="app_too_old">Неопходно је ажурирање апликације</string>
-    <string name="must_update">Морате ажурирати ову апликацију у продавници апликација (или на Гитхабу). Превише је стара да би могла комуницирати са овим радио фирмвером. Молимо вас да прочитате нашу <a href="https://meshtastic.org/docs/software/android/installation">документацијау</a> на ову тему.</string>
+    <string name="must_update">Морате ажурирати ову апликацију у продавници апликација (или на Гитхабу). Превише је стара да би могла комуницирати са овим радио фирмвером. Молимо вас да прочитате наша &lt;a href=\'https://meshtastic.org/docs/software/android/installation\'&gt;документа&lt;/a&gt; на ову тему.</string>
     <string name="none">Ништа (онемогућено)</string>
     <string name="modem_config_turbo">Кратки домет / Турбо</string>
     <string name="modem_config_short">Кратки домет / Брзо</string>
@@ -126,7 +142,7 @@
     <string name="meshtastic_messages_notifications">Обавештења о порукама</string>
     <string name="meshtastic_alerts_notifications">Обавештења о упозорењима</string>
     <string name="protocol_stress_test">Тест стреса протокола</string>
-    <string name="firmware_too_old">Ажурирање фирмвера је неопходно</string>
+    <string name="firmware_too_old">Ажурирање фирмвера је неопходно.</string>
     <string name="firmware_old">Радио фирмвер је превише стар да би комуницирао са овом апликацијом. За више информација о овоме погледајте <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">наш водич за инсталацију фирмвера</a>.</string>
     <string name="okay">Океј</string>
     <string name="must_set_region">Мораш одабрати регион!</string>
@@ -157,7 +173,7 @@
     <string name="modem_config_slow_medium">Средњи домет / Споро</string>
     <plurals name="delete_messages">
         <item quantity="one">Обриши поруку?</item>
-        <item quantity="few">Обриши %s порука?</item>
+        <item quantity="few">Обриши поруке?</item>
         <item quantity="other">Обриши %s порука?</item>
     </plurals>
     <string name="delete">Обриши</string>
@@ -207,7 +223,7 @@
     <string name="map_tile_download_estimate">Процена преузимања плочица:</string>
     <string name="map_start_download">Започни преузимање</string>
     <string name="close">Затвори</string>
-    <string name="device_settings">Конфигурација радио уређаја</string>
+    <string name="radio_configuration">Конфигурација радио уређаја</string>
     <string name="module_settings">Конфигурација модула</string>
     <string name="add">Додај</string>
     <string name="edit">Измени</string>
@@ -257,7 +273,7 @@
     <string name="encryption_pkc_text">Директне поруке користе нову инфраструктуру јавног кључа за шифровање. Потребна је верзија фирмвера 2,5 или новија.</string>
     <string name="encryption_error">Неусаглашеност јавних кључева</string>
     <string name="encryption_error_text">Јавни кључ се не поклапа са забележеним кључем. Можете уклонити чвор и омогућити му поновну размену кључева, али ово може указивати на озбиљнији безбедносни проблем. Контактирајте корисника путем другог поузданог канала да бисте утврдили да ли је промена кључа резултат фабричког ресетовања или друге намерне акције.</string>
-    <string name="meshtastic_new_nodes_notifications">Обавештење о новом чвору</string>
+    <string name="meshtastic_new_nodes_notifications">Обавештења о новим чворовима</string>
     <string name="more_details">Више детаља</string>
     <string name="snr">SNR</string>
     <string name="snr_definition">Однос сигнал/шум SNR је мера која се користи у комуникацијама за квантитативно одређивање нивоа жељеног сигнала у односу на ниво позадинског шума. У Мештастик и другим бежичним системима, већи SNR указује на јаснији сигнал који може побољшати поузданост и квалитет преноса података.</string>
@@ -317,14 +333,81 @@
     <string name="meshtastic_low_battery_notifications">Нотификације о ниском нивоу батерије</string>
     <string name="low_battery_title">Низак ниво батерије: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Нотификације о ниском нивоу батерије (омиљени чворови)</string>
+    <string name="baro_pressure">Барометарски притисак</string>
     <string name="udp_config">UDP конфигурација</string>
+    <string name="user">Корисник</string>
+    <string name="channels">Канали</string>
+    <string name="device">Уређај</string>
+    <string name="position">Позиција</string>
+    <string name="power">Снага</string>
+    <string name="network">Мрежа</string>
+    <string name="display">Приказ</string>
+    <string name="lora">LoRA</string>
+    <string name="bluetooth">Блутут</string>
+    <string name="security">Сигурност</string>
+    <string name="serial">Серијска веза</string>
+    <string name="external_notification">Спољна обавештења</string>
+    <string name="store_forward"><![CDATA[Сачувај и проследи]]></string>
+    <string name="range_test">Тест домета</string>
+    <string name="telemetry">Телеметрија (сензори)</string>
+    <string name="ambient_lighting">Амбијентално осветљење</string>
+    <string name="detection_sensor">Сензор откривања</string>
+    <string name="bluetooth_config">Блутут подешавања</string>
+    <string name="default_">Подразумевано</string>
+    <string name="environment">Окружење</string>
+    <string name="ambient_lighting_config">Подешавања амбијенталног осветљења</string>
+    <string name="gpio_pin_for_rotary_encoder_a_port">GPIO пин за A порт ротационог енкодера</string>
+    <string name="gpio_pin_for_rotary_encoder_b_port">GPIO пин за Б порт ротационог енкодера</string>
+    <string name="gpio_pin_for_rotary_encoder_press_port">GPIO пин за порт клика ротационог енкодера</string>
     <string name="messages">Поруке</string>
+    <string name="detection_sensor_config">Подешавања ензора откривања</string>
+    <string name="friendly_name">Пријатељски назив</string>
+    <string name="device_config">Подешавања уређаја</string>
+    <string name="role">Улога</string>
+    <string name="display_config">Подешавања приказа</string>
+    <string name="external_notification_config">Подешавање спољних обавештења</string>
+    <string name="ringtone">Мелодија звона</string>
+    <string name="lora_config">LoRA подешавања</string>
+    <string name="bandwidth">Проток</string>
+    <string name="ignore_mqtt">Игнориши MQTT</string>
+    <string name="mqtt_config">MQTT подешавања</string>
+    <string name="address">Адреса</string>
+    <string name="username">Корисничко име</string>
+    <string name="password">Лозинка</string>
+    <string name="network_config">Конфигурација мреже</string>
+    <string name="position_config">Подешавања позиције</string>
+    <string name="latitude">Ширина</string>
+    <string name="longitude">Дужина</string>
+    <string name="power_config">Подешавања напајња</string>
+    <string name="range_test_config">Конфигурација теста домета</string>
+    <string name="security_config">Сигурносна подешавања</string>
     <string name="public_key">Јавни кључ</string>
     <string name="private_key">Приватни кључ</string>
-    <string name="timeout">Истекло време</string>
-    <string name="distance">Удаљеност</string>
+    <string name="serial_config">Подешавања серијске везе</string>
+    <string name="timeout">Временско ограничење</string>
+    <string name="number_of_records">Број записа</string>
+    <string name="server">Сервер</string>
+    <string name="telemetry_config">Конфигурација телеметрије</string>
+    <string name="user_config">Корисничка подешавања</string>
+    <string name="distance">Раздаљина</string>
+    <string name="store_forward_config"><![CDATA[Сачувај и проследи подешавања]]></string>
+    <string name="indoor_air_quality_iaq">Квалитет ваздуха у затвореном простору (IAQ)</string>
+    <string name="hardware">Хардвер</string>
+    <string name="supported">Подржан</string>
+    <string name="node_number">Број чвора</string>
+    <string name="uptime">Време рада</string>
+    <string name="timestamp">Временска ознака</string>
+    <string name="heading">Смер</string>
+    <string name="sats">Сателита</string>
+    <string name="alt">Висина</string>
     <string name="primary">Примарни</string>
     <string name="secondary">Секундарни</string>
     <string name="actions">Акције</string>
     <string name="firmware">Фирмвер</string>
+    <string name="map">Мапа</string>
+    <string name="nodes">Чворови</string>
+    <string name="reply">Одговори</string>
+    <string name="expires">Истиче</string>
+    <string name="time">Време</string>
+    <string name="date">Датум</string>
 </resources>

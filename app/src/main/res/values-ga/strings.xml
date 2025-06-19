@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_channel">Cainéal</string>
     <string name="node_filter_placeholder">Scagaire</string>
@@ -112,7 +128,7 @@
     <string name="message_delivery_status">Stádas seachadta teachtaireachta</string>
     <string name="meshtastic_messages_notifications">Fógraí teachtaireachtaí</string>
     <string name="protocol_stress_test">Tástáil strus prótacail</string>
-    <string name="firmware_too_old">Nuashonrú teastaíonn ar an gcórais</string>
+    <string name="firmware_too_old">Nuashonrú teastaíonn ar an gcórais.</string>
     <string name="firmware_old">Tá an firmware raidió ró-aoiseach chun cumarsáid a dhéanamh leis an aip seo. Chun tuilleadh eolais a fháil, féach <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">ár gCúnamh Suiteála Firmware</a>.</string>
     <string name="okay">Ceadaigh</string>
     <string name="must_set_region">Caithfidh tú réigiún a shocrú!</string>
@@ -195,7 +211,7 @@
     <string name="map_tile_download_estimate">Meastachán íoslódála tile:</string>
     <string name="map_start_download">Tosaigh íoslódáil</string>
     <string name="close">Dún</string>
-    <string name="device_settings">Cumraíocht raidió</string>
+    <string name="radio_configuration">Cumraíocht raidió</string>
     <string name="module_settings">Cumraíocht an mhódule</string>
     <string name="add">Cuir leis</string>
     <string name="edit">Cuir in eagar</string>

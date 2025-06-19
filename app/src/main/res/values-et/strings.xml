@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_channel">Kanal</string>
     <string name="node_filter_placeholder">Filtreeri</string>
@@ -105,7 +121,7 @@
     <string name="message_delivery_status">Sõnumi edastamise olek</string>
     <string name="meshtastic_messages_notifications">Sõnumiteated</string>
     <string name="protocol_stress_test">Protokolli stressitest</string>
-    <string name="firmware_too_old">Püsivara värskendus on vajalik</string>
+    <string name="firmware_too_old">Püsivara värskendus on vajalik.</string>
     <string name="firmware_old">Raadio püsivara on selle rakenduse kasutamiseks liiga vana. Lisateabe saamiseks vaata meie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">püsivara paigaldusjuhendit</a>.</string>
     <string name="okay">Olgu</string>
     <string name="must_set_region">Pead valima regiooni!</string>
@@ -185,7 +201,7 @@
     <string name="map_tile_download_estimate">Paanide allalaadimise prognoos:</string>
     <string name="map_start_download">Alusta allalaadimist</string>
     <string name="close">Sule</string>
-    <string name="device_settings">Raadio sätted</string>
+    <string name="radio_configuration">Raadio sätted</string>
     <string name="module_settings">Mooduli sätted</string>
     <string name="add">Lisa</string>
     <string name="edit">Muuda</string>

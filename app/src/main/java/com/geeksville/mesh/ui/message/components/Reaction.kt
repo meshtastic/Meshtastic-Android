@@ -19,22 +19,23 @@ package com.geeksville.mesh.ui.message.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EmojiEmotions
+import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.HorizontalDivider
@@ -58,28 +59,29 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.database.entity.Reaction
-import com.geeksville.mesh.ui.components.BottomSheetDialog
-import com.geeksville.mesh.ui.components.EmojiPickerDialog
-import com.geeksville.mesh.ui.theme.AppTheme
+import com.geeksville.mesh.ui.common.components.BottomSheetDialog
+import com.geeksville.mesh.ui.common.components.EmojiPickerDialog
+import com.geeksville.mesh.ui.common.theme.AppTheme
 
 @Composable
 fun ReactionButton(
     modifier: Modifier = Modifier,
-    onClick: (String) -> Unit = {}
+    onSendReaction: (String) -> Unit = {},
 ) {
     var showEmojiPickerDialog by remember { mutableStateOf(false) }
     if (showEmojiPickerDialog) {
         EmojiPickerDialog(
-            onConfirm = {
+            onConfirm = { selectedEmoji ->
                 showEmojiPickerDialog = false
-                onClick(it)
+                onSendReaction(selectedEmoji)
             },
             onDismiss = { showEmojiPickerDialog = false }
         )
     }
     IconButton(
-        modifier = modifier.size(48.dp),
-        onClick = { showEmojiPickerDialog = true }
+        modifier = modifier
+            .size(48.dp),
+        onClick = { showEmojiPickerDialog = true },
     ) {
         Icon(
             imageVector = Icons.Default.EmojiEmotions,
@@ -89,13 +91,29 @@ fun ReactionButton(
 }
 
 @Composable
+fun ReplyButton(
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+) = IconButton(
+    modifier = modifier
+        .size(48.dp),
+    onClick = onClick,
+    content = {
+        Icon(
+            imageVector = Icons.Default.Reply,
+            contentDescription = "reply",
+        )
+    }
+)
+
+@Composable
 private fun ReactionItem(
     emoji: String,
     emojiCount: Int = 1,
     onClick: () -> Unit = {},
+    onLongClick: () -> Unit = {},
 ) {
     BadgedBox(
-        modifier = Modifier.padding(start = 2.dp, top = 2.dp, end = 2.dp, bottom = 4.dp),
         badge = {
             if (emojiCount > 1) {
                 Badge {
@@ -109,14 +127,17 @@ private fun ReactionItem(
     ) {
         Surface(
             modifier = Modifier
-                .clickable { onClick() },
+                .combinedClickable(
+                    onClick = onClick,
+                    onLongClick = onLongClick
+                ),
             color = MaterialTheme.colorScheme.primaryContainer,
-            shape = RoundedCornerShape(32.dp),
+            shape = CircleShape,
         ) {
             Text(
                 text = emoji,
                 modifier = Modifier
-                    .padding(8.dp)
+                    .padding(4.dp)
                     .clip(CircleShape),
             )
         }
@@ -126,35 +147,46 @@ private fun ReactionItem(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun ReactionRow(
-    fromLocal: Boolean,
+    modifier: Modifier = Modifier,
     reactions: List<Reaction> = emptyList(),
-    onSendReaction: (String) -> Unit = {}
+    onSendReaction: (String) -> Unit = {},
+    onShowReactions: () -> Unit = {},
+    onSendReply: () -> Unit = {},
 ) {
-    val emojiList by remember(reactions) {
-        mutableStateOf(
-            reduceEmojis(
-                if (fromLocal) {
-                    reactions.map { it.emoji }
-                } else {
-                    reactions.map { it.emoji }.reversed()
-                }
-            ).entries
-        )
-    }
+    val emojiList =
+        reduceEmojis(
+            reactions.reversed().map { it.emoji }
+        ).entries
 
-    FlowRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp),
-        horizontalArrangement = if (fromLocal) Arrangement.End else Arrangement.Start
+    LazyRow(
+        modifier = modifier
+            .height(48.dp)
+            .padding(bottom = 8.dp),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically,
+        reverseLayout = true
     ) {
-        emojiList.forEach { entry ->
+        item {
+            ReplyButton {
+                onSendReply()
+            }
+        }
+        item {
+            ReactionButton(
+                onSendReaction = onSendReaction,
+            )
+        }
+        items(
+            emojiList.size
+        ) { index ->
+            val entry = emojiList.elementAt(index)
             ReactionItem(
                 emoji = entry.key,
                 emojiCount = entry.value,
                 onClick = {
                     onSendReaction(entry.key)
-                }
+                },
+                onLongClick = onShowReactions,
             )
         }
     }
@@ -237,7 +269,6 @@ fun ReactionItemPreview() {
 fun ReactionRowPreview() {
     AppTheme {
         ReactionRow(
-            fromLocal = true,
             reactions = listOf(
                 Reaction(
                     replyId = 1,

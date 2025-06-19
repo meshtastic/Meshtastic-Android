@@ -31,6 +31,7 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
+@Suppress("TooManyFunctions")
 class MeshLogRepository @Inject constructor(
     private val meshLogDaoLazy: dagger.Lazy<MeshLogDao>,
     private val dispatchers: CoroutineDispatchers,

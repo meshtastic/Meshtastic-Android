@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_messages">Mensajes</string>
     <string name="main_tab_users">Usuarios</string>
@@ -8,6 +24,8 @@
     <string name="node_filter_placeholder">Filtro</string>
     <string name="desc_node_filter_clear">quitar filtro de nodo</string>
     <string name="node_filter_include_unknown">Incluir desconocidos</string>
+    <string name="node_filter_only_online">Ocultar nodos desconectados</string>
+    <string name="node_filter_only_direct">Mostrar sólo nodos directos</string>
     <string name="node_filter_show_details">Mostrar detalles</string>
     <string name="node_sort_button">Opciones de orden de Nodos</string>
     <string name="node_sort_alpha">A-Z</string>
@@ -40,6 +58,7 @@
     <string name="role_client_mute">El dispositivo no reenvía mensajes de otros dispositivos.</string>
     <string name="role_router">Nodo de infraestructura para ampliar la cobertura de la red mediante la retransmisión de mensajes. Visible en la lista de nodos.</string>
     <string name="role_router_client">Combinación de ROUTER y CLIENTE. No para dispositivos móviles.</string>
+    <string name="role_repeater">Nodo de infraestructura para ampliar la cobertura de la red mediante la retransmisión de mensajes. Visible en la lista de nodos.</string>
     <string name="role_tracker">Transmisión de paquetes de posición GPS como prioridad.</string>
     <string name="role_sensor">Transmite paquetes de telemetría como prioridad.</string>
     <string name="role_tak">Optimizado para el sistema de comunicación ATAK, reduciendo las transmisiones rutinarias.</string>
@@ -49,6 +68,7 @@
     <string name="role_router_late">Nodo de infraestructura que permite la retransmisión de paquetes una vez posterior a los demás modos, asegurando cobertura adicional a los grupos locales. Es visible en la lista de nodos.</string>
     <string name="rebroadcast_mode_all">Si está en nuestro canal privado o desde otra red con los mismos parámetros lora, retransmite cualquier mensaje observado.</string>
     <string name="rebroadcast_mode_all_skip_decoding">Igual al comportamiento que TODOS pero omite la decodificación de paquetes y simplemente los retransmite. Sólo disponible en el rol repetidor. Establecer esto en cualquier otro rol dará como resultado TODOS los comportamientos.</string>
+    <string name="rebroadcast_mode_local_only">Ignora mensajes observados desde mallas foráneas que están abiertas o que no pueden descifrar. Sólo retransmite mensajes en los nodos locales principales / canales secundarios.</string>
     <string name="rebroadcast_mode_none">Solo permitido para los roles SENSOR, TRACKER y TAK_TRACKER, esto inhibirá todas las retransmisiones, no a diferencia del rol de CLIENT_MUTE.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">Trate un doble toque en acelerómetros soportados como una pulsación de botón de usuario.</string>
     <string name="config_device_disableTripleClick_summary">Deshabilita la triple pulsación del botón de usuario para activar o desactivar GPS.</string>
@@ -89,6 +109,7 @@
     <string name="share">Compartir</string>
     <string name="disconnected">Desconectado</string>
     <string name="device_sleeping">Dispositivo en reposo</string>
+    <string name="connected_count">Conectado: %1$s en línea</string>
     <string name="update_firmware">Actualizar el firmware</string>
     <string name="ip_address">Dirección IP:</string>
     <string name="connected">Conectado a la radio</string>
@@ -123,7 +144,7 @@
     <string name="meshtastic_messages_notifications">Notificaciones de mensajes</string>
     <string name="meshtastic_alerts_notifications">Notificaciones de alerta</string>
     <string name="protocol_stress_test">Protocolo de prueba de esfuerzo</string>
-    <string name="firmware_too_old">Es necesario actualizar el firmware</string>
+    <string name="firmware_too_old">Es necesario actualizar el firmware.</string>
     <string name="firmware_old">El firmware de radio es demasiado viejo para comunicar con esta aplicación. Para obtener más información sobre esto consulte <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">nuestra guía de instalación de Firmware</a>.</string>
     <string name="okay">Vale</string>
     <string name="must_set_region">¡Debe establecer una región!</string>
@@ -204,7 +225,7 @@
     <string name="map_start_download">Comenzar Descarga</string>
     <string name="exchange_position">Intercambiar Posición</string>
     <string name="close">Cerrar</string>
-    <string name="device_settings">Configuración de radio</string>
+    <string name="radio_configuration">Configuración de radio</string>
     <string name="module_settings">Configuración de módulo</string>
     <string name="add">Añadir</string>
     <string name="edit">Editar</string>
@@ -315,7 +336,17 @@ Rango de Valores 0 - 500.</string>
     <string name="udp_config">Configuración UDP</string>
     <string name="map_node_popup_details"><![CDATA[%s<br>Última escucha: %s<br>Última posición: %s<br>Batería: %s]]></string>
     <string name="toggle_my_position">Cambiar mi posición</string>
+    <string name="user">Usuario</string>
+    <string name="channels">Canales</string>
+    <string name="device">Dispositivo</string>
+    <string name="position">Posición</string>
+    <string name="power">Energía</string>
+    <string name="network">Red</string>
+    <string name="display">Pantalla</string>
+    <string name="lora">LoRa</string>
+    <string name="bluetooth">Bluetooth</string>
     <string name="security">Seguridad</string>
+    <string name="mqtt">MQTT</string>
     <string name="audio_config">Configuración de sonido</string>
     <string name="codec_2_enabled">CODEC 2 activado</string>
     <string name="bluetooth_config">Configuración Bluetooth</string>
@@ -327,4 +358,5 @@ Rango de Valores 0 - 500.</string>
     <string name="private_key">Clave privada</string>
     <string name="timeout">Tiempo agotado</string>
     <string name="distance">Distancia</string>
+    <string name="map">Mapa</string>
 </resources>

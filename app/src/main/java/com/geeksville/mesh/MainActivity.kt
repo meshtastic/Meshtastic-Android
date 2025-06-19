@@ -25,7 +25,6 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.hardware.usb.UsbManager
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.RemoteException
 import android.provider.Settings
@@ -38,14 +37,15 @@ import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalView
 import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
 import com.geeksville.mesh.android.BindFailedException
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
@@ -58,7 +58,6 @@ import com.geeksville.mesh.android.permissionMissing
 import com.geeksville.mesh.android.shouldShowRequestPermissionRationale
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.model.BluetoothViewModel
-import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.DEEP_LINK_BASE_URI
 import com.geeksville.mesh.service.MeshService
@@ -66,24 +65,17 @@ import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.service.startService
 import com.geeksville.mesh.ui.MainMenuAction
 import com.geeksville.mesh.ui.MainScreen
-import com.geeksville.mesh.ui.theme.AppTheme
-import com.geeksville.mesh.ui.theme.MODE_DYNAMIC
+import com.geeksville.mesh.ui.common.theme.AppTheme
+import com.geeksville.mesh.ui.common.theme.MODE_DYNAMIC
 import com.geeksville.mesh.util.Exceptions
 import com.geeksville.mesh.util.LanguageUtils
 import com.geeksville.mesh.util.getPackageInfoCompat
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity(), Logging {
-
-    // Used to schedule a coroutine in the GUI thread
-    private val mainScope = CoroutineScope(Dispatchers.Main + Job())
-
     private val bluetoothViewModel: BluetoothViewModel by viewModels()
     private val model: UIViewModel by viewModels()
 
@@ -132,25 +124,33 @@ class MainActivity : AppCompatActivity(), Logging {
             (application as GeeksvilleApplication).askToRate(this)
         }
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
-            Box(Modifier.safeDrawingPadding()) {
-                val theme by model.theme.collectAsState()
-                val dynamic = theme == MODE_DYNAMIC
-                val dark = when (theme) {
-                    AppCompatDelegate.MODE_NIGHT_YES -> true
-                    AppCompatDelegate.MODE_NIGHT_NO -> false
-                    AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> isSystemInDarkTheme()
-                    else -> isSystemInDarkTheme()
+            val theme by model.theme.collectAsState()
+            val dynamic = theme == MODE_DYNAMIC
+            val dark = when (theme) {
+                AppCompatDelegate.MODE_NIGHT_YES -> true
+                AppCompatDelegate.MODE_NIGHT_NO -> false
+                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> isSystemInDarkTheme()
+                else -> isSystemInDarkTheme()
+            }
+
+            AppTheme(
+                dynamicColor = dynamic,
+                darkTheme = dark,
+            ) {
+                val view = LocalView.current
+                if (!view.isInEditMode) {
+                    SideEffect {
+                        AppCompatDelegate.setDefaultNightMode(theme)
+                    }
                 }
-                AppTheme(
-                    dynamicColor = dynamic,
-                    darkTheme = dark,
-                ) {
-                    MainScreen(viewModel = model, onAction = ::onMainMenuAction)
-                }
+                MainScreen(
+                    viewModel = model,
+                    onAction = ::onMainMenuAction,
+                )
             }
         }
-
         // Handle any intent
         handleIntent(intent)
     }
@@ -206,7 +206,9 @@ class MainActivity : AppCompatActivity(), Logging {
         val startActivityIntent = Intent(
             Intent.ACTION_VIEW, deepLink.toUri(),
             this, MainActivity::class.java
-        )
+        ).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
 
         val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
             addNextIntentWithParentStack(startActivityIntent)
@@ -216,11 +218,13 @@ class MainActivity : AppCompatActivity(), Logging {
     }
 
     private fun createSettingsIntent(): PendingIntent {
-        val deepLink = "$DEEP_LINK_BASE_URI/settings"
+        val deepLink = "$DEEP_LINK_BASE_URI/connections"
         val startActivityIntent = Intent(
             Intent.ACTION_VIEW, deepLink.toUri(),
             this, MainActivity::class.java
-        )
+        ).apply {
+            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
 
         val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
             addNextIntentWithParentStack(startActivityIntent)
@@ -244,49 +248,9 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
-    override fun onDestroy() {
-        mainScope.cancel("Activity going away")
-        super.onDestroy()
-    }
-
     // Called when we gain/lose a connection to our mesh radio
     private fun onMeshConnectionChanged(newConnection: MeshService.ConnectionState) {
         if (newConnection == MeshService.ConnectionState.CONNECTED) {
-            serviceRepository.meshService?.let { service ->
-                try {
-                    val info: MyNodeInfo? = service.myNodeInfo // this can be null
-
-                    if (info != null) {
-                        val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
-                        if (isOld) {
-                            model.showAlert(
-                                getString(R.string.app_too_old),
-                                getString(R.string.must_update),
-                                dismissable = false,
-                            )
-                        } else {
-                            // If we are already doing an update don't put up a dialog or try to get device info
-                            val isUpdating = service.updateStatus >= 0
-                            if (!isUpdating) {
-                                val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
-                                if (curVer < MeshService.minDeviceVersion) {
-                                    val title = getString(R.string.firmware_too_old)
-                                    val message = getString(R.string.firmware_old)
-                                    model.showAlert(title, message, dismissable = false)
-                                }
-                            }
-                        }
-                    }
-                } catch (ex: RemoteException) {
-                    warn("Abandoning connect $ex, because we probably just lost device connection")
-                }
-                // if provideLocation enabled: Start providing location (from phone GPS) to mesh
-                if (model.provideLocation.value == true) {
-                    service.startProvideLocation()
-                } else {
-                    service.stopProvideLocation()
-                }
-            }
             checkNotificationPermissions()
         }
     }
@@ -312,28 +276,23 @@ class MainActivity : AppCompatActivity(), Logging {
 
     @Suppress("MagicNumber")
     private fun checkAlertDnD() {
-        if (
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
-        ) {
-            val prefs = UIViewModel.getPreferences(this)
-            val rationaleShown = prefs.getBoolean("dnd_rationale_shown", false)
-            if (!rationaleShown && hasNotificationPermission()) {
-                fun showAlertAppNotificationSettings() {
-                    val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
-                    intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
-                    intent.putExtra(Settings.EXTRA_CHANNEL_ID, "my_alerts")
-                    startActivity(intent)
-                }
-                model.showAlert(
-                    title = getString(R.string.alerts_dnd_request_title),
-                    html = getString(R.string.alerts_dnd_request_text),
-                    onConfirm = {
-                        showAlertAppNotificationSettings()
-                    },
-                    dismissable = true
-                ).also {
-                    prefs.edit { putBoolean("dnd_rationale_shown", true) }
-                }
+        val prefs = UIViewModel.getPreferences(this)
+        val rationaleShown = prefs.getBoolean("dnd_rationale_shown", false)
+        if (!rationaleShown && hasNotificationPermission()) {
+            fun showAlertAppNotificationSettings() {
+                val intent = Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS)
+                intent.putExtra(Settings.EXTRA_APP_PACKAGE, packageName)
+                intent.putExtra(Settings.EXTRA_CHANNEL_ID, "my_alerts")
+                startActivity(intent)
+            }
+            model.showAlert(
+                title = getString(R.string.alerts_dnd_request_title),
+                html = getString(R.string.alerts_dnd_request_text),
+                onConfirm = {
+                    showAlertAppNotificationSettings()
+                },
+            ).also {
+                prefs.edit { putBoolean("dnd_rationale_shown", true) }
             }
         }
     }
@@ -350,11 +309,12 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
-    private var connectionJob: Job? = null
+    private var serviceSetupJob: Job? = null
 
     private val mesh = object : ServiceClient<IMeshService>(IMeshService.Stub::asInterface) {
         override fun onConnected(service: IMeshService) {
-            connectionJob = mainScope.handledLaunch {
+            serviceSetupJob?.cancel()
+            serviceSetupJob = lifecycleScope.handledLaunch {
                 serviceRepository.setMeshService(service)
 
                 try {
@@ -365,8 +325,6 @@ class MainActivity : AppCompatActivity(), Logging {
                     onMeshConnectionChanged(connectionState)
                 } catch (ex: RemoteException) {
                     errormsg("Device error during init ${ex.message}")
-                } finally {
-                    connectionJob = null
                 }
 
                 debug("connected to mesh service, connectionState=${model.connectionState.value}")
@@ -374,20 +332,13 @@ class MainActivity : AppCompatActivity(), Logging {
         }
 
         override fun onDisconnected() {
+            serviceSetupJob?.cancel()
             serviceRepository.setMeshService(null)
         }
     }
 
     private fun bindMeshService() {
         debug("Binding to mesh service!")
-        // we bind using the well known name, to make sure 3rd party apps could also
-        if (serviceRepository.meshService != null) {
-            /* This problem can occur if we unbind, but there is already an onConnected job waiting to run.  That job runs and then makes meshService != null again
-            I think I've fixed this by cancelling connectionJob.  We'll see!
-             */
-            Exceptions.reportError("meshService was supposed to be null, ignoring (but reporting a bug)")
-        }
-
         try {
             MeshService.startService(this) // Start the service so it stays running even after we unbind
         } catch (ex: Exception) {
@@ -403,28 +354,8 @@ class MainActivity : AppCompatActivity(), Logging {
         )
     }
 
-    private fun unbindMeshService() {
-        // If we have received the service, and hence registered with
-        // it, then now is the time to unregister.
-        // if we never connected, do nothing
-        debug("Unbinding from mesh service!")
-        connectionJob?.let { job ->
-            connectionJob = null
-            warn("We had a pending onConnection job, so we are cancelling it")
-            job.cancel("unbinding")
-        }
-        mesh.close()
-        serviceRepository.setMeshService(null)
-    }
-
-    override fun onStop() {
-        unbindMeshService()
-        super.onStop()
-    }
-
     override fun onStart() {
         super.onStart()
-
         bluetoothViewModel.enabled.observe(this) { enabled ->
             if (!enabled && !requestedEnable && model.selectedBluetooth) {
                 requestedEnable = true

@@ -1,3 +1,20 @@
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
+
 <resources>
     // Language tags native names (not available via .getDisplayLanguage)
     <string name="fr_HT" translatable="false">Kreyòl ayisyen</string>
@@ -20,9 +37,12 @@
     <string name="main_tab_settings">Settings</string>
 
     <string name="unknown_node_short_name" translatable="false">\???</string>
+    <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">clear node filter</string>
     <string name="node_filter_include_unknown">Include unknown</string>
+    <string name="node_filter_only_online">Hide offline nodes</string>
+    <string name="node_filter_only_direct">Only show direct nodes</string>
     <string name="node_filter_show_details">Show details</string>
     <string name="node_sort_button">Node sorting options</string>
     <string name="node_sort_alpha">A-Z</string>
@@ -142,7 +162,12 @@
     <string name="text_messages">Text messages</string>
     <string name="channel_invalid">This Channel URL is invalid and can not be used</string>
     <string name="debug_panel">Debug Panel</string>
+    <string name="debug_logs_export">Export Logs</string>
     <string name="debug_last_messages">500 last messages</string>
+    <string name="debug_filters">Filters</string>
+    <string name="debug_active_filters">Active filters</string>
+    <string name="debug_default_search">Search in logs...</string>
+    <string name="debug_clear">Clear Logs</string>
     <string name="clear">Clear</string>
     <string name="updating_firmware">Updating firmware, wait up to eight minutes…</string>
     <string name="update_successful">Update successful</string>
@@ -153,7 +178,7 @@
     <string name="meshtastic_messages_notifications">Message notifications</string>
     <string name="meshtastic_alerts_notifications">Alert notifications</string>
     <string name="protocol_stress_test">Protocol stress test</string>
-    <string name="firmware_too_old">Firmware update required</string>
+    <string name="firmware_too_old">Firmware update required.</string>
     <string name="firmware_old">The radio firmware is too old to talk to this application. For more information on this see <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">You must set a region!</string>
@@ -234,7 +259,7 @@
     <string name="map_start_download">Start Download</string>
     <string name="exchange_position">Exchange position</string>
     <string name="close">Close</string>
-    <string name="device_settings">Radio configuration</string>
+    <string name="radio_configuration">Radio configuration</string>
     <string name="module_settings">Module configuration</string>
     <string name="add">Add</string>
     <string name="edit">Edit</string>
@@ -295,6 +320,7 @@
     <string name="device_metrics_log">Device Metrics Log</string>
     <string name="node_map">Node Map</string>
     <string name="position_log">Position Log</string>
+    <string name="last_position_update">Last position update</string>
     <string name="env_metrics_log">Environment Metrics Log</string>
     <string name="sig_metrics_log">Signal Metrics Log</string>
     <string name="administration">Administration</string>
@@ -464,7 +490,7 @@
     <string name="use_i2s_as_buzzer">Use I2S as buzzer</string>
     <string name="lora_config">LoRa Config</string>
     <string name="use_modem_preset">Use modem preset</string>
-    <string name="modem_preset">Modem preset</string>
+    <string name="modem_preset">Modem Preset</string>
     <string name="bandwidth">Bandwidth</string>
     <string name="spread_factor">Spread factor</string>
     <string name="coding_rate">Coding rate</string>
@@ -631,4 +657,38 @@
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Use 12h clock format</string>
     <string name="display_time_in_12h_format">When enabled, the device will display the time in 12-hour format on screen.</string>
+    <string name="host_metrics_log">Host Metrics Log</string>
+    <string name="host">Host</string>
+    <string name="host_metrics">Host Metrics</string>
+    <string name="free_memory">Free Memory</string>
+    <string name="disk_free">Disk Free</string>
+    <string name="load">Load</string>
+    <string name="user_string">User String</string>
+    <string name="navigate_into_label">Navigate Into</string>
+    <string name="connections">Connections</string>
+    <string name="map">Map</string>
+    <string name="contacts">Contacts</string>
+    <string name="nodes">Nodes</string>
+    <string name="set_your_region">Set your region</string>
+    <string name="reply">Reply</string>
+    <string name="map_reporting_summary">Your node will periodically send an unencrypted map report packet to the configured MQTT server, this includes id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset and primary channel name.</string>
+    <string name="map_reporting_consent_header">Consent to Share Unencrypted Node Data via MQTT</string>
+    <string name="map_reporting_consent_text">By enabling this feature, you acknowledge and expressly consent to the transmission of your device’s real-time geographic location over the MQTT protocol without encryption. This location data may be used for purposes such as live map reporting, device tracking, and related telemetry functions.</string>
+    <string name="i_agree_to_share_my_location">I have read and understand the above. I voluntarily consent to the unencrypted transmission of my node data via MQTT</string>
+    <string name="i_agree">I agree.</string>
+    <string name="should_update_firmware">Firmware Update Recommended.</string>
+    <string name="should_update">To benefit from the latest fixes and features, please update your node firmware.\n\nLatest stable firmware version: %1$s</string>
+    <string name="expires">Expires</string>
+    <string name="time">Time</string>
+    <string name="date">Date</string>
+    <string name="map_filter">Map Filter\n</string>
+    <string name="only_favorites">Only Favorites</string>
+    <string name="show_waypoints">Show Waypoints</string>
+    <string name="show_precision_circle">Show Precision Circles</string>
+    <string name="client_notification">Client Notification</string>
+    <string name="compromised_keys">Compromised keys detected, select OK to regenerate.</string>
+    <string name="regenerate_private_key">Regenerate Private Key</string>
+    <string name="regenerate_keys_confirmation">Are you sure you want to regenerate your Private Key?</string>
+    <string name="export_keys">Export Keys</string>
+    <string name="export_keys_confirmation">Exports public and private keys to a file. Please store somewhere securely.</string>
 </resources>

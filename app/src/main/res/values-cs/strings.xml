@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_messages">Zprávy</string>
     <string name="main_tab_users">Uživatelé</string>
@@ -8,6 +24,8 @@
     <string name="node_filter_placeholder">Filtr</string>
     <string name="desc_node_filter_clear">vyčistit filtr uzlů</string>
     <string name="node_filter_include_unknown">Včetně neznámých</string>
+    <string name="node_filter_only_online">Skrýt offline uzly</string>
+    <string name="node_filter_only_direct">Zobrazit jen přímé uzly</string>
     <string name="node_filter_show_details">Zobrazit detaily</string>
     <string name="node_sort_button">Možnosti řazení uzlů</string>
     <string name="node_sort_alpha">A-Z</string>
@@ -130,7 +148,7 @@
     <string name="meshtastic_messages_notifications">Upozornění na zprávy</string>
     <string name="meshtastic_alerts_notifications">Upozornění na varování</string>
     <string name="protocol_stress_test">Protokol zátěžového testu</string>
-    <string name="firmware_too_old">Vyžadována aktualizace firmwaru</string>
+    <string name="firmware_too_old">Je vyžadována aktualizace firmwaru.</string>
     <string name="firmware_old">Firmware rádia je příliš starý na to, aby mohl komunikovat s touto aplikací. Více informací o tomto naleznete v <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">naší firmware instalační příručce</a>.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">Musíte specifikovat region!</string>
@@ -213,7 +231,7 @@
     <string name="map_start_download">Zahájit stahování</string>
     <string name="exchange_position">Vyžádat pozici</string>
     <string name="close">Zavřít</string>
-    <string name="device_settings">Nastavení zařízení</string>
+    <string name="radio_configuration">Nastavení zařízení</string>
     <string name="module_settings">Nastavení modulů</string>
     <string name="add">Přidat</string>
     <string name="edit">Upravit</string>
@@ -291,7 +309,7 @@
     <plurals name="traceroute_hops">
         <item quantity="one">1 skok</item>
         <item quantity="few">%d skoky</item>
-        <item quantity="many">%d skoků</item>
+        <item quantity="many">%d hopů</item>
         <item quantity="other">%d skoků</item>
     </plurals>
     <string name="traceroute_diff">Skok směrem k %1$d Skok zpět do %2$d</string>
@@ -571,7 +589,7 @@
     <string name="primary_channel_feature">Pravidelné vysílání pozice a telemetrie</string>
     <string name="secondary">Sekundární</string>
     <string name="secondary_no_telemetry">Žádné pravidelné telemetrické vysílání</string>
-    <string name="manuel_position_request">Je vyžadován manuální požadavek na pozici</string>
+    <string name="manual_position_request">Je vyžadován manuální požadavek na pozici</string>
     <string name="press_and_drag">Stiskněte a přetáhněte pro změnu pořadí</string>
     <string name="set_region">Nastavit oblast</string>
     <string name="unmute">Zrušit ztlumení</string>
@@ -588,4 +606,21 @@
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Použít 12h formát hodin</string>
     <string name="display_time_in_12h_format">Pokud je povoleno, zařízení bude na obrazovce zobrazovat čas ve 12 hodinovém formátu.</string>
+    <string name="map">Mapa</string>
+    <string name="contacts">Kontakty</string>
+    <string name="nodes">Uzly</string>
+    <string name="set_your_region">Nastavte svůj region</string>
+    <string name="map_reporting_summary">Váš uzel bude pravidelně odesílat nešifrovaný mapový paket na konfigurovaný MQTT server, který zahrnuje id, dlouhé a krátké jméno. přibližné umístění, hardwarový model, role, verze firmwaru, region LoRa, předvolba modemu a název primárního kanálu.</string>
+    <string name="map_reporting_consent_header">Souhlas se sdílením nešifrovaných dat uzlu prostřednictvím MQTT</string>
+    <string name="map_reporting_consent_text">Povolením této funkce potvrzujete a výslovně souhlasíte s přenosem zeměpisné polohy vašeho zařízení v reálném čase přes MQTT protokol bez šifrování. Tato lokalizační data mohou být použita pro účely, jako je hlášení živých map, sledování zařízení a související telemetrické funkce.</string>
+    <string name="i_agree_to_share_my_location">Četl jsem a rozumím výše uvedenému. Dobrovolně souhlasím s nešifrovaným přenosem dat svého uzlu přes MQTT</string>
+    <string name="i_agree">Souhlasím.</string>
+    <string name="should_update_firmware">Doporučena aktualizace firmwaru.</string>
+    <string name="should_update">Chcete-li využít nejnovějších oprav a funkcí, aktualizujte firmware vašeho uzlu.\n\nPoslední stabilní verze firmwaru: %1$s</string>
+    <string name="time">Čas</string>
+    <string name="date">Datum</string>
+    <string name="only_favorites">Pouze oblíbené</string>
+    <string name="show_waypoints">Zobrazit trasové body</string>
+    <string name="show_precision_circle">Zobrazit kruhy přesnosti</string>
+    <string name="client_notification">Oznámení klienta</string>
 </resources>

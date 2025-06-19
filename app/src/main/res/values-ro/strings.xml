@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="routing_error_admin_public_key_unauthorized">Cheie publică neautorizată</string>
     <string name="role_sensor">Transmite pachete telemetrice ca prioritate.</string>
@@ -68,7 +84,7 @@
     <string name="message_delivery_status">Status livrare mesaj</string>
     <string name="meshtastic_messages_notifications">Notificări mesaje</string>
     <string name="protocol_stress_test">Stres test protocol</string>
-    <string name="firmware_too_old">Este necesară actualizarea firmware-ului</string>
+    <string name="firmware_too_old">Este necesară actualizarea firmware-ului.</string>
     <string name="firmware_old">Firmware-ul radioului este prea vechi pentru a putea comunica cu această aplicație. Pentru mai multe informații despre acest proces, consultați <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Ghidul nostru de instalare pentru firmware</a>.</string>
     <string name="okay">Ok</string>
     <string name="must_set_region">Trebuie să alegeți o regiune!</string>
@@ -146,7 +162,7 @@
     <string name="map_tile_download_estimate">Estimare descărcare secțiuni:</string>
     <string name="map_start_download">Pornește descărcarea</string>
     <string name="close">Închide</string>
-    <string name="device_settings">Configurare radio</string>
+    <string name="radio_configuration">Configurare radio</string>
     <string name="module_settings">Configurare modul</string>
     <string name="add">Adaugă</string>
     <string name="calculating">Calculare…</string>

@@ -176,6 +176,7 @@ complexity:
     ignorePrivate: false
     ignoreOverridden: false
     ignoreAnnotated: [ 'Preview', 'PreviewLightDark', 'PreviewScreenSizes' ]
+    ignoreAnnotatedFunctions: [ 'Preview', 'PreviewLightDark', 'PreviewScreenSizes' ]
 
 coroutines:
   active: true

@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_messages">Messaggi</string>
     <string name="main_tab_users">Utenti</string>
@@ -8,6 +24,8 @@
     <string name="node_filter_placeholder">Filtro</string>
     <string name="desc_node_filter_clear">elimina filtro nodi</string>
     <string name="node_filter_include_unknown">Includi sconosciuti</string>
+    <string name="node_filter_only_online">Nascondi i nodi offline</string>
+    <string name="node_filter_only_direct">Mostra solamente i nodi diretti</string>
     <string name="node_filter_show_details">Mostra dettagli</string>
     <string name="node_sort_button">Opzioni ordinamento nodi</string>
     <string name="node_sort_alpha">A-Z</string>
@@ -130,7 +148,7 @@
     <string name="meshtastic_messages_notifications">Notifiche messaggio</string>
     <string name="meshtastic_alerts_notifications">Notifiche di allarme</string>
     <string name="protocol_stress_test">Stress test del protocollo</string>
-    <string name="firmware_too_old">Aggiornamento del firmware necessario</string>
+    <string name="firmware_too_old">È necessario aggiornare il firmware.</string>
     <string name="firmware_old">Il firmware radio è troppo vecchio per parlare con questa applicazione. Per ulteriori informazioni su questo vedi <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">la nostra guida all\'installazione del firmware</a>.</string>
     <string name="okay">Ok</string>
     <string name="must_set_region">Devi impostare una regione!</string>
@@ -211,7 +229,7 @@
     <string name="map_start_download">Inizia download</string>
     <string name="exchange_position">Scambia posizione</string>
     <string name="close">Chiudi</string>
-    <string name="device_settings">Impostazioni dispositivo</string>
+    <string name="radio_configuration">Impostazioni dispositivo</string>
     <string name="module_settings">Impostazioni moduli</string>
     <string name="add">Aggiungere</string>
     <string name="edit">Modifica</string>
@@ -272,6 +290,7 @@
     <string name="device_metrics_log">Registro Metriche Dispositivo</string>
     <string name="node_map">Mappa Dei Nodi</string>
     <string name="position_log">Registro Posizione</string>
+    <string name="last_position_update">Aggiornamento ultima posizione</string>
     <string name="env_metrics_log">Registro Metriche Ambientali</string>
     <string name="sig_metrics_log">Registro Metriche Segnale</string>
     <string name="administration">Amministrazione</string>
@@ -306,9 +325,9 @@
     <string name="alerts_dnd_request_text"><![CDATA[Per consentire gli avvisi critici mentre il telefono è in modalità Non disturbare, attivare la funzione di annullamento della modalità Non disturbare per il canale degli avvisi nelle impostazioni di notifica dell\'app Meshtastic.<br/><br/>Gli utenti Samsung potrebbero dover aggiungere un\'eccezione nelle impostazioni di sistema prima di attivarla per il canale degli avvisi. <a href="https://www.samsung.com/latin_en/support/mobile-devices/how-to-use-the-do-not-disturb-mode-on-your-galaxy-phone/">Visitare il Supporto Samsung per assistenza.</a>.]]></string>
     <string name="critical_alert">Avvisi critici</string>
     <string name="favorite">Preferito</string>
-    <string name="favorite_add">Aggiungi \'%s\' come nodo preferito?</string>
-    <string name="favorite_remove">Rimuovi \'%s\' come nodo preferito?</string>
-    <string name="power_metrics_log">Registri delle metriche di potenza</string>
+    <string name="favorite_add">Aggiungere \'%s\' ai nodi preferiti?</string>
+    <string name="favorite_remove">Rimuovere \'%s\' dai nodi preferiti?</string>
+    <string name="power_metrics_log">Registro delle metriche di potenza</string>
     <string name="channel_1">Canale 1</string>
     <string name="channel_2">Canale 2</string>
     <string name="channel_3">Canale 3</string>
@@ -441,7 +460,7 @@
     <string name="use_i2s_as_buzzer">Usa I2S come buzzer</string>
     <string name="lora_config">Configurazione LoRa</string>
     <string name="use_modem_preset">Usa preimpostazioni del modem</string>
-    <string name="modem_preset">Preimpostazione modem</string>
+    <string name="modem_preset">Configurazione Modem</string>
     <string name="bandwidth">Larghezza di banda</string>
     <string name="spread_factor">Fattore di spread</string>
     <string name="coding_rate">Velocità di codifica</string>
@@ -558,6 +577,8 @@
     <string name="long_name">Nome esteso</string>
     <string name="short_name">Nome breve</string>
     <string name="hardware_model">Modello hardware</string>
+    <string name="licensed_amateur_radio">Radioamatori con licenza (HAM)</string>
+    <string name="licensed_amateur_radio_text">Abilitare questa opzione disabilita la crittografia e non è compatibile con la rete Meshtastic predefinita.</string>
     <string name="dew_point">Punto Di Rugiada</string>
     <string name="pressure">Pressione</string>
     <string name="gas_resistance">Resistenza Ai Gas</string>
@@ -569,5 +590,73 @@
     <string name="store_forward_config"><![CDATA[Configurazione Salva & Inoltra]]></string>
     <string name="indoor_air_quality_iaq">Qualità dell\'Aria Interna (IAQ)</string>
     <string name="url">URL</string>
+    <string name="backup_restore"><![CDATA[Backup & Ripristino]]></string>
+    <string name="import_configuration">Importa configurazione</string>
+    <string name="export_configuration">Esporta configurazione</string>
+    <string name="hardware">Hardware</string>
+    <string name="supported">Supportato</string>
+    <string name="node_number">Numero Nodo</string>
+    <string name="user_id">ID utente</string>
+    <string name="uptime">Tempo di attività</string>
+    <string name="firmware_version">Versione firmware</string>
+    <string name="timestamp">Data e ora</string>
+    <string name="heading">Direzione</string>
+    <string name="sats">Sat</string>
+    <string name="alt">Alt</string>
+    <string name="freq">Freq</string>
+    <string name="slot">Slot</string>
+    <string name="primary">Principale</string>
+    <string name="primary_channel_feature">Diffusione periodica di posizione e telemetria</string>
+    <string name="secondary">Secondario</string>
+    <string name="secondary_no_telemetry">Nessuna trasmissione telemetria periodica</string>
+    <string name="manual_position_request">Richiesta posizione manuale mandatoria</string>
+    <string name="press_and_drag">Premi e trascina per riordinare</string>
+    <string name="set_region">Imposta Regione</string>
+    <string name="unmute">Riattiva l\'audio</string>
     <string name="dynamic">Dinamico</string>
+    <string name="scan_qr_code">Scansiona codice QR</string>
+    <string name="share_contact">Condividi contatto</string>
+    <string name="import_shared_contact">Importare Contatto Condiviso?</string>
+    <string name="unmessageable">Non messaggabile</string>
+    <string name="unmonitored_or_infrastructure">Non monitorato o Infrastruttura</string>
+    <string name="import_known_shared_contact_text">Attenzione: Questo contatto è noto, l\'importazione sovrascriverà le informazioni di contatto precedenti.</string>
+    <string name="public_key_changed">Chiave Pubblica Modificata</string>
+    <string name="import_label">Importa</string>
+    <string name="request_metadata">Richiedi Metadati</string>
+    <string name="actions">Azioni</string>
+    <string name="firmware">Firmware</string>
+    <string name="use_12h_format">Usa formato orologio 12h</string>
+    <string name="display_time_in_12h_format">Se abilitato, il dispositivo visualizzerà il tempo in formato 12 ore sullo schermo.</string>
+    <string name="host_metrics_log">Registro Metriche Host</string>
+    <string name="host">Host</string>
+    <string name="host_metrics">Metriche Host</string>
+    <string name="free_memory">Memoria libera</string>
+    <string name="disk_free">Spazio disco libero</string>
+    <string name="load">Carico</string>
+    <string name="user_string">Stringa Utente</string>
+    <string name="navigate_into_label">Guidami Verso</string>
+    <string name="connections">Connessioni</string>
+    <string name="map">Mappa</string>
+    <string name="contacts">Contatti</string>
+    <string name="nodes">Nodi</string>
+    <string name="set_your_region">Imposta la tua regione</string>
+    <string name="reply">Rispondi</string>
+    <string name="map_reporting_summary">Il nodo invierà periodicamente un pacchetto di report mappa non cifrato al server MQTT configurato, questo include il nome id lungo e breve, posizione approssimativa, modello hardware, ruolo, versione firmware, regione LoRa, configurazione modem e nome del canale primario.</string>
+    <string name="map_reporting_consent_header">Do il consenso a condividere i dati non cifrati del nodo tramite MQTT</string>
+    <string name="map_reporting_consent_text">Abilitando questa funzione, l\'utente riconosce e acconsente espressamente alla trasmissione della posizione geografica in tempo reale del suo dispositivo su protocollo MQTT senza crittografia. Questi dati di localizzazione possono essere utilizzati per scopi quali la compilazione di mappe in tempo reale, il tracking del dispositivo e le relative funzioni di telemetria.</string>
+    <string name="i_agree_to_share_my_location">Ho letto e accetto quanto sopra. Acconsento volontariamente alla trasmissione non crittografata dei dati del mio nodo tramite MQTT</string>
+    <string name="i_agree">Sono d’accordo.</string>
+    <string name="should_update_firmware">Aggiornamento Firmware Consigliato.</string>
+    <string name="should_update">Per usufruire delle ultime correzioni e funzionalità, aggiorna il firmware del tuo nodo.\n\nVersione stabile più recente del firmware: %1$s</string>
+    <string name="expires">Scade</string>
+    <string name="time">Ora</string>
+    <string name="date">Data</string>
+    <string name="map_filter">Filtro mappa\n</string>
+    <string name="only_favorites">Solo preferiti</string>
+    <string name="show_waypoints">Mostra Waypoint</string>
+    <string name="show_precision_circle"></string>
+    <string name="client_notification">Notifiche Client</string>
+    <string name="compromised_keys">Rilevate chiavi compromesse, seleziona OK per rigenerarle.</string>
+    <string name="regenerate_private_key">Rigenera Chiavi Private</string>
+    <string name="regenerate_keys_confirmation">Sei sicuro di voler rigenerare la tua Chiave Privata?</string>
 </resources>

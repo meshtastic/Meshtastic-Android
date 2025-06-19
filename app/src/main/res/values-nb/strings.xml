@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_channel">Kanal</string>
     <string name="node_filter_placeholder">Filter</string>
@@ -24,7 +40,7 @@
     <string name="routing_error_too_large">Pakken er for stor</string>
     <string name="routing_error_no_response">Ingen respons</string>
     <string name="routing_error_bad_request">Ugyldig Forespørsel</string>
-    <string name="routing_error_duty_cycle_limit">Regional Syklusgrense Nådd</string>
+    <string name="routing_error_duty_cycle_limit">Regional Arbeidssyklusgrense Nådd</string>
     <string name="routing_error_not_authorized">Ikke Autorisert</string>
     <string name="routing_error_pki_failed">Kryptert sending mislyktes</string>
     <string name="routing_error_pki_unknown_pubkey">Ukjent Offentlig Nøkkel</string>
@@ -57,7 +73,7 @@
     <string name="channel_name">Kanal Navn</string>
     <string name="channel_options">Kanal valg</string>
     <string name="qr_code">QR kode</string>
-    <string name="unset">Ikke satt</string>
+    <string name="unset">Lås opp</string>
     <string name="connection_status">Tilkoblingsstatus</string>
     <string name="application_icon">applikasjon ikon</string>
     <string name="unknown_username">Ukjent Brukernavn</string>
@@ -121,7 +137,7 @@
     <string name="message_delivery_status">Melding leveringsstatus</string>
     <string name="meshtastic_messages_notifications">Meldingsvarsler</string>
     <string name="protocol_stress_test">Protokoll stresstest</string>
-    <string name="firmware_too_old">Firmwareoppdatering kreves</string>
+    <string name="firmware_too_old">Firmwareoppdatering kreves.</string>
     <string name="firmware_old">Radiofirmwaren er for gammel til å snakke med denne applikasjonen. For mer informasjon om dette se <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">vår Firmware installasjonsveiledning</a>.</string>
     <string name="okay">Ok</string>
     <string name="must_set_region">Du må angi en region!</string>
@@ -201,7 +217,7 @@
     <string name="map_tile_download_estimate">Tile nedlastingsestimat:</string>
     <string name="map_start_download">Start nedlasting</string>
     <string name="close">Lukk</string>
-    <string name="device_settings">Radiokonfigurasjon</string>
+    <string name="radio_configuration">Radiokonfigurasjon</string>
     <string name="module_settings">Modul konfigurasjon</string>
     <string name="add">Legg til</string>
     <string name="edit">Rediger</string>

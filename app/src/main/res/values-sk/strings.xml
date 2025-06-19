@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_messages">Správy</string>
     <string name="main_tab_users">Používatelia</string>
@@ -129,9 +145,8 @@
     <string name="meshtastic_messages_notifications">Upozornenia na správy</string>
     <string name="meshtastic_alerts_notifications">Notifikácie upozornení</string>
     <string name="protocol_stress_test">Test vyťaženia protokolu</string>
-    <string name="firmware_too_old">Nutná aktualizácia firmvéru</string>
+    <string name="firmware_too_old">Nutná aktualizácia firmvéru.</string>
     <string name="firmware_old">Firmvér vysielača je príliš zastaralý, aby dokázal komunikovať s aplikáciou. Viac informácií nájdete na <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">našom sprievodcovi inštaláciou firmvéru</a>.</string>
-    <string name="okay">OK</string>
     <string name="must_set_region">Musíte nastaviť región!</string>
     <string name="region">Región</string>
     <string name="cant_change_no_radio">Nie je možné zmeniť kanál, pretože vysielač ešte nie je pripojený. Skúste to neskôr.</string>
@@ -212,7 +227,7 @@
     <string name="map_start_download">Spustiť sťahovanie</string>
     <string name="exchange_position">Vymeniť si pozície</string>
     <string name="close">Zavrieť</string>
-    <string name="device_settings">Konfigurácia vysielača</string>
+    <string name="radio_configuration">Konfigurácia vysielača</string>
     <string name="module_settings">Konfigurácia modulu</string>
     <string name="add">Pridať</string>
     <string name="edit">Upraviť</string>
@@ -370,4 +385,5 @@
     <string name="private_key">Súkromný kľúč</string>
     <string name="timeout">Časový limit</string>
     <string name="distance">Vzdialenosť</string>
+    <string name="map">Mapa</string>
 </resources>

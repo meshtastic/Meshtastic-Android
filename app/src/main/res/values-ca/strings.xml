@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_channel">Canal</string>
     <string name="node_filter_placeholder">Filtre</string>
@@ -76,7 +92,7 @@
     <string name="message_delivery_status">Estat d\'entrega del missatge</string>
     <string name="meshtastic_messages_notifications">Notificacions de missatge</string>
     <string name="protocol_stress_test">Prova d\'estrès del protocol</string>
-    <string name="firmware_too_old">Actualització de firmware necessària</string>
+    <string name="firmware_too_old">Actualització de firmware necessària.</string>
     <string name="firmware_old">El firmware de la ràdio és massa antic per comunicar-se amb aquesta aplicació. Per a més informació sobre això veure <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">our Firmware Installation guide</a>.</string>
     <string name="okay">Acceptar</string>
     <string name="must_set_region">Has de configurar la regió!</string>
@@ -155,7 +171,7 @@
     <string name="map_tile_download_estimate">Estimació de descàrrega de tessel·les:</string>
     <string name="map_start_download">Iniciar descarrega</string>
     <string name="close">Tancar</string>
-    <string name="device_settings">Configuració de ràdio</string>
+    <string name="radio_configuration">Configuració de ràdio</string>
     <string name="module_settings">Configuració de mòdul</string>
     <string name="add">Afegir</string>
     <string name="edit">Editar</string>

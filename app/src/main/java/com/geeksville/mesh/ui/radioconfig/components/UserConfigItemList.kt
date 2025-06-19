@@ -40,11 +40,12 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.deviceMetadata
 import com.geeksville.mesh.model.DeviceVersion
-import com.geeksville.mesh.ui.components.EditTextPreference
-import com.geeksville.mesh.ui.components.PreferenceCategory
-import com.geeksville.mesh.ui.components.PreferenceFooter
-import com.geeksville.mesh.ui.components.RegularPreference
-import com.geeksville.mesh.ui.components.SwitchPreference
+import com.geeksville.mesh.model.isUnmessageableRole
+import com.geeksville.mesh.ui.common.components.EditTextPreference
+import com.geeksville.mesh.ui.common.components.PreferenceCategory
+import com.geeksville.mesh.ui.common.components.PreferenceFooter
+import com.geeksville.mesh.ui.common.components.RegularPreference
+import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.user
 
@@ -81,6 +82,9 @@ fun UserConfigItemList(
     var userInput by rememberSaveable { mutableStateOf(userConfig) }
     val firmwareVersion = DeviceVersion(metadata?.firmwareVersion ?: "")
 
+    val validLongName = userInput.longName.isNotBlank()
+    val validShortName = userInput.shortName.isNotBlank()
+    val validNames = validLongName && validShortName
     LazyColumn(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -101,7 +105,7 @@ fun UserConfigItemList(
                 value = userInput.longName,
                 maxSize = 39, // long_name max_size:40
                 enabled = enabled,
-                isError = userInput.longName.isEmpty(),
+                isError = !validLongName,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
                 ),
@@ -118,7 +122,7 @@ fun UserConfigItemList(
                 value = userInput.shortName,
                 maxSize = 4, // short_name max_size:5
                 enabled = enabled,
-                isError = userInput.shortName.isEmpty(),
+                isError = !validShortName,
                 keyboardOptions = KeyboardOptions.Default.copy(
                     keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
                 ),
@@ -140,8 +144,11 @@ fun UserConfigItemList(
             SwitchPreference(
                 title = stringResource(R.string.unmessageable),
                 summary = stringResource(R.string.unmonitored_or_infrastructure),
-                checked = userInput.isUnmessagable,
-                enabled = firmwareVersion >= DeviceVersion("2.6.8"),
+                checked = userInput.isUnmessagable || (
+                        firmwareVersion < DeviceVersion("2.6.9") &&
+                                userInput.role.isUnmessageableRole()
+                        ),
+                enabled = userInput.hasIsUnmessagable(),
                 onCheckedChange = { userInput = userInput.copy { isUnmessagable = it } }
             )
         }
@@ -161,7 +168,7 @@ fun UserConfigItemList(
 
         item {
             PreferenceFooter(
-                enabled = enabled && userInput != userConfig,
+                enabled = enabled && userInput != userConfig && validNames,
                 onCancelClicked = {
                     focusManager.clearFocus()
                     userInput = userConfig

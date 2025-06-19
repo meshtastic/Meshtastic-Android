@@ -32,13 +32,16 @@ import android.os.Build
 import androidx.annotation.RequiresApi
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
+import androidx.core.app.RemoteInput
 import androidx.core.net.toUri
 import com.geeksville.mesh.MainActivity
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.android.notificationManager
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.navigation.DEEP_LINK_BASE_URI
+import com.geeksville.mesh.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
 import com.geeksville.mesh.util.formatUptime
 
 @Suppress("TooManyFunctions")
@@ -67,6 +70,7 @@ class MeshServiceNotifications(
             createNewNodeNotificationChannel()
             createLowBatteryNotificationChannel()
             createLowBatteryRemoteNotificationChannel()
+            createClientNotificationChannel()
         }
     }
 
@@ -231,6 +235,25 @@ class MeshServiceNotifications(
         return channelId
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createClientNotificationChannel(): String {
+        val channelId = "client_notifications"
+        if (notificationManager.getNotificationChannel(channelId) == null) {
+            val channelName = context.getString(R.string.client_notification)
+            val channel = NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                lightColor = notificationLightColor
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                setShowBadge(true)
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+        return channelId
+    }
+
     private val channelId: String by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel()
@@ -285,6 +308,14 @@ class MeshServiceNotifications(
         }
     }
 
+    private val clientNotificationChannelId: String by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createClientNotificationChannel()
+        } else {
+            ""
+        }
+    }
+
     private fun LocalStats?.formatToString(): String = this?.allFields?.mapNotNull { (k, v) ->
         when (k.name) {
             "num_online_nodes", "num_total_nodes" -> return@mapNotNull null
@@ -312,6 +343,10 @@ class MeshServiceNotifications(
                 nextUpdateAt = currentStatsUpdatedAtMillis?.plus(FIFTEEN_MINUTES_IN_MILLIS)
             )
         )
+    }
+
+    fun cancelMessageNotification(contactKey: String) {
+        notificationManager.cancel(contactKey.hashCode())
     }
 
     fun updateMessageNotification(contactKey: String, name: String, message: String) =
@@ -345,51 +380,71 @@ class MeshServiceNotifications(
         notificationManager.cancel(node.num)
     }
 
+    fun showClientNotification(notification: MeshProtos.ClientNotification) {
+        notificationManager.notify(
+            notification.toString().hashCode(), // show unique notifications
+            createClientNotification(context.getString(R.string.client_notification), notification.message)
+        )
+    }
+    fun clearClientNotification(notification: MeshProtos.ClientNotification) {
+        notificationManager.cancel(notification.toString().hashCode())
+    }
+
     private val openAppIntent: PendingIntent by lazy {
         PendingIntent.getActivity(
             context,
             0,
-            Intent(context, MainActivity::class.java),
+            Intent(context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            },
             PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
     }
 
+    private fun createMessageReplyIntent(contactKey: String): Intent {
+        return Intent(context, ReplyReceiver::class.java).apply {
+            action = ReplyReceiver.REPLY_ACTION
+            putExtra(ReplyReceiver.CONTACT_KEY, contactKey)
+        }
+    }
+
     private fun createOpenMessageIntent(contactKey: String): PendingIntent {
+        val intentFlags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         val deepLink = "$DEEP_LINK_BASE_URI/messages/$contactKey"
-        val startActivityIntent = Intent(
+        val deepLinkIntent = Intent(
             Intent.ACTION_VIEW,
             deepLink.toUri(),
             context,
             MainActivity::class.java
-        )
-
-        val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(context).run {
-            addNextIntentWithParentStack(startActivityIntent)
-            getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE)
+        ).apply {
+            flags = intentFlags
         }
-        return resultPendingIntent!!
+
+        val deepLinkPendingIntent: PendingIntent = TaskStackBuilder.create(context).run {
+            addNextIntentWithParentStack(deepLinkIntent)
+            getPendingIntent(0, PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+
+        return deepLinkPendingIntent
     }
 
-    private fun commonBuilder(channel: String): NotificationCompat.Builder {
+    private fun commonBuilder(
+        channel: String,
+        contentIntent: PendingIntent? = null
+    ): NotificationCompat.Builder {
         val builder = NotificationCompat.Builder(context, channel)
+            .setDefaults(NotificationCompat.DEFAULT_ALL)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setContentIntent(openAppIntent)
+            .setContentIntent(contentIntent ?: openAppIntent)
 
-        // Set the notification icon
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.LOLLIPOP_MR1) {
-            // If running on really old versions of android (<= 5.1.1) (possibly only cyanogen) we might encounter a bug with setting application specific icons
-            // so punt and stay with just the bluetooth icon - see https://meshtastic.discourse.group/t/android-1-1-42-ready-for-alpha-testing/2399/3?u=geeksville
-            builder.setSmallIcon(android.R.drawable.stat_sys_data_bluetooth)
-        } else {
-            builder.setSmallIcon(
-                // vector form icons don't work reliably on older androids
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                    R.drawable.app_icon_novect
-                } else {
-                    R.drawable.app_icon
-                }
-            )
-        }
+        builder.setSmallIcon(
+            // vector form icons don't work reliably on older androids
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+                R.drawable.app_icon_novect
+            } else {
+                R.drawable.app_icon
+            }
+        )
         return builder
     }
 
@@ -428,18 +483,38 @@ class MeshServiceNotifications(
         return serviceNotificationBuilder.build()
     }
 
-    lateinit var messageNotificationBuilder: NotificationCompat.Builder
     private fun createMessageNotification(
         contactKey: String,
         name: String,
         message: String
     ): Notification {
-        if (!::messageNotificationBuilder.isInitialized) {
-            messageNotificationBuilder = commonBuilder(messageChannelId)
-        }
+        val messageNotificationBuilder: NotificationCompat.Builder =
+            commonBuilder(messageChannelId, createOpenMessageIntent(contactKey))
+
         val person = Person.Builder().setName(name).build()
+        // Key for the string that's delivered in the action's intent.
+        val replyLabel: String = context.getString(R.string.reply)
+        val remoteInput: RemoteInput = RemoteInput.Builder(KEY_TEXT_REPLY).run {
+            setLabel(replyLabel)
+            build()
+        }
+
+        // Build a PendingIntent for the reply action to trigger.
+        val replyPendingIntent: PendingIntent =
+            PendingIntent.getBroadcast(
+                context,
+                contactKey.hashCode(),
+                createMessageReplyIntent(contactKey),
+                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        // Create the reply action and add the remote input.
+        val action: NotificationCompat.Action = NotificationCompat.Action.Builder(
+            android.R.drawable.ic_menu_send,
+            replyLabel,
+            replyPendingIntent
+        ).addRemoteInput(remoteInput).build()
+
         with(messageNotificationBuilder) {
-            setContentIntent(createOpenMessageIntent(contactKey))
             priority = NotificationCompat.PRIORITY_DEFAULT
             setCategory(Notification.CATEGORY_MESSAGE)
             setAutoCancel(true)
@@ -447,6 +522,7 @@ class MeshServiceNotifications(
                 NotificationCompat.MessagingStyle(person)
                     .addMessage(message, System.currentTimeMillis(), person)
             )
+            addAction(action)
             setWhen(System.currentTimeMillis())
             setShowWhen(true)
         }
@@ -460,11 +536,11 @@ class MeshServiceNotifications(
         alert: String
     ): Notification {
         if (!::alertNotificationBuilder.isInitialized) {
-            alertNotificationBuilder = commonBuilder(alertChannelId)
+            alertNotificationBuilder =
+                commonBuilder(alertChannelId, createOpenMessageIntent(contactKey))
         }
         val person = Person.Builder().setName(name).build()
         with(alertNotificationBuilder) {
-            setContentIntent(createOpenMessageIntent(contactKey))
             priority = NotificationCompat.PRIORITY_HIGH
             setCategory(Notification.CATEGORY_ALARM)
             setAutoCancel(true)
@@ -545,5 +621,27 @@ class MeshServiceNotifications(
             lowBatteryNotificationBuilder = tempNotificationBuilder
             return lowBatteryNotificationBuilder.build()
         }
+    }
+
+    lateinit var clientNotificationBuilder: NotificationCompat.Builder
+
+    private fun createClientNotification(name: String, message: String? = null): Notification {
+        if (!::clientNotificationBuilder.isInitialized) {
+            clientNotificationBuilder = commonBuilder(clientNotificationChannelId)
+        }
+        with(clientNotificationBuilder) {
+            priority = NotificationCompat.PRIORITY_DEFAULT
+            setCategory(Notification.CATEGORY_ERROR)
+            setAutoCancel(true)
+            setContentTitle(name)
+            message?.let {
+                setContentText(it)
+                setStyle(
+                    NotificationCompat.BigTextStyle()
+                        .bigText(message),
+                )
+            }
+        }
+        return clientNotificationBuilder.build()
     }
 }

@@ -9,6 +9,7 @@ jobs:
 
   release-build:
     runs-on: ubuntu-latest
+    if: github.repository == 'meshtastic/Meshtastic-Android'
     steps:
 
     - name: Checkout code
@@ -40,8 +41,8 @@ jobs:
     - name: Set up JDK 17
       uses: actions/setup-java@v4
       with:
-        java-version: '17'
-        distribution: 'zulu'
+        java-version: '21'
+        distribution: 'jetbrains'
         # Note: we don't use caches on release builds because we don't want to accidentally not have a virgin build machine
 
     - name: Build F-Droid release

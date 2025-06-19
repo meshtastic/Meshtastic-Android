@@ -29,6 +29,8 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.CoroutineDispatchers
+import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.Position
 import com.geeksville.mesh.Portnums.PortNum
@@ -39,7 +41,7 @@ import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.entity.FirmwareRelease
 import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.model.map.CustomTileSource
-import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.navigation.NodesRoutes
 import com.geeksville.mesh.repository.api.DeviceHardwareRepository
 import com.geeksville.mesh.repository.api.FirmwareReleaseRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
@@ -51,6 +53,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
@@ -66,6 +69,8 @@ import java.util.Locale
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 
+private const val DEFAULT_ID_SUFFIX_LENGTH = 4
+
 data class MetricsState(
     val isLocal: Boolean = false,
     val isManaged: Boolean = true,
@@ -75,19 +80,21 @@ data class MetricsState(
     val deviceMetrics: List<Telemetry> = emptyList(),
     val signalMetrics: List<MeshPacket> = emptyList(),
     val powerMetrics: List<Telemetry> = emptyList(),
+    val hostMetrics: List<Telemetry> = emptyList(),
     val tracerouteRequests: List<MeshLog> = emptyList(),
     val tracerouteResults: List<MeshPacket> = emptyList(),
     val positionLogs: List<Position> = emptyList(),
     val deviceHardware: DeviceHardware? = null,
     val isLocalDevice: Boolean = false,
-    val latestStableFirmware: FirmwareRelease? = null,
-    val latestAlphaFirmware: FirmwareRelease? = null,
+    val latestStableFirmware: FirmwareRelease = FirmwareRelease(),
+    val latestAlphaFirmware: FirmwareRelease = FirmwareRelease(),
 ) {
     fun hasDeviceMetrics() = deviceMetrics.isNotEmpty()
     fun hasSignalMetrics() = signalMetrics.isNotEmpty()
     fun hasPowerMetrics() = powerMetrics.isNotEmpty()
     fun hasTracerouteLogs() = tracerouteRequests.isNotEmpty()
     fun hasPositionLogs() = positionLogs.isNotEmpty()
+    fun hasHostMetrics() = hostMetrics.isNotEmpty()
 
     fun deviceMetricsFiltered(timeFrame: TimeFrame): List<Telemetry> {
         val oldestTime = timeFrame.calculateOldestTime()
@@ -203,10 +210,31 @@ class MetricsViewModel @Inject constructor(
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val preferences: SharedPreferences,
 ) : ViewModel(), Logging {
-    private val destNum = savedStateHandle.toRoute<Route.NodeDetail>().destNum
+    private val destNum = savedStateHandle.toRoute<NodesRoutes.NodeDetail>().destNum
 
     private fun MeshLog.hasValidTraceroute(): Boolean = with(fromRadio.packet) {
         hasDecoded() && decoded.wantResponse && from == 0 && to == destNum
+    }
+
+    /**
+     * Creates a fallback node for hidden clients or nodes not yet in the database.
+     * This prevents the detail screen from freezing when viewing unknown nodes.
+     */
+    private fun createFallbackNode(nodeNum: Int): Node {
+        val userId = DataPacket.nodeNumToDefaultId(nodeNum)
+        val safeUserId = userId.padStart(DEFAULT_ID_SUFFIX_LENGTH, '0').takeLast(DEFAULT_ID_SUFFIX_LENGTH)
+        val longName = app.getString(R.string.fallback_node_name, safeUserId)
+        val defaultUser = MeshProtos.User.newBuilder()
+            .setId(userId)
+            .setLongName(longName)
+            .setShortName(safeUserId)
+            .setHwModel(MeshProtos.HardwareModel.UNSET)
+            .build()
+
+        return Node(
+            num = nodeNum,
+            user = defaultUser,
+        )
     }
 
     fun getUser(nodeNum: Int) = radioConfigRepository.getUser(nodeNum)
@@ -241,12 +269,14 @@ class MetricsViewModel @Inject constructor(
                 .mapLatest { nodes -> nodes[destNum] to nodes.keys.firstOrNull() }
                 .distinctUntilChanged()
                 .onEach { (node, ourNode) ->
-                    val deviceHardware = node?.user?.hwModel?.number?.let {
+                    // Create a fallback node if not found in database (for hidden clients, etc.)
+                    val actualNode = node ?: createFallbackNode(destNum)
+                    val deviceHardware = actualNode.user.hwModel.number.let {
                         deviceHardwareRepository.getDeviceHardwareByModel(it)
                     }
                     _state.update { state ->
                         state.copy(
-                            node = node,
+                            node = actualNode,
                             isLocal = destNum == ourNode,
                             deviceHardware = deviceHardware
                         )
@@ -267,7 +297,8 @@ class MetricsViewModel @Inject constructor(
                 _state.update { state ->
                     state.copy(
                         deviceMetrics = telemetry.filter { it.hasDeviceMetrics() },
-                        powerMetrics = telemetry.filter { it.hasPowerMetrics() }
+                        powerMetrics = telemetry.filter { it.hasPowerMetrics() },
+                        hostMetrics = telemetry.filter { it.hasHostMetrics() },
                     )
                 }
                 _envState.update { state ->
@@ -312,13 +343,13 @@ class MetricsViewModel @Inject constructor(
                     }
                 }.launchIn(viewModelScope)
 
-            firmwareReleaseRepository.stableRelease.onEach { latestStable ->
+            firmwareReleaseRepository.stableRelease.filterNotNull().onEach { latestStable ->
                 _state.update { state ->
                     state.copy(latestStableFirmware = latestStable)
                 }
             }.launchIn(viewModelScope)
 
-            firmwareReleaseRepository.alphaRelease.onEach { latestAlpha ->
+            firmwareReleaseRepository.alphaRelease.filterNotNull().onEach { latestAlpha ->
                 _state.update { state ->
                     state.copy(latestAlphaFirmware = latestAlpha)
                 }

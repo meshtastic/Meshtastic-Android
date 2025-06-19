@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_messages">Повідомлення</string>
     <string name="main_tab_users">Користувач</string>
@@ -79,7 +95,7 @@
     <string name="meshtastic_messages_notifications">Сповіщення повідомлення</string>
     <string name="meshtastic_alerts_notifications">Сповіщення про тривоги</string>
     <string name="protocol_stress_test">Стрес-тест протоколу</string>
-    <string name="firmware_too_old">Потрібне оновлення прошивки</string>
+    <string name="firmware_too_old">Потрібне оновлення прошивки.</string>
     <string name="firmware_old">Прошивка радіо застаріла для зв’язку з цією програмою. Для отримання додаткової інформації дивіться <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">наш посібник із встановлення мікропрограми</a>.</string>
     <string name="okay">Гаразд</string>
     <string name="must_set_region">Ви повинні встановити регіон!</string>
@@ -160,7 +176,7 @@
     <string name="map_tile_download_estimate">Час завантаження фрагментів:</string>
     <string name="map_start_download">Почати завантаження</string>
     <string name="close">Закрити</string>
-    <string name="device_settings">Налаштування пристрою</string>
+    <string name="radio_configuration">Налаштування пристрою</string>
     <string name="module_settings">Налаштування модуля</string>
     <string name="add">Додати</string>
     <string name="edit">Редагувати</string>
@@ -197,4 +213,5 @@
     <string name="router_role_confirmation_text"><![CDATA[<a href="https://meshtastic.org/docs/configuration/radio/device/#roles">]]></string>
     <string name="messages">Повідомлення</string>
     <string name="distance">Відстань</string>
+    <string name="map">Мапа</string>
 </resources>

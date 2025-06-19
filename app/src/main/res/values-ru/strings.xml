@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_messages">Сообщения</string>
     <string name="main_tab_users">Пользователи</string>
@@ -129,9 +145,9 @@
     <string name="meshtastic_messages_notifications">Уведомления о сообщениях</string>
     <string name="meshtastic_alerts_notifications">Служебные уведомления</string>
     <string name="protocol_stress_test">Испытание протокола на нагрузку</string>
-    <string name="firmware_too_old">Требуется обновление прошивки</string>
+    <string name="firmware_too_old">Требуется обновление прошивки.</string>
     <string name="firmware_old">Слишком старая микропрограмма в радио для общения с этим приложением. Более подробную информацию об этом можно найти в <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">нашем руководстве по установке прошивки</a>.</string>
-    <string name="okay">ОК</string>
+    <string name="okay">Лады</string>
     <string name="must_set_region">Вы должны задать регион!</string>
     <string name="region">Регион / Страна</string>
     <string name="cant_change_no_radio">Не удалось изменить канал, потому что радио еще не подключено. Пожалуйста, попробуйте еще раз.</string>
@@ -160,7 +176,7 @@
     <string name="modem_config_slow_medium">Средний диапазон / Медленный</string>
     <plurals name="delete_messages">
         <item quantity="one">Удалить сообщение?</item>
-        <item quantity="few">Удалить %s сообщений?</item>
+        <item quantity="few">Удалить %s сообщения?</item>
         <item quantity="many">Удалить %s сообщений?</item>
         <item quantity="other">Удалить все сообщения? = Delete all messages?</item>
     </plurals>
@@ -212,7 +228,7 @@
     <string name="map_start_download">Начать скачивание</string>
     <string name="exchange_position">Обменяться местоположением</string>
     <string name="close">Закрыть</string>
-    <string name="device_settings">Настройки устройства</string>
+    <string name="radio_configuration">Настройки устройства</string>
     <string name="module_settings">Настройки модуля</string>
     <string name="add">Добавить</string>
     <string name="edit">Редактировать</string>
@@ -444,7 +460,6 @@
     <string name="use_i2s_as_buzzer">Использовать I2S как буззер</string>
     <string name="lora_config">Настройка LoRa</string>
     <string name="use_modem_preset">Использовать шаблон модема</string>
-    <string name="modem_preset">Шаблон модема</string>
     <string name="bandwidth">Ширина канала</string>
     <string name="spread_factor">Коэффициент распространения</string>
     <string name="coding_rate">Частота кодирования</string>
@@ -585,4 +600,7 @@
     <string name="heading">Курс</string>
     <string name="sats">Количество спутников</string>
     <string name="alt">Уровень моря</string>
+    <string name="primary"></string>
+    <string name="host_metrics_log"></string>
+    <string name="map">Карта</string>
 </resources>

@@ -24,15 +24,25 @@ import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lens
 import androidx.compose.material.icons.filled.LocationDisabled
+import androidx.compose.material.icons.filled.PinDrop
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.MyLocation
+import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +50,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.background
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Text
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -64,6 +78,10 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.model.map.MarkerWithLabel
 import com.geeksville.mesh.model.map.clustering.RadiusMarkerClusterer
+import com.geeksville.mesh.ui.map.components.CacheLayout
+import com.geeksville.mesh.ui.map.components.DownloadButton
+import com.geeksville.mesh.ui.map.components.EditWaypointDialog
+import com.geeksville.mesh.ui.map.components.MapButton
 import com.geeksville.mesh.util.SqlTileWriterExt
 import com.geeksville.mesh.util.addCopyright
 import com.geeksville.mesh.util.addScaleBarOverlay
@@ -193,10 +211,16 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
     builder.show()
 }
 
+@Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 fun MapView(
     model: UIViewModel = viewModel(),
+    navigateToNodeDetails: (Int) -> Unit,
 ) {
+    var mapFilterExpanded by remember { mutableStateOf(false) }
+
+    val mapFilterState by model.mapFilterStateFlow.collectAsState()
+
     // UI Elements
     var cacheEstimate by remember { mutableStateOf("") }
 
@@ -285,7 +309,12 @@ fun MapView(
         val ourNode = model.ourNodeInfo.value
         val gpsFormat = model.config.display.gpsFormat.number
         val displayUnits = model.config.display.units.number
-        return nodesWithPosition.map { node ->
+        val mapFilterState = model.mapFilterStateFlow.value // Access mapFilterState directly
+        return nodesWithPosition.mapNotNull { node ->
+            if (mapFilterState.onlyFavorites && !node.isFavorite && !node.equals(ourNode)) {
+                return@mapNotNull null
+            }
+
             val (p, u) = node.position to node.user
             val nodePosition = GeoPoint(node.latitude, node.longitude)
             MarkerWithLabel(
@@ -302,20 +331,25 @@ fun MapView(
                     if (node.batteryStr != "") node.batteryStr else "?"
                 )
                 ourNode?.distanceStr(node, displayUnits)?.let { dist ->
-                    subDescription =
-                        context.getString(R.string.map_subDescription, ourNode.bearing(node), dist)
+                    subDescription = context.getString(
+                        R.string.map_subDescription,
+                        ourNode.bearing(node),
+                        dist
+                    )
                 }
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 position = nodePosition
                 icon = markerIcon
-
-//                setOnLongClickListener {
-//                    performHapticFeedback()
-//                    TODO NodeMenu?
-//                    true
-//                }
                 setNodeColors(node.colors)
-                setPrecisionBits(p.precisionBits)
+                if (!mapFilterState.showPrecisionCircle) {
+                    setPrecisionBits(0)
+                } else {
+                    setPrecisionBits(p.precisionBits)
+                }
+                setOnLongClickListener {
+                    navigateToNodeDetails(node.num)
+                    true
+                }
             }
         }
     }
@@ -366,18 +400,40 @@ fun MapView(
         model.getUser(id).longName
     }
 
+    @Composable
+    @Suppress("MagicNumber")
     fun MapView.onWaypointChanged(waypoints: Collection<Packet>): List<MarkerWithLabel> {
         val dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
         return waypoints.mapNotNull { waypoint ->
             val pt = waypoint.data.waypoint ?: return@mapNotNull null
+            if (!mapFilterState.showWaypoints) return@mapNotNull null
             val lock = if (pt.lockedTo != 0) "\uD83D\uDD12" else ""
             val time = dateFormat.format(waypoint.received_time)
             val label = pt.name + " " + formatAgo((waypoint.received_time / 1000).toInt())
             val emoji = String(Character.toChars(if (pt.icon == 0) 128205 else pt.icon))
+            val timeLeft = pt.expire * 1000L - System.currentTimeMillis()
+            val expireTimeStr = when {
+                pt.expire == 0 || pt.expire == Int.MAX_VALUE -> "Never"
+                timeLeft <= 0 -> "Expired"
+                timeLeft < 60_000 -> "${timeLeft / 1000} seconds"
+                timeLeft < 3_600_000 -> "${timeLeft / 60_000} minute${if (timeLeft / 60_000 != 1L) "s" else ""}"
+                timeLeft < 86_400_000 -> {
+                    val hours = (timeLeft / 3_600_000).toInt()
+                    val minutes = ((timeLeft % 3_600_000) / 60_000).toInt()
+                    if (minutes >= 30) {
+                        "${hours + 1} hour${if (hours + 1 != 1) "s" else ""}"
+                    } else if (minutes > 0) {
+                        "$hours hour${if (hours != 1) "s" else ""}, $minutes minute${if (minutes != 1) "s" else ""}"
+                    } else {
+                        "$hours hour${if (hours != 1) "s" else ""}"
+                    }
+                }
+                else -> "${timeLeft / 86_400_000} day${if (timeLeft / 86_400_000 != 1L) "s" else ""}"
+            }
             MarkerWithLabel(this, label, emoji).apply {
                 id = "${pt.id}"
                 title = "${pt.name} (${getUsername(waypoint.data.from)}$lock)"
-                snippet = "[$time] " + pt.description
+                snippet = "[$time] ${pt.description}  " + stringResource(R.string.expires) + ": $expireTimeStr"
                 position = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
                 setVisible(false)
                 setOnLongClickListener {
@@ -608,6 +664,105 @@ fun MapView(
                         icon = Icons.Outlined.Layers,
                         contentDescription = R.string.map_style_selection,
                     )
+                    Box(modifier = Modifier) {
+                        MapButton(
+                            onClick = { mapFilterExpanded = true },
+                            icon = Icons.Outlined.Tune,
+                            contentDescription = R.string.map_filter,
+                        )
+                        DropdownMenu(
+                            expanded = mapFilterExpanded,
+                            onDismissRequest = { mapFilterExpanded = false },
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                        ) {
+                            // Only Favorites toggle
+                            DropdownMenuItem(
+                                text = {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Star,
+                                            contentDescription = null,
+                                            modifier = Modifier.padding(end = 8.dp),
+                                            tint = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.only_favorites),
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        Checkbox(
+                                            checked = mapFilterState.onlyFavorites,
+                                            onCheckedChange = { enabled ->
+                                                model.setOnlyFavorites(enabled)
+                                            },
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    model.setOnlyFavorites(!mapFilterState.onlyFavorites)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.PinDrop,
+                                            contentDescription = null,
+                                            modifier = Modifier.padding(end = 8.dp),
+                                            tint = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.show_waypoints),
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        Checkbox(
+                                            checked = mapFilterState.showWaypoints,
+                                            onCheckedChange = model::setShowWaypointsOnMap,
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    model.setShowWaypointsOnMap(!mapFilterState.showWaypoints)
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.Lens,
+                                            contentDescription = null,
+                                            modifier = Modifier.padding(end = 8.dp),
+                                            tint = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.show_precision_circle),
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        Checkbox(
+                                            checked = mapFilterState.showPrecisionCircle,
+                                            onCheckedChange = { enabled ->
+                                                model.setShowPrecisionCircleOnMap(enabled)
+                                            },
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    model.setShowPrecisionCircleOnMap(!mapFilterState.showPrecisionCircle)
+                                }
+                            )
+                        }
+                    }
                     if (hasGps) {
                         MapButton(
                             icon = if (myLocationOverlay == null) {
@@ -638,8 +793,10 @@ fun MapView(
                 model.sendWaypoint(
                     waypoint.copy {
                         if (id == 0) id = model.generatePacketId() ?: return@EditWaypointDialog
-                        expire = Int.MAX_VALUE // TODO add expire picker
+                        if (name == "") name = "Dropped Pin"
+                        if (expire == 0) expire = Int.MAX_VALUE
                         lockedTo = if (waypoint.lockedTo != 0) model.myNodeNum ?: 0 else 0
+                        if (waypoint.icon == 0) icon = 128205
                     }
                 )
             },

@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_messages">Wiadomości</string>
     <string name="main_tab_users">Użytkownicy</string>
@@ -128,7 +144,7 @@
     <string name="meshtastic_messages_notifications">Powiadomienia wiadomości</string>
     <string name="meshtastic_alerts_notifications">Powiadomienia alertowe</string>
     <string name="protocol_stress_test">Protokół testu warunków skrajnych</string>
-    <string name="firmware_too_old">Wymagana aktualizacja firmware\'u</string>
+    <string name="firmware_too_old">Wymagana aktualizacja firmware\'u.</string>
     <string name="firmware_old">Oprogramowanie układowe radia jest zbyt stare, aby komunikować się z tą aplikacją. Aby uzyskać więcej informacji na ten temat, zobacz <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">nasz przewodnik instalacji oprogramowania układowego</a>.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">Musisz ustawić region!</string>
@@ -211,7 +227,7 @@
     <string name="map_start_download">Rozpocznij pobieranie</string>
     <string name="exchange_position">Poproś o pozycję</string>
     <string name="close">Zamknij</string>
-    <string name="device_settings">Ustawienia urządzenia</string>
+    <string name="radio_configuration">Ustawienia urządzenia</string>
     <string name="module_settings">Ustawienia modułu</string>
     <string name="add">Dodaj</string>
     <string name="edit">Edytuj</string>
@@ -336,7 +352,12 @@
     <string name="network">Sieć</string>
     <string name="display">Wyświetlacz</string>
     <string name="security">Bezpieczeństwo</string>
+    <string name="serial">Seryjny</string>
+    <string name="external_notification">Zewnętrzne Powiadomienie</string>
+    <string name="range_test">Test zasięgu</string>
     <string name="telemetry">Telemetria</string>
+    <string name="bluetooth_config">Konfiguracja Bluetooth</string>
+    <string name="default_">Domyślny</string>
     <string name="hide_password">Ukryj hasło</string>
     <string name="show_password">Pokaż hasło</string>
     <string name="details">Szczegóły</string>
@@ -344,8 +365,13 @@
     <string name="device_config">Konfiguracja urządzenia</string>
     <string name="role">Rola</string>
     <string name="display_config">Konfiguracja wyświetlacza</string>
+    <string name="external_notification_config">Konfiguracja Zewnętrznego Powiadomienia</string>
+    <string name="ringtone">Dzwonek</string>
+    <string name="lora_config">Konfiguracja LoRa</string>
     <string name="hop_limit">Limit skoków</string>
+    <string name="mqtt_config">Konfiguracja MQTT</string>
     <string name="username">Nazwa użytkownika</string>
+    <string name="password">Hasło</string>
     <string name="encryption_enabled">Szyfrowanie włączone</string>
     <string name="network_config">Konfiguracja sieci</string>
     <string name="wifi_enabled">WiFi włączone</string>
@@ -353,17 +379,18 @@
     <string name="ntp_server">Serwer NTP</string>
     <string name="gateway">Brama domyślna</string>
     <string name="wifi_rssi_threshold_defaults_to_80">Próg WiFi RSSI (domyślnie: -80)</string>
-    <string name="ble_rssi_threshold_defaults_to_80"></string>
     <string name="position_config">Konfiguracja pozycjonowania</string>
     <string name="smart_position_enabled">Sprytne pozycjonowanie</string>
     <string name="use_fixed_position">Użyj stałego położenia</string>
     <string name="latitude">Szerokość geograficzna</string>
     <string name="position_flags">Flagi położenia</string>
     <string name="power_config">Konfiguracja zarządzania energią</string>
+    <string name="range_test_config">Konfiguracja testu zasięgu</string>
     <string name="security_config">Konfiguracja zabezpieczeń</string>
     <string name="public_key">Klucz publiczny</string>
     <string name="private_key">Klucz prywatny</string>
-    <string name="timeout">Upłynął limit czasu</string>
+    <string name="serial_config">Konfiguracja seryjna</string>
+    <string name="timeout">Limit czasu</string>
     <string name="server">Serwer</string>
     <string name="telemetry_config">Konfiguracja telemetrii</string>
     <string name="node_id">ID węzła</string>
@@ -382,7 +409,10 @@
     <string name="user_id">ID użytkownika</string>
     <string name="uptime">Czas pracy</string>
     <string name="firmware_version">Wersja firmware</string>
+    <string name="timestamp">Znacznik czasu</string>
     <string name="heading">Kierunek</string>
     <string name="primary">Podstawowy</string>
     <string name="secondary">Wtórny</string>
+    <string name="map">Mapa</string>
+    <string name="reply">Odpowiedz</string>
 </resources>

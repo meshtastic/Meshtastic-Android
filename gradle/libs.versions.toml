@@ -1,24 +1,25 @@
 [versions]
-agp = "8.10.0"
-appcompat = "1.7.0"
+adaptive = "1.2.0-alpha07"
+adaptive-navigation-suite = "1.3.2"
+agp = "8.10.1"
+appcompat = "1.7.1"
 appintro = "6.3.1"
 awesome-app-rating = "2.8.0"
-cardview = "1.0.0"
 coil = "3.2.0"
-compose-bom = "2025.05.01"
+compose-bom = "2025.06.00"
 constraintlayout = "2.2.1"
 core-ktx = "1.16.0"
 core-location-altitude = "1.0.0-alpha03"
 core-splashscreen = "1.0.1"
-crashlytics = "3.0.3"
+crashlytics = "3.0.4"
 datastore = "1.1.7"
 detekt = "1.23.8"
-devtools-ksp = "2.1.21-2.0.1"
+devtools-ksp = "2.1.21-2.0.2"
 emoji2 = "1.5.0"
 espresso-core = "3.6.1"
-firebase-bom = "33.14.0"
-fragment-compose = "1.8.7"
-fragment-ktx = "1.8.7"
+firebase-bom = "33.15.0"
+fragment-compose = "1.8.8"
+fragment-ktx = "1.8.8"
 google-services = "4.4.2"
 hilt = "2.56.2"
 hilt-navigation-compose = "1.2.0"
@@ -28,9 +29,9 @@ kotlin = "2.1.21"
 kotlinx-collections-immutable = "0.4.0"
 kotlinx-coroutines-android = "1.10.2"
 kotlinx-serialization-json = "1.8.1"
-lifecycle = "2.9.0"
+lifecycle = "2.9.1"
 material = "1.12.0"
-material3 = "1.3.2"
+material3 = "1.4.0-alpha16"
 mgrs = "2.1.3"
 navigation = "2.9.0"
 okhttp = "4.12.0"
@@ -38,25 +39,29 @@ org-eclipse-paho-client-mqttv3 = "1.2.5"
 osmbonuspack = "6.9.0"
 osmdroid-android = "6.1.20"
 protobuf-gradle-plugin = "0.9.5"
-protobuf-kotlin = "4.31.0"
+protobuf-kotlin = "4.31.1"
 retrofit = "3.0.0"
-room = "2.7.1"
+room = "2.7.2"
 streamsupport-minifuture = "1.7.4"
 usb-serial-android = "3.9.0"
-viewpager2 = "1.1.0"
-work-runtime-ktx = "2.10.1"
+work-runtime-ktx = "2.10.2"
 zxing-android-embedded = "4.3.0"
 zxing-core = "3.5.3"
 
 [libraries]
 agp = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
+activity = { group = "androidx.activity", name = "activity" }
 actvity-ktx = { group = "androidx.activity", name = "activity-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose" }
+adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive", version.ref = "adaptive" }
+adaptive-layout = { group = "androidx.compose.material3.adaptive", name = "adaptive-layout", version.ref = "adaptive" }
+adaptive-navigation = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation", version.ref = "adaptive" }
+adaptive-navigation-android = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation-android", version.ref = "adaptive" }
+adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite", version.ref = "adaptive-navigation-suite" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 appcompat-resources = { group = "androidx.appcompat", name = "appcompat-resources", version.ref = "appcompat" }
 appintro = { group = "com.github.AppIntro", name = "AppIntro", version.ref = "appintro" }
 awesome-app-rating = { group = "com.suddenh4x.ratingdialog", name = "awesome-app-rating", version.ref = "awesome-app-rating" }
-cardview = { group = "androidx.cardview", name = "cardview", version.ref = "cardview" }
 coil = { group = "io.coil-kt.coil3", name = "coil-compose", version.ref = "coil" }
 coil-network-core = { group = "io.coil-kt.coil3", name = "coil-network-core", version.ref = "coil" }
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
@@ -81,8 +86,8 @@ espresso-core = { group = "androidx.test.espresso", name = "espresso-core", vers
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junit-version" }
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
-firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics"}
-firebase-crashlytics-gradle = { group = "com.google.firebase", name ="firebase-crashlytics-gradle", version.ref = "crashlytics" }
+firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
+firebase-crashlytics-gradle = { group = "com.google.firebase", name = "firebase-crashlytics-gradle", version.ref = "crashlytics" }
 fragment-compose = { module = "androidx.fragment:fragment-compose", version.ref = "fragment-compose" }
 fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragment-ktx" }
 google-services = { group = "com.google.gms", name = "google-services", version.ref = "google-services" }
@@ -115,10 +120,9 @@ org-eclipse-paho-client-mqttv3 = { group = "org.eclipse.paho", name = "org.eclip
 osmbonuspack = { group = "com.github.MKergall", name = "osmbonuspack", version.ref = "osmbonuspack" }
 osmdroid-android = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid-android" }
 osmdroid-geopackage = { group = "org.osmdroid", name = "osmdroid-geopackage", version.ref = "osmdroid-android" }
-osmdroid-wms = { group = "org.osmdroid", name = "osmdroid-wms", version.ref = "osmdroid-android" }
 protobuf-gradle-plugin = { group = "com.google.protobuf", name = "protobuf-gradle-plugin", version.ref = "protobuf-gradle-plugin" }
 protobuf-kotlin = { group = "com.google.protobuf", name = "protobuf-kotlin", version.ref = "protobuf-kotlin" }
-protobuf-protoc = { group = "com.google.protobuf", name ="protoc", version.ref = "protobuf-kotlin" }
+protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf-kotlin" }
 retrofit2 = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit2-kotlin-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
@@ -127,17 +131,17 @@ room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "
 room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
 streamsupport-minifuture = { group = "net.sourceforge.streamsupport", name = "streamsupport-minifuture", version.ref = "streamsupport-minifuture" }
 usb-serial-android = { group = "com.github.mik3y", name = "usb-serial-for-android", version.ref = "usb-serial-android" }
-viewpager2 = { group = "androidx.viewpager2", name = "viewpager2", version.ref = "viewpager2" }
 work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work-runtime-ktx" }
 zxing-android-embedded = { group = "com.journeyapps", name = "zxing-android-embedded", version.ref = "zxing-android-embedded" }
 zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing-core" }
 
 [bundles]
 # Core AndroidX
-androidx = ["core-ktx", "appcompat", "appcompat-resources", "cardview", "fragment-ktx", "actvity-ktx", "fragment-compose", "activity-compose"]
+androidx = ["core-ktx", "appcompat", "appcompat-resources", "fragment-ktx", "actvity-ktx", "fragment-compose", "activity-compose"]
 
 # UI
-ui = ["material", "constraintlayout", "viewpager2", "compose-material3", "compose-material-icons-extended", "compose-ui-tooling-preview", "compose-runtime-livedata"]
+ui = ["material", "constraintlayout", "compose-material3", "compose-material-icons-extended", "compose-ui-tooling-preview", "compose-runtime-livedata"]
+adaptive = ["adaptive", "adaptive-layout", "adaptive-navigation", "adaptive-navigation-android", "adaptive-navigation-suite"]
 ui-tooling = ["compose-ui-tooling"] #Separate for debugImplementation
 
 # Lifecycle
@@ -165,7 +169,7 @@ testing-navigation = ["navigation-testing"]
 testing-room = ["room-testing"]
 
 # OSM
-osm = ["osmdroid-android", "osmdroid-wms", "osmbonuspack", "mgrs"]
+osm = ["osmdroid-android", "osmbonuspack", "mgrs"]
 
 # Firebase
 firebase = ["firebase-analytics", "firebase-crashlytics"]
@@ -191,4 +195,5 @@ kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization" }
 protobuf = { id = "com.google.protobuf" }
 android-library = { id = "com.android.library" }
-
+google-services = { id = "com.google.gms.google-services" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics" }

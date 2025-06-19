@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_channel">Kanal</string>
     <string name="node_filter_placeholder">Filter</string>
@@ -121,7 +137,7 @@
     <string name="message_delivery_status">Stanje poslanega sporočila</string>
     <string name="meshtastic_messages_notifications">Obvestila o sporočilu</string>
     <string name="protocol_stress_test">Protokol stresni test</string>
-    <string name="firmware_too_old">Zastarela programska oprema</string>
+    <string name="firmware_too_old">Zastarela programska oprema.</string>
     <string name="firmware_old">Vdelana programska oprema radijskega sprejemnika je za pogovor s to aplikacijo prestara. Za več informacij o tem glejte<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">naš vodnik za namestitev strojne programske opreme</a>.</string>
     <string name="okay">V redu</string>
     <string name="must_set_region">Nastavitev regije!</string>
@@ -152,7 +168,7 @@
     <string name="modem_config_slow_medium">Srednji doseg (počasen)</string>
     <plurals name="delete_messages">
         <item quantity="one">Izbriši sporočilo?</item>
-        <item quantity="two">Izbrišem %s sporočila?</item>
+        <item quantity="two">Izbrišem sporočili?</item>
         <item quantity="few">Izbrišem %s sporočila?</item>
         <item quantity="other">Izbrišem sporočila: %1$s?</item>
     </plurals>
@@ -203,7 +219,7 @@
     <string name="map_tile_download_estimate">Ocena prenosa plošče:</string>
     <string name="map_start_download">Začni prenos</string>
     <string name="close">Zapri</string>
-    <string name="device_settings">Nastavitev radia</string>
+    <string name="radio_configuration">Nastavitev radia</string>
     <string name="module_settings">Nastavitev modula</string>
     <string name="add">Dodaj</string>
     <string name="edit">Uredi</string>
@@ -280,7 +296,7 @@
     <plurals name="traceroute_hops">
         <item quantity="one">1 skok</item>
         <item quantity="two">%dskoka</item>
-        <item quantity="few">%dskoki</item>
+        <item quantity="few">%dskoka</item>
         <item quantity="other">%dskoki</item>
     </plurals>
     <string name="traceroute_diff">Skokov k %1$d Skokov nazaj %2$d</string>

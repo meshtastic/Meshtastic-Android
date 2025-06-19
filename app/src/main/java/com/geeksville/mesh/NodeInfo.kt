@@ -23,6 +23,7 @@ import com.geeksville.mesh.util.GPSFormat
 import com.geeksville.mesh.util.bearing
 import com.geeksville.mesh.util.latLongToMeter
 import com.geeksville.mesh.util.anonymize
+import com.geeksville.mesh.util.onlineTimeThreshold
 import kotlinx.parcelize.Parcelize
 
 //
@@ -202,9 +203,7 @@ data class NodeInfo(
      */
     val isOnline: Boolean
         get() {
-            val now = System.currentTimeMillis() / 1000
-            val timeout = 15 * 60
-            return (now - lastHeard <= timeout)
+            return lastHeard > onlineTimeThreshold()
         }
 
     /// return the position if it is valid, else null

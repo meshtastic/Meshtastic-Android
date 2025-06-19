@@ -18,21 +18,25 @@
 package com.geeksville.mesh.ui.message
 
 import android.content.ClipData
-import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.SelectAll
@@ -59,7 +63,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusEvent
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.isAltPressed
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.platform.LocalFocusManager
@@ -67,9 +78,11 @@ import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -77,19 +90,19 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.QuickChatAction
+import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannel
-import com.geeksville.mesh.ui.SharedContactDialog
-import com.geeksville.mesh.ui.components.NodeKeyStatusIcon
-import com.geeksville.mesh.ui.components.NodeMenuAction
-import com.geeksville.mesh.ui.message.components.MessageList
-import com.geeksville.mesh.ui.theme.AppTheme
+import com.geeksville.mesh.ui.common.theme.AppTheme
+import com.geeksville.mesh.ui.node.components.NodeKeyStatusIcon
+import com.geeksville.mesh.ui.node.components.NodeMenuAction
+import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import kotlinx.coroutines.launch
 
 private const val MESSAGE_CHARACTER_LIMIT = 200
+private const val SNIPPET_CHARACTER_LIMIT = 50
 
-@OptIn(ExperimentalSharedTransitionApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 internal fun MessageScreen(
@@ -99,8 +112,6 @@ internal fun MessageScreen(
     navigateToMessages: (String) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
     onNavigateBack: () -> Unit,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope,
 ) {
     val coroutineScope = rememberCoroutineScope()
     val clipboardManager = LocalClipboard.current
@@ -136,6 +147,7 @@ internal fun MessageScreen(
     val messageInput = rememberSaveable(stateSaver = TextFieldValue.Saver) {
         mutableStateOf(TextFieldValue(message))
     }
+    var replyingTo by remember { mutableStateOf<Message?>(null) }
 
     var showDeleteDialog by remember { mutableStateOf(false) }
     if (showDeleteDialog) {
@@ -206,7 +218,55 @@ internal fun MessageScreen(
                         viewModel.sendMessage(action.message, contactKey)
                     }
                 }
-                TextInput(isConnected, messageInput) { viewModel.sendMessage(it, contactKey) }
+
+                AnimatedVisibility(visible = replyingTo != null) {
+                    val fromLocal = replyingTo?.node?.user?.id == DataPacket.ID_LOCAL
+
+                    val replyingToNode = if (fromLocal) {
+                        viewModel.ourNodeInfo.value
+                    } else {
+                        replyingTo?.node
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(24.dp))
+                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.AutoMirrored.Default.Reply,
+                            contentDescription = stringResource(R.string.reply)
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                "Replying to ${replyingToNode?.user?.shortName ?: stringResource(R.string.unknown)}",
+                                style = MaterialTheme.typography.labelMedium
+                            )
+                            Text(
+                                replyingTo?.text?.take(SNIPPET_CHARACTER_LIMIT)
+                                    ?.let { if (it.length == SNIPPET_CHARACTER_LIMIT) "$it…" else it } ?: "", // Snippet
+                                style = MaterialTheme.typography.bodySmall,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                        IconButton(onClick = {
+                            replyingTo = null
+                        }) { // ViewModel function to set replyingToMessageState to null
+                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.cancel))
+                        }
+                    }
+                }
+                TextInput(isConnected, messageInput) { message ->
+                    replyingTo?.let {
+                        viewModel.sendMessage(message, contactKey, it.packetId)
+                        replyingTo = null
+                    } ?: viewModel.sendMessage(message, contactKey)
+                    // Clear the text input after sending the message and updating all state
+                    messageInput.value = TextFieldValue("")
+                }
             }
         }
     ) { padding ->
@@ -227,6 +287,7 @@ internal fun MessageScreen(
                 onSendReaction = { emoji, id -> viewModel.sendReaction(emoji, id, contactKey) },
                 viewModel = viewModel,
                 contactKey = contactKey,
+                onReply = { replyingTo = it },
                 onNodeMenuAction = { action ->
                     when (action) {
                         is NodeMenuAction.DirectMessage -> {
@@ -236,13 +297,12 @@ internal fun MessageScreen(
                                 if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else action.node.channel
                             navigateToMessages("$channel${action.node.user.id}")
                         }
+
                         is NodeMenuAction.MoreDetails -> navigateToNodeDetails(action.node.num)
                         is NodeMenuAction.Share -> sharedContact = action.node
                         else -> viewModel.handleNodeMenuAction(action)
                     }
                 },
-                sharedTransitionScope = sharedTransitionScope,
-                animatedContentScope = animatedContentScope,
             )
         }
     }
@@ -378,6 +438,7 @@ private fun QuickChatRow(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun TextInput(
     enabled: Boolean,
@@ -397,11 +458,34 @@ private fun TextInput(
         },
         modifier = Modifier
             .fillMaxWidth()
-            .onFocusEvent { isFocused = it.isFocused },
+            .onFocusEvent { isFocused = it.isFocused }
+            .onKeyEvent { event ->
+                if (event.type == KeyEventType.KeyDown &&
+                    event.key == Key.Enter &&
+                    event.isAltPressed
+                ) {
+                    val str = message.value.text.trim()
+                    if (str.isNotEmpty()) {
+                        onClick(str)
+                    }
+                    true // Consume the event
+                } else {
+                    false // Do not consume other key events
+                }
+            },
         enabled = enabled,
         placeholder = { Text(stringResource(id = R.string.send_text)) },
         keyboardOptions = KeyboardOptions(
             capitalization = KeyboardCapitalization.Sentences,
+            imeAction = ImeAction.Send
+        ),
+        keyboardActions = KeyboardActions(
+            onSend = {
+                val str = message.value.text.trim()
+                if (str.isNotEmpty()) {
+                    onClick(str)
+                }
+            }
         ),
         maxLines = 3,
         shape = RoundedCornerShape(24.dp),
@@ -410,9 +494,8 @@ private fun TextInput(
                 onClick = {
                     val str = message.value.text.trim()
                     if (str.isNotEmpty()) {
-                        focusManager.clearFocus()
                         onClick(str)
-                        message.value = TextFieldValue("")
+                        focusManager.clearFocus()
                     }
                 },
                 modifier = Modifier.size(48.dp),

@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_messages">Berichten</string>
     <string name="main_tab_users">Gebruikers</string>
@@ -129,7 +145,7 @@
     <string name="meshtastic_messages_notifications">Berichtmeldingen</string>
     <string name="meshtastic_alerts_notifications">Waarschuwingsmeldingen</string>
     <string name="protocol_stress_test">Protocol stresstest</string>
-    <string name="firmware_too_old">Firmware-update vereist</string>
+    <string name="firmware_too_old">Firmware-update vereist.</string>
     <string name="firmware_old">De radio firmware is te oud om met deze applicatie te praten. Voor meer informatie over deze zaak, zie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">onze Firmware Installation gids</a>.</string>
     <string name="okay">OK</string>
     <string name="must_set_region">Je moet een regio instellen!</string>
@@ -210,7 +226,7 @@
     <string name="map_start_download">Download starten</string>
     <string name="exchange_position">Positie uitwisselen</string>
     <string name="close">Sluit</string>
-    <string name="device_settings">Radioconfiguratie</string>
+    <string name="radio_configuration">Radioconfiguratie</string>
     <string name="module_settings">Module-configuratie</string>
     <string name="add">Voeg toe</string>
     <string name="edit">Wijzig</string>
@@ -392,7 +408,6 @@
     <string name="ringtone">Beltoon</string>
     <string name="lora_config">LoRa Configuratie</string>
     <string name="use_modem_preset">Gebruik modem preset</string>
-    <string name="modem_preset">Modem preset</string>
     <string name="bandwidth">Bandbreedte</string>
     <string name="spread_factor">Spread factor</string>
     <string name="coding_rate">Codering ratio</string>
@@ -490,7 +505,7 @@
     <string name="slot">Slot</string>
     <string name="primary">Primair</string>
     <string name="secondary">Secundair</string>
-    <string name="manuel_position_request">Handmatige positieaanvraag vereist</string>
+    <string name="manual_position_request">Handmatige positieaanvraag vereist</string>
     <string name="set_region">Regio Instellen</string>
     <string name="unmute">Dempen opheffen</string>
     <string name="dynamic">Dynamisch</string>
@@ -502,4 +517,5 @@
     <string name="import_label">Importeer</string>
     <string name="request_metadata">Metadata opvragen</string>
     <string name="actions">Acties</string>
+    <string name="map">Kaart</string>
 </resources>

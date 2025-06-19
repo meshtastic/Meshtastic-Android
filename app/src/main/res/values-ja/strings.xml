@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_messages">メッセージ</string>
     <string name="main_tab_users">ユーザー</string>
@@ -130,9 +146,7 @@
     <string name="meshtastic_messages_notifications">メッセージ通知</string>
     <string name="meshtastic_alerts_notifications">アラート通知</string>
     <string name="protocol_stress_test">プロトコルストレステスト</string>
-    <string name="firmware_too_old">ファームウェアの更新が必要です。</string>
     <string name="firmware_old">デバイスのファームウェアが古く、アプリと通信ができません。詳細は<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Firmware Installation guide</a> に記載されています。</string>
-    <string name="okay">OK</string>
     <string name="must_set_region">リージョンを指定する必要があります。</string>
     <string name="region">リージョン</string>
     <string name="cant_change_no_radio">デバイスが未接続のため、チャンネルが変更できませんでした。もう一度やり直してください。</string>
@@ -146,7 +160,7 @@
     <string name="theme">テーマ</string>
     <string name="theme_light">ライト</string>
     <string name="theme_dark">ダーク</string>
-    <string name="theme_system">システム既定</string>
+    <string name="theme_system">システムのデフォルト</string>
     <string name="choose_theme">テーマを選択</string>
     <string name="background_required">バックグラウンド位置情報</string>
     <string name="why_background_required">この機能を利用するには、位置情報の権限オプションで「常に許可」を選択する必要があります。\nこの設定により、アプリが閉じている状態でも、Meshtasticがスマホの位置情報をメッシュネットワーク内の他のメンバーに送信できるようになります。</string>
@@ -210,7 +224,7 @@
     <string name="map_start_download">ダウンロード開始</string>
     <string name="exchange_position">位置交換</string>
     <string name="close">終了</string>
-    <string name="device_settings">デバイスの設定</string>
+    <string name="radio_configuration">デバイスの設定</string>
     <string name="module_settings">追加機能の設定</string>
     <string name="add">追加</string>
     <string name="edit">編集</string>
@@ -439,7 +453,6 @@
     <string name="use_i2s_as_buzzer">I2Sをブザーとして使用</string>
     <string name="lora_config">LoRa設定</string>
     <string name="use_modem_preset">モデムプリセットを使用</string>
-    <string name="modem_preset">モデムプリセット</string>
     <string name="bandwidth">帯域</string>
     <string name="spread_factor">拡散係数</string>
     <string name="coding_rate">コーディングレート</string>
@@ -585,4 +598,5 @@
     <string name="set_region">リージョン設定</string>
     <string name="unmute">ミュート解除</string>
     <string name="dynamic">動的</string>
+    <string name="map">地図</string>
 </resources>

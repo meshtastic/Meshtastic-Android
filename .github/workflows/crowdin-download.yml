@@ -2,12 +2,13 @@ name: Crowdin Download Translations Action
 
 on:
   schedule:              # Every Sunday at midnight
-    - cron: '0 0 * * 0'
+    - cron: '0 */1 * * *'
   workflow_dispatch:     # Allow manual triggering
 
 jobs:
   synchronize-with-crowdin:
     runs-on: ubuntu-latest
+    if: github.repository == 'meshtastic/Meshtastic-Android'
 
     steps:
       - name: Checkout

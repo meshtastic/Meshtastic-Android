@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_channel">Kanalas</string>
     <string name="node_filter_placeholder">Filtras</string>
@@ -48,7 +64,7 @@
     <string name="config_security_public_key">Viešasis raktas</string>
     <string name="config_security_private_key">Privatus raktas</string>
     <string name="channel_name">Kanalo pavadinimas</string>
-    <string name="channel_options">Kanalo nuostata</string>
+    <string name="channel_options">Kanalo parinktys</string>
     <string name="qr_code">QR kodas</string>
     <string name="unset">Nenustatyta</string>
     <string name="connection_status">Ryšio būsena</string>
@@ -73,23 +89,23 @@
     <string name="report_a_bug">Pranešti apie klaidą</string>
     <string name="report_bug_text">Ar tikrai norite pranešti apie klaidą? Po pranešimo prašome parašyti forume https://github.com/orgs/meshtastic/discussions, kad galėtume suderinti pranešimą su jūsų pastebėjimais.</string>
     <string name="report">Raportuoti</string>
-    <string name="not_paired_yet">Jūs dar nesusiejote įtaiso.</string>
+    <string name="not_paired_yet">Jūs dar nesusiejote radijo.</string>
     <string name="change_radio">Pakeisti radiją</string>
     <string name="pairing_completed">Susiejimas užbaigtas, paslauga pradedama</string>
     <string name="pairing_failed_try_again">Susiejimas nepavyko, prašome pasirinkti iš naujo</string>
     <string name="location_disabled">Vietos prieigos funkcija išjungta, negalima pateikti pozicijos tinklui.</string>
     <string name="share">Dalintis</string>
-    <string name="disconnected">Persikrauna</string>
+    <string name="disconnected">Atsijungta</string>
     <string name="device_sleeping">Įrenginys miega</string>
     <string name="update_firmware">Atnaujinti Firmware</string>
     <string name="ip_address">IP adresas:</string>
-    <string name="connected">Prisijungta prie įtaiso</string>
-    <string name="connected_to">Prisijungta prie įtaiso (%s)</string>
+    <string name="connected">Prisijungta prie radijo</string>
+    <string name="connected_to">Prisijungta prie radijo (%s)</string>
     <string name="not_connected">Neprijungtas</string>
-    <string name="connected_sleeping">Prisijungta prie įtaiso, bet jis yra miego režime</string>
+    <string name="connected_sleeping">Prisijungta prie radijo, bet jis yra miego režime</string>
     <string name="update_to">Atnaujinti iki %s</string>
     <string name="app_too_old">Reikalingas programos atnaujinimas</string>
-    <string name="must_update">Turite atnaujinti šią programą programėlių parduotuvėje (arba Github). Ji per sena, kad galėtų bendrauti su šio įtaiso programinės įrangos versija. Prašome perskaityti mūsų <a href="https://meshtastic.org/docs/software/android/installation">dokumentaciją</a> šia tema.</string>
+    <string name="must_update">Urite atnaujinti šią programą programėlių parduotuvėje (arba Github). Ji per sena, kad galėtų bendrauti su šiuo radijo įrangos programinės įrangos versija. Prašome perskaityti mūsų <a href="https://meshtastic.org/docs/software/android/installation">dokumentaciją</a> šia tema.</string>
     <string name="none">Nėra (išjungti)</string>
     <string name="modem_config_turbo">Mažo nuotolio / Turbo</string>
     <string name="modem_config_short">Trumpas nuotolis / Greitas</string>
@@ -114,8 +130,8 @@
     <string name="message_delivery_status">Žinutės pristatymo statusas</string>
     <string name="meshtastic_messages_notifications">Žinutės pranešimai</string>
     <string name="protocol_stress_test">Protokolo apkrovos testas</string>
-    <string name="firmware_too_old">Reikalingas įrangos Firmware atnaujinimas</string>
-    <string name="firmware_old">Įrangos programinė įranga yra per sena, kad galėtų bendrauti su šia programa. Daugiau informacijos apie tai rasite <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">mūsų programinės įrangos diegimo vadove</a>.</string>
+    <string name="firmware_too_old">Reikalingas įrangos Firmware atnaujinimas.</string>
+    <string name="firmware_old">Radijo įrangos pfirmware yra per sena, kad galėtų bendrauti su šia programa. Daugiau informacijos apie tai rasite <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">mūsų firmware diegimo vadove</a>.</string>
     <string name="okay">Gerai</string>
     <string name="must_set_region">Turite nustatyti regioną!</string>
     <string name="region">Regionas</string>
@@ -135,7 +151,7 @@
     <string name="background_required">Vietos sekimas fone</string>
     <string name="why_background_required">Norint naudotis šia funkcija, turite suteikti vietos nustatymo leidimą su parinktimi „Leisti visą laiką“.\nTai leidžia „Meshtastic“ skaityti jūsų išmaniojo telefono vietą ir siųsti ją kitiems jūsų tinklo nariams net tada, kai programa yra uždaryta arba nenaudojama.</string>
     <string name="required_permissions">Reikalingi leidimai</string>
-    <string name="provide_location_to_mesh">Leisti naudoti telefono GPS poziciją tinkle</string>
+    <string name="provide_location_to_mesh">Pateikti telefono vietą tinklui</string>
     <string name="camera_required">Fotoaparato leidimai</string>
     <string name="why_camera_required">Mums turi būti suteiktas prieigos prie kameros leidimas, kad galėtume skaityti QR kodus. Nuotraukos ar vaizdo įrašai nebus išsaugoti.</string>
     <string name="notification_required">Pranešimų leidimas</string>
@@ -154,7 +170,7 @@
     <string name="delete_for_me">Ištrinti man</string>
     <string name="select_all">Pažymėti visus</string>
     <string name="modem_config_slow_long">Ilgas nuotolis / Lėtas</string>
-    <string name="map_style_selection">Stiliaus pasirinkimas</string>
+    <string name="map_style_selection">Stiliaus parinktys</string>
     <string name="map_download_region">Atsisiųsti regioną</string>
     <string name="name">Pavadinimas</string>
     <string name="description">Aprašymas</string>
@@ -169,12 +185,12 @@
     <string name="traceroute">Žinutės kelias</string>
     <string name="intro_show">Rodyti įvadą</string>
     <string name="intro_welcome">Sveikiname prisijungus prie Meshtastic</string>
-    <string name="intro_welcome_text">Meshtastic yra atvirojo kodo, nepriklausoma nuo tinklo (GSM ar WiFi), šifruotos komunikacijos platforma. Meshtastic ryšio įrenginiai formuoja tinklą ir komunikuoja, naudodami LoRa protokolą siųsti bei gauti tekstinius pranešimus.</string>
+    <string name="intro_welcome_text">Meshtastic yra atvirojo kodo, nepriklausomas nuo tinklo, šifruota komunikacijos platforma. Meshtastic radijo ryšys formuoja tinklą ir komunikuoja, naudodamas LoRa protokolą siųsti bei gauti tekstinius pranešimus.</string>
     <string name="intro_started">… Pradėkime!</string>
-    <string name="intro_started_text">Prijunkite savo Meshtastic įrenginį naudodami Bluetooth, USB jungtį arba WiFi. \n\n
+    <string name="intro_started_text">Prijunkite savo „Meshtastic“ įrenginį naudodami „Bluetooth“, serijinę jungtį arba „WiFi“. \n\n
 Suderinamus įrenginius galite pamatyti apsilankę adresu www.meshtastic.org/docs/hardware</string>
     <string name="intro_encryption">"Šifravimo nustatymas"</string>
-    <string name="intro_encryption_text">Pagal nutylėjimą kanale nustatomas numatytasis šifravimo raktas. Norėdami įgalinti savo uždarą kanalą ir pagerinti turinio šifravimą, eikite į kanalo skirtuką ir pakeiskite kanalo pavadinimą, tai nustatys atsitiktinį raktą AES256 šifravimui. \n\nNorint bendrauti su kitais įrenginiais, jie turės nuskaityti jūsų QR kodą arba sekti bendrinamą nuorodą, kad sukonfigūruotų įdentiškus kanalo nustatymus ir šifro raktą.</string>
+    <string name="intro_encryption_text">Pagal numatytuosius nustatymus nustatomas numatytasis šifravimo raktas. Norėdami įgalinti savo kanalą ir pagerinti šifravimą, eikite į kanalo skirtuką ir pakeiskite kanalo pavadinimą, tai nustatys atsitiktinį raktą AES256 šifravimui. \n\nNorėdami bendrauti su kitais įrenginiais, jie turės nuskaityti jūsų QR kodą arba sekti bendrinamą nuorodą, kad sukonfigūruotų kanalo nustatymus.</string>
     <string name="message">Žinutė</string>
     <string name="quick_chat">Greito pokalbio parinktys</string>
     <string name="quick_chat_new">Naujas greitas pokalbis</string>
@@ -189,7 +205,7 @@ Suderinamus įrenginius galite pamatyti apsilankę adresu www.meshtastic.org/doc
     <string name="nodedb_reset">NodeDB perkrauti</string>
     <string name="nodedb_reset_description">Tai išvalys visus mazgus iš šio sąrašo.</string>
     <string name="delivery_confirmed">Nustatymas įkeltas</string>
-    <string name="error">Nustatymas įkeltas</string>
+    <string name="error">Klaida</string>
     <string name="ignore">Ignoruoti</string>
     <string name="ignore_add">Ar pridėti „%s“ į ignoruojamų sąrašą? Po šio pakeitimo jūsų radijas bus perkrautas.</string>
     <string name="ignore_remove">Ar pašalinti „%s“ iš ignoruojamų sąrašo? Po šio pakeitimo jūsų radijas bus perkrautas.</string>
@@ -197,8 +213,8 @@ Suderinamus įrenginius galite pamatyti apsilankę adresu www.meshtastic.org/doc
     <string name="map_tile_download_estimate">Plytelių atsisiuntimo apskaičiavimas:</string>
     <string name="map_start_download">Pradėti atsiuntimą</string>
     <string name="close">Uždaryti</string>
-    <string name="device_settings">Įrenginio konfigūracija</string>
-    <string name="module_settings">Modulių konfigūracija</string>
+    <string name="radio_configuration">Radijo modulio konfigūracija</string>
+    <string name="module_settings">Modulio konfigūracija</string>
     <string name="add">Pridėti</string>
     <string name="edit">Redaguoti</string>
     <string name="calculating">Skaičiuojama…</string>
@@ -208,7 +224,7 @@ Suderinamus įrenginius galite pamatyti apsilankę adresu www.meshtastic.org/doc
     <string name="map_clear_tiles">Ištrinti atsisiųstas plyteles</string>
     <string name="map_tile_source">Plytelių šaltinis</string>
     <string name="map_purge_success">SQL talpykla išvalyta %s</string>
-    <string name="map_purge_fail">SQL talpyklos išvalymas nepavyko, detales žiūrėkite išrašę</string>
+    <string name="map_purge_fail">SQL talpyklos išvalymas nepavyko, detales žiūrėkite logcat</string>
     <string name="map_cache_manager">Talpyklos valdymas</string>
     <string name="map_download_complete">Atsiuntimas baigtas!</string>
     <string name="map_download_errors">Atsiuntimas baigtas su %d klaidomis</string>
@@ -235,7 +251,7 @@ Suderinamus įrenginius galite pamatyti apsilankę adresu www.meshtastic.org/doc
     <string name="air_utilization">Eterio panaudojimas</string>
     <string name="temperature">Temperatūra</string>
     <string name="humidity">Drėgmė</string>
-    <string name="logs">Įrašai</string>
+    <string name="logs">Log`ai</string>
     <string name="hops_away">Persiuntimų kiekis</string>
     <string name="info">Informacija</string>
     <string name="ch_util_definition">Dabartinio kanalo panaudojimas, įskaitant gerai suformuotą TX (siuntimas), RX (gavimas) ir netinkamai suformuotą RX (arba - triukšmas).</string>
@@ -245,20 +261,20 @@ Suderinamus įrenginius galite pamatyti apsilankę adresu www.meshtastic.org/doc
     <string name="encryption_pkc">Viešojo rakto šifruotė</string>
     <string name="encryption_pkc_text">Tiesioginės žinutės šifravimui naudoja naująją viešojo rakto infrastruktūrą. Reikalinga 2,5 ar vėlesnės versijos programinė įranga.</string>
     <string name="encryption_error">Viešojo rakto neatitikimas</string>
-    <string name="meshtastic_new_nodes_notifications">Naujų įtaisų pranešimai</string>
-    <string name="more_details">Daugiau duomenų</string>
+    <string name="meshtastic_new_nodes_notifications">Naujo įtaiso pranešimas</string>
+    <string name="more_details">Daugiau info</string>
     <string name="snr">SNR</string>
     <string name="rssi">RSSI</string>
     <string name="device_metrics_log">Įtaiso duomenų žurnalas</string>
-    <string name="node_map">Įtaiso pozicijų žemėlapis</string>
+    <string name="node_map">Įtaisų žemėlapis</string>
     <string name="position_log">Pozicijos  duomenų žurnalas</string>
     <string name="env_metrics_log">Aplinkos duomenų žurnalas</string>
     <string name="sig_metrics_log">Signalo duomenų žurnalas</string>
     <string name="administration">Administravimas</string>
     <string name="remote_admin">Nuotolinis administravimas</string>
     <string name="bad">Silpnas</string>
-    <string name="fair">Geras</string>
-    <string name="good">Puikus</string>
+    <string name="fair">Pakankamas</string>
+    <string name="good">Geras</string>
     <string name="none_quality">Nėra</string>
     <string name="share_to">Dalintis su…</string>
     <string name="share_message">Dalintis žinute</string>

@@ -1,4 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2025 Meshtastic LLC
+  ~
+  ~ This program is free software: you can redistribute it and/or modify
+  ~ it under the terms of the GNU General Public License as published by
+  ~ the Free Software Foundation, either version 3 of the License, or
+  ~ (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  ~ GNU General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License
+  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
+  -->
 <resources>
     <string name="main_tab_channel">Kanal</string>
     <string name="node_filter_placeholder">Filtrimi</string>
@@ -113,7 +129,7 @@
     <string name="message_delivery_status">Statusi i dorëzimit të mesazhit</string>
     <string name="meshtastic_messages_notifications">Njoftime mesazhesh</string>
     <string name="protocol_stress_test">Test stresi i protokollit</string>
-    <string name="firmware_too_old">Përditësimi i firmware kërkohet</string>
+    <string name="firmware_too_old">Përditësimi i firmware kërkohet.</string>
     <string name="firmware_old">Firmware radio është shumë i vjetër për të komunikuar me këtë aplikacion. Për më shumë informacion rreth kësaj, shikoni <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">udhëzuesin tonë për instalimin e firmware</a>.</string>
     <string name="okay">Mirë</string>
     <string name="must_set_region">Duhet të vendosni një rajon!</string>
@@ -192,7 +208,7 @@
     <string name="map_tile_download_estimate">Parashikimi i shkarkimit të pllakatës:</string>
     <string name="map_start_download">Filloni shkarkimin</string>
     <string name="close">Mbylle</string>
-    <string name="device_settings">Konfigurimi i radios</string>
+    <string name="radio_configuration">Konfigurimi i radios</string>
     <string name="module_settings">Konfigurimi i modulit</string>
     <string name="add">Shto</string>
     <string name="edit">Redakto</string>
