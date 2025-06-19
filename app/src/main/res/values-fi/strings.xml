@@ -138,7 +138,12 @@
     <string name="text_messages">Tekstiviestit</string>
     <string name="channel_invalid">Kanavan URL-osoite on virheellinen, eikä sitä voida käyttää</string>
     <string name="debug_panel">Vianetsintäpaneeli</string>
+    <string name="debug_logs_export">Vie lokitiedot</string>
     <string name="debug_last_messages">500 viimeisintä viestiä</string>
+    <string name="debug_filters">Suodattimet</string>
+    <string name="debug_active_filters">Aktiiviset suodattimet</string>
+    <string name="debug_default_search">Hae lokitiedoista...</string>
+    <string name="debug_clear">Tyhjennä lokit</string>
     <string name="clear">Tyhjennä</string>
     <string name="updating_firmware">Päivitetään laiteohjelmistoa, tämä voi kestää jopa kahdeksan minuuttia…</string>
     <string name="update_successful">Päivitys onnistui</string>
