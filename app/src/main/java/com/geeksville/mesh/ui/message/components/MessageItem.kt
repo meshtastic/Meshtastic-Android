@@ -23,11 +23,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -102,149 +102,158 @@ internal fun MessageItem(
         Color(node.colors.second).copy(alpha = 0.25f)
     }
     val messageModifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
-
-    Card(
-        modifier = Modifier
-            .padding(
-                start = if (fromLocal) 0.dp else 8.dp,
-                end = if (!fromLocal) 0.dp else 8.dp,
-            )
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick,
-            )
-            .then(messageModifier),
-        colors = CardDefaults.cardColors(
-            containerColor = messageColor,
-            contentColor = contentColorFor(messageColor),
-        ),
-    ) {
-        Column(
+    Box {
+        Card(
             modifier = Modifier
-                .fillMaxWidth(),
+                .align(if (fromLocal) Alignment.BottomEnd else Alignment.BottomStart)
+                .padding(
+                    top = 4.dp,
+                    start = if (!fromLocal) 0.dp else 16.dp,
+                    end = if (fromLocal) 0.dp else 16.dp,
+                )
+                .combinedClickable(
+                    onClick = onClick,
+                    onLongClick = onLongClick,
+                )
+                .then(messageModifier),
+            colors = CardDefaults.cardColors(
+                containerColor = messageColor,
+                contentColor = contentColorFor(messageColor),
+            ),
         ) {
-            message.originalMessage?.let { originalMessage ->
-                val originalMessageIsFromLocal = originalMessage.node.user.id == DataPacket.ID_LOCAL
-                val originalMessageNode =
-                    if (originalMessageIsFromLocal) ourNode else originalMessage.node
-                OutlinedCard(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(4.dp)
-                        .clickable { onNavigateToOriginalMessage(originalMessage.packetId) },
-                    colors = CardDefaults.cardColors(
-                        containerColor = Color(originalMessageNode.colors.second).copy(alpha = 0.8f),
-                        contentColor = Color(originalMessageNode.colors.first),
-                    ),
-                ) {
-                    Row(
-                        modifier = Modifier.padding(4.dp),
-                        verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(),
+            ) {
+                message.originalMessage?.let { originalMessage ->
+                    val originalMessageIsFromLocal =
+                        originalMessage.node.user.id == DataPacket.ID_LOCAL
+                    val originalMessageNode =
+                        if (originalMessageIsFromLocal) ourNode else originalMessage.node
+                    OutlinedCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onNavigateToOriginalMessage(originalMessage.packetId) },
+                        colors = CardDefaults.cardColors(
+                            containerColor = Color(originalMessageNode.colors.second).copy(alpha = 0.5f),
+                            contentColor = Color(originalMessageNode.colors.first),
+                        ),
                     ) {
-                        Icon(
-                            Icons.Default.FormatQuote,
-                            contentDescription = stringResource(R.string.reply), // Add to strings.xml
-                            modifier = Modifier.size(14.dp), // Smaller icon
-                        )
-                        Spacer(Modifier.width(6.dp))
-                        Column {
-                            Text(
-                                text = "${originalMessageNode.user.shortName} ${originalMessageNode.user.longName
-                                    ?: stringResource(R.string.unknown_username)}",
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.Bold,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                        Row(
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                Icons.Default.FormatQuote,
+                                contentDescription = stringResource(R.string.reply), // Add to strings.xml
+                                modifier = Modifier.size(14.dp), // Smaller icon
                             )
-                            Spacer(Modifier.height(1.dp))
-                            Text(
-                                text = originalMessage.text, // Should not be null if isAReply is true
-                                style = MaterialTheme.typography.bodySmall,
-                                maxLines = 2, // Keep snippet brief
-                                overflow = TextOverflow.Ellipsis,
-                            )
+                            Spacer(Modifier.width(4.dp))
+                            Column {
+                                Text(
+                                    text = "${originalMessageNode.user.shortName} ${
+                                        originalMessageNode.user.longName
+                                            ?: stringResource(R.string.unknown_username)
+                                    }",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.Bold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                Text(
+                                    text = originalMessage.text, // Should not be null if isAReply is true
+                                    style = MaterialTheme.typography.bodySmall,
+                                    maxLines = 1, // Keep snippet brief
+                                    overflow = TextOverflow.Ellipsis,
+                                )
+                            }
                         }
                     }
                 }
-            }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (!fromLocal) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
                     NodeChip(
-                        node = node,
+                        node = if (fromLocal) ourNode else node,
                         onAction = onAction,
                         isConnected = isConnected,
-                        isThisNode = false,
+                        isThisNode = fromLocal,
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = with(node.user) { "$longName ($id)" },
-                        modifier = Modifier.padding(bottom = 4.dp),
+                        text = with(if (fromLocal) ourNode.user else node.user) { "$longName ($id)" },
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
                         style = MaterialTheme.typography.labelLarge
                     )
+                    Spacer(Modifier.weight(1f))
+                    MessageActions(
+                        onSendReaction = sendReaction,
+                        onSendReply = onReply,
+                    )
                 }
-            }
-            AutoLinkText(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(4.dp),
-                text = message.text,
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                if (!fromLocal) {
-                    if (message.hopsAway == 0) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        ) {
-                            Snr(
-                                message.snr,
-                                fontSize = MaterialTheme.typography.labelSmall.fontSize
-                            )
-                            Rssi(
-                                message.rssi,
-                                fontSize = MaterialTheme.typography.labelSmall.fontSize
+                AutoLinkText(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                    text = message.text,
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 4.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (!fromLocal) {
+                        if (message.hopsAway == 0) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                Snr(
+                                    message.snr,
+                                    fontSize = MaterialTheme.typography.labelSmall.fontSize
+                                )
+                                Rssi(
+                                    message.rssi,
+                                    fontSize = MaterialTheme.typography.labelSmall.fontSize
+                                )
+                            }
+                        } else {
+                            Text(
+                                text = stringResource(
+                                    R.string.hops_away_template,
+                                    message.hopsAway
+                                ),
+                                style = MaterialTheme.typography.labelSmall,
                             )
                         }
-                    } else {
-                        Text(
-                            text = stringResource(R.string.hops_away_template, message.hopsAway),
-                            style = MaterialTheme.typography.labelSmall,
+                    }
+                    Text(
+                        text = message.time,
+                        style = MaterialTheme.typography.labelSmall,
+                    )
+                    AnimatedVisibility(visible = fromLocal) {
+                        Icon(
+                            imageVector = when (message.status) {
+                                MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
+                                MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
+                                MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
+                                MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
+                                MessageStatus.ERROR -> Icons.TwoTone.CloudOff
+                                else -> Icons.TwoTone.Warning
+                            },
+                            contentDescription = stringResource(R.string.message_delivery_status),
+                            modifier = Modifier
+                                .padding(start = 8.dp)
+                                .clickable { onStatusClick() },
                         )
                     }
-                }
-                Text(
-                    text = message.time,
-                    style = MaterialTheme.typography.labelSmall,
-                )
-                AnimatedVisibility(visible = fromLocal) {
-                    Icon(
-                        imageVector = when (message.status) {
-                            MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
-                            MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
-                            MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
-                            MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
-                            MessageStatus.ERROR -> Icons.TwoTone.CloudOff
-                            else -> Icons.TwoTone.Warning
-                        },
-                        contentDescription = stringResource(R.string.message_delivery_status),
-                        modifier = Modifier
-                            .padding(start = 8.dp)
-                            .clickable { onStatusClick() },
-                    )
                 }
             }
         }
@@ -255,7 +264,6 @@ internal fun MessageItem(
         reactions = emojis,
         onSendReaction = sendReaction,
         onShowReactions = onShowReactions,
-        onSendReply = onReply
     )
 }
 
