@@ -35,6 +35,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.text.DateFormat
+import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 import com.geeksville.mesh.Portnums.PortNum
@@ -286,7 +287,7 @@ class DebugViewModel @Inject constructor(
             // decoded
             add("decoded")
             // today (locale-dependent short date format)
-            add(java.text.DateFormat.getDateInstance(java.text.DateFormat.SHORT).format(java.util.Date()))
+            add(DateFormat.getDateInstance(DateFormat.SHORT).format(Date()))
             // Each app name
             addAll(PortNum.entries.map { it.name })
         }
