@@ -42,9 +42,8 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CloudDownload
+import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.twotone.FilterAltOff
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ColorScheme
@@ -82,12 +81,14 @@ import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.components.CopyIconButton
 import android.widget.Toast
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.datastore.core.IOException
 import com.geeksville.mesh.android.BuildUtils.warn
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
+import androidx.compose.material3.IconButton
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
 
@@ -138,7 +139,7 @@ internal fun DebugScreen(
             DebugSearchStateviewModelDefaults(
                 searchState = searchState,
                 filterTexts = filterTexts,
-                presetFilters = viewModel.presetFilters.asList(),
+                presetFilters = viewModel.presetFilters,
             )
         }
 
@@ -243,7 +244,7 @@ private fun DebugItemHeader(
             modifier = Modifier.padding(start = 8.dp)
         )
         Icon(
-            imageVector = Icons.Outlined.CloudDownload,
+            imageVector = Icons.Outlined.FileDownload,
             contentDescription = stringResource(id = R.string.logs),
             tint = Color.Gray.copy(alpha = 0.6f),
             modifier = Modifier.padding(end = 8.dp),
@@ -457,17 +458,23 @@ private fun DebugMenuActionsPreview() {
         Row(
             modifier = Modifier.padding(16.dp)
         ) {
-            Button(
+            IconButton(
                 onClick = { /* Preview only */ },
                 modifier = Modifier.padding(4.dp)
             ) {
-                Text(text = "Export Logs")
+                Icon(
+                    imageVector = Icons.Outlined.FileDownload,
+                    contentDescription = "Export Logs"
+                )
             }
-            Button(
+            IconButton(
                 onClick = { /* Preview only */ },
                 modifier = Modifier.padding(4.dp)
             ) {
-                Text(text = "Clear All")
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = "Clear All"
+                )
             }
         }
     }
@@ -661,23 +668,29 @@ fun DebugMenuActions(
     val scope = rememberCoroutineScope()
     val logs by viewModel.meshLog.collectAsStateWithLifecycle()
 
-    Button(
+    IconButton(
         onClick = {
             scope.launch {
                 exportAllLogs(context, logs)
             }
         },
-        modifier = modifier,
+        modifier = modifier.padding(4.dp)
     ) {
-        Text(text = stringResource(R.string.debug_logs_export))
+        Icon(
+            imageVector = Icons.Outlined.FileDownload,
+            contentDescription = "Export Logs"
+        )
     }
-    Button(
+    IconButton(
         onClick = viewModel::deleteAllLogs,
-        modifier = modifier,
+        modifier = modifier.padding(4.dp)
     ) {
-        Text(text = stringResource(R.string.debug_clear))
+        Icon(
+            imageVector = Icons.Default.Delete,
+            contentDescription = "Clear All"
+        )
     }
-}
+    }
 
 private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = withContext(Dispatchers.IO) {
     try {

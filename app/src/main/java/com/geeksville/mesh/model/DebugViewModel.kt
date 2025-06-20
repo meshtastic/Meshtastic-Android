@@ -35,11 +35,13 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import java.text.DateFormat
+import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 import com.geeksville.mesh.Portnums.PortNum
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 
 data class SearchMatch(
     val logIndex: Int,
@@ -155,6 +157,7 @@ class LogFilterManager {
 @HiltViewModel
 class DebugViewModel @Inject constructor(
     private val meshLogRepository: MeshLogRepository,
+    private val radioConfigRepository: RadioConfigRepository,
 ) : ViewModel(), Logging {
 
     val meshLog: StateFlow<ImmutableList<UiMeshLog>> = meshLogRepository.getAllLogs()
@@ -275,10 +278,19 @@ class DebugViewModel @Inject constructor(
         private val TIME_FORMAT = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
     }
 
-    val presetFilters = arrayOf(
-        // "!xxxxxxxx", // Dynamically determine the address of the connected node (i.e., messages to us).
-        "!ffffffff", // broadcast
-    ) + PortNum.entries.map { it.name } // all apps
+    val presetFilters: List<String>
+        get() = buildList {
+            // Our address if available
+            radioConfigRepository.myNodeInfo.value?.myNodeNum?.let { add("!%08x".format(it)) }
+            // broadcast
+            add("!ffffffff")
+            // decoded
+            add("decoded")
+            // today (locale-dependent short date format)
+            add(DateFormat.getDateInstance(DateFormat.SHORT).format(Date()))
+            // Each app name
+            addAll(PortNum.entries.map { it.name })
+        }
 
     fun setSelectedLogId(id: String?) { _selectedLogId.value = id }
 }
