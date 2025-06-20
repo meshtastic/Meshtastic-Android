@@ -357,8 +357,8 @@ private fun RadioConfigItemList(
     }
 }
 
-private const val UNLOCK_CLICK_COUNT = 5 // Number of clicks required to unlock excluded modules. Chosen to prevent accidental unlocking while keeping it accessible for users.
-private const val UNLOCK_TIMEOUT_SECONDS = 3 // Timeout in seconds to reset the click counter. Ensures users perform the clicks in quick succession to unlock.
+private const val UNLOCK_CLICK_COUNT = 5 // Number of clicks required to unlock excluded modules.
+private const val UNLOCK_TIMEOUT_SECONDS = 3 // Timeout in seconds to reset the click counter.
 
 @Composable
 fun RadioConfigMenuActions(
