@@ -56,7 +56,7 @@ fun NodeChip(
         AssistChip(
             modifier = modifier
                 .width(IntrinsicSize.Min)
-                .defaultMinSize(minHeight = 32.dp, minWidth = 72.dp),
+                .defaultMinSize(minHeight = 24.dp, minWidth = 48.dp),
             colors = AssistChipDefaults.assistChipColors(
                 containerColor = Color(nodeColor),
                 labelColor = Color(textColor),

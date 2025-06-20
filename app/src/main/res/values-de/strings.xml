@@ -21,6 +21,7 @@
     <string name="main_tab_map">Karte</string>
     <string name="main_tab_channel">Kanal</string>
     <string name="main_tab_settings">Einstellungen</string>
+    <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">Node Filter löschen</string>
     <string name="node_filter_include_unknown">Unbekannte Stationen einbeziehen</string>
@@ -137,7 +138,12 @@
     <string name="text_messages">Textnachrichten</string>
     <string name="channel_invalid">Diese Kanal-URL ist ungültig und kann nicht verwendet werden</string>
     <string name="debug_panel">Debug Anzeige</string>
+    <string name="debug_logs_export">Protokolle exportieren</string>
     <string name="debug_last_messages">500 letzte Nachrichten</string>
+    <string name="debug_filters">Filter</string>
+    <string name="debug_active_filters">Aktive Filter (alle)</string>
+    <string name="debug_default_search">In Protokollen suchen...</string>
+    <string name="debug_clear">Protokolle löschen</string>
     <string name="clear">Leeren</string>
     <string name="updating_firmware">Firmware aktualisieren, bitte bis zu acht Minuten warten …</string>
     <string name="update_successful">Aktualisierung erfolgreich</string>
@@ -269,6 +275,7 @@
     <string name="humidity">Luftfeuchte</string>
     <string name="logs">Protokolle</string>
     <string name="hops_away">Zwischenschritte entfernt</string>
+    <string name="hops_away_template">Sprungweite: %$1d</string>
     <string name="info">Information</string>
     <string name="ch_util_definition">Auslastung für den aktuellen Kanal, einschließlich gut geformtem TX, RX und fehlerhaftem RX (auch bekannt als Rauschen).</string>
     <string name="air_util_definition">Prozent der Sendezeit für die Übertragung innerhalb der letzten Stunde.</string>

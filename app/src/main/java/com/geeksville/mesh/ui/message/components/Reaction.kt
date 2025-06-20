@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.message.components
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -26,18 +27,19 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.filled.EmojiEmotions
-import androidx.compose.material.icons.filled.Reply
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -100,7 +102,7 @@ fun ReplyButton(
     onClick = onClick,
     content = {
         Icon(
-            imageVector = Icons.Default.Reply,
+            imageVector = Icons.AutoMirrored.Filled.Reply,
             contentDescription = "reply",
         )
     }
@@ -151,44 +153,47 @@ fun ReactionRow(
     reactions: List<Reaction> = emptyList(),
     onSendReaction: (String) -> Unit = {},
     onShowReactions: () -> Unit = {},
-    onSendReply: () -> Unit = {},
 ) {
     val emojiList =
         reduceEmojis(
             reactions.reversed().map { it.emoji }
         ).entries
 
-    LazyRow(
-        modifier = modifier
-            .height(48.dp)
-            .padding(bottom = 8.dp),
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically,
-        reverseLayout = true
-    ) {
-        item {
-            ReplyButton {
-                onSendReply()
+    AnimatedVisibility(emojiList.isNotEmpty()) {
+        LazyRow(
+            modifier = modifier.padding(horizontal = 4.dp),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            items(
+                emojiList.size
+            ) { index ->
+                val entry = emojiList.elementAt(index)
+                ReactionItem(
+                    emoji = entry.key,
+                    emojiCount = entry.value,
+                    onClick = {
+                        onSendReaction(entry.key)
+                    },
+                    onLongClick = onShowReactions,
+                )
             }
         }
-        item {
-            ReactionButton(
-                onSendReaction = onSendReaction,
-            )
-        }
-        items(
-            emojiList.size
-        ) { index ->
-            val entry = emojiList.elementAt(index)
-            ReactionItem(
-                emoji = entry.key,
-                emojiCount = entry.value,
-                onClick = {
-                    onSendReaction(entry.key)
-                },
-                onLongClick = onShowReactions,
-            )
-        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+fun MessageActions(
+    modifier: Modifier = Modifier,
+    onSendReaction: (String) -> Unit = {},
+    onSendReply: () -> Unit = {},
+) {
+    Row(
+        modifier = modifier.wrapContentSize(),
+    ) {
+        ReactionButton { onSendReaction(it) }
+        ReplyButton { onSendReply() }
     }
 }
 

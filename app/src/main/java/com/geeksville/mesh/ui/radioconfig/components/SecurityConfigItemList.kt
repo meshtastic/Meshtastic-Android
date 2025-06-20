@@ -34,6 +34,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -59,6 +60,7 @@ import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.node.NodeActionButton
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.util.encodeToString
+import com.geeksville.mesh.util.toByteString
 import com.google.protobuf.ByteString
 import java.security.SecureRandom
 
@@ -102,6 +104,15 @@ fun SecurityConfigItemList(
 ) {
     val focusManager = LocalFocusManager.current
     var securityInput by rememberSaveable { mutableStateOf(securityConfig) }
+
+    var publicKey by rememberSaveable { mutableStateOf(securityInput.publicKey) }
+    LaunchedEffect(securityInput.privateKey) {
+        if (securityInput.privateKey != securityConfig.privateKey) {
+            publicKey = "".toByteString()
+        } else if (securityInput.privateKey == securityConfig.privateKey) {
+            publicKey = securityConfig.publicKey
+        }
+    }
 
     val exportConfigLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
@@ -157,7 +168,7 @@ fun SecurityConfigItemList(
         item {
             EditBase64Preference(
                 title = stringResource(R.string.public_key),
-                value = securityInput.publicKey,
+                value = publicKey,
                 enabled = enabled,
                 readOnly = true,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -314,6 +325,7 @@ fun PrivateKeyRegenerateDialog(
                     onClick = {
                         securityInput = securityInput.copy {
                             clearPrivateKey()
+                            clearPublicKey()
                             // Generate a random "f" value
                             val f = ByteArray(32).apply {
                                 SecureRandom().nextBytes(this)
