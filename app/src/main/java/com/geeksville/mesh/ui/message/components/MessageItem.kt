@@ -108,8 +108,8 @@ internal fun MessageItem(
                 .align(if (fromLocal) Alignment.BottomEnd else Alignment.BottomStart)
                 .padding(
                     top = 4.dp,
-                    start = if (fromLocal) 0.dp else 16.dp,
-                    end = if (!fromLocal) 0.dp else 16.dp,
+                    start = if (!fromLocal) 0.dp else 16.dp,
+                    end = if (fromLocal) 0.dp else 16.dp,
                 )
                 .combinedClickable(
                     onClick = onClick,
