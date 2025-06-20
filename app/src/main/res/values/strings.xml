@@ -689,7 +689,7 @@
     <string name="client_notification">Client Notification</string>
     <string name="compromised_keys">Compromised keys detected, select OK to regenerate.</string>
     <string name="regenerate_private_key">Regenerate Private Key</string>
-    <string name="regenerate_keys_confirmation">Are you sure you want to regenerate your Private Key?</string>
+    <string name="regenerate_keys_confirmation">Are you sure you want to regenerate your Private Key?\n\nNodes that may have previously exchanged keys with this node will need to Remove that node and re-exchange keys in order to resume secure communication.</string>
     <string name="export_keys">Export Keys</string>
     <string name="export_keys_confirmation">Exports public and private keys to a file. Please store somewhere securely.</string>
 </resources>
