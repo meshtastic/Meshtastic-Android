@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -157,9 +158,28 @@ private fun PowerMetricsChart(
     }
     val timeDiff = newest.time - oldest.time
 
+    val scrollState = rememberScrollState()
+    val screenWidth = LocalWindowInfo.current.containerSize.width
+    val dp by remember(key1 = selectedTime) {
+        mutableStateOf(selectedTime.dp(screenWidth, time = (newest.time - oldest.time).toLong()))
+    }
+
+    // Calculate visible time range based on scroll position and chart width
+    val visibleTimeRange = run {
+        val density = LocalDensity.current
+        val totalWidthPx = with(density) { dp.toPx() }
+        val scrollPx = scrollState.value.toFloat()
+        val visibleWidthPx = with(density) { screenWidth.toDp().toPx() }
+        val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
+        val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
+        val visibleOldest = oldest.time + (timeDiff * leftRatio).toInt()
+        val visibleNewest = oldest.time + (timeDiff * rightRatio).toInt()
+        visibleOldest to visibleNewest
+    }
+
     TimeLabels(
-        oldest = oldest.time,
-        newest = newest.time
+        oldest = visibleTimeRange.first,
+        newest = visibleTimeRange.second
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -167,12 +187,6 @@ private fun PowerMetricsChart(
     val graphColor = MaterialTheme.colorScheme.onSurface
     val currentDiff = Power.CURRENT.difference()
     val voltageDiff = Power.VOLTAGE.difference()
-
-    val scrollState = rememberScrollState()
-    val screenWidth = LocalWindowInfo.current.containerSize.width
-    val dp by remember(key1 = selectedTime) {
-        mutableStateOf(selectedTime.dp(screenWidth, time = (newest.time - oldest.time).toLong()))
-    }
 
     Row {
         YAxisLabels(
