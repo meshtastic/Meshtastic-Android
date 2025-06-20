@@ -693,4 +693,5 @@
     <string name="export_keys">Export Keys</string>
     <string name="export_keys_confirmation">Exports public and private keys to a file. Please store somewhere securely.</string>
     <string name="modules_unlocked">Modules unlocked</string>
+    <string name="remote">Remote</string>
 </resources>

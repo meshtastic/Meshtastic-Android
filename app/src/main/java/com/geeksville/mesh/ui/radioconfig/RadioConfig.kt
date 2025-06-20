@@ -90,7 +90,16 @@ fun RadioConfigScreen(
     onNavigate: (Route) -> Unit = {}
 ) {
     val node by viewModel.destNode.collectAsStateWithLifecycle()
-    val nodeName: String? = node?.user?.longName
+    val ourNode by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val isLocal = node?.num == ourNode?.num
+    val nodeName: String? = node?.user?.longName?.let {
+        if (!isLocal) {
+            "$it (" + stringResource(R.string.remote) + ")"
+        } else {
+            it
+        }
+    }
+
     nodeName?.let {
         uiViewModel.setTitle(it)
     }

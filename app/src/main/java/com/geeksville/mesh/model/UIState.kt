@@ -266,7 +266,10 @@ class UIViewModel @Inject constructor(
     private val _title = MutableStateFlow("")
     val title: StateFlow<String> = _title.asStateFlow()
     fun setTitle(title: String) {
-        _title.value = title
+        viewModelScope.launch {
+
+            _title.value = title
+        }
     }
 
     val receivingLocationUpdates: StateFlow<Boolean> get() = locationRepository.receivingLocationUpdates
