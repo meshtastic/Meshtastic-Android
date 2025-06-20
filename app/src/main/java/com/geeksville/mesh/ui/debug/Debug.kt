@@ -42,7 +42,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.CloudDownload
+import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.twotone.FilterAltOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -244,7 +244,7 @@ private fun DebugItemHeader(
             modifier = Modifier.padding(start = 8.dp)
         )
         Icon(
-            imageVector = Icons.Outlined.CloudDownload,
+            imageVector = Icons.Outlined.FileDownload,
             contentDescription = stringResource(id = R.string.logs),
             tint = Color.Gray.copy(alpha = 0.6f),
             modifier = Modifier.padding(end = 8.dp),
@@ -463,7 +463,7 @@ private fun DebugMenuActionsPreview() {
                 modifier = Modifier.padding(4.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Outlined.CloudDownload,
+                    imageVector = Icons.Outlined.FileDownload,
                     contentDescription = "Export Logs"
                 )
             }
@@ -677,7 +677,7 @@ fun DebugMenuActions(
         modifier = modifier.padding(4.dp)
     ) {
         Icon(
-            imageVector = Icons.Outlined.CloudDownload,
+            imageVector = Icons.Outlined.FileDownload,
             contentDescription = "Export Logs"
         )
     }
