@@ -24,6 +24,7 @@
     <string name="node_filter_placeholder">필터</string>
     <string name="desc_node_filter_clear">노드 필터 지우기</string>
     <string name="node_filter_include_unknown">미확인 노드 포함</string>
+    <string name="node_filter_only_online">오프라인 노드 숨기기</string>
     <string name="node_filter_show_details">자세히 보기</string>
     <string name="node_sort_button">노드 정렬</string>
     <string name="node_sort_alpha">A-Z</string>
@@ -134,7 +135,9 @@
     <string name="text_messages">문자 메시지</string>
     <string name="channel_invalid">이 채널 URL은 잘못 되었습니다. 따라서 사용할 수 없습니다.</string>
     <string name="debug_panel">디버그 패널</string>
+    <string name="debug_logs_export">로그 내보내기</string>
     <string name="debug_last_messages">500개의 마지막 메시지</string>
+    <string name="debug_filters">필터</string>
     <string name="clear">초기화</string>
     <string name="updating_firmware">펌웨어 업데이트 중, 최대 8분 소요 예정…</string>
     <string name="update_successful">업데이트 성공</string>
@@ -286,6 +289,7 @@
     <string name="device_metrics_log">장치 메트릭 로그</string>
     <string name="node_map">노드 지도</string>
     <string name="position_log">위치 로그</string>
+    <string name="last_position_update">최근 위치 업데이트</string>
     <string name="env_metrics_log">환경 메트릭 로그</string>
     <string name="sig_metrics_log">신호 메트릭 로그</string>
     <string name="administration">관리</string>
@@ -513,6 +517,7 @@
     <string name="range_test_enabled">거리 테스트 활성화</string>
     <string name="sender_message_interval_seconds">송신 기기 메시지 간격 (초)</string>
     <string name="save_csv_in_storage_esp32_only">.CSV 파일 기기 저장 (EPS32만 동작)</string>
+    <string name="remote_hardware_config">원격 기기 설정</string>
     <string name="security_config">보안 설정</string>
     <string name="public_key">공개 키</string>
     <string name="private_key">개인 키</string>
@@ -540,5 +545,32 @@
     <string name="short_name">짧은 이름</string>
     <string name="hardware_model">하드웨어 모델</string>
     <string name="distance">거리</string>
+    <string name="store_forward_config"><![CDATA[저장 및 전달 설정]]></string>
+    <string name="url">URL</string>
+    <string name="backup_restore"><![CDATA[백업 & 복구]]></string>
+    <string name="import_configuration">설정 불러오기</string>
+    <string name="export_configuration">설정 내보내기</string>
+    <string name="hardware">하드웨어</string>
+    <string name="supported">지원됨</string>
+    <string name="node_number">노드 번호</string>
+    <string name="user_id">유저 ID</string>
+    <string name="uptime">업타임</string>
+    <string name="firmware_version">펌웨어 버전</string>
+    <string name="timestamp">타임스탬프</string>
+    <string name="set_region">지역 설정</string>
+    <string name="unmute">음소거 해제</string>
+    <string name="scan_qr_code"> QR코드 스캔</string>
+    <string name="public_key_changed">공개 키 변경됨</string>
+    <string name="import_label">불러오기</string>
+    <string name="request_metadata">메타데이터 요청</string>
+    <string name="actions">작업</string>
+    <string name="firmware">펌웨어</string>
+    <string name="use_12h_format">12시간제 보기</string>
+    <string name="display_time_in_12h_format">활성화 하면 기기의 디스플레이에서 시간이 12시간제로 표시됩니다.</string>
     <string name="map">지도</string>
+    <string name="should_update">노드의 펌웨어를 업데이트하여 최신 기능, 수정사항을 이용하세요. \n\n최신 안정 버전: %1$s</string>
+    <string name="time">시간</string>
+    <string name="date">날짜</string>
+    <string name="only_favorites">즐겨찾기만 보기</string>
+    <string name="show_waypoints">웨이포인트 보기</string>
 </resources>
