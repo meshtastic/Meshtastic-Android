@@ -95,6 +95,8 @@ fun RadioConfigScreen(
         uiViewModel.setTitle(it)
     }
 
+    val excludedModulesUnlocked by uiViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
+
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     var isWaiting by remember { mutableStateOf(false) }
     if (isWaiting) {
@@ -168,6 +170,7 @@ fun RadioConfigScreen(
     RadioConfigItemList(
         modifier = modifier,
         state = state,
+        excludedModulesUnlocked = excludedModulesUnlocked,
         onRouteClick = { route ->
             isWaiting = true
             viewModel.setResponseStateLoading(route)
@@ -295,6 +298,7 @@ private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Un
 @Composable
 private fun RadioConfigItemList(
     state: RadioConfigState,
+    excludedModulesUnlocked: Boolean = false,
     modifier: Modifier = Modifier,
     onRouteClick: (Enum<*>) -> Unit = {},
     onImport: () -> Unit = {},
@@ -302,8 +306,8 @@ private fun RadioConfigItemList(
 ) {
     val enabled = state.connected && !state.responseState.isWaiting()
     var modules by remember { mutableStateOf(ModuleRoute.filterExcludedFrom(state.metadata)) }
-    LaunchedEffect(state.excludedModulesUnlocked) {
-        if (state.excludedModulesUnlocked) {
+    LaunchedEffect(excludedModulesUnlocked) {
+        if (excludedModulesUnlocked) {
             modules = ModuleRoute.entries
         } else {
             modules = ModuleRoute.filterExcludedFrom(state.metadata)
