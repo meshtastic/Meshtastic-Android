@@ -221,7 +221,7 @@ internal fun MessageItem(
                         }
                     } else {
                         Text(
-                            text = stringResource(R.string.hops_away, message.hopsAway),
+                            text = stringResource(R.string.hops_away_template, message.hopsAway),
                             style = MaterialTheme.typography.labelSmall,
                         )
                     }
