@@ -131,7 +131,7 @@ data class DataPacket(
         parcel.readInt(),
         parcel.readFloat(),
         parcel.readInt(),
-        if (parcel.readInt() == 0) null else parcel.readInt()
+        parcel.readInt().let { if (it == 0) null else it }
     )
 
     @Suppress("CyclomaticComplexMethod")
@@ -232,7 +232,8 @@ data class DataPacket(
         const val PKC_CHANNEL_INDEX = 8
 
         fun nodeNumToDefaultId(n: Int): String = "!%08x".format(n)
-        fun idToDefaultNodeNum(id: String?): Int? = runCatching { id?.toLong(16)?.toInt() }.getOrNull()
+        fun idToDefaultNodeNum(id: String?): Int? =
+            runCatching { id?.toLong(16)?.toInt() }.getOrNull()
 
         override fun createFromParcel(parcel: Parcel): DataPacket {
             return DataPacket(parcel)
