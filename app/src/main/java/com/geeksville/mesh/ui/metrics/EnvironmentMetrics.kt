@@ -49,6 +49,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -165,7 +166,6 @@ fun EnvironmentMetricsScreen(
     }
 }
 
-/* TODO need to take the time to understand this. */
 @SuppressLint("ConfigurationScreenWidthHeight")
 @Suppress("LongMethod")
 @Composable
@@ -182,9 +182,30 @@ private fun EnvironmentMetricsChart(
     }
 
     val (oldest, newest) = graphData.times
+    val timeDiff = newest - oldest
+
+    val scrollState = rememberScrollState()
+    val screenWidth = LocalConfiguration.current.screenWidthDp
+    val dp by remember(key1 = selectedTime) {
+        mutableStateOf(selectedTime.dp(screenWidth, time = timeDiff.toLong()))
+    }
+
+    // Calculate visible time range based on scroll position and chart width
+    val visibleTimeRange = run {
+        val density = LocalDensity.current
+        val totalWidthPx = with(density) { dp.toPx() }
+        val scrollPx = scrollState.value.toFloat()
+        val visibleWidthPx = with(density) { screenWidth.dp.toPx() }
+        val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
+        val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
+        val visibleOldest = oldest + (timeDiff * leftRatio).toInt()
+        val visibleNewest = oldest + (timeDiff * rightRatio).toInt()
+        visibleOldest to visibleNewest
+    }
+
     TimeLabels(
-        oldest = oldest,
-        newest = newest
+        oldest = visibleTimeRange.first,
+        newest = visibleTimeRange.second
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -196,12 +217,6 @@ private fun EnvironmentMetricsChart(
     var min = rightMin
     var diff = rightMax - rightMin
 
-    val scrollState = rememberScrollState()
-    val screenWidth = LocalConfiguration.current.screenWidthDp
-    val timeDiff = newest - oldest
-    val dp by remember(key1 = selectedTime) {
-        mutableStateOf(selectedTime.dp(screenWidth, time = timeDiff.toLong()))
-    }
     val shouldPlot = graphData.shouldPlot
 
     Row {
