@@ -50,7 +50,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -59,14 +58,12 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
-import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.common.components.BatteryInfo
 import com.geeksville.mesh.ui.common.components.OptionLabel
 import com.geeksville.mesh.ui.common.components.SlidingSelector
-import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.Orange
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MAX_PERCENT_VALUE
@@ -74,7 +71,6 @@ import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.plotPoint
-import androidx.compose.ui.tooling.preview.PreviewLightDark
 
 private enum class Device(val color: Color) {
     BATTERY(Color.Green),
@@ -143,7 +139,6 @@ private fun DeviceMetricsChart(
     selectedTime: TimeFrame,
     promptInfoDialog: () -> Unit
 ) {
-    val graphColor = MaterialTheme.colorScheme.onSurface
 
     ChartHeader(amount = telemetries.size)
     if (telemetries.isEmpty()) return
@@ -156,30 +151,20 @@ private fun DeviceMetricsChart(
     }
     val timeDiff = newest.time - oldest.time
 
+    TimeLabels(
+        oldest = oldest.time,
+        newest = newest.time
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    val graphColor = MaterialTheme.colorScheme.onSurface
+
     val scrollState = rememberScrollState()
     val screenWidth = LocalWindowInfo.current.containerSize.width
     val dp by remember(key1 = selectedTime) {
         mutableStateOf(selectedTime.dp(screenWidth, time = timeDiff.toLong()))
     }
-
-    // Calculate visible time range based on scroll position and chart width
-    val visibleTimeRange = run {
-        val totalWidthPx = with(LocalDensity.current) { dp.toPx() }
-        val scrollPx = scrollState.value.toFloat()
-        val visibleWidthPx = with(LocalDensity.current) { screenWidth.toDp().toPx() }
-        val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
-        val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
-        val visibleOldest = oldest.time + (timeDiff * leftRatio).toInt()
-        val visibleNewest = oldest.time + (timeDiff * rightRatio).toInt()
-        visibleOldest to visibleNewest
-    }
-
-    TimeLabels(
-        oldest = visibleTimeRange.first,
-        newest = visibleTimeRange.second
-    )
-
-    Spacer(modifier = Modifier.height(16.dp))
 
     Row {
         Box(
@@ -280,34 +265,6 @@ private fun DeviceMetricsChart(
     Spacer(modifier = Modifier.height(16.dp))
 }
 
-@Suppress("detekt:MagicNumber") // fake data
-@PreviewLightDark
-@Composable
-private fun DeviceMetricsChartPreview() {
-    val now = (System.currentTimeMillis() / 1000).toInt()
-    val telemetries = List(20) { i ->
-        Telemetry.newBuilder()
-            .setTime(now - (19 - i) * 60 * 60) // 1-hour intervals, oldest first
-            .setDeviceMetrics(
-                TelemetryProtos.DeviceMetrics.newBuilder()
-                    .setBatteryLevel(80 - i)
-                    .setVoltage(3.7f - i * 0.02f)
-                    .setChannelUtilization(10f + i * 2)
-                    .setAirUtilTx(5f + i)
-                    .setUptimeSeconds(3600 + i * 300)
-            )
-            .build()
-    }
-    AppTheme {
-        DeviceMetricsChart(
-            modifier = Modifier.height(400.dp),
-            telemetries = telemetries,
-            selectedTime = TimeFrame.TWENTY_FOUR_HOURS,
-            promptInfoDialog = {}
-        )
-    }
-}
-
 @Composable
 private fun DeviceMetricsCard(telemetry: Telemetry) {
     val deviceMetrics = telemetry.deviceMetrics
@@ -362,26 +319,5 @@ private fun DeviceMetricsCard(telemetry: Telemetry) {
                 }
             }
         }
-    }
-}
-
-@Suppress("detekt:MagicNumber") // fake data
-@PreviewLightDark
-@Composable
-private fun DeviceMetricsCardPreview() {
-    val now = (System.currentTimeMillis() / 1000).toInt()
-    val telemetry = Telemetry.newBuilder()
-        .setTime(now)
-        .setDeviceMetrics(
-            TelemetryProtos.DeviceMetrics.newBuilder()
-                .setBatteryLevel(75)
-                .setVoltage(3.65f)
-                .setChannelUtilization(22.5f)
-                .setAirUtilTx(12.0f)
-                .setUptimeSeconds(7200)
-        )
-        .build()
-    AppTheme {
-        DeviceMetricsCard(telemetry = telemetry)
     }
 }
