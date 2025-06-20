@@ -90,6 +90,7 @@ import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
 import com.geeksville.mesh.ui.debug.DebugMenuActions
+import com.geeksville.mesh.ui.radioconfig.RadioConfigMenuActions
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
     Contacts(R.string.contacts, Icons.AutoMirrored.TwoTone.Chat, ContactsRoutes.Contacts),
@@ -125,8 +126,6 @@ fun MainScreen(
     }
 
     VersionChecks(viewModel)
-
-    val title by viewModel.title.collectAsStateWithLifecycle()
 
     val alertDialogState by viewModel.currentAlert.collectAsStateWithLifecycle()
     alertDialogState?.let { state ->
@@ -245,7 +244,7 @@ fun MainScreen(
                 .fillMaxSize()
         ) {
             MainAppBar(
-                title = title,
+                viewModel = viewModel,
                 isManaged = localConfig.security.isManaged,
                 navController = navController,
                 onAction = { action ->
@@ -336,7 +335,7 @@ enum class MainMenuAction(@StringRes val stringRes: Int) {
 @Suppress("LongMethod")
 @Composable
 private fun MainAppBar(
-    title: String,
+    viewModel: UIViewModel = hiltViewModel(),
     isManaged: Boolean,
     navController: NavHostController,
     modifier: Modifier = Modifier,
@@ -350,6 +349,7 @@ private fun MainAppBar(
     if (currentDestination?.hasRoute<ContactsRoutes.Messages>() == true) {
         return
     }
+    val title by viewModel.title.collectAsStateWithLifecycle("")
     TopAppBar(
         title = {
             when {
@@ -405,17 +405,37 @@ private fun MainAppBar(
             }
         },
         actions = {
-            when {
-                currentDestination == null || isTopLevelRoute ->
-                    MainMenuActions(isManaged, onAction)
-
-                currentDestination.hasRoute<Route.DebugPanel>() ->
-                    DebugMenuActions()
-
-                else -> {}
-            }
+            TopBarActions(
+                viewModel = viewModel,
+                currentDestination = currentDestination,
+                isManaged = isManaged,
+                isTopLevelRoute = isTopLevelRoute,
+                onAction = onAction
+            )
         },
     )
+}
+
+@Composable
+private fun TopBarActions(
+    viewModel: UIViewModel = hiltViewModel(),
+    currentDestination: NavDestination?,
+    isManaged: Boolean,
+    isTopLevelRoute: Boolean,
+    onAction: (MainMenuAction) -> Unit
+) {
+    when {
+        currentDestination == null || isTopLevelRoute ->
+            MainMenuActions(isManaged, onAction)
+
+        currentDestination.hasRoute<Route.DebugPanel>() ->
+            DebugMenuActions()
+
+        currentDestination.hasRoute<RadioConfigRoutes.RadioConfig>() ->
+            RadioConfigMenuActions(viewModel = viewModel)
+
+        else -> {}
+    }
 }
 
 @Composable
