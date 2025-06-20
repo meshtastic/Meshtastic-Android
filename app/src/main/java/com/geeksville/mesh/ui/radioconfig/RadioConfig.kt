@@ -19,6 +19,7 @@ package com.geeksville.mesh.ui.radioconfig
 
 import android.app.Activity
 import android.content.Intent
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
@@ -45,17 +46,21 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -73,6 +78,8 @@ import com.geeksville.mesh.ui.common.components.PreferenceCategory
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.radioconfig.components.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.seconds
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -294,6 +301,14 @@ private fun RadioConfigItemList(
     onExport: () -> Unit = {},
 ) {
     val enabled = state.connected && !state.responseState.isWaiting()
+    var modules by remember { mutableStateOf(ModuleRoute.filterExcludedFrom(state.metadata)) }
+    LaunchedEffect(state.excludedModulesUnlocked) {
+        if (state.excludedModulesUnlocked) {
+            modules = ModuleRoute.entries
+        } else {
+            modules = ModuleRoute.filterExcludedFrom(state.metadata)
+        }
+    }
     LazyColumn(
         modifier = modifier,
         contentPadding = PaddingValues(horizontal = 16.dp),
@@ -308,7 +323,7 @@ private fun RadioConfigItemList(
         }
 
         item { PreferenceCategory(stringResource(R.string.module_settings)) }
-        items(ModuleRoute.filterExcludedFrom(state.metadata)) {
+        items(modules) {
             NavCard(
                 title = stringResource(it.title),
                 icon = it.icon,
@@ -335,6 +350,40 @@ private fun RadioConfigItemList(
         }
 
         items(AdminRoute.entries) { NavButton(it.title, enabled) { onRouteClick(it) } }
+    }
+}
+
+private const val UNLOCK_CLICK_COUNT = 5
+private const val UNLOCK_TIMEOUT_SECONDS = 3
+
+@Composable
+fun RadioConfigMenuActions(
+    modifier: Modifier = Modifier,
+    viewModel: UIViewModel = hiltViewModel(),
+) {
+    val context = LocalContext.current
+    var counter by remember { mutableIntStateOf(0) }
+    LaunchedEffect(counter) {
+        if (counter > 0 && counter < UNLOCK_CLICK_COUNT) {
+            delay(UNLOCK_TIMEOUT_SECONDS.seconds)
+            counter = 0
+        }
+    }
+    IconButton(
+        enabled = counter < UNLOCK_CLICK_COUNT,
+        onClick = {
+            counter++
+            if (counter == UNLOCK_CLICK_COUNT) {
+                viewModel.unlockExcludedModules()
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.modules_unlocked),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        },
+        modifier = modifier,
+    ) {
     }
 }
 

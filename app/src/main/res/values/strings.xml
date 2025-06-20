@@ -691,4 +691,5 @@
     <string name="regenerate_keys_confirmation">Are you sure you want to regenerate your Private Key?</string>
     <string name="export_keys">Export Keys</string>
     <string name="export_keys_confirmation">Exports public and private keys to a file. Please store somewhere securely.</string>
+    <string name="modules_unlocked">Modules unlocked</string>
 </resources>

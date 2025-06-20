@@ -79,6 +79,7 @@ data class RadioConfigState(
     val isLocal: Boolean = false,
     val connected: Boolean = false,
     val route: String = "",
+    val excludedModulesUnlocked: Boolean = false,
     val metadata: MeshProtos.DeviceMetadata? = null,
     val userConfig: MeshProtos.User = MeshProtos.User.getDefaultInstance(),
     val channelList: List<ChannelProtos.ChannelSettings> = emptyList(),
@@ -134,6 +135,12 @@ class RadioConfigViewModel @Inject constructor(
 
         radioConfigRepository.myNodeInfo.onEach { ni ->
             _radioConfigState.update { it.copy(isLocal = destNum == null || destNum == ni?.myNodeNum) }
+        }.launchIn(viewModelScope)
+
+        radioConfigRepository.excludedModulesUnlocked.onEach { unlocked ->
+            _radioConfigState.update {
+                it.copy(excludedModulesUnlocked = unlocked)
+            }
         }.launchIn(viewModelScope)
 
         debug("RadioConfigViewModel created")

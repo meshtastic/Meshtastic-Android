@@ -41,8 +41,10 @@ import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.service.ServiceRepository
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import javax.inject.Inject
@@ -233,5 +235,11 @@ class RadioConfigRepository @Inject constructor(
 
     fun clearTracerouteResponse() {
         setTracerouteResponse(null)
+    }
+
+    private val _excludedModulesUnlocked = MutableStateFlow(false)
+    val excludedModulesUnlocked get() = _excludedModulesUnlocked.asStateFlow()
+    fun unlockExcludedModules() {
+        _excludedModulesUnlocked.value = true
     }
 }
