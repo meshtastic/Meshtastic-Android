@@ -139,7 +139,7 @@ internal fun DebugScreen(
             DebugSearchStateviewModelDefaults(
                 searchState = searchState,
                 filterTexts = filterTexts,
-                presetFilters = viewModel.presetFilters.asList(),
+                presetFilters = viewModel.presetFilters,
             )
         }
 
