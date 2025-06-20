@@ -50,6 +50,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -142,6 +143,7 @@ private fun DeviceMetricsChart(
     selectedTime: TimeFrame,
     promptInfoDialog: () -> Unit
 ) {
+    val graphColor = MaterialTheme.colorScheme.onSurface
 
     ChartHeader(amount = telemetries.size)
     if (telemetries.isEmpty()) return
@@ -154,20 +156,30 @@ private fun DeviceMetricsChart(
     }
     val timeDiff = newest.time - oldest.time
 
-    TimeLabels(
-        oldest = oldest.time,
-        newest = newest.time
-    )
-
-    Spacer(modifier = Modifier.height(16.dp))
-
-    val graphColor = MaterialTheme.colorScheme.onSurface
-
     val scrollState = rememberScrollState()
     val screenWidth = LocalWindowInfo.current.containerSize.width
     val dp by remember(key1 = selectedTime) {
         mutableStateOf(selectedTime.dp(screenWidth, time = timeDiff.toLong()))
     }
+
+    // Calculate visible time range based on scroll position and chart width
+    val visibleTimeRange = run {
+        val totalWidthPx = with(LocalDensity.current) { dp.toPx() }
+        val scrollPx = scrollState.value.toFloat()
+        val visibleWidthPx = with(LocalDensity.current) { screenWidth.toDp().toPx() }
+        val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
+        val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
+        val visibleOldest = oldest.time + (timeDiff * leftRatio).toInt()
+        val visibleNewest = oldest.time + (timeDiff * rightRatio).toInt()
+        visibleOldest to visibleNewest
+    }
+
+    TimeLabels(
+        oldest = visibleTimeRange.first,
+        newest = visibleTimeRange.second
+    )
+
+    Spacer(modifier = Modifier.height(16.dp))
 
     Row {
         Box(
@@ -268,6 +280,7 @@ private fun DeviceMetricsChart(
     Spacer(modifier = Modifier.height(16.dp))
 }
 
+@Suppress("detekt:MagicNumber") // fake data
 @PreviewLightDark
 @Composable
 private fun DeviceMetricsChartPreview() {
@@ -352,6 +365,7 @@ private fun DeviceMetricsCard(telemetry: Telemetry) {
     }
 }
 
+@Suppress("detekt:MagicNumber") // fake data
 @PreviewLightDark
 @Composable
 private fun DeviceMetricsCardPreview() {
