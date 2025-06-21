@@ -406,12 +406,12 @@ private fun DeviceMetricsScreenPreview() {
             )
             .build()
     }
-    
+
     AppTheme {
         Surface {
             Column {
                 var displayInfoDialog by remember { mutableStateOf(false) }
-                
+
                 if (displayInfoDialog) {
                     LegendInfoDialog(
                         pairedRes = listOf(
