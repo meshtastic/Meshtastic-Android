@@ -193,7 +193,7 @@ fun TimeAxisOverlay(
     Canvas(modifier = modifier) {
 
         val height = size.height
-        val width = size.width - 28.dp.toPx()
+        val width = size.width
 
         /* Cut out the time remaining in order to place the lines on the dot. */
         val timeRemaining = oldest % timeInterval
