@@ -88,6 +88,10 @@ private enum class PowerChannel(@StringRes val strRes: Int) {
     THREE(R.string.channel_3)
 }
 
+private const val CHART_WEIGHT = 1f
+private const val Y_AXIS_WEIGHT = 0.1f
+private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIGHT + Y_AXIS_WEIGHT)
+
 private val LEGEND_DATA = listOf(
     LegendData(nameRes = R.string.current, color = Power.CURRENT.color, isLine = true),
     LegendData(nameRes = R.string.voltage, color = Power.VOLTAGE.color, isLine = true),
@@ -166,14 +170,15 @@ private fun PowerMetricsChart(
 
     // Calculate visible time range based on scroll position and chart width
     val visibleTimeRange = run {
-        val density = LocalDensity.current
-        val totalWidthPx = with(density) { dp.toPx() }
+        val totalWidthPx = with(LocalDensity.current) { dp.toPx() }
         val scrollPx = scrollState.value.toFloat()
-        val visibleWidthPx = with(density) { screenWidth.toDp().toPx() }
+        // Calculate visible width based on actual weight distribution
+        val visibleWidthPx = screenWidth * CHART_WIDTH_RATIO
         val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
         val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
-        val visibleOldest = oldest.time + (timeDiff * leftRatio).toInt()
-        val visibleNewest = oldest.time + (timeDiff * rightRatio).toInt()
+        // With reverseScrolling = true, scrolling right shows older data (left side of chart)
+        val visibleOldest = oldest.time + (timeDiff * (1f - rightRatio)).toInt()
+        val visibleNewest = oldest.time + (timeDiff * (1f - leftRatio)).toInt()
         visibleOldest to visibleNewest
     }
 
@@ -190,7 +195,7 @@ private fun PowerMetricsChart(
 
     Row {
         YAxisLabels(
-            modifier = modifier.weight(weight = .1f),
+            modifier = modifier.weight(weight = Y_AXIS_WEIGHT),
             Power.CURRENT.color,
             minValue = Power.CURRENT.min,
             maxValue = Power.CURRENT.max,
@@ -277,7 +282,7 @@ private fun PowerMetricsChart(
             }
         }
         YAxisLabels(
-            modifier = modifier.weight(weight = .1f),
+            modifier = modifier.weight(weight = Y_AXIS_WEIGHT),
             Power.VOLTAGE.color,
             minValue = Power.VOLTAGE.min,
             maxValue = Power.VOLTAGE.max,

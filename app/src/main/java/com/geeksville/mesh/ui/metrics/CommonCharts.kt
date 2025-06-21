@@ -59,7 +59,6 @@ import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.metrics.CommonCharts.MAX_PERCENT_VALUE
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
-import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_MINUTE_FORMAT
 import java.text.DateFormat
 
@@ -251,7 +250,6 @@ fun TimeAxisOverlay(
 fun TimeLabels(
     oldest: Int,
     newest: Int,
-    telemetries: List<Telemetry>? = null
 ) {
 
     Row {

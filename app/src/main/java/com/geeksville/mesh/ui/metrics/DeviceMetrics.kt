@@ -84,7 +84,7 @@ private enum class Device(val color: Color) {
 
 private const val CHART_WEIGHT = 1f
 private const val Y_AXIS_WEIGHT = 0.1f
-private val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIGHT)
+private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIGHT)
 
 private val LEGEND_DATA = listOf(
     LegendData(nameRes = R.string.battery, color = Device.BATTERY.color, isLine = true),
@@ -183,7 +183,6 @@ private fun DeviceMetricsChart(
     TimeLabels(
         oldest = visibleTimeRange.first,
         newest = visibleTimeRange.second,
-        telemetries = telemetries
     )
 
     Spacer(modifier = Modifier.height(16.dp))

@@ -48,8 +48,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -77,6 +77,11 @@ private enum class Metric(val color: Color, val min: Float, val max: Float) {
      */
     fun difference() = max - min
 }
+
+private const val CHART_WEIGHT = 1f
+private const val Y_AXIS_WEIGHT = 0.1f
+private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIGHT + Y_AXIS_WEIGHT)
+
 private val LEGEND_DATA = listOf(
     LegendData(nameRes = R.string.rssi, color = Metric.RSSI.color),
     LegendData(nameRes = R.string.snr, color = Metric.SNR.color)
@@ -150,22 +155,22 @@ private fun SignalMetricsChart(
     val timeDiff = newest.rxTime - oldest.rxTime
 
     val scrollState = rememberScrollState()
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp
+    val screenWidth = LocalWindowInfo.current.containerSize.width
     val dp by remember(key1 = selectedTime) {
         mutableStateOf(selectedTime.dp(screenWidth, time = (newest.rxTime - oldest.rxTime).toLong()))
     }
 
     // Calculate visible time range based on scroll position and chart width
     val visibleTimeRange = run {
-        val density = LocalDensity.current
-        val totalWidthPx = with(density) { dp.toPx() }
+        val totalWidthPx = with(LocalDensity.current) { dp.toPx() }
         val scrollPx = scrollState.value.toFloat()
-        val visibleWidthPx = with(density) { screenWidth.dp.toPx() }
+        // Calculate visible width based on actual weight distribution
+        val visibleWidthPx = screenWidth * CHART_WIDTH_RATIO
         val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
         val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
-        val visibleOldest = oldest.rxTime + (timeDiff * leftRatio).toInt()
-        val visibleNewest = oldest.rxTime + (timeDiff * rightRatio).toInt()
+        // With reverseScrolling = true, scrolling right shows older data (left side of chart)
+        val visibleOldest = oldest.rxTime + (timeDiff * (1f - rightRatio)).toInt()
+        val visibleNewest = oldest.rxTime + (timeDiff * (1f - leftRatio)).toInt()
         visibleOldest to visibleNewest
     }
 
@@ -182,7 +187,7 @@ private fun SignalMetricsChart(
 
     Row {
         YAxisLabels(
-            modifier = modifier.weight(weight = .1f),
+            modifier = modifier.weight(weight = Y_AXIS_WEIGHT),
             Metric.RSSI.color,
             minValue = Metric.RSSI.min,
             maxValue = Metric.RSSI.max,
@@ -235,7 +240,7 @@ private fun SignalMetricsChart(
             }
         }
         YAxisLabels(
-            modifier = modifier.weight(weight = .1f),
+            modifier = modifier.weight(weight = Y_AXIS_WEIGHT),
             Metric.SNR.color,
             minValue = Metric.SNR.min,
             maxValue = Metric.SNR.max,
