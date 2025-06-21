@@ -56,7 +56,7 @@ fun NodeChip(
         AssistChip(
             modifier = modifier
                 .width(IntrinsicSize.Min)
-                .defaultMinSize(minHeight = 24.dp, minWidth = 48.dp),
+                .defaultMinSize(minHeight = 24.dp, minWidth = 72.dp),
             colors = AssistChipDefaults.assistChipColors(
                 containerColor = Color(nodeColor),
                 labelColor = Color(textColor),
@@ -69,6 +69,7 @@ fun NodeChip(
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                     textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                     textAlign = TextAlign.Center,
+                    maxLines = 1,
                 )
             },
             onClick = {},
