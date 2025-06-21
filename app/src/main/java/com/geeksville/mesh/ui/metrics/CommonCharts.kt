@@ -255,14 +255,18 @@ fun TimeLabels(
 ) {
     val actualOldest = if (telemetries != null && telemetries.isNotEmpty()) {
         // Find the oldest telemetry that falls within the visible time range
-        telemetries.filter { it.time >= oldest && it.time <= newest }
+        // Add a small tolerance to account for precision issues in the range calculation
+        val tolerance = 1 // 1 second tolerance
+        telemetries.filter { it.time >= (oldest - tolerance) && it.time <= (newest + tolerance) }
             .minByOrNull { it.time }?.time ?: oldest
     } else {
         oldest
     }
     val actualNewest = if (telemetries != null && telemetries.isNotEmpty()) {
         // Find the newest telemetry that falls within the visible time range
-        telemetries.filter { it.time >= oldest && it.time <= newest }
+        // Add a small tolerance to account for precision issues in the range calculation
+        val tolerance = 1 // 1 second tolerance
+        telemetries.filter { it.time >= (oldest - tolerance) && it.time <= (newest + tolerance) }
             .maxByOrNull { it.time }?.time ?: newest
     } else {
         newest
