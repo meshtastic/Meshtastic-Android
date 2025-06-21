@@ -176,6 +176,7 @@ internal fun MessageItem(
                         .fillMaxWidth()
                         .padding(horizontal = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     NodeChip(
                         node = if (fromLocal) ourNode else node,
@@ -183,14 +184,13 @@ internal fun MessageItem(
                         isConnected = isConnected,
                         isThisNode = fromLocal,
                     )
-                    Spacer(Modifier.width(4.dp))
                     Text(
                         text = with(if (fromLocal) ourNode.user else node.user) { "$longName ($id)" },
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
-                        style = MaterialTheme.typography.labelLarge
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.weight(1f, fill = false)
                     )
-                    Spacer(Modifier.weight(1f))
                     MessageActions(
                         onSendReaction = sendReaction,
                         onSendReply = onReply,
