@@ -138,6 +138,7 @@
     <string name="channel_invalid">Tato adresa URL kanálu je neplatná a nelze ji použít</string>
     <string name="debug_panel">Panel pro ladění</string>
     <string name="debug_last_messages">500 posledních zpráv</string>
+    <string name="debug_filters">Filtry</string>
     <string name="clear">Vymazat</string>
     <string name="updating_firmware">Aktualizuji firmware, čekejte až osm minut…</string>
     <string name="update_successful">Aktualizace byla úspěšná</string>
@@ -292,6 +293,7 @@
     <string name="device_metrics_log">Protokol metrik zařízení</string>
     <string name="node_map">Mapa uzlu</string>
     <string name="position_log">Protokol pozic</string>
+    <string name="last_position_update">Poslední aktualizace pozice</string>
     <string name="env_metrics_log">Protokol metrik prostředí</string>
     <string name="sig_metrics_log">Protokol signálů</string>
     <string name="administration">Administrace</string>
@@ -623,4 +625,9 @@
     <string name="show_waypoints">Zobrazit trasové body</string>
     <string name="show_precision_circle">Zobrazit kruhy přesnosti</string>
     <string name="client_notification">Oznámení klienta</string>
+    <string name="compromised_keys">Zjištěny kompromitované klíče, zvolte OK pro obnovení.</string>
+    <string name="regenerate_private_key">Obnovit soukromý klíč</string>
+    <string name="regenerate_keys_confirmation">Jste si jisti, že chcete obnovit svůj soukromý klíč?</string>
+    <string name="export_keys">Exportovat klíče</string>
+    <string name="export_keys_confirmation">Exportuje veřejné a soukromé klíče do souboru. Uložte je prosím bezpečně.</string>
 </resources>

@@ -96,6 +96,7 @@
     <string name="channel_invalid">URL адресът на този канал е невалиден и не може да се използва</string>
     <string name="debug_panel">Панел за отстраняване на грешки</string>
     <string name="debug_last_messages">Последни 500 съобщения</string>
+    <string name="debug_filters">Филтри</string>
     <string name="clear">Изчисти</string>
     <string name="updating_firmware">Актуализиране на фърмуера, изчакайте до осем минути…</string>
     <string name="update_successful">Обновлението е успешно</string>
@@ -283,6 +284,7 @@
     <string name="red">Червен</string>
     <string name="green">Зелен</string>
     <string name="blue">Син</string>
+    <string name="rotary_encoder_1_enabled">Ротационен енкодер #1 е активиран</string>
     <string name="messages">Съобщения</string>
     <string name="friendly_name">Приятелско име</string>
     <string name="device_config">Конфигурация на устройството</string>
@@ -299,6 +301,8 @@
     <string name="tx_enabled">TX е активирано</string>
     <string name="tx_power_dbm">TX мощност (dBm)</string>
     <string name="frequency_slot">Честотен слот</string>
+    <string name="mqtt_config">Конфигурация на MQTT</string>
+    <string name="mqtt_enabled">MQTT е активиран</string>
     <string name="address">Адрес</string>
     <string name="username">Потребителско име</string>
     <string name="password">Парола</string>
@@ -312,6 +316,7 @@
     <string name="ethernet_enabled">Ethernet е активиран</string>
     <string name="ntp_server">NTP сървър</string>
     <string name="rsyslog_server">rsyslog сървър</string>
+    <string name="ipv4_mode">Режим на IPv4</string>
     <string name="ip">IP</string>
     <string name="gateway">Шлюз</string>
     <string name="paxcounter_config">Конфигурация на Paxcounter</string>
@@ -351,6 +356,7 @@
     <string name="import_configuration">Импортиране на конфигурацията</string>
     <string name="export_configuration">Експортиране на конфигурацията</string>
     <string name="hardware">Хардуер</string>
+    <string name="supported">Поддържан</string>
     <string name="node_number">Номер на възела</string>
     <string name="uptime">Време на работа</string>
     <string name="firmware_version">Версия на Фърмуера</string>

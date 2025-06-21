@@ -141,7 +141,6 @@
     <string name="debug_logs_export">Vie lokitiedot</string>
     <string name="debug_last_messages">500 viimeisintä viestiä</string>
     <string name="debug_filters">Suodattimet</string>
-    <string name="debug_active_filters">Aktiiviset suodattimet</string>
     <string name="debug_default_search">Hae lokitiedoista...</string>
     <string name="debug_clear">Tyhjennä lokit</string>
     <string name="clear">Tyhjennä</string>

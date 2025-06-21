@@ -206,7 +206,18 @@ class UIViewModel @Inject constructor(
     private val _lastTraceRouteTime = MutableStateFlow<Long?>(null)
     val lastTraceRouteTime: StateFlow<Long?> = _lastTraceRouteTime.asStateFlow()
 
-    val clientNotification: StateFlow<MeshProtos.ClientNotification?> = radioConfigRepository.clientNotification
+    private val _excludedModulesUnlocked = MutableStateFlow(false)
+    val excludedModulesUnlocked: StateFlow<Boolean> = _excludedModulesUnlocked.asStateFlow()
+
+    fun unlockExcludedModules() {
+        viewModelScope.launch {
+            _excludedModulesUnlocked.value = true
+        }
+    }
+
+    val clientNotification: StateFlow<MeshProtos.ClientNotification?> =
+        radioConfigRepository.clientNotification
+
     fun clearClientNotification(notification: MeshProtos.ClientNotification) {
         radioConfigRepository.clearClientNotification()
         meshServiceNotifications.clearClientNotification(notification)
