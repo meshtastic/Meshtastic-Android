@@ -18,6 +18,7 @@
 package com.geeksville.mesh.ui
 
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -62,6 +63,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
@@ -74,6 +76,7 @@ import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DeviceVersion
+import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.ChannelsRoutes
 import com.geeksville.mesh.navigation.ConnectionsRoutes
@@ -90,7 +93,10 @@ import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
 import com.geeksville.mesh.ui.debug.DebugMenuActions
+import com.geeksville.mesh.ui.node.components.NodeChip
+import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.radioconfig.RadioConfigMenuActions
+import com.geeksville.mesh.ui.sharing.SharedContactDialog
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
     Contacts(R.string.contacts, Icons.AutoMirrored.TwoTone.Chat, ContactsRoutes.Contacts),
@@ -243,16 +249,36 @@ fun MainScreen(
             modifier = Modifier
                 .fillMaxSize()
         ) {
+            var sharedContact: Node? by remember { mutableStateOf(null) }
+            if (sharedContact != null) {
+                SharedContactDialog(
+                    contact = sharedContact,
+                    onDismiss = { sharedContact = null }
+                )
+            }
             MainAppBar(
                 viewModel = viewModel,
                 isManaged = localConfig.security.isManaged,
                 navController = navController,
                 onAction = { action ->
-                    when (action) {
-                        MainMenuAction.DEBUG -> navController.navigate(Route.DebugPanel)
-                        MainMenuAction.RADIO_CONFIG -> navController.navigate(RadioConfigRoutes.RadioConfig())
-                        MainMenuAction.QUICK_CHAT -> navController.navigate(ContactsRoutes.QuickChat)
-                        else -> onAction(action)
+                    if (action is MainMenuAction) {
+                        when (action) {
+                            MainMenuAction.DEBUG -> navController.navigate(Route.DebugPanel)
+                            MainMenuAction.RADIO_CONFIG -> navController.navigate(RadioConfigRoutes.RadioConfig())
+                            MainMenuAction.QUICK_CHAT -> navController.navigate(ContactsRoutes.QuickChat)
+                            else -> onAction(action)
+                        }
+                    } else if (action is NodeMenuAction) {
+                        when (action) {
+                            is NodeMenuAction.MoreDetails -> navController.navigate(
+                                NodesRoutes.NodeDetail(
+                                    action.node.num
+                                )
+                            )
+
+                            is NodeMenuAction.Share -> sharedContact = action.node
+                            else -> {}
+                        }
                     }
                 },
             )
@@ -339,7 +365,7 @@ private fun MainAppBar(
     isManaged: Boolean,
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    onAction: (MainMenuAction) -> Unit
+    onAction: (Any?) -> Unit
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
@@ -352,34 +378,25 @@ private fun MainAppBar(
     val title by viewModel.title.collectAsStateWithLifecycle("")
     TopAppBar(
         title = {
-            when {
-                currentDestination == null || isTopLevelRoute -> {
-                    Text(
-                        text = stringResource(id = R.string.app_name),
-                    )
-                }
+            val title = when {
+                currentDestination == null || isTopLevelRoute -> stringResource(id = R.string.app_name)
 
-                currentDestination.hasRoute<Route.DebugPanel>() ->
-                    Text(
-                        stringResource(id = R.string.debug_panel),
-                    )
+                currentDestination.hasRoute<Route.DebugPanel>() -> stringResource(id = R.string.debug_panel)
 
-                currentDestination.hasRoute<ContactsRoutes.QuickChat>() ->
-                    Text(
-                        stringResource(id = R.string.quick_chat),
-                    )
+                currentDestination.hasRoute<ContactsRoutes.QuickChat>() -> stringResource(id = R.string.quick_chat)
 
-                currentDestination.hasRoute<ContactsRoutes.Share>() ->
-                    Text(
-                        stringResource(id = R.string.share_to),
-                    )
+                currentDestination.hasRoute<ContactsRoutes.Share>() -> stringResource(id = R.string.share_to)
 
-                currentDestination.showLongNameTitle() -> {
-                    Text(
-                        title,
-                    )
-                }
+                currentDestination.showLongNameTitle() -> title
+
+                else -> stringResource(id = R.string.app_name)
             }
+            Text(
+                text = title,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.titleLarge,
+            )
         },
         modifier = modifier,
         navigationIcon = if (canNavigateBack && !isTopLevelRoute) {
@@ -422,8 +439,18 @@ private fun TopBarActions(
     currentDestination: NavDestination?,
     isManaged: Boolean,
     isTopLevelRoute: Boolean,
-    onAction: (MainMenuAction) -> Unit
+    onAction: (Any?) -> Unit
 ) {
+    val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val isConnected by viewModel.isConnected.collectAsStateWithLifecycle(false)
+    AnimatedVisibility(ourNode != null) {
+        NodeChip(
+            node = ourNode!!,
+            isThisNode = true,
+            isConnected = isConnected,
+            onAction = onAction
+        )
+    }
     when {
         currentDestination == null || isTopLevelRoute ->
             MainMenuActions(isManaged, onAction)
