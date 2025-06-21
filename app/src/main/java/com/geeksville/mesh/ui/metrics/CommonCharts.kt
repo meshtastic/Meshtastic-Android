@@ -253,35 +253,17 @@ fun TimeLabels(
     newest: Int,
     telemetries: List<Telemetry>? = null
 ) {
-    val actualOldest = if (telemetries != null && telemetries.isNotEmpty()) {
-        // Find the oldest telemetry that falls within the visible time range
-        // Add a small tolerance to account for precision issues in the range calculation
-        val tolerance = 1 // 1 second tolerance
-        telemetries.filter { it.time >= (oldest - tolerance) && it.time <= (newest + tolerance) }
-            .minByOrNull { it.time }?.time ?: oldest
-    } else {
-        oldest
-    }
-    val actualNewest = if (telemetries != null && telemetries.isNotEmpty()) {
-        // Find the newest telemetry that falls within the visible time range
-        // Add a small tolerance to account for precision issues in the range calculation
-        val tolerance = 1 // 1 second tolerance
-        telemetries.filter { it.time >= (oldest - tolerance) && it.time <= (newest + tolerance) }
-            .maxByOrNull { it.time }?.time ?: newest
-    } else {
-        newest
-    }
 
     Row {
         Text(
-            text = DATE_TIME_MINUTE_FORMAT.format(actualOldest * MS_PER_SEC),
+            text = DATE_TIME_MINUTE_FORMAT.format(oldest * MS_PER_SEC),
             modifier = Modifier.wrapContentWidth(),
             style = TextStyle(fontWeight = FontWeight.Bold),
             fontSize = 12.sp,
         )
         Spacer(modifier = Modifier.weight(1f))
         Text(
-            text = DATE_TIME_MINUTE_FORMAT.format(actualNewest * MS_PER_SEC),
+            text = DATE_TIME_MINUTE_FORMAT.format(newest * MS_PER_SEC),
             modifier = Modifier.wrapContentWidth(),
             style = TextStyle(fontWeight = FontWeight.Bold),
             fontSize = 12.sp
