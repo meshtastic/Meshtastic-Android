@@ -659,5 +659,4 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="client_notification">客户端通知</string>
     <string name="compromised_keys">检测到密钥泄漏，请点击 确定 进行重新生成。</string>
     <string name="regenerate_private_key">重新生成私钥</string>
-    <string name="regenerate_keys_confirmation">您确定要重新生成您的私钥吗？</string>
 </resources>
