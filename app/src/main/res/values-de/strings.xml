@@ -669,4 +669,5 @@
     <string name="export_keys">Schlüssel exportieren</string>
     <string name="export_keys_confirmation">Exportiert den öffentlichen und privaten Schlüssel in eine Datei. Bitte speichern Sie diese an einem sicheren Ort.</string>
     <string name="modules_unlocked">Entsperrte Module</string>
+    <string name="remote">Entfernt</string>
 </resources>
