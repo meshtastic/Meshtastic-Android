@@ -93,9 +93,9 @@ import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
 import com.geeksville.mesh.ui.debug.DebugMenuActions
-import com.geeksville.mesh.ui.radioconfig.RadioConfigMenuActions
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
+import com.geeksville.mesh.ui.radioconfig.RadioConfigMenuActions
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
@@ -132,9 +132,6 @@ fun MainScreen(
     }
 
     VersionChecks(viewModel)
-
-    val title by viewModel.title.collectAsStateWithLifecycle()
-    val ourNodeInfo by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
 
     val alertDialogState by viewModel.currentAlert.collectAsStateWithLifecycle()
     alertDialogState?.let { state ->
@@ -386,17 +383,13 @@ private fun MainAppBar(
 
                 currentDestination.hasRoute<Route.DebugPanel>() -> stringResource(id = R.string.debug_panel)
 
-
                 currentDestination.hasRoute<ContactsRoutes.QuickChat>() -> stringResource(id = R.string.quick_chat)
 
-
                 currentDestination.hasRoute<ContactsRoutes.Share>() -> stringResource(id = R.string.share_to)
-
 
                 currentDestination.showLongNameTitle() -> title
 
                 else -> stringResource(id = R.string.app_name)
-
             }
             Text(
                 text = title,
