@@ -60,11 +60,16 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MAX_PERCENT_VALUE
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
+import com.geeksville.mesh.TelemetryProtos.Telemetry
+import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_MINUTE_FORMAT
+import com.geeksville.mesh.ui.metrics.CommonCharts.TIME_MINUTE_FORMAT
 import java.text.DateFormat
 
 object CommonCharts {
     val DATE_TIME_FORMAT: DateFormat =
         DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
+    val TIME_MINUTE_FORMAT: DateFormat = DateFormat.getTimeInstance(DateFormat.SHORT)
+    val DATE_TIME_MINUTE_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
     const val MS_PER_SEC = 1000L
     const val MAX_PERCENT_VALUE = 100f
 }
@@ -247,18 +252,34 @@ fun TimeAxisOverlay(
 @Composable
 fun TimeLabels(
     oldest: Int,
-    newest: Int
+    newest: Int,
+    telemetries: List<Telemetry>? = null
 ) {
+    val actualOldest = if (telemetries != null && telemetries.isNotEmpty()) {
+        // Find the oldest telemetry that falls within the visible time range
+        telemetries.filter { it.time >= oldest && it.time <= newest }
+            .minByOrNull { it.time }?.time ?: oldest
+    } else {
+        oldest
+    }
+    val actualNewest = if (telemetries != null && telemetries.isNotEmpty()) {
+        // Find the newest telemetry that falls within the visible time range
+        telemetries.filter { it.time >= oldest && it.time <= newest }
+            .maxByOrNull { it.time }?.time ?: newest
+    } else {
+        newest
+    }
+    
     Row {
         Text(
-            text = DATE_TIME_FORMAT.format(oldest * MS_PER_SEC),
+            text = DATE_TIME_MINUTE_FORMAT.format(actualOldest * MS_PER_SEC),
             modifier = Modifier.wrapContentWidth(),
             style = TextStyle(fontWeight = FontWeight.Bold),
             fontSize = 12.sp,
         )
         Spacer(modifier = Modifier.weight(1f))
         Text(
-            text = DATE_TIME_FORMAT.format(newest * MS_PER_SEC),
+            text = DATE_TIME_MINUTE_FORMAT.format(actualNewest * MS_PER_SEC),
             modifier = Modifier.wrapContentWidth(),
             style = TextStyle(fontWeight = FontWeight.Bold),
             fontSize = 12.sp

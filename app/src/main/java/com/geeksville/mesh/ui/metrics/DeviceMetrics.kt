@@ -169,14 +169,16 @@ private fun DeviceMetricsChart(
         val visibleWidthPx = with(LocalDensity.current) { screenWidth.toDp().toPx() }
         val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
         val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
-        val visibleOldest = oldest.time + (timeDiff * leftRatio).toInt()
-        val visibleNewest = oldest.time + (timeDiff * rightRatio).toInt()
+        // With reverseScrolling = true, scrolling right shows older data (left side of chart)
+        val visibleOldest = oldest.time + (timeDiff * (1f - rightRatio)).toInt()
+        val visibleNewest = oldest.time + (timeDiff * (1f - leftRatio)).toInt()
         visibleOldest to visibleNewest
     }
 
     TimeLabels(
         oldest = visibleTimeRange.first,
-        newest = visibleTimeRange.second
+        newest = visibleTimeRange.second,
+        telemetries = telemetries
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -383,5 +385,67 @@ private fun DeviceMetricsCardPreview() {
         .build()
     AppTheme {
         DeviceMetricsCard(telemetry = telemetry)
+    }
+}
+
+@Suppress("detekt:MagicNumber") // fake data
+@PreviewLightDark
+@Composable
+private fun DeviceMetricsScreenPreview() {
+    val now = (System.currentTimeMillis() / 1000).toInt()
+    val telemetries = List(24) { i ->
+        Telemetry.newBuilder()
+            .setTime(now - (23 - i) * 60 * 60) // 1-hour intervals, oldest first
+            .setDeviceMetrics(
+                TelemetryProtos.DeviceMetrics.newBuilder()
+                    .setBatteryLevel(85 - i * 2) // Battery decreases over time
+                    .setVoltage(3.8f - i * 0.01f) // Voltage decreases slightly
+                    .setChannelUtilization(15f + i * 1.5f) // Channel utilization increases
+                    .setAirUtilTx(8f + i * 0.8f) // Air utilization increases
+                    .setUptimeSeconds(3600 + i * 3600) // Uptime increases by 1 hour each
+            )
+            .build()
+    }
+    
+    AppTheme {
+        Surface {
+            Column {
+                var displayInfoDialog by remember { mutableStateOf(false) }
+                
+                if (displayInfoDialog) {
+                    LegendInfoDialog(
+                        pairedRes = listOf(
+                            Pair(R.string.channel_utilization, R.string.ch_util_definition),
+                            Pair(R.string.air_utilization, R.string.air_util_definition)
+                        ),
+                        onDismiss = { displayInfoDialog = false }
+                    )
+                }
+
+                DeviceMetricsChart(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .fillMaxHeight(fraction = 0.33f),
+                    telemetries.reversed(),
+                    TimeFrame.TWENTY_FOUR_HOURS,
+                    promptInfoDialog = { displayInfoDialog = true }
+                )
+
+                SlidingSelector(
+                    TimeFrame.entries.toList(),
+                    TimeFrame.TWENTY_FOUR_HOURS,
+                    onOptionSelected = { /* Preview only */ }
+                ) {
+                    OptionLabel(stringResource(it.strRes))
+                }
+
+                /* Device Metric Cards */
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    items(telemetries) { telemetry -> DeviceMetricsCard(telemetry) }
+                }
+            }
+        }
     }
 }
