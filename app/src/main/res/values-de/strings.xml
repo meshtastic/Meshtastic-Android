@@ -275,7 +275,7 @@
     <string name="humidity">Luftfeuchte</string>
     <string name="logs">Protokolle</string>
     <string name="hops_away">Zwischenschritte entfernt</string>
-    <string name="hops_away_template">Sprungweite: %$1d</string>
+    <string name="hops_away_template">Sprungweite: %1$d</string>
     <string name="info">Information</string>
     <string name="ch_util_definition">Auslastung für den aktuellen Kanal, einschließlich gut geformtem TX, RX und fehlerhaftem RX (auch bekannt als Rauschen).</string>
     <string name="air_util_definition">Prozent der Sendezeit für die Übertragung innerhalb der letzten Stunde.</string>
@@ -665,7 +665,8 @@
     <string name="client_notification">Kundenbenachrichtigung</string>
     <string name="compromised_keys">Kompromittierte Schlüssel erkannt, wählen Sie OK, um diese neu zu erstellen.</string>
     <string name="regenerate_private_key">Privaten Schlüssel neu erstellen</string>
-    <string name="regenerate_keys_confirmation">Sind Sie sicher, dass Sie Ihren privaten Schlüssel neu erstellen möchten?</string>
+    <string name="regenerate_keys_confirmation">Sind Sie sicher, dass Sie den privaten Schlüssel neu erstellen möchten?\n\nAndere Knoten, die bereits Schlüssel mit diesem Knoten ausgetauscht haben, müssen diesen entfernen und erneut austauschen, um eine sichere Kommunikation fortzusetzen.</string>
     <string name="export_keys">Schlüssel exportieren</string>
     <string name="export_keys_confirmation">Exportiert den öffentlichen und privaten Schlüssel in eine Datei. Bitte speichern Sie diese an einem sicheren Ort.</string>
+    <string name="modules_unlocked">Entsperrte Module</string>
 </resources>

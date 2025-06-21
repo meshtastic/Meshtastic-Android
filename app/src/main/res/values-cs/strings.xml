@@ -627,7 +627,6 @@
     <string name="client_notification">Oznámení klienta</string>
     <string name="compromised_keys">Zjištěny kompromitované klíče, zvolte OK pro obnovení.</string>
     <string name="regenerate_private_key">Obnovit soukromý klíč</string>
-    <string name="regenerate_keys_confirmation">Jste si jisti, že chcete obnovit svůj soukromý klíč?</string>
     <string name="export_keys">Exportovat klíče</string>
     <string name="export_keys_confirmation">Exportuje veřejné a soukromé klíče do souboru. Uložte je prosím bezpečně.</string>
 </resources>

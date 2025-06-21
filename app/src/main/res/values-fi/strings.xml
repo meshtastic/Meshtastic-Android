@@ -141,6 +141,7 @@
     <string name="debug_logs_export">Vie lokitiedot</string>
     <string name="debug_last_messages">500 viimeisintä viestiä</string>
     <string name="debug_filters">Suodattimet</string>
+    <string name="debug_active_filters">Aktiiviset suodattimet (täsmää mihinkä tahansa)</string>
     <string name="debug_default_search">Hae lokitiedoista...</string>
     <string name="debug_clear">Tyhjennä lokit</string>
     <string name="clear">Tyhjennä</string>
@@ -274,6 +275,7 @@
     <string name="humidity">Kosteus</string>
     <string name="logs">lokitietoa</string>
     <string name="hops_away">Hyppyjä</string>
+    <string name="hops_away_template">Hyppyjä: %1$d</string>
     <string name="info">Tiedot</string>
     <string name="ch_util_definition">Nykyisen kanavan lähetyksen (TX) ja vastaanoton (RX) käyttöaste ja virheelliset lähetykset, eli häiriöt.</string>
     <string name="air_util_definition">Viimeisen tunnin aikana käytetyn lähetyksen prosenttiosuus.</string>
@@ -663,7 +665,8 @@
     <string name="client_notification">Sovellusilmoitukset</string>
     <string name="compromised_keys">Turvallisuusriski havaittu: avaimet ovat vaarantuneet. Valitse OK luodaksesi uudet.</string>
     <string name="regenerate_private_key">Luo uusi yksityinen avain</string>
-    <string name="regenerate_keys_confirmation">Oletko varma, että haluat luoda uuden yksityisen avaimen?</string>
+    <string name="regenerate_keys_confirmation">Haluatko varmasti luoda yksityisen avaimen uudelleen?\n\nLaitteet, jotka ovat aiemmin vaihtaneet avaimia tämän laitteen kanssa, joutuvat poistamaan kyseisen laitteen ja vaihtamaan avaimet uudelleen, jotta suojattu viestintä voi jatkua.</string>
     <string name="export_keys">Vie avaimet</string>
     <string name="export_keys_confirmation">Vie julkiset ja yksityiset avaimet tiedostoon. Säilytä tiedosto turvallisessa paikassa.</string>
+    <string name="modules_unlocked">Lukittamattomat moduulit</string>
 </resources>
