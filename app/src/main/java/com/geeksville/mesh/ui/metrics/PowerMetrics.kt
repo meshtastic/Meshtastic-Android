@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -86,6 +87,10 @@ private enum class PowerChannel(@StringRes val strRes: Int) {
     TWO(R.string.channel_2),
     THREE(R.string.channel_3)
 }
+
+private const val CHART_WEIGHT = 1f
+private const val Y_AXIS_WEIGHT = 0.1f
+private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIGHT + Y_AXIS_WEIGHT)
 
 private val LEGEND_DATA = listOf(
     LegendData(nameRes = R.string.current, color = Power.CURRENT.color, isLine = true),
@@ -157,9 +162,29 @@ private fun PowerMetricsChart(
     }
     val timeDiff = newest.time - oldest.time
 
+    val scrollState = rememberScrollState()
+    val screenWidth = LocalWindowInfo.current.containerSize.width
+    val dp by remember(key1 = selectedTime) {
+        mutableStateOf(selectedTime.dp(screenWidth, time = (newest.time - oldest.time).toLong()))
+    }
+
+    // Calculate visible time range based on scroll position and chart width
+    val visibleTimeRange = run {
+        val totalWidthPx = with(LocalDensity.current) { dp.toPx() }
+        val scrollPx = scrollState.value.toFloat()
+        // Calculate visible width based on actual weight distribution
+        val visibleWidthPx = screenWidth * CHART_WIDTH_RATIO
+        val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
+        val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
+        // With reverseScrolling = true, scrolling right shows older data (left side of chart)
+        val visibleOldest = oldest.time + (timeDiff * (1f - rightRatio)).toInt()
+        val visibleNewest = oldest.time + (timeDiff * (1f - leftRatio)).toInt()
+        visibleOldest to visibleNewest
+    }
+
     TimeLabels(
-        oldest = oldest.time,
-        newest = newest.time
+        oldest = visibleTimeRange.first,
+        newest = visibleTimeRange.second
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -168,15 +193,9 @@ private fun PowerMetricsChart(
     val currentDiff = Power.CURRENT.difference()
     val voltageDiff = Power.VOLTAGE.difference()
 
-    val scrollState = rememberScrollState()
-    val screenWidth = LocalWindowInfo.current.containerSize.width
-    val dp by remember(key1 = selectedTime) {
-        mutableStateOf(selectedTime.dp(screenWidth, time = (newest.time - oldest.time).toLong()))
-    }
-
     Row {
         YAxisLabels(
-            modifier = modifier.weight(weight = .1f),
+            modifier = modifier.weight(weight = Y_AXIS_WEIGHT),
             Power.CURRENT.color,
             minValue = Power.CURRENT.min,
             maxValue = Power.CURRENT.max,
@@ -263,7 +282,7 @@ private fun PowerMetricsChart(
             }
         }
         YAxisLabels(
-            modifier = modifier.weight(weight = .1f),
+            modifier = modifier.weight(weight = Y_AXIS_WEIGHT),
             Power.VOLTAGE.color,
             minValue = Power.VOLTAGE.min,
             maxValue = Power.VOLTAGE.max,
