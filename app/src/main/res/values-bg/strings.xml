@@ -26,6 +26,7 @@
     <string name="desc_node_filter_clear">clear node филтър</string>
     <string name="node_filter_include_unknown">Включително неизвестните</string>
     <string name="node_filter_only_online">Скриване на офлайн възлите</string>
+    <string name="node_filter_only_direct"></string>
     <string name="node_filter_show_details">Показване на детайли</string>
     <string name="node_sort_button">Опции за сортиране на възлите</string>
     <string name="node_sort_alpha">А-Я</string>
@@ -38,6 +39,8 @@
     <string name="routing_error_no_channel">Няма канал</string>
     <string name="routing_error_no_response">Няма отговор</string>
     <string name="routing_error_pki_unknown_pubkey">Неизвестен публичен ключ</string>
+    <string name="role_tracker">Излъчва приоритетно пакети за GPS позиция</string>
+    <string name="role_sensor">Излъчва приоритетно телеметрични пакети.</string>
     <string name="config_security_public_key">Публичен ключ</string>
     <string name="config_security_private_key">Частен ключ</string>
     <string name="channel_name">Име на канал</string>
@@ -273,6 +276,7 @@
     <string name="low_battery_title">Батерията е изтощена: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Известия за изтощена батерия (любими възли)</string>
     <string name="baro_pressure">Барометрично налягане</string>
+    <string name="mesh_via_udp_enabled">Активирана Mesh чрез UDP</string>
     <string name="udp_config">Конфигурация на UDP</string>
     <string name="map_node_popup_details"><![CDATA[%s<br>Последно чут: %s<br>Последна позиция: %s<br>Батерия: %s]]></string>
     <string name="user">Потребител</string>
@@ -333,6 +337,7 @@
     <string name="encryption_enabled">Криптирането е активирано</string>
     <string name="tls_enabled">TLS е активиран</string>
     <string name="update_interval_seconds">Интервал на актуализиране (секунди)</string>
+    <string name="transmit_over_lora">Предаване през LoRa</string>
     <string name="network_config">Конфигурация на мрежата</string>
     <string name="wifi_enabled">Wi-Fi е активиран</string>
     <string name="ssid">SSID</string>
@@ -346,13 +351,19 @@
     <string name="paxcounter_config">Конфигурация на Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter е активиран</string>
     <string name="position_config">Конфигурация на позицията</string>
+    <string name="position_broadcast_interval_seconds">Интервал на излъчване на позиция (секунди)</string>
     <string name="use_fixed_position">Използване на фиксирана позиция</string>
     <string name="latitude">Геогр. ширина</string>
     <string name="longitude">Геогр. дължина</string>
     <string name="altitude_meters">Надм. височина (метри)</string>
     <string name="gps_mode">Режим на GPS</string>
+    <string name="gps_update_interval_seconds">Интервал на актуализиране на GPS (секунди)</string>
     <string name="power_config">Конфигурация на захранването</string>
     <string name="enable_power_saving_mode">Активиране на енергоспестяващ режим</string>
+    <string name="range_test_config">Конфигурация на Тест на обхвата</string>
+    <string name="range_test_enabled">Тест на обхвата е активиран</string>
+    <string name="remote_hardware_config">Конфигурация на Отдалечен хардуер</string>
+    <string name="remote_hardware_enabled">Отдалечен хардуер е активиран</string>
     <string name="available_pins">Налични пинове</string>
     <string name="security_config">Конфигурация на сигурността</string>
     <string name="public_key">Публичен ключ</string>
@@ -413,9 +424,13 @@
     <string name="reply">Отговор</string>
     <string name="i_agree">Съгласен съм.</string>
     <string name="should_update_firmware">Препоръчва се актуализация на фърмуера.</string>
+    <string name="expires">Изтича</string>
     <string name="time">Време</string>
     <string name="date">Дата</string>
+    <string name="map_filter">Филтър на картата\n</string>
     <string name="only_favorites">Само любими</string>
+    <string name="show_waypoints">Показване на пътни точки</string>
+    <string name="compromised_keys">Открити са компрометирани ключове, изберете OK за регенериране.</string>
     <string name="regenerate_private_key">Регенериране на частния ключ</string>
     <string name="export_keys">Експортиране на ключовете</string>
     <string name="export_keys_confirmation">Експортира публичния и частния ключове във файл. Моля, съхранявайте го на сигурно място.</string>
