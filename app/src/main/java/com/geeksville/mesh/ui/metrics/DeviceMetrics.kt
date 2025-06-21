@@ -166,7 +166,9 @@ private fun DeviceMetricsChart(
     val visibleTimeRange = run {
         val totalWidthPx = with(LocalDensity.current) { dp.toPx() }
         val scrollPx = scrollState.value.toFloat()
-        val visibleWidthPx = with(LocalDensity.current) { screenWidth.toDp().toPx() }
+        // Account for YAxisLabels on the right side (weight 0.1 vs chart weight 1.0)
+        // Chart area is 1/(1+0.1) = 90.9% of the available width
+        val visibleWidthPx = screenWidth * 0.909f
         val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
         val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
         // With reverseScrolling = true, scrolling right shows older data (left side of chart)
