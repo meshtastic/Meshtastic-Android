@@ -247,6 +247,7 @@ fun MainScreen(
                 viewModel = viewModel,
                 isManaged = localConfig.security.isManaged,
                 navController = navController,
+                viewModel = viewModel,
                 onAction = { action ->
                     when (action) {
                         MainMenuAction.DEBUG -> navController.navigate(Route.DebugPanel)
@@ -332,27 +333,38 @@ enum class MainMenuAction(@StringRes val stringRes: Int) {
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("LongMethod")
+@Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 private fun MainAppBar(
     viewModel: UIViewModel = hiltViewModel(),
     isManaged: Boolean,
     navController: NavHostController,
     modifier: Modifier = Modifier,
-    onAction: (MainMenuAction) -> Unit
+    viewModel: UIViewModel,
+    onAction: (MainMenuAction) -> Unit,
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
     val canNavigateBack = navController.previousBackStackEntry != null
     val isTopLevelRoute = currentDestination?.isTopLevel() == true
     val navigateUp: () -> Unit = navController::navigateUp
+    val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
     if (currentDestination?.hasRoute<ContactsRoutes.Messages>() == true) {
-        return
+      return
     }
     val title by viewModel.title.collectAsStateWithLifecycle("")
     TopAppBar(
         title = {
+            val numNodes = nodes.size
+            val numOnlineNodes = viewModel.meshService?.nodes?.filter { it.isOnline }?.size ?: 0
             when {
+                currentDestination?.hasRoute<NodesRoutes.Nodes>() ?: false ->
+                    Text(
+                        stringResource(id = R.string.app_name) + " " + when (numNodes) {
+                            0 -> "(0)"
+                            else -> "($numOnlineNodes/$numNodes)"
+                        },
+                    )
                 currentDestination == null || isTopLevelRoute -> {
                     Text(
                         text = stringResource(id = R.string.app_name),
