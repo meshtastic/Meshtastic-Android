@@ -82,6 +82,10 @@ private enum class Device(val color: Color) {
     AIR_UTIL(Color.Cyan)
 }
 
+private const val CHART_WEIGHT = 1f
+private const val Y_AXIS_WEIGHT = 0.1f
+private val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIGHT)
+
 private val LEGEND_DATA = listOf(
     LegendData(nameRes = R.string.battery, color = Device.BATTERY.color, isLine = true),
     LegendData(nameRes = R.string.channel_utilization, color = Device.CH_UTIL.color),
@@ -166,9 +170,8 @@ private fun DeviceMetricsChart(
     val visibleTimeRange = run {
         val totalWidthPx = with(LocalDensity.current) { dp.toPx() }
         val scrollPx = scrollState.value.toFloat()
-        // Account for YAxisLabels on the right side (weight 0.1 vs chart weight 1.0)
-        // Chart area is 1/(1+0.1) = 90.9% of the available width
-        val visibleWidthPx = screenWidth * 0.909f
+        // Calculate visible width based on actual weight distribution
+        val visibleWidthPx = screenWidth * CHART_WIDTH_RATIO
         val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
         val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
         // With reverseScrolling = true, scrolling right shows older data (left side of chart)
@@ -271,7 +274,7 @@ private fun DeviceMetricsChart(
             }
         }
         YAxisLabels(
-            modifier = modifier.weight(weight = .1f),
+            modifier = modifier.weight(weight = Y_AXIS_WEIGHT),
             graphColor,
             minValue = 0f,
             maxValue = 100f
