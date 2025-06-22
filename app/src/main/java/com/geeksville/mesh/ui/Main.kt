@@ -36,6 +36,7 @@ import androidx.compose.material.icons.twotone.People
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -357,7 +358,7 @@ enum class MainMenuAction(@StringRes val stringRes: Int) {
     ABOUT(R.string.about),
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod")
 @Composable
 private fun MainAppBar(
@@ -381,10 +382,7 @@ private fun MainAppBar(
     TopAppBar(
         title = {
             val title = when {
-                currentDestination == null -> stringResource(id = R.string.app_name)
-
-                currentDestination.hasRoute<NodesRoutes.Nodes>() -> stringResource(id = R.string.app_name) +
-                        " ($onlineNodeCount/$totalNodeCount)"
+                currentDestination == null || isTopLevelRoute -> stringResource(id = R.string.app_name)
 
                 currentDestination.hasRoute<Route.DebugPanel>() -> stringResource(id = R.string.debug_panel)
 
@@ -402,6 +400,17 @@ private fun MainAppBar(
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.titleLarge,
             )
+        },
+        subtitle = {
+            if (currentDestination?.hasRoute<NodesRoutes.Nodes>() == true ){
+                Text(
+                    text = stringResource(
+                        R.string.node_count_template,
+                        onlineNodeCount,
+                        totalNodeCount
+                    ),
+                )
+            }
         },
         modifier = modifier,
         navigationIcon = if (canNavigateBack && !isTopLevelRoute) {
