@@ -19,7 +19,6 @@ package com.geeksville.mesh.ui.map.components
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material3.FloatingActionButton
@@ -58,7 +57,6 @@ fun MapButton(
     FloatingActionButton(
         onClick = onClick,
         modifier = modifier,
-        shape = CircleShape,
     ) {
         Icon(
             imageVector = icon,
