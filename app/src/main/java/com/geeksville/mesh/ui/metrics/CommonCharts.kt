@@ -57,14 +57,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.R
-import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MAX_PERCENT_VALUE
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
+import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_MINUTE_FORMAT
 import java.text.DateFormat
 
 object CommonCharts {
     val DATE_TIME_FORMAT: DateFormat =
         DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
+    val TIME_MINUTE_FORMAT: DateFormat = DateFormat.getTimeInstance(DateFormat.SHORT)
+    val DATE_TIME_MINUTE_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
     const val MS_PER_SEC = 1000L
     const val MAX_PERCENT_VALUE = 100f
 }
@@ -190,7 +192,7 @@ fun TimeAxisOverlay(
     Canvas(modifier = modifier) {
 
         val height = size.height
-        val width = size.width - 28.dp.toPx()
+        val width = size.width
 
         /* Cut out the time remaining in order to place the lines on the dot. */
         val timeRemaining = oldest % timeInterval
@@ -247,18 +249,19 @@ fun TimeAxisOverlay(
 @Composable
 fun TimeLabels(
     oldest: Int,
-    newest: Int
+    newest: Int,
 ) {
+
     Row {
         Text(
-            text = DATE_TIME_FORMAT.format(oldest * MS_PER_SEC),
+            text = DATE_TIME_MINUTE_FORMAT.format(oldest * MS_PER_SEC),
             modifier = Modifier.wrapContentWidth(),
             style = TextStyle(fontWeight = FontWeight.Bold),
             fontSize = 12.sp,
         )
         Spacer(modifier = Modifier.weight(1f))
         Text(
-            text = DATE_TIME_FORMAT.format(newest * MS_PER_SEC),
+            text = DATE_TIME_MINUTE_FORMAT.format(newest * MS_PER_SEC),
             modifier = Modifier.wrapContentWidth(),
             style = TextStyle(fontWeight = FontWeight.Bold),
             fontSize = 12.sp
