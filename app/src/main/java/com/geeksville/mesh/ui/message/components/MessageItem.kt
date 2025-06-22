@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.ui.message.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -33,12 +32,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatQuote
-import androidx.compose.material.icons.twotone.Cloud
-import androidx.compose.material.icons.twotone.CloudDone
-import androidx.compose.material.icons.twotone.CloudOff
-import androidx.compose.material.icons.twotone.CloudUpload
-import androidx.compose.material.icons.twotone.HowToReg
-import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -125,51 +118,7 @@ internal fun MessageItem(
                 modifier = Modifier
                     .fillMaxWidth(),
             ) {
-                message.originalMessage?.let { originalMessage ->
-                    val originalMessageIsFromLocal =
-                        originalMessage.node.user.id == DataPacket.ID_LOCAL
-                    val originalMessageNode =
-                        if (originalMessageIsFromLocal) ourNode else originalMessage.node
-                    OutlinedCard(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onNavigateToOriginalMessage(originalMessage.packetId) },
-                        colors = CardDefaults.cardColors(
-                            containerColor = Color(originalMessageNode.colors.second).copy(alpha = 0.5f),
-                            contentColor = Color(originalMessageNode.colors.first),
-                        ),
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                Icons.Default.FormatQuote,
-                                contentDescription = stringResource(R.string.reply), // Add to strings.xml
-                                modifier = Modifier.size(14.dp), // Smaller icon
-                            )
-                            Spacer(Modifier.width(4.dp))
-                            Column {
-                                Text(
-                                    text = "${originalMessageNode.user.shortName} ${
-                                        originalMessageNode.user.longName
-                                            ?: stringResource(R.string.unknown_username)
-                                    }",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Bold,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                Text(
-                                    text = originalMessage.text, // Should not be null if isAReply is true
-                                    style = MaterialTheme.typography.bodySmall,
-                                    maxLines = 1, // Keep snippet brief
-                                    overflow = TextOverflow.Ellipsis,
-                                )
-                            }
-                        }
-                    }
-                }
+                ReplyingTo(message, ourNode, onNavigateToOriginalMessage)
 
                 Row(
                     modifier = Modifier
@@ -189,24 +138,27 @@ internal fun MessageItem(
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
                         style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.weight(1f, fill = false)
+                        modifier = Modifier.weight(1f, fill = true)
                     )
                     MessageActions(
+                        isLocal = fromLocal,
+                        status = message.status,
                         onSendReaction = sendReaction,
                         onSendReply = onReply,
+                        onStatusClick = onStatusClick,
                     )
                 }
                 AutoLinkText(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 4.dp),
+                        .padding(horizontal = 8.dp),
                     text = message.text,
                     style = MaterialTheme.typography.bodyMedium,
                 )
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 4.dp),
+                        .padding(horizontal = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -234,26 +186,11 @@ internal fun MessageItem(
                             )
                         }
                     }
+                    Spacer(modifier = Modifier.weight(1f))
                     Text(
                         text = message.time,
                         style = MaterialTheme.typography.labelSmall,
                     )
-                    AnimatedVisibility(visible = fromLocal) {
-                        Icon(
-                            imageVector = when (message.status) {
-                                MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
-                                MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
-                                MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
-                                MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
-                                MessageStatus.ERROR -> Icons.TwoTone.CloudOff
-                                else -> Icons.TwoTone.Warning
-                            },
-                            contentDescription = stringResource(R.string.message_delivery_status),
-                            modifier = Modifier
-                                .padding(start = 8.dp)
-                                .clickable { onStatusClick() },
-                        )
-                    }
                 }
             }
         }
@@ -265,6 +202,59 @@ internal fun MessageItem(
         onSendReaction = sendReaction,
         onShowReactions = onShowReactions,
     )
+}
+
+@Composable
+private fun ReplyingTo(
+    message: Message,
+    ourNode: Node,
+    onNavigateToOriginalMessage: (Int) -> Unit
+) {
+    message.originalMessage?.let { originalMessage ->
+        val originalMessageIsFromLocal =
+            originalMessage.node.user.id == DataPacket.ID_LOCAL
+        val originalMessageNode =
+            if (originalMessageIsFromLocal) ourNode else originalMessage.node
+        OutlinedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { onNavigateToOriginalMessage(originalMessage.packetId) },
+            colors = CardDefaults.cardColors(
+                containerColor = Color(originalMessageNode.colors.second).copy(alpha = 0.5f),
+                contentColor = Color(originalMessageNode.colors.first),
+            ),
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    Icons.Default.FormatQuote,
+                    contentDescription = stringResource(R.string.reply), // Add to strings.xml
+                    modifier = Modifier.size(14.dp), // Smaller icon
+                )
+                Spacer(Modifier.width(4.dp))
+                Column {
+                    Text(
+                        text = "${originalMessageNode.user.shortName} ${
+                            originalMessageNode.user.longName
+                                ?: stringResource(R.string.unknown_username)
+                        }",
+                        style = MaterialTheme.typography.labelMedium,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Text(
+                        text = originalMessage.text, // Should not be null if isAReply is true
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1, // Keep snippet brief
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalUuidApi::class)
@@ -288,15 +278,36 @@ private fun MessageItemPreview() {
         replyId = null,
     )
     AppTheme {
-        MessageItem(
-            message = message,
-            node = message.node,
-            selected = false,
-            onClick = {},
-            onLongClick = {},
-            onStatusClick = {},
-            isConnected = true,
-            ourNode = message.node,
-        )
+        Column {
+            MessageItem(
+                message = message,
+                node = message.node,
+                selected = false,
+                onClick = {},
+                onLongClick = {},
+                onStatusClick = {},
+                isConnected = true,
+                ourNode = message.node,
+            )
+
+            MessageItem(
+                message = message.let { message ->
+                    val originalMessage = message.copy(
+                        replyId = message.packetId,
+                        node = NodePreviewParameterProvider().values.last(),
+                        text = "This is a reply to the original message."
+                    )
+                    message.copy(originalMessage = originalMessage)
+                },
+                node = message.node,
+                selected = false,
+                onClick = {},
+                onLongClick = {},
+                onStatusClick = {},
+                isConnected = true,
+                ourNode = message.node,
+                onNavigateToOriginalMessage = {}
+            )
+        }
     }
 }

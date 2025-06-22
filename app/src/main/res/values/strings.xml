@@ -696,4 +696,5 @@
     <string name="modules_unlocked">Modules unlocked</string>
     <string name="remote">Remote</string>
     <string name="node_count_template">(%1$d online / %2$d total)</string>
+    <string name="react">React</string>
 </resources>
