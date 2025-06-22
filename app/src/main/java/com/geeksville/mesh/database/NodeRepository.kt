@@ -29,6 +29,7 @@ import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.NodeSortOption
 import com.geeksville.mesh.util.onlineTimeThreshold
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -133,4 +134,12 @@ class NodeRepository @Inject constructor(
     suspend fun insertMetadata(metadata: MetadataEntity) = withContext(dispatchers.io) {
         nodeInfoDao.upsert(metadata)
     }
+
+    val onlineNodeCount: Flow<Int> = nodeInfoDao.nodeDBbyNum().mapLatest { map ->
+        map.values.count { it.node.lastHeard > onlineTimeThreshold() }
+    }.flowOn(dispatchers.io).conflate()
+
+    val totalNodeCount: Flow<Int> = nodeInfoDao.nodeDBbyNum().mapLatest { map ->
+        map.values.count()
+    }.flowOn(dispatchers.io).conflate()
 }
