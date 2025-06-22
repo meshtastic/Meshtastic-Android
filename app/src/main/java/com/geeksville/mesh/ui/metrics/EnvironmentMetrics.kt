@@ -47,8 +47,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -71,6 +73,20 @@ import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.drawPathWithGradient
 import com.geeksville.mesh.util.UnitConversions.celsiusToFahrenheit
+
+@Suppress("MagicNumber")
+private enum class Environment(val color: Color) {
+    TEMPERATURE(Color.Red),
+    RELATIVE_HUMIDITY(Color.Blue),
+    BAROMETRIC_PRESSURE(Color.Green),
+    GAS_RESISTANCE(Color.Yellow),
+    IAQ(Color.Magenta)
+}
+
+private const val CHART_WEIGHT = 1f
+private const val Y_AXIS_WEIGHT = 0.1f
+// EnvironmentMetrics can have 1 or 2 Y-axis labels depending on whether barometric pressure is plotted
+// We'll calculate this dynamically in the chart function
 
 private val LEGEND_DATA_1 = listOf(
     LegendData(
@@ -165,7 +181,6 @@ fun EnvironmentMetricsScreen(
     }
 }
 
-/* TODO need to take the time to understand this. */
 @SuppressLint("ConfigurationScreenWidthHeight")
 @Suppress("LongMethod")
 @Composable
@@ -182,9 +197,35 @@ private fun EnvironmentMetricsChart(
     }
 
     val (oldest, newest) = graphData.times
+    val timeDiff = newest - oldest
+
+    val scrollState = rememberScrollState()
+    val screenWidth = LocalWindowInfo.current.containerSize.width
+    val dp by remember(key1 = selectedTime) {
+        mutableStateOf(selectedTime.dp(screenWidth, time = timeDiff.toLong()))
+    }
+
+    val shouldPlot = graphData.shouldPlot
+
+    // Calculate visible time range based on scroll position and chart width
+    val visibleTimeRange = run {
+        val totalWidthPx = with(LocalDensity.current) { dp.toPx() }
+        val scrollPx = scrollState.value.toFloat()
+        // Calculate chart width ratio dynamically based on whether barometric pressure is plotted
+        val yAxisCount = if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) 2 else 1
+        val chartWidthRatio = CHART_WEIGHT / (CHART_WEIGHT + (Y_AXIS_WEIGHT * yAxisCount))
+        val visibleWidthPx = screenWidth * chartWidthRatio
+        val leftRatio = (scrollPx / totalWidthPx).coerceIn(0f, 1f)
+        val rightRatio = ((scrollPx + visibleWidthPx) / totalWidthPx).coerceIn(0f, 1f)
+        // With reverseScrolling = true, scrolling right shows older data (left side of chart)
+        val visibleOldest = oldest + (timeDiff * (1f - rightRatio)).toInt()
+        val visibleNewest = oldest + (timeDiff * (1f - leftRatio)).toInt()
+        visibleOldest to visibleNewest
+    }
+
     TimeLabels(
-        oldest = oldest,
-        newest = newest
+        oldest = visibleTimeRange.first,
+        newest = visibleTimeRange.second
     )
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -196,18 +237,10 @@ private fun EnvironmentMetricsChart(
     var min = rightMin
     var diff = rightMax - rightMin
 
-    val scrollState = rememberScrollState()
-    val screenWidth = LocalConfiguration.current.screenWidthDp
-    val timeDiff = newest - oldest
-    val dp by remember(key1 = selectedTime) {
-        mutableStateOf(selectedTime.dp(screenWidth, time = timeDiff.toLong()))
-    }
-    val shouldPlot = graphData.shouldPlot
-
     Row {
         if (shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal]) {
             YAxisLabels(
-                modifier = modifier.weight(weight = .1f),
+                modifier = modifier.weight(weight = Y_AXIS_WEIGHT),
                 Environment.BAROMETRIC_PRESSURE.color,
                 minValue = pressureMin,
                 maxValue = pressureMax
@@ -277,7 +310,7 @@ private fun EnvironmentMetricsChart(
             }
         }
         YAxisLabels(
-            modifier = modifier.weight(weight = .1f),
+            modifier = modifier.weight(weight = Y_AXIS_WEIGHT),
             graphColor,
             minValue = rightMin,
             maxValue = rightMax
