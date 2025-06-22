@@ -335,14 +335,12 @@
     <string name="are_you_sure">확실합니까?</string>
     <string name="router_role_confirmation_text"><![CDATA[<a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Device Role Documentation</a>과 <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Choosing The Right Device Role</a> 에 대한 블로그 게시물을 읽었습니다.]]></string>
     <string name="i_know_what_i_m_doing">뭘하는지 알고 있습니다</string>
-    <string name="low_battery_message">노드 %s의 배터리가 부족합니다(%d%%).</string>
     <string name="meshtastic_low_battery_notifications">배터리 부족 알림</string>
     <string name="low_battery_title">배터리  부족: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">배터리 부족 알림 (즐겨찾기 노드)</string>
     <string name="baro_pressure">기압</string>
     <string name="mesh_via_udp_enabled">UDP를 통한 메시 활성화</string>
     <string name="udp_config">UDP 설정</string>
-    <string name="map_node_popup_details"><![CDATA[%s<br>최근 수신: %s<br>최근 위치: %s<br>배터리: %s]]></string>
     <string name="toggle_my_position">내 위치 토글</string>
     <string name="user">사용자</string>
     <string name="channels">채널</string>
