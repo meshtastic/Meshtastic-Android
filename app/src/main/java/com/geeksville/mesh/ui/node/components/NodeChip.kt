@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.ui.node.components
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -29,7 +28,6 @@ import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,7 +37,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.PaxcountProtos
+import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.model.Node
 
 @Composable
@@ -64,7 +66,6 @@ fun NodeChip(
                 containerColor = Color(nodeColor),
                 labelColor = Color(textColor),
             ),
-            border = BorderStroke(1.dp, contentColorFor(Color(nodeColor))),
             label = {
                 Text(
                     modifier = Modifier
@@ -99,5 +100,29 @@ fun NodeChip(
             menuExpanded = false
             onAction(it)
         }
+    )
+}
+
+@Suppress("MagicNumber")
+@Preview
+@Composable
+fun NodeChipPreview() {
+    val user = MeshProtos.User.newBuilder()
+        .setShortName("\uD83E\uDEE0")
+        .setLongName("John Doe")
+        .build()
+    val node = Node(
+        num = 13444,
+        user = user,
+        isIgnored = false,
+        paxcounter = PaxcountProtos.Paxcount.newBuilder().setBle(10).setWifi(5).build(),
+        environmentMetrics = TelemetryProtos.EnvironmentMetrics.newBuilder().setTemperature(25f)
+            .setRelativeHumidity(60f).build()
+    )
+    NodeChip(
+        node = node,
+        isThisNode = false,
+        isConnected = true,
+        onAction = {}
     )
 }
