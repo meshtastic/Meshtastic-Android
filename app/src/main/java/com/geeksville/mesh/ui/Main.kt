@@ -376,10 +376,15 @@ private fun MainAppBar(
         return
     }
     val title by viewModel.title.collectAsStateWithLifecycle("")
+    val onlineNodeCount by viewModel.onlineNodeCount.collectAsStateWithLifecycle(0)
+    val totalNodeCount by viewModel.totalNodeCount.collectAsStateWithLifecycle(0)
     TopAppBar(
         title = {
             val title = when {
-                currentDestination == null || isTopLevelRoute -> stringResource(id = R.string.app_name)
+                currentDestination == null -> stringResource(id = R.string.app_name)
+
+                currentDestination.hasRoute<NodesRoutes.Nodes>() -> stringResource(id = R.string.app_name) +
+                        " ($onlineNodeCount/$totalNodeCount)"
 
                 currentDestination.hasRoute<Route.DebugPanel>() -> stringResource(id = R.string.debug_panel)
 

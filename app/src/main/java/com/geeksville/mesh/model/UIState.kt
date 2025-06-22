@@ -403,6 +403,18 @@ class UIViewModel @Inject constructor(
         initialValue = emptyList(),
     )
 
+    val onlineNodeCount = nodeDB.onlineNodeCount.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = 0,
+    )
+
+    val totalNodeCount = nodeDB.totalNodeCount.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = 0,
+    )
+
     val filteredNodeList: StateFlow<List<Node>> = nodeList.mapLatest { list ->
         list.filter { node ->
             !node.isIgnored
