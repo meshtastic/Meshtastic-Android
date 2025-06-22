@@ -23,6 +23,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -30,8 +31,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Reply
@@ -53,7 +58,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,23 +68,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.onFocusEvent
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.isAltPressed
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -144,12 +138,8 @@ internal fun MessageScreen(
     val quickChat by viewModel.quickChatActions.collectAsStateWithLifecycle()
     val messages by viewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(listOf())
 
-    val messageInput = rememberSaveable(
-        key = contactKey, // Use contactKey as key so state resets when switching conversations
-        stateSaver = TextFieldValue.Saver
-    ) {
-        mutableStateOf(TextFieldValue(message))
-    }
+    val messageInput = rememberTextFieldState(message)
+
     var replyingTo by remember { mutableStateOf<Message?>(null) }
 
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -166,6 +156,7 @@ internal fun MessageScreen(
     }
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             if (inSelectionMode) {
                 ActionModeTopBar(selectedIds.value) { action ->
@@ -206,7 +197,7 @@ internal fun MessageScreen(
             ) {
                 QuickChatRow(isConnected, quickChat) { action ->
                     if (action.mode == QuickChatAction.Mode.Append) {
-                        val originalText = messageInput.value.text
+                        val originalText = messageInput.text
                         if (!originalText.contains(action.message)) {
                             val needsSpace =
                                 !originalText.endsWith(' ') && originalText.isNotEmpty()
@@ -215,7 +206,7 @@ internal fun MessageScreen(
                                 if (needsSpace) append(' ')
                                 append(action.message)
                             }.take(MESSAGE_CHARACTER_LIMIT)
-                            messageInput.value = TextFieldValue(newText, TextRange(newText.length))
+                            messageInput.setTextAndPlaceCursorAtEnd(newText)
                         }
                     } else {
                         viewModel.sendMessage(action.message, contactKey)
@@ -262,13 +253,16 @@ internal fun MessageScreen(
                         }
                     }
                 }
-                TextInput(isConnected, messageInput) { message ->
-                    replyingTo?.let {
-                        viewModel.sendMessage(message, contactKey, it.packetId)
-                        replyingTo = null
-                    } ?: viewModel.sendMessage(message, contactKey)
-                    // Clear the text input after sending the message and updating all state
-                    messageInput.value = TextFieldValue("")
+                TextInput(isConnected, messageInput) {
+                    val message = messageInput.text.toString().trim()
+                    if (message.isNotEmpty()) {
+                        replyingTo?.let {
+                            viewModel.sendMessage(message, contactKey, it.packetId)
+                            replyingTo = null
+                        } ?: viewModel.sendMessage(message, contactKey)
+                        // Clear the text input after sending the message and updating all state
+                        messageInput.clearText()
+                    }
                 }
             }
         }
@@ -441,68 +435,57 @@ private fun QuickChatRow(
     }
 }
 
+private const val ROUNDED_CORNER_PERCENT = 100
 @Suppress("LongMethod")
 @Composable
 private fun TextInput(
     enabled: Boolean,
-    message: MutableState<TextFieldValue>,
+    message: TextFieldState,
     modifier: Modifier = Modifier,
     maxSize: Int = MESSAGE_CHARACTER_LIMIT,
-    onClick: (String) -> Unit = {}
-) = Column(modifier) {
-    val focusManager = LocalFocusManager.current
-    var isFocused by remember { mutableStateOf(false) }
+    onSendMessage: () -> Unit = {}
+) {
+    val isOverLimit = message.text.length > maxSize
+    val isValid = !isOverLimit && message.text.isNotEmpty()
     OutlinedTextField(
-        value = message.value,
-        onValueChange = {
-            if (it.text.toByteArray().size <= maxSize) {
-                message.value = it
-            }
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .onFocusEvent { isFocused = it.isFocused }
-            .onKeyEvent { event ->
-                if (event.type == KeyEventType.KeyDown &&
-                    event.key == Key.Enter &&
-                    event.isAltPressed
-                ) {
-                    val str = message.value.text.trim()
-                    if (str.isNotEmpty()) {
-                        onClick(str)
-                    }
-                    true // Consume the event
-                } else {
-                    false // Do not consume other key events
-                }
-            },
+        modifier = modifier.fillMaxWidth(),
+        state = message,
+        lineLimits = TextFieldLineLimits.SingleLine,
+        label = { Text(stringResource(R.string.send_text)) },
         enabled = enabled,
-        placeholder = { Text(stringResource(id = R.string.send_text)) },
+        shape = RoundedCornerShape(ROUNDED_CORNER_PERCENT),
+        isError = isOverLimit,
+        placeholder = { Text(stringResource(R.string.send_text)) },
         keyboardOptions = KeyboardOptions(
             capitalization = KeyboardCapitalization.Sentences,
             imeAction = ImeAction.Send
         ),
-        keyboardActions = KeyboardActions(
-            onSend = {
-                val str = message.value.text.trim()
-                if (str.isNotEmpty()) {
-                    onClick(str)
-                }
+        onKeyboardAction = {
+            if (isValid) {
+                onSendMessage()
             }
-        ),
-        maxLines = 3,
-        shape = RoundedCornerShape(24.dp),
+        },
+        supportingText = {
+            Text(
+                text = "${message.text.length}/$maxSize",
+                style = MaterialTheme.typography.bodySmall,
+                color = if (isOverLimit) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        inputTransformation = {
+            if (this.length > maxSize) {
+                this.replace(maxSize, this.length, "")
+            }
+        },
         trailingIcon = {
             IconButton(
                 onClick = {
-                    val str = message.value.text.trim()
-                    if (str.isNotEmpty()) {
-                        onClick(str)
-                        focusManager.clearFocus()
+                    if (isValid) {
+                        onSendMessage()
                     }
                 },
                 modifier = Modifier.size(48.dp),
-                enabled = enabled,
+                enabled = enabled && isValid,
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.Send,
@@ -511,15 +494,6 @@ private fun TextInput(
             }
         }
     )
-    if (isFocused) {
-        Text(
-            text = "${message.value.text.toByteArray().size}/$maxSize",
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier
-                .align(Alignment.End)
-                .padding(top = 4.dp, end = 72.dp)
-        )
-    }
 }
 
 @PreviewLightDark
@@ -530,12 +504,12 @@ private fun TextInputPreview() {
             Column {
                 TextInput(
                     enabled = true,
-                    message = remember { mutableStateOf(TextFieldValue("")) },
+                    message = rememberTextFieldState("Hello"),
                 )
                 Spacer(Modifier.size(16.dp))
                 TextInput(
                     enabled = true,
-                    message = remember { mutableStateOf(TextFieldValue("Hello")) },
+                    message = rememberTextFieldState("Hello"),
                 )
             }
         }
