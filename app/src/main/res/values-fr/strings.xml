@@ -142,7 +142,6 @@
     <string name="message_reception_time">heure de réception du message</string>
     <string name="message_reception_state">état de réception du message</string>
     <string name="message_delivery_status">Statut d\'envoi du message</string>
-    <string name="meshtastic_messages_notifications">Notifications de message</string>
     <string name="meshtastic_alerts_notifications">Notifications d\'alerte</string>
     <string name="protocol_stress_test">Test de contrainte de protocole</string>
     <string name="firmware_too_old">Mise à jour du micrologiciel requise.</string>

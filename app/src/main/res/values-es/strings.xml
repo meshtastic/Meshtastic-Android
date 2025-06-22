@@ -141,7 +141,6 @@
     <string name="message_reception_time">tiempo de recepción del mensaje</string>
     <string name="message_reception_state">estado de recepción de mensajes</string>
     <string name="message_delivery_status">Estado de entrega del mensaje</string>
-    <string name="meshtastic_messages_notifications">Notificaciones de mensajes</string>
     <string name="meshtastic_alerts_notifications">Notificaciones de alerta</string>
     <string name="protocol_stress_test">Protocolo de prueba de esfuerzo</string>
     <string name="firmware_too_old">Es necesario actualizar el firmware.</string>

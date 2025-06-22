@@ -127,7 +127,6 @@
     <string name="message_reception_time">Tan resepsyon mesaj</string>
     <string name="message_reception_state">Eta resepsyon mesaj</string>
     <string name="message_delivery_status">Eta livrezon mesaj</string>
-    <string name="meshtastic_messages_notifications">Notifikasyon mesaj</string>
     <string name="protocol_stress_test">Tès estrès pwotokòl</string>
     <string name="firmware_too_old">Nouvo mizajou mikwo lojisyèl obligatwa.</string>
     <string name="firmware_old">Mikwo lojisyèl radyo a twò ansyen pou li kominike ak aplikasyon sa a. Pou plis enfòmasyon sou sa, gade <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">gid enstalasyon mikwo lojisyèl nou an</a>.</string>

@@ -142,7 +142,6 @@
     <string name="message_reception_time">aankomsttijd van bericht</string>
     <string name="message_reception_state">bericht aankomst status</string>
     <string name="message_delivery_status">Bericht afleverstatus</string>
-    <string name="meshtastic_messages_notifications">Berichtmeldingen</string>
     <string name="meshtastic_alerts_notifications">Waarschuwingsmeldingen</string>
     <string name="protocol_stress_test">Protocol stresstest</string>
     <string name="firmware_too_old">Firmware-update vereist.</string>

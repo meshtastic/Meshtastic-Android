@@ -143,7 +143,6 @@
     <string name="message_reception_time">メッセージ受信時刻</string>
     <string name="message_reception_state">メッセージ受信状態</string>
     <string name="message_delivery_status">メッセージ配信状況</string>
-    <string name="meshtastic_messages_notifications">メッセージ通知</string>
     <string name="meshtastic_alerts_notifications">アラート通知</string>
     <string name="protocol_stress_test">プロトコルストレステスト</string>
     <string name="firmware_old">デバイスのファームウェアが古く、アプリと通信ができません。詳細は<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Firmware Installation guide</a> に記載されています。</string>

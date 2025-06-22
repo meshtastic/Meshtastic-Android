@@ -119,7 +119,6 @@
     <string name="message_reception_time">sõnumi vastuvõtu aeg</string>
     <string name="message_reception_state">sõnumi vastuvõtmise olek</string>
     <string name="message_delivery_status">Sõnumi edastamise olek</string>
-    <string name="meshtastic_messages_notifications">Sõnumiteated</string>
     <string name="protocol_stress_test">Protokolli stressitest</string>
     <string name="firmware_too_old">Püsivara värskendus on vajalik.</string>
     <string name="firmware_old">Raadio püsivara on selle rakenduse kasutamiseks liiga vana. Lisateabe saamiseks vaata meie <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">püsivara paigaldusjuhendit</a>.</string>

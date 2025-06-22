@@ -128,7 +128,6 @@
     <string name="message_reception_time">žinutės priėmimo laikas</string>
     <string name="message_reception_state">žinutės priėmimo statusas</string>
     <string name="message_delivery_status">Žinutės pristatymo statusas</string>
-    <string name="meshtastic_messages_notifications">Žinutės pranešimai</string>
     <string name="protocol_stress_test">Protokolo apkrovos testas</string>
     <string name="firmware_too_old">Reikalingas įrangos Firmware atnaujinimas.</string>
     <string name="firmware_old">Radijo įrangos pfirmware yra per sena, kad galėtų bendrauti su šia programa. Daugiau informacijos apie tai rasite <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">mūsų firmware diegimo vadove</a>.</string>

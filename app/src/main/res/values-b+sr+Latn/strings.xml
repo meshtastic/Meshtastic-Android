@@ -139,7 +139,6 @@
     <string name="message_reception_time">vreme prijema poruke</string>
     <string name="message_reception_state">status prijema poruke</string>
     <string name="message_delivery_status">Status prijema poruke</string>
-    <string name="meshtastic_messages_notifications">Obaveštenja o porukama</string>
     <string name="meshtastic_alerts_notifications">Обавештења о упозорењима</string>
     <string name="protocol_stress_test">Тест стреса протокола</string>
     <string name="firmware_too_old">Ажурирање фирмвера је неопходно.</string>
