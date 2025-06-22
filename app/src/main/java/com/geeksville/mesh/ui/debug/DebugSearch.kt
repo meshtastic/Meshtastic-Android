@@ -161,36 +161,41 @@ internal fun DebugSearchState(
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
-    Column(
-        modifier = Modifier.padding(8.dp)
+    androidx.compose.material3.Surface(
+        color = colorScheme.background,
+        tonalElevation = 0.dp,
+        shadowElevation = 0.dp,
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth()
-                .background(colorScheme.background.copy(alpha = 1.0f)),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+        Column(
+            modifier = Modifier.padding(8.dp)
         ) {
-            DebugSearchBar(
-                searchState = searchState,
-                onSearchTextChange = onSearchTextChange,
-                onNextMatch = onNextMatch,
-                onPreviousMatch = onPreviousMatch,
-                onClearSearch = onClearSearch
-            )
-            DebugFilterBar(
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                DebugSearchBar(
+                    searchState = searchState,
+                    onSearchTextChange = onSearchTextChange,
+                    onNextMatch = onNextMatch,
+                    onPreviousMatch = onPreviousMatch,
+                    onClearSearch = onClearSearch
+                )
+                DebugFilterBar(
+                    filterTexts = filterTexts,
+                    onFilterTextsChange = onFilterTextsChange,
+                    customFilterText = "",
+                    onCustomFilterTextChange = {},
+                    presetFilters = presetFilters
+                )
+            }
+
+            DebugActiveFilters(
                 filterTexts = filterTexts,
-                onFilterTextsChange = onFilterTextsChange,
-                customFilterText = "",
-                onCustomFilterTextChange = {},
-                presetFilters = presetFilters
+                onFilterTextsChange = onFilterTextsChange
             )
         }
     }
-
-    DebugActiveFilters(
-        filterTexts = filterTexts,
-        onFilterTextsChange = onFilterTextsChange
-    )
 }
 
 @Composable
