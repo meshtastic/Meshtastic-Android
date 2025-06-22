@@ -94,11 +94,11 @@ import com.geeksville.mesh.android.BuildUtils.warn
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import androidx.compose.material3.IconButton
-import androidx.compose.ui.zIndex
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.Dp
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
+const val ITEM_INDEX_MODIFIER = 10000
 
 @Composable
 internal fun DebugScreen(
@@ -110,16 +110,6 @@ internal fun DebugScreen(
     val filterTexts by viewModel.filterTexts.collectAsStateWithLifecycle()
     val selectedLogId by viewModel.selectedLogId.collectAsStateWithLifecycle()
 
-    val filteredLogs = remember(logs, filterTexts) {
-        logs.filter { log ->
-            filterTexts.isEmpty() || filterTexts.any { filterText ->
-                log.logMessage.contains(filterText, ignoreCase = true) ||
-                        log.messageType.contains(filterText, ignoreCase = true) ||
-                        log.formattedReceivedDate.contains(filterText, ignoreCase = true)
-            }
-        }.toImmutableList()
-    }
-
     // Track scroll direction and focus for header
     var lastScrollOffset by remember { mutableStateOf(0) }
     var headerVisible by remember { mutableStateOf(true) }
@@ -128,9 +118,13 @@ internal fun DebugScreen(
     var ignoreNextScroll by remember { mutableStateOf(false) }
 
     // header display
-    val headerHeightPx = remember { mutableStateOf(0) }
+    var headerHeightPx by remember { mutableStateOf(0) }
     val density = LocalDensity.current
-    val headerHeightDp = with(density) { headerHeightPx.value.toDp() }
+    val headerHeightDp = with(density) { headerHeightPx.toDp() }
+
+    val filteredLogs = remember(logs, filterTexts) {
+        filterLogs(logs, filterTexts)
+    }
 
     fun setHeaderVisible(newValue: Boolean) {
         if (headerVisible != newValue) {
@@ -183,46 +177,55 @@ internal fun DebugScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            state = listState,
-            contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
-        ) {
-            item {
-                Spacer(modifier = Modifier.height(headerHeightDp))
-            }
-            items(filteredLogs, key = { it.uuid }) { log ->
-                DebugItem(
-                    modifier = Modifier.animateItem(),
-                    log = log,
-                    searchText = searchState.searchText,
-                    isSelected = selectedLogId == log.uuid,
-                    onLogClick = {
-                        setHeaderHasFocus(false)
-                        viewModel.setSelectedLogId(if (selectedLogId == log.uuid) null else log.uuid)
-                    }
-                )
-            }
-        }
+        DebugLogList(
+            logs = filteredLogs,
+            selectedLogId = selectedLogId,
+            headerHeightDp = headerHeightDp,
+            searchText = searchState.searchText,
+            onLogClick = { uuid ->
+                setHeaderHasFocus(false)
+                viewModel.setSelectedLogId(if (selectedLogId == uuid) null else uuid)
+            },
+            listState = listState
+        )
         if (headerVisible) {
-            androidx.compose.material3.Surface(
-                tonalElevation = 4.dp,
-                shadowElevation = 4.dp,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.TopCenter)
-                    .zIndex(1f)
-                    .onGloballyPositioned { coordinates ->
-                        headerHeightPx.value = coordinates.size.height
-                    }
-            ) {
-                DebugSearchStateviewModelDefaults(
-                    searchState = searchState,
-                    filterTexts = filterTexts,
-                    presetFilters = viewModel.presetFilters,
-                    onHeaderFocusChanged = { focused -> setHeaderHasFocus(focused) }
-                )
-            }
+            DebugHeaderBar(
+                visible = headerVisible,
+                onHeightChanged = { headerHeightPx = it },
+                searchState = searchState,
+                filterTexts = filterTexts,
+                presetFilters = viewModel.presetFilters,
+                onHeaderFocusChanged = { focused -> setHeaderHasFocus(focused) }
+            )
+        }
+    }
+}
+
+@Composable
+private fun DebugLogList(
+    logs: List<DebugViewModel.UiMeshLog>,
+    selectedLogId: String?,
+    headerHeightDp: Dp,
+    searchText: String,
+    onLogClick: (String) -> Unit,
+    listState: LazyListState
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxSize(),
+        state = listState,
+        contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
+    ) {
+        item {
+            Spacer(modifier = Modifier.height(headerHeightDp))
+        }
+        items(logs, key = { it.uuid }) { log ->
+            DebugItem(
+                modifier = Modifier.animateItem(),
+                log = log,
+                searchText = searchText,
+                isSelected = selectedLogId == log.uuid,
+                onLogClick = { onLogClick(log.uuid) }
+            )
         }
     }
 }
@@ -829,9 +832,9 @@ private fun handleHeaderVisibilityOnScroll(
             setIgnoreNextScroll(false)
             return@LaunchedEffect
         }
-        const itemIndexMultiplier = 10000
+//        const ITEM_INDEX_MODIFIER = 10000
         val currentOffset = listState.firstVisibleItemScrollOffset +
-            listState.firstVisibleItemIndex * itemIndexMultiplier
+            listState.firstVisibleItemIndex * ITEM_INDEX_MODIFIER
         val scrollingUp = currentOffset < lastScrollOffset
         val scrollingDown = currentOffset > lastScrollOffset
         val idle = currentOffset == lastScrollOffset
@@ -847,4 +850,17 @@ private fun handleHeaderVisibilityOnScroll(
         }
         lastScrollOffset = currentOffset
     }
+}
+
+private fun filterLogs(
+    logs: List<DebugViewModel.UiMeshLog>,
+    filterTexts: List<String>
+): List<DebugViewModel.UiMeshLog> {
+    return logs.filter { log ->
+        filterTexts.isEmpty() || filterTexts.any { filterText ->
+            log.logMessage.contains(filterText, ignoreCase = true) ||
+            log.messageType.contains(filterText, ignoreCase = true) ||
+            log.formattedReceivedDate.contains(filterText, ignoreCase = true)
+        }
+    }.toImmutableList()
 }

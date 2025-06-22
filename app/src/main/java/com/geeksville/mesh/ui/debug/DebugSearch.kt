@@ -54,6 +54,8 @@ import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.model.DebugViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.zIndex
 
 @Composable
 internal fun DebugSearchNavigation(
@@ -198,6 +200,37 @@ internal fun DebugSearchState(
                 onFilterTextsChange = onFilterTextsChange
             )
         }
+    }
+}
+
+@Composable
+fun DebugHeaderBar(
+    visible: Boolean,
+    onHeightChanged: (Int) -> Unit,
+    searchState: SearchState,
+    filterTexts: List<String>,
+    presetFilters: List<String>,
+    onHeaderFocusChanged: (Boolean) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    if (!visible) return
+    Surface(
+        tonalElevation = 4.dp,
+        shadowElevation = 4.dp,
+        color = MaterialTheme.colorScheme.background.copy(alpha = 1.0f),
+        modifier = modifier
+            .fillMaxWidth()
+            .zIndex(1f)
+            .onGloballyPositioned { coordinates ->
+                onHeightChanged(coordinates.size.height)
+            }
+    ) {
+        DebugSearchStateviewModelDefaults(
+            searchState = searchState,
+            filterTexts = filterTexts,
+            presetFilters = presetFilters,
+            onHeaderFocusChanged = onHeaderFocusChanged
+        )
     }
 }
 
