@@ -17,15 +17,15 @@
 
 package com.geeksville.mesh.ui.debug
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -39,6 +39,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -47,12 +51,12 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.DebugViewModel
 import com.geeksville.mesh.model.LogSearchManager.SearchMatch
 import com.geeksville.mesh.model.LogSearchManager.SearchState
 import com.geeksville.mesh.ui.common.theme.AppTheme
-import com.geeksville.mesh.model.DebugViewModel
-import androidx.hilt.navigation.compose.hiltViewModel
 
 @Composable
 internal fun DebugSearchNavigation(
@@ -150,6 +154,7 @@ internal fun DebugSearchBar(
 
 @Composable
 internal fun DebugSearchState(
+    modifier: Modifier = Modifier,
     searchState: SearchState,
     filterTexts: List<String>,
     presetFilters: List<String>,
@@ -160,12 +165,18 @@ internal fun DebugSearchState(
     onFilterTextsChange: (List<String>) -> Unit,
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    var customFilterText by remember { mutableStateOf("") }
 
     Column(
-        modifier = Modifier.padding(8.dp)
+        modifier = modifier
+            .background(
+                color = colorScheme.background.copy(alpha = 1.0f)
+            )
+            .padding(8.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .background(colorScheme.background.copy(alpha = 1.0f)),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -180,27 +191,28 @@ internal fun DebugSearchState(
             DebugFilterBar(
                 filterTexts = filterTexts,
                 onFilterTextsChange = onFilterTextsChange,
-                customFilterText = "",
-                onCustomFilterTextChange = {},
+                customFilterText = customFilterText,
+                onCustomFilterTextChange = { customFilterText = it },
                 presetFilters = presetFilters
             )
         }
+        DebugActiveFilters(
+            filterTexts = filterTexts,
+            onFilterTextsChange = onFilterTextsChange
+        )
     }
-
-    DebugActiveFilters(
-        filterTexts = filterTexts,
-        onFilterTextsChange = onFilterTextsChange
-    )
 }
 
 @Composable
 fun DebugSearchStateviewModelDefaults(
+    modifier: Modifier = Modifier,
     searchState: SearchState,
     filterTexts: List<String>,
     presetFilters: List<String>,
 ) {
     val viewModel: DebugViewModel = hiltViewModel()
     DebugSearchState(
+        modifier = modifier,
         searchState = searchState,
         filterTexts = filterTexts,
         presetFilters = presetFilters,
