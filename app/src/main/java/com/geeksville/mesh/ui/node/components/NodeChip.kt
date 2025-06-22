@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.node.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -24,10 +25,11 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -53,14 +55,16 @@ fun NodeChip(
     var menuExpanded by remember { mutableStateOf(false) }
     val inputChipInteractionSource = remember { MutableInteractionSource() }
     Box {
-        AssistChip(
+        ElevatedAssistChip(
             modifier = modifier
                 .width(IntrinsicSize.Min)
-                .defaultMinSize(minHeight = 24.dp, minWidth = 72.dp),
-            colors = AssistChipDefaults.assistChipColors(
+                .defaultMinSize(minWidth = 72.dp),
+            elevation = AssistChipDefaults.elevatedAssistChipElevation(),
+            colors = AssistChipDefaults.elevatedAssistChipColors(
                 containerColor = Color(nodeColor),
                 labelColor = Color(textColor),
             ),
+            border = BorderStroke(1.dp, contentColorFor(Color(nodeColor))),
             label = {
                 Text(
                     modifier = Modifier
