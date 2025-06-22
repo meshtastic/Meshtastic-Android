@@ -267,6 +267,8 @@ internal fun MessageScreen(
                         viewModel.sendMessage(message, contactKey, it.packetId)
                         replyingTo = null
                     } ?: viewModel.sendMessage(message, contactKey)
+                    // Clear the text input after sending the message and updating all state
+                    messageInput.value = TextFieldValue("")
                 }
             }
         }
@@ -468,7 +470,6 @@ private fun TextInput(
                     val str = message.value.text.trim()
                     if (str.isNotEmpty()) {
                         onClick(str)
-                        message.value = TextFieldValue("")
                     }
                     true // Consume the event
                 } else {
@@ -486,7 +487,6 @@ private fun TextInput(
                 val str = message.value.text.trim()
                 if (str.isNotEmpty()) {
                     onClick(str)
-                    message.value = TextFieldValue("")
                 }
             }
         ),
@@ -498,7 +498,6 @@ private fun TextInput(
                     val str = message.value.text.trim()
                     if (str.isNotEmpty()) {
                         onClick(str)
-                        message.value = TextFieldValue("")
                         focusManager.clearFocus()
                     }
                 },
