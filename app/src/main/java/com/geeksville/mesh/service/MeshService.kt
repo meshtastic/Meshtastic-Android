@@ -340,7 +340,8 @@ class MeshService : Service(), Logging {
         serviceNotifications.updateMessageNotification(
             contactKey,
             getSenderName(dataPacket),
-            message
+            message,
+            isBroadcast = dataPacket.to == DataPacket.ID_BROADCAST
         )
     }
 
