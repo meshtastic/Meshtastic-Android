@@ -271,11 +271,17 @@ fun MainScreen(
                         }
                     } else if (action is NodeMenuAction) {
                         when (action) {
-                            is NodeMenuAction.MoreDetails -> navController.navigate(
-                                NodesRoutes.NodeDetail(
-                                    action.node.num
+                            is NodeMenuAction.MoreDetails -> {
+                                navController.navigate(
+                                    NodesRoutes.NodeDetail(
+                                        action.node.num
+                                    ),
+                                    {
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    }
                                 )
-                            )
+                            }
 
                             is NodeMenuAction.Share -> sharedContact = action.node
                             else -> {}
@@ -458,12 +464,14 @@ private fun TopBarActions(
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isConnected by viewModel.isConnected.collectAsStateWithLifecycle(false)
     AnimatedVisibility(ourNode != null) {
-        NodeChip(
-            node = ourNode!!,
-            isThisNode = true,
-            isConnected = isConnected,
-            onAction = onAction
-        )
+        ourNode?.let {
+            NodeChip(
+                node = it,
+                isThisNode = true,
+                isConnected = isConnected,
+                onAction = onAction
+            )
+        }
     }
     when {
         currentDestination == null || isTopLevelRoute ->

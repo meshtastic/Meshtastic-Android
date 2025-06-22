@@ -166,7 +166,7 @@
     <string name="debug_last_messages">500 last messages</string>
     <string name="debug_filters">Filters</string>
     <string name="debug_active_filters">Active filters (Match any)</string>
-    <string name="debug_default_search">Search in logs...</string>
+    <string name="debug_default_search">Search in logs…</string>
     <string name="debug_clear">Clear Logs</string>
     <string name="clear">Clear</string>
     <string name="updating_firmware">Updating firmware, wait up to eight minutes…</string>
@@ -368,14 +368,14 @@
     <string name="are_you_sure">Are you sure?</string>
     <string name="router_role_confirmation_text"><![CDATA[I have read the <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Device Role Documentation</a> and the blog post about <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Choosing The Right Device Role</a>.]]></string>
     <string name="i_know_what_i_m_doing">I know what I\'m doing.</string>
-    <string name="low_battery_message">Node %s has a low battery (%d%%)</string>
+    <string name="low_battery_message">Node %1$s has a low battery (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Low battery notifications</string>
     <string name="low_battery_title">Low battery: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Low battery notifications (favorite nodes)</string>
     <string name="baro_pressure">Barometric Pressure</string>
     <string name="mesh_via_udp_enabled">Mesh via UDP enabled</string>
     <string name="udp_config">UDP Config</string>
-    <string name="map_node_popup_details"><![CDATA[%s<br>Last heard: %s<br>Last position: %s<br>Battery: %s]]></string>
+    <string name="map_node_popup_details"><![CDATA[%1$s<br>Last heard: %2$s<br>Last position: %3$s<br>Battery: %4$s]]></string>
     <string name="toggle_my_position">Toggle my position</string>
     <string name="user">User</string>
     <string name="channels">Channels</string>
