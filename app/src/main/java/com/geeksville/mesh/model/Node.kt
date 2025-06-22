@@ -121,6 +121,17 @@ data class Node(
             null
         }
         val humidity = if (relativeHumidity != 0f) "%.0f%%".format(relativeHumidity) else null
+        val soilTemp = if (soilTemperature != 0f) {
+            if (isFahrenheit) {
+                val fahrenheit = soilTemperature * 1.8F + 32
+                "%.1f°F".format(fahrenheit)
+            } else {
+                "%.1f°C".format(soilTemperature)
+            }
+        } else {
+            null
+        }
+        val soilMoisture = if (soilMoisture != 0) "%.0%%".format(soilMoisture) else null
         val voltage = if (this.voltage != 0f) "%.2fV".format(this.voltage) else null
         val current = if (current != 0f) "%.1fmA".format(current) else null
         val iaq = if (iaq != 0) "IAQ: $iaq" else null
@@ -128,6 +139,8 @@ data class Node(
         return listOfNotNull(
             temp,
             humidity,
+            soilTemp,
+            soilMoisture,
             voltage,
             current,
             iaq,

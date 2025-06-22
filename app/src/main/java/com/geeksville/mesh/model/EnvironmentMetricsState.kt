@@ -33,6 +33,16 @@ enum class Environment(val color: Color) {
             return telemetry.environmentMetrics.relativeHumidity
         }
     },
+    SOIL_TEMPERATURE(Color.Red) {
+        override fun getValue(telemetry: Telemetry): Float {
+            return telemetry.environmentMetrics.soilTemperature
+        }
+    },
+    SOIL_MOISTURE(InfantryBlue) {
+        override fun getValue(telemetry: Telemetry): Float {
+            return telemetry.environmentMetrics.soilMoisture.toFloat()
+        }
+    },
     IAQ(Color.Green) {
         override fun getValue(telemetry: Telemetry): Float {
             return telemetry.environmentMetrics.iaq.toFloat()
@@ -105,6 +115,27 @@ data class EnvironmentMetricsState(
             minValues.add(minHumidity.environmentMetrics.relativeHumidity)
             maxValues.add(maxHumidity.environmentMetrics.relativeHumidity)
             shouldPlot[Environment.HUMIDITY.ordinal] = true
+        }
+
+        val (minSoilTemp, maxSoilTemp) = Pair(
+            telemetries.minBy { it.environmentMetrics.soilTemperature },
+            telemetries.maxBy { it.environmentMetrics.soilTemperature }
+        )
+        if (minSoilTemp.environmentMetrics.soilTemperature != 0f || maxSoilTemp.environmentMetrics.soilTemperature != 0f) {
+            minValues.add(minTemp.environmentMetrics.soilTemperature)
+            maxValues.add(maxTemp.environmentMetrics.soilTemperature)
+            shouldPlot[Environment.SOIL_TEMPERATURE.ordinal] = true
+        }
+
+        val (minSoilMoisture, maxSoilMoisture) = Pair(
+            telemetries.minBy { it.environmentMetrics.soilMoisture },
+            telemetries.maxBy { it.environmentMetrics.soilMoisture }
+        )
+        if (minSoilMoisture.environmentMetrics.soilMoisture != 0 ||
+            maxSoilMoisture.environmentMetrics.soilMoisture != 0) {
+            minValues.add(minHumidity.environmentMetrics.soilMoisture.toFloat())
+            maxValues.add(maxHumidity.environmentMetrics.soilMoisture.toFloat())
+            shouldPlot[Environment.SOIL_MOISTURE.ordinal] = true
         }
 
         val (minIAQ, maxIAQ) = Pair(
