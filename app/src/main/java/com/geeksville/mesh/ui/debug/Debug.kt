@@ -19,15 +19,10 @@ package com.geeksville.mesh.ui.debug
 
 import android.content.Context
 import android.os.Environment
-import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import java.io.FileOutputStream
-import java.io.OutputStreamWriter
-import java.nio.charset.StandardCharsets
+import android.widget.Toast
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -39,15 +34,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material.icons.twotone.FilterAltOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
@@ -58,9 +53,12 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
@@ -73,25 +71,30 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.datastore.core.IOException
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.BuildUtils.warn
 import com.geeksville.mesh.model.DebugViewModel
 import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
-import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.components.CopyIconButton
-import android.widget.Toast
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.datastore.core.IOException
-import com.geeksville.mesh.android.BuildUtils.warn
+import com.geeksville.mesh.ui.common.theme.AppTheme
 import kotlinx.collections.immutable.toImmutableList
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import androidx.compose.material3.IconButton
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import java.io.OutputStreamWriter
+import java.nio.charset.StandardCharsets
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
 
+@Suppress("LongMethod")
 @Composable
 internal fun DebugScreen(
     viewModel: DebugViewModel = hiltViewModel(),
@@ -131,28 +134,39 @@ internal fun DebugScreen(
         }
     }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        state = listState,
+    Column(
+        modifier = Modifier.fillMaxSize()
     ) {
-        stickyHeader {
-            DebugSearchStateviewModelDefaults(
-                searchState = searchState,
-                filterTexts = filterTexts,
-                presetFilters = viewModel.presetFilters,
-            )
-        }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            state = listState,
+        ) {
+            stickyHeader {
+                val animatedAlpha by animateFloatAsState(
+                    targetValue = if (!listState.isScrollInProgress) 1.0f else 0f,
+                    label = "alpha"
+                )
+                DebugSearchStateviewModelDefaults(
+                    modifier = Modifier.graphicsLayer(
+                        alpha = animatedAlpha
+                    ),
+                    searchState = searchState,
+                    filterTexts = filterTexts,
+                    presetFilters = viewModel.presetFilters,
+                )
+            }
 
-        items(filteredLogs, key = { it.uuid }) { log ->
-            DebugItem(
-                modifier = Modifier.animateItem(),
-                log = log,
-                searchText = searchState.searchText,
-                isSelected = selectedLogId == log.uuid,
-                onLogClick = {
-                    viewModel.setSelectedLogId(if (selectedLogId == log.uuid) null else log.uuid)
-                }
-            )
+            items(filteredLogs, key = { it.uuid }) { log ->
+                DebugItem(
+                    modifier = Modifier.animateItem(),
+                    log = log,
+                    searchText = searchState.searchText,
+                    isSelected = selectedLogId == log.uuid,
+                    onLogClick = {
+                        viewModel.setSelectedLogId(if (selectedLogId == log.uuid) null else log.uuid)
+                    }
+                )
+            }
         }
     }
 }
