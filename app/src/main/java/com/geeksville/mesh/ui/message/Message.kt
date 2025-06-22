@@ -150,6 +150,15 @@ internal fun MessageScreen(
     ) {
         mutableStateOf(TextFieldValue(message))
     }
+
+    // Track when a message is sent to clear the input
+    var messageSent by remember { mutableStateOf(false) }
+    LaunchedEffect(messageSent) {
+        if (messageSent) {
+            messageInput.value = TextFieldValue("")
+            messageSent = false
+        }
+    }
     var replyingTo by remember { mutableStateOf<Message?>(null) }
 
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -267,8 +276,7 @@ internal fun MessageScreen(
                         viewModel.sendMessage(message, contactKey, it.packetId)
                         replyingTo = null
                     } ?: viewModel.sendMessage(message, contactKey)
-                    // Clear the text input after sending the message and updating all state
-                    messageInput.value = TextFieldValue("")
+                    messageSent = true
                 }
             }
         }
