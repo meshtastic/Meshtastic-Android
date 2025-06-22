@@ -62,7 +62,7 @@ fun ReactionButton(
     ) {
         Icon(
             imageVector = Icons.Default.EmojiEmotions,
-            contentDescription = "emoji",
+            contentDescription = stringResource(R.string.react),
         )
     }
 }
@@ -75,7 +75,7 @@ fun ReplyButton(
     content = {
         Icon(
             imageVector = Icons.AutoMirrored.Filled.Reply,
-            contentDescription = "reply",
+            contentDescription = stringResource(R.string.reply),
         )
     }
 )
