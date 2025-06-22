@@ -57,7 +57,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -81,6 +83,9 @@ import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.components.CopyIconButton
 import android.widget.Toast
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.runtime.rememberCoroutineScope
@@ -89,6 +94,9 @@ import com.geeksville.mesh.android.BuildUtils.warn
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.launch
 import androidx.compose.material3.IconButton
+import androidx.compose.ui.zIndex
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.platform.LocalDensity
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
 
@@ -112,10 +120,35 @@ internal fun DebugScreen(
         }.toImmutableList()
     }
 
+    // Track scroll direction and focus for header
+    var lastScrollOffset by remember { mutableStateOf(0) }
+    var headerVisible by remember { mutableStateOf(true) }
+    var headerHasFocus by remember { mutableStateOf(false) }
+    var programmaticScroll by remember { mutableStateOf(false) }
+    var ignoreNextScroll by remember { mutableStateOf(false) }
+
+    // header display
+    val headerHeightPx = remember { mutableStateOf(0) }
+    val density = LocalDensity.current
+    val headerHeightDp = with(density) { headerHeightPx.value.toDp() }
+
+    fun setHeaderVisible(newValue: Boolean) {
+        if (headerVisible != newValue) {
+            headerVisible = newValue
+            ignoreNextScroll = true // Ignore the next scroll event caused by this change (and search)
+        }
+    }
+    fun setHeaderHasFocus(newValue: Boolean) {
+            headerHasFocus = newValue
+    }
+
     LaunchedEffect(filteredLogs) {
         viewModel.updateFilteredLogs(filteredLogs)
     }
 
+    // This code automatically scrolls the log list to the top (item 0) whenever the filteredLogs change,
+    // but only if the user is already near the top (within the first 3 items) and not currently scrolling.
+    // It uses a derived state to determine if auto-scroll should occur, and triggers the scroll in a LaunchedEffect.
     val shouldAutoScroll by remember { derivedStateOf { listState.firstVisibleItemIndex < 3 } }
     if (shouldAutoScroll) {
         LaunchedEffect(filteredLogs) {
@@ -124,35 +157,72 @@ internal fun DebugScreen(
             }
         }
     }
-    // Handle search result navigation
+
+    // Scrolls to the currently selected search match in the log list when searchState changes.
     LaunchedEffect(searchState) {
         if (searchState.currentMatchIndex >= 0 && searchState.currentMatchIndex < searchState.allMatches.size) {
+            programmaticScroll = true
             listState.requestScrollToItem(searchState.allMatches[searchState.currentMatchIndex].logIndex)
+            programmaticScroll = false
         }
     }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        state = listState,
-    ) {
-        stickyHeader {
-            DebugSearchStateviewModelDefaults(
-                searchState = searchState,
-                filterTexts = filterTexts,
-                presetFilters = viewModel.presetFilters,
-            )
-        }
+    handleHeaderVisibilityOnScroll(
+        listState = listState,
+        headerHasFocus = headerHasFocus,
+        programmaticScroll = programmaticScroll,
+        ignoreNextScroll = ignoreNextScroll,
+        setHeaderVisible = { setHeaderVisible(it) },
+        setIgnoreNextScroll = { ignoreNextScroll = it }
+    )
 
-        items(filteredLogs, key = { it.uuid }) { log ->
-            DebugItem(
-                modifier = Modifier.animateItem(),
-                log = log,
-                searchText = searchState.searchText,
-                isSelected = selectedLogId == log.uuid,
-                onLogClick = {
-                    viewModel.setSelectedLogId(if (selectedLogId == log.uuid) null else log.uuid)
-                }
-            )
+    LaunchedEffect(listState.isScrollInProgress) {
+        if (listState.isScrollInProgress) {
+            setHeaderHasFocus(false)
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            state = listState,
+            contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
+        ) {
+            item {
+                Spacer(modifier = Modifier.height(headerHeightDp))
+            }
+            items(filteredLogs, key = { it.uuid }) { log ->
+                DebugItem(
+                    modifier = Modifier.animateItem(),
+                    log = log,
+                    searchText = searchState.searchText,
+                    isSelected = selectedLogId == log.uuid,
+                    onLogClick = {
+                        setHeaderHasFocus(false)
+                        viewModel.setSelectedLogId(if (selectedLogId == log.uuid) null else log.uuid)
+                    }
+                )
+            }
+        }
+        if (headerVisible) {
+            androidx.compose.material3.Surface(
+                tonalElevation = 4.dp,
+                shadowElevation = 4.dp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.TopCenter)
+                    .zIndex(1f)
+                    .onGloballyPositioned { coordinates ->
+                        headerHeightPx.value = coordinates.size.height
+                    }
+            ) {
+                DebugSearchStateviewModelDefaults(
+                    searchState = searchState,
+                    filterTexts = filterTexts,
+                    presetFilters = viewModel.presetFilters,
+                    onHeaderFocusChanged = { focused -> setHeaderHasFocus(focused) }
+                )
+            }
         }
     }
 }
@@ -690,7 +760,7 @@ fun DebugMenuActions(
             contentDescription = "Clear All"
         )
     }
-    }
+}
 
 private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = withContext(Dispatchers.IO) {
     try {
@@ -736,5 +806,45 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
             ).show()
         }
         warn("Error:IOException: " + e.toString())
+    }
+}
+
+@Composable
+private fun handleHeaderVisibilityOnScroll(
+    listState: LazyListState,
+    headerHasFocus: Boolean,
+    programmaticScroll: Boolean,
+    ignoreNextScroll: Boolean,
+    setHeaderVisible: (Boolean) -> Unit,
+    setIgnoreNextScroll: (Boolean) -> Unit
+) {
+    var lastScrollOffset by remember { mutableStateOf(0) }
+    LaunchedEffect(
+        listState.firstVisibleItemScrollOffset,
+        listState.firstVisibleItemIndex,
+        headerHasFocus,
+        programmaticScroll
+    ) {
+        if (ignoreNextScroll) {
+            setIgnoreNextScroll(false)
+            return@LaunchedEffect
+        }
+        const itemIndexMultiplier = 10000
+        val currentOffset = listState.firstVisibleItemScrollOffset +
+            listState.firstVisibleItemIndex * itemIndexMultiplier
+        val scrollingUp = currentOffset < lastScrollOffset
+        val scrollingDown = currentOffset > lastScrollOffset
+        val idle = currentOffset == lastScrollOffset
+
+        when {
+            headerHasFocus -> setHeaderVisible(true)
+            programmaticScroll -> setHeaderVisible(true)
+            scrollingUp -> setHeaderVisible(true)
+            scrollingDown -> setHeaderVisible(false)
+            listState.firstVisibleItemIndex == 0 && listState.firstVisibleItemScrollOffset == 0
+                -> setHeaderVisible(true)
+            idle -> { /* Do nothing */ }
+        }
+        lastScrollOffset = currentOffset
     }
 }

@@ -53,6 +53,7 @@ import com.geeksville.mesh.model.LogSearchManager.SearchState
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.model.DebugViewModel
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.focus.onFocusChanged
 
 @Composable
 internal fun DebugSearchNavigation(
@@ -158,6 +159,7 @@ internal fun DebugSearchState(
     onPreviousMatch: () -> Unit,
     onClearSearch: () -> Unit,
     onFilterTextsChange: (List<String>) -> Unit,
+    onHeaderFocusChanged: (Boolean) -> Unit = {},
 ) {
     val colorScheme = MaterialTheme.colorScheme
 
@@ -179,7 +181,8 @@ internal fun DebugSearchState(
                     onSearchTextChange = onSearchTextChange,
                     onNextMatch = onNextMatch,
                     onPreviousMatch = onPreviousMatch,
-                    onClearSearch = onClearSearch
+                    onClearSearch = onClearSearch,
+                    modifier = Modifier.onFocusChanged { onHeaderFocusChanged(it.isFocused) }
                 )
                 DebugFilterBar(
                     filterTexts = filterTexts,
@@ -203,6 +206,7 @@ fun DebugSearchStateviewModelDefaults(
     searchState: SearchState,
     filterTexts: List<String>,
     presetFilters: List<String>,
+    onHeaderFocusChanged: (Boolean) -> Unit = {},
 ) {
     val viewModel: DebugViewModel = hiltViewModel()
     DebugSearchState(
@@ -214,6 +218,7 @@ fun DebugSearchStateviewModelDefaults(
         onPreviousMatch = viewModel.searchManager::goToPreviousMatch,
         onClearSearch = viewModel.searchManager::clearSearch,
         onFilterTextsChange = viewModel.filterManager::setFilterTexts,
+        onHeaderFocusChanged = onHeaderFocusChanged,
     )
 }
 
