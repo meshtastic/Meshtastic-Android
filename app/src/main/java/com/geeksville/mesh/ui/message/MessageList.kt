@@ -172,6 +172,7 @@ internal fun MessageList(
                     mutableStateOf(nodes.find { it.num == msg.node.num } ?: msg.node)
                 }
                 MessageItem(
+                    modifier = Modifier.animateItem(),
                     node = node,
                     ourNode = ourNode!!,
                     message = msg,

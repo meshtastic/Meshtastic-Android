@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -89,11 +90,17 @@ internal fun MessageItem(
         .background(color = if (selected) Color.Gray else MaterialTheme.colorScheme.background),
 ) {
     val fromLocal = node.user.id == DataPacket.ID_LOCAL
-    val messageColor = if (fromLocal) {
-        Color(ourNode.colors.second).copy(alpha = 0.25f)
-    } else {
-        Color(node.colors.second).copy(alpha = 0.25f)
-    }
+    val containerColor = Color(
+        if (fromLocal) {
+            ourNode.colors.second
+        } else {
+            node.colors.second
+        }
+    ).copy(alpha = 0.2f)
+    val cardColors = CardDefaults.cardColors().copy(
+        containerColor = containerColor,
+        contentColor = contentColorFor(containerColor)
+    )
     val messageModifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
     Box {
         Card(
@@ -109,17 +116,18 @@ internal fun MessageItem(
                     onLongClick = onLongClick,
                 )
                 .then(messageModifier),
-            colors = CardDefaults.cardColors(
-                containerColor = messageColor,
-                contentColor = contentColorFor(messageColor),
-            ),
+            colors = cardColors,
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth(),
             ) {
-                ReplyingTo(message, ourNode, onNavigateToOriginalMessage)
-
+                ReplyingTo(
+                    message = message,
+                    ourNode = ourNode,
+                    cardColors = cardColors,
+                    onNavigateToOriginalMessage = onNavigateToOriginalMessage
+                )
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -154,6 +162,7 @@ internal fun MessageItem(
                         .padding(horizontal = 8.dp),
                     text = message.text,
                     style = MaterialTheme.typography.bodyMedium,
+                    color = cardColors.contentColor
                 )
                 Row(
                     modifier = Modifier
@@ -208,6 +217,7 @@ internal fun MessageItem(
 private fun ReplyingTo(
     message: Message,
     ourNode: Node,
+    cardColors: CardColors = CardDefaults.cardColors(),
     onNavigateToOriginalMessage: (Int) -> Unit
 ) {
     message.originalMessage?.let { originalMessage ->
@@ -219,10 +229,7 @@ private fun ReplyingTo(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { onNavigateToOriginalMessage(originalMessage.packetId) },
-            colors = CardDefaults.cardColors(
-                containerColor = Color(originalMessageNode.colors.second).copy(alpha = 0.5f),
-                contentColor = Color(originalMessageNode.colors.first),
-            ),
+            colors = cardColors,
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 4.dp),
