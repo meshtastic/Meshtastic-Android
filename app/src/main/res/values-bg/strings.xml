@@ -104,7 +104,6 @@
     <string name="debug_logs_export">Експортиране на журнали</string>
     <string name="debug_last_messages">Последни 500 съобщения</string>
     <string name="debug_filters">Филтри</string>
-    <string name="debug_default_search">Търсене в журналите...</string>
     <string name="debug_clear">Изчистване на журналите</string>
     <string name="clear">Изчисти</string>
     <string name="updating_firmware">Актуализиране на фърмуера, изчакайте до осем минути…</string>
@@ -270,14 +269,12 @@
     <string name="voltage">Напрежение</string>
     <string name="are_you_sure">Сигурни ли сте?</string>
     <string name="i_know_what_i_m_doing">Знам какво правя.</string>
-    <string name="low_battery_message">Възелът %s има изтощена батерия (%d%%)</string>
     <string name="meshtastic_low_battery_notifications">Известия за изтощена батерия</string>
     <string name="low_battery_title">Батерията е изтощена: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Известия за изтощена батерия (любими възли)</string>
     <string name="baro_pressure">Барометрично налягане</string>
     <string name="mesh_via_udp_enabled">Активирана Mesh чрез UDP</string>
     <string name="udp_config">Конфигурация на UDP</string>
-    <string name="map_node_popup_details"><![CDATA[%s<br>Последно чут: %s<br>Последна позиция: %s<br>Батерия: %s]]></string>
     <string name="user">Потребител</string>
     <string name="channels">Канали</string>
     <string name="device">Устройство</string>
