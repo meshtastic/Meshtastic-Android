@@ -76,6 +76,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
@@ -119,22 +120,23 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun MainScreen(
-    viewModel: UIViewModel = hiltViewModel(),
+    uIViewModel: UIViewModel = hiltViewModel(),
+    bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
     onAction: (MainMenuAction) -> Unit,
 ) {
     val navController = rememberNavController()
-    val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
-    val localConfig by viewModel.localConfig.collectAsStateWithLifecycle()
-    val requestChannelSet by viewModel.requestChannelSet.collectAsStateWithLifecycle()
+    val connectionState by uIViewModel.connectionState.collectAsStateWithLifecycle()
+    val localConfig by uIViewModel.localConfig.collectAsStateWithLifecycle()
+    val requestChannelSet by uIViewModel.requestChannelSet.collectAsStateWithLifecycle()
     if (connectionState.isConnected()) {
         requestChannelSet?.let { newChannelSet ->
-            ScannedQrCodeDialog(viewModel, newChannelSet)
+            ScannedQrCodeDialog(uIViewModel, newChannelSet)
         }
     }
 
-    VersionChecks(viewModel)
+    VersionChecks(uIViewModel)
 
-    val alertDialogState by viewModel.currentAlert.collectAsStateWithLifecycle()
+    val alertDialogState by uIViewModel.currentAlert.collectAsStateWithLifecycle()
     alertDialogState?.let { state ->
         if (state.choices.isNotEmpty()) {
             MultipleChoiceAlertDialog(
@@ -154,7 +156,7 @@ fun MainScreen(
         }
     }
 
-    val clientNotification by viewModel.clientNotification.collectAsStateWithLifecycle()
+    val clientNotification by uIViewModel.clientNotification.collectAsStateWithLifecycle()
     clientNotification?.let { notification ->
         var message = notification.message
         val compromisedKeys =
@@ -173,12 +175,12 @@ fun MainScreen(
                 if (compromisedKeys) {
                     navController.navigate(RadioConfigRoutes.Security)
                 }
-                viewModel.clearClientNotification(notification)
+                uIViewModel.clearClientNotification(notification)
             },
         )
     }
 
-    val traceRouteResponse by viewModel.tracerouteResponse.observeAsState()
+    val traceRouteResponse by uIViewModel.tracerouteResponse.observeAsState()
     traceRouteResponse?.let { response ->
         SimpleAlertDialog(
             title = R.string.traceroute,
@@ -186,7 +188,7 @@ fun MainScreen(
                 Text(text = response)
             },
             dismissText = stringResource(id = R.string.okay),
-            onDismiss = { viewModel.clearTracerouteResponse() }
+            onDismiss = { uIViewModel.clearTracerouteResponse() }
         )
     }
     val navSuiteType =
@@ -258,7 +260,7 @@ fun MainScreen(
                 )
             }
             MainAppBar(
-                viewModel = viewModel,
+                viewModel = uIViewModel,
                 isManaged = localConfig.security.isManaged,
                 navController = navController,
                 onAction = { action ->
@@ -290,7 +292,8 @@ fun MainScreen(
                 },
             )
             NavGraph(
-                uIViewModel = viewModel,
+                uIViewModel = uIViewModel,
+                bluetoothViewModel = bluetoothViewModel,
                 navController = navController,
             )
         }

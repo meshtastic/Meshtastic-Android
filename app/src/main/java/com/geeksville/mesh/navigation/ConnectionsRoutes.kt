@@ -24,6 +24,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
+import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.connections.ConnectionsScreen
 import com.geeksville.mesh.ui.radioconfig.components.LoRaConfigScreen
@@ -41,7 +42,11 @@ sealed class ConnectionsRoutes {
 /**
  * Navigation graph for for the top level ConnectionsScreen - [ConnectionsRoutes.Connections].
  */
-fun NavGraphBuilder.connectionsGraph(navController: NavHostController, uiViewModel: UIViewModel) {
+fun NavGraphBuilder.connectionsGraph(
+    navController: NavHostController,
+    uiViewModel: UIViewModel,
+    bluetoothViewModel: BluetoothViewModel
+) {
     navigation<ConnectionsRoutes.ConnectionsGraph>(
         startDestination = ConnectionsRoutes.Connections,
     ) {
@@ -57,7 +62,8 @@ fun NavGraphBuilder.connectionsGraph(navController: NavHostController, uiViewMod
                 navController.getBackStackEntry<ConnectionsRoutes.ConnectionsGraph>()
             }
             ConnectionsScreen(
-                uiViewModel,
+                uiViewModel = uiViewModel,
+                bluetoothViewModel = bluetoothViewModel,
                 radioConfigViewModel = hiltViewModel(parentEntry),
                 onNavigateToRadioConfig = { navController.navigate(RadioConfigRoutes.RadioConfig()) },
                 onNavigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetail(it)) },

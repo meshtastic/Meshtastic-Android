@@ -146,7 +146,8 @@ class MainActivity : AppCompatActivity(), Logging {
                     }
                 }
                 MainScreen(
-                    viewModel = model,
+                    uIViewModel = model,
+                    bluetoothViewModel = bluetoothViewModel,
                     onAction = ::onMainMenuAction,
                 )
             }
