@@ -56,6 +56,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.zIndex
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.foundation.lazy.LazyListState
 
 @Composable
 internal fun DebugSearchNavigation(
@@ -253,6 +255,21 @@ fun DebugSearchStateviewModelDefaults(
         onFilterTextsChange = viewModel.filterManager::setFilterTexts,
         onHeaderFocusChanged = onHeaderFocusChanged,
     )
+}
+
+@Composable
+fun ScrollToSearchMatchEffect(
+    searchState: SearchState,
+    listState: LazyListState,
+    setProgrammaticScroll: (Boolean) -> Unit
+) {
+    LaunchedEffect(searchState) {
+        if (searchState.currentMatchIndex >= 0 && searchState.currentMatchIndex < searchState.allMatches.size) {
+            setProgrammaticScroll(true)
+            listState.requestScrollToItem(searchState.allMatches[searchState.currentMatchIndex].logIndex)
+            setProgrammaticScroll(false)
+        }
+    }
 }
 
 @PreviewLightDark

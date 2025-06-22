@@ -100,40 +100,44 @@ import androidx.compose.ui.unit.Dp
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
 const val ITEM_INDEX_MODIFIER = 10000
 
+data class HeaderUiState(
+    var lastScrollOffset: Int = 0,
+    var headerVisible: Boolean = true,
+    var headerHasFocus: Boolean = false,
+    var programmaticScroll: Boolean = false,
+    var ignoreNextScroll: Boolean = false,
+    var headerHeightPx: Int = 0
+)
+
+@Suppress("detekt:LongMethod")
 @Composable
 internal fun DebugScreen(
     viewModel: DebugViewModel = hiltViewModel(),
 ) {
     val listState = rememberLazyListState()
     val logs by viewModel.meshLog.collectAsStateWithLifecycle()
+
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
     val filterTexts by viewModel.filterTexts.collectAsStateWithLifecycle()
     val selectedLogId by viewModel.selectedLogId.collectAsStateWithLifecycle()
-
-    // Track scroll direction and focus for header
-    var lastScrollOffset by remember { mutableStateOf(0) }
-    var headerVisible by remember { mutableStateOf(true) }
-    var headerHasFocus by remember { mutableStateOf(false) }
-    var programmaticScroll by remember { mutableStateOf(false) }
-    var ignoreNextScroll by remember { mutableStateOf(false) }
-
-    // header display
-    var headerHeightPx by remember { mutableStateOf(0) }
-    val density = LocalDensity.current
-    val headerHeightDp = with(density) { headerHeightPx.toDp() }
 
     val filteredLogs = remember(logs, filterTexts) {
         filterLogs(logs, filterTexts)
     }
 
+    // Track scroll direction and focus for header
+    val headerUiState = remember { mutableStateOf(HeaderUiState()) }
+    val headerHeightDp = with(LocalDensity.current) { headerUiState.value.headerHeightPx.toDp() }
+
     fun setHeaderVisible(newValue: Boolean) {
-        if (headerVisible != newValue) {
-            headerVisible = newValue
-            ignoreNextScroll = true // Ignore the next scroll event caused by this change (and search)
+        if (headerUiState.value.headerVisible != newValue) {
+            headerUiState.value.headerVisible = newValue
+            // Ignore the next scroll event caused by this change (and search)
+            headerUiState.value.ignoreNextScroll = true
         }
     }
     fun setHeaderHasFocus(newValue: Boolean) {
-            headerHasFocus = newValue
+            headerUiState.value.headerHasFocus = newValue
     }
 
     LaunchedEffect(filteredLogs) {
@@ -153,21 +157,19 @@ internal fun DebugScreen(
     }
 
     // Scrolls to the currently selected search match in the log list when searchState changes.
-    LaunchedEffect(searchState) {
-        if (searchState.currentMatchIndex >= 0 && searchState.currentMatchIndex < searchState.allMatches.size) {
-            programmaticScroll = true
-            listState.requestScrollToItem(searchState.allMatches[searchState.currentMatchIndex].logIndex)
-            programmaticScroll = false
-        }
-    }
+    ScrollToSearchMatchEffect(
+        searchState = searchState,
+        listState = listState,
+        setProgrammaticScroll = { headerUiState.value.programmaticScroll = it }
+    )
 
     handleHeaderVisibilityOnScroll(
         listState = listState,
-        headerHasFocus = headerHasFocus,
-        programmaticScroll = programmaticScroll,
-        ignoreNextScroll = ignoreNextScroll,
+        headerHasFocus = headerUiState.value.headerHasFocus,
+        programmaticScroll = headerUiState.value.programmaticScroll,
+        ignoreNextScroll = headerUiState.value.ignoreNextScroll,
         setHeaderVisible = { setHeaderVisible(it) },
-        setIgnoreNextScroll = { ignoreNextScroll = it }
+        setIgnoreNextScroll = { headerUiState.value.ignoreNextScroll = it }
     )
 
     LaunchedEffect(listState.isScrollInProgress) {
@@ -188,10 +190,10 @@ internal fun DebugScreen(
             },
             listState = listState
         )
-        if (headerVisible) {
+        if (headerUiState.value.headerVisible) {
             DebugHeaderBar(
-                visible = headerVisible,
-                onHeightChanged = { headerHeightPx = it },
+                visible = headerUiState.value.headerVisible,
+                onHeightChanged = { headerUiState.value.headerHeightPx = it },
                 searchState = searchState,
                 filterTexts = filterTexts,
                 presetFilters = viewModel.presetFilters,
