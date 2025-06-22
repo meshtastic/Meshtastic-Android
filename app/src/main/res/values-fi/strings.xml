@@ -142,7 +142,7 @@
     <string name="debug_last_messages">500 viimeisintä viestiä</string>
     <string name="debug_filters">Suodattimet</string>
     <string name="debug_active_filters">Aktiiviset suodattimet (täsmää mihinkä tahansa)</string>
-    <string name="debug_default_search">Hae lokitiedoista...</string>
+    <string name="debug_default_search">Hae lokitiedoista…</string>
     <string name="debug_clear">Tyhjennä lokit</string>
     <string name="clear">Tyhjennä</string>
     <string name="updating_firmware">Päivitetään laiteohjelmistoa, tämä voi kestää jopa kahdeksan minuuttia…</string>
@@ -344,14 +344,14 @@
     <string name="are_you_sure">Oletko varma?</string>
     <string name="router_role_confirmation_text"><![CDATA[Olen lukenut <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Laitteen roolit ohjeen</a> ja blogikirjoituksen <a href="http://meshtastic.org/blog/choosing-the-right-device-role"> valitakseni laitteelle oikean roolin</a>.]]></string>
     <string name="i_know_what_i_m_doing">Tiedän mitä olen tekemässä.</string>
-    <string name="low_battery_message">Laitteen %s akun varaustila on vähissä (%d%%)</string>
+    <string name="low_battery_message">Laitteen %1$s akun varaustila on vähissä (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Akun vähäisen varauksen ilmoitukset</string>
     <string name="low_battery_title">Akku vähissä: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Akun vähäisen varauksen ilmoitukset (suosikkilaitteet)</string>
     <string name="baro_pressure">Barometrinen paine</string>
     <string name="mesh_via_udp_enabled">Mesh-verkko UDP:n kautta käytössä</string>
     <string name="udp_config">UDP asetukset</string>
-    <string name="map_node_popup_details"><![CDATA[%s<br>Viimeksi kuultu: %s<br>Viimeisin sijainti: %s<br>Akku: %s]]></string>
+    <string name="map_node_popup_details"><![CDATA[%1$s<br>Viimeksi kuultu: %2$s<br>Viimeisin sijainti: %3$s<br>Akku: %4$s]]></string>
     <string name="toggle_my_position">Kytke sijainti päälle</string>
     <string name="user">Käyttäjä</string>
     <string name="channels">Kanavat</string>
@@ -672,4 +672,5 @@
     <string name="modules_unlocked">Lukittamattomat moduulit</string>
     <string name="remote">Etäyhteys</string>
     <string name="node_count_template">(%1$d yhdistetty / %2$d yhteensä)</string>
+    <string name="react">Reagoi</string>
 </resources>

@@ -139,6 +139,8 @@
     <string name="debug_panel">Panel pro ladění</string>
     <string name="debug_last_messages">500 posledních zpráv</string>
     <string name="debug_filters">Filtry</string>
+    <string name="debug_default_search">Hledat v protokolech…</string>
+    <string name="debug_clear">Vymazat protokoly</string>
     <string name="clear">Vymazat</string>
     <string name="updating_firmware">Aktualizuji firmware, čekejte až osm minut…</string>
     <string name="update_successful">Aktualizace byla úspěšná</string>
@@ -146,6 +148,8 @@
     <string name="message_reception_time">čas přijetí zprávy</string>
     <string name="message_reception_state">stav přijetí zprávy</string>
     <string name="message_delivery_status">Stav doručení zprávy</string>
+    <string name="meshtastic_messages_notifications">Upozornění na přímou zprávu</string>
+    <string name="meshtastic_broadcast_notifications">Upozornění na hromadné zprávy</string>
     <string name="meshtastic_alerts_notifications">Upozornění na varování</string>
     <string name="protocol_stress_test">Protokol zátěžového testu</string>
     <string name="firmware_too_old">Je vyžadována aktualizace firmwaru.</string>
@@ -271,6 +275,7 @@
     <string name="humidity">Vlhkost</string>
     <string name="logs">Logy</string>
     <string name="hops_away">Počet skoků</string>
+    <string name="hops_away_template">Počet skoků: %1$d</string>
     <string name="info">Informace</string>
     <string name="ch_util_definition">Využití aktuálního kanálu, včetně dobře vytvořeného TX, RX a poškozeného RX (tzv. šumu).</string>
     <string name="air_util_definition">Procento vysílacího času použitého během poslední hodiny.</string>
@@ -340,14 +345,14 @@
     <string name="are_you_sure">Jste si jistý?</string>
     <string name="router_role_confirmation_text"><![CDATA[Přečetl jsem si <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">dokumentaci o rolích zařízení</a> a blogový příspěvek o <a href="http://meshtastic.org/blog/choosing-the-right-device-role">výběru správné role zařízení</a>.]]></string>
     <string name="i_know_what_i_m_doing">Vím co dělám.</string>
-    <string name="low_battery_message">Uzel %s má nízký stav baterie (%d%%)</string>
+    <string name="low_battery_message">Uzel %1$s má nízký stav baterie (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Upozornění na nízký stav baterie</string>
     <string name="low_battery_title">Nízký stav baterie: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Upozornění na nízký stav baterie (oblíbené uzly)</string>
     <string name="baro_pressure">Barometrický tlak</string>
     <string name="mesh_via_udp_enabled">Povoleno posílání přes UDP</string>
     <string name="udp_config">UDP Konfigurace</string>
-    <string name="map_node_popup_details"><![CDATA[%s<br>Naposledy slyšen: %s<br>Poslední pozice: %s<br>Baterie: %s]]></string>
+    <string name="map_node_popup_details"><![CDATA[%1$s<br>Naposledy slyšen: %2$s<br>Poslední pozice: %3$s<br>Baterie: %4$s]]></string>
     <string name="toggle_my_position">Zapnout/vypnout pozici</string>
     <string name="user">Uživatel</string>
     <string name="channels">Kanály</string>
@@ -394,6 +399,8 @@
     <string name="red">Červená</string>
     <string name="green">Zelená</string>
     <string name="blue">Modrá</string>
+    <string name="canned_message_config">Přednastavené zprávy</string>
+    <string name="canned_message_enabled">Přednastavené zprávy povoleny</string>
     <string name="rotary_encoder_1_enabled">Rotační enkodér #1 povolen</string>
     <string name="gpio_pin_for_rotary_encoder_a_port">GPIO pin pro rotační enkodér A port</string>
     <string name="gpio_pin_for_rotary_encoder_b_port">GPIO pin pro port B rotačního enkodéru</string>
@@ -450,6 +457,7 @@
     <string name="use_pwm_buzzer">Použít PWM bzučák</string>
     <string name="output_vibra_gpio">Výstupní pin vybračního motorku (GPIO)</string>
     <string name="output_duration_milliseconds">Doba trvání výstupu (v milisekundách)</string>
+    <string name="nag_timeout_seconds">Interval opakovaného zvonění (v sekundách)</string>
     <string name="ringtone">Vyzváněcí tón</string>
     <string name="use_i2s_as_buzzer">Použít I2S jako bzučák</string>
     <string name="lora_config">LoRa nastavení</string>
@@ -515,6 +523,7 @@
     <string name="power_config">Nastavení napájení</string>
     <string name="enable_power_saving_mode">Povolit úsporný režim</string>
     <string name="shutdown_on_battery_delay_seconds">Interval vypnutí při napájení z baterie (sekundy)</string>
+    <string name="adc_multiplier_override_ratio">Vlastní hodnota násobiče pro ADC</string>
     <string name="wait_for_bluetooth_duration_seconds">Čekat na Bluetooth (sekundy)</string>
     <string name="super_deep_sleep_duration_seconds">Trvání super hlubokého spánku (sekundy)</string>
     <string name="light_sleep_duration_seconds">Trvání lehkého spánku (sekundy)</string>
@@ -532,6 +541,7 @@
     <string name="public_key">Veřejný klíč</string>
     <string name="private_key">Soukromý klíč</string>
     <string name="admin_key">Administrátorský klíč</string>
+    <string name="managed_mode">Řízený režim</string>
     <string name="serial_console">Sériová komunikace</string>
     <string name="debug_log_api_enabled">Ladící protokol API povolen</string>
     <string name="legacy_admin_channel">Starý kanál správce</string>
@@ -607,6 +617,8 @@
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Použít 12h formát hodin</string>
     <string name="display_time_in_12h_format">Pokud je povoleno, zařízení bude na obrazovce zobrazovat čas ve 12 hodinovém formátu.</string>
+    <string name="free_memory">Volná paměť</string>
+    <string name="load">Zatížení</string>
     <string name="map">Mapa</string>
     <string name="contacts">Kontakty</string>
     <string name="nodes">Uzly</string>
@@ -618,6 +630,7 @@
     <string name="i_agree">Souhlasím.</string>
     <string name="should_update_firmware">Doporučena aktualizace firmwaru.</string>
     <string name="should_update">Chcete-li využít nejnovějších oprav a funkcí, aktualizujte firmware vašeho uzlu.\n\nPoslední stabilní verze firmwaru: %1$s</string>
+    <string name="expires">Platnost do</string>
     <string name="time">Čas</string>
     <string name="date">Datum</string>
     <string name="only_favorites">Pouze oblíbené</string>
@@ -626,6 +639,9 @@
     <string name="client_notification">Oznámení klienta</string>
     <string name="compromised_keys">Zjištěny kompromitované klíče, zvolte OK pro obnovení.</string>
     <string name="regenerate_private_key">Obnovit soukromý klíč</string>
+    <string name="regenerate_keys_confirmation">Jste si jisti, že chcete obnovit svůj soukromý klíč?\n\nUzly, které si již vyměnily klíče s tímto uzlem, budou muset odebrat tento uzel a vyměnit klíče pro obnovení bezpečné komunikace.</string>
     <string name="export_keys">Exportovat klíče</string>
     <string name="export_keys_confirmation">Exportuje veřejné a soukromé klíče do souboru. Uložte je prosím bezpečně.</string>
+    <string name="node_count_template">(%1$d online / %2$d celkem)</string>
+    <string name="react">Odpovědět</string>
 </resources>

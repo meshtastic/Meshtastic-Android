@@ -335,14 +335,12 @@
     <string name="are_you_sure">Sei sicuro?</string>
     <string name="router_role_confirmation_text"><![CDATA[Ho letto la <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Documentazione sui ruoli dei dispositivi </a> e il post del blog su <a href="http://meshtastic.org/blog/choosing-the-right-device-role"> Scegliere il ruolo giusto del dispositivo </a>.]]></string>
     <string name="i_know_what_i_m_doing">So cosa sto facendo.</string>
-    <string name="low_battery_message">Il nodo %s ha la batteria scarica (%d%%)</string>
     <string name="meshtastic_low_battery_notifications">Notifica di batteria scarica</string>
     <string name="low_battery_title">Poca energia rimanente nella batteria: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notifiche batteria scarica (nodi preferiti)</string>
     <string name="baro_pressure">Pressione barometrica</string>
     <string name="mesh_via_udp_enabled">Mesh via UDP abilitato</string>
     <string name="udp_config">Configurazione UDP</string>
-    <string name="map_node_popup_details"><![CDATA[%s<br>Ultima notizia: %s<br>Ultima posizione: %s<br>Batteria: %s]]></string>
     <string name="toggle_my_position">Attiva/disattiva posizione</string>
     <string name="user">Utente</string>
     <string name="channels">Canali</string>
