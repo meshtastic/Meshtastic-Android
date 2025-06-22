@@ -94,6 +94,7 @@ import java.util.Locale
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
 
+@Suppress("LongMethod")
 @Composable
 internal fun DebugScreen(
     viewModel: DebugViewModel = hiltViewModel(),
@@ -135,8 +136,7 @@ internal fun DebugScreen(
 
     Column(
         modifier = Modifier.fillMaxSize()
-    ){
-
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             state = listState,
