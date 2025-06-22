@@ -87,7 +87,7 @@ fun MessageStatusButton(
     fromLocal: Boolean,
 ) = AnimatedVisibility(visible = fromLocal) {
     IconButton(
-        onStatusClick
+        onClick = onStatusClick
     ) {
         Icon(
             imageVector = when (status) {
