@@ -144,7 +144,10 @@ internal fun MessageScreen(
     val quickChat by viewModel.quickChatActions.collectAsStateWithLifecycle()
     val messages by viewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(listOf())
 
-    val messageInput = rememberSaveable(stateSaver = TextFieldValue.Saver) {
+    val messageInput = rememberSaveable(
+        key = contactKey, // Use contactKey as key so state resets when switching conversations
+        stateSaver = TextFieldValue.Saver
+    ) {
         mutableStateOf(TextFieldValue(message))
     }
     var replyingTo by remember { mutableStateOf<Message?>(null) }
