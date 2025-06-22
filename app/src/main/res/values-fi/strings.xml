@@ -669,4 +669,5 @@
     <string name="export_keys">Vie avaimet</string>
     <string name="export_keys_confirmation">Vie julkiset ja yksityiset avaimet tiedostoon. Säilytä tiedosto turvallisessa paikassa.</string>
     <string name="modules_unlocked">Lukittamattomat moduulit</string>
+    <string name="remote">Etäyhteys</string>
 </resources>
