@@ -39,6 +39,10 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -160,6 +164,7 @@ internal fun DebugSearchState(
     onFilterTextsChange: (List<String>) -> Unit,
 ) {
     val colorScheme = MaterialTheme.colorScheme
+    var customFilterText by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier.padding(8.dp)
@@ -180,8 +185,8 @@ internal fun DebugSearchState(
             DebugFilterBar(
                 filterTexts = filterTexts,
                 onFilterTextsChange = onFilterTextsChange,
-                customFilterText = "",
-                onCustomFilterTextChange = {},
+                customFilterText = customFilterText,
+                onCustomFilterTextChange = { customFilterText = it },
                 presetFilters = presetFilters
             )
         }
