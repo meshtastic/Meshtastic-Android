@@ -22,6 +22,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -196,7 +198,7 @@ fun MainScreen(
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
     val topLevelDestination = TopLevelDestination.fromNavDestination(currentDestination)
     NavigationSuiteScaffold(
-        modifier = Modifier.safeDrawingPadding(),
+        modifier = Modifier.fillMaxSize(),
         navigationSuiteItems = {
             TopLevelDestination.entries.forEach { destination ->
                 val isSelected = destination == topLevelDestination
@@ -292,6 +294,11 @@ fun MainScreen(
                 },
             )
             NavGraph(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .recalculateWindowInsets()
+                    .safeDrawingPadding()
+                    .imePadding(),
                 uIViewModel = uIViewModel,
                 bluetoothViewModel = bluetoothViewModel,
                 navController = navController,
