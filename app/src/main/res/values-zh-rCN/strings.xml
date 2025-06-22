@@ -145,7 +145,6 @@
     <string name="message_reception_time">消息接收时间</string>
     <string name="message_reception_state">消息接收状态</string>
     <string name="message_delivery_status">消息传递状态</string>
-    <string name="meshtastic_messages_notifications">消息通知</string>
     <string name="meshtastic_alerts_notifications">提醒通知</string>
     <string name="protocol_stress_test">协议压力测试</string>
     <string name="firmware_too_old">需要固件更新。</string>

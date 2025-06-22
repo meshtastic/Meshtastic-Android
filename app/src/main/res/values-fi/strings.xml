@@ -151,7 +151,8 @@
     <string name="message_reception_time">viestien vastaanottoaika</string>
     <string name="message_reception_state">viestin vastaanottotila</string>
     <string name="message_delivery_status">Viestin toimitustila</string>
-    <string name="meshtastic_messages_notifications">Viesti-ilmoitukset</string>
+    <string name="meshtastic_messages_notifications">Suorien viestien ilmoitukset</string>
+    <string name="meshtastic_broadcast_notifications">Yleislähetysviestien ilmoitukset</string>
     <string name="meshtastic_alerts_notifications">Hälytysilmoitukset</string>
     <string name="protocol_stress_test">Protokollan kuormitustesti</string>
     <string name="firmware_too_old">Laiteohjelmistopäivitys vaaditaan.</string>
@@ -670,4 +671,5 @@
     <string name="export_keys_confirmation">Vie julkiset ja yksityiset avaimet tiedostoon. Säilytä tiedosto turvallisessa paikassa.</string>
     <string name="modules_unlocked">Lukittamattomat moduulit</string>
     <string name="remote">Etäyhteys</string>
+    <string name="node_count_template">(%1$d yhdistetty / %2$d yhteensä)</string>
 </resources>

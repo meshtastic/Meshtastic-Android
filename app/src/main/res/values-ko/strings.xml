@@ -146,7 +146,6 @@
     <string name="message_reception_time">메시지 수신 시간</string>
     <string name="message_reception_state">메시지 수신 상태</string>
     <string name="message_delivery_status">메시지 전송 상태</string>
-    <string name="meshtastic_messages_notifications">메시지 알림</string>
     <string name="meshtastic_alerts_notifications">경고 알림</string>
     <string name="protocol_stress_test">프로토콜 스트레스 테스트</string>
     <string name="firmware_too_old">펌웨어 업데이트 필요.</string>

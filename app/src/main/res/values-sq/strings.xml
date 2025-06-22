@@ -127,7 +127,6 @@
     <string name="message_reception_time">koha e pranimit të mesazhit</string>
     <string name="message_reception_state">gjendja e pranimit të mesazhit</string>
     <string name="message_delivery_status">Statusi i dorëzimit të mesazhit</string>
-    <string name="meshtastic_messages_notifications">Njoftime mesazhesh</string>
     <string name="protocol_stress_test">Test stresi i protokollit</string>
     <string name="firmware_too_old">Përditësimi i firmware kërkohet.</string>
     <string name="firmware_old">Firmware radio është shumë i vjetër për të komunikuar me këtë aplikacion. Për më shumë informacion rreth kësaj, shikoni <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">udhëzuesin tonë për instalimin e firmware</a>.</string>
