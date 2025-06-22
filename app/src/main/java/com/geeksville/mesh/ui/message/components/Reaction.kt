@@ -28,21 +28,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Reply
-import androidx.compose.material.icons.filled.EmojiEmotions
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -62,51 +54,7 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.ui.common.components.BottomSheetDialog
-import com.geeksville.mesh.ui.common.components.EmojiPickerDialog
 import com.geeksville.mesh.ui.common.theme.AppTheme
-
-@Composable
-fun ReactionButton(
-    modifier: Modifier = Modifier,
-    onSendReaction: (String) -> Unit = {},
-) {
-    var showEmojiPickerDialog by remember { mutableStateOf(false) }
-    if (showEmojiPickerDialog) {
-        EmojiPickerDialog(
-            onConfirm = { selectedEmoji ->
-                showEmojiPickerDialog = false
-                onSendReaction(selectedEmoji)
-            },
-            onDismiss = { showEmojiPickerDialog = false }
-        )
-    }
-    IconButton(
-        modifier = modifier
-            .size(48.dp),
-        onClick = { showEmojiPickerDialog = true },
-    ) {
-        Icon(
-            imageVector = Icons.Default.EmojiEmotions,
-            contentDescription = "emoji",
-        )
-    }
-}
-
-@Composable
-fun ReplyButton(
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit = {},
-) = IconButton(
-    modifier = modifier
-        .size(48.dp),
-    onClick = onClick,
-    content = {
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.Reply,
-            contentDescription = "reply",
-        )
-    }
-)
 
 @Composable
 private fun ReactionItem(
@@ -179,21 +127,6 @@ fun ReactionRow(
                 )
             }
         }
-    }
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-fun MessageActions(
-    modifier: Modifier = Modifier,
-    onSendReaction: (String) -> Unit = {},
-    onSendReply: () -> Unit = {},
-) {
-    Row(
-        modifier = modifier.wrapContentSize(),
-    ) {
-        ReactionButton { onSendReaction(it) }
-        ReplyButton { onSendReply() }
     }
 }
 
