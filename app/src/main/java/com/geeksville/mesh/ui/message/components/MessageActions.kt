@@ -106,7 +106,7 @@ fun MessageStatusButton(
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MessageActions(
-    modifier: Modifier = Modifier.Companion,
+    modifier: Modifier = Modifier,
     isLocal: Boolean = false,
     status: MessageStatus?,
     onSendReaction: (String) -> Unit = {},
