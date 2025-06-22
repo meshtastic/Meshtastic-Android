@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
@@ -50,6 +51,7 @@ fun AutoLinkText(
     modifier: Modifier = Modifier,
     style: TextStyle = TextStyle.Default,
     linkStyles: TextLinkStyles = DefaultTextLinkStyles,
+    color: Color = Color.Unspecified,
 ) {
     val spannable = remember(text) {
         linkify(text)
@@ -57,7 +59,7 @@ fun AutoLinkText(
     Text(
         text = spannable.toAnnotatedString(linkStyles),
         modifier = modifier,
-        style = style,
+        style = style.copy(color = color),
     )
 }
 
