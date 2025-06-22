@@ -144,7 +144,10 @@ internal fun MessageScreen(
     val quickChat by viewModel.quickChatActions.collectAsStateWithLifecycle()
     val messages by viewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(listOf())
 
-    val messageInput = rememberSaveable(stateSaver = TextFieldValue.Saver) {
+    val messageInput = rememberSaveable(
+        key = contactKey, // Use contactKey as key so state resets when switching conversations
+        stateSaver = TextFieldValue.Saver
+    ) {
         mutableStateOf(TextFieldValue(message))
     }
     var replyingTo by remember { mutableStateOf<Message?>(null) }
@@ -264,8 +267,6 @@ internal fun MessageScreen(
                         viewModel.sendMessage(message, contactKey, it.packetId)
                         replyingTo = null
                     } ?: viewModel.sendMessage(message, contactKey)
-                    // Clear the text input after sending the message and updating all state
-                    messageInput.value = TextFieldValue("")
                 }
             }
         }
@@ -467,6 +468,7 @@ private fun TextInput(
                     val str = message.value.text.trim()
                     if (str.isNotEmpty()) {
                         onClick(str)
+                        message.value = TextFieldValue("")
                     }
                     true // Consume the event
                 } else {
@@ -484,6 +486,7 @@ private fun TextInput(
                 val str = message.value.text.trim()
                 if (str.isNotEmpty()) {
                     onClick(str)
+                    message.value = TextFieldValue("")
                 }
             }
         ),
@@ -495,6 +498,7 @@ private fun TextInput(
                     val str = message.value.text.trim()
                     if (str.isNotEmpty()) {
                         onClick(str)
+                        message.value = TextFieldValue("")
                         focusManager.clearFocus()
                     }
                 },
