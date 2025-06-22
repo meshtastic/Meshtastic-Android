@@ -983,7 +983,8 @@ class MeshService : Service(), Logging {
         fromNum: Int,
         t: TelemetryProtos.Telemetry,
     ) {
-        if (t.hasLocalStats()) {
+        val isRemote = (fromNum != myNodeNum)
+        if (!isRemote && t.hasLocalStats()) {
             localStatsTelemetry = t
             maybeUpdateServiceStatusNotification()
         }
@@ -991,7 +992,6 @@ class MeshService : Service(), Logging {
             when {
                 t.hasDeviceMetrics() -> {
                     it.deviceTelemetry = t
-                    val isRemote = (fromNum != myNodeNum)
                     if (fromNum == myNodeNum || (isRemote && it.isFavorite)) {
                         if (t.deviceMetrics.voltage > batteryPercentUnsupported &&
                             t.deviceMetrics.batteryLevel <= batteryPercentLowThreshold
