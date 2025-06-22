@@ -402,7 +402,7 @@ private fun MainAppBar(
             )
         },
         subtitle = {
-            if (currentDestination?.hasRoute<NodesRoutes.Nodes>() == true ){
+            if (currentDestination?.hasRoute<NodesRoutes.Nodes>() == true) {
                 Text(
                     text = stringResource(
                         R.string.node_count_template,
