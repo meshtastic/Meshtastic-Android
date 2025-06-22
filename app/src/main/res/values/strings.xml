@@ -175,7 +175,8 @@
     <string name="message_reception_time">message reception time</string>
     <string name="message_reception_state">message reception state</string>
     <string name="message_delivery_status">Message delivery status</string>
-    <string name="meshtastic_messages_notifications">Message notifications</string>
+    <string name="meshtastic_messages_notifications">Direct message notifications</string>
+    <string name="meshtastic_broadcast_notifications">Broadcast message notifications</string>
     <string name="meshtastic_alerts_notifications">Alert notifications</string>
     <string name="protocol_stress_test">Protocol stress test</string>
     <string name="firmware_too_old">Firmware update required.</string>
