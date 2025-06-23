@@ -89,7 +89,6 @@ internal fun EditWaypointDialog(
     val emoji = if (waypointInput.icon == 0) 128205 else waypointInput.icon
     var showEmojiPickerView by remember { mutableStateOf(false) }
 
-
     // Get current context for dialogs
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
