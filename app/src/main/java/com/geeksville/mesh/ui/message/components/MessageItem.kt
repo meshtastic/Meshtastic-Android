@@ -28,8 +28,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material3.Card
@@ -122,7 +120,7 @@ internal fun MessageItem(
                 modifier = Modifier
                     .fillMaxWidth(),
             ) {
-                ReplyingTo(
+                OriginalMessageSnippet(
                     message = message,
                     ourNode = ourNode,
                     cardColors = cardColors,
@@ -214,7 +212,7 @@ internal fun MessageItem(
 }
 
 @Composable
-private fun ReplyingTo(
+private fun OriginalMessageSnippet(
     message: Message,
     ourNode: Node,
     cardColors: CardColors = CardDefaults.cardColors(),
@@ -233,32 +231,27 @@ private fun ReplyingTo(
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Icon(
                     Icons.Default.FormatQuote,
                     contentDescription = stringResource(R.string.reply), // Add to strings.xml
-                    modifier = Modifier.size(14.dp), // Smaller icon
                 )
-                Spacer(Modifier.width(4.dp))
-                Column {
-                    Text(
-                        text = "${originalMessageNode.user.shortName} ${
-                            originalMessageNode.user.longName
-                                ?: stringResource(R.string.unknown_username)
-                        }",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = originalMessage.text, // Should not be null if isAReply is true
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 1, // Keep snippet brief
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
+                Text(
+                    text = "${originalMessageNode.user.shortName}",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    modifier = Modifier.weight(1f, fill = true),
+                    text = originalMessage.text, // Should not be null if isAReply is true
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1, // Keep snippet brief
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
         }
     }

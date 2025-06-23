@@ -20,6 +20,7 @@ package com.geeksville.mesh.ui.message
 import android.content.ClipData
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -27,7 +28,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -110,6 +110,9 @@ internal fun MessageScreen(
     val coroutineScope = rememberCoroutineScope()
     val clipboardManager = LocalClipboard.current
 
+    val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val isConnected by viewModel.isConnected.collectAsStateWithLifecycle(false)
+
     val channelIndex = contactKey[0].digitToIntOrNull()
     val nodeId = contactKey.substring(1)
     val channels by viewModel.channels.collectAsStateWithLifecycle()
@@ -134,7 +137,6 @@ internal fun MessageScreen(
     val selectedIds = rememberSaveable { mutableStateOf(emptySet<Long>()) }
     val inSelectionMode by remember { derivedStateOf { selectedIds.value.isNotEmpty() } }
 
-    val connState by viewModel.connectionState.collectAsStateWithLifecycle()
     val quickChat by viewModel.quickChatActions.collectAsStateWithLifecycle()
     val messages by viewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(listOf())
 
@@ -152,6 +154,13 @@ internal fun MessageScreen(
                 showDeleteDialog = false
             },
             onDismiss = { showDeleteDialog = false }
+        )
+    }
+    var sharedContact: Node? by remember { mutableStateOf(null) }
+    if (sharedContact != null) {
+        SharedContactDialog(
+            contact = sharedContact,
+            onDismiss = { sharedContact = null }
         )
     }
 
@@ -189,99 +198,20 @@ internal fun MessageScreen(
                 MessageTopBar(title, channelIndex, mismatchKey, onNavigateBack)
             }
         },
-        bottomBar = {
-            val isConnected = connState.isConnected()
-            Column(
-                modifier = Modifier
-                    .padding(start = 8.dp, end = 8.dp, bottom = 4.dp),
-            ) {
-                QuickChatRow(isConnected, quickChat) { action ->
-                    if (action.mode == QuickChatAction.Mode.Append) {
-                        val originalText = messageInput.text
-                        if (!originalText.contains(action.message)) {
-                            val needsSpace =
-                                !originalText.endsWith(' ') && originalText.isNotEmpty()
-                            val newText = buildString {
-                                append(originalText)
-                                if (needsSpace) append(' ')
-                                append(action.message)
-                            }.take(MESSAGE_CHARACTER_LIMIT)
-                            messageInput.setTextAndPlaceCursorAtEnd(newText)
-                        }
-                    } else {
-                        viewModel.sendMessage(action.message, contactKey)
-                    }
-                }
-
-                AnimatedVisibility(visible = replyingTo != null) {
-                    val fromLocal = replyingTo?.node?.user?.id == DataPacket.ID_LOCAL
-
-                    val replyingToNode = if (fromLocal) {
-                        viewModel.ourNodeInfo.value
-                    } else {
-                        replyingTo?.node
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(24.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            Icons.AutoMirrored.Default.Reply,
-                            contentDescription = stringResource(R.string.reply)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                "Replying to ${replyingToNode?.user?.shortName ?: stringResource(R.string.unknown)}",
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                            Text(
-                                replyingTo?.text?.take(SNIPPET_CHARACTER_LIMIT)
-                                    ?.let { if (it.length == SNIPPET_CHARACTER_LIMIT) "$it…" else it } ?: "", // Snippet
-                                style = MaterialTheme.typography.bodySmall,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                        IconButton(onClick = {
-                            replyingTo = null
-                        }) { // ViewModel function to set replyingToMessageState to null
-                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.cancel))
-                        }
-                    }
-                }
-                TextInput(isConnected, messageInput) {
-                    val message = messageInput.text.toString().trim()
-                    if (message.isNotEmpty()) {
-                        replyingTo?.let {
-                            viewModel.sendMessage(message, contactKey, it.packetId)
-                            replyingTo = null
-                        } ?: viewModel.sendMessage(message, contactKey)
-                        // Clear the text input after sending the message and updating all state
-                        messageInput.clearText()
-                    }
-                }
-            }
-        }
     ) { padding ->
-        if (messages.isNotEmpty()) {
-            var sharedContact: Node? by remember { mutableStateOf(null) }
-            if (sharedContact != null) {
-                SharedContactDialog(
-                    contact = sharedContact,
-                    onDismiss = { sharedContact = null }
-                )
-            }
-
+        Column(Modifier.padding(padding)) {
             MessageList(
-                modifier = Modifier.padding(padding),
+                modifier = Modifier.weight(1f, fill = true),
                 messages = messages,
                 selectedIds = selectedIds,
                 onUnreadChanged = { viewModel.clearUnreadCount(contactKey, it) },
-                onSendReaction = { emoji, id -> viewModel.sendReaction(emoji, id, contactKey) },
+                onSendReaction = { emoji, id ->
+                    viewModel.sendReaction(
+                        emoji,
+                        id,
+                        contactKey
+                    )
+                },
                 viewModel = viewModel,
                 contactKey = contactKey,
                 onReply = { replyingTo = it },
@@ -301,7 +231,105 @@ internal fun MessageScreen(
                     }
                 },
             )
+            QuickChatRow(
+                enabled = isConnected,
+                actions = quickChat,
+                onClick = { action ->
+                    handleQuickChatAction(action, messageInput, viewModel, contactKey)
+                }
+            )
+            ReplySnippet(replyingTo, { replyingTo = null }, ourNode)
+            TextInput(isConnected, messageInput) {
+                val message = messageInput.text.toString().trim()
+                if (message.isNotEmpty()) {
+                    replyingTo?.let {
+                        viewModel.sendMessage(message, contactKey, it.packetId)
+                        replyingTo = null
+                    } ?: viewModel.sendMessage(message, contactKey)
+                    // Clear the text input after sending the message and updating all state
+                    messageInput.clearText()
+                }
+            }
         }
+    }
+}
+
+@Composable
+private fun ReplySnippet(
+    originalMessage: Message?,
+    clearReply: () -> Unit = {},
+    ourNode: Node?
+) {
+    AnimatedVisibility(visible = originalMessage != null) {
+        val fromLocal = originalMessage?.node?.user?.id == DataPacket.ID_LOCAL
+
+        val replyingToNode = if (fromLocal) {
+            ourNode
+        } else {
+            originalMessage?.node
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(24.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            IconButton(
+                enabled = false,
+                onClick = {}
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Default.Reply,
+                    contentDescription = stringResource(R.string.reply)
+                )
+            }
+            Text(
+                "Replying to ${replyingToNode?.user?.shortName ?: stringResource(R.string.unknown)}",
+                style = MaterialTheme.typography.labelMedium
+            )
+            Text(
+                modifier = Modifier.weight(1f, fill = true),
+                text = originalMessage?.text?.take(SNIPPET_CHARACTER_LIMIT)
+                    ?.let { if (it.length == SNIPPET_CHARACTER_LIMIT) "$it…" else it }
+                    ?: "", // Snippet
+                style = MaterialTheme.typography.bodySmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            IconButton(
+                onClick = clearReply
+            ) { // ViewModel function to set replyingToMessageState to null
+                Icon(
+                    Icons.Filled.Close,
+                    contentDescription = stringResource(R.string.cancel)
+                )
+            }
+        }
+    }
+}
+
+private fun handleQuickChatAction(
+    action: QuickChatAction,
+    messageInput: TextFieldState,
+    viewModel: UIViewModel,
+    contactKey: String
+) {
+    if (action.mode == QuickChatAction.Mode.Append) {
+        val originalText = messageInput.text
+        if (!originalText.contains(action.message)) {
+            val needsSpace =
+                !originalText.endsWith(' ') && originalText.isNotEmpty()
+            val newText = buildString {
+                append(originalText)
+                if (needsSpace) append(' ')
+                append(action.message)
+            }.take(MESSAGE_CHARACTER_LIMIT)
+            messageInput.setTextAndPlaceCursorAtEnd(newText)
+        }
+    } else {
+        viewModel.sendMessage(action.message, contactKey)
     }
 }
 
@@ -406,9 +434,9 @@ private fun MessageTopBar(
 
 @Composable
 private fun QuickChatRow(
+    modifier: Modifier = Modifier,
     enabled: Boolean,
     actions: List<QuickChatAction>,
-    modifier: Modifier = Modifier,
     onClick: (QuickChatAction) -> Unit
 ) {
     val alertAction = QuickChatAction(
@@ -436,6 +464,7 @@ private fun QuickChatRow(
 }
 
 private const val ROUNDED_CORNER_PERCENT = 100
+
 @Suppress("LongMethod")
 @Composable
 private fun TextInput(
