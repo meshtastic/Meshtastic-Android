@@ -139,6 +139,7 @@ internal fun MessageScreen(
 
     val quickChat by viewModel.quickChatActions.collectAsStateWithLifecycle()
     val messages by viewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(listOf())
+    val unreadIndex by remember { derivedStateOf { messages.indexOfLast { !it.read } } }
 
     val messageInput = rememberTextFieldState(message)
 
@@ -204,7 +205,12 @@ internal fun MessageScreen(
                 modifier = Modifier.weight(1f, fill = true),
                 messages = messages,
                 selectedIds = selectedIds,
-                onUnreadChanged = { viewModel.clearUnreadCount(contactKey, it) },
+                onUnreadChanged = { firstUnreadIndex ->
+                    if (unreadIndex != -1 && firstUnreadIndex <= unreadIndex) {
+                        val message = messages[firstUnreadIndex]
+                        viewModel.clearUnreadCount(contactKey, message.receivedTime)
+                    }
+                },
                 onSendReaction = { emoji, id ->
                     viewModel.sendReaction(
                         emoji,
