@@ -55,6 +55,18 @@ fun DeviceListItem(
         Icons.Default.Add
     }
 
+    val contentDescription = if (device.isBLE) {
+        stringResource(R.string.bluetooth)
+    } else if (device.isUSB) {
+        stringResource(R.string.serial)
+    } else if (device.isTCP) {
+        stringResource(R.string.network)
+    } else if (device.isDisconnect) {
+        stringResource(R.string.disconnect)
+    } else {
+        stringResource(R.string.add)
+    }
+
     ListItem(
         modifier = Modifier
             .fillMaxWidth()
@@ -66,7 +78,7 @@ fun DeviceListItem(
         leadingContent = {
             Icon(
                 icon,
-                stringResource(R.string.add)
+                contentDescription
             )
         },
         trailingContent = {
