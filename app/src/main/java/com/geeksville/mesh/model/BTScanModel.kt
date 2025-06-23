@@ -42,6 +42,7 @@ import com.hoho.android.usbserial.driver.UsbSerialDriver
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
@@ -49,7 +50,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
@@ -127,6 +127,9 @@ class BTScanModel @Inject constructor(
         val isBLE: Boolean get() = prefix == 'x'
         val isUSB: Boolean get() = prefix == 's'
         val isTCP: Boolean get() = prefix == 't'
+
+        val isMock: Boolean get() = prefix == 'm'
+        val isDisconnect: Boolean get() = prefix == 'n'
     }
 
     @SuppressLint("MissingPermission")

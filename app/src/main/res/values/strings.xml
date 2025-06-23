@@ -697,4 +697,8 @@
     <string name="remote">Remote</string>
     <string name="node_count_template">(%1$d online / %2$d total)</string>
     <string name="react">React</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="no_ble_devices">No Bluetooth devices found.</string>
+    <string name="no_network_devices">No Network devices found.</string>
+    <string name="no_usb_devices">No USB Serial devices found.</string>
 </resources>
