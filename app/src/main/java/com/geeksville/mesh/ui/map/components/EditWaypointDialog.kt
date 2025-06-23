@@ -90,7 +90,6 @@ internal fun EditWaypointDialog(
     var showEmojiPickerView by remember { mutableStateOf(false) }
 
 
-
     // Get current context for dialogs
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
@@ -120,7 +119,6 @@ internal fun EditWaypointDialog(
     } else {
         SimpleDateFormat("hh:mm a", locale)
     }
-
 
     // State to hold selected date and time
     var selectedDate by remember { mutableStateOf(dateFormat.format(calendar.time)) }
