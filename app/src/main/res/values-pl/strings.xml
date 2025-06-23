@@ -412,4 +412,5 @@
     <string name="secondary">Wtórny</string>
     <string name="map">Mapa</string>
     <string name="reply">Odpowiedz</string>
+    <string name="disconnect">Rozłącz</string>
 </resources>

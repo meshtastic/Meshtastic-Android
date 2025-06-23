@@ -142,6 +142,7 @@
     <string name="debug_last_messages">500 letzte Nachrichten</string>
     <string name="debug_filters">Filter</string>
     <string name="debug_active_filters">Aktive Filter (alle)</string>
+    <string name="debug_default_search">In Protokollen suchen</string>
     <string name="debug_clear">Protokolle löschen</string>
     <string name="clear">Leeren</string>
     <string name="updating_firmware">Firmware aktualisieren, bitte bis zu acht Minuten warten …</string>
@@ -150,6 +151,8 @@
     <string name="message_reception_time">Nachricht-Empfangszeit</string>
     <string name="message_reception_state">Nachricht-Empfangsstatus</string>
     <string name="message_delivery_status">Nachrichten-Zustellungsstatus</string>
+    <string name="meshtastic_messages_notifications">Benachrichtigung direkte Nachrichten</string>
+    <string name="meshtastic_broadcast_notifications">Benachrichtigung allgemeine Nachrichten</string>
     <string name="meshtastic_alerts_notifications">Benachrichtigungen</string>
     <string name="protocol_stress_test">Protokollstress-Test</string>
     <string name="firmware_too_old">Firmware-Aktualisierung erforderlich.</string>
@@ -341,12 +344,14 @@
     <string name="are_you_sure">Bist du sicher?</string>
     <string name="router_role_confirmation_text"><![CDATA[Ich habe die <a href="https://meshtastic.org/docs/configuration/radio/device/#roles"> Geräte-Rollen Dokumentation </a> und den dazugehörigen Blogpost <a href="http://meshtastic.org/blog/choosing-the-right-device-role"> über die Auswahl der Geräte Rolle</a>.]]></string>
     <string name="i_know_what_i_m_doing">Ich weiß was ich tue.</string>
+    <string name="low_battery_message">Knoten %1$s hat einen niedrigen Ladezustand (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Leere Batterie Benachrichtigung</string>
     <string name="low_battery_title">Leere Batterie: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Akkustands Warnung (für Favoriten)</string>
     <string name="baro_pressure">Luftdruck</string>
     <string name="mesh_via_udp_enabled">Mesh über UDP ermöglichen</string>
     <string name="udp_config">UDP Konfiguration</string>
+    <string name="map_node_popup_details"><![CDATA[%1$s<br>Zuletzt gehört:%2$s<br>Letzte Position:%3$s<br>Akku:%4$s]]></string>
     <string name="toggle_my_position">Position einschalten</string>
     <string name="user">Benutzer</string>
     <string name="channels">Kanäle</string>
@@ -666,4 +671,7 @@
     <string name="export_keys_confirmation">Exportiert den öffentlichen und privaten Schlüssel in eine Datei. Bitte speichern Sie diese an einem sicheren Ort.</string>
     <string name="modules_unlocked">Entsperrte Module</string>
     <string name="remote">Entfernt</string>
+    <string name="node_count_template">(%1$d Online / %2$d Gesamt)</string>
+    <string name="react">Reagieren</string>
+    <string name="disconnect">Trennen</string>
 </resources>

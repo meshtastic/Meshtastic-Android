@@ -527,6 +527,7 @@
     <string name="serial_config">시리얼 설정</string>
     <string name="serial_enabled">시리</string>
     <string name="timeout">시간 초과됨</string>
+    <string name="serial_mode"></string>
     <string name="server">서버</string>
     <string name="telemetry_config">텔레메트리 설정</string>
     <string name="device_metrics_update_interval_seconds">기기 메트릭 업데이트 간격 (초)</string>

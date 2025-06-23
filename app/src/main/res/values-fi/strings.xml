@@ -673,4 +673,8 @@
     <string name="remote">Etäyhteys</string>
     <string name="node_count_template">(%1$d yhdistetty / %2$d yhteensä)</string>
     <string name="react">Reagoi</string>
+    <string name="disconnect">Katkaise yhteys</string>
+    <string name="no_ble_devices">Bluetooth-laitteita ei löytynyt.</string>
+    <string name="no_network_devices">Verkkolaitteita ei löytynyt.</string>
+    <string name="no_usb_devices">USB-sarjalaitteita ei löytynyt.</string>
 </resources>
