@@ -225,19 +225,15 @@ private fun UpdateUnreadCount(
     messages: List<Message>,
     onUnreadChanged: (Long) -> Unit,
 ) {
-    val lastUnreadIndex by remember { derivedStateOf { messages.indexOfLast { !it.read } } }
-    val firstVisibleItemIndex by remember { derivedStateOf { listState.firstVisibleItemIndex } }
-
-    LaunchedEffect(firstVisibleItemIndex, lastUnreadIndex) {
-        if (lastUnreadIndex != -1 && firstVisibleItemIndex <= lastUnreadIndex) {
-            snapshotFlow { listState.firstVisibleItemIndex }
-                .debounce(timeoutMillis = 500L)
-                .collectLatest { index ->
-                        if (index <= lastUnreadIndex && index < messages.size) {
-                        val visibleMessage = messages[index]
-                        onUnreadChanged(visibleMessage.receivedTime)
-                    }
+    LaunchedEffect(messages) {
+        snapshotFlow { listState.firstVisibleItemIndex }
+            .debounce(timeoutMillis = 500L)
+            .collectLatest { index ->
+                val lastUnreadIndex = messages.indexOfLast { !it.read }
+                if (lastUnreadIndex != -1 && index <= lastUnreadIndex && index < messages.size) {
+                    val visibleMessage = messages[index]
+                    onUnreadChanged(visibleMessage.receivedTime)
                 }
-        }
+            }
     }
 }
