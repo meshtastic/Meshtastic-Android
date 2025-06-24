@@ -226,13 +226,11 @@ private fun UpdateUnreadCount(
 ) {
     val firstVisibleItemIndex by remember { derivedStateOf { listState.firstVisibleItemIndex } }
 
-    if (firstVisibleItemIndex != -1) {
-        LaunchedEffect(firstVisibleItemIndex) {
-            snapshotFlow { listState.firstVisibleItemIndex }
-                .debounce(timeoutMillis = 500L)
-                .collectLatest { index ->
-                    onUnreadChanged(index)
-                }
-        }
+    LaunchedEffect(firstVisibleItemIndex) {
+        snapshotFlow { listState.firstVisibleItemIndex }
+            .debounce(timeoutMillis = 500L)
+            .collectLatest { index ->
+                onUnreadChanged(index)
+            }
     }
 }
