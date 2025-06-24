@@ -111,7 +111,7 @@ internal fun MessageList(
     modifier: Modifier = Modifier,
     messages: List<Message>,
     selectedIds: MutableState<Set<Long>>,
-    onUnreadChanged: (Int) -> Unit,
+    onUnreadChanged: (Long) -> Unit,
     onSendReaction: (String, Int) -> Unit,
     onNodeMenuAction: (NodeMenuAction) -> Unit,
     viewModel: UIViewModel,
@@ -124,7 +124,7 @@ internal fun MessageList(
         initialFirstVisibleItemIndex = messages.indexOfLast { !it.read }.coerceAtLeast(0)
     )
     AutoScrollToBottom(listState, messages)
-    UpdateUnreadCount(listState, onUnreadChanged)
+    UpdateUnreadCount(listState, messages, onUnreadChanged)
 
     var showStatusDialog by remember { mutableStateOf<Message?>(null) }
     if (showStatusDialog != null) {
@@ -222,15 +222,22 @@ private fun <T> AutoScrollToBottom(
 @Composable
 private fun UpdateUnreadCount(
     listState: LazyListState,
-    onUnreadChanged: (Int) -> Unit,
+    messages: List<Message>,
+    onUnreadChanged: (Long) -> Unit,
 ) {
+    val lastUnreadIndex by remember { derivedStateOf { messages.indexOfLast { !it.read } } }
     val firstVisibleItemIndex by remember { derivedStateOf { listState.firstVisibleItemIndex } }
 
-    LaunchedEffect(firstVisibleItemIndex) {
-        snapshotFlow { listState.firstVisibleItemIndex }
-            .debounce(timeoutMillis = 500L)
-            .collectLatest { index ->
-                onUnreadChanged(index)
-            }
+    LaunchedEffect(firstVisibleItemIndex, lastUnreadIndex) {
+        if (lastUnreadIndex != -1 && firstVisibleItemIndex <= lastUnreadIndex) {
+            snapshotFlow { listState.firstVisibleItemIndex }
+                .debounce(timeoutMillis = 500L)
+                .collectLatest { index ->
+                        if (index <= lastUnreadIndex && index < messages.size) {
+                        val visibleMessage = messages[index]
+                        onUnreadChanged(visibleMessage.receivedTime)
+                    }
+                }
+        }
     }
 }
