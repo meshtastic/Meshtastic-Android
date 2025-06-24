@@ -14,8 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+
 package com.geeksville.mesh.ui.map
 
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -39,30 +43,27 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.createBitmap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
-import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.map.components.EditWaypointDialog
 import com.geeksville.mesh.ui.map.components.MapButton
 import com.geeksville.mesh.ui.node.DegD
+import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.util.formatAgo
 import com.geeksville.mesh.waypoint
-import com.google.android.gms.maps.CameraUpdateFactory
+import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
-import com.google.android.gms.maps.model.BitmapDescriptorFactory.HUE_AZURE
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
@@ -80,54 +81,24 @@ import com.google.maps.android.compose.clustering.Clustering
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.maps.android.compose.widgets.DisappearingScaleBar
-import kotlinx.coroutines.launch
-import java.text.DateFormat
 
-data class NodeClusterItem(
-    val node: Node,
-    val nodePosition: LatLng,
-    val nodeTitle: String,
-    val nodeSnippet: String,
-) : ClusterItem {
-    override fun getPosition(): LatLng = nodePosition
-    override fun getTitle(): String = nodeTitle
-    override fun getSnippet(): String = nodeSnippet
-    override fun getZIndex(): Float? = null // Default behavior
-}
-
+@Suppress("CyclomaticComplexMethod", "LongMethod")
 @OptIn(MapsComposeExperimentalApi::class)
 @Composable
 fun MapView(
     uiViewModel: UIViewModel,
+    navigateToNodeDetails: (Int) -> Unit,
 ) {
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
     var mapFilterMenuExpanded by remember { mutableStateOf(false) }
     val mapFilterState by uiViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     val ourNodeInfo by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     var editingWaypoint by remember { mutableStateOf<MeshProtos.Waypoint?>(null) }
-    val uiSettings by remember {
-        mutableStateOf(
-            MapUiSettings(
-                zoomControlsEnabled = true,
-                myLocationButtonEnabled = true,
-                mapToolbarEnabled = true
-            )
-        )
-    }
+
     var selectedMapType by remember { mutableStateOf(MapType.NORMAL) }
     var mapTypeMenuExpanded by remember { mutableStateOf(false) }
-    // Default to a wide view of the US
     val defaultLatLng = LatLng(39.8283, -98.5795)
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(defaultLatLng, 3f)
-    }
-
-    @Composable
-    fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) {
-        stringResource(R.string.you)
-    } else {
-        uiViewModel.getUser(id).longName
     }
 
     val allNodes by uiViewModel.filteredNodeList.collectAsStateWithLifecycle()
@@ -145,13 +116,7 @@ fun MapView(
             node = node,
             nodePosition = latLng,
             nodeTitle = "${node.user.shortName} ${formatAgo(node.position.time)}",
-            nodeSnippet = context.getString(
-                R.string.map_node_popup_details,
-                node.gpsString(uiViewModel.config.display.gpsFormat.number),
-                formatAgo(node.lastHeard),
-                formatAgo(node.position.time),
-                if (node.batteryStr != "") node.batteryStr else "?"
-            ),
+            nodeSnippet = "${node.user.longName}"
         )
     }
 
@@ -189,21 +154,20 @@ fun MapView(
         else -> ComposeMapColorScheme.LIGHT
     }
 
-
     Box(modifier = Modifier.fillMaxSize()) {
         GoogleMap(
             mapColorScheme = mapColorScheme,
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
+            uiSettings = MapUiSettings(),
             properties = MapProperties(
-                mapType = selectedMapType
+                mapType = selectedMapType,
             ),
-            uiSettings = uiSettings,
             onMapLongClick = { latLng ->
                 if (isConnected) {
                     val newWaypoint = waypoint {
-                        latitudeI = (latLng.latitude * DegD).toInt()
-                        longitudeI = (latLng.longitude * DegD).toInt()
+                        latitudeI = (latLng.latitude / DegD).toInt()
+                        longitudeI = (latLng.longitude / DegD).toInt()
                     }
                     editingWaypoint = newWaypoint
                 }
@@ -211,20 +175,20 @@ fun MapView(
         ) {
             Clustering(
                 items = nodeClusterItems,
-                onClusterClick = { cluster ->
-                    val bounds = LatLngBounds.builder()
-                    cluster.items.forEach { bounds.include(it.position) }
-                    coroutineScope.launch {
-                        cameraPositionState.animate(
-                            CameraUpdateFactory.newLatLngBounds(bounds.build(), 100)
-                        )
-                    }
-                    debug("Cluster clicked! $cluster")
+                onClusterItemInfoWindowClick = { item ->
+                    navigateToNodeDetails(item.node.num)
                     false
                 },
+                clusterItemContent = {
+                    NodeChip(
+                        node = it.node,
+                        enabled = false,
+                        isThisNode = false,
+                        isConnected = false
+                    ) { }
+                },
                 onClusterManager = { clusterManager ->
-                    (clusterManager.renderer as DefaultClusterRenderer).minClusterSize =
-                        7
+                    (clusterManager.renderer as DefaultClusterRenderer).minClusterSize = 7
                 }
             )
 
@@ -235,8 +199,8 @@ fun MapView(
                             Circle(
                                 center = clusterItem.position,
                                 radius = accuracy.toDouble(), // In meters
-                                fillColor = Color(0x44AAAAFF), // Semi-transparent blue
-                                strokeColor = Color(0x88AAAAFF), // More opaque blue
+                                fillColor = Color(clusterItem.node.colors.second).copy(alpha = 0.2f),
+                                strokeColor = Color(clusterItem.node.colors.second),
                                 strokeWidth = 2f
                             )
                         }
@@ -244,64 +208,39 @@ fun MapView(
                 }
             }
 
-            waypoints.forEach { waypoint ->
-                waypoint.value.data.waypoint?.let { pt ->
-                    val dateFormat =
-                        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
-                    val lock = if (pt.lockedTo != 0) "\uD83D\uDD12" else ""
-                    val time = dateFormat.format(waypoint.value.received_time)
-                    val label =
-                        pt.name + " " + formatAgo((waypoint.value.received_time / 1000).toInt())
-                    val emoji = String(Character.toChars(if (pt.icon == 0) 128205 else pt.icon))
-                    val timeLeft = pt.expire * 1000L - System.currentTimeMillis()
-                    val expireTimeStr = when {
-                        pt.expire == 0 || pt.expire == Int.MAX_VALUE -> "Never"
-                        timeLeft <= 0 -> "Expired"
-                        timeLeft < 60_000 -> "${timeLeft / 1000} seconds"
-                        timeLeft < 3_600_000 -> "${timeLeft / 60_000} minute${if (timeLeft / 60_000 != 1L) "s" else ""}"
-                        timeLeft < 86_400_000 -> {
-                            val hours = (timeLeft / 3_600_000).toInt()
-                            val minutes = ((timeLeft % 3_600_000) / 60_000).toInt()
-                            if (minutes >= 30) {
-                                "${hours + 1} hour${if (hours + 1 != 1) "s" else ""}"
-                            } else if (minutes > 0) {
-                                "$hours hour${if (hours != 1) "s" else ""}, $minutes minute${if (minutes != 1) "s" else ""}"
-                            } else {
-                                "$hours hour${if (hours != 1) "s" else ""}"
-                            }
+            waypoints.map { it.value.data }.forEach { data ->
+                val waypoint = data.waypoint ?: return@forEach
+                Marker(
+                    state = rememberUpdatedMarkerState(
+                        position = LatLng(
+                            waypoint.latitudeI * DegD,
+                            waypoint.longitudeI * DegD
+                        )
+                    ),
+                    icon = if (waypoint.icon == 0) {
+                        unicodeEmojiToBitmap(0x1F4CD)
+                    } else {
+                        unicodeEmojiToBitmap(waypoint.icon)
+                    },
+                    title = waypoint.name,
+                    snippet = waypoint.description,
+                    visible = mapFilterState.showWaypoints,
+                    onInfoWindowClick = { marker ->
+                        val wpToEdit = waypoint
+                        val myNodeNum = uiViewModel.myNodeNum ?: 0
+                        // Check if editable
+                        if (
+                            wpToEdit.lockedTo == 0 ||
+                            wpToEdit.lockedTo == myNodeNum ||
+                            !isConnected
+                        ) {
+                            editingWaypoint = waypoint
+                        } else {
+                            // Optionally show a toast that it's locked by someone else
                         }
 
-                        else -> "${timeLeft / 86_400_000} day${if (timeLeft / 86_400_000 != 1L) "s" else ""}"
                     }
-                    val title = "${pt.name} (${getUsername(waypoint.value.data.from)}$lock)"
-                    val snippet =
-                        "[$time] ${pt.description}  " + stringResource(R.string.expires) + ": $expireTimeStr"
-                    val latLng = LatLng(pt.latitudeI * DegD, pt.longitudeI * DegD)
-                    Marker(
-                        icon = BitmapDescriptorFactory.defaultMarker(HUE_AZURE),
-                        state = rememberUpdatedMarkerState(position = latLng),
-                        title = title,
-                        snippet = snippet,
-                        visible = mapFilterState.showWaypoints,
-                        tag = waypoint.value.data.id.toString(), // Store waypoint ID in marker tag
-                        onInfoWindowClick = { marker ->
-                            val clickedWaypointId = marker.tag?.toString()?.toIntOrNull()
-                            if (clickedWaypointId != null) {
-                                val wpToEdit =
-                                    waypoints.values.find { it.data.id == clickedWaypointId }
-                                if (wpToEdit != null) {
-                                    val myNodeNum = uiViewModel.myNodeNum ?: 0
-                                    // Check if editable
-                                    if (wpToEdit.data.waypoint?.lockedTo == 0 || wpToEdit.data.waypoint?.lockedTo == myNodeNum || !isConnected) {
-                                        editingWaypoint = wpToEdit.data.waypoint
-                                    } else {
-                                        // Optionally show a toast that it's locked by someone else
-                                    }
-                                }
-                            }
-                        }
-                    )
-                }
+                )
             }
         }
         DisappearingScaleBar(
@@ -312,16 +251,12 @@ fun MapView(
             EditWaypointDialog(
                 waypoint = waypointToEdit,
                 onSendClicked = { updatedWp ->
-                    var finalWp = waypointToEdit.copy {
-                        if (id == 0) {
-                            id =
-                                uiViewModel.generatePacketId() ?: return@EditWaypointDialog
-                        }
-                        if (name == "") name = "Dropped Pin"
-                        if (expire == 0) expire = Int.MAX_VALUE
-                        lockedTo =
-                            if (waypointToEdit.lockedTo != 0) uiViewModel.myNodeNum ?: 0 else 0
-                        if (waypointToEdit.icon == 0) icon = 128205
+                    var finalWp = updatedWp
+                    if (updatedWp.id == 0) {
+                        finalWp = finalWp.copy { id = uiViewModel.generatePacketId() ?: 0 }
+                    }
+                    if (updatedWp.icon == 0) {
+                        finalWp = finalWp.copy { icon = 0x1F4CD } // 📍 Round Pushpin
                     }
 
                     uiViewModel.sendWaypoint(finalWp)
@@ -388,11 +323,11 @@ private fun MapFilterDropdown(
     mapFilterState: UIViewModel.MapFilterState,
     uiViewModel: UIViewModel
 ) {
-    androidx.compose.material3.DropdownMenu(
+    DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest
     ) {
-        androidx.compose.material3.DropdownMenuItem(
+        DropdownMenuItem(
             text = { Text(stringResource(id = R.string.only_favorites)) },
             onClick = { uiViewModel.setOnlyFavorites(!mapFilterState.onlyFavorites) },
             leadingIcon = {
@@ -408,7 +343,7 @@ private fun MapFilterDropdown(
                 )
             }
         )
-        androidx.compose.material3.DropdownMenuItem(
+        DropdownMenuItem(
             text = { Text(stringResource(id = R.string.show_waypoints)) },
             onClick = { uiViewModel.setShowWaypointsOnMap(!mapFilterState.showWaypoints) },
             leadingIcon = {
@@ -424,7 +359,7 @@ private fun MapFilterDropdown(
                 )
             }
         )
-        androidx.compose.material3.DropdownMenuItem(
+        DropdownMenuItem(
             text = { Text(stringResource(id = R.string.show_precision_circle)) },
             onClick = { uiViewModel.setShowPrecisionCircleOnMap(!mapFilterState.showPrecisionCircle) },
             leadingIcon = {
@@ -441,6 +376,18 @@ private fun MapFilterDropdown(
             }
         )
     }
+}
+
+data class NodeClusterItem(
+    val node: Node,
+    val nodePosition: LatLng,
+    val nodeTitle: String,
+    val nodeSnippet: String,
+) : ClusterItem {
+    override fun getPosition(): LatLng = nodePosition
+    override fun getTitle(): String = nodeTitle
+    override fun getSnippet(): String = nodeSnippet
+    override fun getZIndex(): Float? = null // Default behavior
 }
 
 @Composable
@@ -467,4 +414,41 @@ private fun MapTypeDropdown(
             )
         }
     }
+}
+
+private fun convertIntToEmoji(unicodeCodePoint: Int): String {
+    return try {
+        String(Character.toChars(unicodeCodePoint))
+    } catch (e: IllegalArgumentException) {
+        // Handle cases where the integer is not a valid Unicode code point
+        // For example, return a placeholder or an empty string
+        Log.e("Emoji_Conversion", "Invalid Unicode code point: $unicodeCodePoint", e)
+        "\uD83D\uDCCD" // Placeholder for invalid code point
+    }
+}
+
+private fun unicodeEmojiToBitmap(icon: Int): BitmapDescriptor {
+    val unicodeEmoji = convertIntToEmoji(icon)
+    // Create a Paint object for drawing text
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        textSize = 90f // Adjust size as needed
+        textAlign = Paint.Align.CENTER
+    }
+
+    // Measure text bounds to create a bitmap of the correct size
+    val bounds = android.graphics.Rect()
+    paint.getTextBounds(unicodeEmoji, 0, unicodeEmoji.length, bounds)
+
+    // Create a bitmap and canvas
+    val bitmap = createBitmap(bounds.width() + 20, bounds.height() + 20) // Add some padding
+    val canvas = Canvas(bitmap)
+
+    // Draw the emoji onto the canvas
+    canvas.drawText(
+        unicodeEmoji,
+        canvas.width / 2f,
+        canvas.height / 2f - bounds.exactCenterY(),
+        paint
+    )
+    return BitmapDescriptorFactory.fromBitmap(bitmap)
 }

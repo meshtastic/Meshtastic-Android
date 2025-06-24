@@ -47,6 +47,7 @@ import com.geeksville.mesh.model.Node
 @Composable
 fun NodeChip(
     modifier: Modifier = Modifier,
+    enabled: Boolean = true,
     node: Node,
     isThisNode: Boolean,
     isConnected: Boolean,
@@ -84,6 +85,7 @@ fun NodeChip(
             modifier = Modifier
                 .matchParentSize()
                 .combinedClickable(
+                    enabled = enabled,
                     onClick = { onAction(NodeMenuAction.MoreDetails(node)) },
                     onLongClick = { menuExpanded = true },
                     interactionSource = inputChipInteractionSource,

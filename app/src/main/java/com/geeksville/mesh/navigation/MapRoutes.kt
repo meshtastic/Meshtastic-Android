@@ -35,7 +35,7 @@ fun NavGraphBuilder.mapGraph(
 ) {
     composable<MapRoutes.Map> {
         MapView(
-            model = uiViewModel,
+            uiViewModel = uiViewModel,
             navigateToNodeDetails = {
                 navController.navigate(NodesRoutes.NodeDetail(it))
             },

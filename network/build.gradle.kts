@@ -30,9 +30,9 @@ android {
     buildFeatures {
         buildConfig = true
     }
-    compileSdk = 35
+    compileSdk = Configs.COMPILE_SDK
     defaultConfig {
-        minSdk = 21
+        minSdk = Configs.MIN_SDK
     }
 
     namespace = "com.geeksville.mesh.network"
@@ -70,4 +70,12 @@ dependencies {
 detekt {
     config.setFrom("../config/detekt/detekt.yml")
     baseline = file("../config/detekt/detekt-baseline-network.xml")
+    source.setFrom(
+        files(
+            "src/main/java",
+            "google/main/java",
+            "fdroid/main/java",
+        )
+    )
 }
+

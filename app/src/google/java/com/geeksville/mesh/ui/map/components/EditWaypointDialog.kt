@@ -72,7 +72,7 @@ import java.util.Locale
 import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun EditWaypointDialog(
     waypoint: Waypoint,
@@ -81,7 +81,7 @@ fun EditWaypointDialog(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    var waypointInput by remember { mutableStateOf(waypoint.copy {} ) } // Work on a copy, ensure `copy` is the correct method
+    var waypointInput by remember { mutableStateOf(waypoint) }
     val title = if (waypoint.id == 0) R.string.waypoint_new else R.string.waypoint_edit
     val defaultEmoji = 0x1F4CD // 📍 Round Pushpin
     val currentEmojiCodepoint = if (waypointInput.icon == 0) defaultEmoji else waypointInput.icon
@@ -93,7 +93,11 @@ fun EditWaypointDialog(
     // Initialize date and time states from waypointInput.expire
     var selectedDateString by remember { mutableStateOf("") }
     var selectedTimeString by remember { mutableStateOf("") }
-    var isExpiryEnabled by remember { mutableStateOf(waypointInput.expire != 0 && waypointInput.expire != Int.MAX_VALUE) }
+    var isExpiryEnabled by remember {
+        mutableStateOf(
+            waypointInput.expire != 0 && waypointInput.expire != Int.MAX_VALUE
+        )
+    }
 
     val locale = Locale.getDefault()
     val dateFormat = remember {
@@ -123,8 +127,8 @@ fun EditWaypointDialog(
             } else { // If enabled but not set, default to 8 hours from now
                 calendar.timeInMillis = System.currentTimeMillis()
                 calendar.add(Calendar.HOUR_OF_DAY, 8)
-                waypointInput = waypointInput.copy { expire = (calendar.timeInMillis / 1000).toInt() }
-                // This will trigger another LaunchedEffect pass to format strings
+                waypointInput =
+                    waypointInput.copy { expire = (calendar.timeInMillis / 1000).toInt() }
             }
         } else {
             selectedDateString = ""
@@ -148,7 +152,9 @@ fun EditWaypointDialog(
                 Column(modifier = modifier.fillMaxWidth()) {
                     OutlinedTextField(
                         value = waypointInput.name,
-                        onValueChange = { waypointInput = waypointInput.copy { name = it.take(29) } },
+                        onValueChange = {
+                            waypointInput = waypointInput.copy { name = it.take(29) }
+                        },
                         label = { Text(stringResource(R.string.name)) },
                         singleLine = true,
                         keyboardOptions = KeyboardOptions.Default.copy(
@@ -161,7 +167,10 @@ fun EditWaypointDialog(
                                 Text(
                                     text = String(Character.toChars(currentEmojiCodepoint)),
                                     modifier = Modifier
-                                        .background(MaterialTheme.colorScheme.surfaceVariant, CircleShape)
+                                        .background(
+                                            MaterialTheme.colorScheme.surfaceVariant,
+                                            CircleShape
+                                        )
                                         .padding(6.dp),
                                     fontSize = 20.sp,
                                 )
@@ -171,7 +180,9 @@ fun EditWaypointDialog(
                     Spacer(modifier = Modifier.size(8.dp))
                     OutlinedTextField(
                         value = waypointInput.description,
-                        onValueChange = { waypointInput = waypointInput.copy { description = it.take(99) } },
+                        onValueChange = {
+                            waypointInput = waypointInput.copy { description = it.take(99) }
+                        },
                         label = { Text(stringResource(R.string.description)) },
                         keyboardOptions = KeyboardOptions.Default.copy(
                             keyboardType = KeyboardType.Text,
@@ -227,7 +238,9 @@ fun EditWaypointDialog(
                                         val cal = Calendar.getInstance()
                                         cal.timeInMillis = System.currentTimeMillis()
                                         cal.add(Calendar.HOUR_OF_DAY, 8)
-                                        waypointInput = waypointInput.copy { expire = (cal.timeInMillis / 1000).toInt() }
+                                        waypointInput = waypointInput.copy {
+                                            expire = (cal.timeInMillis / 1000).toInt()
+                                        }
                                     }
                                     // LaunchedEffect will update date/time strings
                                 } else {
@@ -257,7 +270,9 @@ fun EditWaypointDialog(
                             { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
                                 calendar.clear()
                                 calendar.set(selectedYear, selectedMonth, selectedDay, hour, minute)
-                                waypointInput = waypointInput.copy { expire = (calendar.timeInMillis / 1000).toInt() }
+                                waypointInput = waypointInput.copy {
+                                    expire = (calendar.timeInMillis / 1000).toInt()
+                                }
                             }, year, month, day
                         )
 
@@ -269,7 +284,9 @@ fun EditWaypointDialog(
                                 tempCal.timeInMillis = waypointInput.expire * 1000L
                                 tempCal.set(Calendar.HOUR_OF_DAY, selectedHour)
                                 tempCal.set(Calendar.MINUTE, selectedMinute)
-                                waypointInput = waypointInput.copy { expire = (tempCal.timeInMillis / 1000).toInt() }
+                                waypointInput = waypointInput.copy {
+                                    expire = (tempCal.timeInMillis / 1000).toInt()
+                                }
                             }, hour, minute, android.text.format.DateFormat.is24HourFormat(context)
                         )
                         Spacer(modifier = Modifier.size(8.dp))
@@ -313,7 +330,12 @@ fun EditWaypointDialog(
                         TextButton(
                             onClick = { onDeleteClicked(waypointInput) },
                             modifier = Modifier.padding(end = 8.dp)
-                        ) { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) }
+                        ) {
+                            Text(
+                                stringResource(R.string.delete),
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
                     }
                     Spacer(modifier = Modifier.weight(1f)) // Pushes delete to left and cancel/send to right
                     TextButton(

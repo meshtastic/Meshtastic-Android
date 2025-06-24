@@ -51,7 +51,7 @@ android {
     compileSdk = Configs.COMPILE_SDK
     defaultConfig {
         applicationId = Configs.APPLICATION_ID
-        minSdk = Configs.MIN_SDK_VERSION
+        minSdk = Configs.MIN_SDK
         targetSdk = Configs.TARGET_SDK
         versionCode =
             Configs.VERSION_CODE // format is Mmmss (where M is 1+the numeric major number)
@@ -72,11 +72,9 @@ android {
         }
         create("google") {
             dimension = "default"
-            if (Configs.USE_CRASHLYTICS) {
-                // Enable Firebase Crashlytics for Google Play builds
-                apply(plugin = libs.plugins.google.services.get().pluginId)
-                apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
-            }
+            // Enable Firebase Crashlytics for Google Play builds
+            apply(plugin = libs.plugins.google.services.get().pluginId)
+            apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
         }
     }
     buildTypes {
@@ -253,6 +251,13 @@ repositories {
 detekt {
     config.setFrom("../config/detekt/detekt.yml")
     baseline = file("../config/detekt/detekt-baseline.xml")
+    source.setFrom(
+        files(
+            "src/main/java",
+            "google/main/java",
+            "fdroid/main/java",
+        )
+    )
 }
 
 secrets {
