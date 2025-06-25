@@ -131,10 +131,10 @@ jobs:
           KEYSTORE_FILENAME: ${{ secrets.KEYSTORE_FILENAME }}
           KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
 
-      - name: Set up JDK 24
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
-          java-version: '24'
+          java-version: '21'
           distribution: 'jetbrains'
 
       - name: Build Play Store release
