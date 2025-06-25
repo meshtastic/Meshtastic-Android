@@ -106,7 +106,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        api-level: [26, 35]
+        api-level: [26, 36]
 
     steps:
       - uses: actions/checkout@v4
