@@ -310,6 +310,14 @@ class UIViewModel @Inject constructor(
     private val showPrecisionCircleOnMap =
         MutableStateFlow(preferences.getBoolean("show-precision-circle-on-map", true))
 
+    private val _btAutoSwitchToStrongest =
+        MutableStateFlow(preferences.getBoolean("bt-auto-switch-to-strongest", false))
+    val btAutoSwitchToStrongest: StateFlow<Boolean> get() = _btAutoSwitchToStrongest.asStateFlow()
+    fun setBtAutoSwitchToStrongest(value: Boolean) {
+        preferences.edit { putBoolean("bt-auto-switch-to-strongest", value) }
+        _btAutoSwitchToStrongest.value = value
+    }
+
     fun setSortOption(sort: NodeSortOption) {
         nodeSortOption.value = sort
         preferences.edit { putInt("node-sort-option", sort.ordinal) }

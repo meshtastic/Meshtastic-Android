@@ -19,6 +19,7 @@ package com.geeksville.mesh.service
 
 import android.annotation.SuppressLint
 import android.app.Service
+import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
@@ -73,9 +74,11 @@ import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.getTracerouteResponse
 import com.geeksville.mesh.position
+import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.network.MQTTRepository
+import com.geeksville.mesh.repository.radio.InterfaceId
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.radio.RadioServiceConnectionState
 import com.geeksville.mesh.telemetry
@@ -93,13 +96,19 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable.isActive
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.Random
 import java.util.UUID
@@ -108,6 +117,7 @@ import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import javax.inject.Inject
+import kotlin.collections.filterValues
 import kotlin.math.absoluteValue
 
 sealed class ServiceAction {
@@ -152,6 +162,12 @@ class MeshService : Service(), Logging {
 
     @Inject
     lateinit var serviceNotifications: MeshServiceNotifications
+
+    @Inject
+    lateinit var bluetoothRepository: BluetoothRepository
+
+    @Inject
+    lateinit var serviceRepository: ServiceRepository
 
     companion object : Logging {
 
@@ -349,6 +365,8 @@ class MeshService : Service(), Logging {
         super.onCreate()
         sharedPreferences = getSharedPreferences("mesh-prefs", Context.MODE_PRIVATE)
         _lastAddress.value = sharedPreferences.getString("device_address", null) ?: NO_DEVICE_SELECTED
+
+        uiPreferences = getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
 
         info("Creating mesh service")
         serviceNotifications.initChannels()
@@ -1421,9 +1439,36 @@ class MeshService : Service(), Logging {
 
         connectionState = c
         when (c) {
-            ConnectionState.CONNECTED -> startConnect()
-            ConnectionState.DEVICE_SLEEP -> startDeviceSleep()
-            ConnectionState.DISCONNECTED -> startDisconnect()
+            ConnectionState.CONNECTED -> {
+                startConnect()
+                stopAutoConnectScan() // When connected, stop periodic auto-connect scan.
+            }
+            ConnectionState.DEVICE_SLEEP -> {
+                startDeviceSleep()
+                stopAutoConnectScan() // If device is sleeping, stop auto-connect scan.
+            }
+            ConnectionState.DISCONNECTED -> {
+                startDisconnect()
+
+                // Only start scan if:
+                // - Auto-switch is enabled
+                // - Last interface used was Bluetooth
+                // - Selected device is not "none"
+                val lastDevice = radioInterfaceService.getDeviceAddress()
+                val isBluetooth = lastDevice?.startsWith("x") == true
+                val isNoneSelected = lastDevice == NO_DEVICE_SELECTED
+
+                if (isBluetooth && !isNoneSelected) {
+                    manageAutoConnectScanOnDisconnect()
+                } else {
+                    debug("Not starting scan. Reason: ${when {
+                        isNoneSelected -> "No device selected"
+                        !isBluetooth -> "Last connection not Bluetooth"
+                        else -> "Unknown"
+                    }}")
+                    stopAutoConnectScan()
+                }
+            }
         }
 
         // Update the android notification in the status bar
@@ -2012,6 +2057,7 @@ class MeshService : Service(), Logging {
         get() = _lastAddress.asStateFlow()
 
     lateinit var sharedPreferences: SharedPreferences
+    lateinit var uiPreferences: SharedPreferences
 
     fun clearDatabases() = serviceScope.handledLaunch {
         debug("Clearing nodeDB")
@@ -2361,6 +2407,92 @@ class MeshService : Service(), Logging {
             sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = requestId) {
                 nodedbReset = 1
             })
+        }
+    }
+
+    private val autoScanIntervalMS = 60_000L
+    private val scanDurationMS = 2000L
+    private var autoConnectScanJob: Job? = null
+
+    fun manageAutoConnectScanOnDisconnect() {
+        if (uiPreferences.getBoolean("bt-auto-switch-to-strongest", false)) {
+            debug("Auto-switch enabled. Starting background scan.")
+            startAutoConnectScan()
+        } else {
+            debug("Auto-switch disabled. Not scanning.")
+            stopAutoConnectScan()
+        }
+    }
+
+    fun startAutoConnectScan() {
+        if (autoConnectScanJob?.isActive == true || !serviceScope.isActive) return
+
+        autoConnectScanJob = serviceScope.launch(dispatchers.io) {
+            try {
+                delay(autoScanIntervalMS) // Initial delay before first scan
+
+                while (isActive) {
+                    performSingleScanAndEvaluate()
+                    delay(autoScanIntervalMS) // Wait before next attempt
+                }
+            } catch (ex: CancellationException) {
+                debug("Auto-connect scan cancelled.")
+            } catch (ex: Exception) {
+                errormsg("Auto-connect scan error: ${ex.message}")
+            }
+        }
+    }
+
+    fun stopAutoConnectScan() {
+        autoConnectScanJob?.cancel()
+        autoConnectScanJob = null
+    }
+
+    @SuppressLint("MissingPermission")
+    private suspend fun performSingleScanAndEvaluate() : Boolean {
+        val currentConnected = radioInterfaceService.getDeviceAddress()
+        val readings = mutableMapOf<BluetoothDevice, MutableList<Int>>()
+
+        coroutineScope {
+            try {
+                withTimeoutOrNull(scanDurationMS) {
+                    bluetoothRepository.scan()
+                        .filter {
+                            it.device.bondState == BluetoothDevice.BOND_BONDED &&
+                                    radioInterfaceService.toInterfaceAddress(InterfaceId.BLUETOOTH, it.device.address).let { addr ->
+                                        addr.startsWith("x") && addr != currentConnected
+                                    }
+                        }
+                        .onEach {
+                            ensureActive()
+                            readings.getOrPut(it.device) { mutableListOf() }.add(it.rssi)
+                            debug("Scanned: ${it.device.name} (${it.device.address}), RSSI: ${it.rssi}")
+                        }
+                        .collect{}
+                }
+            } catch (e: Exception) {
+                errormsg("Scan error: ${e.message}")
+            }
+        }
+        return findAndConnectToStrongestDevice(readings)
+    }
+
+    @SuppressLint("MissingPermission")
+    private suspend fun findAndConnectToStrongestDevice(readings: Map<BluetoothDevice, List<Int>>): Boolean {
+        val best = readings
+            .filterValues { it.isNotEmpty() }
+            .mapValues { it.value.average() }
+            .maxByOrNull { it.value }
+
+        best?.let { (device, avgRssi) ->
+            debug("Best device: ${device.name} (${device.address}), Avg RSSI: ${avgRssi.toInt()}")
+            val address = radioInterfaceService.toInterfaceAddress(InterfaceId.BLUETOOTH, device.address)
+            radioInterfaceService.setDeviceAddress(address)
+            delay(2000L)
+            return true
+        } ?: run {
+            debug("No suitable device found.")
+            return false
         }
     }
 }

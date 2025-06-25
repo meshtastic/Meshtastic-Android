@@ -24,23 +24,36 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.BluetoothDisabled
 import androidx.compose.material3.Button
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.getBluetoothPermissions
 import com.geeksville.mesh.model.BTScanModel
+import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
 
 @Suppress("LongMethod")
 @Composable
@@ -49,7 +62,8 @@ fun BLEDevices(
     selectedDevice: String,
     showBluetoothRationaleDialog: () -> Unit,
     requestBluetoothPermission: (Array<String>) -> Unit,
-    scanModel: BTScanModel
+    scanModel: BTScanModel,
+    uiViewModel: UIViewModel = hiltViewModel(),
 ) {
     val context = LocalContext.current
     Row {
@@ -68,6 +82,55 @@ fun BLEDevices(
             ) {
                 scanModel.onSelected(device)
             }
+        }
+        // Bluetooth auto change to strongest signal
+        val btAutoSwitchToStrongest by uiViewModel.btAutoSwitchToStrongest.collectAsStateWithLifecycle()
+        var showDialog by remember { mutableStateOf<String?>(null) }
+        val infoText = stringResource(R.string.bluetooth_auto_switch_info)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .toggleable(
+                    value = btAutoSwitchToStrongest,
+                    onValueChange = { checked ->
+                        uiViewModel.setBtAutoSwitchToStrongest(checked)
+                    },
+                    enabled = true
+                )
+                .padding(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Checkbox(
+                checked = btAutoSwitchToStrongest,
+                onCheckedChange = { checked ->
+                    uiViewModel.setBtAutoSwitchToStrongest(checked)
+                },
+                enabled = true
+            )
+            Text(
+                text = stringResource(R.string.bluetooth_auto_switch),
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(start = 16.dp)
+            )
+            IconButton(
+                onClick = {
+                    showDialog = infoText
+                }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.HelpOutline,
+                    contentDescription = stringResource(R.string.info)
+                )
+            }
+        }
+
+        showDialog?.let { message ->
+            SimpleAlertDialog(
+                title = R.string.bluetooth_auto_switch,
+                text = message,
+                onConfirm = { showDialog = null }
+            )
         }
     } else {
         Column(

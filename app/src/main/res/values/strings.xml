@@ -704,4 +704,6 @@
     <string name="no_ble_devices">No Bluetooth devices found.</string>
     <string name="no_network_devices">No Network devices found.</string>
     <string name="no_usb_devices">No USB Serial devices found.</string>
+    <string name="bluetooth_auto_switch">Automatic device change</string>
+    <string name="bluetooth_auto_switch_info">When enabled, if Bluetooth device connection is lost, app will try to connect to the strongest signal available.\nScan for available devices is every 60 seconds.</string>
 </resources>
