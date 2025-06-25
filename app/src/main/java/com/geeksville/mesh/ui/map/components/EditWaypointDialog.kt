@@ -89,11 +89,6 @@ internal fun EditWaypointDialog(
     val emoji = if (waypointInput.icon == 0) 128205 else waypointInput.icon
     var showEmojiPickerView by remember { mutableStateOf(false) }
 
-    // State to hold selected date and time
-    var selectedDate by remember { mutableStateOf("") }
-    var selectedTime by remember { mutableStateOf("") }
-    var epochTime by remember { mutableStateOf<Long?>(null) }
-
     // Get current context for dialogs
     val context = LocalContext.current
     val calendar = Calendar.getInstance()
@@ -123,6 +118,11 @@ internal fun EditWaypointDialog(
     } else {
         SimpleDateFormat("hh:mm a", locale)
     }
+
+    // State to hold selected date and time
+    var selectedDate by remember { mutableStateOf(dateFormat.format(calendar.time)) }
+    var selectedTime by remember { mutableStateOf(timeFormat.format(calendar.time)) }
+    var epochTime by remember { mutableStateOf<Long?>(null) }
 
     if (!showEmojiPickerView) {
         AlertDialog(

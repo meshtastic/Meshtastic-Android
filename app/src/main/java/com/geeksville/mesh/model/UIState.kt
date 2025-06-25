@@ -560,7 +560,9 @@ class UIViewModel @Inject constructor(
 
     val waypoints = packetRepository.getWaypoints().mapLatest { list ->
         list.associateBy { packet -> packet.data.waypoint!!.id }
-            .filterValues { it.data.waypoint!!.expire > System.currentTimeMillis() / 1000 }
+            .filterValues {
+                it.data.waypoint!!.expire == 0 || it.data.waypoint!!.expire > System.currentTimeMillis() / 1000
+            }
     }
 
     fun generatePacketId(): Int? {
