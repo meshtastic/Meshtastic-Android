@@ -214,7 +214,7 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 fun MapView(
-    model: UIViewModel = viewModel(),
+    uiViewModel: UIViewModel = viewModel(),
     navigateToNodeDetails: (Int) -> Unit,
 ) {
     var mapFilterExpanded by remember { mutableStateOf(false) }
