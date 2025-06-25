@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -124,12 +123,6 @@ android {
         aidl = true
         buildConfig = true
     }
-    // Configure the build-logic plugins to target JDK 21
-    // This matches the JDK used to build the project, and is not related to what is running on device.
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
     lint {
         abortOnError = false
         disable.add("MissingTranslation")
@@ -142,9 +135,7 @@ android {
 
 kotlin {
     compilerOptions {
-        jvmToolchain {
-            JvmTarget.JVM_21
-        }
+        jvmToolchain(21)
         freeCompilerArgs.addAll(
             "-opt-in=kotlin.RequiresOptIn",
             "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
@@ -256,4 +247,13 @@ repositories {
 detekt {
     config.setFrom("../config/detekt/detekt.yml")
     baseline = file("../config/detekt/detekt-baseline.xml")
+}
+
+tasks.configureEach {
+    if (
+        name.contains("crashlytics", ignoreCase = true) && name.contains("fdroid", ignoreCase = true)
+    ) {
+        project.logger.lifecycle("Disabling Crashlytics task for F-Droid: $name")
+        enabled = false
+    }
 }
