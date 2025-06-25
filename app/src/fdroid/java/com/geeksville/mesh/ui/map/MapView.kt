@@ -21,6 +21,7 @@ import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,14 +33,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lens
 import androidx.compose.material.icons.filled.LocationDisabled
 import androidx.compose.material.icons.filled.PinDrop
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -50,10 +54,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.background
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Text
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -219,7 +219,7 @@ fun MapView(
 ) {
     var mapFilterExpanded by remember { mutableStateOf(false) }
 
-    val mapFilterState by model.mapFilterStateFlow.collectAsState()
+    val mapFilterState by uiViewModel.mapFilterStateFlow.collectAsState()
 
     // UI Elements
     var cacheEstimate by remember { mutableStateOf("") }
@@ -244,7 +244,7 @@ fun MapView(
     val hasGps = remember { context.hasGps() }
 
     fun loadOnlineTileSourceBase(): ITileSource {
-        val id = model.mapStyleId
+        val id = uiViewModel.mapStyleId
         debug("mapStyleId from prefs: $id")
         return CustomTileSource.getTileSource(id).also {
             zoomLevelMax = it.maximumZoomLevel.toDouble()
@@ -254,7 +254,7 @@ fun MapView(
     }
 
     val cameraView = remember {
-        val geoPoints = model.nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
+        val geoPoints = uiViewModel.nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
         BoundingBox.fromGeoPoints(geoPoints)
     }
     val map = rememberMapViewWithLifecycle(cameraView, loadOnlineTileSourceBase())
@@ -264,7 +264,7 @@ fun MapView(
     fun MapView.toggleMyLocation() {
         if (context.gpsDisabled()) {
             debug("Telling user we need location turned on for MyLocationNewOverlay")
-            model.showSnackbar(R.string.location_disabled)
+            uiViewModel.showSnackbar(R.string.location_disabled)
             return
         }
         debug("user clicked MyLocationNewOverlay ${myLocationOverlay == null}")
@@ -297,8 +297,8 @@ fun MapView(
             if (permissions.entries.all { it.value }) map.toggleMyLocation()
         }
 
-    val nodes by model.filteredNodeList.collectAsStateWithLifecycle()
-    val waypoints by model.waypoints.collectAsStateWithLifecycle(emptyMap())
+    val nodes by uiViewModel.filteredNodeList.collectAsStateWithLifecycle()
+    val waypoints by uiViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
 
     val markerIcon = remember {
         AppCompatResources.getDrawable(context, R.drawable.ic_baseline_location_on_24)
@@ -306,10 +306,10 @@ fun MapView(
 
     fun MapView.onNodesChanged(nodes: Collection<Node>): List<MarkerWithLabel> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
-        val ourNode = model.ourNodeInfo.value
-        val gpsFormat = model.config.display.gpsFormat.number
-        val displayUnits = model.config.display.units.number
-        val mapFilterState = model.mapFilterStateFlow.value // Access mapFilterState directly
+        val ourNode = uiViewModel.ourNodeInfo.value
+        val gpsFormat = uiViewModel.config.display.gpsFormat.number
+        val displayUnits = uiViewModel.config.display.units.number
+        val mapFilterState = uiViewModel.mapFilterStateFlow.value // Access mapFilterState directly
         return nodesWithPosition.mapNotNull { node ->
             if (mapFilterState.onlyFavorites && !node.isFavorite && !node.equals(ourNode)) {
                 return@mapNotNull null
@@ -362,13 +362,13 @@ fun MapView(
         }
         builder.setNegativeButton(R.string.delete_for_me) { _, _ ->
             debug("User deleted waypoint ${waypoint.id} for me")
-            model.deleteWaypoint(waypoint.id)
+            uiViewModel.deleteWaypoint(waypoint.id)
         }
-        if (waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0) && model.isConnected()) {
+        if (waypoint.lockedTo in setOf(0, uiViewModel.myNodeNum ?: 0) && uiViewModel.isConnected()) {
             builder.setPositiveButton(R.string.delete_for_everyone) { _, _ ->
                 debug("User deleted waypoint ${waypoint.id} for everyone")
-                model.sendWaypoint(waypoint.copy { expire = 1 })
-                model.deleteWaypoint(waypoint.id)
+                uiViewModel.sendWaypoint(waypoint.copy { expire = 1 })
+                uiViewModel.deleteWaypoint(waypoint.id)
             }
         }
         val dialog = builder.show()
@@ -387,7 +387,7 @@ fun MapView(
         debug("marker long pressed id=$id")
         val waypoint = waypoints[id]?.data?.waypoint ?: return
         // edit only when unlocked or lockedTo myNodeNum
-        if (waypoint.lockedTo in setOf(0, model.myNodeNum ?: 0) && model.isConnected()) {
+        if (waypoint.lockedTo in setOf(0, uiViewModel.myNodeNum ?: 0) && uiViewModel.isConnected()) {
             showEditWaypointDialog = waypoint
         } else {
             showDeleteMarkerDialog(waypoint)
@@ -397,7 +397,7 @@ fun MapView(
     fun getUsername(id: String?) = if (id == DataPacket.ID_LOCAL) {
         context.getString(R.string.you)
     } else {
-        model.getUser(id).longName
+        uiViewModel.getUser(id).longName
     }
 
     @Composable
@@ -446,7 +446,7 @@ fun MapView(
 
     LaunchedEffect(showCurrentCacheInfo) {
         if (!showCurrentCacheInfo) return@LaunchedEffect
-        model.showSnackbar(R.string.calculating)
+        uiViewModel.showSnackbar(R.string.calculating)
         val cacheManager = CacheManager(map) // Make sure CacheManager has latest from map
         val cacheCapacity = cacheManager.cacheCapacity()
         val currentCacheUsage = cacheManager.currentCacheUsage()
@@ -475,7 +475,7 @@ fun MapView(
 
         override fun longPressHelper(p: GeoPoint): Boolean {
             performHapticFeedback()
-            val enabled = model.isConnected() && downloadRegionBoundingBox == null
+            val enabled = uiViewModel.isConnected() && downloadRegionBoundingBox == null
 
             if (enabled) {
                 showEditWaypointDialog = waypoint {
@@ -564,11 +564,11 @@ fun MapView(
                 zoomLevelMax.toInt(),
                 cacheManagerCallback(
                     onTaskComplete = {
-                        model.showSnackbar(R.string.map_download_complete)
+                        uiViewModel.showSnackbar(R.string.map_download_complete)
                         writer.onDetach()
                     },
                     onTaskFailed = { errors ->
-                        model.showSnackbar(context.getString(R.string.map_download_errors, errors))
+                        uiViewModel.showSnackbar(context.getString(R.string.map_download_errors, errors))
                         writer.onDetach()
                     },
                 )
@@ -584,10 +584,10 @@ fun MapView(
         val builder = MaterialAlertDialogBuilder(context)
         val mapStyles: Array<CharSequence> = CustomTileSource.mTileSources.values.toTypedArray()
 
-        val mapStyleInt = model.mapStyleId
+        val mapStyleInt = uiViewModel.mapStyleId
         builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
             debug("Set mapStyleId pref to $which")
-            model.mapStyleId = which
+            uiViewModel.mapStyleId = which
             dialog.dismiss()
             map.setTileSource(loadOnlineTileSourceBase())
         }
@@ -613,7 +613,7 @@ fun MapView(
                         dialog.dismiss()
                     }
 
-                    2 -> purgeTileSource { model.showSnackbar(it) }
+                    2 -> purgeTileSource { uiViewModel.showSnackbar(it) }
                     else -> dialog.dismiss()
                 }
             }.show()
@@ -695,14 +695,14 @@ fun MapView(
                                         Checkbox(
                                             checked = mapFilterState.onlyFavorites,
                                             onCheckedChange = { enabled ->
-                                                model.setOnlyFavorites(enabled)
+                                                uiViewModel.setOnlyFavorites(enabled)
                                             },
                                             modifier = Modifier.padding(start = 8.dp)
                                         )
                                     }
                                 },
                                 onClick = {
-                                    model.setOnlyFavorites(!mapFilterState.onlyFavorites)
+                                    uiViewModel.setOnlyFavorites(!mapFilterState.onlyFavorites)
                                 }
                             )
                             DropdownMenuItem(
@@ -723,13 +723,13 @@ fun MapView(
                                         )
                                         Checkbox(
                                             checked = mapFilterState.showWaypoints,
-                                            onCheckedChange = model::setShowWaypointsOnMap,
+                                            onCheckedChange = uiViewModel::setShowWaypointsOnMap,
                                             modifier = Modifier.padding(start = 8.dp)
                                         )
                                     }
                                 },
                                 onClick = {
-                                    model.setShowWaypointsOnMap(!mapFilterState.showWaypoints)
+                                    uiViewModel.setShowWaypointsOnMap(!mapFilterState.showWaypoints)
                                 }
                             )
                             DropdownMenuItem(
@@ -751,14 +751,14 @@ fun MapView(
                                         Checkbox(
                                             checked = mapFilterState.showPrecisionCircle,
                                             onCheckedChange = { enabled ->
-                                                model.setShowPrecisionCircleOnMap(enabled)
+                                                uiViewModel.setShowPrecisionCircleOnMap(enabled)
                                             },
                                             modifier = Modifier.padding(start = 8.dp)
                                         )
                                     }
                                 },
                                 onClick = {
-                                    model.setShowPrecisionCircleOnMap(!mapFilterState.showPrecisionCircle)
+                                    uiViewModel.setShowPrecisionCircleOnMap(!mapFilterState.showPrecisionCircle)
                                 }
                             )
                         }
@@ -790,12 +790,12 @@ fun MapView(
             onSendClicked = { waypoint ->
                 debug("User clicked send waypoint ${waypoint.id}")
                 showEditWaypointDialog = null
-                model.sendWaypoint(
+                uiViewModel.sendWaypoint(
                     waypoint.copy {
-                        if (id == 0) id = model.generatePacketId() ?: return@EditWaypointDialog
+                        if (id == 0) id = uiViewModel.generatePacketId() ?: return@EditWaypointDialog
                         if (name == "") name = "Dropped Pin"
                         if (expire == 0) expire = Int.MAX_VALUE
-                        lockedTo = if (waypoint.lockedTo != 0) model.myNodeNum ?: 0 else 0
+                        lockedTo = if (waypoint.lockedTo != 0) uiViewModel.myNodeNum ?: 0 else 0
                         if (waypoint.icon == 0) icon = 128205
                     }
                 )
