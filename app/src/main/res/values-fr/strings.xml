@@ -586,4 +586,5 @@
     <string name="map">Carte</string>
     <string name="nodes">Noeuds</string>
     <string name="reply">Répondre</string>
+    <string name="disconnect">Déconnecter</string>
 </resources>

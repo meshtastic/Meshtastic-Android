@@ -104,6 +104,7 @@
     <string name="debug_logs_export">Експортиране на журнали</string>
     <string name="debug_last_messages">Последни 500 съобщения</string>
     <string name="debug_filters">Филтри</string>
+    <string name="debug_default_search">Търсене в журналите…</string>
     <string name="debug_clear">Изчистване на журналите</string>
     <string name="clear">Изчисти</string>
     <string name="updating_firmware">Актуализиране на фърмуера, изчакайте до осем минути…</string>
@@ -269,12 +270,14 @@
     <string name="voltage">Напрежение</string>
     <string name="are_you_sure">Сигурни ли сте?</string>
     <string name="i_know_what_i_m_doing">Знам какво правя.</string>
+    <string name="low_battery_message">Възелът %1$s има изтощена батерия (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Известия за изтощена батерия</string>
     <string name="low_battery_title">Батерията е изтощена: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Известия за изтощена батерия (любими възли)</string>
     <string name="baro_pressure">Барометрично налягане</string>
     <string name="mesh_via_udp_enabled">Активирана Mesh чрез UDP</string>
     <string name="udp_config">Конфигурация на UDP</string>
+    <string name="map_node_popup_details"><![CDATA[%1$s<br>Последно чут: %2$s<br>Последна позиция: %3$s<br>Батерия: %4$s]]></string>
     <string name="user">Потребител</string>
     <string name="channels">Канали</string>
     <string name="device">Устройство</string>
@@ -304,6 +307,7 @@
     <string name="hide_password">Скриване на паролата</string>
     <string name="show_password">Показване на паролата</string>
     <string name="details">Подробности</string>
+    <string name="environment">Околна среда</string>
     <string name="led_state">Състояние на LED</string>
     <string name="red">Червен</string>
     <string name="green">Зелен</string>
@@ -316,6 +320,7 @@
     <string name="posix_timezone">POSIX часова зона</string>
     <string name="display_config">Конфигурация на дисплея</string>
     <string name="gps_coordinates_format">Формат на GPS координатите</string>
+    <string name="compass_north_top">Север на компаса отгоре</string>
     <string name="compass_orientation">Ориентация на компаса</string>
     <string name="ringtone">Тон на звънене</string>
     <string name="lora_config">Конфигурация на LoRa</string>
@@ -395,7 +400,9 @@
     <string name="firmware_version">Версия на Фърмуера</string>
     <string name="timestamp">Времево клеймо</string>
     <string name="slot">Слот</string>
+    <string name="primary">Първичен</string>
     <string name="primary_channel_feature">Периодично излъчване на местоположение и телеметрия</string>
+    <string name="secondary">Вторичен</string>
     <string name="secondary_no_telemetry">Без периодично излъчване на телеметрия</string>
     <string name="press_and_drag">Натиснете и плъзнете, за да пренаредите</string>
     <string name="set_region">Задаване на регион</string>
@@ -403,6 +410,7 @@
     <string name="scan_qr_code">Сканиране на QR кода</string>
     <string name="share_contact">Споделяне на контакт</string>
     <string name="import_shared_contact">Импортиране на споделен контакт?</string>
+    <string name="unmonitored_or_infrastructure">Ненаблюдаван или инфраструктурен</string>
     <string name="public_key_changed">Публичният ключ е променен</string>
     <string name="import_label">Импортиране</string>
     <string name="actions">Действия</string>
@@ -430,4 +438,5 @@
     <string name="regenerate_private_key">Регенериране на частния ключ</string>
     <string name="export_keys">Експортиране на ключовете</string>
     <string name="export_keys_confirmation">Експортира публичния и частния ключове във файл. Моля, съхранявайте го на сигурно място.</string>
+    <string name="node_count_template">(%1$d онлайн / %2$d общо)</string>
 </resources>
