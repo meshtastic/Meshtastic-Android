@@ -72,11 +72,9 @@ android {
         }
         create("google") {
             dimension = "default"
-            if (Configs.USE_CRASHLYTICS) {
-                // Enable Firebase Crashlytics for Google Play builds
-                apply(plugin = libs.plugins.google.services.get().pluginId)
-                apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
-            }
+            // Enable Firebase Crashlytics for Google Play builds
+            apply(plugin = libs.plugins.google.services.get().pluginId)
+            apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
         }
     }
     buildTypes {
