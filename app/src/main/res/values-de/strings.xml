@@ -674,4 +674,7 @@
     <string name="node_count_template">(%1$d Online / %2$d Gesamt)</string>
     <string name="react">Reagieren</string>
     <string name="disconnect">Trennen</string>
+    <string name="no_ble_devices">Keine Bluetooth Geräte gefunden</string>
+    <string name="no_network_devices">Keine Netzwerkgeräte gefunden.</string>
+    <string name="no_usb_devices">Keine seriellen USB Geräte gefunden.</string>
 </resources>
