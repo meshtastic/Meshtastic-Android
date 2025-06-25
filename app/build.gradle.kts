@@ -72,11 +72,9 @@ android {
         }
         create("google") {
             dimension = "default"
-            if (Configs.USE_CRASHLYTICS) {
-                // Enable Firebase Crashlytics for Google Play builds
-                apply(plugin = libs.plugins.google.services.get().pluginId)
-                apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
-            }
+            // Enable Firebase Crashlytics for Google Play builds
+            apply(plugin = libs.plugins.google.services.get().pluginId)
+            apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
         }
     }
     buildTypes {
@@ -126,7 +124,7 @@ android {
         aidl = true
         buildConfig = true
     }
-    // Configure the build-logic plugins to target JDK 17
+    // Configure the build-logic plugins to target JDK 21
     // This matches the JDK used to build the project, and is not related to what is running on device.
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_21
@@ -144,7 +142,9 @@ android {
 
 kotlin {
     compilerOptions {
-        jvmTarget = JvmTarget.JVM_21 // match Java 21
+        jvmToolchain {
+            JvmTarget.JVM_21
+        }
         freeCompilerArgs.addAll(
             "-opt-in=kotlin.RequiresOptIn",
             "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",

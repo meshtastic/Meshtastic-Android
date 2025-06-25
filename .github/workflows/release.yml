@@ -2,108 +2,253 @@ name: Make Release
 
 on:
   workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to build from'
+        required: true
+        default: 'main' # Or your most common release branch
+        type: string
+      create_github_release:
+        description: 'Create a GitHub Release (and upload assets)'
+        required: true
+        default: true
+        type: boolean
 
-permissions: write-all
+permissions: write-all # Needed for creating releases and uploading assets
 
 jobs:
+  # Job to prepare common environment variables like version
+  prepare-release-info:
+    runs-on: ubuntu-latest
+    outputs:
+      versionCode: ${{ steps.get_version.outputs.versionCode }}
+      versionName: ${{ steps.get_version.outputs.versionName }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+          submodules: 'recursive'
 
-  release-build:
+      - name: Get `versionCode` & `versionName`
+        id: get_version
+        run: |
+          echo "versionCode=$(grep -oP 'VERSION_CODE = \K\d+' ./buildSrc/src/main/kotlin/Configs.kt)" >> $GITHUB_OUTPUT
+          echo "versionName=$(grep -oP 'VERSION_NAME = \"\K[^\"]+' ./buildSrc/src/main/kotlin/Configs.kt)" >> $GITHUB_OUTPUT
+
+  # Job for F-Droid build
+  build-fdroid:
+    needs: prepare-release-info # Depends on version info
     runs-on: ubuntu-latest
     if: github.repository == 'meshtastic/Meshtastic-Android'
+    outputs:
+      apk_path: app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
+      apk_name: fdroidRelease-${{ needs.prepare-release-info.outputs.versionName }}.apk
     steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+          submodules: 'recursive'
 
-    - name: Checkout code
-      uses: actions/checkout@v4
-      with:
-        submodules: 'recursive'
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
-    - name: Get `versionCode` & `versionName`
-      run: |
-        echo "versionCode=$(grep -oP 'VERSION_CODE = \K\d+' ./buildSrc/src/main/kotlin/Configs.kt)" >> $GITHUB_ENV
-        echo "versionName=$(grep -oP 'VERSION_NAME = \"\K[^\"]+' ./buildSrc/src/main/kotlin/Configs.kt)" >> $GITHUB_ENV
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v4
 
-    - name: Validate Gradle wrapper
-      uses: gradle/actions/wrapper-validation@v4
+      - name: Load secrets (only keystore for F-Droid)
+        run: |
+          echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
+          echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
+        env:
+          KEYSTORE: ${{ secrets.KEYSTORE }}
+          KEYSTORE_FILENAME: ${{ secrets.KEYSTORE_FILENAME }}
+          KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
 
-    - name: Load secrets
-      run: |
-        rm ./app/google-services.json
-        echo $GSERVICES > ./app/google-services.json
-        echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
-        echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
-        echo -e "versionCode=$versionCode\nversionName=$versionName" > ./version_info.txt
-      env:
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'jetbrains'
+
+      - name: Build F-Droid release
+        run: ./gradlew assembleFdroidRelease
+
+      - name: Upload F-Droid APK artifact (for release job)
+        uses: actions/upload-artifact@v4
+        with:
+          name: fdroid-apk
+          path: app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
+          retention-days: 1 # Keep for a short period as it will be uploaded to release
+
+  # Job for Play Store build
+  build-google:
+    needs: prepare-release-info # Depends on version info
+    runs-on: ubuntu-latest
+    if: github.repository == 'meshtastic/Meshtastic-Android'
+    outputs:
+      aab_path: app/build/outputs/bundle/googleRelease/app-google-release.aab
+      aab_name: googleRelease-${{ needs.prepare-release-info.outputs.versionName }}.aab
+      apk_path: app/build/outputs/apk/google/release/app-google-release.apk
+      apk_name: googleRelease-${{ needs.prepare-release-info.outputs.versionName }}.apk
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }}
+          submodules: 'recursive'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
+
+      - name: Validate Gradle wrapper
+        uses: gradle/actions/wrapper-validation@v4
+
+      - name: Load secrets
+        run: |
+          rm -f ./app/google-services.json # Ensure clean state
+          echo $GSERVICES > ./app/google-services.json
+          echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
+          echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
+        env:
           GSERVICES: ${{ secrets.GSERVICES }}
           KEYSTORE: ${{ secrets.KEYSTORE }}
           KEYSTORE_FILENAME: ${{ secrets.KEYSTORE_FILENAME }}
           KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
 
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'jetbrains'
-        # Note: we don't use caches on release builds because we don't want to accidentally not have a virgin build machine
+      - name: Set up JDK 24
+        uses: actions/setup-java@v4
+        with:
+          java-version: '24'
+          distribution: 'jetbrains'
 
-    - name: Build F-Droid release
-      run: ./gradlew assembleFdroidRelease
+      - name: Build Play Store release
+        run: ./gradlew bundleGoogleRelease assembleGoogleRelease
 
-    - name: Enable Crashlytics
-      run: sed -i 's/USE_CRASHLYTICS = false/USE_CRASHLYTICS = true/g' ./buildSrc/src/main/kotlin/Configs.kt
+      - name: Upload Play Store AAB artifact (for release job)
+        uses: actions/upload-artifact@v4
+        with:
+          name: google-aab
+          path: app/build/outputs/bundle/googleRelease/app-google-release.aab
+          retention-days: 1
 
-    - name: Build Play Store release
-      run: ./gradlew bundleGoogleRelease assembleGoogleRelease
+      - name: Upload Play Store APK artifact (for release job)
+        uses: actions/upload-artifact@v4
+        with:
+          name: google-apk
+          path: app/build/outputs/apk/google/release/app-google-release.apk
+          retention-days: 1
 
-    - name: Create GitHub release
-      uses: actions/create-release@v1
-      id: create_release
-      with:
-        draft: true
-        prerelease: true
-        release_name: Meshtastic Android ${{ env.versionName }} alpha
-        tag_name: ${{ env.versionName }}
-        body: |
-          Autogenerated by github action, developer should edit as required before publishing...
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  # Job to create GitHub release and upload assets (runs after builds if enabled)
+  create-github-release:
+    needs: [ prepare-release-info, build-fdroid, build-google ]
+    runs-on: ubuntu-latest
+    # Only run this job if the input create_github_release is true
+    if: github.repository == 'meshtastic/Meshtastic-Android' && github.event.inputs.create_github_release == 'true'
+    steps:
+      # We need version info again for release name and tag
+      # Alternatively, we could pass it as an artifact, but this is simpler for just two values
+      - name: Checkout code (for version_info.txt and version retrieval)
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.branch }} # Checkout the specified branch
 
-    - name: Add F-Droid APK to release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
-        asset_name: fdroidRelease-${{ env.versionName }}.apk
-        asset_content_type: application/zip
+      - name: Get `versionCode` & `versionName` (again for this job's env)
+        id: get_version # Unique ID within this job
+        run: |
+          echo "versionCode=$(grep -oP 'VERSION_CODE = \K\d+' ./buildSrc/src/main/kotlin/Configs.kt)" >> $GITHUB_ENV
+          echo "versionName=$(grep -oP 'VERSION_NAME = \"\K[^\"]+' ./buildSrc/src/main/kotlin/Configs.kt)" >> $GITHUB_ENV
 
-    - name: Add Play Store AAB to release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: app/build/outputs/bundle/googleRelease/app-google-release.aab
-        asset_name: googleRelease-${{ env.versionName }}.aab
-        asset_content_type: application/zip
+      - name: Create version_info.txt
+        run: |
+          echo -e "versionCode=${{ env.versionCode }}\nversionName=${{ env.versionName }}" > ./version_info.txt
 
-    - name: Add Play Store APK to release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: app/build/outputs/apk/google/release/app-google-release.apk
-        asset_name: googleRelease-${{ env.versionName }}.apk
-        asset_content_type: application/zip
+      - name: Download F-Droid APK
+        uses: actions/download-artifact@v4
+        with:
+          name: fdroid-apk
+          path: ./fdroid-apk-download # Download to a specific folder
 
-    # https://github.com/f-droid/fdroiddata/blob/main/metadata/com.geeksville.mesh.yml#L34
-    - name: Add `version_info.txt` to release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: version_info.txt
-        asset_name: version_info.txt
-        asset_content_type: text/plain
+      - name: Download Google AAB
+        uses: actions/download-artifact@v4
+        with:
+          name: google-aab
+          path: ./google-aab-download
+
+      - name: Download Google APK
+        uses: actions/download-artifact@v4
+        with:
+          name: google-apk
+          path: ./google-apk-download
+
+      - name: Create GitHub release
+        uses: actions/create-release@v1
+        id: create_release_step
+        with:
+          draft: true
+          prerelease: true
+          release_name: Meshtastic Android ${{ env.versionName }} alpha (Branch ${{ github.event.inputs.branch }})
+          tag_name: ${{ env.versionName }} # Consider making tag unique if version can be same across branches, e.g., ${{ env.versionName }}-${{ github.event.inputs.branch }}
+          target_commitish: ${{ github.event.inputs.branch }}
+          body: |
+            Release built from branch: `${{ github.event.inputs.branch }}`
+            Version: ${{ env.versionName }} (Code: ${{ env.versionCode }})
+
+            Autogenerated by GitHub Action. Please review and edit before publishing.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Add F-Droid APK to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release_step.outputs.upload_url }}
+          asset_path: ./fdroid-apk-download/app-fdroid-release.apk # Path from download
+          asset_name: fdroidRelease-${{ env.versionName }}.apk
+          asset_content_type: application/vnd.android.package-archive
+
+      - name: Add Play Store AAB to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release_step.outputs.upload_url }}
+          asset_path: ./google-aab-download/app-google-release.aab # Path from download
+          asset_name: googleRelease-${{ env.versionName }}.aab
+          asset_content_type: application/octet-stream # More generic for AAB
+
+      - name: Add Play Store APK to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release_step.outputs.upload_url }}
+          asset_path: ./google-apk-download/app-google-release.apk # Path from download
+          asset_name: googleRelease-${{ env.versionName }}.apk
+          asset_content_type: application/vnd.android.package-archive
+
+      - name: Add version_info.txt to release
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release_step.outputs.upload_url }}
+          asset_path: ./version_info.txt
+          asset_name: version_info.txt
+          asset_content_type: text/plain
