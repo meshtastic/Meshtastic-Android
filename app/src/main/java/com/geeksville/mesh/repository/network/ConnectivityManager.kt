@@ -31,7 +31,6 @@ internal fun ConnectivityManager.networkAvailable(): Flow<Boolean> = observeNetw
         .map { activeNetworksList -> activeNetworksList.isNotEmpty() }
         .distinctUntilChanged()
 
-
 internal fun ConnectivityManager.observeNetworks(
     networkRequest: NetworkRequest = NetworkRequest.Builder().build(),
 ): Flow<List<Network>> = callbackFlow {
