@@ -141,7 +141,7 @@
     <string name="debug_logs_export">Protokolle exportieren</string>
     <string name="debug_last_messages">500 letzte Nachrichten</string>
     <string name="debug_filters">Filter</string>
-    <string name="debug_active_filters">Aktive Filter (alle)</string>
+    <string name="debug_active_filters">Aktive Filter</string>
     <string name="debug_default_search">In Protokollen suchen</string>
     <string name="debug_clear">Protokolle löschen</string>
     <string name="clear">Leeren</string>

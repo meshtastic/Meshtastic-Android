@@ -141,9 +141,12 @@
     <string name="debug_logs_export">Vie lokitiedot</string>
     <string name="debug_last_messages">500 viimeisintä viestiä</string>
     <string name="debug_filters">Suodattimet</string>
-    <string name="debug_active_filters">Aktiiviset suodattimet (täsmää mihinkä tahansa)</string>
+    <string name="debug_active_filters">Aktiiviset suodattimet</string>
     <string name="debug_default_search">Hae lokitiedoista…</string>
     <string name="debug_clear">Tyhjennä lokit</string>
+    <string name="match_any">Täsmää yhteen | kaikkiin</string>
+    <string name="match_all">Täsmää yhteen | kaikkiin</string>
+    <string name="debug_clear_logs_confirm">Tämä poistaa kaikki lokipaketit ja tietokantamerkinnät laitteestasi – Kyseessä on täydellinen nollaus, ja se on pysyvä.</string>
     <string name="clear">Tyhjennä</string>
     <string name="updating_firmware">Päivitetään laiteohjelmistoa, tämä voi kestää jopa kahdeksan minuuttia…</string>
     <string name="update_successful">Päivitys onnistui</string>
