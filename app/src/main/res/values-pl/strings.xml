@@ -334,14 +334,12 @@
     <string name="are_you_sure">Czy jesteś pewien?</string>
     <string name="router_role_confirmation_text"><![CDATA[Przeczytałem <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Dokumentacja roli urządzenia</a> oraz post na blogu o <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Wybranie odpowiedniej roli urządzenia</a>.]]></string>
     <string name="i_know_what_i_m_doing">Wiem, co robię.</string>
-    <string name="low_battery_message">Węzeł %s ma niski poziom baterii (%d%%)</string>
     <string name="meshtastic_low_battery_notifications">Powiadomienia o niskim poziomie baterii</string>
     <string name="low_battery_title">Niski poziom baterii: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Powiadomienia o niskim poziomie baterii (ulubione węzły)</string>
     <string name="baro_pressure">Ciśnienie barometryczne</string>
     <string name="mesh_via_udp_enabled">Mesh na UDP włączony</string>
     <string name="udp_config">Ustawienia UDP</string>
-    <string name="map_node_popup_details"><![CDATA[%s-<br>Ostatnio słyszany: %s<br>Ostatnia pozycja: %s<br>Bateria: %s]]></string>
     <string name="toggle_my_position">Pokaż moją pozycję</string>
     <string name="user">Użytkownik</string>
     <string name="channels">Kanały</string>
@@ -414,4 +412,5 @@
     <string name="secondary">Wtórny</string>
     <string name="map">Mapa</string>
     <string name="reply">Odpowiedz</string>
+    <string name="disconnect">Rozłącz</string>
 </resources>

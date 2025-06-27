@@ -39,21 +39,25 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Bluetooth
+import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Usb
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.RadioButton
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -70,7 +74,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -92,15 +95,16 @@ import com.geeksville.mesh.android.isGooglePlayAvailable
 import com.geeksville.mesh.android.permissionMissing
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
-import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
-import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.ui.connections.components.BLEDevices
+import com.geeksville.mesh.ui.connections.components.NetworkDevices
+import com.geeksville.mesh.ui.connections.components.UsbDevices
 import com.geeksville.mesh.ui.node.NodeActionButton
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
@@ -186,10 +190,6 @@ fun ConnectionsScreen(
         }
     }
 
-    // State for manual IP address input
-    var manualIpAddress by remember { mutableStateOf("") }
-    var manualIpPort by remember { mutableStateOf(NetworkRepository.SERVICE_PORT.toString()) }
-
     // State for the device scan dialog
     var showScanDialog by remember { mutableStateOf(false) }
     val scanResults by scanModel.scanResult.observeAsState(emptyMap())
@@ -267,11 +267,9 @@ fun ConnectionsScreen(
     Box(modifier = Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp)
-                .verticalScroll(scrollState)
+                .fillMaxWidth()
+                .padding(8.dp)
         ) {
-            // Scan Status Text
             Text(
                 text = scanStatusText.orEmpty(),
                 fontSize = 14.sp,
@@ -286,6 +284,7 @@ fun ConnectionsScreen(
             if (isConnected) {
                 ourNode?.let { node ->
                     Row(
+                        modifier = Modifier.padding(horizontal = 16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         NodeChip(
@@ -308,17 +307,37 @@ fun ConnectionsScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
+                            modifier = Modifier.weight(1f, fill = true),
                             text = node.user.longName,
                             style = MaterialTheme.typography.titleLarge
                         )
+                        IconButton(
+                            enabled = true,
+                            onClick = onNavigateToRadioConfig
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = stringResource(id = R.string.radio_configuration)
+                            )
+                        }
+                        FilledIconButton(
+                            colors = IconButtonDefaults.filledIconButtonColors().copy(
+                                containerColor = MaterialTheme.colorScheme.error
+                            ),
+                            enabled = true,
+                            onClick = {
+                                devices.values.find { it.isDisconnect }?.let {
+                                    scanModel.onSelected(it)
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.CloudOff,
+                                contentDescription = stringResource(id = R.string.disconnect),
+                            )
+                        }
                     }
                 }
-                NodeActionButton(
-                    title = stringResource(id = R.string.radio_configuration),
-                    icon = Icons.Default.Settings,
-                    enabled = true,
-                    onClick = onNavigateToRadioConfig
-                )
                 Spacer(modifier = Modifier.height(8.dp))
                 if (regionUnset && selectedDevice != "m") {
                     NodeActionButton(
@@ -331,393 +350,358 @@ fun ConnectionsScreen(
                         }
                     )
                     Spacer(modifier = Modifier.height(8.dp))
+                    if (scanning) {
+                        LinearProgressIndicator(
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
             }
 
-            // Device List and Manual Input
-            Text(
-                text = stringResource(R.string.device),
-                style = MaterialTheme.typography.titleLarge,
-                modifier = Modifier.padding(vertical = 8.dp)
-            )
-
-            // Progress bar while scanning
-            if (scanning) {
-                LinearProgressIndicator(
-                    modifier = Modifier.fillMaxWidth()
+            var selectedDeviceType by remember { mutableStateOf(DeviceType.BLE) }
+            LaunchedEffect(selectedDevice) {
+                // Determine based on the selected device - if disconnected, keep the last selected type
+                selectedDeviceType =
+                    selectedDevice.let { DeviceType.fromAddress(it) } ?: selectedDeviceType
+            }
+            SingleChoiceSegmentedButtonRow(
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                SegmentedButton(
+                    shape = SegmentedButtonDefaults.itemShape(
+                        DeviceType.BLE.ordinal,
+                        DeviceType.entries.size
+                    ),
+                    onClick = {
+                        selectedDeviceType = DeviceType.BLE
+                    },
+                    selected = (selectedDeviceType == DeviceType.BLE),
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Bluetooth,
+                            contentDescription = stringResource(id = R.string.bluetooth)
+                        )
+                    },
+                    label = {
+                        Text(text = stringResource(id = R.string.bluetooth))
+                    }
+                )
+                SegmentedButton(
+                    shape = SegmentedButtonDefaults.itemShape(
+                        DeviceType.TCP.ordinal,
+                        DeviceType.entries.size
+                    ),
+                    onClick = {
+                        selectedDeviceType = DeviceType.TCP
+                    },
+                    selected = (selectedDeviceType == DeviceType.TCP),
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Wifi,
+                            contentDescription = stringResource(id = R.string.network)
+                        )
+                    },
+                    label = {
+                        Text(text = stringResource(id = R.string.network))
+                    }
+                )
+                SegmentedButton(
+                    shape = SegmentedButtonDefaults.itemShape(
+                        DeviceType.USB.ordinal,
+                        DeviceType.entries.size
+                    ),
+                    onClick = {
+                        selectedDeviceType = DeviceType.USB
+                    },
+                    selected = (selectedDeviceType == DeviceType.USB),
+                    icon = {
+                        Icon(
+                            imageVector = Icons.Default.Usb,
+                            contentDescription = stringResource(id = R.string.serial)
+                        )
+                    },
+                    label = {
+                        Text(text = stringResource(id = R.string.serial))
+                    }
                 )
             }
-            Column(modifier = Modifier.selectableGroup()) {
-                devices.values.forEach { device ->
+
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp)
+                    .verticalScroll(scrollState)
+            ) {
+                when (selectedDeviceType) {
+                    DeviceType.BLE -> {
+
+                        BLEDevices(
+                            devices.values.filter { it.isBLE },
+                            selectedDevice,
+                            showBluetoothRationaleDialog = {
+                                showBluetoothRationaleDialog = true
+                            },
+                            requestBluetoothPermission = {
+                                requestBluetoothPermissionLauncher.launch(
+                                    it
+                                )
+                            },
+                            scanModel
+                        )
+                    }
+
+                    DeviceType.TCP -> {
+                        NetworkDevices(
+                            devices.values.filter { it.isTCP },
+                            selectedDevice,
+                            scanModel
+                        )
+                    }
+
+                    DeviceType.USB -> {
+                        UsbDevices(
+                            devices.values.filter { it.isUSB || it.isMock },
+                            selectedDevice,
+                            scanModel
+                        )
+                    }
+                }
+
+                Spacer(modifier = Modifier.weight(1f))
+
+                LaunchedEffect(ourNode) {
+                    if (ourNode != null) {
+                        uiViewModel.refreshProvideLocation()
+                    }
+                }
+                AnimatedVisibility(isConnected) {
+                    val provideLocation by uiViewModel.provideLocation.collectAsState(false)
+                    LaunchedEffect(provideLocation) {
+                        if (provideLocation) {
+                            if (!context.hasLocationPermission()) {
+                                debug("Requesting location permission for providing location")
+                                showLocationRationaleDialog = true
+                            } else if (isGpsDisabled) {
+                                uiViewModel.showSnackbar(context.getString(R.string.location_disabled))
+                            }
+                        }
+                    }
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .selectable(
-                                selected = (device.fullAddress == selectedDevice) ||
-                                        device.fullAddress == NO_DEVICE_SELECTED,
-                                onClick = {
-                                    if (!device.bonded) {
-                                        uiViewModel.showSnackbar(context.getString(R.string.starting_pairing))
-                                    }
-                                    scanModel.onSelected(device)
+                            .toggleable(
+                                value = provideLocation,
+                                onValueChange = { checked ->
+                                    uiViewModel.setProvideLocation(checked)
                                 },
-                                role = Role.RadioButton,
+                                enabled = !isGpsDisabled
                             )
-                            .padding(8.dp),
+                            .padding(horizontal = 16.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        RadioButton(
-                            selected = (device.fullAddress == selectedDevice),
-                            onClick = null
+                        Checkbox(
+                            checked = receivingLocationUpdates,
+                            onCheckedChange = null,
+                            enabled = !isGpsDisabled // Disable if GPS is disabled
                         )
                         Text(
-                            text = device.name,
+                            text = stringResource(R.string.provide_location_to_mesh),
                             style = MaterialTheme.typography.bodyLarge,
                             modifier = Modifier.padding(start = 16.dp)
                         )
                     }
                 }
+                // Provide Location Checkbox
 
-                // Manual IP Address Input
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .selectable(
-                            selected = ("t$manualIpAddress:$manualIpPort" == selectedDevice),
-                            onClick = {
-                                if (manualIpAddress.isIPAddress()) {
-                                    scanModel.onSelected(
-                                        BTScanModel.DeviceListEntry(
-                                            "",
-                                            "t$manualIpAddress:$manualIpPort",
-                                            true
-                                        )
-                                    )
-                                }
-                            },
-                            enabled = manualIpAddress.isIPAddress(),
-                            role = Role.RadioButton
-                        )
-                        .padding(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    RadioButton(
-                        selected = ("t$manualIpAddress:$manualIpPort" == selectedDevice),
-                        onClick = null,
-                        enabled = manualIpAddress.isIPAddress()
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Warning Not Paired
+                val showWarningNotPaired = !devices.any { it.value.bonded }
+                if (showWarningNotPaired) {
+                    Text(
+                        text = stringResource(R.string.warning_not_paired),
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.padding(horizontal = 16.dp)
                     )
-                    OutlinedTextField(
-                        value = manualIpAddress,
-                        onValueChange = { manualIpAddress = it },
-                        label = { Text(stringResource(R.string.ip_address)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number,
-                            imeAction = androidx.compose.ui.text.input.ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions {
-                            if (manualIpAddress.isIPAddress()) {
-                                scanModel.onSelected(
-                                    BTScanModel.DeviceListEntry(
-                                        "",
-                                        "t$manualIpAddress:$manualIpPort",
-                                        true
-                                    )
-                                )
-                            }
-                        },
-                        modifier = Modifier
-                            .weight(0.7f)
-                            .padding(start = 16.dp)
-                    )
-                    OutlinedTextField(
-                        value = manualIpPort,
-                        onValueChange = {
-                            // Only allow numeric input for port
-                            if (it.all { char -> char.isDigit() }) {
-                                manualIpPort = it
-                            }
-                        },
-                        label = { Text(stringResource(R.string.ip_port)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Number,
-                            imeAction = androidx.compose.ui.text.input.ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions {
-                            if (manualIpAddress.isIPAddress()) {
-                                scanModel.onSelected(
-                                    BTScanModel.DeviceListEntry(
-                                        "",
-                                        "t$manualIpAddress:$manualIpPort",
-                                        true
-                                    )
-                                )
-                            }
-                        },
-                        modifier = Modifier
-                            .weight(weight = 0.3f)
-                            .padding(start = 8.dp)
-                    )
+                    Spacer(modifier = Modifier.height(16.dp))
                 }
-            }
 
-            Spacer(modifier = Modifier.height(16.dp))
+                // Analytics Okay Checkbox
 
-            LaunchedEffect(ourNode) {
-                if (ourNode != null) {
-                    uiViewModel.refreshProvideLocation()
-                }
-            }
-            AnimatedVisibility(isConnected) {
-                val provideLocation by uiViewModel.provideLocation.collectAsState(false)
-                LaunchedEffect(provideLocation) {
-                    if (provideLocation) {
-                        if (!context.hasLocationPermission()) {
-                            debug("Requesting location permission for providing location")
-                            showLocationRationaleDialog = true
-                        } else if (isGpsDisabled) {
-                            uiViewModel.showSnackbar(context.getString(R.string.location_disabled))
-                        }
+                val isGooglePlayAvailable = app.isGooglePlayAvailable()
+                val isAnalyticsAllowed = app.isAnalyticsAllowed && isGooglePlayAvailable
+                if (isGooglePlayAvailable) {
+                    var loading by remember { mutableStateOf(false) }
+                    LaunchedEffect(isAnalyticsAllowed) {
+                        loading = false
                     }
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .toggleable(
-                            value = provideLocation,
-                            onValueChange = { checked ->
-                                uiViewModel.setProvideLocation(checked)
-                            },
-                            enabled = !isGpsDisabled
-                        )
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Checkbox(
-                        checked = receivingLocationUpdates,
-                        onCheckedChange = null,
-                        enabled = !isGpsDisabled // Disable if GPS is disabled
-                    )
-                    Text(
-                        text = stringResource(R.string.provide_location_to_mesh),
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                }
-            }
-            // Provide Location Checkbox
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Warning Not Paired
-            val showWarningNotPaired = !devices.any { it.value.bonded }
-            if (showWarningNotPaired) {
-                Text(
-                    text = stringResource(R.string.warning_not_paired),
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.padding(horizontal = 16.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-            }
-
-            // Analytics Okay Checkbox
-
-            val isGooglePlayAvailable = app.isGooglePlayAvailable()
-            val isAnalyticsAllowed = app.isAnalyticsAllowed && isGooglePlayAvailable
-            if (isGooglePlayAvailable) {
-                var loading by remember { mutableStateOf(false) }
-                LaunchedEffect(isAnalyticsAllowed) {
-                    loading = false
-                }
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .toggleable(
-                            value = isAnalyticsAllowed,
-                            onValueChange = {
-                                debug("User changed analytics to $it")
-                                app.isAnalyticsAllowed = it
-                                loading = true
-                            },
-                            role = Role.Checkbox,
-                            enabled = isGooglePlayAvailable && !loading
-                        )
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Checkbox(
-                        enabled = isGooglePlayAvailable,
-                        checked = isAnalyticsAllowed,
-                        onCheckedChange = null
-                    )
-                    Text(
-                        text = stringResource(R.string.analytics_okay),
-                        style = MaterialTheme.typography.bodyLarge,
-                        modifier = Modifier.padding(start = 16.dp)
-                    )
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                // Report Bug Button
-                Button(
-                    onClick = { showReportBugDialog = true }, // Set state to show Report Bug dialog
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    enabled = isAnalyticsAllowed
-                ) {
-                    Text(stringResource(R.string.report_bug))
-                }
-            }
-        }
-        // Floating Action Button (Change Radio)
-        FloatingActionButton(
-            onClick = {
-                val bluetoothPermissions = context.getBluetoothPermissions()
-                if (bluetoothPermissions.isEmpty()) {
-                    // If no permissions needed, trigger the scan directly (or via ViewModel)
-                    scanModel.startScan()
-                } else {
-                    if (
-                        context.findActivity()
-                            .shouldShowRequestPermissionRationale(bluetoothPermissions.first())
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .toggleable(
+                                value = isAnalyticsAllowed,
+                                onValueChange = {
+                                    debug("User changed analytics to $it")
+                                    app.isAnalyticsAllowed = it
+                                    loading = true
+                                },
+                                role = Role.Checkbox,
+                                enabled = isGooglePlayAvailable && !loading
+                            )
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        showBluetoothRationaleDialog = true
-                    } else {
-                        requestBluetoothPermissionLauncher.launch(bluetoothPermissions)
-                    }
-                }
-            },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-        ) {
-            Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.change_radio))
-        }
-    }
-
-// Compose Device Scan Dialog
-    if (showScanDialog) {
-        Dialog(onDismissRequest = {
-            showScanDialog = false
-            scanModel.clearScanResults()
-        }) {
-            Surface(shape = MaterialTheme.shapes.medium) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                    Text(
-                        text = "Select a Bluetooth device",
-                        style = MaterialTheme.typography.titleLarge,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
-                    Column(modifier = Modifier.selectableGroup()) {
-                        scanResults.values.forEach { device ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .selectable(
-                                        selected = false, // No pre-selection in this dialog
-                                        onClick = {
-                                            scanModel.onSelected(device)
-                                            scanModel.clearScanResults()
-                                            showScanDialog = false
-                                        }
-                                    )
-                                    .padding(vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(text = device.name)
-                            }
-                        }
+                        Checkbox(
+                            enabled = isGooglePlayAvailable,
+                            checked = isAnalyticsAllowed,
+                            onCheckedChange = null
+                        )
+                        Text(
+                            text = stringResource(R.string.analytics_okay),
+                            style = MaterialTheme.typography.bodyLarge,
+                            modifier = Modifier.padding(start = 16.dp)
+                        )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
-                    TextButton(onClick = {
-                        scanModel.clearScanResults()
-                        showScanDialog = false
+                    // Report Bug Button
+                    Button(
+                        onClick = {
+                            showReportBugDialog = true
+                        }, // Set state to show Report Bug dialog
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        enabled = isAnalyticsAllowed
+                    ) {
+                        Text(stringResource(R.string.report_bug))
+                    }
+                }
+            }
+        }
+
+// Compose Device Scan Dialog
+        if (showScanDialog) {
+            Dialog(onDismissRequest = {
+                showScanDialog = false
+                scanModel.clearScanResults()
+            }) {
+                Surface(shape = MaterialTheme.shapes.medium) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text(
+                            text = "Select a Bluetooth device",
+                            style = MaterialTheme.typography.titleLarge,
+                            modifier = Modifier.padding(bottom = 16.dp)
+                        )
+                        Column(modifier = Modifier.selectableGroup()) {
+                            scanResults.values.forEach { device ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .selectable(
+                                            selected = false, // No pre-selection in this dialog
+                                            onClick = {
+                                                scanModel.onSelected(device)
+                                                scanModel.clearScanResults()
+                                                showScanDialog = false
+                                            }
+                                        )
+                                        .padding(vertical = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(text = device.name)
+                                }
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        TextButton(onClick = {
+                            scanModel.clearScanResults()
+                            showScanDialog = false
+                        }) {
+                            Text(stringResource(R.string.cancel))
+                        }
+                    }
+                }
+            }
+        }
+
+// Compose Location Permission Rationale Dialog
+        if (showLocationRationaleDialog) {
+            AlertDialog(
+                onDismissRequest = { showLocationRationaleDialog = false },
+                title = { Text(stringResource(R.string.background_required)) },
+                text = { Text(stringResource(R.string.why_background_required)) },
+                confirmButton = {
+                    Button(onClick = {
+                        showLocationRationaleDialog = false
+                        if (!context.hasLocationPermission()) {
+                            requestLocationPermissionLauncher.launch(context.getLocationPermissions())
+                        }
+                    }) {
+                        Text(stringResource(R.string.accept))
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { showLocationRationaleDialog = false }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            )
+        }
+
+// Compose Bluetooth Permission Rationale Dialog
+        if (showBluetoothRationaleDialog) {
+            val bluetoothPermissions = context.getBluetoothPermissions()
+            AlertDialog(
+                onDismissRequest = { showBluetoothRationaleDialog = false },
+                title = { Text(stringResource(R.string.required_permissions)) },
+                text = { Text(stringResource(R.string.permission_missing_31)) },
+                confirmButton = {
+                    Button(onClick = {
+                        showBluetoothRationaleDialog = false
+                        if (bluetoothPermissions.isNotEmpty()) {
+                            requestBluetoothPermissionLauncher.launch(bluetoothPermissions)
+                        } else {
+                            // If somehow no permissions are required, just scan
+                            scanModel.startScan()
+                        }
+                    }) {
+                        Text(stringResource(R.string.okay))
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { showBluetoothRationaleDialog = false }) {
+                        Text(stringResource(R.string.cancel))
+                    }
+                }
+            )
+        }
+
+// Compose Report Bug Dialog
+        if (showReportBugDialog) {
+            AlertDialog(
+                onDismissRequest = { showReportBugDialog = false },
+                title = { Text(stringResource(R.string.report_a_bug)) },
+                text = { Text(stringResource(R.string.report_bug_text)) },
+                confirmButton = {
+                    Button(onClick = {
+                        showReportBugDialog = false
+                        reportError("Clicked Report A Bug")
+                        uiViewModel.showSnackbar("Bug report sent!")
+                    }) {
+                        Text(stringResource(R.string.report))
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = {
+                        showReportBugDialog = false
+                        debug("Decided not to report a bug")
                     }) {
                         Text(stringResource(R.string.cancel))
                     }
                 }
-            }
+            )
         }
-    }
-
-// Compose Location Permission Rationale Dialog
-    if (showLocationRationaleDialog) {
-        AlertDialog(
-            onDismissRequest = { showLocationRationaleDialog = false },
-            title = { Text(stringResource(R.string.background_required)) },
-            text = { Text(stringResource(R.string.why_background_required)) },
-            confirmButton = {
-                Button(onClick = {
-                    showLocationRationaleDialog = false
-                    if (!context.hasLocationPermission()) {
-                        requestLocationPermissionLauncher.launch(context.getLocationPermissions())
-                    }
-                }) {
-                    Text(stringResource(R.string.accept))
-                }
-            },
-            dismissButton = {
-                Button(onClick = { showLocationRationaleDialog = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        )
-    }
-
-// Compose Bluetooth Permission Rationale Dialog
-    if (showBluetoothRationaleDialog) {
-        val bluetoothPermissions = context.getBluetoothPermissions()
-        AlertDialog(
-            onDismissRequest = { showBluetoothRationaleDialog = false },
-            title = { Text(stringResource(R.string.required_permissions)) },
-            text = { Text(stringResource(R.string.permission_missing_31)) },
-            confirmButton = {
-                Button(onClick = {
-                    showBluetoothRationaleDialog = false
-                    if (bluetoothPermissions.isNotEmpty()) {
-                        requestBluetoothPermissionLauncher.launch(bluetoothPermissions)
-                    } else {
-                        // If somehow no permissions are required, just scan
-                        scanModel.startScan()
-                    }
-                }) {
-                    Text(stringResource(R.string.okay))
-                }
-            },
-            dismissButton = {
-                Button(onClick = { showBluetoothRationaleDialog = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        )
-    }
-
-// Compose Report Bug Dialog
-    if (showReportBugDialog) {
-        AlertDialog(
-            onDismissRequest = { showReportBugDialog = false },
-            title = { Text(stringResource(R.string.report_a_bug)) },
-            text = { Text(stringResource(R.string.report_bug_text)) },
-            confirmButton = {
-                Button(onClick = {
-                    showReportBugDialog = false
-                    reportError("Clicked Report A Bug")
-                    uiViewModel.showSnackbar("Bug report sent!")
-                }) {
-                    Text(stringResource(R.string.report))
-                }
-            },
-            dismissButton = {
-                Button(onClick = {
-                    showReportBugDialog = false
-                    debug("Decided not to report a bug")
-                }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
-        )
     }
 }
 
@@ -725,6 +709,30 @@ private tailrec fun Context.findActivity(): Activity = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()
     else -> error("No activity found")
+}
+
+private enum class DeviceType {
+    BLE,
+    TCP,
+    USB;
+
+    companion object {
+        fun fromAddress(address: String): DeviceType? {
+            val prefix = address[0]
+            val isBLE: Boolean = prefix == 'x'
+            val isUSB: Boolean = prefix == 's'
+            val isTCP: Boolean = prefix == 't'
+            val isMock: Boolean = prefix == 'm'
+            val isDisconnect: Boolean = prefix == 'n'
+            return when {
+                isBLE -> BLE
+                isUSB -> USB
+                isTCP -> TCP
+                isMock -> USB // Treat mock as USB for UI purposes
+                else -> null
+            }
+        }
+    }
 }
 
 private const val SCAN_PERIOD: Long = 10000 // 10 seconds

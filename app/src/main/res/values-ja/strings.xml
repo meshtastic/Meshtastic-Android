@@ -328,14 +328,12 @@
     <string name="are_you_sure">よろしいですか？</string>
     <string name="router_role_confirmation_text"><![CDATA[私はすでに<a href="https://meshtastic.org/docs/configuration/radio/device/#roles">デバイスロールドキュメント</a>と <a href="http://meshtastic.org/blog/choosing-the-right-device-role> 正しいデバイスロールを選択</a>についてのブログ記事を読んでいます。]]></string>
     <string name="i_know_what_i_m_doing">はい、了承します</string>
-    <string name="low_battery_message">ノード %s のバッテリー残量が少なくなっています (%d%%)</string>
     <string name="meshtastic_low_battery_notifications">バッテリー残量低下通知</string>
     <string name="low_battery_title">バッテリー低残量: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">バッテリー残量低下通知 (お気に入りノード)</string>
     <string name="baro_pressure">大気圧</string>
     <string name="mesh_via_udp_enabled">UDP経由のメッシュを有効化</string>
     <string name="udp_config">UDP Config</string>
-    <string name="map_node_popup_details"><![CDATA[%s<br>最終受信: %s<br>最終位置: %s<br>バッテリー: %s]]></string>
     <string name="toggle_my_position">自分の位置を切り替え</string>
     <string name="user">ユーザー</string>
     <string name="channels">チャンネル</string>

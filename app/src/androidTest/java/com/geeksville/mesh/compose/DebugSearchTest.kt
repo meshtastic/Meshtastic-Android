@@ -37,6 +37,8 @@ import org.junit.runner.RunWith
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.geeksville.mesh.ui.debug.FilterMode
+import com.geeksville.mesh.ui.debug.DebugActiveFilters
 
 @RunWith(AndroidJUnit4::class)
 class DebugSearchTest {
@@ -137,7 +139,9 @@ class DebugSearchTest {
             var customFilterText by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
             com.geeksville.mesh.ui.debug.DebugActiveFilters(
                 filterTexts = filterTexts,
-                onFilterTextsChange = { filterTexts = it }
+                onFilterTextsChange = { filterTexts = it },
+                filterMode = FilterMode.OR,
+                onFilterModeChange = {}
             )
             com.geeksville.mesh.ui.debug.DebugCustomFilterInput(
                 customFilterText = customFilterText,
@@ -162,7 +166,9 @@ class DebugSearchTest {
             var filterTexts by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(listOf("A", "B")) }
             com.geeksville.mesh.ui.debug.DebugActiveFilters(
                 filterTexts = filterTexts,
-                onFilterTextsChange = { filterTexts = it }
+                onFilterTextsChange = { filterTexts = it },
+                filterMode = FilterMode.OR,
+                onFilterModeChange = {}
             )
         }
         // The active filters label and chips should be visible

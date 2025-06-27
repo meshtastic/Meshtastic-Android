@@ -28,6 +28,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.debug.DebugScreen
@@ -74,6 +75,7 @@ fun NavDestination.showLongNameTitle(): Boolean {
 fun NavGraph(
     modifier: Modifier = Modifier,
     uIViewModel: UIViewModel = hiltViewModel(),
+    bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController(),
 ) {
     NavHost(
@@ -89,7 +91,7 @@ fun NavGraph(
         nodesGraph(navController, uIViewModel,)
         mapGraph(navController, uIViewModel)
         channelsGraph(navController, uIViewModel)
-        connectionsGraph(navController, uIViewModel)
+        connectionsGraph(navController, uIViewModel, bluetoothViewModel)
         composable<Route.DebugPanel> { DebugScreen() }
         radioConfigGraph(navController, uIViewModel)
     }

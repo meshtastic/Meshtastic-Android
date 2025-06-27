@@ -328,7 +328,6 @@
     <string name="are_you_sure">Да ли сте сигурни?</string>
     <string name="router_role_confirmation_text"><![CDATA[Прочитао сам <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Документацију улога уређаја</a> и објаву на блогу <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Одабир праве улоге за уређај</a>.]]></string>
     <string name="i_know_what_i_m_doing">Знам шта радим.</string>
-    <string name="low_battery_message">Чвор %s има низак ниво батерије (%d%%)</string>
     <string name="meshtastic_low_battery_notifications">Нотификације о ниском нивоу батерије</string>
     <string name="low_battery_title">Низак ниво батерије: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Нотификације о ниском нивоу батерије (омиљени чворови)</string>
@@ -409,4 +408,5 @@
     <string name="expires">Истиче</string>
     <string name="time">Време</string>
     <string name="date">Датум</string>
+    <string name="disconnect">Прекините везу</string>
 </resources>

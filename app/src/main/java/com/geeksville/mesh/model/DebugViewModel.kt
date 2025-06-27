@@ -126,11 +126,13 @@ class LogSearchManager {
         }
         return filteredLogs.flatMapIndexed { logIndex, log ->
             searchText.split(" ").flatMap { term ->
-                val messageMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.logMessage)
+                val escapedTerm = Regex.escape(term)
+                val regex = escapedTerm.toRegex(RegexOption.IGNORE_CASE)
+                val messageMatches = regex.findAll(log.logMessage)
                     .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "message") }
-                val typeMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.messageType)
+                val typeMatches = regex.findAll(log.messageType)
                     .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "type") }
-                val dateMatches = term.toRegex(RegexOption.IGNORE_CASE).findAll(log.formattedReceivedDate)
+                val dateMatches = regex.findAll(log.formattedReceivedDate)
                     .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "date") }
                 messageMatches + typeMatches + dateMatches
             }

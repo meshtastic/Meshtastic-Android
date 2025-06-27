@@ -172,6 +172,7 @@ internal fun MessageList(
                     mutableStateOf(nodes.find { it.num == msg.node.num } ?: msg.node)
                 }
                 MessageItem(
+                    modifier = Modifier.animateItem(),
                     node = node,
                     ourNode = ourNode!!,
                     message = msg,
@@ -224,17 +225,15 @@ private fun UpdateUnreadCount(
     messages: List<Message>,
     onUnreadChanged: (Long) -> Unit,
 ) {
-    val unreadIndex by remember { derivedStateOf { messages.indexOfLast { !it.read } } }
-    val firstVisibleItemIndex by remember { derivedStateOf { listState.firstVisibleItemIndex } }
-
-    if (unreadIndex != -1 && firstVisibleItemIndex != -1 && firstVisibleItemIndex <= unreadIndex) {
-        LaunchedEffect(firstVisibleItemIndex, unreadIndex) {
-            snapshotFlow { listState.firstVisibleItemIndex }
-                .debounce(timeoutMillis = 500L)
-                .collectLatest { index ->
-                    val lastVisibleItem = messages[index]
-                    onUnreadChanged(lastVisibleItem.receivedTime)
+    LaunchedEffect(messages) {
+        snapshotFlow { listState.firstVisibleItemIndex }
+            .debounce(timeoutMillis = 500L)
+            .collectLatest { index ->
+                val lastUnreadIndex = messages.indexOfLast { !it.read }
+                if (lastUnreadIndex != -1 && index <= lastUnreadIndex && index < messages.size) {
+                    val visibleMessage = messages[index]
+                    onUnreadChanged(visibleMessage.receivedTime)
                 }
-        }
+            }
     }
 }

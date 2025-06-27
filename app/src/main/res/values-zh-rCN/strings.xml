@@ -336,14 +336,12 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="are_you_sure">你确定吗？</string>
     <string name="router_role_confirmation_text"><![CDATA[我已经阅读 <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">设备角色文档</a> 以及关于 <a href="http://meshtastic.org/blog/choosing-the-right-device-role">选择正确设备角色</a>的博客文章。]]></string>
     <string name="i_know_what_i_m_doing">我知道自己在做什么</string>
-    <string name="low_battery_message">节点 %s 电池电量低(%d%%)</string>
     <string name="meshtastic_low_battery_notifications">低电量通知</string>
     <string name="low_battery_title">电池电量低: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">低电量通知 (收藏节点)</string>
     <string name="baro_pressure">气压</string>
     <string name="mesh_via_udp_enabled">通过 UDP 的Mesh</string>
     <string name="udp_config">UDP 设置</string>
-    <string name="map_node_popup_details"><![CDATA[%s<br>最后听到: %s<br>最后位置: %s<br>电量: %s]]></string>
     <string name="toggle_my_position">切换我的位置</string>
     <string name="user">用户</string>
     <string name="channels">频道</string>
@@ -658,4 +656,5 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="client_notification">客户端通知</string>
     <string name="compromised_keys">检测到密钥泄漏，请点击 确定 进行重新生成。</string>
     <string name="regenerate_private_key">重新生成私钥</string>
+    <string name="disconnect">断开连接</string>
 </resources>

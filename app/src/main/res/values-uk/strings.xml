@@ -21,14 +21,17 @@
     <string name="main_tab_map">Мапа</string>
     <string name="main_tab_channel">Канал</string>
     <string name="main_tab_settings">Налаштування</string>
+    <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Фільтри</string>
     <string name="desc_node_filter_clear">очистити фільтр вузлів</string>
     <string name="node_filter_include_unknown">Включаючи невідомий</string>
+    <string name="node_filter_only_online">Сховати вузли не в мережі</string>
     <string name="node_filter_show_details">Показати деталі</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Канал</string>
     <string name="node_sort_distance">Відстань</string>
     <string name="node_sort_via_mqtt">через MQTT</string>
+    <string name="node_sort_via_favorite">через Обране</string>
     <string name="routing_error_no_channel">Канал відсутній</string>
     <string name="routing_error_too_large">Пакет завеликий</string>
     <string name="routing_error_no_response">Немає відповіді</string>
@@ -89,9 +92,9 @@
     <string name="text_messages">Текстові повідомлення</string>
     <string name="channel_invalid">URL-адреса цього каналу недійсна та не може бути використана</string>
     <string name="debug_panel">Панель налагодження</string>
+    <string name="debug_logs_export">Експортувати журнали</string>
     <string name="debug_last_messages">500 останніх повідомлень</string>
     <string name="debug_filters">Фільтри</string>
-    <string name="debug_default_search">Пошук у журналах...</string>
     <string name="debug_clear">Очистити журнал</string>
     <string name="clear">Очистити</string>
     <string name="updating_firmware">Оновлення прошивки, зачекайте до восьми хвилин…</string>
@@ -239,7 +242,9 @@
     <string name="are_you_sure">Ви впевнені?</string>
     <string name="router_role_confirmation_text"><![CDATA[<a href="https://meshtastic.org/docs/configuration/radio/device/#roles">]]></string>
     <string name="i_know_what_i_m_doing">Я знаю, що роблю.</string>
+    <string name="meshtastic_low_battery_notifications">Сповіщення про низький рівень заряду</string>
     <string name="low_battery_title">Низький заряд батареї: %s</string>
+    <string name="udp_config">Налаштування UDP</string>
     <string name="user">Користувач</string>
     <string name="channels">Канали</string>
     <string name="device">Пристрій</string>
@@ -256,6 +261,8 @@
     <string name="telemetry">Телеметрія</string>
     <string name="audio">Аудіо</string>
     <string name="audio_config">Налаштування аудіо</string>
+    <string name="bluetooth_config">Налаштування Bluetooth</string>
+    <string name="bluetooth_enabled">Bluetooth увімкнено</string>
     <string name="type">Тип</string>
     <string name="hide_password">Приховати пароль</string>
     <string name="show_password">Показати пароль</string>
@@ -266,12 +273,19 @@
     <string name="green">Зелений</string>
     <string name="blue">Синій</string>
     <string name="messages">Повідомлення</string>
+    <string name="device_config">Конфігурація пристрою</string>
     <string name="role">Роль</string>
+    <string name="redefine_pin_button">Перевизначити PIN_BUTTON</string>
+    <string name="redefine_pin_buzzer">Перевизначити PIN_BUZZER</string>
+    <string name="posix_timezone">Часова зона POSIX</string>
     <string name="display_config">Налаштування дисплею</string>
     <string name="screen_timeout_seconds">Тайм-аут екрану (секунд)</string>
     <string name="flip_screen">Перевернути екран</string>
     <string name="display_mode">Режим екрану</string>
+    <string name="compass_orientation">Орієнтація компаса</string>
     <string name="ringtone">Мелодія</string>
+    <string name="lora_config">Налаштування LoRa</string>
+    <string name="tx_enabled">TX увімкнено</string>
     <string name="tx_power_dbm">Потужність TX (dBm)</string>
     <string name="ignore_incoming">Ігнорувати вхідні</string>
     <string name="username">Ім\'я користувача</string>
@@ -302,6 +316,7 @@
     <string name="serial_console">Серійна консоль</string>
     <string name="timeout">Таймаут</string>
     <string name="server">Сервер</string>
+    <string name="user_config">Налаштування користувача</string>
     <string name="long_name">Довга назва</string>
     <string name="short_name">Коротка назва</string>
     <string name="pressure">Атмосферний тиск</string>

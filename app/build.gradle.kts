@@ -71,11 +71,9 @@ android {
         }
         create("google") {
             dimension = "default"
-            if (Configs.USE_CRASHLYTICS) {
-                // Enable Firebase Crashlytics for Google Play builds
-                apply(plugin = libs.plugins.google.services.get().pluginId)
-                apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
-            }
+            // Enable Firebase Crashlytics for Google Play builds
+            apply(plugin = libs.plugins.google.services.get().pluginId)
+            apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
         }
     }
     buildTypes {
@@ -125,19 +123,6 @@ android {
         aidl = true
         buildConfig = true
     }
-    // Configure the build-logic plugins to target JDK 17
-    // This matches the JDK used to build the project, and is not related to what is running on device.
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_21.toString()
-        freeCompilerArgs += listOf(
-            "-opt-in=kotlin.RequiresOptIn",
-            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
-        )
-    }
     lint {
         abortOnError = false
         disable.add("MissingTranslation")
@@ -145,6 +130,18 @@ android {
     sourceSets {
         // Adds exported schema location as test app assets.
         named("androidTest") { assets.srcDirs(files("$projectDir/schemas")) }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmToolchain(21)
+        freeCompilerArgs.addAll(
+            "-opt-in=kotlin.RequiresOptIn",
+            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+            "-Xcontext-receivers",
+            "-Xannotation-default-target=param-property"
+        )
     }
 }
 
@@ -250,4 +247,13 @@ repositories {
 detekt {
     config.setFrom("../config/detekt/detekt.yml")
     baseline = file("../config/detekt/detekt-baseline.xml")
+}
+
+tasks.configureEach {
+    if (
+        name.contains("crashlytics", ignoreCase = true) && name.contains("fdroid", ignoreCase = true)
+    ) {
+        project.logger.lifecycle("Disabling Crashlytics task for F-Droid: $name")
+        enabled = false
+    }
 }

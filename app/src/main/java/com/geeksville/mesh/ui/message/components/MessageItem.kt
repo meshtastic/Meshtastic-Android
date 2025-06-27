@@ -28,11 +28,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
@@ -89,11 +88,17 @@ internal fun MessageItem(
         .background(color = if (selected) Color.Gray else MaterialTheme.colorScheme.background),
 ) {
     val fromLocal = node.user.id == DataPacket.ID_LOCAL
-    val messageColor = if (fromLocal) {
-        Color(ourNode.colors.second).copy(alpha = 0.25f)
-    } else {
-        Color(node.colors.second).copy(alpha = 0.25f)
-    }
+    val containerColor = Color(
+        if (fromLocal) {
+            ourNode.colors.second
+        } else {
+            node.colors.second
+        }
+    ).copy(alpha = 0.2f)
+    val cardColors = CardDefaults.cardColors().copy(
+        containerColor = containerColor,
+        contentColor = contentColorFor(containerColor)
+    )
     val messageModifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
     Box {
         Card(
@@ -109,17 +114,18 @@ internal fun MessageItem(
                     onLongClick = onLongClick,
                 )
                 .then(messageModifier),
-            colors = CardDefaults.cardColors(
-                containerColor = messageColor,
-                contentColor = contentColorFor(messageColor),
-            ),
+            colors = cardColors,
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth(),
             ) {
-                ReplyingTo(message, ourNode, onNavigateToOriginalMessage)
-
+                OriginalMessageSnippet(
+                    message = message,
+                    ourNode = ourNode,
+                    cardColors = cardColors,
+                    onNavigateToOriginalMessage = onNavigateToOriginalMessage
+                )
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -154,6 +160,7 @@ internal fun MessageItem(
                         .padding(horizontal = 8.dp),
                     text = message.text,
                     style = MaterialTheme.typography.bodyMedium,
+                    color = cardColors.contentColor
                 )
                 Row(
                     modifier = Modifier
@@ -205,9 +212,10 @@ internal fun MessageItem(
 }
 
 @Composable
-private fun ReplyingTo(
+private fun OriginalMessageSnippet(
     message: Message,
     ourNode: Node,
+    cardColors: CardColors = CardDefaults.cardColors(),
     onNavigateToOriginalMessage: (Int) -> Unit
 ) {
     message.originalMessage?.let { originalMessage ->
@@ -219,39 +227,31 @@ private fun ReplyingTo(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable { onNavigateToOriginalMessage(originalMessage.packetId) },
-            colors = CardDefaults.cardColors(
-                containerColor = Color(originalMessageNode.colors.second).copy(alpha = 0.5f),
-                contentColor = Color(originalMessageNode.colors.first),
-            ),
+            colors = cardColors,
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 4.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Icon(
                     Icons.Default.FormatQuote,
                     contentDescription = stringResource(R.string.reply), // Add to strings.xml
-                    modifier = Modifier.size(14.dp), // Smaller icon
                 )
-                Spacer(Modifier.width(4.dp))
-                Column {
-                    Text(
-                        text = "${originalMessageNode.user.shortName} ${
-                            originalMessageNode.user.longName
-                                ?: stringResource(R.string.unknown_username)
-                        }",
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    Text(
-                        text = originalMessage.text, // Should not be null if isAReply is true
-                        style = MaterialTheme.typography.bodySmall,
-                        maxLines = 1, // Keep snippet brief
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                }
+                Text(
+                    text = "${originalMessageNode.user.shortName}",
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Text(
+                    modifier = Modifier.weight(1f, fill = true),
+                    text = originalMessage.text, // Should not be null if isAReply is true
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1, // Keep snippet brief
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
         }
     }
