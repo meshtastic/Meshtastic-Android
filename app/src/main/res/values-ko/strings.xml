@@ -434,14 +434,14 @@
     <string name="display_config">화면 설정</string>
     <string name="screen_timeout_seconds">화면 끄기 시간 (초)</string>
     <string name="gps_coordinates_format">GPS 좌표 포맷</string>
-    <string name="auto_screen_carousel_seconds">화면 자동 변환 (초)</string>
-    <string name="compass_north_top">북쪽을 항상 화면 상단으로</string>
+    <string name="auto_screen_carousel_seconds">화면 자동 전환 (초)</string>
+    <string name="compass_north_top">나침반 상단을 북쪽으로 고정</string>
     <string name="flip_screen">화면 뒤집기</string>
     <string name="display_units">단위 표시</string>
     <string name="override_oled_auto_detect">OLED 자동 감지</string>
     <string name="display_mode">디스플레이 모드</string>
     <string name="heading_bold">상태표시줄 볼드체</string>
-    <string name="wake_screen_on_tap_or_motion">탭하거나 흔들어 깨우기</string>
+    <string name="wake_screen_on_tap_or_motion">탭하거나 모션으로 깨우기</string>
     <string name="compass_orientation">나침반 방향</string>
     <string name="external_notification_config">외부 알림 설정</string>
     <string name="external_notification_enabled">외부 알림 활성화</string>
