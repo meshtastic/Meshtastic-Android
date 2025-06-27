@@ -77,8 +77,6 @@ class DebugFiltersTest {
                 onCustomFilterTextChange = { customFilterText = it },
                 filterTexts = filterTexts,
                 onFilterTextsChange = { filterTexts = it },
-                filterMode = FilterMode.OR,
-                onFilterModeChange = {}
             )
         }
         // Add a custom filter
