@@ -108,12 +108,24 @@ internal fun DebugScreen(
     val filterTexts by viewModel.filterTexts.collectAsStateWithLifecycle()
     val selectedLogId by viewModel.selectedLogId.collectAsStateWithLifecycle()
 
-    val filteredLogs = remember(logs, filterTexts) {
+    var filterMode by remember { mutableStateOf(FilterMode.OR) }
+
+    val filteredLogs = remember(logs, filterTexts, filterMode) {
         logs.filter { log ->
-            filterTexts.isEmpty() || filterTexts.any { filterText ->
-                log.logMessage.contains(filterText, ignoreCase = true) ||
-                        log.messageType.contains(filterText, ignoreCase = true) ||
-                        log.formattedReceivedDate.contains(filterText, ignoreCase = true)
+            if (filterTexts.isEmpty()) {
+                true
+            } else { when (filterMode) {
+                FilterMode.OR -> filterTexts.any { filterText ->
+                    log.logMessage.contains(filterText, ignoreCase = true) ||
+                    log.messageType.contains(filterText, ignoreCase = true) ||
+                    log.formattedReceivedDate.contains(filterText, ignoreCase = true)
+                }
+                FilterMode.AND -> filterTexts.all { filterText ->
+                    log.logMessage.contains(filterText, ignoreCase = true) ||
+                    log.messageType.contains(filterText, ignoreCase = true) ||
+                    log.formattedReceivedDate.contains(filterText, ignoreCase = true)
+                }
+            }
             }
         }.toImmutableList()
     }
@@ -136,7 +148,6 @@ internal fun DebugScreen(
             listState.requestScrollToItem(searchState.allMatches[searchState.currentMatchIndex].logIndex)
         }
     }
-
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -156,9 +167,10 @@ internal fun DebugScreen(
                     searchState = searchState,
                     filterTexts = filterTexts,
                     presetFilters = viewModel.presetFilters,
+                    filterMode = filterMode,
+                    onFilterModeChange = { filterMode = it }
                 )
             }
-
             items(filteredLogs, key = { it.uuid }) { log ->
                 DebugItem(
                     modifier = Modifier.animateItem(),
@@ -708,7 +720,6 @@ fun DebugMenuActions(
             contentDescription = "Clear All"
         )
     }
-
     if (showDeleteLogsDialog) {
         SimpleAlertDialog(
             title = R.string.debug_clear,
