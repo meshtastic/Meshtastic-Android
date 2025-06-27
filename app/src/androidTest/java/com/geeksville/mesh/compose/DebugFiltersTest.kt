@@ -31,6 +31,7 @@ import org.junit.runner.RunWith
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.geeksville.mesh.ui.debug.FilterMode
 
 @RunWith(AndroidJUnit4::class)
 class DebugFiltersTest {
@@ -67,16 +68,17 @@ class DebugFiltersTest {
             var customFilterText by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
             com.geeksville.mesh.ui.debug.DebugActiveFilters(
                 filterTexts = filterTexts,
-                onFilterTextsChange = { filterTexts = it }
+                onFilterTextsChange = { filterTexts = it }, 
+                filterMode = FilterMode.OR,
+                onFilterModeChange = {}
             )
             com.geeksville.mesh.ui.debug.DebugCustomFilterInput(
                 customFilterText = customFilterText,
                 onCustomFilterTextChange = { customFilterText = it },
                 filterTexts = filterTexts,
                 onFilterTextsChange = { filterTexts = it },
-                filterMode = com.geeksville.mesh.ui.debug.FilterMode.OR,
+                filterMode = FilterMode.OR,
                 onFilterModeChange = {}
-
             )
         }
         // Add a custom filter
@@ -96,7 +98,7 @@ class DebugFiltersTest {
             com.geeksville.mesh.ui.debug.DebugActiveFilters(
                 filterTexts = filterTexts,
                 onFilterTextsChange = { filterTexts = it },
-                filterMode = com.geeksville.mesh.ui.debug.FilterMode.OR,
+                filterMode = FilterMode.OR,
                 onFilterModeChange = {}
             )
         }
