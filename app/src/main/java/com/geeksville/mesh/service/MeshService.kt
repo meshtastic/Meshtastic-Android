@@ -57,6 +57,7 @@ import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.android.hasBluetoothPermission
 import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.config
@@ -96,7 +97,6 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -1356,122 +1356,96 @@ class MeshService : Service(), Logging {
     private fun onConnectionChanged(c: ConnectionState) {
         debug("onConnectionChanged: $connectionState -> $c")
 
-        // Perform all the steps needed once we start waiting for device sleep to complete
-        fun startDeviceSleep() {
-            stopPacketQueue()
-            stopLocationRequests()
-            stopMqttClientProxy()
-
-            if (connectTimeMsec != 0L) {
-                val now = System.currentTimeMillis()
-                connectTimeMsec = 0L
-
-                GeeksvilleApplication.analytics.track(
-                    "connected_seconds",
-                    DataPair((now - connectTimeMsec) / 1000.0)
-                )
-            }
-
-            // Have our timeout fire in the appropriate number of seconds
-            sleepTimeout = serviceScope.handledLaunch {
-                try {
-                    // If we have a valid timeout, wait that long (+30 seconds) otherwise, just wait 30 seconds
-                    val timeout = (localConfig.power?.lsSecs ?: 0) + 30
-
-                    debug("Waiting for sleeping device, timeout=$timeout secs")
-                    delay(timeout * 1000L)
-                    warn("Device timeout out, setting disconnected")
-                    onConnectionChanged(ConnectionState.DISCONNECTED)
-                } catch (ex: CancellationException) {
-                    debug("device sleep timeout cancelled")
-                }
-            }
-
-            // broadcast an intent with our new connection state
-            serviceBroadcasts.broadcastConnection()
-        }
-
-        fun startDisconnect() {
-            stopPacketQueue()
-            stopLocationRequests()
-            stopMqttClientProxy()
-
-            GeeksvilleApplication.analytics.track(
-                "mesh_disconnect",
-                DataPair("num_nodes", numNodes),
-                DataPair("num_online", numOnlineNodes)
-            )
-            GeeksvilleApplication.analytics.track("num_nodes", DataPair(numNodes))
-
-            // broadcast an intent with our new connection state
-            serviceBroadcasts.broadcastConnection()
-        }
-
-        fun startConnect() {
-            // Do our startup init
-            try {
-                connectTimeMsec = System.currentTimeMillis()
-                startConfig()
-            } catch (ex: InvalidProtocolBufferException) {
-                errormsg(
-                    "Invalid protocol buffer sent by device - update device software and try again",
-                    ex
-                )
-            } catch (ex: RadioNotConnectedException) {
-                // note: no need to call startDeviceSleep(), because this exception could only have reached us if it was already called
-                errormsg("Lost connection to radio during init - waiting for reconnect")
-            } catch (ex: RemoteException) {
-                // It seems that when the ESP32 goes offline it can briefly come back for a 100ms ish which
-                // causes the phone to try and reconnect.  If we fail downloading our initial radio state we don't want to
-                // claim we have a valid connection still
-                connectionState = ConnectionState.DEVICE_SLEEP
-                startDeviceSleep()
-                throw ex // Important to rethrow so that we don't tell the app all is well
-            }
-        }
-
-        // Cancel any existing timeouts
-        sleepTimeout?.let {
-            it.cancel()
-            sleepTimeout = null
-        }
+        sleepTimeout?.cancel()
+        sleepTimeout = null
 
         connectionState = c
+
         when (c) {
-            ConnectionState.CONNECTED -> {
-                startConnect()
-                stopAutoConnectScan() // When connected, stop periodic auto-connect scan.
-            }
-            ConnectionState.DEVICE_SLEEP -> {
-                startDeviceSleep()
-                stopAutoConnectScan() // If device is sleeping, stop auto-connect scan.
-            }
-            ConnectionState.DISCONNECTED -> {
-                startDisconnect()
+            ConnectionState.CONNECTED -> handleConnectedState()
+            ConnectionState.DEVICE_SLEEP -> handleDeviceSleepState()
+            ConnectionState.DISCONNECTED -> handleDisconnectedState()
+        }
 
-                // Only start scan if:
-                // - Auto-switch is enabled
-                // - Last interface used was Bluetooth
-                // - Selected device is not "none"
-                val lastDevice = radioInterfaceService.getDeviceAddress()
-                val isBluetooth = lastDevice?.startsWith("x") == true
-                val isNoneSelected = lastDevice == NO_DEVICE_SELECTED
+        maybeUpdateServiceStatusNotification()
+    }
 
-                if (isBluetooth && !isNoneSelected) {
-                    manageAutoConnectScanOnDisconnect()
-                } else {
-                    debug("Not starting scan. Reason: ${when {
-                        isNoneSelected -> "No device selected"
-                        !isBluetooth -> "Last connection not Bluetooth"
-                        else -> "Unknown"
-                    }}")
-                    stopAutoConnectScan()
-                }
+    private fun handleConnectedState() {
+        try {
+            connectTimeMsec = System.currentTimeMillis()
+            startConfig()
+            stopAutoConnectScan()
+        } catch (ex: InvalidProtocolBufferException) {
+            errormsg("Invalid protocol buffer sent by device - update device software and try again", ex)
+        } catch (ex: RadioNotConnectedException) {
+            errormsg("Lost connection to radio during init - waiting for reconnect")
+        } catch (ex: RemoteException) {
+            connectionState = ConnectionState.DEVICE_SLEEP
+            handleDeviceSleepState()
+            throw ex
+        }
+    }
+
+    private fun handleDeviceSleepState() {
+        stopPacketQueue()
+        stopLocationRequests()
+        stopMqttClientProxy()
+
+        if (connectTimeMsec != 0L) {
+            val now = System.currentTimeMillis()
+            GeeksvilleApplication.analytics.track(
+                "connected_seconds",
+                DataPair((now - connectTimeMsec) / 1000.0)
+            )
+            connectTimeMsec = 0L
+        }
+
+        stopAutoConnectScan()
+        val timeout = (localConfig.power?.lsSecs ?: 0) + 30
+        debug("Waiting for sleeping device, timeout=$timeout secs")
+
+        sleepTimeout = serviceScope.handledLaunch {
+            try {
+                delay(timeout * 1000L)
+                warn("Device timed out, setting disconnected")
+                onConnectionChanged(ConnectionState.DISCONNECTED)
+            } catch (ex: CancellationException) {
+                debug("Device sleep timeout cancelled")
             }
         }
 
-        // Update the android notification in the status bar
-        maybeUpdateServiceStatusNotification()
+        serviceBroadcasts.broadcastConnection()
+    }
+
+    private fun handleDisconnectedState() {
+        stopPacketQueue()
+        stopLocationRequests()
+        stopMqttClientProxy()
+
+        GeeksvilleApplication.analytics.track(
+            "mesh_disconnect",
+            DataPair("num_nodes", numNodes),
+            DataPair("num_online", numOnlineNodes)
+        )
+        GeeksvilleApplication.analytics.track("num_nodes", DataPair(numNodes))
+
+        val lastDevice = radioInterfaceService.getDeviceAddress()
+        val isBluetooth = lastDevice?.startsWith("x") == true
+        val isNoneSelected = lastDevice == NO_DEVICE_SELECTED
+
+        if (isBluetooth && !isNoneSelected) {
+            manageAutoConnectScanOnDisconnect()
+        } else {
+            val reason = when {
+                isNoneSelected -> "No device selected"
+                !isBluetooth -> "Last connection not Bluetooth"
+                else -> "Unknown"
+            }
+            debug("Not considering auto-scan. Reason: $reason")
+            stopAutoConnectScan()
+        }
+
+        serviceBroadcasts.broadcastConnection()
     }
 
     private fun maybeUpdateServiceStatusNotification() {
@@ -2447,51 +2421,90 @@ class MeshService : Service(), Logging {
         autoConnectScanJob = null
     }
 
-    @SuppressLint("MissingPermission")
-    private suspend fun performSingleScanAndEvaluate() : Boolean {
-        val currentConnected = radioInterfaceService.getDeviceAddress()
-        val readings = mutableMapOf<BluetoothDevice, MutableList<Int>>()
+    private fun safeDeviceName(device: BluetoothDevice): String = try {
+        device.name ?: "Unknown"
+    } catch (e: SecurityException) {
+        errormsg("Cannot access device name: ${e.message}")
+        "<no access>"
+    }
 
-        coroutineScope {
+    private suspend fun performSingleScanAndEvaluate(): Boolean {
+        var result = false
+
+        if (!applicationContext.hasBluetoothPermission()) {
+            errormsg("Bluetooth permissions are missing. Cannot perform scan.")
+        } else {
+            val currentConnected = radioInterfaceService.getDeviceAddress()
+            val readings = mutableMapOf<BluetoothDevice, MutableList<Int>>()
+
             try {
                 withTimeoutOrNull(scanDurationMS) {
                     bluetoothRepository.scan()
                         .filter {
                             it.device.bondState == BluetoothDevice.BOND_BONDED &&
-                                    radioInterfaceService.toInterfaceAddress(InterfaceId.BLUETOOTH, it.device.address).let { addr ->
+                                    radioInterfaceService.toInterfaceAddress(
+                                        InterfaceId.BLUETOOTH,
+                                        it.device.address
+                                    ).let { addr ->
                                         addr.startsWith("x") && addr != currentConnected
                                     }
                         }
                         .onEach {
                             ensureActive()
                             readings.getOrPut(it.device) { mutableListOf() }.add(it.rssi)
-                            debug("Scanned: ${it.device.name} (${it.device.address}), RSSI: ${it.rssi}")
+                            val deviceName = safeDeviceName(it.device)
+                            debug("Scanned: $deviceName (${it.device.address}), RSSI: ${it.rssi}")
                         }
-                        .collect{}
+                        .collect {}
                 }
+                result = findAndConnectToStrongestDevice(readings)
+            } catch (e: SecurityException) {
+                errormsg(
+                    "Security Exception during Bluetooth scan: ${e.message}. " +
+                            "Please grant required Bluetooth permissions."
+                )
             } catch (e: Exception) {
                 errormsg("Scan error: ${e.message}")
             }
         }
-        return findAndConnectToStrongestDevice(readings)
+        return result
     }
 
-    @SuppressLint("MissingPermission")
     private suspend fun findAndConnectToStrongestDevice(readings: Map<BluetoothDevice, List<Int>>): Boolean {
-        val best = readings
+        var result = false
+
+        val maxRssiDevice = readings
             .filterValues { it.isNotEmpty() }
             .mapValues { it.value.average() }
             .maxByOrNull { it.value }
 
-        best?.let { (device, avgRssi) ->
-            debug("Best device: ${device.name} (${device.address}), Avg RSSI: ${avgRssi.toInt()}")
-            val address = radioInterfaceService.toInterfaceAddress(InterfaceId.BLUETOOTH, device.address)
-            radioInterfaceService.setDeviceAddress(address)
-            delay(2000L)
-            return true
-        } ?: run {
+        if (maxRssiDevice != null) {
+            if (!applicationContext.hasBluetoothPermission()) {
+                errormsg("Bluetooth permissions are missing. Cannot connect to device.")
+            } else {
+                val (device, avgRssi) = maxRssiDevice
+                val address = radioInterfaceService.toInterfaceAddress(InterfaceId.BLUETOOTH, device.address)
+
+                val deviceName = safeDeviceName(device)
+
+                debug("Max RSSI device: $deviceName (${device.address}), Avg RSSI: ${avgRssi.toInt()}")
+
+                try {
+                    radioInterfaceService.setDeviceAddress(address)
+                    delay(scanDurationMS)
+                    result = true
+                } catch (e: SecurityException) {
+                    errormsg(
+                        "Security Exception during device connection: ${e.message}. " +
+                                "Please grant required Bluetooth permissions."
+                    )
+                } catch (e: Exception) {
+                    errormsg("Connection error: ${e.message}")
+                }
+            }
+        } else {
             debug("No suitable device found.")
-            return false
         }
+        return result
     }
 }
