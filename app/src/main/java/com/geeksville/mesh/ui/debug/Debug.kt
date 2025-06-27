@@ -52,8 +52,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -79,6 +81,7 @@ import com.geeksville.mesh.android.BuildUtils.warn
 import com.geeksville.mesh.model.DebugViewModel
 import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
 import com.geeksville.mesh.ui.common.components.CopyIconButton
+import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
@@ -681,6 +684,7 @@ fun DebugMenuActions(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val logs by viewModel.meshLog.collectAsStateWithLifecycle()
+    var showDeleteLogsDialog by remember { mutableStateOf(false) }
 
     IconButton(
         onClick = {
@@ -696,7 +700,7 @@ fun DebugMenuActions(
         )
     }
     IconButton(
-        onClick = viewModel::deleteAllLogs,
+        onClick = { showDeleteLogsDialog = true },
         modifier = modifier.padding(4.dp)
     ) {
         Icon(
@@ -704,7 +708,19 @@ fun DebugMenuActions(
             contentDescription = "Clear All"
         )
     }
+
+    if (showDeleteLogsDialog) {
+        SimpleAlertDialog(
+            title = R.string.debug_clear,
+            text = R.string.debug_clear_logs_confirm,
+            onConfirm = {
+                showDeleteLogsDialog = false
+                viewModel.deleteAllLogs()
+            },
+            onDismiss = { showDeleteLogsDialog = false }
+        )
     }
+}
 
 private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = withContext(Dispatchers.IO) {
     try {
