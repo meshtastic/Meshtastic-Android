@@ -163,3 +163,11 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-metrics -camera-back none
           disable-animations: true
           script: ./gradlew :app:connectedFdroidDebugAndroidTest && killall -INT crashpad_handler || true
+
+      - name: Upload Test Results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-test-reports-api-${{ matrix.api-level }}
+          path: app/build/outputs/androidTest-results/
+          retention-days: 30
