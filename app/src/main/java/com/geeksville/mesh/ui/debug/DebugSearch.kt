@@ -163,6 +163,8 @@ internal fun DebugSearchState(
     onPreviousMatch: () -> Unit,
     onClearSearch: () -> Unit,
     onFilterTextsChange: (List<String>) -> Unit,
+    filterMode: FilterMode,
+    onFilterModeChange: (FilterMode) -> Unit,
 ) {
     val colorScheme = MaterialTheme.colorScheme
     var customFilterText by remember { mutableStateOf("") }
@@ -198,7 +200,9 @@ internal fun DebugSearchState(
         }
         DebugActiveFilters(
             filterTexts = filterTexts,
-            onFilterTextsChange = onFilterTextsChange
+            onFilterTextsChange = onFilterTextsChange,
+            filterMode = filterMode,
+            onFilterModeChange = onFilterModeChange
         )
     }
 }
@@ -209,6 +213,8 @@ fun DebugSearchStateviewModelDefaults(
     searchState: SearchState,
     filterTexts: List<String>,
     presetFilters: List<String>,
+    filterMode: FilterMode,
+    onFilterModeChange: (FilterMode) -> Unit,
 ) {
     val viewModel: DebugViewModel = hiltViewModel()
     DebugSearchState(
@@ -221,6 +227,8 @@ fun DebugSearchStateviewModelDefaults(
         onPreviousMatch = viewModel.searchManager::goToPreviousMatch,
         onClearSearch = viewModel.searchManager::clearSearch,
         onFilterTextsChange = viewModel.filterManager::setFilterTexts,
+        filterMode = filterMode,
+        onFilterModeChange = onFilterModeChange
     )
 }
 

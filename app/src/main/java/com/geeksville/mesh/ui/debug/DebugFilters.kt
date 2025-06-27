@@ -215,10 +215,13 @@ internal fun DebugFilterBar(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 internal fun DebugActiveFilters(
     filterTexts: List<String>,
     onFilterTextsChange: (List<String>) -> Unit,
+    filterMode: FilterMode,
+    onFilterModeChange: (FilterMode) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -237,6 +240,20 @@ internal fun DebugActiveFilters(
                     text = stringResource(R.string.debug_active_filters),
                     style = TextStyle(fontWeight = FontWeight.Bold)
                 )
+                TextButton(
+                    onClick = {
+                        onFilterModeChange(
+                            if (filterMode == FilterMode.OR) FilterMode.AND else FilterMode.OR
+                        )
+                    }
+                ) {
+                    Text(if (filterMode == FilterMode.OR) {
+                                stringResource(R.string.match_any)
+                            } else {
+                                stringResource(R.string.match_all)
+                            }
+                        )
+                }
                 IconButton(
                     onClick = { onFilterTextsChange(emptyList()) }
                 ) {
@@ -278,3 +295,5 @@ internal fun DebugActiveFilters(
         }
     }
 }
+
+enum class FilterMode { OR, AND }
