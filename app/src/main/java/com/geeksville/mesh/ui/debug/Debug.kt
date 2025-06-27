@@ -297,7 +297,7 @@ private fun rememberAnnotatedString(
             append(text)
             if (searchText.isNotEmpty()) {
                 searchText.split(" ").forEach { term ->
-                    term.toRegex(RegexOption.IGNORE_CASE).findAll(text).forEach { match ->
+                    Regex(Regex.escape(term), RegexOption.IGNORE_CASE).findAll(text).forEach { match ->
                         addStyle(
                             style = highlightStyle,
                             start = match.range.first,
@@ -339,7 +339,7 @@ private fun rememberAnnotatedLogMessage(log: UiMeshLog, searchText: String): Ann
             // Add search highlight annotations
             if (searchText.isNotEmpty()) {
                 searchText.split(" ").forEach { term ->
-                    term.toRegex(RegexOption.IGNORE_CASE).findAll(log.logMessage).forEach { match ->
+                    Regex(Regex.escape(term), RegexOption.IGNORE_CASE).findAll(log.logMessage).forEach { match ->
                         addStyle(
                             style = highlightStyle,
                             start = match.range.first,
