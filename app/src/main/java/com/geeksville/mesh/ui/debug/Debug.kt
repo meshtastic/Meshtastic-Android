@@ -720,7 +720,6 @@ fun DebugMenuActions(
             onDismiss = { showDeleteLogsDialog = false }
         )
     }
-
 }
 
 private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = withContext(Dispatchers.IO) {
