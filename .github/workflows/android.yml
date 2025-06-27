@@ -12,7 +12,7 @@ on:
   pull_request:
     branches: [ main ]
   merge_group:
-    branches: [ main ]
+    types: [ checks-requested ]
 
   workflow_dispatch:
 
@@ -47,15 +47,19 @@ jobs:
       uses: gradle/actions/setup-gradle@v4
       with:
         cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+        build-scan-publish: true
+        build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
+        build-scan-terms-of-use-agree: 'yes'
+        add-job-summary: always
 
     - name: Check lint
-      run: ./gradlew lintFdroidDebug lintGoogleDebug
+      run: ./gradlew lintFdroidDebug lintGoogleDebug --configuration-cache --scan
 
     - name: Build debug artifacts
-      run: ./gradlew assembleDebug
+      run: ./gradlew assembleDebug --configuration-cache --scan
 
     - name: Run local tests
-      run: ./gradlew testFdroidDebug testGoogleDebug
+      run: ./gradlew testFdroidDebug testGoogleDebug --configuration-cache --scan
 
     - name: Upload debug artifact
       uses: actions/upload-artifact@v4
@@ -91,9 +95,15 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          build-scan-publish: true
+          build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
+          build-scan-terms-of-use-agree: 'yes'
+          add-job-summary: always
 
       - name: Check detekt
-        run: ./gradlew detekt
+        run: ./gradlew detekt --configuration-cache --scan
 
       - name: Upload build reports
         if: ${{ !cancelled() }}
@@ -127,6 +137,12 @@ jobs:
           distribution: 'jetbrains'
 
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          build-scan-publish: true
+          build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
+          build-scan-terms-of-use-agree: 'yes'
+          add-job-summary: always
 
       - uses: actions/cache@v4
         id: avd-cache
@@ -162,7 +178,7 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-metrics -camera-back none
           disable-animations: true
-          script: ./gradlew :app:connectedFdroidDebugAndroidTest && killall -INT crashpad_handler || true
+          script: ./gradlew :app:connectedFdroidDebugAndroidTest --configuration-cache --scan && killall -INT crashpad_handler || true
 
       - name: Upload Test Results
         if: ${{ !cancelled() }}
