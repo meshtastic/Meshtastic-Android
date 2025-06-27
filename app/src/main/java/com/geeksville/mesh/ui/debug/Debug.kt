@@ -81,6 +81,7 @@ import com.geeksville.mesh.android.BuildUtils.warn
 import com.geeksville.mesh.model.DebugViewModel
 import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
 import com.geeksville.mesh.ui.common.components.CopyIconButton
+import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
@@ -695,6 +696,7 @@ fun DebugMenuActions(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val logs by viewModel.meshLog.collectAsStateWithLifecycle()
+    var showDeleteLogsDialog by remember { mutableStateOf(false) }
 
     IconButton(
         onClick = {
@@ -710,12 +712,23 @@ fun DebugMenuActions(
         )
     }
     IconButton(
-        onClick = viewModel::deleteAllLogs,
+        onClick = { showDeleteLogsDialog = true },
         modifier = modifier.padding(4.dp)
     ) {
         Icon(
             imageVector = Icons.Default.Delete,
             contentDescription = "Clear All"
+        )
+    }
+    if (showDeleteLogsDialog) {
+        SimpleAlertDialog(
+            title = R.string.debug_clear,
+            text = R.string.debug_clear_logs_confirm,
+            onConfirm = {
+                showDeleteLogsDialog = false
+                viewModel.deleteAllLogs()
+            },
+            onDismiss = { showDeleteLogsDialog = false }
         )
     }
 }

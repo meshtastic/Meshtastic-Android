@@ -170,6 +170,7 @@
     <string name="debug_clear">Clear Logs</string>
     <string name="match_any">Match Any | All</string>
     <string name="match_all">Match All | Any</string>
+    <string name="debug_clear_logs_confirm">This will remove all log packets and database entries from your device - It is a full reset, and is permanent.</string>
     <string name="clear">Clear</string>
     <string name="updating_firmware">Updating firmware, wait up to eight minutes…</string>
     <string name="update_successful">Update successful</string>
