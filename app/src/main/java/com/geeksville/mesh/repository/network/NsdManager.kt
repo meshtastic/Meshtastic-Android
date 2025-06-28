@@ -24,27 +24,16 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.CopyOnWriteArrayList
 import kotlin.coroutines.resume
 
-internal fun NsdManager.serviceList(
-    serviceTypes: Set<String>,
-    serviceName: String,
-): Flow<List<NsdServiceInfo>> {
-    val flows = serviceTypes.map { serviceType -> serviceList(serviceType, serviceName) }
-    return combine(flows) { lists -> lists.flatMap { it } }
-}
-
 @OptIn(ExperimentalCoroutinesApi::class)
 internal fun NsdManager.serviceList(
     serviceType: String,
-    serviceName: String,
 ): Flow<List<NsdServiceInfo>> = discoverServices(serviceType).mapLatest { serviceList ->
     serviceList
-        .filter { it.serviceName.contains(serviceName) }
         .mapNotNull { resolveService(it) }
 }
 
