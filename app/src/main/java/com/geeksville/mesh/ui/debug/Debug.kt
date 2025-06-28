@@ -167,6 +167,7 @@ internal fun DebugScreen(
                     searchState = searchState,
                     filterTexts = filterTexts,
                     presetFilters = viewModel.presetFilters,
+                    logs = filteredLogs,
                     filterMode = filterMode,
                     onFilterModeChange = { filterMode = it }
                 )
