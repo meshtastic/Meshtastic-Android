@@ -47,12 +47,21 @@ class DebugFiltersTest {
             var filterTexts by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(listOf<String>()) }
             var customFilterText by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
             val presetFilters = listOf("Error", "Warning", "Info")
+            val logs = listOf(
+                com.geeksville.mesh.model.DebugViewModel.UiMeshLog(
+                    uuid = "1",
+                    messageType = "Info",
+                    formattedReceivedDate = "2024-01-01 12:00:00",
+                    logMessage = "Sample log message"
+                )
+            )
             com.geeksville.mesh.ui.debug.DebugFilterBar(
                 filterTexts = filterTexts,
                 onFilterTextsChange = { filterTexts = it },
                 customFilterText = customFilterText,
                 onCustomFilterTextChange = { customFilterText = it },
-                presetFilters = presetFilters
+                presetFilters = presetFilters,
+                logs = logs
             )
         }
         // The filter button should be visible
