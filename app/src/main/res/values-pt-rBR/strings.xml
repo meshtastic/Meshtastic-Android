@@ -25,7 +25,7 @@
     <string name="node_filter_placeholder">Filtro</string>
     <string name="desc_node_filter_clear">limpar filtro de dispositivos</string>
     <string name="node_filter_include_unknown">Incluir desconhecido</string>
-    <string name="node_filter_only_online">Ocultar nós ‘offline’</string>
+    <string name="node_filter_only_online">Ocultar nós offline</string>
     <string name="node_filter_only_direct">Mostrar apenas nós diretos</string>
     <string name="node_filter_show_details">Mostrar detalhes</string>
     <string name="node_sort_button">Opções de ordenação do nó</string>
@@ -680,4 +680,5 @@
     <string name="no_ble_devices">Nenhum dispositivo Bluetooth encontrado</string>
     <string name="no_network_devices">Nenhum dispositivo de rede encontrado.</string>
     <string name="no_usb_devices">Nenhum dispositivo USB Serial encontrado.</string>
+    <string name="scroll_to_bottom">Rolar para o final</string>
 </resources>
