@@ -61,7 +61,7 @@ class NodePreviewParameterProvider : PreviewParameterProvider<Node> {
         hopsAway = 0
     )
 
-    private val minnieMouse = mickeyMouse.copy(
+    val minnieMouse = mickeyMouse.copy(
         num = Random.nextInt(),
         user = user {
             longName = "Minnie Mouse"
