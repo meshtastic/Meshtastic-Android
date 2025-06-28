@@ -515,7 +515,11 @@ class UIViewModel @Inject constructor(
 
             val shortName = user.shortName
             val longName = if (toBroadcast) {
-                channelSet.getChannel(data.channel)?.name ?: app.getString(R.string.channel_name)
+                val _channel = channelSet.getChannel(data.channel)
+                val name = _channel?.name ?: app.getString(R.string.channel_name)
+                // Check if PSK is the default (base64 'AQ==', i.e., single byte 0x01)
+                val isDefaultPSK = (_channel?.settings?.psk?.size() == 1 && _channel.settings.psk.byteAt(0) == 1.toByte() ) || _channel?.settings?.psk?.toByteArray()?.isEmpty() == true
+                if (isDefaultPSK) name + " \uD83D\uDD13" else name
             } else {
                 user.longName
             }

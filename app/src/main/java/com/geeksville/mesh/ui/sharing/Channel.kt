@@ -448,9 +448,12 @@ private fun ChannelListView(
     AdaptiveTwoPane(
         first = {
             channelSet.settingsList.forEachIndexed { index, channel ->
+                val isDefaultPSK = (channel.psk.size() == 1 && channel.psk.byteAt(0) == 1.toByte()) || channel.psk.toByteArray().isEmpty()
+                val displayTitle = channel.name.ifEmpty { modemPresetName } + if (isDefaultPSK) " \uD83D\uDD13" else ""
+
                 ChannelSelection(
                     index = index,
-                    title = channel.name.ifEmpty { modemPresetName },
+                    title = displayTitle,
                     enabled = enabled,
                     isSelected = channelSelections[index],
                     onSelected = {

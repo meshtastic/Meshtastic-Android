@@ -118,10 +118,15 @@ internal fun MessageScreen(
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     val channelName by remember(channelIndex) {
         derivedStateOf {
-            channelIndex?.let { channels.getChannel(it)?.name } ?: "Unknown Channel"
+            channelIndex?.let {
+                val channel = channels.getChannel(it)
+                val name = channel?.name ?: "Unknown Channel"
+                // Check if PSK is the default (base64 'AQ==', i.e., single byte 0x01)
+                val isDefaultPSK = (channel?.settings?.psk?.size() == 1 && channel.settings.psk.byteAt(0) == 1.toByte() ) || channel?.psk?.toByteArray()?.isEmpty() == true
+                if (isDefaultPSK) name + " \uD83D\uDD13" else name
+            } ?: "Unknown Channel"
         }
     }
-
     val title = when (nodeId) {
         DataPacket.ID_BROADCAST -> channelName
         else -> viewModel.getUser(nodeId).longName
