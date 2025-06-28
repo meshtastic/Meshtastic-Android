@@ -2040,8 +2040,13 @@ class MeshService : Service(), Logging {
                     putString("device_address", deviceAddr)
                 }
                 clearDatabases()
+                clearNotifications()
             }
         }
+    }
+
+    private fun clearNotifications() {
+        serviceNotifications.clearNotifications()
     }
     private val binder = object : IMeshService.Stub() {
 
