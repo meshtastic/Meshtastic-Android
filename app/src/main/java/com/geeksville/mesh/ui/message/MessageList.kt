@@ -168,9 +168,10 @@ internal fun MessageList(
         items(messages, key = { it.uuid }) { msg ->
             if (ourNode != null) {
                 val selected by remember { derivedStateOf { selectedIds.value.contains(msg.uuid) } }
-                var node by remember {
-                    mutableStateOf(nodes.find { it.num == msg.node.num } ?: msg.node)
+                val node by remember {
+                    derivedStateOf { nodes.find { it.num == msg.node.num } ?: msg.node }
                 }
+
                 MessageItem(
                     node = node,
                     ourNode = ourNode!!,
