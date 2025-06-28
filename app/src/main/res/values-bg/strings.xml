@@ -35,10 +35,18 @@
     <string name="node_sort_hops_away">Брой хопове</string>
     <string name="node_sort_last_heard">Последно чут</string>
     <string name="node_sort_via_mqtt">с MQTT</string>
+    <string name="node_sort_via_favorite">чрез Любим</string>
+    <string name="unrecognized">Неразпознат</string>
     <string name="routing_error_no_interface">Няма интерфейс</string>
     <string name="routing_error_no_channel">Няма канал</string>
+    <string name="routing_error_too_large">Пакетът е твърде голям</string>
     <string name="routing_error_no_response">Няма отговор</string>
     <string name="routing_error_pki_unknown_pubkey">Неизвестен публичен ключ</string>
+    <string name="role_client">Свързано с приложение или самостоятелно устройство за съобщения.</string>
+    <string name="role_client_mute">Устройство, което не препредава пакети от други устройства.</string>
+    <string name="role_router"></string>
+    <string name="role_router_client">Комбинация от РУТЕР и КЛИЕНТ. Не е за мобилни устройства.</string>
+    <string name="role_repeater">Инфраструктурен възел за разширяване на мрежовото покритие чрез препредаване на съобщения с минимални разходи. Не се вижда в списъка с възли.</string>
     <string name="role_tracker">Излъчва приоритетно пакети за GPS позиция</string>
     <string name="role_sensor">Излъчва приоритетно телеметрични пакети.</string>
     <string name="config_security_public_key">Публичен ключ</string>
@@ -227,6 +235,7 @@
     <string name="wifi_qr_code_scan">Сканиране на QR код за WiFi</string>
     <string name="battery">Батерия</string>
     <string name="channel_utilization">Използване на канала</string>
+    <string name="air_utilization">Използване на ефира</string>
     <string name="temperature">Температура</string>
     <string name="humidity">Влажност</string>
     <string name="logs">Журнали</string>
@@ -239,7 +248,9 @@
     <string name="more_details">Повече подробности</string>
     <string name="snr">SNR</string>
     <string name="rssi">RSSI</string>
-    <string name="node_map">Карта на възлите</string>
+    <string name="node_map">Карта на възела</string>
+    <string name="position_log">Журнал на позициите</string>
+    <string name="last_position_update">Последна актуализация на позицията</string>
     <string name="administration">Администриране</string>
     <string name="remote_admin">Отдалечено администриране</string>
     <string name="bad">Лошо</string>
@@ -290,6 +301,7 @@
     <string name="security">Сигурност</string>
     <string name="mqtt">MQTT</string>
     <string name="external_notification">Външно известие</string>
+    <string name="store_forward"><![CDATA[Съхраняване & препращане]]></string>
     <string name="range_test">Тест на обхвата</string>
     <string name="telemetry">Телеметрия</string>
     <string name="audio">Аудио</string>
@@ -298,11 +310,12 @@
     <string name="codec_2_enabled">CODEC 2 е активиран</string>
     <string name="ptt_pin">Пин за РТТ</string>
     <string name="bluetooth_config">Конфигурация на Bluetooth</string>
-    <string name="bluetooth_enabled">Bluetooth е включен</string>
+    <string name="bluetooth_enabled">Bluetooth е активиран</string>
     <string name="pairing_mode">Режим на сдвояване</string>
     <string name="fixed_pin">Фиксиран ПИН</string>
     <string name="default_">По подразбиране</string>
     <string name="position_enabled">Позицията е активирана</string>
+    <string name="gpio_pin">GPIO пин</string>
     <string name="type">Тип</string>
     <string name="hide_password">Скриване на паролата</string>
     <string name="show_password">Показване на паролата</string>
@@ -321,6 +334,9 @@
     <string name="display_config">Конфигурация на дисплея</string>
     <string name="gps_coordinates_format">Формат на GPS координатите</string>
     <string name="compass_north_top">Север на компаса отгоре</string>
+    <string name="flip_screen">Обръщане на екрана</string>
+    <string name="display_units">Показвани единици</string>
+    <string name="display_mode">Режим на дисплея</string>
     <string name="compass_orientation">Ориентация на компаса</string>
     <string name="ringtone">Тон на звънене</string>
     <string name="lora_config">Конфигурация на LoRa</string>
@@ -352,7 +368,7 @@
     <string name="paxcounter_config">Конфигурация на Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter е активиран</string>
     <string name="position_config">Конфигурация на позицията</string>
-    <string name="position_broadcast_interval_seconds">Интервал на излъчване на позиция (секунди)</string>
+    <string name="position_broadcast_interval_seconds">Интервал на излъчване на позицията (секунди)</string>
     <string name="use_fixed_position">Използване на фиксирана позиция</string>
     <string name="latitude">Геогр. ширина</string>
     <string name="longitude">Геогр. дължина</string>
@@ -363,6 +379,7 @@
     <string name="enable_power_saving_mode">Активиране на енергоспестяващ режим</string>
     <string name="range_test_config">Конфигурация на Тест на обхвата</string>
     <string name="range_test_enabled">Тест на обхвата е активиран</string>
+    <string name="save_csv_in_storage_esp32_only">Запазване на .CSV в хранилище (само за ESP32)</string>
     <string name="remote_hardware_config">Конфигурация на Отдалечен хардуер</string>
     <string name="remote_hardware_enabled">Отдалечен хардуер е активиран</string>
     <string name="available_pins">Налични пинове</string>
@@ -371,6 +388,8 @@
     <string name="private_key">Частен ключ</string>
     <string name="admin_key">Администраторски ключ</string>
     <string name="serial_console">Серийна конзола</string>
+    <string name="serial_mode">Сериен режим</string>
+    <string name="store_forward_enabled"><![CDATA[Съхраняване & препращане е активиран]]></string>
     <string name="number_of_records">Брой записи</string>
     <string name="server">Сървър</string>
     <string name="telemetry_config">Конфигурация на телеметрията</string>
@@ -387,6 +406,7 @@
     <string name="wind">Вятър</string>
     <string name="weight">Тегло</string>
     <string name="radiation">Радиация</string>
+    <string name="store_forward_config"><![CDATA[Конфигурация на Съхраняване & препращане]]></string>
     <string name="indoor_air_quality_iaq">Качество на въздуха на закрито (IAQ)</string>
     <string name="url">URL</string>
     <string name="backup_restore"><![CDATA[Архивиране & Възстановяване]]></string>
@@ -399,6 +419,9 @@
     <string name="uptime">Време на работа</string>
     <string name="firmware_version">Версия на Фърмуера</string>
     <string name="timestamp">Времево клеймо</string>
+    <string name="sats">Сат</string>
+    <string name="alt">н.в.</string>
+    <string name="freq">Чест.</string>
     <string name="slot">Слот</string>
     <string name="primary">Първичен</string>
     <string name="primary_channel_feature">Периодично излъчване на местоположение и телеметрия</string>
@@ -410,7 +433,9 @@
     <string name="scan_qr_code">Сканиране на QR кода</string>
     <string name="share_contact">Споделяне на контакт</string>
     <string name="import_shared_contact">Импортиране на споделен контакт?</string>
+    <string name="unmessageable">Без съобщения</string>
     <string name="unmonitored_or_infrastructure">Ненаблюдаван или инфраструктурен</string>
+    <string name="import_known_shared_contact_text">Предупреждение: Този контакт е известен, импортирането ще презапише предишната информация за контакта.</string>
     <string name="public_key_changed">Публичният ключ е променен</string>
     <string name="import_label">Импортиране</string>
     <string name="actions">Действия</string>
@@ -439,4 +464,6 @@
     <string name="export_keys">Експортиране на ключовете</string>
     <string name="export_keys_confirmation">Експортира публичния и частния ключове във файл. Моля, съхранявайте го на сигурно място.</string>
     <string name="node_count_template">(%1$d онлайн / %2$d общо)</string>
+    <string name="no_ble_devices">Няма открити Bluetooth устройства</string>
+    <string name="no_usb_devices">Няма открити USB серийни устройства.</string>
 </resources>
