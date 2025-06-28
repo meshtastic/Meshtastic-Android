@@ -142,7 +142,6 @@
     <string name="message_reception_time">время получения сообщения</string>
     <string name="message_reception_state">состояние получения сообщения</string>
     <string name="message_delivery_status">Статус доставки сообщения</string>
-    <string name="meshtastic_messages_notifications">Уведомления о сообщениях</string>
     <string name="meshtastic_alerts_notifications">Служебные уведомления</string>
     <string name="protocol_stress_test">Испытание протокола на нагрузку</string>
     <string name="firmware_too_old">Требуется обновление прошивки.</string>
@@ -336,14 +335,12 @@
     <string name="are_you_sure">Вы уверены?</string>
     <string name="router_role_confirmation_text"><![CDATA[Я прочитал <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">документацию ролей</a> и блог об этом<a href="http://meshtastic.org/blog/choosing-the-right-device-role">выбор правильной роли</a>.]]></string>
     <string name="i_know_what_i_m_doing">Я знаю, что я делаю.</string>
-    <string name="low_battery_message">У узла %s низкий заряд батареи (%d%%)</string>
     <string name="meshtastic_low_battery_notifications">Уведомление о низком заряде</string>
     <string name="low_battery_title">Низкий заряд батареи: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Уведомления о низком заряде батареи (Фаворитные узлы)</string>
     <string name="baro_pressure">Давление на барометре</string>
     <string name="mesh_via_udp_enabled">Сеть через UDP включена</string>
     <string name="udp_config">UDP Config</string>
-    <string name="map_node_popup_details"><![CDATA[%s<br>Последний приём: %s<br>Последняя позиция: %s<br>Батарея: %s]]></string>
     <string name="toggle_my_position">Переключить мою позицию</string>
     <string name="user">Пользователь</string>
     <string name="channels">Каналы</string>

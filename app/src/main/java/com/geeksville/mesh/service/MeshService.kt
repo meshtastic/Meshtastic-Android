@@ -340,7 +340,8 @@ class MeshService : Service(), Logging {
         serviceNotifications.updateMessageNotification(
             contactKey,
             getSenderName(dataPacket),
-            message
+            message,
+            isBroadcast = dataPacket.to == DataPacket.ID_BROADCAST
         )
     }
 
@@ -692,6 +693,9 @@ class MeshService : Service(), Logging {
         ) {
             portnumValue = p.dataType
             payload = ByteString.copyFrom(p.bytes)
+            if (p.replyId != null && p.replyId != 0) {
+                this.replyId = p.replyId!!
+            }
         }
     }
 
@@ -980,7 +984,8 @@ class MeshService : Service(), Logging {
         fromNum: Int,
         t: TelemetryProtos.Telemetry,
     ) {
-        if (t.hasLocalStats()) {
+        val isRemote = (fromNum != myNodeNum)
+        if (!isRemote && t.hasLocalStats()) {
             localStatsTelemetry = t
             maybeUpdateServiceStatusNotification()
         }
@@ -988,7 +993,6 @@ class MeshService : Service(), Logging {
             when {
                 t.hasDeviceMetrics() -> {
                     it.deviceTelemetry = t
-                    val isRemote = (fromNum != myNodeNum)
                     if (fromNum == myNodeNum || (isRemote && it.isFavorite)) {
                         if (t.deviceMetrics.voltage > batteryPercentUnsupported &&
                             t.deviceMetrics.batteryLevel <= batteryPercentLowThreshold
@@ -2036,8 +2040,13 @@ class MeshService : Service(), Logging {
                     putString("device_address", deviceAddr)
                 }
                 clearDatabases()
+                clearNotifications()
             }
         }
+    }
+
+    private fun clearNotifications() {
+        serviceNotifications.clearNotifications()
     }
     private val binder = object : IMeshService.Stub() {
 
@@ -2272,13 +2281,38 @@ class MeshService : Service(), Logging {
             }
         }
         override fun requestPosition(destNum: Int, position: Position) = toRemoteExceptions {
-            sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(
-                channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
-                priority = MeshPacket.Priority.BACKGROUND,
-            ) {
-                portnumValue = Portnums.PortNum.POSITION_APP_VALUE
-                wantResponse = true
-            })
+            if (destNum != myNodeNum) {
+                // Determine the best position to send based on user preferences and available data
+                val provideLocation = sharedPreferences.getBoolean("provide-location-$myNodeNum", false)
+                val currentPosition = when {
+                    // Use provided position if valid and user allows phone location sharing
+                    provideLocation && position.isValid() -> position
+                    // Otherwise use the last valid position from nodeDB (node GPS or static)
+                    else -> nodeDBbyNodeNum[myNodeNum]?.position?.let { Position(it) }?.takeIf { it.isValid() }
+                }
+
+                if (currentPosition == null) {
+                    debug("Position request skipped - no valid position available")
+                    return@toRemoteExceptions
+                }
+
+                // Convert Position to MeshProtos.Position for the payload
+                val meshPosition = position {
+                    latitudeI = Position.degI(currentPosition.latitude)
+                    longitudeI = Position.degI(currentPosition.longitude)
+                    altitude = currentPosition.altitude
+                    time = currentSecond()
+                }
+
+                sendToRadio(newMeshPacketTo(destNum).buildMeshPacket(
+                    channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
+                    priority = MeshPacket.Priority.BACKGROUND,
+                ) {
+                    portnumValue = Portnums.PortNum.POSITION_APP_VALUE
+                    payload = meshPosition.toByteString()
+                    wantResponse = true
+                })
+            }
         }
 
         override fun setFixedPosition(destNum: Int, position: Position) = toRemoteExceptions {

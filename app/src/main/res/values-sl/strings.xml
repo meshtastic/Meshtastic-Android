@@ -135,7 +135,6 @@
     <string name="message_reception_time">čas prejetega sporočila</string>
     <string name="message_reception_state">stanje prejetega sporočila</string>
     <string name="message_delivery_status">Stanje poslanega sporočila</string>
-    <string name="meshtastic_messages_notifications">Obvestila o sporočilu</string>
     <string name="protocol_stress_test">Protokol stresni test</string>
     <string name="firmware_too_old">Zastarela programska oprema.</string>
     <string name="firmware_old">Vdelana programska oprema radijskega sprejemnika je za pogovor s to aplikacijo prestara. Za več informacij o tem glejte<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">naš vodnik za namestitev strojne programske opreme</a>.</string>

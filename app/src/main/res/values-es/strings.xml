@@ -141,7 +141,6 @@
     <string name="message_reception_time">tiempo de recepción del mensaje</string>
     <string name="message_reception_state">estado de recepción de mensajes</string>
     <string name="message_delivery_status">Estado de entrega del mensaje</string>
-    <string name="meshtastic_messages_notifications">Notificaciones de mensajes</string>
     <string name="meshtastic_alerts_notifications">Notificaciones de alerta</string>
     <string name="protocol_stress_test">Protocolo de prueba de esfuerzo</string>
     <string name="firmware_too_old">Es necesario actualizar el firmware.</string>
@@ -327,14 +326,12 @@ Rango de Valores 0 - 500.</string>
     <string name="voltage">Tensión</string>
     <string name="are_you_sure">¿Estás seguro?</string>
     <string name="i_know_what_i_m_doing">Sé lo que estoy haciendo</string>
-    <string name="low_battery_message">El nodo %s tiene poca batería (%d%%)</string>
     <string name="meshtastic_low_battery_notifications">Notificaciones de batería baja</string>
     <string name="low_battery_title">Batería baja: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notificaciones de batería baja (nodos favoritos)</string>
     <string name="baro_pressure">Presión Barométrica</string>
     <string name="mesh_via_udp_enabled">Mesh a través de UDP activado</string>
     <string name="udp_config">Configuración UDP</string>
-    <string name="map_node_popup_details"><![CDATA[%s<br>Última escucha: %s<br>Última posición: %s<br>Batería: %s]]></string>
     <string name="toggle_my_position">Cambiar mi posición</string>
     <string name="user">Usuario</string>
     <string name="channels">Canales</string>

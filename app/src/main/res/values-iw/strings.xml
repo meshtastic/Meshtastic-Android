@@ -93,7 +93,6 @@
     <string name="message_reception_time">זמן קבלת ההודעה</string>
     <string name="message_reception_state">מצב קבלת הודעה</string>
     <string name="message_delivery_status">מצב שליחת הודעה</string>
-    <string name="meshtastic_messages_notifications">התראות על הודעות</string>
     <string name="meshtastic_alerts_notifications">התראות</string>
     <string name="protocol_stress_test">בדיקת קיבולת רשת (stress test)</string>
     <string name="firmware_too_old">נדרש עדכון קושחה.</string>

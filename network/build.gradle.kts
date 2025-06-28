@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.library)
@@ -30,16 +29,12 @@ android {
     buildFeatures {
         buildConfig = true
     }
-    compileSdk = 35
+    compileSdk = Configs.COMPILE_SDK
     defaultConfig {
-        minSdk = 21
+        minSdk = Configs.MIN_SDK_VERSION
     }
 
     namespace = "com.geeksville.mesh.network"
-    compileOptions {
-        sourceCompatibility(JavaVersion.VERSION_17)
-        targetCompatibility(JavaVersion.VERSION_17)
-    }
 
     flavorDimensions += "default"
     productFlavors {
@@ -53,9 +48,7 @@ android {
 }
 
 kotlin {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
-    }
+    jvmToolchain(21)
 }
 
 dependencies {

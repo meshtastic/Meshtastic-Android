@@ -206,7 +206,18 @@ class UIViewModel @Inject constructor(
     private val _lastTraceRouteTime = MutableStateFlow<Long?>(null)
     val lastTraceRouteTime: StateFlow<Long?> = _lastTraceRouteTime.asStateFlow()
 
-    val clientNotification: StateFlow<MeshProtos.ClientNotification?> = radioConfigRepository.clientNotification
+    private val _excludedModulesUnlocked = MutableStateFlow(false)
+    val excludedModulesUnlocked: StateFlow<Boolean> = _excludedModulesUnlocked.asStateFlow()
+
+    fun unlockExcludedModules() {
+        viewModelScope.launch {
+            _excludedModulesUnlocked.value = true
+        }
+    }
+
+    val clientNotification: StateFlow<MeshProtos.ClientNotification?> =
+        radioConfigRepository.clientNotification
+
     fun clearClientNotification(notification: MeshProtos.ClientNotification) {
         radioConfigRepository.clearClientNotification()
         meshServiceNotifications.clearClientNotification(notification)
@@ -255,7 +266,10 @@ class UIViewModel @Inject constructor(
     private val _title = MutableStateFlow("")
     val title: StateFlow<String> = _title.asStateFlow()
     fun setTitle(title: String) {
-        _title.value = title
+        viewModelScope.launch {
+
+            _title.value = title
+        }
     }
 
     val receivingLocationUpdates: StateFlow<Boolean> get() = locationRepository.receivingLocationUpdates
@@ -387,6 +401,18 @@ class UIViewModel @Inject constructor(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
         initialValue = emptyList(),
+    )
+
+    val onlineNodeCount = nodeDB.onlineNodeCount.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = 0,
+    )
+
+    val totalNodeCount = nodeDB.totalNodeCount.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = 0,
     )
 
     val filteredNodeList: StateFlow<List<Node>> = nodeList.mapLatest { list ->
@@ -534,7 +560,9 @@ class UIViewModel @Inject constructor(
 
     val waypoints = packetRepository.getWaypoints().mapLatest { list ->
         list.associateBy { packet -> packet.data.waypoint!!.id }
-            .filterValues { it.data.waypoint!!.expire > System.currentTimeMillis() / 1000 }
+            .filterValues {
+                it.data.waypoint!!.expire == 0 || it.data.waypoint!!.expire > System.currentTimeMillis() / 1000
+            }
     }
 
     fun generatePacketId(): Int? {

@@ -24,17 +24,8 @@ buildscript {
         classpath(libs.agp)
         classpath(libs.kotlin.gradle.plugin)
         classpath(libs.kotlin.serialization)
-
-        // Google Play Services and Firebase Crashlytics
-        // If you want to use Firebase Crashlytics,
-        // set Configs.USE_CRASHLYTICS to true in:
-        // buildSrc/src/main/kotlin/Configs.kt
-        // Disabled by default for fdroid builds
-        if (Configs.USE_CRASHLYTICS) {
-            classpath(libs.google.services)
-            classpath(libs.firebase.crashlytics.gradle)
-        }
-
+        classpath(libs.google.services)
+        classpath(libs.firebase.crashlytics.gradle)
         classpath(libs.protobuf.gradle.plugin)
         classpath(libs.hilt.android.gradle.plugin)
     }

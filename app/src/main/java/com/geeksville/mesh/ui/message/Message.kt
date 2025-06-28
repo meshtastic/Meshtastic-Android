@@ -20,22 +20,30 @@ package com.geeksville.mesh.ui.message
 import android.content.ClipData
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.input.TextFieldLineLimits
+import androidx.compose.foundation.text.input.TextFieldState
+import androidx.compose.foundation.text.input.clearText
+import androidx.compose.foundation.text.input.rememberTextFieldState
+import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
@@ -43,6 +51,7 @@ import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -53,7 +62,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,23 +72,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.onFocusEvent
-import androidx.compose.ui.input.key.Key
-import androidx.compose.ui.input.key.KeyEventType
-import androidx.compose.ui.input.key.isAltPressed
-import androidx.compose.ui.input.key.key
-import androidx.compose.ui.input.key.onKeyEvent
-import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -116,6 +114,9 @@ internal fun MessageScreen(
     val coroutineScope = rememberCoroutineScope()
     val clipboardManager = LocalClipboard.current
 
+    val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val isConnected by viewModel.isConnected.collectAsStateWithLifecycle(false)
+
     val channelIndex = contactKey[0].digitToIntOrNull()
     val nodeId = contactKey.substring(1)
     val channels by viewModel.channels.collectAsStateWithLifecycle()
@@ -140,13 +141,13 @@ internal fun MessageScreen(
     val selectedIds = rememberSaveable { mutableStateOf(emptySet<Long>()) }
     val inSelectionMode by remember { derivedStateOf { selectedIds.value.isNotEmpty() } }
 
-    val connState by viewModel.connectionState.collectAsStateWithLifecycle()
     val quickChat by viewModel.quickChatActions.collectAsStateWithLifecycle()
     val messages by viewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(listOf())
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = messages.indexOfLast { !it.read }.coerceAtLeast(0)
+    )
+    val messageInput = rememberTextFieldState(message)
 
-    val messageInput = rememberSaveable(stateSaver = TextFieldValue.Saver) {
-        mutableStateOf(TextFieldValue(message))
-    }
     var replyingTo by remember { mutableStateOf<Message?>(null) }
 
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -161,8 +162,16 @@ internal fun MessageScreen(
             onDismiss = { showDeleteDialog = false }
         )
     }
+    var sharedContact: Node? by remember { mutableStateOf(null) }
+    if (sharedContact != null) {
+        SharedContactDialog(
+            contact = sharedContact,
+            onDismiss = { sharedContact = null }
+        )
+    }
 
     Scaffold(
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             if (inSelectionMode) {
                 ActionModeTopBar(selectedIds.value) { action ->
@@ -195,116 +204,160 @@ internal fun MessageScreen(
                 MessageTopBar(title, channelIndex, mismatchKey, onNavigateBack)
             }
         },
-        bottomBar = {
-            val isConnected = connState.isConnected()
-            Column(
-                modifier = Modifier
-                    .padding(start = 8.dp, end = 8.dp, bottom = 4.dp),
+    ) { padding ->
+        Column(Modifier.padding(padding)) {
+            Box(
+                modifier = Modifier.weight(1f, fill = true),
             ) {
-                QuickChatRow(isConnected, quickChat) { action ->
-                    if (action.mode == QuickChatAction.Mode.Append) {
-                        val originalText = messageInput.value.text
-                        if (!originalText.contains(action.message)) {
-                            val needsSpace =
-                                !originalText.endsWith(' ') && originalText.isNotEmpty()
-                            val newText = buildString {
-                                append(originalText)
-                                if (needsSpace) append(' ')
-                                append(action.message)
-                            }.take(MESSAGE_CHARACTER_LIMIT)
-                            messageInput.value = TextFieldValue(newText, TextRange(newText.length))
+                MessageList(
+                    modifier = Modifier.fillMaxSize(),
+                    listState = listState,
+                    messages = messages,
+                    selectedIds = selectedIds,
+                    onUnreadChanged = { viewModel.clearUnreadCount(contactKey, it) },
+                    onSendReaction = { emoji, id ->
+                        viewModel.sendReaction(
+                            emoji,
+                            id,
+                            contactKey
+                        )
+                    },
+                    viewModel = viewModel,
+                    contactKey = contactKey,
+                    onReply = { replyingTo = it },
+                    onNodeMenuAction = { action ->
+                        when (action) {
+                            is NodeMenuAction.DirectMessage -> {
+                                val hasPKC =
+                                    viewModel.ourNodeInfo.value?.hasPKC == true && action.node.hasPKC
+                                val channel =
+                                    if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else action.node.channel
+                                navigateToMessages("$channel${action.node.user.id}")
+                            }
+
+                            is NodeMenuAction.MoreDetails -> navigateToNodeDetails(action.node.num)
+                            is NodeMenuAction.Share -> sharedContact = action.node
+                            else -> viewModel.handleNodeMenuAction(action)
                         }
-                    } else {
-                        viewModel.sendMessage(action.message, contactKey)
-                    }
-                }
-
-                AnimatedVisibility(visible = replyingTo != null) {
-                    val fromLocal = replyingTo?.node?.user?.id == DataPacket.ID_LOCAL
-
-                    val replyingToNode = if (fromLocal) {
-                        viewModel.ourNodeInfo.value
-                    } else {
-                        replyingTo?.node
-                    }
-                    Row(
+                    },
+                )
+                if (listState.canScrollBackward) {
+                    FloatingActionButton(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(24.dp))
-                            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
-                        verticalAlignment = Alignment.CenterVertically
+                            .align(Alignment.BottomEnd)
+                            .padding(16.dp),
+                        onClick = {
+                            coroutineScope.launch {
+                                listState.animateScrollToItem(0)
+                            }
+                        }
                     ) {
                         Icon(
-                            Icons.AutoMirrored.Default.Reply,
-                            contentDescription = stringResource(R.string.reply)
+                            imageVector = Icons.Default.ArrowDownward,
+                            contentDescription = stringResource(id = R.string.scroll_to_bottom)
                         )
-                        Spacer(Modifier.width(8.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                "Replying to ${replyingToNode?.user?.shortName ?: stringResource(R.string.unknown)}",
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                            Text(
-                                replyingTo?.text?.take(SNIPPET_CHARACTER_LIMIT)
-                                    ?.let { if (it.length == SNIPPET_CHARACTER_LIMIT) "$it…" else it } ?: "", // Snippet
-                                style = MaterialTheme.typography.bodySmall,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                        IconButton(onClick = {
-                            replyingTo = null
-                        }) { // ViewModel function to set replyingToMessageState to null
-                            Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.cancel))
-                        }
                     }
                 }
-                TextInput(isConnected, messageInput) { message ->
+            }
+            QuickChatRow(
+                enabled = isConnected,
+                actions = quickChat,
+                onClick = { action ->
+                    handleQuickChatAction(action, messageInput, viewModel, contactKey)
+                }
+            )
+            ReplySnippet(replyingTo, { replyingTo = null }, ourNode)
+            TextInput(isConnected, messageInput) {
+                val message = messageInput.text.toString().trim()
+                if (message.isNotEmpty()) {
                     replyingTo?.let {
                         viewModel.sendMessage(message, contactKey, it.packetId)
                         replyingTo = null
                     } ?: viewModel.sendMessage(message, contactKey)
                     // Clear the text input after sending the message and updating all state
-                    messageInput.value = TextFieldValue("")
+                    messageInput.clearText()
                 }
             }
         }
-    ) { padding ->
-        if (messages.isNotEmpty()) {
-            var sharedContact: Node? by remember { mutableStateOf(null) }
-            if (sharedContact != null) {
-                SharedContactDialog(
-                    contact = sharedContact,
-                    onDismiss = { sharedContact = null }
+    }
+}
+
+@Composable
+private fun ReplySnippet(
+    originalMessage: Message?,
+    clearReply: () -> Unit = {},
+    ourNode: Node?
+) {
+    AnimatedVisibility(visible = originalMessage != null) {
+        val fromLocal = originalMessage?.node?.user?.id == DataPacket.ID_LOCAL
+
+        val replyingToNode = if (fromLocal) {
+            ourNode
+        } else {
+            originalMessage?.node
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(24.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            IconButton(
+                enabled = false,
+                onClick = {}
+            ) {
+                Icon(
+                    Icons.AutoMirrored.Default.Reply,
+                    contentDescription = stringResource(R.string.reply)
                 )
             }
-
-            MessageList(
-                modifier = Modifier.padding(padding),
-                messages = messages,
-                selectedIds = selectedIds,
-                onUnreadChanged = { viewModel.clearUnreadCount(contactKey, it) },
-                onSendReaction = { emoji, id -> viewModel.sendReaction(emoji, id, contactKey) },
-                viewModel = viewModel,
-                contactKey = contactKey,
-                onReply = { replyingTo = it },
-                onNodeMenuAction = { action ->
-                    when (action) {
-                        is NodeMenuAction.DirectMessage -> {
-                            val hasPKC =
-                                viewModel.ourNodeInfo.value?.hasPKC == true && action.node.hasPKC
-                            val channel =
-                                if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else action.node.channel
-                            navigateToMessages("$channel${action.node.user.id}")
-                        }
-
-                        is NodeMenuAction.MoreDetails -> navigateToNodeDetails(action.node.num)
-                        is NodeMenuAction.Share -> sharedContact = action.node
-                        else -> viewModel.handleNodeMenuAction(action)
-                    }
-                },
+            Text(
+                "Replying to ${replyingToNode?.user?.shortName ?: stringResource(R.string.unknown)}",
+                style = MaterialTheme.typography.labelMedium
             )
+            Text(
+                modifier = Modifier.weight(1f, fill = true),
+                text = originalMessage?.text?.take(SNIPPET_CHARACTER_LIMIT)
+                    ?.let { if (it.length == SNIPPET_CHARACTER_LIMIT) "$it…" else it }
+                    ?: "", // Snippet
+                style = MaterialTheme.typography.bodySmall,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            IconButton(
+                onClick = clearReply
+            ) { // ViewModel function to set replyingToMessageState to null
+                Icon(
+                    Icons.Filled.Close,
+                    contentDescription = stringResource(R.string.cancel)
+                )
+            }
         }
+    }
+}
+
+private fun handleQuickChatAction(
+    action: QuickChatAction,
+    messageInput: TextFieldState,
+    viewModel: UIViewModel,
+    contactKey: String
+) {
+    if (action.mode == QuickChatAction.Mode.Append) {
+        val originalText = messageInput.text
+        if (!originalText.contains(action.message)) {
+            val needsSpace =
+                !originalText.endsWith(' ') && originalText.isNotEmpty()
+            val newText = buildString {
+                append(originalText)
+                if (needsSpace) append(' ')
+                append(action.message)
+            }.take(MESSAGE_CHARACTER_LIMIT)
+            messageInput.setTextAndPlaceCursorAtEnd(newText)
+        }
+    } else {
+        viewModel.sendMessage(action.message, contactKey)
     }
 }
 
@@ -409,9 +462,9 @@ private fun MessageTopBar(
 
 @Composable
 private fun QuickChatRow(
+    modifier: Modifier = Modifier,
     enabled: Boolean,
     actions: List<QuickChatAction>,
-    modifier: Modifier = Modifier,
     onClick: (QuickChatAction) -> Unit
 ) {
     val alertAction = QuickChatAction(
@@ -438,68 +491,58 @@ private fun QuickChatRow(
     }
 }
 
+private const val ROUNDED_CORNER_PERCENT = 100
+
 @Suppress("LongMethod")
 @Composable
 private fun TextInput(
     enabled: Boolean,
-    message: MutableState<TextFieldValue>,
+    message: TextFieldState,
     modifier: Modifier = Modifier,
     maxSize: Int = MESSAGE_CHARACTER_LIMIT,
-    onClick: (String) -> Unit = {}
-) = Column(modifier) {
-    val focusManager = LocalFocusManager.current
-    var isFocused by remember { mutableStateOf(false) }
+    onSendMessage: () -> Unit = {}
+) {
+    val isOverLimit = message.text.length > maxSize
+    val isValid = !isOverLimit && message.text.isNotEmpty()
     OutlinedTextField(
-        value = message.value,
-        onValueChange = {
-            if (it.text.toByteArray().size <= maxSize) {
-                message.value = it
-            }
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .onFocusEvent { isFocused = it.isFocused }
-            .onKeyEvent { event ->
-                if (event.type == KeyEventType.KeyDown &&
-                    event.key == Key.Enter &&
-                    event.isAltPressed
-                ) {
-                    val str = message.value.text.trim()
-                    if (str.isNotEmpty()) {
-                        onClick(str)
-                    }
-                    true // Consume the event
-                } else {
-                    false // Do not consume other key events
-                }
-            },
+        modifier = modifier.fillMaxWidth(),
+        state = message,
+        lineLimits = TextFieldLineLimits.SingleLine,
+        label = { Text(stringResource(R.string.send_text)) },
         enabled = enabled,
-        placeholder = { Text(stringResource(id = R.string.send_text)) },
+        shape = RoundedCornerShape(ROUNDED_CORNER_PERCENT),
+        isError = isOverLimit,
+        placeholder = { Text(stringResource(R.string.send_text)) },
         keyboardOptions = KeyboardOptions(
             capitalization = KeyboardCapitalization.Sentences,
             imeAction = ImeAction.Send
         ),
-        keyboardActions = KeyboardActions(
-            onSend = {
-                val str = message.value.text.trim()
-                if (str.isNotEmpty()) {
-                    onClick(str)
-                }
+        onKeyboardAction = {
+            if (isValid) {
+                onSendMessage()
             }
-        ),
-        maxLines = 3,
-        shape = RoundedCornerShape(24.dp),
+        },
+        supportingText = {
+            Text(
+                text = "${message.text.length}/$maxSize",
+                style = MaterialTheme.typography.bodySmall,
+                color = if (isOverLimit) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
+        inputTransformation = {
+            if (this.length > maxSize) {
+                this.replace(maxSize, this.length, "")
+            }
+        },
         trailingIcon = {
             IconButton(
                 onClick = {
-                    val str = message.value.text.trim()
-                    if (str.isNotEmpty()) {
-                        onClick(str)
-                        focusManager.clearFocus()
+                    if (isValid) {
+                        onSendMessage()
                     }
                 },
                 modifier = Modifier.size(48.dp),
-                enabled = enabled,
+                enabled = enabled && isValid,
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.Send,
@@ -508,15 +551,6 @@ private fun TextInput(
             }
         }
     )
-    if (isFocused) {
-        Text(
-            text = "${message.value.text.toByteArray().size}/$maxSize",
-            style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier
-                .align(Alignment.End)
-                .padding(top = 4.dp, end = 72.dp)
-        )
-    }
 }
 
 @PreviewLightDark
@@ -527,12 +561,12 @@ private fun TextInputPreview() {
             Column {
                 TextInput(
                     enabled = true,
-                    message = remember { mutableStateOf(TextFieldValue("")) },
+                    message = rememberTextFieldState("Hello"),
                 )
                 Spacer(Modifier.size(16.dp))
                 TextInput(
                     enabled = true,
-                    message = remember { mutableStateOf(TextFieldValue("Hello")) },
+                    message = rememberTextFieldState("Hello"),
                 )
             }
         }

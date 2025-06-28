@@ -138,7 +138,15 @@
     <string name="text_messages">Tekstiviestit</string>
     <string name="channel_invalid">Kanavan URL-osoite on virheellinen, eikä sitä voida käyttää</string>
     <string name="debug_panel">Vianetsintäpaneeli</string>
+    <string name="debug_logs_export">Vie lokitiedot</string>
     <string name="debug_last_messages">500 viimeisintä viestiä</string>
+    <string name="debug_filters">Suodattimet</string>
+    <string name="debug_active_filters">Aktiiviset suodattimet</string>
+    <string name="debug_default_search">Hae lokitiedoista…</string>
+    <string name="debug_clear">Tyhjennä lokit</string>
+    <string name="match_any">Täsmää yhteen | kaikkiin</string>
+    <string name="match_all">Täsmää yhteen | kaikkiin</string>
+    <string name="debug_clear_logs_confirm">Tämä poistaa kaikki lokipaketit ja tietokantamerkinnät laitteestasi – Kyseessä on täydellinen nollaus, ja se on pysyvä.</string>
     <string name="clear">Tyhjennä</string>
     <string name="updating_firmware">Päivitetään laiteohjelmistoa, tämä voi kestää jopa kahdeksan minuuttia…</string>
     <string name="update_successful">Päivitys onnistui</string>
@@ -146,7 +154,8 @@
     <string name="message_reception_time">viestien vastaanottoaika</string>
     <string name="message_reception_state">viestin vastaanottotila</string>
     <string name="message_delivery_status">Viestin toimitustila</string>
-    <string name="meshtastic_messages_notifications">Viesti-ilmoitukset</string>
+    <string name="meshtastic_messages_notifications">Suorien viestien ilmoitukset</string>
+    <string name="meshtastic_broadcast_notifications">Yleislähetysviestien ilmoitukset</string>
     <string name="meshtastic_alerts_notifications">Hälytysilmoitukset</string>
     <string name="protocol_stress_test">Protokollan kuormitustesti</string>
     <string name="firmware_too_old">Laiteohjelmistopäivitys vaaditaan.</string>
@@ -270,6 +279,7 @@
     <string name="humidity">Kosteus</string>
     <string name="logs">lokitietoa</string>
     <string name="hops_away">Hyppyjä</string>
+    <string name="hops_away_template">Hyppyjä: %1$d</string>
     <string name="info">Tiedot</string>
     <string name="ch_util_definition">Nykyisen kanavan lähetyksen (TX) ja vastaanoton (RX) käyttöaste ja virheelliset lähetykset, eli häiriöt.</string>
     <string name="air_util_definition">Viimeisen tunnin aikana käytetyn lähetyksen prosenttiosuus.</string>
@@ -337,14 +347,14 @@
     <string name="are_you_sure">Oletko varma?</string>
     <string name="router_role_confirmation_text"><![CDATA[Olen lukenut <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Laitteen roolit ohjeen</a> ja blogikirjoituksen <a href="http://meshtastic.org/blog/choosing-the-right-device-role"> valitakseni laitteelle oikean roolin</a>.]]></string>
     <string name="i_know_what_i_m_doing">Tiedän mitä olen tekemässä.</string>
-    <string name="low_battery_message">Laitteen %s akun varaustila on vähissä (%d%%)</string>
+    <string name="low_battery_message">Laitteen %1$s akun varaustila on vähissä (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Akun vähäisen varauksen ilmoitukset</string>
     <string name="low_battery_title">Akku vähissä: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Akun vähäisen varauksen ilmoitukset (suosikkilaitteet)</string>
     <string name="baro_pressure">Barometrinen paine</string>
     <string name="mesh_via_udp_enabled">Mesh-verkko UDP:n kautta käytössä</string>
     <string name="udp_config">UDP asetukset</string>
-    <string name="map_node_popup_details"><![CDATA[%s<br>Viimeksi kuultu: %s<br>Viimeisin sijainti: %s<br>Akku: %s]]></string>
+    <string name="map_node_popup_details"><![CDATA[%1$s<br>Viimeksi kuultu: %2$s<br>Viimeisin sijainti: %3$s<br>Akku: %4$s]]></string>
     <string name="toggle_my_position">Kytke sijainti päälle</string>
     <string name="user">Käyttäjä</string>
     <string name="channels">Kanavat</string>
@@ -659,7 +669,15 @@
     <string name="client_notification">Sovellusilmoitukset</string>
     <string name="compromised_keys">Turvallisuusriski havaittu: avaimet ovat vaarantuneet. Valitse OK luodaksesi uudet.</string>
     <string name="regenerate_private_key">Luo uusi yksityinen avain</string>
-    <string name="regenerate_keys_confirmation">Oletko varma, että haluat luoda uuden yksityisen avaimen?</string>
+    <string name="regenerate_keys_confirmation">Haluatko varmasti luoda yksityisen avaimen uudelleen?\n\nLaitteet, jotka ovat aiemmin vaihtaneet avaimia tämän laitteen kanssa, joutuvat poistamaan kyseisen laitteen ja vaihtamaan avaimet uudelleen, jotta suojattu viestintä voi jatkua.</string>
     <string name="export_keys">Vie avaimet</string>
     <string name="export_keys_confirmation">Vie julkiset ja yksityiset avaimet tiedostoon. Säilytä tiedosto turvallisessa paikassa.</string>
+    <string name="modules_unlocked">Lukittamattomat moduulit</string>
+    <string name="remote">Etäyhteys</string>
+    <string name="node_count_template">(%1$d yhdistetty / %2$d yhteensä)</string>
+    <string name="react">Reagoi</string>
+    <string name="disconnect">Katkaise yhteys</string>
+    <string name="no_ble_devices">Bluetooth-laitteita ei löytynyt.</string>
+    <string name="no_network_devices">Verkkolaitteita ei löytynyt.</string>
+    <string name="no_usb_devices">USB-sarjalaitteita ei löytynyt.</string>
 </resources>

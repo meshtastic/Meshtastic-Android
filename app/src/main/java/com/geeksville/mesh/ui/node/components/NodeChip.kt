@@ -24,8 +24,8 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.ElevatedAssistChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -37,7 +37,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.PaxcountProtos
+import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.model.Node
 
 @Composable
@@ -53,11 +57,12 @@ fun NodeChip(
     var menuExpanded by remember { mutableStateOf(false) }
     val inputChipInteractionSource = remember { MutableInteractionSource() }
     Box {
-        AssistChip(
+        ElevatedAssistChip(
             modifier = modifier
                 .width(IntrinsicSize.Min)
-                .defaultMinSize(minHeight = 32.dp, minWidth = 72.dp),
-            colors = AssistChipDefaults.assistChipColors(
+                .defaultMinSize(minWidth = 72.dp),
+            elevation = AssistChipDefaults.elevatedAssistChipElevation(),
+            colors = AssistChipDefaults.elevatedAssistChipColors(
                 containerColor = Color(nodeColor),
                 labelColor = Color(textColor),
             ),
@@ -69,6 +74,7 @@ fun NodeChip(
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                     textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                     textAlign = TextAlign.Center,
+                    maxLines = 1,
                 )
             },
             onClick = {},
@@ -94,5 +100,29 @@ fun NodeChip(
             menuExpanded = false
             onAction(it)
         }
+    )
+}
+
+@Suppress("MagicNumber")
+@Preview
+@Composable
+fun NodeChipPreview() {
+    val user = MeshProtos.User.newBuilder()
+        .setShortName("\uD83E\uDEE0")
+        .setLongName("John Doe")
+        .build()
+    val node = Node(
+        num = 13444,
+        user = user,
+        isIgnored = false,
+        paxcounter = PaxcountProtos.Paxcount.newBuilder().setBle(10).setWifi(5).build(),
+        environmentMetrics = TelemetryProtos.EnvironmentMetrics.newBuilder().setTemperature(25f)
+            .setRelativeHumidity(60f).build()
+    )
+    NodeChip(
+        node = node,
+        isThisNode = false,
+        isConnected = true,
+        onAction = {}
     )
 }

@@ -61,11 +61,16 @@ class MeshServiceNotifications(
     // We have two notification channels: one for general service status and another one for messages
     val notifyId = 101
 
+    fun clearNotifications() {
+        notificationManager.cancelAll()
+    }
+
     fun initChannels() {
         // create notification channels on service creation
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel()
             createMessageNotificationChannel()
+            createBroadcastNotificationChannel()
             createAlertNotificationChannel()
             createNewNodeNotificationChannel()
             createLowBatteryNotificationChannel()
@@ -101,6 +106,32 @@ class MeshServiceNotifications(
                 channelId,
                 channelName,
                 NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                lightColor = notificationLightColor
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                setShowBadge(true)
+                setSound(
+                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
+                    AudioAttributes.Builder()
+                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                        .build()
+                )
+            }
+            notificationManager.createNotificationChannel(channel)
+        }
+        return channelId
+    }
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    private fun createBroadcastNotificationChannel(): String {
+        val channelId = "my_broadcasts"
+        if (notificationManager.getNotificationChannel(channelId) == null) {
+            val channelName = context.getString(R.string.meshtastic_broadcast_notifications)
+            val channel = NotificationChannel(
+                channelId,
+                channelName,
+                NotificationManager.IMPORTANCE_DEFAULT
             ).apply {
                 lightColor = notificationLightColor
                 lockscreenVisibility = Notification.VISIBILITY_PUBLIC
@@ -274,6 +305,14 @@ class MeshServiceNotifications(
         }
     }
 
+    private val broadcastChannelId: String by lazy {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            createBroadcastNotificationChannel()
+        } else {
+            ""
+        }
+    }
+
     private val alertChannelId: String by lazy {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createAlertNotificationChannel()
@@ -349,10 +388,10 @@ class MeshServiceNotifications(
         notificationManager.cancel(contactKey.hashCode())
     }
 
-    fun updateMessageNotification(contactKey: String, name: String, message: String) =
+    fun updateMessageNotification(contactKey: String, name: String, message: String, isBroadcast: Boolean) =
         notificationManager.notify(
             contactKey.hashCode(), // show unique notifications,
-            createMessageNotification(contactKey, name, message)
+            createMessageNotification(contactKey, name, message, isBroadcast)
         )
 
     fun showAlertNotification(contactKey: String, name: String, alert: String) {
@@ -486,10 +525,12 @@ class MeshServiceNotifications(
     private fun createMessageNotification(
         contactKey: String,
         name: String,
-        message: String
+        message: String,
+        isBroadcast: Boolean,
     ): Notification {
+        val channelId = if (isBroadcast) broadcastChannelId else messageChannelId
         val messageNotificationBuilder: NotificationCompat.Builder =
-            commonBuilder(messageChannelId, createOpenMessageIntent(contactKey))
+            commonBuilder(channelId, createOpenMessageIntent(contactKey))
 
         val person = Person.Builder().setName(name).build()
         // Key for the string that's delivered in the action's intent.

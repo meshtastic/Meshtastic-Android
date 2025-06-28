@@ -142,7 +142,6 @@
     <string name="message_reception_time">čas prijatia správy</string>
     <string name="message_reception_state">stav prijatia správy</string>
     <string name="message_delivery_status">Stav doručenia správy</string>
-    <string name="meshtastic_messages_notifications">Upozornenia na správy</string>
     <string name="meshtastic_alerts_notifications">Notifikácie upozornení</string>
     <string name="protocol_stress_test">Test vyťaženia protokolu</string>
     <string name="firmware_too_old">Nutná aktualizácia firmvéru.</string>
@@ -335,14 +334,12 @@
     <string name="are_you_sure">Si si istý?</string>
     <string name="router_role_confirmation_text"><![CDATA[Prečítal som si <a href="https://meshtastic.org/docs/configuration/radio/device/#roles"> Dokumentáciu o úlohách zariadení</a> a blog o <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Výberaní správnej úlohy pre zariadenie </a>.]]></string>
     <string name="i_know_what_i_m_doing">Viem čo robím.</string>
-    <string name="low_battery_message">Uzol %s má slabú batériu (%d%%)</string>
     <string name="meshtastic_low_battery_notifications">Upozornenia o slabej batérii</string>
     <string name="low_battery_title">Slabá batéria: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Upozornenia o slabej batérii (obľúbene uzle)</string>
     <string name="baro_pressure">Barometrický tlak</string>
     <string name="mesh_via_udp_enabled">Sieť prostredníctvom UDP zapnutá</string>
     <string name="udp_config">Konfigurácia UDP</string>
-    <string name="map_node_popup_details"><![CDATA[%s<br>Naposledy počutý: %s<br>Posledná pozícia: %s<br>Batéria: %s]]></string>
     <string name="toggle_my_position">Zapnúť lokalizáciu</string>
     <string name="user">Užívateľ</string>
     <string name="channels">Kanále</string>

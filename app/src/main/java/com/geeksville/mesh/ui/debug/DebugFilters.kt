@@ -57,6 +57,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
 
 @Composable
 fun DebugCustomFilterInput(
@@ -110,9 +111,17 @@ fun DebugCustomFilterInput(
 internal fun DebugPresetFilters(
     presetFilters: List<String>,
     filterTexts: List<String>,
+    logs: List<UiMeshLog>,
     onFilterTextsChange: (List<String>) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val availableFilters = presetFilters.filter { filter ->
+        logs.any { log ->
+            log.logMessage.contains(filter, ignoreCase = true) ||
+            log.messageType.contains(filter, ignoreCase = true) ||
+            log.formattedReceivedDate.contains(filter, ignoreCase = true)
+        }
+    }
     Column(modifier = modifier) {
         Text(
             text = "Preset Filters",
@@ -126,7 +135,7 @@ internal fun DebugPresetFilters(
             horizontalArrangement = Arrangement.spacedBy(2.dp),
             verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
-            for (filter in presetFilters) {
+            for (filter in availableFilters) {
                 FilterChip(
                     selected = filter in filterTexts,
                     onClick = {
@@ -159,6 +168,7 @@ internal fun DebugFilterBar(
     customFilterText: String,
     onCustomFilterTextChange: (String) -> Unit,
     presetFilters: List<String>,
+    logs: List<UiMeshLog>,
     modifier: Modifier = Modifier
 ) {
     var showFilterMenu by remember { mutableStateOf(false) }
@@ -207,6 +217,7 @@ internal fun DebugFilterBar(
                     DebugPresetFilters(
                         presetFilters = presetFilters,
                         filterTexts = filterTexts,
+                        logs = logs,
                         onFilterTextsChange = onFilterTextsChange
                     )
                 }
@@ -215,10 +226,13 @@ internal fun DebugFilterBar(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 internal fun DebugActiveFilters(
     filterTexts: List<String>,
     onFilterTextsChange: (List<String>) -> Unit,
+    filterMode: FilterMode,
+    onFilterModeChange: (FilterMode) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val colorScheme = MaterialTheme.colorScheme
@@ -237,6 +251,20 @@ internal fun DebugActiveFilters(
                     text = stringResource(R.string.debug_active_filters),
                     style = TextStyle(fontWeight = FontWeight.Bold)
                 )
+                TextButton(
+                    onClick = {
+                        onFilterModeChange(
+                            if (filterMode == FilterMode.OR) FilterMode.AND else FilterMode.OR
+                        )
+                    }
+                ) {
+                    Text(if (filterMode == FilterMode.OR) {
+                                stringResource(R.string.match_any)
+                            } else {
+                                stringResource(R.string.match_all)
+                            }
+                        )
+                }
                 IconButton(
                     onClick = { onFilterTextsChange(emptyList()) }
                 ) {
@@ -278,3 +306,5 @@ internal fun DebugActiveFilters(
         }
     }
 }
+
+enum class FilterMode { OR, AND }
