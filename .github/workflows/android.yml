@@ -78,7 +78,7 @@ jobs:
 
   detekt:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
 
     steps:
 
@@ -115,7 +115,7 @@ jobs:
 
   androidTest:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     strategy:
       matrix:
         api-level: [26, 35]
@@ -178,7 +178,7 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-metrics -camera-back none
           disable-animations: true
-          script: ./gradlew :app:connectedFdroidDebugAndroidTest --configuration-cache --scan && killall -INT crashpad_handler || true
+          script: ./gradlew :app:connectedFdroidDebugAndroidTest --configuration-cache --scan && ( killall -INT crashpad_handler || true )
 
       - name: Upload Test Results
         if: ${{ !cancelled() }}
