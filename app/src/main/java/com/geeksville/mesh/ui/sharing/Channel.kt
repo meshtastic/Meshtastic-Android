@@ -462,7 +462,7 @@ private fun ChannelListView(
                             channelSelections[index] = it
                         }
                     },
-                    showUnlockIcon = isDefaultPSK
+                    isDefaultPSK = isDefaultPSK
                 )
             }
             OutlinedButton(

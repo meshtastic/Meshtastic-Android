@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -124,18 +125,19 @@ fun ChannelCard(
     enabled: Boolean,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    showUnlockIcon: Boolean = false,
+    isDefaultPSK: Boolean = false,
 ) = ChannelItem(
     index = index,
     title = title,
     enabled = enabled,
     onClick = onEditClick,
 ) {
-    if (showUnlockIcon) {
+    if (isDefaultPSK) {
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
             contentDescription = "Unlocked"
         )
+        Spacer(modifier = Modifier.width(10.dp))
     }
     IconButton(onClick = { onDeleteClick() }) {
         Icon(
@@ -153,14 +155,14 @@ fun ChannelSelection(
     enabled: Boolean,
     isSelected: Boolean,
     onSelected: (Boolean) -> Unit,
-    showUnlockIcon: Boolean = false,
+    isDefaultPSK: Boolean = false,
 ) = ChannelItem(
     index = index,
     title = title,
     enabled = enabled,
     onClick = {},
 ) {
-    if (showUnlockIcon) {
+    if (isDefaultPSK) {
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
             contentDescription = "Unlocked"
@@ -298,7 +300,7 @@ fun ChannelSettingsItemList(
                         enabled = enabled,
                         onEditClick = { showEditChannelDialog = index },
                         onDeleteClick = { settingsListInput.removeAt(index) },
-                        showUnlockIcon = isDefaultPSK
+                        isDefaultPSK = isDefaultPSK
                     )
                     if (index == 0 && !isDragging) {
                         Text(
