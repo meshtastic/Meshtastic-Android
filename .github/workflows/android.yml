@@ -11,6 +11,8 @@ on:
 
   pull_request:
     branches: [ main ]
+  merge_group:
+    types: [ checks-requested ]
 
   workflow_dispatch:
 
@@ -45,15 +47,19 @@ jobs:
       uses: gradle/actions/setup-gradle@v4
       with:
         cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+        build-scan-publish: true
+        build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
+        build-scan-terms-of-use-agree: 'yes'
+        add-job-summary: always
 
     - name: Check lint
-      run: ./gradlew lintFdroidDebug lintGoogleDebug
+      run: ./gradlew lintFdroidDebug lintGoogleDebug --configuration-cache --scan
 
     - name: Build debug artifacts
-      run: ./gradlew assembleDebug
+      run: ./gradlew assembleDebug --configuration-cache --scan
 
     - name: Run local tests
-      run: ./gradlew testFdroidDebug testGoogleDebug
+      run: ./gradlew testFdroidDebug testGoogleDebug --configuration-cache --scan
 
     - name: Upload debug artifact
       uses: actions/upload-artifact@v4
@@ -72,7 +78,7 @@ jobs:
 
   detekt:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
 
     steps:
 
@@ -89,9 +95,15 @@ jobs:
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          build-scan-publish: true
+          build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
+          build-scan-terms-of-use-agree: 'yes'
+          add-job-summary: always
 
       - name: Check detekt
-        run: ./gradlew detekt
+        run: ./gradlew detekt --configuration-cache --scan
 
       - name: Upload build reports
         if: ${{ !cancelled() }}
@@ -103,7 +115,7 @@ jobs:
 
   androidTest:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     strategy:
       matrix:
         api-level: [26, 35]
@@ -125,6 +137,12 @@ jobs:
           distribution: 'jetbrains'
 
       - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          build-scan-publish: true
+          build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
+          build-scan-terms-of-use-agree: 'yes'
+          add-job-summary: always
 
       - uses: actions/cache@v4
         id: avd-cache
@@ -133,6 +151,12 @@ jobs:
             ~/.android/avd/*
             ~/.android/adb*
           key: avd-${{ matrix.api-level }}
+
+      - name: Enable KVM group perms
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
 
       - name: create AVD and generate snapshot for caching
         if: steps.avd-cache.outputs.cache-hit != 'true'
@@ -154,4 +178,12 @@ jobs:
           force-avd-creation: false
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-metrics -camera-back none
           disable-animations: true
-          script: ./gradlew connectedFdroidDebugAndroidTest && killall -INT crashpad_handler || true
+          script: ./gradlew :app:connectedFdroidDebugAndroidTest --configuration-cache --scan && ( killall -INT crashpad_handler || true )
+
+      - name: Upload Test Results
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-test-reports-api-${{ matrix.api-level }}
+          path: app/build/outputs/androidTest-results/
+          retention-days: 30
