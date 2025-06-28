@@ -103,19 +103,19 @@ class BTScanModel @Inject constructor(
 
                 // Include Network Service Discovery
                 tcp.forEach { service ->
+                    val address = service.toAddressString()
                     val txtRecords = service.attributes // Map<String, ByteArray?>
                     val shortNameBytes = txtRecords["shortname"]
                     val idBytes = txtRecords["id"]
 
                     val shortName = shortNameBytes?.let { String(it, Charsets.UTF_8) }
-                        ?: service.serviceName
+                        ?: address
                     val deviceId =
                         idBytes?.let { String(it, Charsets.UTF_8) }
                     var displayName = shortName
                     if (deviceId != null) {
                         displayName += "_$deviceId"
                     }
-                    val address = service.toAddressString()
                     addDevice(DeviceListEntry(displayName, "t$address", true))
                 }
 
@@ -179,9 +179,6 @@ class BTScanModel @Inject constructor(
 
     private var scanJob: Job? = null
 
-    val selectedAddress get() = radioInterfaceService.getDeviceAddress()
-
-    // / Use the string for the NopInterface
     val selectedAddressFlow: StateFlow<String?> = radioInterfaceService.currentDeviceAddressFlow
 
     val selectedNotNullFlow: StateFlow<String> = selectedAddressFlow
