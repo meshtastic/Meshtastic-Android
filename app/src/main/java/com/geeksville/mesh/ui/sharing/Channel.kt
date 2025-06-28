@@ -450,7 +450,7 @@ private fun ChannelListView(
             channelSet.settingsList.forEachIndexed { index, channel ->
                 val isDefaultPSK = (channel.psk.size() == 1 && channel.psk.byteAt(0) == 1.toByte()) ||
                     channel.psk.toByteArray().isEmpty()
-                val displayTitle = channel.name.ifEmpty { modemPresetName } + if (isDefaultPSK) " \uD83D\uDD13" else ""
+                val displayTitle = channel.name.ifEmpty { modemPresetName }
 
                 ChannelSelection(
                     index = index,
@@ -462,6 +462,7 @@ private fun ChannelListView(
                             channelSelections[index] = it
                         }
                     },
+                    showUnlockIcon = isDefaultPSK
                 )
             }
             OutlinedButton(

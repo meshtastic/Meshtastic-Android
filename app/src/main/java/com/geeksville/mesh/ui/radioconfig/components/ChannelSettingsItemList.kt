@@ -61,6 +61,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -78,6 +79,7 @@ import com.geeksville.mesh.ui.common.components.dragContainer
 import com.geeksville.mesh.ui.common.components.dragDropItemsIndexed
 import com.geeksville.mesh.ui.common.components.rememberDragDropState
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
+import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
 private fun ChannelItem(
@@ -122,12 +124,19 @@ fun ChannelCard(
     enabled: Boolean,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
+    showUnlockIcon: Boolean = false,
 ) = ChannelItem(
     index = index,
     title = title,
     enabled = enabled,
     onClick = onEditClick,
 ) {
+    if (showUnlockIcon) {
+        Icon(
+            imageVector = ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
+            contentDescription = "Unlocked"
+        )
+    }
     IconButton(onClick = { onDeleteClick() }) {
         Icon(
             imageVector = Icons.TwoTone.Close,
@@ -143,13 +152,20 @@ fun ChannelSelection(
     title: String,
     enabled: Boolean,
     isSelected: Boolean,
-    onSelected: (Boolean) -> Unit
+    onSelected: (Boolean) -> Unit,
+    showUnlockIcon: Boolean = false,
 ) = ChannelItem(
     index = index,
     title = title,
     enabled = enabled,
     onClick = {},
 ) {
+    if (showUnlockIcon) {
+        Icon(
+            imageVector = ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
+            contentDescription = "Unlocked"
+        )
+    }
     Checkbox(
         enabled = enabled,
         checked = isSelected,
@@ -276,14 +292,13 @@ fun ChannelSettingsItemList(
                 ) { index, channel, isDragging ->
                     val isDefaultPSK = (channel.psk.size() == 1 && channel.psk.byteAt(0) == 1.toByte()) ||
                         channel.psk.toByteArray().isEmpty()
-                    val displayTitle = channel.name.ifEmpty { primaryChannel.name } +
-                        if (isDefaultPSK) " \uD83D\uDD13" else ""
                     ChannelCard(
                         index = index,
-                        title = displayTitle,
+                        title = channel.name.ifEmpty { primaryChannel.name },
                         enabled = enabled,
                         onEditClick = { showEditChannelDialog = index },
-                        onDeleteClick = { settingsListInput.removeAt(index) }
+                        onDeleteClick = { settingsListInput.removeAt(index) },
+                        showUnlockIcon = isDefaultPSK
                     )
                     if (index == 0 && !isDragging) {
                         Text(
