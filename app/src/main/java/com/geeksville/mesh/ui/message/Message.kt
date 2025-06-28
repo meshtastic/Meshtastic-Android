@@ -434,13 +434,13 @@ private fun MessageTopBar(
             Text(text = title)
             if (isDefaultPsk
             ) {
-                Spacer(modifier = Modifier.width(8.dp))
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
-                    contentDescription = "Unlocked"
-                )
+                Spacer(modifier = Modifier.width(10.dp))
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
+                        contentDescription = "Unlocked"
+                    )
+                }
             }
-        }
     },
     navigationIcon = {
         IconButton(onClick = onNavigateBack) {
