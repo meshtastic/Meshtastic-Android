@@ -78,7 +78,6 @@ import com.geeksville.mesh.ui.common.components.dragContainer
 import com.geeksville.mesh.ui.common.components.dragDropItemsIndexed
 import com.geeksville.mesh.ui.common.components.rememberDragDropState
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
-import com.google.protobuf.ByteString
 
 @Composable
 private fun ChannelItem(
@@ -275,8 +274,10 @@ fun ChannelSettingsItemList(
                     items = settingsListInput,
                     dragDropState = dragDropState,
                 ) { index, channel, isDragging ->
-                    val isDefaultPSK = (channel.psk.size() == 1 && channel.psk.byteAt(0) == 1.toByte()) || channel.psk.toByteArray().isEmpty()
-                    val displayTitle = channel.name.ifEmpty { primaryChannel.name } + if (isDefaultPSK) " \uD83D\uDD13" else ""
+                    val isDefaultPSK = (channel.psk.size() == 1 && channel.psk.byteAt(0) == 1.toByte()) ||
+                        channel.psk.toByteArray().isEmpty()
+                    val displayTitle = channel.name.ifEmpty { primaryChannel.name } +
+                        if (isDefaultPSK) " \uD83D\uDD13" else ""
                     ChannelCard(
                         index = index,
                         title = displayTitle,
