@@ -50,6 +50,7 @@ data class Message(
     val receivedTime: Long,
     val node: Node,
     val text: String,
+    val fromLocal: Boolean,
     val time: String,
     val read: Boolean,
     val status: MessageStatus?,
