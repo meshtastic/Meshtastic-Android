@@ -21,6 +21,7 @@ import android.content.ClipData
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,6 +31,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
@@ -41,6 +43,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
@@ -48,6 +51,7 @@ import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -139,7 +143,9 @@ internal fun MessageScreen(
 
     val quickChat by viewModel.quickChatActions.collectAsStateWithLifecycle()
     val messages by viewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(listOf())
-
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = messages.indexOfLast { !it.read }.coerceAtLeast(0)
+    )
     val messageInput = rememberTextFieldState(message)
 
     var replyingTo by remember { mutableStateOf<Message?>(null) }
@@ -200,37 +206,59 @@ internal fun MessageScreen(
         },
     ) { padding ->
         Column(Modifier.padding(padding)) {
-            MessageList(
+            Box(
                 modifier = Modifier.weight(1f, fill = true),
-                messages = messages,
-                selectedIds = selectedIds,
-                onUnreadChanged = { viewModel.clearUnreadCount(contactKey, it) },
-                onSendReaction = { emoji, id ->
-                    viewModel.sendReaction(
-                        emoji,
-                        id,
-                        contactKey
-                    )
-                },
-                viewModel = viewModel,
-                contactKey = contactKey,
-                onReply = { replyingTo = it },
-                onNodeMenuAction = { action ->
-                    when (action) {
-                        is NodeMenuAction.DirectMessage -> {
-                            val hasPKC =
-                                viewModel.ourNodeInfo.value?.hasPKC == true && action.node.hasPKC
-                            val channel =
-                                if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else action.node.channel
-                            navigateToMessages("$channel${action.node.user.id}")
-                        }
+            ) {
+                MessageList(
+                    modifier = Modifier.fillMaxSize(),
+                    listState = listState,
+                    messages = messages,
+                    selectedIds = selectedIds,
+                    onUnreadChanged = { viewModel.clearUnreadCount(contactKey, it) },
+                    onSendReaction = { emoji, id ->
+                        viewModel.sendReaction(
+                            emoji,
+                            id,
+                            contactKey
+                        )
+                    },
+                    viewModel = viewModel,
+                    contactKey = contactKey,
+                    onReply = { replyingTo = it },
+                    onNodeMenuAction = { action ->
+                        when (action) {
+                            is NodeMenuAction.DirectMessage -> {
+                                val hasPKC =
+                                    viewModel.ourNodeInfo.value?.hasPKC == true && action.node.hasPKC
+                                val channel =
+                                    if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else action.node.channel
+                                navigateToMessages("$channel${action.node.user.id}")
+                            }
 
-                        is NodeMenuAction.MoreDetails -> navigateToNodeDetails(action.node.num)
-                        is NodeMenuAction.Share -> sharedContact = action.node
-                        else -> viewModel.handleNodeMenuAction(action)
+                            is NodeMenuAction.MoreDetails -> navigateToNodeDetails(action.node.num)
+                            is NodeMenuAction.Share -> sharedContact = action.node
+                            else -> viewModel.handleNodeMenuAction(action)
+                        }
+                    },
+                )
+                if (listState.canScrollBackward) {
+                    FloatingActionButton(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(16.dp),
+                        onClick = {
+                            coroutineScope.launch {
+                                listState.animateScrollToItem(0)
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowDownward,
+                            contentDescription = stringResource(id = R.string.scroll_to_bottom)
+                        )
                     }
-                },
-            )
+                }
+            }
             QuickChatRow(
                 enabled = isConnected,
                 actions = quickChat,
