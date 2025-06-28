@@ -148,50 +148,56 @@ internal fun MessageItem(
                         onStatusClick = onStatusClick,
                     )
                 }
-                AutoLinkText(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
-                    text = message.text,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = cardColors.contentColor
-                )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically,
+
+                Column(
+                    modifier = Modifier.padding(horizontal = 8.dp),
                 ) {
-                    if (!message.fromLocal) {
-                        if (message.hopsAway == 0) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            ) {
-                                Snr(
-                                    message.snr,
-                                    fontSize = MaterialTheme.typography.labelSmall.fontSize
-                                )
-                                Rssi(
-                                    message.rssi,
-                                    fontSize = MaterialTheme.typography.labelSmall.fontSize
+                    AutoLinkText(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        text = message.text,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = cardColors.contentColor
+                    )
+
+                    val topPadding = if (!message.fromLocal) 2.dp else 0.dp
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = topPadding, bottom = 4.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        if (!message.fromLocal) {
+                            if (message.hopsAway == 0) {
+                                Row(
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                ) {
+                                    Snr(
+                                        message.snr,
+                                        fontSize = MaterialTheme.typography.labelSmall.fontSize
+                                    )
+                                    Rssi(
+                                        message.rssi,
+                                        fontSize = MaterialTheme.typography.labelSmall.fontSize
+                                    )
+                                }
+                            } else {
+                                Text(
+                                    text = stringResource(
+                                        R.string.hops_away_template,
+                                        message.hopsAway
+                                    ),
+                                    style = MaterialTheme.typography.labelSmall,
                                 )
                             }
-                        } else {
-                            Text(
-                                text = stringResource(
-                                    R.string.hops_away_template,
-                                    message.hopsAway
-                                ),
-                                style = MaterialTheme.typography.labelSmall,
-                            )
                         }
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text(
+                            text = message.time,
+                            style = MaterialTheme.typography.labelSmall,
+                        )
                     }
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        text = message.time,
-                        style = MaterialTheme.typography.labelSmall,
-                    )
                 }
             }
         }
@@ -306,7 +312,11 @@ private fun MessageItemPreview() {
         originalMessage = received,
     )
     AppTheme {
-        Column {
+        Column(
+            modifier = Modifier
+                .background(MaterialTheme.colorScheme.background)
+                .padding(vertical = 16.dp),
+        ) {
             MessageItem(
                 message = sent,
                 node = sent.node,
