@@ -109,6 +109,7 @@ fun DeliveryInfo(
 @Composable
 internal fun MessageList(
     modifier: Modifier = Modifier,
+    listState: LazyListState = rememberLazyListState(),
     messages: List<Message>,
     selectedIds: MutableState<Set<Long>>,
     onUnreadChanged: (Long) -> Unit,
@@ -120,9 +121,6 @@ internal fun MessageList(
 ) {
     val haptics = LocalHapticFeedback.current
     val inSelectionMode by remember { derivedStateOf { selectedIds.value.isNotEmpty() } }
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = messages.indexOfLast { !it.read }.coerceAtLeast(0)
-    )
     AutoScrollToBottom(listState, messages)
     UpdateUnreadCount(listState, messages, onUnreadChanged)
 
