@@ -207,8 +207,7 @@ internal fun DebugFilterBar(
                     DebugPresetFilters(
                         presetFilters = presetFilters,
                         filterTexts = filterTexts,
-                        onFilterTextsChange = onFilterTextsChange,
-                        intentionalFail = True
+                        onFilterTextsChange = onFilterTextsChange
                     )
                 }
             }
