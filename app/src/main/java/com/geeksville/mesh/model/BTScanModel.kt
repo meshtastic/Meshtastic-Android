@@ -109,9 +109,9 @@ class BTScanModel @Inject constructor(
                     val idBytes = txtRecords["id"]
 
                     val shortName = shortNameBytes?.let { String(it, Charsets.UTF_8) }
-                        ?: address
+                        ?: context.getString(R.string.meshtastic)
                     val deviceId =
-                        idBytes?.let { String(it, Charsets.UTF_8) }
+                        idBytes?.let { String(it, Charsets.UTF_8) }?.replace("!", "")
                     var displayName = shortName
                     if (deviceId != null) {
                         displayName += "_$deviceId"
