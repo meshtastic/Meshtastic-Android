@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -76,6 +77,7 @@ import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -97,6 +99,7 @@ import com.geeksville.mesh.ui.node.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import kotlinx.coroutines.launch
+import androidx.compose.ui.graphics.vector.ImageVector
 
 private const val MESSAGE_CHARACTER_LIMIT = 200
 private const val SNIPPET_CHARACTER_LIMIT = 50
@@ -122,12 +125,20 @@ internal fun MessageScreen(
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     val channelName by remember(channelIndex) {
         derivedStateOf {
-            channelIndex?.let { channels.getChannel(it)?.name } ?: "Unknown Channel"
+            channelIndex?.let {
+                val channel = channels.getChannel(it)
+                val name = channel?.name ?: "Unknown Channel"
+                // Check if PSK is the default (base64 'AQ==', i.e., single byte 0x01)
+                val isDefaultPSK = (channel?.settings?.psk?.size() == 1 &&
+                    channel.settings.psk.byteAt(0) == 1.toByte()) ||
+                    channel?.psk?.toByteArray()?.isEmpty() == true
+                Pair(name, isDefaultPSK)
+            } ?: Pair("Unknown Channel", false)
         }
     }
-
+    val (channelTitle, isDefaultPsk) = channelName
     val title = when (nodeId) {
-        DataPacket.ID_BROADCAST -> channelName
+        DataPacket.ID_BROADCAST -> channelTitle
         else -> viewModel.getUser(nodeId).longName
     }
     viewModel.setTitle(title)
@@ -201,7 +212,8 @@ internal fun MessageScreen(
                     }
                 }
             } else {
-                MessageTopBar(title, channelIndex, mismatchKey, onNavigateBack)
+                MessageTopBar(title, channelIndex, mismatchKey, onNavigateBack, isDefaultPsk = isDefaultPsk
+        )
             }
         },
     ) { padding ->
@@ -442,9 +454,22 @@ private fun MessageTopBar(
     title: String,
     channelIndex: Int?,
     mismatchKey: Boolean = false,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    isDefaultPsk: Boolean = false
 ) = TopAppBar(
-    title = { Text(text = title) },
+    title = {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = title)
+            if (isDefaultPsk
+            ) {
+                Spacer(modifier = Modifier.width(10.dp))
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
+                        contentDescription = "Unlocked"
+                    )
+                }
+            }
+    },
     navigationIcon = {
         IconButton(onClick = onNavigateBack) {
             Icon(
