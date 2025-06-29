@@ -81,6 +81,7 @@ import com.geeksville.mesh.repository.radio.RadioServiceConnectionState
 import com.geeksville.mesh.telemetry
 import com.geeksville.mesh.user
 import com.geeksville.mesh.util.anonymize
+import com.geeksville.mesh.util.ignoreException
 import com.geeksville.mesh.util.toOneLineString
 import com.geeksville.mesh.util.toPIIString
 import com.geeksville.mesh.util.toRemoteExceptions
@@ -1932,12 +1933,14 @@ class MeshService : Service(), Logging {
     }
 
     private fun onServiceAction(action: ServiceAction) {
-        when (action) {
-            is ServiceAction.GetDeviceMetadata -> getDeviceMetadata(action.destNum)
-            is ServiceAction.Favorite -> favoriteNode(action.node)
-            is ServiceAction.Ignore -> ignoreNode(action.node)
-            is ServiceAction.Reaction -> sendReaction(action)
-            is ServiceAction.AddSharedContact -> importContact(action.contact)
+        ignoreException {
+            when (action) {
+                is ServiceAction.GetDeviceMetadata -> getDeviceMetadata(action.destNum)
+                is ServiceAction.Favorite -> favoriteNode(action.node)
+                is ServiceAction.Ignore -> ignoreNode(action.node)
+                is ServiceAction.Reaction -> sendReaction(action)
+                is ServiceAction.AddSharedContact -> importContact(action.contact)
+            }
         }
     }
 
