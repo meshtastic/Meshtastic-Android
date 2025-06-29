@@ -1,0 +1,79 @@
+#!/usr/bin/env python3
+
+""" sum_debug_alloc
+
+    Sum lines reported from codec2-dev/src/debug_alloc.h and report
+
+    Lines like:
+
+        CALLOC: run_ldpc_decoder(112, 32)
+
+
+        MALLOC: other_func(238)
+
+    """
+
+import fileinput
+
+by_func = {}
+by_addr = {}
+
+def new_func():
+    rec = {}
+    rec['cur'] = 0
+    rec['max'] = 0
+    return(rec)
+
+def new_addr():
+    rec = {}
+    rec['func'] = 0     # Where allocated, may not be same as where free'd!
+    rec['size'] = 0
+    return(rec)
+
+for line in fileinput.input():
+
+    if ((line.startswith("MALLOC:")) or (line.startswith("CALLOC:"))):
+      if (line.startswith("MALLOC:")):
+        words = line.translate( str.maketrans("()", "  ") ).strip().split()
+        func = words[1]
+        addr = words[2]
+        size = int(words[3])
+
+      elif (line.startswith("CALLOC:")):
+        words = line.translate( str.maketrans("(,)", "   ") ).strip().split()
+        func = words[1]
+        addr = words[2]
+        size = int(words[3]) * int(words[4])
+
+      #print("Alloc: {} to {} in {}".format(size, addr, func))
+      if (not (func in by_func)): by_func[func] = new_func()
+      data = by_func[func]
+      data['cur'] += size
+      if (data['cur'] > data['max']):
+          data['max'] = data['cur']
+      if (addr in by_addr): 
+          print("Error: duplicate allocation to {} in {}".format(addr, func))
+      else: 
+          by_addr[addr] = new_addr()
+          by_addr[addr]['func'] = func
+          by_addr[addr]['size'] = size
+
+    elif (line.startswith("FREE:")):
+      words = line.translate( str.maketrans("(,)", "   ") ).strip().split()
+      func = words[1]
+      addr = words[2]
+      if (addr in by_addr): 
+          func_a = by_addr[addr]['func']
+          by_func[func_a]['cur'] -= by_addr[addr]['size']
+          del(by_addr[addr])
+      else:
+          print("Error: free of unallocated location {} in {}".format(addr, func))
+      #print("Free: {}:{} in {} to {}".format(func_a, addr, func, by_func[func_a]['cur']))
+
+#####
+total = 0
+for func, sum in by_func.items():
+    max = by_func[func]['max']
+    print("{} = {}".format(func, max))
+    total += max
+print("Total = {}".format(total))

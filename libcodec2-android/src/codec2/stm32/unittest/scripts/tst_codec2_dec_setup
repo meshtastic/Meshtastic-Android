@@ -1,0 +1,54 @@
+#!/bin/bash
+#
+# tst_codec2_dec_setup
+#
+# Setup input and reference data for one of several versions of this test.
+
+# Find the scripts directory
+SCRIPTS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+# Setup common variables
+source $SCRIPTS/run_tests_common.sh
+
+# RUN_DIR - Directory where test will be run
+RUN_DIR="${UNITTEST_BASE}/test_run/${FULL_TEST_NAME}"
+
+# Call common setup function to make the directory
+setup_common "${RUN_DIR}"
+
+# Change to test directory
+cd "${RUN_DIR}"
+
+
+#####################################################################
+## Test SETUP actions:
+
+case "${TEST_OPT}" in
+
+    1300 )
+    	# Config is <mode>, <teswtframes> 
+    	echo "41000000" > stm_cfg.txt
+	#
+        # Copy N frames of a raw audio file to stm_in.raw. 
+        dd bs=2560 count=30 if=../../../../raw/hts1.raw of=spch_in.raw \
+		> setup.log 2>&1
+	c2enc 1300 spch_in.raw stm_in.raw >> setup.log 2>&1
+	#
+        # Reference
+        c2dec 1300 stm_in.raw ref_dec.raw > ref_gen.log 2>&1
+	;;
+
+    700C )
+    	# Config is <mode>, <teswtframes> 
+    	echo "81000000" > stm_cfg.txt
+	#
+        # Copy N frames of a raw audio file to stm_in.raw. 
+        dd bs=2560 count=30 if=../../../../raw/hts1.raw of=spch_in.raw \
+		> setup.log 2>&1
+	c2enc 700C spch_in.raw stm_in.raw >> setup.log 2>&1
+	#
+        # Reference
+        c2dec 700C stm_in.raw ref_dec.raw > ref_gen.log 2>&1
+	;;
+
+    esac

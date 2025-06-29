@@ -1,0 +1,25 @@
+#!/bin/bash
+#
+# run_all_codec2_tests
+
+# Find the scripts directory
+SCRIPTS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+# Setup common variables
+source $SCRIPTS/run_tests_common.sh
+
+declare -i Fails=0
+
+run_all_codec2_tests "$@" || Fails+=1
+run_all_ofdm_tests "$@" || Fails+=1
+run_all_ldpc_tests "$@" || Fails+=1
+
+if (( $Fails == 0 )); then
+    echo -e "\nAll STM32 Tests PASSED"
+else
+    echo -e "\n$Fails STM32 Tests FAILED!"
+fi
+
+exit $Fails
+
+# vi:set ts=4 et sts=4:

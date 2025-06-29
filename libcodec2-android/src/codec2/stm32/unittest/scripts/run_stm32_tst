@@ -1,0 +1,53 @@
+#!/bin/bash
+#
+# run_stm32_tst <test> <test_sub_type> [--noload] [--st-util]
+
+# Find the scripts directory
+SCRIPTS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+# Setup common variables
+source $SCRIPTS/run_tests_common.sh
+
+declare -i Fails=0
+
+#####################################################################
+LOAD=${ARGS[--noload]:+--noload}
+STUTIL=${ARGS[--st-util]:+--st-util}
+RUN_DIR="${UNITTEST_BASE}/test_run/${FULL_TEST_NAME}"
+echo -e "test full name: ${FULL_TEST_NAME}"
+setup_common "${RUN_DIR}"
+
+if [ ! -f "${SCRIPTS}/${TEST}_setup" ]; then
+    echo -e "\nERROR: scripts/${TEST}_setup not found!"
+    echo "Test name correct?"
+    echo "valid test names:"
+    cd scripts; ls tst*setup | sed 's/_setup//'
+    exit 1
+fi
+
+# Call setup - run - check scripts
+${TEST}_setup ${TEST} ${TEST_OPT} --clean || { echo "ERROR in ${TEST}_setup! Exiting..."; exit 1; }
+cd "${RUN_DIR}" 
+run_stm32_prog ${UNITTEST_BIN}/${TEST}.elf ${LOAD} ${OPENOCD} | tee gdb.log
+[ ! ${PIPESTATUS[0]} -eq 0 ] && { echo "ERROR in run_stm32_prog! Exiting..."; exit 1; }
+# stop now if we see an assert() fire, no point running check phase
+grep -q assertion gdb.log && exit 1
+${TEST}_check ${TEST} ${TEST_OPT} 2>&1 | tee check.log
+if [ ! "${PIPESTATUS[0]}" -eq 0 ]; then
+    let Fails=($Fails + 1)
+fi
+
+sleep 5 # Delay for st-util to close
+
+if (( $Fails == 0 )); then
+    echo -e "\nTest ${FULL_TEST_NAME} PASSED"
+else
+    echo -e "\nTest ${FULL_TEST_NAME} FAILED!"
+    cat ${RUN_DIR}/check.log
+    echo -e "\n  -> look at log files in: ${RUN_DIR}:"
+    ls  ${RUN_DIR}
+fi
+
+exit $Fails
+
+# vi:set ts=4 et sts=4:

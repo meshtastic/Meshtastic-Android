@@ -1,0 +1,43 @@
+#!/bin/bash
+#
+# tst_codec2_dec_check
+#
+# Setup input and reference data for one of several versions of this test.
+
+# Find the scripts directory
+SCRIPTS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+# Setup common variables
+source $SCRIPTS/run_tests_common.sh
+
+# RUN_DIR - Directory where test will be run
+RUN_DIR="${UNITTEST_BASE}/test_run/${FULL_TEST_NAME}"
+
+# Call common setup function to make the directory
+setup_common "${RUN_DIR}"
+
+# Change to test directory
+cd "${RUN_DIR}"
+
+
+#####################################################################
+## Test CHECK actions:
+
+declare -i Fails=0
+
+#case "${TEST_OPT}" in
+#    1300)
+#    700C)
+#    esac
+
+echo -e "\nMust manually listen to this!"
+aplay -f S16_LE stm_out.raw
+
+if (( $Fails == 0 )); then
+    echo -e "\nTest PASSED"
+else
+    echo -e "\nTest FAILED!"
+fi
+
+
+exit $Fails

@@ -704,4 +704,9 @@
     <string name="no_ble_devices">No Bluetooth devices found.</string>
     <string name="no_network_devices">No Network devices found.</string>
     <string name="no_usb_devices">No USB Serial devices found.</string>
+    <string name="audio_message">Audio message</string>
+    <string name="record">Record</string>
+    <string name="play">Play</string>
+    <string name="stop">Stop</string>
+    <string name="seconds_abbreviated">s</string>
 </resources>

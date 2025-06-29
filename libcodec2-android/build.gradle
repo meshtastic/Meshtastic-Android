@@ -1,0 +1,108 @@
+apply plugin: 'com.android.library'
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+    }
+}
+
+android {
+    android.ndkVersion "21.4.7075529"
+    compileSdkVersion 36
+    namespace "com.ustadmobile.codec2"
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    defaultConfig {
+        ndkVersion '21.4.7075529'
+        minSdkVersion 26
+        targetSdkVersion 36
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+            }
+        }
+        ndk {
+            abiFilters = []
+            abiFilters.addAll(rootProject.ext.ABI_FILTERS.split(';').collect{it as String})
+        }
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+        }
+    }
+}
+
+tasks.configureEach { task ->
+    if (task.name.contains('externalNativeBuildRelease') || task.name.contains("externalNativeBuildDebug")) {
+        task.dependsOn compileCodec2
+    } else if (task.name.contains('buildCMakeDebug') || task.name.contains("buildCMakeRelease") || task.name.contains("buildCMakeRelWithDebInfo")) {
+        task.dependsOn compileCodec2
+    }
+}
+
+tasks.register('compileCodec2') {
+    doFirst {
+        project.file("build/codec2_build_linux").mkdirs()
+        for (String abi : rootProject.ext.ABI_FILTERS.split(";")) {
+            project.file("build/codec2_build_android_" + abi).mkdirs()
+            project.file("build/imported-lib/" + abi).mkdirs()
+        }
+    }
+
+    doLast {
+        exec {
+            workingDir "$projectDir/build/codec2_build_linux"
+            commandLine "cmake", "$projectDir/src/codec2"
+        }
+
+        exec {
+            workingDir "$projectDir/build/codec2_build_linux"
+            commandLine "make"
+        }
+
+        for (String abi : rootProject.ext.ABI_FILTERS.split(";")) {
+            System.out.println("Handle abi " + abi)
+            exec {
+                workingDir "$projectDir/build/codec2_build_android_" + abi
+                commandLine "cmake", "$projectDir/src/codec2",
+                        "-DCMAKE_TOOLCHAIN_FILE=" + android.ndkDirectory + "/build/cmake/android.toolchain.cmake",
+                        "-DUNITTEST=FALSE",
+                        "-DGENERATE_CODEBOOK=$projectDir/build/codec2_build_linux/src/generate_codebook",
+                        "-DANDROID_NATIVE_API_LEVEL=23", "-DANDROID_ABI=" + abi,
+                        "-DANDROID_STL=c++_shared"
+            }
+
+            exec {
+                workingDir "$projectDir/build/codec2_build_android_" + abi
+                commandLine "cmake", "--build", "."
+            }
+
+            copy {
+                from "$projectDir/build/codec2_build_android_" + abi + "/src/libcodec2.so"
+                into "$projectDir/build/imported-lib/" + abi
+            }
+        }
+    }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation 'com.android.support:support-annotations:28.0.0'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'com.android.support.test:runner:1.0.2'
+    androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+}

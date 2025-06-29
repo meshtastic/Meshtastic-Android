@@ -1,0 +1,32 @@
+#!/bin/bash
+#
+# run_all_ofdm_tests
+
+# Find the scripts directory
+SCRIPTS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+# Setup common variables
+source $SCRIPTS/run_tests_common.sh
+
+declare -i Fails=0
+
+run_stm32_tst tst_ofdm_mod plain "$@" || Fails+=1
+run_stm32_tst tst_ofdm_mod ldpc "$@" || Fails+=1
+
+run_stm32_tst tst_ofdm_demod quick "$@"  || Fails+=1
+run_stm32_tst tst_ofdm_demod ideal "$@"  || Fails+=1
+run_stm32_tst tst_ofdm_demod AWGN "$@"  || Fails+=1
+run_stm32_tst tst_ofdm_demod fade "$@"  || Fails+=1
+run_stm32_tst tst_ofdm_demod ldpc "$@"  || Fails+=1
+run_stm32_tst tst_ofdm_demod ldpc_AWGN "$@"  || Fails+=1
+run_stm32_tst tst_ofdm_demod ldpc_fade "$@"  || Fails+=1
+
+if (( $Fails == 0 )); then
+    echo -e "\nAll ODFM Tests PASSED"
+else
+    echo -e "\n$Fails ODFM Tests FAILED!"
+fi
+
+exit $Fails
+
+# vi:set ts=4 et sts=4:

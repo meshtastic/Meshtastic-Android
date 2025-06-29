@@ -1,0 +1,115 @@
+#!/bin/bash
+#
+# tst_api_mod_check
+#
+# Setup input and reference data for one of several versions of this test.
+
+# Find the scripts directory
+SCRIPTS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+# Setup common variables
+source $SCRIPTS/run_tests_common.sh
+
+# RUN_DIR - Directory where test will be run
+RUN_DIR="${UNITTEST_BASE}/test_run/${FULL_TEST_NAME}"
+
+# Call common setup function to make the directory
+setup_common "${RUN_DIR}"
+
+# Change to test directory
+cd "${RUN_DIR}"
+
+
+#####################################################################
+## Test CHECK actions:
+
+declare -i Fails=0
+
+case "${TEST_OPT}" in
+
+    700D_TEST)
+        #
+        echo -e "\nReference check"
+        if freedv_rx 700D ref_mod.raw ref_rx.raw --testframes; then
+            echo "Passed"
+        else
+            echo "Failed"
+            let Fails=($Fails + 1)
+        fi
+        #
+        echo -e "\nTarget check"
+        if freedv_rx 700D stm_out.raw stm_rx.raw --testframes; then
+            echo "Passed"
+        else
+            echo "Failed"
+            let Fails=($Fails + 1)
+        fi
+        #
+        echo -e "\nCompare output binary data"
+        if compare_ints -s -b2 -t4 ref_mod.raw stm_out.raw; then 
+            echo "Passed"
+        else
+            echo "Failed"
+            let Fails=($Fails + 1)
+        fi
+	;;
+
+    700D_CODEC)
+        #
+        echo -e "\nCompare output binary data"
+        if compare_ints -s -b2 -t4 ref_mod.raw stm_out.raw; then 
+            echo "Passed"
+        else
+            echo "Failed"
+            let Fails=($Fails + 1)
+        fi
+	;;
+
+    700E_TEST)
+        #
+        echo -e "\nReference check"
+        if freedv_rx 700E ref_mod.raw ref_rx.raw --testframes; then
+            echo "Passed"
+        else
+            echo "Failed"
+            let Fails=($Fails + 1)
+        fi
+        #
+        echo -e "\nTarget check"
+        if freedv_rx 700E stm_out.raw stm_rx.raw --testframes; then
+            echo "Passed"
+        else
+            echo "Failed"
+            let Fails=($Fails + 1)
+        fi
+        #
+        echo -e "\nCompare output binary data"
+        if compare_ints -s -b2 -t4 ref_mod.raw stm_out.raw; then 
+            echo "Passed"
+        else
+            echo "Failed"
+            let Fails=($Fails + 1)
+        fi
+	;;
+
+    700E_CODEC)
+        #
+        echo -e "\nCompare output binary data"
+        if compare_ints -s -b2 -t4 ref_mod.raw stm_out.raw; then 
+            echo "Passed"
+        else
+            echo "Failed"
+            let Fails=($Fails + 1)
+        fi
+	;;
+
+    esac
+
+if (( $Fails == 0 )); then
+    echo -e "\nTest PASSED"
+else
+    echo -e "\nTest FAILED!"
+fi
+
+
+exit $Fails

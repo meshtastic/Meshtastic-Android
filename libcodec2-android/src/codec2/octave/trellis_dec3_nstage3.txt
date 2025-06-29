@@ -1,0 +1,15 @@
+# Created by Octave 5.2.0, Sun Sep 12 12:26:33 2021 ACST <david@boomer>
+# name: EbNodB
+# type: matrix
+# rows: 1
+# columns: 6
+ 0 1 2 3 4 5
+
+
+# name: rms_sd
+# type: matrix
+# rows: 1
+# columns: 6
+ 7.7412523956816406 6.4841339000579836 5.8017966072531637 4.9470616511274006 4.3575512816148612 3.5924646693565796
+
+

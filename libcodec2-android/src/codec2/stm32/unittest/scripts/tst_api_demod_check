@@ -1,0 +1,214 @@
+#!/bin/bash
+#
+# tst_api_demod_check
+#
+# Setup input and reference data for one of several versions of this test.
+
+# Find the scripts directory
+SCRIPTS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+# Setup common variables
+source $SCRIPTS/run_tests_common.sh
+
+# RUN_DIR - Directory where test will be run
+RUN_DIR="${UNITTEST_BASE}/test_run/${FULL_TEST_NAME}"
+
+# Call common setup function to make the directory
+setup_common "${RUN_DIR}"
+
+# Change to test directory
+cd "${RUN_DIR}"
+
+# way of performing a rough comparsion of two output speech files that are not exactly the same
+
+function compare_energy() {
+    energy_ref=$(python3 -c "import numpy as np; x=np.fromfile(\"ref_demod.raw\",dtype=\"int16\").astype(float); print(10*np.log10(np.dot(x,x)))")
+    energy_target=$(python3 -c "import numpy as np; x=np.fromfile(\"stm_out.raw\",dtype=\"int16\").astype(float); print(10*np.log10(np.dot(x,x)))")
+    printf "ref energy: %f target energy: %f\n" $energy_ref $energy_target
+	
+    python3 -c "import sys; sys.exit(1) if abs($energy_ref-$energy_target) < 1 else sys.exit(0)"
+    if [[ $? -eq 1 ]]; then echo "energy compare OK"; 
+    else echo "energy compare BAD"; 
+     	 let Fails=($Fails + 1)
+    fi
+}
+
+#####################################################################
+## Test CHECK actions:
+
+declare -i Fails=0
+
+case "${TEST_OPT}" in
+
+    700D_plain_test)
+	echo "Check reference decode"
+	p1=$(grep '^BER\.*: 0.000' ref_gen.log | wc -l)
+	p2=$(grep '^Coded BER: 0.000' ref_gen.log | wc -l)
+	if [[ $p1 -eq 1 && $p2 -eq 1 ]]; then echo "OK"; 
+	else echo "BAD"; 
+     	    let Fails=($Fails + 1)
+     	fi
+	#
+	echo "Check target decode"
+	p1=$(grep '^BER\.*: 0.000' stderr.log | wc -l)
+	p2=$(grep '^Coded BER: 0.000' stderr.log | wc -l)
+	if [[ $p1 -eq 1 && $p2 -eq 1 ]]; then echo "OK"; 
+	else echo "BAD"; 
+     	    let Fails=($Fails + 1)
+     	fi
+	;;
+
+    700D_AWGN_test)
+	echo "Check reference decode"
+	uber_ref=$(cat ref_gen.log | sed -n "s/^BER.*: \([0-9..]*\).*Tbits.*/\1/p")
+	cber_ref=$(cat ref_gen.log | sed -n "s/^Coded BER.*: \([0-9..]*\).*Tbits.*/\1/p")
+	printf "REF   uncoded BER: %f coded BER: %f\n" $uber_ref $cber_ref
+
+	# As per notes in tst_api_demod_setup, coded BER is unreliable
+	# for such a short test, so we'll just sanity check the
+	# reference uncoded BER here. Bash can't compare floats
+	# .... so use return code of some python script
+	python3 -c "import sys; sys.exit(1) if $uber_ref < 0.1 else sys.exit(0)"
+	if [[ $? -eq 1 ]]; then echo "OK"; 
+	else echo "BAD"; 
+     	    let Fails=($Fails + 1)
+     	fi
+
+	echo "Check target decode"
+	uber_target=$(cat stderr.log | sed -n "s/^BER.*: \([0-9..]*\).*Tbits.*/\1/p")
+	cber_target=$(cat stderr.log | sed -n "s/^Coded BER.*: \([0-9..]*\).*Tbits.*/\1/p")
+	printf "TARGET uncoded BER: %f coded BER: %f\n" $uber_target $cber_target
+	python3 -c "import sys; sys.exit(1) if $uber_target < 0.1 and abs($cber_ref-$cber_target) < 0.01 else sys.exit(0)"
+	if [[ $? -eq 1 ]]; then echo "OK"; 
+	else echo "BAD"; 
+     	    let Fails=($Fails + 1)
+     	fi
+	;;
+
+    700D_AWGN_codec)
+	# 1/ The two output files sound OK, and when plotted look very
+	#    similar, but they don't match on a sample-sample basis.
+	
+	# 2/ Suspect some small state difference, or perhaps random
+	#    number generator diverging, sampling codec2_rand() at the
+	#    end of the x86 and stm32 test programs might show up any
+	#    differences.
+
+	# 3/ At this stage - we can't make sample by sample automatic
+	#    tests work.  However there is value in running the test
+	#    to ensure no asserts are hit and the code doesn't crash
+	#    (e.g. due to an out of memory issues). A simple energy
+	#    comparison is used on the output speech files, which
+	#    will trap any large errors.
+
+	# 4/ We can also manually evaulate the ouput decoded speech by
+	#    listening to the output speech files.
+
+	compare_energy;
+
+	# make sure execution time stays within bounds
+	execution_time=mktmp
+	cat stdout.log | sed  -n "s/.*freedv_rx \([0-9..]*\) msecs/\1/p" > $execution_time
+	python3 -c "import sys; import numpy as np;  x=np.loadtxt(\"$execution_time\"); print(\"execution time max:: %5.2f mean: %5.2f ms\" % (np.max(x), np.mean(x))); sys.exit(1) if np.max(x) < 80.0 else sys.exit(0)"
+	if [[ $? -eq 1 ]]; then echo "execution time OK"; 
+        else echo "BAD"; 
+     	   let Fails=($Fails + 1)
+        fi
+
+	;;
+
+    700E_plain_test)
+	echo "Check reference decode"
+	p1=$(grep '^BER\.*: 0.000' ref_gen.log | wc -l)
+	p2=$(grep '^Coded BER: 0.000' ref_gen.log | wc -l)
+	if [[ $p1 -eq 1 && $p2 -eq 1 ]]; then echo "OK"; 
+	else echo "BAD"; 
+     	    let Fails=($Fails + 1)
+     	fi
+	#
+	echo "Check target decode"
+	p1=$(grep '^BER\.*: 0.000' stderr.log | wc -l)
+	p2=$(grep '^Coded BER: 0.000' stderr.log | wc -l)
+	if [[ $p1 -eq 1 && $p2 -eq 1 ]]; then echo "OK"; 
+	else echo "BAD"; 
+     	    let Fails=($Fails + 1)
+     	fi
+	;;
+
+    700E_AWGN_test)
+	echo "Check reference decode"
+	uber_ref=$(cat ref_gen.log | sed -n "s/^BER.*: \([0-9..]*\).*Tbits.*/\1/p")
+	cber_ref=$(cat ref_gen.log | sed -n "s/^Coded BER.*: \([0-9..]*\).*Tbits.*/\1/p")
+	printf "REF   uncoded BER: %f coded BER: %f\n" $uber_ref $cber_ref
+
+	# As per notes in tst_api_demod_setup, coded BER is unreliable
+	# for such a short test, so we'll just sanity check the
+	# reference uncoded BER here. Bash can't compare floats
+	# .... so use return code of some python script
+	python3 -c "import sys; sys.exit(1) if $uber_ref < 0.1 else sys.exit(0)"
+	if [[ $? -eq 1 ]]; then echo "OK"; 
+	else echo "BAD"; 
+     	    let Fails=($Fails + 1)
+     	fi
+
+	echo "Check target decode"
+	uber_target=$(cat stderr.log | sed -n "s/^BER.*: \([0-9..]*\).*Tbits.*/\1/p")
+	cber_target=$(cat stderr.log | sed -n "s/^Coded BER.*: \([0-9..]*\).*Tbits.*/\1/p")
+	printf "TARGET uncoded BER: %f coded BER: %f\n" $uber_target $cber_target
+	python3 -c "import sys; sys.exit(1) if $uber_target < 0.1 and abs($cber_ref-$cber_target) < 0.01 else sys.exit(0)"
+	if [[ $? -eq 1 ]]; then echo "OK"; 
+	else echo "BAD"; 
+     	    let Fails=($Fails + 1)
+     	fi
+	;;
+
+    700E_AWGN_codec)
+	# 1/ The two output files sound OK, and when plotted look very
+	#    similar, but they don't match on a sample-sample basis.
+	
+	# 2/ Suspect some small state difference, or perhaps random
+	#    number generator diverging, sampling codec2_rand() at the
+	#    end of the x86 and stm32 test programs might show up any
+	#    differences.
+
+	# 3/ At this stage - we can't make sample by sample automatic
+	#    tests work.  However there is value in running the test
+	#    to ensure no asserts are hit and the code doesn't crash
+	#    (e.g. due to an out of memory issues). A simple energy
+	#    comparison is used on the output speech files, which
+	#    will trap any large errors.
+
+	# 4/ We can also manually evaulate the ouput decoded speech by
+	#    listening to the output speech files.
+
+	compare_energy;
+
+	# make sure execution time stays within bounds
+	execution_time=mktmp
+	cat stdout.log | sed  -n "s/.*freedv_rx \([0-9..]*\) msecs/\1/p" > $execution_time
+	python3 -c "import sys; import numpy as np;  x=np.loadtxt(\"$execution_time\"); print(\"execution time max:: %5.2f mean: %5.2f ms\" % (np.max(x), np.mean(x))); sys.exit(1) if np.max(x) < 80.0 else sys.exit(0)"
+	if [[ $? -eq 1 ]]; then echo "execution time OK"; 
+        else echo "BAD"; 
+     	   let Fails=($Fails + 1)
+        fi
+
+	;;
+
+    1600_plain_codec)
+	compare_energy;
+	;;
+
+    *) 
+       	printf "ERROR: invalid test option. Valid options are:\n  700D_plain_test\n  700D_AWGN_test\n  700D_plain_codec\n  1600_plain_codec\n"
+	exit 1
+
+    esac
+
+if (( $Fails == 0 )); then
+    echo -e "\nTest PASSED"
+else
+    echo -e "\nTest FAILED!"
+fi
+
+
+exit $Fails

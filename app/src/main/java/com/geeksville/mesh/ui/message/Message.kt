@@ -18,12 +18,18 @@
 package com.geeksville.mesh.ui.message
 
 import android.content.ClipData
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -44,15 +50,20 @@ import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.filled.StopCircle
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -68,10 +79,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -109,6 +126,8 @@ internal fun MessageScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val clipboardManager = LocalClipboard.current
+    val context = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
 
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isConnected by viewModel.isConnected.collectAsStateWithLifecycle(false)
@@ -162,6 +181,20 @@ internal fun MessageScreen(
             contact = sharedContact,
             onDismiss = { sharedContact = null }
         )
+    }
+    val isRecording by viewModel.isRecording.collectAsStateWithLifecycle()
+    val interactionSource = remember { MutableInteractionSource() }
+
+    // Permission launcher for RECORD_AUDIO
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (!isGranted) {
+            Log.e("AudioRecord", "RECORD_AUDIO permission denied")
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar("Microphone permission is required")
+            }
+        }
     }
 
     Scaffold(
@@ -231,25 +264,70 @@ internal fun MessageScreen(
                     }
                 },
             )
-            QuickChatRow(
-                enabled = isConnected,
-                actions = quickChat,
-                onClick = { action ->
-                    handleQuickChatAction(action, messageInput, viewModel, contactKey)
-                }
-            )
             ReplySnippet(replyingTo, { replyingTo = null }, ourNode)
-            TextInput(isConnected, messageInput) {
-                val message = messageInput.text.toString().trim()
-                if (message.isNotEmpty()) {
-                    replyingTo?.let {
-                        viewModel.sendMessage(message, contactKey, it.packetId)
-                        replyingTo = null
-                    } ?: viewModel.sendMessage(message, contactKey)
-                    // Clear the text input after sending the message and updating all state
-                    messageInput.clearText()
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Column {
+                    QuickChatRow(
+                        enabled = isConnected,
+                        actions = quickChat,
+                        onClick = { action ->
+                            handleQuickChatAction(action, messageInput, viewModel, contactKey)
+                        }
+                    )
+                    val buttonColors = ButtonDefaults.buttonColors()
+                    Surface(
+                        modifier = Modifier
+                            .semantics { role = Role.Button }
+                            .padding(horizontal = 4.dp)
+                            .pointerInput(Unit) {
+                                detectTapGestures(onPress = {
+                                    viewModel.startRecording(context)
+                                    awaitRelease()
+                                    val data = viewModel.stopRecording()
+                                    if (data.size >= 8000) {
+                                        viewModel.sendAudio(data, contactKey)
+                                    }
+                                })
+                            },
+                        shape = ButtonDefaults.shape,
+                        color = if (isRecording) Color.Red else buttonColors.containerColor,
+                        contentColor = buttonColors.contentColor,
+                        shadowElevation = 0.dp,
+                        border = null,
+                    ) {
+                        Row(
+                            Modifier
+                                .defaultMinSize(
+                                    minWidth = ButtonDefaults.MinWidth,
+                                    minHeight = ButtonDefaults.MinHeight,
+                                )
+                                .padding(ButtonDefaults.ContentPadding),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically,
+                            content = {
+                                Icon(
+                                    imageVector = if (isRecording) Icons.Default.StopCircle else Icons.Default.Mic,
+                                    contentDescription = stringResource(id = R.string.record),
+                                )
+                            },
+                        )
+                    }
+                }
+                TextInput(isConnected, messageInput) {
+                    val message = messageInput.text.toString().trim()
+                    if (message.isNotEmpty()) {
+                        replyingTo?.let {
+                            viewModel.sendMessage(message, contactKey, it.packetId)
+                            replyingTo = null
+                        } ?: viewModel.sendMessage(message, contactKey)
+                        // Clear the text input after sending the message and updating all state
+                        messageInput.clearText()
+                    }
                 }
             }
+            SnackbarHost(
+                hostState = snackbarHostState,
+            )
         }
     }
 }

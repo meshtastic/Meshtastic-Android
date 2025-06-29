@@ -65,8 +65,12 @@ import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.map.MAP_STYLE_ID
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
+import com.geeksville.mesh.util.Codec2Player
+import com.geeksville.mesh.util.Codec2Recorder
+import com.geeksville.mesh.util.MAX_AUDIO_PAYLOAD
 import com.geeksville.mesh.util.getShortDate
 import com.geeksville.mesh.util.positionToMeter
+import com.ustadmobile.codec2.Codec2
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -85,6 +89,8 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
@@ -194,7 +200,6 @@ class UIViewModel @Inject constructor(
     private val preferences: SharedPreferences,
     private val meshServiceNotifications: MeshServiceNotifications
 ) : ViewModel(), Logging {
-
     private val _theme =
         MutableStateFlow(preferences.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM))
     val theme: StateFlow<Int> = _theme.asStateFlow()
@@ -396,7 +401,13 @@ class UIViewModel @Inject constructor(
     )
 
     val nodeList: StateFlow<List<Node>> = nodesUiState.flatMapLatest { state ->
-        nodeDB.getNodes(state.sort, state.filter, state.includeUnknown, state.onlyOnline, state.onlyDirect)
+        nodeDB.getNodes(
+            state.sort,
+            state.filter,
+            state.includeUnknown,
+            state.onlyOnline,
+            state.onlyDirect
+        )
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
@@ -574,7 +585,11 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    fun sendMessage(str: String, contactKey: String = "0${DataPacket.ID_BROADCAST}", replyId: Int? = null) {
+    fun sendMessage(
+        str: String,
+        contactKey: String = "0${DataPacket.ID_BROADCAST}",
+        replyId: Int? = null
+    ) {
         // contactKey: unique contact key filter (channel)+(nodeId)
         val channel = contactKey[0].digitToIntOrNull()
         val dest = if (channel != null) contactKey.substring(1) else contactKey
@@ -589,6 +604,56 @@ class UIViewModel @Inject constructor(
         }
         val p = DataPacket(dest, channel ?: 0, str, replyId)
         sendDataPacket(p)
+    }
+
+    fun sendAudio(
+        recordSamples: ShortArray,
+        contactKey: String = "0${DataPacket.ID_BROADCAST}",
+        replyId: Int? = null
+    ) {
+        // contactKey: unique contact key filter (channel)+(nodeId)
+        val channel = contactKey[0].digitToIntOrNull()
+        val dest = if (channel != null) contactKey.substring(1) else contactKey
+
+        // if the destination is a node, we need to ensure it's a
+        // favorite so it does not get removed from the on-device node database.
+        if (channel == null) { // no channel specified, so we assume it's a direct message
+            val node = nodeDB.getNode(dest)
+            if (!node.isFavorite) {
+                favoriteNode(nodeDB.getNode(dest))
+            }
+        }
+        val mode = Codec2.CODEC2_MODE_1200
+        val c2con = Codec2.create(mode)
+        val samplesPerFrame = Codec2.getSamplesPerFrame(c2con);
+        val bytesPerFrame = Codec2.getBitsSize(c2con);
+        val header = byteArrayOf(0xc0.toByte(), 0xde.toByte(), 0xc2.toByte(), mode.toByte())
+        try {
+            var lastId: Int? = replyId
+            recordSamples.toList().chunked(samplesPerFrame * (MAX_AUDIO_PAYLOAD / bytesPerFrame))
+                .forEach({
+                    val encodedData = it.chunked(samplesPerFrame).map {
+                        val chunk = it.toShortArray()
+                        val encoded = ByteArray(bytesPerFrame)
+                        Codec2.encode(c2con, chunk, encoded)
+                        encoded
+                    }.flatMap { it.toList() }.toByteArray()
+
+                    val packetData = header.plus(encodedData)
+                    val p = DataPacket(
+                        to = dest,
+                        bytes = packetData,
+                        dataType = Portnums.PortNum.AUDIO_APP_VALUE,
+                        from = DataPacket.ID_LOCAL,
+                        channel = channel ?: 0,
+                        replyId = lastId
+                    )
+                    sendDataPacket(p)
+                    lastId = p.id
+                })
+        } finally {
+            Codec2.destroy(c2con)
+        }
     }
 
     fun sendWaypoint(wpt: MeshProtos.Waypoint, contactKey: String = "0${DataPacket.ID_BROADCAST}") {
@@ -984,5 +1049,42 @@ class UIViewModel @Inject constructor(
 
     fun setNodeFilterText(text: String) {
         nodeFilterText.value = text
+    }
+
+    private val player = Codec2Player()
+    private val playerMutex = Mutex()
+    private val _playingMessageState = MutableStateFlow<Message?>(null)
+    val playingMessageState: StateFlow<Message?> = _playingMessageState.asStateFlow()
+    private val recorder = Codec2Recorder()
+    private val _isRecording = MutableStateFlow(false)
+    val isRecording: StateFlow<Boolean> = _isRecording.asStateFlow()
+
+    suspend fun playMessage(message: Message?) {
+        playerMutex.withLock {
+            if (!player.isPlaying.get()) {
+                _playingMessageState.value = message
+            } else {
+                player.stop()
+                return
+            }
+        }
+        if (message == null) {
+            return
+        }
+        player.play(message.getAudioMessageChain())
+        _playingMessageState.value = null
+    }
+
+    fun startRecording(context: Context) {
+        debug("Start recording")
+        _isRecording.value = true
+        recorder.startRecording(context)
+    }
+
+    suspend fun stopRecording(): ShortArray {
+        val data = recorder.stopRecording()
+        debug("Stopped recording")
+        _isRecording.value = false
+        return data
     }
 }

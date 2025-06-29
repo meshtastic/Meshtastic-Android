@@ -24,6 +24,7 @@ import com.geeksville.mesh.database.dao.PacketDao
 import com.geeksville.mesh.database.entity.ContactSettings
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.ReactionEntity
+import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.model.Node
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -62,17 +63,25 @@ class PacketRepository @Inject constructor(private val packetDaoLazy: dagger.Laz
 
     suspend fun getMessagesFrom(contact: String, getNode: suspend (String?) -> Node) =
         withContext(Dispatchers.IO) {
+            val refs = mutableMapOf<Int, Message>()
             packetDao.getMessagesFrom(contact).mapLatest { packets ->
                 packets.map { packet ->
                     val message = packet.toMessage(getNode)
-                    message.replyId.takeIf { it != null && it != 0 }
-                        ?.let { getPacketByPacketId(it) }
-                        ?.toMessage(getNode)
-                        ?.let { originalMessage -> message.copy(originalMessage = originalMessage) }
-                        ?: message
+                    refs.set(message.packetId, message)
+                    message
+                }.map {
+                    val og = refs[it.replyId]
+                    if (og != null) {
+                        if (it.portNum == PortNum.AUDIO_APP_VALUE) {
+                            og.hasBeenReplied = true
+                        }
+                        it.originalMessage = og
+                    }
+                    it
                 }
             }
         }
+
 
     suspend fun updateMessageStatus(d: DataPacket, m: MessageStatus) = withContext(Dispatchers.IO) {
         packetDao.updateMessageStatus(d, m)

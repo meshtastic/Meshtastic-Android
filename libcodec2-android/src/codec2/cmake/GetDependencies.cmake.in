@@ -1,0 +1,24 @@
+# As this script is run in a new cmake instance, it does not have access to
+# the existing cache variables. Pass them in via the configure_file command.
+set(CMAKE_BINARY_DIR @CMAKE_BINARY_DIR@)
+set(CMAKE_SOURCE_DIR @CMAKE_SOURCE_DIR@)
+set(UNIX @UNIX@)
+set(WIN32 @WIN32@)
+set(CMAKE_CROSSCOMPILING @CMAKE_CROSSCOMPILING@)
+set(CMAKE_FIND_LIBRARY_SUFFIXES @CMAKE_FIND_LIBRARY_SUFFIXES@)
+set(CMAKE_FIND_LIBRARY_PREFIXES @CMAKE_FIND_LIBRARY_PREFIXES@)
+set(CMAKE_SYSTEM_LIBRARY_PATH @CMAKE_SYSTEM_LIBRARY_PATH@)
+set(CMAKE_FIND_ROOT_PATH @CMAKE_FIND_ROOT_PATH@)
+set(CODEC2_DLL ${CMAKE_BINARY_DIR}/src/libcodec2.dll)
+
+include(${CMAKE_SOURCE_DIR}/cmake/GetPrerequisites.cmake)
+get_prerequisites(${CODEC2_DLL} _deps 1 0 "" "")
+foreach(_runtime ${_deps})
+    message("Looking for ${_runtime}")
+    find_library(RUNTIME_${_runtime} ${_runtime})
+    message("${RUNTIME_${_runtime}}")
+    if(RUNTIME_${_runtime})
+        file(INSTALL DESTINATION "${CMAKE_INSTALL_PREFIX}/bin"
+        TYPE EXECUTABLE FILES "${RUNTIME_${_runtime}}")
+    endif()
+endforeach()

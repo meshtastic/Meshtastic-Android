@@ -439,4 +439,9 @@
     <string name="export_keys">Експортиране на ключовете</string>
     <string name="export_keys_confirmation">Експортира публичния и частния ключове във файл. Моля, съхранявайте го на сигурно място.</string>
     <string name="node_count_template">(%1$d онлайн / %2$d общо)</string>
+    <string name="audio_message">Звуково съобщение</string>
+    <string name="record">Звукозапис</string>
+    <string name="play">Изслушай</string>
+    <string name="stop">Спри</string>
+    <string name="seconds_abbreviated">сек.</string>
 </resources>

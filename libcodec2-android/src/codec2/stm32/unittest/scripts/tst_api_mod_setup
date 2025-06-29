@@ -1,0 +1,86 @@
+#!/bin/bash
+#
+# tst_api_mod_setup
+#
+# Setup input and reference data for one of several versions of this test.
+
+# Find the scripts directory
+SCRIPTS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+# Setup common variables
+source $SCRIPTS/run_tests_common.sh
+
+# RUN_DIR - Directory where test will be run
+RUN_DIR="${UNITTEST_BASE}/test_run/${FULL_TEST_NAME}"
+
+# Call common setup function to make the directory
+setup_common "${RUN_DIR}"
+
+# Change to test directory
+cd "${RUN_DIR}"
+
+
+#####################################################################
+## Test SETUP actions:
+
+case "${TEST_OPT}" in
+
+    700D_TEST )
+    	# Config is <mode>, <teswtframes>, <clip>, <bpf>
+    	echo "71000000" > stm_cfg.txt
+	#
+        # Copy N frames of a raw audio file to stm_in.raw. 
+        dd bs=1280 count=48 if=../../../../raw/hts1.raw of=stm_in.raw \
+		> setup.log 2>&1
+	#
+        # Reference
+        freedv_tx 700D stm_in.raw ref_mod.raw --testframes --txbpf 0 \
+		> ref_gen.log 2>&1
+	;;
+
+    700D_CODEC )
+    	# Config is <mode>, <teswtframes>, <clip>, <bpf>
+    	echo "70000000" > stm_cfg.txt
+	#
+        # Copy N frames of a raw audio file to stm_in.raw. 
+        dd bs=1280 count=48 if=../../../../raw/hts1.raw of=stm_in.raw \
+		> setup.log 2>&1
+	#
+        # Reference
+        freedv_tx 700D stm_in.raw ref_mod.raw --txbpf 0 \
+		> ref_gen.log 2>&1
+	;;
+
+    700E_TEST )
+    	# Config is <mode>, <teswtframes>, <clip>, <bpf>
+    	echo "81110000" > stm_cfg.txt
+	#
+        # Copy N frames of a raw audio file to stm_in.raw. 
+        dd bs=1280 count=48 if=../../../../raw/hts1.raw of=stm_in.raw \
+		> setup.log 2>&1
+	#
+        # Reference
+        freedv_tx 700E stm_in.raw ref_mod.raw --testframes --txbpf 1 --clip 1 \
+		> ref_gen.log 2>&1
+	;;
+
+    700E_CODEC )
+    	# Config is <mode>, <teswtframes>, <cip>, <bpf>
+    	echo "80110000" > stm_cfg.txt
+	#
+        # Copy N frames of a raw audio file to stm_in.raw. 
+        dd bs=1280 count=48 if=../../../../raw/hts1.raw of=stm_in.raw \
+		> setup.log 2>&1
+	#
+        # Reference
+        freedv_tx 700E stm_in.raw ref_mod.raw --txbpf 1 --clip 1 \
+		> ref_gen.log 2>&1
+	;;
+
+    *)
+	printf "ERROR: invalid test option. Valid options are:\n  700D_TEST\n  700D_CODEC\n  700E_TEST\n  700E_CODEC\n"
+	exit 1
+      	;;
+    esac
+
+exit 0

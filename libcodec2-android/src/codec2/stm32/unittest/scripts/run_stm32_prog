@@ -1,0 +1,91 @@
+#!/bin/bash
+
+#######################################
+# Parse command line options
+# Options (starting with "--") are stored in $ARGS.
+# Non-options are taken as the test name (last one sticks).
+
+declare -A ARGS
+for arg in "$@"; do
+    if [[ ${arg} == --* ]] ; then ARGS[${arg}]=true
+    else ELF=${arg}
+    fi
+    done
+
+# Add the parameters for connecting via ssh to
+# your machine with an stm32 connected to
+# UT_SSH_PARAMS
+# e.g.
+# UT_SSH_PARAMS="-p 22 user@host_with_stm32"
+
+if [ -z "$UT_SSH_PARAMS" ]; then
+  UT_SSH=""
+  UT_SLEEP=${UT_SLEEP:=1}
+  UI_SH_FIO="disable"
+else
+  UT_SSH="ssh -f -L 3333:localhost:3333 $UT_SSH_PARAMS"
+  UT_SLEEP=${UT_SLEEP:=4}
+  UT_SH_FIO="enable"
+fi
+
+rm -f gdb_cmds
+
+if [ ! ${ARGS[--st-util]+_} ] ; then
+   # OpenOCD
+   if [ -n "$UT_SSH" ]; then
+        cat <<-EEOOFF >> gdb_cmds
+        shell ${UT_SSH} killall -q openocd\; sleep 1\; openocd -d0 -f board/stm32f4discovery.cfg 2> >(tee stderr.log >&2) | tee stdout.log & 
+	EEOOFF
+   else
+        cat <<-EEOOFF >> gdb_cmds
+             shell killall -q openocd
+             shell openocd -d0 -f board/stm32f4discovery.cfg 2> >(tee stderr.log >&2) | tee stdout.log & 
+	EEOOFF
+   fi
+
+    cat <<-EEOOFF >> gdb_cmds
+        shell sleep ${UT_SLEEP}
+	target remote :3333
+        monitor arm semihosting enable
+        monitor arm semihosting_fileio $UT_SH_FIO 
+	EEOOFF
+    
+       SHUTDOWN="monitor shutdown"
+else
+    # ST-Util
+    echo "---------------------- STARTING gdb/st-util ------------------------------"
+    cat <<-EEOOFF >> gdb_cmds
+        shell st-util --verbose=0 --semihosting 2>stutil_stderr.log >stutil_stdout.log &
+        shell sleep ${UT_SLEEP} 
+	target remote :4242
+	EEOOFF
+
+       SHUTDOWN=""
+fi
+
+if [ ! ${ARGS[--noload]+_} ] ; then
+    cat <<-EEOOFF >> gdb_cmds
+	load
+	EEOOFF
+    fi
+
+cat <<-EEOOFF >> gdb_cmds
+        monitor reset halt
+        monitor adapter speed 4000
+	break EndofMain
+	break abort
+	EEOOFF
+
+if [ -z ${ARGS[--debug]+_} ] ; then
+    cat <<-EEOOFF >> gdb_cmds
+        shell printf "\n----------------------------STARTING PROGRAM-------------------------\n\n"
+	continue
+	set confirm off
+        $SHUTDOWN 
+	quit
+	EEOOFF
+    arm-none-eabi-gdb -batch -x gdb_cmds ${ELF}
+    else 
+    arm-none-eabi-gdb -x gdb_cmds ${ELF}
+    fi
+

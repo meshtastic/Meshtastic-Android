@@ -48,6 +48,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.MessageStatus
+import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.model.Message
@@ -159,13 +160,15 @@ internal fun MessageList(
     val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isConnected by viewModel.isConnected.collectAsStateWithLifecycle(false)
+    val playingMessage by viewModel.playingMessageState.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
     LazyColumn(
         modifier = modifier.fillMaxSize(),
         state = listState,
         reverseLayout = true,
     ) {
-        items(messages, key = { it.uuid }) { msg ->
+        val filteredMessages = messages.filter { it.portNum != Portnums.PortNum.AUDIO_APP_VALUE || !it.hasBeenReplied }
+        items(filteredMessages, key = { it.uuid }) { msg ->
             if (ourNode != null) {
                 val selected by remember { derivedStateOf { selectedIds.value.contains(msg.uuid) } }
                 var node by remember {
@@ -195,7 +198,9 @@ internal fun MessageList(
                                 index = messages.indexOfFirst { it.packetId == msg.replyId }
                             )
                         }
-                    }
+                    },
+                    onPlayStop = { coroutineScope.launch { viewModel.playMessage(msg) }  },
+                    playingMessage = playingMessage
                 )
             }
         }

@@ -31,3 +31,4 @@ toolchainManagement {
         }
     }
 }
+include(":libcodec2-android")

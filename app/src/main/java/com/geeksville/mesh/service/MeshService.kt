@@ -110,6 +110,7 @@ import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 import kotlin.math.absoluteValue
 
+
 sealed class ServiceAction {
     data class GetDeviceMetadata(val destNum: Int) : ServiceAction()
     data class Favorite(val node: Node) : ServiceAction()
@@ -333,6 +334,9 @@ class MeshService : Service(), Logging {
             Portnums.PortNum.TEXT_MESSAGE_APP_VALUE -> dataPacket.text!!
             Portnums.PortNum.WAYPOINT_APP_VALUE -> {
                 getString(R.string.waypoint_received, dataPacket.waypoint!!.name)
+            }
+            Portnums.PortNum.AUDIO_APP_VALUE -> {
+                getString(R.string.audio_message)
             }
 
             else -> return
@@ -703,6 +707,7 @@ class MeshService : Service(), Logging {
         Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
         Portnums.PortNum.ALERT_APP_VALUE,
         Portnums.PortNum.WAYPOINT_APP_VALUE,
+        Portnums.PortNum.AUDIO_APP_VALUE,
     )
 
     private fun rememberReaction(packet: MeshPacket) = serviceScope.handledLaunch {
@@ -874,6 +879,11 @@ class MeshService : Service(), Logging {
                         radioConfigRepository.setTracerouteResponse(
                             packet.getTracerouteResponse(::getUserName)
                         )
+                    }
+
+                    Portnums.PortNum.AUDIO_APP_VALUE -> {
+                        debug("Received AUDIO_APP from $fromId")
+                        rememberDataPacket(dataPacket)
                     }
 
                     else -> debug("No custom processing needed for ${data.portnumValue}")

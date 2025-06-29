@@ -1,0 +1,428 @@
+diff --git Makefile.am Makefile.am
+index a315dd7..7406216 100644
+--- Makefile.am
++++ Makefile.am
+@@ -7,7 +7,7 @@ bin_PROGRAMS = st-flash st-util
+ noinst_LIBRARIES      = libstlink.a
+ 
+ st_flash_SOURCES = flash/main.c
+-st_util_SOURCES = gdbserver/gdb-remote.c gdbserver/gdb-remote.h gdbserver/gdb-server.c mingw/mingw.c mingw/mingw.h
++st_util_SOURCES = gdbserver/gdb-remote.c gdbserver/gdb-remote.h gdbserver/gdb-server.c gdbserver/elfsym.c mingw/mingw.c mingw/mingw.h
+ 
+ CFILES = \
+ 	src/stlink-common.c \
+@@ -24,14 +24,14 @@ HFILES	= \
+ 
+ libstlink_a_SOURCES	=	$(CFILES) $(HFILES)
+ 
+-libstlink_a_CPPFLAGS	= -std=gnu99 -Wall -Wextra -O2
++libstlink_a_CPPFLAGS	= -std=gnu99 -Wall -Wextra -g
+ libstlink_a_LIBADD = $(LIBOBJS)
+ 
+ st_flash_LDADD	=	libstlink.a
+-st_flash_CPPFLAGS	= -std=gnu99 -Wall -Wextra -O2 -I$(top_srcdir)/src -I$(top_srcdir)/mingw
++st_flash_CPPFLAGS	= -std=gnu99 -Wall -Wextra -g  -I$(top_srcdir)/src -I$(top_srcdir)/mingw
+ 
+-st_util_LDADD	=	libstlink.a
+-st_util_CPPFLAGS	= -std=gnu99 -Wall -Wextra -O2 -I$(top_srcdir)/src -I$(top_srcdir)/mingw
++st_util_LDADD	=	libstlink.a -lelf
++st_util_CPPFLAGS	= -std=gnu99 -Wall -Wextra -g -I$(top_srcdir)/src -I$(top_srcdir)/mingw
+ 
+ EXTRA_DIST = autogen.sh
+ 
+diff --git gdbserver/Makefile gdbserver/Makefile
+index bd5c73d..6763388 100644
+--- gdbserver/Makefile
++++ gdbserver/Makefile
+@@ -1,12 +1,11 @@
+ PRG := st-util
+-OBJS = gdb-remote.o gdb-server.o
++OBJS = gdb-remote.o gdb-server.o elfsym.o
+ 
+ CFLAGS+=-g -Wall -Werror -std=gnu99 -I../src
+ LDFLAGS=-L.. -lstlink
+ 
+ # libusb location
+-LDFLAGS+=`pkg-config --libs libusb-1.0`
+-CFLAGS+=`pkg-config --cflags libusb-1.0`
++LDFLAGS+=`pkg-config --libs libusb-1.0` -lelfCFLAGS+=`pkg-config --cflags libusb-1.0`
+ 
+ all: $(PRG)
+ 
+diff --git gdbserver/gdb-server.c gdbserver/gdb-server.c
+index f92fc05..e54d136 100644
+--- gdbserver/gdb-server.c
++++ gdbserver/gdb-server.c
+@@ -1,11 +1,12 @@
+ /* -*- tab-width:8 -*- */
+-#define DEBUG 0
++//#define DEBUG 0
+ /*
+  Copyright (C)  2011 Peter Zotov <whitequark@whitequark.org>
+  Use of this source code is governed by a BSD-style
+  license that can be found in the LICENSE file.
+ */
+ 
++#include <assert.h>
+ #include <getopt.h>
+ #include <stdio.h>
+ #include <string.h>
+@@ -20,14 +21,29 @@
+ #include <arpa/inet.h>
+ #include <signal.h>
+ #endif
++#include <sys/stat.h>
++#include <unistd.h>
++#include <fcntl.h>
+ 
+ #include <stlink-common.h>
+ 
+ #include "gdb-remote.h"
++#include "elfsym.h"
+ 
+ #define DEFAULT_LOGGING_LEVEL 50
+ #define DEFAULT_GDB_LISTEN_PORT 4242
+ 
++/* stdio command codes from target */
++
++#define GDB_STDIO_PRINTF  1
++#define GDB_STDIO_FOPEN   2
++#define GDB_STDIO_FCLOSE  3
++#define GDB_STDIO_FWRITE  4
++#define GDB_STDIO_FREAD   5
++#define GDB_STDIO_FPRINTF 6
++
++#define MAX_STR 256
++
+ #define STRINGIFY_inner(name) #name
+ #define STRINGIFY(name) STRINGIFY_inner(name)
+ 
+@@ -46,11 +62,12 @@ typedef struct _st_state_t {
+     // "/dev/serial/by-id/usb-FTDI_TTL232R-3V3_FTE531X6-if00-port0" is only 58 chars
+     char devicename[100];
+     int logging_level;
+-	int listen_port;
++    int listen_port;
++    char elf_filename[255];
+ } st_state_t;
+ 
+ 
+-int serve(stlink_t *sl, int port);
++int serve(stlink_t *sl, int port, char *elf_filename);
+ char* make_memory_map(stlink_t *sl);
+ 
+ 
+@@ -76,13 +93,14 @@ int parse_options(int argc, char** argv, st_state_t *st) {
+ 	"  -p 4242, --listen_port=1234\n"
+ 	"\t\t\tSet the gdb server listen port. "
+ 	"(default port: " STRINGIFY(DEFAULT_GDB_LISTEN_PORT) ")\n"
++	"  -f <elf_filename>\tenable File I/O of target executable elf_filename"
+ 	;
+ 
+ 
+     int option_index = 0;
+     int c;
+     int q;
+-    while ((c = getopt_long(argc, argv, "hv::d:s:1p:", long_options, &option_index)) != -1) {
++    while ((c = getopt_long(argc, argv, "hv::d:s:1p:1f:", long_options, &option_index)) != -1) {
+         switch (c) {
+         case 0:
+             printf("XXXXX Shouldn't really normally come here, only if there's no corresponding option\n");
+@@ -110,25 +128,29 @@ int parse_options(int argc, char** argv, st_state_t *st) {
+                 strcpy(st->devicename, optarg);
+             }
+             break;
+-		case '1':
+-			st->stlink_version = 1;
+-			break;
+-		case 's':
+-			sscanf(optarg, "%i", &q);
+-			if (q < 0 || q > 2) {
+-				fprintf(stderr, "stlink version %d unknown!\n", q);
+-				exit(EXIT_FAILURE);
+-			}
+-			st->stlink_version = q;
+-			break;
+-		case 'p':
+-			sscanf(optarg, "%i", &q);
+-			if (q < 0) {
+-				fprintf(stderr, "Can't use a negative port to listen on: %d\n", q);
+-				exit(EXIT_FAILURE);
+-			}
+-			st->listen_port = q;
+-			break;
++        case '1':
++            st->stlink_version = 1;
++            break;
++        case 's':
++            sscanf(optarg, "%i", &q);
++            if (q < 0 || q > 2) {
++                fprintf(stderr, "stlink version %d unknown!\n", q);
++                exit(EXIT_FAILURE);
++            }
++            st->stlink_version = q;
++            break;
++        case 'p':
++            sscanf(optarg, "%i", &q);
++            if (q < 0) {
++                fprintf(stderr, "Can't use a negative port to listen on: %d\n", q);
++                exit(EXIT_FAILURE);
++            }
++            st->listen_port = q;
++            break;
++        case 'f':
++            sscanf(optarg, "%s", st->elf_filename);
++            printf("-f arg; %s\n", st->elf_filename);
++            break;
+         }
+     }
+ 
+@@ -162,7 +184,7 @@ int main(int argc, char** argv) {
+ 		sl = stlink_v1_open(state.logging_level);
+ 		if(sl == NULL) return 1;
+ 		break;
+-    }
++        }
+ 
+ 	printf("Chip ID is %08x, Core ID is  %08x.\n", sl->chip_id, sl->core_id);
+ 
+@@ -177,7 +199,7 @@ int main(int argc, char** argv) {
+ 	}
+ #endif
+ 
+-	while(serve(sl, state.listen_port) == 0);
++	while(serve(sl, state.listen_port, state.elf_filename) == 0);
+ 
+ #ifdef __MINGW32__
+ winsock_error:
+@@ -625,7 +647,179 @@ error:
+ 	return error;
+ }
+ 
+-int serve(stlink_t *sl, int port) {
++static unsigned int func_addr, ret_addr, pstr1_addr, pstr2_addr;
++static unsigned int strlen1_addr, strlen2_addr, file_addr, ptr_addr;
++static unsigned int size_addr, nmem_addr;
++
++static void write_buffer(stlink_t *sl, int target_addr, char* buf, size_t size) {
++    /* write the buffer right after the loader */
++    size_t chunk = size & ~0x3;
++    size_t rem   = size & 0x3;
++
++    if (chunk) {
++        memcpy(sl->q_buf, buf, chunk);
++        stlink_write_mem32(sl, target_addr, chunk);
++    }
++    if (rem) {
++        memcpy(sl->q_buf, buf+chunk, rem);
++        stlink_write_mem8(sl, target_addr+chunk, rem);
++    }
++}
++
++static void read_buffer(stlink_t *sl, int target_addr, char* buf, size_t size) {
++    unsigned adj_start = target_addr % 4;
++    unsigned count_rnd = (size + adj_start + 4 - 1) / 4 * 4;
++    size_t i;
++
++    stlink_read_mem32(sl, target_addr - adj_start, count_rnd);
++
++    for(i=0; i<size; i++)
++        buf[i] = sl->q_buf[i + adj_start];
++}
++
++static void fileio(stlink_t *sl)
++{
++    int   func, pstr1, pstr2, strlen1, strlen2, ptr, size, nmem;
++    int   ret = 0;
++    FILE *file;
++    char  file_name[MAX_STR];
++    char  mode[MAX_STR];
++    char *buf;
++
++    stlink_read_mem32(sl, func_addr, 4);
++    func = read_uint32(sl->q_buf, 0);
++
++    /* func != 0 means target has requested a system call */
++
++    switch(func) {
++
++    case GDB_STDIO_PRINTF:
++        stlink_read_mem32(sl, pstr1_addr, 4);
++        pstr1 = read_uint32(sl->q_buf, 0);
++        stlink_read_mem32(sl, strlen1_addr, 4);
++        strlen1 = read_uint32(sl->q_buf, 0);
++        buf = (char*)malloc(strlen1+1);
++        assert(buf != NULL);
++        read_buffer(sl, pstr1, buf, strlen1);
++        buf[strlen1] = 0;
++ 	#ifdef DEBUG
++        //printf("gdb_stdio printf pstr1: 0x%0x strlen1: %d  buf: %s\n", pstr1, strlen1, buf);
++        #endif
++        fputs(buf, stdout);
++        free(buf);
++
++       break;
++
++    case GDB_STDIO_FPRINTF:
++        stlink_read_mem32(sl, file_addr, 4);
++        file = (FILE*)read_uint32(sl->q_buf, 0);
++        stlink_read_mem32(sl, pstr1_addr, 4);
++        pstr1 = read_uint32(sl->q_buf, 0);
++        stlink_read_mem32(sl, strlen1_addr, 4);
++        strlen1 = read_uint32(sl->q_buf, 0);
++        buf = (char*)malloc(strlen1+1);
++        assert(buf != NULL);
++        read_buffer(sl, pstr1, buf, strlen1);
++        buf[strlen1] = 0;
++ 	#ifdef DEBUG
++        //printf("gdb_stdio fprintf pstr1: 0x%0x strlen1: %d  buf: %s file: 0x%x\n", pstr1, strlen1, buf, (unsigned int)file);
++        #endif
++        fputs(buf, file);
++        free(buf);
++
++       break;
++
++    case GDB_STDIO_FOPEN:
++        stlink_read_mem32(sl, pstr1_addr, 4);
++        pstr1 = read_uint32(sl->q_buf, 0);
++        stlink_read_mem32(sl, strlen1_addr, 4);
++        strlen1 = read_uint32(sl->q_buf, 0);
++        assert(strlen1 < MAX_STR);
++        read_buffer(sl, pstr1, file_name, strlen1);
++        file_name[strlen1] = 0;
++
++        stlink_read_mem32(sl, pstr2_addr, 4);
++        pstr2 = read_uint32(sl->q_buf, 0);
++        stlink_read_mem32(sl, strlen2_addr, 4);
++        strlen2 = read_uint32(sl->q_buf, 0);
++        assert(strlen2 < MAX_STR);
++        read_buffer(sl, pstr2, mode, strlen2);
++        mode[strlen2] = 0;
++
++        file = fopen(file_name, mode);
++
++        ret = (int)file;
++ 	#ifdef DEBUG
++        printf("gdb_stdio fopen file_name: %s mode: %s file: 0x%x\n", file_name, mode, (unsigned int)file);
++        #endif
++        break;
++
++    case GDB_STDIO_FCLOSE:
++        stlink_read_mem32(sl, file_addr, 4);
++        file = (FILE*)read_uint32(sl->q_buf, 0);
++        fclose(file);
++
++ 	#ifdef DEBUG
++        printf("gdb_stdio fclose file: 0x%x\n", (unsigned int)file);
++        #endif
++        break;
++
++    case GDB_STDIO_FWRITE:
++        stlink_read_mem32(sl, ptr_addr, 4);
++        ptr = read_uint32(sl->q_buf, 0);
++        stlink_read_mem32(sl, size_addr, 4);
++        size = read_uint32(sl->q_buf, 0);
++        stlink_read_mem32(sl, nmem_addr, 4);
++        nmem = read_uint32(sl->q_buf, 0);
++        stlink_read_mem32(sl, file_addr, 4);
++        file = (FILE*)read_uint32(sl->q_buf, 0);
++
++        buf = (char*)malloc(size*nmem);
++        assert(buf != NULL);
++        read_buffer(sl, ptr, buf, size*nmem);
++        ret = fwrite(buf, size, nmem, file);
++        free(buf);
++ 	#ifdef DEBUG
++        printf("gdb_stdio fwrite ptr: 0x%x size: %d nmem: %d file: 0x%x\n", 
++               ptr, size, nmem, (unsigned int)file);
++        #endif
++        break;
++
++    case GDB_STDIO_FREAD:
++        stlink_read_mem32(sl, ptr_addr, 4);
++        ptr = read_uint32(sl->q_buf, 0);
++        stlink_read_mem32(sl, size_addr, 4);
++        size = read_uint32(sl->q_buf, 0);
++        stlink_read_mem32(sl, nmem_addr, 4);
++        nmem = read_uint32(sl->q_buf, 0);
++        stlink_read_mem32(sl, file_addr, 4);
++        file = (FILE*)read_uint32(sl->q_buf, 0);
++
++        buf = (char*)malloc(size*nmem);
++        assert(buf != NULL);
++        ret = fread(buf, size, nmem, file);
++        write_buffer(sl, ptr, buf, size*nmem);
++        free(buf);
++
++ 	#ifdef DEBUG
++        printf("gdb_stdio fread ptr: 0x%x size: %d nmem: %d file: 0x%x\n", 
++               ptr, size, nmem, (unsigned int)file);
++        #endif
++        break;
++    }
++       
++    if (func) {
++        memcpy(sl->q_buf, &ret, sizeof(int));
++        stlink_write_mem32(sl, ret_addr, 4);
++
++        func = 0;
++        memcpy(sl->q_buf, &func, sizeof(int));
++        stlink_write_mem32(sl, func_addr, 4);
++    }
++}
++
++
++int serve(stlink_t *sl, int port, char *elf_filename) {
+ 	int sock = socket(AF_INET, SOCK_STREAM, 0);
+ 	if(sock < 0) {
+ 		perror("socket");
+@@ -650,7 +844,33 @@ int serve(stlink_t *sl, int port) {
+ 		perror("listen");
+ 		return 1;
+ 	}
+-
++
++        /* init for file I/O */
++
++        func_addr = ret_addr = pstr1_addr = pstr2_addr = strlen1_addr = strlen2_addr = 0;
++        file_addr = ptr_addr = size_addr = nmem_addr = 0;
++
++        printf("elf_filename: %s----------------------------------\n", elf_filename);
++        if (*elf_filename != 0) {
++            int fd = elfsym_open(elf_filename);
++            if (fd == -1)
++                exit(0);
++            func_addr = elfsym_get_symbol_address(fd, "gdb_stdio_func");
++            ret_addr = elfsym_get_symbol_address(fd, "gdb_stdio_ret");
++            pstr1_addr = elfsym_get_symbol_address(fd, "gdb_stdio_pstr1");
++            pstr2_addr = elfsym_get_symbol_address(fd, "gdb_stdio_pstr2");
++            strlen1_addr = elfsym_get_symbol_address(fd, "gdb_stdio_strlen1");
++            strlen2_addr = elfsym_get_symbol_address(fd, "gdb_stdio_strlen2");
++            file_addr = elfsym_get_symbol_address(fd, "gdb_stdio_file");
++            ptr_addr = elfsym_get_symbol_address(fd, "gdb_stdio_ptr");
++            size_addr = elfsym_get_symbol_address(fd, "gdb_stdio_size");
++            nmem_addr = elfsym_get_symbol_address(fd, "gdb_stdio_nmem");
++            elfsym_close(fd);
++            #ifdef DEBUG
++            printf("func_addr: 0x%x\n", func_addr);
++            #endif
++        }
++
+ start_again:
+ 	stlink_force_debug(sl);
+ 	stlink_reset(sl);
+@@ -924,8 +1144,13 @@ start_again:
+ 				if(sl->core_stat == STLINK_CORE_HALTED) {
+ 					break;
+ 				}
++                                
++                                /* file I/O if enabled */
++
++                                if (*elf_filename != 0)
++                                    fileio(sl);
+ 
+-				usleep(100000);
++				usleep(10000);
+ 			}
+ 
+ 			reply = strdup("S05"); // TRAP

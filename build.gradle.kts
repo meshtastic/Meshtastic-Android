@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 /*
  * Copyright (c) 2025 Meshtastic LLC
  *
@@ -30,6 +33,15 @@ buildscript {
         classpath(libs.hilt.android.gradle.plugin)
     }
 }
+
+val buildConfigProperties = Properties().apply {
+    load(FileInputStream(project.file("buildconfig.default.properties")))
+    if (project.file("buildconfig.local.properties").exists()) {
+        load(FileInputStream(project.file("buildconfig.local.properties")))
+    }
+}
+
+extra["ABI_FILTERS"] = buildConfigProperties["abi.filters"]
 
 plugins {
     alias(libs.plugins.kotlin.jvm) apply false

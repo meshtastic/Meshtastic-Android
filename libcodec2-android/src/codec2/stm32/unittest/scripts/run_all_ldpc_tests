@@ -1,0 +1,26 @@
+#!/bin/bash
+#
+# run_all_ldpc_tests
+
+# Find the scripts directory
+SCRIPTS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+# Setup common variables
+source $SCRIPTS/run_tests_common.sh
+
+declare -i Fails=0
+
+run_stm32_tst tst_ldpc_enc "$@" || Fails+=1
+
+run_stm32_tst tst_ldpc_dec ideal "$@" || Fails+=1
+run_stm32_tst tst_ldpc_dec noise "$@" || Fails+=1
+
+if (( $Fails == 0 )); then
+    echo -e "\nAll LDPC Tests PASSED"
+else
+    echo -e "\n$Fails LDPC Tests FAILED!"
+fi
+
+exit $Fails
+
+# vi:set ts=4 et sts=4:

@@ -1,0 +1,71 @@
+#!/bin/bash
+#
+# tst_ldpc_enc_check
+#
+# Setup input and reference data for one of several versions of this test.
+
+# Find the scripts directory
+SCRIPTS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+# Setup common variables
+source $SCRIPTS/run_tests_common.sh
+
+# RUN_DIR - Directory where test will be run
+RUN_DIR="${UNITTEST_BASE}/test_run/${FULL_TEST_NAME}"
+
+# Call common setup function to make the directory
+setup_common "${RUN_DIR}"
+
+# Change to test directory
+cd "${RUN_DIR}"
+
+
+#####################################################################
+## Test CHECK actions:
+
+declare -i Fails=0
+
+case "${TEST_OPT}" in
+
+    ideal) 
+    	BER_LIMIT_RAW=0.0
+    	BER_LIMIT_CODED=0.0
+	;;
+    noise) 
+    	BER_LIMIT_RAW=0.15 
+    	BER_LIMIT_CODED=0.015
+	;;
+    esac
+
+echo -e "\nCompare output binary data"
+if compare_ints -b1 ref_out.raw stm_out.raw; then 
+    echo "Passed"
+else
+    echo "Failed"
+    let Fails=($Fails + 1)
+fi
+#
+
+echo -e "\nReference BER values"
+n=$(grep 'Raw.*BER:' ref_gen.log | awk '{print $7}')
+p1=$(echo $n '<=' ${BER_LIMIT_RAW} | bc)
+n=$(grep 'Coded.*BER:' ref_gen.log | awk '{print $7}')
+p2=$(echo $n '<=' ${BER_LIMIT_CODED} | bc)
+if [[ $p1 -eq 1 && $p2 -eq 1 ]]; then echo "Pass"; 
+else echo "Fail"; let Fails=($Fails + 1); fi
+#
+echo -e "\nTarget BER values"
+n=$(grep 'Raw.*BER:' stderr.log | cut -d ' ' -f 7)
+p1=$(echo $n '<=' ${BER_LIMIT_RAW} | bc)
+n=$(grep 'Coded.*BER:' stderr.log | cut -d ' ' -f 7)
+p2=$(echo $n '<=' ${BER_LIMIT_CODED} | bc)
+if [[ $p1 -eq 1 && $p2 -eq 1 ]]; then echo "Pass"; 
+else echo "Fail"; let Fails=($Fails + 1); fi
+
+if (( $Fails == 0 )); then
+    echo -e "\nTest PASSED"
+else
+    echo -e "\nTest FAILED!"
+fi
+
+exit $Fails

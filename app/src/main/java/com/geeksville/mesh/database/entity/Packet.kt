@@ -38,6 +38,8 @@ data class PacketEntity(
         Message(
             uuid = uuid,
             receivedTime = received_time,
+            portNum = packet.port_num,
+            raw = data.bytes,
             node = getNode(data.from),
             text = data.text.orEmpty(),
             time = getShortDateTime(data.time),
@@ -49,7 +51,7 @@ data class PacketEntity(
             routingError = routingError,
             packetId = packetId,
             emojis = reactions.toReaction(getNode),
-            replyId = data.replyId
+            replyId = data.replyId,
         )
     }
 }

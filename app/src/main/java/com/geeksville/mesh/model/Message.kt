@@ -22,6 +22,7 @@ import com.geeksville.mesh.MeshProtos.Routing
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.Reaction
+import com.geeksville.mesh.util.modeToBitrate
 
 @Suppress("CyclomaticComplexMethod")
 @StringRes
@@ -48,6 +49,8 @@ fun getStringResFrom(routingError: Int): Int = when (routingError) {
 data class Message(
     val uuid: Long,
     val receivedTime: Long,
+    val portNum: Int,
+    val raw: ByteArray?,
     val node: Node,
     val text: String,
     val time: String,
@@ -60,7 +63,8 @@ data class Message(
     val rssi: Int,
     val hopsAway: Int,
     val replyId: Int?,
-    val originalMessage: Message? = null,
+    var originalMessage: Message? = null,
+    var hasBeenReplied: Boolean = false,
 ) {
     fun getStatusStringRes(): Pair<Int, Int> {
         val title = if (routingError > 0) R.string.error else R.string.message_delivery_status
@@ -71,5 +75,29 @@ data class Message(
             else -> getStringResFrom(routingError)
         }
         return title to text
+    }
+
+    fun getAudioMessageChain(): List<Message> {
+        val ml = mutableListOf(this)
+        var m: Message? = this.originalMessage
+        while (m != null) {
+            ml.add(0, m)
+            m = m.originalMessage
+        }
+        return ml
+    }
+
+    fun getAudioTime(): Float {
+        if (raw == null) {
+            return 0f
+        }
+        val bitrate = modeToBitrate(raw[3].toInt())
+        val len = raw.size - 4
+        return len / (bitrate / 8.0f)
+    }
+
+    fun getTotalAudioTime(): Float {
+        return getAudioMessageChain().fold(0f) { acc, message -> acc + message.getAudioTime() }
+
     }
 }

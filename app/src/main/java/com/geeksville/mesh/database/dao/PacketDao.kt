@@ -90,7 +90,7 @@ interface PacketDao {
         """
     SELECT * FROM packet
     WHERE (myNodeNum = 0 OR myNodeNum = (SELECT myNodeNum FROM my_node))
-        AND port_num = 1 AND contact_key = :contact
+        AND port_num IN (1, 9) AND contact_key = :contact
     ORDER BY received_time DESC
     """
     )

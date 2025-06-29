@@ -1,0 +1,68 @@
+#! /bin/bash
+
+# ofdm_check
+#
+# A series of checks of the ofdm functions, mostly decode.
+# 
+# This uses ofdm_mod to supply test data to ofdm_demod and mosty
+# assumes that the encode function is correct.
+
+# Define macros to (later) allow testing alternate versions.
+alias OFDM_MOD=ofdm_mod
+alias OFDM_DEMOD=ofdm_demod
+shopt -s expand_aliases
+
+# PATH
+PATH=$PATH:../src
+
+PASS=1
+
+###############################
+echo
+echo "Simple test, plain, ideal"
+OFDM_MOD --in /dev/zero --testframes 100 |
+    OFDM_DEMOD --out /dev/null --testframes --verbose 1 2> tmp
+cat tmp
+p1=$(grep '^BER\.*: 0.000' tmp | wc -l)
+p2=$(grep '^BER2\.*: 0.000' tmp | wc -l)
+if [[ $p1 -eq 1 && $p2 -eq 1 ]]; then echo "OK"; else echo "BAD"; PASS=0; fi
+
+###############################
+echo
+echo "Simple test, plain, AWGN"
+OFDM_MOD --in /dev/zero --testframes 100 |
+    cohpsk_ch - - -20 -Fs 8000 -f -5  |
+    OFDM_DEMOD --out /dev/null --testframes --verbose 1 2>tmp
+cat tmp
+n=$(grep '^BER\.*:' tmp | cut -d ' ' -f 2)
+p1=$(echo $n '<=' 0.10 | bc)
+n=$(grep '^BER2\.*:' tmp | cut -d ' ' -f 2)
+p2=$(echo $n '<=' 0.10 | bc)
+if [[ $p1 -eq 1 && $p2 -eq 1 ]]; then echo "OK"; else echo "BAD"; PASS=0; fi
+
+###############################
+echo
+echo "Simple test, LDPC, ideal"
+OFDM_MOD --in /dev/zero --ldpc --testframes 100 |
+    OFDM_DEMOD --out /dev/null --ldpc --testframes --verbose 1 2>tmp
+cat tmp
+p1=$(grep '^BER\.*: 0.000' tmp | wc -l)
+p2=$(grep '^Coded BER: 0.000' tmp | wc -l)
+if [[ $p1 -eq 1 && $p2 -eq 1 ]]; then echo "OK"; else echo "BAD"; PASS=0; fi
+
+###############################
+echo
+echo "Simple test, LDPC, AWGN"
+OFDM_MOD --in /dev/zero --ldpc --testframes 100 |
+    cohpsk_ch - - -20 -Fs 8000 -f -5 --fading_dir ../../build_linux/unittest |
+    OFDM_DEMOD --out /dev/null --ldpc --testframes --verbose 1 2>tmp
+cat tmp
+n=$(grep '^BER\.*:' tmp | cut -d ' ' -f 2)
+p1=$(echo $n '<=' 0.10 | bc)
+n=$(grep '^Coded.*BER\.*:' tmp | cut -d ' ' -f 3)
+p2=$(echo $n '<=' 0.01 | bc)
+if [[ $p1 -eq 1 && $p2 -eq 1 ]]; then echo "OK"; else echo "BAD"; PASS=0; fi
+
+
+echo
+if [[ $PASS == 1 ]]; then echo "PASSED"; else echo "FAILED"; fi

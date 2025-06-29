@@ -1,0 +1,100 @@
+#!/bin/bash -x
+#
+# tst_ofdm_demod_setup
+#
+# Setup input and reference data for one of several versions of this test.
+
+# Find the scripts directory
+SCRIPTS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+# Setup common variables
+source $SCRIPTS/run_tests_common.sh
+
+# RUN_DIR - Directory where test will be run
+RUN_DIR="${UNITTEST_BASE}/test_run/${FULL_TEST_NAME}"
+
+# Call common setup function to make the directory
+setup_common "${RUN_DIR}"
+
+# Change to test directory
+cd "${RUN_DIR}"
+
+
+#####################################################################
+## Test SETUP actions:
+
+case "${TEST_OPT}" in
+
+    quick )
+    	# Config is <verbose>, <testframes>, <ldpc_en>, <log_payload_syms> <profile>
+    	echo "01000000" > stm_cfg.txt
+	ofdm_mod --in /dev/zero --out stm_in.raw --testframes 10 > setup.log 2>&1
+        ofdm_demod --in stm_in.raw --out ref_demod_out.raw --log ofdm_demod_ref_log.txt \
+        	--testframes --verbose 1 > ref_gen_log.txt 2>&1
+	;;
+
+    ideal )
+    	# Config is <verbose>, <testframes>, <ldpc_en>, <log_payload_syms> <profile>
+    	echo "01000000" > stm_cfg.txt
+	ofdm_mod --in /dev/zero --out stm_in.raw --testframes 10 > setup.log 2>&1
+        ofdm_demod --in stm_in.raw --out ref_demod_out.raw --log ofdm_demod_ref_log.txt \
+        	--testframes --verbose 1 > ref_gen_log.txt 2>&1
+	;;
+
+    AWGN )
+    	# Config is <verbose>, <testframes>, <ldpc_en>, <log_payload_syms> <profile>
+    	echo "11000000" > stm_cfg.txt
+	ofdm_mod --in /dev/zero --out mod_bits.raw --testframes 10 > setup.log 2>&1
+        cohpsk_ch mod_bits.raw stm_in.raw -20 --Fs 8000 -f -5 >> setup.log 2>&1
+        ofdm_demod --in stm_in.raw --out ref_demod_out.raw --log ofdm_demod_ref_log.txt \
+        	--testframes --verbose 1 > ref_gen_log.txt 2>&1
+	;;
+
+    fade )
+    	# Config is <verbose>, <testframes>, <ldpc_en>, <log_payload_syms> <profile>
+    	echo "11000000" > stm_cfg.txt
+	ofdm_mod --in /dev/zero --out mod_bits.raw --testframes 60 > setup.log 2>&1
+        ch mod_bits.raw stm_in.raw --No -24.5 -f -10 --mpp \
+	    --fading_dir ${CODEC2_BASE}/build_linux/unittest >> setup.log 2>&1
+        ofdm_demod --in stm_in.raw --out ref_demod_out.raw --log ofdm_demod_ref_log.txt \
+        	--testframes --verbose 1 > ref_gen_log.txt 2>&1
+	;;
+
+    profile )
+    	# Config is <verbose>, <testframes>, <ldpc_en>, <log_payload_syms> <profile>
+    	echo "00001000" > stm_cfg.txt
+	ofdm_mod --in /dev/zero --out mod_bits.raw --testframes 100 > setup.log 2>&1
+        ch mod_bits.raw stm_in.raw --No -20 -f -10 --mpp \
+	    --fading_dir ${CODEC2_BASE}/build_linux/unittest >> setup.log 2>&1
+        ofdm_demod --in stm_in.raw --out ref_demod_out.raw --log ofdm_demod_ref_log.txt \
+        	--testframes --verbose 1 > ref_gen_log.txt 2>&1
+	;;
+
+    ldpc )
+    	# Config is <verbose>, <testframes>, <ldpc_en>, <log_payload_syms> <profile>
+    	echo "01110000" > stm_cfg.txt
+	ofdm_mod --in /dev/zero --out stm_in.raw --testframes 1 --ldpc 1 > setup.log 2>&1
+        ofdm_demod --in stm_in.raw --out ref_demod_out.raw --log ofdm_demod_ref_log.txt \
+        	--testframes --ldpc 1 --verbose 1 > ref_gen_log.txt 2>&1
+	;;
+
+    ldpc_AWGN )
+    	# Config is <verbose>, <testframes>, <ldpc_en>, <log_payload_syms> <profile>
+    	echo "01110000" > stm_cfg.txt
+	ofdm_mod --in /dev/zero --out mod_bits.raw --testframes 30 --ldpc 1 > setup.log 2>&1
+        ch mod_bits.raw stm_in.raw --No -20 -f -10 >> setup.log 2>&1
+        ofdm_demod --in stm_in.raw --out ref_demod_out.raw --log ofdm_demod_ref_log.txt \
+        	--testframes --ldpc 1 --verbose 1 > ref_gen_log.txt 2>&1
+	;;
+
+    ldpc_fade )
+    	# Config is <verbose>, <testframes>, <ldpc_en>, <log_payload_syms> <profile>
+    	echo "01110000" > stm_cfg.txt
+	ofdm_mod --in /dev/zero --out mod_bits.raw --testframes 120 --ldpc 1 > setup.log 2>&1
+        ch mod_bits.raw stm_in.raw --No -30 -f -10 --mpp \
+	    --fading_dir ${CODEC2_BASE}/build_linux/unittest >> setup.log 2>&1
+        ofdm_demod --in stm_in.raw --out ref_demod_out.raw --log ofdm_demod_ref_log.txt \
+        	   --testframes --ldpc 1 --verbose 1 > ref_gen_log.txt 2>&1;
+	;;
+
+    esac

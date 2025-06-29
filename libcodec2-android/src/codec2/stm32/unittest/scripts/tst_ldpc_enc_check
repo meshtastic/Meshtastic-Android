@@ -1,0 +1,68 @@
+#!/bin/bash
+#
+# tst_ldpc_enc_check
+#
+# Setup input and reference data for one of several versions of this test.
+
+# Find the scripts directory
+SCRIPTS="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
+
+# Setup common variables
+source $SCRIPTS/run_tests_common.sh
+
+# RUN_DIR - Directory where test will be run
+RUN_DIR="${UNITTEST_BASE}/test_run/${FULL_TEST_NAME}"
+
+# Call common setup function to make the directory
+setup_common "${RUN_DIR}"
+
+# Change to test directory
+cd "${RUN_DIR}"
+
+
+#####################################################################
+## Test CHECK actions:
+
+declare -i Fails=0
+
+#case "${TEST_OPT}" in
+#
+#    plain) 
+#	;;
+#    esac
+
+##### TODO: ldpc_dec should be able to check this outputs,
+#####       it currently reports Tbits = 0!
+
+#echo -e "\nReference check"
+#if ofdm_demod ref_mod_out.raw ref_ofdm_demod.raw --testframes ${LDPC}; then
+#    echo "Passed"
+#else
+#    echo "Failed"
+#    let Fails=($Fails + 1)
+#fi
+##
+#echo -e "\nTarget check"
+#if ofdm_demod mod.raw stm_demod.raw --testframes ${LDPC}; then
+#    echo "Passed"
+#else
+#    echo "Failed"
+#    let Fails=($Fails + 1)
+#fi
+##
+echo -e "\nCompare output binary data"
+if compare_ints -b1 ref_out.raw stm_out.raw; then 
+    echo "Passed"
+else
+    echo "Failed"
+    let Fails=($Fails + 1)
+fi
+#
+
+if (( $Fails == 0 )); then
+    echo -e "\nTest PASSED"
+else
+    echo -e "\nTest FAILED!"
+fi
+
+exit $Fails

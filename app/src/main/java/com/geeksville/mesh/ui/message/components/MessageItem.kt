@@ -30,6 +30,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
@@ -50,6 +54,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MessageStatus
+import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.model.Message
@@ -82,6 +87,8 @@ internal fun MessageItem(
     onStatusClick: () -> Unit = {},
     isConnected: Boolean,
     onNavigateToOriginalMessage: (Int) -> Unit = {},
+    onPlayStop: () -> Unit = {},
+    playingMessage: Message? = null,
 ) = Column(
     modifier = modifier
         .fillMaxWidth()
@@ -120,12 +127,14 @@ internal fun MessageItem(
                 modifier = Modifier
                     .fillMaxWidth(),
             ) {
-                OriginalMessageSnippet(
-                    message = message,
-                    ourNode = ourNode,
-                    cardColors = cardColors,
-                    onNavigateToOriginalMessage = onNavigateToOriginalMessage
-                )
+                if (message.portNum != Portnums.PortNum.AUDIO_APP_VALUE) {
+                    OriginalMessageSnippet(
+                        message = message,
+                        ourNode = ourNode,
+                        cardColors = cardColors,
+                        onNavigateToOriginalMessage = onNavigateToOriginalMessage
+                    )
+                }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -154,14 +163,45 @@ internal fun MessageItem(
                         onStatusClick = onStatusClick,
                     )
                 }
-                AutoLinkText(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 8.dp),
-                    text = message.text,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = cardColors.contentColor
-                )
+                if (message.portNum == Portnums.PortNum.AUDIO_APP_VALUE) {
+                    Row {
+                        val colors = if (playingMessage == message) ButtonDefaults.buttonColors().copy(containerColor=Color.Red) else ButtonDefaults.buttonColors()
+                        Button(
+                            enabled = playingMessage == null || playingMessage == message,
+                            modifier = Modifier.padding(horizontal = 4.dp),
+                            onClick = onPlayStop,
+                            colors = colors,
+                        ) {
+                            Icon(
+                                imageVector = if (playingMessage == message) Icons.Default.Stop else Icons.Default.PlayArrow,
+                                contentDescription = stringResource(id = if (playingMessage == message) R.string.stop else R.string.play),
+                            )
+                        }
+                        Text(
+                            text = "${stringResource(id = R.string.audio_message)} (${
+                                "%.2f".format(
+                                    message.getTotalAudioTime()
+                                )
+                            } ${
+                                stringResource(
+                                    id = R.string.seconds_abbreviated
+                                )
+                            })",
+                            modifier = Modifier
+                                .padding(all = 4.dp)
+                                .align(Alignment.CenterVertically),
+                        )
+                    }
+                } else {
+                    AutoLinkText(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp),
+                        text = message.text,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = cardColors.contentColor
+                    )
+                }
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -265,6 +305,8 @@ private fun MessageItemPreview() {
         text = stringResource(R.string.sample_message),
         time = "10:00",
         status = MessageStatus.DELIVERED,
+        portNum = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+        raw = null,
         snr = 20.5f,
         rssi = 90,
         hopsAway = 0,

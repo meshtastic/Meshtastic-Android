@@ -176,6 +176,9 @@ dependencies {
     implementation(project(":network"))
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
 
+    // internal dependencies
+    implementation(project(":libcodec2-android"))
+
     // Bundles
     implementation(libs.bundles.androidx)
     implementation(libs.bundles.ui)
