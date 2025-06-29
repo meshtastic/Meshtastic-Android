@@ -23,6 +23,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -41,6 +42,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -49,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.ui.common.theme.AppTheme
+import androidx.compose.ui.graphics.vector.ImageVector
 
 @Suppress("LongMethod")
 @Composable
@@ -108,10 +111,23 @@ fun ContactItem(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Text(
-                        text = longName,
-                        modifier = Modifier.weight(1f),
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = longName,
+                        )
+                        // Show unlock icon for broadcast with default PSK
+                        val isBroadcast = contact.contactKey.getOrNull(1) == '^' ||
+                             contact.contactKey.endsWith("^all") ||
+                             contact.contactKey.endsWith("^broadcast")
+
+                        if (isBroadcast && isDefaultPSK == true) {
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Icon(
+                                imageVector = ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
+                                contentDescription = "Unlocked"
+                            )
+                        }
+                    }
                     Text(
                         text = lastMessageTime.orEmpty(),
                         color = MaterialTheme.colorScheme.onSurface,
@@ -172,7 +188,7 @@ private fun ContactItemPreview() {
                 unreadCount = 2,
                 messageCount = 10,
                 isMuted = true,
-                isUnmessageable = false,
+                isUnmessageable = false
             ),
             selected = false,
         )

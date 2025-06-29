@@ -177,6 +177,7 @@ data class Contact(
     val isMuted: Boolean,
     val isUnmessageable: Boolean,
     val nodeColors: Pair<Int, Int>? = null,
+    val isDefaultPSK: Boolean? = false
 )
 
 @Suppress("LongParameterList", "LargeClass")
@@ -519,6 +520,15 @@ class UIViewModel @Inject constructor(
             } else {
                 user.longName
             }
+            val isDefaultPSK = if (toBroadcast) {
+                val _channel = channelSet.getChannel(data.channel)
+                val isDefaultPSK = (_channel?.settings?.psk?.size() == 1 &&
+                     _channel.settings.psk.byteAt(0) == 1.toByte()) ||
+                     _channel?.settings?.psk?.toByteArray()?.isEmpty() == true
+                isDefaultPSK
+            } else {
+                false
+            }
 
             Contact(
                 contactKey = contactKey,
@@ -535,6 +545,7 @@ class UIViewModel @Inject constructor(
                 } else {
                     null
                 },
+                isDefaultPSK = isDefaultPSK
             )
         }
     }.stateIn(
