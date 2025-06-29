@@ -68,8 +68,9 @@ class BTScanModel @Inject constructor(
     val devices = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
     val errorText = MutableLiveData<String?>(null)
 
-    private val showMockInterface: StateFlow<Boolean> get() =
-        MutableStateFlow(radioInterfaceService.isMockInterface()).asStateFlow()
+    private val showMockInterface: StateFlow<Boolean>
+        get() =
+            MutableStateFlow(radioInterfaceService.isMockInterface()).asStateFlow()
 
     init {
         combine(
@@ -84,7 +85,13 @@ class BTScanModel @Inject constructor(
                 }
 
                 // Include a placeholder for "None"
-                addDevice(DeviceListEntry(context.getString(R.string.none), NO_DEVICE_SELECTED, true))
+                addDevice(
+                    DeviceListEntry(
+                        context.getString(R.string.none),
+                        NO_DEVICE_SELECTED,
+                        true
+                    )
+                )
 
                 if (showMockInterface) {
                     addDevice(DeviceListEntry("Demo Mode", "m", true))
@@ -97,7 +104,19 @@ class BTScanModel @Inject constructor(
                 // Include Network Service Discovery
                 tcp.forEach { service ->
                     val address = service.toAddressString()
-                    addDevice(DeviceListEntry(address, "t$address", true))
+                    val txtRecords = service.attributes // Map<String, ByteArray?>
+                    val shortNameBytes = txtRecords["shortname"]
+                    val idBytes = txtRecords["id"]
+
+                    val shortName = shortNameBytes?.let { String(it, Charsets.UTF_8) }
+                        ?: context.getString(R.string.meshtastic)
+                    val deviceId =
+                        idBytes?.let { String(it, Charsets.UTF_8) }?.replace("!", "")
+                    var displayName = shortName
+                    if (deviceId != null) {
+                        displayName += "_$deviceId"
+                    }
+                    addDevice(DeviceListEntry(displayName, "t$address", true))
                 }
 
                 usb.forEach { (_, d) ->
@@ -160,10 +179,6 @@ class BTScanModel @Inject constructor(
 
     private var scanJob: Job? = null
 
-    val selectedAddress get() = radioInterfaceService.getDeviceAddress()
-    val selectedBluetooth: Boolean get() = selectedAddress?.getOrNull(0) == 'x'
-
-    // / Use the string for the NopInterface
     val selectedAddressFlow: StateFlow<String?> = radioInterfaceService.currentDeviceAddressFlow
 
     val selectedNotNullFlow: StateFlow<String> = selectedAddressFlow
