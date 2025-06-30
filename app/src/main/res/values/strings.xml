@@ -711,4 +711,9 @@
     <string name="map_type_satellite">Satellite</string>
     <string name="map_type_terrain">Terrain</string>
     <string name="map_type_hybrid">Hybrid</string>
+    <string name="manage_map_layers">Manage Map Layers</string>
+    <string name="map_layers_title">Map Layers</string>
+    <string name="no_map_layers_loaded">No custom layers loaded.</string>
+    <string name="add_layer_button">Add Layer</string>
+    <string name="kml_feature_info">KML Feature Information</string>
 </resources>

@@ -46,7 +46,7 @@ import java.text.DateFormat
 
 const val DegD = 1e-7
 
-
+@Suppress("MagicNumber")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NodeMapScreen(
@@ -89,7 +89,7 @@ fun NodeMapScreen(
             latLngs.forEachIndexed { index, latLng ->
                 Marker(
                     state = rememberUpdatedMarkerState(position = latLng),
-                    title = "Position ${index}",
+                    title = "Position $index",
                     snippet = "Time of position: ${dateFormat.format(positions[index].time)}",
                 )
             }

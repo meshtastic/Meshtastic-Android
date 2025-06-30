@@ -72,7 +72,7 @@ import java.util.Locale
 import java.util.TimeZone
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Suppress("LongMethod", "CyclomaticComplexMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod", "MagicNumber")
 @Composable
 fun EditWaypointDialog(
     waypoint: Waypoint,
@@ -135,7 +135,6 @@ fun EditWaypointDialog(
             selectedTimeString = ""
         }
     }
-
 
     if (!showEmojiPickerView) {
         AlertDialog(

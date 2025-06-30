@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import io.gitlab.arturbosch.detekt.Detekt
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -253,10 +254,11 @@ detekt {
     source.setFrom(
         files(
             "src/main/java",
-            "google/main/java",
-            "fdroid/main/java",
+            "src/google/java",
+            "src/fdroid/java",
         )
     )
+    parallel = true
 }
 
 secrets {
@@ -274,4 +276,19 @@ tasks.configureEach {
         project.logger.lifecycle("Disabling task for F-Droid: $name")
         enabled = false
     }
+}
+tasks.withType<Detekt> {
+    reports {
+        xml.required = true
+        xml.outputLocation = file("build/reports/detekt/detekt.xml")
+        html.required = true
+        html.outputLocation = file("build/reports/detekt/detekt.html")
+        sarif.required = true
+        sarif.outputLocation = file("build/reports/detekt/detekt.sarif")
+        md.required = true
+        md.outputLocation = file("build/reports/detekt/detekt.md")
+    }
+    debug = true
+    include("**/*.kt")
+    include("**/*.kts")
 }

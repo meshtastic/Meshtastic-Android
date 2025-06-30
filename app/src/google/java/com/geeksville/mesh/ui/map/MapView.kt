@@ -15,29 +15,48 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+@file:Suppress("MagicNumber")
+
 package com.geeksville.mesh.ui.map
 
+import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.net.Uri
 import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material.icons.outlined.Layers
+import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,6 +66,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.createBitmap
@@ -72,6 +92,7 @@ import com.google.maps.android.clustering.view.DefaultClusterRenderer
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.ComposeMapColorScheme
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapEffect
 import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
@@ -87,8 +108,24 @@ import com.google.maps.android.compose.widgets.DisappearingScaleBar
 @Composable
 fun MapView(
     uiViewModel: UIViewModel,
+    mapViewModel: MapViewModel,
     navigateToNodeDetails: (Int) -> Unit,
 ) {
+    val context = LocalContext.current
+    val mapLayers by mapViewModel.mapLayers.collectAsStateWithLifecycle()
+    var showLayerManagementDialog by remember { mutableStateOf(false) }
+
+    val kmlFilePickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            result.data?.data?.let { uri ->
+                val fileName = uri.getFileName(context)
+                mapViewModel.addMapLayer(uri, fileName)
+            }
+        }
+    }
+
     var mapFilterMenuExpanded by remember { mutableStateOf(false) }
     val mapFilterState by uiViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     val ourNodeInfo by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
@@ -96,9 +133,9 @@ fun MapView(
 
     var selectedMapType by remember { mutableStateOf(MapType.NORMAL) }
     var mapTypeMenuExpanded by remember { mutableStateOf(false) }
-    val defaultLatLng = LatLng(39.8283, -98.5795)
+    val defaultLatLng = LatLng(40.7871508066057, -119.2041344866371)
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(defaultLatLng, 3f)
+        position = CameraPosition.fromLatLngZoom(defaultLatLng, 7f)
     }
 
     val allNodes by uiViewModel.filteredNodeList.collectAsStateWithLifecycle()
@@ -238,11 +275,23 @@ fun MapView(
                         } else {
                             // Optionally show a toast that it's locked by someone else
                         }
-
                     }
                 )
             }
+            MapEffect(mapLayers) { map ->
+                mapLayers.forEach { layerItem ->
+                    mapViewModel.loadKmlLayerIfNeeded(map, layerItem)
+                        ?.let { kmlLayer -> // Combine let with ?.
+                            if (layerItem.isVisible && !kmlLayer.isLayerOnMap) {
+                                kmlLayer.addLayerToMap()
+                            } else if (!layerItem.isVisible && kmlLayer.isLayerOnMap) {
+                                kmlLayer.removeLayerFromMap()
+                            }
+                        }
+                }
+            }
         }
+
         DisappearingScaleBar(
             cameraPositionState = cameraPositionState
         )
@@ -278,7 +327,7 @@ fun MapView(
 
         Column(
             modifier = Modifier
-                .align(Alignment.CenterEnd)
+                .align(Alignment.TopEnd)
                 .padding(16.dp),
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -299,7 +348,7 @@ fun MapView(
 
             Box {
                 MapButton(
-                    icon = Icons.Outlined.Layers,
+                    icon = Icons.Outlined.Map,
                     contentDescription = stringResource(id = R.string.map_tile_source),
                     onClick = { mapTypeMenuExpanded = true }
                 )
@@ -312,6 +361,38 @@ fun MapView(
                     }
                 )
             }
+
+            MapButton( // Add KML Layer Button
+                icon = Icons.Outlined.Layers,
+                contentDescription = stringResource(id = R.string.manage_map_layers),
+                onClick = { showLayerManagementDialog = true }
+            )
+        }
+        if (showLayerManagementDialog) {
+            LayerManagementDialog(
+                mapLayers = mapLayers,
+                onDismissRequest = { showLayerManagementDialog = false },
+                onAddLayerClicked = {
+                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "*/*" // Allow all file types initially
+                        // More specific MIME types for KML/KMZ
+                        val mimeTypes = arrayOf(
+                            "application/vnd.google-earth.kml+xml",
+                            "application/vnd.google-earth.kmz"
+                        )
+                        putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+                    }
+                    kmlFilePickerLauncher.launch(intent)
+                    // showLayerManagementDialog = false // Optionally dismiss after clicking add
+                },
+                onToggleVisibility = { layerId ->
+                    mapViewModel.toggleLayerVisibility(
+                        layerId
+                    )
+                },
+                onRemoveLayer = { layerId -> mapViewModel.removeMapLayer(layerId) }
+            )
         }
     }
 }
@@ -451,4 +532,107 @@ private fun unicodeEmojiToBitmap(icon: Int): BitmapDescriptor {
         paint
     )
     return BitmapDescriptorFactory.fromBitmap(bitmap)
+}
+
+@Suppress("LongMethod")
+@Composable
+fun LayerManagementDialog(
+    mapLayers: List<MapLayerItem>,
+    onDismissRequest: () -> Unit,
+    onAddLayerClicked: () -> Unit,
+    onToggleVisibility: (String) -> Unit,
+    onRemoveLayer: (String) -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismissRequest,
+        title = { Text(stringResource(R.string.map_layers_title)) },
+        text = {
+            if (mapLayers.isEmpty()) {
+                Text(stringResource(R.string.no_map_layers_loaded))
+            } else {
+                LazyColumn {
+                    items(mapLayers, key = { it.id }) { layer ->
+                        ListItem(
+                            headlineContent = {
+                                Text(
+                                    layer.name
+                                )
+                            },
+                            supportingContent = {
+                                Text(
+                                    layer.uri?.lastPathSegment ?: "Unknown source", maxLines = 1
+                                )
+                            },
+                            leadingContent = {
+                                Icon(
+                                    imageVector = if (layer.isVisible) {
+                                        Icons.Filled.Visibility
+                                    } else {
+                                        Icons.Filled.VisibilityOff
+                                    },
+                                    contentDescription = if (layer.isVisible) "Visible" else "Hidden",
+                                    modifier = Modifier.clickable { onToggleVisibility(layer.id) }
+                                )
+                            },
+                            trailingContent = {
+                                IconButton(onClick = { onRemoveLayer(layer.id) }) {
+                                    Icon(
+                                        Icons.Filled.Delete,
+                                        contentDescription = "Remove Layer"
+                                    )
+                                }
+                            },
+                            colors = ListItemDefaults.colors(
+                                containerColor = if (layer.isVisible) {
+                                    Color.Transparent
+                                } else {
+                                    Color.Gray.copy(
+                                        alpha = 0.2f
+                                    )
+                                }
+                            )
+                        )
+                        HorizontalDivider()
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onAddLayerClicked) {
+                Text(stringResource(R.string.add_layer_button))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismissRequest) {
+                Text(stringResource(R.string.close))
+            }
+        }
+    )
+}
+
+@Suppress("NestedBlockDepth")
+fun Uri.getFileName(context: android.content.Context): String? {
+    var result: String? = null
+    if (scheme == "content") {
+        val cursor = context.contentResolver.query(this, null, null, null, null)
+        try {
+            if (cursor != null && cursor.moveToFirst()) {
+                val displayNameIndex =
+                    cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
+                if (displayNameIndex != -1) {
+                    result = cursor.getString(displayNameIndex)
+                }
+            }
+        } finally {
+            cursor?.close()
+        }
+    }
+    if (result == null) {
+        result = path
+        val cut = result?.lastIndexOf('/')
+        if (cut != -1 && cut != null) {
+            result = result.substring(cut + 1)
+        }
+    }
+    return result
 }
