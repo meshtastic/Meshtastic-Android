@@ -21,6 +21,7 @@ import android.content.ClipData
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,8 +29,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
@@ -41,6 +44,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
@@ -48,6 +52,7 @@ import androidx.compose.material.icons.filled.SelectAll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -72,6 +77,7 @@ import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -93,6 +99,7 @@ import com.geeksville.mesh.ui.node.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import kotlinx.coroutines.launch
+import androidx.compose.ui.graphics.vector.ImageVector
 
 private const val MESSAGE_CHARACTER_LIMIT = 200
 private const val SNIPPET_CHARACTER_LIMIT = 50
@@ -118,12 +125,20 @@ internal fun MessageScreen(
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     val channelName by remember(channelIndex) {
         derivedStateOf {
-            channelIndex?.let { channels.getChannel(it)?.name } ?: "Unknown Channel"
+            channelIndex?.let {
+                val channel = channels.getChannel(it)
+                val name = channel?.name ?: "Unknown Channel"
+                // Check if PSK is the default (base64 'AQ==', i.e., single byte 0x01)
+                val isDefaultPSK = (channel?.settings?.psk?.size() == 1 &&
+                    channel.settings.psk.byteAt(0) == 1.toByte()) ||
+                    channel?.psk?.toByteArray()?.isEmpty() == true
+                Pair(name, isDefaultPSK)
+            } ?: Pair("Unknown Channel", false)
         }
     }
-
+    val (channelTitle, isDefaultPsk) = channelName
     val title = when (nodeId) {
-        DataPacket.ID_BROADCAST -> channelName
+        DataPacket.ID_BROADCAST -> channelTitle
         else -> viewModel.getUser(nodeId).longName
     }
     viewModel.setTitle(title)
@@ -139,7 +154,9 @@ internal fun MessageScreen(
 
     val quickChat by viewModel.quickChatActions.collectAsStateWithLifecycle()
     val messages by viewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(listOf())
-
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = messages.indexOfLast { !it.read }.coerceAtLeast(0)
+    )
     val messageInput = rememberTextFieldState(message)
 
     var replyingTo by remember { mutableStateOf<Message?>(null) }
@@ -195,42 +212,65 @@ internal fun MessageScreen(
                     }
                 }
             } else {
-                MessageTopBar(title, channelIndex, mismatchKey, onNavigateBack)
+                MessageTopBar(title, channelIndex, mismatchKey, onNavigateBack, isDefaultPsk = isDefaultPsk
+        )
             }
         },
     ) { padding ->
         Column(Modifier.padding(padding)) {
-            MessageList(
+            Box(
                 modifier = Modifier.weight(1f, fill = true),
-                messages = messages,
-                selectedIds = selectedIds,
-                onUnreadChanged = { viewModel.clearUnreadCount(contactKey, it) },
-                onSendReaction = { emoji, id ->
-                    viewModel.sendReaction(
-                        emoji,
-                        id,
-                        contactKey
-                    )
-                },
-                viewModel = viewModel,
-                contactKey = contactKey,
-                onReply = { replyingTo = it },
-                onNodeMenuAction = { action ->
-                    when (action) {
-                        is NodeMenuAction.DirectMessage -> {
-                            val hasPKC =
-                                viewModel.ourNodeInfo.value?.hasPKC == true && action.node.hasPKC
-                            val channel =
-                                if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else action.node.channel
-                            navigateToMessages("$channel${action.node.user.id}")
-                        }
+            ) {
+                MessageList(
+                    modifier = Modifier.fillMaxSize(),
+                    listState = listState,
+                    messages = messages,
+                    selectedIds = selectedIds,
+                    onUnreadChanged = { viewModel.clearUnreadCount(contactKey, it) },
+                    onSendReaction = { emoji, id ->
+                        viewModel.sendReaction(
+                            emoji,
+                            id,
+                            contactKey
+                        )
+                    },
+                    viewModel = viewModel,
+                    contactKey = contactKey,
+                    onReply = { replyingTo = it },
+                    onNodeMenuAction = { action ->
+                        when (action) {
+                            is NodeMenuAction.DirectMessage -> {
+                                val hasPKC =
+                                    viewModel.ourNodeInfo.value?.hasPKC == true && action.node.hasPKC
+                                val channel =
+                                    if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else action.node.channel
+                                navigateToMessages("$channel${action.node.user.id}")
+                            }
 
-                        is NodeMenuAction.MoreDetails -> navigateToNodeDetails(action.node.num)
-                        is NodeMenuAction.Share -> sharedContact = action.node
-                        else -> viewModel.handleNodeMenuAction(action)
+                            is NodeMenuAction.MoreDetails -> navigateToNodeDetails(action.node.num)
+                            is NodeMenuAction.Share -> sharedContact = action.node
+                            else -> viewModel.handleNodeMenuAction(action)
+                        }
+                    },
+                )
+                if (listState.canScrollBackward) {
+                    FloatingActionButton(
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(16.dp),
+                        onClick = {
+                            coroutineScope.launch {
+                                listState.animateScrollToItem(0)
+                            }
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowDownward,
+                            contentDescription = stringResource(id = R.string.scroll_to_bottom)
+                        )
                     }
-                },
-            )
+                }
+            }
             QuickChatRow(
                 enabled = isConnected,
                 actions = quickChat,
@@ -414,9 +454,22 @@ private fun MessageTopBar(
     title: String,
     channelIndex: Int?,
     mismatchKey: Boolean = false,
-    onNavigateBack: () -> Unit
+    onNavigateBack: () -> Unit,
+    isDefaultPsk: Boolean = false
 ) = TopAppBar(
-    title = { Text(text = title) },
+    title = {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(text = title)
+            if (isDefaultPsk
+            ) {
+                Spacer(modifier = Modifier.width(10.dp))
+                    Icon(
+                        imageVector = ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
+                        contentDescription = "Unlocked"
+                    )
+                }
+            }
+    },
     navigationIcon = {
         IconButton(onClick = onNavigateBack) {
             Icon(

@@ -249,11 +249,14 @@ detekt {
     baseline = file("../config/detekt/detekt-baseline.xml")
 }
 
+val googleServiceKeywords = listOf("crashlytics", "google")
 tasks.configureEach {
     if (
-        name.contains("crashlytics", ignoreCase = true) && name.contains("fdroid", ignoreCase = true)
+        googleServiceKeywords.any {
+            name.contains(it, ignoreCase = true)
+        } && name.contains("fdroid", ignoreCase = true)
     ) {
-        project.logger.lifecycle("Disabling Crashlytics task for F-Droid: $name")
+        project.logger.lifecycle("Disabling task for F-Droid: $name")
         enabled = false
     }
 }

@@ -56,6 +56,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DebugViewModel
 import com.geeksville.mesh.model.LogSearchManager.SearchMatch
 import com.geeksville.mesh.model.LogSearchManager.SearchState
+import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
 import com.geeksville.mesh.ui.common.theme.AppTheme
 
 @Composable
@@ -158,6 +159,7 @@ internal fun DebugSearchState(
     searchState: SearchState,
     filterTexts: List<String>,
     presetFilters: List<String>,
+    logs: List<UiMeshLog>,
     onSearchTextChange: (String) -> Unit,
     onNextMatch: () -> Unit,
     onPreviousMatch: () -> Unit,
@@ -195,7 +197,8 @@ internal fun DebugSearchState(
                 onFilterTextsChange = onFilterTextsChange,
                 customFilterText = customFilterText,
                 onCustomFilterTextChange = { customFilterText = it },
-                presetFilters = presetFilters
+                presetFilters = presetFilters,
+                logs = logs
             )
         }
         DebugActiveFilters(
@@ -213,6 +216,7 @@ fun DebugSearchStateviewModelDefaults(
     searchState: SearchState,
     filterTexts: List<String>,
     presetFilters: List<String>,
+    logs: List<UiMeshLog>,
     filterMode: FilterMode,
     onFilterModeChange: (FilterMode) -> Unit,
 ) {
@@ -222,6 +226,7 @@ fun DebugSearchStateviewModelDefaults(
         searchState = searchState,
         filterTexts = filterTexts,
         presetFilters = presetFilters,
+        logs = logs,
         onSearchTextChange = viewModel.searchManager::setSearchText,
         onNextMatch = viewModel.searchManager::goToNextMatch,
         onPreviousMatch = viewModel.searchManager::goToPreviousMatch,
