@@ -264,6 +264,7 @@
     <string name="air_utilization">Využitie éteru</string>
     <string name="temperature">Teplota</string>
     <string name="humidity">Vlhkosť</string>
+    <string name="soil_moisture">Vlhkosť pôdy</string>
     <string name="logs">Záznamy</string>
     <string name="hops_away">Počet skokov</string>
     <string name="info">Informácia</string>
@@ -383,4 +384,5 @@
     <string name="timeout">Časový limit</string>
     <string name="distance">Vzdialenosť</string>
     <string name="map">Mapa</string>
+    <string name="soil_temperature">Teplota pôdy</string>
 </resources>

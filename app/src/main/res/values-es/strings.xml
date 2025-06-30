@@ -262,6 +262,7 @@
     <string name="air_utilization">Tiempo de Transmisión</string>
     <string name="temperature">Temperatura:</string>
     <string name="humidity">Humedad</string>
+    <string name="soil_moisture">Humedad del suelo</string>
     <string name="logs">Registros</string>
     <string name="hops_away">Saltos de distancia</string>
     <string name="info">Información</string>
@@ -356,4 +357,5 @@ Rango de Valores 0 - 500.</string>
     <string name="timeout">Tiempo agotado</string>
     <string name="distance">Distancia</string>
     <string name="map">Mapa</string>
+    <string name="soil_temperature">Temperatura del suelo</string>
 </resources>

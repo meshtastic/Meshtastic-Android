@@ -274,6 +274,7 @@
     <string name="air_utilization">Využití přenosu</string>
     <string name="temperature">Teplota</string>
     <string name="humidity">Vlhkost</string>
+    <string name="soil_moisture">Půdní vlhkost</string>
     <string name="logs">Logy</string>
     <string name="hops_away">Počet skoků</string>
     <string name="hops_away_template">Počet skoků: %1$d</string>
@@ -645,4 +646,5 @@
     <string name="export_keys_confirmation">Exportuje veřejné a soukromé klíče do souboru. Uložte je prosím bezpečně.</string>
     <string name="node_count_template">(%1$d online / %2$d celkem)</string>
     <string name="react">Odpovědět</string>
+    <string name="soil_temperature">Teplota půdy</string>
 </resources>

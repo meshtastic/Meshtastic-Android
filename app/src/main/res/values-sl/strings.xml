@@ -256,6 +256,7 @@
     <string name="air_utilization">Uporaba oddaje</string>
     <string name="temperature">Temperatura</string>
     <string name="humidity">Vlaga</string>
+    <string name="soil_moisture">Vlažnost tal</string>
     <string name="logs">Dnevniki</string>
     <string name="hops_away">Skokov stran</string>
     <string name="info">Informacije</string>
@@ -311,4 +312,5 @@
     <string name="private_key">Zasebni ključ</string>
     <string name="timeout">Časovna omejitev</string>
     <string name="distance">Razdalja</string>
+    <string name="soil_temperature">Temperatura tal</string>
 </resources>

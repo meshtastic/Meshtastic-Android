@@ -264,6 +264,7 @@
     <string name="air_utilization">Wykorzystanie eteru</string>
     <string name="temperature">Temperatura</string>
     <string name="humidity">Wilgotność</string>
+    <string name="soil_moisture">Wilgotność gleby</string>
     <string name="logs">Rejestry zdarzeń (logs)</string>
     <string name="hops_away">Skoków</string>
     <string name="info">Informacja</string>
@@ -413,4 +414,5 @@
     <string name="map">Mapa</string>
     <string name="reply">Odpowiedz</string>
     <string name="disconnect">Rozłącz</string>
+    <string name="soil_temperature">Temperatura gleby</string>
 </resources>

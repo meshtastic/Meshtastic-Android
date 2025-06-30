@@ -202,4 +202,5 @@
     <string name="mute_1_week">1 semana</string>
     <string name="mute_always">Sempre</string>
     <string name="distance">Distancia</string>
+    <string name="soil_temperature">Temperatura do solo</string>
 </resources>

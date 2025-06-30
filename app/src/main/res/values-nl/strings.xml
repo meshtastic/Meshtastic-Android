@@ -263,6 +263,8 @@
     <string name="air_utilization">Luchtverbruik</string>
     <string name="temperature">Temperatuur</string>
     <string name="humidity">Vochtigheid</string>
+    <string name="soil_temperature">Bodemtemperatuur</string>
+    <string name="soil_moisture">Bodemvochtigheid</string>
     <string name="logs">Logs</string>
     <string name="hops_away">Aantal sprongen</string>
     <string name="info">Informatie</string>

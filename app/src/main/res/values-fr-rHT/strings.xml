@@ -245,6 +245,7 @@
     <string name="air_utilization">Itilizasyon Ay</string>
     <string name="temperature">Tanperati</string>
     <string name="humidity">Imidite</string>
+    <string name="soil_moisture">Humidade do solo</string>
     <string name="logs">Jounal</string>
     <string name="hops_away">Hops Lwen</string>
     <string name="info">Enfòmasyon</string>
@@ -279,4 +280,5 @@
     <string name="traceroute_diff">Hops vèsus %1$d Hops tounen %2$d</string>
     <string name="timeout">Tan pase</string>
     <string name="distance">Distans</string>
+    <string name="soil_temperature">Tanperati tè a</string>
 </resources>

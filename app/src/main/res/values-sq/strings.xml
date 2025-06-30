@@ -245,6 +245,7 @@
     <string name="air_utilization">Përdorimi i ajrit</string>
     <string name="temperature">Temperatura</string>
     <string name="humidity">Lagështia</string>
+    <string name="soil_moisture">Lagështia e tokës</string>
     <string name="logs">Loget</string>
     <string name="hops_away">Hops larg</string>
     <string name="info">Informacion</string>
@@ -279,4 +280,5 @@
     <string name="traceroute_diff">Hops drejt %1$d Hops prapa %2$d</string>
     <string name="timeout">Koha e skaduar</string>
     <string name="distance">Distanca</string>
+    <string name="soil_temperature">Temperatura e tokës</string>
 </resources>

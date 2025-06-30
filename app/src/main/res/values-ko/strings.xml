@@ -271,6 +271,7 @@
     <string name="air_utilization">전파 사용</string>
     <string name="temperature">온도</string>
     <string name="humidity">습도</string>
+    <string name="soil_moisture">토양 수분</string>
     <string name="logs">로그</string>
     <string name="hops_away">Hops 수</string>
     <string name="hops_away_template">%1$d Hops 떨어짐</string>
@@ -647,4 +648,5 @@
     <string name="no_ble_devices">블루투스 장치를 찾을수 없습니다.</string>
     <string name="no_network_devices">네트워크 장치를 찾을 수 없습니다.</string>
     <string name="no_usb_devices">USB 시리얼 장치를 찾을 수 없습니다.</string>
+    <string name="soil_temperature">토양 온도</string>
 </resources>

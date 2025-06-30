@@ -266,6 +266,7 @@
     <string name="air_utilization">Tempo di Trasmissione Utilizzato</string>
     <string name="temperature">Temperatura</string>
     <string name="humidity">Umidità</string>
+    <string name="soil_moisture">Umidità del suolo</string>
     <string name="logs">Registri</string>
     <string name="hops_away">Distanza in Hop</string>
     <string name="info">Informazioni</string>
@@ -655,4 +656,5 @@
     <string name="client_notification">Notifiche Client</string>
     <string name="compromised_keys">Rilevate chiavi compromesse, seleziona OK per rigenerarle.</string>
     <string name="regenerate_private_key">Rigenera Chiavi Private</string>
+    <string name="soil_temperature">Temperatura del suolo</string>
 </resources>

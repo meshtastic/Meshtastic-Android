@@ -260,6 +260,7 @@
     <string name="air_utilization">Искоришћеност ваздуха</string>
     <string name="temperature">Температура</string>
     <string name="humidity">Влажност</string>
+    <string name="soil_moisture">Соил Моистуре</string>
     <string name="logs">Дневници</string>
     <string name="hops_away">Скокова удаљено</string>
     <string name="info">Информација</string>
@@ -409,4 +410,5 @@
     <string name="time">Време</string>
     <string name="date">Датум</string>
     <string name="disconnect">Прекините везу</string>
+    <string name="soil_temperature">Температура земљишта</string>
 </resources>

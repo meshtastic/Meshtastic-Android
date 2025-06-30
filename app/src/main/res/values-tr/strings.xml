@@ -264,6 +264,7 @@
     <string name="air_utilization">Yayın Süresi Kullanımı</string>
     <string name="temperature">Sıcaklık</string>
     <string name="humidity">Nem</string>
+    <string name="soil_moisture">Toprak Nemi</string>
     <string name="logs">Kayıtlar</string>
     <string name="hops_away">Atlama Üzerinden</string>
     <string name="info">Bilgi</string>
@@ -628,4 +629,5 @@
     <string name="load">Yükle</string>
     <string name="user_string">Kullanıcı Karakter Dizisi</string>
     <string name="map">Harita</string>
+    <string name="soil_temperature">Toprak Sıcaklığı</string>
 </resources>

@@ -224,6 +224,7 @@
     <string name="air_utilization">Légidőhasználat</string>
     <string name="temperature">Hőmérséklet</string>
     <string name="humidity">Páratartalom</string>
+    <string name="soil_moisture">Talaj nedvesség</string>
     <string name="logs">Naplók</string>
     <string name="hops_away">Ugrás Messzire</string>
     <string name="info">Információ</string>
@@ -259,4 +260,5 @@
     <string name="timeout">Időtúllépés</string>
     <string name="distance">Távolság</string>
     <string name="map">Térkép</string>
+    <string name="soil_temperature">Talaj hőmérséklet</string>
 </resources>

@@ -238,6 +238,7 @@
     <string name="air_utilization">Eetri kasutus</string>
     <string name="temperature">Temperatuur</string>
     <string name="humidity">Niiskus</string>
+    <string name="soil_moisture">Mulla niiskus</string>
     <string name="logs">Logi kirjet</string>
     <string name="hops_away">Hüppe kaugusel</string>
     <string name="info">Informatsioon</string>
@@ -266,4 +267,5 @@
     <string name="environment">Keskkond</string>
     <string name="timeout">Aegunud</string>
     <string name="distance">Kaugus</string>
+    <string name="soil_temperature">Mulla temperatuur</string>
 </resources>

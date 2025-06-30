@@ -220,6 +220,7 @@
     <string name="battery">Батарея</string>
     <string name="temperature">Температура</string>
     <string name="humidity">Вологість</string>
+    <string name="soil_moisture">"Вологість ґрунту "</string>
     <string name="logs">Журнали подій</string>
     <string name="info">Інформація</string>
     <string name="more_details">Докладніше</string>
@@ -342,4 +343,5 @@
     <string name="date">Дата</string>
     <string name="only_favorites">Лише обрані</string>
     <string name="export_keys">Експортувати ключі</string>
+    <string name="soil_temperature">Температура грунту</string>
 </resources>

@@ -268,6 +268,7 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="air_utilization">无线信道利用率</string>
     <string name="temperature">温度</string>
     <string name="humidity">湿度</string>
+    <string name="soil_moisture">土壤湿度</string>
     <string name="logs">日志</string>
     <string name="hops_away">跳数</string>
     <string name="info">信息</string>
@@ -657,4 +658,5 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="compromised_keys">检测到密钥泄漏，请点击 确定 进行重新生成。</string>
     <string name="regenerate_private_key">重新生成私钥</string>
     <string name="disconnect">断开连接</string>
+    <string name="soil_temperature">土壤温度</string>
 </resources>

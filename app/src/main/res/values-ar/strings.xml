@@ -117,6 +117,7 @@
     <string name="channel_utilization">استخدام القناة</string>
     <string name="temperature">الحرارة</string>
     <string name="humidity">الرطوبة</string>
+    <string name="soil_moisture">رطوبة التربة</string>
     <string name="logs">سجلات</string>
     <string name="info">معلومات</string>
     <string name="iaq">معدل جودة الهواء الداخلي</string>
@@ -166,4 +167,5 @@
     <string name="messages">الرسائل</string>
     <string name="distance">المسافة</string>
     <string name="map">الخريطة</string>
+    <string name="soil_temperature">درجة حرارة التربة</string>
 </resources>

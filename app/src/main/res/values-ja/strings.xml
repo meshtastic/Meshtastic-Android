@@ -261,6 +261,7 @@
     <string name="air_utilization">通信の利用</string>
     <string name="temperature">温度</string>
     <string name="humidity">湿度</string>
+    <string name="soil_moisture">土壌水分</string>
     <string name="logs">ログ</string>
     <string name="hops_away">ホップ数</string>
     <string name="info">情報</string>
@@ -596,4 +597,5 @@
     <string name="unmute">ミュート解除</string>
     <string name="dynamic">動的</string>
     <string name="map">地図</string>
+    <string name="soil_temperature">土壌温度</string>
 </resources>
