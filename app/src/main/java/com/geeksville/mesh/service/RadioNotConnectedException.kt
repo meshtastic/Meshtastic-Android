@@ -17,5 +17,7 @@
 
 package com.geeksville.mesh.service
 
+import android.os.RemoteException
+
 open class RadioNotConnectedException(message: String = "Not connected to radio") :
-    BLEException(message)
+    RemoteException(message)

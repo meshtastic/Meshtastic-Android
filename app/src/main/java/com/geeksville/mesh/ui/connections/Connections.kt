@@ -359,6 +359,11 @@ fun ConnectionsScreen(
             }
 
             var selectedDeviceType by remember { mutableStateOf(DeviceType.BLE) }
+            LaunchedEffect(selectedDevice) {
+                // Determine based on the selected device - if disconnected, keep the last selected type
+                selectedDeviceType =
+                    selectedDevice.let { DeviceType.fromAddress(it) } ?: selectedDeviceType
+            }
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier.fillMaxWidth(),
             ) {
@@ -709,7 +714,25 @@ private tailrec fun Context.findActivity(): Activity = when (this) {
 private enum class DeviceType {
     BLE,
     TCP,
-    USB,
+    USB;
+
+    companion object {
+        fun fromAddress(address: String): DeviceType? {
+            val prefix = address[0]
+            val isBLE: Boolean = prefix == 'x'
+            val isUSB: Boolean = prefix == 's'
+            val isTCP: Boolean = prefix == 't'
+            val isMock: Boolean = prefix == 'm'
+            val isDisconnect: Boolean = prefix == 'n'
+            return when {
+                isBLE -> BLE
+                isUSB -> USB
+                isTCP -> TCP
+                isMock -> USB // Treat mock as USB for UI purposes
+                else -> null
+            }
+        }
+    }
 }
 
 private const val SCAN_PERIOD: Long = 10000 // 10 seconds

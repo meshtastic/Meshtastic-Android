@@ -102,20 +102,6 @@ internal fun QuickChatScreen(
             ) { showActionDialog = null }
         }
 
-        FloatingActionButton(
-            onClick = {
-                showActionDialog = QuickChatAction(position = actions.size)
-            },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = stringResource(id = R.string.add),
-            )
-        }
-
         LazyColumn(
             modifier = Modifier.dragContainer(
                 dragDropState = dragDropState,
@@ -134,6 +120,20 @@ internal fun QuickChatScreen(
                     onEdit = { showActionDialog = it },
                 )
             }
+        }
+
+        FloatingActionButton(
+            onClick = {
+                showActionDialog = QuickChatAction(position = actions.size)
+            },
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(16.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = stringResource(id = R.string.add),
+            )
         }
     }
 }

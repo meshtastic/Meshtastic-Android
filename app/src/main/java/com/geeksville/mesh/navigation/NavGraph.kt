@@ -19,8 +19,11 @@ package com.geeksville.mesh.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
@@ -47,6 +50,9 @@ const val DEEP_LINK_BASE_URI = "meshtastic://meshtastic"
 sealed interface Graph : Route
 @Serializable
 sealed interface Route {
+    @Serializable
+    data object Dispatcher : Route
+
     @Serializable
     data object DebugPanel : Route
 }
@@ -80,15 +86,25 @@ fun NavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = if (uIViewModel.isConnected()) {
-            NodesRoutes.NodesGraph
-        } else {
-            ConnectionsRoutes.ConnectionsGraph
-        },
+        startDestination = Route.Dispatcher,
         modifier = modifier,
     ) {
+        composable<Route.Dispatcher> {
+            val isConnected by uIViewModel.isConnected.collectAsStateWithLifecycle(false)
+            LaunchedEffect(isConnected) {
+                if (isConnected) {
+                    navController.navigate(NodesRoutes.NodesGraph) {
+                        popUpTo(Route.Dispatcher) { inclusive = true }
+                    }
+                } else {
+                    navController.navigate(ConnectionsRoutes.ConnectionsGraph) {
+                        popUpTo(Route.Dispatcher) { inclusive = true }
+                    }
+                }
+            }
+        }
         contactsGraph(navController, uIViewModel)
-        nodesGraph(navController, uIViewModel,)
+        nodesGraph(navController, uIViewModel)
         mapGraph(navController, uIViewModel)
         channelsGraph(navController, uIViewModel)
         connectionsGraph(navController, uIViewModel, bluetoothViewModel)

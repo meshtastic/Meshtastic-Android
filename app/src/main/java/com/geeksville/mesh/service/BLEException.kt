@@ -17,10 +17,10 @@
 
 package com.geeksville.mesh.service
 
-import java.io.IOException
-import java.util.*
+import android.os.RemoteException
+import java.util.UUID
 
-open class BLEException(msg: String) : IOException(msg)
+open class BLEException(msg: String) : RemoteException(msg)
 
 open class BLECharacteristicNotFoundException(uuid: UUID) :
     BLEException("Can't get characteristic $uuid")

@@ -139,6 +139,7 @@
     <string name="debug_panel">Panel pro ladění</string>
     <string name="debug_last_messages">500 posledních zpráv</string>
     <string name="debug_filters">Filtry</string>
+    <string name="debug_active_filters">Aktivní filtry</string>
     <string name="debug_default_search">Hledat v protokolech…</string>
     <string name="debug_clear">Vymazat protokoly</string>
     <string name="clear">Vymazat</string>

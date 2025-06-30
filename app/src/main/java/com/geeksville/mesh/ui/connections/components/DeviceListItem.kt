@@ -81,6 +81,11 @@ fun DeviceListItem(
                 contentDescription
             )
         },
+        supportingContent = {
+            if (device.isTCP) {
+                Text(device.address)
+            }
+        },
         trailingContent = {
             if (selected) {
                 Icon(

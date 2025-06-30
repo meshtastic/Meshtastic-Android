@@ -124,19 +124,6 @@ android {
         aidl = true
         buildConfig = true
     }
-    // Configure the build-logic plugins to target JDK 17
-    // This matches the JDK used to build the project, and is not related to what is running on device.
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_21
-        targetCompatibility = JavaVersion.VERSION_21
-    }
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_21.toString()
-        freeCompilerArgs += listOf(
-            "-opt-in=kotlin.RequiresOptIn",
-            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi"
-        )
-    }
     lint {
         abortOnError = false
         disable.add("MissingTranslation")
@@ -144,6 +131,18 @@ android {
     sourceSets {
         // Adds exported schema location as test app assets.
         named("androidTest") { assets.srcDirs(files("$projectDir/schemas")) }
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmToolchain(21)
+        freeCompilerArgs.addAll(
+            "-opt-in=kotlin.RequiresOptIn",
+            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+            "-Xcontext-receivers",
+            "-Xannotation-default-target=param-property"
+        )
     }
 }
 
@@ -263,4 +262,16 @@ detekt {
 secrets {
     propertiesFileName = "secrets.properties"
     defaultPropertiesFileName = "local.defaults.properties"
+}
+
+val googleServiceKeywords = listOf("crashlytics", "google")
+tasks.configureEach {
+    if (
+        googleServiceKeywords.any {
+            name.contains(it, ignoreCase = true)
+        } && name.contains("fdroid", ignoreCase = true)
+    ) {
+        project.logger.lifecycle("Disabling task for F-Droid: $name")
+        enabled = false
+    }
 }

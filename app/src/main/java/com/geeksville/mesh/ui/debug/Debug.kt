@@ -52,8 +52,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -79,6 +81,7 @@ import com.geeksville.mesh.android.BuildUtils.warn
 import com.geeksville.mesh.model.DebugViewModel
 import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
 import com.geeksville.mesh.ui.common.components.CopyIconButton
+import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
@@ -105,12 +108,24 @@ internal fun DebugScreen(
     val filterTexts by viewModel.filterTexts.collectAsStateWithLifecycle()
     val selectedLogId by viewModel.selectedLogId.collectAsStateWithLifecycle()
 
-    val filteredLogs = remember(logs, filterTexts) {
+    var filterMode by remember { mutableStateOf(FilterMode.OR) }
+
+    val filteredLogs = remember(logs, filterTexts, filterMode) {
         logs.filter { log ->
-            filterTexts.isEmpty() || filterTexts.any { filterText ->
-                log.logMessage.contains(filterText, ignoreCase = true) ||
-                        log.messageType.contains(filterText, ignoreCase = true) ||
-                        log.formattedReceivedDate.contains(filterText, ignoreCase = true)
+            if (filterTexts.isEmpty()) {
+                true
+            } else { when (filterMode) {
+                FilterMode.OR -> filterTexts.any { filterText ->
+                    log.logMessage.contains(filterText, ignoreCase = true) ||
+                    log.messageType.contains(filterText, ignoreCase = true) ||
+                    log.formattedReceivedDate.contains(filterText, ignoreCase = true)
+                }
+                FilterMode.AND -> filterTexts.all { filterText ->
+                    log.logMessage.contains(filterText, ignoreCase = true) ||
+                    log.messageType.contains(filterText, ignoreCase = true) ||
+                    log.formattedReceivedDate.contains(filterText, ignoreCase = true)
+                }
+            }
             }
         }.toImmutableList()
     }
@@ -133,7 +148,6 @@ internal fun DebugScreen(
             listState.requestScrollToItem(searchState.allMatches[searchState.currentMatchIndex].logIndex)
         }
     }
-
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
@@ -153,9 +167,11 @@ internal fun DebugScreen(
                     searchState = searchState,
                     filterTexts = filterTexts,
                     presetFilters = viewModel.presetFilters,
+                    logs = filteredLogs,
+                    filterMode = filterMode,
+                    onFilterModeChange = { filterMode = it }
                 )
             }
-
             items(filteredLogs, key = { it.uuid }) { log ->
                 DebugItem(
                     modifier = Modifier.animateItem(),
@@ -294,7 +310,7 @@ private fun rememberAnnotatedString(
             append(text)
             if (searchText.isNotEmpty()) {
                 searchText.split(" ").forEach { term ->
-                    term.toRegex(RegexOption.IGNORE_CASE).findAll(text).forEach { match ->
+                    Regex(Regex.escape(term), RegexOption.IGNORE_CASE).findAll(text).forEach { match ->
                         addStyle(
                             style = highlightStyle,
                             start = match.range.first,
@@ -336,7 +352,7 @@ private fun rememberAnnotatedLogMessage(log: UiMeshLog, searchText: String): Ann
             // Add search highlight annotations
             if (searchText.isNotEmpty()) {
                 searchText.split(" ").forEach { term ->
-                    term.toRegex(RegexOption.IGNORE_CASE).findAll(log.logMessage).forEach { match ->
+                    Regex(Regex.escape(term), RegexOption.IGNORE_CASE).findAll(log.logMessage).forEach { match ->
                         addStyle(
                             style = highlightStyle,
                             start = match.range.first,
@@ -681,6 +697,7 @@ fun DebugMenuActions(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val logs by viewModel.meshLog.collectAsStateWithLifecycle()
+    var showDeleteLogsDialog by remember { mutableStateOf(false) }
 
     IconButton(
         onClick = {
@@ -696,7 +713,7 @@ fun DebugMenuActions(
         )
     }
     IconButton(
-        onClick = viewModel::deleteAllLogs,
+        onClick = { showDeleteLogsDialog = true },
         modifier = modifier.padding(4.dp)
     ) {
         Icon(
@@ -704,7 +721,18 @@ fun DebugMenuActions(
             contentDescription = "Clear All"
         )
     }
+    if (showDeleteLogsDialog) {
+        SimpleAlertDialog(
+            title = R.string.debug_clear,
+            text = R.string.debug_clear_logs_confirm,
+            onConfirm = {
+                showDeleteLogsDialog = false
+                viewModel.deleteAllLogs()
+            },
+            onDismiss = { showDeleteLogsDialog = false }
+        )
     }
+}
 
 private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = withContext(Dispatchers.IO) {
     try {

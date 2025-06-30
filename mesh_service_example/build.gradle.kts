@@ -48,16 +48,13 @@ android {
             )
         }
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    kotlinOptions {
-        jvmTarget = "11" // match Java 11
-    }
     buildFeatures {
         aidl = true
     }
+}
+
+kotlin {
+    jvmToolchain(21)
 }
 
 // per protobuf-gradle-plugin docs, this is recommended for android

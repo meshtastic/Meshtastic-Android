@@ -22,10 +22,10 @@ import android.content.SharedPreferences
 import androidx.core.content.edit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
+import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.android.BinaryLogFile
-import com.geeksville.mesh.android.BuildUtils
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.concurrent.handledLaunch
@@ -140,7 +140,7 @@ class RadioInterfaceService @Inject constructor(
     }
 
     fun isMockInterface(): Boolean {
-        return BuildUtils.isEmulator || (context as GeeksvilleApplication).isInTestLab
+        return BuildConfig.DEBUG || (context as GeeksvilleApplication).isInTestLab
     }
 
     /** Return the device we are configured to use, or null for none

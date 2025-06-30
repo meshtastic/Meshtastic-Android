@@ -117,8 +117,8 @@ data class EnvironmentMetricsState(
             shouldPlot[Environment.IAQ.ordinal] = true
         }
 
-        val min = minValues.minOf { it }
-        val max = maxValues.maxOf { it }
+        val min = if (minValues.isEmpty()) 0f else minValues.minOf { it }
+        val max = if (maxValues.isEmpty()) 0f else maxValues.maxOf { it }
 
         val (minPressure, maxPressure) = Pair(
             telemetries.minBy { it.environmentMetrics.barometricPressure },

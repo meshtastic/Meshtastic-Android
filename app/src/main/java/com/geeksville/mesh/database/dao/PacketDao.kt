@@ -85,6 +85,7 @@ interface PacketDao {
     @Upsert
     suspend fun insert(packet: Packet)
 
+    @Transaction
     @Query(
         """
     SELECT * FROM packet
@@ -93,7 +94,6 @@ interface PacketDao {
     ORDER BY received_time DESC
     """
     )
-    @Transaction
     fun getMessagesFrom(contact: String): Flow<List<PacketEntity>>
 
     @Query(
@@ -164,6 +164,7 @@ interface PacketDao {
     )
     suspend fun getDataPackets(): List<DataPacket>
 
+    @Transaction
     @Query(
         """
     SELECT * FROM packet
@@ -174,6 +175,7 @@ interface PacketDao {
     )
     suspend fun getPacketById(requestId: Int): Packet?
 
+    @Transaction
     @Query("SELECT * FROM packet WHERE packet_id = :packetId LIMIT 1")
     suspend fun getPacketByPacketId(packetId: Int): PacketEntity?
 

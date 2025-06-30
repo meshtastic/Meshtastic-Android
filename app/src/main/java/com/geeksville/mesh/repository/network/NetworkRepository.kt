@@ -41,16 +41,13 @@ class NetworkRepository @Inject constructor(
             .conflate()
 
     val resolvedList: Flow<List<NsdServiceInfo>>
-        get() = nsdManagerLazy.get().serviceList(SERVICE_TYPES, SERVICE_NAME)
+        get() = nsdManagerLazy.get().serviceList(SERVICE_TYPE)
             .flowOn(dispatchers.io)
             .conflate()
 
     companion object {
-        // To find all available services use SERVICE_TYPE = "_services._dns-sd._udp"
-        internal const val SERVICE_NAME = "Meshtastic"
         internal const val SERVICE_PORT = 4403
         private const val SERVICE_TYPE = "_meshtastic._tcp"
-        internal val SERVICE_TYPES = setOf("_http._tcp", SERVICE_TYPE)
 
         fun NsdServiceInfo.toAddressString() = buildString {
             append(@Suppress("DEPRECATION") host.toString().substring(1))

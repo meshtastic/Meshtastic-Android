@@ -34,6 +34,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -61,6 +62,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -78,6 +80,7 @@ import com.geeksville.mesh.ui.common.components.dragContainer
 import com.geeksville.mesh.ui.common.components.dragDropItemsIndexed
 import com.geeksville.mesh.ui.common.components.rememberDragDropState
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
+import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
 private fun ChannelItem(
@@ -122,12 +125,20 @@ fun ChannelCard(
     enabled: Boolean,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
+    isDefaultPSK: Boolean = false,
 ) = ChannelItem(
     index = index,
     title = title,
     enabled = enabled,
     onClick = onEditClick,
 ) {
+    if (isDefaultPSK) {
+        Icon(
+            imageVector = ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
+            contentDescription = "Unlocked"
+        )
+        Spacer(modifier = Modifier.width(10.dp))
+    }
     IconButton(onClick = { onDeleteClick() }) {
         Icon(
             imageVector = Icons.TwoTone.Close,
@@ -143,13 +154,20 @@ fun ChannelSelection(
     title: String,
     enabled: Boolean,
     isSelected: Boolean,
-    onSelected: (Boolean) -> Unit
+    onSelected: (Boolean) -> Unit,
+    isDefaultPSK: Boolean = false,
 ) = ChannelItem(
     index = index,
     title = title,
     enabled = enabled,
     onClick = {},
 ) {
+    if (isDefaultPSK) {
+        Icon(
+            imageVector = ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
+            contentDescription = "Unlocked"
+        )
+    }
     Checkbox(
         enabled = enabled,
         checked = isSelected,
@@ -274,12 +292,15 @@ fun ChannelSettingsItemList(
                     items = settingsListInput,
                     dragDropState = dragDropState,
                 ) { index, channel, isDragging ->
+                    val isDefaultPSK = (channel.psk.size() == 1 && channel.psk.byteAt(0) == 1.toByte()) ||
+                        channel.psk.toByteArray().isEmpty()
                     ChannelCard(
                         index = index,
                         title = channel.name.ifEmpty { primaryChannel.name },
                         enabled = enabled,
                         onEditClick = { showEditChannelDialog = index },
-                        onDeleteClick = { settingsListInput.removeAt(index) }
+                        onDeleteClick = { settingsListInput.removeAt(index) },
+                        isDefaultPSK = isDefaultPSK
                     )
                     if (index == 0 && !isDragging) {
                         Text(

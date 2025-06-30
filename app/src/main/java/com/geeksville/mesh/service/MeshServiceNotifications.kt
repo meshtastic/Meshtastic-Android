@@ -61,6 +61,10 @@ class MeshServiceNotifications(
     // We have two notification channels: one for general service status and another one for messages
     val notifyId = 101
 
+    fun clearNotifications() {
+        notificationManager.cancelAll()
+    }
+
     fun initChannels() {
         // create notification channels on service creation
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {

@@ -36,10 +36,6 @@ android {
     }
 
     namespace = "com.geeksville.mesh.network"
-    compileOptions {
-        sourceCompatibility(JavaVersion.VERSION_17)
-        targetCompatibility(JavaVersion.VERSION_17)
-    }
 
     flavorDimensions += "default"
     productFlavors {
@@ -53,9 +49,7 @@ android {
 }
 
 kotlin {
-    compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
-    }
+    jvmToolchain(21)
 }
 
 dependencies {
@@ -78,4 +72,3 @@ detekt {
         )
     )
 }
-
