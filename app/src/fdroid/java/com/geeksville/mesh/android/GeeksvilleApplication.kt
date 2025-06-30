@@ -70,3 +70,5 @@ open class GeeksvilleApplication : Application(), Logging {
         isAnalyticsAllowed = false
     }
 }
+
+fun Context.isGooglePlayAvailable(): Boolean = false

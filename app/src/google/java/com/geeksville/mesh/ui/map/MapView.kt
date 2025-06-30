@@ -70,6 +70,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.createBitmap
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
@@ -108,7 +109,7 @@ import com.google.maps.android.compose.widgets.DisappearingScaleBar
 @Composable
 fun MapView(
     uiViewModel: UIViewModel,
-    mapViewModel: MapViewModel,
+    mapViewModel: MapViewModel = hiltViewModel(),
     navigateToNodeDetails: (Int) -> Unit,
 ) {
     val context = LocalContext.current
