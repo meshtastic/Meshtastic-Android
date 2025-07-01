@@ -13,8 +13,9 @@
 This is a tool for using Android with open-source mesh radios. For more information see our webpage: [meshtastic.org](https://www.meshtastic.org). If you are looking for the the device side code, see [here](https://github.com/meshtastic/Meshtastic-device).
 
 This project is currently beta testing, if you have questions or feedback
-please [Join our discussion forum](https://github.com/orgs/meshtastic/discussions). We would love to hear from
-you!
+please [Join our discussion forum](https://github.com/orgs/meshtastic/discussions) or the [Discord Group](https://discord.com/invite/ktMAKGBnBs) . We would love to hear from you!
+
+For the latest Beta, use xxx, 
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
 alt="Get it on F-Droid"
