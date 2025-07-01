@@ -65,7 +65,7 @@ open class GeeksvilleApplication : Application(), Logging {
     override fun onCreate() {
         super.onCreate()
 
-        val nopAnalytics = com.geeksville.mesh.analyticdetekts.NopAnalytics(this)
+        val nopAnalytics = com.geeksville.mesh.analytics.NopAnalytics(this)
         analytics = nopAnalytics
         isAnalyticsAllowed = false
     }
