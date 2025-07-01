@@ -265,7 +265,6 @@
     <string name="air_utilization">Использование эфира</string>
     <string name="temperature">Температура</string>
     <string name="humidity">Влажность</string>
-    <string name="soil_moisture">Влажность почвы</string>
     <string name="logs">Журналы</string>
     <string name="hops_away">Прыжков</string>
     <string name="info">Информация</string>
@@ -601,5 +600,4 @@
     <string name="primary"></string>
     <string name="host_metrics_log"></string>
     <string name="map">Карта</string>
-    <string name="soil_temperature">Температура почвы</string>
 </resources>

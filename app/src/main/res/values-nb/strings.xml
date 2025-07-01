@@ -254,7 +254,6 @@
     <string name="air_utilization">Luftutnyttelse</string>
     <string name="temperature">Temperatur</string>
     <string name="humidity">Luftfuktighet</string>
-    <string name="soil_moisture">Jordfuktighet</string>
     <string name="logs">Logger</string>
     <string name="hops_away">Hopp Unna</string>
     <string name="info">Informasjon</string>
@@ -308,5 +307,4 @@
     <string name="private_key">Privat nøkkel</string>
     <string name="timeout">Tidsavbrudd</string>
     <string name="distance">Distanse</string>
-    <string name="soil_temperature">Jordtemperatur</string>
 </resources>

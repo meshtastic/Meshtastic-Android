@@ -182,6 +182,4 @@
     <string name="waypoint_new">Waypoint nou</string>
     <string name="waypoint_received">Waypoint recepționat: $1%s</string>
     <string name="error_duty_cycle">Limita Duty Cycle a fost atinsă. Nu se pot trimite mesaje acum, vă rugăm să încercați din nou mai târziu.</string>
-    <string name="soil_temperature">Temperatura solului</string>
-    <string name="soil_moisture">Umiditatea solului</string>
 </resources>

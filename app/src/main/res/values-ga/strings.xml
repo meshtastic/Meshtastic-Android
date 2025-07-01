@@ -248,7 +248,6 @@
     <string name="air_utilization">Úsáid aeir</string>
     <string name="temperature">Teocht</string>
     <string name="humidity">Laige</string>
-    <string name="soil_moisture">Taise Ithir</string>
     <string name="logs">Lógáil</string>
     <string name="hops_away">Céimeanna uaidh</string>
     <string name="info">Eolas</string>
@@ -291,5 +290,4 @@
     <string name="traceroute_diff">Céimeanna i dtreo %1$d Céimeanna ar ais %2$d</string>
     <string name="timeout">Am tráth</string>
     <string name="distance">Sáth</string>
-    <string name="soil_temperature">Teocht na hithreach</string>
 </resources>

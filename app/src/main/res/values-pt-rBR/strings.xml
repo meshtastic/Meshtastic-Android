@@ -277,7 +277,6 @@
     <string name="air_utilization">Utilização do Ar</string>
     <string name="temperature">Temperatura</string>
     <string name="humidity">Umidade</string>
-    <string name="soil_moisture">Umidade do solo</string>
     <string name="logs">Registros</string>
     <string name="hops_away">Qtd de saltos</string>
     <string name="hops_away_template">Hops de Distância: %1$d</string>
@@ -682,5 +681,4 @@
     <string name="no_network_devices">Nenhum dispositivo de rede encontrado.</string>
     <string name="no_usb_devices">Nenhum dispositivo USB Serial encontrado.</string>
     <string name="scroll_to_bottom">Rolar para o final</string>
-    <string name="soil_temperature">"Temperatura do solo "</string>
 </resources>

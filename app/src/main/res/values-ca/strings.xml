@@ -200,6 +200,4 @@
     <string name="mute_1_week">1 setmana</string>
     <string name="mute_always">Sempre</string>
     <string name="distance">Distància</string>
-    <string name="soil_temperature">Temperatura del sòl</string>
-    <string name="soil_moisture">Humitat del sòl</string>
 </resources>

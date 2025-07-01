@@ -277,7 +277,6 @@
     <string name="air_utilization">Ilmantien käyttöaste</string>
     <string name="temperature">Lämpötila</string>
     <string name="humidity">Kosteus</string>
-    <string name="soil_moisture">Maaperän kosteus</string>
     <string name="logs">lokitietoa</string>
     <string name="hops_away">Hyppyjä</string>
     <string name="hops_away_template">Hyppyjä: %1$d</string>
@@ -682,5 +681,4 @@
     <string name="no_network_devices">Verkkolaitteita ei löytynyt.</string>
     <string name="no_usb_devices">USB-sarjalaitteita ei löytynyt.</string>
     <string name="scroll_to_bottom">Siirry loppuun</string>
-    <string name="soil_temperature">Maaperän lämpötila</string>
 </resources>

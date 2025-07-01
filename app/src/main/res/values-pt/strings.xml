@@ -265,7 +265,6 @@
     <string name="air_utilization">Utilização do ar</string>
     <string name="temperature">Temperatura</string>
     <string name="humidity">Humidade</string>
-    <string name="soil_moisture">Humidade do solo</string>
     <string name="logs">Registo de eventos</string>
     <string name="hops_away">Saltos</string>
     <string name="info">Informações</string>
@@ -620,5 +619,4 @@
     <string name="contacts">Contactos</string>
     <string name="nodes">Nodes</string>
     <string name="i_agree">Estou de acordo.</string>
-    <string name="soil_temperature">Temperatura do solo</string>
 </resources>

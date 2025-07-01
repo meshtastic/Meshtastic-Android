@@ -201,6 +201,4 @@
     <string name="mute_1_week">1 tjedan</string>
     <string name="mute_always">Uvijek</string>
     <string name="distance">Udaljenost</string>
-    <string name="soil_temperature">Temperatura tla</string>
-    <string name="soil_moisture">Vlažnost tla</string>
 </resources>

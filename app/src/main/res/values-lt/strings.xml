@@ -250,7 +250,6 @@ Suderinamus įrenginius galite pamatyti apsilankę adresu www.meshtastic.org/doc
     <string name="air_utilization">Eterio panaudojimas</string>
     <string name="temperature">Temperatūra</string>
     <string name="humidity">Drėgmė</string>
-    <string name="soil_moisture">Dirvožemio drėgmė</string>
     <string name="logs">Log`ai</string>
     <string name="hops_away">Persiuntimų kiekis</string>
     <string name="info">Informacija</string>
@@ -301,5 +300,4 @@ Suderinamus įrenginius galite pamatyti apsilankę adresu www.meshtastic.org/doc
     <string name="private_key">Privatus raktas</string>
     <string name="timeout">Baigėsi laikas</string>
     <string name="distance">Atstumas</string>
-    <string name="soil_temperature">Dirvožemio temperatūra</string>
 </resources>

@@ -263,7 +263,6 @@
     <string name="air_utilization">Utilisation de la transmission</string>
     <string name="temperature">Température</string>
     <string name="humidity">Humidité</string>
-    <string name="soil_moisture">Humidité du sol</string>
     <string name="logs">Journaux</string>
     <string name="hops_away">Passer au suivant</string>
     <string name="info">Information</string>
@@ -588,5 +587,4 @@
     <string name="nodes">Noeuds</string>
     <string name="reply">Répondre</string>
     <string name="disconnect">Déconnecter</string>
-    <string name="soil_temperature">Température du sol</string>
 </resources>

@@ -192,7 +192,6 @@
     <string name="battery">Μπαταρία</string>
     <string name="temperature">Θερμοκρασία</string>
     <string name="humidity">Υγρασία</string>
-    <string name="soil_moisture">Υγρασία εδάφους</string>
     <string name="logs">Αρχεία καταγραφής</string>
     <string name="info">Πληροφορίες</string>
     <string name="encryption_psk">Κοινόχρηστο Κλειδί</string>
@@ -247,5 +246,4 @@
     <string name="map">Χάρτης</string>
     <string name="contacts">Επαφές</string>
     <string name="reply">Απάντηση</string>
-    <string name="soil_temperature">Θερμοκρασία εδάφους</string>
 </resources>

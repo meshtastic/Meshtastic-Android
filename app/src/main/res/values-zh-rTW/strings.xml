@@ -262,7 +262,6 @@
     <string name="air_utilization">無線通道利用率</string>
     <string name="temperature">溫度</string>
     <string name="humidity">濕度</string>
-    <string name="soil_moisture">土壤濕度</string>
     <string name="logs">系統記錄</string>
     <string name="hops_away">節點距</string>
     <string name="info">資訊</string>
@@ -475,5 +474,4 @@
     <string name="distance">距離</string>
     <string name="firmware">韌體</string>
     <string name="map">地圖</string>
-    <string name="soil_temperature">土壤溫度</string>
 </resources>

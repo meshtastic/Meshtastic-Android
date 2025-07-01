@@ -256,7 +256,6 @@
     <string name="air_utilization">Luftrumsutnyttjande</string>
     <string name="temperature">Temperatur</string>
     <string name="humidity">Luftfuktighet</string>
-    <string name="soil_moisture">Jordfuktighet</string>
     <string name="logs">Loggar</string>
     <string name="hops_away">Hopp bort</string>
     <string name="info">Information</string>
@@ -351,5 +350,4 @@
     <string name="map">Karta</string>
     <string name="nodes">Noder</string>
     <string name="reply">Svara</string>
-    <string name="soil_temperature">Jordtemperatur</string>
 </resources>

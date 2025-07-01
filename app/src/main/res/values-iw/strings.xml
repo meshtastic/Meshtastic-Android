@@ -200,6 +200,4 @@
     <string name="messages">הודעות</string>
     <string name="distance">מרחק</string>
     <string name="map">מפה</string>
-    <string name="soil_temperature">טמפרטורת קרקע</string>
-    <string name="soil_moisture">לחות אדמה</string>
 </resources>
