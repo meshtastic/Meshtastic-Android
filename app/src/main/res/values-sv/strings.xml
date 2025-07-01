@@ -350,4 +350,5 @@
     <string name="map">Karta</string>
     <string name="nodes">Noder</string>
     <string name="reply">Svara</string>
+    <string name="meshtastic">Meshtastic</string>
 </resources>
