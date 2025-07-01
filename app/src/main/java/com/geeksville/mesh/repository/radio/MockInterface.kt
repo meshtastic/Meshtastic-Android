@@ -38,6 +38,7 @@ private val defaultChannel = channel {
     role = ChannelProtos.Channel.Role.PRIMARY
 }
 
+@Suppress("detekt:TooManyFunctions")
 /** A simulated interface that is used for testing in the simulator */
 class MockInterface @AssistedInject constructor(
     private val service: RadioInterfaceService,
@@ -275,16 +276,13 @@ class MockInterface @AssistedInject constructor(
             // Done with config response, now pretend to receive some text messages
 
             makeTextMessage(MY_NODE + 1),
-            sendNeighborInfo(MY_NODE + 4),
+            sendNeighborInfo(MY_NODE + 1),
             sendPosition(MY_NODE + 1),
-            sendTelemetry(MY_NODE + 10)
+            sendTelemetry(MY_NODE + 1)
         )
 
         packets.forEach { p ->
             service.handleFromRadio(p.build().toByteArray())
         }
     }
-
-    
-
 }
