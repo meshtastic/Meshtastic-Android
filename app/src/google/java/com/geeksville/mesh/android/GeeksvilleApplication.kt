@@ -55,6 +55,16 @@ open class GeeksvilleApplication : Application(), Logging {
         getSharedPreferences("analytics-prefs", Context.MODE_PRIVATE)
     }
 
+    val isGooglePlayAvailable: Boolean
+        get() {
+            return GoogleApiAvailabilityLight.getInstance()
+                .isGooglePlayServicesAvailable(this)
+                .let {
+                    it != ConnectionResult.SERVICE_MISSING &&
+                            it != ConnectionResult.SERVICE_INVALID
+                }
+        }
+
     var isAnalyticsAllowed: Boolean
         get() = analyticsPrefs.getBoolean("allowed", true)
         set(value) {
@@ -68,7 +78,7 @@ open class GeeksvilleApplication : Application(), Logging {
 
     /** Ask user to rate in play store */
     fun askToRate(activity: AppCompatActivity) {
-        if (!isGooglePlayAvailable()) return
+        if (!isGooglePlayAvailable) return
 
         @Suppress("MaxLineLength")
         exceptionReporter { // we don't want to crash our app because of bugs in this optional feature
@@ -90,13 +100,4 @@ open class GeeksvilleApplication : Application(), Logging {
         // Set analytics per prefs
         isAnalyticsAllowed = isAnalyticsAllowed
     }
-}
-
-fun Context.isGooglePlayAvailable(): Boolean {
-    return GoogleApiAvailabilityLight.getInstance()
-        .isGooglePlayServicesAvailable(this)
-        .let {
-            it != ConnectionResult.SERVICE_MISSING &&
-            it != ConnectionResult.SERVICE_INVALID
-        }
 }
