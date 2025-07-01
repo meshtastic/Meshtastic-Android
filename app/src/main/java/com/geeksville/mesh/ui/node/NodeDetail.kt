@@ -769,7 +769,7 @@ private fun EnvironmentMetrics(
         }
         if (hasSoilMoisture()) {
             InfoCard(
-                icon =ImageVector.vectorResource(id = R.drawable.soil_moisture),
+                icon = ImageVector.vectorResource(id = R.drawable.soil_moisture),
                 text = stringResource(R.string.soil_moisture),
                 value = "%.0%%".format(soilMoisture)
             )
