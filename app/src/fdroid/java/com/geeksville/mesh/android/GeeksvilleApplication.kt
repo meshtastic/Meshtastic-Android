@@ -71,4 +71,4 @@ open class GeeksvilleApplication : Application(), Logging {
     }
 }
 
-fun Context.isGooglePlayAvailable(): Boolean = false
+const val Context.isGooglePlayAvailable(): Boolean = false
