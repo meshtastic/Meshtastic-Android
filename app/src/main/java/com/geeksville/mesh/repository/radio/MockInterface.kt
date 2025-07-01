@@ -117,6 +117,51 @@ class MockInterface @AssistedInject constructor(
             }.build()
         }
 
+    private fun sendNeighborInfo(numIn: Int) =
+        MeshProtos.FromRadio.newBuilder().apply {
+            packet = MeshProtos.MeshPacket.newBuilder().apply {
+                id = packetIdSequence.next()
+                from = numIn
+                to = 0xffffffff.toInt() // ugly way of saying broadcast
+                rxTime = (System.currentTimeMillis() / 1000).toInt()
+                rxSnr = 1.5f
+                decoded = MeshProtos.Data.newBuilder().apply {
+                    portnum = Portnums.PortNum.NEIGHBORINFO_APP
+                    payload = ByteString.copyFromUtf8("asdf")
+                }.build()
+            }.build()
+        }
+
+    private fun sendPosition(numIn: Int) =
+        MeshProtos.FromRadio.newBuilder().apply {
+            packet = MeshProtos.MeshPacket.newBuilder().apply {
+                id = packetIdSequence.next()
+                from = numIn
+                to = 0xffffffff.toInt() // ugly way of saying broadcast
+                rxTime = (System.currentTimeMillis() / 1000).toInt()
+                rxSnr = 1.5f
+                decoded = MeshProtos.Data.newBuilder().apply {
+                    portnum = Portnums.PortNum.POSITION_APP
+                    payload = ByteString.copyFromUtf8("asdfasdf")
+                }.build()
+            }.build()
+        }
+
+    private fun sendTelemetry(numIn: Int) =
+        MeshProtos.FromRadio.newBuilder().apply {
+            packet = MeshProtos.MeshPacket.newBuilder().apply {
+                id = packetIdSequence.next()
+                from = numIn
+                to = 0xffffffff.toInt() // ugly way of saying broadcast
+                rxTime = (System.currentTimeMillis() / 1000).toInt()
+                rxSnr = 1.5f
+                decoded = MeshProtos.Data.newBuilder().apply {
+                    portnum = Portnums.PortNum.TELEMETRY_APP
+                    payload = ByteString.copyFromUtf8("asdfasdfasdf")
+                }.build()
+            }.build()
+        }
+
     private fun makeDataPacket(fromIn: Int, toIn: Int, data: MeshProtos.Data.Builder) =
         MeshProtos.FromRadio.newBuilder().apply {
             packet = MeshProtos.MeshPacket.newBuilder().apply {
@@ -229,11 +274,17 @@ class MockInterface @AssistedInject constructor(
 
             // Done with config response, now pretend to receive some text messages
 
-            makeTextMessage(MY_NODE + 1)
+            makeTextMessage(MY_NODE + 1),
+            sendNeighborInfo(MY_NODE + 4),
+            sendPosition(MY_NODE + 1),
+            sendTelemetry(MY_NODE + 10)
         )
 
         packets.forEach { p ->
             service.handleFromRadio(p.build().toByteArray())
         }
     }
+
+    
+
 }
