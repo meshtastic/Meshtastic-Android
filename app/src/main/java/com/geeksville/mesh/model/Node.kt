@@ -111,13 +111,15 @@ data class Node(
     }
 
     private fun getTemperatureString(currentTempInCelcius: Float, isFahrenheit: Boolean): String? {
+        var resultStr: String? = null
         if (currentTempInCelcius != 0f) {
             if (isFahrenheit) {
-                return "%.1f°F".format(toFahrenheit(currentTempInCelcius))
+                resultStr = "%.1f°F".format(toFahrenheit(currentTempInCelcius))
+            } else {
+                resultStr = "%.1f°C".format(currentTempInCelcius)
             }
-            return "%.1f°C".format(currentTempInCelcius)
         }
-        return null
+        return resultStr
     }
 
     private fun getHumidityString(relativeHumidity: Float): String? {
