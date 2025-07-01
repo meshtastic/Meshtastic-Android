@@ -91,7 +91,6 @@ import com.geeksville.mesh.android.getBluetoothPermissions
 import com.geeksville.mesh.android.getLocationPermissions
 import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.android.hasLocationPermission
-import com.geeksville.mesh.android.isGooglePlayAvailable
 import com.geeksville.mesh.android.permissionMissing
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
@@ -529,7 +528,7 @@ fun ConnectionsScreen(
 
                 // Analytics Okay Checkbox
 
-                val isGooglePlayAvailable = app.isGooglePlayAvailable()
+                val isGooglePlayAvailable = app.isGooglePlayAvailable
                 val isAnalyticsAllowed = app.isAnalyticsAllowed && isGooglePlayAvailable
                 if (isGooglePlayAvailable) {
                     var loading by remember { mutableStateOf(false) }

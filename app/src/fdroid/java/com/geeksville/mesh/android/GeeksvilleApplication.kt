@@ -30,7 +30,10 @@ open class GeeksvilleApplication : Application(), Logging {
     companion object {
         lateinit var analytics: AnalyticsProvider
     }
-
+    val isGooglePlayAvailable: Boolean
+        get() {
+          return false
+        }
     // / Are we running inside the testlab?
     val isInTestLab: Boolean
         get() {
@@ -70,5 +73,3 @@ open class GeeksvilleApplication : Application(), Logging {
         isAnalyticsAllowed = false
     }
 }
-
-const val Context.isGooglePlayAvailable(): Boolean = false
