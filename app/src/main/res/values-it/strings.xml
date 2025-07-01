@@ -655,4 +655,5 @@
     <string name="client_notification">Notifiche Client</string>
     <string name="compromised_keys">Rilevate chiavi compromesse, seleziona OK per rigenerarle.</string>
     <string name="regenerate_private_key">Rigenera Chiavi Private</string>
+    <string name="meshtastic">Meshtastic</string>
 </resources>

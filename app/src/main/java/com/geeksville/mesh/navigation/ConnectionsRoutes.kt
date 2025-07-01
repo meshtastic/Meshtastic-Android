@@ -66,7 +66,7 @@ fun NavGraphBuilder.connectionsGraph(
                 bluetoothViewModel = bluetoothViewModel,
                 radioConfigViewModel = hiltViewModel(parentEntry),
                 onNavigateToRadioConfig = { navController.navigate(RadioConfigRoutes.RadioConfig()) },
-                onNavigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetail(it)) },
+                onNavigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
                 onConfigNavigate = { route -> navController.navigate(route) }
             )
         }

@@ -210,7 +210,7 @@ class MetricsViewModel @Inject constructor(
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val preferences: SharedPreferences,
 ) : ViewModel(), Logging {
-    private val destNum = savedStateHandle.toRoute<NodesRoutes.NodeDetail>().destNum
+    private val destNum = savedStateHandle.toRoute<NodesRoutes.NodeDetailGraph>().destNum
 
     private fun MeshLog.hasValidTraceroute(): Boolean = with(fromRadio.packet) {
         hasDecoded() && decoded.wantResponse && from == 0 && to == destNum

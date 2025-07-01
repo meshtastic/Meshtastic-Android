@@ -74,7 +74,7 @@ fun NavGraphBuilder.contactsGraph(
                 message = args.message,
                 viewModel = uiViewModel,
                 navigateToMessages = { navController.navigate(ContactsRoutes.Messages(it)) },
-                navigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetail(it)) },
+                navigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
                 onNavigateBack = navController::navigateUp,
             )
         }
