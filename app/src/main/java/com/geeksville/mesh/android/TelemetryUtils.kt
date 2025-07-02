@@ -17,11 +17,11 @@
 
 package com.geeksville.mesh.android
 
-private const val FARENHEIT_MULTIPLIER = 1.8F
-private const val FARENHEIT_OFFSET = 32
+private const val FAHRENHEIT_MULTIPLIER = 1.8F
+private const val FAHRENHEIT_OFFSET = 32
 
 object TelemetryUtils {
     fun toFahrenheit(tempCelsius: Float): Float {
-        return (tempCelsius * FARENHEIT_MULTIPLIER) + FARENHEIT_OFFSET
+        return (tempCelsius * FAHRENHEIT_MULTIPLIER) + FAHRENHEIT_OFFSET
     }
 }
