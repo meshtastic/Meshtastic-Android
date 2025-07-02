@@ -30,14 +30,18 @@ open class GeeksvilleApplication : Application(), Logging {
     companion object {
         lateinit var analytics: AnalyticsProvider
     }
-
-    /// Are we running inside the testlab?
+    val isGooglePlayAvailable: Boolean
+        get() {
+          return false
+        }
+    // / Are we running inside the testlab?
     val isInTestLab: Boolean
         get() {
             val testLabSetting =
                 Settings.System.getString(contentResolver, "firebase.test.lab") ?: null
-            if(testLabSetting != null)
+            if (testLabSetting != null) {
                 info("Testlab is $testLabSetting")
+            }
             return "true" == testLabSetting
         }
 
@@ -69,5 +73,3 @@ open class GeeksvilleApplication : Application(), Logging {
         isAnalyticsAllowed = false
     }
 }
-
-fun Context.isGooglePlayAvailable(): Boolean = false

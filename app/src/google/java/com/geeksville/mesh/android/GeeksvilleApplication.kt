@@ -33,25 +33,37 @@ import com.suddenh4x.ratingdialog.AppRating
  * Created by kevinh on 1/4/15.
  */
 
+@Suppress("MagicNumber")
 open class GeeksvilleApplication : Application(), Logging {
 
     companion object {
         lateinit var analytics: AnalyticsProvider
     }
 
-    /// Are we running inside the testlab?
+    // / Are we running inside the testlab?
     val isInTestLab: Boolean
         get() {
             val testLabSetting =
-                Settings.System.getString(contentResolver, "firebase.test.lab") ?: null
-            if(testLabSetting != null)
+                Settings.System.getString(contentResolver, "firebase.test.lab")
+            if (testLabSetting != null) {
                 info("Testlab is $testLabSetting")
+            }
             return "true" == testLabSetting
         }
 
     private val analyticsPrefs: SharedPreferences by lazy {
         getSharedPreferences("analytics-prefs", Context.MODE_PRIVATE)
     }
+
+    val isGooglePlayAvailable: Boolean
+        get() {
+            return GoogleApiAvailabilityLight.getInstance()
+                .isGooglePlayServicesAvailable(this)
+                .let {
+                    it != ConnectionResult.SERVICE_MISSING &&
+                            it != ConnectionResult.SERVICE_INVALID
+                }
+        }
 
     var isAnalyticsAllowed: Boolean
         get() = analyticsPrefs.getBoolean("allowed", true)
@@ -66,8 +78,9 @@ open class GeeksvilleApplication : Application(), Logging {
 
     /** Ask user to rate in play store */
     fun askToRate(activity: AppCompatActivity) {
-        if (!isGooglePlayAvailable()) return
+        if (!isGooglePlayAvailable) return
 
+        @Suppress("MaxLineLength")
         exceptionReporter { // we don't want to crash our app because of bugs in this optional feature
             AppRating.Builder(activity)
                 .setMinimumLaunchTimes(10) // default is 5, 3 means app is launched 3 or more times
@@ -87,13 +100,4 @@ open class GeeksvilleApplication : Application(), Logging {
         // Set analytics per prefs
         isAnalyticsAllowed = isAnalyticsAllowed
     }
-}
-
-fun Context.isGooglePlayAvailable(): Boolean {
-    return GoogleApiAvailabilityLight.getInstance()
-        .isGooglePlayServicesAvailable(this)
-        .let {
-            it != ConnectionResult.SERVICE_MISSING &&
-            it != ConnectionResult.SERVICE_INVALID
-        }
 }

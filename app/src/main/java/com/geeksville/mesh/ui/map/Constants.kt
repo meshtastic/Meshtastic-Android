@@ -15,13 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-object Configs {
-    const val APPLICATION_ID = "com.geeksville.mesh"
-    const val MIN_SDK = 26
-    const val TARGET_SDK = 36
-    const val COMPILE_SDK = 36
-    const val VERSION_CODE = 30628 // format is Mmmss (where M is 1+the numeric major number)
-    const val VERSION_NAME = "2.6.28"
-    const val MIN_FW_VERSION = "2.5.14" // Minimum device firmware version supported by this app
-    const val ABS_MIN_FW_VERSION = "2.3.15" // Minimum device firmware version supported by this app
-}
+package com.geeksville.mesh.ui.map
+
+const val MAP_STYLE_ID = "map_style_id"
