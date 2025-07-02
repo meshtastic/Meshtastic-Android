@@ -1,15 +1,16 @@
 # mesh_service_example
 
-This module provides an example implementation of a mesh service for the Meshtastic-Android project.
+This module provides an example implementation of an app that uses the [AIDL](https://developer.android.com/develop/background-work/services/aidl) Mesh Service provided by Meshtastic-Android project.
 
 ## Overview
+
+The [AIDL](../app/src/main/aidl/com/geeksville/mesh/IMeshService.aidl) is defined in the main app module and is used to interact with the mesh network.
 
 `mesh_service_example` demonstrates how to build and integrate a custom mesh service within the Meshtastic ecosystem. It is intended as a reference for developers who want to extend or customize mesh-related functionality.
 
 ## Features
 - Example service structure for mesh integration
 - Sample code for service registration and communication
-- Reference for best practices in module development
 
 ## Usage
 1. Clone the Meshtastic-Android repository.
