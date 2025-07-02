@@ -15,7 +15,7 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   ~
-  ~ NOTE: Only modify the english strings.xml file directly.
+  ~ NOTE: Only modify this english strings.xml file directly.
   ~       Other languages are managed by CrowdIn
   -->
 <resources>
@@ -115,6 +115,7 @@
     <string name="debug_logs_export">Експортиране на журнали</string>
     <string name="debug_last_messages">Последни 500 съобщения</string>
     <string name="debug_filters">Филтри</string>
+    <string name="debug_active_filters">Активни филтри</string>
     <string name="debug_default_search">Търсене в журналите…</string>
     <string name="debug_clear">Изчистване на журналите</string>
     <string name="clear">Изчисти</string>
@@ -243,6 +244,7 @@
     <string name="humidity">Влажност</string>
     <string name="logs">Журнали</string>
     <string name="info">Информация</string>
+    <string name="air_util_definition">Процент от ефирното време за предаване, използвано през последния час.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Споделен ключ</string>
     <string name="encryption_psk_text">Директните съобщения използват споделения ключ за канала.</string>
@@ -251,9 +253,11 @@
     <string name="more_details">Повече подробности</string>
     <string name="snr">SNR</string>
     <string name="rssi">RSSI</string>
+    <string name="device_metrics_log">Журнал на показателите на устройството</string>
     <string name="node_map">Карта на възела</string>
     <string name="position_log">Журнал на позициите</string>
     <string name="last_position_update">Последна актуализация на позицията</string>
+    <string name="env_metrics_log">Журнал на показателите на околната среда</string>
     <string name="administration">Администриране</string>
     <string name="remote_admin">Отдалечено администриране</string>
     <string name="bad">Лошо</string>
@@ -277,6 +281,7 @@
     <string name="favorite">Любим</string>
     <string name="favorite_add">Добавяне на \'%s\' като любим възел?</string>
     <string name="favorite_remove">Премахване на \'%s\' като любим възел?</string>
+    <string name="power_metrics_log">Журнал на показателите на захранването</string>
     <string name="channel_1">Канал 1</string>
     <string name="channel_2">Канал 2</string>
     <string name="channel_3">Канал 3</string>
@@ -356,6 +361,7 @@
     <string name="password">Парола</string>
     <string name="encryption_enabled">Криптирането е активирано</string>
     <string name="tls_enabled">TLS е активиран</string>
+    <string name="proxy_to_client_enabled">Прокси към клиент е активиран</string>
     <string name="update_interval_seconds">Интервал на актуализиране (секунди)</string>
     <string name="transmit_over_lora">Предаване през LoRa</string>
     <string name="network_config">Конфигурация на мрежата</string>
@@ -396,6 +402,7 @@
     <string name="number_of_records">Брой записи</string>
     <string name="server">Сървър</string>
     <string name="telemetry_config">Конфигурация на телеметрията</string>
+    <string name="device_metrics_update_interval_seconds">Интервал на актуализиране на показателите на устройството (секунди)</string>
     <string name="user_config">Конфигурация на потребителя</string>
     <string name="node_id">ID на възела</string>
     <string name="long_name">Дълго име</string>
