@@ -84,6 +84,7 @@ data class EnvironmentMetricsState(
      *
      * @param timeFrame used to filter
      * @return [EnvironmentGraphingData]
+     * CyclomaticComplexMethod
      */
     @Suppress("LongMethod")
     fun environmentMetricsFiltered(timeFrame: TimeFrame): EnvironmentGraphingData {
