@@ -469,4 +469,5 @@
     <string name="node_count_template">(%1$d онлайн / %2$d общо)</string>
     <string name="no_ble_devices">Няма открити Bluetooth устройства</string>
     <string name="no_usb_devices">Няма открити USB серийни устройства.</string>
+    <string name="meshtastic">Meshtastic</string>
 </resources>

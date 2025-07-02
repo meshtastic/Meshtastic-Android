@@ -37,7 +37,7 @@ fun NavGraphBuilder.mapGraph(
         MapView(
             model = uiViewModel,
             navigateToNodeDetails = {
-                navController.navigate(NodesRoutes.NodeDetail(it))
+                navController.navigate(NodesRoutes.NodeDetailGraph(it))
             },
         )
     }

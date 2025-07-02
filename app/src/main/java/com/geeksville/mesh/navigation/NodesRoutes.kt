@@ -55,7 +55,7 @@ sealed class NodesRoutes {
     data object NodesGraph : Graph
 
     @Serializable
-    data object NodeDetailGraph : Graph
+    data class NodeDetailGraph(val destNum: Int? = null) : Graph
 
     @Serializable
     data class NodeDetail(val destNum: Int? = null) : Route
@@ -102,7 +102,7 @@ fun NavGraphBuilder.nodesGraph(
                     navController.navigate(ContactsRoutes.Messages(it))
                 },
                 navigateToNodeDetails = {
-                    navController.navigate(NodesRoutes.NodeDetail(it))
+                    navController.navigate(NodesRoutes.NodeDetailGraph(it))
                 },
             )
         }
@@ -115,7 +115,7 @@ fun NavGraphBuilder.nodeDetailGraph(
     uiViewModel: UIViewModel,
 ) {
     navigation<NodesRoutes.NodeDetailGraph>(
-        startDestination = NodesRoutes.NodeDetail()
+        startDestination = NodesRoutes.NodeDetail(),
     ) {
         composable<NodesRoutes.NodeDetail> { backStackEntry ->
             val parentEntry = remember(backStackEntry) {

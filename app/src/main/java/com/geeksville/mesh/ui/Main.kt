@@ -277,7 +277,7 @@ fun MainScreen(
                         when (action) {
                             is NodeMenuAction.MoreDetails -> {
                                 navController.navigate(
-                                    NodesRoutes.NodeDetail(
+                                    NodesRoutes.NodeDetailGraph(
                                         action.node.num
                                     ),
                                     {

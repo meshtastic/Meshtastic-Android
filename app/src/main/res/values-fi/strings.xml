@@ -684,4 +684,5 @@
     <string name="no_network_devices">Verkkolaitteita ei löytynyt.</string>
     <string name="no_usb_devices">USB-sarjalaitteita ei löytynyt.</string>
     <string name="scroll_to_bottom">Siirry loppuun</string>
+    <string name="meshtastic">Meshtastic</string>
 </resources>

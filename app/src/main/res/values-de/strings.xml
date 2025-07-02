@@ -683,4 +683,6 @@
     <string name="no_ble_devices">Keine Bluetooth Geräte gefunden</string>
     <string name="no_network_devices">Keine Netzwerkgeräte gefunden.</string>
     <string name="no_usb_devices">Keine seriellen USB Geräte gefunden.</string>
+    <string name="scroll_to_bottom">Zum Ende springen</string>
+    <string name="meshtastic">Meshtastic</string>
 </resources>

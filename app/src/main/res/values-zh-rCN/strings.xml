@@ -24,6 +24,7 @@
     <string name="main_tab_map">地图</string>
     <string name="main_tab_channel">频道</string>
     <string name="main_tab_settings">设置</string>
+    <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">筛选</string>
     <string name="desc_node_filter_clear">清除筛选</string>
     <string name="node_filter_include_unknown">包括未知内容</string>
@@ -140,7 +141,15 @@
     <string name="text_messages">短信</string>
     <string name="channel_invalid">此频道网址无效，无法使用</string>
     <string name="debug_panel">调试面板</string>
+    <string name="debug_logs_export">导出程序日志</string>
     <string name="debug_last_messages">500条最新消息</string>
+    <string name="debug_filters">筛选器</string>
+    <string name="debug_active_filters">启用的过滤器</string>
+    <string name="debug_default_search">搜索日志…</string>
+    <string name="debug_clear">清除日志</string>
+    <string name="match_any">匹配任意 | 所有</string>
+    <string name="match_all">匹配所有 | 任意</string>
+    <string name="debug_clear_logs_confirm">这将从您的设备中移除所有日志数据包和数据库条目 - 完整重置，永久失去所有内容。</string>
     <string name="clear">清除</string>
     <string name="updating_firmware">更新固件，请等待几分钟…</string>
     <string name="update_successful">更新成功</string>
@@ -148,6 +157,8 @@
     <string name="message_reception_time">消息接收时间</string>
     <string name="message_reception_state">消息接收状态</string>
     <string name="message_delivery_status">消息传递状态</string>
+    <string name="meshtastic_messages_notifications">私信提醒</string>
+    <string name="meshtastic_broadcast_notifications">广播消息提醒</string>
     <string name="meshtastic_alerts_notifications">提醒通知</string>
     <string name="protocol_stress_test">协议压力测试</string>
     <string name="firmware_too_old">需要固件更新。</string>
@@ -273,6 +284,7 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="humidity">湿度</string>
     <string name="logs">日志</string>
     <string name="hops_away">跳数</string>
+    <string name="hops_away_template">越点数: %1$d</string>
     <string name="info">信息</string>
     <string name="ch_util_definition">当前信道的利用情况，包括格式正确的发送(TX）、接收（RX）以及无法解码的接收(即噪声）。</string>
     <string name="air_util_definition">过去一小时内用于传输的空中占用时间百分比。</string>
@@ -339,12 +351,14 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="are_you_sure">你确定吗？</string>
     <string name="router_role_confirmation_text"><![CDATA[我已经阅读 <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">设备角色文档</a> 以及关于 <a href="http://meshtastic.org/blog/choosing-the-right-device-role">选择正确设备角色</a>的博客文章。]]></string>
     <string name="i_know_what_i_m_doing">我知道自己在做什么</string>
+    <string name="low_battery_message">节点 %1$s 电量低(%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">低电量通知</string>
     <string name="low_battery_title">电池电量低: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">低电量通知 (收藏节点)</string>
     <string name="baro_pressure">气压</string>
     <string name="mesh_via_udp_enabled">通过 UDP 的Mesh</string>
     <string name="udp_config">UDP 设置</string>
+    <string name="map_node_popup_details"><![CDATA[%1$s<br>最后听到: %2$s<br>最后位置: %3$s<br>电量: %4$s]]></string>
     <string name="toggle_my_position">切换我的位置</string>
     <string name="user">用户</string>
     <string name="channels">频道</string>
@@ -659,5 +673,17 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="client_notification">客户端通知</string>
     <string name="compromised_keys">检测到密钥泄漏，请点击 确定 进行重新生成。</string>
     <string name="regenerate_private_key">重新生成私钥</string>
+    <string name="regenerate_keys_confirmation">您确定要重新生成您的私钥吗？\n\n曾与此节点交换过密钥的节点将需要删除该节点并重新交换密钥以恢复安全通信。</string>
+    <string name="export_keys">导出密钥</string>
+    <string name="export_keys_confirmation">导出公钥和私钥到文件。请安全地存储某处。</string>
+    <string name="modules_unlocked">模块已解锁</string>
+    <string name="remote">远程</string>
+    <string name="node_count_template">(%1$d 在线 / %2$d 总计)</string>
+    <string name="react">互动</string>
     <string name="disconnect">断开连接</string>
+    <string name="no_ble_devices">未找到蓝牙设备。</string>
+    <string name="no_network_devices">未找到网络设备。</string>
+    <string name="no_usb_devices">未找到 USB 串口设备。</string>
+    <string name="scroll_to_bottom">滚动到底部</string>
+    <string name="meshtastic">Meshtastic</string>
 </resources>
