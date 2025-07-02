@@ -14,9 +14,6 @@
   ~
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
-  ~
-  ~ NOTE: Only modify this english strings.xml file directly.
-  ~       Other languages are managed by CrowdIn
   -->
 <resources>
     <string name="main_tab_messages">Сообщения</string>
@@ -140,6 +137,8 @@
     <string name="debug_panel">Панель отладки</string>
     <string name="debug_last_messages">500 последних сообщений</string>
     <string name="debug_filters">Фильтры</string>
+    <string name="debug_default_search">Искать в журнале…</string>
+    <string name="debug_clear">Очистить журнал</string>
     <string name="clear">Очистить</string>
     <string name="updating_firmware">Обновление прошивки, подождите до восьми минут…</string>
     <string name="update_successful">Успешно обновлено</string>
@@ -603,7 +602,14 @@
     <string name="sats">Количество спутников</string>
     <string name="alt">Уровень моря</string>
     <string name="primary"></string>
+    <string name="firmware">Прошивка</string>
+    <string name="use_12h_format">Использовать 12-часовой формат времени</string>
     <string name="host_metrics_log"></string>
+    <string name="connections">Соединения</string>
     <string name="map">Карта</string>
+    <string name="contacts">Контакты</string>
+    <string name="nodes">Узлы</string>
+    <string name="regenerate_private_key">Пересоздать приватный ключ</string>
     <string name="node_count_template">(%1$d в сети / всего %2$d)</string>
+    <string name="meshtastic">Meshtastic</string>
 </resources>
