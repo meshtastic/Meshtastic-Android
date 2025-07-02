@@ -144,6 +144,14 @@ class RadioInterfaceService @Inject constructor(
         return BuildConfig.DEBUG || (context as GeeksvilleApplication).isInTestLab
     }
 
+    /**
+     * Determines whether to default to mock interface for device address.
+     * This keeps the decision logic separate and easy to extend.
+     */
+    private fun shouldDefaultToMockInterface(): Boolean {
+        return BuildUtils.isEmulator
+    }
+
     /** Return the device we are configured to use, or null for none
      * device address strings are of the form:
      *
@@ -157,7 +165,7 @@ class RadioInterfaceService @Inject constructor(
         var address = prefs.getString(DEVADDR_KEY, null)
 
         // If we are running on the emulator we default to the mock interface, so we can have some data to show to the user
-        if (address == null && BuildUtils.isEmulator) {
+        if (address == null && shouldDefaultToMockInterface()) {
             address = mockInterfaceAddress
         }
 
