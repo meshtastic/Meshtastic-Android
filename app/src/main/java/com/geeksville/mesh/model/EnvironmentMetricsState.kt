@@ -20,6 +20,7 @@ package com.geeksville.mesh.model
 import androidx.compose.ui.graphics.Color
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.ui.common.theme.InfantryBlue
+import com.geeksville.mesh.ui.common.theme.LightBlue
 import com.geeksville.mesh.ui.common.theme.Orange
 
 enum class Environment(val color: Color) {
@@ -33,12 +34,12 @@ enum class Environment(val color: Color) {
             return telemetry.environmentMetrics.relativeHumidity
         }
     },
-    SOIL_TEMPERATURE(Color.Red) {
+    SOIL_TEMPERATURE(Color.Cyan) {
         override fun getValue(telemetry: Telemetry): Float {
             return telemetry.environmentMetrics.soilTemperature
         }
     },
-    SOIL_MOISTURE(InfantryBlue) {
+    SOIL_MOISTURE(LightBlue) {
         override fun getValue(telemetry: Telemetry): Float {
             return telemetry.environmentMetrics.soilMoisture.toFloat()
         }
