@@ -13,9 +13,6 @@
   ~
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
-  ~
-  ~ NOTE: Only modify this english strings.xml file directly.
-  ~       Other languages are managed by CrowdIn
   -->
 
 <resources>
@@ -711,4 +708,5 @@
     <string name="no_usb_devices">No USB Serial devices found.</string>
     <string name="scroll_to_bottom">Scroll to bottom</string>
     <string name="meshtastic">Meshtastic</string>
+    <string name="scanning">Scanning</string>
 </resources>
