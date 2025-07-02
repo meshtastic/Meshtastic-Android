@@ -77,7 +77,7 @@ Comprehensive testing helps prevent regressions and ensures a stable experience 
 ## Community Standards
 
 - Be respectful and considerate in all interactions.
-- The Meshtastic Android project is subject to the code of conduct for the parent project, which can be [found here:] (https://meshtastic.org/docs/legal/conduct/)
+- The Meshtastic Android project is subject to the code of conduct for the parent project, which can be [found here:](https://meshtastic.org/docs/legal/conduct/)
 - Help others by reviewing pull requests and answering questions when possible.
 
 Thank you for helping make Meshtastic-Android better! 
