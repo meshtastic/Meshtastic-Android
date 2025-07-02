@@ -123,7 +123,8 @@ data class EnvironmentMetricsState(
             telemetries.minBy { it.environmentMetrics.soilTemperature },
             telemetries.maxBy { it.environmentMetrics.soilTemperature }
         )
-        if (minSoilTemp.environmentMetrics.soilTemperature != 0f || maxSoilTemp.environmentMetrics.soilTemperature != 0f) {
+        if (minSoilTemp.environmentMetrics.soilTemperature != 0f ||
+            maxSoilTemp.environmentMetrics.soilTemperature != 0f) {
             minValues.add(minTemp.environmentMetrics.soilTemperature)
             maxValues.add(maxTemp.environmentMetrics.soilTemperature)
             shouldPlot[Environment.SOIL_TEMPERATURE.ordinal] = true
