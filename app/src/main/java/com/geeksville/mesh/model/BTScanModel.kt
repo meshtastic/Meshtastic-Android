@@ -21,6 +21,7 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.content.SharedPreferences
 import android.hardware.usb.UsbManager
 import android.os.RemoteException
 import androidx.lifecycle.LiveData
@@ -54,6 +55,7 @@ import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
 
 @HiltViewModel
+@Suppress("LongParameterList")
 class BTScanModel @Inject constructor(
     private val application: Application,
     private val serviceRepository: ServiceRepository,
@@ -62,11 +64,14 @@ class BTScanModel @Inject constructor(
     private val usbManagerLazy: dagger.Lazy<UsbManager>,
     private val networkRepository: NetworkRepository,
     private val radioInterfaceService: RadioInterfaceService,
+    private val preferences: SharedPreferences,
 ) : ViewModel(), Logging {
 
     private val context: Context get() = application.applicationContext
     val devices = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
     val errorText = MutableLiveData<String?>(null)
+
+    var recentIpAddresses = MutableStateFlow(preferences.getStringSet("recent-ip-addresses", emptySet<String>()))
 
     private val showMockInterface: StateFlow<Boolean>
         get() =
@@ -76,9 +81,10 @@ class BTScanModel @Inject constructor(
         combine(
             bluetoothRepository.state,
             networkRepository.resolvedList,
+            recentIpAddresses.asStateFlow(),
             usbRepository.serialDevicesWithDrivers,
             showMockInterface,
-        ) { ble, tcp, usb, showMockInterface ->
+        ) { ble, tcp, recent, usb, showMockInterface ->
             devices.value = mutableMapOf<String, DeviceListEntry>().apply {
                 fun addDevice(entry: DeviceListEntry) {
                     this[entry.fullAddress] = entry
@@ -117,6 +123,11 @@ class BTScanModel @Inject constructor(
                         displayName += "_$deviceId"
                     }
                     addDevice(DeviceListEntry(displayName, "t$address", true))
+                }
+
+                // Include saved IP connections
+                recent?.sorted()?.forEach { address ->
+                    addDevice(DeviceListEntry(context.getString(R.string.meshtastic), address.substring(1), true))
                 }
 
                 usb.forEach { (_, d) ->
@@ -283,11 +294,28 @@ class BTScanModel @Inject constructor(
             }.launchIn(viewModelScope)
     }
 
+    fun addRecentAddress(address: String) {
+        if (!address.startsWith("t")) return
+        val existingItems = preferences.getStringSet("recent-ip-addresses", hashSetOf<String>()) ?: hashSetOf<String>()
+        val updatedList = mutableListOf<String>()
+        val recentList = existingItems.filter { it.substring(1) != address }.sorted().map { it.substring(1) }.take(2)
+        updatedList.add(address)
+        updatedList.addAll(recentList)
+        val updatedSet = updatedList
+            .mapIndexed { index, address -> (index + 1).toString() + address.toString() }
+            .toHashSet()
+        val e = preferences.edit()
+        e.putStringSet("recent-ip-addresses", updatedSet)
+        e.commit()
+        recentIpAddresses.value = updatedSet
+    }
+
     // Called by the GUI when a new device has been selected by the user
     // @returns true if we were able to change to that item
     fun onSelected(it: DeviceListEntry): Boolean {
         // If the device is paired, let user select it, otherwise start the pairing flow
         if (it.bonded) {
+            addRecentAddress(it.fullAddress)
             changeDeviceAddress(it.fullAddress)
             return true
         } else {
