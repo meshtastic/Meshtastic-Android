@@ -623,6 +623,15 @@ class UIViewModel @Inject constructor(
         radioConfigRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey))
     }
 
+    private val _sharedContactRequested: MutableStateFlow<AdminProtos.SharedContact?> =
+        MutableStateFlow(null)
+    val sharedContactRequested: StateFlow<AdminProtos.SharedContact?> get() = _sharedContactRequested.asStateFlow()
+    fun setSharedContactRequested(sharedContact: AdminProtos.SharedContact?) {
+        viewModelScope.launch {
+            _sharedContactRequested.value = sharedContact
+        }
+    }
+
     fun addSharedContact(sharedContact: AdminProtos.SharedContact) = viewModelScope.launch {
         radioConfigRepository.onServiceAction(ServiceAction.AddSharedContact(sharedContact))
     }

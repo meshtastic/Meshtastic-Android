@@ -67,6 +67,7 @@ import com.geeksville.mesh.ui.MainMenuAction
 import com.geeksville.mesh.ui.MainScreen
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.MODE_DYNAMIC
+import com.geeksville.mesh.ui.sharing.toSharedContact
 import com.geeksville.mesh.util.Exceptions
 import com.geeksville.mesh.util.LanguageUtils
 import com.geeksville.mesh.util.getPackageInfoCompat
@@ -175,6 +176,12 @@ class MainActivity : AppCompatActivity(), Logging {
                     ) {
                         debug("App link data is a channel set")
                         model.requestChannelUrl(it)
+                    } else if (it.path?.startsWith("/v/") == true ||
+                        it.path?.startsWith("/V/") == true
+                    ) {
+                        val sharedContact = it.toSharedContact()
+                        debug("App link data is a shared contact: ${sharedContact.user.longName}")
+                        model.setSharedContactRequested(sharedContact)
                     } else {
                         debug("App link data is not a channel set")
                     }

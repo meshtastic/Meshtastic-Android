@@ -53,6 +53,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
@@ -82,7 +83,7 @@ fun AddContactFAB(
     onSharedContactImport: (AdminProtos.SharedContact) -> Unit = {},
 ) {
     val context = LocalContext.current
-    var contactToImport: AdminProtos.SharedContact? by remember { mutableStateOf(null) }
+    val contactToImport: AdminProtos.SharedContact? by model.sharedContactRequested.collectAsStateWithLifecycle(null)
 
     val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
         if (result.contents != null) {
@@ -94,7 +95,7 @@ fun AddContactFAB(
                 null
             }
             if (sharedContact != null) {
-                contactToImport = sharedContact
+                model.setSharedContactRequested(sharedContact)
             }
         }
     }
@@ -134,12 +135,12 @@ fun AddContactFAB(
             },
             dismissText = stringResource(R.string.cancel),
             onDismiss = {
-                contactToImport = null
+                model.setSharedContactRequested(null)
             },
             confirmText = stringResource(R.string.import_label),
             onConfirm = {
                 onSharedContactImport(contactToImport!!)
-                contactToImport = null
+                model.setSharedContactRequested(null)
             }
         )
     }
