@@ -45,9 +45,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -61,8 +59,6 @@ private data class IntroSlide(
     val title: String,
     val description: String,
     @DrawableRes val imageRes: Int,
-    val backgroundColor: Color,
-    val contentColor: Color
 )
 
 @Suppress("LongMethod")
@@ -140,22 +136,16 @@ private fun slides(): List<IntroSlide> {
             title = stringResource(R.string.intro_welcome),
             description = stringResource(R.string.intro_welcome_text),
             imageRes = R.drawable.app_icon,
-            backgroundColor = colorResource(R.color.colourGrey),
-            contentColor = colorResource(R.color.colorOnPrimary)
         ),
         IntroSlide(
             title = stringResource(R.string.intro_started),
             description = stringResource(R.string.intro_started_text),
             imageRes = R.drawable.icon_meanings,
-            backgroundColor = colorResource(R.color.colourGrey),
-            contentColor = colorResource(R.color.colorOnPrimary)
         ),
         IntroSlide(
             title = stringResource(R.string.intro_encryption),
             description = stringResource(R.string.intro_encryption_text),
             imageRes = R.drawable.channel_name_image,
-            backgroundColor = colorResource(R.color.colourGrey),
-            contentColor = colorResource(R.color.colorOnPrimary)
         )
     )
     return slides
