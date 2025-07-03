@@ -225,9 +225,6 @@
         </receiver>
         <receiver android:name="com.geeksville.mesh.service.ReplyReceiver"/>
 
-        <activity
-            android:name=".AppIntroduction"/>
-
         <!-- allow for plugin discovery -->
         <activity
             android:name="com.atakmap.app.component"

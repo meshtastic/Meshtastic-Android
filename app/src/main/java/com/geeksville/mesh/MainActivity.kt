@@ -40,6 +40,8 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalView
 import androidx.core.content.edit
 import androidx.core.net.toUri
@@ -68,6 +70,7 @@ import com.geeksville.mesh.ui.MainScreen
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.MODE_DYNAMIC
 import com.geeksville.mesh.ui.sharing.toSharedContact
+import com.geeksville.mesh.ui.intro.AppIntroductionScreen
 import com.geeksville.mesh.util.Exceptions
 import com.geeksville.mesh.util.LanguageUtils
 import com.geeksville.mesh.util.getPackageInfoCompat
@@ -82,6 +85,8 @@ class MainActivity : AppCompatActivity(), Logging {
 
     @Inject
     internal lateinit var serviceRepository: ServiceRepository
+
+    private var showAppIntro by mutableStateOf(false)
 
     private val bluetoothPermissionsLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { result ->
@@ -111,18 +116,17 @@ class MainActivity : AppCompatActivity(), Logging {
         installSplashScreen()
         super.onCreate(savedInstanceState)
 
+        val prefs = UIViewModel.getPreferences(this)
         if (savedInstanceState == null) {
-            val prefs = UIViewModel.getPreferences(this)
-            // First run: migrate in-app language prefs to appcompat
             val lang = prefs.getString("lang", LanguageUtils.SYSTEM_DEFAULT)
             if (lang != LanguageUtils.SYSTEM_MANAGED) LanguageUtils.migrateLanguagePrefs(prefs)
             info("in-app language is ${LanguageUtils.getLocale()}")
-            // First run: show AppIntroduction
+
             if (!prefs.getBoolean("app_intro_completed", false)) {
-                startActivity(Intent(this, AppIntroduction::class.java))
+                showAppIntro = true
+            } else {
+                (application as GeeksvilleApplication).askToRate(this)
             }
-            // Ask user to rate in play store
-            (application as GeeksvilleApplication).askToRate(this)
         }
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -146,14 +150,22 @@ class MainActivity : AppCompatActivity(), Logging {
                         AppCompatDelegate.setDefaultNightMode(theme)
                     }
                 }
-                MainScreen(
-                    uIViewModel = model,
-                    bluetoothViewModel = bluetoothViewModel,
-                    onAction = ::onMainMenuAction,
-                )
+
+                if (showAppIntro) {
+                    AppIntroductionScreen(onDone = {
+                        prefs.edit { putBoolean("app_intro_completed", true) }
+                        showAppIntro = false
+                        (application as GeeksvilleApplication).askToRate(this@MainActivity)
+                    })
+                } else {
+                    MainScreen(
+                        uIViewModel = model,
+                        bluetoothViewModel = bluetoothViewModel,
+                        onAction = ::onMainMenuAction,
+                    )
+                }
             }
         }
-        // Handle any intent
         handleIntent(intent)
     }
 
@@ -162,7 +174,6 @@ class MainActivity : AppCompatActivity(), Logging {
         handleIntent(intent)
     }
 
-    // Handle any intents that were passed into us
     private fun handleIntent(intent: Intent) {
         val appLinkAction = intent.action
         val appLinkData: Uri? = intent.data
@@ -256,7 +267,6 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
-    // Called when we gain/lose a connection to our mesh radio
     private fun onMeshConnectionChanged(newConnection: MeshService.ConnectionState) {
         if (newConnection == MeshService.ConnectionState.CONNECTED) {
             checkNotificationPermissions()
@@ -329,7 +339,6 @@ class MainActivity : AppCompatActivity(), Logging {
                     val connectionState =
                         MeshService.ConnectionState.valueOf(service.connectionState())
 
-                    // We won't receive a notify for the initial state of connection, so we force an update here
                     onMeshConnectionChanged(connectionState)
                 } catch (ex: RemoteException) {
                     errormsg("Device error during init ${ex.message}")
@@ -348,13 +357,11 @@ class MainActivity : AppCompatActivity(), Logging {
     private fun bindMeshService() {
         debug("Binding to mesh service!")
         try {
-            MeshService.startService(this) // Start the service so it stays running even after we unbind
+            MeshService.startService(this)
         } catch (ex: Exception) {
-            // Old samsung phones have a race condition andthis might rarely fail.  Which is probably find because the bind will be sufficient most of the time
             errormsg("Failed to start service from activity - but ignoring because bind will work ${ex.message}")
         }
 
-        // ALSO bind so we can use the api
         mesh.connect(
             this,
             MeshService.createIntent(),
@@ -388,7 +395,6 @@ class MainActivity : AppCompatActivity(), Logging {
         try {
             bindMeshService()
         } catch (ex: BindFailedException) {
-            // App is probably shutting down, ignore
             errormsg("Bind of MeshService failed${ex.message}")
         }
     }
@@ -421,7 +427,7 @@ class MainActivity : AppCompatActivity(), Logging {
             }
 
             MainMenuAction.SHOW_INTRO -> {
-                startActivity(Intent(this, AppIntroduction::class.java))
+                showAppIntro = true // Show intro again if selected from menu
             }
 
             else -> {}
@@ -438,8 +444,6 @@ class MainActivity : AppCompatActivity(), Logging {
         }
     }
 
-    // Theme functions
-
     private fun chooseThemeDialog() {
         val styles = mapOf(
             getString(R.string.dynamic) to MODE_DYNAMIC,
@@ -448,11 +452,9 @@ class MainActivity : AppCompatActivity(), Logging {
             getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
         )
 
-        // Load preferences and its value
         val prefs = UIViewModel.getPreferences(this)
         val theme = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         debug("Theme from prefs: $theme")
-        // map theme keys to function to set theme
         model.showAlert(
             title = getString(R.string.choose_theme),
             message = "",
@@ -466,10 +468,8 @@ class MainActivity : AppCompatActivity(), Logging {
 
     private fun chooseLangDialog() {
         val languageTags = LanguageUtils.getLanguageTags(this)
-        // Load preferences and its value
         val lang = LanguageUtils.getLocale()
         debug("Lang from prefs: $lang")
-        // map lang keys to function to set locale
         val langMap = languageTags.mapValues { (_, value) ->
             {
                 LanguageUtils.setLocale(value)
