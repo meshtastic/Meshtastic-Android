@@ -28,16 +28,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.BluetoothDisabled
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.getBluetoothPermissions
 import com.geeksville.mesh.model.BTScanModel
@@ -52,6 +55,7 @@ fun BLEDevices(
     scanModel: BTScanModel
 ) {
     val context = LocalContext.current
+    val isScanning by scanModel.spinner.collectAsStateWithLifecycle(false)
     Row {
         Text(
             text = stringResource(R.string.bluetooth),
@@ -68,6 +72,22 @@ fun BLEDevices(
             ) {
                 scanModel.onSelected(device)
             }
+        }
+    } else if (isScanning) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
+            horizontalAlignment = CenterHorizontally
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(96.dp)
+            )
+            Text(
+                text = stringResource(R.string.scanning),
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
         }
     } else {
         Column(
@@ -89,6 +109,7 @@ fun BLEDevices(
         }
     }
     Button(
+        enabled = !isScanning,
         modifier = Modifier.fillMaxWidth(),
         onClick = {
             val bluetoothPermissions = context.getBluetoothPermissions()

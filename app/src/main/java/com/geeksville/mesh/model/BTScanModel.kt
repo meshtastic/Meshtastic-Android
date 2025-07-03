@@ -24,7 +24,6 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.hardware.usb.UsbManager
 import android.os.RemoteException
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -343,8 +342,8 @@ class BTScanModel @Inject constructor(
         }
     }
 
-    private val _spinner = MutableLiveData(false)
-    val spinner: LiveData<Boolean> get() = _spinner
+    private val _spinner = MutableStateFlow(false)
+    val spinner: StateFlow<Boolean> get() = _spinner.asStateFlow()
 }
 
 const val NO_DEVICE_SELECTED = "n"

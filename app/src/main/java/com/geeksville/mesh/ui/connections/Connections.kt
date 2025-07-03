@@ -140,7 +140,7 @@ fun ConnectionsScreen(
     val scanStatusText by scanModel.errorText.observeAsState("")
     val connectionState by uiViewModel.connectionState.collectAsState(MeshService.ConnectionState.DISCONNECTED)
     val devices by scanModel.devices.observeAsState(emptyMap())
-    val scanning by scanModel.spinner.observeAsState(false)
+    val scanning by scanModel.spinner.collectAsStateWithLifecycle(false)
     val receivingLocationUpdates by uiViewModel.receivingLocationUpdates.collectAsState(false)
     val context = LocalContext.current
     val app = (context.applicationContext as GeeksvilleApplication)
