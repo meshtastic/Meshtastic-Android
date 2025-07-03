@@ -53,9 +53,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import javax.inject.Inject
+import org.json.JSONArray
 
 @HiltViewModel
-@Suppress("LongParameterList")
+@Suppress("LongParameterList", "TooManyFunctions")
 class BTScanModel @Inject constructor(
     private val application: Application,
     private val serviceRepository: ServiceRepository,
@@ -71,7 +72,7 @@ class BTScanModel @Inject constructor(
     val devices = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
     val errorText = MutableLiveData<String?>(null)
 
-    var recentIpAddresses = MutableStateFlow(preferences.getStringSet("recent-ip-addresses", emptySet<String>()))
+    private val recentIpAddresses = MutableStateFlow(getRecentAddresses())
 
     private val showMockInterface: StateFlow<Boolean>
         get() =
@@ -126,8 +127,8 @@ class BTScanModel @Inject constructor(
                 }
 
                 // Include saved IP connections
-                recent?.sorted()?.forEach { address ->
-                    addDevice(DeviceListEntry(context.getString(R.string.meshtastic), address.substring(1), true))
+                recent?.forEach { address ->
+                    addDevice(DeviceListEntry(context.getString(R.string.meshtastic), address, true))
                 }
 
                 usb.forEach { (_, d) ->
@@ -294,20 +295,28 @@ class BTScanModel @Inject constructor(
             }.launchIn(viewModelScope)
     }
 
+    private fun getRecentAddresses(): List<String> {
+        val jsonAddresses = preferences.getString("recent-ip-addresses", "[]") ?: "[]"
+        val listAddresses = JSONArray(jsonAddresses).let { jsonArray ->
+            List(jsonArray.length()) { index -> jsonArray.getString(index) }
+        }
+        return listAddresses
+    }
+
+    private fun setRecentAddresses(addresses: List<String>) {
+        val editor = preferences.edit()
+        editor.putString("recent-ip-addresses", addresses.toString())
+        editor.apply()
+        recentIpAddresses.value = addresses
+    }
+
     fun addRecentAddress(address: String) {
         if (!address.startsWith("t")) return
-        val existingItems = preferences.getStringSet("recent-ip-addresses", hashSetOf<String>()) ?: hashSetOf<String>()
+        val existingItems = getRecentAddresses()
         val updatedList = mutableListOf<String>()
-        val recentList = existingItems.filter { it.substring(1) != address }.sorted().map { it.substring(1) }.take(2)
         updatedList.add(address)
-        updatedList.addAll(recentList)
-        val updatedSet = updatedList
-            .mapIndexed { index, address -> (index + 1).toString() + address.toString() }
-            .toHashSet()
-        val e = preferences.edit()
-        e.putStringSet("recent-ip-addresses", updatedSet)
-        e.commit()
-        recentIpAddresses.value = updatedSet
+        updatedList.addAll(existingItems.filter { it != address }.take(2))
+        setRecentAddresses(updatedList)
     }
 
     // Called by the GUI when a new device has been selected by the user
