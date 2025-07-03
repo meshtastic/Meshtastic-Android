@@ -587,4 +587,5 @@
     <string name="nodes">Noeuds</string>
     <string name="reply">Répondre</string>
     <string name="disconnect">Déconnecter</string>
+    <string name="app_intro_back_button">Retour</string>
 </resources>
