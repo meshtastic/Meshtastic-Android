@@ -709,4 +709,8 @@
     <string name="scroll_to_bottom">Scroll to bottom</string>
     <string name="meshtastic">Meshtastic</string>
     <string name="scanning">Scanning</string>
+    <string name="app_intro_back_button">Back</string>
+    <string name="app_intro_next_button">Next</string>
+    <string name="app_intro_done_button">Done</string>
+    <string name="app_intro_skip_button">Skip</string>
 </resources>
