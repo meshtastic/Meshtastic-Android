@@ -24,6 +24,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.hardware.usb.UsbManager
 import android.os.RemoteException
+import androidx.core.content.edit
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -51,8 +52,8 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import javax.inject.Inject
 import org.json.JSONArray
+import javax.inject.Inject
 
 @HiltViewModel
 @Suppress("LongParameterList", "TooManyFunctions")
@@ -126,7 +127,7 @@ class BTScanModel @Inject constructor(
                 }
 
                 // Include saved IP connections
-                recent?.forEach { address ->
+                recent.forEach { address ->
                     addDevice(DeviceListEntry(context.getString(R.string.meshtastic), address, true))
                 }
 
@@ -303,9 +304,9 @@ class BTScanModel @Inject constructor(
     }
 
     private fun setRecentAddresses(addresses: List<String>) {
-        val editor = preferences.edit()
-        editor.putString("recent-ip-addresses", addresses.toString())
-        editor.apply()
+        preferences.edit {
+            putString("recent-ip-addresses", addresses.toString())
+        }
         recentIpAddresses.value = addresses
     }
 

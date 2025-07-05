@@ -19,8 +19,6 @@ package com.geeksville.mesh.ui.connections.components
 
 import android.app.Activity
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -44,10 +42,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.getBluetoothPermissions
 import com.geeksville.mesh.model.BTScanModel
+import com.geeksville.mesh.service.MeshService
 
 @Suppress("LongMethod")
 @Composable
 fun BLEDevices(
+    connectionState: MeshService.ConnectionState,
     btDevices: List<BTScanModel.DeviceListEntry>,
     selectedDevice: String,
     showBluetoothRationaleDialog: () -> Unit,
@@ -56,24 +56,21 @@ fun BLEDevices(
 ) {
     val context = LocalContext.current
     val isScanning by scanModel.spinner.collectAsStateWithLifecycle(false)
-    Row {
-        Text(
-            text = stringResource(R.string.bluetooth),
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
-        Spacer(modifier = Modifier.weight(1f))
-    }
-    if (btDevices.isNotEmpty()) {
-        btDevices.forEach { device ->
-            DeviceListItem(
-                device,
-                device.fullAddress == selectedDevice
-            ) {
-                scanModel.onSelected(device)
-            }
+    Text(
+        text = stringResource(R.string.bluetooth),
+        style = MaterialTheme.typography.titleLarge,
+        modifier = Modifier.padding(vertical = 8.dp)
+    )
+    btDevices.forEach { device ->
+        DeviceListItem(
+            connectionState,
+            device,
+            device.fullAddress == selectedDevice
+        ) {
+            scanModel.onSelected(device)
         }
-    } else if (isScanning) {
+    }
+    if (isScanning) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -89,7 +86,7 @@ fun BLEDevices(
                 modifier = Modifier.padding(vertical = 8.dp)
             )
         }
-    } else {
+    } else if (btDevices.filterNot { it.isDisconnect }.isEmpty()) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
