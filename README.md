@@ -12,25 +12,31 @@
 
 This is a tool for using Android with open-source mesh radios. For more information see our webpage: [meshtastic.org](https://www.meshtastic.org). If you are looking for the the device side code, see [here](https://github.com/meshtastic/Meshtastic-device).
 
-This project is currently beta testing, if you have questions or feedback
-please [Join our discussion forum](https://github.com/orgs/meshtastic/discussions) or the [Discord Group](https://discord.gg/meshtastic) . We would love to hear from you!
+This project is currently beta testing across various providers. If you have questions or feedback please [Join our discussion forum](https://github.com/orgs/meshtastic/discussions) or the [Discord Group](https://discord.gg/meshtastic) . We would love to hear from you!
 
-For the latest Beta, use xxx, 
+
+
+## Get Meshtastic
+
+The easiest, and fastest way to get the latest beta releases is to use our [github releases](https://github.com/meshtastic/Meshtastic-Android/releases). It is recommend to use these with [Obtainum](https://github.com/ImranR98/Obtainium) to get the latest updates.
+
+Alternatively, these other providers are also available, but may be slower to update. 
 
 [<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
 alt="Get it on F-Droid"
-width="32%">](https://f-droid.org/packages/com.geeksville.mesh/)
+width="24%">](https://f-droid.org/packages/com.geeksville.mesh/)
 [<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png"
 alt="Get it on IzzyOnDroid"
-width="32%">](https://apt.izzysoft.de/fdroid/index/apk/com.geeksville.mesh)
+width="24%">](https://apt.izzysoft.de/fdroid/index/apk/com.geeksville.mesh)
+[<img src="https://github.com/machiav3lli/oandbackupx/blob/034b226cea5c1b30eb4f6a6f313e4dadcbb0ece4/badge_github.png"
+alt="Get it on GitHub"
+width="24%">](https://github.com/meshtastic/Meshtastic-Android/releases)
 [<img src="https://play.google.com/intl/en_us/badges/static/images/badges/en_badge_web_generic.png"
 alt="Download at https://play.google.com/store/apps/details?id=com.geeksville.mesh]"
-width="32%">](https://play.google.com/store/apps/details?id=com.geeksville.mesh&referrer=utm_source%3Dgithub-android-readme)
+width="24%">](https://play.google.com/store/apps/details?id=com.geeksville.mesh&referrer=utm_source%3Dgithub-android-readme)
 
-If you want to join the Play Store testing program go to [this URL](https://play.google.com/apps/testing/com.geeksville.mesh) and opt-in to become a tester.
+The play store is the last to update of these options, but if you want to join the Play Store testing program go to [this URL](https://play.google.com/apps/testing/com.geeksville.mesh) and opt-in to become a tester.
 If you encounter any problems or have questions, [post in the forum](https://github.com/orgs/meshtastic/discussions) and we'll help.
-
-However, if you must use 'raw' APKs you can get them from our [github releases](https://github.com/meshtastic/Meshtastic-Android/releases). It is recommend to use these with [Obtainum](https://github.com/ImranR98/Obtainium) to get the latest updates.
 
 ## Translations
 
