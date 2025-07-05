@@ -41,6 +41,7 @@ import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -100,6 +101,7 @@ import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import kotlinx.coroutines.launch
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.Color
 
 private const val MESSAGE_CHARACTER_LIMIT = 200
 private const val SNIPPET_CHARACTER_LIMIT = 50
@@ -129,12 +131,16 @@ internal fun MessageScreen(
                 val channel = channels.getChannel(it)
                 val name = channel?.name ?: "Unknown Channel"
                 // Check if PSK is the default (0 or 1 byte key)
-                val isLowEntropyKey = channel?.psk?.size() ?: 0 <= 1
-                Pair(name, isLowEntropyKey)
-            } ?: Pair("Unknown Channel", false)
+                val isLowEntropyKey = (channel?.psk?.size() ?: 0) <= 1
+                val isPreciseLocation = channel?.settings?.getModuleSettings()?.positionPrecision == 32
+                val key = arrayOf(isLowEntropyKey, isPreciseLocation)
+                Pair(name, key)
+        } ?: Pair("Unknown Channel", arrayOf(false, false))
         }
     }
-    val (channelTitle, isLowEntropyKey) = channelName
+    val (channelTitle, key) = channelName
+    val isLowEntropyKey = key[0]
+    val isPreciseLocation = key[1]
     val title = when (nodeId) {
         DataPacket.ID_BROADCAST -> channelTitle
         else -> viewModel.getUser(nodeId).longName
@@ -210,7 +216,8 @@ internal fun MessageScreen(
                     }
                 }
             } else {
-                MessageTopBar(title, channelIndex, mismatchKey, onNavigateBack, isLowEntropyKey = isLowEntropyKey
+                MessageTopBar(title, channelIndex, mismatchKey, onNavigateBack,
+                 isLowEntropyKey = isLowEntropyKey, isPreciseLocation = isPreciseLocation
         )
             }
         },
@@ -453,17 +460,25 @@ private fun MessageTopBar(
     channelIndex: Int?,
     mismatchKey: Boolean = false,
     onNavigateBack: () -> Unit,
-    isLowEntropyKey: Boolean = false
+    isLowEntropyKey: Boolean = false,
+    isPreciseLocation: Boolean = false,
 ) = TopAppBar(
     title = {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(text = title)
-            if (isLowEntropyKey
-            ) {
-                Spacer(modifier = Modifier.width(10.dp))
+            Spacer(modifier = Modifier.width(10.dp))
+
+            if (!isLowEntropyKey) {
+                Icon(
+                    imageVector = Icons.Default.Lock,
+                    contentDescription = "Secure",
+                    tint = Color.Green,
+                )
+            } else {
                     Icon(
                         imageVector = ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
-                        contentDescription = "Unlocked"
+                        contentDescription = "Unlocked",
+                        tint = if (isPreciseLocation) Color.Red else Color.Yellow,
                     )
                 }
             }

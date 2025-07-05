@@ -145,7 +145,7 @@ fun ChannelCard(
     } else {
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
-            contentDescription = "Unlocked", 
+            contentDescription = "Unlocked",
             tint = if (isPreciseLocation) Color.Red else Color.Yellow,
         )
         Spacer(modifier = Modifier.width(10.dp))

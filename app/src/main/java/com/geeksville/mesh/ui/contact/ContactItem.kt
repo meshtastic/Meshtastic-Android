@@ -120,7 +120,7 @@ fun ContactItem(
                         val isBroadcast = contact.contactKey.getOrNull(1) == '^' ||
                              contact.contactKey.endsWith("^all") ||
                              contact.contactKey.endsWith("^broadcast")
-                        if (isBroadcast && isLowEntropyKey == false) { // secure 
+                        if (isBroadcast && isLowEntropyKey == false) { // secure
                             Spacer(modifier = Modifier.width(10.dp))
                             Icon(
                                 imageVector = Icons.Default.Lock,
