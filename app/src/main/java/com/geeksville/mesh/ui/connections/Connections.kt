@@ -42,17 +42,14 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bluetooth
-import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Usb
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
@@ -320,22 +317,6 @@ fun ConnectionsScreen(
                                 contentDescription = stringResource(id = R.string.radio_configuration)
                             )
                         }
-                        FilledIconButton(
-                            colors = IconButtonDefaults.filledIconButtonColors().copy(
-                                containerColor = MaterialTheme.colorScheme.error
-                            ),
-                            enabled = true,
-                            onClick = {
-                                devices.values.find { it.isDisconnect }?.let {
-                                    scanModel.onSelected(it)
-                                }
-                            }
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.CloudOff,
-                                contentDescription = stringResource(id = R.string.disconnect),
-                            )
-                        }
                     }
                 }
                 Spacer(modifier = Modifier.height(8.dp))
@@ -357,12 +338,11 @@ fun ConnectionsScreen(
                     }
                 }
             }
-
             var selectedDeviceType by remember { mutableStateOf(DeviceType.BLE) }
             LaunchedEffect(selectedDevice) {
-                // Determine based on the selected device - if disconnected, keep the last selected type
-                selectedDeviceType =
-                    selectedDevice.let { DeviceType.fromAddress(it) } ?: selectedDeviceType
+                DeviceType.fromAddress(selectedDevice)?.let { type ->
+                    selectedDeviceType = type
+                }
             }
             SingleChoiceSegmentedButtonRow(
                 modifier = Modifier.fillMaxWidth(),
@@ -436,7 +416,8 @@ fun ConnectionsScreen(
                     DeviceType.BLE -> {
 
                         BLEDevices(
-                            devices.values.filter { it.isBLE },
+                            connectionState,
+                            devices.values.filter { it.isBLE || it.isDisconnect },
                             selectedDevice,
                             showBluetoothRationaleDialog = {
                                 showBluetoothRationaleDialog = true
@@ -452,7 +433,8 @@ fun ConnectionsScreen(
 
                     DeviceType.TCP -> {
                         NetworkDevices(
-                            devices.values.filter { it.isTCP },
+                            connectionState,
+                            devices.values.filter { it.isTCP || it.isDisconnect },
                             selectedDevice,
                             scanModel
                         )
@@ -460,7 +442,8 @@ fun ConnectionsScreen(
 
                     DeviceType.USB -> {
                         UsbDevices(
-                            devices.values.filter { it.isUSB || it.isMock },
+                            connectionState,
+                            devices.values.filter { it.isUSB || it.isDisconnect || it.isMock },
                             selectedDevice,
                             scanModel
                         )
@@ -723,7 +706,6 @@ private enum class DeviceType {
             val isUSB: Boolean = prefix == 's'
             val isTCP: Boolean = prefix == 't'
             val isMock: Boolean = prefix == 'm'
-            val isDisconnect: Boolean = prefix == 'n'
             return when {
                 isBLE -> BLE
                 isUSB -> USB

@@ -45,30 +45,31 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.repository.network.NetworkRepository
+import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.connections.isIPAddress
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("MagicNumber", "LongMethod")
 @Composable
 fun NetworkDevices(
+    connectionState: MeshService.ConnectionState,
     networkDevices: List<BTScanModel.DeviceListEntry>,
     selectedDevice: String,
     scanModel: BTScanModel,
 ) {
     val manualIpAddress = rememberTextFieldState("")
     val manualIpPort = rememberTextFieldState(NetworkRepository.Companion.SERVICE_PORT.toString())
-    if (networkDevices.isNotEmpty()) {
-        Text(
-            text = stringResource(R.string.network),
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(vertical = 8.dp)
-        )
-        networkDevices.forEach { device ->
-            DeviceListItem(device, device.fullAddress == selectedDevice) {
-                scanModel.onSelected(device)
-            }
+    Text(
+        text = stringResource(R.string.network),
+        style = MaterialTheme.typography.titleLarge,
+        modifier = Modifier.padding(vertical = 8.dp)
+    )
+    networkDevices.forEach { device ->
+        DeviceListItem(connectionState, device, device.fullAddress == selectedDevice) {
+            scanModel.onSelected(device)
         }
-    } else {
+    }
+    if (networkDevices.filterNot { it.isDisconnect }.isEmpty()) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -93,7 +94,7 @@ fun NetworkDevices(
             .fillMaxWidth()
             .padding(8.dp),
         verticalAlignment = Alignment.Companion.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
+        horizontalArrangement = Arrangement.spacedBy(8.dp, CenterHorizontally)
     ) {
         OutlinedTextField(
             state = manualIpAddress,

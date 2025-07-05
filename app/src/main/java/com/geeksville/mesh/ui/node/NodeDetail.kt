@@ -952,7 +952,10 @@ fun TracerouteActionButton(
 @Suppress("LongMethod")
 @Composable
 fun NodeActionButton(
-    modifier: Modifier = Modifier,
+    modifier: Modifier = Modifier
+        .fillMaxWidth()
+        .padding(vertical = 4.dp)
+        .height(48.dp),
     title: String,
     enabled: Boolean,
     icon: ImageVector? = null,
@@ -966,9 +969,6 @@ fun NodeActionButton(
         },
         enabled = enabled,
         modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .height(48.dp),
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
