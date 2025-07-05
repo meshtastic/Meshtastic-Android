@@ -113,10 +113,10 @@ data class Node(
     private fun getTemperatureString(currentTempInCelcius: Float, isFahrenheit: Boolean): String? {
         var resultStr: String? = null
         if (currentTempInCelcius != 0f) {
-            if (isFahrenheit) {
-                resultStr = "%.1f°F".format(toFahrenheit(currentTempInCelcius))
+            resultStr = if (isFahrenheit) {
+                "%.1f°F".format(toFahrenheit(currentTempInCelcius))
             } else {
-                resultStr = "%.1f°C".format(currentTempInCelcius)
+                "%.1f°C".format(currentTempInCelcius)
             }
         }
         return resultStr
