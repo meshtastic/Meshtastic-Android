@@ -29,8 +29,10 @@
     "translation_replace": {
       "sr-Latn": "b+sr+Latn",
     },
-    "update_strings": true,
     "cleanup_mode": true,
-    "escape_special_characters": 1
+    "update_option:": "update_as_unapproved",
+    "escape_quotes": 2,
+    "escape_special_characters": 1,
+    "type": "android",
   }
 ]
