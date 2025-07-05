@@ -160,6 +160,8 @@ data class EnvironmentMetrics(
     val time: Int = currentTime(), // default to current time in secs (NOT MILLISECONDS!)
     val temperature: Float,
     val relativeHumidity: Float,
+    val soilTemperature: Float,
+    val soilMoisture: Int,
     val barometricPressure: Float,
     val gasResistance: Float,
     val voltage: Float,

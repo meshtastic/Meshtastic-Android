@@ -25,6 +25,7 @@ import com.geeksville.mesh.PaxcountProtos
 import com.geeksville.mesh.TelemetryProtos.DeviceMetrics
 import com.geeksville.mesh.TelemetryProtos.EnvironmentMetrics
 import com.geeksville.mesh.TelemetryProtos.PowerMetrics
+import com.geeksville.mesh.android.TelemetryUtils.celsiusToFahrenheit
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.util.GPSFormat
 import com.geeksville.mesh.util.latLongToMeter
@@ -109,25 +110,35 @@ data class Node(
         else -> GPSFormat.toDEC(latitude, longitude)
     }
 
-    private fun EnvironmentMetrics.getDisplayString(isFahrenheit: Boolean): String {
-        val temp = if (temperature != 0f) {
-            if (isFahrenheit) {
-                val fahrenheit = temperature * 1.8F + 32
-                "%.1f°F".format(fahrenheit)
+    private fun buildTemperatureString(currentTempInCelcius: Float, isFahrenheit: Boolean): String? {
+        var resultStr: String? = null
+        if (currentTempInCelcius != 0f) {
+            resultStr = if (isFahrenheit) {
+                "%.1f°F".format(celsiusToFahrenheit(currentTempInCelcius))
             } else {
-                "%.1f°C".format(temperature)
+                "%.1f°C".format(currentTempInCelcius)
             }
-        } else {
-            null
         }
-        val humidity = if (relativeHumidity != 0f) "%.0f%%".format(relativeHumidity) else null
+        return resultStr
+    }
+
+    private fun buildHumidityString(relativeHumidity: Float): String? {
+        if (relativeHumidity != 0f) {
+            return "%.0f%%".format(relativeHumidity)
+        }
+        return null
+    }
+
+    private fun EnvironmentMetrics.getDisplayString(isFahrenheit: Boolean): String {
         val voltage = if (this.voltage != 0f) "%.2fV".format(this.voltage) else null
         val current = if (current != 0f) "%.1fmA".format(current) else null
         val iaq = if (iaq != 0) "IAQ: $iaq" else null
 
         return listOfNotNull(
-            temp,
-            humidity,
+            buildTemperatureString(temperature, isFahrenheit),
+            buildHumidityString(relativeHumidity),
+            buildTemperatureString(soilTemperature, isFahrenheit),
+            buildHumidityString(soilMoisture.toFloat()),
             voltage,
             current,
             iaq,

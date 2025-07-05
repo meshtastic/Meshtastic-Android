@@ -301,6 +301,8 @@
     <string name="air_utilization">Air Utilization</string>
     <string name="temperature">Temperature</string>
     <string name="humidity">Humidity</string>
+    <string name="soil_temperature">Soil Temperature</string>
+    <string name="soil_moisture">Soil Moisture</string>
     <string name="logs">Logs</string>
     <string name="hops_away">Hops Away</string>
     <string name="hops_away_template">Hops Away: %1$d</string>

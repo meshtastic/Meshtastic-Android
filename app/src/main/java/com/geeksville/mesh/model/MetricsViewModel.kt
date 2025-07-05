@@ -305,8 +305,10 @@ class MetricsViewModel @Inject constructor(
                     state.copy(
                         environmentMetrics = telemetry.filter {
                             it.hasEnvironmentMetrics() &&
-                                    it.environmentMetrics.relativeHumidity >= 0f &&
-                                    !it.environmentMetrics.temperature.isNaN()
+                                    (it.environmentMetrics.relativeHumidity >= 0f &&
+                                    !it.environmentMetrics.temperature.isNaN()) ||
+                                    (it.environmentMetrics.soilMoisture >= 0 &&
+                                    !it.environmentMetrics.soilTemperature.isNaN())
                         },
                     )
                 }
