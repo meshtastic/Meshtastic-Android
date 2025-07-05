@@ -25,7 +25,7 @@ import com.geeksville.mesh.PaxcountProtos
 import com.geeksville.mesh.TelemetryProtos.DeviceMetrics
 import com.geeksville.mesh.TelemetryProtos.EnvironmentMetrics
 import com.geeksville.mesh.TelemetryProtos.PowerMetrics
-import com.geeksville.mesh.android.TelemetryUtils.toFahrenheit
+import com.geeksville.mesh.android.TelemetryUtils.celsiusToFahrenheit
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.util.GPSFormat
 import com.geeksville.mesh.util.latLongToMeter
@@ -110,11 +110,11 @@ data class Node(
         else -> GPSFormat.toDEC(latitude, longitude)
     }
 
-    private fun getTemperatureString(currentTempInCelcius: Float, isFahrenheit: Boolean): String? {
+    private fun buildTemperatureString(currentTempInCelcius: Float, isFahrenheit: Boolean): String? {
         var resultStr: String? = null
         if (currentTempInCelcius != 0f) {
             resultStr = if (isFahrenheit) {
-                "%.1f°F".format(toFahrenheit(currentTempInCelcius))
+                "%.1f°F".format(celsiusToFahrenheit(currentTempInCelcius))
             } else {
                 "%.1f°C".format(currentTempInCelcius)
             }
@@ -122,7 +122,7 @@ data class Node(
         return resultStr
     }
 
-    private fun getHumidityString(relativeHumidity: Float): String? {
+    private fun buildHumidityString(relativeHumidity: Float): String? {
         if (relativeHumidity != 0f) {
             return "%.0f%%".format(relativeHumidity)
         }
@@ -135,10 +135,10 @@ data class Node(
         val iaq = if (iaq != 0) "IAQ: $iaq" else null
 
         return listOfNotNull(
-            getTemperatureString(temperature, isFahrenheit),
-            getHumidityString(relativeHumidity),
-            getTemperatureString(soilTemperature, isFahrenheit),
-            getHumidityString(soilMoisture.toFloat()),
+            buildTemperatureString(temperature, isFahrenheit),
+            buildHumidityString(relativeHumidity),
+            buildTemperatureString(soilTemperature, isFahrenheit),
+            buildHumidityString(soilMoisture.toFloat()),
             voltage,
             current,
             iaq,

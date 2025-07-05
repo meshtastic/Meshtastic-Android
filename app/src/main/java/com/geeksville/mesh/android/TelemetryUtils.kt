@@ -21,7 +21,7 @@ private const val FAHRENHEIT_MULTIPLIER = 1.8F
 private const val FAHRENHEIT_OFFSET = 32
 
 object TelemetryUtils {
-    fun toFahrenheit(tempCelsius: Float): Float {
+    fun celsiusToFahrenheit(tempCelsius: Float): Float {
         return (tempCelsius * FAHRENHEIT_MULTIPLIER) + FAHRENHEIT_OFFSET
     }
 }
