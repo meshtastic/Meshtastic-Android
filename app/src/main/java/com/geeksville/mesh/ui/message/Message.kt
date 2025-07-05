@@ -128,15 +128,13 @@ internal fun MessageScreen(
             channelIndex?.let {
                 val channel = channels.getChannel(it)
                 val name = channel?.name ?: "Unknown Channel"
-                // Check if PSK is the default (base64 'AQ==', i.e., single byte 0x01)
-                val isDefaultPSK = (channel?.settings?.psk?.size() == 1 &&
-                    channel.settings.psk.byteAt(0) == 1.toByte()) ||
-                    channel?.psk?.toByteArray()?.isEmpty() == true
-                Pair(name, isDefaultPSK)
+                // Check if PSK is the default (0 or 1 byte key)
+                val isLowEntropyKey = channel?.psk?.size() ?: 0 <= 1
+                Pair(name, isLowEntropyKey)
             } ?: Pair("Unknown Channel", false)
         }
     }
-    val (channelTitle, isDefaultPsk) = channelName
+    val (channelTitle, isLowEntropyKey) = channelName
     val title = when (nodeId) {
         DataPacket.ID_BROADCAST -> channelTitle
         else -> viewModel.getUser(nodeId).longName
@@ -212,7 +210,7 @@ internal fun MessageScreen(
                     }
                 }
             } else {
-                MessageTopBar(title, channelIndex, mismatchKey, onNavigateBack, isDefaultPsk = isDefaultPsk
+                MessageTopBar(title, channelIndex, mismatchKey, onNavigateBack, isLowEntropyKey = isLowEntropyKey
         )
             }
         },
@@ -455,12 +453,12 @@ private fun MessageTopBar(
     channelIndex: Int?,
     mismatchKey: Boolean = false,
     onNavigateBack: () -> Unit,
-    isDefaultPsk: Boolean = false
+    isLowEntropyKey: Boolean = false
 ) = TopAppBar(
     title = {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(text = title)
-            if (isDefaultPsk
+            if (isLowEntropyKey
             ) {
                 Spacer(modifier = Modifier.width(10.dp))
                     Icon(

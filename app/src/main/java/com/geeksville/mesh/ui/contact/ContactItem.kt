@@ -31,6 +31,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.VolumeOff
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
@@ -119,12 +120,26 @@ fun ContactItem(
                         val isBroadcast = contact.contactKey.getOrNull(1) == '^' ||
                              contact.contactKey.endsWith("^all") ||
                              contact.contactKey.endsWith("^broadcast")
+                        if (isBroadcast && isLowEntropyKey == false) { // secure 
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Icon(
+                                imageVector = Icons.Default.Lock,
+                                contentDescription = "Secure",
+                                tint = Color.Green,
+                            )
+                        }
+                        // Check if the channel for this contact has precise location enabled
+                        val channelIndex = contact.contactKey.getOrNull(0)?.digitToIntOrNull()
+//                        val isPreciseLocation = channel.moduleSettings.positionPrecision == 32
+                        val isPreciseLocation = channelIndex == 0 // && // needs other flags, but this is a start
+                            // viewModel.channels.getOrNull(channelIndex ?: -1)?.preciseLocation == true
 
-                        if (isBroadcast && isDefaultPSK == true) {
+                        if (isBroadcast && isLowEntropyKey == false) {
                             Spacer(modifier = Modifier.width(10.dp))
                             Icon(
                                 imageVector = ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
-                                contentDescription = "Unlocked"
+                                contentDescription = "Unlocked",
+                                tint = if (isPreciseLocation) Color.Red else Color.Yellow,
                             )
                         }
                     }

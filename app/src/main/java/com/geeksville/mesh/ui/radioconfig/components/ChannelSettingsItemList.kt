@@ -39,6 +39,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material3.AssistChip
@@ -59,6 +60,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -125,17 +127,26 @@ fun ChannelCard(
     enabled: Boolean,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    isDefaultPSK: Boolean = false,
+    isLowEntropyKey: Boolean = false,
+    isPreciseLocation: Boolean = false,
 ) = ChannelItem(
     index = index,
     title = title,
     enabled = enabled,
     onClick = onEditClick,
 ) {
-    if (isDefaultPSK) {
+
+    if (!isLowEntropyKey) {
+        Icon(
+            imageVector = Icons.Default.Lock,
+            contentDescription = "Secure",
+            tint = Color.Green,
+        )
+    } else {
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
-            contentDescription = "Unlocked"
+            contentDescription = "Unlocked", 
+            tint = if (isPreciseLocation) Color.Red else Color.Yellow,
         )
         Spacer(modifier = Modifier.width(10.dp))
     }
@@ -155,19 +166,28 @@ fun ChannelSelection(
     enabled: Boolean,
     isSelected: Boolean,
     onSelected: (Boolean) -> Unit,
-    isDefaultPSK: Boolean = false,
+    isLowEntropyKey: Boolean = false,
+    isPreciseLocation: Boolean = false,
 ) = ChannelItem(
     index = index,
     title = title,
     enabled = enabled,
     onClick = {},
 ) {
-    if (isDefaultPSK) {
+    if (!isLowEntropyKey) {
+        Icon(
+            imageVector = Icons.Default.Lock,
+            contentDescription = "Secure",
+            tint = Color.Green,
+        )
+    } else {
         Icon(
             imageVector = ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
-            contentDescription = "Unlocked"
+            contentDescription = "Unlocked",
+            tint = if (isPreciseLocation) Color.Red else Color.Yellow,
         )
     }
+    Spacer(modifier = Modifier.width(10.dp))
     Checkbox(
         enabled = enabled,
         checked = isSelected,
@@ -292,15 +312,16 @@ fun ChannelSettingsItemList(
                     items = settingsListInput,
                     dragDropState = dragDropState,
                 ) { index, channel, isDragging ->
-                    val isDefaultPSK = (channel.psk.size() == 1 && channel.psk.byteAt(0) == 1.toByte()) ||
-                        channel.psk.toByteArray().isEmpty()
+                    val isLowEntropyKey = channel.psk.size() <= 1
+                    val isPreciseLocation = channel.moduleSettings.positionPrecision == 32
                     ChannelCard(
                         index = index,
                         title = channel.name.ifEmpty { primaryChannel.name },
                         enabled = enabled,
                         onEditClick = { showEditChannelDialog = index },
                         onDeleteClick = { settingsListInput.removeAt(index) },
-                        isDefaultPSK = isDefaultPSK
+                        isLowEntropyKey = isLowEntropyKey,
+                        isPreciseLocation = isPreciseLocation
                     )
                     if (index == 0 && !isDragging) {
                         Text(

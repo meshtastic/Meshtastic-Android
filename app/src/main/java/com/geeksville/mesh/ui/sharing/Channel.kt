@@ -448,8 +448,8 @@ private fun ChannelListView(
     AdaptiveTwoPane(
         first = {
             channelSet.settingsList.forEachIndexed { index, channel ->
-                val isDefaultPSK = (channel.psk.size() == 1 && channel.psk.byteAt(0) == 1.toByte()) ||
-                    channel.psk.toByteArray().isEmpty()
+                val isLowEntropyKey = channel.psk.size() <= 1
+                val isPreciseLocation = channel.moduleSettings.positionPrecision == 1
                 val displayTitle = channel.name.ifEmpty { modemPresetName }
 
                 ChannelSelection(
@@ -462,7 +462,8 @@ private fun ChannelListView(
                             channelSelections[index] = it
                         }
                     },
-                    isDefaultPSK = isDefaultPSK
+                    isLowEntropyKey = isLowEntropyKey,
+                    isPreciseLocation = isPreciseLocation
                 )
             }
             OutlinedButton(
