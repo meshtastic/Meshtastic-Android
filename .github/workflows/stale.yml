@@ -1,7 +1,7 @@
 name: Close Stale Issues
 on:
   schedule:
-    - cron: 0 6 * * *
+    - cron: 0 6 * * * # Run every day at 6am
   workflow_dispatch: {}
 
 permissions:

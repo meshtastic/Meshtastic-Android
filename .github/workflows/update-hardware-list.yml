@@ -2,7 +2,7 @@ name: Update Hardware List
 
 on:
   schedule:
-    - cron: '0 * * * *'  # Run every hour
+    - cron: '0 */3 * * *'  # Run every 3 hours
   workflow_dispatch:     # Allow manual triggering
 
 jobs:

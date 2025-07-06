@@ -115,11 +115,13 @@ jobs:
           retention-days: 14
 
   androidTest:
+    needs: [build, detekt]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
       matrix:
-        api-level: [26, 35]
+        # api-level: [26, 35]
+        api-level: [35] # only do a single set on MRs, full test in the merge queue
     steps:
       - uses: actions/checkout@v4
         with:

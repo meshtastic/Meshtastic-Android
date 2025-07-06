@@ -1,8 +1,16 @@
 name: Dependency Submission
-
+# This has been disabled in the GH web interface, so I don't know that we need to update it. 
 on:
   push:
     branches: [ 'main' ]
+    paths:
+      - 'build.gradle.kts'
+      - 'settings.gradle.kts'
+      - 'gradle.properties'
+      - 'gradle/**'
+      - '**/build.gradle.kts'
+      - '**/build.gradle'
+      - 'gradle/libs.versions.toml'
   workflow_dispatch:
 
 permissions:

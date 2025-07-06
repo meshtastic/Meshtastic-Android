@@ -10,14 +10,15 @@
 # supported CodeQL languages.
 #
 name: "CodeQL Advanced"
+# This has been disabled in the GH CLI.
 
 on:
-  # push:
+  # push:    # this has been disabled - why? 
   #   branches: [ "main" ]
   # pull_request:
   #   branches: [ "main" ]
-  schedule:
-    - cron: '0 0 * * 0'
+  # schedule:
+  #   - cron: '0 0 * * 0' # Run every Sunday at midnight
   workflow_dispatch:
 
 jobs:
