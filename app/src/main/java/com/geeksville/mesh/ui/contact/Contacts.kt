@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.model.UIViewModel
@@ -136,12 +137,14 @@ fun ContactsScreen(
             }
         }
     ) { paddingValues ->
+        val channels by uiViewModel.channels.collectAsStateWithLifecycle()
         ContactListView(
             contacts = contacts,
             selectedList = selectedContactKeys,
             onClick = onContactClick,
             onLongClick = onContactLongClick,
-            contentPadding = paddingValues
+            contentPadding = paddingValues,
+            channels = channels
         )
     }
     DeleteConfirmationDialog(
@@ -336,7 +339,8 @@ fun ContactListView(
     selectedList: List<String>,
     onClick: (Contact) -> Unit,
     onLongClick: (Contact) -> Unit,
-    contentPadding: PaddingValues
+    contentPadding: PaddingValues,
+    channels: AppOnlyProtos.ChannelSet? = null
 ) {
     val haptics = LocalHapticFeedback.current
     LazyColumn(
@@ -355,6 +359,7 @@ fun ContactListView(
                     onLongClick(contact)
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                 },
+                channels = channels
             )
         }
     }

@@ -112,16 +112,16 @@ fun ContactItem(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = longName,
-                        )
+                    Text(
+                        text = longName,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
                         // Show unlock icon for broadcast with default PSK
                         val isBroadcast = contact.contactKey.getOrNull(1) == '^' ||
                              contact.contactKey.endsWith("^all") ||
                              contact.contactKey.endsWith("^broadcast")
                         if (isBroadcast && channels != null) {
-                            Spacer(modifier = Modifier.width(10.dp))
                             val channelIndex = contact.contactKey[0].digitToIntOrNull()
                             channelIndex?.let { index ->
                                 getSecurityIcon(channels, index)?.let { (icon, tint) ->
@@ -132,13 +132,15 @@ fun ContactItem(
                                     )
                                 }
                             }
+                            Spacer(modifier = Modifier.width(8.dp))
                         }
+                        Text(
+                            text = lastMessageTime.orEmpty(),
+                            color = MaterialTheme.colorScheme.onSurface,
+                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                            modifier = Modifier.width(80.dp),
+                        )
                     }
-                    Text(
-                        text = lastMessageTime.orEmpty(),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                    )
                 }
                 Row(
                     modifier = Modifier

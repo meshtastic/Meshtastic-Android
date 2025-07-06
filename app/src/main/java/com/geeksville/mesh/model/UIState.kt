@@ -93,8 +93,6 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.roundToInt
-import com.geeksville.mesh.ui.common.components.isPreciseLocation
-import com.geeksville.mesh.ui.common.components.isLowEntropyKey
 
 // Given a human name, strip out the first letter of the first three words and return that as the initials for
 // that user, ignoring emojis. If the original name is only one word, strip vowels from the original

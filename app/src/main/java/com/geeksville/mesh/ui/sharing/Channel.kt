@@ -113,7 +113,6 @@ import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
-import com.geeksville.mesh.ui.common.components.getSecurityIcon
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
