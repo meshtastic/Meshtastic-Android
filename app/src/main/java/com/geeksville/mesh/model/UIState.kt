@@ -93,6 +93,8 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.roundToInt
+import com.geeksville.mesh.ui.common.components.isPreciseLocation
+import com.geeksville.mesh.ui.common.components.isLowEntropyKey
 
 // Given a human name, strip out the first letter of the first three words and return that as the initials for
 // that user, ignoring emojis. If the original name is only one word, strip vowels from the original
@@ -177,7 +179,8 @@ data class Contact(
     val isMuted: Boolean,
     val isUnmessageable: Boolean,
     val nodeColors: Pair<Int, Int>? = null,
-    val isLowEntropyKey: Boolean? = false
+    val isLowEntropyKey: Boolean? = false,
+    val isPreciseLocation: Boolean? = false
 )
 
 @Suppress("LongParameterList", "LargeClass")
@@ -543,7 +546,13 @@ class UIViewModel @Inject constructor(
                 } else {
                     null
                 },
-                isLowEntropyKey = isLowEntropyKey
+                isLowEntropyKey = isLowEntropyKey,
+                isPreciseLocation = if (toBroadcast) {
+                    val _channel = channelSet.getChannel(data.channel)
+                    _channel?.isPreciseLocation() ?: false
+                } else {
+                    false
+                }
             )
         }
     }.stateIn(

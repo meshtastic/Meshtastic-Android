@@ -39,7 +39,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.twotone.Add
 import androidx.compose.material.icons.twotone.Close
 import androidx.compose.material3.AssistChip
@@ -60,11 +59,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -82,7 +79,9 @@ import com.geeksville.mesh.ui.common.components.dragContainer
 import com.geeksville.mesh.ui.common.components.dragDropItemsIndexed
 import com.geeksville.mesh.ui.common.components.rememberDragDropState
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
-import androidx.compose.ui.graphics.vector.ImageVector
+import com.geeksville.mesh.ui.common.components.getSecurityIcon
+import com.geeksville.mesh.ui.common.components.isPreciseLocation
+import com.geeksville.mesh.ui.common.components.isLowEntropyKey
 
 @Composable
 private fun ChannelItem(
@@ -135,21 +134,13 @@ fun ChannelCard(
     enabled = enabled,
     onClick = onEditClick,
 ) {
-
-    if (!isLowEntropyKey) {
-        Icon(
-            imageVector = Icons.Default.Lock,
-            contentDescription = "Secure",
-            tint = Color.Green,
-        )
-    } else {
-        Icon(
-            imageVector = ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
-            contentDescription = "Unlocked",
-            tint = if (isPreciseLocation) Color.Red else Color.Yellow,
-        )
-        Spacer(modifier = Modifier.width(10.dp))
-    }
+    val (icon, tint) = getSecurityIcon(isLowEntropyKey, isPreciseLocation)
+    Icon(
+        imageVector = icon,
+        contentDescription = if (!isLowEntropyKey) "Secure" else "Unlocked",
+        tint = tint,
+    )
+    Spacer(modifier = Modifier.width(10.dp))
     IconButton(onClick = { onDeleteClick() }) {
         Icon(
             imageVector = Icons.TwoTone.Close,
@@ -174,19 +165,12 @@ fun ChannelSelection(
     enabled = enabled,
     onClick = {},
 ) {
-    if (!isLowEntropyKey) {
-        Icon(
-            imageVector = Icons.Default.Lock,
-            contentDescription = "Secure",
-            tint = Color.Green,
-        )
-    } else {
-        Icon(
-            imageVector = ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
-            contentDescription = "Unlocked",
-            tint = if (isPreciseLocation) Color.Red else Color.Yellow,
-        )
-    }
+    val (icon, tint) = getSecurityIcon(isLowEntropyKey, isPreciseLocation)
+    Icon(
+        imageVector = icon,
+        contentDescription = if (!isLowEntropyKey) "Secure" else "Unlocked",
+        tint = tint,
+    )
     Spacer(modifier = Modifier.width(10.dp))
     Checkbox(
         enabled = enabled,
@@ -312,16 +296,14 @@ fun ChannelSettingsItemList(
                     items = settingsListInput,
                     dragDropState = dragDropState,
                 ) { index, channel, isDragging ->
-                    val isLowEntropyKey = channel.psk.size() <= 1
-                    val isPreciseLocation = channel.moduleSettings.positionPrecision == 32
                     ChannelCard(
                         index = index,
                         title = channel.name.ifEmpty { primaryChannel.name },
                         enabled = enabled,
                         onEditClick = { showEditChannelDialog = index },
                         onDeleteClick = { settingsListInput.removeAt(index) },
-                        isLowEntropyKey = isLowEntropyKey,
-                        isPreciseLocation = isPreciseLocation
+                        isLowEntropyKey = channel.isLowEntropyKey(),
+                        isPreciseLocation = channel.isPreciseLocation()
                     )
                     if (index == 0 && !isDragging) {
                         Text(

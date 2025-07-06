@@ -31,7 +31,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.VolumeOff
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
@@ -43,7 +42,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -52,7 +50,7 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.ui.common.theme.AppTheme
-import androidx.compose.ui.graphics.vector.ImageVector
+import com.geeksville.mesh.ui.common.components.getSecurityIcon
 
 @Suppress("LongMethod")
 @Composable
@@ -120,26 +118,16 @@ fun ContactItem(
                         val isBroadcast = contact.contactKey.getOrNull(1) == '^' ||
                              contact.contactKey.endsWith("^all") ||
                              contact.contactKey.endsWith("^broadcast")
-                        if (isBroadcast && isLowEntropyKey == false) { // secure
+                        if (isBroadcast) {
                             Spacer(modifier = Modifier.width(10.dp))
-                            Icon(
-                                imageVector = Icons.Default.Lock,
-                                contentDescription = "Secure",
-                                tint = Color.Green,
+                            val (icon, tint) = getSecurityIcon(
+                                isLowEntropyKey = isLowEntropyKey ?: false,
+                                isPreciseLocation = isPreciseLocation ?: false
                             )
-                        }
-                        // Check if the channel for this contact has precise location enabled
-                        val channelIndex = contact.contactKey.getOrNull(0)?.digitToIntOrNull()
-//                        val isPreciseLocation = channel.moduleSettings.positionPrecision == 32
-                        val isPreciseLocation = channelIndex == 0 // && // needs other flags, but this is a start
-                            // viewModel.channels.getOrNull(channelIndex ?: -1)?.preciseLocation == true
-
-                        if (isBroadcast && isLowEntropyKey == false) {
-                            Spacer(modifier = Modifier.width(10.dp))
                             Icon(
-                                imageVector = ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
-                                contentDescription = "Unlocked",
-                                tint = if (isPreciseLocation) Color.Red else Color.Yellow,
+                                imageVector = icon,
+                                contentDescription = if (!(isLowEntropyKey ?: false)) "Secure" else "Unlocked",
+                                tint = tint,
                             )
                         }
                     }

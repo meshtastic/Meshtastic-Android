@@ -113,6 +113,9 @@ import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
+import com.geeksville.mesh.ui.common.components.getSecurityIcon
+import com.geeksville.mesh.ui.common.components.isPreciseLocation
+import com.geeksville.mesh.ui.common.components.isLowEntropyKey
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -448,8 +451,7 @@ private fun ChannelListView(
     AdaptiveTwoPane(
         first = {
             channelSet.settingsList.forEachIndexed { index, channel ->
-                val isLowEntropyKey = channel.psk.size() <= 1
-                val isPreciseLocation = channel.moduleSettings.positionPrecision == 1
+                val (icon, tint) = getSecurityIcon(channel)
                 val displayTitle = channel.name.ifEmpty { modemPresetName }
 
                 ChannelSelection(
@@ -462,8 +464,8 @@ private fun ChannelListView(
                             channelSelections[index] = it
                         }
                     },
-                    isLowEntropyKey = isLowEntropyKey,
-                    isPreciseLocation = isPreciseLocation
+                    isLowEntropyKey = channel.isLowEntropyKey(),
+                    isPreciseLocation = channel.isPreciseLocation()
                 )
             }
             OutlinedButton(

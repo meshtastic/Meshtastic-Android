@@ -41,7 +41,6 @@ import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.Send
@@ -78,7 +77,6 @@ import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -100,8 +98,9 @@ import com.geeksville.mesh.ui.node.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import kotlinx.coroutines.launch
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.graphics.Color
+import com.geeksville.mesh.ui.common.components.getSecurityIcon
+import com.geeksville.mesh.ui.common.components.isPreciseLocation
+import com.geeksville.mesh.ui.common.components.isLowEntropyKey
 
 private const val MESSAGE_CHARACTER_LIMIT = 200
 private const val SNIPPET_CHARACTER_LIMIT = 50
@@ -130,14 +129,14 @@ internal fun MessageScreen(
             channelIndex?.let {
                 val channel = channels.getChannel(it)
                 val name = channel?.name ?: "Unknown Channel"
-                // Check if PSK is the default (0 or 1 byte key)
-                val isLowEntropyKey = (channel?.psk?.size() ?: 0) <= 1
-                val isPreciseLocation = channel?.settings?.getModuleSettings()?.positionPrecision == 32
+                val isLowEntropyKey = channel?.isLowEntropyKey() ?: false
+                val isPreciseLocation = channel?.isPreciseLocation() ?: false
                 val key = arrayOf(isLowEntropyKey, isPreciseLocation)
                 Pair(name, key)
-        } ?: Pair("Unknown Channel", arrayOf(false, false))
+            } ?: Pair("Unknown Channel", arrayOf(false, false))
         }
     }
+
     val (channelTitle, key) = channelName
     val isLowEntropyKey = key[0]
     val isPreciseLocation = key[1]
@@ -468,20 +467,13 @@ private fun MessageTopBar(
             Text(text = title)
             Spacer(modifier = Modifier.width(10.dp))
 
-            if (!isLowEntropyKey) {
-                Icon(
-                    imageVector = Icons.Default.Lock,
-                    contentDescription = "Secure",
-                    tint = Color.Green,
-                )
-            } else {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
-                        contentDescription = "Unlocked",
-                        tint = if (isPreciseLocation) Color.Red else Color.Yellow,
-                    )
-                }
-            }
+            val (icon, tint) = getSecurityIcon(isLowEntropyKey, isPreciseLocation)
+            Icon(
+                imageVector = icon,
+                contentDescription = if (!isLowEntropyKey) "Secure" else "Unlocked",
+                tint = tint,
+            )
+        }
     },
     navigationIcon = {
         IconButton(onClick = onNavigateBack) {
