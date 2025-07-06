@@ -343,7 +343,7 @@
     <string name="network">網路</string>
     <string name="display">顯示</string>
     <string name="lora">LoRa</string>
-    <string name="bluetooth">藍芽</string>
+    <string name="bluetooth">藍牙</string>
     <string name="security">安全</string>
     <string name="mqtt">MQTT</string>
     <string name="serial">序號</string>
