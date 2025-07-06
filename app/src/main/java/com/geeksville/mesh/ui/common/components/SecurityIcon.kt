@@ -48,30 +48,30 @@ fun SecurityIcon(
     isLowEntropyKey: Boolean,
     isPreciseLocation: Boolean = false,
     isMqttEnabled: Boolean = false,
-    contentDescription: String = "Security status"
+    contentDescription: String? = null
 ) {
-    val (icon, color) = when {
+    val (icon, color, computedDescription) = when {
         !isLowEntropyKey -> {
             // Secure channel - green lock
-            Icons.Default.Lock to Color.Green
+            Icons.Default.Lock to Color.Green to "Secure channel"
         }
         isPreciseLocation && isMqttEnabled -> {
             // MQTT enabled - warning icon in red
-            Icons.Default.Warning to Color.Red
+            Icons.Default.Warning to Color.Red to "MQTT warning"
         }
         isPreciseLocation -> {
             // Insecure channel with precise location - red unlocked icon
-            ImageVector.vectorResource(R.drawable.ic_lock_open_right_24) to Color.Red
+            ImageVector.vectorResource(R.drawable.ic_lock_open_right_24) to Color.Red to "Insecure – precise location"
         }
         else -> {
             // Insecure channel without precise location - yellow unlocked icon
-            ImageVector.vectorResource(R.drawable.ic_lock_open_right_24) to Color.Yellow
+            ImageVector.vectorResource(R.drawable.ic_lock_open_right_24) to Color.Yellow to "Insecure channel"
         }
     }
 
     androidx.compose.material3.Icon(
         imageVector = icon,
-        contentDescription = contentDescription,
+        contentDescription = contentDescription ?: computedDescription,
         tint = color
     )
 }
