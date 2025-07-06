@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -48,30 +49,30 @@ fun SecurityIcon(
     isLowEntropyKey: Boolean,
     isPreciseLocation: Boolean = false,
     isMqttEnabled: Boolean = false,
-    contentDescription: String? = null
+    contentDescription: String = stringResource(id = R.string.security_icon_description)
 ) {
     val (icon, color, computedDescription) = when {
         !isLowEntropyKey -> {
-            // Secure channel - green lock
-            Icons.Default.Lock to Color.Green to "Secure channel"
+            Triple(Icons.Default.Lock, Color.Green, stringResource(id = R.string.security_icon_secure))
         }
         isPreciseLocation && isMqttEnabled -> {
-            // MQTT enabled - warning icon in red
-            Icons.Default.Warning to Color.Red to "MQTT warning"
+            Triple(Icons.Default.Warning, Color.Red, stringResource(id = R.string.security_icon_warning))
         }
         isPreciseLocation -> {
-            // Insecure channel with precise location - red unlocked icon
-            ImageVector.vectorResource(R.drawable.ic_lock_open_right_24) to Color.Red to "Insecure – precise location"
+            Triple(ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
+                Color.Red,
+                stringResource(id = R.string.security_icon_insecure_precise))
         }
         else -> {
-            // Insecure channel without precise location - yellow unlocked icon
-            ImageVector.vectorResource(R.drawable.ic_lock_open_right_24) to Color.Yellow to "Insecure channel"
+            Triple(ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
+                Color.Yellow,
+                stringResource(id = R.string.security_icon_insecure))
         }
     }
 
     androidx.compose.material3.Icon(
         imageVector = icon,
-        contentDescription = contentDescription ?: computedDescription,
+        contentDescription = contentDescription + computedDescription,
         tint = color
     )
 }
@@ -83,7 +84,7 @@ fun Channel.isMqttEnabled(): Boolean = settings.uplinkEnabled
 @Composable
 fun SecurityIcon(
     channel: Channel,
-    contentDescription: String = "Security status"
+    contentDescription: String = stringResource(id = R.string.security_icon_description)
 ) = SecurityIcon(
     channel.isLowEntropyKey(),
     channel.isPreciseLocation(),
@@ -95,7 +96,7 @@ fun SecurityIcon(
 fun SecurityIcon(
     channelSet: AppOnlyProtos.ChannelSet,
     channelIndex: Int,
-    contentDescription: String = "Security status"
+    contentDescription: String = stringResource(id = R.string.security_icon_description)
 ) {
     val channel = channelSet.getChannel(channelIndex) ?: return
     SecurityIcon(channel, contentDescription)
@@ -105,7 +106,7 @@ fun SecurityIcon(
 fun SecurityIcon(
     channelSet: AppOnlyProtos.ChannelSet,
     channelName: String,
-    contentDescription: String = "Security status"
+    contentDescription: String = stringResource(id = R.string.security_icon_description)
 ) {
     val channel = channelSet.settingsList.find {
         Channel(it, channelSet.loraConfig).name == channelName
