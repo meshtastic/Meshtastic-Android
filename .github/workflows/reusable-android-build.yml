@@ -13,9 +13,9 @@ on:
         required: false
 
 jobs:
-  build_and_detekt: # Renamed job for clarity
+  build_and_detekt:
     runs-on: ubuntu-latest
-    timeout-minutes: 35 # Slightly increased timeout just in case
+    timeout-minutes: 35
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -54,20 +54,26 @@ jobs:
           add-job-summary: always
       - name: Run Detekt, Build, Lint, and Local Tests
         run: ./gradlew detekt lintFdroidDebug lintGoogleDebug assembleDebug testFdroidDebug testGoogleDebug --configuration-cache --scan --parallel
-      - name: Upload debug artifact
+      - name: Upload F-Droid debug artifact
         if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@v4
         with:
           name: fdroidDebug
           path: app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
           retention-days: 14
+      - name: Upload Google debug artifact
+        if: ${{ inputs.upload_artifacts }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: googleDebug
+          path: app/build/outputs/apk/google/debug/app-google-debug.apk
+          retention-days: 14
       - name: Upload build and Detekt reports
         if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@v4
         with:
           name: build-and-detekt-reports
-          path: | # Using a multi-line path to include Detekt reports specifically
+          path: |
             app/build/reports
-            **/build/reports/detekt # More specific path for detekt if it's not under app/build/reports
+            **/build/reports/detekt
           retention-days: 14
-
