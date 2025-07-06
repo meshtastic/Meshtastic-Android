@@ -31,9 +31,9 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.model.getChannel
-@Suppress("TooManyFunctions") // lots of overloads
 
 private const val PRECISE_POSITION_BITS = 32
+
 /**
  * Returns the appropriate security icon composable based on the channel's security settings.
  *
@@ -76,152 +76,21 @@ fun SecurityIcon(
     )
 }
 
-/**
- * Calculates whether a channel uses a low entropy key (0 or 1 byte PSK).
- *
- * @param channel The channel to check
- * @return true if the channel uses a low entropy key, false otherwise
- */
 fun Channel.isLowEntropyKey(): Boolean = settings.psk.size() <= 1
-
-/**
- * Calculates whether a channel has precise location enabled (32 bits).
- *
- * @param channel The channel to check
- * @return true if the channel has precise location enabled, false otherwise
- */
-fun Channel.isPreciseLocation(): Boolean =
-    settings.getModuleSettings().positionPrecision == PRECISE_POSITION_BITS
-
-/**
- * Calculates whether a channel uses a low entropy key (0 or 1 byte PSK).
- *
- * @param channelSettings The channel settings to check
- * @return true if the channel uses a low entropy key, false otherwise
- */
-fun com.geeksville.mesh.ChannelProtos.ChannelSettings.isLowEntropyKey(): Boolean =
-    psk.size() <= 1
-
-/**
- * Calculates whether a channel has precise location enabled (32 bits).
- *
- * @param channelSettings The channel settings to check
- * @return true if the channel has precise location enabled, false otherwise
- */
-fun com.geeksville.mesh.ChannelProtos.ChannelSettings.isPreciseLocation(): Boolean =
-    getModuleSettings().positionPrecision == PRECISE_POSITION_BITS
-
-/**
- * Calculates whether MQTT is effectively enabled for a channel.
- * This checks if the channel has uplink enabled, which means
- * messages from this channel will be sent to MQTT by the wider network.
- *
- * @param channel The channel to check
- * @return true if the channel uses uplink, false otherwise
- */
+fun Channel.isPreciseLocation(): Boolean = settings.getModuleSettings().positionPrecision == PRECISE_POSITION_BITS
 fun Channel.isMqttEnabled(): Boolean = settings.uplinkEnabled
 
-/**
- * Calculates whether MQTT is effectively enabled for channel settings.
- * This checks if the channel has uplink enabled, which means
- * messages from this channel will be sent to MQTT by the wider network.
- *
- * @param channelSettings The channel settings to check
- * @return true if the channel uses uplink, false otherwise
- */
-fun com.geeksville.mesh.ChannelProtos.ChannelSettings.isMqttEnabled(): Boolean = uplinkEnabled
-
-/**
- * Gets the security icon for a channel.
- *
- * @param channel The channel to get the security icon for
- * @param isMqttEnabled Whether MQTT is enabled
- * @param contentDescription The content description for the icon
- * @return A composable Icon element with appropriate imageVector and tint
- */
 @Composable
 fun SecurityIcon(
     channel: Channel,
-    isMqttEnabled: Boolean = false,
     contentDescription: String = "Security status"
 ) = SecurityIcon(
     channel.isLowEntropyKey(),
     channel.isPreciseLocation(),
-    isMqttEnabled,
+    channel.isMqttEnabled(),
     contentDescription
 )
 
-/**
- * Gets the security icon for channel settings.
- *
- * @param channelSettings The channel settings to get the security icon for
- * @param isMqttEnabled Whether MQTT is enabled
- * @param contentDescription The content description for the icon
- * @return A composable Icon element with appropriate imageVector and tint
- */
-@Composable
-fun SecurityIcon(
-    channelSettings: com.geeksville.mesh.ChannelProtos.ChannelSettings,
-    isMqttEnabled: Boolean = false,
-    contentDescription: String = "Security status"
-) = SecurityIcon(
-    channelSettings.isLowEntropyKey(),
-    channelSettings.isPreciseLocation(),
-    isMqttEnabled,
-    contentDescription
-)
-
-/**
- * Gets the security icon for a channel by index from a channel set.
- *
- * @param channelSet The channel set containing the channel
- * @param channelIndex The index of the channel in the channel set
- * @param isMqttEnabled Whether MQTT is enabled
- * @param contentDescription The content description for the icon
- * @return A composable Icon element with appropriate imageVector and tint, or null if channel not found
- */
-@Composable
-fun SecurityIcon(
-    channelSet: AppOnlyProtos.ChannelSet,
-    channelIndex: Int,
-    isMqttEnabled: Boolean = false,
-    contentDescription: String = "Security status"
-) {
-    val channel = channelSet.getChannel(channelIndex) ?: return
-    SecurityIcon(channel, isMqttEnabled, contentDescription)
-}
-
-/**
- * Gets the security icon for a channel by name from a channel set.
- *
- * @param channelSet The channel set containing the channel
- * @param channelName The name of the channel to find
- * @param isMqttEnabled Whether MQTT is enabled
- * @param contentDescription The content description for the icon
- * @return A composable Icon element with appropriate imageVector and tint, or null if channel not found
- */
-@Composable
-fun SecurityIcon(
-    channelSet: AppOnlyProtos.ChannelSet,
-    channelName: String,
-    isMqttEnabled: Boolean = false,
-    contentDescription: String = "Security status"
-) {
-    val channel = channelSet.settingsList.find {
-        Channel(it, channelSet.loraConfig).name == channelName
-    }?.let { Channel(it, channelSet.loraConfig) } ?: return
-    SecurityIcon(channel, isMqttEnabled, contentDescription)
-}
-
-/**
- * Gets the security icon for a channel by index from a channel set.
- * This automatically determines if MQTT is enabled for this specific channel.
- *
- * @param channelSet The channel set containing the channel
- * @param channelIndex The index of the channel in the channel set
- * @param contentDescription The content description for the icon
- * @return A composable Icon element with appropriate imageVector and tint, or null if channel not found
- */
 @Composable
 fun SecurityIcon(
     channelSet: AppOnlyProtos.ChannelSet,
@@ -229,18 +98,9 @@ fun SecurityIcon(
     contentDescription: String = "Security status"
 ) {
     val channel = channelSet.getChannel(channelIndex) ?: return
-    SecurityIcon(channel, channel.isMqttEnabled(), contentDescription)
+    SecurityIcon(channel, contentDescription)
 }
 
-/**
- * Gets the security icon for a channel by name from a channel set.
- * This automatically determines if MQTT is enabled for this specific channel.
- *
- * @param channelSet The channel set containing the channel
- * @param channelName The name of the channel to find
- * @param contentDescription The content description for the icon
- * @return A composable Icon element with appropriate imageVector and tint, or null if channel not found
- */
 @Composable
 fun SecurityIcon(
     channelSet: AppOnlyProtos.ChannelSet,
@@ -250,39 +110,7 @@ fun SecurityIcon(
     val channel = channelSet.settingsList.find {
         Channel(it, channelSet.loraConfig).name == channelName
     }?.let { Channel(it, channelSet.loraConfig) } ?: return
-    SecurityIcon(channel, channel.isMqttEnabled(), contentDescription)
-}
-
-/**
- * Gets the security icon for a channel.
- * This automatically determines if MQTT is enabled for this specific channel.
- *
- * @param channel The channel to get the security icon for
- * @param contentDescription The content description for the icon
- * @return A composable Icon element with appropriate imageVector and tint
- */
-@Composable
-fun SecurityIcon(
-    channel: Channel,
-    contentDescription: String = "Security status"
-) {
-    SecurityIcon(channel, channel.isMqttEnabled(), contentDescription)
-}
-
-/**
- * Gets the security icon for channel settings.
- * This automatically determines if MQTT is enabled for this specific channel.
- *
- * @param channelSettings The channel settings to get the security icon for
- * @param contentDescription The content description for the icon
- * @return A composable Icon element with appropriate imageVector and tint
- */
-@Composable
-fun SecurityIcon(
-    channelSettings: com.geeksville.mesh.ChannelProtos.ChannelSettings,
-    contentDescription: String = "Security status"
-) {
-    SecurityIcon(channelSettings, channelSettings.isMqttEnabled(), contentDescription)
+    SecurityIcon(channel, contentDescription)
 }
 
 // Preview functions for development and testing
