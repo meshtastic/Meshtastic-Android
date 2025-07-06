@@ -51,7 +51,7 @@ import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.ui.common.theme.AppTheme
-import com.geeksville.mesh.ui.common.components.getSecurityIcon
+import com.geeksville.mesh.ui.common.components.SecurityIcon
 
 @Suppress("LongMethod")
 @Composable
@@ -124,13 +124,7 @@ fun ContactItem(
                         if (isBroadcast && channels != null) {
                             val channelIndex = contact.contactKey[0].digitToIntOrNull()
                             channelIndex?.let { index ->
-                                getSecurityIcon(channels, index)?.let { (icon, tint) ->
-                                    Icon(
-                                        imageVector = icon,
-                                        contentDescription = "Security status",
-                                        tint = tint,
-                                    )
-                                }
+                                SecurityIcon(channels, index)
                             }
                             Spacer(modifier = Modifier.width(8.dp))
                         }

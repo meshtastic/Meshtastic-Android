@@ -99,7 +99,7 @@ import com.geeksville.mesh.ui.node.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import kotlinx.coroutines.launch
-import com.geeksville.mesh.ui.common.components.getSecurityIcon
+import com.geeksville.mesh.ui.common.components.SecurityIcon
 
 private const val MESSAGE_CHARACTER_LIMIT = 200
 private const val SNIPPET_CHARACTER_LIMIT = 50
@@ -458,13 +458,7 @@ private fun MessageTopBar(
             Spacer(modifier = Modifier.width(10.dp))
 
             channelIndexParam?.let { index ->
-                getSecurityIcon(channels, index)?.let { (icon, tint) ->
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = "Security status",
-                        tint = tint,
-                    )
-                }
+                SecurityIcon(channels, index)
             }
         }
     },

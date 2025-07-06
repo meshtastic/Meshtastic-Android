@@ -79,7 +79,7 @@ import com.geeksville.mesh.ui.common.components.dragContainer
 import com.geeksville.mesh.ui.common.components.dragDropItemsIndexed
 import com.geeksville.mesh.ui.common.components.rememberDragDropState
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
-import com.geeksville.mesh.ui.common.components.getSecurityIcon
+import com.geeksville.mesh.ui.common.components.SecurityIcon
 
 @Composable
 private fun ChannelItem(
@@ -131,13 +131,7 @@ fun ChannelCard(
     enabled = enabled,
     onClick = onEditClick,
 ) {
-    getSecurityIcon(channel)?.let { (icon, tint) ->
-        Icon(
-            imageVector = icon,
-            contentDescription = "Security status",
-            tint = tint,
-        )
-    }
+    SecurityIcon(channel)
     Spacer(modifier = Modifier.width(10.dp))
     IconButton(onClick = { onDeleteClick() }) {
         Icon(
@@ -162,13 +156,7 @@ fun ChannelSelection(
     enabled = enabled,
     onClick = {},
 ) {
-    getSecurityIcon(channel)?.let { (icon, tint) ->
-        Icon(
-            imageVector = icon,
-            contentDescription = "Security status",
-            tint = tint,
-        )
-    }
+    SecurityIcon(channel)
     Spacer(modifier = Modifier.width(10.dp))
     Checkbox(
         enabled = enabled,
