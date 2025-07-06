@@ -176,9 +176,7 @@ data class Contact(
     val messageCount: Int,
     val isMuted: Boolean,
     val isUnmessageable: Boolean,
-    val nodeColors: Pair<Int, Int>? = null,
-    val isLowEntropyKey: Boolean? = false,
-    val isPreciseLocation: Boolean? = false
+    val nodeColors: Pair<Int, Int>? = null
 )
 
 @Suppress("LongParameterList", "LargeClass")
@@ -520,13 +518,6 @@ class UIViewModel @Inject constructor(
                 channelSet.getChannel(data.channel)?.name ?: app.getString(R.string.channel_name)
             } else {
                 user.longName
-            }
-            val isLowEntropyKey = if (toBroadcast) {
-                val _channel = channelSet.getChannel(data.channel)
-                val isLowEntropyKey = _channel?.psk?.size() ?: 0 <= 1
-                isLowEntropyKey
-            } else {
-                false
             }
 
             Contact(
