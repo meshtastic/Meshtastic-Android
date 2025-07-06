@@ -35,7 +35,7 @@ private const val PRECISE_POSITION_BITS = 32
  * Returns the appropriate security icon and color based on the channel's security settings.
  *
  * @param isLowEntropyKey Whether the channel uses a low entropy key (0 or 1 byte PSK)
- * @param isPreciseLocation Whether the channel has precise location enabled
+ * @param isPreciseLocation Whether the channel has precise location enabled (32 bits)
  * @return A pair of (ImageVector, Color) representing the security icon and its color
  */
 @Composable
@@ -65,10 +65,10 @@ fun getSecurityIcon(
  * @param channel The channel to check
  * @return true if the channel uses a low entropy key, false otherwise
  */
-fun Channel.isLowEntropyKey(): Boolean = psk.size() <= 1
+fun Channel.isLowEntropyKey(): Boolean = settings.psk.size() <= 1
 
 /**
- * Calculates whether a channel has precise location enabled.
+ * Calculates whether a channel has precise location enabled (32 bits).
  *
  * @param channel The channel to check
  * @return true if the channel has precise location enabled, false otherwise
@@ -84,7 +84,7 @@ fun Channel.isPreciseLocation(): Boolean = settings.getModuleSettings().position
 fun com.geeksville.mesh.ChannelProtos.ChannelSettings.isLowEntropyKey(): Boolean = psk.size() <= 1
 
 /**
- * Calculates whether a channel has precise location enabled.
+ * Calculates whether a channel has precise location enabled (32 bits).
  *
  * @param channelSettings The channel settings to check
  * @return true if the channel has precise location enabled, false otherwise

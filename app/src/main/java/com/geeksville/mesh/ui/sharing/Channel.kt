@@ -114,8 +114,6 @@ import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
 import com.geeksville.mesh.ui.common.components.getSecurityIcon
-import com.geeksville.mesh.ui.common.components.isPreciseLocation
-import com.geeksville.mesh.ui.common.components.isLowEntropyKey
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -451,7 +449,7 @@ private fun ChannelListView(
     AdaptiveTwoPane(
         first = {
             channelSet.settingsList.forEachIndexed { index, channel ->
-                val (icon, tint) = getSecurityIcon(channel)
+                val channelObj = Channel(channel, channelSet.loraConfig)
                 val displayTitle = channel.name.ifEmpty { modemPresetName }
 
                 ChannelSelection(
@@ -464,8 +462,7 @@ private fun ChannelListView(
                             channelSelections[index] = it
                         }
                     },
-                    isLowEntropyKey = channel.isLowEntropyKey(),
-                    isPreciseLocation = channel.isPreciseLocation()
+                    channel = channelObj
                 )
             }
             OutlinedButton(

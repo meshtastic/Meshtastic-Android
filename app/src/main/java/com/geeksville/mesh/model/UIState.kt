@@ -545,13 +545,6 @@ class UIViewModel @Inject constructor(
                     node.colors
                 } else {
                     null
-                },
-                isLowEntropyKey = isLowEntropyKey,
-                isPreciseLocation = if (toBroadcast) {
-                    val _channel = channelSet.getChannel(data.channel)
-                    _channel?.isPreciseLocation() ?: false
-                } else {
-                    false
                 }
             )
         }

@@ -86,6 +86,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.QuickChatAction
@@ -99,8 +100,6 @@ import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import kotlinx.coroutines.launch
 import com.geeksville.mesh.ui.common.components.getSecurityIcon
-import com.geeksville.mesh.ui.common.components.isPreciseLocation
-import com.geeksville.mesh.ui.common.components.isLowEntropyKey
 
 private const val MESSAGE_CHARACTER_LIMIT = 200
 private const val SNIPPET_CHARACTER_LIMIT = 50
@@ -128,20 +127,13 @@ internal fun MessageScreen(
         derivedStateOf {
             channelIndex?.let {
                 val channel = channels.getChannel(it)
-                val name = channel?.name ?: "Unknown Channel"
-                val isLowEntropyKey = channel?.isLowEntropyKey() ?: false
-                val isPreciseLocation = channel?.isPreciseLocation() ?: false
-                val key = arrayOf(isLowEntropyKey, isPreciseLocation)
-                Pair(name, key)
-            } ?: Pair("Unknown Channel", arrayOf(false, false))
+                channel?.name ?: "Unknown Channel"
+            } ?: "Unknown Channel"
         }
     }
 
-    val (channelTitle, key) = channelName
-    val isLowEntropyKey = key[0]
-    val isPreciseLocation = key[1]
     val title = when (nodeId) {
-        DataPacket.ID_BROADCAST -> channelTitle
+        DataPacket.ID_BROADCAST -> channelName
         else -> viewModel.getUser(nodeId).longName
     }
     viewModel.setTitle(title)
@@ -215,9 +207,7 @@ internal fun MessageScreen(
                     }
                 }
             } else {
-                MessageTopBar(title, channelIndex, mismatchKey, onNavigateBack,
-                 isLowEntropyKey = isLowEntropyKey, isPreciseLocation = isPreciseLocation
-        )
+                MessageTopBar(title, channelIndex, mismatchKey, onNavigateBack, channels, channelIndex)
             }
         },
     ) { padding ->
@@ -459,20 +449,23 @@ private fun MessageTopBar(
     channelIndex: Int?,
     mismatchKey: Boolean = false,
     onNavigateBack: () -> Unit,
-    isLowEntropyKey: Boolean = false,
-    isPreciseLocation: Boolean = false,
+    channels: AppOnlyProtos.ChannelSet,
+    channelIndexParam: Int?,
 ) = TopAppBar(
     title = {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(text = title)
             Spacer(modifier = Modifier.width(10.dp))
 
-            val (icon, tint) = getSecurityIcon(isLowEntropyKey, isPreciseLocation)
-            Icon(
-                imageVector = icon,
-                contentDescription = if (!isLowEntropyKey) "Secure" else "Unlocked",
-                tint = tint,
-            )
+            channelIndexParam?.let { index ->
+                getSecurityIcon(channels, index)?.let { (icon, tint) ->
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = "Security status",
+                        tint = tint,
+                    )
+                }
+            }
         }
     },
     navigationIcon = {

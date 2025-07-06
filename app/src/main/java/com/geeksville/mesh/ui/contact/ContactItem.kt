@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.ui.common.theme.AppTheme
@@ -60,6 +61,7 @@ fun ContactItem(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
+    channels: AppOnlyProtos.ChannelSet? = null,
 ) = with(contact) {
     Card(
         modifier = modifier
@@ -118,17 +120,18 @@ fun ContactItem(
                         val isBroadcast = contact.contactKey.getOrNull(1) == '^' ||
                              contact.contactKey.endsWith("^all") ||
                              contact.contactKey.endsWith("^broadcast")
-                        if (isBroadcast) {
+                        if (isBroadcast && channels != null) {
                             Spacer(modifier = Modifier.width(10.dp))
-                            val (icon, tint) = getSecurityIcon(
-                                isLowEntropyKey = isLowEntropyKey ?: false,
-                                isPreciseLocation = isPreciseLocation ?: false
-                            )
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = if (!(isLowEntropyKey ?: false)) "Secure" else "Unlocked",
-                                tint = tint,
-                            )
+                            val channelIndex = contact.contactKey[0].digitToIntOrNull()
+                            channelIndex?.let { index ->
+                                getSecurityIcon(channels, index)?.let { (icon, tint) ->
+                                    Icon(
+                                        imageVector = icon,
+                                        contentDescription = "Security status",
+                                        tint = tint,
+                                    )
+                                }
+                            }
                         }
                     }
                     Text(

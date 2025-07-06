@@ -80,8 +80,6 @@ import com.geeksville.mesh.ui.common.components.dragDropItemsIndexed
 import com.geeksville.mesh.ui.common.components.rememberDragDropState
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.ui.common.components.getSecurityIcon
-import com.geeksville.mesh.ui.common.components.isPreciseLocation
-import com.geeksville.mesh.ui.common.components.isLowEntropyKey
 
 @Composable
 private fun ChannelItem(
@@ -126,20 +124,20 @@ fun ChannelCard(
     enabled: Boolean,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    isLowEntropyKey: Boolean = false,
-    isPreciseLocation: Boolean = false,
+    channel: Channel,
 ) = ChannelItem(
     index = index,
     title = title,
     enabled = enabled,
     onClick = onEditClick,
 ) {
-    val (icon, tint) = getSecurityIcon(isLowEntropyKey, isPreciseLocation)
-    Icon(
-        imageVector = icon,
-        contentDescription = if (!isLowEntropyKey) "Secure" else "Unlocked",
-        tint = tint,
-    )
+    getSecurityIcon(channel)?.let { (icon, tint) ->
+        Icon(
+            imageVector = icon,
+            contentDescription = "Security status",
+            tint = tint,
+        )
+    }
     Spacer(modifier = Modifier.width(10.dp))
     IconButton(onClick = { onDeleteClick() }) {
         Icon(
@@ -157,20 +155,20 @@ fun ChannelSelection(
     enabled: Boolean,
     isSelected: Boolean,
     onSelected: (Boolean) -> Unit,
-    isLowEntropyKey: Boolean = false,
-    isPreciseLocation: Boolean = false,
+    channel: Channel,
 ) = ChannelItem(
     index = index,
     title = title,
     enabled = enabled,
     onClick = {},
 ) {
-    val (icon, tint) = getSecurityIcon(isLowEntropyKey, isPreciseLocation)
-    Icon(
-        imageVector = icon,
-        contentDescription = if (!isLowEntropyKey) "Secure" else "Unlocked",
-        tint = tint,
-    )
+    getSecurityIcon(channel)?.let { (icon, tint) ->
+        Icon(
+            imageVector = icon,
+            contentDescription = "Security status",
+            tint = tint,
+        )
+    }
     Spacer(modifier = Modifier.width(10.dp))
     Checkbox(
         enabled = enabled,
@@ -296,14 +294,14 @@ fun ChannelSettingsItemList(
                     items = settingsListInput,
                     dragDropState = dragDropState,
                 ) { index, channel, isDragging ->
+                    val channelObj = Channel(channel, loraConfig)
                     ChannelCard(
                         index = index,
                         title = channel.name.ifEmpty { primaryChannel.name },
                         enabled = enabled,
                         onEditClick = { showEditChannelDialog = index },
                         onDeleteClick = { settingsListInput.removeAt(index) },
-                        isLowEntropyKey = channel.isLowEntropyKey(),
-                        isPreciseLocation = channel.isPreciseLocation()
+                        channel = channelObj
                     )
                     if (index == 0 && !isDragging) {
                         Text(
