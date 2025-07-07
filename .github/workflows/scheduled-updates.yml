@@ -92,7 +92,7 @@ jobs:
       - name: Create Pull Request if changes occurred
         uses: peter-evans/create-pull-request@v7
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.AUTOMATION_PAT }}
           commit-message: |
             chore: Scheduled updates (Firmware, Hardware, Translations)
 
