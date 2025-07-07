@@ -536,7 +536,7 @@
     <string name="position_flags">Standort Optionen</string>
     <string name="power_config">Power Konfiguration</string>
     <string name="enable_power_saving_mode">Energiesparmodus aktivieren</string>
-    <string name="shutdown_on_battery_delay_seconds">Verzögerung Herunterfahren bei Akkubetrieb</string>
+    <string name="shutdown_on_battery_delay_seconds">Verzögerung Herunterfahren bei Akkubetrieb (Sekunden)</string>
     <string name="adc_multiplier_override_ratio">ADC Multiplikator Überschreibungsverhältnis</string>
     <string name="wait_for_bluetooth_duration_seconds">Warte auf Bluetooth (Sekunden)</string>
     <string name="super_deep_sleep_duration_seconds">Supertiefeschlaf (Sekunden)</string>
