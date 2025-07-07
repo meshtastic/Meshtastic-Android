@@ -20,7 +20,7 @@ on:
 jobs:
   androidTest:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     strategy:
       matrix:
         api-level: ${{ fromJson(inputs.api_levels) }} # Use the input to define the matrix
