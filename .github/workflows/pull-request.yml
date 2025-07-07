@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  scheduled-updates:
+  scheduled_updates:
     if: github.head_ref == 'scheduled-updates'
     runs-on: ubuntu-latest
     steps:
