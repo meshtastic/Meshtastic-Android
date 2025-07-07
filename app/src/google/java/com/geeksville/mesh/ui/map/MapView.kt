@@ -248,11 +248,11 @@ fun MapView(
 
             if (mapFilterState.showPrecisionCircle) {
                 nodeClusterItems.forEach { clusterItem ->
-                    clusterItem.node.position.precisionBits.let { accuracy ->
-                        if (accuracy > 0) {
+                    clusterItem.getPrecisionMeters()?.let { precisionMeters ->
+                        if (precisionMeters > 0) {
                             Circle(
                                 center = clusterItem.position,
-                                radius = accuracy.toDouble(), // In meters
+                                radius = precisionMeters,
                                 fillColor = Color(clusterItem.node.colors.second).copy(alpha = 0.2f),
                                 strokeColor = Color(clusterItem.node.colors.second),
                                 strokeWidth = 2f
@@ -486,6 +486,22 @@ data class NodeClusterItem(
     override fun getTitle(): String = nodeTitle
     override fun getSnippet(): String = nodeSnippet
     override fun getZIndex(): Float? = null // Default behavior
+
+    fun getPrecisionMeters(): Double? {
+        val precisionMap = mapOf(
+            10 to 23345.484932,
+            11 to 11672.7369,
+            12 to 5836.36288,
+            13 to 2918.175876,
+            14 to 1459.0823719999053,
+            15 to 729.53562,
+            16 to 364.7622,
+            17 to 182.375556,
+            18 to 91.182212,
+            19 to 45.58554
+        )
+        return precisionMap[node.position.precisionBits]
+    }
 }
 
 @Composable
