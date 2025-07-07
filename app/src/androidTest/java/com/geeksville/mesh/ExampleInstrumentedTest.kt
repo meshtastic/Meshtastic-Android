@@ -36,9 +36,4 @@ class ExampleInstrumentedTest {
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         assertEquals("com.geeksville.mesh", appContext.packageName)
     }
-
-    @Test
-    fun intentionallyBrokenUITest() {
-        assert(false)
-    }
 }
