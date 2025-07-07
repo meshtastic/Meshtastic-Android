@@ -123,12 +123,13 @@ internal fun MessageScreen(
     val channelIndex = contactKey[0].digitToIntOrNull()
     val nodeId = contactKey.substring(1)
     val channels by viewModel.channels.collectAsStateWithLifecycle()
-    val channelName by remember(channelIndex) {
+    val unknownChannelText = stringResource(id = R.string.unknown_channel)
+    val channelName by remember(channelIndex, unknownChannelText) {
         derivedStateOf {
             channelIndex?.let {
                 val channel = channels.getChannel(it)
-                channel?.name ?: stringResource(id = R.string.unknown_channel)
-            } ?: stringResource(id = R.string.unknown_channel)
+                channel?.name ?: unknownChannelText
+            } ?: unknownChannelText
         }
     }
 
