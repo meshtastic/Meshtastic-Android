@@ -20,8 +20,19 @@ rootProject.name = "Meshtastic Android"
 
 plugins {
     id("org.gradle.toolchains.foojay-resolver") version "1.0.0"
+    id("com.gradle.develocity") version("4.0.2")
 }
 
+develocity {
+    buildScan {
+        capture {
+            fileFingerprints.set(true)
+        }
+        publishing.onlyIf { false }
+    }
+}
+
+@Suppress("UnstableApiUsage")
 toolchainManagement {
     jvm {
         javaRepositories {
