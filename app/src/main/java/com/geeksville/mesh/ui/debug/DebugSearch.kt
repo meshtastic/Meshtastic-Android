@@ -83,7 +83,7 @@ internal fun DebugSearchNavigation(
         ) {
             Icon(
                 imageVector = Icons.Default.KeyboardArrowUp,
-                contentDescription = "Previous match",
+                contentDescription = stringResource(R.string.debug_search_prev),
                 modifier = Modifier.size(16.dp)
             )
         }
@@ -94,7 +94,7 @@ internal fun DebugSearchNavigation(
         ) {
             Icon(
                 imageVector = Icons.Default.KeyboardArrowDown,
-                contentDescription = "Next match",
+                contentDescription = stringResource(R.string.debug_search_next),
                 modifier = Modifier.size(16.dp)
             )
         }
@@ -143,7 +143,7 @@ internal fun DebugSearchBar(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Clear,
-                            contentDescription = "Clear search",
+                            contentDescription = stringResource(R.string.debug_search_clear),
                             modifier = Modifier.size(16.dp)
                         )
                     }
