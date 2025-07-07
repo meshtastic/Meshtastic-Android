@@ -1,9 +1,6 @@
 name: Scheduled Updates (Firmware, Hardware, Translations)
 
 on:
-  push:
-    branches:
-      - ci_fixes  # debug only - don't let this get to main
   schedule:
     - cron: '0 * * * *' # Run every hour
   workflow_dispatch:     # Allow manual triggering
