@@ -172,6 +172,7 @@
     <string name="debug_search_clear">Clear search</string>
     <string name="debug_filter_add">Add filter</string>
     <string name="debug_filter_included">Filter included</string>
+    <string name="debug_filter_clear">Clear all filters</string>
     <string name="debug_clear">Clear Logs</string>
     <string name="match_any">Match Any | All</string>
     <string name="match_all">Match All | Any</string>

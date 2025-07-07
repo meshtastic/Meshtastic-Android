@@ -270,7 +270,7 @@ internal fun DebugActiveFilters(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Clear,
-                        contentDescription = stringResource(id = R.string.debug_clear)
+                        contentDescription = stringResource(id = R.string.debug_filter_clear)
                     )
                 }
             }
