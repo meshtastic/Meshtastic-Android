@@ -2,8 +2,7 @@ name: Android CI (PR)
 
 on:
   pull_request:
-    branches:
-      - main
+    branches: [ main ]
 
 concurrency:
   group: build-pr-${{ github.ref }}
@@ -11,7 +10,7 @@ concurrency:
 
 jobs:
   build_and_detekt:
-    if: github.repository == 'meshtastic/Meshtastic-Android' && github.head_ref != 'scheduled-updates'
+    if: github.repository == 'meshtastic/Meshtastic-Android'
     uses: ./.github/workflows/reusable-android-build.yml
     secrets:
       GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
@@ -19,7 +18,7 @@ jobs:
 
   androidTest:
     # AssumingandroidTest should also only run for the main repository
-    if: github.repository == 'meshtastic/Meshtastic-Android' && github.head_ref != 'scheduled-updates'
+    if: github.repository == 'meshtastic/Meshtastic-Android'
     uses: ./.github/workflows/reusable-android-test.yml
     with:
       api_levels: '[35]' # Run only on API 35 for PRs
