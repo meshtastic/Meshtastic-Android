@@ -1,6 +1,9 @@
 name: Scheduled Updates (Firmware, Hardware, Translations)
 
 on:
+  push:
+    branches:
+      - ci_fixes  # debug only - don't let this get to main
   schedule:
     - cron: '0 * * * *' # Run every hour
   workflow_dispatch:     # Allow manual triggering
@@ -82,7 +85,7 @@ jobs:
           commit_message: 'chore(l10n): New Crowdin Translations from scheduled update'
           push_translations: false
           push_sources: false
-          localization_branch_name: ${{ git symbolic-ref HEAD --short }}
+          localization_branch_name: ${{ github.ref_name }}
           # skip_ref_checkout: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
