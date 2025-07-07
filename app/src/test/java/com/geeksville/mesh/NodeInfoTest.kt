@@ -23,7 +23,7 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import java.util.*
+import java.util.Locale
 
 class NodeInfoTest {
     private val model = MeshProtos.HardwareModel.ANDROID_SIM
@@ -60,5 +60,10 @@ class NodeInfoTest {
         Assert.assertEquals(node[1].distanceStr(node[3], DisplayUnits.METRIC_VALUE), "111 m")
         Assert.assertEquals(node[1].distanceStr(node[4], DisplayUnits.IMPERIAL_VALUE), "1.1 mi")
         Assert.assertEquals(node[1].distanceStr(node[3], DisplayUnits.IMPERIAL_VALUE), "364 ft")
+    }
+
+    @Test
+    fun intentionallyBrokenUnitTest() {
+        Assert.assertTrue("This unit test is intentionally broken", false)
     }
 }
