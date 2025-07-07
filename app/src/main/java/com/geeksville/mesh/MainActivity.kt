@@ -69,8 +69,8 @@ import com.geeksville.mesh.ui.MainMenuAction
 import com.geeksville.mesh.ui.MainScreen
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.MODE_DYNAMIC
-import com.geeksville.mesh.ui.intro.AppIntroductionScreen
 import com.geeksville.mesh.ui.sharing.toSharedContact
+import com.geeksville.mesh.ui.intro.AppIntroductionScreen
 import com.geeksville.mesh.util.Exceptions
 import com.geeksville.mesh.util.LanguageUtils
 import com.geeksville.mesh.util.getPackageInfoCompat
@@ -112,7 +112,6 @@ class MainActivity : AppCompatActivity(), Logging {
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        val x: Int = "error" // intentionally cause lint error
         enableEdgeToEdge()
         installSplashScreen()
         super.onCreate(savedInstanceState)
