@@ -116,6 +116,12 @@ fun MapView(
     val mapLayers by mapViewModel.mapLayers.collectAsStateWithLifecycle()
     var showLayerManagementDialog by remember { mutableStateOf(false) }
 
+    var hasLocationPermission by remember { mutableStateOf(false) }
+
+    LocationPermissionsHandler { isGranted ->
+        hasLocationPermission = isGranted
+    }
+
     val kmlFilePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -197,9 +203,19 @@ fun MapView(
             mapColorScheme = mapColorScheme,
             modifier = Modifier.fillMaxSize(),
             cameraPositionState = cameraPositionState,
-            uiSettings = MapUiSettings(),
+            uiSettings = MapUiSettings(
+                zoomControlsEnabled = true,
+                mapToolbarEnabled = true,
+                compassEnabled = true,
+                myLocationButtonEnabled = hasLocationPermission,
+                rotationGesturesEnabled = true,
+                scrollGesturesEnabled = true,
+                tiltGesturesEnabled = true,
+                zoomGesturesEnabled = true
+            ),
             properties = MapProperties(
                 mapType = selectedMapType,
+                isMyLocationEnabled = hasLocationPermission
             ),
             onMapLongClick = { latLng ->
                 if (isConnected) {
@@ -328,7 +344,7 @@ fun MapView(
 
         Column(
             modifier = Modifier
-                .align(Alignment.TopEnd)
+                .align(Alignment.CenterEnd)
                 .padding(16.dp),
             horizontalAlignment = Alignment.End,
             verticalArrangement = Arrangement.spacedBy(8.dp)
