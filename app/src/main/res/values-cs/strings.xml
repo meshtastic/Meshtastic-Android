@@ -645,4 +645,5 @@
     <string name="export_keys_confirmation">Exportuje veřejné a soukromé klíče do souboru. Uložte je prosím bezpečně.</string>
     <string name="node_count_template">(%1$d online / %2$d celkem)</string>
     <string name="react">Odpovědět</string>
+    <string name="warning">Varování</string>
 </resources>
