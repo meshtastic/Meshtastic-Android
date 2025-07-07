@@ -308,7 +308,7 @@ fun MapView(
         val nodesWithPosition = nodes.filter { it.validPosition != null }
         val ourNode = model.ourNodeInfo.value
         val gpsFormat = model.config.display.gpsFormat.number
-        val displayUnits = model.config.display.units.number
+        val displayUnits = model.config.display.units
         val mapFilterState = model.mapFilterStateFlow.value // Access mapFilterState directly
         return nodesWithPosition.mapNotNull { node ->
             if (mapFilterState.onlyFavorites && !node.isFavorite && !node.equals(ourNode)) {
