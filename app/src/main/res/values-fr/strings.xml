@@ -21,9 +21,12 @@
     <string name="main_tab_map">Carte</string>
     <string name="main_tab_channel">Canal</string>
     <string name="main_tab_settings">Configurations</string>
+    <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Filtre</string>
     <string name="desc_node_filter_clear">Effacer le filtre de nœud</string>
     <string name="node_filter_include_unknown">Inclure inconnus</string>
+    <string name="node_filter_only_online">Masquer les nœuds hors ligne</string>
+    <string name="node_filter_only_direct">Afficher uniquement les nœuds directs</string>
     <string name="node_filter_show_details">Afficher les détails</string>
     <string name="node_sort_button">Options de tri des nœuds</string>
     <string name="node_sort_alpha">A-Z</string>
@@ -113,6 +116,7 @@
     <string name="connected_count">Connectés : %1$s sur  en ligne</string>
     <string name="update_firmware">Mise à jour du Firmware</string>
     <string name="ip_address">Adresse IP:</string>
+    <string name="ip_port">Port:</string>
     <string name="connected">Connecté à la radio</string>
     <string name="connected_to">Connecté à la radio (%s)</string>
     <string name="not_connected">Non connecté</string>
@@ -135,6 +139,7 @@
     <string name="channel_invalid">Cette URL de canal est invalide et ne peut pas être utilisée</string>
     <string name="debug_panel">Panneau de débogage</string>
     <string name="debug_last_messages">500 derniers messages</string>
+    <string name="debug_filter_clear">Supprimer tous les filtres</string>
     <string name="clear">Effacer</string>
     <string name="updating_firmware">Mise à jour du microprogramme, attendez jusqu\'à huit minutes…</string>
     <string name="update_successful">Mise à jour réussie</string>
