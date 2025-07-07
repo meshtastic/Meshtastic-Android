@@ -17,10 +17,17 @@
 
 package com.geeksville.mesh.ui.common.components
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.material3.Icon
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -30,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Channel
-import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.model.getChannel
 
 private const val PRECISE_POSITION_BITS = 32
@@ -70,7 +76,7 @@ fun SecurityIcon(
         }
     }
 
-    androidx.compose.material3.Icon(
+    Icon(
         imageVector = icon,
         contentDescription = contentDescription + computedDescription,
         tint = color
@@ -158,61 +164,61 @@ private fun PreviewMqttEnabled() {
 @Preview(name = "All Security Icons")
 @Composable
 private fun PreviewAllSecurityIcons() {
-    androidx.compose.foundation.layout.Column(
-        horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
-        verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp)
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        androidx.compose.material3.Text(
+        Text(
             "Security Icons Preview",
-            style = androidx.compose.material3.MaterialTheme.typography.headlineSmall
+            style = MaterialTheme.typography.headlineSmall
         )
 
-        androidx.compose.foundation.layout.Row(
-            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             SecurityIcon(
                 isLowEntropyKey = false,
                 isPreciseLocation = false,
                 isMqttEnabled = false
             )
-            androidx.compose.material3.Text("Secure")
+            Text("Secure")
         }
 
-        androidx.compose.foundation.layout.Row(
-            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             SecurityIcon(
                 isLowEntropyKey = true,
                 isPreciseLocation = true,
                 isMqttEnabled = false
             )
-            androidx.compose.material3.Text("Insecure + Precise Location")
+            Text("Insecure + Precise Location")
         }
 
-        androidx.compose.foundation.layout.Row(
-            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             SecurityIcon(
                 isLowEntropyKey = true,
                 isPreciseLocation = false,
                 isMqttEnabled = false
             )
-            androidx.compose.material3.Text("Insecure")
+            Text("Insecure")
         }
 
-        androidx.compose.foundation.layout.Row(
-            horizontalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(16.dp),
-            verticalAlignment = androidx.compose.ui.Alignment.CenterVertically
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
             SecurityIcon(
                 isLowEntropyKey = false,
                 isPreciseLocation = false,
                 isMqttEnabled = true
             )
-            androidx.compose.material3.Text("MQTT Enabled")
+            Text("MQTT Enabled")
         }
     }
 }
