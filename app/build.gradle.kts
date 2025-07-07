@@ -203,7 +203,6 @@ dependencies {
     implementation(libs.zxing.core)
 
     // Individual dependencies
-    implementation(libs.appintro)
     "googleImplementation"(libs.awesome.app.rating)
     implementation(libs.core.splashscreen)
     implementation(libs.emoji2.emojipicker)

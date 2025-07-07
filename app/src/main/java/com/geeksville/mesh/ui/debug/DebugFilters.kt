@@ -101,7 +101,7 @@ fun DebugCustomFilterInput(
         ) {
             Icon(
                 imageVector = Icons.Default.Add,
-                contentDescription = "Add filter"
+                contentDescription = stringResource(id = R.string.debug_filter_add)
             )
         }
     }
@@ -151,7 +151,7 @@ internal fun DebugPresetFilters(
                     leadingIcon = { if (filter in filterTexts) {
                         Icon(
                             imageVector = Icons.Filled.Done,
-                            contentDescription = "Done icon",
+                            contentDescription = stringResource(id = R.string.debug_filter_included),
                         )
                         }
                     }
@@ -194,7 +194,7 @@ internal fun DebugFilterBar(
                         } else {
                             Icons.TwoTone.FilterAltOff
                         },
-                        contentDescription = "Filter"
+                        contentDescription = stringResource(id = R.string.debug_filters)
                     )
                 }
             }
@@ -270,7 +270,7 @@ internal fun DebugActiveFilters(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Clear,
-                        contentDescription = "Clear all filters"
+                        contentDescription = stringResource(id = R.string.debug_filter_clear)
                     )
                 }
             }

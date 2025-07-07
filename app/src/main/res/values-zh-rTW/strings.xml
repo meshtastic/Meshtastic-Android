@@ -14,9 +14,6 @@
   ~
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
-  ~
-  ~ NOTE: Only modify this english strings.xml file directly.
-  ~       Other languages are managed by CrowdIn
   -->
 <resources>
     <string name="main_tab_messages">訊息</string>
@@ -116,6 +113,7 @@
     <string name="connected_count">已連接:%1$s 在線</string>
     <string name="update_firmware">更新韌體</string>
     <string name="ip_address">IP地址：</string>
+    <string name="ip_port">埠號：</string>
     <string name="connected">連接到設備</string>
     <string name="connected_to">已連接至設備 (%s)</string>
     <string name="not_connected">未連線</string>
@@ -147,7 +145,7 @@
     <string name="message_delivery_status">訊息傳遞狀態</string>
     <string name="meshtastic_alerts_notifications">警告信息</string>
     <string name="protocol_stress_test">通訊協定壓力測試</string>
-    <string name="firmware_too_old">需要更新韌體.</string>
+    <string name="firmware_too_old">需要更新韌體。</string>
     <string name="firmware_old">無法與此應用程式通訊，無線電韌體太舊。有關詳細信息，請參閱<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">我們的韌體安裝指南</a>。</string>
     <string name="okay">好的</string>
     <string name="must_set_region">您必須設定一個區域！</string>
@@ -351,6 +349,7 @@
     <string name="mqtt">MQTT</string>
     <string name="serial">序號</string>
     <string name="external_notification">外部通知</string>
+    <string name="store_forward"><![CDATA[儲存 & 轉發]]></string>
     <string name="range_test">範圍測試</string>
     <string name="canned_message">罐頭訊息</string>
     <string name="audio">音頻</string>
@@ -380,6 +379,7 @@
     <string name="red">紅色</string>
     <string name="green">綠色</string>
     <string name="blue">藍色</string>
+    <string name="allow_input_source">允許輸入來源</string>
     <string name="send_bell">發送振鈴</string>
     <string name="messages">訊息</string>
     <string name="device_config">設備設置</string>
@@ -416,6 +416,7 @@
     <string name="output_vibra_gpio">輸出振動（GPIO）</string>
     <string name="output_duration_milliseconds">輸出持續時間（毫秒）</string>
     <string name="ringtone">鈴聲</string>
+    <string name="lora_config">LoRa 設定</string>
     <string name="bandwidth">帶寬</string>
     <string name="tx_enabled">TX已啟用</string>
     <string name="tx_power_dbm">TX功率 (dBm)</string>
@@ -474,7 +475,40 @@
     <string name="public_key">公鑰</string>
     <string name="private_key">私鑰</string>
     <string name="timeout">逾時</string>
+    <string name="heartbeat">心跳</string>
+    <string name="server">伺服器</string>
+    <string name="user_config">使用者設定</string>
+    <string name="node_id">節點 ID</string>
+    <string name="hardware_model">硬體型號</string>
     <string name="distance">距離</string>
+    <string name="hardware">硬體</string>
+    <string name="user_id">使用者 ID</string>
+    <string name="uptime">在線時間</string>
+    <string name="freq">頻率</string>
+    <string name="primary">主要的</string>
+    <string name="secondary">次要的</string>
+    <string name="unmute">取消靜音</string>
+    <string name="dynamic">動態</string>
+    <string name="scan_qr_code">掃描 QR Code</string>
+    <string name="share_contact">分享聯絡人</string>
     <string name="firmware">韌體</string>
+    <string name="load">載入</string>
     <string name="map">地圖</string>
+    <string name="nodes">節點</string>
+    <string name="set_your_region">設定你的地區</string>
+    <string name="reply">回復</string>
+    <string name="i_agree">我同意。</string>
+    <string name="time">時間</string>
+    <string name="date">日期</string>
+    <string name="remote">遠端</string>
+    <string name="disconnect">中斷連線</string>
+    <string name="no_ble_devices">找不到藍牙裝置。</string>
+    <string name="no_network_devices">找不到網路裝置。</string>
+    <string name="no_usb_devices">找不到 USB 序列裝置。</string>
+    <string name="scroll_to_bottom">捲動至底部</string>
+    <string name="meshtastic">Meshtastic</string>
+    <string name="scanning">掃描中</string>
+    <string name="app_intro_back_button">返回</string>
+    <string name="app_intro_done_button">完成</string>
+    <string name="app_intro_skip_button">跳過</string>
 </resources>

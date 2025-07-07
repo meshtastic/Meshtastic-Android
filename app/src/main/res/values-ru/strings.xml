@@ -14,9 +14,6 @@
   ~
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
-  ~
-  ~ NOTE: Only modify this english strings.xml file directly.
-  ~       Other languages are managed by CrowdIn
   -->
 <resources>
     <string name="main_tab_messages">Сообщения</string>
@@ -24,9 +21,12 @@
     <string name="main_tab_map">Карта</string>
     <string name="main_tab_channel">Канал</string>
     <string name="main_tab_settings">Настройки</string>
+    <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Фильтр</string>
     <string name="desc_node_filter_clear">очистить фильтр узлов</string>
     <string name="node_filter_include_unknown">Включать неизвестно</string>
+    <string name="node_filter_only_online">Скрыть узлы вне сети</string>
+    <string name="node_filter_only_direct">Отображать только прямые узлы</string>
     <string name="node_filter_show_details">Показать детали</string>
     <string name="node_sort_button">Варианты сортировки узлов</string>
     <string name="node_sort_alpha">А-Я</string>
@@ -116,6 +116,7 @@
     <string name="connected_count">Подключено: %1$s из онлайн</string>
     <string name="update_firmware">Обновите прошивку</string>
     <string name="ip_address">IP-адрес:</string>
+    <string name="ip_port">Порт:</string>
     <string name="connected">Подключен к радио</string>
     <string name="connected_to">Подключен к радио (%s)</string>
     <string name="not_connected">Нет соединения</string>
@@ -137,7 +138,15 @@
     <string name="text_messages">Текстовые сообщения</string>
     <string name="channel_invalid">Этот URL-адрес канала недействителен и не может быть использован</string>
     <string name="debug_panel">Панель отладки</string>
+    <string name="debug_logs_export">Экспортировать логи</string>
     <string name="debug_last_messages">500 последних сообщений</string>
+    <string name="debug_filters">Фильтры</string>
+    <string name="debug_active_filters">Активные фильтры</string>
+    <string name="debug_default_search">Искать в журнале…</string>
+    <string name="debug_clear">Очистить журнал</string>
+    <string name="match_any">Совпадение любой | Все</string>
+    <string name="match_all">Совпадение всех | Любой</string>
+    <string name="debug_clear_logs_confirm">Это удалит все пакеты журналов и записи базы данных с вашего устройства. Это — полный сброс, и он необратим.</string>
     <string name="clear">Очистить</string>
     <string name="updating_firmware">Обновление прошивки, подождите до восьми минут…</string>
     <string name="update_successful">Успешно обновлено</string>
@@ -145,6 +154,8 @@
     <string name="message_reception_time">время получения сообщения</string>
     <string name="message_reception_state">состояние получения сообщения</string>
     <string name="message_delivery_status">Статус доставки сообщения</string>
+    <string name="meshtastic_messages_notifications">Уведомления о личных сообщениях</string>
+    <string name="meshtastic_broadcast_notifications">Уведомления о трансляции сообщений</string>
     <string name="meshtastic_alerts_notifications">Служебные уведомления</string>
     <string name="protocol_stress_test">Испытание протокола на нагрузку</string>
     <string name="firmware_too_old">Требуется обновление прошивки.</string>
@@ -270,6 +281,7 @@
     <string name="humidity">Влажность</string>
     <string name="logs">Журналы</string>
     <string name="hops_away">Прыжков</string>
+    <string name="hops_away_template">Количество шагов %1$d</string>
     <string name="info">Информация</string>
     <string name="ch_util_definition">Использование для текущего канала, включая хорошо сформированный TX, RX и неправильно сформированный RX (так называемый шум).</string>
     <string name="air_util_definition">Процент времени эфира для передачи в течение последнего часа.</string>
@@ -291,6 +303,7 @@
     <string name="device_metrics_log">Журнал метрик устройства</string>
     <string name="node_map">Карта узла</string>
     <string name="position_log">Журнал местоположения</string>
+    <string name="last_position_update">Последнее обновление местоположения</string>
     <string name="env_metrics_log">Журнал параметров среды</string>
     <string name="sig_metrics_log">Журнал показателей сигнала</string>
     <string name="administration">Администрирование</string>
@@ -338,12 +351,14 @@
     <string name="are_you_sure">Вы уверены?</string>
     <string name="router_role_confirmation_text"><![CDATA[Я прочитал <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">документацию ролей</a> и блог об этом<a href="http://meshtastic.org/blog/choosing-the-right-device-role">выбор правильной роли</a>.]]></string>
     <string name="i_know_what_i_m_doing">Я знаю, что я делаю.</string>
+    <string name="low_battery_message">Узел %1$s имеет низкий заряд батареи (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Уведомление о низком заряде</string>
     <string name="low_battery_title">Низкий заряд батареи: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Уведомления о низком заряде батареи (Фаворитные узлы)</string>
     <string name="baro_pressure">Давление на барометре</string>
     <string name="mesh_via_udp_enabled">Сеть через UDP включена</string>
     <string name="udp_config">UDP Config</string>
+    <string name="map_node_popup_details"><![CDATA[%1$s<br>Последний приём: %2$s<br>Последнее местоположение: %3$s<br>Батарея: %4$s]]></string>
     <string name="toggle_my_position">Переключить мою позицию</string>
     <string name="user">Пользователь</string>
     <string name="channels">Каналы</string>
@@ -460,6 +475,7 @@
     <string name="use_i2s_as_buzzer">Использовать I2S как буззер</string>
     <string name="lora_config">Настройка LoRa</string>
     <string name="use_modem_preset">Использовать шаблон модема</string>
+    <string name="modem_preset">Режим работы передатчика</string>
     <string name="bandwidth">Ширина канала</string>
     <string name="spread_factor">Коэффициент распространения</string>
     <string name="coding_rate">Частота кодирования</string>
@@ -576,6 +592,8 @@
     <string name="long_name">Полное имя</string>
     <string name="short_name">Короткое имя</string>
     <string name="hardware_model">Модель оборудования</string>
+    <string name="licensed_amateur_radio">Лицензированный радиолюбитель (HAM)</string>
+    <string name="licensed_amateur_radio_text">Включение данной опции отключает шифрование и несовместимо с основной сетью Meshtastic.</string>
     <string name="dew_point">Точка росы</string>
     <string name="pressure">Давление</string>
     <string name="gas_resistance">Сопротивление газа</string>
@@ -600,7 +618,77 @@
     <string name="heading">Курс</string>
     <string name="sats">Количество спутников</string>
     <string name="alt">Уровень моря</string>
+    <string name="freq">Чистота</string>
+    <string name="slot">Слот</string>
     <string name="primary"></string>
-    <string name="host_metrics_log"></string>
+    <string name="primary_channel_feature">Периодическая трансляция местоположения и телеметрии</string>
+    <string name="secondary">Дополнительный</string>
+    <string name="secondary_no_telemetry">Нет периодической телеметрической передачи</string>
+    <string name="manual_position_request">Требуется запрос позиции вручную</string>
+    <string name="press_and_drag">Нажмите и перетащите для изменения порядка</string>
+    <string name="set_region">Установить регион</string>
+    <string name="unmute">Включить микрофон</string>
+    <string name="dynamic">Динамический</string>
+    <string name="scan_qr_code">Сканировать QR код</string>
+    <string name="share_contact">Поделиться контактом</string>
+    <string name="import_shared_contact">Импортировать контакт?</string>
+    <string name="unmessageable">Не отправляемо</string>
+    <string name="unmonitored_or_infrastructure">Неконтролируемые или инфраструктура</string>
+    <string name="import_known_shared_contact_text">Внимание: Данный контакт уже существует, импорт перезапишет ранее известную информацию о нём.</string>
+    <string name="public_key_changed">Публичный ключ изменён</string>
+    <string name="import_label">Импортировать</string>
+    <string name="request_metadata">Запросить метаданные</string>
+    <string name="actions">Действия</string>
+    <string name="firmware">Прошивка</string>
+    <string name="use_12h_format">Использовать 12-часовой формат времени</string>
+    <string name="display_time_in_12h_format">Если включено, устройство будет отображать время на экране в 12-часовом формате.</string>
+    <string name="host_metrics_log">Журнал метрик хоста</string>
+    <string name="host">Хост</string>
+    <string name="host_metrics">Метрики хоста</string>
+    <string name="free_memory">Свободная память</string>
+    <string name="disk_free">Свободно памяти на диске</string>
+    <string name="load">Загрузка</string>
+    <string name="user_string">Строка пользователя</string>
+    <string name="navigate_into_label">Перейти в</string>
+    <string name="connections">Соединения</string>
     <string name="map">Карта</string>
+    <string name="contacts">Контакты</string>
+    <string name="nodes">Узлы</string>
+    <string name="set_your_region">Установите ваш регион</string>
+    <string name="reply">Ответить</string>
+    <string name="map_reporting_summary">Ваш узел будет периодически отправлять незашифрованный пакет отчёта карты на настроенный MQTT-сервер, что включает идентификатор, полное и краткое имя, примерное местоположение, модель аппаратного обеспечения, роль, версия прошивки, регион LoRa, режим работы передатчика и имя основного канала.</string>
+    <string name="map_reporting_consent_header">Согласие на передачу незашифрованных данных узла через MQTT</string>
+    <string name="map_reporting_consent_text">Включая данную функцию, вы подтверждаете и прямо соглашаетесь на передачу географического местоположения вашего устройства в реальном времени через протокол MQTT без шифрования. Эти данные о местоположении могут быть использованы для таких целей, как отчёты карты в реальном времени, отслеживание устройства и подобные функции телеметрии.</string>
+    <string name="i_agree_to_share_my_location">Я прочитал и понял вышеописанное. Я добровольно даю согласие на незашифрованную передачу данных моего узла через MQTT</string>
+    <string name="i_agree">Я согласен.</string>
+    <string name="should_update_firmware">Рекомендуется обновление прошивки.</string>
+    <string name="should_update">Чтобы использовать последние исправления и функции, обновите прошивку вашего узла. \n\nПоследняя стабильная версия прошивки: %1$s</string>
+    <string name="expires">Срок действия</string>
+    <string name="time">Время</string>
+    <string name="date">Дата</string>
+    <string name="map_filter">Фильтр карты\n</string>
+    <string name="only_favorites">Только Избранные</string>
+    <string name="show_waypoints">Показать путевые точки</string>
+    <string name="show_precision_circle">Показывать точные круги</string>
+    <string name="client_notification">Уведомления клиента</string>
+    <string name="compromised_keys">Обнаружены скомпрометированные ключи, нажмите OK для пересоздания.</string>
+    <string name="regenerate_private_key">Пересоздать приватный ключ</string>
+    <string name="regenerate_keys_confirmation">Вы уверены, что хотите пересоздать свой приватный ключ?\n\nУзлы, которые ранее обменивались ключами с этим узлом, должны будут удалить этот узел и повторно обменяться ключами для того, чтобы возобновить защищённую связь.</string>
+    <string name="export_keys">Экспортировать ключи</string>
+    <string name="export_keys_confirmation">Экспортирует публичный и приватный ключи в файл. Пожалуйста, храните их где-нибудь в безопасности.</string>
+    <string name="modules_unlocked">Модули разблокированы</string>
+    <string name="remote">Удаленные</string>
+    <string name="node_count_template">(%1$d в сети / всего %2$d)</string>
+    <string name="react">Среагировать</string>
+    <string name="disconnect">Отключиться</string>
+    <string name="no_ble_devices">Устройства Bluetooth не найдены.</string>
+    <string name="no_network_devices">Сетевые устройства не найдены.</string>
+    <string name="no_usb_devices">USB-устройства COM-порта не найдены.</string>
+    <string name="scroll_to_bottom">Прокрутить вниз</string>
+    <string name="meshtastic">Meshtastic</string>
+    <string name="scanning">Сканирование</string>
+    <string name="app_intro_back_button">Назад</string>
+    <string name="app_intro_next_button">Далее</string>
+    <string name="app_intro_done_button">Готово</string>
+    <string name="app_intro_skip_button">Пропустить</string>
 </resources>

@@ -1,0 +1,27 @@
+name: Android CI (PR)
+
+on:
+  pull_request:
+    branches: [ main ]
+
+concurrency:
+  group: build-pr-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build_and_detekt:
+    if: github.repository == 'meshtastic/Meshtastic-Android'
+    uses: ./.github/workflows/reusable-android-build.yml
+    secrets:
+      GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+    # inputs.upload_artifacts defaults to true, so no need to specify for PRs
+
+  androidTest:
+    # AssumingandroidTest should also only run for the main repository
+    if: github.repository == 'meshtastic/Meshtastic-Android'
+    uses: ./.github/workflows/reusable-android-test.yml
+    with:
+      api_levels: '[35]' # Run only on API 35 for PRs
+      # upload_artifacts defaults to true, so no need to explicitly set
+    secrets:
+      GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}

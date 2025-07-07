@@ -23,8 +23,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.NoCell
 import androidx.compose.material.icons.rounded.Star
-import androidx.compose.material.icons.twotone.CloudOff
 import androidx.compose.material.icons.twotone.CloudDone
+import androidx.compose.material.icons.twotone.CloudOff
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -150,6 +150,6 @@ fun StatusIconsPreview() {
         isThisNode = true,
         isUnmessageable = true,
         isFavorite = true,
-        isConnected = true,
+        isConnected = false,
     )
 }

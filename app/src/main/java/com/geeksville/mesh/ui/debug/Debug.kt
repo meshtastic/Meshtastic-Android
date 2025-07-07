@@ -167,7 +167,7 @@ internal fun DebugScreen(
                     searchState = searchState,
                     filterTexts = filterTexts,
                     presetFilters = viewModel.presetFilters,
-                    logs = filteredLogs,
+                    logs = logs,
                     filterMode = filterMode,
                     onFilterModeChange = { filterMode = it }
                 )
@@ -494,7 +494,7 @@ private fun DebugMenuActionsPreview() {
             ) {
                 Icon(
                     imageVector = Icons.Outlined.FileDownload,
-                    contentDescription = "Export Logs"
+                    contentDescription = stringResource(id = R.string.debug_logs_export)
                 )
             }
             IconButton(
@@ -503,7 +503,7 @@ private fun DebugMenuActionsPreview() {
             ) {
                 Icon(
                     imageVector = Icons.Default.Delete,
-                    contentDescription = "Clear All"
+                    contentDescription = stringResource(id = R.string.debug_clear)
                 )
             }
         }
@@ -559,7 +559,7 @@ private fun DebugScreenEmptyPreview() {
                                             )
                                             Icon(
                                                 imageVector = Icons.TwoTone.FilterAltOff,
-                                                contentDescription = "Filter"
+                                                contentDescription = stringResource(id = R.string.debug_filters)
                                             )
                                         }
                                     }
@@ -709,7 +709,7 @@ fun DebugMenuActions(
     ) {
         Icon(
             imageVector = Icons.Outlined.FileDownload,
-            contentDescription = "Export Logs"
+            contentDescription = stringResource(id = R.string.debug_logs_export)
         )
     }
     IconButton(
@@ -718,7 +718,7 @@ fun DebugMenuActions(
     ) {
         Icon(
             imageVector = Icons.Default.Delete,
-            contentDescription = "Clear All"
+            contentDescription = stringResource(id = R.string.debug_clear)
         )
     }
     if (showDeleteLogsDialog) {

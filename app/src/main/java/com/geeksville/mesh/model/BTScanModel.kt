@@ -21,9 +21,10 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.content.Context
+import android.content.SharedPreferences
 import android.hardware.usb.UsbManager
 import android.os.RemoteException
-import androidx.lifecycle.LiveData
+import androidx.core.content.edit
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -51,9 +52,11 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import org.json.JSONArray
 import javax.inject.Inject
 
 @HiltViewModel
+@Suppress("LongParameterList", "TooManyFunctions")
 class BTScanModel @Inject constructor(
     private val application: Application,
     private val serviceRepository: ServiceRepository,
@@ -62,11 +65,14 @@ class BTScanModel @Inject constructor(
     private val usbManagerLazy: dagger.Lazy<UsbManager>,
     private val networkRepository: NetworkRepository,
     private val radioInterfaceService: RadioInterfaceService,
+    private val preferences: SharedPreferences,
 ) : ViewModel(), Logging {
 
     private val context: Context get() = application.applicationContext
     val devices = MutableLiveData<MutableMap<String, DeviceListEntry>>(mutableMapOf())
     val errorText = MutableLiveData<String?>(null)
+
+    private val recentIpAddresses = MutableStateFlow(getRecentAddresses())
 
     private val showMockInterface: StateFlow<Boolean>
         get() =
@@ -76,9 +82,10 @@ class BTScanModel @Inject constructor(
         combine(
             bluetoothRepository.state,
             networkRepository.resolvedList,
+            recentIpAddresses.asStateFlow(),
             usbRepository.serialDevicesWithDrivers,
             showMockInterface,
-        ) { ble, tcp, usb, showMockInterface ->
+        ) { ble, tcp, recent, usb, showMockInterface ->
             devices.value = mutableMapOf<String, DeviceListEntry>().apply {
                 fun addDevice(entry: DeviceListEntry) {
                     this[entry.fullAddress] = entry
@@ -117,6 +124,11 @@ class BTScanModel @Inject constructor(
                         displayName += "_$deviceId"
                     }
                     addDevice(DeviceListEntry(displayName, "t$address", true))
+                }
+
+                // Include saved IP connections
+                recent.forEach { address ->
+                    addDevice(DeviceListEntry(context.getString(R.string.meshtastic), address, true))
                 }
 
                 usb.forEach { (_, d) ->
@@ -283,11 +295,36 @@ class BTScanModel @Inject constructor(
             }.launchIn(viewModelScope)
     }
 
+    private fun getRecentAddresses(): List<String> {
+        val jsonAddresses = preferences.getString("recent-ip-addresses", "[]") ?: "[]"
+        val listAddresses = JSONArray(jsonAddresses).let { jsonArray ->
+            List(jsonArray.length()) { index -> jsonArray.getString(index) }
+        }
+        return listAddresses
+    }
+
+    private fun setRecentAddresses(addresses: List<String>) {
+        preferences.edit {
+            putString("recent-ip-addresses", addresses.toString())
+        }
+        recentIpAddresses.value = addresses
+    }
+
+    fun addRecentAddress(address: String) {
+        if (!address.startsWith("t")) return
+        val existingItems = getRecentAddresses()
+        val updatedList = mutableListOf<String>()
+        updatedList.add(address)
+        updatedList.addAll(existingItems.filter { it != address }.take(2))
+        setRecentAddresses(updatedList)
+    }
+
     // Called by the GUI when a new device has been selected by the user
     // @returns true if we were able to change to that item
     fun onSelected(it: DeviceListEntry): Boolean {
         // If the device is paired, let user select it, otherwise start the pairing flow
         if (it.bonded) {
+            addRecentAddress(it.fullAddress)
             changeDeviceAddress(it.fullAddress)
             return true
         } else {
@@ -306,8 +343,8 @@ class BTScanModel @Inject constructor(
         }
     }
 
-    private val _spinner = MutableLiveData(false)
-    val spinner: LiveData<Boolean> get() = _spinner
+    private val _spinner = MutableStateFlow(false)
+    val spinner: StateFlow<Boolean> get() = _spinner.asStateFlow()
 }
 
 const val NO_DEVICE_SELECTED = "n"

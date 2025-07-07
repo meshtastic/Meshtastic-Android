@@ -14,9 +14,6 @@
   ~
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
-  ~
-  ~ NOTE: Only modify this english strings.xml file directly.
-  ~       Other languages are managed by CrowdIn
   -->
 <resources>
     <string name="main_tab_messages">消息</string>
@@ -686,4 +683,9 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="no_usb_devices">未找到 USB 串口设备。</string>
     <string name="scroll_to_bottom">滚动到底部</string>
     <string name="meshtastic">Meshtastic</string>
+    <string name="scanning">正在扫描</string>
+    <string name="app_intro_back_button">后退</string>
+    <string name="app_intro_next_button">下一步</string>
+    <string name="app_intro_done_button">完成</string>
+    <string name="app_intro_skip_button">跳过</string>
 </resources>

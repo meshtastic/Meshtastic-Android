@@ -14,9 +14,6 @@
   ~
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
-  ~
-  ~ NOTE: Only modify this english strings.xml file directly.
-  ~       Other languages are managed by CrowdIn
   -->
 <resources>
     <string name="main_tab_messages">Messages</string>
@@ -590,4 +587,5 @@
     <string name="nodes">Noeuds</string>
     <string name="reply">Répondre</string>
     <string name="disconnect">Déconnecter</string>
+    <string name="app_intro_back_button">Retour</string>
 </resources>

@@ -136,6 +136,7 @@ fun ScannedQrCodeDialog(
                     )
                 }
                 itemsIndexed(channelSet.settingsList) { index, channel ->
+                    val channelObj = Channel(channel, channelSet.loraConfig)
                     ChannelSelection(
                         index = index,
                         title = channel.name.ifEmpty { modemPresetName },
@@ -146,6 +147,7 @@ fun ScannedQrCodeDialog(
                                 channelSelections[index] = it
                             }
                         },
+                        channel = channelObj,
                     )
                 }
 

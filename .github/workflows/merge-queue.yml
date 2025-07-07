@@ -1,0 +1,28 @@
+name: Android CI (Merge Queue)
+
+on:
+  merge_group:
+    types: [checks_requested]
+
+concurrency:
+  group: build-mq-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build_and_detekt:
+    if: github.repository == 'meshtastic/Meshtastic-Android'
+    uses: ./.github/workflows/reusable-android-build.yml
+    with:
+      upload_artifacts: false
+    secrets:
+      GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+
+  androidTest:
+    if: github.repository == 'meshtastic/Meshtastic-Android'
+    uses: ./.github/workflows/reusable-android-test.yml
+    with:
+      api_levels: '[26, 35]' # Run on both API 26 and 35 for merge queue
+      upload_artifacts: false
+    secrets:
+      GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+

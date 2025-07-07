@@ -176,8 +176,7 @@ data class Contact(
     val messageCount: Int,
     val isMuted: Boolean,
     val isUnmessageable: Boolean,
-    val nodeColors: Pair<Int, Int>? = null,
-    val isDefaultPSK: Boolean? = false
+    val nodeColors: Pair<Int, Int>? = null
 )
 
 @Suppress("LongParameterList", "LargeClass")
@@ -520,15 +519,6 @@ class UIViewModel @Inject constructor(
             } else {
                 user.longName
             }
-            val isDefaultPSK = if (toBroadcast) {
-                val _channel = channelSet.getChannel(data.channel)
-                val isDefaultPSK = (_channel?.settings?.psk?.size() == 1 &&
-                     _channel.settings.psk.byteAt(0) == 1.toByte()) ||
-                     _channel?.settings?.psk?.toByteArray()?.isEmpty() == true
-                isDefaultPSK
-            } else {
-                false
-            }
 
             Contact(
                 contactKey = contactKey,
@@ -544,8 +534,7 @@ class UIViewModel @Inject constructor(
                     node.colors
                 } else {
                     null
-                },
-                isDefaultPSK = isDefaultPSK
+                }
             )
         }
     }.stateIn(
@@ -621,6 +610,15 @@ class UIViewModel @Inject constructor(
 
     fun sendReaction(emoji: String, replyId: Int, contactKey: String) = viewModelScope.launch {
         radioConfigRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey))
+    }
+
+    private val _sharedContactRequested: MutableStateFlow<AdminProtos.SharedContact?> =
+        MutableStateFlow(null)
+    val sharedContactRequested: StateFlow<AdminProtos.SharedContact?> get() = _sharedContactRequested.asStateFlow()
+    fun setSharedContactRequested(sharedContact: AdminProtos.SharedContact?) {
+        viewModelScope.launch {
+            _sharedContactRequested.value = sharedContact
+        }
     }
 
     fun addSharedContact(sharedContact: AdminProtos.SharedContact) = viewModelScope.launch {

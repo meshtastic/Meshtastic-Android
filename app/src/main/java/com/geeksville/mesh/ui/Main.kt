@@ -473,7 +473,7 @@ private fun TopBarActions(
 ) {
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isConnected by viewModel.isConnected.collectAsStateWithLifecycle(false)
-    AnimatedVisibility(ourNode != null && currentDestination?.isTopLevel() == true) {
+    AnimatedVisibility(ourNode != null && currentDestination?.isTopLevel() == true && isConnected) {
         ourNode?.let {
             NodeChip(
                 node = it,
@@ -506,7 +506,7 @@ private fun MainMenuActions(
     IconButton(onClick = { showMenu = true }) {
         Icon(
             imageVector = Icons.Default.MoreVert,
-            contentDescription = "Overflow menu",
+            contentDescription = stringResource(R.string.overflow_menu),
         )
     }
 
