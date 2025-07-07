@@ -143,6 +143,12 @@
     <string name="debug_filters">Suodattimet</string>
     <string name="debug_active_filters">Aktiiviset suodattimet</string>
     <string name="debug_default_search">Hae lokitiedoista…</string>
+    <string name="debug_search_next">Seuraava osuma</string>
+    <string name="debug_search_prev">Edellinen osuma</string>
+    <string name="debug_search_clear">Tyhjennä haku</string>
+    <string name="debug_filter_add">Lisää suodatin</string>
+    <string name="debug_filter_included">Sisältää suodattimen</string>
+    <string name="debug_filter_clear">Tyhjennä kaikki suodattimet</string>
     <string name="debug_clear">Tyhjennä lokit</string>
     <string name="match_any">Täsmää yhteen | kaikkiin</string>
     <string name="match_all">Täsmää yhteen | kaikkiin</string>
@@ -195,6 +201,8 @@
     <string name="delete_for_everyone">Poista kaikilta</string>
     <string name="delete_for_me">Poista minulta</string>
     <string name="select_all">Valitse kaikki</string>
+    <string name="close_selection">Sulje valinta</string>
+    <string name="delete_selection">Poista valitut</string>
     <string name="modem_config_slow_long">Pitkä Kantama / Hidas</string>
     <string name="map_style_selection">Tyylin Valinta</string>
     <string name="map_download_region">Lataa alue</string>
@@ -580,6 +588,7 @@
     <string name="environment_metrics_use_fahrenheit">Käytä Fahrenheit yksikköä</string>
     <string name="air_quality_metrics_module_enabled">Ilmanlaadun tietojen moduuli käytössä</string>
     <string name="air_quality_metrics_update_interval_seconds">Ilmanlaadun tietojen päivitysväli (sekuntia)</string>
+    <string name="air_quality_icon">Ilmanlaadun kuvake</string>
     <string name="power_metrics_module_enabled">Virrankulutuksen moduuli käytössä</string>
     <string name="power_metrics_update_interval_seconds">Virrankulutuksen päivitysväli (sekuntia)</string>
     <string name="power_metrics_on_screen_enabled">Virrankulutuksen näyttö käytössä</string>
@@ -687,4 +696,12 @@
     <string name="app_intro_next_button">Seuraava</string>
     <string name="app_intro_done_button">Valmis</string>
     <string name="app_intro_skip_button">Ohita</string>
+    <string name="security_icon_description">Turvallisuustila</string>
+    <string name="security_icon_secure"> - Suojattu</string>
+    <string name="security_icon_warning"> - VAROITUS, suojaamaton MQTT</string>
+    <string name="security_icon_insecure"> - VAROITUS, alhainen entropian avain</string>
+    <string name="security_icon_insecure_precise"> - VAROITUS, suojaamaton sijaintitieto käytössä</string>
+    <string name="unknown_channel">Tuntematon kanava</string>
+    <string name="warning">Varoitus</string>
+    <string name="overflow_menu">Lisävalikko</string>
 </resources>
