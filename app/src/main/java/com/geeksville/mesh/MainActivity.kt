@@ -116,6 +116,8 @@ class MainActivity : AppCompatActivity(), Logging {
         installSplashScreen()
         super.onCreate(savedInstanceState)
 
+        val intentionalDetektError = 1234567
+
         val prefs = UIViewModel.getPreferences(this)
         if (savedInstanceState == null) {
             val lang = prefs.getString("lang", LanguageUtils.SYSTEM_DEFAULT)
