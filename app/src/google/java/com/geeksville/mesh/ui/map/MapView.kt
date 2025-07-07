@@ -27,12 +27,12 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -42,21 +42,20 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Place
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.outlined.Layers
-import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
-import androidx.compose.material.icons.outlined.Tune
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
-import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -65,7 +64,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -78,9 +76,10 @@ import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.map.components.EditWaypointDialog
-import com.geeksville.mesh.ui.map.components.MapButton
+import com.geeksville.mesh.ui.map.components.MapControlsOverlay
+import com.geeksville.mesh.ui.map.components.NodeClusterMarkers
+import com.geeksville.mesh.ui.map.components.WaypointMarkers
 import com.geeksville.mesh.ui.node.DegD
-import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.util.formatAgo
 import com.geeksville.mesh.waypoint
 import com.google.android.gms.maps.model.BitmapDescriptor
@@ -89,8 +88,6 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.clustering.ClusterItem
-import com.google.maps.android.clustering.view.DefaultClusterRenderer
-import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.ComposeMapColorScheme
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapEffect
@@ -98,14 +95,14 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapsComposeExperimentalApi
-import com.google.maps.android.compose.Marker
-import com.google.maps.android.compose.clustering.Clustering
 import com.google.maps.android.compose.rememberCameraPositionState
-import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.maps.android.compose.widgets.DisappearingScaleBar
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
-@OptIn(MapsComposeExperimentalApi::class)
+@OptIn(
+    MapsComposeExperimentalApi::class, ExperimentalMaterial3AdaptiveApi::class,
+    ExperimentalMaterial3Api::class
+)
 @Composable
 fun MapView(
     uiViewModel: UIViewModel,
@@ -114,8 +111,6 @@ fun MapView(
 ) {
     val context = LocalContext.current
     val mapLayers by mapViewModel.mapLayers.collectAsStateWithLifecycle()
-    var showLayerManagementDialog by remember { mutableStateOf(false) }
-
     var hasLocationPermission by remember { mutableStateOf(false) }
 
     LocationPermissionsHandler { isGranted ->
@@ -147,6 +142,7 @@ fun MapView(
 
     val allNodes by uiViewModel.filteredNodeList.collectAsStateWithLifecycle()
     val waypoints by uiViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
+    val displayableWaypoints = waypoints.values.mapNotNull { it.data.waypoint }
 
     val filteredNodes = if (mapFilterState.onlyFavorites) {
         allNodes.filter { it.isFavorite || it.num == ourNodeInfo?.num }
@@ -198,224 +194,226 @@ fun MapView(
         else -> ComposeMapColorScheme.LIGHT
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        GoogleMap(
-            mapColorScheme = mapColorScheme,
-            modifier = Modifier.fillMaxSize(),
-            cameraPositionState = cameraPositionState,
-            uiSettings = MapUiSettings(
-                zoomControlsEnabled = true,
-                mapToolbarEnabled = true,
-                compassEnabled = true,
-                myLocationButtonEnabled = hasLocationPermission,
-                rotationGesturesEnabled = true,
-                scrollGesturesEnabled = true,
-                tiltGesturesEnabled = true,
-                zoomGesturesEnabled = true
-            ),
-            properties = MapProperties(
-                mapType = selectedMapType,
-                isMyLocationEnabled = hasLocationPermission
-            ),
-            onMapLongClick = { latLng ->
-                if (isConnected) {
-                    val newWaypoint = waypoint {
-                        latitudeI = (latLng.latitude / DegD).toInt()
-                        longitudeI = (latLng.longitude / DegD).toInt()
+    var showLayersBottomSheet by remember { mutableStateOf(false) }
+
+    val onAddLayerClicked = {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "*/*" // Allow all file types initially
+            // More specific MIME types for KML/KMZ
+            val mimeTypes = arrayOf(
+                "application/vnd.google-earth.kml+xml",
+                "application/vnd.google-earth.kmz"
+            )
+            putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
+        }
+        kmlFilePickerLauncher.launch(intent)
+        // showLayerManagementDialog = false // Optionally dismiss after clicking add
+    }
+    val onRemoveLayer = { layerId: String ->
+        mapViewModel.removeMapLayer(layerId)
+    }
+    val onToggleVisibility = { layerId: String ->
+        mapViewModel.toggleLayerVisibility(layerId)
+    }
+    Scaffold(
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(it)
+        ) {
+            GoogleMap(
+                mapColorScheme = mapColorScheme,
+                modifier = Modifier.fillMaxSize(),
+                cameraPositionState = cameraPositionState,
+                uiSettings = MapUiSettings(
+                    zoomControlsEnabled = true,
+                    mapToolbarEnabled = true,
+                    compassEnabled = true,
+                    myLocationButtonEnabled = hasLocationPermission,
+                    rotationGesturesEnabled = true,
+                    scrollGesturesEnabled = true,
+                    tiltGesturesEnabled = true,
+                    zoomGesturesEnabled = true
+                ),
+                properties = MapProperties(
+                    mapType = selectedMapType,
+                    isMyLocationEnabled = hasLocationPermission
+                ),
+                onMapLongClick = { latLng ->
+                    if (isConnected) {
+                        val newWaypoint = waypoint {
+                            latitudeI = (latLng.latitude / DegD).toInt()
+                            longitudeI = (latLng.longitude / DegD).toInt()
+                        }
+                        editingWaypoint = newWaypoint
                     }
-                    editingWaypoint = newWaypoint
+                }
+            ) {
+                NodeClusterMarkers(
+                    nodeClusterItems = nodeClusterItems,
+                    mapFilterState = mapFilterState,
+                    navigateToNodeDetails = navigateToNodeDetails
+                )
+
+                WaypointMarkers(
+                    displayableWaypoints = displayableWaypoints,
+                    mapFilterState = mapFilterState,
+                    myNodeNum = uiViewModel.myNodeNum ?: 0,
+                    isConnected = isConnected,
+                    unicodeEmojiToBitmapProvider = ::unicodeEmojiToBitmap,
+                    onEditWaypointRequest = { waypointToEdit ->
+                        editingWaypoint = waypointToEdit
+                    }
+                )
+
+                MapEffect(mapLayers) { map ->
+                    mapLayers.forEach { layerItem ->
+                        mapViewModel.loadKmlLayerIfNeeded(map, layerItem)
+                            ?.let { kmlLayer -> // Combine let with ?.
+                                if (layerItem.isVisible && !kmlLayer.isLayerOnMap) {
+                                    kmlLayer.addLayerToMap()
+                                } else if (!layerItem.isVisible && kmlLayer.isLayerOnMap) {
+                                    kmlLayer.removeLayerFromMap()
+                                }
+                            }
+                    }
                 }
             }
-        ) {
-            Clustering(
-                items = nodeClusterItems,
-                onClusterItemInfoWindowClick = { item ->
-                    navigateToNodeDetails(item.node.num)
-                    false
-                },
-                clusterItemContent = {
-                    NodeChip(
-                        node = it.node,
-                        enabled = false,
-                        isThisNode = false,
-                        isConnected = false
-                    ) { }
-                },
-                onClusterManager = { clusterManager ->
-                    (clusterManager.renderer as DefaultClusterRenderer).minClusterSize = 7
-                }
+
+            DisappearingScaleBar(
+                cameraPositionState = cameraPositionState
             )
 
-            if (mapFilterState.showPrecisionCircle) {
-                nodeClusterItems.forEach { clusterItem ->
-                    clusterItem.getPrecisionMeters()?.let { precisionMeters ->
-                        if (precisionMeters > 0) {
-                            Circle(
-                                center = clusterItem.position,
-                                radius = precisionMeters,
-                                fillColor = Color(clusterItem.node.colors.second).copy(alpha = 0.2f),
-                                strokeColor = Color(clusterItem.node.colors.second),
-                                strokeWidth = 2f
+            editingWaypoint?.let { waypointToEdit ->
+                EditWaypointDialog(
+                    waypoint = waypointToEdit,
+                    onSendClicked = { updatedWp ->
+                        var finalWp = updatedWp
+                        if (updatedWp.id == 0) {
+                            finalWp =
+                                finalWp.copy { id = uiViewModel.generatePacketId() ?: 0 }
+                        }
+                        if (updatedWp.icon == 0) {
+                            finalWp = finalWp.copy { icon = 0x1F4CD } // 📍 Round Pushpin
+                        }
+
+                        uiViewModel.sendWaypoint(finalWp)
+                        editingWaypoint = null
+                    },
+                    onDeleteClicked = { wpToDelete ->
+                        // If it's a shared waypoint and we are connected, send out a delete message
+                        if (wpToDelete.lockedTo == 0 && isConnected && wpToDelete.id != 0) {
+                            val deleteMarkerWp =
+                                wpToDelete.copy {
+                                    expire = 1
+                                } // Set expire to 1 to indicate deletion
+                            uiViewModel.sendWaypoint(deleteMarkerWp)
+                        }
+                        uiViewModel.deleteWaypoint(wpToDelete.id) // Delete from local DB
+                        editingWaypoint = null
+                    },
+                    onDismissRequest = { editingWaypoint = null }
+                )
+            }
+
+            MapControlsOverlay(
+                modifier = Modifier.align(Alignment.CenterEnd),
+                mapFilterMenuExpanded = mapFilterMenuExpanded,
+                onMapFilterMenuDismissRequest = { mapFilterMenuExpanded = false },
+                onToggleMapFilterMenu = { mapFilterMenuExpanded = true },
+                mapFilterState = mapFilterState,
+                uiViewModel = uiViewModel,
+                mapTypeMenuExpanded = mapTypeMenuExpanded,
+                onMapTypeMenuDismissRequest = { mapTypeMenuExpanded = false },
+                onToggleMapTypeMenu = { mapTypeMenuExpanded = true },
+                onMapTypeSelected = { mapType ->
+                    selectedMapType = mapType
+                    mapTypeMenuExpanded = false
+                },
+                onManageLayersClicked = {
+                    showLayersBottomSheet = true
+                }
+            )
+        }
+        if (showLayersBottomSheet) {
+            ModalBottomSheet({ showLayersBottomSheet = false }) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
+                    LazyColumn {
+                        item {
+                            Text(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                text = stringResource(R.string.manage_map_layers)
                             )
                         }
-                    }
-                }
-            }
-
-            waypoints.map { it.value.data }.forEach { data ->
-                val waypoint = data.waypoint ?: return@forEach
-                Marker(
-                    state = rememberUpdatedMarkerState(
-                        position = LatLng(
-                            waypoint.latitudeI * DegD,
-                            waypoint.longitudeI * DegD
-                        )
-                    ),
-                    icon = if (waypoint.icon == 0) {
-                        unicodeEmojiToBitmap(0x1F4CD)
-                    } else {
-                        unicodeEmojiToBitmap(waypoint.icon)
-                    },
-                    title = waypoint.name,
-                    snippet = waypoint.description,
-                    visible = mapFilterState.showWaypoints,
-                    onInfoWindowClick = { marker ->
-                        val wpToEdit = waypoint
-                        val myNodeNum = uiViewModel.myNodeNum ?: 0
-                        // Check if editable
-                        if (
-                            wpToEdit.lockedTo == 0 ||
-                            wpToEdit.lockedTo == myNodeNum ||
-                            !isConnected
-                        ) {
-                            editingWaypoint = waypoint
-                        } else {
-                            // Optionally show a toast that it's locked by someone else
-                        }
-                    }
-                )
-            }
-            MapEffect(mapLayers) { map ->
-                mapLayers.forEach { layerItem ->
-                    mapViewModel.loadKmlLayerIfNeeded(map, layerItem)
-                        ?.let { kmlLayer -> // Combine let with ?.
-                            if (layerItem.isVisible && !kmlLayer.isLayerOnMap) {
-                                kmlLayer.addLayerToMap()
-                            } else if (!layerItem.isVisible && kmlLayer.isLayerOnMap) {
-                                kmlLayer.removeLayerFromMap()
+                        stickyHeader {
+                            Button(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                onClick = onAddLayerClicked
+                            ) {
+                                Text(stringResource(R.string.add_layer))
                             }
                         }
+                        if (mapLayers.isEmpty()) {
+                            item {
+                                Text(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    text = stringResource(R.string.no_map_layers_loaded)
+                                )
+                            }
+                        }
+                        items(mapLayers, key = { it.id }) { layer ->
+                            ListItem(
+                                headlineContent = { Text(layer.name) },
+                                trailingContent = {
+                                    Row {
+                                        IconButton(onClick = {
+                                            onToggleVisibility(layer.id)
+                                        }) {
+                                            Icon(
+                                                imageVector = if (layer.isVisible) {
+                                                    Icons.Filled.Visibility
+                                                } else {
+                                                    Icons.Filled.VisibilityOff
+                                                },
+                                                contentDescription = stringResource(
+                                                    if (layer.isVisible) {
+                                                        R.string.hide_layer
+                                                    } else {
+                                                        R.string.show_layer
+                                                    }
+                                                )
+                                            )
+                                        }
+                                        IconButton(onClick = { onRemoveLayer(layer.id) }) {
+                                            Icon(
+                                                imageVector = Icons.Filled.Delete,
+                                                contentDescription = stringResource(R.string.remove_layer)
+                                            )
+                                        }
+                                    }
+                                }
+                            )
+                        }
+                        item {
+                            HorizontalDivider()
+                        }
+
+                    }
                 }
             }
-        }
-
-        DisappearingScaleBar(
-            cameraPositionState = cameraPositionState
-        )
-
-        editingWaypoint?.let { waypointToEdit ->
-            EditWaypointDialog(
-                waypoint = waypointToEdit,
-                onSendClicked = { updatedWp ->
-                    var finalWp = updatedWp
-                    if (updatedWp.id == 0) {
-                        finalWp = finalWp.copy { id = uiViewModel.generatePacketId() ?: 0 }
-                    }
-                    if (updatedWp.icon == 0) {
-                        finalWp = finalWp.copy { icon = 0x1F4CD } // 📍 Round Pushpin
-                    }
-
-                    uiViewModel.sendWaypoint(finalWp)
-                    editingWaypoint = null
-                },
-                onDeleteClicked = { wpToDelete ->
-                    // If it's a shared waypoint and we are connected, send out a delete message
-                    if (wpToDelete.lockedTo == 0 && isConnected && wpToDelete.id != 0) {
-                        val deleteMarkerWp =
-                            wpToDelete.copy { expire = 1 } // Set expire to 1 to indicate deletion
-                        uiViewModel.sendWaypoint(deleteMarkerWp)
-                    }
-                    uiViewModel.deleteWaypoint(wpToDelete.id) // Delete from local DB
-                    editingWaypoint = null
-                },
-                onDismissRequest = { editingWaypoint = null }
-            )
-        }
-
-        Column(
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.End,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Box {
-                MapButton(
-                    icon = Icons.Outlined.Tune,
-                    contentDescription = stringResource(id = R.string.map_filter),
-                    onClick = { mapFilterMenuExpanded = true }
-                )
-                MapFilterDropdown(
-                    expanded = mapFilterMenuExpanded,
-                    onDismissRequest = { mapFilterMenuExpanded = false },
-                    mapFilterState = mapFilterState,
-                    uiViewModel = uiViewModel
-                )
-            }
-
-            Box {
-                MapButton(
-                    icon = Icons.Outlined.Map,
-                    contentDescription = stringResource(id = R.string.map_tile_source),
-                    onClick = { mapTypeMenuExpanded = true }
-                )
-                MapTypeDropdown(
-                    expanded = mapTypeMenuExpanded,
-                    onDismissRequest = { mapTypeMenuExpanded = false },
-                    onMapTypeSelected = {
-                        selectedMapType = it
-                        mapTypeMenuExpanded = false
-                    }
-                )
-            }
-
-            MapButton( // Add KML Layer Button
-                icon = Icons.Outlined.Layers,
-                contentDescription = stringResource(id = R.string.manage_map_layers),
-                onClick = { showLayerManagementDialog = true }
-            )
-        }
-        if (showLayerManagementDialog) {
-            LayerManagementDialog(
-                mapLayers = mapLayers,
-                onDismissRequest = { showLayerManagementDialog = false },
-                onAddLayerClicked = {
-                    val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "*/*" // Allow all file types initially
-                        // More specific MIME types for KML/KMZ
-                        val mimeTypes = arrayOf(
-                            "application/vnd.google-earth.kml+xml",
-                            "application/vnd.google-earth.kmz"
-                        )
-                        putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
-                    }
-                    kmlFilePickerLauncher.launch(intent)
-                    // showLayerManagementDialog = false // Optionally dismiss after clicking add
-                },
-                onToggleVisibility = { layerId ->
-                    mapViewModel.toggleLayerVisibility(
-                        layerId
-                    )
-                },
-                onRemoveLayer = { layerId -> mapViewModel.removeMapLayer(layerId) }
-            )
         }
     }
 }
 
 @Composable
-private fun MapFilterDropdown(
+internal fun MapFilterDropdown( // Made internal
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     mapFilterState: UIViewModel.MapFilterState,
@@ -476,36 +474,8 @@ private fun MapFilterDropdown(
     }
 }
 
-data class NodeClusterItem(
-    val node: Node,
-    val nodePosition: LatLng,
-    val nodeTitle: String,
-    val nodeSnippet: String,
-) : ClusterItem {
-    override fun getPosition(): LatLng = nodePosition
-    override fun getTitle(): String = nodeTitle
-    override fun getSnippet(): String = nodeSnippet
-    override fun getZIndex(): Float? = null // Default behavior
-
-    fun getPrecisionMeters(): Double? {
-        val precisionMap = mapOf(
-            10 to 23345.484932,
-            11 to 11672.7369,
-            12 to 5836.36288,
-            13 to 2918.175876,
-            14 to 1459.0823719999053,
-            15 to 729.53562,
-            16 to 364.7622,
-            17 to 182.375556,
-            18 to 91.182212,
-            19 to 45.58554
-        )
-        return precisionMap[node.position.precisionBits]
-    }
-}
-
 @Composable
-private fun MapTypeDropdown(
+internal fun MapTypeDropdown( // Made internal
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     onMapTypeSelected: (MapType) -> Unit
@@ -530,7 +500,7 @@ private fun MapTypeDropdown(
     }
 }
 
-private fun convertIntToEmoji(unicodeCodePoint: Int): String {
+internal fun convertIntToEmoji(unicodeCodePoint: Int): String {
     return try {
         String(Character.toChars(unicodeCodePoint))
     } catch (e: IllegalArgumentException) {
@@ -541,131 +511,67 @@ private fun convertIntToEmoji(unicodeCodePoint: Int): String {
     }
 }
 
-private fun unicodeEmojiToBitmap(icon: Int): BitmapDescriptor {
+internal fun unicodeEmojiToBitmap(icon: Int): BitmapDescriptor {
     val unicodeEmoji = convertIntToEmoji(icon)
     // Create a Paint object for drawing text
     val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        textSize = 90f // Adjust size as needed
+        textSize = 64f // Adjust size as needed
+        color = android.graphics.Color.BLACK // Adjust color as needed
         textAlign = Paint.Align.CENTER
     }
 
-    // Measure text bounds to create a bitmap of the correct size
-    val bounds = android.graphics.Rect()
-    paint.getTextBounds(unicodeEmoji, 0, unicodeEmoji.length, bounds)
+    // Create a bitmap and draw the emoji onto it
+    val baseline = -paint.ascent() // ascent() is negative
+    val width = (paint.measureText(unicodeEmoji) + 0.5f).toInt()
+    val height = (baseline + paint.descent() + 0.5f).toInt()
+    val image = createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(image)
+    canvas.drawText(unicodeEmoji, width / 2f, baseline, paint)
 
-    // Create a bitmap and canvas
-    val bitmap = createBitmap(bounds.width() + 20, bounds.height() + 20) // Add some padding
-    val canvas = Canvas(bitmap)
-
-    // Draw the emoji onto the canvas
-    canvas.drawText(
-        unicodeEmoji,
-        canvas.width / 2f,
-        canvas.height / 2f - bounds.exactCenterY(),
-        paint
-    )
-    return BitmapDescriptorFactory.fromBitmap(bitmap)
+    return BitmapDescriptorFactory.fromBitmap(image)
 }
 
-@Suppress("LongMethod")
-@Composable
-fun LayerManagementDialog(
-    mapLayers: List<MapLayerItem>,
-    onDismissRequest: () -> Unit,
-    onAddLayerClicked: () -> Unit,
-    onToggleVisibility: (String) -> Unit,
-    onRemoveLayer: (String) -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismissRequest,
-        title = { Text(stringResource(R.string.map_layers_title)) },
-        text = {
-            if (mapLayers.isEmpty()) {
-                Text(stringResource(R.string.no_map_layers_loaded))
-            } else {
-                LazyColumn {
-                    items(mapLayers, key = { it.id }) { layer ->
-                        ListItem(
-                            headlineContent = {
-                                Text(
-                                    layer.name
-                                )
-                            },
-                            supportingContent = {
-                                Text(
-                                    layer.uri?.lastPathSegment ?: "Unknown source", maxLines = 1
-                                )
-                            },
-                            leadingContent = {
-                                Icon(
-                                    imageVector = if (layer.isVisible) {
-                                        Icons.Filled.Visibility
-                                    } else {
-                                        Icons.Filled.VisibilityOff
-                                    },
-                                    contentDescription = if (layer.isVisible) "Visible" else "Hidden",
-                                    modifier = Modifier.clickable { onToggleVisibility(layer.id) }
-                                )
-                            },
-                            trailingContent = {
-                                IconButton(onClick = { onRemoveLayer(layer.id) }) {
-                                    Icon(
-                                        Icons.Filled.Delete,
-                                        contentDescription = "Remove Layer"
-                                    )
-                                }
-                            },
-                            colors = ListItemDefaults.colors(
-                                containerColor = if (layer.isVisible) {
-                                    Color.Transparent
-                                } else {
-                                    Color.Gray.copy(
-                                        alpha = 0.2f
-                                    )
-                                }
-                            )
-                        )
-                        HorizontalDivider()
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onAddLayerClicked) {
-                Text(stringResource(R.string.add_layer_button))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismissRequest) {
-                Text(stringResource(R.string.close))
-            }
-        }
-    )
-}
-
-@Suppress("NestedBlockDepth")
-fun Uri.getFileName(context: android.content.Context): String? {
-    var result: String? = null
-    if (scheme == "content") {
-        val cursor = context.contentResolver.query(this, null, null, null, null)
-        try {
-            if (cursor != null && cursor.moveToFirst()) {
+// Extension function to get file name from URI
+fun Uri.getFileName(context: android.content.Context): String {
+    var name = this.lastPathSegment ?: "layer_${System.currentTimeMillis()}"
+    if (this.scheme == "content") {
+        context.contentResolver.query(this, null, null, null, null)?.use { cursor ->
+            if (cursor.moveToFirst()) {
                 val displayNameIndex =
                     cursor.getColumnIndex(android.provider.OpenableColumns.DISPLAY_NAME)
                 if (displayNameIndex != -1) {
-                    result = cursor.getString(displayNameIndex)
+                    name = cursor.getString(displayNameIndex)
                 }
             }
-        } finally {
-            cursor?.close()
         }
     }
-    if (result == null) {
-        result = path
-        val cut = result?.lastIndexOf('/')
-        if (cut != -1 && cut != null) {
-            result = result.substring(cut + 1)
-        }
+    return name
+}
+
+data class NodeClusterItem(
+    val node: Node,
+    val nodePosition: LatLng,
+    val nodeTitle: String,
+    val nodeSnippet: String,
+) : ClusterItem {
+    override fun getPosition(): LatLng = nodePosition
+    override fun getTitle(): String = nodeTitle
+    override fun getSnippet(): String = nodeSnippet
+    override fun getZIndex(): Float? = null // Default behavior
+
+    fun getPrecisionMeters(): Double? {
+        val precisionMap = mapOf(
+            10 to 23345.484932,
+            11 to 11672.7369,
+            12 to 5836.36288,
+            13 to 2918.175876,
+            14 to 1459.0823719999053,
+            15 to 729.53562,
+            16 to 364.7622,
+            17 to 182.375556,
+            18 to 91.182212,
+            19 to 45.58554
+        )
+        return precisionMap[this.node.position.precisionBits]
     }
-    return result
 }

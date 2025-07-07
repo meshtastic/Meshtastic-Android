@@ -737,5 +737,8 @@
     <string name="map_layers_title">Map Layers</string>
     <string name="no_map_layers_loaded">No custom layers loaded.</string>
     <string name="add_layer_button">Add Layer</string>
-    <string name="kml_feature_info">KML Feature Information</string>
+    <string name="hide_layer">Hide Layer</string>
+    <string name="show_layer">Show Layer</string>
+    <string name="remove_layer">Remove Layer</string>
+    <string name="add_layer">Add Layer</string>
 </resources>
