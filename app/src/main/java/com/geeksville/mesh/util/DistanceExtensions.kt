@@ -91,7 +91,18 @@ fun Int.toDistanceString(system: DisplayUnits): String {
 }
 
 @Suppress("MagicNumber")
-fun Float.toSpeedString() = when (DistanceUnit.getFromLocale()) {
-    DisplayUnits.METRIC -> "%.0f km/h".format(this * 3.6)
-    else -> "%.0f mph".format(this * 2.23694f)
+fun Float.toSpeedString(system: DisplayUnits): String =
+    if (system == DisplayUnits.METRIC) {
+       "%.0f km/h".format(this * 3.6)
+    } else {
+        "%.0f mph".format(this * 2.23694f)
+    }
+
+@Suppress("MagicNumber")
+fun Float.toSmallDistanceString(system: DisplayUnits): String {
+    return if (system == DisplayUnits.IMPERIAL) {
+        "%.2f in".format(this / 25.4f)
+    } else {
+        "%.0f mm".format(this)
+    }
 }
