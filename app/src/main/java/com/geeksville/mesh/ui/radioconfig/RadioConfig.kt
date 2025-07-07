@@ -255,7 +255,7 @@ private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Un
                 ) {
                     Icon(
                         imageVector = Icons.TwoTone.Warning,
-                        contentDescription = "warning",
+                        contentDescription = stringResource(id = R.string.warning),
                         modifier = Modifier.padding(end = 8.dp)
                     )
                     Text(
@@ -263,7 +263,7 @@ private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Un
                     )
                     Icon(
                         imageVector = Icons.TwoTone.Warning,
-                        contentDescription = "warning",
+                        contentDescription = stringResource(id = R.string.warning),
                         modifier = Modifier.padding(start = 8.dp)
                     )
                 }

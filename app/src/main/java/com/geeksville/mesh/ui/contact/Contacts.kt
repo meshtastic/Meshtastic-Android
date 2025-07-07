@@ -305,7 +305,7 @@ fun SelectionToolbar(
         title = { Text(text = "$selectedCount") },
         navigationIcon = {
             IconButton(onClick = onCloseSelection) {
-                Icon(Icons.Default.Close, contentDescription = "Close selection")
+                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close_selection))
             }
         },
         actions = {
@@ -324,10 +324,10 @@ fun SelectionToolbar(
                 )
             }
             IconButton(onClick = onDeleteSelected) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete selected")
+                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_selection))
             }
             IconButton(onClick = onSelectAll) {
-                Icon(Icons.Default.SelectAll, contentDescription = "Select all")
+                Icon(Icons.Default.SelectAll, contentDescription = stringResource(R.string.select_all))
             }
         }
     )

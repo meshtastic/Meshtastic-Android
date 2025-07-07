@@ -506,7 +506,7 @@ private fun MainMenuActions(
     IconButton(onClick = { showMenu = true }) {
         Icon(
             imageVector = Icons.Default.MoreVert,
-            contentDescription = "Overflow menu",
+            contentDescription = stringResource(R.string.overflow_menu),
         )
     }
 

@@ -127,8 +127,8 @@ internal fun MessageScreen(
         derivedStateOf {
             channelIndex?.let {
                 val channel = channels.getChannel(it)
-                channel?.name ?: "Unknown Channel"
-            } ?: "Unknown Channel"
+                channel?.name ?: stringResource(id = R.string.unknown_channel)
+            } ?: stringResource(id = R.string.unknown_channel)
         }
     }
 

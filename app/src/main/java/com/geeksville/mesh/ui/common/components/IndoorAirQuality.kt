@@ -129,7 +129,7 @@ fun IndoorAirQuality(iaq: Int, displayMode: IaqDisplayMode = IaqDisplayMode.Pill
                         )
                         Icon(
                             imageVector = if (iaq < 100) Icons.Default.ThumbUp else Icons.Filled.Warning,
-                            contentDescription = "AQI Icon",
+                            contentDescription = stringResource(R.string.air_quality_icon),
                             tint = Color.White
                         )
                     }
