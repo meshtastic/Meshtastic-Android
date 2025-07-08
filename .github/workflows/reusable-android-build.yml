@@ -38,14 +38,14 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', 'gradle.properties', 'settings.gradle*') }}
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts', '**/gradle.properties', '**/libs.versions.toml') }}
           restore-keys: |
             gradle-${{ runner.os }}-
       - name: Cache Android build cache
         uses: actions/cache@v4
         with:
           path: ~/.android/build-cache
-          key: android-build-cache-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', 'gradle.properties', 'settings.gradle*') }}
+          key: android-build-cache-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts', '**/gradle.properties', '**/libs.versions.toml') }}
           restore-keys: |
             android-build-cache-${{ runner.os }}-
       - name: Setup Gradle
@@ -67,8 +67,8 @@ jobs:
           echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
 
       - name: Run Detekt, Build, Lint, and Local Tests
-        run: ./gradlew detekt lintFdroidDebug lintGoogleDebug assembleDebug testFdroidDebug testGoogleDebug --configuration-cache --scan
-        env: 
+        run: ./gradlew :app:detekt :app:lintFdroidDebug :app:lintGoogleDebug :app:assembleDebug :app:testFdroidDebug :app:testGoogleDebug --configuration-cache --scan
+        env:
           VERSION_CODE: ${{ env.VERSION_CODE }}
       - name: Upload F-Droid debug artifact
         if: ${{ inputs.upload_artifacts }}
