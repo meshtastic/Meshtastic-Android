@@ -50,6 +50,7 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch }}
           submodules: 'recursive'
+          fetch-depth: 0
 
       - name: Cache Gradle packages
         uses: actions/cache@v4
@@ -82,8 +83,20 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+
+      - name: Calculate Version Code with Git Commit Count and Offset
+        id: calculate_version_code
+        run: |
+          GIT_COMMIT_COUNT=$(git rev-list --count HEAD)
+          OFFSET=30630 # to ensure versionCode is above 30630
+          VERSION_CODE=$((GIT_COMMIT_COUNT + OFFSET))
+          echo "Calculated versionCode: $VERSION_CODE (from $GIT_COMMIT_COUNT commits + $OFFSET offset)"
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+
       - name: Build F-Droid release
         run: ./gradlew assembleFdroidRelease
+        env:
+          VERSION_CODE: ${{ env.VERSION_CODE }}
 
       - name: Upload F-Droid APK artifact (for release job)
         uses: actions/upload-artifact@v4
@@ -108,6 +121,7 @@ jobs:
         with:
           ref: ${{ github.event.inputs.branch }}
           submodules: 'recursive'
+          fetch-depth: 0
 
       - name: Cache Gradle packages
         uses: actions/cache@v4
@@ -143,8 +157,19 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Calculate Version Code with Git Commit Count and Offset
+        id: calculate_version_code
+        run: |
+          GIT_COMMIT_COUNT=$(git rev-list --count HEAD)
+          OFFSET=30630 # to ensure versionCode is above 30630
+          VERSION_CODE=$((GIT_COMMIT_COUNT + OFFSET))
+          echo "Calculated versionCode: $VERSION_CODE (from $GIT_COMMIT_COUNT commits + $OFFSET offset)"
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+
       - name: Build Play Store release
         run: ./gradlew bundleGoogleRelease assembleGoogleRelease
+        env:
+          VERSION_CODE: ${{ env.VERSION_CODE }}
 
       - name: Upload Play Store AAB artifact (for release job)
         uses: actions/upload-artifact@v4
