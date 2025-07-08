@@ -52,8 +52,8 @@ android {
         applicationId = Configs.APPLICATION_ID
         minSdk = Configs.MIN_SDK_VERSION
         targetSdk = Configs.TARGET_SDK
-        versionCode =
-            Configs.VERSION_CODE // format is Mmmss (where M is 1+the numeric major number)
+        versionCode = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull()
+            ?: 1
         versionName = Configs.VERSION_NAME
         testInstrumentationRunner = "com.geeksville.mesh.TestRunner"
         buildConfigField("String", "MIN_FW_VERSION", "\"${Configs.MIN_FW_VERSION}\"")
