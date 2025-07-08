@@ -79,6 +79,9 @@ jobs:
         with:
           java-version: '21'
           distribution: 'jetbrains'
+          cache: 'gradle'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 
       - name: Calculate Version Code with Git Commit Count and Offset
@@ -150,6 +153,9 @@ jobs:
         with:
           java-version: '21'
           distribution: 'jetbrains'
+          cache: 'gradle'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Calculate Version Code with Git Commit Count and Offset
         id: calculate_version_code
