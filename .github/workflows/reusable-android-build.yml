@@ -20,6 +20,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           submodules: 'recursive'
       - name: Validate Gradle wrapper
         uses: gradle/actions/wrapper-validation@v4
@@ -52,6 +53,16 @@ jobs:
           build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
           build-scan-terms-of-use-agree: 'yes'
           add-job-summary: always
+
+      - name: Calculate Version Code with Git Commit Count and Offset
+        id: calculate_version_code
+        run: |
+          GIT_COMMIT_COUNT=$(git rev-list --count HEAD)
+          OFFSET=30630 # to ensure versionCode is above 30630 (our last manual versionCode)
+          VERSION_CODE=$((GIT_COMMIT_COUNT + OFFSET))
+          echo "Calculated versionCode: $VERSION_CODE (from $GIT_COMMIT_COUNT commits + $OFFSET offset)"
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+
       - name: Run Detekt, Build, Lint, and Local Tests
         run: ./gradlew detekt lintFdroidDebug lintGoogleDebug assembleDebug testFdroidDebug testGoogleDebug --configuration-cache --scan
       - name: Upload F-Droid debug artifact
@@ -61,6 +72,8 @@ jobs:
           name: fdroidDebug
           path: app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
           retention-days: 14
+          env:
+            VERSION_CODE: ${{ env.VERSION_CODE }}
       - name: Upload Google debug artifact
         if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@v4

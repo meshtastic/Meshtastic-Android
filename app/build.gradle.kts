@@ -52,7 +52,7 @@ android {
         applicationId = Configs.APPLICATION_ID
         minSdk = Configs.MIN_SDK_VERSION
         targetSdk = Configs.TARGET_SDK
-        versionCode = System.getenv("GITHUB_RUN_NUMBER")?.toIntOrNull()
+        versionCode = System.getenv("VERSION_CODE")?.toIntOrNull()
             ?: 1
         versionName = Configs.VERSION_NAME
         testInstrumentationRunner = "com.geeksville.mesh.TestRunner"
