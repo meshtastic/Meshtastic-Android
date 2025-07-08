@@ -143,6 +143,9 @@ data class NodeEntity(
 
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
     var paxcounter: PaxcountProtos.Paxcount = PaxcountProtos.Paxcount.getDefaultInstance(),
+
+    @ColumnInfo(name = "public_key")
+    var publicKey: ByteString? = null,
 ) {
     val deviceMetrics: TelemetryProtos.DeviceMetrics
         get() = deviceTelemetry.deviceMetrics
@@ -152,7 +155,6 @@ data class NodeEntity(
 
     val isUnknownUser get() = user.hwModel == MeshProtos.HardwareModel.UNSET
     val hasPKC get() = !user.publicKey.isEmpty
-    val errorByteString: ByteString get() = ERROR_BYTE_STRING
 
     fun setPosition(p: MeshProtos.Position, defaultTime: Int = currentTime()) {
         position = p.copy { time = if (p.time != 0) p.time else defaultTime }
