@@ -78,6 +78,9 @@ jobs:
         with:
           java-version: '21'
           distribution: 'jetbrains'
+          cache: 'gradle'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build F-Droid release
         run: ./gradlew assembleFdroidRelease
@@ -136,6 +139,9 @@ jobs:
         with:
           java-version: '21'
           distribution: 'jetbrains'
+          cache: 'gradle'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Build Play Store release
         run: ./gradlew bundleGoogleRelease assembleGoogleRelease
