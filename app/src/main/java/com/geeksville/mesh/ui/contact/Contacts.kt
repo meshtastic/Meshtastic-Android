@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.model.UIViewModel
@@ -136,12 +137,14 @@ fun ContactsScreen(
             }
         }
     ) { paddingValues ->
+        val channels by uiViewModel.channels.collectAsStateWithLifecycle()
         ContactListView(
             contacts = contacts,
             selectedList = selectedContactKeys,
             onClick = onContactClick,
             onLongClick = onContactLongClick,
-            contentPadding = paddingValues
+            contentPadding = paddingValues,
+            channels = channels
         )
     }
     DeleteConfirmationDialog(
@@ -302,7 +305,7 @@ fun SelectionToolbar(
         title = { Text(text = "$selectedCount") },
         navigationIcon = {
             IconButton(onClick = onCloseSelection) {
-                Icon(Icons.Default.Close, contentDescription = "Close selection")
+                Icon(Icons.Default.Close, contentDescription = stringResource(R.string.close_selection))
             }
         },
         actions = {
@@ -321,10 +324,10 @@ fun SelectionToolbar(
                 )
             }
             IconButton(onClick = onDeleteSelected) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete selected")
+                Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.delete_selection))
             }
             IconButton(onClick = onSelectAll) {
-                Icon(Icons.Default.SelectAll, contentDescription = "Select all")
+                Icon(Icons.Default.SelectAll, contentDescription = stringResource(R.string.select_all))
             }
         }
     )
@@ -336,7 +339,8 @@ fun ContactListView(
     selectedList: List<String>,
     onClick: (Contact) -> Unit,
     onLongClick: (Contact) -> Unit,
-    contentPadding: PaddingValues
+    contentPadding: PaddingValues,
+    channels: AppOnlyProtos.ChannelSet? = null
 ) {
     val haptics = LocalHapticFeedback.current
     LazyColumn(
@@ -355,6 +359,7 @@ fun ContactListView(
                     onLongClick(contact)
                     haptics.performHapticFeedback(HapticFeedbackType.LongPress)
                 },
+                channels = channels
             )
         }
     }

@@ -143,6 +143,12 @@
     <string name="debug_filters">Filter</string>
     <string name="debug_active_filters">Aktive Filter</string>
     <string name="debug_default_search">In Protokollen suchen</string>
+    <string name="debug_search_next">Nächste Übereinstimmung</string>
+    <string name="debug_search_prev">Vorherige Übereinstimmung</string>
+    <string name="debug_search_clear">Neue Suche</string>
+    <string name="debug_filter_add">Filter hinzufügen</string>
+    <string name="debug_filter_included">Filter enthält</string>
+    <string name="debug_filter_clear">Alle Filter löschen</string>
     <string name="debug_clear">Protokolle löschen</string>
     <string name="match_any">Irgendwas finden | Alle</string>
     <string name="match_all">Alle finden | Irgendwas</string>
@@ -195,6 +201,8 @@
     <string name="delete_for_everyone">Für jeden löschen</string>
     <string name="delete_for_me">Für mich löschen</string>
     <string name="select_all">Alle auswählen</string>
+    <string name="close_selection">Auswahl schließen</string>
+    <string name="delete_selection">Auswahl löschen</string>
     <string name="modem_config_slow_long">Hohe Reichweite / Langsam</string>
     <string name="map_style_selection">Stil-Auswahl</string>
     <string name="map_download_region">Region herunterladen</string>
@@ -536,7 +544,7 @@
     <string name="position_flags">Standort Optionen</string>
     <string name="power_config">Power Konfiguration</string>
     <string name="enable_power_saving_mode">Energiesparmodus aktivieren</string>
-    <string name="shutdown_on_battery_delay_seconds">Verzögerung Herunterfahren bei Akkubetrieb</string>
+    <string name="shutdown_on_battery_delay_seconds">Verzögerung Herunterfahren bei Akkubetrieb (Sekunden)</string>
     <string name="adc_multiplier_override_ratio">ADC Multiplikator Überschreibungsverhältnis</string>
     <string name="wait_for_bluetooth_duration_seconds">Warte auf Bluetooth (Sekunden)</string>
     <string name="super_deep_sleep_duration_seconds">Supertiefeschlaf (Sekunden)</string>
@@ -580,6 +588,7 @@
     <string name="environment_metrics_use_fahrenheit">Umweltdaten in Fahrenheit</string>
     <string name="air_quality_metrics_module_enabled">Modul Luftqualität aktiviert</string>
     <string name="air_quality_metrics_update_interval_seconds">Aktualisierungsintervall für Luftqualität (Sekunden)</string>
+    <string name="air_quality_icon">Symbol für Luftqualität</string>
     <string name="power_metrics_module_enabled">Modul Energiedaten aktiviert</string>
     <string name="power_metrics_update_interval_seconds">Aktualisierungsintervall für Energiedaten (Sekunden)</string>
     <string name="power_metrics_on_screen_enabled">Energiedatenanzeige aktiviert</string>
@@ -687,4 +696,12 @@
     <string name="app_intro_next_button">Weiter</string>
     <string name="app_intro_done_button">Fertig</string>
     <string name="app_intro_skip_button">Überspringen</string>
+    <string name="security_icon_description">Sicherheitsstatus</string>
+    <string name="security_icon_secure"> - Sicher</string>
+    <string name="security_icon_warning"> - Warnung, unsicherer MQTT</string>
+    <string name="security_icon_insecure"> - Warnung, Schlüssel mit niedriger Entropie</string>
+    <string name="security_icon_insecure_precise"> - Warnung, unsicherer Standort aktiviert</string>
+    <string name="unknown_channel">Unbekannter Kanal</string>
+    <string name="warning">Warnung</string>
+    <string name="overflow_menu">Überlaufmenü</string>
 </resources>

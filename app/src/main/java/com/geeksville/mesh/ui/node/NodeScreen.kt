@@ -30,6 +30,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,6 +79,10 @@ fun NodeScreen(
         )
     }
 
+    val isScrollInProgress by remember {
+        derivedStateOf { listState.isScrollInProgress }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -88,14 +93,14 @@ fun NodeScreen(
         ) {
             stickyHeader {
                 val animatedAlpha by animateFloatAsState(
-                    targetValue = if (!listState.isScrollInProgress) 1.0f else 0f,
+                    targetValue = if (!isScrollInProgress) 1.0f else 0f,
                     label = "alpha"
                 )
                 NodeFilterTextField(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceDim.copy(alpha = animatedAlpha))
                         .graphicsLayer(alpha = animatedAlpha)
+                        .background(MaterialTheme.colorScheme.surfaceDim)
                         .padding(8.dp),
                     filterText = state.filter,
                     onTextChange = model::setNodeFilterText,
@@ -151,7 +156,7 @@ fun NodeScreen(
 
         AnimatedVisibility(
             modifier = Modifier.align(Alignment.BottomEnd),
-            visible = !listState.isScrollInProgress &&
+            visible = !isScrollInProgress &&
                     connectionState.isConnected() &&
                     shareCapable
         ) {

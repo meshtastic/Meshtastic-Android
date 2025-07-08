@@ -167,6 +167,12 @@
     <string name="debug_filters">Filters</string>
     <string name="debug_active_filters">Active filters</string>
     <string name="debug_default_search">Search in logs…</string>
+    <string name="debug_search_next">Next match</string>
+    <string name="debug_search_prev">Previous match</string>
+    <string name="debug_search_clear">Clear search</string>
+    <string name="debug_filter_add">Add filter</string>
+    <string name="debug_filter_included">Filter included</string>
+    <string name="debug_filter_clear">Clear all filters</string>
     <string name="debug_clear">Clear Logs</string>
     <string name="match_any">Match Any | All</string>
     <string name="match_all">Match All | Any</string>
@@ -219,6 +225,8 @@
     <string name="delete_for_everyone">Delete for everyone</string>
     <string name="delete_for_me">Delete for me</string>
     <string name="select_all">Select all</string>
+    <string name="close_selection">Close selection</string>
+    <string name="delete_selection">Delete selected</string>
     <string name="modem_config_slow_long">Long Range / Slow</string>
     <string name="map_style_selection">Style Selection</string>
     <string name="map_download_region">Download Region</string>
@@ -606,6 +614,7 @@
     <string name="environment_metrics_use_fahrenheit">Environment metrics use Fahrenheit</string>
     <string name="air_quality_metrics_module_enabled">Air quality metrics module enabled</string>
     <string name="air_quality_metrics_update_interval_seconds">Air quality metrics update interval (seconds)</string>
+    <string name="air_quality_icon">Air quality icon</string>
     <string name="power_metrics_module_enabled">Power metrics module enabled</string>
     <string name="power_metrics_update_interval_seconds">Power metrics update interval (seconds)</string>
     <string name="power_metrics_on_screen_enabled">Power metrics on-screen enabled</string>
@@ -713,4 +722,12 @@
     <string name="app_intro_next_button">Next</string>
     <string name="app_intro_done_button">Done</string>
     <string name="app_intro_skip_button">Skip</string>
+    <string name="security_icon_description">Security Status</string>
+    <string name="security_icon_secure"> - Secure</string>
+    <string name="security_icon_warning"> - WARN, insecure MQTT</string>
+    <string name="security_icon_insecure"> - WARN, low entropy key</string>
+    <string name="security_icon_insecure_precise"> - WARNING, insecure location enabled</string>
+    <string name="unknown_channel">Unknown Channel</string>
+    <string name="warning">Warning</string>
+    <string name="overflow_menu">Overflow menu</string>
 </resources>

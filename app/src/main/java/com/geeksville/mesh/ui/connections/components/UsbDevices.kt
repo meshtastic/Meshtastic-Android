@@ -33,9 +33,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.BTScanModel
+import com.geeksville.mesh.service.MeshService
 
 @Composable
 fun UsbDevices(
+    connectionState: MeshService.ConnectionState,
     usbDevices: List<BTScanModel.DeviceListEntry>,
     selectedDevice: String,
     scanModel: BTScanModel
@@ -45,13 +47,12 @@ fun UsbDevices(
         style = MaterialTheme.typography.titleLarge,
         modifier = Modifier.padding(vertical = 8.dp)
     )
-    if (usbDevices.isNotEmpty()) {
-        usbDevices.forEach { device ->
-            DeviceListItem(device, device.fullAddress == selectedDevice) {
-                scanModel.onSelected(device)
-            }
+    usbDevices.forEach { device ->
+        DeviceListItem(connectionState, device, device.fullAddress == selectedDevice) {
+            scanModel.onSelected(device)
         }
-    } else {
+    }
+    if (usbDevices.filterNot { it.isDisconnect || it.isMock }.isEmpty()) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()

@@ -90,11 +90,9 @@ data class Node(
         else -> latLongToMeter(latitude, longitude, o.latitude, o.longitude).toInt()
     }
 
-    // @return a nice human readable string for the distance, or null for unknown
-    fun distanceStr(o: Node, displayUnits: Int = 0): String? = distance(o)?.let { dist ->
-        val system = DisplayConfig.DisplayUnits.forNumber(displayUnits)
-        return if (dist > 0) dist.toDistanceString(system) else null
-    }
+    // @return formatted distance string to another node, using the given display units
+    fun distanceStr(o: Node, displayUnits: DisplayConfig.DisplayUnits): String? =
+        distance(o)?.toDistanceString(displayUnits)
 
     // @return bearing to the other position in degrees
     fun bearing(o: Node?): Int? = when {
