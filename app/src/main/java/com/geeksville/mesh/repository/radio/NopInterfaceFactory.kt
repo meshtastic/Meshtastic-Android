@@ -23,4 +23,6 @@ import dagger.assisted.AssistedFactory
  * Factory for creating `NopInterface` instances.
  */
 @AssistedFactory
-interface NopInterfaceFactory : InterfaceFactorySpi<NopInterface>
+interface NopInterfaceFactory {
+    fun create(rest: String): NopInterface
+}
