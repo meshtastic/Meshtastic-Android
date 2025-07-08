@@ -65,6 +65,8 @@ jobs:
 
       - name: Run Detekt, Build, Lint, and Local Tests
         run: ./gradlew detekt lintFdroidDebug lintGoogleDebug assembleDebug testFdroidDebug testGoogleDebug --configuration-cache --scan
+        env: 
+          VERSION_CODE: ${{ env.VERSION_CODE }}
       - name: Upload F-Droid debug artifact
         if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@v4
@@ -72,8 +74,6 @@ jobs:
           name: fdroidDebug
           path: app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
           retention-days: 14
-          env:
-            VERSION_CODE: ${{ env.VERSION_CODE }}
       - name: Upload Google debug artifact
         if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@v4

@@ -92,9 +92,8 @@ jobs:
 
       - name: Build F-Droid release
         run: ./gradlew assembleFdroidRelease
-        with:
-          env:
-            VERSION_CODE: ${{ env.VERSION_CODE }}
+        env:
+          VERSION_CODE: ${{ env.VERSION_CODE }}
 
       - name: Upload F-Droid APK artifact (for release job)
         uses: actions/upload-artifact@v4
@@ -163,9 +162,8 @@ jobs:
 
       - name: Build Play Store release
         run: ./gradlew bundleGoogleRelease assembleGoogleRelease
-        with:
-          env:
-            VERSION_CODE: ${{ env.VERSION_CODE }}
+        env:
+          VERSION_CODE: ${{ env.VERSION_CODE }}
 
       - name: Upload Play Store AAB artifact (for release job)
         uses: actions/upload-artifact@v4
