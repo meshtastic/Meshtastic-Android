@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.ui.common.theme.InfantryBlue
 import com.geeksville.mesh.ui.common.theme.Orange
+import com.geeksville.mesh.util.UnitConversions
 
 enum class Environment(val color: Color) {
     TEMPERATURE(Color.Red) {
@@ -75,7 +76,7 @@ data class EnvironmentMetricsState(
      * @return [EnvironmentGraphingData]
      */
     @Suppress("LongMethod")
-    fun environmentMetricsFiltered(timeFrame: TimeFrame): EnvironmentGraphingData {
+    fun environmentMetricsFiltered(timeFrame: TimeFrame, useFahrenheit: Boolean = false): EnvironmentGraphingData {
         val oldestTime = timeFrame.calculateOldestTime()
         val telemetries = environmentMetrics.filter { it.time >= oldestTime }
         val shouldPlot = BooleanArray(Environment.entries.size) { false }
@@ -90,9 +91,15 @@ data class EnvironmentMetricsState(
             telemetries.minBy { it.environmentMetrics.temperature },
             telemetries.maxBy { it.environmentMetrics.temperature }
         )
+        var minTempValue = minTemp.environmentMetrics.temperature
+        var maxTempValue = maxTemp.environmentMetrics.temperature
+        if (useFahrenheit) {
+            minTempValue = UnitConversions.celsiusToFahrenheit(minTempValue)
+            maxTempValue = UnitConversions.celsiusToFahrenheit(maxTempValue)
+        }
         if (minTemp.environmentMetrics.temperature != 0f || maxTemp.environmentMetrics.temperature != 0f) {
-            minValues.add(minTemp.environmentMetrics.temperature)
-            maxValues.add(maxTemp.environmentMetrics.temperature)
+            minValues.add(minTempValue)
+            maxValues.add(maxTempValue)
             shouldPlot[Environment.TEMPERATURE.ordinal] = true
         }
 
