@@ -35,6 +35,7 @@ import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.util.onlineTimeThreshold
 import com.google.protobuf.ByteString
+import com.google.protobuf.kotlin.isNotEmpty
 
 data class NodeWithRelations(
     @Embedded val node: NodeEntity,
@@ -154,7 +155,7 @@ data class NodeEntity(
         get() = environmentTelemetry.environmentMetrics
 
     val isUnknownUser get() = user.hwModel == MeshProtos.HardwareModel.UNSET
-    val hasPKC get() = !user.publicKey.isEmpty
+    val hasPKC get() = (publicKey ?: user.publicKey).isNotEmpty()
 
     fun setPosition(p: MeshProtos.Position, defaultTime: Int = currentTime()) {
         position = p.copy { time = if (p.time != 0) p.time else defaultTime }
