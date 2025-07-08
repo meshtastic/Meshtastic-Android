@@ -97,6 +97,7 @@
     <string name="url_for_join">URL pour rejoindre un maillage Meshtastic</string>
     <string name="accept">Accepter</string>
     <string name="cancel">Annuler</string>
+    <string name="clear_changes">Annuler modifications</string>
     <string name="change_channel">Changer de canal</string>
     <string name="are_you_sure_channel">Êtes-vous sûr de vouloir modifier le canal ? Toutes les communications avec les autres nœuds s\'arrêteront jusqu\'à ce que vous partagiez les nouveaux paramètres du canal.</string>
     <string name="new_channel_rcvd">Réception de l\'URL d\'un nouveau cana</string>
@@ -704,4 +705,5 @@
     <string name="unknown_channel">Canal inconnu</string>
     <string name="warning">Attention</string>
     <string name="overflow_menu">Menu supplémentaire</string>
+    <string name="uv_lux">UV Lux</string>
 </resources>
