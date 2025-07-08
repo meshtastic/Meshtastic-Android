@@ -741,4 +741,5 @@
     <string name="show_layer">Show Layer</string>
     <string name="remove_layer">Remove Layer</string>
     <string name="add_layer">Add Layer</string>
+    <string name="nodes_at_this_location">Nodes at this location</string>
 </resources>

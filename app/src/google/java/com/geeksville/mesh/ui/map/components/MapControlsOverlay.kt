@@ -31,9 +31,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.map.MapFilterDropdown
 import com.geeksville.mesh.ui.map.MapTypeDropdown
+import com.geeksville.mesh.ui.map.MapViewModel
 import com.google.maps.android.compose.MapType
 
 @Composable
@@ -42,8 +42,7 @@ fun MapControlsOverlay(
     mapFilterMenuExpanded: Boolean,
     onMapFilterMenuDismissRequest: () -> Unit,
     onToggleMapFilterMenu: () -> Unit,
-    mapFilterState: UIViewModel.MapFilterState,
-    uiViewModel: UIViewModel, // For MapFilterDropdown
+    mapViewModel: MapViewModel, // For MapFilterDropdown
     mapTypeMenuExpanded: Boolean,
     onMapTypeMenuDismissRequest: () -> Unit,
     onToggleMapTypeMenu: () -> Unit,
@@ -65,8 +64,7 @@ fun MapControlsOverlay(
             MapFilterDropdown(
                 expanded = mapFilterMenuExpanded,
                 onDismissRequest = onMapFilterMenuDismissRequest,
-                mapFilterState = mapFilterState,
-                uiViewModel = uiViewModel
+                mapViewModel = mapViewModel,
             )
         }
 

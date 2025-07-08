@@ -17,9 +17,12 @@
 
 package com.geeksville.mesh.ui.map.components
 
+import android.widget.Toast
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.R
+import com.geeksville.mesh.ui.map.MapViewModel
 import com.geeksville.mesh.ui.node.DegD
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.LatLng
@@ -29,16 +32,15 @@ import com.google.maps.android.compose.rememberUpdatedMarkerState
 @Composable
 fun WaypointMarkers(
     displayableWaypoints: List<MeshProtos.Waypoint>,
-    mapFilterState: UIViewModel.MapFilterState, // Assuming MapFilterState is accessible
+    mapFilterState: MapViewModel.MapFilterState,
     myNodeNum: Int,
     isConnected: Boolean,
     unicodeEmojiToBitmapProvider: (Int) -> BitmapDescriptor,
     onEditWaypointRequest: (MeshProtos.Waypoint) -> Unit
 ) {
+    val context = LocalContext.current
     if (mapFilterState.showWaypoints) {
         displayableWaypoints.forEach { waypoint ->
-            // Use rememberMarkerState instead of rememberUpdatedMarkerState if the position doesn't change frequently after initial display
-            // For dynamic updates to position, ensure the key for rememberMarkerState changes or use rememberUpdatedMarkerState
             val markerState = rememberUpdatedMarkerState(
                 position = LatLng(
                     waypoint.latitudeI * DegD,
@@ -49,15 +51,14 @@ fun WaypointMarkers(
             Marker(
                 state = markerState,
                 icon = if (waypoint.icon == 0) {
-                    unicodeEmojiToBitmapProvider(0x1F4CD) // Default icon (Round Pushpin)
+                    unicodeEmojiToBitmapProvider(PUSHPIN) // Default icon (Round Pushpin)
                 } else {
                     unicodeEmojiToBitmapProvider(waypoint.icon)
                 },
                 title = waypoint.name,
                 snippet = waypoint.description,
-                visible = true, // Visibility is controlled by the condition above
+                visible = true,
                 onInfoWindowClick = {
-                    // Check if editable
                     if (
                         waypoint.lockedTo == 0 ||
                         waypoint.lockedTo == myNodeNum ||
@@ -65,8 +66,11 @@ fun WaypointMarkers(
                     ) {
                         onEditWaypointRequest(waypoint)
                     } else {
-                        // Optionally show a toast that it's locked by someone else
-                        // Or simply do nothing to prevent editing.
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.locked),
+                            Toast.LENGTH_SHORT
+                        ).show()
                     }
                 }
             )
@@ -74,3 +78,4 @@ fun WaypointMarkers(
     }
 }
 
+private const val PUSHPIN = 0x1F4CD // Unicode for Round Pushpin

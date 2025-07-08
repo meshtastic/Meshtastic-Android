@@ -19,23 +19,26 @@ package com.geeksville.mesh.ui.map.components
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
-import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.ui.map.MapViewModel
 import com.geeksville.mesh.ui.map.NodeClusterItem
 import com.geeksville.mesh.ui.node.components.NodeChip
-import com.google.maps.android.clustering.view.DefaultClusterRenderer
+import com.google.maps.android.clustering.Cluster
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.clustering.Clustering
 
 @OptIn(MapsComposeExperimentalApi::class)
+@Suppress("NestedBlockDepth")
 @Composable
 fun NodeClusterMarkers(
     nodeClusterItems: List<NodeClusterItem>,
-    mapFilterState: UIViewModel.MapFilterState,
-    navigateToNodeDetails: (Int) -> Unit
+    mapFilterState: MapViewModel.MapFilterState,
+    navigateToNodeDetails: (Int) -> Unit,
+    onClusterClick: (Cluster<NodeClusterItem>) -> Boolean,
 ) {
     Clustering(
         items = nodeClusterItems,
+        onClusterClick = onClusterClick,
         onClusterItemInfoWindowClick = { item ->
             navigateToNodeDetails(item.node.num)
             false
@@ -48,9 +51,6 @@ fun NodeClusterMarkers(
                 isConnected = false
             ) { }
         },
-        onClusterManager = { clusterManager ->
-            (clusterManager.renderer as DefaultClusterRenderer).minClusterSize = 7
-        }
     )
 
     if (mapFilterState.showPrecisionCircle) {
@@ -68,5 +68,4 @@ fun NodeClusterMarkers(
             }
         }
     }
-
 }

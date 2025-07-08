@@ -18,18 +18,26 @@
 package com.geeksville.mesh.ui.map
 
 import android.app.Application
+import android.content.SharedPreferences
 import android.net.Uri
 import android.util.Log
+import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.android.BuildUtils.debug
+import com.geeksville.mesh.database.NodeRepository
+import com.geeksville.mesh.model.Node
 import com.google.android.gms.maps.GoogleMap
 import com.google.maps.android.data.kml.KmlLayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -40,8 +48,58 @@ import java.io.InputStream
 import java.util.UUID
 import javax.inject.Inject
 
+@Suppress("TooManyFunctions")
 @HiltViewModel
-class MapViewModel @Inject constructor(private val application: Application) : ViewModel() {
+class MapViewModel @Inject constructor(
+    private val application: Application,
+    private val preferences: SharedPreferences,
+    nodeRepository: NodeRepository,
+) : ViewModel() {
+
+    private val onlyFavorites = MutableStateFlow(preferences.getBoolean("only-favorites", false))
+    val nodes: StateFlow<List<Node>> =
+        nodeRepository.getNodes().onEach { it.filter { !it.isIgnored } }.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = emptyList(),
+        )
+    private val showWaypointsOnMap =
+        MutableStateFlow(preferences.getBoolean("show-waypoints-on-map", true))
+    private val showPrecisionCircleOnMap =
+        MutableStateFlow(preferences.getBoolean("show-precision-circle-on-map", true))
+
+    fun setOnlyFavorites(value: Boolean) {
+        onlyFavorites.value = value
+        preferences.edit { putBoolean("only-favorites", onlyFavorites.value) }
+    }
+
+    fun setShowWaypointsOnMap(value: Boolean) {
+        showWaypointsOnMap.value = value
+        preferences.edit { putBoolean("show-waypoints-on-map", value) }
+    }
+
+    fun setShowPrecisionCircleOnMap(value: Boolean) {
+        showPrecisionCircleOnMap.value = value
+        preferences.edit { putBoolean("show-precision-circle-on-map", value) }
+    }
+
+    data class MapFilterState(
+        val onlyFavorites: Boolean,
+        val showWaypoints: Boolean,
+        val showPrecisionCircle: Boolean,
+    )
+
+    val mapFilterStateFlow: StateFlow<MapFilterState> = combine(
+        onlyFavorites,
+        showWaypointsOnMap,
+        showPrecisionCircleOnMap,
+    ) { favoritesOnly, showWaypoints, showPrecisionCircle ->
+        MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle)
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = MapFilterState(false, true, true)
+    )
 
     private val _mapLayers = MutableStateFlow<List<MapLayerItem>>(emptyList())
     val mapLayers: StateFlow<List<MapLayerItem>> = _mapLayers.asStateFlow()
@@ -162,17 +220,18 @@ class MapViewModel @Inject constructor(private val application: Application) : V
         }
     }
 
+    @Suppress("Recycle")
     suspend fun getInputStreamFromUri(layerItem: MapLayerItem): InputStream? {
-        // Prioritize localUri if available
         val uriToLoad = layerItem.uri ?: return null
-        return withContext(Dispatchers.IO) {
+        val stream = withContext(Dispatchers.IO) {
             try {
                 application.contentResolver.openInputStream(uriToLoad)
-            } catch (e: Exception) {
+            } catch (_: Exception) {
                 debug("MapViewModel: Error opening InputStream from URI: $uriToLoad")
                 null
             }
         }
+        return stream
     }
 
     suspend fun loadKmlLayerIfNeeded(map: GoogleMap, layerItem: MapLayerItem): KmlLayer? {
@@ -182,7 +241,7 @@ class MapViewModel @Inject constructor(private val application: Application) : V
 
         return try {
             // Pass the whole layerItem to getInputStreamFromUri
-            getInputStreamFromUri(layerItem)?.let { inputStream ->
+            getInputStreamFromUri(layerItem)?.use { inputStream ->
                 val kmlLayer = KmlLayer(
                     map,
                     inputStream,

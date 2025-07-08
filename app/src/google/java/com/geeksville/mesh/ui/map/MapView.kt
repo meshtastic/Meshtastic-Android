@@ -55,12 +55,11 @@ import androidx.compose.material3.ListItem
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -72,9 +71,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.ui.map.components.ClusterItemsListDialog
 import com.geeksville.mesh.ui.map.components.EditWaypointDialog
 import com.geeksville.mesh.ui.map.components.MapControlsOverlay
 import com.geeksville.mesh.ui.map.components.NodeClusterMarkers
@@ -82,6 +83,7 @@ import com.geeksville.mesh.ui.map.components.WaypointMarkers
 import com.geeksville.mesh.ui.node.DegD
 import com.geeksville.mesh.util.formatAgo
 import com.geeksville.mesh.waypoint
+import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
@@ -97,10 +99,11 @@ import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapsComposeExperimentalApi
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.widgets.DisappearingScaleBar
+import kotlinx.coroutines.launch
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @OptIn(
-    MapsComposeExperimentalApi::class, ExperimentalMaterial3AdaptiveApi::class,
+    MapsComposeExperimentalApi::class,
     ExperimentalMaterial3Api::class
 )
 @Composable
@@ -110,6 +113,7 @@ fun MapView(
     navigateToNodeDetails: (Int) -> Unit,
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     val mapLayers by mapViewModel.mapLayers.collectAsStateWithLifecycle()
     var hasLocationPermission by remember { mutableStateOf(false) }
 
@@ -129,7 +133,7 @@ fun MapView(
     }
 
     var mapFilterMenuExpanded by remember { mutableStateOf(false) }
-    val mapFilterState by uiViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
+    val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     val ourNodeInfo by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     var editingWaypoint by remember { mutableStateOf<MeshProtos.Waypoint?>(null) }
 
@@ -140,7 +144,7 @@ fun MapView(
         position = CameraPosition.fromLatLngZoom(defaultLatLng, 7f)
     }
 
-    val allNodes by uiViewModel.filteredNodeList.collectAsStateWithLifecycle()
+    val allNodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by uiViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val displayableWaypoints = waypoints.values.mapNotNull { it.data.waypoint }
 
@@ -158,28 +162,6 @@ fun MapView(
             nodeTitle = "${node.user.shortName} ${formatAgo(node.position.time)}",
             nodeSnippet = "${node.user.longName}"
         )
-    }
-
-    LaunchedEffect(filteredNodes, waypoints, mapFilterState.showWaypoints) {
-        val boundsBuilder = LatLngBounds.Builder()
-        var includedPoints = 0
-
-        filteredNodes.forEach { node ->
-            node.position.let {
-                boundsBuilder.include(LatLng(it.latitudeI * DegD, it.longitudeI * DegD))
-                includedPoints++
-            }
-        }
-        if (mapFilterState.showWaypoints) {
-            waypoints.mapNotNull { waypoint ->
-                val pt = waypoint.value.data.waypoint
-                if (pt == null) {
-                    return@mapNotNull null
-                }
-                boundsBuilder.include(LatLng(pt.latitudeI * DegD, pt.longitudeI * DegD))
-                includedPoints++
-            }
-        }
     }
     val isConnected by uiViewModel.isConnected.collectAsStateWithLifecycle(false)
     val theme by uiViewModel.theme.collectAsStateWithLifecycle()
@@ -208,7 +190,6 @@ fun MapView(
             putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
         }
         kmlFilePickerLauncher.launch(intent)
-        // showLayerManagementDialog = false // Optionally dismiss after clicking add
     }
     val onRemoveLayer = { layerId: String ->
         mapViewModel.removeMapLayer(layerId)
@@ -216,12 +197,12 @@ fun MapView(
     val onToggleVisibility = { layerId: String ->
         mapViewModel.toggleLayerVisibility(layerId)
     }
-    Scaffold(
-    ) {
+    var showClusterItemsDialog by remember { mutableStateOf<List<NodeClusterItem>?>(null) }
+    Scaffold { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(it)
+                .padding(paddingValues)
         ) {
             GoogleMap(
                 mapColorScheme = mapColorScheme,
@@ -254,7 +235,27 @@ fun MapView(
                 NodeClusterMarkers(
                     nodeClusterItems = nodeClusterItems,
                     mapFilterState = mapFilterState,
-                    navigateToNodeDetails = navigateToNodeDetails
+                    navigateToNodeDetails = navigateToNodeDetails,
+                    onClusterClick = { cluster ->
+                        val items = cluster.items.toList()
+                        // Check if all items are at the same location (or very, very close)
+                        val allSameLocation =
+                            items.size > 1 && items.all { it.position == items.first().position }
+
+                        if (allSameLocation) {
+                            showClusterItemsDialog = items
+                        } else {
+                            val bounds = LatLngBounds.builder()
+                            cluster.items.forEach { bounds.include(it.position) }
+                            coroutineScope.launch {
+                                cameraPositionState.animate(
+                                    CameraUpdateFactory.newLatLngBounds(bounds.build(), 100)
+                                )
+                            }
+                            debug("Cluster clicked! $cluster")
+                        }
+                        true
+                    },
                 )
 
                 WaypointMarkers(
@@ -323,8 +324,7 @@ fun MapView(
                 mapFilterMenuExpanded = mapFilterMenuExpanded,
                 onMapFilterMenuDismissRequest = { mapFilterMenuExpanded = false },
                 onToggleMapFilterMenu = { mapFilterMenuExpanded = true },
-                mapFilterState = mapFilterState,
-                uiViewModel = uiViewModel,
+                mapViewModel = mapViewModel,
                 mapTypeMenuExpanded = mapTypeMenuExpanded,
                 onMapTypeMenuDismissRequest = { mapTypeMenuExpanded = false },
                 onToggleMapTypeMenu = { mapTypeMenuExpanded = true },
@@ -404,28 +404,38 @@ fun MapView(
                         item {
                             HorizontalDivider()
                         }
-
                     }
                 }
             }
+        }
+        showClusterItemsDialog?.let {
+            ClusterItemsListDialog(
+                items = it,
+                onDismiss = { showClusterItemsDialog = null },
+                onItemClick = { item ->
+                    navigateToNodeDetails(item.node.num)
+                    showClusterItemsDialog = null
+                }
+            )
         }
     }
 }
 
 @Composable
-internal fun MapFilterDropdown( // Made internal
+internal fun MapFilterDropdown(
+    // Made internal
     expanded: Boolean,
     onDismissRequest: () -> Unit,
-    mapFilterState: UIViewModel.MapFilterState,
-    uiViewModel: UIViewModel
+    mapViewModel: MapViewModel,
 ) {
+    val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = onDismissRequest
     ) {
         DropdownMenuItem(
             text = { Text(stringResource(id = R.string.only_favorites)) },
-            onClick = { uiViewModel.setOnlyFavorites(!mapFilterState.onlyFavorites) },
+            onClick = { mapViewModel.setOnlyFavorites(!mapFilterState.onlyFavorites) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Filled.Favorite,
@@ -435,13 +445,13 @@ internal fun MapFilterDropdown( // Made internal
             trailingIcon = {
                 Checkbox(
                     checked = mapFilterState.onlyFavorites,
-                    onCheckedChange = { uiViewModel.setOnlyFavorites(it) }
+                    onCheckedChange = { mapViewModel.setOnlyFavorites(it) }
                 )
             }
         )
         DropdownMenuItem(
             text = { Text(stringResource(id = R.string.show_waypoints)) },
-            onClick = { uiViewModel.setShowWaypointsOnMap(!mapFilterState.showWaypoints) },
+            onClick = { mapViewModel.setShowWaypointsOnMap(!mapFilterState.showWaypoints) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Filled.Place,
@@ -451,13 +461,13 @@ internal fun MapFilterDropdown( // Made internal
             trailingIcon = {
                 Checkbox(
                     checked = mapFilterState.showWaypoints,
-                    onCheckedChange = { uiViewModel.setShowWaypointsOnMap(it) }
+                    onCheckedChange = { mapViewModel.setShowWaypointsOnMap(it) }
                 )
             }
         )
         DropdownMenuItem(
             text = { Text(stringResource(id = R.string.show_precision_circle)) },
-            onClick = { uiViewModel.setShowPrecisionCircleOnMap(!mapFilterState.showPrecisionCircle) },
+            onClick = { mapViewModel.setShowPrecisionCircleOnMap(!mapFilterState.showPrecisionCircle) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Outlined.RadioButtonUnchecked, // Placeholder icon
@@ -467,7 +477,7 @@ internal fun MapFilterDropdown( // Made internal
             trailingIcon = {
                 Checkbox(
                     checked = mapFilterState.showPrecisionCircle,
-                    onCheckedChange = { uiViewModel.setShowPrecisionCircleOnMap(it) }
+                    onCheckedChange = { mapViewModel.setShowPrecisionCircleOnMap(it) }
                 )
             }
         )
@@ -532,6 +542,7 @@ internal fun unicodeEmojiToBitmap(icon: Int): BitmapDescriptor {
 }
 
 // Extension function to get file name from URI
+@Suppress("NestedBlockDepth")
 fun Uri.getFileName(context: android.content.Context): String {
     var name = this.lastPathSegment ?: "layer_${System.currentTimeMillis()}"
     if (this.scheme == "content") {

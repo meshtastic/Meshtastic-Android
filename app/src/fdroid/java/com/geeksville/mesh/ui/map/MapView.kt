@@ -215,11 +215,12 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
 @Composable
 fun MapView(
     uiViewModel: UIViewModel = viewModel(),
+    mapViewModel: MapViewModel = viewModel(),
     navigateToNodeDetails: (Int) -> Unit,
 ) {
     var mapFilterExpanded by remember { mutableStateOf(false) }
 
-    val mapFilterState by uiViewModel.mapFilterStateFlow.collectAsState()
+    val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsState()
 
     // UI Elements
     var cacheEstimate by remember { mutableStateOf("") }
@@ -244,7 +245,7 @@ fun MapView(
     val hasGps = remember { context.hasGps() }
 
     fun loadOnlineTileSourceBase(): ITileSource {
-        val id = uiViewModel.mapStyleId
+        val id = mapViewModel.mapStyleId
         debug("mapStyleId from prefs: $id")
         return CustomTileSource.getTileSource(id).also {
             zoomLevelMax = it.maximumZoomLevel.toDouble()
@@ -254,7 +255,7 @@ fun MapView(
     }
 
     val cameraView = remember {
-        val geoPoints = uiViewModel.nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
+        val geoPoints = mapViewModel.nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
         BoundingBox.fromGeoPoints(geoPoints)
     }
     val map = rememberMapViewWithLifecycle(cameraView, loadOnlineTileSourceBase())
@@ -297,7 +298,7 @@ fun MapView(
             if (permissions.entries.all { it.value }) map.toggleMyLocation()
         }
 
-    val nodes by uiViewModel.filteredNodeList.collectAsStateWithLifecycle()
+    val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by uiViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
 
     val markerIcon = remember {
@@ -308,8 +309,8 @@ fun MapView(
         val nodesWithPosition = nodes.filter { it.validPosition != null }
         val ourNode = uiViewModel.ourNodeInfo.value
         val gpsFormat = uiViewModel.config.display.gpsFormat.number
-        val displayUnits = uiViewModel.config.display.units.number
-        val mapFilterState = uiViewModel.mapFilterStateFlow.value // Access mapFilterState directly
+        val displayUnits = uiViewModel.config.display.units
+        val mapFilterState = mapViewModel.mapFilterStateFlow.value // Access mapFilterState directly
         return nodesWithPosition.mapNotNull { node ->
             if (mapFilterState.onlyFavorites && !node.isFavorite && !node.equals(ourNode)) {
                 return@mapNotNull null
@@ -584,10 +585,10 @@ fun MapView(
         val builder = MaterialAlertDialogBuilder(context)
         val mapStyles: Array<CharSequence> = CustomTileSource.mTileSources.values.toTypedArray()
 
-        val mapStyleInt = uiViewModel.mapStyleId
+        val mapStyleInt = mapViewModel.mapStyleId
         builder.setSingleChoiceItems(mapStyles, mapStyleInt) { dialog, which ->
             debug("Set mapStyleId pref to $which")
-            uiViewModel.mapStyleId = which
+            mapViewModel.mapStyleId = which
             dialog.dismiss()
             map.setTileSource(loadOnlineTileSourceBase())
         }
@@ -695,14 +696,14 @@ fun MapView(
                                         Checkbox(
                                             checked = mapFilterState.onlyFavorites,
                                             onCheckedChange = { enabled ->
-                                                uiViewModel.setOnlyFavorites(enabled)
+                                                mapViewModel.setOnlyFavorites(enabled)
                                             },
                                             modifier = Modifier.padding(start = 8.dp)
                                         )
                                     }
                                 },
                                 onClick = {
-                                    uiViewModel.setOnlyFavorites(!mapFilterState.onlyFavorites)
+                                    mapViewModel.setOnlyFavorites(!mapFilterState.onlyFavorites)
                                 }
                             )
                             DropdownMenuItem(
@@ -723,13 +724,13 @@ fun MapView(
                                         )
                                         Checkbox(
                                             checked = mapFilterState.showWaypoints,
-                                            onCheckedChange = uiViewModel::setShowWaypointsOnMap,
+                                            onCheckedChange = mapViewModel::setShowWaypointsOnMap,
                                             modifier = Modifier.padding(start = 8.dp)
                                         )
                                     }
                                 },
                                 onClick = {
-                                    uiViewModel.setShowWaypointsOnMap(!mapFilterState.showWaypoints)
+                                    mapViewModel.setShowWaypointsOnMap(!mapFilterState.showWaypoints)
                                 }
                             )
                             DropdownMenuItem(
@@ -751,14 +752,14 @@ fun MapView(
                                         Checkbox(
                                             checked = mapFilterState.showPrecisionCircle,
                                             onCheckedChange = { enabled ->
-                                                uiViewModel.setShowPrecisionCircleOnMap(enabled)
+                                                mapViewModel.setShowPrecisionCircleOnMap(enabled)
                                             },
                                             modifier = Modifier.padding(start = 8.dp)
                                         )
                                     }
                                 },
                                 onClick = {
-                                    uiViewModel.setShowPrecisionCircleOnMap(!mapFilterState.showPrecisionCircle)
+                                    mapViewModel.setShowPrecisionCircleOnMap(!mapFilterState.showPrecisionCircle)
                                 }
                             )
                         }
