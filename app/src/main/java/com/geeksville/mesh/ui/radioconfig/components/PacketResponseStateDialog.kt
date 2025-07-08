@@ -87,7 +87,7 @@ fun <T> PacketResponseStateDialog(
                 Button(
                     onClick = {
                         onDismiss()
-                        if (state is ResponseState.Success || state is ResponseState.Error  ) {
+                        if (state is ResponseState.Success || state is ResponseState.Error) {
                             backDispatcher?.onBackPressed()
                         }
                     },
