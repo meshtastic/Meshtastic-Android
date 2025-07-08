@@ -53,7 +53,7 @@ android {
         minSdk = Configs.MIN_SDK_VERSION
         targetSdk = Configs.TARGET_SDK
         versionCode = System.getenv("VERSION_CODE")?.toIntOrNull()
-            ?: 1
+            ?: 30630
         versionName = Configs.VERSION_NAME
         testInstrumentationRunner = "com.geeksville.mesh.TestRunner"
         buildConfigField("String", "MIN_FW_VERSION", "\"${Configs.MIN_FW_VERSION}\"")
