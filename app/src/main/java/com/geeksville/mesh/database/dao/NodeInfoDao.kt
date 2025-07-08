@@ -36,6 +36,51 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface NodeInfoDao {
 
+    // Helper function to contain all validation logic
+    private fun getVerifiedNodeForUpsert(node: NodeEntity): NodeEntity? {
+        // Populate the new publicKey field for lazy migration
+        node.publicKey = node.user.publicKey
+
+        val existingNode = getNodeByNum(node.num)?.node
+
+        return if (existingNode == null) {
+            // This is a new node. We must check if its public key is already claimed by another node.
+            if (node.publicKey != null && node.publicKey?.isEmpty == false) {
+                val nodeWithSamePK = findNodeByPublicKey(node.publicKey)
+                if (nodeWithSamePK != null && nodeWithSamePK.num != node.num) {
+                    // This is the impersonation attempt we want to block.
+                    @Suppress("MaxLineLength")
+                    warn("NodeInfoDao: Blocking new node #${node.num} because its public key is already used by #${nodeWithSamePK.num}.")
+                    return null // ABORT
+                }
+            }
+            // If we're here, the new node is safe to add.
+             node
+        } else {
+            // This is an update to an existing node.
+            val keyMatch =
+                existingNode.user.publicKey == node.user.publicKey || existingNode.user.publicKey.isEmpty
+             if (keyMatch) {
+                // Keys match, trust the incoming node completely.
+                // This allows for legit nodeId changes etc.
+                node
+            } else {
+                // Keys do NOT match. This is a potential attack.
+                // Log it, and create a NEW entity based on the EXISTING trusted one,
+                // only updating dynamic data and setting the public key to EMPTY to signal a conflict.
+                @Suppress("MaxLineLength")
+                warn("NodeInfoDao: Received packet for #${node.num} with non-matching public key. Identity data ignored, key set to EMPTY.")
+                existingNode.copy(
+                    lastHeard = node.lastHeard,
+                    snr = node.snr,
+                    position = node.position,
+                    user = existingNode.user.toBuilder().setPublicKey(ByteString.EMPTY).build(),
+                    publicKey = ByteString.EMPTY
+                )
+            }
+        }
+    }
+
     @Query("SELECT * FROM my_node")
     fun getMyNodeInfo(): Flow<MyNodeEntity?>
 
@@ -115,94 +160,13 @@ interface NodeInfoDao {
 
     @Transaction
     fun upsert(node: NodeEntity) {
-        // Populate the new publicKey field for lazy migration
-        node.publicKey = node.user.publicKey
-
-        val existingNode = getNodeByNum(node.num)?.node
-
-        if (existingNode == null) {
-            // This is a new node. We must check if its public key is already claimed by another node.
-            if (node.publicKey != null && node.publicKey?.isEmpty == false) {
-                val nodeWithSamePK = findNodeByPublicKey(node.publicKey)
-                if (nodeWithSamePK != null && nodeWithSamePK.num != node.num) {
-                    // This is the impersonation attempt we want to block.
-                    @Suppress("MaxLineLength")
-                    warn("NodeInfoDao: Blocking new node #${node.num} because its public key is already used by #${nodeWithSamePK.num}.")
-                    return // ABORT
-                }
-            }
-            // If we're here, the new node is safe to add.
-            doUpsert(node)
-        } else {
-            // This is an update to an existing node.
-            val keyMatch =
-                existingNode.user.publicKey == node.user.publicKey || existingNode.user.publicKey.isEmpty
-            val nodeToUpsert = if (keyMatch) {
-                // Keys match, trust the incoming node completely.
-                // This allows for legit nodeId changes etc.
-                node
-            } else {
-                // Keys do NOT match. This is a potential attack.
-                // Log it, and create a NEW entity based on the EXISTING trusted one,
-                // only updating dynamic data and setting the public key to EMPTY to signal a conflict.
-                @Suppress("MaxLineLength")
-                warn("NodeInfoDao: Received packet for #${node.num} with non-matching public key. Identity data ignored, key set to EMPTY.")
-                existingNode.copy(
-                    lastHeard = node.lastHeard,
-                    snr = node.snr,
-                    position = node.position,
-                    user = existingNode.user.toBuilder().setPublicKey(ByteString.EMPTY).build(),
-                    publicKey = ByteString.EMPTY
-                )
-            }
-            doUpsert(nodeToUpsert)
-        }
+        getVerifiedNodeForUpsert(node)?.let { doUpsert(it) }
     }
 
     @Suppress("NestedBlockDepth")
     @Transaction
     fun putAll(nodes: List<NodeEntity>) {
-        val safeNodes = mutableListOf<NodeEntity>()
-        for (node in nodes) {
-            // Lazy migration
-            node.publicKey = node.user.publicKey
-
-            val existingNode = getNodeByNum(node.num)?.node
-
-            if (existingNode == null) {
-                // New node. Check for PK collision with a *different* node.
-                if (node.publicKey != null && (node.publicKey?.isEmpty == false)) {
-                    val nodeWithSamePK = findNodeByPublicKey(node.publicKey)
-                    if (nodeWithSamePK != null && nodeWithSamePK.num != node.num) {
-                        @Suppress("MaxLineLength")
-                        warn("NodeInfoDao: Blocking new node #${node.num} in batch because its public key is already used by #${nodeWithSamePK.num}.")
-                        continue // Continue to next node in loop
-                    }
-                }
-                safeNodes.add(node)
-            } else {
-                // Existing node.
-                val keyMatch =
-                    existingNode.user.publicKey == node.user.publicKey || existingNode.user.publicKey.isEmpty
-                if (keyMatch) {
-                    safeNodes.add(node) // Trust it completely
-                } else {
-                    @Suppress("MaxLineLength")
-                    warn("NodeInfoDao: Received packet for #${node.num} in batch with non-matching public key. Identity data ignored, key set to EMPTY.")
-                    // Create a new entity based on the old one, with
-                    // updated dynamic data and an EMPTY key to signal conflict.
-                    val updatedNode = existingNode.copy(
-                        lastHeard = node.lastHeard,
-                        snr = node.snr,
-                        position = node.position,
-                        user = existingNode.user.toBuilder().setPublicKey(ByteString.EMPTY).build(),
-                        publicKey = ByteString.EMPTY
-                    )
-                    safeNodes.add(updatedNode)
-                }
-            }
-        }
-
+        val safeNodes = nodes.mapNotNull { getVerifiedNodeForUpsert(it) }
         if (safeNodes.isNotEmpty()) {
             doPutAll(safeNodes)
         }
@@ -223,6 +187,7 @@ interface NodeInfoDao {
     @Query("SELECT * FROM nodes WHERE num=:num")
     @Transaction
     fun getNodeByNum(num: Int): NodeWithRelations?
+
     @Query("SELECT * FROM nodes WHERE public_key = :publicKey LIMIT 1")
     fun findNodeByPublicKey(publicKey: ByteString?): NodeEntity?
 
