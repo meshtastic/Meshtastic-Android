@@ -23,6 +23,7 @@ import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.PaxcountProtos
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.android.Logging
+import com.google.protobuf.ByteString
 import com.google.protobuf.InvalidProtocolBufferException
 import kotlinx.serialization.json.Json
 
@@ -144,5 +145,15 @@ class Converters : Logging {
             return null
         }
         return Json.encodeToString(list)
+    }
+
+    @TypeConverter
+    fun bytesToByteString(bytes: ByteArray?): ByteString? {
+        return if (bytes == null) null else ByteString.copyFrom(bytes)
+    }
+
+    @TypeConverter
+    fun byteStringToBytes(value: ByteString?): ByteArray? {
+        return value?.toByteArray()
     }
 }
