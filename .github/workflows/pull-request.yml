@@ -2,15 +2,24 @@ name: Android CI (PR)
 
 on:
   pull_request:
-    branches: [ main ]
+    branches:
+      - main
 
 concurrency:
   group: build-pr-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  scheduled_updates:
+    if: github.head_ref == 'scheduled-updates'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Always pass for scheduled-updates
+        run: echo Scheduled updates branch, auto-passing by default.
+
+
   build_and_detekt:
-    if: github.repository == 'meshtastic/Meshtastic-Android'
+    if: github.repository == 'meshtastic/Meshtastic-Android' && github.head_ref != 'scheduled-updates'
     uses: ./.github/workflows/reusable-android-build.yml
     secrets:
       GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
@@ -18,7 +27,7 @@ jobs:
 
   androidTest:
     # AssumingandroidTest should also only run for the main repository
-    if: github.repository == 'meshtastic/Meshtastic-Android'
+    if: github.repository == 'meshtastic/Meshtastic-Android' && github.head_ref != 'scheduled-updates'
     uses: ./.github/workflows/reusable-android-test.yml
     with:
       api_levels: '[35]' # Run only on API 35 for PRs

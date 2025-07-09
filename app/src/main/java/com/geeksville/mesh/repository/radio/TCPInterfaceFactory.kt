@@ -23,4 +23,6 @@ import dagger.assisted.AssistedFactory
  * Factory for creating `TCPInterface` instances.
  */
 @AssistedFactory
-interface TCPInterfaceFactory : InterfaceFactorySpi<TCPInterface>
+interface TCPInterfaceFactory {
+    fun create(rest: String): TCPInterface
+}

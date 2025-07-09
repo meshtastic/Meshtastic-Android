@@ -145,6 +145,7 @@ import com.geeksville.mesh.util.formatAgo
 import com.geeksville.mesh.util.formatUptime
 import com.geeksville.mesh.util.thenIf
 import com.geeksville.mesh.util.toDistanceString
+import com.geeksville.mesh.util.toSmallDistanceString
 import com.geeksville.mesh.util.toSpeedString
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.milliseconds
@@ -294,7 +295,7 @@ private fun NodeDetailList(
 
         if (node.hasEnvironmentMetrics) {
             PreferenceCategory(stringResource(R.string.environment))
-            EnvironmentMetrics(node, metricsState.isFahrenheit)
+            EnvironmentMetrics(node, metricsState.isFahrenheit, metricsState.displayUnits)
             Spacer(modifier = Modifier.height(8.dp))
         }
 
@@ -732,6 +733,7 @@ private fun InfoCard(
 private fun EnvironmentMetrics(
     node: Node,
     isFahrenheit: Boolean = false,
+    displayUnits: DisplayUnits,
 ) = with(node.environmentMetrics) {
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
@@ -799,7 +801,7 @@ private fun EnvironmentMetrics(
             InfoCard(
                 icon = Icons.Default.Height,
                 text = stringResource(R.string.distance),
-                value = "%.0f mm".format(distance)
+                value = distance.toSmallDistanceString(displayUnits)
             )
         }
         if (hasLux()) {
@@ -809,13 +811,20 @@ private fun EnvironmentMetrics(
                 value = "%.0f lx".format(lux)
             )
         }
+        if (hasUvLux()) {
+            InfoCard(
+                icon = Icons.Default.LightMode, // You may want to use a different icon for UV
+                text = stringResource(R.string.uv_lux),
+                value = "%.0f lx".format(uvLux)
+            )
+        }
         if (hasWindSpeed()) {
             @Suppress("MagicNumber")
             val normalizedBearing = (windDirection % 360 + 360) % 360
             InfoCard(
                 icon = Icons.Outlined.Navigation,
                 text = stringResource(R.string.wind),
-                value = windSpeed.toSpeedString(),
+                value = windSpeed.toSpeedString(displayUnits),
                 rotateIcon = normalizedBearing.toFloat(),
             )
         }

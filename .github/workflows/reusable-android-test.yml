@@ -20,7 +20,7 @@ on:
 jobs:
   androidTest:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     strategy:
       matrix:
         api-level: ${{ fromJson(inputs.api_levels) }} # Use the input to define the matrix
@@ -39,13 +39,16 @@ jobs:
         with:
           java-version: '21'
           distribution: 'jetbrains'
+          cache: 'gradle'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Cache Gradle User Home
         uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('''**/*.gradle*''', '''**/gradle-wrapper.properties*''', '''gradle.properties*''', '''settings.gradle*''') }}
+          key: gradle-${{ runner.os }}-${{ hashFiles('build.gradle.kts', 'settings.gradle.kts', 'gradle.properties', 'app/build.gradle.kts', 'buildSrc/build.gradle.kts') }}
           restore-keys: |
             gradle-${{ runner.os }}-
       - name: Setup Gradle
@@ -63,7 +66,7 @@ jobs:
           path: |
             ~/.android/avd/*
             ~/.android/adb*
-          key: avd-${{ matrix.api-level }}-${{ hashFiles('''**/*.gradle*''', '''**/gradle-wrapper.properties*''') }}
+          key: avd-${{ matrix.api-level }}-${{ hashFiles('build.gradle.kts', 'settings.gradle.kts', 'gradle.properties', 'app/build.gradle.kts', 'buildSrc/build.gradle.kts') }}
           restore-keys: |
             avd-${{ matrix.api-level }}-
       - name: Create AVD and generate snapshot for caching

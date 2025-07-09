@@ -23,4 +23,6 @@ import dagger.assisted.AssistedFactory
  * Factory for creating `SerialInterface` instances.
  */
 @AssistedFactory
-interface SerialInterfaceFactory : InterfaceFactorySpi<SerialInterface>
+interface SerialInterfaceFactory {
+    fun create(rest: String): SerialInterface
+}
