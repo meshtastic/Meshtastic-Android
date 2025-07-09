@@ -103,11 +103,11 @@ import com.geeksville.mesh.ui.radioconfig.RadioConfigMenuActions
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
-    Contacts(R.string.contacts, Icons.AutoMirrored.TwoTone.Chat, ContactsRoutes.Contacts),
-    Nodes(R.string.nodes, Icons.TwoTone.People, NodesRoutes.Nodes),
+    Contacts(R.string.contacts, Icons.AutoMirrored.TwoTone.Chat, ContactsRoutes.ContactsGraph),
+    Nodes(R.string.nodes, Icons.TwoTone.People, NodesRoutes.NodesGraph),
     Map(R.string.map, Icons.TwoTone.Map, MapRoutes.Map),
-    Channels(R.string.channels, Icons.TwoTone.Contactless, ChannelsRoutes.Channels),
-    Connections(R.string.connections, Icons.TwoTone.CloudOff, ConnectionsRoutes.Connections),
+    Channels(R.string.channels, Icons.TwoTone.Contactless, ChannelsRoutes.ChannelsGraph),
+    Connections(R.string.connections, Icons.TwoTone.CloudOff, ConnectionsRoutes.ConnectionsGraph),
     ;
 
     companion object {
@@ -230,20 +230,11 @@ fun MainScreen(
                         }
                     },
                     onClick = {
-                        if (!isSelected) {
-                            navController.navigate(destination.route) {
-                                // Pop up to the start destination of the graph to
-                                // avoid building up a large stack of destinations
-                                // on the back stack as users select items
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
-                                }
-                                // Avoid multiple copies of the same destination when
-                                // reselecting the same item
-                                launchSingleTop = true
-                                // Restore state when reselecting a previously selected item
-                                restoreState = true
+                        navController.navigate(destination.route) {
+                            popUpTo(navController.graph.findStartDestination().id) {
+                                saveState = true
                             }
+                            launchSingleTop = true
                         }
                     }
                 )

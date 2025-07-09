@@ -165,7 +165,8 @@ fun NavGraphBuilder.radioConfigGraph(navController: NavHostController, uiViewMod
     ) {
         composable<RadioConfigRoutes.RadioConfig> { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<RadioConfigRoutes.RadioConfigGraph>()
+                val parentRoute = backStackEntry.destination.parent!!.route!!
+                navController.getBackStackEntry(parentRoute)
             }
             RadioConfigScreen(
                 uiViewModel = uiViewModel,
@@ -189,7 +190,8 @@ private fun NavGraphBuilder.configRoutes(
     ConfigRoute.entries.forEach { configRoute ->
         composable(configRoute.route::class) { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<RadioConfigRoutes.RadioConfigGraph>()
+                val parentRoute = backStackEntry.destination.parent!!.route!!
+                navController.getBackStackEntry(parentRoute)
             }
             when (configRoute) {
                 ConfigRoute.USER -> UserConfigScreen(hiltViewModel(parentEntry))
@@ -214,7 +216,8 @@ private fun NavGraphBuilder.moduleRoutes(
     ModuleRoute.entries.forEach { moduleRoute ->
         composable(moduleRoute.route::class) { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<RadioConfigRoutes.RadioConfigGraph>()
+                val parentRoute = backStackEntry.destination.parent!!.route!!
+                navController.getBackStackEntry(parentRoute)
             }
             when (moduleRoute) {
                 ModuleRoute.MQTT -> MQTTConfigScreen(hiltViewModel(parentEntry))
