@@ -18,6 +18,7 @@
 package com.geeksville.mesh.ui.map.components
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.ui.graphics.Color
 import com.geeksville.mesh.ui.map.MapViewModel
 import com.geeksville.mesh.ui.map.NodeClusterItem
@@ -36,6 +37,24 @@ fun NodeClusterMarkers(
     navigateToNodeDetails: (Int) -> Unit,
     onClusterClick: (Cluster<NodeClusterItem>) -> Boolean,
 ) {
+    if (mapFilterState.showPrecisionCircle) {
+        nodeClusterItems.forEach { clusterItem ->
+            key(clusterItem.node.num) { // Add a stable key for each circle
+                clusterItem.getPrecisionMeters()?.let { precisionMeters ->
+                    if (precisionMeters > 0) {
+                        Circle(
+                            center = clusterItem.position,
+                            radius = precisionMeters,
+                            fillColor = Color(clusterItem.node.colors.second).copy(alpha = 0.2f),
+                            strokeColor = Color(clusterItem.node.colors.second),
+                            strokeWidth = 2f,
+                            zIndex = 1f // Ensure circles are drawn above markers
+                        )
+                    }
+                }
+            }
+        }
+    }
     Clustering(
         items = nodeClusterItems,
         onClusterClick = onClusterClick,
@@ -43,29 +62,13 @@ fun NodeClusterMarkers(
             navigateToNodeDetails(item.node.num)
             false
         },
-        clusterItemContent = {
+        clusterItemContent = { clusterItem ->
             NodeChip(
-                node = it.node,
+                node = clusterItem.node,
                 enabled = false,
                 isThisNode = false,
                 isConnected = false
             ) { }
         },
     )
-
-    if (mapFilterState.showPrecisionCircle) {
-        nodeClusterItems.forEach { clusterItem ->
-            clusterItem.getPrecisionMeters()?.let { precisionMeters ->
-                if (precisionMeters > 0) {
-                    Circle(
-                        center = clusterItem.position,
-                        radius = precisionMeters,
-                        fillColor = Color(clusterItem.node.colors.second).copy(alpha = 0.2f),
-                        strokeColor = Color(clusterItem.node.colors.second),
-                        strokeWidth = 2f
-                    )
-                }
-            }
-        }
-    }
 }

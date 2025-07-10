@@ -27,13 +27,20 @@ import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.repository.map.CustomTileProviderRepository
 import com.google.android.gms.maps.GoogleMap
+import com.google.android.gms.maps.model.TileProvider
+import com.google.android.gms.maps.model.UrlTileProvider
+import com.google.maps.android.compose.MapType
 import com.google.maps.android.data.kml.KmlLayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
@@ -41,10 +48,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
 import java.io.InputStream
+import java.net.MalformedURLException
+import java.net.URL
 import java.util.UUID
 import javax.inject.Inject
 
@@ -54,7 +64,143 @@ class MapViewModel @Inject constructor(
     private val application: Application,
     private val preferences: SharedPreferences,
     nodeRepository: NodeRepository,
+    private val customTileProviderRepository: CustomTileProviderRepository
 ) : ViewModel() {
+
+    private val _errorFlow = MutableSharedFlow<String>()
+    val errorFlow: SharedFlow<String> = _errorFlow.asSharedFlow()
+
+    val customTileProviderConfigs: StateFlow<List<CustomTileProviderConfig>> =
+        customTileProviderRepository.getCustomTileProviders()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = emptyList()
+            )
+
+    private val _selectedCustomTileProviderUrl = MutableStateFlow<String?>(null)
+    val selectedCustomTileProviderUrl: StateFlow<String?> =
+        _selectedCustomTileProviderUrl.asStateFlow()
+
+    private val _selectedGoogleMapType = MutableStateFlow<MapType>(MapType.NORMAL)
+    val selectedGoogleMapType: StateFlow<MapType> = _selectedGoogleMapType.asStateFlow()
+
+    fun addCustomTileProvider(name: String, urlTemplate: String) {
+        viewModelScope.launch {
+            if (name.isBlank() || urlTemplate.isBlank() || !isValidTileUrlTemplate(urlTemplate)) {
+                _errorFlow.emit("Invalid name or URL template for custom tile provider.")
+                return@launch
+            }
+            if (customTileProviderConfigs.value.any { it.name.equals(name, ignoreCase = true) }) {
+                _errorFlow.emit("Custom tile provider with name '$name' already exists.")
+                return@launch
+            }
+
+            val newConfig = CustomTileProviderConfig(name = name, urlTemplate = urlTemplate)
+            customTileProviderRepository.addCustomTileProvider(newConfig)
+        }
+    }
+
+    fun updateCustomTileProvider(configToUpdate: CustomTileProviderConfig) {
+        viewModelScope.launch {
+            if (configToUpdate.name.isBlank() ||
+                configToUpdate.urlTemplate.isBlank() ||
+                !isValidTileUrlTemplate(configToUpdate.urlTemplate)
+            ) {
+                _errorFlow.emit("Invalid name or URL template for updating custom tile provider.")
+                return@launch
+            }
+            val existingConfigs = customTileProviderConfigs.value
+            if (existingConfigs.any {
+                it.id != configToUpdate.id && it.name.equals(
+                        configToUpdate.name,
+                        ignoreCase = true
+                    )
+            }
+            ) {
+                _errorFlow.emit("Another custom tile provider with name '${configToUpdate.name}' already exists.")
+                return@launch
+            }
+
+            customTileProviderRepository.updateCustomTileProvider(configToUpdate)
+
+            val originalConfig =
+                customTileProviderRepository.getCustomTileProviderById(configToUpdate.id)
+            if (_selectedCustomTileProviderUrl.value != null && originalConfig?.urlTemplate == _selectedCustomTileProviderUrl.value) {
+                // No change needed if URL didn't change, or handle if it did
+            } else if (originalConfig != null && _selectedCustomTileProviderUrl.value != originalConfig.urlTemplate) {
+                val currentlySelectedConfig =
+                    customTileProviderConfigs.value.find { it.urlTemplate == _selectedCustomTileProviderUrl.value }
+                if (currentlySelectedConfig?.id == configToUpdate.id) {
+                    _selectedCustomTileProviderUrl.value = configToUpdate.urlTemplate
+                }
+            }
+        }
+    }
+
+    fun removeCustomTileProvider(configId: String) {
+        viewModelScope.launch {
+            val configToRemove = customTileProviderRepository.getCustomTileProviderById(configId)
+            customTileProviderRepository.deleteCustomTileProvider(configId)
+
+            if (configToRemove != null && _selectedCustomTileProviderUrl.value == configToRemove.urlTemplate) {
+                _selectedCustomTileProviderUrl.value = null
+            }
+        }
+    }
+
+    fun selectCustomTileProvider(config: CustomTileProviderConfig?) {
+        if (config != null) {
+            if (!isValidTileUrlTemplate(config.urlTemplate)) {
+                Log.w(
+                    "MapViewModel",
+                    "Attempted to select invalid URL template: ${config.urlTemplate}"
+                )
+                _selectedCustomTileProviderUrl.value = null
+                return
+            }
+            _selectedCustomTileProviderUrl.value = config.urlTemplate
+        } else {
+            _selectedCustomTileProviderUrl.value = null
+        }
+    }
+
+    fun setSelectedGoogleMapType(mapType: MapType) {
+        _selectedGoogleMapType.value = mapType
+        if (_selectedCustomTileProviderUrl.value != null) {
+            _selectedCustomTileProviderUrl.value = null
+        }
+    }
+
+    fun createUrlTileProvider(urlString: String): TileProvider? {
+        if (!isValidTileUrlTemplate(urlString)) {
+            Log.e(
+                "MapViewModel",
+                "Tile URL does not contain valid {x}, {y}, and {z} placeholders: $urlString"
+            )
+            return null
+        }
+        return object : UrlTileProvider(256, 256) {
+            override fun getTileUrl(x: Int, y: Int, zoom: Int): URL? {
+                val formattedUrl = urlString
+                    .replace("{z}", zoom.toString(), ignoreCase = true)
+                    .replace("{x}", x.toString(), ignoreCase = true)
+                    .replace("{y}", y.toString(), ignoreCase = true)
+                return try {
+                    URL(formattedUrl)
+                } catch (e: MalformedURLException) {
+                    Log.e("MapViewModel", "Malformed URL: $formattedUrl", e)
+                    null
+                }
+            }
+        }
+    }
+
+    private fun isValidTileUrlTemplate(urlTemplate: String): Boolean {
+        return urlTemplate.contains("{z}", ignoreCase = true) &&
+            urlTemplate.contains("{x}", ignoreCase = true) &&
+            urlTemplate.contains("{y}", ignoreCase = true)
+    }
 
     private val onlyFavorites = MutableStateFlow(preferences.getBoolean("only-favorites", false))
     val nodes: StateFlow<List<Node>> =
@@ -109,7 +255,7 @@ class MapViewModel @Inject constructor(
     }
 
     private fun loadPersistedLayers() {
-        viewModelScope.launch(Dispatchers.IO) { // Perform file operations on IO dispatcher
+        viewModelScope.launch(Dispatchers.IO) {
             try {
                 val layersDir = File(application.filesDir, "map_layers")
                 if (layersDir.exists() && layersDir.isDirectory) {
@@ -140,17 +286,14 @@ class MapViewModel @Inject constructor(
                 }
             } catch (e: Exception) {
                 Log.e("MapViewModel", "Error loading persisted map layers", e)
-                // Optionally, update UI to show an error or clear layers
                 _mapLayers.value = emptyList()
             }
         }
     }
 
-    // --- KML/KMZ Loading ---
     fun addMapLayer(uri: Uri, fileName: String?) {
         viewModelScope.launch {
             val layerName = fileName ?: "Layer ${mapLayers.value.size + 1}"
-            // Copy the file to internal storage
             val localFileUri =
                 copyFileToInternalStorage(uri, fileName ?: "layer_${UUID.randomUUID()}")
 
@@ -159,7 +302,6 @@ class MapViewModel @Inject constructor(
                     MapLayerItem(name = layerName, uri = localFileUri)
                 _mapLayers.value = _mapLayers.value + newItem
             } else {
-                // Handle error: Failed to copy file
                 Log.e("MapViewModel", "Failed to copy KML/KMZ file to internal storage.")
             }
         }
@@ -169,7 +311,6 @@ class MapViewModel @Inject constructor(
         return withContext(Dispatchers.IO) {
             try {
                 val inputStream = application.contentResolver.openInputStream(uri)
-                // It's good practice to store these in a dedicated subdirectory
                 val directory = File(application.filesDir, "map_layers")
                 if (!directory.exists()) {
                     directory.mkdirs()
@@ -199,7 +340,7 @@ class MapViewModel @Inject constructor(
     fun removeMapLayer(layerId: String) {
         viewModelScope.launch {
             val layerToRemove = _mapLayers.value.find { it.id == layerId }
-            layerToRemove?.kmlLayerData?.removeLayerFromMap() // Ensure we cast to KmlLayer if needed
+            layerToRemove?.kmlLayerData?.removeLayerFromMap()
             layerToRemove?.uri?.let { uri ->
                 deleteFileFromInternalStorage(uri)
             }
@@ -210,7 +351,7 @@ class MapViewModel @Inject constructor(
     private suspend fun deleteFileFromInternalStorage(uri: Uri) {
         withContext(Dispatchers.IO) {
             try {
-                val file = File(uri.path ?: return@withContext) // Ensure path is not null
+                val file = File(uri.path ?: return@withContext)
                 if (file.exists()) {
                     file.delete()
                 }
@@ -240,7 +381,6 @@ class MapViewModel @Inject constructor(
         }
 
         return try {
-            // Pass the whole layerItem to getInputStreamFromUri
             getInputStreamFromUri(layerItem)?.use { inputStream ->
                 val kmlLayer = KmlLayer(
                     map,
@@ -266,9 +406,16 @@ class MapViewModel @Inject constructor(
 }
 
 data class MapLayerItem(
-    val id: String = UUID.randomUUID().toString(), // Unique ID for the layer
+    val id: String = UUID.randomUUID().toString(),
     val name: String,
-    val uri: Uri? = null, // Local URI of the file (if stored locally)
+    val uri: Uri? = null,
     var isVisible: Boolean = true,
     var kmlLayerData: KmlLayer? = null
+)
+
+@Serializable
+data class CustomTileProviderConfig(
+    val id: String = UUID.randomUUID().toString(),
+    val name: String,
+    val urlTemplate: String
 )

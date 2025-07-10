@@ -31,10 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
-import com.geeksville.mesh.ui.map.MapFilterDropdown
-import com.geeksville.mesh.ui.map.MapTypeDropdown
 import com.geeksville.mesh.ui.map.MapViewModel
-import com.google.maps.android.compose.MapType
 
 @Composable
 fun MapControlsOverlay(
@@ -42,12 +39,12 @@ fun MapControlsOverlay(
     mapFilterMenuExpanded: Boolean,
     onMapFilterMenuDismissRequest: () -> Unit,
     onToggleMapFilterMenu: () -> Unit,
-    mapViewModel: MapViewModel, // For MapFilterDropdown
+    mapViewModel: MapViewModel, // For MapFilterDropdown and MapTypeDropdown
     mapTypeMenuExpanded: Boolean,
     onMapTypeMenuDismissRequest: () -> Unit,
     onToggleMapTypeMenu: () -> Unit,
-    onMapTypeSelected: (MapType) -> Unit,
-    onManageLayersClicked: () -> Unit
+    onManageLayersClicked: () -> Unit,
+    onManageCustomTileProvidersClicked: () -> Unit // New parameter
 ) {
     Column(
         modifier = modifier
@@ -77,10 +74,8 @@ fun MapControlsOverlay(
             MapTypeDropdown(
                 expanded = mapTypeMenuExpanded,
                 onDismissRequest = onMapTypeMenuDismissRequest,
-                onMapTypeSelected = {
-                    onMapTypeSelected(it)
-                    // Consider if the dismiss should also be explicit here or handled by onMapTypeMenuDismissRequest
-                }
+                mapViewModel = mapViewModel, // Pass mapViewModel
+                onManageCustomTileProvidersClicked = onManageCustomTileProvidersClicked // Pass new callback
             )
         }
 

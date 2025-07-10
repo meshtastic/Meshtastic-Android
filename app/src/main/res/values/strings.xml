@@ -744,4 +744,16 @@
     <string name="remove_layer">Remove Layer</string>
     <string name="add_layer">Add Layer</string>
     <string name="nodes_at_this_location">Nodes at this location</string>
+    <string name="selected_map_type">Selected Map Type</string>
+    <string name="manage_custom_tile_sources">Manage Custom Tile Sources</string>
+    <string name="add_custom_tile_source">Add Custom Tile Source</string>
+    <string name="no_custom_tile_sources_found">No Custom Tile Sources</string>
+    <string name="edit_custom_tile_source">Edit Custom Tile Source</string>
+    <string name="delete_custom_tile_source">Delete Custom Tile Source</string>
+    <string name="name_cannot_be_empty">Name cannot be empty.</string>
+    <string name="provider_name_exists">Provider name exists.</string>
+    <string name="url_cannot_be_empty">URL cannot be empty.</string>
+    <string name="url_must_contain_placeholders">URL must contain placeholders.</string>
+    <string name="url_template">URL Template</string>
+    <string name="url_template_hint">e.g. https://a.tile.openstreetmap.org/{z}/{x}/{y}.png</string>
 </resources>

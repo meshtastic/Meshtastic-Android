@@ -29,34 +29,14 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Place
-import androidx.compose.material.icons.filled.Visibility
-import androidx.compose.material.icons.filled.VisibilityOff
-import androidx.compose.material.icons.outlined.RadioButtonUnchecked
-import androidx.compose.material3.Button
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -64,18 +44,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.core.graphics.createBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.map.components.ClusterItemsListDialog
+import com.geeksville.mesh.ui.map.components.CustomMapLayersSheet
+import com.geeksville.mesh.ui.map.components.CustomTileProviderManagerSheet
 import com.geeksville.mesh.ui.map.components.EditWaypointDialog
 import com.geeksville.mesh.ui.map.components.MapControlsOverlay
 import com.geeksville.mesh.ui.map.components.NodeClusterMarkers
@@ -97,8 +76,10 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapsComposeExperimentalApi
+import com.google.maps.android.compose.TileOverlay
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.widgets.DisappearingScaleBar
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
@@ -137,14 +118,21 @@ fun MapView(
     val ourNodeInfo by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     var editingWaypoint by remember { mutableStateOf<MeshProtos.Waypoint?>(null) }
 
-    var selectedMapType by remember { mutableStateOf(MapType.NORMAL) }
+    // Selected Google Map type from ViewModel
+    val selectedGoogleMapType by mapViewModel.selectedGoogleMapType.collectAsStateWithLifecycle()
+    // Selected custom tile provider URL from ViewModel
+    val currentCustomTileProviderUrl by mapViewModel.selectedCustomTileProviderUrl.collectAsStateWithLifecycle()
+
     var mapTypeMenuExpanded by remember { mutableStateOf(false) }
+    var showCustomTileManagerSheet by remember { mutableStateOf(false) } // State for bottom sheet
+
     val defaultLatLng = LatLng(40.7871508066057, -119.2041344866371)
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(defaultLatLng, 7f)
     }
 
-    val allNodes by mapViewModel.nodes.collectAsStateWithLifecycle()
+    val allNodes by mapViewModel.nodes.map { nodes -> nodes.filter { node -> node.validPosition != null } }
+        .collectAsStateWithLifecycle(listOf())
     val waypoints by uiViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val displayableWaypoints = waypoints.values.mapNotNull { it.data.waypoint }
 
@@ -182,7 +170,6 @@ fun MapView(
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "*/*" // Allow all file types initially
-            // More specific MIME types for KML/KMZ
             val mimeTypes = arrayOf(
                 "application/vnd.google-earth.kml+xml",
                 "application/vnd.google-earth.kmz"
@@ -197,7 +184,16 @@ fun MapView(
     val onToggleVisibility = { layerId: String ->
         mapViewModel.toggleLayerVisibility(layerId)
     }
+
+    // Determine the Google Map type to use for the GoogleMap composable
+    val effectiveGoogleMapType = if (currentCustomTileProviderUrl != null) {
+        MapType.NONE // Don't render base tiles when a custom overlay is active
+    } else {
+        selectedGoogleMapType // Use the Google Map type selected in ViewModel
+    }
+
     var showClusterItemsDialog by remember { mutableStateOf<List<NodeClusterItem>?>(null) }
+
     Scaffold { paddingValues ->
         Box(
             modifier = Modifier
@@ -219,7 +215,7 @@ fun MapView(
                     zoomGesturesEnabled = true
                 ),
                 properties = MapProperties(
-                    mapType = selectedMapType,
+                    mapType = effectiveGoogleMapType,
                     isMyLocationEnabled = hasLocationPermission
                 ),
                 onMapLongClick = { latLng ->
@@ -232,13 +228,26 @@ fun MapView(
                     }
                 }
             ) {
+                // Add TileOverlay if a custom tile provider is selected
+                key(currentCustomTileProviderUrl) {
+                    currentCustomTileProviderUrl?.let { url ->
+                        mapViewModel.createUrlTileProvider(url)?.let { tileProvider ->
+                            TileOverlay(
+                                tileProvider = tileProvider,
+                                fadeIn = true, // Optional: for smoother appearance
+                                transparency = 0f, // Optional: adjust if needed
+                                zIndex = -1f,
+                            )
+                        }
+                    }
+                }
+
                 NodeClusterMarkers(
                     nodeClusterItems = nodeClusterItems,
                     mapFilterState = mapFilterState,
                     navigateToNodeDetails = navigateToNodeDetails,
                     onClusterClick = { cluster ->
                         val items = cluster.items.toList()
-                        // Check if all items are at the same location (or very, very close)
                         val allSameLocation =
                             items.size > 1 && items.all { it.position == items.first().position }
 
@@ -272,7 +281,7 @@ fun MapView(
                 MapEffect(mapLayers) { map ->
                     mapLayers.forEach { layerItem ->
                         mapViewModel.loadKmlLayerIfNeeded(map, layerItem)
-                            ?.let { kmlLayer -> // Combine let with ?.
+                            ?.let { kmlLayer ->
                                 if (layerItem.isVisible && !kmlLayer.isLayerOnMap) {
                                     kmlLayer.addLayerToMap()
                                 } else if (!layerItem.isVisible && kmlLayer.isLayerOnMap) {
@@ -304,15 +313,14 @@ fun MapView(
                         editingWaypoint = null
                     },
                     onDeleteClicked = { wpToDelete ->
-                        // If it's a shared waypoint and we are connected, send out a delete message
                         if (wpToDelete.lockedTo == 0 && isConnected && wpToDelete.id != 0) {
                             val deleteMarkerWp =
                                 wpToDelete.copy {
                                     expire = 1
-                                } // Set expire to 1 to indicate deletion
+                                }
                             uiViewModel.sendWaypoint(deleteMarkerWp)
                         }
-                        uiViewModel.deleteWaypoint(wpToDelete.id) // Delete from local DB
+                        uiViewModel.deleteWaypoint(wpToDelete.id)
                         editingWaypoint = null
                     },
                     onDismissRequest = { editingWaypoint = null }
@@ -328,85 +336,23 @@ fun MapView(
                 mapTypeMenuExpanded = mapTypeMenuExpanded,
                 onMapTypeMenuDismissRequest = { mapTypeMenuExpanded = false },
                 onToggleMapTypeMenu = { mapTypeMenuExpanded = true },
-                onMapTypeSelected = { mapType ->
-                    selectedMapType = mapType
-                    mapTypeMenuExpanded = false
-                },
                 onManageLayersClicked = {
                     showLayersBottomSheet = true
+                },
+                onManageCustomTileProvidersClicked = {
+                    mapTypeMenuExpanded = false
+                    showCustomTileManagerSheet = true
                 }
             )
         }
         if (showLayersBottomSheet) {
-            ModalBottomSheet({ showLayersBottomSheet = false }) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    LazyColumn {
-                        item {
-                            Text(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                text = stringResource(R.string.manage_map_layers)
-                            )
-                        }
-                        stickyHeader {
-                            Button(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                onClick = onAddLayerClicked
-                            ) {
-                                Text(stringResource(R.string.add_layer))
-                            }
-                        }
-                        if (mapLayers.isEmpty()) {
-                            item {
-                                Text(
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    text = stringResource(R.string.no_map_layers_loaded)
-                                )
-                            }
-                        }
-                        items(mapLayers, key = { it.id }) { layer ->
-                            ListItem(
-                                headlineContent = { Text(layer.name) },
-                                trailingContent = {
-                                    Row {
-                                        IconButton(onClick = {
-                                            onToggleVisibility(layer.id)
-                                        }) {
-                                            Icon(
-                                                imageVector = if (layer.isVisible) {
-                                                    Icons.Filled.Visibility
-                                                } else {
-                                                    Icons.Filled.VisibilityOff
-                                                },
-                                                contentDescription = stringResource(
-                                                    if (layer.isVisible) {
-                                                        R.string.hide_layer
-                                                    } else {
-                                                        R.string.show_layer
-                                                    }
-                                                )
-                                            )
-                                        }
-                                        IconButton(onClick = { onRemoveLayer(layer.id) }) {
-                                            Icon(
-                                                imageVector = Icons.Filled.Delete,
-                                                contentDescription = stringResource(R.string.remove_layer)
-                                            )
-                                        }
-                                    }
-                                }
-                            )
-                        }
-                        item {
-                            HorizontalDivider()
-                        }
-                    }
-                }
-            }
+            CustomMapLayersSheet(
+                mapLayers,
+                onToggleVisibility,
+                onRemoveLayer,
+                onAddLayerClicked,
+                onDismissRequest = { showLayersBottomSheet = false }
+            )
         }
         showClusterItemsDialog?.let {
             ClusterItemsListDialog(
@@ -418,94 +364,12 @@ fun MapView(
                 }
             )
         }
-    }
-}
-
-@Composable
-internal fun MapFilterDropdown(
-    // Made internal
-    expanded: Boolean,
-    onDismissRequest: () -> Unit,
-    mapViewModel: MapViewModel,
-) {
-    val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = onDismissRequest
-    ) {
-        DropdownMenuItem(
-            text = { Text(stringResource(id = R.string.only_favorites)) },
-            onClick = { mapViewModel.setOnlyFavorites(!mapFilterState.onlyFavorites) },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Favorite,
-                    contentDescription = stringResource(id = R.string.only_favorites)
-                )
-            },
-            trailingIcon = {
-                Checkbox(
-                    checked = mapFilterState.onlyFavorites,
-                    onCheckedChange = { mapViewModel.setOnlyFavorites(it) }
-                )
+        if (showCustomTileManagerSheet) {
+            ModalBottomSheet(
+                onDismissRequest = { showCustomTileManagerSheet = false },
+            ) {
+                CustomTileProviderManagerSheet(mapViewModel = mapViewModel)
             }
-        )
-        DropdownMenuItem(
-            text = { Text(stringResource(id = R.string.show_waypoints)) },
-            onClick = { mapViewModel.setShowWaypointsOnMap(!mapFilterState.showWaypoints) },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Filled.Place,
-                    contentDescription = stringResource(id = R.string.show_waypoints)
-                )
-            },
-            trailingIcon = {
-                Checkbox(
-                    checked = mapFilterState.showWaypoints,
-                    onCheckedChange = { mapViewModel.setShowWaypointsOnMap(it) }
-                )
-            }
-        )
-        DropdownMenuItem(
-            text = { Text(stringResource(id = R.string.show_precision_circle)) },
-            onClick = { mapViewModel.setShowPrecisionCircleOnMap(!mapFilterState.showPrecisionCircle) },
-            leadingIcon = {
-                Icon(
-                    imageVector = Icons.Outlined.RadioButtonUnchecked, // Placeholder icon
-                    contentDescription = stringResource(id = R.string.show_precision_circle)
-                )
-            },
-            trailingIcon = {
-                Checkbox(
-                    checked = mapFilterState.showPrecisionCircle,
-                    onCheckedChange = { mapViewModel.setShowPrecisionCircleOnMap(it) }
-                )
-            }
-        )
-    }
-}
-
-@Composable
-internal fun MapTypeDropdown( // Made internal
-    expanded: Boolean,
-    onDismissRequest: () -> Unit,
-    onMapTypeSelected: (MapType) -> Unit
-) {
-    val mapTypes = listOf(
-        stringResource(id = R.string.map_type_normal) to MapType.NORMAL,
-        stringResource(id = R.string.map_type_satellite) to MapType.SATELLITE,
-        stringResource(id = R.string.map_type_terrain) to MapType.TERRAIN,
-        stringResource(id = R.string.map_type_hybrid) to MapType.HYBRID,
-    )
-
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = onDismissRequest
-    ) {
-        mapTypes.forEach { (name, type) ->
-            DropdownMenuItem(
-                text = { Text(name) },
-                onClick = { onMapTypeSelected(type) }
-            )
         }
     }
 }
@@ -514,24 +378,20 @@ internal fun convertIntToEmoji(unicodeCodePoint: Int): String {
     return try {
         String(Character.toChars(unicodeCodePoint))
     } catch (e: IllegalArgumentException) {
-        // Handle cases where the integer is not a valid Unicode code point
-        // For example, return a placeholder or an empty string
         Log.e("Emoji_Conversion", "Invalid Unicode code point: $unicodeCodePoint", e)
-        "\uD83D\uDCCD" // Placeholder for invalid code point
+        "\uD83D\uDCCD"
     }
 }
 
 internal fun unicodeEmojiToBitmap(icon: Int): BitmapDescriptor {
     val unicodeEmoji = convertIntToEmoji(icon)
-    // Create a Paint object for drawing text
     val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        textSize = 64f // Adjust size as needed
-        color = android.graphics.Color.BLACK // Adjust color as needed
+        textSize = 64f
+        color = android.graphics.Color.BLACK
         textAlign = Paint.Align.CENTER
     }
 
-    // Create a bitmap and draw the emoji onto it
-    val baseline = -paint.ascent() // ascent() is negative
+    val baseline = -paint.ascent()
     val width = (paint.measureText(unicodeEmoji) + 0.5f).toInt()
     val height = (baseline + paint.descent() + 0.5f).toInt()
     val image = createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888)
@@ -541,7 +401,6 @@ internal fun unicodeEmojiToBitmap(icon: Int): BitmapDescriptor {
     return BitmapDescriptorFactory.fromBitmap(image)
 }
 
-// Extension function to get file name from URI
 @Suppress("NestedBlockDepth")
 fun Uri.getFileName(context: android.content.Context): String {
     var name = this.lastPathSegment ?: "layer_${System.currentTimeMillis()}"
@@ -568,7 +427,7 @@ data class NodeClusterItem(
     override fun getPosition(): LatLng = nodePosition
     override fun getTitle(): String = nodeTitle
     override fun getSnippet(): String = nodeSnippet
-    override fun getZIndex(): Float? = null // Default behavior
+    override fun getZIndex(): Float? = null
 
     fun getPrecisionMeters(): Double? {
         val precisionMap = mapOf(
