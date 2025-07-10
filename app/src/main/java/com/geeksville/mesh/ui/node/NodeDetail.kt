@@ -773,7 +773,7 @@ private fun EnvironmentMetrics(
             InfoCard(
                 icon = ImageVector.vectorResource(id = R.drawable.soil_moisture),
                 text = stringResource(R.string.soil_moisture),
-                value = "%.0%%".format(soilMoisture)
+                value = "%.0f%%".format(soilMoisture.toFloat())
             )
         }
         if (hasBarometricPressure()) {
