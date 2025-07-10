@@ -58,6 +58,8 @@ import java.net.URL
 import java.util.UUID
 import javax.inject.Inject
 
+private const val TILE_SIZE = 256
+
 @Suppress("TooManyFunctions")
 @HiltViewModel
 class MapViewModel @Inject constructor(
@@ -112,11 +114,11 @@ class MapViewModel @Inject constructor(
             }
             val existingConfigs = customTileProviderConfigs.value
             if (existingConfigs.any {
-                it.id != configToUpdate.id && it.name.equals(
+                    it.id != configToUpdate.id && it.name.equals(
                         configToUpdate.name,
                         ignoreCase = true
                     )
-            }
+                }
             ) {
                 _errorFlow.emit("Another custom tile provider with name '${configToUpdate.name}' already exists.")
                 return@launch
@@ -126,7 +128,10 @@ class MapViewModel @Inject constructor(
 
             val originalConfig =
                 customTileProviderRepository.getCustomTileProviderById(configToUpdate.id)
-            if (_selectedCustomTileProviderUrl.value != null && originalConfig?.urlTemplate == _selectedCustomTileProviderUrl.value) {
+            if (
+                _selectedCustomTileProviderUrl.value != null &&
+                originalConfig?.urlTemplate == _selectedCustomTileProviderUrl.value
+            ) {
                 // No change needed if URL didn't change, or handle if it did
             } else if (originalConfig != null && _selectedCustomTileProviderUrl.value != originalConfig.urlTemplate) {
                 val currentlySelectedConfig =
@@ -180,7 +185,7 @@ class MapViewModel @Inject constructor(
             )
             return null
         }
-        return object : UrlTileProvider(256, 256) {
+        return object : UrlTileProvider(TILE_SIZE, TILE_SIZE) {
             override fun getTileUrl(x: Int, y: Int, zoom: Int): URL? {
                 val formattedUrl = urlString
                     .replace("{z}", zoom.toString(), ignoreCase = true)
@@ -198,8 +203,8 @@ class MapViewModel @Inject constructor(
 
     private fun isValidTileUrlTemplate(urlTemplate: String): Boolean {
         return urlTemplate.contains("{z}", ignoreCase = true) &&
-            urlTemplate.contains("{x}", ignoreCase = true) &&
-            urlTemplate.contains("{y}", ignoreCase = true)
+                urlTemplate.contains("{x}", ignoreCase = true) &&
+                urlTemplate.contains("{y}", ignoreCase = true)
     }
 
     private val onlyFavorites = MutableStateFlow(preferences.getBoolean("only-favorites", false))
