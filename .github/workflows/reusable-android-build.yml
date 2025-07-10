@@ -57,14 +57,12 @@ jobs:
           build-scan-terms-of-use-agree: 'yes'
           add-job-summary: always
 
-      - name: Calculate Version Code with Git Commit Count and Offset
+      - name: Calculate Version Code
         id: calculate_version_code
-        run: |
-          GIT_COMMIT_COUNT=$(git rev-list --count HEAD)
-          OFFSET=30630 # to ensure versionCode is above 30630 (our last manual versionCode)
-          VERSION_CODE=$((GIT_COMMIT_COUNT + OFFSET))
-          echo "Calculated versionCode: $VERSION_CODE (from $GIT_COMMIT_COUNT commits + $OFFSET offset)"
-          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+        uses: ./.github/actions/calculate-version-code
+
+      - name: Expose Version Code as Environment Variable
+        run: echo "VERSION_CODE=${{ steps.calculate_version_code.outputs.versionCode }}" >> $GITHUB_ENV
 
       - name: Run Detekt, Build, Lint, and Local Tests
         run: ./gradlew :app:detekt :app:lintFdroidDebug :app:lintGoogleDebug :app:assembleDebug :app:testFdroidDebug :app:testGoogleDebug --configuration-cache --scan
