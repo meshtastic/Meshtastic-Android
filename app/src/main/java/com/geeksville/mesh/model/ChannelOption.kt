@@ -110,7 +110,7 @@ enum class RegionInfo(
     PH_915(RegionCode.PH_915, "Philippines 915MHz", 915.0f, 918.0f),
     LORA_24(RegionCode.LORA_24, "2.4 GHz", 2400.0f, 2483.5f),
     ANZ_433(RegionCode.ANZ_433, "Australia / New Zealand 433MHz", 433.0f, 434.0f),
-    KZ_433(RegionCode.KZ_433, "Kazakhstan 433MHz", 433.0f, 434.0f),
+    KZ_433(RegionCode.protoKZ_433, "Kazakhstan 433MHz", 433.0f, 434.0f),
     KZ_863(RegionCode.KZ_863, "Kazakhstan 863MHz", 863.0f, 870.0f),
 }
 
