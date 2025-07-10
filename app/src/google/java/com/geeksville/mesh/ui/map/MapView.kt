@@ -35,11 +35,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -136,6 +138,41 @@ fun MapView(
     val waypoints by uiViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val displayableWaypoints = waypoints.values.mapNotNull { it.data.waypoint }
 
+    // State to track if the initial camera zoom has happened
+    var hasZoomed by rememberSaveable { mutableStateOf(false) }
+
+    // Effect to zoom to bounds of all items when map is first loaded
+    LaunchedEffect(allNodes, displayableWaypoints) {
+        if (!hasZoomed && (allNodes.isNotEmpty() || displayableWaypoints.isNotEmpty())) {
+            val boundsBuilder = LatLngBounds.builder()
+            allNodes.forEach { node ->
+                boundsBuilder.include(
+                    LatLng(
+                        node.position.latitudeI * DegD,
+                        node.position.longitudeI * DegD
+                    )
+                )
+            }
+            displayableWaypoints.forEach { waypoint ->
+                boundsBuilder.include(
+                    LatLng(
+                        waypoint.latitudeI * DegD,
+                        waypoint.longitudeI * DegD
+                    )
+                )
+            }
+            try {
+                cameraPositionState.animate(
+                    CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 100)
+                )
+                hasZoomed = true // Ensure this runs only once
+            } catch (e: IllegalStateException) {
+                // Ignore cases where the bounds are empty or otherwise invalid
+                Log.w("MapView", "Could not animate to bounds: ${e.message}")
+            }
+        }
+    }
+
     val filteredNodes = if (mapFilterState.onlyFavorites) {
         allNodes.filter { it.isFavorite || it.num == ourNodeInfo?.num }
     } else {
@@ -169,7 +206,7 @@ fun MapView(
     val onAddLayerClicked = {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
-            type = "*/*" // Allow all file types initially
+            type = "*/*"
             val mimeTypes = arrayOf(
                 "application/vnd.google-earth.kml+xml",
                 "application/vnd.google-earth.kmz"
@@ -185,11 +222,10 @@ fun MapView(
         mapViewModel.toggleLayerVisibility(layerId)
     }
 
-    // Determine the Google Map type to use for the GoogleMap composable
     val effectiveGoogleMapType = if (currentCustomTileProviderUrl != null) {
-        MapType.NONE // Don't render base tiles when a custom overlay is active
+        MapType.NONE
     } else {
-        selectedGoogleMapType // Use the Google Map type selected in ViewModel
+        selectedGoogleMapType
     }
 
     var showClusterItemsDialog by remember { mutableStateOf<List<NodeClusterItem>?>(null) }
@@ -228,14 +264,13 @@ fun MapView(
                     }
                 }
             ) {
-                // Add TileOverlay if a custom tile provider is selected
                 key(currentCustomTileProviderUrl) {
                     currentCustomTileProviderUrl?.let { url ->
                         mapViewModel.createUrlTileProvider(url)?.let { tileProvider ->
                             TileOverlay(
                                 tileProvider = tileProvider,
-                                fadeIn = true, // Optional: for smoother appearance
-                                transparency = 0f, // Optional: adjust if needed
+                                fadeIn = true,
+                                transparency = 0f,
                                 zIndex = -1f,
                             )
                         }
