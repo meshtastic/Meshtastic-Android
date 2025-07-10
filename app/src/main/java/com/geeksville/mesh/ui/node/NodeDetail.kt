@@ -811,6 +811,13 @@ private fun EnvironmentMetrics(
                 value = "%.0f lx".format(lux)
             )
         }
+        if (hasUvLux()) {
+            InfoCard(
+                icon = Icons.Default.LightMode, // You may want to use a different icon for UV
+                text = stringResource(R.string.uv_lux),
+                value = "%.0f lx".format(uvLux)
+            )
+        }
         if (hasWindSpeed()) {
             @Suppress("MagicNumber")
             val normalizedBearing = (windDirection % 360 + 360) % 360

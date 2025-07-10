@@ -23,4 +23,6 @@ import dagger.assisted.AssistedFactory
  * Factory for creating `BluetoothInterface` instances.
  */
 @AssistedFactory
-interface BluetoothInterfaceFactory : InterfaceFactorySpi<BluetoothInterface>
+interface BluetoothInterfaceFactory {
+    fun create(rest: String): BluetoothInterface
+}

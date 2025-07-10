@@ -20,6 +20,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           submodules: 'recursive'
       - name: Validate Gradle wrapper
         uses: gradle/actions/wrapper-validation@v4
@@ -28,20 +29,23 @@ jobs:
         with:
           java-version: '21'
           distribution: 'jetbrains'
+          cache: 'gradle'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Cache Gradle User Home
         uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', 'gradle.properties', 'settings.gradle*') }}
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts', '**/gradle.properties', '**/libs.versions.toml') }}
           restore-keys: |
             gradle-${{ runner.os }}-
       - name: Cache Android build cache
         uses: actions/cache@v4
         with:
           path: ~/.android/build-cache
-          key: android-build-cache-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', 'gradle.properties', 'settings.gradle*') }}
+          key: android-build-cache-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts', '**/gradle.properties', '**/libs.versions.toml') }}
           restore-keys: |
             android-build-cache-${{ runner.os }}-
       - name: Setup Gradle
@@ -52,8 +56,18 @@ jobs:
           build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
           build-scan-terms-of-use-agree: 'yes'
           add-job-summary: always
+
+      - name: Calculate Version Code
+        id: calculate_version_code
+        uses: ./.github/actions/calculate-version-code
+
+      - name: Expose Version Code as Environment Variable
+        run: echo "VERSION_CODE=${{ steps.calculate_version_code.outputs.versionCode }}" >> $GITHUB_ENV
+
       - name: Run Detekt, Build, Lint, and Local Tests
-        run: ./gradlew detekt lintFdroidDebug lintGoogleDebug assembleDebug testFdroidDebug testGoogleDebug --configuration-cache --scan
+        run: ./gradlew :app:detekt :app:lintFdroidDebug :app:lintGoogleDebug :app:assembleDebug :app:testFdroidDebug :app:testGoogleDebug --configuration-cache --scan
+        env:
+          VERSION_CODE: ${{ env.VERSION_CODE }}
       - name: Upload F-Droid debug artifact
         if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@v4

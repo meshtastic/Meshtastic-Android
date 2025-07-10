@@ -15,4 +15,6 @@
   ~ You should have received a copy of the GNU General Public License
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
-<resources></resources>
+<resources>
+    <string name="send_hello_message">Enviar Mensaje Hola</string>
+</resources>

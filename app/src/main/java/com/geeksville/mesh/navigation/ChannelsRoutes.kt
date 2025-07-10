@@ -47,7 +47,8 @@ fun NavGraphBuilder.channelsGraph(navController: NavHostController, uiViewModel:
     ) {
         composable<ChannelsRoutes.Channels> { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<ChannelsRoutes.ChannelsGraph>()
+                val parentRoute = backStackEntry.destination.parent!!.route!!
+                navController.getBackStackEntry(parentRoute)
             }
             ChannelScreen(
                 viewModel = uiViewModel,
@@ -65,7 +66,8 @@ private fun NavGraphBuilder.configRoutes(
     ConfigRoute.entries.forEach { configRoute ->
         composable(configRoute.route::class) { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<ChannelsRoutes.ChannelsGraph>()
+                val parentRoute = backStackEntry.destination.parent!!.route!!
+                navController.getBackStackEntry(parentRoute)
             }
             when (configRoute) {
                 ConfigRoute.CHANNELS -> ChannelConfigScreen(hiltViewModel(parentEntry))

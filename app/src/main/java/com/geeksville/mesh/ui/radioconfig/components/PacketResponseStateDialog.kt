@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.radioconfig.components
 
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -44,6 +45,7 @@ fun <T> PacketResponseStateDialog(
     onDismiss: () -> Unit = {},
     onComplete: () -> Unit = {},
 ) {
+    val backDispatcher = LocalOnBackPressedDispatcherOwner.current?.onBackPressedDispatcher
     AlertDialog(
         onDismissRequest = {},
         shape = RoundedCornerShape(16.dp),
@@ -83,7 +85,12 @@ fun <T> PacketResponseStateDialog(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Button(
-                    onClick = onDismiss,
+                    onClick = {
+                        onDismiss()
+                        if (state is ResponseState.Success || state is ResponseState.Error) {
+                            backDispatcher?.onBackPressed()
+                        }
+                    },
                     modifier = Modifier.padding(top = 16.dp)
                 ) { Text(stringResource(R.string.close)) }
             }
