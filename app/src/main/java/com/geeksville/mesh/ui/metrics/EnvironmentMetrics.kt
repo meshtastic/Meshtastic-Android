@@ -120,7 +120,7 @@ fun EnvironmentMetricsScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
     val selectedTimeFrame by viewModel.timeFrame.collectAsState()
-    val graphData = environmentState.environmentMetricsFiltered(selectedTimeFrame, state.isFahrenheit)
+    val graphData = environmentState.environmentMetricsFiltered(selectedTimeFrame)
     val data = graphData.metrics
 
     val processedTelemetries: List<Telemetry> = if (state.isFahrenheit) {
