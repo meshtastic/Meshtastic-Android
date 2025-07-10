@@ -69,6 +69,7 @@
     <string name="url_for_join">Връзка за присъединяване към Meshtastic мрежа</string>
     <string name="accept">Приеми</string>
     <string name="cancel">Отказ</string>
+    <string name="clear_changes">Изчистване на промените</string>
     <string name="change_channel">Промени канал</string>
     <string name="are_you_sure_channel">Сигурни ли сте, че искате да смените канала? Цялата комуникация с други възли ще спре, докато не споделите новите настройки на канала.</string>
     <string name="new_channel_rcvd">Получен е URL адрес на нов канал</string>
@@ -114,6 +115,9 @@
     <string name="debug_filters">Филтри</string>
     <string name="debug_active_filters">Активни филтри</string>
     <string name="debug_default_search">Търсене в журналите…</string>
+    <string name="debug_search_clear">Изчистване на търсенето</string>
+    <string name="debug_filter_add">Добавяне на филтър</string>
+    <string name="debug_filter_clear">Изчистване на всички филтри</string>
     <string name="debug_clear">Изчистване на журналите</string>
     <string name="clear">Изчисти</string>
     <string name="updating_firmware">Актуализиране на фърмуера, изчакайте до осем минути…</string>
@@ -160,6 +164,8 @@
     <string name="delete_for_everyone">Изтриване за всички</string>
     <string name="delete_for_me">Изтриване за мен</string>
     <string name="select_all">Избери всички</string>
+    <string name="close_selection">Затваряне на селекцията</string>
+    <string name="delete_selection">Изтриване на избраните</string>
     <string name="modem_config_slow_long">Дълго разстояние / Бавно</string>
     <string name="map_style_selection">Избор на стил</string>
     <string name="map_download_region">Сваляне на регион</string>
@@ -245,6 +251,7 @@
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Споделен ключ</string>
     <string name="encryption_psk_text">Директните съобщения използват споделения ключ за канала.</string>
+    <string name="encryption_pkc">Криптиране с публичния ключ</string>
     <string name="encryption_error">Несъответствие на публичния ключ</string>
     <string name="encryption_error_text">Публичният ключ не съвпада със записания ключ. Можете да премахнете възела и да го оставите да обмени ключове отново, но това може да означава по-сериозен проблем със сигурността. Свържете се с потребителя чрез друг надежден канал, за да определите дали промяната на ключа се дължи на фабрично нулиране или друго умишлено действие.</string>
     <string name="more_details">Повече подробности</string>
@@ -333,16 +340,24 @@
     <string name="rotary_encoder_1_enabled">Ротационен енкодер #1 е активиран</string>
     <string name="messages">Съобщения</string>
     <string name="friendly_name">Приятелско име</string>
+    <string name="use_input_pullup_mode">Използване на режим INPUT_PULLUP</string>
     <string name="device_config">Конфигурация на устройството</string>
     <string name="role">Роля</string>
     <string name="posix_timezone">POSIX часова зона</string>
     <string name="display_config">Конфигурация на дисплея</string>
+    <string name="screen_timeout_seconds">Време за изключване на екрана (секунди)</string>
     <string name="gps_coordinates_format">Формат на GPS координатите</string>
     <string name="compass_north_top">Север на компаса отгоре</string>
     <string name="flip_screen">Обръщане на екрана</string>
     <string name="display_units">Показвани единици</string>
     <string name="display_mode">Режим на дисплея</string>
+    <string name="heading_bold">Удебелено заглавие</string>
+    <string name="wake_screen_on_tap_or_motion">Събуждане на екрана при докосване или движение</string>
     <string name="compass_orientation">Ориентация на компаса</string>
+    <string name="external_notification_config">Конфигурация за външни известия</string>
+    <string name="external_notification_enabled">Външните известия са активирани</string>
+    <string name="notifications_on_message_receipt">Известия за получаване на съобщение</string>
+    <string name="notifications_on_alert_bell_receipt">Известия при получаване на сигнал/позвъняване</string>
     <string name="ringtone">Тон на звънене</string>
     <string name="lora_config">Конфигурация на LoRa</string>
     <string name="bandwidth">Широчина на честотната лента</string>
@@ -472,6 +487,7 @@
     <string name="export_keys_confirmation">Експортира публичния и частния ключове във файл. Моля, съхранявайте го на сигурно място.</string>
     <string name="node_count_template">(%1$d онлайн / %2$d общо)</string>
     <string name="no_ble_devices">Няма открити Bluetooth устройства</string>
+    <string name="no_network_devices">Няма открити мрежови устройства.</string>
     <string name="no_usb_devices">Няма открити USB серийни устройства.</string>
     <string name="meshtastic">Meshtastic</string>
 </resources>

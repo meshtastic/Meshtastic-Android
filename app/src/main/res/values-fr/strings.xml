@@ -97,6 +97,7 @@
     <string name="url_for_join">URL pour rejoindre un maillage Meshtastic</string>
     <string name="accept">Accepter</string>
     <string name="cancel">Annuler</string>
+    <string name="clear_changes">Annuler modifications</string>
     <string name="change_channel">Changer de canal</string>
     <string name="are_you_sure_channel">Êtes-vous sûr de vouloir modifier le canal ? Toutes les communications avec les autres nœuds s\'arrêteront jusqu\'à ce que vous partagiez les nouveaux paramètres du canal.</string>
     <string name="new_channel_rcvd">Réception de l\'URL d\'un nouveau cana</string>
@@ -116,7 +117,7 @@
     <string name="connected_count">Connectés : %1$s sur  en ligne</string>
     <string name="update_firmware">Mise à jour du Firmware</string>
     <string name="ip_address">Adresse IP:</string>
-    <string name="ip_port">Port:</string>
+    <string name="ip_port">Port :</string>
     <string name="connected">Connecté à la radio</string>
     <string name="connected_to">Connecté à la radio (%s)</string>
     <string name="not_connected">Non connecté</string>
@@ -678,7 +679,7 @@
     <string name="client_notification">Notification client</string>
     <string name="compromised_keys">Clés compromises détectées, sélectionnez OK pour régénérer.</string>
     <string name="regenerate_private_key">Régénérer la clé privée</string>
-    <string name="regenerate_keys_confirmation">Êtes-vous sûr de vouloir régénérer votre clé privée ?\n\nLes nœuds qui peuvent avoir précédemment échangé des clés avec ce noeud devront supprimer ce noeud et ré-échanger des clés afin de reprendre une communication sécurisée.</string>
+    <string name="regenerate_keys_confirmation">Êtes-vous sûr de vouloir régénérer votre clé privée ?\n\nLes nœuds qui peuvent avoir précédemment échangé des clés avec ce nœud devront supprimer ce nœud et ré-échanger des clés afin de reprendre une communication sécurisée.</string>
     <string name="export_keys">Exporter des clés</string>
     <string name="export_keys_confirmation">Exporte les clés publiques et privées vers un fichier. Veuillez stocker quelque part en toute sécurité.</string>
     <string name="modules_unlocked">Modules déverrouillés</string>
@@ -686,7 +687,7 @@
     <string name="node_count_template">(%1$d en ligne / %2$d total)</string>
     <string name="react">Réagir</string>
     <string name="disconnect">Déconnecter</string>
-    <string name="no_ble_devices">Aucun périphérique Bluetooth trouvé..</string>
+    <string name="no_ble_devices">Aucun périphérique Bluetooth trouvé.</string>
     <string name="no_network_devices">Aucun périphérique réseau trouvé.</string>
     <string name="no_usb_devices">Aucun périphérique série USB détecté.</string>
     <string name="scroll_to_bottom">Défiler vers le bas</string>
@@ -704,4 +705,5 @@
     <string name="unknown_channel">Canal inconnu</string>
     <string name="warning">Attention</string>
     <string name="overflow_menu">Menu supplémentaire</string>
+    <string name="uv_lux">UV Lux</string>
 </resources>

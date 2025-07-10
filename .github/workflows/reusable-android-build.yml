@@ -20,6 +20,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
+          fetch-depth: 0
           submodules: 'recursive'
       - name: Validate Gradle wrapper
         uses: gradle/actions/wrapper-validation@v4
@@ -28,20 +29,23 @@ jobs:
         with:
           java-version: '21'
           distribution: 'jetbrains'
+          cache: 'gradle'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Cache Gradle User Home
         uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', 'gradle.properties', 'settings.gradle*') }}
+          key: gradle-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts', '**/gradle.properties', '**/libs.versions.toml') }}
           restore-keys: |
             gradle-${{ runner.os }}-
       - name: Cache Android build cache
         uses: actions/cache@v4
         with:
           path: ~/.android/build-cache
-          key: android-build-cache-${{ runner.os }}-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', 'gradle.properties', 'settings.gradle*') }}
+          key: android-build-cache-${{ runner.os }}-${{ hashFiles('**/*.gradle.kts', '**/gradle.properties', '**/libs.versions.toml') }}
           restore-keys: |
             android-build-cache-${{ runner.os }}-
       - name: Setup Gradle
@@ -52,8 +56,20 @@ jobs:
           build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
           build-scan-terms-of-use-agree: 'yes'
           add-job-summary: always
+
+      - name: Calculate Version Code with Git Commit Count and Offset
+        id: calculate_version_code
+        run: |
+          GIT_COMMIT_COUNT=$(git rev-list --count HEAD)
+          OFFSET=30630 # to ensure versionCode is above 30630 (our last manual versionCode)
+          VERSION_CODE=$((GIT_COMMIT_COUNT + OFFSET))
+          echo "Calculated versionCode: $VERSION_CODE (from $GIT_COMMIT_COUNT commits + $OFFSET offset)"
+          echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
+
       - name: Run Detekt, Build, Lint, and Local Tests
-        run: ./gradlew detekt lintFdroidDebug lintGoogleDebug assembleDebug testFdroidDebug testGoogleDebug --configuration-cache --scan
+        run: ./gradlew :app:detekt :app:lintFdroidDebug :app:lintGoogleDebug :app:assembleDebug :app:testFdroidDebug :app:testGoogleDebug --configuration-cache --scan
+        env:
+          VERSION_CODE: ${{ env.VERSION_CODE }}
       - name: Upload F-Droid debug artifact
         if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@v4

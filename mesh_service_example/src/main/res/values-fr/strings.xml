@@ -16,6 +16,6 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
-    <string name="app_name">MeshServiceExample</string>
+    <string name="app_name">Exemple de service de maillage</string>
     <string name="send_hello_message">Envoyer un message d’annonce</string>
 </resources>

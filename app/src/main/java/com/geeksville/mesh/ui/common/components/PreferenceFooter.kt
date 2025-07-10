@@ -41,7 +41,7 @@ fun PreferenceFooter(
 ) {
     PreferenceFooter(
         enabled = enabled,
-        negativeText = R.string.cancel,
+        negativeText = R.string.clear_changes,
         onNegativeClicked = onCancelClicked,
         positiveText = R.string.send,
         onPositiveClicked = onSaveClicked,

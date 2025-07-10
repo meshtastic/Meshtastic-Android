@@ -119,7 +119,8 @@ fun NavGraphBuilder.nodeDetailGraph(
     ) {
         composable<NodesRoutes.NodeDetail> { backStackEntry ->
             val parentEntry = remember(backStackEntry) {
-                navController.getBackStackEntry<NodesRoutes.NodeDetailGraph>()
+                val parentRoute = backStackEntry.destination.parent!!.route!!
+                navController.getBackStackEntry(parentRoute)
             }
             NodeDetailScreen(
                 uiViewModel = uiViewModel,
@@ -138,7 +139,8 @@ fun NavGraphBuilder.nodeDetailGraph(
         NodeDetailRoute.entries.forEach { nodeDetailRoute ->
             composable(nodeDetailRoute.route::class) { backStackEntry ->
                 val parentEntry = remember(backStackEntry) {
-                    navController.getBackStackEntry<NodesRoutes.NodeDetailGraph>()
+                    val parentRoute = backStackEntry.destination.parent!!.route!!
+                    navController.getBackStackEntry(parentRoute)
                 }
                 when (nodeDetailRoute) {
                     NodeDetailRoute.DEVICE -> DeviceMetricsScreen(hiltViewModel(parentEntry))

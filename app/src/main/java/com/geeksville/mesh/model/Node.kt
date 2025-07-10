@@ -30,6 +30,8 @@ import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.util.GPSFormat
 import com.geeksville.mesh.util.latLongToMeter
 import com.geeksville.mesh.util.toDistanceString
+import com.google.protobuf.ByteString
+import com.google.protobuf.kotlin.isNotEmpty
 
 @Suppress("MagicNumber")
 data class Node(
@@ -49,6 +51,7 @@ data class Node(
     val environmentMetrics: EnvironmentMetrics = EnvironmentMetrics.getDefaultInstance(),
     val powerMetrics: PowerMetrics = PowerMetrics.getDefaultInstance(),
     val paxcounter: PaxcountProtos.Paxcount = PaxcountProtos.Paxcount.getDefaultInstance(),
+    val publicKey: ByteString? = null,
 ) {
     val colors: Pair<Int, Int>
         get() { // returns foreground and background @ColorInt for each 'num'
@@ -60,8 +63,8 @@ data class Node(
         }
 
     val isUnknownUser get() = user.hwModel == MeshProtos.HardwareModel.UNSET
-    val hasPKC get() = !user.publicKey.isEmpty
-    val mismatchKey get() = user.publicKey == NodeEntity.ERROR_BYTE_STRING
+    val hasPKC get() = (publicKey ?: user.publicKey).isNotEmpty()
+    val mismatchKey get() = (publicKey ?: user.publicKey) == NodeEntity.ERROR_BYTE_STRING
 
     val hasEnvironmentMetrics: Boolean
         get() = environmentMetrics != EnvironmentMetrics.getDefaultInstance()
