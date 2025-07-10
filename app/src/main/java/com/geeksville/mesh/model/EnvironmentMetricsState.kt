@@ -85,7 +85,7 @@ data class EnvironmentMetricsState(
      * @param timeFrame used to filter
      * @return [EnvironmentGraphingData]
      */
-    @Suppress("LongMethod", "CyclomaticComplexMethod")
+    @Suppress("LongMethod")
     fun environmentMetricsFiltered(timeFrame: TimeFrame): EnvironmentGraphingData {
         val oldestTime = timeFrame.calculateOldestTime()
         val telemetries = environmentMetrics.filter { it.time >= oldestTime }
