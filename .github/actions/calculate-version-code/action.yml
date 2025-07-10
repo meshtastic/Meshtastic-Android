@@ -1,0 +1,19 @@
+name: 'Calculate Version Code'
+description: 'Calculates the Android versionCode based on the Git commit count plus an offset.'
+outputs:
+  versionCode:
+    description: "The calculated version code"
+    value: ${{ steps.calculate_version.outputs.VERSION_CODE }}
+runs:
+  using: 'composite'
+  steps:
+    - name: Calculate Version Code
+      id: calculate_version
+      shell: bash
+      run: |
+        # This action assumes that the repo has been checked out with `fetch-depth: 0`
+        GIT_COMMIT_COUNT=$(git rev-list --count HEAD)
+        OFFSET=30630
+        VERSION_CODE=$((GIT_COMMIT_COUNT + OFFSET))
+        echo "Calculated versionCode: $VERSION_CODE (from $GIT_COMMIT_COUNT commits + $OFFSET offset)"
+        echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_OUTPUT

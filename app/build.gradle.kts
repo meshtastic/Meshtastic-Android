@@ -54,26 +54,48 @@ android {
         targetSdk = Configs.TARGET_SDK
         versionCode = System.getenv("VERSION_CODE")?.toIntOrNull()
             ?: 30630
-        versionName = Configs.VERSION_NAME
         testInstrumentationRunner = "com.geeksville.mesh.TestRunner"
         buildConfigField("String", "MIN_FW_VERSION", "\"${Configs.MIN_FW_VERSION}\"")
         buildConfigField("String", "ABS_MIN_FW_VERSION", "\"${Configs.ABS_MIN_FW_VERSION}\"")
         // per https://developer.android.com/studio/write/vector-asset-studio
         vectorDrawables.useSupportLibrary = true
+        // We have to list all translated languages here, because some of our libs have bogus languages that google play
+        // doesn't like and we need to strip them (gr)
+        @Suppress("UnstableApiUsage")
+        androidResources.localeFilters.addAll(
+            listOf(
+                "bg", "ca", "cs", "de",
+                "el", "en", "es", "et",
+                "fi", "fr", "fr-rHT", "ga",
+                "gl", "hr", "hu", "is",
+                "it", "iw", "ja", "ko",
+                "lt", "nl", "nb", "pl",
+                "pt", "pt-rBR", "ro",
+                "ru", "sk", "sl", "sq",
+                "sr", "sv", "tr", "zh-rCN",
+                "zh-rTW", "uk"
+            )
+        )
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+        }
     }
     flavorDimensions.add("default")
     productFlavors {
+        val versionCode = defaultConfig.versionCode
         create("fdroid") {
             dimension = "default"
             dependenciesInfo {
                 includeInApk = false
             }
+            versionName = "${Configs.VERSION_NAME_BASE} ($versionCode) fdroid"
         }
         create("google") {
             dimension = "default"
             // Enable Firebase Crashlytics for Google Play builds
             apply(plugin = libs.plugins.google.services.get().pluginId)
             apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
+            versionName = "${Configs.VERSION_NAME_BASE} ($versionCode) google"
         }
     }
     buildTypes {
@@ -90,26 +112,6 @@ android {
         }
         named("debug") {
             isPseudoLocalesEnabled = true
-        }
-    }
-    defaultConfig {
-        // We have to list all translated languages here, because some of our libs have bogus languages that google play
-        // doesn't like and we need to strip them (gr)
-        androidResources.localeFilters += listOf(
-            "bg", "ca", "cs", "de",
-            "el", "en", "es", "et",
-            "fi", "fr", "fr-rHT", "ga",
-            "gl", "hr", "hu", "is",
-            "it", "iw", "ja", "ko",
-            "lt", "nl", "nb", "pl",
-            "pt", "pt-rBR", "ro",
-            "ru", "sk", "sl", "sq",
-            "sr", "sv", "tr", "zh-rCN",
-            "zh-rTW", "uk"
-        )
-
-        ndk {
-            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
         }
     }
     bundle {
