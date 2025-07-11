@@ -21,6 +21,8 @@ import androidx.compose.ui.graphics.Color
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.ui.common.theme.InfantryBlue
 import com.geeksville.mesh.ui.common.theme.Orange
+import com.geeksville.mesh.ui.common.theme.Pink
+import com.geeksville.mesh.ui.common.theme.Purple
 import com.geeksville.mesh.util.UnitConversions
 
 enum class Environment(val color: Color) {
@@ -32,6 +34,16 @@ enum class Environment(val color: Color) {
     HUMIDITY(InfantryBlue) {
         override fun getValue(telemetry: Telemetry): Float {
             return telemetry.environmentMetrics.relativeHumidity
+        }
+    },
+    SOIL_TEMPERATURE(Pink) {
+        override fun getValue(telemetry: Telemetry): Float {
+            return telemetry.environmentMetrics.soilTemperature
+        }
+    },
+    SOIL_MOISTURE(Purple) {
+        override fun getValue(telemetry: Telemetry): Float {
+            return telemetry.environmentMetrics.soilMoisture.toFloat()
         }
     },
     IAQ(Color.Green) {
@@ -84,7 +96,7 @@ data class EnvironmentMetricsState(
             return EnvironmentGraphingData(metrics = telemetries, shouldPlot = shouldPlot.toList())
         }
 
-        /* Grab the combined min and max for temp, humidity, and iaq. */
+        /* Grab the combined min and max for temp, humidity, soil_Temperature, soilMoisture and iaq. */
         val minValues = mutableListOf<Float>()
         val maxValues = mutableListOf<Float>()
         val (minTemp, maxTemp) = Pair(
@@ -112,6 +124,31 @@ data class EnvironmentMetricsState(
             minValues.add(minHumidity.environmentMetrics.relativeHumidity)
             maxValues.add(maxHumidity.environmentMetrics.relativeHumidity)
             shouldPlot[Environment.HUMIDITY.ordinal] = true
+        }
+
+        var minSoilTemperatureValue = minTemp.environmentMetrics.soilTemperature
+        var maxSoilTemperatureValue = maxTemp.environmentMetrics.soilTemperature
+        if (useFahrenheit) {
+            minSoilTemperatureValue = UnitConversions.celsiusToFahrenheit(minSoilTemperatureValue)
+            maxSoilTemperatureValue = UnitConversions.celsiusToFahrenheit(maxSoilTemperatureValue)
+        }
+        if (minTemp.environmentMetrics.soilTemperature != 0f ||
+            maxTemp.environmentMetrics.soilTemperature != 0f) {
+            minValues.add(minSoilTemperatureValue)
+            maxValues.add(maxSoilTemperatureValue)
+            shouldPlot[Environment.SOIL_TEMPERATURE.ordinal] = true
+        }
+
+        val (minSoilMoisture, maxSoilMoisture) = Pair(
+            telemetries.minBy { it.environmentMetrics.soilMoisture },
+            telemetries.maxBy { it.environmentMetrics.soilMoisture }
+        )
+        val soilMoistureRange = 0..100
+        if (minSoilMoisture.environmentMetrics.soilMoisture in soilMoistureRange ||
+            maxSoilMoisture.environmentMetrics.soilMoisture in soilMoistureRange) {
+            minValues.add(minSoilMoisture.environmentMetrics.soilMoisture.toFloat())
+            maxValues.add(maxSoilMoisture.environmentMetrics.soilMoisture.toFloat())
+            shouldPlot[Environment.SOIL_MOISTURE.ordinal] = true
         }
 
         val (minIAQ, maxIAQ) = Pair(

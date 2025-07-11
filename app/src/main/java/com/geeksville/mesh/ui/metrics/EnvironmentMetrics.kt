@@ -68,16 +68,21 @@ import com.geeksville.mesh.ui.common.components.IaqDisplayMode
 import com.geeksville.mesh.ui.common.components.IndoorAirQuality
 import com.geeksville.mesh.ui.common.components.OptionLabel
 import com.geeksville.mesh.ui.common.components.SlidingSelector
+import com.geeksville.mesh.ui.common.theme.Pink
+import com.geeksville.mesh.ui.common.theme.Purple
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.drawPathWithGradient
 import com.geeksville.mesh.util.UnitConversions.celsiusToFahrenheit
+import mil.nga.color.ColorConstants.PURPLE
 
 @Suppress("MagicNumber")
 private enum class Environment(val color: Color) {
     TEMPERATURE(Color.Red),
     RELATIVE_HUMIDITY(Color.Blue),
+    SOIL_TEMPERATURE(Pink),
+    SOIL_MOISTURE(Purple),
     BAROMETRIC_PRESSURE(Color.Green),
     GAS_RESISTANCE(Color.Yellow),
     IAQ(Color.Magenta)
@@ -112,6 +117,18 @@ private val LEGEND_DATA_2 = listOf(
         isLine = true
     )
 )
+private val LEGEND_DATA_3 = listOf(
+    LegendData(
+        nameRes = R.string.soil_temperature,
+        color = Environment.SOIL_TEMPERATURE.color,
+        isLine = true
+    ),
+    LegendData(
+        nameRes = R.string.soil_moisture,
+        color = Environment.SOIL_MOISTURE.color,
+        isLine = true
+    ),
+)
 
 @Composable
 fun EnvironmentMetricsScreen(
@@ -127,9 +144,15 @@ fun EnvironmentMetricsScreen(
         data.map { telemetry ->
             val temperatureFahrenheit =
                 celsiusToFahrenheit(telemetry.environmentMetrics.temperature)
+            val soilTemperatureFahrenheit =
+                celsiusToFahrenheit(telemetry.environmentMetrics.soilTemperature)
             telemetry.copy {
                 environmentMetrics =
                     telemetry.environmentMetrics.copy { temperature = temperatureFahrenheit }
+            }
+            telemetry.copy {
+                environmentMetrics =
+                    telemetry.environmentMetrics.copy { soilTemperature = soilTemperatureFahrenheit }
             }
         }
     } else {
@@ -320,6 +343,7 @@ private fun EnvironmentMetricsChart(
     Spacer(modifier = Modifier.height(16.dp))
 
     Legend(LEGEND_DATA_1, displayInfoIcon = false)
+    Legend(LEGEND_DATA_3, displayInfoIcon = false)
     Legend(LEGEND_DATA_2, promptInfoDialog = promptInfoDialog)
 
     Spacer(modifier = Modifier.height(16.dp))
@@ -387,6 +411,38 @@ private fun EnvironmentMetricsCard(telemetry: Telemetry, environmentDisplayFahre
                             )
                         }
                     }
+
+                    /* Soil Moisture and Soil Temperature */
+                    val soilMoistureRange = 0..100
+                    if (telemetry.environmentMetrics.hasSoilTemperature() ||
+                        telemetry.environmentMetrics.soilMoisture in soilMoistureRange) {
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            val soilTemperatureTextFormat =
+                                if (environmentDisplayFahrenheit) "%s %.1f°F" else "%s %.1f°C"
+                            val soilMoistureTextFormat = "%s %d%%"
+                            Text(
+                                text = soilMoistureTextFormat.format(
+                                    stringResource(R.string.soil_moisture),
+                                    envMetrics.soilMoisture
+                                ),
+                                color = Purple,
+                                fontSize = MaterialTheme.typography.labelLarge.fontSize
+                            )
+                            Text(
+                                text = soilTemperatureTextFormat.format(
+                                    stringResource(R.string.soil_temperature),
+                                    envMetrics.soilTemperature
+                                ),
+                                color = Pink,
+                                fontSize = MaterialTheme.typography.labelLarge.fontSize
+                            )
+                        }
+                    }
+
                     if (telemetry.environmentMetrics.hasIaq()) {
                         Spacer(modifier = Modifier.height(4.dp))
                         /* Air Quality */
