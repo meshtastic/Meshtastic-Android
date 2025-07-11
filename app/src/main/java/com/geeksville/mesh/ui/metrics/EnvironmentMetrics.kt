@@ -75,7 +75,6 @@ import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.drawPathWithGradient
 import com.geeksville.mesh.util.UnitConversions.celsiusToFahrenheit
-import mil.nga.color.ColorConstants.PURPLE
 
 @Suppress("MagicNumber")
 private enum class Environment(val color: Color) {
@@ -429,7 +428,7 @@ private fun EnvironmentMetricsCard(telemetry: Telemetry, environmentDisplayFahre
                                     stringResource(R.string.soil_moisture),
                                     envMetrics.soilMoisture
                                 ),
-                                color = Purple,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = MaterialTheme.typography.labelLarge.fontSize
                             )
                             Text(
@@ -437,7 +436,7 @@ private fun EnvironmentMetricsCard(telemetry: Telemetry, environmentDisplayFahre
                                     stringResource(R.string.soil_temperature),
                                     envMetrics.soilTemperature
                                 ),
-                                color = Pink,
+                                color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = MaterialTheme.typography.labelLarge.fontSize
                             )
                         }
