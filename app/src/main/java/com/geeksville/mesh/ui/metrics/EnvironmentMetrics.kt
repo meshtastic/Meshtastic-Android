@@ -68,6 +68,9 @@ import com.geeksville.mesh.ui.common.components.IaqDisplayMode
 import com.geeksville.mesh.ui.common.components.IndoorAirQuality
 import com.geeksville.mesh.ui.common.components.OptionLabel
 import com.geeksville.mesh.ui.common.components.SlidingSelector
+import com.geeksville.mesh.ui.common.theme.InfantryBlue
+import com.geeksville.mesh.ui.common.theme.LightBlue
+import com.geeksville.mesh.ui.common.theme.Orange
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.util.GraphUtil.createPath
@@ -77,10 +80,12 @@ import com.geeksville.mesh.util.UnitConversions.celsiusToFahrenheit
 @Suppress("MagicNumber")
 private enum class Environment(val color: Color) {
     TEMPERATURE(Color.Red),
-    RELATIVE_HUMIDITY(Color.Blue),
+    RELATIVE_HUMIDITY(InfantryBlue),
     BAROMETRIC_PRESSURE(Color.Green),
     GAS_RESISTANCE(Color.Yellow),
-    IAQ(Color.Magenta)
+    IAQ(Color.Magenta),
+    SOIL_TEMPERATURE(Orange),
+    SOIL_MOISTURE(LightBlue)
 }
 
 private const val CHART_WEIGHT = 1f
