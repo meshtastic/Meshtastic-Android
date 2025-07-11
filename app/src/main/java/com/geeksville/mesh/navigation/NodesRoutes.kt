@@ -144,7 +144,7 @@ fun NavGraphBuilder.nodeDetailGraph(
                 }
                 when (nodeDetailRoute) {
                     NodeDetailRoute.DEVICE -> DeviceMetricsScreen(hiltViewModel(parentEntry))
-                    NodeDetailRoute.NODE_MAP -> NodeMapScreen(hiltViewModel(parentEntry))
+                    NodeDetailRoute.NODE_MAP -> NodeMapScreen(uiViewModel, hiltViewModel(parentEntry))
                     NodeDetailRoute.POSITION_LOG -> PositionLogScreen(hiltViewModel(parentEntry))
                     NodeDetailRoute.ENVIRONMENT -> EnvironmentMetricsScreen(
                         hiltViewModel(

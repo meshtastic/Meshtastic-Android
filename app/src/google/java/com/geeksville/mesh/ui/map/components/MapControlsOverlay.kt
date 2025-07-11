@@ -44,7 +44,8 @@ fun MapControlsOverlay(
     onMapTypeMenuDismissRequest: () -> Unit,
     onToggleMapTypeMenu: () -> Unit,
     onManageLayersClicked: () -> Unit,
-    onManageCustomTileProvidersClicked: () -> Unit // New parameter
+    onManageCustomTileProvidersClicked: () -> Unit, // New parameter
+    showFilterButton: Boolean,
 ) {
     Column(
         modifier = modifier
@@ -52,17 +53,19 @@ fun MapControlsOverlay(
         horizontalAlignment = Alignment.End,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Box {
-            MapButton(
-                icon = Icons.Outlined.Tune,
-                contentDescription = stringResource(id = R.string.map_filter),
-                onClick = onToggleMapFilterMenu
-            )
-            MapFilterDropdown(
-                expanded = mapFilterMenuExpanded,
-                onDismissRequest = onMapFilterMenuDismissRequest,
-                mapViewModel = mapViewModel,
-            )
+        if (showFilterButton) {
+            Box {
+                MapButton(
+                    icon = Icons.Outlined.Tune,
+                    contentDescription = stringResource(id = R.string.map_filter),
+                    onClick = onToggleMapFilterMenu
+                )
+                MapFilterDropdown(
+                    expanded = mapFilterMenuExpanded,
+                    onDismissRequest = onMapFilterMenuDismissRequest,
+                    mapViewModel = mapViewModel,
+                )
+            }
         }
 
         Box {

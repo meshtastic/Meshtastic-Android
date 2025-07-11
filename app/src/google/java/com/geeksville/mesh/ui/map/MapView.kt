@@ -45,11 +45,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.graphics.createBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Node
@@ -62,12 +65,14 @@ import com.geeksville.mesh.ui.map.components.MapControlsOverlay
 import com.geeksville.mesh.ui.map.components.NodeClusterMarkers
 import com.geeksville.mesh.ui.map.components.WaypointMarkers
 import com.geeksville.mesh.ui.node.DegD
+import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.util.formatAgo
 import com.geeksville.mesh.waypoint
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
+import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.maps.android.clustering.ClusterItem
@@ -78,8 +83,12 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapsComposeExperimentalApi
+import com.google.maps.android.compose.Marker
+import com.google.maps.android.compose.MarkerComposable
+import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.TileOverlay
 import com.google.maps.android.compose.rememberCameraPositionState
+import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.maps.android.compose.widgets.DisappearingScaleBar
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -94,6 +103,8 @@ fun MapView(
     uiViewModel: UIViewModel,
     mapViewModel: MapViewModel = hiltViewModel(),
     navigateToNodeDetails: (Int) -> Unit,
+    focusedNodeNum: Int? = null,
+    nodeTrack: List<MeshProtos.Position>? = null,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -142,33 +153,45 @@ fun MapView(
     var hasZoomed by rememberSaveable { mutableStateOf(false) }
 
     // Effect to zoom to bounds of all items when map is first loaded
-    LaunchedEffect(allNodes, displayableWaypoints) {
-        if (!hasZoomed && (allNodes.isNotEmpty() || displayableWaypoints.isNotEmpty())) {
-            val boundsBuilder = LatLngBounds.builder()
-            allNodes.forEach { node ->
-                boundsBuilder.include(
-                    LatLng(
-                        node.position.latitudeI * DegD,
-                        node.position.longitudeI * DegD
+    LaunchedEffect(allNodes, displayableWaypoints, nodeTrack) {
+        if (!hasZoomed) {
+            if (nodeTrack != null && nodeTrack.isNotEmpty()) {
+                val latLngBounds = LatLngBounds.builder().apply {
+                    nodeTrack.forEach { include(LatLng(it.latitudeI * DegD, it.longitudeI * DegD)) }
+                }.build()
+                coroutineScope.launch {
+                    cameraPositionState.animate(
+                        CameraUpdateFactory.newLatLngBounds(latLngBounds, 100)
                     )
-                )
-            }
-            displayableWaypoints.forEach { waypoint ->
-                boundsBuilder.include(
-                    LatLng(
-                        waypoint.latitudeI * DegD,
-                        waypoint.longitudeI * DegD
+                }
+                hasZoomed = true
+            } else if (allNodes.isNotEmpty() || displayableWaypoints.isNotEmpty()) {
+                val boundsBuilder = LatLngBounds.builder()
+                allNodes.forEach { node ->
+                    boundsBuilder.include(
+                        LatLng(
+                            node.position.latitudeI * DegD,
+                            node.position.longitudeI * DegD
+                        )
                     )
-                )
-            }
-            try {
-                cameraPositionState.animate(
-                    CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 100)
-                )
-                hasZoomed = true // Ensure this runs only once
-            } catch (e: IllegalStateException) {
-                // Ignore cases where the bounds are empty or otherwise invalid
-                Log.w("MapView", "Could not animate to bounds: ${e.message}")
+                }
+                displayableWaypoints.forEach { waypoint ->
+                    boundsBuilder.include(
+                        LatLng(
+                            waypoint.latitudeI * DegD,
+                            waypoint.longitudeI * DegD
+                        )
+                    )
+                }
+                try {
+                    cameraPositionState.animate(
+                        CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 100)
+                    )
+                    hasZoomed = true // Ensure this runs only once
+                } catch (e: IllegalStateException) {
+                    // Ignore cases where the bounds are empty or otherwise invalid
+                    Log.w("MapView", "Could not animate to bounds: ${e.message}")
+                }
             }
         }
     }
@@ -277,30 +300,66 @@ fun MapView(
                     }
                 }
 
-                NodeClusterMarkers(
-                    nodeClusterItems = nodeClusterItems,
-                    mapFilterState = mapFilterState,
-                    navigateToNodeDetails = navigateToNodeDetails,
-                    onClusterClick = { cluster ->
-                        val items = cluster.items.toList()
-                        val allSameLocation =
-                            items.size > 1 && items.all { it.position == items.first().position }
+                if (nodeTrack != null && focusedNodeNum != null) {
+                    val latLngs =
+                        nodeTrack.map { LatLng(it.latitudeI * DegD, it.longitudeI * DegD) }
+                    val focusedNode = allNodes.find { it.num == focusedNodeNum }
+                    val polylineColor = focusedNode?.colors?.let { Color(it.first) } ?: Color.Blue
 
-                        if (allSameLocation) {
-                            showClusterItemsDialog = items
-                        } else {
-                            val bounds = LatLngBounds.builder()
-                            cluster.items.forEach { bounds.include(it.position) }
-                            coroutineScope.launch {
-                                cameraPositionState.animate(
-                                    CameraUpdateFactory.newLatLngBounds(bounds.build(), 100)
-                                )
+                    latLngs.forEachIndexed { index, latLng ->
+                        if (index == latLngs.lastIndex) {
+                            focusedNode?.let {
+                                MarkerComposable(
+                                    state = rememberUpdatedMarkerState(position = latLng),
+                                ) {
+                                    NodeChip(
+                                        node = it,
+                                        isThisNode = false,
+                                        isConnected = false,
+                                        onAction = {}
+                                    )
+                                }
                             }
-                            debug("Cluster clicked! $cluster")
+                        } else {
+                            Marker(
+                                state = rememberUpdatedMarkerState(position = latLng),
+                                icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_map_location_dot_24),
+                                anchor = Offset(0.5f, 0.5f)
+                            )
                         }
-                        true
-                    },
-                )
+                    }
+                    Polyline(
+                        points = latLngs,
+                        jointType = JointType.ROUND,
+                        color = polylineColor,
+                        width = 8f
+                    )
+                } else {
+                    NodeClusterMarkers(
+                        nodeClusterItems = nodeClusterItems,
+                        mapFilterState = mapFilterState,
+                        navigateToNodeDetails = navigateToNodeDetails,
+                        onClusterClick = { cluster ->
+                            val items = cluster.items.toList()
+                            val allSameLocation =
+                                items.size > 1 && items.all { it.position == items.first().position }
+
+                            if (allSameLocation) {
+                                showClusterItemsDialog = items
+                            } else {
+                                val bounds = LatLngBounds.builder()
+                                cluster.items.forEach { bounds.include(it.position) }
+                                coroutineScope.launch {
+                                    cameraPositionState.animate(
+                                        CameraUpdateFactory.newLatLngBounds(bounds.build(), 100)
+                                    )
+                                }
+                                debug("Cluster clicked! $cluster")
+                            }
+                            true
+                        },
+                    )
+                }
 
                 WaypointMarkers(
                     displayableWaypoints = displayableWaypoints,
@@ -377,7 +436,8 @@ fun MapView(
                 onManageCustomTileProvidersClicked = {
                     mapTypeMenuExpanded = false
                     showCustomTileManagerSheet = true
-                }
+                },
+                showFilterButton = focusedNodeNum == null,
             )
         }
         if (showLayersBottomSheet) {
