@@ -17,7 +17,7 @@
 
 package com.geeksville.mesh.ui.map.components
 
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -30,7 +30,7 @@ fun MapButton(
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
-    FloatingActionButton(
+    FilledIconButton(
         onClick = onClick,
         modifier = modifier
     ) {

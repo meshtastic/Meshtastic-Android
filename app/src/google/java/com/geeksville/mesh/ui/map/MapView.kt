@@ -30,8 +30,13 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FloatingToolbarDefaults
+import androidx.compose.material3.FloatingToolbarDefaults.ScreenOffset
+import androidx.compose.material3.FloatingToolbarExitDirection.Companion.End
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -47,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.graphics.createBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -96,7 +102,7 @@ import kotlinx.coroutines.launch
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @OptIn(
     MapsComposeExperimentalApi::class,
-    ExperimentalMaterial3Api::class
+    ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class
 )
 @Composable
 fun MapView(
@@ -251,9 +257,13 @@ fun MapView(
         selectedGoogleMapType
     }
 
+    val exitAlwaysScrollBehavior =
+        FloatingToolbarDefaults.exitAlwaysScrollBehavior(exitDirection = End)
     var showClusterItemsDialog by remember { mutableStateOf<List<NodeClusterItem>?>(null) }
 
-    Scaffold { paddingValues ->
+    Scaffold(
+        modifier = Modifier.nestedScroll(exitAlwaysScrollBehavior)
+    ) { paddingValues ->
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -261,7 +271,8 @@ fun MapView(
         ) {
             GoogleMap(
                 mapColorScheme = mapColorScheme,
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier
+                    .fillMaxSize(),
                 cameraPositionState = cameraPositionState,
                 uiSettings = MapUiSettings(
                     zoomControlsEnabled = true,
@@ -422,7 +433,7 @@ fun MapView(
             }
 
             MapControlsOverlay(
-                modifier = Modifier.align(Alignment.CenterEnd),
+                modifier = Modifier.align(Alignment.CenterEnd).offset(x = -ScreenOffset),
                 mapFilterMenuExpanded = mapFilterMenuExpanded,
                 onMapFilterMenuDismissRequest = { mapFilterMenuExpanded = false },
                 onToggleMapFilterMenu = { mapFilterMenuExpanded = true },
@@ -438,6 +449,7 @@ fun MapView(
                     showCustomTileManagerSheet = true
                 },
                 showFilterButton = focusedNodeNum == null,
+                scrollBehavior = exitAlwaysScrollBehavior,
             )
         }
         if (showLayersBottomSheet) {

@@ -17,22 +17,21 @@
 
 package com.geeksville.mesh.ui.map.components
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FloatingToolbarScrollBehavior
+import androidx.compose.material3.VerticalFloatingToolbar
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.map.MapViewModel
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun MapControlsOverlay(
     modifier: Modifier = Modifier,
@@ -46,46 +45,50 @@ fun MapControlsOverlay(
     onManageLayersClicked: () -> Unit,
     onManageCustomTileProvidersClicked: () -> Unit, // New parameter
     showFilterButton: Boolean,
+    scrollBehavior: FloatingToolbarScrollBehavior,
 ) {
-    Column(
-        modifier = modifier
-            .padding(16.dp),
-        horizontalAlignment = Alignment.End,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
-    ) {
-        if (showFilterButton) {
+    VerticalFloatingToolbar(
+        modifier = modifier,
+        expanded = true,
+        leadingContent = { },
+        trailingContent = { },
+        scrollBehavior = scrollBehavior,
+        content = {
+            if (showFilterButton) {
+                Box {
+                    MapButton(
+                        icon = Icons.Outlined.Tune,
+                        contentDescription = stringResource(id = R.string.map_filter),
+                        onClick = onToggleMapFilterMenu
+                    )
+                    MapFilterDropdown(
+                        expanded = mapFilterMenuExpanded,
+                        onDismissRequest = onMapFilterMenuDismissRequest,
+                        mapViewModel = mapViewModel,
+                    )
+                }
+            }
+
             Box {
                 MapButton(
-                    icon = Icons.Outlined.Tune,
-                    contentDescription = stringResource(id = R.string.map_filter),
-                    onClick = onToggleMapFilterMenu
+                    icon = Icons.Outlined.Map,
+                    contentDescription = stringResource(id = R.string.map_tile_source),
+                    onClick = onToggleMapTypeMenu
                 )
-                MapFilterDropdown(
-                    expanded = mapFilterMenuExpanded,
-                    onDismissRequest = onMapFilterMenuDismissRequest,
-                    mapViewModel = mapViewModel,
+                MapTypeDropdown(
+                    expanded = mapTypeMenuExpanded,
+                    onDismissRequest = onMapTypeMenuDismissRequest,
+                    mapViewModel = mapViewModel, // Pass mapViewModel
+                    onManageCustomTileProvidersClicked = onManageCustomTileProvidersClicked // Pass new callback
                 )
             }
-        }
 
-        Box {
             MapButton(
-                icon = Icons.Outlined.Map,
-                contentDescription = stringResource(id = R.string.map_tile_source),
-                onClick = onToggleMapTypeMenu
-            )
-            MapTypeDropdown(
-                expanded = mapTypeMenuExpanded,
-                onDismissRequest = onMapTypeMenuDismissRequest,
-                mapViewModel = mapViewModel, // Pass mapViewModel
-                onManageCustomTileProvidersClicked = onManageCustomTileProvidersClicked // Pass new callback
+                icon = Icons.Outlined.Layers,
+                contentDescription = stringResource(id = R.string.manage_map_layers),
+                onClick = onManageLayersClicked
             )
         }
 
-        MapButton(
-            icon = Icons.Outlined.Layers,
-            contentDescription = stringResource(id = R.string.manage_map_layers),
-            onClick = onManageLayersClicked
-        )
-    }
+    )
 }
