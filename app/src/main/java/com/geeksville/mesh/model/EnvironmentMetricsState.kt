@@ -158,8 +158,8 @@ data class EnvironmentMetricsState(
             shouldPlot[Environment.SOIL_MOISTURE.ordinal] = true
         }
 
-        //val min = minValues.minOf { it }
-        //val max = maxValues.maxOf { it }
+        val min = minValues.minOf { it }
+        val max = maxValues.maxOf { it }
 
         val (oldest, newest) = Pair(
             telemetries.minBy { it.time },
@@ -173,7 +173,7 @@ data class EnvironmentMetricsState(
                 minPressure.environmentMetrics.barometricPressure,
                 maxPressure.environmentMetrics.barometricPressure
             ),
-            //rightMinMax = Pair(min, max),
+            rightMinMax = Pair(min, max),
             times = Pair(oldest.time, newest.time)
         )
     }
