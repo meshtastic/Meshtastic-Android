@@ -27,6 +27,7 @@ import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.animation.core.animate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,6 +40,7 @@ import androidx.compose.material3.FloatingToolbarDefaults.ScreenOffset
 import androidx.compose.material3.FloatingToolbarExitDirection.Companion.End
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.rememberFloatingToolbarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -150,6 +152,37 @@ fun MapView(
         position = CameraPosition.fromLatLngZoom(defaultLatLng, 7f)
     }
 
+    val floatingToolbarState = rememberFloatingToolbarState()
+    val exitAlwaysScrollBehavior =
+        FloatingToolbarDefaults.exitAlwaysScrollBehavior(
+            exitDirection = End,
+            state = floatingToolbarState
+        )
+
+    LaunchedEffect(cameraPositionState.isMoving, floatingToolbarState.offsetLimit) {
+        val targetOffset = if (cameraPositionState.isMoving) {
+            // Hide: Use the offsetLimit (which is typically negative or zero).
+            // If heightOffsetLimit is 0f (toolbar not measured yet or has no height),
+            // this will effectively mean "don't move yet" if current offset is also 0.
+            floatingToolbarState.offsetLimit
+        } else {
+            // Show: Offset is 0f
+            0f
+        }
+        if (floatingToolbarState.offset != targetOffset) {
+            if (targetOffset == 0f || floatingToolbarState.offsetLimit != 0f) {
+                launch {
+                    animate(
+                        initialValue = floatingToolbarState.offset,
+                        targetValue = targetOffset,
+                    ) { value, _ ->
+                        floatingToolbarState.offset = value
+                    }
+                }
+            }
+        }
+    }
+
     val allNodes by mapViewModel.nodes.map { nodes -> nodes.filter { node -> node.validPosition != null } }
         .collectAsStateWithLifecycle(listOf())
     val waypoints by uiViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
@@ -257,8 +290,6 @@ fun MapView(
         selectedGoogleMapType
     }
 
-    val exitAlwaysScrollBehavior =
-        FloatingToolbarDefaults.exitAlwaysScrollBehavior(exitDirection = End)
     var showClusterItemsDialog by remember { mutableStateOf<List<NodeClusterItem>?>(null) }
 
     Scaffold(
@@ -433,7 +464,9 @@ fun MapView(
             }
 
             MapControlsOverlay(
-                modifier = Modifier.align(Alignment.CenterEnd).offset(x = -ScreenOffset),
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .offset(x = -ScreenOffset),
                 mapFilterMenuExpanded = mapFilterMenuExpanded,
                 onMapFilterMenuDismissRequest = { mapFilterMenuExpanded = false },
                 onToggleMapFilterMenu = { mapFilterMenuExpanded = true },
