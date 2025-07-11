@@ -15,22 +15,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Always pass for scheduled-updates
-        run: echo Scheduled updates branch, auto-passing by default.
+        run: | 
+          echo Scheduled updates branch, auto-passing by default.
+          echo We could add an xml linter here.
 
 
   build_and_detekt:
-    if: github.repository == 'meshtastic/Meshtastic-Android' && github.head_ref != 'scheduled-updates'
+    if: github.repository == 'meshtastic/Meshtastic-Android'
     uses: ./.github/workflows/reusable-android-build.yml
+    with:
+      skip_tests: ${{ github.head_ref != 'scheduled-updates' }}
     secrets:
       GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
     # inputs.upload_artifacts defaults to true, so no need to specify for PRs
 
   androidTest:
     # AssumingandroidTest should also only run for the main repository
-    if: github.repository == 'meshtastic/Meshtastic-Android' && github.head_ref != 'scheduled-updates'
+    if: github.repository == 'meshtastic/Meshtastic-Android'
     uses: ./.github/workflows/reusable-android-test.yml
     with:
       api_levels: '[35]' # Run only on API 35 for PRs
+      skip_tests: ${{ github.head_ref != 'scheduled-updates' }}
       # upload_artifacts defaults to true, so no need to explicitly set
     secrets:
       GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
