@@ -21,6 +21,7 @@
     <string name="main_tab_map">Mapa</string>
     <string name="main_tab_channel">Canal</string>
     <string name="main_tab_settings">Ajustes</string>
+    <string name="fallback_node_name">(No se ha podido obtener el nombre) Meshtastic %s</string>
     <string name="node_filter_placeholder">Filtro</string>
     <string name="desc_node_filter_clear">quitar filtro de nodo</string>
     <string name="node_filter_include_unknown">Incluir desconocidos</string>
@@ -282,6 +283,8 @@
     <string name="air_utilization">Tiempo de Transmisión</string>
     <string name="temperature">Temperatura:</string>
     <string name="humidity">Humedad</string>
+    <string name="soil_temperature">Temperatura del suelo/tierra</string>
+    <string name="soil_moisture">Humedad del suelo/tierra</string>
     <string name="logs">Registros</string>
     <string name="hops_away">Saltos de distancia</string>
     <string name="hops_away_template">Número de saltos: %1$d</string>
@@ -382,15 +385,26 @@ Rango de Valores 0 - 500.</string>
     <string name="paxcounter">Contador de Paquetes</string>
     <string name="audio_config">Configuración de sonido</string>
     <string name="codec_2_enabled">CODEC 2 activado</string>
+    <string name="ptt_pin">Pin PTT</string>
     <string name="codec2_sample_rate">Frecuencia de Muestreo CODEC2</string>
+    <string name="i2s_clock">Reloj del I2S</string>
     <string name="bluetooth_config">Configuración Bluetooth</string>
     <string name="bluetooth_enabled">Bluetooth activado</string>
     <string name="pairing_mode">Modo de emparejamiento</string>
+    <string name="fixed_pin">Pin fijo</string>
+    <string name="default_">Por defecto</string>
     <string name="show_password">Mostrar contraseña</string>
     <string name="messages">Mensajes</string>
+    <string name="role">Rol</string>
+    <string name="position_config">Configuración de la posición</string>
     <string name="public_key">Clave Pública</string>
     <string name="private_key">Clave privada</string>
     <string name="timeout">Tiempo agotado</string>
+    <string name="heartbeat">Latidos</string>
+    <string name="air_quality_icon">Icono de la calidad del aire</string>
     <string name="distance">Distancia</string>
     <string name="map">Mapa</string>
+    <string name="react">Reaccionar</string>
+    <string name="app_intro_skip_button">Saltar</string>
+    <string name="uv_lux">Lux ultravioletas</string>
 </resources>
