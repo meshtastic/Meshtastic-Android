@@ -13,12 +13,18 @@ on:
         required: false
         type: string
         default: '[26, 35]' # Default to running both if not specified by caller
+      skip_tests:
+        description: 'Whether to skip running tests'
+        required: false
+        type: boolean
+        default: false
     secrets:
       GRADLE_ENCRYPTION_KEY:
         required: false
 
 jobs:
   androidTest:
+    if: ${{ !inputs.skip_tests }}
     runs-on: ubuntu-latest
     timeout-minutes: 25
     strategy:
