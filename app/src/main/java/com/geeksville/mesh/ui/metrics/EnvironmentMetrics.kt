@@ -146,12 +146,10 @@ fun EnvironmentMetricsScreen(
             val soilTemperatureFahrenheit =
                 celsiusToFahrenheit(telemetry.environmentMetrics.soilTemperature)
             telemetry.copy {
-                environmentMetrics =
-                    telemetry.environmentMetrics.copy { temperature = temperatureFahrenheit }
-            }
-            telemetry.copy {
-                environmentMetrics =
-                    telemetry.environmentMetrics.copy { soilTemperature = soilTemperatureFahrenheit }
+                environmentMetrics = telemetry.environmentMetrics.copy {
+                    temperature = temperatureFahrenheit }
+                environmentMetrics = telemetry.environmentMetrics.copy {
+                    soilTemperature = soilTemperatureFahrenheit }
             }
         }
     } else {
@@ -159,9 +157,7 @@ fun EnvironmentMetricsScreen(
     }
 
     var displayInfoDialog by remember { mutableStateOf(false) }
-
     Column {
-
         if (displayInfoDialog) {
             LegendInfoDialog(
                 pairedRes = listOf(
@@ -189,15 +185,11 @@ fun EnvironmentMetricsScreen(
             OptionLabel(stringResource(it.strRes))
         }
 
-        /* Environment Metric Cards */
         LazyColumn(
             modifier = Modifier.fillMaxSize()
         ) {
             items(processedTelemetries) { telemetry ->
-                EnvironmentMetricsCard(
-                    telemetry,
-                    state.isFahrenheit
-                )
+                EnvironmentMetricsCard(telemetry, state.isFahrenheit)
             }
         }
     }
@@ -348,7 +340,7 @@ private fun EnvironmentMetricsChart(
     Spacer(modifier = Modifier.height(16.dp))
 }
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "MagicNumber")
 @Composable
 private fun EnvironmentMetricsCard(telemetry: Telemetry, environmentDisplayFahrenheit: Boolean) {
     val envMetrics = telemetry.environmentMetrics

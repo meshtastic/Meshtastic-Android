@@ -28,7 +28,7 @@ val Green = Color(0xFF30C047)
 
 val HyperlinkBlue = Color(0xFF43C3B0)
 val InfantryBlue = Color(red = 75, green = 119, blue = 190)
-val Purple= Color(0xFF9C27B0)
+val Purple = Color(0xFF9C27B0)
 val Pink = Color(red = 255, green = 102, blue = 204)
 
 val primaryLight = Color(0xFF306A42)

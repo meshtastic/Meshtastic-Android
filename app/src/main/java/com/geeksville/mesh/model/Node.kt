@@ -27,6 +27,7 @@ import com.geeksville.mesh.TelemetryProtos.EnvironmentMetrics
 import com.geeksville.mesh.TelemetryProtos.PowerMetrics
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.util.GPSFormat
+import com.geeksville.mesh.util.UnitConversions.celsiusToFahrenheit
 import com.geeksville.mesh.util.latLongToMeter
 import com.geeksville.mesh.util.toDistanceString
 import com.google.protobuf.ByteString
@@ -113,8 +114,7 @@ data class Node(
     private fun EnvironmentMetrics.getDisplayString(isFahrenheit: Boolean): String {
         val temp = if (temperature != 0f) {
             if (isFahrenheit) {
-                val fahrenheit = temperature * 1.8F + 32
-                "%.1f°F".format(fahrenheit)
+                "%.1f°F".format(celsiusToFahrenheit(temperature))
             } else {
                 "%.1f°C".format(temperature)
             }
@@ -124,8 +124,7 @@ data class Node(
         val humidity = if (relativeHumidity != 0f) "%.0f%%".format(relativeHumidity) else null
         val soilTemperatureStr = if (soilTemperature != 0f) {
             if (isFahrenheit) {
-                val fahrenheit = soilTemperature * 1.8F + 32
-                "%.1f°F".format(fahrenheit)
+                "%.1f°F".format(celsiusToFahrenheit(temperature))
             } else {
                 "%.1f°C".format(soilTemperature)
             }
@@ -133,7 +132,10 @@ data class Node(
             null
         }
         val soilMoistureRange = 0..100
-        val soilMoisture = if (soilMoisture in soilMoistureRange && soilTemperature != 0f) "%d%%".format(soilMoisture) else null
+        val soilMoisture =
+            if (soilMoisture in soilMoistureRange && soilTemperature != 0f) {
+                "%d%%".format(soilMoisture)
+            } else { null }
         val voltage = if (this.voltage != 0f) "%.2fV".format(this.voltage) else null
         val current = if (current != 0f) "%.1fmA".format(current) else null
         val iaq = if (iaq != 0) "IAQ: $iaq" else null
