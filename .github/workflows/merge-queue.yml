@@ -26,3 +26,23 @@ jobs:
     secrets:
       GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
+  check-workflow-status:
+    name: Check Workflow Status  # Matches another in pull-request, and is required for merge to main.
+    runs-on: ubuntu-latest
+    needs:
+      [
+        build_and_detekt,
+        androidTest
+      ]
+    if: always()
+    steps:
+      - name: Check Workflow Status
+        run: |
+          exit_on_result() {
+            if [[ "$2" == "failure" || "$2" == "cancelled" ]]; then
+              echo "Job '$1' failed or was cancelled."
+              exit 1
+            fi
+          }
+          exit_on_result "build_and_detekt" "${{ needs.build_and_detekt.result }}"
+          exit_on_result "androidTest" "${{ needs.androidTest.result }}"
