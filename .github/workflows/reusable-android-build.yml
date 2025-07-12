@@ -8,11 +8,6 @@ on:
         required: false
         type: boolean
         default: true
-      skip_tests:
-        description: 'Whether to skip running tests'
-        required: false
-        type: boolean
-        default: false
     secrets:
       GRADLE_ENCRYPTION_KEY:
         required: false
@@ -21,7 +16,6 @@ jobs:
   build_and_detekt:
     runs-on: ubuntu-latest
     timeout-minutes: 35
-    if: ${{ !inputs.skip_tests }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
