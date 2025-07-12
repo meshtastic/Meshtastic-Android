@@ -40,9 +40,8 @@ jobs:
     needs:
       [
         build_and_detekt,
-        androidTest,
-        deploy,
-      ]
+        androidTest
+        ]
     if: always()
     steps:
       - name: Check Workflow Status
