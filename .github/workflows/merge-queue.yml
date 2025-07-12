@@ -10,7 +10,7 @@ concurrency:
 
 jobs:
   build_and_detekt:
-    if: github.repository == 'meshtastic/Meshtastic-Android' && 
+    if: github.repository == 'meshtastic/Meshtastic-Android'
     uses: ./.github/workflows/reusable-android-build.yml
     with:
       upload_artifacts: false
