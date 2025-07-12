@@ -146,7 +146,7 @@ internal fun MessageItem(
                         Icon(
                             Icons.Default.Cloud,
                             contentDescription = stringResource(R.string.via_mqtt),
-                            modifier = Modifier.size(MaterialTheme.typography.labelMedium.fontSize)
+                            modifier = Modifier.size(16.dp)
                         )
                     }
                     MessageActions(
