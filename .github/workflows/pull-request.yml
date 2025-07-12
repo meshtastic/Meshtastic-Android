@@ -39,3 +39,25 @@ jobs:
       # upload_artifacts defaults to true, so no need to explicitly set
     secrets:
       GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+
+  check-workflow-status:
+    name: Check Workflow Status
+    runs-on: ubuntu-latest
+    needs:
+      [
+        build_and_detekt,
+        androidTest,
+        deploy,
+      ]
+    if: always()
+    steps:
+      - name: Check Workflow Status
+        run: |
+          exit_on_result() {
+            if [[ "$2" == "failure" || "$2" == "cancelled" ]]; then
+              echo "Job '$1' failed or was cancelled."
+              exit 1
+            fi
+          }
+          exit_on_result "build_and_detekt" "${{ needs.build_and_detekt.result }}"
+          exit_on_result "androidTest" "${{ needs.androidTest.result }}"
