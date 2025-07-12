@@ -29,6 +29,8 @@ kotlinx-collections-immutable = "0.4.0"
 kotlinx-coroutines-android = "1.10.2"
 kotlinx-serialization-json = "1.9.0"
 lifecycle = "2.9.1"
+location-services = "21.3.0"
+maps-compose = "6.6.0"
 material = "1.12.0"
 material3 = "1.4.0-alpha17"
 mgrs = "2.1.3"
@@ -41,6 +43,7 @@ protobuf-gradle-plugin = "0.9.5"
 protobuf-kotlin = "4.31.1"
 retrofit = "3.0.0"
 room = "2.7.2"
+secrets-gradle-plugin = "2.0.1"
 streamsupport-minifuture = "1.7.4"
 usb-serial-android = "3.9.0"
 work-runtime-ktx = "2.10.2"
@@ -108,6 +111,10 @@ lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-ru
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+location-services = { group = "com.google.android.gms", name = "play-services-location", version.ref = "location-services" }
+maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "maps-compose" }
+maps-compose-utils = { group = "com.google.maps.android", name = "maps-compose-utils", version.ref = "maps-compose" }
+maps-compose-widgets = { group = "com.google.maps.android", name = "maps-compose-widgets", version.ref = "maps-compose" }
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 mgrs = { group = "mil.nga", name = "mgrs", version.ref = "mgrs" }
 navigation-compose = { group = "androidx.navigation", name = "navigation-compose", version.ref = "navigation" }
@@ -127,6 +134,7 @@ room-compiler = { group = "androidx.room", name = "room-compiler", version.ref =
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
 room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
+secrets = { group = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", name = "secrets-gradle-plugin", version.ref = "secrets-gradle-plugin" }
 streamsupport-minifuture = { group = "net.sourceforge.streamsupport", name = "streamsupport-minifuture", version.ref = "streamsupport-minifuture" }
 usb-serial-android = { group = "com.github.mik3y", name = "usb-serial-for-android", version.ref = "usb-serial-android" }
 work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work-runtime-ktx" }
@@ -169,6 +177,9 @@ testing-room = ["room-testing"]
 # OSM
 osm = ["osmdroid-android", "osmbonuspack", "mgrs"]
 
+# Google Maps (Compose)
+maps-compose = ["location-services", "maps-compose", "maps-compose-utils", "maps-compose-widgets", "mgrs"]
+
 # Firebase
 firebase = ["firebase-analytics", "firebase-crashlytics"]
 
@@ -183,6 +194,7 @@ coil = ["coil", "coil-network-core", "coil-network-okhttp", "coil-svg"]
 
 [plugins]
 android-application = { id = "com.android.application" }
+android-library = { id = "com.android.library" }
 compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "devtools-ksp" }
@@ -192,6 +204,6 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization" }
 protobuf = { id = "com.google.protobuf" }
-android-library = { id = "com.android.library" }
 google-services = { id = "com.google.gms.google-services" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics" }
+secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin" }

@@ -63,7 +63,6 @@ import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceAction
-import com.geeksville.mesh.ui.map.MAP_STYLE_ID
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.util.getShortDate
 import com.geeksville.mesh.util.positionToMeter
@@ -304,12 +303,6 @@ class UIViewModel @Inject constructor(
     private val onlyOnline = MutableStateFlow(preferences.getBoolean("only-online", false))
     private val onlyDirect = MutableStateFlow(preferences.getBoolean("only-direct", false))
 
-    private val onlyFavorites = MutableStateFlow(preferences.getBoolean("only-favorites", false))
-    private val showWaypointsOnMap =
-        MutableStateFlow(preferences.getBoolean("show-waypoints-on-map", true))
-    private val showPrecisionCircleOnMap =
-        MutableStateFlow(preferences.getBoolean("show-precision-circle-on-map", true))
-
     fun setSortOption(sort: NodeSortOption) {
         nodeSortOption.value = sort
         preferences.edit { putInt("node-sort-option", sort.ordinal) }
@@ -333,21 +326,6 @@ class UIViewModel @Inject constructor(
     fun toggleOnlyDirect() {
         onlyDirect.value = !onlyDirect.value
         preferences.edit { putBoolean("only-direct", onlyDirect.value) }
-    }
-
-    fun setOnlyFavorites(value: Boolean) {
-        onlyFavorites.value = value
-        preferences.edit { putBoolean("only-favorites", onlyFavorites.value) }
-    }
-
-    fun setShowWaypointsOnMap(value: Boolean) {
-        showWaypointsOnMap.value = value
-        preferences.edit { putBoolean("show-waypoints-on-map", value) }
-    }
-
-    fun setShowPrecisionCircleOnMap(value: Boolean) {
-        showPrecisionCircleOnMap.value = value
-        preferences.edit { putBoolean("show-precision-circle-on-map", value) }
     }
 
     data class NodeFilterState(
@@ -415,43 +393,9 @@ class UIViewModel @Inject constructor(
         initialValue = 0,
     )
 
-    val filteredNodeList: StateFlow<List<Node>> = nodeList.mapLatest { list ->
-        list.filter { node ->
-            !node.isIgnored
-        }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = emptyList(),
-    )
-
-    data class MapFilterState(
-        val onlyFavorites: Boolean,
-        val showWaypoints: Boolean,
-        val showPrecisionCircle: Boolean,
-    )
-
-    val mapFilterStateFlow: StateFlow<MapFilterState> = combine(
-        onlyFavorites,
-        showWaypointsOnMap,
-        showPrecisionCircleOnMap,
-    ) { favoritesOnly, showWaypoints, showPrecisionCircle ->
-        MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle)
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = MapFilterState(false, true, true)
-    )
-
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeEntity?> get() = nodeDB.myNodeInfo
     val ourNodeInfo: StateFlow<Node?> get() = nodeDB.ourNodeInfo
-
-    val nodesWithPosition get() = nodeDB.nodeDBbyNum.value.values.filter { it.validPosition != null }
-
-    var mapStyleId: Int
-        get() = preferences.getInt(MAP_STYLE_ID, 0)
-        set(value) = preferences.edit { putInt(MAP_STYLE_ID, value) }
 
     fun getNode(userId: String?) = nodeDB.getNode(userId ?: DataPacket.ID_BROADCAST)
     fun getUser(userId: String?) = nodeDB.getUser(userId ?: DataPacket.ID_BROADCAST)

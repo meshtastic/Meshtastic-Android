@@ -15,18 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh
+package com.geeksville.mesh.ui.map
 
-import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.Logging
-import dagger.hilt.android.HiltAndroidApp
-
-@HiltAndroidApp
-class MeshUtilApplication : GeeksvilleApplication() {
-
-    override fun onCreate() {
-        super.onCreate()
-
-        Logging.showLogs = BuildConfig.DEBUG
-    }
-}
+const val MAP_STYLE_ID = "map_style_id"

@@ -46,24 +46,26 @@ import org.osmdroid.views.MapView
 
 @SuppressLint("WakelockTimeout")
 private fun PowerManager.WakeLock.safeAcquire() {
-    if (!isHeld) try {
+    if (!isHeld) {
+        try {
         acquire()
     } catch (e: SecurityException) {
         errormsg("WakeLock permission exception: ${e.message}")
     } catch (e: IllegalStateException) {
         errormsg("WakeLock acquire() exception: ${e.message}")
     }
+    }
 }
 
 private fun PowerManager.WakeLock.safeRelease() {
-    if (isHeld) try {
+    if (isHeld) {
+        try {
         release()
     } catch (e: IllegalStateException) {
         errormsg("WakeLock release() exception: ${e.message}")
     }
+    }
 }
-
-const val MAP_STYLE_ID = "map_style_id"
 
 private const val MinZoomLevel = 1.5
 private const val MaxZoomLevel = 20.0

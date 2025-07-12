@@ -21,15 +21,15 @@ import android.content.Context
 import android.os.Bundle
 import com.geeksville.mesh.android.AppPrefs
 import com.geeksville.mesh.android.Logging
+import com.google.firebase.Firebase
 import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.analytics
 import com.google.firebase.analytics.logEvent
-import com.google.firebase.Firebase
 
 class DataPair(val name: String, valueIn: Any?) {
     val value = valueIn ?: "null"
 
-    /// An accumulating firebase event - only one allowed per event
+    // / An accumulating firebase event - only one allowed per event
     constructor(d: Double) : this(FirebaseAnalytics.Param.VALUE, d)
     constructor(d: Int) : this(FirebaseAnalytics.Param.VALUE, d)
 }
@@ -85,7 +85,7 @@ class FirebaseAnalytics(context: Context) : AnalyticsProvider, Logging {
     }
 
     override fun increment(name: String, amount: Double) {
-        //Mint.logEvent("$name increment")
+        // Mint.logEvent("$name increment")
     }
 
     /**

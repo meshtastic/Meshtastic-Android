@@ -15,18 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh
+package com.geeksville.mesh.model.map
 
-import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.Logging
-import dagger.hilt.android.HiltAndroidApp
 
-@HiltAndroidApp
-class MeshUtilApplication : GeeksvilleApplication() {
+class CustomTileSource {
 
-    override fun onCreate() {
-        super.onCreate()
-
-        Logging.showLogs = BuildConfig.DEBUG
+    companion object {
+        fun getTileSource(index: Int) {
+            index
+        }
     }
 }
