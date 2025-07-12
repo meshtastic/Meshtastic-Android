@@ -762,6 +762,20 @@ private fun EnvironmentMetrics(
                 value = dewPoint.toTempString(isFahrenheit)
             )
         }
+        if (hasSoilTemperature()) {
+            InfoCard(
+                icon = ImageVector.vectorResource(R.drawable.soil_temperature),
+                text = stringResource(R.string.soil_temperature),
+                value = soilTemperature.toTempString(isFahrenheit)
+            )
+        }
+        if (hasSoilMoisture()) {
+            InfoCard(
+                icon = ImageVector.vectorResource(R.drawable.soil_moisture),
+                text = stringResource(R.string.soil_moisture),
+                value = "%d%%".format(soilMoisture)
+            )
+        }
         if (hasBarometricPressure()) {
             InfoCard(
                 icon = Icons.Default.Speed,

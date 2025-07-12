@@ -215,6 +215,8 @@ data class NodeEntity(
             time = environmentTelemetry.time,
             temperature = environmentMetrics.temperature,
             relativeHumidity = environmentMetrics.relativeHumidity,
+            soilTemperature = environmentMetrics.soilTemperature,
+            soilMoisture = environmentMetrics.soilMoisture,
             barometricPressure = environmentMetrics.barometricPressure,
             gasResistance = environmentMetrics.gasResistance,
             voltage = environmentMetrics.voltage,
