@@ -42,6 +42,7 @@
     <string name="routing_error_too_large">Пакетът е твърде голям</string>
     <string name="routing_error_no_response">Няма отговор</string>
     <string name="routing_error_pki_unknown_pubkey">Неизвестен публичен ключ</string>
+    <string name="routing_error_admin_public_key_unauthorized">Публичният ключ е неоторизиран</string>
     <string name="role_client">Свързано с приложение или самостоятелно устройство за съобщения.</string>
     <string name="role_client_mute">Устройство, което не препредава пакети от други устройства.</string>
     <string name="role_router"></string>
@@ -254,6 +255,7 @@
     <string name="encryption_pkc">Криптиране с публичния ключ</string>
     <string name="encryption_error">Несъответствие на публичния ключ</string>
     <string name="encryption_error_text">Публичният ключ не съвпада със записания ключ. Можете да премахнете възела и да го оставите да обмени ключове отново, но това може да означава по-сериозен проблем със сигурността. Свържете се с потребителя чрез друг надежден канал, за да определите дали промяната на ключа се дължи на фабрично нулиране или друго умишлено действие.</string>
+    <string name="meshtastic_new_nodes_notifications">Известия за нови възли</string>
     <string name="more_details">Повече подробности</string>
     <string name="snr">SNR</string>
     <string name="rssi">RSSI</string>
