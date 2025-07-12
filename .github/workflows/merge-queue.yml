@@ -9,16 +9,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # New job to satisfy the required check for the merge queue
-  # scheduled_updates:
-  #   if: github.repository == 'meshtastic/Meshtastic-Android' # Keep consistent with other jobs
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Always pass merge queue scheduled_updates check
-  #       run: echo "This check is primarily for PR entry; passing in merge queue."
-
   build_and_detekt:
-    if: github.repository == 'meshtastic/Meshtastic-Android'
+    if: github.repository == 'meshtastic/Meshtastic-Android' && 
     uses: ./.github/workflows/reusable-android-build.yml
     with:
       upload_artifacts: false
@@ -35,13 +27,13 @@ jobs:
       GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
   check-workflow-status:
-    name: Check Workflow Status
+    name: Check Workflow Status  # Matches another in pull-request, and is required for merge to main.
     runs-on: ubuntu-latest
     needs:
       [
         build_and_detekt,
         androidTest
-        ]
+      ]
     if: always()
     steps:
       - name: Check Workflow Status
