@@ -97,6 +97,7 @@
     <string name="url_for_join">加入 Meshtastic 网状网络的 URL</string>
     <string name="accept">接受</string>
     <string name="cancel">取消</string>
+    <string name="clear_changes">清除更改</string>
     <string name="change_channel">切换频道</string>
     <string name="are_you_sure_channel">您确定要更改频道吗？在您分享新的频道设定之前，与其他节点的所有通讯都将停止。</string>
     <string name="new_channel_rcvd">收到新的频道 URL</string>
@@ -143,6 +144,12 @@
     <string name="debug_filters">筛选器</string>
     <string name="debug_active_filters">启用的过滤器</string>
     <string name="debug_default_search">搜索日志…</string>
+    <string name="debug_search_next">下一匹配</string>
+    <string name="debug_search_prev">上一匹配</string>
+    <string name="debug_search_clear">清除搜索</string>
+    <string name="debug_filter_add">添加筛选条件</string>
+    <string name="debug_filter_included">筛选已包含</string>
+    <string name="debug_filter_clear">清除所有筛选条件</string>
     <string name="debug_clear">清除日志</string>
     <string name="match_any">匹配任意 | 所有</string>
     <string name="match_all">匹配所有 | 任意</string>
@@ -196,6 +203,8 @@
     <string name="delete_for_everyone">也从所有人的聊天纪录中删除</string>
     <string name="delete_for_me">仅在我的设备中删除</string>
     <string name="select_all">选择全部</string>
+    <string name="close_selection">关闭选中</string>
+    <string name="delete_selection">删除选中</string>
     <string name="modem_config_slow_long">长距离（慢速）</string>
     <string name="map_style_selection">主题选择</string>
     <string name="map_download_region">下载区域</string>
@@ -279,6 +288,8 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="air_utilization">无线信道利用率</string>
     <string name="temperature">温度</string>
     <string name="humidity">湿度</string>
+    <string name="soil_temperature">土壤温度</string>
+    <string name="soil_moisture">土壤湿度</string>
     <string name="logs">日志</string>
     <string name="hops_away">跳数</string>
     <string name="hops_away_template">越点数: %1$d</string>
@@ -581,6 +592,7 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="environment_metrics_use_fahrenheit">环境测量值使用华氏度</string>
     <string name="air_quality_metrics_module_enabled">启用空气质量计量模块</string>
     <string name="air_quality_metrics_update_interval_seconds">空气质量计量更新间隔 (秒)</string>
+    <string name="air_quality_icon">空气质量图标</string>
     <string name="power_metrics_module_enabled">启用电源计量模块</string>
     <string name="power_metrics_update_interval_seconds">电量计更新间隔 (秒)</string>
     <string name="power_metrics_on_screen_enabled">在屏幕上启用电源指标</string>
@@ -688,4 +700,13 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="app_intro_next_button">下一步</string>
     <string name="app_intro_done_button">完成</string>
     <string name="app_intro_skip_button">跳过</string>
+    <string name="security_icon_description">安全状态</string>
+    <string name="security_icon_secure"> - 安全</string>
+    <string name="security_icon_warning"> - 警告，不安全 MQTT</string>
+    <string name="security_icon_insecure"> - 警告， 不安全密钥</string>
+    <string name="security_icon_insecure_precise"> - 警告，不安全位置</string>
+    <string name="unknown_channel">未知频道</string>
+    <string name="warning">警告</string>
+    <string name="overflow_menu">溢出菜单</string>
+    <string name="uv_lux">紫外线强度</string>
 </resources>

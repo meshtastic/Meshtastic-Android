@@ -165,7 +165,7 @@
     <string name="delete_for_everyone">Изтриване за всички</string>
     <string name="delete_for_me">Изтриване за мен</string>
     <string name="select_all">Избери всички</string>
-    <string name="close_selection">Затваряне на селекцията</string>
+    <string name="close_selection">Затваряне на избраните</string>
     <string name="delete_selection">Изтриване на избраните</string>
     <string name="modem_config_slow_long">Дълго разстояние / Бавно</string>
     <string name="map_style_selection">Избор на стил</string>
@@ -362,12 +362,15 @@
     <string name="notifications_on_alert_bell_receipt">Известия при получаване на сигнал/позвъняване</string>
     <string name="ringtone">Тон на звънене</string>
     <string name="lora_config">Конфигурация на LoRa</string>
+    <string name="use_modem_preset">Използване на предварително зададени настройки на модема</string>
+    <string name="modem_preset">Предварително настроен модем</string>
     <string name="bandwidth">Широчина на честотната лента</string>
     <string name="frequency_offset_mhz">Отместване на честотата (MHz)</string>
     <string name="region_frequency_plan">Регион (честотен план)</string>
     <string name="tx_enabled">TX е активирано</string>
     <string name="tx_power_dbm">TX мощност (dBm)</string>
     <string name="frequency_slot">Честотен слот</string>
+    <string name="ignore_mqtt">Игнориране на MQTT</string>
     <string name="mqtt_config">Конфигурация на MQTT</string>
     <string name="mqtt_enabled">MQTT е активиран</string>
     <string name="address">Адрес</string>
@@ -417,6 +420,7 @@
     <string name="server">Сървър</string>
     <string name="telemetry_config">Конфигурация на телеметрията</string>
     <string name="device_metrics_update_interval_seconds">Интервал на актуализиране на показателите на устройството (секунди)</string>
+    <string name="air_quality_icon">Икона за качество на въздуха</string>
     <string name="user_config">Конфигурация на потребителя</string>
     <string name="node_id">ID на възела</string>
     <string name="long_name">Дълго име</string>
@@ -492,4 +496,8 @@
     <string name="no_network_devices">Няма открити мрежови устройства.</string>
     <string name="no_usb_devices">Няма открити USB серийни устройства.</string>
     <string name="meshtastic">Meshtastic</string>
+    <string name="scanning">Сканиране</string>
+    <string name="app_intro_back_button">Назад</string>
+    <string name="app_intro_next_button">Напред</string>
+    <string name="app_intro_done_button">Готово</string>
 </resources>
