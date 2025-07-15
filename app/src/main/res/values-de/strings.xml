@@ -286,6 +286,8 @@
     <string name="air_utilization">Luftauslastung</string>
     <string name="temperature">Temperatur</string>
     <string name="humidity">Luftfeuchte</string>
+    <string name="soil_temperature">Bodentemperatur</string>
+    <string name="soil_moisture">Bodenfeuchtigkeit</string>
     <string name="logs">Protokolle</string>
     <string name="hops_away">Zwischenschritte entfernt</string>
     <string name="hops_away_template">Sprungweite: %1$d</string>

@@ -16,5 +16,6 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <string name="app_name">Ejemplo de servicio de red</string>
     <string name="send_hello_message">Enviar Mensaje Hola</string>
 </resources>

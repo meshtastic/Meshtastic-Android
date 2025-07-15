@@ -21,9 +21,12 @@
     <string name="main_tab_map">地圖</string>
     <string name="main_tab_channel">頻道</string>
     <string name="main_tab_settings">設定</string>
+    <string name="fallback_node_name">鏈網%s</string>
     <string name="node_filter_placeholder">過濾器</string>
     <string name="desc_node_filter_clear">清除節點過濾器</string>
     <string name="node_filter_include_unknown">顯示未知節點</string>
+    <string name="node_filter_only_online">隱藏離線節點</string>
+    <string name="node_filter_only_direct">只顯示直連節點</string>
     <string name="node_filter_show_details">顯示詳細資料</string>
     <string name="node_sort_button">節點排序選項</string>
     <string name="node_sort_alpha">依名字排序</string>
@@ -94,6 +97,7 @@
     <string name="url_for_join">加入 Meshtastic 網狀網路的 URL</string>
     <string name="accept">接受</string>
     <string name="cancel">取消</string>
+    <string name="clear_changes">清除變更</string>
     <string name="change_channel">切換頻道</string>
     <string name="are_you_sure_channel">您確定要更改頻道嗎？在您分享新的頻道設定之前，與其他節點的所有通訊都將停止。</string>
     <string name="new_channel_rcvd">收到新的頻道 URL</string>
@@ -102,7 +106,7 @@
     <string name="report_a_bug">回報問題</string>
     <string name="report_bug_text">您確定要報告錯誤嗎？報告後，請在 https://github.com/orgs/meshtastic/discussions 上貼文，以便我們可以將報告與您發現的問題匹配。</string>
     <string name="report">報告</string>
-    <string name="not_paired_yet">您還沒有配對.</string>
+    <string name="not_paired_yet">您還沒有配對。</string>
     <string name="change_radio">換設備</string>
     <string name="pairing_completed">配對完成，開始服務</string>
     <string name="pairing_failed_try_again">配對失敗，請重新選擇</string>
@@ -135,7 +139,19 @@
     <string name="text_messages">文字訊息</string>
     <string name="channel_invalid">此頻道 URL 無效，無法使用</string>
     <string name="debug_panel">除錯面板</string>
+    <string name="debug_logs_export">匯出日誌</string>
     <string name="debug_last_messages">最後 500 則訊息</string>
+    <string name="debug_filters">篩選</string>
+    <string name="debug_active_filters">啟動篩選功能</string>
+    <string name="debug_default_search">在日誌中搜尋…</string>
+    <string name="debug_search_next">下個符合的</string>
+    <string name="debug_search_prev">上個符合的</string>
+    <string name="debug_search_clear">清除搜尋結果</string>
+    <string name="debug_filter_add">增加篩選條件</string>
+    <string name="debug_filter_included">已包含了篩選</string>
+    <string name="debug_filter_clear">清除所有篩選</string>
+    <string name="debug_clear">清除所有日誌</string>
+    <string name="debug_clear_logs_confirm">這將從您的裝置中刪除所有日誌包和資料庫條目 - 這是永久完全重置。</string>
     <string name="clear">清除</string>
     <string name="updating_firmware">更新韌體中，請等待最多八分鐘…</string>
     <string name="update_successful">更新成功</string>
@@ -143,6 +159,8 @@
     <string name="message_reception_time">訊息接收時間</string>
     <string name="message_reception_state">訊息接收狀態</string>
     <string name="message_delivery_status">訊息傳遞狀態</string>
+    <string name="meshtastic_messages_notifications">直接訊息通知</string>
+    <string name="meshtastic_broadcast_notifications">廣播訊息通知</string>
     <string name="meshtastic_alerts_notifications">警告信息</string>
     <string name="protocol_stress_test">通訊協定壓力測試</string>
     <string name="firmware_too_old">需要更新韌體。</string>
@@ -351,6 +369,7 @@
     <string name="external_notification">外部通知</string>
     <string name="store_forward"><![CDATA[儲存 & 轉發]]></string>
     <string name="range_test">範圍測試</string>
+    <string name="telemetry">遙測</string>
     <string name="canned_message">罐頭訊息</string>
     <string name="audio">音頻</string>
     <string name="remote_hardware">遠程硬件</string>
@@ -359,7 +378,9 @@
     <string name="detection_sensor">檢測傳感器</string>
     <string name="paxcounter">客流量計數</string>
     <string name="audio_config">音頻設置</string>
+    <string name="codec_2_enabled">啟動CODEC2</string>
     <string name="ptt_pin">PTT針腳</string>
+    <string name="codec2_sample_rate">CODEC2取樣率</string>
     <string name="i2s_clock">I2S 時鐘</string>
     <string name="bluetooth_config">藍牙配置</string>
     <string name="bluetooth_enabled">藍牙已啟用</string>
@@ -491,6 +512,8 @@
     <string name="dynamic">動態</string>
     <string name="scan_qr_code">掃描 QR Code</string>
     <string name="share_contact">分享聯絡人</string>
+    <string name="unmessageable">不接收訊息</string>
+    <string name="unmonitored_or_infrastructure">無監控裝置或基礎設施</string>
     <string name="firmware">韌體</string>
     <string name="load">載入</string>
     <string name="map">地圖</string>
