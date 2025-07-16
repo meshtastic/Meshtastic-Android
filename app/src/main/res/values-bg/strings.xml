@@ -26,7 +26,7 @@
     <string name="desc_node_filter_clear">clear node филтър</string>
     <string name="node_filter_include_unknown">Включително неизвестните</string>
     <string name="node_filter_only_online">Скриване на офлайн възлите</string>
-    <string name="node_filter_only_direct"></string>
+    <string name="node_filter_only_direct">Показване само на директни възли</string>
     <string name="node_filter_show_details">Показване на детайли</string>
     <string name="node_sort_button">Опции за сортиране на възлите</string>
     <string name="node_sort_alpha">А-Я</string>
@@ -246,6 +246,8 @@
     <string name="air_utilization">Използване на ефира</string>
     <string name="temperature">Температура</string>
     <string name="humidity">Влажност</string>
+    <string name="soil_temperature">Температура на почвата</string>
+    <string name="soil_moisture">Влажност на почвата</string>
     <string name="logs">Журнали</string>
     <string name="info">Информация</string>
     <string name="air_util_definition">Процент от ефирното време за предаване, използвано през последния час.</string>
@@ -495,9 +497,18 @@
     <string name="no_ble_devices">Няма открити Bluetooth устройства</string>
     <string name="no_network_devices">Няма открити мрежови устройства.</string>
     <string name="no_usb_devices">Няма открити USB серийни устройства.</string>
+    <string name="scroll_to_bottom">Превъртане до края</string>
     <string name="meshtastic">Meshtastic</string>
     <string name="scanning">Сканиране</string>
     <string name="app_intro_back_button">Назад</string>
     <string name="app_intro_next_button">Напред</string>
     <string name="app_intro_done_button">Готово</string>
+    <string name="app_intro_skip_button">Пропускане</string>
+    <string name="security_icon_description">Състояние на сигурността</string>
+    <string name="security_icon_secure">- Сигурно</string>
+    <string name="security_icon_warning"> - ПРЕДУПРЕЖДЕНИЕ, несигурен MQTT</string>
+    <string name="security_icon_insecure"> - ПРЕДУПРЕЖДЕНИЕ, ключ с ниска ентропия</string>
+    <string name="security_icon_insecure_precise"> - ПРЕДУПРЕЖДЕНИЕ, активирано е несигурно местоположение</string>
+    <string name="unknown_channel">Неизвестен канал</string>
+    <string name="warning">Предупреждение</string>
 </resources>
