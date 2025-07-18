@@ -15,18 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh
+package com.geeksville.mesh.repository.map
 
-import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.Logging
-import dagger.hilt.android.HiltAndroidApp
+import com.geeksville.mesh.ui.map.CustomTileProviderConfig
+import kotlinx.coroutines.flow.Flow
 
-@HiltAndroidApp
-class MeshUtilApplication : GeeksvilleApplication() {
-
-    override fun onCreate() {
-        super.onCreate()
-
-        Logging.showLogs = BuildConfig.DEBUG
-    }
+interface CustomTileProviderRepository {
+    fun getCustomTileProviders(): Flow<List<CustomTileProviderConfig>>
+    suspend fun addCustomTileProvider(config: CustomTileProviderConfig)
+    suspend fun updateCustomTileProvider(config: CustomTileProviderConfig)
+    suspend fun deleteCustomTileProvider(configId: String)
+    suspend fun getCustomTileProviderById(configId: String): CustomTileProviderConfig?
 }

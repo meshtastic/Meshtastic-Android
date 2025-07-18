@@ -15,32 +15,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.navigation
+package com.geeksville.mesh.ui.node
 
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavGraphBuilder
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.composable
+import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.map.MapView
-import kotlinx.serialization.Serializable
 
-sealed class MapRoutes {
-    @Serializable
-    data object Map : Route
-}
+const val DegD = 1e-7
 
-fun NavGraphBuilder.mapGraph(
-    navController: NavHostController,
+@Composable
+fun NodeMapScreen(
     uiViewModel: UIViewModel,
+    metricsViewModel: MetricsViewModel = hiltViewModel(),
 ) {
-    composable<MapRoutes.Map> {
-        MapView(
-            uiViewModel = uiViewModel,
-            mapViewModel = hiltViewModel(),
-            navigateToNodeDetails = {
-                navController.navigate(NodesRoutes.NodeDetailGraph(it))
-            },
-        )
-    }
+    val state by metricsViewModel.state.collectAsState()
+    val positions = state.positionLogs
+    val destNum = state.node?.num
+    MapView(
+        uiViewModel = uiViewModel,
+        focusedNodeNum = destNum,
+        nodeTrack = positions,
+        navigateToNodeDetails = {}
+    )
 }

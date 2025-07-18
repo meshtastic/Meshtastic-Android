@@ -27,6 +27,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.model.MetricsViewModel
+import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.map.rememberMapViewWithLifecycle
 import com.geeksville.mesh.util.addCopyright
 import com.geeksville.mesh.util.addPolyline
@@ -39,6 +40,8 @@ private const val DegD = 1e-7
 
 @Composable
 fun NodeMapScreen(
+    @Suppress("UNUSED_PARAMETER") // needed for google builds but unused in fdroid
+    uiViewModel: UIViewModel = hiltViewModel(),
     viewModel: MetricsViewModel = hiltViewModel(),
 ) {
     val density = LocalDensity.current

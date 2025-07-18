@@ -23,7 +23,7 @@ import com.geeksville.mesh.android.Logging
 class DataPair(val name: String, valueIn: Any?) {
     val value = valueIn ?: "null"
 
-    /// An accumulating firebase event - only one allowed per event
+    // / An accumulating firebase event - only one allowed per event
     constructor(d: Double) : this("BOGUS", d)
     constructor(d: Int) : this("BOGUS", d)
 }

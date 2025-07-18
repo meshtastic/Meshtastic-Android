@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import io.gitlab.arturbosch.detekt.Detekt
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -28,6 +29,7 @@ plugins {
     alias(libs.plugins.protobuf)
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.secrets)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -50,7 +52,7 @@ android {
     compileSdk = Configs.COMPILE_SDK
     defaultConfig {
         applicationId = Configs.APPLICATION_ID
-        minSdk = Configs.MIN_SDK_VERSION
+        minSdk = Configs.MIN_SDK
         targetSdk = Configs.TARGET_SDK
         versionCode = System.getenv("VERSION_CODE")?.toIntOrNull()
             ?: 30630
@@ -193,8 +195,10 @@ dependencies {
     implementation(libs.bundles.coil)
 
     // OSM
-    implementation(libs.bundles.osm)
-    implementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
+    "fdroidImplementation"(libs.bundles.osm)
+    "fdroidImplementation"(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
+
+    "googleImplementation"(libs.bundles.maps.compose)
 
     // ZXing
     implementation(libs.zxing.android.embedded) { isTransitive = false }
@@ -248,6 +252,19 @@ repositories {
 detekt {
     config.setFrom("../config/detekt/detekt.yml")
     baseline = file("../config/detekt/detekt-baseline.xml")
+    source.setFrom(
+        files(
+            "src/main/java",
+            "src/google/java",
+            "src/fdroid/java",
+        )
+    )
+    parallel = true
+}
+
+secrets {
+    propertiesFileName = "secrets.properties"
+    defaultPropertiesFileName = "local.defaults.properties"
 }
 
 val googleServiceKeywords = listOf("crashlytics", "google")
@@ -260,4 +277,19 @@ tasks.configureEach {
         project.logger.lifecycle("Disabling task for F-Droid: $name")
         enabled = false
     }
+}
+tasks.withType<Detekt> {
+    reports {
+        xml.required = true
+        xml.outputLocation = file("build/reports/detekt/detekt.xml")
+        html.required = true
+        html.outputLocation = file("build/reports/detekt/detekt.html")
+        sarif.required = true
+        sarif.outputLocation = file("build/reports/detekt/detekt.sarif")
+        md.required = true
+        md.outputLocation = file("build/reports/detekt/detekt.md")
+    }
+    debug = true
+    include("**/*.kt")
+    include("**/*.kts")
 }
