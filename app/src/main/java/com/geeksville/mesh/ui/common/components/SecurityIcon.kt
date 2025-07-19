@@ -17,21 +17,44 @@
 
 package com.geeksville.mesh.ui.common.components
 
+import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material3.Icon
-import androidx.compose.material3.Text
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.AppOnlyProtos
@@ -42,183 +65,470 @@ import com.geeksville.mesh.model.getChannel
 private const val PRECISE_POSITION_BITS = 32
 
 /**
- * Returns the appropriate security icon composable based on the channel's security settings.
+ * Represents the various visual states of the security icon as an enum.
+ * Each enum constant encapsulates the icon, color, descriptive text, and optional badge details.
  *
- * @param isLowEntropyKey Whether the channel uses a low entropy key (0 or 1 byte PSK)
- * @param isPreciseLocation Whether the channel has precise location enabled (32 bits)
- * @param isMqttEnabled Whether MQTT is enabled (adds warning icon)
- * @param contentDescription The content description for the icon
- * @return A composable Icon element with appropriate imageVector and tint
+ * @property icon The primary vector graphic for the icon.
+ * @property color The tint color for the primary icon.
+ * @property descriptionResId The string resource ID for the accessibility description of the icon's state.
+ * @property helpTextResId The string resource ID for the detailed help text associated with this state.
+ * @property badgeIcon Optional vector graphic for a badge to be displayed on the icon.
+ * @property badgeIconColor Optional tint color for the badge icon.
+ */
+@Immutable
+enum class SecurityState(
+    @Stable val icon: ImageVector,
+    @Stable val color: Color,
+    @StringRes val descriptionResId: Int,
+    @StringRes val helpTextResId: Int,
+    @Stable val badgeIcon: ImageVector? = null,
+    @Stable val badgeIconColor: Color? = null,
+) {
+    /** State for a secure channel (green lock). */
+    SECURE(
+        icon = Icons.Filled.Lock,
+        color = Color.Green,
+        descriptionResId = R.string.security_icon_secure,
+        helpTextResId = R.string.security_icon_help_green_lock,
+    ),
+
+    /** State for an insecure channel (yellow open lock). */
+    INSECURE(
+        icon = Icons.Filled.LockOpen,
+        color = Color.Yellow,
+        descriptionResId = R.string.security_icon_insecure,
+        helpTextResId = R.string.security_icon_help_yellow_open_lock,
+    ),
+
+    /** State for an insecure channel with precise location enabled (red open lock). */
+    INSECURE_PRECISE(
+        icon = Icons.Filled.LockOpen,
+        color = Color.Red,
+        descriptionResId = R.string.security_icon_insecure_precise,
+        helpTextResId = R.string.security_icon_help_red_open_lock,
+    ),
+
+    /** State indicating a warning, typically used when MQTT is enabled (red open lock with yellow warning badge). */
+    MQTT_WARNING(
+        icon = Icons.Filled.LockOpen,
+        color = Color.Red,
+        descriptionResId = R.string.security_icon_warning,
+        helpTextResId = R.string.security_icon_help_mqtt_warning_combined,
+        badgeIcon = Icons.Filled.Warning,
+        badgeIconColor = Color.Yellow,
+    );
+}
+
+/**
+ * Internal composable to display the security icon, potentially with a badge.
+ *
+ * @param icon The main vector graphic for the icon.
+ * @param mainIconTint The tint color for the main icon.
+ * @param contentDescription The accessibility description for the icon.
+ * @param modifier Modifier for this composable.
+ * @param badgeIcon Optional vector graphic for the badge.
+ * @param badgeIconColor Optional tint color for the badge icon.
+ */
+@Composable
+private fun SecurityIconDisplay(
+    icon: ImageVector,
+    mainIconTint: Color,
+    contentDescription: String,
+    modifier: Modifier = Modifier,
+    badgeIcon: ImageVector? = null,
+    badgeIconColor: Color? = null,
+) {
+    BadgedBox(
+        badge = {
+            if (badgeIcon != null) {
+                Badge(
+                    containerColor = Color.Transparent, // Allows badgeIconColor to define appearance
+                ) {
+                    Icon(
+                        imageVector = badgeIcon,
+                        contentDescription = stringResource(R.string.security_icon_badge_warning_description),
+                        tint = badgeIconColor
+                            ?: MaterialTheme.colorScheme.onError, // Default for contrast
+                        modifier = Modifier.size(16.dp), // Adjusted badge icon size
+                    )
+                }
+            }
+        },
+        modifier = modifier,
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = contentDescription,
+            tint = mainIconTint,
+        )
+    }
+}
+
+/**
+ * Determines the [SecurityState] based on channel properties.
+ * The priority of states is: MQTT warning, then secure, then insecure variations.
+ *
+ * @param isLowEntropyKey True if the channel uses a low entropy key (not securely encrypted).
+ * @param isPreciseLocation True if precise location is enabled.
+ * @param isMqttEnabled True if MQTT is enabled for the channel.
+ * @return The determined [SecurityState].
+ */
+private fun determineSecurityState(
+    isLowEntropyKey: Boolean,
+    isPreciseLocation: Boolean,
+    isMqttEnabled: Boolean,
+): SecurityState = when {
+    isMqttEnabled -> SecurityState.MQTT_WARNING
+    !isLowEntropyKey -> SecurityState.SECURE
+    isPreciseLocation -> SecurityState.INSECURE_PRECISE
+    else -> SecurityState.INSECURE
+}
+
+/**
+ * Displays an icon representing the security status of a channel.
+ * Clicking the icon shows a detailed help dialog.
+ *
+ * @param securityState The current [SecurityState] to display.
+ * @param baseContentDescription The base content description for the icon, to which the specific
+ * state description will be appended. Defaults to a generic security icon description.
+ * @param externalOnClick Optional lambda to be invoked for external actions when the icon is clicked,
+ * in addition to showing the help dialog.
+ */
+@Composable
+fun SecurityIcon(
+    securityState: SecurityState,
+    baseContentDescription: String = stringResource(id = R.string.security_icon_description),
+    externalOnClick: (() -> Unit)? = null,
+) {
+    var showHelpDialog by rememberSaveable { mutableStateOf(false) }
+    val fullContentDescription =
+        baseContentDescription + " " + stringResource(id = securityState.descriptionResId)
+
+    IconButton(
+        onClick = {
+            showHelpDialog = true
+            externalOnClick?.invoke()
+        },
+    ) {
+        SecurityIconDisplay(
+            icon = securityState.icon,
+            mainIconTint = securityState.color,
+            contentDescription = fullContentDescription,
+            badgeIcon = securityState.badgeIcon,
+            badgeIconColor = securityState.badgeIconColor,
+        )
+    }
+
+    if (showHelpDialog) {
+        SecurityHelpDialog(
+            securityState = securityState,
+            onDismiss = { showHelpDialog = false },
+        )
+    }
+}
+
+/**
+ * Overload for [SecurityIcon] that derives the [SecurityState] from boolean flags.
+ *
+ * @param isLowEntropyKey Whether the channel uses a low entropy key.
+ * @param isPreciseLocation Whether the channel has precise location enabled. Defaults to false.
+ * @param isMqttEnabled Whether MQTT is enabled for the channel. Defaults to false.
+ * @param baseContentDescription The base content description for the icon.
+ * @param externalOnClick Optional lambda for external actions, invoked when the icon is clicked.
  */
 @Composable
 fun SecurityIcon(
     isLowEntropyKey: Boolean,
     isPreciseLocation: Boolean = false,
     isMqttEnabled: Boolean = false,
-    contentDescription: String = stringResource(id = R.string.security_icon_description)
+    baseContentDescription: String = stringResource(id = R.string.security_icon_description),
+    externalOnClick: (() -> Unit)? = null,
 ) {
-    val (icon, color, computedDescription) = when {
-        !isLowEntropyKey -> {
-            Triple(Icons.Default.Lock, Color.Green, stringResource(id = R.string.security_icon_secure))
-        }
-        isPreciseLocation && isMqttEnabled -> {
-            Triple(Icons.Default.Warning, Color.Red, stringResource(id = R.string.security_icon_warning))
-        }
-        isPreciseLocation -> {
-            Triple(ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
-                Color.Red,
-                stringResource(id = R.string.security_icon_insecure_precise))
-        }
-        else -> {
-            Triple(ImageVector.vectorResource(R.drawable.ic_lock_open_right_24),
-                Color.Yellow,
-                stringResource(id = R.string.security_icon_insecure))
-        }
-    }
-
-    Icon(
-        imageVector = icon,
-        contentDescription = contentDescription + computedDescription,
-        tint = color
+    val securityState = determineSecurityState(isLowEntropyKey, isPreciseLocation, isMqttEnabled)
+    SecurityIcon(
+        securityState = securityState,
+        baseContentDescription = baseContentDescription,
+        externalOnClick = externalOnClick,
     )
 }
 
-fun Channel.isLowEntropyKey(): Boolean = settings.psk.size() <= 1
-fun Channel.isPreciseLocation(): Boolean = settings.getModuleSettings().positionPrecision == PRECISE_POSITION_BITS
-fun Channel.isMqttEnabled(): Boolean = settings.uplinkEnabled
+/** Extension property to check if the channel uses a low entropy PSK (not securely encrypted). */
+val Channel.isLowEntropyKey: Boolean get() = settings.psk.size() <= 1
 
+/** Extension property to check if the channel has precise location enabled. */
+val Channel.isPreciseLocation: Boolean get() = settings.moduleSettings.positionPrecision == PRECISE_POSITION_BITS
+
+/** Extension property to check if MQTT is enabled for the channel. */
+val Channel.isMqttEnabled: Boolean get() = settings.uplinkEnabled
+
+/**
+ * Overload for [SecurityIcon] that takes a [Channel] object to determine its security state.
+ *
+ * @param channel The channel whose security status is to be displayed.
+ * @param baseContentDescription The base content description for the icon.
+ * @param externalOnClick Optional lambda for external actions, invoked when the icon is clicked.
+ */
 @Composable
 fun SecurityIcon(
     channel: Channel,
-    contentDescription: String = stringResource(id = R.string.security_icon_description)
+    baseContentDescription: String = stringResource(id = R.string.security_icon_description),
+    externalOnClick: (() -> Unit)? = null,
 ) = SecurityIcon(
-    channel.isLowEntropyKey(),
-    channel.isPreciseLocation(),
-    channel.isMqttEnabled(),
-    contentDescription
+    isLowEntropyKey = channel.isLowEntropyKey,
+    isPreciseLocation = channel.isPreciseLocation,
+    isMqttEnabled = channel.isMqttEnabled,
+    baseContentDescription = baseContentDescription,
+    externalOnClick = externalOnClick,
 )
 
+/**
+ * Overload for [SecurityIcon] that takes an [AppOnlyProtos.ChannelSet] and a channel index.
+ * If the channel at the given index is not found, nothing is rendered.
+ *
+ * @param channelSet The set of channels.
+ * @param channelIndex The index of the channel within the set.
+ * @param baseContentDescription The base content description for the icon.
+ * @param externalOnClick Optional lambda for external actions, invoked when the icon is clicked.
+ */
 @Composable
 fun SecurityIcon(
     channelSet: AppOnlyProtos.ChannelSet,
     channelIndex: Int,
-    contentDescription: String = stringResource(id = R.string.security_icon_description)
+    baseContentDescription: String = stringResource(id = R.string.security_icon_description),
+    externalOnClick: (() -> Unit)? = null,
 ) {
-    val channel = channelSet.getChannel(channelIndex) ?: return
-    SecurityIcon(channel, contentDescription)
+    channelSet.getChannel(channelIndex)?.let { channel ->
+        SecurityIcon(
+            channel = channel,
+            baseContentDescription = baseContentDescription,
+            externalOnClick = externalOnClick,
+        )
+    }
 }
 
+/**
+ * Overload for [SecurityIcon] that takes an [AppOnlyProtos.ChannelSet] and a channel name.
+ * If a channel with the given name is not found, nothing is rendered.
+ * This overload optimizes lookup by name by memoizing a map of channel names to settings.
+ *
+ * @param channelSet The set of channels.
+ * @param channelName The name of the channel to find.
+ * @param baseContentDescription The base content description for the icon.
+ * @param externalOnClick Optional lambda for external actions, invoked when the icon is clicked.
+ */
 @Composable
 fun SecurityIcon(
     channelSet: AppOnlyProtos.ChannelSet,
     channelName: String,
-    contentDescription: String = stringResource(id = R.string.security_icon_description)
+    baseContentDescription: String = stringResource(id = R.string.security_icon_description),
+    externalOnClick: (() -> Unit)? = null,
 ) {
-    val channel = channelSet.settingsList.find {
-        Channel(it, channelSet.loraConfig).name == channelName
-    }?.let { Channel(it, channelSet.loraConfig) } ?: return
-    SecurityIcon(channel, contentDescription)
+    val channelByNameMap = remember(channelSet) {
+        channelSet.settingsList.associateBy {
+            Channel(it, channelSet.loraConfig).name
+        }
+    }
+
+    channelByNameMap[channelName]?.let { channelSetting ->
+        SecurityIcon(
+            channel = Channel(channelSetting, channelSet.loraConfig),
+            baseContentDescription = baseContentDescription,
+            externalOnClick = externalOnClick,
+        )
+    }
+}
+
+/**
+ * Displays a help dialog explaining the meaning of different security icons.
+ * The dialog can show details for a specific [SecurityState] or a list of all states.
+ *
+ * @param securityState The initial security state to display contextually.
+ * @param onDismiss Lambda invoked when the dialog is dismissed.
+ */
+@Composable
+private fun SecurityHelpDialog(
+    securityState: SecurityState,
+    onDismiss: () -> Unit,
+) {
+    var showAll by rememberSaveable { mutableStateOf(false) }
+
+    AlertDialog(
+        modifier = if (showAll) {
+            Modifier.fillMaxSize()
+        } else {
+            Modifier
+        },
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                if (showAll) {
+                    stringResource(R.string.security_icon_help_title_all)
+                } else {
+                    stringResource(R.string.security_icon_help_title)
+                },
+            )
+        },
+        text = {
+            if (showAll) {
+                AllSecurityStates()
+            } else {
+                ContextualSecurityState(securityState)
+            }
+        },
+        confirmButton = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                TextButton(onClick = { showAll = !showAll }) {
+                    Text(
+                        if (showAll) {
+                            stringResource(R.string.security_icon_help_show_less)
+                        } else {
+                            stringResource(R.string.security_icon_help_show_all)
+                        },
+                    )
+                }
+                TextButton(onClick = onDismiss) {
+                    Text(stringResource(R.string.security_icon_help_dismiss))
+                }
+            }
+        },
+    )
+}
+
+/**
+ * Displays details for a single, specific security state within the help dialog.
+ *
+ * @param securityState The state to display.
+ */
+@Composable
+private fun ContextualSecurityState(securityState: SecurityState) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        SecurityIconDisplay(
+            icon = securityState.icon,
+            mainIconTint = securityState.color,
+            contentDescription = stringResource(securityState.descriptionResId),
+            modifier = Modifier.size(48.dp),
+            badgeIcon = securityState.badgeIcon,
+            badgeIconColor = securityState.badgeIconColor,
+        )
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = stringResource(securityState.helpTextResId),
+            style = MaterialTheme.typography.bodyMedium,
+        )
+    }
+}
+
+/**
+ * Displays a list of all possible security states with their icons and descriptions
+ * within the help dialog. Iterates over `SecurityState.entries` which is provided
+ * by the enum class.
+ */
+@Composable
+private fun AllSecurityStates() {
+    Column(
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.verticalScroll(rememberScrollState())
+    ) {
+        SecurityState.entries.forEach { state -> // Uses enum entries
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                SecurityIconDisplay(
+                    icon = state.icon,
+                    mainIconTint = state.color,
+                    contentDescription = stringResource(state.descriptionResId),
+                    modifier = Modifier.size(48.dp),
+                    badgeIcon = state.badgeIcon,
+                    badgeIconColor = state.badgeIconColor,
+                )
+                Column(modifier = Modifier.padding(start = 16.dp)) {
+                    Text(
+                        text = stringResource(state.descriptionResId),
+                        style = MaterialTheme.typography.titleMedium,
+                    )
+                    Text(
+                        text = stringResource(state.helpTextResId),
+                        style = MaterialTheme.typography.bodyMedium,
+                    )
+                }
+            }
+            if (state != SecurityState.entries.lastOrNull()) {
+                HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
+            }
+        }
+    }
 }
 
 // Preview functions for development and testing
-@Preview(name = "Secure Channel - Green Lock")
+
+@Preview(name = "Secure Channel Icon")
 @Composable
 private fun PreviewSecureChannel() {
-    SecurityIcon(
-        isLowEntropyKey = false,
-        isPreciseLocation = false,
-        isMqttEnabled = false
-    )
+    SecurityIcon(securityState = SecurityState.SECURE)
 }
 
-@Preview(name = "Insecure Channel with Precise Location - Red Unlock")
+@Preview(name = "Insecure Precise Icon")
 @Composable
 private fun PreviewInsecureChannelWithPreciseLocation() {
-    SecurityIcon(
-        isLowEntropyKey = true,
-        isPreciseLocation = true,
-        isMqttEnabled = false
-    )
+    SecurityIcon(securityState = SecurityState.INSECURE_PRECISE)
 }
 
-@Preview(name = "Insecure Channel without Precise Location - Yellow Unlock")
+@Preview(name = "Insecure Channel Icon")
 @Composable
 private fun PreviewInsecureChannelWithoutPreciseLocation() {
-    SecurityIcon(
-        isLowEntropyKey = true,
-        isPreciseLocation = false,
-        isMqttEnabled = false
-    )
+    SecurityIcon(securityState = SecurityState.INSECURE)
 }
 
-@Preview(name = "MQTT Enabled - Red Warning")
+@Preview(name = "MQTT Enabled Icon")
 @Composable
 private fun PreviewMqttEnabled() {
-    SecurityIcon(
-        isLowEntropyKey = false,
-        isPreciseLocation = false,
-        isMqttEnabled = true
-    )
+    SecurityIcon(securityState = SecurityState.MQTT_WARNING)
 }
 
-@Preview(name = "All Security Icons")
+@Preview(name = "All Security Icons with Dialog")
 @Composable
-private fun PreviewAllSecurityIcons() {
+private fun PreviewAllSecurityIconsWithDialog() {
+    var showHelpDialogFor by remember { mutableStateOf<SecurityState?>(null) }
+    val stateLabels = remember { // Using SecurityState.entries to build the map keys
+        mapOf(
+            SecurityState.SECURE to "Secure",
+            SecurityState.INSECURE_PRECISE to "Insecure + Precise Location",
+            SecurityState.INSECURE to "Insecure (No Precise)",
+            SecurityState.MQTT_WARNING to "MQTT Enabled (Warning)",
+        )
+    }
+
     Column(
+        modifier = Modifier.padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         Text(
-            "Security Icons Preview",
-            style = MaterialTheme.typography.headlineSmall
+            text = "Security Icons Preview (Click for Help)",
+            style = MaterialTheme.typography.headlineSmall,
         )
 
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            SecurityIcon(
-                isLowEntropyKey = false,
-                isPreciseLocation = false,
-                isMqttEnabled = false
-            )
-            Text("Secure")
+        SecurityState.entries.forEach { state -> // Iterate over enum entries
+            val label =
+                stateLabels[state] ?: "Unknown State (${state.name})" // Fallback to enum name
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                SecurityIcon(
+                    securityState = state,
+                    externalOnClick = { showHelpDialogFor = state },
+                )
+                Text(label)
+            }
         }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            SecurityIcon(
-                isLowEntropyKey = true,
-                isPreciseLocation = true,
-                isMqttEnabled = false
+        showHelpDialogFor?.let {
+            SecurityHelpDialog(
+                securityState = it,
+                onDismiss = { showHelpDialogFor = null },
             )
-            Text("Insecure + Precise Location")
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            SecurityIcon(
-                isLowEntropyKey = true,
-                isPreciseLocation = false,
-                isMqttEnabled = false
-            )
-            Text("Insecure")
-        }
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            SecurityIcon(
-                isLowEntropyKey = false,
-                isPreciseLocation = false,
-                isMqttEnabled = true
-            )
-            Text("MQTT Enabled")
         }
     }
 }

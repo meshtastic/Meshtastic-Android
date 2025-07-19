@@ -728,8 +728,47 @@
     <string name="security_icon_warning"> - WARN, insecure MQTT</string>
     <string name="security_icon_insecure"> - WARN, low entropy key</string>
     <string name="security_icon_insecure_precise"> - WARNING, insecure location enabled</string>
+    <string name="security_icon_badge_warning_description">Warning Badge</string>
     <string name="unknown_channel">Unknown Channel</string>
     <string name="warning">Warning</string>
     <string name="overflow_menu">Overflow menu</string>
     <string name="uv_lux">UV Lux</string>
+    <string name="unknown">Unknown</string>
+    <string name="map_type_normal">Normal</string>
+    <string name="map_type_satellite">Satellite</string>
+    <string name="map_type_terrain">Terrain</string>
+    <string name="map_type_hybrid">Hybrid</string>
+    <string name="manage_map_layers">Manage Map Layers</string>
+    <string name="map_layers_title">Map Layers</string>
+    <string name="no_map_layers_loaded">No custom layers loaded.</string>
+    <string name="add_layer_button">Add Layer</string>
+    <string name="hide_layer">Hide Layer</string>
+    <string name="show_layer">Show Layer</string>
+    <string name="remove_layer">Remove Layer</string>
+    <string name="add_layer">Add Layer</string>
+    <string name="nodes_at_this_location">Nodes at this location</string>
+    <string name="selected_map_type">Selected Map Type</string>
+    <string name="manage_custom_tile_sources">Manage Custom Tile Sources</string>
+    <string name="add_custom_tile_source">Add Custom Tile Source</string>
+    <string name="no_custom_tile_sources_found">No Custom Tile Sources</string>
+    <string name="edit_custom_tile_source">Edit Custom Tile Source</string>
+    <string name="delete_custom_tile_source">Delete Custom Tile Source</string>
+    <string name="name_cannot_be_empty">Name cannot be empty.</string>
+    <string name="provider_name_exists">Provider name exists.</string>
+    <string name="url_cannot_be_empty">URL cannot be empty.</string>
+    <string name="url_must_contain_placeholders">URL must contain placeholders.</string>
+    <string name="url_template">URL Template</string>
+    <string name="url_template_hint">e.g. https://a.tile.openstreetmap.org/{z}/{x}/{y}.png</string>
+    <!-- Security Icon Help Dialog -->
+    <string name="security_icon_help_title">Channel Security Explained</string>
+    <string name="security_icon_help_title_all">All Security States</string>
+    <string name="security_icon_help_primary_channel_info">"A channel index of 0 indicates the primary channel where broadcast packets are sent from. Location data is broadcast from the first channel where it is enabled (firmware 2.7+)."</string>
+    <string name="security_icon_help_green_lock">"<b>Green Lock:</b> Securely encrypted with a 128 or 256-bit AES key."</string>
+    <string name="security_icon_help_yellow_open_lock">"<b>Yellow Open Lock:</b> Not securely encrypted (uses no key or a 1-byte known key) and NOT used for precise location data."</string>
+    <string name="security_icon_help_red_open_lock">"<b>Red Open Lock:</b> Not securely encrypted (uses no key or a 1-byte known key) AND IS used for precise location data."</string>
+    <string name="security_icon_help_mqtt_warning_combined">"<b>Red Open Lock with Yellow Warning Badge:</b> Indicates channel data is being uplinked to the internet via MQTT.\n\nIf this warning appears for a channel that is:\n- <i>Not securely encrypted (red or yellow open lock)</i>\n- <i>AND used for precise location data,</i>\nthis signifies a notable privacy risk as unencrypted precise location is shared online."</string>
+    <string name="security_icon_help_dismiss">Dismiss</string>
+    <string name="security_icon_help_show_all">Show All</string>
+    <string name="security_icon_help_show_less">Show Less</string>
+
 </resources>
