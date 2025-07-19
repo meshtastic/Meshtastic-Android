@@ -70,6 +70,7 @@
     <string name="rebroadcast_mode_all">Si está en nuestro canal privado o desde otra red con los mismos parámetros lora, retransmite cualquier mensaje observado.</string>
     <string name="rebroadcast_mode_all_skip_decoding">Igual al comportamiento que TODOS pero omite la decodificación de paquetes y simplemente los retransmite. Sólo disponible en el rol repetidor. Establecer esto en cualquier otro rol dará como resultado TODOS los comportamientos.</string>
     <string name="rebroadcast_mode_local_only">Ignora mensajes observados desde mallas foráneas que están abiertas o que no pueden descifrar. Sólo retransmite mensajes en los nodos locales principales / canales secundarios.</string>
+    <string name="rebroadcast_mode_known_only">Ignora los mensajes recibidos de redes externas como LOCAL ONLY, pero ignora también mensajes de nodos que no están ya en la lista de nodos conocidos.</string>
     <string name="rebroadcast_mode_none">Solo permitido para los roles SENSOR, TRACKER y TAK_TRACKER, esto inhibirá todas las retransmisiones, no a diferencia del rol de CLIENT_MUTE.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">Trate un doble toque en acelerómetros soportados como una pulsación de botón de usuario.</string>
     <string name="config_device_disableTripleClick_summary">Deshabilita la triple pulsación del botón de usuario para activar o desactivar GPS.</string>
