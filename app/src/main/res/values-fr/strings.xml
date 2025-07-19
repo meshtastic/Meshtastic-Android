@@ -286,6 +286,8 @@
     <string name="air_utilization">Utilisation de la transmission</string>
     <string name="temperature">Température</string>
     <string name="humidity">Humidité</string>
+    <string name="soil_temperature">Température du sol</string>
+    <string name="soil_moisture">Humidité du sol</string>
     <string name="logs">Journaux</string>
     <string name="hops_away">Passer au suivant</string>
     <string name="hops_away_template">Sauts : %1$d</string>
