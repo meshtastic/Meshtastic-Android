@@ -724,9 +724,7 @@
     <string name="app_intro_done_button">Done</string>
     <string name="app_intro_skip_button">Skip</string>
     <string name="security_icon_description">Security Status</string>
-    <string name="security_icon_secure"> - Secure</string>
-    <string name="security_icon_warning"> - WARN, insecure MQTT</string>
-    <string name="security_icon_insecure"> - WARN, low entropy key</string>
+    <string name="security_icon_secure">Secure</string>
     <string name="security_icon_insecure_precise"> - WARNING, insecure location enabled</string>
     <string name="security_icon_badge_warning_description">Warning Badge</string>
     <string name="unknown_channel">Unknown Channel</string>
@@ -759,16 +757,26 @@
     <string name="url_must_contain_placeholders">URL must contain placeholders.</string>
     <string name="url_template">URL Template</string>
     <string name="url_template_hint">e.g. https://a.tile.openstreetmap.org/{z}/{x}/{y}.png</string>
-    <!-- Security Icon Help Dialog -->
-    <string name="security_icon_help_title">Channel Security Explained</string>
-    <string name="security_icon_help_title_all">All Security States</string>
-    <string name="security_icon_help_primary_channel_info">"A channel index of 0 indicates the primary channel where broadcast packets are sent from. Location data is broadcast from the first channel where it is enabled (firmware 2.7+)."</string>
-    <string name="security_icon_help_green_lock">"<b>Green Lock:</b> Securely encrypted with a 128 or 256-bit AES key."</string>
-    <string name="security_icon_help_yellow_open_lock">"<b>Yellow Open Lock:</b> Not securely encrypted (uses no key or a 1-byte known key) and NOT used for precise location data."</string>
-    <string name="security_icon_help_red_open_lock">"<b>Red Open Lock:</b> Not securely encrypted (uses no key or a 1-byte known key) AND IS used for precise location data."</string>
-    <string name="security_icon_help_mqtt_warning_combined">"<b>Red Open Lock with Yellow Warning Badge:</b> Indicates channel data is being uplinked to the internet via MQTT.\n\nIf this warning appears for a channel that is:\n- <i>Not securely encrypted (red or yellow open lock)</i>\n- <i>AND used for precise location data,</i>\nthis signifies a notable privacy risk as unencrypted precise location is shared online."</string>
+
+    <string name="security_icon_help_green_lock">A green lock means the channel is securely encrypted with either a 128 or 256 bit AES key.</string>
+
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <string name="security_icon_insecure_no_precise">Insecure Channel, Not Precise</string>
+    <string name="security_icon_help_yellow_open_lock">A yellow open lock means the channel is not securely encrypted, is not used for precise location data, and uses either no key at all or a 1 byte known key.</string>
+
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <string name="security_icon_insecure_precise_only">Insecure Channel, Precise Location</string>
+    <string name="security_icon_help_red_open_lock">A red open lock means the channel is not securely encrypted, is used for precise location data, and uses either no key at all or a 1 byte known key.</string>
+
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <string name="security_icon_warning_precise_mqtt">Warning: Insecure, Precise Location &amp; MQTT Uplink</string>
+    <string name="security_icon_help_warning_precise_mqtt">A red open lock with a warning means the channel is not securely encrypted, is used for precise location data which is being uplinked to the internet via MQTT, and uses either no key at all or a 1 byte known key.</string>
+
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="security_icon_help_title">Channel Security</string>
+    <string name="security_icon_help_title_all">Channel Security Meanings</string>
+    <string name="security_icon_help_show_all">Show All Meanings</string>
+    <string name="security_icon_help_show_less">Show Current Status</string>
     <string name="security_icon_help_dismiss">Dismiss</string>
-    <string name="security_icon_help_show_all">Show All</string>
-    <string name="security_icon_help_show_less">Show Less</string>
 
 </resources>

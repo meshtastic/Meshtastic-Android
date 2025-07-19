@@ -92,31 +92,39 @@ enum class SecurityState(
         helpTextResId = R.string.security_icon_help_green_lock,
     ),
 
-    /** State for an insecure channel (yellow open lock). */
-    INSECURE(
+    /** State for an insecure channel,
+     *  not used for precise location,
+     *  and MQTT not the primary concern for a higher warning.
+     *  (yellow open lock) */
+    INSECURE_NO_PRECISE(
         icon = Icons.Filled.LockOpen,
         color = Color.Yellow,
-        descriptionResId = R.string.security_icon_insecure,
+        descriptionResId = R.string.security_icon_insecure_no_precise,
         helpTextResId = R.string.security_icon_help_yellow_open_lock,
     ),
 
-    /** State for an insecure channel with precise location enabled (red open lock). */
-    INSECURE_PRECISE(
+    /** State for an insecure channel
+     *  with precise location enabled,
+     *  but MQTT not causing the highest
+     *  warning. (red open lock) */
+    INSECURE_PRECISE_ONLY(
         icon = Icons.Filled.LockOpen,
         color = Color.Red,
-        descriptionResId = R.string.security_icon_insecure_precise,
+        descriptionResId = R.string.security_icon_insecure_precise_only,
         helpTextResId = R.string.security_icon_help_red_open_lock,
     ),
 
-    /** State indicating a warning, typically used when MQTT is enabled (red open lock with yellow warning badge). */
-    MQTT_WARNING(
+    /** State indicating an insecure channel
+     *  with precise location and MQTT enabled
+     *  (red open lock with yellow warning badge). */
+    INSECURE_PRECISE_MQTT_WARNING(
         icon = Icons.Filled.LockOpen,
         color = Color.Red,
-        descriptionResId = R.string.security_icon_warning,
-        helpTextResId = R.string.security_icon_help_mqtt_warning_combined,
+        descriptionResId = R.string.security_icon_warning_precise_mqtt,
+        helpTextResId = R.string.security_icon_help_warning_precise_mqtt,
         badgeIcon = Icons.Filled.Warning,
         badgeIconColor = Color.Yellow,
-    );
+    )
 }
 
 /**
@@ -178,10 +186,13 @@ private fun determineSecurityState(
     isPreciseLocation: Boolean,
     isMqttEnabled: Boolean,
 ): SecurityState = when {
-    isMqttEnabled -> SecurityState.MQTT_WARNING
     !isLowEntropyKey -> SecurityState.SECURE
-    isPreciseLocation -> SecurityState.INSECURE_PRECISE
-    else -> SecurityState.INSECURE
+
+    isMqttEnabled && isPreciseLocation -> SecurityState.INSECURE_PRECISE_MQTT_WARNING
+
+    isPreciseLocation -> SecurityState.INSECURE_PRECISE_ONLY
+
+    else -> SecurityState.INSECURE_NO_PRECISE
 }
 
 /**
@@ -191,8 +202,9 @@ private fun determineSecurityState(
  * @param securityState The current [SecurityState] to display.
  * @param baseContentDescription The base content description for the icon, to which the specific
  * state description will be appended. Defaults to a generic security icon description.
- * @param externalOnClick Optional lambda to be invoked for external actions when the icon is clicked,
- * in addition to showing the help dialog.
+ * @param externalOnClick Optional lambda to be invoked when the icon is clicked,
+ * in addition to its primary action (showing a help dialog).
+ * This allows callers to inject custom side effects.
  */
 @Composable
 fun SecurityIcon(
@@ -234,7 +246,9 @@ fun SecurityIcon(
  * @param isPreciseLocation Whether the channel has precise location enabled. Defaults to false.
  * @param isMqttEnabled Whether MQTT is enabled for the channel. Defaults to false.
  * @param baseContentDescription The base content description for the icon.
- * @param externalOnClick Optional lambda for external actions, invoked when the icon is clicked.
+ * @param externalOnClick Optional lambda to be invoked when the icon is clicked,
+ * in addition to its primary action (showing a help dialog).
+ * This allows callers to inject custom side effects.
  */
 @Composable
 fun SecurityIcon(
@@ -431,7 +445,7 @@ private fun ContextualSecurityState(securityState: SecurityState) {
 private fun AllSecurityStates() {
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.verticalScroll(rememberScrollState())
+        modifier = Modifier.verticalScroll(rememberScrollState()),
     ) {
         SecurityState.entries.forEach { state -> // Uses enum entries
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -472,19 +486,19 @@ private fun PreviewSecureChannel() {
 @Preview(name = "Insecure Precise Icon")
 @Composable
 private fun PreviewInsecureChannelWithPreciseLocation() {
-    SecurityIcon(securityState = SecurityState.INSECURE_PRECISE)
+    SecurityIcon(securityState = SecurityState.INSECURE_PRECISE_ONLY)
 }
 
 @Preview(name = "Insecure Channel Icon")
 @Composable
 private fun PreviewInsecureChannelWithoutPreciseLocation() {
-    SecurityIcon(securityState = SecurityState.INSECURE)
+    SecurityIcon(securityState = SecurityState.INSECURE_NO_PRECISE)
 }
 
 @Preview(name = "MQTT Enabled Icon")
 @Composable
 private fun PreviewMqttEnabled() {
-    SecurityIcon(securityState = SecurityState.MQTT_WARNING)
+    SecurityIcon(securityState = SecurityState.INSECURE_PRECISE_MQTT_WARNING)
 }
 
 @Preview(name = "All Security Icons with Dialog")
@@ -494,9 +508,9 @@ private fun PreviewAllSecurityIconsWithDialog() {
     val stateLabels = remember { // Using SecurityState.entries to build the map keys
         mapOf(
             SecurityState.SECURE to "Secure",
-            SecurityState.INSECURE_PRECISE to "Insecure + Precise Location",
-            SecurityState.INSECURE to "Insecure (No Precise)",
-            SecurityState.MQTT_WARNING to "MQTT Enabled (Warning)",
+            SecurityState.INSECURE_NO_PRECISE to "Insecure (No Precise Location)",
+            SecurityState.INSECURE_PRECISE_ONLY to "Insecure (Precise Location Only)",
+            SecurityState.INSECURE_PRECISE_MQTT_WARNING to "Insecure (Precise Location + MQTT Warning)",
         )
     }
 
