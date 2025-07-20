@@ -780,4 +780,6 @@
     <string name="security_icon_help_show_less">Show Current Status</string>
     <string name="security_icon_help_dismiss">Dismiss</string>
 
+    <string name="confirm_delete_node">Are you sure you want to delete this node?</string>
+
 </resources>
