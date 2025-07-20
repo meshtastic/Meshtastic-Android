@@ -754,4 +754,5 @@
     <string name="security_icon_help_show_all">Показать все значения</string>
     <string name="security_icon_help_show_less">Показать текущий статус</string>
     <string name="security_icon_help_dismiss">Отменить</string>
+    <string name="message_input_label">Сообщение</string>
 </resources>

@@ -750,4 +750,5 @@
     <string name="security_icon_help_show_all">Alle Bedeutungen anzeigen</string>
     <string name="security_icon_help_show_less">Aktuellen Status anzeigen</string>
     <string name="security_icon_help_dismiss">Tastatur ausblenden</string>
+    <string name="message_input_label">Nachricht</string>
 </resources>
