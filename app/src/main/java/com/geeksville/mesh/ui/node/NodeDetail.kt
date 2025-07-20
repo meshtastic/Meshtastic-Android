@@ -820,7 +820,7 @@ private fun EnvironmentMetrics(
         }
         if (hasWindSpeed()) {
             @Suppress("MagicNumber")
-            val normalizedBearing = (windDirection % 360 + 360) % 360
+            val normalizedBearing = (windDirection + 180) % 360
             InfoCard(
                 icon = Icons.Outlined.Navigation,
                 text = stringResource(R.string.wind),
@@ -1068,4 +1068,71 @@ private fun NodeDetailsPreview(
             metricsAvailability = BooleanArray(LogsType.entries.size) { false },
         )
     }
+}
+@Preview(name = "Wind Dir -359°")
+@Composable
+private fun PreviewWindDirectionn359() {
+    PreviewWindDirectionItem(-359f)
+}
+
+@Preview(name = "Wind Dir 0°")
+@Composable
+private fun PreviewWindDirection0() {
+    PreviewWindDirectionItem(0f)
+}
+
+@Preview(name = "Wind Dir 45°")
+@Composable
+private fun PreviewWindDirection45() {
+    PreviewWindDirectionItem(45f)
+}
+
+@Preview(name = "Wind Dir 90°")
+@Composable
+private fun PreviewWindDirection90() {
+    PreviewWindDirectionItem(90f)
+}
+
+@Preview(name = "Wind Dir 180°")
+@Composable
+private fun PreviewWindDirection180() {
+    PreviewWindDirectionItem(180f)
+}
+
+@Preview(name = "Wind Dir 225°")
+@Composable
+private fun PreviewWindDirection225() {
+    PreviewWindDirectionItem(225f)
+}
+
+@Preview(name = "Wind Dir 270°")
+@Composable
+private fun PreviewWindDirection270() {
+    PreviewWindDirectionItem(270f)
+}
+
+@Preview(name = "Wind Dir 315°")
+@Composable
+private fun PreviewWindDirection315() {
+    PreviewWindDirectionItem(315f)
+}
+
+@Preview(name = "Wind Dir -45")
+@Composable
+private fun PreviewWindDirectionN45() {
+    PreviewWindDirectionItem(-45f)
+}
+
+@Composable
+private fun PreviewWindDirectionItem(
+    windDirection: Float,
+    windSpeed: String = "5 m/s"
+) {
+    val normalizedBearing = (windDirection % 360 + 180) % 360
+    InfoCard(
+        icon = Icons.Outlined.Navigation,
+        text = "Wind",
+        value = windSpeed,
+        rotateIcon = normalizedBearing
+    )
 }
