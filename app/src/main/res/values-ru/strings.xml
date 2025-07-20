@@ -25,8 +25,8 @@
     <string name="node_filter_placeholder">Фильтр</string>
     <string name="desc_node_filter_clear">очистить фильтр узлов</string>
     <string name="node_filter_include_unknown">Включать неизвестно</string>
-    <string name="node_filter_only_online">Скрыть узлы вне сети</string>
-    <string name="node_filter_only_direct">Отображать только прямые узлы</string>
+    <string name="node_filter_only_online">Скрыть узлы офлайн</string>
+    <string name="node_filter_only_direct">Отображать только слышимые узлы</string>
     <string name="node_filter_show_details">Показать детали</string>
     <string name="node_sort_button">Варианты сортировки узлов</string>
     <string name="node_sort_alpha">А-Я</string>
@@ -35,6 +35,7 @@
     <string name="node_sort_hops_away">Прыжков</string>
     <string name="node_sort_last_heard">Последний раз слышен</string>
     <string name="node_sort_via_mqtt">через MQTT</string>
+    <string name="via_mqtt">через MQTT</string>
     <string name="node_sort_via_favorite">по фаворитам</string>
     <string name="unrecognized">Нераспознанный</string>
     <string name="message_status_enroute">Ожидание подтверждения</string>
@@ -97,6 +98,7 @@
     <string name="url_for_join">URL для присоединения к сети Meshtastic</string>
     <string name="accept">Принять</string>
     <string name="cancel">Отмена</string>
+    <string name="clear_changes">Отменить изменения</string>
     <string name="change_channel">Смена канала</string>
     <string name="are_you_sure_channel">Вы уверены, что хотите изменить канал? Связь с другими устройствами будет прервана, пока вы не поделитесь новыми настройками канала.</string>
     <string name="new_channel_rcvd">URL нового канала получен</string>
@@ -143,6 +145,12 @@
     <string name="debug_filters">Фильтры</string>
     <string name="debug_active_filters">Активные фильтры</string>
     <string name="debug_default_search">Искать в журнале…</string>
+    <string name="debug_search_next">Следующее совпадение</string>
+    <string name="debug_search_prev">Предыдущее совпадение</string>
+    <string name="debug_search_clear">Очистить условия поиска</string>
+    <string name="debug_filter_add">Добавить фильтр</string>
+    <string name="debug_filter_included">Фильтр включен</string>
+    <string name="debug_filter_clear">Очистить все фильтры</string>
     <string name="debug_clear">Очистить журнал</string>
     <string name="match_any">Совпадение любой | Все</string>
     <string name="match_all">Совпадение всех | Любой</string>
@@ -155,7 +163,7 @@
     <string name="message_reception_state">состояние получения сообщения</string>
     <string name="message_delivery_status">Статус доставки сообщения</string>
     <string name="meshtastic_messages_notifications">Уведомления о личных сообщениях</string>
-    <string name="meshtastic_broadcast_notifications">Уведомления о трансляции сообщений</string>
+    <string name="meshtastic_broadcast_notifications">Уведомления о сообщениях в общем чате</string>
     <string name="meshtastic_alerts_notifications">Служебные уведомления</string>
     <string name="protocol_stress_test">Испытание протокола на нагрузку</string>
     <string name="firmware_too_old">Требуется обновление прошивки.</string>
@@ -197,6 +205,8 @@
     <string name="delete_for_everyone">Удалить для всех</string>
     <string name="delete_for_me">Удалить у меня</string>
     <string name="select_all">Выбрать все</string>
+    <string name="close_selection">Закрыть выбранное</string>
+    <string name="delete_selection">Удалить выбранное</string>
     <string name="modem_config_slow_long">Дальний / медленный</string>
     <string name="map_style_selection">Выбор стиля</string>
     <string name="map_download_region">Скачать Регион</string>
@@ -279,9 +289,11 @@
     <string name="air_utilization">Использование эфира</string>
     <string name="temperature">Температура</string>
     <string name="humidity">Влажность</string>
+    <string name="soil_temperature">Температура почвы</string>
+    <string name="soil_moisture">Влажность почвы</string>
     <string name="logs">Журналы</string>
     <string name="hops_away">Прыжков</string>
-    <string name="hops_away_template">Количество шагов %1$d</string>
+    <string name="hops_away_template">Количество ретрансляций %1$d</string>
     <string name="info">Информация</string>
     <string name="ch_util_definition">Использование для текущего канала, включая хорошо сформированный TX, RX и неправильно сформированный RX (так называемый шум).</string>
     <string name="air_util_definition">Процент времени эфира для передачи в течение последнего часа.</string>
@@ -303,7 +315,7 @@
     <string name="device_metrics_log">Журнал метрик устройства</string>
     <string name="node_map">Карта узла</string>
     <string name="position_log">Журнал местоположения</string>
-    <string name="last_position_update">Последнее обновление местоположения</string>
+    <string name="last_position_update">Обновление последнего местоположения</string>
     <string name="env_metrics_log">Журнал параметров среды</string>
     <string name="sig_metrics_log">Журнал показателей сигнала</string>
     <string name="administration">Администрирование</string>
@@ -475,7 +487,7 @@
     <string name="use_i2s_as_buzzer">Использовать I2S как буззер</string>
     <string name="lora_config">Настройка LoRa</string>
     <string name="use_modem_preset">Использовать шаблон модема</string>
-    <string name="modem_preset">Режим работы передатчика</string>
+    <string name="modem_preset">Режим работы модема</string>
     <string name="bandwidth">Ширина канала</string>
     <string name="spread_factor">Коэффициент распространения</string>
     <string name="coding_rate">Частота кодирования</string>
@@ -584,6 +596,7 @@
     <string name="environment_metrics_use_fahrenheit">Использовать метрику окружения в Fahrenheit</string>
     <string name="air_quality_metrics_module_enabled">Модуль измерения качества воздуха включен</string>
     <string name="air_quality_metrics_update_interval_seconds">Интервал обновления показателей качества воздуха (в секундах)</string>
+    <string name="air_quality_icon">Значок качества воздуха</string>
     <string name="power_metrics_module_enabled">Модуль метрик питания включен</string>
     <string name="power_metrics_update_interval_seconds">Интервал обновления метрик питания (в секундах)</string>
     <string name="power_metrics_on_screen_enabled">Включить метрики питания на экране</string>
@@ -618,11 +631,11 @@
     <string name="heading">Курс</string>
     <string name="sats">Количество спутников</string>
     <string name="alt">Уровень моря</string>
-    <string name="freq">Чистота</string>
+    <string name="freq">Частота</string>
     <string name="slot">Слот</string>
-    <string name="primary"></string>
+    <string name="primary">Первичный</string>
     <string name="primary_channel_feature">Периодическая трансляция местоположения и телеметрии</string>
-    <string name="secondary">Дополнительный</string>
+    <string name="secondary">Вторичный</string>
     <string name="secondary_no_telemetry">Нет периодической телеметрической передачи</string>
     <string name="manual_position_request">Требуется запрос позиции вручную</string>
     <string name="press_and_drag">Нажмите и перетащите для изменения порядка</string>
@@ -691,4 +704,54 @@
     <string name="app_intro_next_button">Далее</string>
     <string name="app_intro_done_button">Готово</string>
     <string name="app_intro_skip_button">Пропустить</string>
+    <string name="security_icon_description">Статус безопасности</string>
+    <string name="security_icon_secure">Безопасный</string>
+    <string name="security_icon_insecure_precise"> - ВНИМАНИЕ, включена небезопасная локация</string>
+    <string name="security_icon_badge_warning_description">Предупреждающий Знак</string>
+    <string name="unknown_channel">Неизвестный канал</string>
+    <string name="warning">Предупреждение</string>
+    <string name="overflow_menu">Переполнение меню</string>
+    <string name="uv_lux">УФ Люкс</string>
+    <string name="unknown">Неизвестно</string>
+    <string name="map_type_normal">Обычный</string>
+    <string name="map_type_satellite">Спутниковая</string>
+    <string name="map_type_terrain">Ландшафт</string>
+    <string name="map_type_hybrid">Смешанный</string>
+    <string name="manage_map_layers">Управление Слоями Карты</string>
+    <string name="map_layers_title">Слои карты</string>
+    <string name="no_map_layers_loaded">Пользовательские слои не загружены.</string>
+    <string name="add_layer_button">Добавить слой</string>
+    <string name="hide_layer">Скрыть слой</string>
+    <string name="show_layer">Показать слой</string>
+    <string name="remove_layer">Удалить слой</string>
+    <string name="add_layer">Добавить слой</string>
+    <string name="nodes_at_this_location">Узлы в этом месте</string>
+    <string name="selected_map_type">Выбранный тип карты</string>
+    <string name="manage_custom_tile_sources">Управление собственными источниками плиток</string>
+    <string name="add_custom_tile_source">Добавить свой источник плиток</string>
+    <string name="no_custom_tile_sources_found">Нет пользовательских источников плиток</string>
+    <string name="edit_custom_tile_source">Изменить свой источник плиток</string>
+    <string name="delete_custom_tile_source">Удалить свой источник плиток</string>
+    <string name="name_cannot_be_empty">Имя не может быть пустым.</string>
+    <string name="provider_name_exists">Имя провайдера уже существует.</string>
+    <string name="url_cannot_be_empty">URL не может быть пустым.</string>
+    <string name="url_must_contain_placeholders">URL должен содержать placeholders.</string>
+    <string name="url_template">Шаблон URL</string>
+    <string name="url_template_hint">например: https://a.tile.openstreetmap.org/{z}/{x}/{y}.png</string>
+    <string name="security_icon_help_green_lock">Зеленый замок означает, что канал надежно зашифрован либо 128, либо 256 битным ключом AES.</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <string name="security_icon_insecure_no_precise">Небезопасный канал, не точный</string>
+    <string name="security_icon_help_yellow_open_lock">Желтый открытый замок означает, что канал небезопасно зашифрован, не используется для точного определения местоположения и не использует ни один ключ вообще, ни один из известных байтовых ключей.</string>
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <string name="security_icon_insecure_precise_only">Небезопасный канал, точное местоположение</string>
+    <string name="security_icon_help_red_open_lock">Красный открытый замок означает, что канал не зашифрован, используется для точного определения местоположения и не использует ни один ключ вообще, ни один байтный известный ключ.</string>
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <string name="security_icon_warning_precise_mqtt">Предупреждение: Небезопасно, точное местоположение; Uplink MQTT</string>
+    <string name="security_icon_help_warning_precise_mqtt">Красный открытый замок с предупреждением означает, что канал не зашифрован, используется для получения точных данных о местоположении, которые передаются через Интернет по MQTT, и не использует ни один ключ вообще, ни один байтовый известный ключ.</string>
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="security_icon_help_title">Безопасность канала</string>
+    <string name="security_icon_help_title_all">Значения безопасности канала</string>
+    <string name="security_icon_help_show_all">Показать все значения</string>
+    <string name="security_icon_help_show_less">Показать текущий статус</string>
+    <string name="security_icon_help_dismiss">Отменить</string>
 </resources>

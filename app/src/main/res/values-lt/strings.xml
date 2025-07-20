@@ -27,6 +27,7 @@
     <string name="node_sort_hops_away">Persiuntimų kiekis</string>
     <string name="node_sort_last_heard">Seniausiai girdėtas</string>
     <string name="node_sort_via_mqtt">per MQTT</string>
+    <string name="via_mqtt">per MQTT</string>
     <string name="unrecognized">Be kategorijos</string>
     <string name="message_status_enroute">Laukiama patvirtinimo</string>
     <string name="message_status_queued">Eilėje išsiuntimui</string>
@@ -300,4 +301,8 @@ Suderinamus įrenginius galite pamatyti apsilankę adresu www.meshtastic.org/doc
     <string name="private_key">Privatus raktas</string>
     <string name="timeout">Baigėsi laikas</string>
     <string name="distance">Atstumas</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
 </resources>

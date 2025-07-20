@@ -35,6 +35,7 @@
     <string name="node_sort_hops_away">Brinca afuera</string>
     <string name="node_sort_last_heard">Última escucha</string>
     <string name="node_sort_via_mqtt">vía MQTT</string>
+    <string name="via_mqtt">vía MQTT</string>
     <string name="node_sort_via_favorite">vía Favorita</string>
     <string name="unrecognized">No reconocido</string>
     <string name="message_status_enroute">Esperando ser reconocido</string>
@@ -468,4 +469,8 @@ Rango de Valores 0 - 500.</string>
     <string name="react">Reaccionar</string>
     <string name="app_intro_skip_button">Saltar</string>
     <string name="uv_lux">Lux ultravioletas</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
 </resources>

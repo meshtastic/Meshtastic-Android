@@ -33,6 +33,7 @@
     <string name="node_sort_hops_away">Saltos</string>
     <string name="node_sort_last_heard">Último recebido</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
+    <string name="via_mqtt">via MQTT</string>
     <string name="node_sort_via_favorite">via Favorito</string>
     <string name="unrecognized">Desconhecido</string>
     <string name="message_status_enroute">A aguardar confirmação</string>
@@ -619,4 +620,8 @@
     <string name="contacts">Contactos</string>
     <string name="nodes">Nodes</string>
     <string name="i_agree">Estou de acordo.</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
 </resources>

@@ -35,6 +35,7 @@
     <string name="node_sort_hops_away">Hyppyjä</string>
     <string name="node_sort_last_heard">Viimeksi kuultu</string>
     <string name="node_sort_via_mqtt">MQTT:n kautta</string>
+    <string name="via_mqtt">MQTT:n kautta</string>
     <string name="node_sort_via_favorite">Suosikkien kautta</string>
     <string name="unrecognized">Tuntematon</string>
     <string name="message_status_enroute">Odottaa vahvistusta</string>
@@ -700,12 +701,53 @@
     <string name="app_intro_done_button">Valmis</string>
     <string name="app_intro_skip_button">Ohita</string>
     <string name="security_icon_description">Turvallisuustila</string>
-    <string name="security_icon_secure"> - Suojattu</string>
-    <string name="security_icon_warning"> - VAROITUS, suojaamaton MQTT</string>
-    <string name="security_icon_insecure"> - VAROITUS, alhainen entropian avain</string>
+    <string name="security_icon_secure">Suojattu</string>
     <string name="security_icon_insecure_precise"> - VAROITUS, suojaamaton sijaintitieto käytössä</string>
+    <string name="security_icon_badge_warning_description">Varoituskuvake</string>
     <string name="unknown_channel">Tuntematon kanava</string>
     <string name="warning">Varoitus</string>
     <string name="overflow_menu">Lisävalikko</string>
     <string name="uv_lux">UV-valon voimakkuus</string>
+    <string name="unknown">Tuntematon</string>
+    <string name="map_type_normal">Normaali</string>
+    <string name="map_type_satellite">Satelliitti</string>
+    <string name="map_type_terrain">Maasto</string>
+    <string name="map_type_hybrid">Hybridi</string>
+    <string name="manage_map_layers">Hallitse Karttatasoja</string>
+    <string name="map_layers_title">Karttatasot</string>
+    <string name="no_map_layers_loaded">Mukautettuja karttatasoja ei ladattu.</string>
+    <string name="add_layer_button">Lisää taso</string>
+    <string name="hide_layer">Piilota taso</string>
+    <string name="show_layer">Näytä taso</string>
+    <string name="remove_layer">Poista taso</string>
+    <string name="add_layer">Lisää taso</string>
+    <string name="nodes_at_this_location">Laitteet tässä sijainnissa</string>
+    <string name="selected_map_type">Valittu karttatyyppi</string>
+    <string name="manage_custom_tile_sources">Hallitse mukautettuja karttatasoja</string>
+    <string name="add_custom_tile_source">Lisää mukautettu karttataso</string>
+    <string name="no_custom_tile_sources_found">Ei mukautettuja karttatasoja</string>
+    <string name="edit_custom_tile_source">Muokkaa mukautettua karttatasoa</string>
+    <string name="delete_custom_tile_source">Poista mukautettu karttataso</string>
+    <string name="name_cannot_be_empty">Nimi ei voi olla tyhjä.</string>
+    <string name="provider_name_exists">Palveluntarjoajan nimi on olemassa.</string>
+    <string name="url_cannot_be_empty">URL-osoite ei voi olla tyhjä.</string>
+    <string name="url_must_contain_placeholders">URL-osoitteessa on oltava paikkamerkkejä.</string>
+    <string name="url_template">URL-mallipohja</string>
+    <string name="url_template_hint">esim. https://a.tile.openstreetmap.org/{z}/{x}/{y}.png</string>
+    <string name="security_icon_help_green_lock">Vihreä lukko tarkoittaa, että kanava on suojattu salauksella käyttäen joko 128- tai 256-bittistä AES-avainta.</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <string name="security_icon_insecure_no_precise">Kanava ei ole suojattu, tieto ei tarkkaa</string>
+    <string name="security_icon_help_yellow_open_lock">Keltainen avoin lukko osoittaa, että yhteys ei ole salattu turvallisesti. Sitä ei käytetä tarkkaan sijaintitietoon, ja se käyttää joko salaamatonta yhteyttä tai tunnettua yhden tavun avainta.</string>
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <string name="security_icon_insecure_precise_only">Kanava ei ole suojattu, tarkka sijainti</string>
+    <string name="security_icon_help_red_open_lock">Punainen avoin lukko osoittaa, että yhteys ei ole turvallisesti salattu, vaikka sitä käytetään tarkkojen sijaintitietojen siirtoon. Salaus on joko kokonaan puuttuva tai perustuu tunnettuun yhden tavun avaimen käyttöön.</string>
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <string name="security_icon_warning_precise_mqtt">Varoitus: tarkka sijainti &amp; MQTT-lähetys käytössä</string>
+    <string name="security_icon_help_warning_precise_mqtt">Punainen avoin lukko varoituksella tarkoittaa, että kanava ei ole suojattu salauksella, sitä käytetään tarkkoihin sijaintitietoihin, jotka lähetetään internetiin MQTT-protokallalla ja se käyttää joko ei lainkaan salausta tai tunnettua yhden tavun avainta.</string>
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="security_icon_help_title">Kanavan turvallisuus</string>
+    <string name="security_icon_help_title_all">Kanavan turvallisuuden merkitykset</string>
+    <string name="security_icon_help_show_all">Näytä kaikki merkitykset</string>
+    <string name="security_icon_help_show_less">Näytä nykyinen tila</string>
+    <string name="security_icon_help_dismiss">Hylkää</string>
 </resources>

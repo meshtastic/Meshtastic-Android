@@ -200,4 +200,8 @@
     <string name="messages">הודעות</string>
     <string name="distance">מרחק</string>
     <string name="map">מפה</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
 </resources>
