@@ -26,6 +26,7 @@
     <string name="node_sort_hops_away">Brinca fóra</string>
     <string name="node_sort_last_heard">Última escoita</string>
     <string name="node_sort_via_mqtt">vía MQTT</string>
+    <string name="via_mqtt">vía MQTT</string>
     <string name="routing_error_pki_failed">Fallou o envío cifrado</string>
     <string name="role_client">Aplicación conectada ou dispositivo de mensaxería autónomo.</string>
     <string name="channel_name">Nome de canle</string>
@@ -202,4 +203,8 @@
     <string name="mute_1_week">1 semana</string>
     <string name="mute_always">Sempre</string>
     <string name="distance">Distancia</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
 </resources>

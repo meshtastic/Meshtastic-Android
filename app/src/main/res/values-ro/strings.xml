@@ -182,4 +182,8 @@
     <string name="waypoint_new">Waypoint nou</string>
     <string name="waypoint_received">Waypoint recepționat: $1%s</string>
     <string name="error_duty_cycle">Limita Duty Cycle a fost atinsă. Nu se pot trimite mesaje acum, vă rugăm să încercați din nou mai târziu.</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
 </resources>

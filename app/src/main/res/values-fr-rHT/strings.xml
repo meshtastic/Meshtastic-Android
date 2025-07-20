@@ -26,6 +26,7 @@
     <string name="node_sort_hops_away">Sote lwen</string>
     <string name="node_sort_last_heard">Dènye fwa li tande</string>
     <string name="node_sort_via_mqtt">atravè MQTT</string>
+    <string name="via_mqtt">atravè MQTT</string>
     <string name="unrecognized">Inkonu</string>
     <string name="message_status_enroute">Ap tann pou li rekonèt</string>
     <string name="message_status_queued">Kwen pou voye</string>
@@ -279,4 +280,8 @@
     <string name="traceroute_diff">Hops vèsus %1$d Hops tounen %2$d</string>
     <string name="timeout">Tan pase</string>
     <string name="distance">Distans</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
 </resources>

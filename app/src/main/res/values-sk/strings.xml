@@ -32,6 +32,7 @@
     <string name="node_sort_hops_away">Počet skokov</string>
     <string name="node_sort_last_heard">Posledný príjem</string>
     <string name="node_sort_via_mqtt">cez MQTT</string>
+    <string name="via_mqtt">cez MQTT</string>
     <string name="node_sort_via_favorite">Prostredníctvom obľúbených</string>
     <string name="unrecognized">Nerozoznaný</string>
     <string name="message_status_enroute">Čaká sa na potvrdenie</string>
@@ -383,4 +384,8 @@
     <string name="timeout">Časový limit</string>
     <string name="distance">Vzdialenosť</string>
     <string name="map">Mapa</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
 </resources>

@@ -26,6 +26,7 @@
     <string name="node_sort_hops_away">Cúlaithe</string>
     <string name="node_sort_last_heard">Deiridh chluinmhu</string>
     <string name="node_sort_via_mqtt">trí MQTT</string>
+    <string name="via_mqtt">trí MQTT</string>
     <string name="unrecognized">Neamh-aithnidiúil</string>
     <string name="message_status_enroute">Ag fanacht le ceadú</string>
     <string name="message_status_queued">Cur síos ar sheoladh</string>
@@ -290,4 +291,8 @@
     <string name="traceroute_diff">Céimeanna i dtreo %1$d Céimeanna ar ais %2$d</string>
     <string name="timeout">Am tráth</string>
     <string name="distance">Sáth</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
 </resources>

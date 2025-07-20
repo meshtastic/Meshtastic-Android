@@ -35,6 +35,7 @@
     <string name="node_sort_hops_away">依轉跳排序</string>
     <string name="node_sort_last_heard">最近一次收到排序</string>
     <string name="node_sort_via_mqtt">有節點MQTT排序</string>
+    <string name="via_mqtt">有節點MQTT排序</string>
     <string name="node_sort_via_favorite">通過喜好</string>
     <string name="unrecognized">無法識別</string>
     <string name="message_status_enroute">正在等待確認</string>
@@ -534,4 +535,8 @@
     <string name="app_intro_back_button">返回</string>
     <string name="app_intro_done_button">完成</string>
     <string name="app_intro_skip_button">跳過</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
 </resources>

@@ -35,6 +35,7 @@
     <string name="node_sort_hops_away">Hüppeid</string>
     <string name="node_sort_last_heard">Viimati kuuldud</string>
     <string name="node_sort_via_mqtt">läbi MQTT</string>
+    <string name="via_mqtt">läbi MQTT</string>
     <string name="node_sort_via_favorite">läbi Lemmikud</string>
     <string name="unrecognized">Tundmatu</string>
     <string name="message_status_enroute">Ootab kinnitamist</string>
@@ -700,12 +701,13 @@
     <string name="app_intro_done_button">Valmis</string>
     <string name="app_intro_skip_button">Jäta vahele</string>
     <string name="security_icon_description">Turvalisuse olek</string>
-    <string name="security_icon_secure"> - Kaitstud</string>
-    <string name="security_icon_warning"> - HOIATUS, kaitsmata MQTT</string>
-    <string name="security_icon_insecure"> - HOIATUS, madal entropy võti</string>
     <string name="security_icon_insecure_precise"> - HOIATUS, kaitsmata asukoht lubatud</string>
     <string name="unknown_channel">Tundmatu kanal</string>
     <string name="warning">Hoiatus</string>
     <string name="overflow_menu">Lisa valikud</string>
     <string name="uv_lux">UV Luks</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
 </resources>

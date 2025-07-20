@@ -35,6 +35,7 @@
     <string name="node_sort_hops_away">Zwischenschritte entfernt</string>
     <string name="node_sort_last_heard">Zuletzt gehört</string>
     <string name="node_sort_via_mqtt">über MQTT</string>
+    <string name="via_mqtt">über MQTT</string>
     <string name="node_sort_via_favorite">über Favorit</string>
     <string name="unrecognized">Unbekannt</string>
     <string name="message_status_enroute">Warte auf Bestätigung</string>
@@ -700,12 +701,53 @@
     <string name="app_intro_done_button">Fertig</string>
     <string name="app_intro_skip_button">Überspringen</string>
     <string name="security_icon_description">Sicherheitsstatus</string>
-    <string name="security_icon_secure"> - Sicher</string>
-    <string name="security_icon_warning"> - Warnung, unsicherer MQTT</string>
-    <string name="security_icon_insecure"> - Warnung, Schlüssel mit niedriger Entropie</string>
+    <string name="security_icon_secure">Sicher</string>
     <string name="security_icon_insecure_precise"> - Warnung, unsicherer Standort aktiviert</string>
+    <string name="security_icon_badge_warning_description">Warnhinweis</string>
     <string name="unknown_channel">Unbekannter Kanal</string>
     <string name="warning">Warnung</string>
     <string name="overflow_menu">Überlaufmenü</string>
     <string name="uv_lux">UV Lux</string>
+    <string name="unknown">Unbekannt</string>
+    <string name="map_type_normal">Normal</string>
+    <string name="map_type_satellite">Satellit</string>
+    <string name="map_type_terrain">Gelände</string>
+    <string name="map_type_hybrid">Hybrid</string>
+    <string name="manage_map_layers">Kartenebenen verwalten</string>
+    <string name="map_layers_title">Kartenebenen</string>
+    <string name="no_map_layers_loaded">Keine benutzerdefinierten Ebenen geladen.</string>
+    <string name="add_layer_button">Ebene hinzufügen</string>
+    <string name="hide_layer">Ebene ausblenden</string>
+    <string name="show_layer">Ebene anzeigen</string>
+    <string name="remove_layer">Ebene entfernen</string>
+    <string name="add_layer">Ebene hinzufügen</string>
+    <string name="nodes_at_this_location">Knoten an diesem Standort</string>
+    <string name="selected_map_type">Ausgewählter Kartentyp</string>
+    <string name="manage_custom_tile_sources">Benutzerdefinierte Kachelquellen verwalten</string>
+    <string name="add_custom_tile_source">Benutzerdefinierte Kachelquelle hinzufügen</string>
+    <string name="no_custom_tile_sources_found">Keine benutzerdefinierten Kachelquellen</string>
+    <string name="edit_custom_tile_source">Benutzerdefinierte Kachelquelle bearbeiten</string>
+    <string name="delete_custom_tile_source">Benutzerdefinierte Kachelquelle löschen</string>
+    <string name="name_cannot_be_empty">Name darf nicht leer sein.</string>
+    <string name="provider_name_exists">Der Name des Anbieters existiert bereits.</string>
+    <string name="url_cannot_be_empty">URL darf nicht leer sein.</string>
+    <string name="url_must_contain_placeholders">URL muss Platzhalter enthalten.</string>
+    <string name="url_template">URL Vorlage</string>
+    <string name="url_template_hint">z.B. https://a.tile.openstreetmap.org/{z}/{x}/{y}.png</string>
+    <string name="security_icon_help_green_lock">Ein grünes Schloss bedeutet, dass der Kanal sicher mit einem 128 oder 256 Bit AES-Schlüssel verschlüsselt ist.</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <string name="security_icon_insecure_no_precise">Unsicherer Kanal, nicht genau</string>
+    <string name="security_icon_help_yellow_open_lock">Ein gelbes offenes Schloss bedeutet, dass der Kanal nicht sicher verschlüsselt ist, nicht für genaue Standortdaten verwendet wird und entweder gar keinen Schlüssel oder einen bekannten 1 Byte Schlüssel verwendet.</string>
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <string name="security_icon_insecure_precise_only">Unsicherer Kanal, genauer Standort</string>
+    <string name="security_icon_help_red_open_lock">Ein rotes offenes Schloss bedeutet, dass der Kanal nicht sicher verschlüsselt ist, für genaue Standortdaten verwendet wird und entweder gar keinen Schlüssel oder einen bekannten 1 Byte Schlüssel verwendet.</string>
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <string name="security_icon_warning_precise_mqtt">Warnung: Unsicherer, genauer Standort &amp; MQTT Uplink</string>
+    <string name="security_icon_help_warning_precise_mqtt">Ein rotes offenes Schloss mit Warnung bedeutet, dass der Kanal nicht sicher verschlüsselt ist, für präzise Standortdaten verwendet wird, die über MQTT ins Internet hochgeladen werden und entweder gar keinen Schlüssel oder einen bekannten 1 Byte Schlüssel verwendet.</string>
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="security_icon_help_title">Kanalsicherheit</string>
+    <string name="security_icon_help_title_all">Bedeutung für Kanalsicherheit</string>
+    <string name="security_icon_help_show_all">Alle Bedeutungen anzeigen</string>
+    <string name="security_icon_help_show_less">Aktuellen Status anzeigen</string>
+    <string name="security_icon_help_dismiss">Tastatur ausblenden</string>
 </resources>
