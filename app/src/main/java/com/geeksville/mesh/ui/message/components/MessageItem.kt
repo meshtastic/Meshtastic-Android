@@ -227,7 +227,8 @@ private fun OriginalMessageSnippet(
     cardColors: CardColors = CardDefaults.cardColors(),
     onNavigateToOriginalMessage: (Int) -> Unit
 ) {
-    message.originalMessage?.let { originalMessage ->
+    val originalMessage = message.originalMessage
+    if (originalMessage != null && originalMessage.packetId != 0) {
         val originalMessageNode =
             if (originalMessage.fromLocal) ourNode else originalMessage.node
         OutlinedCard(
