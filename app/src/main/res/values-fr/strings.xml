@@ -750,4 +750,11 @@
     <string name="security_icon_help_show_all">Afficher toutes les significations</string>
     <string name="security_icon_help_show_less">Afficher l\'état actuel</string>
     <string name="security_icon_help_dismiss">Annuler</string>
+    <string name="confirm_delete_node">Êtes-vous sûr de vouloir supprimer ce nœud?</string>
+    <string name="replying_to">Répondre à %1$s</string>
+    <string name="cancel_reply">Annuler la réponse</string>
+    <string name="delete_messages_title">Supprimer les messages ?</string>
+    <string name="clear_selection">Effacer la sélection</string>
+    <string name="message_input_label">Message</string>
+    <string name="type_a_message">Composer un message</string>
 </resources>

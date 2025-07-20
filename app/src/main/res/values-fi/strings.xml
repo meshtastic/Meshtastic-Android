@@ -750,4 +750,11 @@
     <string name="security_icon_help_show_all">Näytä kaikki merkitykset</string>
     <string name="security_icon_help_show_less">Näytä nykyinen tila</string>
     <string name="security_icon_help_dismiss">Hylkää</string>
+    <string name="confirm_delete_node">Oletko varma, että haluat poistaa tämän laitteen?</string>
+    <string name="replying_to">Vastataan käyttäjälle %1$s</string>
+    <string name="cancel_reply">Peruuta vastaus</string>
+    <string name="delete_messages_title">Poistetaanko viestit?</string>
+    <string name="clear_selection">Tyhjennä valinta</string>
+    <string name="message_input_label">Viesti</string>
+    <string name="type_a_message">Kirjoita viesti</string>
 </resources>
