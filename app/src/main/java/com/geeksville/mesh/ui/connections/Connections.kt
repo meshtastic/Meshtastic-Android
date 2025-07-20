@@ -278,6 +278,8 @@ fun ConnectionsScreen(
 
             val isConnected by uiViewModel.isConnected.collectAsState(false)
             val ourNode by uiViewModel.ourNodeInfo.collectAsState()
+            // Set the connected node long name for BTScanModel
+            scanModel.connectedNodeLongName = ourNode?.user?.longName
             if (isConnected) {
                 ourNode?.let { node ->
                     Row(

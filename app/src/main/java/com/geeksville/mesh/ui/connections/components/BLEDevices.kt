@@ -63,12 +63,12 @@ fun BLEDevices(
     )
     btDevices.forEach { device ->
         DeviceListItem(
-            connectionState,
-            device,
-            device.fullAddress == selectedDevice
-        ) {
-            scanModel.onSelected(device)
-        }
+            connectionState = connectionState,
+            device = device,
+            selected = device.fullAddress == selectedDevice,
+            onSelect = { scanModel.onSelected(device) },
+            modifier = Modifier
+        )
     }
     if (isScanning) {
         Column(
