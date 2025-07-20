@@ -190,9 +190,10 @@ internal fun MessageList(
                     isConnected = isConnected,
                     onNavigateToOriginalMessage = {
                         coroutineScope.launch {
-                            listState.animateScrollToItem(
-                                index = messages.indexOfFirst { it.packetId == msg.replyId }
-                            )
+                            val targetIndex = messages.indexOfFirst { it.packetId == msg.replyId }
+                            if (targetIndex != -1) {
+                                listState.animateScrollToItem(index = targetIndex)
+                            }
                         }
                     }
                 )
