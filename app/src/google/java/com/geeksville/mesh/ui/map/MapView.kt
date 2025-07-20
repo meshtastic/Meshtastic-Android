@@ -486,13 +486,16 @@ fun MapView(
             )
         }
         if (showLayersBottomSheet) {
-            CustomMapLayersSheet(
-                mapLayers,
-                onToggleVisibility,
-                onRemoveLayer,
-                onAddLayerClicked,
-                onDismissRequest = { showLayersBottomSheet = false }
-            )
+            ModalBottomSheet(
+                onDismissRequest = { showLayersBottomSheet = false },
+            ) {
+                CustomMapLayersSheet(
+                    mapLayers,
+                    onToggleVisibility,
+                    onRemoveLayer,
+                    onAddLayerClicked,
+                )
+            }
         }
         showClusterItemsDialog?.let {
             ClusterItemsListDialog(

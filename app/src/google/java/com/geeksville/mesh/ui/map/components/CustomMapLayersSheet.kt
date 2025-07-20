@@ -34,7 +34,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -51,74 +50,71 @@ fun CustomMapLayersSheet(
     onToggleVisibility: (String) -> Unit,
     onRemoveLayer: (String) -> Unit,
     onAddLayerClicked: () -> Unit,
-    onDismissRequest: () -> Unit
 ) {
-    ModalBottomSheet({ onDismissRequest }) {
-        LazyColumn(
-            contentPadding = PaddingValues(bottom = 16.dp)
-        ) {
+    LazyColumn(
+        contentPadding = PaddingValues(bottom = 16.dp)
+    ) {
+        item {
+            Text(
+                modifier = Modifier.Companion.padding(16.dp),
+                text = stringResource(R.string.manage_map_layers),
+                style = MaterialTheme.typography.headlineSmall
+            )
+            HorizontalDivider()
+        }
+
+        if (mapLayers.isEmpty()) {
             item {
                 Text(
                     modifier = Modifier.Companion.padding(16.dp),
-                    text = stringResource(R.string.manage_map_layers),
-                    style = MaterialTheme.typography.headlineSmall
+                    text = stringResource(R.string.no_map_layers_loaded),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        } else {
+            items(mapLayers, key = { it.id }) { layer ->
+                ListItem(
+                    headlineContent = { Text(layer.name) },
+                    trailingContent = {
+                        Row {
+                            IconButton(onClick = {
+                                onToggleVisibility(layer.id)
+                            }) {
+                                Icon(
+                                    imageVector = if (layer.isVisible) {
+                                        Icons.Filled.Visibility
+                                    } else {
+                                        Icons.Filled.VisibilityOff
+                                    },
+                                    contentDescription = stringResource(
+                                        if (layer.isVisible) {
+                                            R.string.hide_layer
+                                        } else {
+                                            R.string.show_layer
+                                        }
+                                    )
+                                )
+                            }
+                            IconButton(onClick = { onRemoveLayer(layer.id) }) {
+                                Icon(
+                                    imageVector = Icons.Filled.Delete,
+                                    contentDescription = stringResource(R.string.remove_layer)
+                                )
+                            }
+                        }
+                    }
                 )
                 HorizontalDivider()
             }
-
-            if (mapLayers.isEmpty()) {
-                item {
-                    Text(
-                        modifier = Modifier.Companion.padding(16.dp),
-                        text = stringResource(R.string.no_map_layers_loaded),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            } else {
-                items(mapLayers, key = { it.id }) { layer ->
-                    ListItem(
-                        headlineContent = { Text(layer.name) },
-                        trailingContent = {
-                            Row {
-                                IconButton(onClick = {
-                                    onToggleVisibility(layer.id)
-                                }) {
-                                    Icon(
-                                        imageVector = if (layer.isVisible) {
-                                            Icons.Filled.Visibility
-                                        } else {
-                                            Icons.Filled.VisibilityOff
-                                        },
-                                        contentDescription = stringResource(
-                                            if (layer.isVisible) {
-                                                R.string.hide_layer
-                                            } else {
-                                                R.string.show_layer
-                                            }
-                                        )
-                                    )
-                                }
-                                IconButton(onClick = { onRemoveLayer(layer.id) }) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Delete,
-                                        contentDescription = stringResource(R.string.remove_layer)
-                                    )
-                                }
-                            }
-                        }
-                    )
-                    HorizontalDivider()
-                }
-            }
-            item {
-                Button(
-                    modifier = Modifier.Companion
-                        .fillMaxWidth()
-                        .padding(16.dp),
-                    onClick = onAddLayerClicked
-                ) {
-                    Text(stringResource(R.string.add_layer))
-                }
+        }
+        item {
+            Button(
+                modifier = Modifier.Companion
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                onClick = onAddLayerClicked
+            ) {
+                Text(stringResource(R.string.add_layer))
             }
         }
     }
