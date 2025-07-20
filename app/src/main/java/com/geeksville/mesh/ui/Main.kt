@@ -111,7 +111,19 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
     ;
 
     companion object {
-        fun NavDestination.isTopLevel(): Boolean = entries.any { hasRoute(it.route::class) }
+        fun NavDestination.isTopLevel(): Boolean {
+            // Check if this destination matches any top-level graph or its start destination
+            return entries.any { topLevel ->
+                hasRoute(topLevel.route::class) ||
+                when (topLevel) {
+                    Contacts -> hasRoute(ContactsRoutes.Contacts::class)
+                    Nodes -> hasRoute(NodesRoutes.Nodes::class)
+                    Map -> hasRoute(MapRoutes.Map::class)
+                    Channels -> hasRoute(ChannelsRoutes.Channels::class)
+                    Connections -> hasRoute(ConnectionsRoutes.Connections::class)
+                }
+            }
+        }
 
         fun fromNavDestination(destination: NavDestination?): TopLevelDestination? = entries
             .find { dest -> destination?.hierarchy?.any { it.hasRoute(dest.route::class) } == true }
