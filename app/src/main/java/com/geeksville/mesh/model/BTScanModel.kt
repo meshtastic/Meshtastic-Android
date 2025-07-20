@@ -53,6 +53,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import org.json.JSONArray
+import org.json.JSONObject
 import javax.inject.Inject
 
 @HiltViewModel
@@ -127,8 +128,8 @@ class BTScanModel @Inject constructor(
                 }
 
                 // Include saved IP connections
-                recent.forEach { address ->
-                    addDevice(DeviceListEntry(context.getString(R.string.meshtastic), address, true))
+                recent.forEach { (address, name) ->
+                    addDevice(DeviceListEntry(name, address, true))
                 }
 
                 usb.forEach { (_, d) ->
@@ -295,27 +296,67 @@ class BTScanModel @Inject constructor(
             }.launchIn(viewModelScope)
     }
 
-    private fun getRecentAddresses(): List<String> {
+    private fun getRecentAddresses(): List<Pair<String, String>> {
         val jsonAddresses = preferences.getString("recent-ip-addresses", "[]") ?: "[]"
-        val listAddresses = JSONArray(jsonAddresses).let { jsonArray ->
-            List(jsonArray.length()) { index -> jsonArray.getString(index) }
+        val jsonArray = JSONArray(jsonAddresses)
+        var needsMigration = false
+
+        val listAddresses = (0 until jsonArray.length()).mapNotNull { i ->
+            when (val item = jsonArray.get(i)) {
+                is JSONObject -> {
+                    // Modern format: JSONObject with address and name
+                    item.getString("address") to item.getString("name")
+                }
+
+                is String -> {
+                    // Old format: just the address string
+                    needsMigration = true
+                    item to context.getString(R.string.meshtastic) // [3]
+                }
+
+                else -> {
+                    // Unknown format, log or handle as an error if necessary
+                    warn("Unknown item type in recent IP addresses: $item")
+                    null
+                }
+            }
+        }
+
+        // If migration was needed for any item, rewrite the entire list in the new format
+        if (needsMigration) {
+            setRecentAddresses(listAddresses)
         }
         return listAddresses
     }
 
-    private fun setRecentAddresses(addresses: List<String>) {
+    private fun setRecentAddresses(addresses: List<Pair<String, String>>) {
+        val jsonArray = JSONArray()
+        addresses.forEach { (address, name) ->
+            val obj = JSONObject()
+            obj.put("address", address)
+            obj.put("name", name)
+            jsonArray.put(obj)
+        }
         preferences.edit {
-            putString("recent-ip-addresses", addresses.toString())
+            putString("recent-ip-addresses", jsonArray.toString())
         }
         recentIpAddresses.value = addresses
     }
 
-    fun addRecentAddress(address: String) {
+    // Remove 'name' parameter from addRecentAddress and related logic
+    fun addRecentAddress(address: String, overrideName: String? = null) {
         if (!address.startsWith("t")) return
         val existingItems = getRecentAddresses()
-        val updatedList = mutableListOf<String>()
-        updatedList.add(address)
-        updatedList.addAll(existingItems.filter { it != address }.take(2))
+        val updatedList = mutableListOf<Pair<String, String>>()
+        val displayName = overrideName ?: context.getString(R.string.meshtastic)
+        updatedList.add(address to displayName)
+        updatedList.addAll(existingItems.filter { it.first != address }.take(2))
+        setRecentAddresses(updatedList)
+    }
+
+    fun removeRecentAddress(address: String) {
+        val existingItems = getRecentAddresses()
+        val updatedList = existingItems.filter { it.first != address }
         setRecentAddresses(updatedList)
     }
 
@@ -324,7 +365,7 @@ class BTScanModel @Inject constructor(
     fun onSelected(it: DeviceListEntry): Boolean {
         // If the device is paired, let user select it, otherwise start the pairing flow
         if (it.bonded) {
-            addRecentAddress(it.fullAddress)
+            addRecentAddress(it.fullAddress, connectedNodeLongName)
             changeDeviceAddress(it.fullAddress)
             return true
         } else {
@@ -345,6 +386,9 @@ class BTScanModel @Inject constructor(
 
     private val _spinner = MutableStateFlow(false)
     val spinner: StateFlow<Boolean> get() = _spinner.asStateFlow()
+
+    // Add a new property to hold the connected node's long name
+    var connectedNodeLongName: String? = null
 }
 
 const val NO_DEVICE_SELECTED = "n"

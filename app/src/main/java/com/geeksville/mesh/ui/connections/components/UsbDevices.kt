@@ -48,9 +48,13 @@ fun UsbDevices(
         modifier = Modifier.padding(vertical = 8.dp)
     )
     usbDevices.forEach { device ->
-        DeviceListItem(connectionState, device, device.fullAddress == selectedDevice) {
-            scanModel.onSelected(device)
-        }
+        DeviceListItem(
+            connectionState = connectionState,
+            device = device,
+            selected = device.fullAddress == selectedDevice,
+            onSelect = { scanModel.onSelected(device) },
+            modifier = Modifier
+        )
     }
     if (usbDevices.filterNot { it.isDisconnect || it.isMock }.isEmpty()) {
         Column(

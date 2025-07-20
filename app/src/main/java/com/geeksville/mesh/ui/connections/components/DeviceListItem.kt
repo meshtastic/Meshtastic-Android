@@ -48,6 +48,7 @@ fun DeviceListItem(
     device: BTScanModel.DeviceListEntry,
     selected: Boolean,
     onSelect: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val icon = if (device.isBLE) {
         Icons.Default.Bluetooth
@@ -102,13 +103,18 @@ fun DeviceListItem(
         }
     }
 
+    val useSelectable = modifier == Modifier
     ListItem(
-        modifier = Modifier
-            .fillMaxWidth()
-            .selectable(
-                selected = selected,
-                onClick = onSelect,
-            ),
+        modifier = if (useSelectable) {
+            modifier
+                .fillMaxWidth()
+                .selectable(
+                    selected = selected,
+                    onClick = onSelect,
+                )
+        } else {
+            modifier.fillMaxWidth()
+        },
         headlineContent = { Text(device.name) },
         leadingContent = {
             Icon(

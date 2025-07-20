@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+@file:Suppress("TooManyFunctions")
 package com.geeksville.mesh.ui.message
 
 import android.content.ClipData
@@ -22,6 +23,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,6 +32,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -73,11 +76,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
@@ -94,17 +95,30 @@ import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.getChannel
+import com.geeksville.mesh.ui.common.components.SecurityIcon
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.node.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import com.geeksville.mesh.ui.common.components.SecurityIcon
+import java.nio.charset.StandardCharsets
 
-private const val MESSAGE_CHARACTER_LIMIT = 200
+private const val MESSAGE_CHARACTER_LIMIT_BYTES = 200
 private const val SNIPPET_CHARACTER_LIMIT = 50
+private const val ROUNDED_CORNER_PERCENT = 100
 
-@Suppress("LongMethod", "CyclomaticComplexMethod")
+/**
+ * The main screen for displaying and sending messages to a contact or channel.
+ *
+ * @param contactKey A unique key identifying the contact or channel.
+ * @param message An optional message to pre-fill in the input field.
+ * @param viewModel The [UIViewModel] instance for handling business logic and state.
+ * @param navigateToMessages Callback to navigate to a different message thread.
+ * @param navigateToNodeDetails Callback to navigate to a node's detail screen.
+ * @param onNavigateBack Callback to navigate back from this screen.
+ */
+@Suppress("LongMethod", "CyclomaticComplexMethod") // Due to multiple states and event handling
 @Composable
 internal fun MessageScreen(
     contactKey: String,
@@ -117,62 +131,124 @@ internal fun MessageScreen(
     val coroutineScope = rememberCoroutineScope()
     val clipboardManager = LocalClipboard.current
 
+    // State from ViewModel
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val isConnected by viewModel.isConnected.collectAsStateWithLifecycle(false)
-
-    val channelIndex = contactKey[0].digitToIntOrNull()
-    val nodeId = contactKey.substring(1)
+    val isConnected by viewModel.isConnected.collectAsStateWithLifecycle(initialValue = false)
     val channels by viewModel.channels.collectAsStateWithLifecycle()
+    val quickChatActions by viewModel.quickChatActions.collectAsStateWithLifecycle(initialValue = emptyList())
+    val messages by viewModel.getMessagesFrom(contactKey)
+        .collectAsStateWithLifecycle(initialValue = emptyList())
+
+    // UI State managed within this Composable
+    var replyingTo by rememberSaveable { mutableStateOf<Message?>(null) }
+    var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
+    var sharedContact by rememberSaveable { mutableStateOf<Node?>(null) }
+    val selectedMessageIds = rememberSaveable { mutableStateOf(emptySet<Long>()) }
+    val messageInputState = rememberTextFieldState(message)
+
+    // Derived state, memoized for performance
+    val channelInfo = remember(contactKey, channels) {
+        val index = contactKey.firstOrNull()?.digitToIntOrNull()
+        val id = contactKey.substring(1)
+        val name = index?.let { channels.getChannel(it)?.name } // channels can be null initially
+        Triple(index, id, name)
+    }
+    val (channelIndex, nodeId, rawChannelName) = channelInfo
     val unknownChannelText = stringResource(id = R.string.unknown_channel)
-    val channelName by remember(channelIndex, unknownChannelText) {
-        derivedStateOf {
-            channelIndex?.let {
-                val channel = channels.getChannel(it)
-                channel?.name ?: unknownChannelText
-            } ?: unknownChannelText
+    val channelName = rawChannelName ?: unknownChannelText
+
+    val title = remember(nodeId, channelName, viewModel) {
+        when (nodeId) {
+            DataPacket.ID_BROADCAST -> channelName
+            else -> viewModel.getUser(nodeId).longName
         }
     }
 
-    val title = when (nodeId) {
-        DataPacket.ID_BROADCAST -> channelName
-        else -> viewModel.getUser(nodeId).longName
+    val isMismatchKey = remember(channelIndex, nodeId, viewModel) {
+        channelIndex == DataPacket.PKC_CHANNEL_INDEX && viewModel.getNode(nodeId).mismatchKey
     }
-    viewModel.setTitle(title)
-    val mismatchKey =
-        DataPacket.PKC_CHANNEL_INDEX == channelIndex && viewModel.getNode(nodeId).mismatchKey
 
-//    if (channelIndex != DataPacket.PKC_CHANNEL_INDEX && nodeId != DataPacket.ID_BROADCAST) {
-//        subtitle = "(ch: $channelIndex - $channelName)"
-//    }
+    val inSelectionMode by remember { derivedStateOf { selectedMessageIds.value.isNotEmpty() } }
 
-    val selectedIds = rememberSaveable { mutableStateOf(emptySet<Long>()) }
-    val inSelectionMode by remember { derivedStateOf { selectedIds.value.isNotEmpty() } }
-
-    val quickChat by viewModel.quickChatActions.collectAsStateWithLifecycle()
-    val messages by viewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(listOf())
     val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = messages.indexOfLast { !it.read }.coerceAtLeast(0)
+        initialFirstVisibleItemIndex = remember(messages) {
+            messages.indexOfLast { !it.read }.coerceAtLeast(0)
+        }
     )
-    val messageInput = rememberTextFieldState(message)
 
-    var replyingTo by remember { mutableStateOf<Message?>(null) }
+    val onEvent: (MessageScreenEvent) -> Unit =
+        remember(
+            viewModel, contactKey, messageInputState, ourNode
+        ) {
+            {
+                event ->
+                when (event) {
+                    is MessageScreenEvent.SendMessage -> {
+                        viewModel.sendMessage(event.text, contactKey, event.replyingToPacketId)
+                        if (event.replyingToPacketId != null) replyingTo = null
+                        messageInputState.clearText()
+                    }
 
-    var showDeleteDialog by remember { mutableStateOf(false) }
+                    is MessageScreenEvent.SendReaction -> viewModel.sendReaction(
+                        event.emoji,
+                        event.messageId,
+                        contactKey
+                    )
+
+                    is MessageScreenEvent.DeleteMessages -> {
+                        viewModel.deleteMessages(event.ids)
+                        selectedMessageIds.value = emptySet()
+                        showDeleteDialog = false
+                    }
+
+                    is MessageScreenEvent.ClearUnreadCount -> viewModel.clearUnreadCount(
+                        contactKey,
+                        event.lastReadMessageId
+                    )
+
+                    is MessageScreenEvent.HandleNodeMenuAction -> {
+                        when (val action = event.action) {
+                            is NodeMenuAction.DirectMessage -> {
+                                val hasPKC = ourNode?.hasPKC == true && action.node.hasPKC
+                                val targetChannel =
+                                    if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else action.node.channel
+                                navigateToMessages("$targetChannel${action.node.user.id}")
+                            }
+
+                            is NodeMenuAction.MoreDetails -> navigateToNodeDetails(action.node.num)
+                            is NodeMenuAction.Share -> sharedContact = action.node
+                            else -> viewModel.handleNodeMenuAction(action)
+                        }
+                    }
+
+                    is MessageScreenEvent.SetTitle -> viewModel.setTitle(event.title)
+                    is MessageScreenEvent.NavigateToMessages -> navigateToMessages(event.contactKey)
+                    is MessageScreenEvent.NavigateToNodeDetails -> navigateToNodeDetails(event.nodeNum)
+                    MessageScreenEvent.NavigateBack -> onNavigateBack()
+                    is MessageScreenEvent.CopyToClipboard -> {
+                        clipboardManager.nativeClipboard.setPrimaryClip(
+                            ClipData.newPlainText(
+                                event.text,
+                                event.text
+                            )
+                        )
+                        selectedMessageIds.value = emptySet()
+                    }
+                }
+            }
+        }
+
     if (showDeleteDialog) {
         DeleteMessageDialog(
-            size = selectedIds.value.size,
-            onConfirm = {
-                viewModel.deleteMessages(selectedIds.value.toList())
-                selectedIds.value = emptySet()
-                showDeleteDialog = false
-            },
+            count = selectedMessageIds.value.size,
+            onConfirm = { onEvent(MessageScreenEvent.DeleteMessages(selectedMessageIds.value.toList())) },
             onDismiss = { showDeleteDialog = false }
         )
     }
-    var sharedContact: Node? by remember { mutableStateOf(null) }
-    if (sharedContact != null) {
+
+    sharedContact?.let { contact ->
         SharedContactDialog(
-            contact = sharedContact,
+            contact = contact,
             onDismiss = { sharedContact = null }
         )
     }
@@ -181,210 +257,292 @@ internal fun MessageScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = {
             if (inSelectionMode) {
-                ActionModeTopBar(selectedIds.value) { action ->
-                    when (action) {
-                        MessageMenuAction.ClipboardCopy -> coroutineScope.launch {
-                            val copiedText = messages
-                                .filter { it.uuid in selectedIds.value }
-                                .joinToString("\n") { it.text }
+                ActionModeTopBar(
+                    selectedCount = selectedMessageIds.value.size,
+                    onAction = { action ->
+                        when (action) {
+                            MessageMenuAction.ClipboardCopy -> {
+                                val copiedText = messages
+                                    .filter { it.uuid in selectedMessageIds.value }
+                                    .joinToString("\n") { it.text }
+                                onEvent(MessageScreenEvent.CopyToClipboard(copiedText))
+                            }
 
-                            val clipData = ClipData.newPlainText("", AnnotatedString(copiedText))
-                            clipboardManager.setClipEntry(ClipEntry(clipData))
-                            selectedIds.value = emptySet()
-                        }
-
-                        MessageMenuAction.Delete -> {
-                            showDeleteDialog = true
-                        }
-
-                        MessageMenuAction.Dismiss -> selectedIds.value = emptySet()
-                        MessageMenuAction.SelectAll -> {
-                            if (selectedIds.value.size == messages.size) {
-                                selectedIds.value = emptySet()
-                            } else {
-                                selectedIds.value = messages.map { it.uuid }.toSet()
+                            MessageMenuAction.Delete -> showDeleteDialog = true
+                            MessageMenuAction.Dismiss -> selectedMessageIds.value = emptySet()
+                            MessageMenuAction.SelectAll -> {
+                                selectedMessageIds.value =
+                                    if (selectedMessageIds.value.size == messages.size) {
+                                        emptySet()
+                                    } else {
+                                        messages.map { it.uuid }.toSet()
+                                    }
                             }
                         }
                     }
-                }
+                )
             } else {
-                MessageTopBar(title, channelIndex, mismatchKey, onNavigateBack, channels, channelIndex)
+                MessageTopBar(
+                    title = title,
+                    channelIndex = channelIndex,
+                    mismatchKey = isMismatchKey,
+                    onNavigateBack = { onEvent(MessageScreenEvent.NavigateBack) },
+                    channels = channels,
+                    channelIndexParam = channelIndex
+                )
             }
         },
-    ) { padding ->
-        Column(Modifier.padding(padding)) {
+    ) { paddingValues ->
+        Column(Modifier.padding(paddingValues)) {
             Box(
-                modifier = Modifier.weight(1f, fill = true),
+                modifier = Modifier.weight(1f),
             ) {
                 MessageList(
                     modifier = Modifier.fillMaxSize(),
                     listState = listState,
                     messages = messages,
-                    selectedIds = selectedIds,
-                    onUnreadChanged = { viewModel.clearUnreadCount(contactKey, it) },
+                    selectedIds = selectedMessageIds,
+                    onUnreadChanged = { messageId ->
+                        onEvent(
+                            MessageScreenEvent.ClearUnreadCount(
+                                messageId
+                            )
+                        )
+                    },
                     onSendReaction = { emoji, id ->
-                        viewModel.sendReaction(
-                            emoji,
-                            id,
-                            contactKey
+                        onEvent(
+                            MessageScreenEvent.SendReaction(
+                                emoji,
+                                id
+                            )
                         )
                     },
                     viewModel = viewModel,
                     contactKey = contactKey,
-                    onReply = { replyingTo = it },
+                    onReply = { message -> replyingTo = message },
                     onNodeMenuAction = { action ->
-                        when (action) {
-                            is NodeMenuAction.DirectMessage -> {
-                                val hasPKC =
-                                    viewModel.ourNodeInfo.value?.hasPKC == true && action.node.hasPKC
-                                val channel =
-                                    if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else action.node.channel
-                                navigateToMessages("$channel${action.node.user.id}")
-                            }
-
-                            is NodeMenuAction.MoreDetails -> navigateToNodeDetails(action.node.num)
-                            is NodeMenuAction.Share -> sharedContact = action.node
-                            else -> viewModel.handleNodeMenuAction(action)
-                        }
+                        onEvent(
+                            MessageScreenEvent.HandleNodeMenuAction(
+                                action
+                            )
+                        )
                     },
                 )
-                if (listState.canScrollBackward) {
-                    FloatingActionButton(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(16.dp),
-                        onClick = {
-                            coroutineScope.launch {
-                                listState.animateScrollToItem(0)
-                            }
-                        }
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowDownward,
-                            contentDescription = stringResource(id = R.string.scroll_to_bottom)
-                        )
-                    }
+                // Show FAB if we can scroll towards the newest messages (index 0).
+                if (listState.canScrollForward) {
+                    ScrollToBottomFab(coroutineScope, listState)
                 }
             }
             QuickChatRow(
                 enabled = isConnected,
-                actions = quickChat,
+                actions = quickChatActions,
                 onClick = { action ->
-                    handleQuickChatAction(action, messageInput, viewModel, contactKey)
+                    handleQuickChatAction(
+                        action = action,
+                        messageInputState = messageInputState,
+                        onSendMessage = { text ->
+                            onEvent(MessageScreenEvent.SendMessage(text))
+                        },
+                    )
                 }
             )
-            ReplySnippet(replyingTo, { replyingTo = null }, ourNode)
-            TextInput(isConnected, messageInput) {
-                val message = messageInput.text.toString().trim()
-                if (message.isNotEmpty()) {
-                    replyingTo?.let {
-                        viewModel.sendMessage(message, contactKey, it.packetId)
-                        replyingTo = null
-                    } ?: viewModel.sendMessage(message, contactKey)
-                    // Clear the text input after sending the message and updating all state
-                    messageInput.clearText()
+            ReplySnippet(
+                originalMessage = replyingTo,
+                onClearReply = { replyingTo = null },
+                ourNode = ourNode
+            )
+            MessageInput(
+                isEnabled = isConnected,
+                textFieldState = messageInputState,
+                onSendMessage = {
+                    val messageText = messageInputState.text.toString().trim()
+                    if (messageText.isNotEmpty()) {
+                        onEvent(MessageScreenEvent.SendMessage(messageText, replyingTo?.packetId))
+                    }
                 }
-            }
+            )
         }
     }
 }
 
+/**
+ * A FloatingActionButton that scrolls the message list to the bottom (most recent messages).
+ * @param coroutineScope The coroutine scope for launching the scroll animation.
+ * @param listState The [LazyListState] of the message list.
+ */
+@Composable
+private fun BoxScope.ScrollToBottomFab(coroutineScope: CoroutineScope, listState: LazyListState) {
+    FloatingActionButton(
+        modifier = Modifier
+            .align(Alignment.BottomEnd)
+            .padding(16.dp),
+        onClick = {
+            coroutineScope.launch {
+                // Assuming messages are ordered with the newest at index 0
+                listState.animateScrollToItem(0)
+            }
+        }
+    ) {
+        Icon(
+            imageVector = Icons.Default.ArrowDownward,
+            contentDescription = stringResource(id = R.string.scroll_to_bottom)
+        )
+    }
+}
+
+/**
+ * Displays a snippet of the message being replied to.
+ * @param originalMessage The message being replied to, or null if not replying.
+ * @param onClearReply Callback to clear the reply state.
+ * @param ourNode The current user's node information, to display "You" if replying to self.
+ */
 @Composable
 private fun ReplySnippet(
     originalMessage: Message?,
-    clearReply: () -> Unit = {},
+    onClearReply: () -> Unit,
     ourNode: Node?
 ) {
     AnimatedVisibility(visible = originalMessage != null) {
-        val fromLocal = originalMessage?.node?.user?.id == DataPacket.ID_LOCAL
+        originalMessage?.let { message ->
+            val isFromLocalUser = message.node.user.id == DataPacket.ID_LOCAL
+            val replyingToNodeUser = if (isFromLocalUser) ourNode?.user else message.node.user
+            val unknownUserText = stringResource(R.string.unknown)
 
-        val replyingToNode = if (fromLocal) {
-            ourNode
-        } else {
-            originalMessage?.node
-        }
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(24.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            IconButton(
-                enabled = false,
-                onClick = {}
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(24.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Icon(
-                    Icons.AutoMirrored.Default.Reply,
-                    contentDescription = stringResource(R.string.reply)
+                    imageVector = Icons.AutoMirrored.Default.Reply,
+                    contentDescription = stringResource(R.string.reply), // Decorative
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-            }
-            Text(
-                "Replying to ${replyingToNode?.user?.shortName ?: stringResource(R.string.unknown)}",
-                style = MaterialTheme.typography.labelMedium
-            )
-            Text(
-                modifier = Modifier.weight(1f, fill = true),
-                text = originalMessage?.text?.take(SNIPPET_CHARACTER_LIMIT)
-                    ?.let { if (it.length == SNIPPET_CHARACTER_LIMIT) "$it…" else it }
-                    ?: "", // Snippet
-                style = MaterialTheme.typography.bodySmall,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            IconButton(
-                onClick = clearReply
-            ) { // ViewModel function to set replyingToMessageState to null
-                Icon(
-                    Icons.Filled.Close,
-                    contentDescription = stringResource(R.string.cancel)
+                Text(
+                    text = stringResource(
+                        R.string.replying_to,
+                        replyingToNodeUser?.shortName ?: unknownUserText
+                    ),
+                    style = MaterialTheme.typography.labelMedium
                 )
+                Text(
+                    modifier = Modifier.weight(1f),
+                    text = message.text.ellipsize(SNIPPET_CHARACTER_LIMIT),
+                    style = MaterialTheme.typography.bodySmall,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                IconButton(onClick = onClearReply) {
+                    Icon(
+                        Icons.Filled.Close,
+                        contentDescription = stringResource(R.string.cancel_reply) // Specific action
+                    )
+                }
             }
         }
     }
 }
 
+/**
+ * Ellipsizes a string if its length exceeds [maxLength].
+ * @receiver The string to ellipsize.
+ * @param maxLength The maximum number of characters to display before adding "…".
+ * @return The ellipsized string.
+ */
+private fun String.ellipsize(maxLength: Int): String {
+    return if (length > maxLength) "${take(maxLength)}…" else this
+}
+
+/**
+ * Handles a quick chat action, either appending its message to the input field or sending it directly.
+ * @param action The [QuickChatAction] to handle.
+ * @param messageInputState The [TextFieldState] of the message input field.
+ * @param onSendMessage Lambda to call when a message needs to be sent.
+ */
 private fun handleQuickChatAction(
     action: QuickChatAction,
-    messageInput: TextFieldState,
-    viewModel: UIViewModel,
-    contactKey: String
+    messageInputState: TextFieldState,
+    onSendMessage: (String) -> Unit,
 ) {
-    if (action.mode == QuickChatAction.Mode.Append) {
-        val originalText = messageInput.text
-        if (!originalText.contains(action.message)) {
-            val needsSpace =
-                !originalText.endsWith(' ') && originalText.isNotEmpty()
-            val newText = buildString {
-                append(originalText)
-                if (needsSpace) append(' ')
-                append(action.message)
-            }.take(MESSAGE_CHARACTER_LIMIT)
-            messageInput.setTextAndPlaceCursorAtEnd(newText)
+    when (action.mode) {
+        QuickChatAction.Mode.Append -> {
+            val originalText = messageInputState.text.toString()
+            // Avoid appending if the exact message is already present (simple check)
+            if (!originalText.contains(action.message)) {
+                val newText = buildString {
+                    append(originalText)
+                    if (originalText.isNotEmpty() && !originalText.endsWith(' ')) {
+                        append(' ')
+                    }
+                    append(action.message)
+                }.limitBytes(MESSAGE_CHARACTER_LIMIT_BYTES)
+                messageInputState.setTextAndPlaceCursorAtEnd(newText)
+            }
         }
-    } else {
-        viewModel.sendMessage(action.message, contactKey)
+
+        QuickChatAction.Mode.Instant -> {
+            // Byte limit for 'Send' mode messages is handled by the backend/transport layer.
+            onSendMessage(action.message)
+        }
     }
 }
 
+/**
+ * Truncates a string to ensure its UTF-8 byte representation does not exceed [maxBytes].
+ *
+ * This implementation iterates by characters and checks byte length to avoid splitting
+ * multi-byte characters.
+ *
+ * @receiver The string to limit.
+ * @param maxBytes The maximum allowed byte length.
+ * @return The truncated string, or the original string if it's within the byte limit.
+ */
+private fun String.limitBytes(maxBytes: Int): String {
+    val bytes = this.toByteArray(StandardCharsets.UTF_8)
+    if (bytes.size <= maxBytes) {
+        return this
+    }
+
+    var currentBytesSum = 0
+    var validCharCount = 0
+    for (charIndex in this.indices) {
+        val charToTest = this[charIndex]
+        val charBytes = charToTest.toString().toByteArray(StandardCharsets.UTF_8).size
+        if (currentBytesSum + charBytes > maxBytes) {
+            break
+        }
+        currentBytesSum += charBytes
+        validCharCount++
+    }
+    return this.substring(0, validCharCount)
+}
+
+/**
+ * A dialog confirming the deletion of messages.
+ * @param count The number of messages to be deleted.
+ * @param onConfirm Callback invoked when the user confirms the deletion.
+ * @param onDismiss Callback invoked when the dialog is dismissed.
+ */
 @Composable
 private fun DeleteMessageDialog(
-    size: Int,
-    onConfirm: () -> Unit = {},
-    onDismiss: () -> Unit = {},
+    count: Int,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
 ) {
-    val deleteMessagesString = pluralStringResource(R.plurals.delete_messages, size, size)
+    val deleteMessagesString = pluralStringResource(R.plurals.delete_messages, count, count)
 
     AlertDialog(
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(16.dp),
+        title = {
+            Text(stringResource(R.string.delete_messages_title))
+        },
         text = {
-            Text(
-                text = deleteMessagesString,
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center,
-            )
+            Text(text = deleteMessagesString)
         },
         confirmButton = {
             TextButton(onClick = onConfirm) {
@@ -399,25 +557,33 @@ private fun DeleteMessageDialog(
     )
 }
 
-sealed class MessageMenuAction {
+/**
+ * Actions available in the message selection mode's top bar.
+ */
+internal sealed class MessageMenuAction {
     data object ClipboardCopy : MessageMenuAction()
     data object Delete : MessageMenuAction()
     data object Dismiss : MessageMenuAction()
     data object SelectAll : MessageMenuAction()
 }
 
+/**
+ * The top app bar displayed when in message selection mode.
+ * @param selectedCount The number of currently selected messages.
+ * @param onAction Callback for when a menu action is triggered.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ActionModeTopBar(
-    selectedList: Set<Long>,
+    selectedCount: Int,
     onAction: (MessageMenuAction) -> Unit,
 ) = TopAppBar(
-    title = { Text(text = selectedList.size.toString()) },
+    title = { Text(text = selectedCount.toString()) },
     navigationIcon = {
         IconButton(onClick = { onAction(MessageMenuAction.Dismiss) }) {
             Icon(
                 imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = stringResource(id = R.string.clear),
+                contentDescription = stringResource(id = R.string.clear_selection)
             )
         }
     },
@@ -443,23 +609,32 @@ private fun ActionModeTopBar(
     },
 )
 
+/**
+ * The default top app bar for the message screen.
+ * @param title The title to display (contact or channel name).
+ * @param channelIndex The index of the current channel, if applicable.
+ * @param mismatchKey True if there's a key mismatch for the current PKC.
+ * @param onNavigateBack Callback for the navigation icon.
+ * @param channels The set of all channels, used for the [SecurityIcon].
+ * @param channelIndexParam The specific channel index for the [SecurityIcon].
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun MessageTopBar(
     title: String,
     channelIndex: Int?,
-    mismatchKey: Boolean = false,
+    mismatchKey: Boolean,
     onNavigateBack: () -> Unit,
-    channels: AppOnlyProtos.ChannelSet,
+    channels: AppOnlyProtos.ChannelSet?,
     channelIndexParam: Int?,
 ) = TopAppBar(
     title = {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = title)
+            Text(text = title, maxLines = 1, overflow = TextOverflow.Ellipsis)
             Spacer(modifier = Modifier.width(10.dp))
 
-            channelIndexParam?.let { index ->
-                SecurityIcon(channels, index)
+            if (channels != null && channelIndexParam != null) {
+                SecurityIcon(channels, channelIndexParam)
             }
         }
     },
@@ -478,6 +653,12 @@ private fun MessageTopBar(
     }
 )
 
+/**
+ * A row of quick chat action buttons.
+ * @param enabled Whether the buttons should be enabled.
+ * @param actions The list of [QuickChatAction]s to display.
+ * @param onClick Callback when a quick chat button is clicked.
+ */
 @Composable
 private fun QuickChatRow(
     modifier: Modifier = Modifier,
@@ -485,86 +666,106 @@ private fun QuickChatRow(
     actions: List<QuickChatAction>,
     onClick: (QuickChatAction) -> Unit
 ) {
-    val alertAction = QuickChatAction(
-        name = "🔔",
-        message = "🔔 ${stringResource(R.string.alert_bell_text)} \u0007",
-        mode = QuickChatAction.Mode.Append,
-        position = -1
-    )
+    val alertActionMessage = stringResource(R.string.alert_bell_text)
+    val alertAction = remember(alertActionMessage) { // Memoize if content is static
+        QuickChatAction(
+            name = "🔔",
+            message = "🔔 $alertActionMessage ", // Bell character added to message
+            mode = QuickChatAction.Mode.Append,
+            position = -1 // Assuming -1 means it's a special prepended action
+        )
+    }
+
+    val allActions = remember(alertAction, actions) { listOf(alertAction) + actions }
 
     LazyRow(
-        modifier = modifier,
+        modifier = modifier.padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        items(listOf(alertAction) + actions, key = { it.uuid }) { action ->
+        items(allActions, key = { it.uuid }) { action ->
             Button(
                 onClick = { onClick(action) },
-                modifier = Modifier.padding(horizontal = 4.dp),
                 enabled = enabled,
             ) {
-                Text(
-                    text = action.name,
-                )
+                Text(text = action.name)
             }
         }
     }
 }
 
-private const val ROUNDED_CORNER_PERCENT = 100
-
-@Suppress("LongMethod")
+/**
+ * The text input field for composing messages.
+ *
+ * @param isEnabled Whether the input field should be enabled.
+ * @param textFieldState The [TextFieldState] managing the input's text.
+ * @param modifier The modifier for this composable.
+ * @param maxByteSize The maximum allowed size of the message in bytes.
+ * @param onSendMessage Callback invoked when the send button is pressed or send IME action is triggered.
+ */
+@Suppress("LongMethod") // Due to multiple parts of the OutlinedTextField
 @Composable
-private fun TextInput(
-    enabled: Boolean,
-    message: TextFieldState,
+private fun MessageInput(
+    isEnabled: Boolean,
+    textFieldState: TextFieldState,
     modifier: Modifier = Modifier,
-    maxSize: Int = MESSAGE_CHARACTER_LIMIT,
-    onSendMessage: () -> Unit = {}
+    maxByteSize: Int = MESSAGE_CHARACTER_LIMIT_BYTES,
+    onSendMessage: () -> Unit
 ) {
-    val isOverLimit = message.text.length > maxSize
-    val isValid = !isOverLimit && message.text.isNotEmpty()
+    val currentText = textFieldState.text.toString()
+    val currentByteLength = remember(currentText) { // Recalculate only when text changes
+        currentText.toByteArray(StandardCharsets.UTF_8).size
+    }
+
+    val isOverLimit = currentByteLength > maxByteSize
+    val canSend = !isOverLimit && currentText.isNotEmpty() && isEnabled
+
     OutlinedTextField(
-        modifier = modifier.fillMaxWidth(),
-        state = message,
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        state = textFieldState,
         lineLimits = TextFieldLineLimits.SingleLine,
-        label = { Text(stringResource(R.string.send_text)) },
-        enabled = enabled,
-        shape = RoundedCornerShape(ROUNDED_CORNER_PERCENT),
+        label = { Text(stringResource(R.string.message_input_label)) },
+        enabled = isEnabled,
+        shape = RoundedCornerShape(ROUNDED_CORNER_PERCENT.toFloat()),
         isError = isOverLimit,
-        placeholder = { Text(stringResource(R.string.send_text)) },
+        placeholder = { Text(stringResource(R.string.type_a_message)) },
         keyboardOptions = KeyboardOptions(
             capitalization = KeyboardCapitalization.Sentences,
             imeAction = ImeAction.Send
         ),
         onKeyboardAction = {
-            if (isValid) {
+            if (canSend) {
                 onSendMessage()
             }
         },
         supportingText = {
-            Text(
-                text = "${message.text.length}/$maxSize",
-                style = MaterialTheme.typography.bodySmall,
-                color = if (isOverLimit) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        },
-        inputTransformation = {
-            if (this.length > maxSize) {
-                this.replace(maxSize, this.length, "")
+            if (isEnabled) { // Only show supporting text if input is enabled
+                Text(
+                    text = "$currentByteLength/$maxByteSize",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isOverLimit) {
+                        MaterialTheme.colorScheme.error
+                    } else {
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.End
+                )
             }
         },
+        // Direct byte limiting via inputTransformation in TextFieldState is complex.
+        // The current approach (show error, disable send) is generally preferred for UX.
+        // If strict real-time byte trimming is required, it needs careful handling of
+        // cursor position and multi-byte characters, likely outside simple inputTransformation.
         trailingIcon = {
             IconButton(
-                onClick = {
-                    if (isValid) {
-                        onSendMessage()
-                    }
-                },
-                modifier = Modifier.size(48.dp),
-                enabled = enabled && isValid,
+                onClick = { if (canSend) onSendMessage() },
+                enabled = canSend,
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.Send,
-                    contentDescription = stringResource(id = R.string.send_text),
+                    contentDescription = stringResource(id = R.string.send)
                 )
             }
         }
@@ -573,18 +774,39 @@ private fun TextInput(
 
 @PreviewLightDark
 @Composable
-private fun TextInputPreview() {
+private fun MessageInputPreview() {
     AppTheme {
         Surface {
-            Column {
-                TextInput(
-                    enabled = true,
-                    message = rememberTextFieldState("Hello"),
+            Column(modifier = Modifier.padding(8.dp)) {
+                MessageInput(
+                    isEnabled = true,
+                    textFieldState = rememberTextFieldState("Hello"),
+                    onSendMessage = {}
                 )
                 Spacer(Modifier.size(16.dp))
-                TextInput(
-                    enabled = true,
-                    message = rememberTextFieldState("Hello"),
+                MessageInput(
+                    isEnabled = false,
+                    textFieldState = rememberTextFieldState("Disabled"),
+                    onSendMessage = {}
+                )
+                Spacer(Modifier.size(16.dp))
+                MessageInput(
+                    isEnabled = true,
+                    textFieldState = rememberTextFieldState(
+                        "A very long message that might exceed the byte limit " +
+                                "and cause an error state display for the user to see clearly."
+                    ),
+                    onSendMessage = {},
+                    maxByteSize = 50 // Test with a smaller limit
+                )
+                Spacer(Modifier.size(16.dp))
+                // Test Japanese characters (multi-byte)
+                MessageInput(
+                    isEnabled = true,
+                    textFieldState = rememberTextFieldState("こんにちは世界"), // Hello World in Japanese
+                    onSendMessage = {},
+                    maxByteSize = 10
+                    // Each char is 3 bytes, so "こん" (6 bytes) is ok, "こんに" (9 bytes) is ok, "こんにち" (12 bytes) is over
                 )
             }
         }

@@ -47,6 +47,13 @@ import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.connections.isIPAddress
+import androidx.compose.foundation.combinedClickable
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("MagicNumber", "LongMethod")
@@ -59,15 +66,50 @@ fun NetworkDevices(
 ) {
     val manualIpAddress = rememberTextFieldState("")
     val manualIpPort = rememberTextFieldState(NetworkRepository.Companion.SERVICE_PORT.toString())
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    var deviceToDelete by remember { mutableStateOf<BTScanModel.DeviceListEntry?>(null) }
     Text(
         text = stringResource(R.string.network),
         style = MaterialTheme.typography.titleLarge,
         modifier = Modifier.padding(vertical = 8.dp)
     )
     networkDevices.forEach { device ->
-        DeviceListItem(connectionState, device, device.fullAddress == selectedDevice) {
-            scanModel.onSelected(device)
+        val isRecent = device.isTCP && device.fullAddress.startsWith("t")
+        val modifier = if (isRecent) {
+            Modifier.combinedClickable(
+                onClick = { scanModel.onSelected(device) },
+                onLongClick = {
+                    deviceToDelete = device
+                    showDeleteDialog = true
+                }
+            )
+        } else {
+            Modifier
         }
+        DeviceListItem(
+            connectionState, device, device.fullAddress == selectedDevice, onSelect = { scanModel.onSelected(device) },
+            modifier = modifier
+        )
+    }
+    if (showDeleteDialog && deviceToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text(stringResource(R.string.delete)) },
+            text = { Text(stringResource(R.string.confirm_delete_node)) },
+            confirmButton = {
+                Button(onClick = {
+                    scanModel.removeRecentAddress(deviceToDelete!!.fullAddress)
+                    showDeleteDialog = false
+                }) {
+                    Text(stringResource(R.string.delete))
+                }
+            },
+            dismissButton = {
+                Button(onClick = { showDeleteDialog = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            }
+        )
     }
     if (networkDevices.filterNot { it.isDisconnect }.isEmpty()) {
         Column(

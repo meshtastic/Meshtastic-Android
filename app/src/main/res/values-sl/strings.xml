@@ -27,6 +27,7 @@
     <string name="node_sort_hops_away">Skokov stran</string>
     <string name="node_sort_last_heard">Nazadnje slišano</string>
     <string name="node_sort_via_mqtt">Preko MQTT</string>
+    <string name="via_mqtt">Preko MQTT</string>
     <string name="unrecognized">Neprepoznano</string>
     <string name="message_status_enroute">Čakanje na potrditev</string>
     <string name="message_status_queued">V čakalni vrsti za pošiljanje</string>
@@ -311,4 +312,8 @@
     <string name="private_key">Zasebni ključ</string>
     <string name="timeout">Časovna omejitev</string>
     <string name="distance">Razdalja</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
 </resources>

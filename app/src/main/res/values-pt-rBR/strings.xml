@@ -35,6 +35,7 @@
     <string name="node_sort_hops_away">Qtd de saltos</string>
     <string name="node_sort_last_heard">Última vez visto em</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
+    <string name="via_mqtt">via MQTT</string>
     <string name="node_sort_via_favorite">Via favorito</string>
     <string name="unrecognized">Desconhecido</string>
     <string name="message_status_enroute">Esperando para ser reconhecido</string>
@@ -681,4 +682,8 @@
     <string name="no_network_devices">Nenhum dispositivo de rede encontrado.</string>
     <string name="no_usb_devices">Nenhum dispositivo USB Serial encontrado.</string>
     <string name="scroll_to_bottom">Rolar para o final</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
 </resources>

@@ -51,6 +51,7 @@
     <string name="node_sort_hops_away">Hops away</string>
     <string name="node_sort_last_heard">Last heard</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
+    <string name="via_mqtt">via MQTT</string>
     <string name="node_sort_via_favorite">via Favorite</string>
 
     <string name="unrecognized">Unrecognized</string>
@@ -724,10 +725,9 @@
     <string name="app_intro_done_button">Done</string>
     <string name="app_intro_skip_button">Skip</string>
     <string name="security_icon_description">Security Status</string>
-    <string name="security_icon_secure"> - Secure</string>
-    <string name="security_icon_warning"> - WARN, insecure MQTT</string>
-    <string name="security_icon_insecure"> - WARN, low entropy key</string>
+    <string name="security_icon_secure">Secure</string>
     <string name="security_icon_insecure_precise"> - WARNING, insecure location enabled</string>
+    <string name="security_icon_badge_warning_description">Warning Badge</string>
     <string name="unknown_channel">Unknown Channel</string>
     <string name="warning">Warning</string>
     <string name="overflow_menu">Overflow menu</string>
@@ -758,4 +758,35 @@
     <string name="url_must_contain_placeholders">URL must contain placeholders.</string>
     <string name="url_template">URL Template</string>
     <string name="url_template_hint">e.g. https://a.tile.openstreetmap.org/{z}/{x}/{y}.png</string>
+
+    <string name="security_icon_help_green_lock">A green lock means the channel is securely encrypted with either a 128 or 256 bit AES key.</string>
+
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <string name="security_icon_insecure_no_precise">Insecure Channel, Not Precise</string>
+    <string name="security_icon_help_yellow_open_lock">A yellow open lock means the channel is not securely encrypted, is not used for precise location data, and uses either no key at all or a 1 byte known key.</string>
+
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <string name="security_icon_insecure_precise_only">Insecure Channel, Precise Location</string>
+    <string name="security_icon_help_red_open_lock">A red open lock means the channel is not securely encrypted, is used for precise location data, and uses either no key at all or a 1 byte known key.</string>
+
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <string name="security_icon_warning_precise_mqtt">Warning: Insecure, Precise Location &amp; MQTT Uplink</string>
+    <string name="security_icon_help_warning_precise_mqtt">A red open lock with a warning means the channel is not securely encrypted, is used for precise location data which is being uplinked to the internet via MQTT, and uses either no key at all or a 1 byte known key.</string>
+
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="security_icon_help_title">Channel Security</string>
+    <string name="security_icon_help_title_all">Channel Security Meanings</string>
+    <string name="security_icon_help_show_all">Show All Meanings</string>
+    <string name="security_icon_help_show_less">Show Current Status</string>
+    <string name="security_icon_help_dismiss">Dismiss</string>
+
+    <string name="confirm_delete_node">Are you sure you want to delete this node?</string>
+
+    <string name="replying_to">Replying to %1$s</string>
+    <string name="cancel_reply">Cancel reply</string>
+    <string name="delete_messages_title">Delete Messages?</string>
+    <string name="clear_selection">Clear selection</string>
+    <string name="message_input_label">Message</string>
+    <string name="type_a_message">Type a message</string>
+
 </resources>

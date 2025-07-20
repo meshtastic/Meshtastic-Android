@@ -35,6 +35,7 @@
     <string name="node_sort_hops_away">Nœuds intermédiaires</string>
     <string name="node_sort_last_heard">Dernière écoute</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
+    <string name="via_mqtt">via MQTT</string>
     <string name="node_sort_via_favorite">par Favoris</string>
     <string name="unrecognized">Non reconnu</string>
     <string name="message_status_enroute">En attente d\'accusé de réception</string>
@@ -286,6 +287,8 @@
     <string name="air_utilization">Utilisation de la transmission</string>
     <string name="temperature">Température</string>
     <string name="humidity">Humidité</string>
+    <string name="soil_temperature">Température du sol</string>
+    <string name="soil_moisture">Humidité du sol</string>
     <string name="logs">Journaux</string>
     <string name="hops_away">Passer au suivant</string>
     <string name="hops_away_template">Sauts : %1$d</string>
@@ -698,12 +701,53 @@
     <string name="app_intro_done_button">Terminé</string>
     <string name="app_intro_skip_button">Ignorer</string>
     <string name="security_icon_description">Statut de sécurité</string>
-    <string name="security_icon_secure"> - Sécurisé</string>
-    <string name="security_icon_warning"> - AVERTISSEMENT, MQTT non sécurisé</string>
-    <string name="security_icon_insecure"> - AVERTISSEMENT : clé à faible entropie</string>
+    <string name="security_icon_secure">Sécurisé</string>
     <string name="security_icon_insecure_precise"> - ATTENTION, emplacement non sécurisé activé</string>
+    <string name="security_icon_badge_warning_description">Badge d\'alerte</string>
     <string name="unknown_channel">Canal inconnu</string>
     <string name="warning">Attention</string>
     <string name="overflow_menu">Menu supplémentaire</string>
     <string name="uv_lux">UV Lux</string>
+    <string name="unknown">Inconnu</string>
+    <string name="map_type_normal">Normal</string>
+    <string name="map_type_satellite">Satellite</string>
+    <string name="map_type_terrain">Terrain</string>
+    <string name="map_type_hybrid">Hybride</string>
+    <string name="manage_map_layers">Gérer les calques de la carte</string>
+    <string name="map_layers_title">Couches cartographiques</string>
+    <string name="no_map_layers_loaded">Aucun calque personnalisé chargé.</string>
+    <string name="add_layer_button">Ajouter un calque</string>
+    <string name="hide_layer">Ajouter un calque</string>
+    <string name="show_layer">Afficher le calque</string>
+    <string name="remove_layer">Supprimer le calque</string>
+    <string name="add_layer">Ajouter un calque</string>
+    <string name="nodes_at_this_location">Nœuds à cet emplacement</string>
+    <string name="selected_map_type">Type de carte sélectionné</string>
+    <string name="manage_custom_tile_sources">Gérer les sources de tuiles personnalisées</string>
+    <string name="add_custom_tile_source">Ajouter une source de tuile personnalisée</string>
+    <string name="no_custom_tile_sources_found">Aucune source de tuiles personnalisée</string>
+    <string name="edit_custom_tile_source">Modifier la source de tuile personnalisée</string>
+    <string name="delete_custom_tile_source">Supprimer la source de tuile personnalisée</string>
+    <string name="name_cannot_be_empty">Le nom ne peut pas être vide.</string>
+    <string name="provider_name_exists">Le nom du fournisseur existe déjà.</string>
+    <string name="url_cannot_be_empty">URL ne peut être vide.</string>
+    <string name="url_must_contain_placeholders">L\'URL doit contenir des espaces réservés.</string>
+    <string name="url_template">Modèle d\'URL</string>
+    <string name="url_template_hint">e.g. https://a.tile.openstreetmap.org/{z}/{x}/{y}.png</string>
+    <string name="security_icon_help_green_lock">Un cadenas vert signifie que le canal est chiffré de façon sécurisée avec une clé AES 128 ou 256 bits.</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <string name="security_icon_insecure_no_precise">Canal non sécurisé, non précisé</string>
+    <string name="security_icon_help_yellow_open_lock">Un cadenas ouvert jaune signifie que le canal n\'est pas crypté de manière sécurisée, n\'est pas utilisé pour des données de localisation précises, et n\'utilise ni une clé du tout, ni une clé connue de 1 octet.</string>
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <string name="security_icon_insecure_precise_only">Canal non sécurisé, localisation précise</string>
+    <string name="security_icon_help_red_open_lock">Un cadenas rouge ouvert signifie que le canal n\'est pas crypté de manière sécurisée, est utilisé pour des données de localisation précises, et n\'utilise aucune clé du tout, ou une clé connue de 1 octet.</string>
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <string name="security_icon_warning_precise_mqtt">Afficher l\'état actuel</string>
+    <string name="security_icon_help_warning_precise_mqtt">Un cadenas rouge ouvert avec un avertissement signifie que le canal n\'est pas crypté de manière sécurisée, est utilisé pour des données de localisation précises qui sont placées sur Internet via MQTT, et n\'utilise aucune clé du tout, ou une clé connue de 1 octet.</string>
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="security_icon_help_title">Sécurité du canal</string>
+    <string name="security_icon_help_title_all">Signification de la sécurité des canaux</string>
+    <string name="security_icon_help_show_all">Afficher toutes les significations</string>
+    <string name="security_icon_help_show_less">Afficher l\'état actuel</string>
+    <string name="security_icon_help_dismiss">Annuler</string>
 </resources>

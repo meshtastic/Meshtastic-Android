@@ -26,6 +26,7 @@
     <string name="node_sort_channel">Κανάλι</string>
     <string name="node_sort_distance">Απόσταση</string>
     <string name="node_sort_via_mqtt">μέσω MQTT</string>
+    <string name="via_mqtt">μέσω MQTT</string>
     <string name="routing_error_timeout">Λήξη χρονικού ορίου</string>
     <string name="routing_error_bad_request">Εσφαλμένο Αίτημα</string>
     <string name="routing_error_pki_unknown_pubkey">Άγνωστο Δημόσιο Κλειδί</string>
@@ -246,4 +247,8 @@
     <string name="map">Χάρτης</string>
     <string name="contacts">Επαφές</string>
     <string name="reply">Απάντηση</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
 </resources>

@@ -111,7 +111,13 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
     ;
 
     companion object {
-        fun NavDestination.isTopLevel(): Boolean = entries.any { hasRoute(it.route::class) }
+        fun NavDestination.isTopLevel(): Boolean = listOf<Route>(
+            NodesRoutes.Nodes,
+            ContactsRoutes.Contacts,
+            MapRoutes.Map,
+            ChannelsRoutes.Channels,
+            ConnectionsRoutes.Connections,
+        ).any { this.hasRoute(it::class) }
 
         fun fromNavDestination(destination: NavDestination?): TopLevelDestination? = entries
             .find { dest -> destination?.hierarchy?.any { it.hasRoute(dest.route::class) } == true }
@@ -378,7 +384,6 @@ private fun MainAppBar(
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
     val canNavigateBack = navController.previousBackStackEntry != null
-    val isTopLevelRoute = currentDestination?.isTopLevel() == true
     val navigateUp: () -> Unit = navController::navigateUp
     if (currentDestination?.hasRoute<ContactsRoutes.Messages>() == true) {
         return
@@ -389,7 +394,7 @@ private fun MainAppBar(
     TopAppBar(
         title = {
             val title = when {
-                currentDestination == null || isTopLevelRoute -> stringResource(id = R.string.app_name)
+                currentDestination == null || currentDestination.isTopLevel() -> stringResource(id = R.string.app_name)
 
                 currentDestination.hasRoute<Route.DebugPanel>() -> stringResource(id = R.string.debug_panel)
 
@@ -420,7 +425,7 @@ private fun MainAppBar(
             }
         },
         modifier = modifier,
-        navigationIcon = if (canNavigateBack && !isTopLevelRoute) {
+        navigationIcon = if (canNavigateBack && currentDestination?.isTopLevel() == false) {
             {
                 IconButton(onClick = navigateUp) {
                     Icon(
@@ -447,7 +452,6 @@ private fun MainAppBar(
                 viewModel = viewModel,
                 currentDestination = currentDestination,
                 isManaged = isManaged,
-                isTopLevelRoute = isTopLevelRoute,
                 onAction = onAction
             )
         },
@@ -459,7 +463,6 @@ private fun TopBarActions(
     viewModel: UIViewModel = hiltViewModel(),
     currentDestination: NavDestination?,
     isManaged: Boolean,
-    isTopLevelRoute: Boolean,
     onAction: (Any?) -> Unit
 ) {
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
@@ -474,17 +477,19 @@ private fun TopBarActions(
             )
         }
     }
-    when {
-        currentDestination == null || isTopLevelRoute ->
-            MainMenuActions(isManaged, onAction)
+    currentDestination?.let {
+        when {
+            it.isTopLevel() ->
+                MainMenuActions(isManaged, onAction)
 
-        currentDestination.hasRoute<Route.DebugPanel>() ->
-            DebugMenuActions()
+            currentDestination.hasRoute<Route.DebugPanel>() ->
+                DebugMenuActions()
 
-        currentDestination.hasRoute<RadioConfigRoutes.RadioConfig>() ->
-            RadioConfigMenuActions(viewModel = viewModel)
+            currentDestination.hasRoute<RadioConfigRoutes.RadioConfig>() ->
+                RadioConfigMenuActions(viewModel = viewModel)
 
-        else -> {}
+            else -> {}
+        }
     }
 }
 

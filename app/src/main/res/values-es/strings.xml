@@ -35,6 +35,7 @@
     <string name="node_sort_hops_away">Brinca afuera</string>
     <string name="node_sort_last_heard">Última escucha</string>
     <string name="node_sort_via_mqtt">vía MQTT</string>
+    <string name="via_mqtt">vía MQTT</string>
     <string name="node_sort_via_favorite">vía Favorita</string>
     <string name="unrecognized">No reconocido</string>
     <string name="message_status_enroute">Esperando ser reconocido</string>
@@ -70,6 +71,7 @@
     <string name="rebroadcast_mode_all">Si está en nuestro canal privado o desde otra red con los mismos parámetros lora, retransmite cualquier mensaje observado.</string>
     <string name="rebroadcast_mode_all_skip_decoding">Igual al comportamiento que TODOS pero omite la decodificación de paquetes y simplemente los retransmite. Sólo disponible en el rol repetidor. Establecer esto en cualquier otro rol dará como resultado TODOS los comportamientos.</string>
     <string name="rebroadcast_mode_local_only">Ignora mensajes observados desde mallas foráneas que están abiertas o que no pueden descifrar. Sólo retransmite mensajes en los nodos locales principales / canales secundarios.</string>
+    <string name="rebroadcast_mode_known_only">Ignora los mensajes recibidos de redes externas como LOCAL ONLY, pero ignora también mensajes de nodos que no están ya en la lista de nodos conocidos.</string>
     <string name="rebroadcast_mode_none">Solo permitido para los roles SENSOR, TRACKER y TAK_TRACKER, esto inhibirá todas las retransmisiones, no a diferencia del rol de CLIENT_MUTE.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">Trate un doble toque en acelerómetros soportados como una pulsación de botón de usuario.</string>
     <string name="config_device_disableTripleClick_summary">Deshabilita la triple pulsación del botón de usuario para activar o desactivar GPS.</string>
@@ -467,4 +469,8 @@ Rango de Valores 0 - 500.</string>
     <string name="react">Reaccionar</string>
     <string name="app_intro_skip_button">Saltar</string>
     <string name="uv_lux">Lux ultravioletas</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
 </resources>
