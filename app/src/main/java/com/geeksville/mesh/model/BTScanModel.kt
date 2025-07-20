@@ -53,6 +53,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import org.json.JSONArray
+import org.json.JSONObject
 import javax.inject.Inject
 
 @HiltViewModel
@@ -298,21 +299,30 @@ class BTScanModel @Inject constructor(
     private fun getRecentAddresses(): List<Pair<String, String>> {
         val jsonAddresses = preferences.getString("recent-ip-addresses", "[]") ?: "[]"
         val jsonArray = JSONArray(jsonAddresses)
-        val listAddresses = mutableListOf<Pair<String, String>>()
         var needsMigration = false
-        for (i in 0 until jsonArray.length()) {
-            val item = jsonArray.get(i)
-            if (item is org.json.JSONObject) {
-                val address = item.getString("address")
-                val name = item.getString("name")
-                listAddresses.add(address to name)
-            } else if (item is String) {
-                // Old format: just the address, use default name and mark for migration
-                listAddresses.add(item to context.getString(R.string.meshtastic))
-                needsMigration = true
+
+        val listAddresses = (0 until jsonArray.length()).mapNotNull { i ->
+            when (val item = jsonArray.get(i)) {
+                is JSONObject -> {
+                    // Modern format: JSONObject with address and name
+                    item.getString("address") to item.getString("name")
+                }
+
+                is String -> {
+                    // Old format: just the address string
+                    needsMigration = true
+                    item to context.getString(R.string.meshtastic) // [3]
+                }
+
+                else -> {
+                    // Unknown format, log or handle as an error if necessary
+                    warn("Unknown item type in recent IP addresses: $item")
+                    null
+                }
             }
         }
-        // If migration is needed, rewrite the storage in the new format
+
+        // If migration was needed for any item, rewrite the entire list in the new format
         if (needsMigration) {
             setRecentAddresses(listAddresses)
         }
@@ -322,7 +332,7 @@ class BTScanModel @Inject constructor(
     private fun setRecentAddresses(addresses: List<Pair<String, String>>) {
         val jsonArray = JSONArray()
         addresses.forEach { (address, name) ->
-            val obj = org.json.JSONObject()
+            val obj = JSONObject()
             obj.put("address", address)
             obj.put("name", name)
             jsonArray.put(obj)
