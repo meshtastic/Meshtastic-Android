@@ -20,6 +20,7 @@ package com.geeksville.mesh.model
 import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig
 import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.ModemPreset
 import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.RegionCode
+import kotlin.math.floor
 
 /**
  * hash a string into an integer using the djb2 algorithm by Dan Bernstein
@@ -58,11 +59,15 @@ private fun LoRaConfig.bandwidth(regionInfo: RegionInfo?) = if (usePreset) {
 val LoRaConfig.numChannels: Int
     get() {
         val regionInfo = RegionInfo.fromRegionCode(region)
-        return if (regionInfo != null) {
-            (regionInfo.freqEnd - regionInfo.freqStart).toInt() / bandwidth(regionInfo).toInt()
-        } else {
-            0
-        }
+        if (regionInfo == null) return 0
+
+        val bw = bandwidth(regionInfo)
+        if (bw <= 0f) return 1 // Return 1 if bandwidth is zero or negative
+
+        val num = floor((regionInfo.freqEnd - regionInfo.freqStart) / bw)
+        // If the regional frequency range is smaller than the bandwidth, the firmware would
+        // fall back to a default preset. In the app, we return 1 to avoid a crash.
+        return if (num > 0) num.toInt() else 1
     }
 
 internal fun LoRaConfig.channelNum(primaryName: String): Int = when {
@@ -153,7 +158,7 @@ enum class RegionInfo(
     /**
      * Taiwan, 920-925Mhz, limited to 0.5W indoor or coastal, 1.0W outdoor.
      * 5.8.1 in the Low-power Radio-frequency Devices Technical Regulations
-     * @see [NCC Taiwan](https://www.ncc.gov.tw/english/files/23070/102_5190_230703_1_doc_C.PDF)
+     * @see [NCC Taiwan](httpshttps://www.ncc.gov.tw/english/files/23070/102_5190_230703_1_doc_C.PDF)
      * @see [National Gazette](https://gazette.nat.gov.tw/egFront/e_detail.do?metaid=147283)
      */
     TW(RegionCode.TW, "Taiwan", 920.0f, 925.0f),
