@@ -789,5 +789,11 @@
     <string name="clear_selection">Clear selection</string>
     <string name="message_input_label">Message</string>
     <string name="type_a_message">Type a message</string>
+    <string name="pax_metrics_log">PAX Metrics Log</string>
+    <string name="pax">PAX</string>
+    <!-- <string name="no_pax_metrics_logs">No PAX metrics logs available.</string>
+    <string name="wifi_devices">WiFi Devices</string>
+    <string name="ble_devices">BLE Devices</string> -->
+
 
 </resources>
