@@ -281,10 +281,13 @@ spotless {
     kotlin {
         target("src/*/kotlin/**/*.kt", "src/*/java/**/*.kt")
         targetExclude("**/build/**/*.kt")
+        ktlint()
         ktfmt().kotlinlangStyle()
+        licenseHeaderFile(rootProject.file("config/copyright.txt"))
     }
     kotlinGradle {
         target("**/*.gradle.kts")
+        ktlint()
         ktfmt().kotlinlangStyle()
     }
 }
