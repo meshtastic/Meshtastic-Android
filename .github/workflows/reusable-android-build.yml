@@ -64,8 +64,8 @@ jobs:
       - name: Expose Version Code as Environment Variable
         run: echo "VERSION_CODE=${{ steps.calculate_version_code.outputs.versionCode }}" >> $GITHUB_ENV
 
-      - name: Run Detekt, Build, Lint, and Local Tests
-        run: ./gradlew :app:detekt :app:lintFdroidDebug :app:lintGoogleDebug :app:assembleDebug :app:testFdroidDebug :app:testGoogleDebug --configuration-cache --scan
+      - name: Run Spotless, Detekt, Build, Lint, and Local Tests
+        run: ./gradlew :app:spotlessCheck :app:detekt :app:lintFdroidDebug :app:lintGoogleDebug :app:assembleDebug :app:testFdroidDebug :app:testGoogleDebug --configuration-cache --scan
         env:
           VERSION_CODE: ${{ env.VERSION_CODE }}
       - name: Upload F-Droid debug artifact
@@ -82,11 +82,11 @@ jobs:
           name: googleDebug
           path: app/build/outputs/apk/google/debug/app-google-debug.apk
           retention-days: 14
-      - name: Upload build and Detekt reports
+      - name: Upload reports
         if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@v4
         with:
-          name: build-and-detekt-reports
+          name: upload-reports
           path: |
             app/build/reports
             **/build/reports/detekt
