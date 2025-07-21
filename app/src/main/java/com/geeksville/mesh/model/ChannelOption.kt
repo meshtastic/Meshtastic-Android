@@ -158,7 +158,7 @@ enum class RegionInfo(
     /**
      * Taiwan, 920-925Mhz, limited to 0.5W indoor or coastal, 1.0W outdoor.
      * 5.8.1 in the Low-power Radio-frequency Devices Technical Regulations
-     * @see [NCC Taiwan](httpshttps://www.ncc.gov.tw/english/files/23070/102_5190_230703_1_doc_C.PDF)
+     * @see [NCC Taiwan](https://www.ncc.gov.tw/english/files/23070/102_5190_230703_1_doc_C.PDF)
      * @see [National Gazette](https://gazette.nat.gov.tw/egFront/e_detail.do?metaid=147283)
      */
     TW(RegionCode.TW, "Taiwan", 920.0f, 925.0f),
