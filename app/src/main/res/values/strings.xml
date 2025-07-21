@@ -164,6 +164,7 @@
     <string name="text_messages">Text messages</string>
     <string name="channel_invalid">This Channel URL is invalid and can not be used</string>
     <string name="debug_panel">Debug Panel</string>
+    <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">Export Logs</string>
     <string name="debug_last_messages">500 last messages</string>
     <string name="debug_filters">Filters</string>

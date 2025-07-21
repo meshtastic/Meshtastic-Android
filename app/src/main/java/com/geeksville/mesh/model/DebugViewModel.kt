@@ -206,6 +206,7 @@ class DebugViewModel @Inject constructor(
             messageType = log.message_type,
             formattedReceivedDate = TIME_FORMAT.format(log.received_date),
             logMessage = annotateMeshLogMessage(log),
+            decodedPayload = decodePayloadFromMeshLog(log),
         )
     }.toImmutableList()
 
@@ -213,22 +214,35 @@ class DebugViewModel @Inject constructor(
      * Transform the input [MeshLog] by enhancing the raw message with annotations.
      */
     private fun annotateMeshLogMessage(meshLog: MeshLog): String {
-        val annotated = when (meshLog.message_type) {
+        return when (meshLog.message_type) {
             "Packet" -> meshLog.meshPacket?.let { packet ->
-                annotateRawMessage(meshLog.raw_message, packet.from, packet.to)
-            }
+                val builder = packet.toBuilder()
+                val hasDecoded = builder.hasDecoded()
+                val decoded = if (hasDecoded) builder.decoded else null
+                if (hasDecoded) builder.clearDecoded()
+                // Serialize all other fields (without decoded)
+                val baseText = builder.build().toString().trimEnd()
+                // Append decoded at the end if present
+                val result = if (hasDecoded && decoded != null) {
+                    val decodedText = decoded.toString().trimEnd().prependIndent("  ")
+                    "$baseText\ndecoded {\n$decodedText\n}"
+                } else {
+                    baseText
+                }
+                // Annotate node IDs as before
+                annotateRawMessage(result, packet.from, packet.to)
+            } ?: meshLog.raw_message
 
             "NodeInfo" -> meshLog.nodeInfo?.let { nodeInfo ->
                 annotateRawMessage(meshLog.raw_message, nodeInfo.num)
-            }
+            } ?: meshLog.raw_message
 
             "MyNodeInfo" -> meshLog.myNodeInfo?.let { nodeInfo ->
                 annotateRawMessage(meshLog.raw_message, nodeInfo.myNodeNum)
-            }
+            } ?: meshLog.raw_message
 
-            else -> null
+            else -> meshLog.raw_message
         }
-        return annotated ?: meshLog.raw_message
     }
 
     /**
@@ -274,6 +288,7 @@ class DebugViewModel @Inject constructor(
         val messageType: String,
         val formattedReceivedDate: String,
         val logMessage: String,
+        val decodedPayload: String? = null,
     )
 
     companion object {
@@ -295,4 +310,60 @@ class DebugViewModel @Inject constructor(
         }
 
     fun setSelectedLogId(id: String?) { _selectedLogId.value = id }
+
+    /**
+     * Attempts to fully decode the payload of a MeshLog's MeshPacket using the appropriate protobuf definition,
+     * based on the portnum of the packet.
+     *
+     * For known portnums, the payload is parsed into its corresponding proto message and returned as a string.
+     * For text and alert messages, the payload is interpreted as UTF-8 text.
+     * For unknown portnums, the payload is shown as a hex string.
+     *
+     * @param log The MeshLog containing the packet and payload to decode.
+     * @return A human-readable string representation of the decoded payload, or an error message if decoding fails,
+     *         or null if the log does not contain a decodable packet.
+     */
+    private fun decodePayloadFromMeshLog(log: MeshLog): String? {
+        val packet = log.meshPacket ?: return null
+        if (!packet.hasDecoded()) return null
+        val portnum = packet.decoded.portnumValue
+        val payload = packet.decoded.payload.toByteArray()
+        return try {
+            when (portnum) {
+                PortNum.TEXT_MESSAGE_APP_VALUE,
+                PortNum.ALERT_APP_VALUE -> {
+                    payload.toString(Charsets.UTF_8)
+                }
+                PortNum.POSITION_APP_VALUE -> {
+                    com.geeksville.mesh.MeshProtos.Position.parseFrom(payload).toString()
+                }
+                PortNum.WAYPOINT_APP_VALUE -> {
+                    com.geeksville.mesh.MeshProtos.Waypoint.parseFrom(payload).toString()
+                }
+                PortNum.NODEINFO_APP_VALUE -> {
+                    com.geeksville.mesh.MeshProtos.User.parseFrom(payload).toString()
+                }
+                PortNum.TELEMETRY_APP_VALUE -> {
+                    com.geeksville.mesh.TelemetryProtos.Telemetry.parseFrom(payload).toString()
+                }
+                PortNum.ROUTING_APP_VALUE -> {
+                    com.geeksville.mesh.MeshProtos.Routing.parseFrom(payload).toString()
+                }
+                PortNum.ADMIN_APP_VALUE -> {
+                    com.geeksville.mesh.AdminProtos.AdminMessage.parseFrom(payload).toString()
+                }
+                PortNum.PAXCOUNTER_APP_VALUE -> {
+                    com.geeksville.mesh.PaxcountProtos.Paxcount.parseFrom(payload).toString()
+                }
+                PortNum.STORE_FORWARD_APP_VALUE -> {
+                    com.geeksville.mesh.StoreAndForwardProtos.StoreAndForward.parseFrom(payload).toString()
+                }
+                else -> {
+                    payload.joinToString(" ") { "%02x".format(it) }
+                }
+            }
+        } catch (e: Exception) {
+            "Failed to decode payload: ${e.message}"
+        }
+    }
 }
