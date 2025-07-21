@@ -237,14 +237,6 @@ internal fun DebugItem(
                         color = colorScheme.onSurface
                     )
                 )
-                // Show decoded payload if available
-                if (!log.decodedPayload.isNullOrBlank()) {
-                    DecodedPayloadBlock(
-                        decodedPayload = log.decodedPayload,
-                        isSelected = isSelected,
-                        colorScheme = colorScheme
-                    )
-                }
             }
         }
     }
@@ -787,49 +779,4 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
         }
         warn("Error:IOException: " + e.toString())
     }
-}
-
-@Composable
-private fun DecodedPayloadBlock(
-    decodedPayload: String,
-    isSelected: Boolean,
-    colorScheme: ColorScheme
-) {
-    Text(
-        text = stringResource(id = R.string.debug_decoded_payload),
-        style = TextStyle(
-            fontSize = if (isSelected) 10.sp else 8.sp,
-            fontWeight = FontWeight.Bold,
-            color = colorScheme.primary
-        ),
-        modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
-    )
-    Text(
-        text = "{",
-        style = TextStyle(
-            fontSize = if (isSelected) 10.sp else 8.sp,
-            fontWeight = FontWeight.Bold,
-            color = colorScheme.primary
-        ),
-        modifier = Modifier.padding(start = 8.dp, bottom = 2.dp)
-    )
-    Text(
-        text = decodedPayload,
-        softWrap = true,
-        style = TextStyle(
-            fontSize = if (isSelected) 10.sp else 8.sp,
-            fontFamily = FontFamily.Monospace,
-            color = colorScheme.onSurface.copy(alpha = 0.8f)
-        ),
-        modifier = Modifier.padding(start = 16.dp, bottom = 0.dp)
-    )
-    Text(
-        text = "}",
-        style = TextStyle(
-            fontSize = if (isSelected) 10.sp else 8.sp,
-            fontWeight = FontWeight.Bold,
-            color = colorScheme.primary
-        ),
-        modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
-    )
 }

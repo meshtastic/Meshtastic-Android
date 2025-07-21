@@ -53,7 +53,6 @@ import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Map
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.Numbers
-import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Power
 import androidx.compose.material.icons.filled.Route
@@ -176,7 +175,6 @@ private enum class LogsType(
     POWER(R.string.power_metrics_log, Icons.Default.Power, NodeDetailRoutes.PowerMetrics),
     TRACEROUTE(R.string.traceroute_log, Icons.Default.Route, NodeDetailRoutes.TracerouteLog),
     HOST(R.string.host_metrics_log, Icons.Default.Memory, NodeDetailRoutes.HostMetricsLog),
-    PAX(R.string.pax_metrics_log, Icons.Default.People, NodeDetailRoutes.PaxMetrics),
 }
 
 @Suppress("LongMethod")
@@ -204,7 +202,6 @@ fun NodeDetailScreen(
             state.hasPowerMetrics(),
             state.hasTracerouteLogs(),
             state.hasHostMetrics(),
-            state.hasPaxMetrics(), // Added for PAX log
         )
     }
     val ourNode by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
