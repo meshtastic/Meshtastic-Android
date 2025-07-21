@@ -176,7 +176,7 @@ private enum class LogsType(
     POWER(R.string.power_metrics_log, Icons.Default.Power, NodeDetailRoutes.PowerMetrics),
     TRACEROUTE(R.string.traceroute_log, Icons.Default.Route, NodeDetailRoutes.TracerouteLog),
     HOST(R.string.host_metrics_log, Icons.Default.Memory, NodeDetailRoutes.HostMetricsLog),
-    PAX(R.string.pax_metrics_log, Icons.Default.People, NodeDetailRoutes.PaxMetricsLog),
+    PAX(R.string.pax_metrics_log, Icons.Default.People, NodeDetailRoutes.PaxMetrics),
 }
 
 @Suppress("LongMethod")
