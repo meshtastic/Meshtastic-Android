@@ -160,6 +160,7 @@ data class NodesUiState(
     val distanceUnits: Int = 0,
     val tempInFahrenheit: Boolean = false,
     val showDetails: Boolean = false,
+    val showIgnored: Boolean = false,
 ) {
     companion object {
         val Empty = NodesUiState()
@@ -310,6 +311,12 @@ class UIViewModel @Inject constructor(
     private val showPrecisionCircleOnMap =
         MutableStateFlow(preferences.getBoolean("show-precision-circle-on-map", true))
 
+    private val showIgnored = MutableStateFlow(preferences.getBoolean("show-ignored", false))
+    fun toggleShowIgnored() {
+        showIgnored.value = !showIgnored.value
+        preferences.edit { putBoolean("show-ignored", showIgnored.value) }
+    }
+
     fun setSortOption(sort: NodeSortOption) {
         nodeSortOption.value = sort
         preferences.edit { putInt("node-sort-option", sort.ordinal) }
@@ -355,6 +362,7 @@ class UIViewModel @Inject constructor(
         val includeUnknown: Boolean,
         val onlyOnline: Boolean,
         val onlyDirect: Boolean,
+        val showIgnored: Boolean,
     )
 
     val nodeFilterStateFlow: Flow<NodeFilterState> = combine(
@@ -362,8 +370,9 @@ class UIViewModel @Inject constructor(
         includeUnknown,
         onlyOnline,
         onlyDirect,
-    ) { filterText, includeUnknown, onlyOnline, onlyDirect ->
-        NodeFilterState(filterText, includeUnknown, onlyOnline, onlyDirect)
+        showIgnored,
+    ) { filterText, includeUnknown, onlyOnline, onlyDirect, showIgnored ->
+        NodeFilterState(filterText, includeUnknown, onlyOnline, onlyDirect, showIgnored)
     }
 
     val nodesUiState: StateFlow<NodesUiState> = combine(
@@ -382,6 +391,7 @@ class UIViewModel @Inject constructor(
             distanceUnits = profile.config.display.units.number,
             tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
             showDetails = showDetails,
+            showIgnored = filterFlow.showIgnored,
         )
     }.stateIn(
         scope = viewModelScope,
@@ -397,6 +407,9 @@ class UIViewModel @Inject constructor(
 
     val nodeList: StateFlow<List<Node>> = nodesUiState.flatMapLatest { state ->
         nodeDB.getNodes(state.sort, state.filter, state.includeUnknown, state.onlyOnline, state.onlyDirect)
+            .map { list ->
+                list.filter { it.isIgnored == state.showIgnored }
+            }
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),

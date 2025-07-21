@@ -701,11 +701,34 @@
     <string name="app_intro_done_button">Valmis</string>
     <string name="app_intro_skip_button">Jäta vahele</string>
     <string name="security_icon_description">Turvalisuse olek</string>
+    <string name="security_icon_secure">Turvaline</string>
     <string name="security_icon_insecure_precise"> - HOIATUS, kaitsmata asukoht lubatud</string>
+    <string name="security_icon_badge_warning_description">Hoiatusmärk</string>
     <string name="unknown_channel">Tundmatu kanal</string>
     <string name="warning">Hoiatus</string>
     <string name="overflow_menu">Lisa valikud</string>
     <string name="uv_lux">UV Luks</string>
+    <string name="unknown">Tundmatu</string>
+    <string name="map_type_normal">Normaalne</string>
+    <string name="map_type_satellite">Sateliit</string>
+    <string name="map_type_terrain">Maastik</string>
+    <string name="map_type_hybrid">Hübriid</string>
+    <string name="manage_map_layers">Halda kaardikihte</string>
+    <string name="map_layers_title">Kaardikihid</string>
+    <string name="no_map_layers_loaded">Kaardikihid laadimata.</string>
+    <string name="add_layer_button">Lisa kiht</string>
+    <string name="hide_layer">Peida kiht</string>
+    <string name="show_layer">Näita kiht</string>
+    <string name="remove_layer">Eemalda kiht</string>
+    <string name="add_layer">Lisa kiht</string>
+    <string name="nodes_at_this_location">Sõlmed siin asukohas</string>
+    <string name="selected_map_type">Vali kaardi tüüp</string>
+    <string name="manage_custom_tile_sources">Halda kohandatud kardikihti</string>
+    <string name="add_custom_tile_source">Lisa kohandatud kardikiht</string>
+    <string name="no_custom_tile_sources_found">Kohandatud kardikihte ei ole</string>
+    <string name="edit_custom_tile_source">Muuda kohandatud kardikihti</string>
+    <string name="delete_custom_tile_source">Kustuta kohandatud kardikiht</string>
+    <string name="name_cannot_be_empty">Nimi ei tohi olla tühi.</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
