@@ -757,4 +757,5 @@
     <string name="clear_selection">Effacer la sélection</string>
     <string name="message_input_label">Message</string>
     <string name="type_a_message">Composer un message</string>
+    <string name="download">Télécharger</string>
 </resources>

@@ -656,4 +656,5 @@
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="security_icon_help_dismiss">취소</string>
     <string name="message_input_label">메시지</string>
+    <string name="download">다운로드</string>
 </resources>

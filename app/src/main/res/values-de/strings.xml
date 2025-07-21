@@ -754,4 +754,5 @@
     <string name="confirm_delete_node">Willst du diesen Node wirklich löschen?</string>
     <string name="replying_to"></string>
     <string name="message_input_label">Nachricht</string>
+    <string name="download">Herunterladen</string>
 </resources>
