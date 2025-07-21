@@ -25,6 +25,9 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
+import com.geeksville.mesh.R
 import com.geeksville.mesh.database.dao.DeviceHardwareDao
 import com.geeksville.mesh.database.dao.FirmwareReleaseDao
 import com.geeksville.mesh.database.dao.MeshLogDao
@@ -73,7 +76,7 @@ import com.geeksville.mesh.database.entity.ReactionEntity
         AutoMigration(from = 17, to = 18),
         AutoMigration(from = 18, to = 19),
     ],
-    version = 19,
+    version = 20,
     exportSchema = true,
 )
 @TypeConverters(Converters::class)
@@ -93,9 +96,23 @@ abstract class MeshtasticDatabase : RoomDatabase() {
                 MeshtasticDatabase::class.java,
                 "meshtastic_database"
             )
+                .addMigrations(migration19to20(context))
                 .fallbackToDestructiveMigration(false)
                 .build()
         }
+    }
+}
+
+@Suppress("MagicNumber")
+fun migration19to20(context: Context) = object : Migration(19, 20) {
+    override fun migrate(db: SupportSQLiteDatabase) {
+        val alertActionMessage = context.getString(R.string.alert_bell_text)
+        val message = "🔔 $alertActionMessage "
+        db.execSQL(
+            "INSERT INTO quick_chat (name, message, mode, position) " +
+                "SELECT '🔔', '$message', 'Append', -1 " +
+                "WHERE NOT EXISTS (SELECT 1 FROM quick_chat WHERE name = '🔔')"
+        )
     }
 }
 

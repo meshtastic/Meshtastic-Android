@@ -16,6 +16,7 @@
  */
 
 @file:Suppress("TooManyFunctions")
+
 package com.geeksville.mesh.ui.message
 
 import android.content.ClipData
@@ -666,23 +667,14 @@ private fun QuickChatRow(
     actions: List<QuickChatAction>,
     onClick: (QuickChatAction) -> Unit
 ) {
-    val alertActionMessage = stringResource(R.string.alert_bell_text)
-    val alertAction = remember(alertActionMessage) { // Memoize if content is static
-        QuickChatAction(
-            name = "🔔",
-            message = "🔔 $alertActionMessage ", // Bell character added to message
-            mode = QuickChatAction.Mode.Append,
-            position = -1 // Assuming -1 means it's a special prepended action
-        )
+    if (actions.isEmpty()) {
+        return
     }
-
-    val allActions = remember(alertAction, actions) { listOf(alertAction) + actions }
-
     LazyRow(
         modifier = modifier.padding(vertical = 4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp)
     ) {
-        items(allActions, key = { it.uuid }) { action ->
+        items(actions, key = { it.uuid }) { action ->
             Button(
                 onClick = { onClick(action) },
                 enabled = enabled,
