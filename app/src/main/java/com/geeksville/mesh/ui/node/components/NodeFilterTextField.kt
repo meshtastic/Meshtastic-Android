@@ -21,8 +21,10 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
@@ -79,31 +81,48 @@ fun NodeFilterTextField(
     onToggleShowIgnored: () -> Unit,
     ignoredNodeCount: Int,
 ) {
-    Row(
-        modifier = modifier.background(MaterialTheme.colorScheme.background),
-    ) {
-        NodeFilterTextField(
-            filterText = filterText,
-            onTextChange = onTextChange,
-            modifier = Modifier.weight(1f)
-        )
+    Column(modifier = modifier.background(MaterialTheme.colorScheme.background)) {
+        Row {
+            NodeFilterTextField(
+                filterText = filterText,
+                onTextChange = onTextChange,
+                modifier = Modifier.weight(1f)
+            )
 
-        NodeSortButton(
-            modifier = Modifier.align(Alignment.CenterVertically),
-            currentSortOption = currentSortOption,
-            onSortSelect = onSortSelect,
-            includeUnknown = includeUnknown,
-            onToggleIncludeUnknown = onToggleIncludeUnknown,
-            onlyOnline = onlyOnline,
-            onToggleOnlyOnline = onToggleOnlyOnline,
-            onlyDirect = onlyDirect,
-            onToggleOnlyDirect = onToggleOnlyDirect,
-            showDetails = showDetails,
-            onToggleShowDetails = onToggleShowDetails,
-            showIgnored = showIgnored,
-            onToggleShowIgnored = onToggleShowIgnored,
-            ignoredNodeCount = ignoredNodeCount,
-        )
+            NodeSortButton(
+                modifier = Modifier.align(Alignment.CenterVertically),
+                currentSortOption = currentSortOption,
+                onSortSelect = onSortSelect,
+                includeUnknown = includeUnknown,
+                onToggleIncludeUnknown = onToggleIncludeUnknown,
+                onlyOnline = onlyOnline,
+                onToggleOnlyOnline = onToggleOnlyOnline,
+                onlyDirect = onlyDirect,
+                onToggleOnlyDirect = onToggleOnlyDirect,
+                showDetails = showDetails,
+                onToggleShowDetails = onToggleShowDetails,
+                showIgnored = showIgnored,
+                onToggleShowIgnored = onToggleShowIgnored,
+                ignoredNodeCount = ignoredNodeCount,
+            )
+        }
+        if (showIgnored) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surfaceDim)
+                    .clickable { onToggleShowIgnored() }
+                    .padding(vertical = 16.dp, horizontal = 24.dp)
+            ) {
+                Text(
+                    text = "You are viewing ignored nodes,\nPress to return to the node list.",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                )
+            }
+        }
     }
 }
 
