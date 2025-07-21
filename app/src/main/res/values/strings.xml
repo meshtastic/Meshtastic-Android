@@ -53,7 +53,7 @@
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="via_mqtt">via MQTT</string>
     <string name="node_sort_via_favorite">via Favorite</string>
-
+    <string name="node_filter_show_ignored">Ignored Nodes</string>
     <string name="unrecognized">Unrecognized</string>
     <string name="message_status_enroute">Waiting to be acknowledged</string>
     <string name="message_status_queued">Queued for sending</string>

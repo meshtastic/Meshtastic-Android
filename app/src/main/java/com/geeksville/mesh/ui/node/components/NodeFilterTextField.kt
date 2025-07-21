@@ -75,6 +75,9 @@ fun NodeFilterTextField(
     onToggleOnlyDirect: () -> Unit,
     showDetails: Boolean,
     onToggleShowDetails: () -> Unit,
+    showIgnored: Boolean,
+    onToggleShowIgnored: () -> Unit,
+    ignoredNodeCount: Int,
 ) {
     Row(
         modifier = modifier.background(MaterialTheme.colorScheme.background),
@@ -97,6 +100,9 @@ fun NodeFilterTextField(
             onToggleOnlyDirect = onToggleOnlyDirect,
             showDetails = showDetails,
             onToggleShowDetails = onToggleShowDetails,
+            showIgnored = showIgnored,
+            onToggleShowIgnored = onToggleShowIgnored,
+            ignoredNodeCount = ignoredNodeCount,
         )
     }
 }
@@ -167,6 +173,9 @@ private fun NodeSortButton(
     onToggleOnlyDirect: () -> Unit,
     showDetails: Boolean,
     onToggleShowDetails: () -> Unit,
+    showIgnored: Boolean,
+    onToggleShowIgnored: () -> Unit,
+    ignoredNodeCount: Int,
     modifier: Modifier = Modifier,
 ) = Box(modifier) {
     var expanded by remember { mutableStateOf(false) }
@@ -281,6 +290,34 @@ private fun NodeSortButton(
                 }
             }
         )
+        HorizontalDivider()
+        DropdownMenuItem(
+            onClick = {
+                onToggleShowIgnored()
+                expanded = false
+            },
+            text = {
+                Row {
+                    AnimatedVisibility(visible = showIgnored) {
+                        Icon(
+                            imageVector = Icons.Default.Done,
+                            contentDescription = null,
+                            modifier = Modifier.padding(end = 4.dp),
+                        )
+                    }
+                    Text(
+                        text = stringResource(id = R.string.node_filter_show_ignored),
+                    )
+                    if (ignoredNodeCount > 0) {
+                        Text(
+                            text = " ($ignoredNodeCount)",
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(start = 4.dp),
+                        )
+                    }
+                }
+            }
+        )
     }
 }
 
@@ -302,6 +339,9 @@ private fun NodeFilterTextFieldPreview() {
             onToggleOnlyDirect = {},
             showDetails = false,
             onToggleShowDetails = {},
+            showIgnored = false,
+            onToggleShowIgnored = {},
+            ignoredNodeCount = 0,
         )
     }
 }
