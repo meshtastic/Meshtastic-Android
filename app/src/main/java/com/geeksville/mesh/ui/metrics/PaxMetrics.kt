@@ -255,7 +255,7 @@ fun PaxMetricsScreen(
     }
 }
 
-@Suppress("MagicNumber")
+@Suppress("MagicNumber", "CyclomaticComplexMethod")
 fun decodePaxFromLog(log: MeshLog): PaxcountProtos.Paxcount? {
     var result: PaxcountProtos.Paxcount? = null
     // First, try to parse from the binary fromRadio field (robust, like telemetry)
