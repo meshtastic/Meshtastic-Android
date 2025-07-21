@@ -181,6 +181,7 @@ dependencies {
     // Bundles
     implementation(libs.bundles.androidx)
     implementation(libs.bundles.ui)
+    implementation(libs.bundles.markdown)
     debugImplementation(libs.bundles.ui.tooling)
     implementation(libs.bundles.adaptive)
     implementation(libs.bundles.lifecycle)

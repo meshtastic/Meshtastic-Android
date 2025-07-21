@@ -760,5 +760,10 @@
     <string name="clear_selection">Tyhjennä valinta</string>
     <string name="message_input_label">Viesti</string>
     <string name="type_a_message">Kirjoita viesti</string>
+    <string name="pax_metrics_log">PAX-laskurien lokitiedot</string>
+    <string name="pax">PAX</string>
+    <string name="no_pax_metrics_logs">PAX-laskurien lokitietoja ei ole saatavilla.</string>
+    <string name="wifi_devices">WiFi-laitteet</string>
+    <string name="ble_devices">Bluetooth-laitteet</string>
     <string name="routing_error_rate_limit_exceeded">Käyttöraja ylitetty. Yritä myöhemmin uudelleen.</string>
 </resources>
