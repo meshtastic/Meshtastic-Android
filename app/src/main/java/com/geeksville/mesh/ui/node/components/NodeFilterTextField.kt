@@ -93,17 +93,19 @@ fun NodeFilterTextField(
                 modifier = Modifier.align(Alignment.CenterVertically),
                 currentSortOption = currentSortOption,
                 onSortSelect = onSortSelect,
-                includeUnknown = includeUnknown,
-                onToggleIncludeUnknown = onToggleIncludeUnknown,
-                onlyOnline = onlyOnline,
-                onToggleOnlyOnline = onToggleOnlyOnline,
-                onlyDirect = onlyDirect,
-                onToggleOnlyDirect = onToggleOnlyDirect,
-                showDetails = showDetails,
-                onToggleShowDetails = onToggleShowDetails,
-                showIgnored = showIgnored,
-                onToggleShowIgnored = onToggleShowIgnored,
-                ignoredNodeCount = ignoredNodeCount,
+                toggles = NodeFilterToggles(
+                    includeUnknown = includeUnknown,
+                    onToggleIncludeUnknown = onToggleIncludeUnknown,
+                    onlyOnline = onlyOnline,
+                    onToggleOnlyOnline = onToggleOnlyOnline,
+                    onlyDirect = onlyDirect,
+                    onToggleOnlyDirect = onToggleOnlyDirect,
+                    showDetails = showDetails,
+                    onToggleShowDetails = onToggleShowDetails,
+                    showIgnored = showIgnored,
+                    onToggleShowIgnored = onToggleShowIgnored,
+                    ignoredNodeCount = ignoredNodeCount,
+                ),
             )
         }
         if (showIgnored) {
@@ -184,17 +186,7 @@ private fun NodeFilterTextField(
 private fun NodeSortButton(
     currentSortOption: NodeSortOption,
     onSortSelect: (NodeSortOption) -> Unit,
-    includeUnknown: Boolean,
-    onToggleIncludeUnknown: () -> Unit,
-    onlyOnline: Boolean,
-    onToggleOnlyOnline: () -> Unit,
-    onlyDirect: Boolean,
-    onToggleOnlyDirect: () -> Unit,
-    showDetails: Boolean,
-    onToggleShowDetails: () -> Unit,
-    showIgnored: Boolean,
-    onToggleShowIgnored: () -> Unit,
-    ignoredNodeCount: Int,
+    toggles: NodeFilterToggles,
     modifier: Modifier = Modifier,
 ) = Box(modifier) {
     var expanded by remember { mutableStateOf(false) }
@@ -230,12 +222,12 @@ private fun NodeSortButton(
         HorizontalDivider()
         DropdownMenuItem(
             onClick = {
-                onToggleIncludeUnknown()
+                toggles.onToggleIncludeUnknown()
                 expanded = false
             },
             text = {
                 Row {
-                    AnimatedVisibility(visible = includeUnknown) {
+                    AnimatedVisibility(visible = toggles.includeUnknown) {
                         Icon(
                             imageVector = Icons.Default.Done,
                             contentDescription = null,
@@ -250,12 +242,12 @@ private fun NodeSortButton(
         )
         DropdownMenuItem(
             onClick = {
-                onToggleOnlyOnline()
+                toggles.onToggleOnlyOnline()
                 expanded = false
             },
             text = {
                 Row {
-                    AnimatedVisibility(visible = onlyOnline) {
+                    AnimatedVisibility(visible = toggles.onlyOnline) {
                         Icon(
                             imageVector = Icons.Default.Done,
                             contentDescription = null,
@@ -270,12 +262,12 @@ private fun NodeSortButton(
         )
         DropdownMenuItem(
             onClick = {
-                onToggleOnlyDirect()
+                toggles.onToggleOnlyDirect()
                 expanded = false
             },
             text = {
                 Row {
-                    AnimatedVisibility(visible = onlyDirect) {
+                    AnimatedVisibility(visible = toggles.onlyDirect) {
                         Icon(
                             imageVector = Icons.Default.Done,
                             contentDescription = null,
@@ -291,12 +283,12 @@ private fun NodeSortButton(
         HorizontalDivider()
         DropdownMenuItem(
             onClick = {
-                onToggleShowDetails()
+                toggles.onToggleShowDetails()
                 expanded = false
             },
             text = {
                 Row {
-                    AnimatedVisibility(visible = showDetails) {
+                    AnimatedVisibility(visible = toggles.showDetails) {
                         Icon(
                             imageVector = Icons.Default.Done,
                             contentDescription = null,
@@ -312,12 +304,12 @@ private fun NodeSortButton(
         HorizontalDivider()
         DropdownMenuItem(
             onClick = {
-                onToggleShowIgnored()
+                toggles.onToggleShowIgnored()
                 expanded = false
             },
             text = {
                 Row {
-                    AnimatedVisibility(visible = showIgnored) {
+                    AnimatedVisibility(visible = toggles.showIgnored) {
                         Icon(
                             imageVector = Icons.Default.Done,
                             contentDescription = null,
@@ -327,9 +319,9 @@ private fun NodeSortButton(
                     Text(
                         text = stringResource(id = R.string.node_filter_show_ignored),
                     )
-                    if (ignoredNodeCount > 0) {
+                    if (toggles.ignoredNodeCount > 0) {
                         Text(
-                            text = " ($ignoredNodeCount)",
+                            text = " (${toggles.ignoredNodeCount})",
                             color = MaterialTheme.colorScheme.primary,
                             modifier = Modifier.padding(start = 4.dp),
                         )
@@ -364,3 +356,17 @@ private fun NodeFilterTextFieldPreview() {
         )
     }
 }
+
+data class NodeFilterToggles(
+    val includeUnknown: Boolean,
+    val onToggleIncludeUnknown: () -> Unit,
+    val onlyOnline: Boolean,
+    val onToggleOnlyOnline: () -> Unit,
+    val onlyDirect: Boolean,
+    val onToggleOnlyDirect: () -> Unit,
+    val showDetails: Boolean,
+    val onToggleShowDetails: () -> Unit,
+    val showIgnored: Boolean,
+    val onToggleShowIgnored: () -> Unit,
+    val ignoredNodeCount: Int,
+)
