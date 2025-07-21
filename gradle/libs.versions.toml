@@ -47,7 +47,7 @@ usb-serial-android = "3.9.0"
 work-runtime-ktx = "2.10.2"
 zxing-android-embedded = "4.3.0"
 zxing-core = "3.5.3"
-spotless = "7.1.0"
+spotless = "7.2.1"
 
 [libraries]
 agp = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
