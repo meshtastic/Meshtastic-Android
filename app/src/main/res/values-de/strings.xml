@@ -140,6 +140,7 @@
     <string name="text_messages">Textnachrichten</string>
     <string name="channel_invalid">Diese Kanal-URL ist ungültig und kann nicht verwendet werden</string>
     <string name="debug_panel">Debug Anzeige</string>
+    <string name="debug_decoded_payload">Dekodiertes Payload:</string>
     <string name="debug_logs_export">Protokolle exportieren</string>
     <string name="debug_last_messages">500 letzte Nachrichten</string>
     <string name="debug_filters">Filter</string>
@@ -750,5 +751,7 @@
     <string name="security_icon_help_show_all">Alle Bedeutungen anzeigen</string>
     <string name="security_icon_help_show_less">Aktuellen Status anzeigen</string>
     <string name="security_icon_help_dismiss">Tastatur ausblenden</string>
+    <string name="confirm_delete_node">Willst du diesen Node wirklich löschen?</string>
+    <string name="replying_to"></string>
     <string name="message_input_label">Nachricht</string>
 </resources>
