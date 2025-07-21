@@ -48,6 +48,7 @@ import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.PaxcountProtos
 import com.geeksville.mesh.StoreAndForwardProtos
+import com.geeksville.mesh.ui.debug.FilterMode
 
 data class SearchMatch(
     val logIndex: Int,
@@ -140,7 +141,11 @@ class LogSearchManager {
                     .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "type") }
                 val dateMatches = regex.findAll(log.formattedReceivedDate)
                     .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "date") }
-                messageMatches + typeMatches + dateMatches
+                val decodedPayloadMatches = log.decodedPayload?.let { decoded ->
+                    regex.findAll(decoded)
+                        .map { match -> SearchMatch(logIndex, match.range.first, match.range.last, "decodedPayload") }
+                } ?: emptySequence()
+                messageMatches + typeMatches + dateMatches + decodedPayloadMatches
             }
         }.sortedBy { it.start }
     }
@@ -159,6 +164,30 @@ class LogFilterManager {
 
     fun updateFilteredLogs(logs: List<DebugViewModel.UiMeshLog>) {
         _filteredLogs.value = logs
+    }
+
+    fun filterLogs(
+        logs: List<DebugViewModel.UiMeshLog>,
+        filterTexts: List<String>,
+        filterMode: FilterMode
+        ): List<DebugViewModel.UiMeshLog> {
+        if (filterTexts.isEmpty()) return logs
+        return logs.filter { log ->
+            when (filterMode) {
+                FilterMode.OR -> filterTexts.any { filterText ->
+                    log.logMessage.contains(filterText, ignoreCase = true) ||
+                    log.messageType.contains(filterText, ignoreCase = true) ||
+                    log.formattedReceivedDate.contains(filterText, ignoreCase = true) ||
+                    (log.decodedPayload?.contains(filterText, ignoreCase = true) == true)
+                }
+                FilterMode.AND -> filterTexts.all { filterText ->
+                    log.logMessage.contains(filterText, ignoreCase = true) ||
+                    log.messageType.contains(filterText, ignoreCase = true) ||
+                    log.formattedReceivedDate.contains(filterText, ignoreCase = true) ||
+                    (log.decodedPayload?.contains(filterText, ignoreCase = true) == true)
+                }
+            }
+        }
     }
 }
 

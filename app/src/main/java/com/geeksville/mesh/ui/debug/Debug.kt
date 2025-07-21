@@ -110,24 +110,9 @@ internal fun DebugScreen(
 
     var filterMode by remember { mutableStateOf(FilterMode.OR) }
 
+    // Use the new filterLogs method to include decodedPayload in filtering
     val filteredLogs = remember(logs, filterTexts, filterMode) {
-        logs.filter { log ->
-            if (filterTexts.isEmpty()) {
-                true
-            } else { when (filterMode) {
-                FilterMode.OR -> filterTexts.any { filterText ->
-                    log.logMessage.contains(filterText, ignoreCase = true) ||
-                    log.messageType.contains(filterText, ignoreCase = true) ||
-                    log.formattedReceivedDate.contains(filterText, ignoreCase = true)
-                }
-                FilterMode.AND -> filterTexts.all { filterText ->
-                    log.logMessage.contains(filterText, ignoreCase = true) ||
-                    log.messageType.contains(filterText, ignoreCase = true) ||
-                    log.formattedReceivedDate.contains(filterText, ignoreCase = true)
-                }
-            }
-            }
-        }.toImmutableList()
+        viewModel.filterManager.filterLogs(logs, filterTexts, filterMode).toImmutableList()
     }
 
     LaunchedEffect(filteredLogs) {
@@ -237,12 +222,14 @@ internal fun DebugItem(
                         color = colorScheme.onSurface
                     )
                 )
-                // Show decoded payload if available
+                // Show decoded payload if available, with search highlighting
                 if (!log.decodedPayload.isNullOrBlank()) {
                     DecodedPayloadBlock(
                         decodedPayload = log.decodedPayload,
                         isSelected = isSelected,
-                        colorScheme = colorScheme
+                        colorScheme = colorScheme,
+                        searchText = searchText,
+                        modifier = Modifier.weight(1f)
                     )
                 }
             }
@@ -277,8 +264,20 @@ private fun DebugItemHeader(
                 color = theme.onSurface
             ),
         )
+        // Copy full log: message + decoded payload if present
+        val fullLogText = remember(log.logMessage, log.decodedPayload) {
+            buildString {
+                append(log.logMessage)
+                if (!log.decodedPayload.isNullOrBlank()) {
+                    append("\n\nDecoded Payload:\n{")
+                    append("\n")
+                    append(log.decodedPayload)
+                    append("\n}")
+                }
+            }
+        }
         CopyIconButton(
-            valueToCopy = log.logMessage,
+            valueToCopy = fullLogText,
             modifier = Modifier.padding(start = 8.dp)
         )
         Icon(
@@ -756,6 +755,12 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
             logs.forEach { log ->
                 writer.write("${log.formattedReceivedDate} [${log.messageType}]\n")
                 writer.write(log.logMessage)
+                if (!log.decodedPayload.isNullOrBlank()) {
+                    writer.write("\n\nDecoded Payload:\n{")
+                    writer.write("\n")
+                    writer.write(log.decodedPayload)
+                    writer.write("\n}")
+                }
                 writer.write("\n\n")
             }
         }
@@ -793,7 +798,9 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
 private fun DecodedPayloadBlock(
     decodedPayload: String,
     isSelected: Boolean,
-    colorScheme: ColorScheme
+    colorScheme: ColorScheme,
+    searchText: String = "",
+    modifier: Modifier = Modifier
 ) {
     val commonTextStyle = TextStyle(
         fontSize = if (isSelected) 10.sp else 8.sp,
@@ -801,29 +808,60 @@ private fun DecodedPayloadBlock(
         color = colorScheme.primary
     )
 
-    Text(
-        text = stringResource(id = R.string.debug_decoded_payload),
-        style = commonTextStyle,
-        modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+    Column(modifier = modifier) {
+        Text(
+            text = stringResource(id = R.string.debug_decoded_payload),
+            style = commonTextStyle,
+            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+        )
+        Text(
+            text = "{",
+            style = commonTextStyle,
+            modifier = Modifier.padding(start = 8.dp, bottom = 2.dp)
+        )
+        val annotatedPayload = rememberAnnotatedDecodedPayload(decodedPayload, searchText, colorScheme)
+        Text(
+            text = annotatedPayload,
+            softWrap = true,
+            style = TextStyle(
+                fontSize = if (isSelected) 10.sp else 8.sp,
+                fontFamily = FontFamily.Monospace,
+                color = colorScheme.onSurface.copy(alpha = 0.8f)
+            ),
+            modifier = Modifier.padding(start = 16.dp, bottom = 0.dp)
+        )
+        Text(
+            text = "}",
+            style = commonTextStyle,
+            modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
+        )
+    }
+}
+
+@Composable
+private fun rememberAnnotatedDecodedPayload(
+    decodedPayload: String,
+    searchText: String,
+    colorScheme: ColorScheme
+): AnnotatedString {
+    val highlightStyle = SpanStyle(
+        background = colorScheme.primary.copy(alpha = 0.3f),
+        color = colorScheme.onSurface
     )
-    Text(
-        text = "{",
-        style = commonTextStyle,
-        modifier = Modifier.padding(start = 8.dp, bottom = 2.dp)
-    )
-    Text(
-        text = decodedPayload,
-        softWrap = true,
-        style = TextStyle(
-            fontSize = if (isSelected) 10.sp else 8.sp,
-            fontFamily = FontFamily.Monospace,
-            color = colorScheme.onSurface.copy(alpha = 0.8f)
-        ),
-        modifier = Modifier.padding(start = 16.dp, bottom = 0.dp)
-    )
-    Text(
-        text = "}",
-        style = commonTextStyle,
-        modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
-    )
+    return remember(decodedPayload, searchText) {
+        buildAnnotatedString {
+            append(decodedPayload)
+            if (searchText.isNotEmpty()) {
+                searchText.split(" ").forEach { term ->
+                    Regex(Regex.escape(term), RegexOption.IGNORE_CASE).findAll(decodedPayload).forEach { match ->
+                        addStyle(
+                            style = highlightStyle,
+                            start = match.range.first,
+                            end = match.range.last + 1
+                        )
+                    }
+                }
+            }
+        }
+    }
 }
