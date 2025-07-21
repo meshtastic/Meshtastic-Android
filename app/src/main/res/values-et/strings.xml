@@ -67,7 +67,7 @@
     <string name="role_client_hidden">Seade, mis edastab ülekandeid ainult siis, kui see on vajalik varjamiseks või energia säästmiseks.</string>
     <string name="role_lost_and_found">Edastab asukohta regulaarselt vaikekanalile sõnumina, et aidata seadme leidmisel.</string>
     <string name="role_tak_tracker">Võimaldab automaatseid TAK PLI saateid ja vähendab rutiinseid saateid.</string>
-    <string name="role_router_late">Infrastruktuurisõlm, mis alati saadab pakette ainult ühe korra, aga alles pärast kõiki teisi sõlmi, tagades kohalikele klastritele täiendava katvuse. Nähtav sõlmede loendis.</string>
+    <string name="role_router_late">Infrastruktuurisõlm, mis saadab pakette ainult ühe korra, ning alles peale kõiki teisi sõlmi, tagades kohalikele klastritele täiendava katvuse. Nähtav sõlmede loendis.</string>
     <string name="rebroadcast_mode_all">Saada uuesti mis tahes jälgitav sõnum, kui see oli privaatkanali või teisest samade LoRa parameetritega võrgus.</string>
     <string name="rebroadcast_mode_all_skip_decoding">Sama käitumine nagu KÕIK puhul, aga pakete ei dekodeerita vaid need lihtsalt edastatakse. Saadaval ainult Repiiteri rollis. Teise rolli puhul toob kaasa KÕIK käitumise.</string>
     <string name="rebroadcast_mode_local_only">Ignoreerib jälgitavaid sõnumeid välisvõrkudest avatud või dekrüpteerida mittevõimalikke sõnumeid. Saadab sõnumeid ainult kohalikel primaarsetel/sekundaarsetel kanalitel.</string>
@@ -393,9 +393,9 @@
     <string name="paxcounter">Pax loendur</string>
     <string name="audio_config">Heli sätted</string>
     <string name="codec_2_enabled">CODEC 2 lubatud</string>
-    <string name="ptt_pin">PTT pin</string>
+    <string name="ptt_pin">PTT klemm</string>
     <string name="codec2_sample_rate">CODEC2 test sagedus</string>
-    <string name="i2s_word_select">I2S sõna valikj</string>
+    <string name="i2s_word_select">I2S sõna valik</string>
     <string name="i2s_data_in">I2S info sisse</string>
     <string name="i2s_data_out">I2S info välja</string>
     <string name="i2s_clock">I2S kell</string>
@@ -403,8 +403,8 @@
     <string name="bluetooth_enabled">Sinihammas lubatud</string>
     <string name="pairing_mode">Sidumine</string>
     <string name="fixed_pin">Fikseeritud PIN</string>
-    <string name="uplink_enabled">Üleslaadimine lubatud</string>
-    <string name="downlink_enabled">Allalaadimine lubatud</string>
+    <string name="uplink_enabled">Saatmine lubatud</string>
+    <string name="downlink_enabled">Vastuvõtt lubatud</string>
     <string name="default_">Vaikesäte</string>
     <string name="position_enabled">Asukoht lubatud</string>
     <string name="gpio_pin">GPIO klemm</string>
@@ -729,9 +729,32 @@
     <string name="edit_custom_tile_source">Muuda kohandatud kardikihti</string>
     <string name="delete_custom_tile_source">Kustuta kohandatud kardikiht</string>
     <string name="name_cannot_be_empty">Nimi ei tohi olla tühi.</string>
+    <string name="provider_name_exists">Teenusepakkuja nimi on olemas.</string>
+    <string name="url_cannot_be_empty">URL ei tohi olla tühi.</string>
+    <string name="url_must_contain_placeholders">URL peab sisaldama vahesümboleid.</string>
+    <string name="url_template">URL mall</string>
+    <string name="url_template_hint">näit. https://a.tile.openstreetmap.org/{z}/{x}/{y}.png</string>
+    <string name="security_icon_help_green_lock">Roheline lukk näitab, et kanal on turvaliselt krüpteeritud kas 128 või 256 bittise AES võtmega.</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <string name="security_icon_insecure_no_precise">Ebaturvaline kanal, ei ole täpne</string>
+    <string name="security_icon_help_yellow_open_lock">Kollane avatud lukk näitab, et kanal ei ole turvaliselt krüpteeritud ning seda ei kasutata täpsete asukohaandmete edastamiseks. Võtit ei kasuta üldse või on vaike 1-baidine.</string>
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <string name="security_icon_insecure_precise_only">Ebaturvaline kanal, asukoht täpne</string>
+    <string name="security_icon_help_red_open_lock">Punane avatud lukk näitab, et kanal ei ole turvaliselt krüpteeritud ning seda kasutatakse täpsete asukohaandmete edastamiseks. Võtit ei kasuta üldse või on see vaike 1-baidine.</string>
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <string name="security_icon_warning_precise_mqtt">Hoiatus: ebaturvaline, täpne asukoht &amp; MQTT saatmine</string>
+    <string name="security_icon_help_warning_precise_mqtt">Punane avatud lukk koos hoiatusega näitab, et kanal ei ole turvaliselt krüpteeritud ning seda kasutatakse täpsete asukohaandmete edastamiseks internetti läbi MQTT. Võtit ei kasuta või on see vaike 1-baidine.</string>
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="security_icon_help_title">Kanali turvalisus</string>
+    <string name="security_icon_help_title_all">Kanali turvalisuse tähendus</string>
+    <string name="security_icon_help_show_all">Näita kõik tähendused</string>
+    <string name="security_icon_help_show_less">Näita hetke olukord</string>
+    <string name="security_icon_help_dismiss">Loobu</string>
+    <string name="confirm_delete_node">Kas olete kindel, et soovite selle sõlme kustutada?</string>
+    <string name="replying_to">Vasta kasutajale %1$s</string>
+    <string name="cancel_reply">Tühista vastus</string>
+    <string name="delete_messages_title">Kustuta sõnum?</string>
+    <string name="clear_selection">Ära vali midagi</string>
     <string name="message_input_label">Sõnum</string>
+    <string name="type_a_message">Sisesta sõnum</string>
 </resources>
