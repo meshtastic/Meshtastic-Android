@@ -185,5 +185,5 @@ enum class NodeDetailRoute(
     TRACEROUTE(R.string.traceroute, NodeDetailRoutes.TracerouteLog, Icons.Default.PermScanWifi),
     POWER(R.string.power, NodeDetailRoutes.PowerMetrics, Icons.Default.Power),
     HOST(R.string.host, NodeDetailRoutes.HostMetricsLog, Icons.Default.Memory),
-    PAX(R.string.pax, NodeDetailRoutes.PaxMetrics, Icons.Default.Memory),
+    PAX(R.string.pax, NodeDetailRoutes.PaxMetrics, Icons.Default.People),
 }

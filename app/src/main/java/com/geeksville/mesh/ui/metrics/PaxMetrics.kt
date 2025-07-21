@@ -187,8 +187,7 @@ fun PaxMetricsScreen(
     var timeFrame by remember { mutableStateOf(TimeFrame.TWENTY_FOUR_HOURS) }
     // Only show logs that can be decoded as PaxcountProtos.Paxcount
     val paxMetrics = state.paxMetrics.mapNotNull { log ->
-        var pax: PaxcountProtos.Paxcount? = null
-        pax = decodePaxFromLog(log)
+        val pax = decodePaxFromLog(log)
         if (pax != null) {
             Pair(log, pax)
         } else {
@@ -267,7 +266,11 @@ fun decodePaxFromLog(log: MeshLog): PaxcountProtos.Paxcount? {
             val pax = PaxcountProtos.Paxcount.parseFrom(packet.decoded.payload)
             if (pax.ble != 0 || pax.wifi != 0 || pax.uptime != 0) result = pax
         }
-    } catch (_: Exception) {}
+    } catch (e: com.google.protobuf.InvalidProtocolBufferException) {
+        android.util.Log.e("PaxMetrics", "Failed to parse Paxcount from binary data", e)
+    } catch (e: IllegalArgumentException) {
+        android.util.Log.e("PaxMetrics", "Invalid argument while parsing Paxcount from binary data", e)
+    }
     // Fallback: Try direct base64 or bytes from raw_message
     if (result == null) {
         try {
@@ -281,7 +284,11 @@ fun decodePaxFromLog(log: MeshLog): PaxcountProtos.Paxcount? {
                 val pax = PaxcountProtos.Paxcount.parseFrom(bytes)
                 result = pax
             }
-        } catch (_: Exception) {}
+        } catch (e: IllegalArgumentException) {
+            android.util.Log.e("PaxMetrics", "Invalid Base64 or hex input", e)
+        } catch (e: com.google.protobuf.InvalidProtocolBufferException) {
+            android.util.Log.e("PaxMetrics", "Failed to parse Paxcount from decoded data", e)
+        }
     }
     return result
 }
