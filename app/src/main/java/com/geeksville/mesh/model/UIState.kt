@@ -370,7 +370,7 @@ class UIViewModel @Inject constructor(
         includeUnknown,
         onlyOnline,
         onlyDirect,
-        showIgnored, // NEW
+        showIgnored,
     ) { filterText, includeUnknown, onlyOnline, onlyDirect, showIgnored ->
         NodeFilterState(filterText, includeUnknown, onlyOnline, onlyDirect, showIgnored)
     }
@@ -391,7 +391,7 @@ class UIViewModel @Inject constructor(
             distanceUnits = profile.config.display.units.number,
             tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
             showDetails = showDetails,
-            showIgnored = filterFlow.showIgnored, // NEW
+            showIgnored = filterFlow.showIgnored,
         )
     }.stateIn(
         scope = viewModelScope,

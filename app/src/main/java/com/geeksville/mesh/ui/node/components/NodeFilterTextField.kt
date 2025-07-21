@@ -117,7 +117,7 @@ fun NodeFilterTextField(
                     .padding(vertical = 16.dp, horizontal = 24.dp)
             ) {
                 Text(
-                    text = "You are viewing ignored nodes,\nPress to return to the node list.",
+                    text = stringResource(id = R.string.node_filter_ignored),
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.fillMaxWidth(),
