@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PermScanWifi
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Power
 import androidx.compose.material.icons.filled.Router
 import androidx.compose.runtime.remember
