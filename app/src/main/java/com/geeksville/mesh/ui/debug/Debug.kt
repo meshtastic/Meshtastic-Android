@@ -795,6 +795,7 @@ private fun DecodedPayloadBlock(
     isSelected: Boolean,
     colorScheme: ColorScheme
 ) {
+
     val commonTextStyle = TextStyle(
         fontSize = if (isSelected) 10.sp else 8.sp,
         fontWeight = FontWeight.Bold,

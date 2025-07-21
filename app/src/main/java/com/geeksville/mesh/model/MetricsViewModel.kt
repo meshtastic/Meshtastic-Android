@@ -47,6 +47,7 @@ import com.geeksville.mesh.repository.api.FirmwareReleaseRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.map.MAP_STYLE_ID
+import com.geeksville.mesh.Portnums
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -88,6 +89,7 @@ data class MetricsState(
     val isLocalDevice: Boolean = false,
     val latestStableFirmware: FirmwareRelease = FirmwareRelease(),
     val latestAlphaFirmware: FirmwareRelease = FirmwareRelease(),
+    val paxMetrics: List<MeshLog> = emptyList(),
 ) {
     fun hasDeviceMetrics() = deviceMetrics.isNotEmpty()
     fun hasSignalMetrics() = signalMetrics.isNotEmpty()
@@ -95,6 +97,7 @@ data class MetricsState(
     fun hasTracerouteLogs() = tracerouteRequests.isNotEmpty()
     fun hasPositionLogs() = positionLogs.isNotEmpty()
     fun hasHostMetrics() = hostMetrics.isNotEmpty()
+    fun hasPaxMetrics() = paxMetrics.isNotEmpty()
 
     fun deviceMetricsFiltered(timeFrame: TimeFrame): List<Telemetry> {
         val oldestTime = timeFrame.calculateOldestTime()
@@ -264,7 +267,7 @@ class MetricsViewModel @Inject constructor(
     val timeFrame: StateFlow<TimeFrame> = _timeFrame
 
     init {
-        destNum?.let {
+        if (destNum != null) {
             radioConfigRepository.nodeDBbyNum
                 .mapLatest { nodes -> nodes[destNum] to nodes.keys.firstOrNull() }
                 .distinctUntilChanged()
@@ -344,6 +347,12 @@ class MetricsViewModel @Inject constructor(
                     }
                 }.launchIn(viewModelScope)
 
+            meshLogRepository.getLogsFrom(destNum, Portnums.PortNum.PAXCOUNTER_APP_VALUE).onEach { logs ->
+                _state.update { state ->
+                    state.copy(paxMetrics = logs)
+                }
+            }.launchIn(viewModelScope)
+
             firmwareReleaseRepository.stableRelease.filterNotNull().onEach { latestStable ->
                 _state.update { state ->
                     state.copy(latestStableFirmware = latestStable)
@@ -357,6 +366,8 @@ class MetricsViewModel @Inject constructor(
             }.launchIn(viewModelScope)
 
             debug("MetricsViewModel created")
+        } else {
+            debug("MetricsViewModel: destNum is null, skipping metrics flows initialization.")
         }
     }
 
