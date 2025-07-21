@@ -93,7 +93,7 @@ enum class RegionInfo(
     EU_868(RegionCode.EU_868, "European Union 868MHz", 869.4f, 869.65f),
     CN(RegionCode.CN, "China", 470.0f, 510.0f),
     JP(RegionCode.JP, "Japan", 920.5f, 923.5f),
-    ANZ(RegionCode.ANZ, "Australia / New Zealand", 915.0f, 928.0f),
+    ANZ(RegionCode.ANZ, "Australia / Brazil / New Zealand", 915.0f, 928.0f),
     KR(RegionCode.KR, "Korea", 920.0f, 923.0f),
     TW(RegionCode.TW, "Taiwan", 920.0f, 925.0f),
     RU(RegionCode.RU, "Russia", 868.7f, 869.2f),
