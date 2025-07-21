@@ -42,6 +42,12 @@ import com.geeksville.mesh.Portnums.PortNum
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
+import com.google.protobuf.InvalidProtocolBufferException
+import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.TelemetryProtos
+import com.geeksville.mesh.AdminProtos
+import com.geeksville.mesh.PaxcountProtos
+import com.geeksville.mesh.StoreAndForwardProtos
 
 data class SearchMatch(
     val logIndex: Int,
@@ -156,6 +162,7 @@ class LogFilterManager {
     }
 }
 
+@Suppress("TooManyFunctions")
 @HiltViewModel
 class DebugViewModel @Inject constructor(
     private val meshLogRepository: MeshLogRepository,
@@ -206,6 +213,7 @@ class DebugViewModel @Inject constructor(
             messageType = log.message_type,
             formattedReceivedDate = TIME_FORMAT.format(log.received_date),
             logMessage = annotateMeshLogMessage(log),
+            decodedPayload = decodePayloadFromMeshLog(log),
         )
     }.toImmutableList()
 
@@ -213,22 +221,33 @@ class DebugViewModel @Inject constructor(
      * Transform the input [MeshLog] by enhancing the raw message with annotations.
      */
     private fun annotateMeshLogMessage(meshLog: MeshLog): String {
-        val annotated = when (meshLog.message_type) {
+        return when (meshLog.message_type) {
             "Packet" -> meshLog.meshPacket?.let { packet ->
-                annotateRawMessage(meshLog.raw_message, packet.from, packet.to)
-            }
-
+                annotatePacketLog(packet)
+            } ?: meshLog.raw_message
             "NodeInfo" -> meshLog.nodeInfo?.let { nodeInfo ->
                 annotateRawMessage(meshLog.raw_message, nodeInfo.num)
-            }
-
+            } ?: meshLog.raw_message
             "MyNodeInfo" -> meshLog.myNodeInfo?.let { nodeInfo ->
                 annotateRawMessage(meshLog.raw_message, nodeInfo.myNodeNum)
-            }
-
-            else -> null
+            } ?: meshLog.raw_message
+            else -> meshLog.raw_message
         }
-        return annotated ?: meshLog.raw_message
+    }
+
+    private fun annotatePacketLog(packet: MeshProtos.MeshPacket): String {
+        val builder = packet.toBuilder()
+        val hasDecoded = builder.hasDecoded()
+        val decoded = if (hasDecoded) builder.decoded else null
+        if (hasDecoded) builder.clearDecoded()
+        val baseText = builder.build().toString().trimEnd()
+        val result = if (hasDecoded && decoded != null) {
+            val decodedText = decoded.toString().trimEnd().prependIndent("  ")
+            "$baseText\ndecoded {\n$decodedText\n}"
+        } else {
+            baseText
+        }
+        return annotateRawMessage(result, packet.from, packet.to)
     }
 
     /**
@@ -274,6 +293,7 @@ class DebugViewModel @Inject constructor(
         val messageType: String,
         val formattedReceivedDate: String,
         val logMessage: String,
+        val decodedPayload: String? = null,
     )
 
     companion object {
@@ -295,4 +315,54 @@ class DebugViewModel @Inject constructor(
         }
 
     fun setSelectedLogId(id: String?) { _selectedLogId.value = id }
+
+    /**
+     * Attempts to fully decode the payload of a MeshLog's MeshPacket using the appropriate protobuf definition,
+     * based on the portnum of the packet.
+     *
+     * For known portnums, the payload is parsed into its corresponding proto message and returned as a string.
+     * For text and alert messages, the payload is interpreted as UTF-8 text.
+     * For unknown portnums, the payload is shown as a hex string.
+     *
+     * @param log The MeshLog containing the packet and payload to decode.
+     * @return A human-readable string representation of the decoded payload, or an error message if decoding fails,
+     *         or null if the log does not contain a decodable packet.
+     */
+    private fun decodePayloadFromMeshLog(log: MeshLog): String? {
+        var result: String? = null
+        val packet = log.meshPacket
+        if (packet == null || !packet.hasDecoded()) {
+            result = null
+        } else {
+            val portnum = packet.decoded.portnumValue
+            val payload = packet.decoded.payload.toByteArray()
+            result = try {
+                when (portnum) {
+                    PortNum.TEXT_MESSAGE_APP_VALUE,
+                    PortNum.ALERT_APP_VALUE ->
+                        payload.toString(Charsets.UTF_8)
+                    PortNum.POSITION_APP_VALUE ->
+                        MeshProtos.Position.parseFrom(payload).toString()
+                    PortNum.WAYPOINT_APP_VALUE ->
+                        MeshProtos.Waypoint.parseFrom(payload).toString()
+                    PortNum.NODEINFO_APP_VALUE ->
+                        MeshProtos.User.parseFrom(payload).toString()
+                    PortNum.TELEMETRY_APP_VALUE ->
+                        TelemetryProtos.Telemetry.parseFrom(payload).toString()
+                    PortNum.ROUTING_APP_VALUE ->
+                        MeshProtos.Routing.parseFrom(payload).toString()
+                    PortNum.ADMIN_APP_VALUE ->
+                        AdminProtos.AdminMessage.parseFrom(payload).toString()
+                    PortNum.PAXCOUNTER_APP_VALUE ->
+                        PaxcountProtos.Paxcount.parseFrom(payload).toString()
+                    PortNum.STORE_FORWARD_APP_VALUE ->
+                        StoreAndForwardProtos.StoreAndForward.parseFrom(payload).toString()
+                    else -> payload.joinToString(" ") { "%02x".format(it) }
+                }
+            } catch (e: InvalidProtocolBufferException) {
+                "Failed to decode payload: ${e.message}"
+            }
+        }
+        return result
+    }
 }
