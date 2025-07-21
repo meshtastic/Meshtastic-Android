@@ -45,7 +45,7 @@
     <string name="routing_error_got_nak">negative Bestätigung erhalten</string>
     <string name="routing_error_timeout">Zeitüberschreitung</string>
     <string name="routing_error_no_interface">Keine Schnittstelle</string>
-    <string name="routing_error_max_retransmit">Maximale Anzahl Weiterleitungen erreicht</string>
+    <string name="routing_error_max_retransmit">Maximale Anzahl Wiederholungen erreicht</string>
     <string name="routing_error_no_channel">Kein Kanal</string>
     <string name="routing_error_too_large">Paket zu groß</string>
     <string name="routing_error_no_response">Keine Reaktion</string>
