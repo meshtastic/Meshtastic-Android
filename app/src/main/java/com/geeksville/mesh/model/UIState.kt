@@ -160,7 +160,7 @@ data class NodesUiState(
     val distanceUnits: Int = 0,
     val tempInFahrenheit: Boolean = false,
     val showDetails: Boolean = false,
-    val showIgnored: Boolean = false, // NEW
+    val showIgnored: Boolean = false,
 ) {
     companion object {
         val Empty = NodesUiState()
@@ -362,7 +362,7 @@ class UIViewModel @Inject constructor(
         val includeUnknown: Boolean,
         val onlyOnline: Boolean,
         val onlyDirect: Boolean,
-        val showIgnored: Boolean, // NEW
+        val showIgnored: Boolean,
     )
 
     val nodeFilterStateFlow: Flow<NodeFilterState> = combine(
@@ -408,7 +408,7 @@ class UIViewModel @Inject constructor(
     val nodeList: StateFlow<List<Node>> = nodesUiState.flatMapLatest { state ->
         nodeDB.getNodes(state.sort, state.filter, state.includeUnknown, state.onlyOnline, state.onlyDirect)
             .map { list ->
-                if (state.showIgnored) list.filter { it.isIgnored } else list.filter { !it.isIgnored }
+                list.filter { it.isIgnored == state.showIgnored }
             }
     }.stateIn(
         scope = viewModelScope,
