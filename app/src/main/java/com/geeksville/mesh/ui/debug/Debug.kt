@@ -795,22 +795,21 @@ private fun DecodedPayloadBlock(
     isSelected: Boolean,
     colorScheme: ColorScheme
 ) {
+
+    val commonTextStyle = TextStyle(
+        fontSize = if (isSelected) 10.sp else 8.sp,
+        fontWeight = FontWeight.Bold,
+        color = colorScheme.primary
+    )
+
     Text(
         text = stringResource(id = R.string.debug_decoded_payload),
-        style = TextStyle(
-            fontSize = if (isSelected) 10.sp else 8.sp,
-            fontWeight = FontWeight.Bold,
-            color = colorScheme.primary
-        ),
+        style = commonTextStyle,
         modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
     )
     Text(
         text = "{",
-        style = TextStyle(
-            fontSize = if (isSelected) 10.sp else 8.sp,
-            fontWeight = FontWeight.Bold,
-            color = colorScheme.primary
-        ),
+        style = commonTextStyle,
         modifier = Modifier.padding(start = 8.dp, bottom = 2.dp)
     )
     Text(
@@ -825,11 +824,7 @@ private fun DecodedPayloadBlock(
     )
     Text(
         text = "}",
-        style = TextStyle(
-            fontSize = if (isSelected) 10.sp else 8.sp,
-            fontWeight = FontWeight.Bold,
-            color = colorScheme.primary
-        ),
+        style = commonTextStyle,
         modifier = Modifier.padding(start = 8.dp, bottom = 4.dp)
     )
 }

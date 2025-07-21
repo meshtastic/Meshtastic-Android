@@ -162,6 +162,8 @@ class LogFilterManager {
     }
 }
 
+private const val HEX_FORMAT = "%02x"
+
 @Suppress("TooManyFunctions")
 @HiltViewModel
 class DebugViewModel @Inject constructor(
@@ -357,7 +359,7 @@ class DebugViewModel @Inject constructor(
                         PaxcountProtos.Paxcount.parseFrom(payload).toString()
                     PortNum.STORE_FORWARD_APP_VALUE ->
                         StoreAndForwardProtos.StoreAndForward.parseFrom(payload).toString()
-                    else -> payload.joinToString(" ") { "%02x".format(it) }
+                    else -> payload.joinToString(" ") { HEX_FORMAT.format(it) }
                 }
             } catch (e: InvalidProtocolBufferException) {
                 "Failed to decode payload: ${e.message}"
