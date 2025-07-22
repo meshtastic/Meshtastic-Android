@@ -101,9 +101,9 @@ import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.node.components.NodeKeyStatusIcon
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
+import java.nio.charset.StandardCharsets
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import java.nio.charset.StandardCharsets
 
 private const val MESSAGE_CHARACTER_LIMIT_BYTES = 200
 private const val SNIPPET_CHARACTER_LIMIT = 50
