@@ -282,6 +282,9 @@ spotless {
         target("src/*/kotlin/**/*.kt", "src/*/java/**/*.kt")
         targetExclude("**/build/**/*.kt")
         ktlint()
+            .editorConfigOverride(
+                mapOf("ktlint_function_naming_ignore_when_annotated_with" to "Composable")
+            )
         ktfmt().kotlinlangStyle()
         licenseHeaderFile(rootProject.file("config/copyright.txt"))
     }
