@@ -27,6 +27,7 @@
     <string name="node_filter_include_unknown">Inclure inconnus</string>
     <string name="node_filter_only_online">Masquer les nœuds hors ligne</string>
     <string name="node_filter_only_direct">Afficher uniquement les nœuds directs</string>
+    <string name="node_filter_ignored">Vous visualisez les nœuds ignorés,\nAppuyez pour retourner à la liste des nœuds.</string>
     <string name="node_filter_show_details">Afficher les détails</string>
     <string name="node_sort_button">Options de tri des nœuds</string>
     <string name="node_sort_alpha">A-Z</string>
@@ -37,6 +38,7 @@
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="via_mqtt">via MQTT</string>
     <string name="node_sort_via_favorite">par Favoris</string>
+    <string name="node_filter_show_ignored">Nœuds ignorés</string>
     <string name="unrecognized">Non reconnu</string>
     <string name="message_status_enroute">En attente d\'accusé de réception</string>
     <string name="message_status_queued">En file d\'attente pour l\'envoi</string>
@@ -140,6 +142,7 @@
     <string name="text_messages">Messages texte</string>
     <string name="channel_invalid">Cette URL de canal est invalide et ne peut pas être utilisée</string>
     <string name="debug_panel">Panneau de débogage</string>
+    <string name="debug_decoded_payload">Charge décodée:</string>
     <string name="debug_logs_export">Exporter les logs</string>
     <string name="debug_last_messages">500 derniers messages</string>
     <string name="debug_filters">Filtres</string>
@@ -757,5 +760,16 @@
     <string name="clear_selection">Effacer la sélection</string>
     <string name="message_input_label">Message</string>
     <string name="type_a_message">Composer un message</string>
+    <string name="pax_metrics_log">Journal des métriques PAX</string>
+    <string name="pax">PAX</string>
+    <string name="no_pax_metrics_logs">Aucun journal de métriques PAX disponible.</string>
+    <string name="wifi_devices">Périphériques WiFi</string>
+    <string name="ble_devices">Apapreils BLE</string>
+    <string name="routing_error_rate_limit_exceeded">Limite de débit dépassée. Veuillez réessayer plus tard.</string>
+    <string name="view_release">Voir la version</string>
     <string name="download">Télécharger</string>
+    <string name="installed_firmware_version">Actuellement installés</string>
+    <string name="latest_stable_firmware">Dernière version stable</string>
+    <string name="latest_alpha_firmware">Dernière version alpha</string>
+    <string name="supported_by_community">Soutenu par la communauté Meshtastic</string>
 </resources>
