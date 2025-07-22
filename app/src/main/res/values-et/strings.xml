@@ -766,4 +766,10 @@
     <string name="wifi_devices">WiFi seadmed</string>
     <string name="ble_devices">Sinihamba seadmed</string>
     <string name="routing_error_rate_limit_exceeded">Limiit ületatud. Proovi hiljem uuesti.</string>
+    <string name="view_release">Näita versioon</string>
+    <string name="download">Lae alla</string>
+    <string name="installed_firmware_version">Paigaldatud</string>
+    <string name="latest_stable_firmware">Viimane stabiilne</string>
+    <string name="latest_alpha_firmware">Viimane alfa</string>
+    <string name="supported_by_community">Toetatud Meshtastic kommuuni poolt</string>
 </resources>
