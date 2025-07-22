@@ -10,7 +10,7 @@ constraintlayout = "2.2.1"
 core-ktx = "1.16.0"
 core-location-altitude = "1.0.0-alpha03"
 core-splashscreen = "1.0.1"
-crashlytics = "3.0.4"
+crashlytics = "3.0.5"
 datastore = "1.1.7"
 detekt = "1.23.8"
 devtools-ksp = "2.2.0-2.0.2"
@@ -47,6 +47,7 @@ usb-serial-android = "3.9.0"
 work-runtime-ktx = "2.10.2"
 zxing-android-embedded = "4.3.0"
 zxing-core = "3.5.3"
+spotless = "7.1.0"
 
 [libraries]
 agp = { group = "com.android.tools.build", name = "gradle", version.ref = "agp" }
@@ -200,3 +201,4 @@ protobuf = { id = "com.google.protobuf" }
 android-library = { id = "com.android.library" }
 google-services = { id = "com.google.gms.google-services" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics" }
+spotless = { id = "com.diffplug.spotless", version .ref= "spotless" }

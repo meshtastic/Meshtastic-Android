@@ -359,4 +359,5 @@
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="security_icon_help_dismiss">Stäng</string>
     <string name="message_input_label">Meddelande</string>
+    <string name="download">Ladda ner</string>
 </resources>
