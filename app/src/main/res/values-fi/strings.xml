@@ -291,7 +291,7 @@
     <string name="temperature">Lämpötila</string>
     <string name="humidity">Kosteus</string>
     <string name="soil_temperature">Maaperän lämpötila</string>
-    <string name="soil_moisture">Määperän kosteus</string>
+    <string name="soil_moisture">Maaperän kosteus</string>
     <string name="logs">lokitietoa</string>
     <string name="hops_away">Hyppyjä</string>
     <string name="hops_away_template">Hyppyjä: %1$d</string>
@@ -766,5 +766,10 @@
     <string name="wifi_devices">WiFi-laitteet</string>
     <string name="ble_devices">Bluetooth-laitteet</string>
     <string name="routing_error_rate_limit_exceeded">Käyttöraja ylitetty. Yritä myöhemmin uudelleen.</string>
+    <string name="view_release">Näytä versio</string>
     <string name="download">Lataa</string>
+    <string name="installed_firmware_version">Asennettu</string>
+    <string name="latest_stable_firmware">Viimeisin vakaa (stable)</string>
+    <string name="latest_alpha_firmware">Viimeisin epävakaa (alpha)</string>
+    <string name="supported_by_community">Meshtastic-yhteisön tukema</string>
 </resources>
