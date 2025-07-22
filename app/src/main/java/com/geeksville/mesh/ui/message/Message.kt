@@ -16,6 +16,7 @@
  */
 
 @file:Suppress("TooManyFunctions")
+
 package com.geeksville.mesh.ui.message
 
 import android.content.ClipData
@@ -135,9 +136,12 @@ internal fun MessageScreen(
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isConnected by viewModel.isConnected.collectAsStateWithLifecycle(initialValue = false)
     val channels by viewModel.channels.collectAsStateWithLifecycle()
-    val quickChatActions by viewModel.quickChatActions.collectAsStateWithLifecycle(initialValue = emptyList())
-    val messages by viewModel.getMessagesFrom(contactKey)
-        .collectAsStateWithLifecycle(initialValue = emptyList())
+    val quickChatActions by
+        viewModel.quickChatActions.collectAsStateWithLifecycle(initialValue = emptyList())
+    val messages by
+        viewModel
+            .getMessagesFrom(contactKey)
+            .collectAsStateWithLifecycle(initialValue = emptyList())
 
     // UI State managed within this Composable
     var replyingTo by rememberSaveable { mutableStateOf<Message?>(null) }
@@ -147,41 +151,42 @@ internal fun MessageScreen(
     val messageInputState = rememberTextFieldState(message)
 
     // Derived state, memoized for performance
-    val channelInfo = remember(contactKey, channels) {
-        val index = contactKey.firstOrNull()?.digitToIntOrNull()
-        val id = contactKey.substring(1)
-        val name = index?.let { channels.getChannel(it)?.name } // channels can be null initially
-        Triple(index, id, name)
-    }
+    val channelInfo =
+        remember(contactKey, channels) {
+            val index = contactKey.firstOrNull()?.digitToIntOrNull()
+            val id = contactKey.substring(1)
+            val name =
+                index?.let { channels.getChannel(it)?.name } // channels can be null initially
+            Triple(index, id, name)
+        }
     val (channelIndex, nodeId, rawChannelName) = channelInfo
     val unknownChannelText = stringResource(id = R.string.unknown_channel)
     val channelName = rawChannelName ?: unknownChannelText
 
-    val title = remember(nodeId, channelName, viewModel) {
-        when (nodeId) {
-            DataPacket.ID_BROADCAST -> channelName
-            else -> viewModel.getUser(nodeId).longName
+    val title =
+        remember(nodeId, channelName, viewModel) {
+            when (nodeId) {
+                DataPacket.ID_BROADCAST -> channelName
+                else -> viewModel.getUser(nodeId).longName
+            }
         }
-    }
 
-    val isMismatchKey = remember(channelIndex, nodeId, viewModel) {
-        channelIndex == DataPacket.PKC_CHANNEL_INDEX && viewModel.getNode(nodeId).mismatchKey
-    }
+    val isMismatchKey =
+        remember(channelIndex, nodeId, viewModel) {
+            channelIndex == DataPacket.PKC_CHANNEL_INDEX && viewModel.getNode(nodeId).mismatchKey
+        }
 
     val inSelectionMode by remember { derivedStateOf { selectedMessageIds.value.isNotEmpty() } }
 
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = remember(messages) {
-            messages.indexOfLast { !it.read }.coerceAtLeast(0)
-        }
-    )
+    val listState =
+        rememberLazyListState(
+            initialFirstVisibleItemIndex =
+                remember(messages) { messages.indexOfLast { !it.read }.coerceAtLeast(0) }
+        )
 
     val onEvent: (MessageScreenEvent) -> Unit =
-        remember(
-            viewModel, contactKey, messageInputState, ourNode
-        ) {
-            {
-                event ->
+        remember(viewModel, contactKey, messageInputState, ourNode) {
+            { event ->
                 when (event) {
                     is MessageScreenEvent.SendMessage -> {
                         viewModel.sendMessage(event.text, contactKey, event.replyingToPacketId)
@@ -189,11 +194,8 @@ internal fun MessageScreen(
                         messageInputState.clearText()
                     }
 
-                    is MessageScreenEvent.SendReaction -> viewModel.sendReaction(
-                        event.emoji,
-                        event.messageId,
-                        contactKey
-                    )
+                    is MessageScreenEvent.SendReaction ->
+                        viewModel.sendReaction(event.emoji, event.messageId, contactKey)
 
                     is MessageScreenEvent.DeleteMessages -> {
                         viewModel.deleteMessages(event.ids)
@@ -201,17 +203,19 @@ internal fun MessageScreen(
                         showDeleteDialog = false
                     }
 
-                    is MessageScreenEvent.ClearUnreadCount -> viewModel.clearUnreadCount(
-                        contactKey,
-                        event.lastReadMessageId
-                    )
+                    is MessageScreenEvent.ClearUnreadCount ->
+                        viewModel.clearUnreadCount(contactKey, event.lastReadMessageId)
 
                     is MessageScreenEvent.HandleNodeMenuAction -> {
                         when (val action = event.action) {
                             is NodeMenuAction.DirectMessage -> {
                                 val hasPKC = ourNode?.hasPKC == true && action.node.hasPKC
                                 val targetChannel =
-                                    if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else action.node.channel
+                                    if (hasPKC) {
+                                        DataPacket.PKC_CHANNEL_INDEX
+                                    } else {
+                                        action.node.channel
+                                    }
                                 navigateToMessages("$targetChannel${action.node.user.id}")
                             }
 
@@ -223,14 +227,12 @@ internal fun MessageScreen(
 
                     is MessageScreenEvent.SetTitle -> viewModel.setTitle(event.title)
                     is MessageScreenEvent.NavigateToMessages -> navigateToMessages(event.contactKey)
-                    is MessageScreenEvent.NavigateToNodeDetails -> navigateToNodeDetails(event.nodeNum)
+                    is MessageScreenEvent.NavigateToNodeDetails ->
+                        navigateToNodeDetails(event.nodeNum)
                     MessageScreenEvent.NavigateBack -> onNavigateBack()
                     is MessageScreenEvent.CopyToClipboard -> {
                         clipboardManager.nativeClipboard.setPrimaryClip(
-                            ClipData.newPlainText(
-                                event.text,
-                                event.text
-                            )
+                            ClipData.newPlainText(event.text, event.text)
                         )
                         selectedMessageIds.value = emptySet()
                     }
@@ -241,16 +243,15 @@ internal fun MessageScreen(
     if (showDeleteDialog) {
         DeleteMessageDialog(
             count = selectedMessageIds.value.size,
-            onConfirm = { onEvent(MessageScreenEvent.DeleteMessages(selectedMessageIds.value.toList())) },
-            onDismiss = { showDeleteDialog = false }
+            onConfirm = {
+                onEvent(MessageScreenEvent.DeleteMessages(selectedMessageIds.value.toList()))
+            },
+            onDismiss = { showDeleteDialog = false },
         )
     }
 
     sharedContact?.let { contact ->
-        SharedContactDialog(
-            contact = contact,
-            onDismiss = { sharedContact = null }
-        )
+        SharedContactDialog(contact = contact, onDismiss = { sharedContact = null })
     }
 
     Scaffold(
@@ -262,9 +263,10 @@ internal fun MessageScreen(
                     onAction = { action ->
                         when (action) {
                             MessageMenuAction.ClipboardCopy -> {
-                                val copiedText = messages
-                                    .filter { it.uuid in selectedMessageIds.value }
-                                    .joinToString("\n") { it.text }
+                                val copiedText =
+                                    messages
+                                        .filter { it.uuid in selectedMessageIds.value }
+                                        .joinToString("\n") { it.text }
                                 onEvent(MessageScreenEvent.CopyToClipboard(copiedText))
                             }
 
@@ -279,7 +281,7 @@ internal fun MessageScreen(
                                     }
                             }
                         }
-                    }
+                    },
                 )
             } else {
                 MessageTopBar(
@@ -288,48 +290,33 @@ internal fun MessageScreen(
                     mismatchKey = isMismatchKey,
                     onNavigateBack = { onEvent(MessageScreenEvent.NavigateBack) },
                     channels = channels,
-                    channelIndexParam = channelIndex
+                    channelIndexParam = channelIndex,
                 )
             }
         },
     ) { paddingValues ->
         Column(Modifier.padding(paddingValues)) {
-            Box(
-                modifier = Modifier.weight(1f),
-            ) {
+            Box(modifier = Modifier.weight(1f)) {
                 MessageList(
                     modifier = Modifier.fillMaxSize(),
                     listState = listState,
                     messages = messages,
                     selectedIds = selectedMessageIds,
                     onUnreadChanged = { messageId ->
-                        onEvent(
-                            MessageScreenEvent.ClearUnreadCount(
-                                messageId
-                            )
-                        )
+                        onEvent(MessageScreenEvent.ClearUnreadCount(messageId))
                     },
                     onSendReaction = { emoji, id ->
-                        onEvent(
-                            MessageScreenEvent.SendReaction(
-                                emoji,
-                                id
-                            )
-                        )
+                        onEvent(MessageScreenEvent.SendReaction(emoji, id))
                     },
                     viewModel = viewModel,
                     contactKey = contactKey,
                     onReply = { message -> replyingTo = message },
                     onNodeMenuAction = { action ->
-                        onEvent(
-                            MessageScreenEvent.HandleNodeMenuAction(
-                                action
-                            )
-                        )
+                        onEvent(MessageScreenEvent.HandleNodeMenuAction(action))
                     },
                 )
                 // Show FAB if we can scroll towards the newest messages (index 0).
-                if (listState.canScrollForward) {
+                if (listState.canScrollBackward) {
                     ScrollToBottomFab(coroutineScope, listState)
                 }
             }
@@ -340,16 +327,14 @@ internal fun MessageScreen(
                     handleQuickChatAction(
                         action = action,
                         messageInputState = messageInputState,
-                        onSendMessage = { text ->
-                            onEvent(MessageScreenEvent.SendMessage(text))
-                        },
+                        onSendMessage = { text -> onEvent(MessageScreenEvent.SendMessage(text)) },
                     )
-                }
+                },
             )
             ReplySnippet(
                 originalMessage = replyingTo,
                 onClearReply = { replyingTo = null },
-                ourNode = ourNode
+                ourNode = ourNode,
             )
             MessageInput(
                 isEnabled = isConnected,
@@ -359,7 +344,7 @@ internal fun MessageScreen(
                     if (messageText.isNotEmpty()) {
                         onEvent(MessageScreenEvent.SendMessage(messageText, replyingTo?.packetId))
                     }
-                }
+                },
             )
         }
     }
@@ -367,41 +352,37 @@ internal fun MessageScreen(
 
 /**
  * A FloatingActionButton that scrolls the message list to the bottom (most recent messages).
+ *
  * @param coroutineScope The coroutine scope for launching the scroll animation.
  * @param listState The [LazyListState] of the message list.
  */
 @Composable
 private fun BoxScope.ScrollToBottomFab(coroutineScope: CoroutineScope, listState: LazyListState) {
     FloatingActionButton(
-        modifier = Modifier
-            .align(Alignment.BottomEnd)
-            .padding(16.dp),
+        modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
         onClick = {
             coroutineScope.launch {
                 // Assuming messages are ordered with the newest at index 0
                 listState.animateScrollToItem(0)
             }
-        }
+        },
     ) {
         Icon(
             imageVector = Icons.Default.ArrowDownward,
-            contentDescription = stringResource(id = R.string.scroll_to_bottom)
+            contentDescription = stringResource(id = R.string.scroll_to_bottom),
         )
     }
 }
 
 /**
  * Displays a snippet of the message being replied to.
+ *
  * @param originalMessage The message being replied to, or null if not replying.
  * @param onClearReply Callback to clear the reply state.
  * @param ourNode The current user's node information, to display "You" if replying to self.
  */
 @Composable
-private fun ReplySnippet(
-    originalMessage: Message?,
-    onClearReply: () -> Unit,
-    ourNode: Node?
-) {
+private fun ReplySnippet(originalMessage: Message?, onClearReply: () -> Unit, ourNode: Node?) {
     AnimatedVisibility(visible = originalMessage != null) {
         originalMessage?.let { message ->
             val isFromLocalUser = message.node.user.id == DataPacket.ID_LOCAL
@@ -409,37 +390,39 @@ private fun ReplySnippet(
             val unknownUserText = stringResource(R.string.unknown)
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
-                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                modifier =
+                    Modifier.fillMaxWidth()
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+                        .padding(horizontal = 8.dp, vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.Reply,
                     contentDescription = stringResource(R.string.reply), // Decorative
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
-                    text = stringResource(
-                        R.string.replying_to,
-                        replyingToNodeUser?.shortName ?: unknownUserText
-                    ),
-                    style = MaterialTheme.typography.labelMedium
+                    text =
+                        stringResource(
+                            R.string.replying_to,
+                            replyingToNodeUser?.shortName ?: unknownUserText,
+                        ),
+                    style = MaterialTheme.typography.labelMedium,
                 )
                 Text(
                     modifier = Modifier.weight(1f),
                     text = message.text.ellipsize(SNIPPET_CHARACTER_LIMIT),
                     style = MaterialTheme.typography.bodySmall,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
                 IconButton(onClick = onClearReply) {
                     Icon(
                         Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.cancel_reply) // Specific action
+                        contentDescription =
+                            stringResource(R.string.cancel_reply), // Specific action
                     )
                 }
             }
@@ -449,16 +432,18 @@ private fun ReplySnippet(
 
 /**
  * Ellipsizes a string if its length exceeds [maxLength].
- * @receiver The string to ellipsize.
+ *
  * @param maxLength The maximum number of characters to display before adding "…".
  * @return The ellipsized string.
+ * @receiver The string to ellipsize.
  */
-private fun String.ellipsize(maxLength: Int): String {
-    return if (length > maxLength) "${take(maxLength)}…" else this
-}
+private fun String.ellipsize(maxLength: Int): String =
+    if (length > maxLength) "${take(maxLength)}…" else this
 
 /**
- * Handles a quick chat action, either appending its message to the input field or sending it directly.
+ * Handles a quick chat action, either appending its message to the input field or sending it
+ * directly.
+ *
  * @param action The [QuickChatAction] to handle.
  * @param messageInputState The [TextFieldState] of the message input field.
  * @param onSendMessage Lambda to call when a message needs to be sent.
@@ -473,13 +458,15 @@ private fun handleQuickChatAction(
             val originalText = messageInputState.text.toString()
             // Avoid appending if the exact message is already present (simple check)
             if (!originalText.contains(action.message)) {
-                val newText = buildString {
-                    append(originalText)
-                    if (originalText.isNotEmpty() && !originalText.endsWith(' ')) {
-                        append(' ')
-                    }
-                    append(action.message)
-                }.limitBytes(MESSAGE_CHARACTER_LIMIT_BYTES)
+                val newText =
+                    buildString {
+                            append(originalText)
+                            if (originalText.isNotEmpty() && !originalText.endsWith(' ')) {
+                                append(' ')
+                            }
+                            append(action.message)
+                        }
+                        .limitBytes(MESSAGE_CHARACTER_LIMIT_BYTES)
                 messageInputState.setTextAndPlaceCursorAtEnd(newText)
             }
         }
@@ -494,12 +481,12 @@ private fun handleQuickChatAction(
 /**
  * Truncates a string to ensure its UTF-8 byte representation does not exceed [maxBytes].
  *
- * This implementation iterates by characters and checks byte length to avoid splitting
- * multi-byte characters.
+ * This implementation iterates by characters and checks byte length to avoid splitting multi-byte
+ * characters.
  *
- * @receiver The string to limit.
  * @param maxBytes The maximum allowed byte length.
  * @return The truncated string, or the original string if it's within the byte limit.
+ * @receiver The string to limit.
  */
 private fun String.limitBytes(maxBytes: Int): String {
     val bytes = this.toByteArray(StandardCharsets.UTF_8)
@@ -523,94 +510,84 @@ private fun String.limitBytes(maxBytes: Int): String {
 
 /**
  * A dialog confirming the deletion of messages.
+ *
  * @param count The number of messages to be deleted.
  * @param onConfirm Callback invoked when the user confirms the deletion.
  * @param onDismiss Callback invoked when the dialog is dismissed.
  */
 @Composable
-private fun DeleteMessageDialog(
-    count: Int,
-    onConfirm: () -> Unit,
-    onDismiss: () -> Unit,
-) {
+private fun DeleteMessageDialog(count: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
     val deleteMessagesString = pluralStringResource(R.plurals.delete_messages, count, count)
 
     AlertDialog(
         onDismissRequest = onDismiss,
         shape = RoundedCornerShape(16.dp),
-        title = {
-            Text(stringResource(R.string.delete_messages_title))
-        },
-        text = {
-            Text(text = deleteMessagesString)
-        },
+        title = { Text(stringResource(R.string.delete_messages_title)) },
+        text = { Text(text = deleteMessagesString) },
         confirmButton = {
-            TextButton(onClick = onConfirm) {
-                Text(stringResource(R.string.delete))
-            }
+            TextButton(onClick = onConfirm) { Text(stringResource(R.string.delete)) }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel))
-            }
-        }
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) }
+        },
     )
 }
 
-/**
- * Actions available in the message selection mode's top bar.
- */
+/** Actions available in the message selection mode's top bar. */
 internal sealed class MessageMenuAction {
     data object ClipboardCopy : MessageMenuAction()
+
     data object Delete : MessageMenuAction()
+
     data object Dismiss : MessageMenuAction()
+
     data object SelectAll : MessageMenuAction()
 }
 
 /**
  * The top app bar displayed when in message selection mode.
+ *
  * @param selectedCount The number of currently selected messages.
  * @param onAction Callback for when a menu action is triggered.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun ActionModeTopBar(
-    selectedCount: Int,
-    onAction: (MessageMenuAction) -> Unit,
-) = TopAppBar(
-    title = { Text(text = selectedCount.toString()) },
-    navigationIcon = {
-        IconButton(onClick = { onAction(MessageMenuAction.Dismiss) }) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = stringResource(id = R.string.clear_selection)
-            )
-        }
-    },
-    actions = {
-        IconButton(onClick = { onAction(MessageMenuAction.ClipboardCopy) }) {
-            Icon(
-                imageVector = Icons.Default.ContentCopy,
-                contentDescription = stringResource(id = R.string.copy)
-            )
-        }
-        IconButton(onClick = { onAction(MessageMenuAction.Delete) }) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = stringResource(id = R.string.delete)
-            )
-        }
-        IconButton(onClick = { onAction(MessageMenuAction.SelectAll) }) {
-            Icon(
-                imageVector = Icons.Default.SelectAll,
-                contentDescription = stringResource(id = R.string.select_all)
-            )
-        }
-    },
-)
+private fun ActionModeTopBar(selectedCount: Int, onAction: (MessageMenuAction) -> Unit) =
+    TopAppBar(
+        title = { Text(text = selectedCount.toString()) },
+        navigationIcon = {
+            IconButton(onClick = { onAction(MessageMenuAction.Dismiss) }) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(id = R.string.clear_selection),
+                )
+            }
+        },
+        actions = {
+            IconButton(onClick = { onAction(MessageMenuAction.ClipboardCopy) }) {
+                Icon(
+                    imageVector = Icons.Default.ContentCopy,
+                    contentDescription = stringResource(id = R.string.copy),
+                )
+            }
+            IconButton(onClick = { onAction(MessageMenuAction.Delete) }) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = stringResource(id = R.string.delete),
+                )
+            }
+            IconButton(onClick = { onAction(MessageMenuAction.SelectAll) }) {
+                Icon(
+                    imageVector = Icons.Default.SelectAll,
+                    contentDescription = stringResource(id = R.string.select_all),
+                )
+            }
+        },
+    )
 
 /**
  * The default top app bar for the message screen.
+ *
  * @param title The title to display (contact or channel name).
  * @param channelIndex The index of the current channel, if applicable.
  * @param mismatchKey True if there's a key mismatch for the current PKC.
@@ -627,34 +604,36 @@ private fun MessageTopBar(
     onNavigateBack: () -> Unit,
     channels: AppOnlyProtos.ChannelSet?,
     channelIndexParam: Int?,
-) = TopAppBar(
-    title = {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(text = title, maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Spacer(modifier = Modifier.width(10.dp))
+) =
+    TopAppBar(
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Spacer(modifier = Modifier.width(10.dp))
 
-            if (channels != null && channelIndexParam != null) {
-                SecurityIcon(channels, channelIndexParam)
+                if (channels != null && channelIndexParam != null) {
+                    SecurityIcon(channels, channelIndexParam)
+                }
             }
-        }
-    },
-    navigationIcon = {
-        IconButton(onClick = onNavigateBack) {
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                contentDescription = stringResource(id = R.string.navigate_back),
-            )
-        }
-    },
-    actions = {
-        if (channelIndex == DataPacket.PKC_CHANNEL_INDEX) {
-            NodeKeyStatusIcon(hasPKC = true, mismatchKey = mismatchKey)
-        }
-    }
-)
+        },
+        navigationIcon = {
+            IconButton(onClick = onNavigateBack) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                    contentDescription = stringResource(id = R.string.navigate_back),
+                )
+            }
+        },
+        actions = {
+            if (channelIndex == DataPacket.PKC_CHANNEL_INDEX) {
+                NodeKeyStatusIcon(hasPKC = true, mismatchKey = mismatchKey)
+            }
+        },
+    )
 
 /**
  * A row of quick chat action buttons.
+ *
  * @param enabled Whether the buttons should be enabled.
  * @param actions The list of [QuickChatAction]s to display.
  * @param onClick Callback when a quick chat button is clicked.
@@ -664,31 +643,28 @@ private fun QuickChatRow(
     modifier: Modifier = Modifier,
     enabled: Boolean,
     actions: List<QuickChatAction>,
-    onClick: (QuickChatAction) -> Unit
+    onClick: (QuickChatAction) -> Unit,
 ) {
     val alertActionMessage = stringResource(R.string.alert_bell_text)
-    val alertAction = remember(alertActionMessage) { // Memoize if content is static
-        QuickChatAction(
-            name = "🔔",
-            message = "🔔 $alertActionMessage ", // Bell character added to message
-            mode = QuickChatAction.Mode.Append,
-            position = -1 // Assuming -1 means it's a special prepended action
-        )
-    }
+    val alertAction =
+        remember(alertActionMessage) {
+            // Memoize if content is static
+            QuickChatAction(
+                name = "🔔",
+                message = "🔔 $alertActionMessage ", // Bell character added to message
+                mode = QuickChatAction.Mode.Append,
+                position = -1, // Assuming -1 means it's a special prepended action
+            )
+        }
 
     val allActions = remember(alertAction, actions) { listOf(alertAction) + actions }
 
     LazyRow(
         modifier = modifier.padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
     ) {
         items(allActions, key = { it.uuid }) { action ->
-            Button(
-                onClick = { onClick(action) },
-                enabled = enabled,
-            ) {
-                Text(text = action.name)
-            }
+            Button(onClick = { onClick(action) }, enabled = enabled) { Text(text = action.name) }
         }
     }
 }
@@ -700,7 +676,8 @@ private fun QuickChatRow(
  * @param textFieldState The [TextFieldState] managing the input's text.
  * @param modifier The modifier for this composable.
  * @param maxByteSize The maximum allowed size of the message in bytes.
- * @param onSendMessage Callback invoked when the send button is pressed or send IME action is triggered.
+ * @param onSendMessage Callback invoked when the send button is pressed or send IME action is
+ *   triggered.
  */
 @Suppress("LongMethod") // Due to multiple parts of the OutlinedTextField
 @Composable
@@ -709,20 +686,20 @@ private fun MessageInput(
     textFieldState: TextFieldState,
     modifier: Modifier = Modifier,
     maxByteSize: Int = MESSAGE_CHARACTER_LIMIT_BYTES,
-    onSendMessage: () -> Unit
+    onSendMessage: () -> Unit,
 ) {
     val currentText = textFieldState.text.toString()
-    val currentByteLength = remember(currentText) { // Recalculate only when text changes
-        currentText.toByteArray(StandardCharsets.UTF_8).size
-    }
+    val currentByteLength =
+        remember(currentText) {
+            // Recalculate only when text changes
+            currentText.toByteArray(StandardCharsets.UTF_8).size
+        }
 
     val isOverLimit = currentByteLength > maxByteSize
     val canSend = !isOverLimit && currentText.isNotEmpty() && isEnabled
 
     OutlinedTextField(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
         state = textFieldState,
         lineLimits = TextFieldLineLimits.SingleLine,
         label = { Text(stringResource(R.string.message_input_label)) },
@@ -730,10 +707,11 @@ private fun MessageInput(
         shape = RoundedCornerShape(ROUNDED_CORNER_PERCENT.toFloat()),
         isError = isOverLimit,
         placeholder = { Text(stringResource(R.string.type_a_message)) },
-        keyboardOptions = KeyboardOptions(
-            capitalization = KeyboardCapitalization.Sentences,
-            imeAction = ImeAction.Send
-        ),
+        keyboardOptions =
+            KeyboardOptions(
+                capitalization = KeyboardCapitalization.Sentences,
+                imeAction = ImeAction.Send,
+            ),
         onKeyboardAction = {
             if (canSend) {
                 onSendMessage()
@@ -744,13 +722,14 @@ private fun MessageInput(
                 Text(
                     text = "$currentByteLength/$maxByteSize",
                     style = MaterialTheme.typography.bodySmall,
-                    color = if (isOverLimit) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
+                    color =
+                        if (isOverLimit) {
+                            MaterialTheme.colorScheme.error
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
                     modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.End
+                    textAlign = TextAlign.End,
                 )
             }
         },
@@ -759,16 +738,13 @@ private fun MessageInput(
         // If strict real-time byte trimming is required, it needs careful handling of
         // cursor position and multi-byte characters, likely outside simple inputTransformation.
         trailingIcon = {
-            IconButton(
-                onClick = { if (canSend) onSendMessage() },
-                enabled = canSend,
-            ) {
+            IconButton(onClick = { if (canSend) onSendMessage() }, enabled = canSend) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.Send,
-                    contentDescription = stringResource(id = R.string.send)
+                    contentDescription = stringResource(id = R.string.send),
                 )
             }
-        }
+        },
     )
 }
 
@@ -781,23 +757,24 @@ private fun MessageInputPreview() {
                 MessageInput(
                     isEnabled = true,
                     textFieldState = rememberTextFieldState("Hello"),
-                    onSendMessage = {}
+                    onSendMessage = {},
                 )
                 Spacer(Modifier.size(16.dp))
                 MessageInput(
                     isEnabled = false,
                     textFieldState = rememberTextFieldState("Disabled"),
-                    onSendMessage = {}
+                    onSendMessage = {},
                 )
                 Spacer(Modifier.size(16.dp))
                 MessageInput(
                     isEnabled = true,
-                    textFieldState = rememberTextFieldState(
-                        "A very long message that might exceed the byte limit " +
+                    textFieldState =
+                        rememberTextFieldState(
+                            "A very long message that might exceed the byte limit " +
                                 "and cause an error state display for the user to see clearly."
-                    ),
+                        ),
                     onSendMessage = {},
-                    maxByteSize = 50 // Test with a smaller limit
+                    maxByteSize = 50, // Test with a smaller limit
                 )
                 Spacer(Modifier.size(16.dp))
                 // Test Japanese characters (multi-byte)
@@ -805,8 +782,9 @@ private fun MessageInputPreview() {
                     isEnabled = true,
                     textFieldState = rememberTextFieldState("こんにちは世界"), // Hello World in Japanese
                     onSendMessage = {},
-                    maxByteSize = 10
-                    // Each char is 3 bytes, so "こん" (6 bytes) is ok, "こんに" (9 bytes) is ok, "こんにち" (12 bytes) is over
+                    maxByteSize = 10,
+                    // Each char is 3 bytes, so "こん" (6 bytes) is ok, "こんに" (9 bytes) is ok, "こんにち"
+                    // (12 bytes) is over
                 )
             }
         }
