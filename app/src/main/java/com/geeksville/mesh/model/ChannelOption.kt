@@ -290,7 +290,14 @@ enum class RegionInfo(
      *
      * @see [Firmware Issue #7204](https://github.com/meshtastic/firmware/issues/7204)
      */
-    KZ_863(RegionCode.KZ_863, "Kazakhstan 863MHz", 863.0f, 868.0f, wideLora = true);
+    KZ_863(RegionCode.KZ_863, "Kazakhstan 863MHz", 863.0f, 868.0f, wideLora = true),
+
+    /**
+     * Brazil 902MHz 902 - 907.5 MHz
+     *
+     * @see [Firmware Issue #7399](https://github.com/meshtastic/firmware/pull/7399)
+     */
+    BR_902(RegionCode.BR_902, "Brazil 902MHz", 902.0f, 907.5f, wideLora = false);
 
     companion object {
         fun fromRegionCode(regionCode: RegionCode): RegionInfo? =
