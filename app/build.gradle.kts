@@ -103,7 +103,7 @@ android {
                 "zh-rCN",
                 "zh-rTW",
                 "uk",
-            )
+            ),
         )
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64") }
     }
@@ -118,8 +118,18 @@ android {
         create("google") {
             dimension = "default"
             // Enable Firebase Crashlytics for Google Play builds
-            apply(plugin = libs.plugins.google.services.get().pluginId)
-            apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
+            apply(
+                plugin =
+                    libs.plugins.google.services
+                        .get()
+                        .pluginId,
+            )
+            apply(
+                plugin =
+                    libs.plugins.firebase.crashlytics
+                        .get()
+                        .pluginId,
+            )
             versionName = "${Configs.VERSION_NAME_BASE} ($versionCode) google"
         }
     }
@@ -168,7 +178,12 @@ kotlin {
 
 // per protobuf-gradle-plugin docs, this is recommended for android
 protobuf {
-    protoc { artifact = libs.protobuf.protoc.get().toString() }
+    protoc {
+        artifact =
+            libs.protobuf.protoc
+                .get()
+                .toString()
+    }
     generateProtoTasks {
         all().forEach { task ->
             task.builtins {
@@ -267,9 +282,8 @@ detekt {
 val googleServiceKeywords = listOf("crashlytics", "google")
 
 tasks.configureEach {
-    if (
-        googleServiceKeywords.any { name.contains(it, ignoreCase = true) } &&
-            name.contains("fdroid", ignoreCase = true)
+    if (googleServiceKeywords.any { name.contains(it, ignoreCase = true) } &&
+        name.contains("fdroid", ignoreCase = true)
     ) {
         project.logger.lifecycle("Disabling task for F-Droid: $name")
         enabled = false
@@ -281,31 +295,13 @@ spotless {
     kotlin {
         target("src/*/kotlin/**/*.kt", "src/*/java/**/*.kt")
         targetExclude("**/build/**/*.kt")
-        ktlint()
-            .editorConfigOverride(
-                mapOf("ktlint_function_naming_ignore_when_annotated_with" to "Composable")
-            )
-        ktfmt().kotlinlangStyle()
-        licenseHeaderFile(rootProject.file("config/copyright.txt"))
+        ktfmt()
+        ktlint("1.7.1").setEditorConfigPath("../config/spotless/.editorconfig")
+        licenseHeaderFile(rootProject.file("config/spotless/copyright.txt"))
     }
     kotlinGradle {
         target("**/*.gradle.kts")
-        ktlint()
-        ktfmt().kotlinlangStyle()
+        ktfmt()
+        ktlint("1.7.1").setEditorConfigPath("../config/spotless/.editorconfig")
     }
-}
-
-tasks.register("createSpotlessPreCommitHook") {
-    val gitHooksDirectory = rootProject.file(".git/hooks")
-    if (!gitHooksDirectory.exists()) gitHooksDirectory.mkdirs()
-    val preCommitHook = rootProject.file(".git/hooks/pre-commit")
-    preCommitHook.writeText(
-        """
-        #!/bin/bash
-        echo "Running spotless check"
-        ./gradlew spotlessApply
-        """
-            .trimIndent()
-    )
-    preCommitHook.setExecutable(true)
 }
