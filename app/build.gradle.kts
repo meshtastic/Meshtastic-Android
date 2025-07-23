@@ -118,18 +118,8 @@ android {
         create("google") {
             dimension = "default"
             // Enable Firebase Crashlytics for Google Play builds
-            apply(
-                plugin =
-                    libs.plugins.google.services
-                        .get()
-                        .pluginId,
-            )
-            apply(
-                plugin =
-                    libs.plugins.firebase.crashlytics
-                        .get()
-                        .pluginId,
-            )
+            apply(plugin = libs.plugins.google.services.get().pluginId)
+            apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
             versionName = "${Configs.VERSION_NAME_BASE} ($versionCode) google"
         }
     }
@@ -140,10 +130,7 @@ android {
             }
             isMinifyEnabled = true
             isShrinkResources = true
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro",
-            )
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
         named("debug") { isPseudoLocalesEnabled = true }
     }
@@ -178,12 +165,7 @@ kotlin {
 
 // per protobuf-gradle-plugin docs, this is recommended for android
 protobuf {
-    protoc {
-        artifact =
-            libs.protobuf.protoc
-                .get()
-                .toString()
-    }
+    protoc { artifact = libs.protobuf.protoc.get().toString() }
     generateProtoTasks {
         all().forEach { task ->
             task.builtins {
@@ -282,8 +264,8 @@ detekt {
 val googleServiceKeywords = listOf("crashlytics", "google")
 
 tasks.configureEach {
-    if (googleServiceKeywords.any { name.contains(it, ignoreCase = true) } &&
-        name.contains("fdroid", ignoreCase = true)
+    if (
+        googleServiceKeywords.any { name.contains(it, ignoreCase = true) } && name.contains("fdroid", ignoreCase = true)
     ) {
         project.logger.lifecycle("Disabling task for F-Droid: $name")
         enabled = false
@@ -295,13 +277,13 @@ spotless {
     kotlin {
         target("src/*/kotlin/**/*.kt", "src/*/java/**/*.kt")
         targetExclude("**/build/**/*.kt")
-        ktfmt()
+        ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
         ktlint("1.7.1").setEditorConfigPath("../config/spotless/.editorconfig")
         licenseHeaderFile(rootProject.file("config/spotless/copyright.txt"))
     }
     kotlinGradle {
         target("**/*.gradle.kts")
-        ktfmt()
+        ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
         ktlint("1.7.1").setEditorConfigPath("../config/spotless/.editorconfig")
     }
 }
