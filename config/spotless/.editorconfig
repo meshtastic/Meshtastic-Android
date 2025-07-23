@@ -1,15 +1,9 @@
-[*.{kt,kts}]
-ktlint_code_style = ktlint_official
-ktlint_standard = enabled
-ktlint_experimental = enabled
-ktlint_custom_rule-set = enabled
-ktlint_function_naming_ignore_when_annotated_with = Composable
-
 root = true
-ij_kotlin_code_style_defaults = KOTLIN_OFFICIAL
-ij_kotlin_name_count_to_use_star_import = 2147483647
-ij_kotlin_name_count_to_use_star_import_for_members = 2147483647
-ij_kotlin_packages_to_use_import_on_demand = unset
 
 [*]
 insert_final_newline = true
+max_line_length=140
+
+[*.{kt,kts}]
+ktlint_code_style = intellij_idea
+ktlint_function_naming_ignore_when_annotated_with = Composable
