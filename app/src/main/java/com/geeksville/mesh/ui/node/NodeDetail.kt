@@ -188,23 +188,24 @@ fun NodeDetailScreen(
     val lastTracerouteTime by uiViewModel.lastTraceRouteTime.collectAsStateWithLifecycle()
     val ourNode by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
 
-    val availableLogs by remember(state, environmentState) {
-        derivedStateOf {
-            buildSet {
-                if (state.hasDeviceMetrics()) add(LogsType.DEVICE)
-                if (state.hasPositionLogs()) {
-                    add(LogsType.NODE_MAP)
-                    add(LogsType.POSITIONS)
+    val availableLogs by
+        remember(state, environmentState) {
+            derivedStateOf {
+                buildSet {
+                    if (state.hasDeviceMetrics()) add(LogsType.DEVICE)
+                    if (state.hasPositionLogs()) {
+                        add(LogsType.NODE_MAP)
+                        add(LogsType.POSITIONS)
+                    }
+                    if (environmentState.hasEnvironmentMetrics()) add(LogsType.ENVIRONMENT)
+                    if (state.hasSignalMetrics()) add(LogsType.SIGNAL)
+                    if (state.hasPowerMetrics()) add(LogsType.POWER)
+                    if (state.hasTracerouteLogs()) add(LogsType.TRACEROUTE)
+                    if (state.hasHostMetrics()) add(LogsType.HOST)
+                    if (state.hasPaxMetrics()) add(LogsType.PAX)
                 }
-                if (environmentState.hasEnvironmentMetrics()) add(LogsType.ENVIRONMENT)
-                if (state.hasSignalMetrics()) add(LogsType.SIGNAL)
-                if (state.hasPowerMetrics()) add(LogsType.POWER)
-                if (state.hasTracerouteLogs()) add(LogsType.TRACEROUTE)
-                if (state.hasHostMetrics()) add(LogsType.HOST)
-                if (state.hasPaxMetrics()) add(LogsType.PAX)
             }
         }
-    }
 
     val node = state.node
     if (node != null) {
@@ -229,9 +230,7 @@ fun NodeDetailScreen(
             modifier = modifier,
         )
     } else {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
     }
 }
 
@@ -254,13 +253,16 @@ private fun handleNodeAction(
                     val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
                     navigateToMessages("$channel${node.user.id}")
                 }
+
                 is NodeMenuAction.Remove -> {
                     uiViewModel.handleNodeMenuAction(menuAction)
                     onNavigateUp()
                 }
+
                 else -> uiViewModel.handleNodeMenuAction(menuAction)
             }
         }
+
         is NodeDetailAction.ShareContact -> {
             /* Handled in NodeDetailContent */
         }
@@ -269,17 +271,21 @@ private fun handleNodeAction(
 
 sealed interface NodeDetailAction {
     data class Navigate(val route: Route) : NodeDetailAction
+
     data class TriggerServiceAction(val action: ServiceAction) : NodeDetailAction
+
     data class HandleNodeMenuAction(val action: NodeMenuAction) : NodeDetailAction
+
     data object ShareContact : NodeDetailAction
 }
 
 val Node.isEffectivelyUnmessageable: Boolean
-    get() = if (user.hasIsUnmessagable()) {
-        user.isUnmessagable
-    } else {
-        user.role?.isUnmessageableRole() == true
-    }
+    get() =
+        if (user.hasIsUnmessagable()) {
+            user.isUnmessagable
+        } else {
+            user.role?.isUnmessageableRole() == true
+        }
 
 private enum class LogsType(@StringRes val titleRes: Int, val icon: ImageVector, val route: Route) {
     DEVICE(R.string.device_metrics_log, Icons.Default.ChargingStation, NodeDetailRoutes.DeviceMetrics),
@@ -343,19 +349,14 @@ private fun NodeDetailList(
 
     if (showFirmwareSheet) {
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
-        ModalBottomSheet(
-            onDismissRequest = { showFirmwareSheet = false },
-            sheetState = sheetState,
-        ) {
+        ModalBottomSheet(onDismissRequest = { showFirmwareSheet = false }, sheetState = sheetState) {
             selectedFirmware?.let { FirmwareReleaseSheetContent(firmwareRelease = it) }
         }
     }
 
     Column(modifier = modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState())) {
         if (metricsState.deviceHardware != null) {
-            PreferenceCategory(stringResource(R.string.device)) {
-                DeviceDetailsContent(metricsState)
-            }
+            PreferenceCategory(stringResource(R.string.device)) { DeviceDetailsContent(metricsState) }
         }
         PreferenceCategory(stringResource(R.string.details)) {
             NodeDetailsContent(node, ourNode, metricsState.displayUnits)
@@ -406,11 +407,7 @@ private fun MetricsSection(
         PreferenceCategory(stringResource(id = R.string.logs)) {
             LogsType.entries.forEach { type ->
                 if (availableLogs.contains(type)) {
-                    NavCard(
-                        title = stringResource(type.titleRes),
-                        icon = type.icon,
-                        enabled = true,
-                    ) {
+                    NavCard(title = stringResource(type.titleRes), icon = type.icon, enabled = true) {
                         onAction(NodeDetailAction.Navigate(type.route))
                     }
                 }
@@ -442,11 +439,19 @@ private fun AdministrationSection(
         }
     }
 
-    node.metadata?.firmwareVersion?.let { firmwareVersion ->
-        val latestStable = metricsState.latestStableFirmware
-        val latestAlpha = metricsState.latestAlphaFirmware
+    PreferenceCategory(stringResource(R.string.firmware)) {
+        val firmwareEdition = metricsState.firmwareEdition
+        firmwareEdition?.let {
+            NodeDetailRow(
+                label = stringResource(R.string.firmware_edition),
+                icon = Icons.Default.Download,
+                value = it.name,
+            )
+        }
+        node.metadata?.firmwareVersion?.let { firmwareVersion ->
+            val latestStable = metricsState.latestStableFirmware
+            val latestAlpha = metricsState.latestAlphaFirmware
 
-        PreferenceCategory(stringResource(R.string.firmware)) {
             val deviceVersion = DeviceVersion(firmwareVersion.substringBeforeLast("."))
             val statusColor = deviceVersion.determineFirmwareStatusColor(latestStable, latestAlpha)
 
@@ -495,19 +500,13 @@ private fun DeviceVersion.determineFirmwareStatusColor(
 private fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease) {
     val context = LocalContext.current
     Column(
-        modifier = Modifier
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
-            .fillMaxWidth(),
+        modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp).fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(text = firmwareRelease.title, style = MaterialTheme.typography.titleLarge)
         Text(text = "Version: ${firmwareRelease.id}", style = MaterialTheme.typography.bodyMedium)
         Markdown(modifier = Modifier.padding(8.dp), content = firmwareRelease.releaseNotes)
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-        ) {
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(
                 onClick = {
                     val intent = Intent(Intent.ACTION_VIEW, firmwareRelease.pageUrl.toUri())
@@ -515,10 +514,7 @@ private fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease) {
                 },
                 modifier = Modifier.weight(1f),
             ) {
-                Icon(
-                    imageVector = Icons.Default.Link,
-                    contentDescription = stringResource(id = R.string.view_release),
-                )
+                Icon(imageVector = Icons.Default.Link, contentDescription = stringResource(id = R.string.view_release))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = stringResource(id = R.string.view_release))
             }
@@ -529,10 +525,7 @@ private fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease) {
                 },
                 modifier = Modifier.weight(1f),
             ) {
-                Icon(
-                    imageVector = Icons.Default.Download,
-                    contentDescription = stringResource(id = R.string.download),
-                )
+                Icon(imageVector = Icons.Default.Download, contentDescription = stringResource(id = R.string.download))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = stringResource(id = R.string.download))
             }
@@ -550,12 +543,8 @@ private fun NodeDetailRow(
     onClick: (() -> Unit)? = null,
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .thenIf(onClick != null) {
-                clickable(onClick = onClick!!)
-            }
-            .padding(vertical = 8.dp),
+        modifier =
+        modifier.fillMaxWidth().thenIf(onClick != null) { clickable(onClick = onClick!!) }.padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -624,11 +613,7 @@ private fun DeviceActions(
 }
 
 @Composable
-private fun RemoteDeviceActions(
-    node: Node,
-    lastTracerouteTime: Long?,
-    onAction: (NodeDetailAction) -> Unit,
-) {
+private fun RemoteDeviceActions(node: Node, lastTracerouteTime: Long?, onAction: (NodeDetailAction) -> Unit) {
     if (!node.isEffectivelyUnmessageable) {
         NodeActionButton(
             title = stringResource(id = R.string.direct_message),
@@ -663,8 +648,8 @@ private fun DeviceDetailsContent(state: MetricsState) {
     val hwModelName = deviceHardware.displayName
     val isSupported = deviceHardware.activelySupported
     Box(
-        modifier = Modifier
-            .size(100.dp)
+        modifier =
+        Modifier.size(100.dp)
             .padding(4.dp)
             .clip(CircleShape)
             .background(color = Color(node.colors.second).copy(alpha = .5f), shape = CircleShape),
@@ -674,7 +659,8 @@ private fun DeviceDetailsContent(state: MetricsState) {
     }
     NodeDetailRow(label = stringResource(R.string.hardware), icon = Icons.Default.Router, value = hwModelName)
     NodeDetailRow(
-        label = if (isSupported) {
+        label =
+        if (isSupported) {
             stringResource(R.string.supported)
         } else {
             stringResource(R.string.supported_by_community)
@@ -737,11 +723,7 @@ private fun EncryptionErrorContent() {
 }
 
 @Composable
-private fun MainNodeDetails(
-    node: Node,
-    ourNode: Node?,
-    displayUnits: ConfigProtos.Config.DisplayConfig.DisplayUnits,
-) {
+private fun MainNodeDetails(node: Node, ourNode: Node?, displayUnits: ConfigProtos.Config.DisplayConfig.DisplayUnits) {
     NodeDetailRow(
         label = stringResource(R.string.long_name),
         icon = Icons.TwoTone.Person,
@@ -757,16 +739,8 @@ private fun MainNodeDetails(
         icon = Icons.Default.Numbers,
         value = node.num.toUInt().toString(),
     )
-    NodeDetailRow(
-        label = stringResource(R.string.user_id),
-        icon = Icons.Default.Person,
-        value = node.user.id,
-    )
-    NodeDetailRow(
-        label = stringResource(R.string.role),
-        icon = Icons.Default.Work,
-        value = node.user.role.name,
-    )
+    NodeDetailRow(label = stringResource(R.string.user_id), icon = Icons.Default.Person, value = node.user.id)
+    NodeDetailRow(label = stringResource(R.string.role), icon = Icons.Default.Work, value = node.user.role.name)
     if (node.isEffectivelyUnmessageable) {
         NodeDetailRow(
             label = stringResource(R.string.unmonitored_or_infrastructure),
@@ -804,25 +778,12 @@ private fun MainNodeDetails(
 @Composable
 private fun InfoCard(icon: ImageVector, text: String, value: String, rotateIcon: Float = 0f) {
     Card(modifier = Modifier.padding(4.dp).width(100.dp).height(100.dp)) {
-        Box(
-            modifier = Modifier
-                .padding(4.dp)
-                .width(100.dp)
-                .height(100.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
+        Box(modifier = Modifier.padding(4.dp).width(100.dp).height(100.dp), contentAlignment = Alignment.Center) {
+            Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
                     imageVector = icon,
                     contentDescription = text,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .thenIf(rotateIcon != 0f) {
-                            rotate(rotateIcon)
-                        },
+                    modifier = Modifier.size(24.dp).thenIf(rotateIcon != 0f) { rotate(rotateIcon) },
                 )
                 Text(
                     textAlign = TextAlign.Center,
@@ -843,32 +804,14 @@ private fun InfoCard(icon: ImageVector, text: String, value: String, rotateIcon:
 }
 
 @Composable
-private fun DrawableInfoCard(
-    @DrawableRes iconRes: Int,
-    text: String,
-    value: String,
-    rotateIcon: Float = 0f,
-) {
+private fun DrawableInfoCard(@DrawableRes iconRes: Int, text: String, value: String, rotateIcon: Float = 0f) {
     Card(modifier = Modifier.padding(4.dp).width(100.dp).height(100.dp)) {
-        Box(
-            modifier = Modifier
-                .padding(4.dp)
-                .width(100.dp)
-                .height(100.dp),
-            contentAlignment = Alignment.Center,
-        ) {
-            Column(
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
+        Box(modifier = Modifier.padding(4.dp).width(100.dp).height(100.dp), contentAlignment = Alignment.Center) {
+            Column(verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
                 Icon(
                     painter = painterResource(id = iconRes),
                     contentDescription = text,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .thenIf(rotateIcon != 0f) {
-                            rotate(rotateIcon)
-                        },
+                    modifier = Modifier.size(24.dp).thenIf(rotateIcon != 0f) { rotate(rotateIcon) },
                 )
                 Text(
                     textAlign = TextAlign.Center,
@@ -895,118 +838,128 @@ private fun EnvironmentMetrics(
     isFahrenheit: Boolean = false,
     displayUnits: ConfigProtos.Config.DisplayConfig.DisplayUnits,
 ) {
-    val vectorMetrics = remember(node.environmentMetrics, isFahrenheit, displayUnits) {
-        buildList {
-            with(node.environmentMetrics) {
-                if (hasTemperature()) {
-                    add(
-                        VectorMetricInfo(
-                            R.string.temperature,
-                            temperature.toTempString(isFahrenheit),
-                            Icons.Default.Thermostat,
-                        ),
-                    )
-                }
-                if (hasRelativeHumidity()) {
-                    add(
-                        VectorMetricInfo(
-                            R.string.humidity,
-                            "%.0f%%".format(relativeHumidity),
-                            Icons.Default.WaterDrop,
-                        ),
-                    )
-                }
-                if (hasBarometricPressure()) {
-                    add(
-                        VectorMetricInfo(
-                            R.string.pressure,
-                            "%.0f hPa".format(barometricPressure),
-                            Icons.Default.Speed,
-                        ),
-                    )
-                }
-                if (hasGasResistance()) {
-                    add(
-                        VectorMetricInfo(
-                            R.string.gas_resistance,
-                            "%.0f MΩ".format(gasResistance),
-                            Icons.Default.BlurOn,
-                        ),
-                    )
-                }
-                if (hasVoltage()) add(VectorMetricInfo(R.string.voltage, "%.2fV".format(voltage), Icons.Default.Bolt))
-                if (hasCurrent()) add(VectorMetricInfo(R.string.current, "%.1fmA".format(current), Icons.Default.Power))
-                if (hasIaq()) add(VectorMetricInfo(R.string.iaq, iaq.toString(), Icons.Default.Air))
-                if (hasDistance()) {
-                    add(
-                        VectorMetricInfo(
-                            R.string.distance,
-                            distance.toSmallDistanceString(displayUnits),
-                            Icons.Default.Height,
-                        ),
-                    )
-                }
-                if (hasLux()) add(VectorMetricInfo(R.string.lux, "%.0f lx".format(lux), Icons.Default.LightMode))
-                if (hasUvLux()) add(VectorMetricInfo(R.string.uv_lux, "%.0f lx".format(uvLux), Icons.Default.LightMode))
-                if (hasWindSpeed()) {
-                    @Suppress("MagicNumber")
-                    val normalizedBearing = (windDirection + 180) % 360
-                    add(
-                        VectorMetricInfo(
-                            R.string.wind,
-                            windSpeed.toSpeedString(displayUnits),
-                            Icons.Outlined.Navigation,
-                            normalizedBearing.toFloat(),
-                        ),
-                    )
-                }
-                if (hasWeight()) add(VectorMetricInfo(R.string.weight, "%.2f kg".format(weight), Icons.Default.Scale))
-            }
-        }
-    }
-    val drawableMetrics = remember(node.environmentMetrics, isFahrenheit) {
-        buildList {
-            with(node.environmentMetrics) {
-                if (hasTemperature() && hasRelativeHumidity()) {
-                    val dewPoint = UnitConversions.calculateDewPoint(temperature, relativeHumidity)
-                    add(
-                        DrawableMetricInfo(
-                            R.string.dew_point,
-                            dewPoint.toTempString(isFahrenheit),
-                            R.drawable.ic_outlined_dew_point_24,
-                        ),
-                    )
-                }
-                if (hasSoilTemperature()) {
-                    add(
-                        DrawableMetricInfo(
-                            R.string.soil_temperature,
-                            soilTemperature.toTempString(isFahrenheit),
-                            R.drawable.soil_temperature,
-                        ),
-                    )
-                }
-                if (hasSoilMoisture()) {
-                    add(
-                        DrawableMetricInfo(
-                            R.string.soil_moisture,
-                            "%d%%".format(soilMoisture),
-                            R.drawable.soil_moisture,
-                        ),
-                    )
-                }
-                if (hasRadiation()) {
-                    add(
-                        DrawableMetricInfo(
-                            R.string.radiation,
-                            "%.1f µR/h".format(radiation),
-                            R.drawable.ic_filled_radioactive_24,
-                        ),
-                    )
+    val vectorMetrics =
+        remember(node.environmentMetrics, isFahrenheit, displayUnits) {
+            buildList {
+                with(node.environmentMetrics) {
+                    if (hasTemperature()) {
+                        add(
+                            VectorMetricInfo(
+                                R.string.temperature,
+                                temperature.toTempString(isFahrenheit),
+                                Icons.Default.Thermostat,
+                            ),
+                        )
+                    }
+                    if (hasRelativeHumidity()) {
+                        add(
+                            VectorMetricInfo(
+                                R.string.humidity,
+                                "%.0f%%".format(relativeHumidity),
+                                Icons.Default.WaterDrop,
+                            ),
+                        )
+                    }
+                    if (hasBarometricPressure()) {
+                        add(
+                            VectorMetricInfo(
+                                R.string.pressure,
+                                "%.0f hPa".format(barometricPressure),
+                                Icons.Default.Speed,
+                            ),
+                        )
+                    }
+                    if (hasGasResistance()) {
+                        add(
+                            VectorMetricInfo(
+                                R.string.gas_resistance,
+                                "%.0f MΩ".format(gasResistance),
+                                Icons.Default.BlurOn,
+                            ),
+                        )
+                    }
+                    if (hasVoltage()) {
+                        add(VectorMetricInfo(R.string.voltage, "%.2fV".format(voltage), Icons.Default.Bolt))
+                    }
+                    if (hasCurrent()) {
+                        add(VectorMetricInfo(R.string.current, "%.1fmA".format(current), Icons.Default.Power))
+                    }
+                    if (hasIaq()) add(VectorMetricInfo(R.string.iaq, iaq.toString(), Icons.Default.Air))
+                    if (hasDistance()) {
+                        add(
+                            VectorMetricInfo(
+                                R.string.distance,
+                                distance.toSmallDistanceString(displayUnits),
+                                Icons.Default.Height,
+                            ),
+                        )
+                    }
+                    if (hasLux()) add(VectorMetricInfo(R.string.lux, "%.0f lx".format(lux), Icons.Default.LightMode))
+                    if (hasUvLux()) {
+                        add(VectorMetricInfo(R.string.uv_lux, "%.0f lx".format(uvLux), Icons.Default.LightMode))
+                    }
+                    if (hasWindSpeed()) {
+                        @Suppress("MagicNumber")
+                        val normalizedBearing = (windDirection + 180) % 360
+                        add(
+                            VectorMetricInfo(
+                                R.string.wind,
+                                windSpeed.toSpeedString(displayUnits),
+                                Icons.Outlined.Navigation,
+                                normalizedBearing.toFloat(),
+                            ),
+                        )
+                    }
+                    if (hasWeight()) {
+                        add(VectorMetricInfo(R.string.weight, "%.2f kg".format(weight), Icons.Default.Scale))
+                    }
                 }
             }
         }
-    }
+    val drawableMetrics =
+        remember(node.environmentMetrics, isFahrenheit) {
+            buildList {
+                with(node.environmentMetrics) {
+                    if (hasTemperature() && hasRelativeHumidity()) {
+                        val dewPoint = UnitConversions.calculateDewPoint(temperature, relativeHumidity)
+                        add(
+                            DrawableMetricInfo(
+                                R.string.dew_point,
+                                dewPoint.toTempString(isFahrenheit),
+                                R.drawable.ic_outlined_dew_point_24,
+                            ),
+                        )
+                    }
+                    if (hasSoilTemperature()) {
+                        add(
+                            DrawableMetricInfo(
+                                R.string.soil_temperature,
+                                soilTemperature.toTempString(isFahrenheit),
+                                R.drawable.soil_temperature,
+                            ),
+                        )
+                    }
+                    if (hasSoilMoisture()) {
+                        add(
+                            DrawableMetricInfo(
+                                R.string.soil_moisture,
+                                "%d%%".format(soilMoisture),
+                                R.drawable.soil_moisture,
+                            ),
+                        )
+                    }
+                    if (hasRadiation()) {
+                        add(
+                            DrawableMetricInfo(
+                                R.string.radiation,
+                                "%.1f µR/h".format(radiation),
+                                R.drawable.ic_filled_radioactive_24,
+                            ),
+                        )
+                    }
+                }
+            }
+        }
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceEvenly,
@@ -1033,24 +986,25 @@ private fun EnvironmentMetrics(
 
 @Composable
 private fun PowerMetrics(node: Node) {
-    val metrics = remember(node.powerMetrics) {
-        buildList {
-            with(node.powerMetrics) {
-                if (ch1Voltage != 0f) {
-                    add(VectorMetricInfo(R.string.channel_1, "%.2fV".format(ch1Voltage), Icons.Default.Bolt))
-                    add(VectorMetricInfo(R.string.channel_1, "%.1fmA".format(ch1Current), Icons.Default.Power))
-                }
-                if (ch2Voltage != 0f) {
-                    add(VectorMetricInfo(R.string.channel_2, "%.2fV".format(ch2Voltage), Icons.Default.Bolt))
-                    add(VectorMetricInfo(R.string.channel_2, "%.1fmA".format(ch2Current), Icons.Default.Power))
-                }
-                if (ch3Voltage != 0f) {
-                    add(VectorMetricInfo(R.string.channel_3, "%.2fV".format(ch3Voltage), Icons.Default.Bolt))
-                    add(VectorMetricInfo(R.string.channel_3, "%.1fmA".format(ch3Current), Icons.Default.Power))
+    val metrics =
+        remember(node.powerMetrics) {
+            buildList {
+                with(node.powerMetrics) {
+                    if (ch1Voltage != 0f) {
+                        add(VectorMetricInfo(R.string.channel_1, "%.2fV".format(ch1Voltage), Icons.Default.Bolt))
+                        add(VectorMetricInfo(R.string.channel_1, "%.1fmA".format(ch1Current), Icons.Default.Power))
+                    }
+                    if (ch2Voltage != 0f) {
+                        add(VectorMetricInfo(R.string.channel_2, "%.2fV".format(ch2Voltage), Icons.Default.Bolt))
+                        add(VectorMetricInfo(R.string.channel_2, "%.1fmA".format(ch2Current), Icons.Default.Power))
+                    }
+                    if (ch3Voltage != 0f) {
+                        add(VectorMetricInfo(R.string.channel_3, "%.2fV".format(ch3Voltage), Icons.Default.Bolt))
+                        add(VectorMetricInfo(R.string.channel_3, "%.1fmA".format(ch3Current), Icons.Default.Power))
+                    }
                 }
             }
         }
-    }
     FlowRow(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -1066,10 +1020,11 @@ private const val COOL_DOWN_TIME_MS = 30000L
 
 @Composable
 fun TracerouteActionButton(title: String, lastTracerouteTime: Long?, onClick: () -> Unit) {
-    var isCoolingDown by remember(lastTracerouteTime) {
-        val timeSinceLast = System.currentTimeMillis() - (lastTracerouteTime ?: 0)
-        mutableStateOf(timeSinceLast < COOL_DOWN_TIME_MS)
-    }
+    var isCoolingDown by
+        remember(lastTracerouteTime) {
+            val timeSinceLast = System.currentTimeMillis() - (lastTracerouteTime ?: 0)
+            mutableStateOf(timeSinceLast < COOL_DOWN_TIME_MS)
+        }
 
     LaunchedEffect(lastTracerouteTime) {
         val timeSinceLast = System.currentTimeMillis() - (lastTracerouteTime ?: 0)
@@ -1079,10 +1034,7 @@ fun TracerouteActionButton(title: String, lastTracerouteTime: Long?, onClick: ()
         }
     }
 
-    val progress by animateFloatAsState(
-        targetValue = if (isCoolingDown) 1f else 0f,
-        label = "TracerouteCooldown",
-    )
+    val progress by animateFloatAsState(targetValue = if (isCoolingDown) 1f else 0f, label = "TracerouteCooldown")
 
     Button(
         onClick = {
@@ -1090,10 +1042,7 @@ fun TracerouteActionButton(title: String, lastTracerouteTime: Long?, onClick: ()
             onClick()
         },
         enabled = !isCoolingDown,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .height(48.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).height(48.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             if (progress > 0f) {
@@ -1119,10 +1068,7 @@ fun TracerouteActionButton(title: String, lastTracerouteTime: Long?, onClick: ()
 
 @Composable
 fun NodeActionButton(
-    modifier: Modifier = Modifier
-        .fillMaxWidth()
-        .padding(vertical = 4.dp)
-        .height(48.dp),
+    modifier: Modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).height(48.dp),
     title: String,
     enabled: Boolean,
     icon: ImageVector? = null,
@@ -1156,8 +1102,8 @@ fun NodeActionSwitch(
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier =
+        Modifier.fillMaxWidth()
             .padding(vertical = 4.dp)
             .height(48.dp)
             .toggleable(value = checked, enabled = enabled, role = Role.Switch, onValueChange = { onClick() }),
@@ -1167,9 +1113,7 @@ fun NodeActionSwitch(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 12.dp, horizontal = 16.dp),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp, horizontal = 16.dp),
         ) {
             if (icon != null) {
                 Icon(
@@ -1268,10 +1212,5 @@ private fun PreviewWindDirectionN45() {
 @Composable
 private fun PreviewWindDirectionItem(windDirection: Float, windSpeed: String = "5 m/s") {
     val normalizedBearing = (windDirection + 180) % 360
-    InfoCard(
-        icon = Icons.Outlined.Navigation,
-        text = "Wind",
-        value = windSpeed,
-        rotateIcon = normalizedBearing,
-    )
+    InfoCard(icon = Icons.Outlined.Navigation, text = "Wind", value = windSpeed, rotateIcon = normalizedBearing)
 }

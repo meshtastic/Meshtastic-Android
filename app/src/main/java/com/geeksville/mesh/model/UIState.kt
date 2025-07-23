@@ -899,7 +899,7 @@ constructor(
 
             writeToUri(uri) { writer ->
                 val nodePositions = mutableMapOf<Int, MeshProtos.Position?>()
-
+                @Suppress("MaxLineLength")
                 writer.appendLine(
                     "\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"distance\",\"hop limit\",\"payload\"",
                 )
@@ -976,6 +976,7 @@ constructor(
 
                             //  date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx
                             // elevation,rx snr,distance,hop limit,payload
+                            @Suppress("MaxLineLength")
                             writer.appendLine(
                                 "$rxDateTime,\"$rxFrom\",\"$senderName\",\"$senderLat\",\"$senderLong\",\"$rxLat\",\"$rxLong\",\"$rxAlt\",\"$rxSnr\",\"$dist\",\"$hopLimit\",\"$payload\"",
                             )
