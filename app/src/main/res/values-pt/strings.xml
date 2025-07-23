@@ -334,6 +334,7 @@
     <string name="are_you_sure">Confirma?</string>
     <string name="router_role_confirmation_text"><![CDATA[Li a documentação <a href="https://meshtastic.org/docs/configuration/radio/device/#roles"> Configuração do Dispositivo</a> e o post do blog sobre a <a href="http://meshtastic.org/blog/choosing-the-right-device-role">escolha da função correta do dispositivo</a>.]]></string>
     <string name="i_know_what_i_m_doing">Eu sei o que estou a fazer.</string>
+    <string name="low_battery_message">O node %1$s tem a bateria fraca (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Notificação de bateria fraca</string>
     <string name="low_battery_title">Bateria fraca: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notificações de bateria fraca (nodes favoritos)</string>
@@ -620,6 +621,8 @@
     <string name="contacts">Contactos</string>
     <string name="nodes">Nodes</string>
     <string name="i_agree">Estou de acordo.</string>
+    <string name="should_update_firmware">Atualização de firmware recomendada.</string>
+    <string name="should_update">Para beneficiar das últimas correções e funcionalidades, por favor, atualize o firmware do node.\n\nÚltima versão estável do firmware: %1$s</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->

@@ -100,7 +100,7 @@
     <string name="url_for_join">URL-linkki Meshtastic verkkoon liittymiseksi</string>
     <string name="accept">Hyväksy</string>
     <string name="cancel">Peruuta</string>
-    <string name="clear_changes">Tyhjennä muutokset</string>
+    <string name="clear_changes">Peru muutokset</string>
     <string name="change_channel">Vaihda kanavaa</string>
     <string name="are_you_sure_channel">Oletko varma, että haluat vaihtaa kanavaa? Kaikki yhteydet katkeavat, ennen kuin olet jakanut uudet kanavan asetukset.</string>
     <string name="new_channel_rcvd">Uusi kanavan URL-osoite vastaanotettu</string>
