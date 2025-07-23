@@ -264,8 +264,8 @@ detekt {
 val googleServiceKeywords = listOf("crashlytics", "google")
 
 tasks.configureEach {
-    if (googleServiceKeywords.any { name.contains(it, ignoreCase = true) } &&
-        name.contains("fdroid", ignoreCase = true)
+    if (
+        googleServiceKeywords.any { name.contains(it, ignoreCase = true) } && name.contains("fdroid", ignoreCase = true)
     ) {
         project.logger.lifecycle("Disabling task for F-Droid: $name")
         enabled = false
@@ -277,13 +277,13 @@ spotless {
     kotlin {
         target("src/*/kotlin/**/*.kt", "src/*/java/**/*.kt")
         targetExclude("**/build/**/*.kt")
-        ktfmt().kotlinlangStyle().configure { it.setMaxWidth(140) }
+        ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
         ktlint("1.7.1").setEditorConfigPath("../config/spotless/.editorconfig")
         licenseHeaderFile(rootProject.file("config/spotless/copyright.txt"))
     }
     kotlinGradle {
         target("**/*.gradle.kts")
-        ktfmt().kotlinlangStyle().configure { it.setMaxWidth(140) }
+        ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
         ktlint("1.7.1").setEditorConfigPath("../config/spotless/.editorconfig")
     }
 }

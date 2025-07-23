@@ -2,7 +2,7 @@ root = true
 
 [*]
 insert_final_newline = true
-max_line_length=140
+max_line_length=120
 
 [*.{kt,kts}]
 ktlint_code_style = intellij_idea
