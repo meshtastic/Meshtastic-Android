@@ -23,7 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.map.MapViewModel
-import com.geeksville.mesh.ui.node.DegD
+import com.geeksville.mesh.ui.node.DEG_D
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Marker
@@ -36,21 +36,18 @@ fun WaypointMarkers(
     myNodeNum: Int,
     isConnected: Boolean,
     unicodeEmojiToBitmapProvider: (Int) -> BitmapDescriptor,
-    onEditWaypointRequest: (MeshProtos.Waypoint) -> Unit
+    onEditWaypointRequest: (MeshProtos.Waypoint) -> Unit,
 ) {
     val context = LocalContext.current
     if (mapFilterState.showWaypoints) {
         displayableWaypoints.forEach { waypoint ->
-            val markerState = rememberUpdatedMarkerState(
-                position = LatLng(
-                    waypoint.latitudeI * DegD,
-                    waypoint.longitudeI * DegD
-                )
-            )
+            val markerState =
+                rememberUpdatedMarkerState(position = LatLng(waypoint.latitudeI * DEG_D, waypoint.longitudeI * DEG_D))
 
             Marker(
                 state = markerState,
-                icon = if (waypoint.icon == 0) {
+                icon =
+                if (waypoint.icon == 0) {
                     unicodeEmojiToBitmapProvider(PUSHPIN) // Default icon (Round Pushpin)
                 } else {
                     unicodeEmojiToBitmapProvider(waypoint.icon)
@@ -59,20 +56,12 @@ fun WaypointMarkers(
                 snippet = waypoint.description,
                 visible = true,
                 onInfoWindowClick = {
-                    if (
-                        waypoint.lockedTo == 0 ||
-                        waypoint.lockedTo == myNodeNum ||
-                        !isConnected
-                    ) {
+                    if (waypoint.lockedTo == 0 || waypoint.lockedTo == myNodeNum || !isConnected) {
                         onEditWaypointRequest(waypoint)
                     } else {
-                        Toast.makeText(
-                            context,
-                            context.getString(R.string.locked),
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(context, context.getString(R.string.locked), Toast.LENGTH_SHORT).show()
                     }
-                }
+                },
             )
         }
     }

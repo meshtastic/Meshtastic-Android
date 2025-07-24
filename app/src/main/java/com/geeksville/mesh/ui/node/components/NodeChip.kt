@@ -59,18 +59,16 @@ fun NodeChip(
     val inputChipInteractionSource = remember { MutableInteractionSource() }
     Box {
         ElevatedAssistChip(
-            modifier = modifier
-                .width(IntrinsicSize.Min)
-                .defaultMinSize(minWidth = 72.dp),
+            modifier = modifier.width(IntrinsicSize.Min).defaultMinSize(minWidth = 72.dp),
             elevation = AssistChipDefaults.elevatedAssistChipElevation(),
-            colors = AssistChipDefaults.elevatedAssistChipColors(
+            colors =
+            AssistChipDefaults.elevatedAssistChipColors(
                 containerColor = Color(nodeColor),
                 labelColor = Color(textColor),
             ),
             label = {
                 Text(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     text = node.user.shortName.ifEmpty { "???" },
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                     textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
@@ -82,15 +80,15 @@ fun NodeChip(
             interactionSource = inputChipInteractionSource,
         )
         Box(
-            modifier = Modifier
-                .matchParentSize()
+            modifier =
+            Modifier.matchParentSize()
                 .combinedClickable(
                     enabled = enabled,
                     onClick = { onAction(NodeMenuAction.MoreDetails(node)) },
                     onLongClick = { menuExpanded = true },
                     interactionSource = inputChipInteractionSource,
                     indication = null,
-                )
+                ),
         )
     }
     NodeMenu(
@@ -101,7 +99,7 @@ fun NodeChip(
         onAction = {
             menuExpanded = false
             onAction(it)
-        }
+        },
     )
 }
 
@@ -109,22 +107,15 @@ fun NodeChip(
 @Preview
 @Composable
 fun NodeChipPreview() {
-    val user = MeshProtos.User.newBuilder()
-        .setShortName("\uD83E\uDEE0")
-        .setLongName("John Doe")
-        .build()
-    val node = Node(
-        num = 13444,
-        user = user,
-        isIgnored = false,
-        paxcounter = PaxcountProtos.Paxcount.newBuilder().setBle(10).setWifi(5).build(),
-        environmentMetrics = TelemetryProtos.EnvironmentMetrics.newBuilder().setTemperature(25f)
-            .setRelativeHumidity(60f).build()
-    )
-    NodeChip(
-        node = node,
-        isThisNode = false,
-        isConnected = true,
-        onAction = {}
-    )
+    val user = MeshProtos.User.newBuilder().setShortName("\uD83E\uDEE0").setLongName("John Doe").build()
+    val node =
+        Node(
+            num = 13444,
+            user = user,
+            isIgnored = false,
+            paxcounter = PaxcountProtos.Paxcount.newBuilder().setBle(10).setWifi(5).build(),
+            environmentMetrics =
+            TelemetryProtos.EnvironmentMetrics.newBuilder().setTemperature(25f).setRelativeHumidity(60f).build(),
+        )
+    NodeChip(node = node, isThisNode = false, isConnected = true, onAction = {})
 }

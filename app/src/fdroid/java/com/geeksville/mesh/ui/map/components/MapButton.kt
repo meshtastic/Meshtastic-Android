@@ -37,7 +37,7 @@ fun MapButton(
     icon: ImageVector,
     @StringRes contentDescription: Int,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
 ) {
     MapButton(
         icon = icon,
@@ -48,31 +48,14 @@ fun MapButton(
 }
 
 @Composable
-fun MapButton(
-    icon: ImageVector,
-    contentDescription: String?,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit = {}
-) {
-    FloatingActionButton(
-        onClick = onClick,
-        modifier = modifier,
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription,
-            modifier = Modifier.size(24.dp),
-        )
+fun MapButton(icon: ImageVector, contentDescription: String?, modifier: Modifier = Modifier, onClick: () -> Unit = {}) {
+    FloatingActionButton(onClick = onClick, modifier = modifier) {
+        Icon(imageVector = icon, contentDescription = contentDescription, modifier = Modifier.size(24.dp))
     }
 }
 
 @PreviewLightDark
 @Composable
 private fun MapButtonPreview() {
-    AppTheme {
-        MapButton(
-            icon = Icons.Outlined.Layers,
-            contentDescription = R.string.map_style_selection,
-        )
-    }
+    AppTheme { MapButton(icon = Icons.Outlined.Layers, contentDescription = R.string.map_style_selection) }
 }

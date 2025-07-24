@@ -35,24 +35,30 @@ import javax.inject.Inject
 
 @Suppress("TooManyFunctions")
 @HiltViewModel
-class MapViewModel @Inject constructor(
+class MapViewModel
+@Inject
+constructor(
     private val preferences: SharedPreferences,
     private val nodeRepository: NodeRepository,
 ) : ViewModel() {
-    val nodesWithPosition get() = nodeRepository.nodeDBbyNum.value.values.filter { it.validPosition != null }
+    val nodesWithPosition
+        get() = nodeRepository.nodeDBbyNum.value.values.filter { it.validPosition != null }
 
     var mapStyleId: Int
         get() = preferences.getInt(MAP_STYLE_ID, 0)
         set(value) = preferences.edit { putInt(MAP_STYLE_ID, value) }
+
     private val onlyFavorites = MutableStateFlow(preferences.getBoolean("only-favorites", false))
     val nodes: StateFlow<List<Node>> =
-        nodeRepository.getNodes().onEach { it.filter { !it.isIgnored } }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = emptyList(),
-        )
-    private val showWaypointsOnMap =
-        MutableStateFlow(preferences.getBoolean("show-waypoints-on-map", true))
+        nodeRepository
+            .getNodes()
+            .onEach { it.filter { !it.isIgnored } }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList(),
+            )
+    private val showWaypointsOnMap = MutableStateFlow(preferences.getBoolean("show-waypoints-on-map", true))
     private val showPrecisionCircleOnMap =
         MutableStateFlow(preferences.getBoolean("show-precision-circle-on-map", true))
 
@@ -77,21 +83,19 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    data class MapFilterState(
-        val onlyFavorites: Boolean,
-        val showWaypoints: Boolean,
-        val showPrecisionCircle: Boolean,
-    )
+    data class MapFilterState(val onlyFavorites: Boolean, val showWaypoints: Boolean, val showPrecisionCircle: Boolean)
 
-    val mapFilterStateFlow: StateFlow<MapFilterState> = combine(
-        onlyFavorites,
-        showWaypointsOnMap,
-        showPrecisionCircleOnMap,
-    ) { favoritesOnly, showWaypoints, showPrecisionCircle ->
-        MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle)
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = MapFilterState(false, true, true)
-    )
+    val mapFilterStateFlow: StateFlow<MapFilterState> =
+        combine(onlyFavorites, showWaypointsOnMap, showPrecisionCircleOnMap) {
+                favoritesOnly,
+                showWaypoints,
+                showPrecisionCircle,
+            ->
+            MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle)
+        }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = MapFilterState(false, true, true),
+            )
 }

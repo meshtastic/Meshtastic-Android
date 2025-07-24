@@ -39,7 +39,8 @@ fun NodeClusterMarkers(
 ) {
     if (mapFilterState.showPrecisionCircle) {
         nodeClusterItems.forEach { clusterItem ->
-            key(clusterItem.node.num) { // Add a stable key for each circle
+            key(clusterItem.node.num) {
+                // Add a stable key for each circle
                 clusterItem.getPrecisionMeters()?.let { precisionMeters ->
                     if (precisionMeters > 0) {
                         Circle(
@@ -48,7 +49,7 @@ fun NodeClusterMarkers(
                             fillColor = Color(clusterItem.node.colors.second).copy(alpha = 0.2f),
                             strokeColor = Color(clusterItem.node.colors.second),
                             strokeWidth = 2f,
-                            zIndex = 1f // Ensure circles are drawn above markers
+                            zIndex = 1f, // Ensure circles are drawn above markers
                         )
                     }
                 }
@@ -63,12 +64,7 @@ fun NodeClusterMarkers(
             false
         },
         clusterItemContent = { clusterItem ->
-            NodeChip(
-                node = clusterItem.node,
-                enabled = false,
-                isThisNode = false,
-                isConnected = false
-            ) { }
+            NodeChip(node = clusterItem.node, enabled = false, isThisNode = false, isConnected = false) {}
         },
     )
 }

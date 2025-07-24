@@ -50,8 +50,8 @@ fun MapControlsOverlay(
     VerticalFloatingToolbar(
         modifier = modifier,
         expanded = true,
-        leadingContent = { },
-        trailingContent = { },
+        leadingContent = {},
+        trailingContent = {},
         scrollBehavior = scrollBehavior,
         content = {
             if (showFilterButton) {
@@ -59,7 +59,7 @@ fun MapControlsOverlay(
                     MapButton(
                         icon = Icons.Outlined.Tune,
                         contentDescription = stringResource(id = R.string.map_filter),
-                        onClick = onToggleMapFilterMenu
+                        onClick = onToggleMapFilterMenu,
                     )
                     MapFilterDropdown(
                         expanded = mapFilterMenuExpanded,
@@ -73,22 +73,21 @@ fun MapControlsOverlay(
                 MapButton(
                     icon = Icons.Outlined.Map,
                     contentDescription = stringResource(id = R.string.map_tile_source),
-                    onClick = onToggleMapTypeMenu
+                    onClick = onToggleMapTypeMenu,
                 )
                 MapTypeDropdown(
                     expanded = mapTypeMenuExpanded,
                     onDismissRequest = onMapTypeMenuDismissRequest,
                     mapViewModel = mapViewModel, // Pass mapViewModel
-                    onManageCustomTileProvidersClicked = onManageCustomTileProvidersClicked // Pass new callback
+                    onManageCustomTileProvidersClicked = onManageCustomTileProvidersClicked, // Pass new callback
                 )
             }
 
             MapButton(
                 icon = Icons.Outlined.Layers,
                 contentDescription = stringResource(id = R.string.manage_map_layers),
-                onClick = onManageLayersClicked
+                onClick = onManageLayersClicked,
             )
-        }
-
+        },
     )
 }

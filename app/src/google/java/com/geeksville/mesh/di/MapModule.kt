@@ -44,22 +44,15 @@ annotation class DefaultDispatcher
 object MapModule { // Renamed from DispatchersModule for a more general name
 
     // Dispatcher Providers (from original DispatchersModule)
-    @Provides
-    @DefaultDispatcher
+    @Provides @DefaultDispatcher
     fun provideDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
 
-    @Provides
-    @IoDispatcher
+    @Provides @IoDispatcher
     fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
     // Serialization Provider (from original SerializationModule)
-    @Provides
-    @Singleton
-    fun provideJson(): Json {
-        return Json {
-            prettyPrint = false
-        }
-    }
+    @Provides @Singleton
+    fun provideJson(): Json = Json { prettyPrint = false }
 }
 
 @Module
@@ -70,6 +63,6 @@ abstract class MapRepositoryModule { // Renamed from RepositoryModule, Binds met
     @Binds
     @Singleton
     abstract fun bindCustomTileProviderRepository(
-        impl: SharedPreferencesCustomTileProviderRepository
+        impl: SharedPreferencesCustomTileProviderRepository,
     ): CustomTileProviderRepository
 }

@@ -263,13 +263,7 @@ repositories { maven { url = uri("https://jitpack.io") } }
 detekt {
     config.setFrom("../config/detekt/detekt.yml")
     baseline = file("../config/detekt/detekt-baseline.xml")
-    source.setFrom(
-        files(
-            "src/main/java",
-            "src/google/java",
-            "src/fdroid/java",
-        )
-    )
+    source.setFrom(files("src/main/java", "src/google/java", "src/fdroid/java"))
     parallel = true
 }
 
@@ -288,6 +282,7 @@ tasks.configureEach {
         enabled = false
     }
 }
+
 tasks.withType<Detekt> {
     reports {
         xml.required = true

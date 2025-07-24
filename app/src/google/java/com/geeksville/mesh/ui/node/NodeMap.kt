@@ -25,20 +25,12 @@ import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.map.MapView
 
-const val DegD = 1e-7
+const val DEG_D = 1e-7
 
 @Composable
-fun NodeMapScreen(
-    uiViewModel: UIViewModel,
-    metricsViewModel: MetricsViewModel = hiltViewModel(),
-) {
+fun NodeMapScreen(uiViewModel: UIViewModel, metricsViewModel: MetricsViewModel = hiltViewModel()) {
     val state by metricsViewModel.state.collectAsState()
     val positions = state.positionLogs
     val destNum = state.node?.num
-    MapView(
-        uiViewModel = uiViewModel,
-        focusedNodeNum = destNum,
-        nodeTrack = positions,
-        navigateToNodeDetails = {}
-    )
+    MapView(uiViewModel = uiViewModel, focusedNodeNum = destNum, nodeTrack = positions, navigateToNodeDetails = {})
 }

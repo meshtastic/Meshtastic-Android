@@ -29,53 +29,46 @@ import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 
-/*******************************************************************************
+/**
+ * ****************************************************************************
  * Revive some of my old Gaggle source code...
  *
- * GNU Public License, version 2
- * All other distribution of Gaggle must conform to the terms of the GNU Public License, version 2.  The full
- * text of this license is included in the Gaggle source, see assets/manual/gpl-2.0.txt.
- ******************************************************************************/
-
+ * GNU Public License, version 2 All other distribution of Gaggle must conform to the terms of the GNU Public License,
+ * version 2. The full text of this license is included in the Gaggle source, see assets/manual/gpl-2.0.txt.
+ * ****************************************************************************
+ */
 object GPSFormat {
-    fun DEC(p: Position): String {
-        return String.format("%.5f %.5f", p.latitude, p.longitude).replace(",", ".")
-    }
+    @Suppress("ImplicitDefaultLocale")
+    fun dec(p: Position): String = String.format("%.5f %.5f", p.latitude, p.longitude).replace(",", ".")
 
-    fun DMS(p: Position): String {
+    fun dms(p: Position): String {
         val lat = degreesToDMS(p.latitude, true)
         val lon = degreesToDMS(p.longitude, false)
         fun string(a: Array<String>) = String.format("%s°%s'%.5s\"%s", a[0], a[1], a[2], a[3])
         return string(lat) + " " + string(lon)
     }
 
-    fun UTM(p: Position): String {
-        val UTM = UTM.from(Point.point(p.longitude, p.latitude))
-        return String.format(
-            "%s%s %.6s %.7s",
-            UTM.zone,
-            UTM.toMGRS().band,
-            UTM.easting,
-            UTM.northing
-        )
+    @Suppress("ImplicitDefaultLocale")
+    fun utm(p: Position): String {
+        val utm = UTM.from(Point.point(p.longitude, p.latitude))
+        return String.format("%s%s %.6s %.7s", utm.zone, utm.toMGRS().band, utm.easting, utm.northing)
     }
 
-    fun MGRS(p: Position): String {
-        val MGRS = MGRS.from(Point.point(p.longitude, p.latitude))
+    @Suppress("ImplicitDefaultLocale")
+    fun mgrs(p: Position): String {
+        val mgrs = MGRS.from(Point.point(p.longitude, p.latitude))
         return String.format(
             "%s%s %s%s %05d %05d",
-            MGRS.zone,
-            MGRS.band,
-            MGRS.column,
-            MGRS.row,
-            MGRS.easting,
-            MGRS.northing
+            mgrs.zone,
+            mgrs.band,
+            mgrs.column,
+            mgrs.row,
+            mgrs.easting,
+            mgrs.northing,
         )
     }
 
-    fun toDEC(latitude: Double, longitude: Double): String {
-        return "%.5f %.5f".format(latitude, longitude).replace(",", ".")
-    }
+    fun toDEC(latitude: Double, longitude: Double): String = "%.5f %.5f".format(latitude, longitude).replace(",", ".")
 
     fun toDMS(latitude: Double, longitude: Double): String {
         val lat = degreesToDMS(latitude, true)
@@ -85,64 +78,48 @@ object GPSFormat {
     }
 
     fun toUTM(latitude: Double, longitude: Double): String {
-        val UTM = UTM.from(Point.point(longitude, latitude))
-        return "%s%s %.6s %.7s".format(UTM.zone, UTM.toMGRS().band, UTM.easting, UTM.northing)
+        val utm = UTM.from(Point.point(longitude, latitude))
+        return "%s%s %.6s %.7s".format(utm.zone, utm.toMGRS().band, utm.easting, utm.northing)
     }
 
     fun toMGRS(latitude: Double, longitude: Double): String {
-        val MGRS = MGRS.from(Point.point(longitude, latitude))
-        return "%s%s %s%s %05d %05d".format(
-            MGRS.zone,
-            MGRS.band,
-            MGRS.column,
-            MGRS.row,
-            MGRS.easting,
-            MGRS.northing
-        )
+        val mgrs = MGRS.from(Point.point(longitude, latitude))
+        return "%s%s %s%s %05d %05d".format(mgrs.zone, mgrs.band, mgrs.column, mgrs.row, mgrs.easting, mgrs.northing)
     }
 }
 
 /**
  * Format as degrees, minutes, secs
  *
- * @param _degIn
+ * @param degIn
  * @param isLatitude
  * @return a string like 120deg
  */
-fun degreesToDMS(
-    _degIn: Double,
-    isLatitude: Boolean
-): Array<String> {
-    var degIn = _degIn
+fun degreesToDMS(degIn: Double, isLatitude: Boolean): Array<String> {
+    var degIn = degIn
     val isPos = degIn >= 0
     val dirLetter =
-        if (isLatitude) if (isPos) 'N' else 'S' else if (isPos) 'E' else 'W'
+        if (isLatitude) if (isPos) 'N' else 'S'
+        else if (isPos) {
+            'E'
+        } else {
+            'W'
+        }
     degIn = abs(degIn)
     val degOut = degIn.toInt()
     val minutes = 60 * (degIn - degOut)
     val minwhole = minutes.toInt()
     val seconds = (minutes - minwhole) * 60
-    return arrayOf(
-        degOut.toString(), minwhole.toString(),
-        seconds.toString(),
-        dirLetter.toString()
-    )
+    return arrayOf(degOut.toString(), minwhole.toString(), seconds.toString(), dirLetter.toString())
 }
 
-/**
- * @return distance in meters along the surface of the earth (ish)
- */
-fun latLongToMeter(
-    lat_a: Double,
-    lng_a: Double,
-    lat_b: Double,
-    lng_b: Double
-): Double {
+/** @return distance in meters along the surface of the earth (ish) */
+fun latLongToMeter(latA: Double, lngA: Double, latB: Double, lngB: Double): Double {
     val pk = (180 / PI)
-    val a1 = lat_a / pk
-    val a2 = lng_a / pk
-    val b1 = lat_b / pk
-    val b2 = lng_b / pk
+    val a1 = latA / pk
+    val a2 = lngA / pk
+    val b1 = latB / pk
+    val b2 = lngB / pk
     val t1 = cos(a1) * cos(a2) * cos(b1) * cos(b2)
     val t2 = cos(a1) * sin(a2) * cos(b1) * sin(b2)
     val t3 = sin(a1) * sin(b1)
@@ -152,35 +129,19 @@ fun latLongToMeter(
 }
 
 // Same as above, but takes Mesh Position proto.
-fun positionToMeter(a: MeshProtos.Position, b: MeshProtos.Position): Double {
-    return latLongToMeter(
-        a.latitudeI * 1e-7,
-        a.longitudeI * 1e-7,
-        b.latitudeI * 1e-7,
-        b.longitudeI * 1e-7
-    )
-}
+fun positionToMeter(a: MeshProtos.Position, b: MeshProtos.Position): Double =
+    latLongToMeter(a.latitudeI * 1e-7, a.longitudeI * 1e-7, b.latitudeI * 1e-7, b.longitudeI * 1e-7)
 
 /**
  * Computes the bearing in degrees between two points on Earth.
  *
- * @param lat1
- * Latitude of the first point
- * @param lon1
- * Longitude of the first point
- * @param lat2
- * Latitude of the second point
- * @param lon2
- * Longitude of the second point
- * @return Bearing between the two points in degrees. A value of 0 means due
- * north.
+ * @param lat1 Latitude of the first point
+ * @param lon1 Longitude of the first point
+ * @param lat2 Latitude of the second point
+ * @param lon2 Longitude of the second point
+ * @return Bearing between the two points in degrees. A value of 0 means due north.
  */
-fun bearing(
-    lat1: Double,
-    lon1: Double,
-    lat2: Double,
-    lon2: Double
-): Double {
+fun bearing(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
     val lat1Rad = Math.toRadians(lat1)
     val lat2Rad = Math.toRadians(lat2)
     val deltaLonRad = Math.toRadians(lon2 - lon1)
@@ -189,9 +150,5 @@ fun bearing(
     return radToBearing(atan2(y, x))
 }
 
-/**
- * Converts an angle in radians to degrees
- */
-fun radToBearing(rad: Double): Double {
-    return (Math.toDegrees(rad) + 360) % 360
-}
+/** Converts an angle in radians to degrees */
+fun radToBearing(rad: Double): Double = (Math.toDegrees(rad) + 360) % 360

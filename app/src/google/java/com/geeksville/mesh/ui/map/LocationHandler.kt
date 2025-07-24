@@ -43,54 +43,46 @@ private const val INTERVAL_MILLIS = 10000L
 
 @Suppress("LongMethod")
 @Composable
-fun LocationPermissionsHandler(
-    onPermissionResult: (Boolean) -> Unit
-) {
+fun LocationPermissionsHandler(onPermissionResult: (Boolean) -> Unit) {
     val context = LocalContext.current
     var localHasPermission by remember {
         mutableStateOf(
-            ContextCompat.checkSelfPermission(
-                context, Manifest.permission.ACCESS_FINE_LOCATION
-            ) == PackageManager.PERMISSION_GRANTED
+            ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED,
         )
     }
 
-    val requestLocationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        localHasPermission = isGranted
-        // Defer to the LaunchedEffect(localHasPermission) to check settings before confirming via onPermissionResult
-        // if permission is granted. If not granted, immediately report false.
-        if (!isGranted) {
-            onPermissionResult(false)
+    val requestLocationPermissionLauncher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) { isGranted ->
+            localHasPermission = isGranted
+            // Defer to the LaunchedEffect(localHasPermission) to check settings before confirming via
+            // onPermissionResult
+            // if permission is granted. If not granted, immediately report false.
+            if (!isGranted) {
+                onPermissionResult(false)
+            }
         }
-    }
 
-    val locationSettingsLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartIntentSenderForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            debug("Location settings changed by user.")
-            // User has enabled location services or improved accuracy.
-            onPermissionResult(true) // Settings are now adequate, and permission was already granted.
-        } else {
-            debug("Location settings change cancelled by user.")
-            // User chose not to change settings. The permission itself is still granted,
-            // but the experience might be degraded. For the purpose of enabling map features,
-            // we consider this as success if the core permission is there.
-            // If stricter handling is needed (e.g., block feature if settings not optimal),
-            // this logic might change.
-            onPermissionResult(localHasPermission)
+    val locationSettingsLauncher =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            if (result.resultCode == Activity.RESULT_OK) {
+                debug("Location settings changed by user.")
+                // User has enabled location services or improved accuracy.
+                onPermissionResult(true) // Settings are now adequate, and permission was already granted.
+            } else {
+                debug("Location settings change cancelled by user.")
+                // User chose not to change settings. The permission itself is still granted,
+                // but the experience might be degraded. For the purpose of enabling map features,
+                // we consider this as success if the core permission is there.
+                // If stricter handling is needed (e.g., block feature if settings not optimal),
+                // this logic might change.
+                onPermissionResult(localHasPermission)
+            }
         }
-    }
 
-    LaunchedEffect(Unit) { // Initial permission check
-        when (
-            ContextCompat.checkSelfPermission(
-                context,
-                Manifest.permission.ACCESS_FINE_LOCATION
-            )
-        ) {
+    LaunchedEffect(Unit) {
+        // Initial permission check
+        when (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)) {
             PackageManager.PERMISSION_GRANTED -> {
                 if (!localHasPermission) {
                     localHasPermission = true
@@ -107,15 +99,13 @@ fun LocationPermissionsHandler(
         }
     }
 
-    LaunchedEffect(localHasPermission) { // Handles logic after permission status is known/updated
+    LaunchedEffect(localHasPermission) {
+        // Handles logic after permission status is known/updated
         if (localHasPermission) {
             // Permission is granted, now check location settings
-            val locationRequest = LocationRequest.Builder(
-                Priority.PRIORITY_HIGH_ACCURACY, INTERVAL_MILLIS
-            ).build()
+            val locationRequest = LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, INTERVAL_MILLIS).build()
 
-            val builder = LocationSettingsRequest.Builder()
-                .addLocationRequest(locationRequest)
+            val builder = LocationSettingsRequest.Builder().addLocationRequest(locationRequest)
 
             val client = LocationServices.getSettingsClient(context)
             val task = client.checkLocationSettings(builder.build())
@@ -128,8 +118,7 @@ fun LocationPermissionsHandler(
             task.addOnFailureListener { exception ->
                 if (exception is ResolvableApiException) {
                     try {
-                        val intentSenderRequest =
-                            IntentSenderRequest.Builder(exception.resolution).build()
+                        val intentSenderRequest = IntentSenderRequest.Builder(exception.resolution).build()
                         locationSettingsLauncher.launch(intentSenderRequest)
                         // Result of this launch will be handled by locationSettingsLauncher's callback
                     } catch (sendEx: ActivityNotFoundException) {

@@ -62,31 +62,27 @@ fun LinkedCoordinates(
     val context = LocalContext.current
     val clipboard: Clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
-    val style = SpanStyle(
-        color = HyperlinkBlue,
-        fontSize = MaterialTheme.typography.labelLarge.fontSize,
-        textDecoration = TextDecoration.Underline
-    )
+    val style =
+        SpanStyle(
+            color = HyperlinkBlue,
+            fontSize = MaterialTheme.typography.labelLarge.fontSize,
+            textDecoration = TextDecoration.Underline,
+        )
 
     val annotatedString = rememberAnnotatedString(latitude, longitude, format, nodeName, style)
 
     Text(
-        modifier = modifier.combinedClickable(
-            onClick = {
-                handleClick(context, annotatedString)
-            },
+        modifier =
+        modifier.combinedClickable(
+            onClick = { handleClick(context, annotatedString) },
             onLongClick = {
                 coroutineScope.launch {
-                    clipboard.setClipEntry(
-                        ClipEntry(
-                            ClipData.newPlainText("", annotatedString)
-                        )
-                    )
+                    clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("", annotatedString)))
                     debug("Copied to clipboard")
                 }
-            }
+            },
         ),
-        text = annotatedString
+        text = annotatedString,
     )
 }
 
@@ -96,47 +92,39 @@ private fun rememberAnnotatedString(
     longitude: Double,
     format: Int,
     nodeName: String,
-    style: SpanStyle
+    style: SpanStyle,
 ) = buildAnnotatedString {
     pushStringAnnotation(
         tag = "gps",
-        annotation = "geo:0,0?q=$latitude,$longitude&z=17&label=${
+        annotation =
+        "geo:0,0?q=$latitude,$longitude&z=17&label=${
             URLEncoder.encode(nodeName, "utf-8")
-        }"
+        }",
     )
     withStyle(style = style) {
-        val gpsString = when (format) {
-            GpsCoordinateFormat.DEC_VALUE -> GPSFormat.toDEC(latitude, longitude)
-            GpsCoordinateFormat.DMS_VALUE -> GPSFormat.toDMS(latitude, longitude)
-            GpsCoordinateFormat.UTM_VALUE -> GPSFormat.toUTM(latitude, longitude)
-            GpsCoordinateFormat.MGRS_VALUE -> GPSFormat.toMGRS(latitude, longitude)
-            else -> GPSFormat.toDEC(latitude, longitude)
-        }
+        val gpsString =
+            when (format) {
+                GpsCoordinateFormat.DEC_VALUE -> GPSFormat.toDec(latitude, longitude)
+                GpsCoordinateFormat.DMS_VALUE -> GPSFormat.toDms(latitude, longitude)
+                GpsCoordinateFormat.UTM_VALUE -> GPSFormat.toUtm(latitude, longitude)
+                GpsCoordinateFormat.MGRS_VALUE -> GPSFormat.toMgrs(latitude, longitude)
+                else -> GPSFormat.toDec(latitude, longitude)
+            }
         append(gpsString)
     }
     pop()
 }
 
 private fun handleClick(context: Context, annotatedString: AnnotatedString) {
-    annotatedString.getStringAnnotations(
-        tag = "gps",
-        start = 0,
-        end = annotatedString.length
-    ).firstOrNull()?.let {
+    annotatedString.getStringAnnotations(tag = "gps", start = 0, end = annotatedString.length).firstOrNull()?.let {
         val uri = it.item.toUri()
-        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
+        val intent = Intent(Intent.ACTION_VIEW, uri).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
 
         try {
             if (intent.resolveActivity(context.packageManager) != null) {
                 context.startActivity(intent)
             } else {
-                Toast.makeText(
-                    context,
-                    "No application available to open this location!",
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(context, "No application available to open this location!", Toast.LENGTH_LONG).show()
             }
         } catch (ex: ActivityNotFoundException) {
             debug("Failed to open geo intent: $ex")
@@ -146,16 +134,9 @@ private fun handleClick(context: Context, annotatedString: AnnotatedString) {
 
 @PreviewLightDark
 @Composable
-fun LinkedCoordinatesPreview(
-    @PreviewParameter(GPSFormatPreviewParameterProvider::class) format: Int
-) {
+fun LinkedCoordinatesPreview(@PreviewParameter(GPSFormatPreviewParameterProvider::class) format: Int) {
     AppTheme {
-        LinkedCoordinates(
-            latitude = 37.7749,
-            longitude = -122.4194,
-            format = format,
-            nodeName = "Test Node Name"
-        )
+        LinkedCoordinates(latitude = 37.7749, longitude = -122.4194, format = format, nodeName = "Test Node Name")
     }
 }
 

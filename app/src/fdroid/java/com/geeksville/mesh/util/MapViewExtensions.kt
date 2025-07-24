@@ -36,9 +36,7 @@ import org.osmdroid.views.overlay.ScaleBarOverlay
 import org.osmdroid.views.overlay.advancedpolyline.MonochromaticPaintList
 import org.osmdroid.views.overlay.gridlines.LatLonGridlineOverlay2
 
-/**
- * Adds copyright to map depending on what source is showing
- */
+/** Adds copyright to map depending on what source is showing */
 fun MapView.addCopyright() {
     if (overlays.none { it is CopyrightOverlay }) {
         val copyrightNotice: String = tileProvider.tileSource.copyrightNotice ?: return
@@ -50,19 +48,21 @@ fun MapView.addCopyright() {
 
 /**
  * Create LatLong Grid line overlay
+ *
  * @param enabled: turn on/off gridlines
  */
 fun MapView.createLatLongGrid(enabled: Boolean) {
     val latLongGridOverlay = LatLonGridlineOverlay2()
     latLongGridOverlay.isEnabled = enabled
     if (latLongGridOverlay.isEnabled) {
-        val textPaint = Paint().apply {
-            textSize = 40f
-            color = Color.GRAY
-            isAntiAlias = true
-            isFakeBoldText = true
-            textAlign = Paint.Align.CENTER
-        }
+        val textPaint =
+            Paint().apply {
+                textSize = 40f
+                color = Color.GRAY
+                isAntiAlias = true
+                isFakeBoldText = true
+                textAlign = Paint.Align.CENTER
+            }
         latLongGridOverlay.textPaint = textPaint
         latLongGridOverlay.setBackgroundColor(Color.TRANSPARENT)
         latLongGridOverlay.setLineWidth(3.0f)
@@ -73,75 +73,73 @@ fun MapView.createLatLongGrid(enabled: Boolean) {
 
 fun MapView.addScaleBarOverlay(density: Density) {
     if (overlays.none { it is ScaleBarOverlay }) {
-        val scaleBarOverlay = ScaleBarOverlay(this).apply {
-            setAlignBottom(true)
-            with(density) {
-                setScaleBarOffset(15.dp.toPx().toInt(), 40.dp.toPx().toInt())
-                setTextSize(12.sp.toPx())
+        val scaleBarOverlay =
+            ScaleBarOverlay(this).apply {
+                setAlignBottom(true)
+                with(density) {
+                    setScaleBarOffset(15.dp.toPx().toInt(), 40.dp.toPx().toInt())
+                    setTextSize(12.sp.toPx())
+                }
+                textPaint.apply {
+                    isAntiAlias = true
+                    typeface = Typeface.DEFAULT_BOLD
+                }
             }
-            textPaint.apply {
-                isAntiAlias = true
-                typeface = Typeface.DEFAULT_BOLD
-            }
-        }
         overlays.add(scaleBarOverlay)
     }
 }
 
-fun MapView.addPolyline(
-    density: Density,
-    geoPoints: List<GeoPoint>,
-    onClick: () -> Unit
-): Polyline {
-    val polyline = Polyline(this).apply {
-        val borderPaint = Paint().apply {
-            color = Color.BLACK
-            isAntiAlias = true
-            strokeWidth = with(density) { 10.dp.toPx() }
-            style = Paint.Style.STROKE
-            strokeJoin = Paint.Join.ROUND
-            strokeCap = Paint.Cap.ROUND
-            pathEffect = DashPathEffect(floatArrayOf(80f, 60f), 0f)
+fun MapView.addPolyline(density: Density, geoPoints: List<GeoPoint>, onClick: () -> Unit): Polyline {
+    val polyline =
+        Polyline(this).apply {
+            val borderPaint =
+                Paint().apply {
+                    color = Color.BLACK
+                    isAntiAlias = true
+                    strokeWidth = with(density) { 10.dp.toPx() }
+                    style = Paint.Style.STROKE
+                    strokeJoin = Paint.Join.ROUND
+                    strokeCap = Paint.Cap.ROUND
+                    pathEffect = DashPathEffect(floatArrayOf(80f, 60f), 0f)
+                }
+            outlinePaintLists.add(MonochromaticPaintList(borderPaint))
+            val fillPaint =
+                Paint().apply {
+                    color = Color.WHITE
+                    isAntiAlias = true
+                    strokeWidth = with(density) { 6.dp.toPx() }
+                    style = Paint.Style.FILL_AND_STROKE
+                    strokeJoin = Paint.Join.ROUND
+                    strokeCap = Paint.Cap.ROUND
+                    pathEffect = DashPathEffect(floatArrayOf(80f, 60f), 0f)
+                }
+            outlinePaintLists.add(MonochromaticPaintList(fillPaint))
+            setPoints(geoPoints)
+            setOnClickListener { _, _, _ ->
+                onClick()
+                true
+            }
         }
-        outlinePaintLists.add(MonochromaticPaintList(borderPaint))
-        val fillPaint = Paint().apply {
-            color = Color.WHITE
-            isAntiAlias = true
-            strokeWidth = with(density) { 6.dp.toPx() }
-            style = Paint.Style.FILL_AND_STROKE
-            strokeJoin = Paint.Join.ROUND
-            strokeCap = Paint.Cap.ROUND
-            pathEffect = DashPathEffect(floatArrayOf(80f, 60f), 0f)
-        }
-        outlinePaintLists.add(MonochromaticPaintList(fillPaint))
-        setPoints(geoPoints)
-        setOnClickListener { _, _, _ ->
-            onClick()
-            true
-        }
-    }
     overlays.add(polyline)
 
     return polyline
 }
 
-fun MapView.addPositionMarkers(
-    positions: List<MeshProtos.Position>,
-    onClick: () -> Unit
-): List<Marker> {
+fun MapView.addPositionMarkers(positions: List<MeshProtos.Position>, onClick: () -> Unit): List<Marker> {
     val navIcon = ContextCompat.getDrawable(context, R.drawable.ic_map_navigation_24)
-    val markers = positions.map {
-        Marker(this).apply {
-            icon = navIcon
-            rotation = (it.groundTrack * 1e-5).toFloat()
-            setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
-            position = GeoPoint(it.latitudeI * 1e-7, it.longitudeI * 1e-7)
-            setOnMarkerClickListener { _, _ ->
-                onClick()
-                true
+    val markers =
+        positions.map {
+            Marker(this).apply {
+                icon = navIcon
+                rotation = (it.groundTrack * 1e-5).toFloat()
+                setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_CENTER)
+                position = GeoPoint(it.latitudeI * 1e-7, it.longitudeI * 1e-7)
+                setOnMarkerClickListener { _, _ ->
+                    onClick()
+                    true
+                }
             }
         }
-    }
     overlays.addAll(markers)
 
     return markers

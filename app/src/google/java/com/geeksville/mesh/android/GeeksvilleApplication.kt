@@ -29,12 +29,11 @@ import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailabilityLight
 import com.suddenh4x.ratingdialog.AppRating
 
-/**
- * Created by kevinh on 1/4/15.
- */
-
+/** Created by kevinh on 1/4/15. */
 @Suppress("MagicNumber")
-open class GeeksvilleApplication : Application(), Logging {
+open class GeeksvilleApplication :
+    Application(),
+    Logging {
 
     companion object {
         lateinit var analytics: AnalyticsProvider
@@ -43,8 +42,7 @@ open class GeeksvilleApplication : Application(), Logging {
     // / Are we running inside the testlab?
     val isInTestLab: Boolean
         get() {
-            val testLabSetting =
-                Settings.System.getString(contentResolver, "firebase.test.lab")
+            val testLabSetting = Settings.System.getString(contentResolver, "firebase.test.lab")
             if (testLabSetting != null) {
                 info("Testlab is $testLabSetting")
             }
@@ -57,20 +55,15 @@ open class GeeksvilleApplication : Application(), Logging {
 
     val isGooglePlayAvailable: Boolean
         get() {
-            return GoogleApiAvailabilityLight.getInstance()
-                .isGooglePlayServicesAvailable(this)
-                .let {
-                    it != ConnectionResult.SERVICE_MISSING &&
-                            it != ConnectionResult.SERVICE_INVALID
-                }
+            return GoogleApiAvailabilityLight.getInstance().isGooglePlayServicesAvailable(this).let {
+                it != ConnectionResult.SERVICE_MISSING && it != ConnectionResult.SERVICE_INVALID
+            }
         }
 
     var isAnalyticsAllowed: Boolean
         get() = analyticsPrefs.getBoolean("allowed", true)
         set(value) {
-            analyticsPrefs.edit {
-                putBoolean("allowed", value)
-            }
+            analyticsPrefs.edit { putBoolean("allowed", value) }
 
             // Change the flag with the providers
             analytics.setEnabled(value && !isInTestLab) // Never do analytics in the test lab
@@ -81,12 +74,19 @@ open class GeeksvilleApplication : Application(), Logging {
         if (!isGooglePlayAvailable) return
 
         @Suppress("MaxLineLength")
-        exceptionReporter { // we don't want to crash our app because of bugs in this optional feature
+        exceptionReporter {
+            // we don't want to crash our app because of bugs in this optional feature
             AppRating.Builder(activity)
                 .setMinimumLaunchTimes(10) // default is 5, 3 means app is launched 3 or more times
-                .setMinimumDays(10) // default is 5, 0 means install day, 10 means app is launched 10 or more days later than installation
-                .setMinimumLaunchTimesToShowAgain(5) // default is 5, 1 means app is launched 1 or more times after neutral button clicked
-                .setMinimumDaysToShowAgain(14) // default is 14, 1 means app is launched 1 or more days after neutral button clicked
+                .setMinimumDays(
+                    10,
+                ) // default is 5, 0 means install day, 10 means app is launched 10 or more days later than installation
+                .setMinimumLaunchTimesToShowAgain(
+                    5,
+                ) // default is 5, 1 means app is launched 1 or more times after neutral button clicked
+                .setMinimumDaysToShowAgain(
+                    14,
+                ) // default is 14, 1 means app is launched 1 or more days after neutral button clicked
                 .showIfMeetsConditions()
         }
     }

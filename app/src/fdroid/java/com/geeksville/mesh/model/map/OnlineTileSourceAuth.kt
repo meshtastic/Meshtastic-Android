@@ -21,29 +21,28 @@ import org.osmdroid.tileprovider.tilesource.OnlineTileSourceBase
 import org.osmdroid.tileprovider.tilesource.TileSourcePolicy
 import org.osmdroid.util.MapTileIndex
 
+@Suppress("LongParameterList")
 open class OnlineTileSourceAuth(
-    aName: String,
-    aZoomLevel: Int,
-    aZoomMaxLevel: Int,
-    aTileSizePixels: Int,
-    aImageFileNameEnding: String,
-    aBaseUrl: Array<String>,
+    name: String,
+    zoomLevel: Int,
+    zoomMaxLevel: Int,
+    tileSizePixels: Int,
+    imageFileNameEnding: String,
+    baseUrl: Array<String>,
     pCopyright: String,
     tileSourcePolicy: TileSourcePolicy,
     layerName: String?,
-    apiKey: String
-) :
-    OnlineTileSourceBase(
-        aName,
-        aZoomLevel,
-        aZoomMaxLevel,
-        aTileSizePixels,
-        aImageFileNameEnding,
-        aBaseUrl,
-        pCopyright,
-        tileSourcePolicy
-
-    ) {
+    apiKey: String,
+) : OnlineTileSourceBase(
+    name,
+    zoomLevel,
+    zoomMaxLevel,
+    tileSizePixels,
+    imageFileNameEnding,
+    baseUrl,
+    pCopyright,
+    tileSourcePolicy,
+) {
     private var layerName = ""
     private var apiKey = ""
 
@@ -52,13 +51,16 @@ open class OnlineTileSourceAuth(
             this.layerName = layerName
         }
         this.apiKey = apiKey
-
     }
 
-    override fun getTileURLString(pMapTileIndex: Long): String {
-        return "$baseUrl$layerName/" + (MapTileIndex.getZoom(pMapTileIndex)
-            .toString() + "/" + MapTileIndex.getX(pMapTileIndex)
-            .toString() + "/" + MapTileIndex.getY(pMapTileIndex)
-            .toString()) + mImageFilenameEnding + "?appId=$apiKey"
-    }
+    override fun getTileURLString(pMapTileIndex: Long): String = "$baseUrl$layerName/" +
+        (
+            MapTileIndex.getZoom(pMapTileIndex).toString() +
+                "/" +
+                MapTileIndex.getX(pMapTileIndex).toString() +
+                "/" +
+                MapTileIndex.getY(pMapTileIndex).toString()
+            ) +
+        mImageFilenameEnding +
+        "?appId=$apiKey"
 }

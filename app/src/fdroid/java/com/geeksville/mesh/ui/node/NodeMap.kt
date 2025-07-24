@@ -36,17 +36,16 @@ import com.geeksville.mesh.util.addScaleBarOverlay
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 
-private const val DegD = 1e-7
+private const val DEG_D = 1e-7
 
 @Composable
 fun NodeMapScreen(
-    @Suppress("UNUSED_PARAMETER") // needed for google builds but unused in fdroid
-    uiViewModel: UIViewModel = hiltViewModel(),
+    @Suppress("UNUSED_PARAMETER") uiViewModel: UIViewModel = hiltViewModel(),
     viewModel: MetricsViewModel = hiltViewModel(),
 ) {
     val density = LocalDensity.current
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val geoPoints = state.positionLogs.map { GeoPoint(it.latitudeI * DegD, it.longitudeI * DegD) }
+    val geoPoints = state.positionLogs.map { GeoPoint(it.latitudeI * DEG_D, it.longitudeI * DEG_D) }
     val cameraView = remember { BoundingBox.fromGeoPoints(geoPoints) }
     val mapView = rememberMapViewWithLifecycle(cameraView, viewModel.tileSource)
 
@@ -60,6 +59,6 @@ fun NodeMapScreen(
 
             map.addPolyline(density, geoPoints) {}
             map.addPositionMarkers(state.positionLogs) {}
-        }
+        },
     )
 }

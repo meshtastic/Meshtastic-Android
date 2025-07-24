@@ -47,7 +47,8 @@ internal fun CacheLayout(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .wrapContentHeight()
             .background(color = MaterialTheme.colorScheme.background)
@@ -70,24 +71,13 @@ internal fun CacheLayout(
         )
 
         FlowRow(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
             horizontalArrangement = Arrangement.spacedBy(space = 8.dp),
         ) {
-            Button(
-                onClick = onCancelDownload,
-                modifier = Modifier.weight(1f),
-            ) {
-                Text(
-                    text = stringResource(id = R.string.cancel),
-                    color = MaterialTheme.colorScheme.onPrimary,
-                )
+            Button(onClick = onCancelDownload, modifier = Modifier.weight(1f)) {
+                Text(text = stringResource(id = R.string.cancel), color = MaterialTheme.colorScheme.onPrimary)
             }
-            Button(
-                onClick = onExecuteJob,
-                modifier = Modifier.weight(1f),
-            ) {
+            Button(onClick = onExecuteJob, modifier = Modifier.weight(1f)) {
                 Text(
                     text = stringResource(id = R.string.map_start_download),
                     color = MaterialTheme.colorScheme.onPrimary,
@@ -100,9 +90,5 @@ internal fun CacheLayout(
 @Preview(showBackground = true)
 @Composable
 private fun CacheLayoutPreview() {
-    CacheLayout(
-        cacheEstimate = "100 tiles",
-        onExecuteJob = { },
-        onCancelDownload = { },
-    )
+    CacheLayout(cacheEstimate = "100 tiles", onExecuteJob = {}, onCancelDownload = {})
 }

@@ -62,27 +62,25 @@ private const val TILE_SIZE = 256
 
 @Suppress("TooManyFunctions")
 @HiltViewModel
-class MapViewModel @Inject constructor(
+class MapViewModel
+@Inject
+constructor(
     private val application: Application,
     private val preferences: SharedPreferences,
     nodeRepository: NodeRepository,
-    private val customTileProviderRepository: CustomTileProviderRepository
+    private val customTileProviderRepository: CustomTileProviderRepository,
 ) : ViewModel() {
 
     private val _errorFlow = MutableSharedFlow<String>()
     val errorFlow: SharedFlow<String> = _errorFlow.asSharedFlow()
 
     val customTileProviderConfigs: StateFlow<List<CustomTileProviderConfig>> =
-        customTileProviderRepository.getCustomTileProviders()
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5000),
-                initialValue = emptyList()
-            )
+        customTileProviderRepository
+            .getCustomTileProviders()
+            .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000), initialValue = emptyList())
 
     private val _selectedCustomTileProviderUrl = MutableStateFlow<String?>(null)
-    val selectedCustomTileProviderUrl: StateFlow<String?> =
-        _selectedCustomTileProviderUrl.asStateFlow()
+    val selectedCustomTileProviderUrl: StateFlow<String?> = _selectedCustomTileProviderUrl.asStateFlow()
 
     private val _selectedGoogleMapType = MutableStateFlow<MapType>(MapType.NORMAL)
     val selectedGoogleMapType: StateFlow<MapType> = _selectedGoogleMapType.asStateFlow()
@@ -105,7 +103,8 @@ class MapViewModel @Inject constructor(
 
     fun updateCustomTileProvider(configToUpdate: CustomTileProviderConfig) {
         viewModelScope.launch {
-            if (configToUpdate.name.isBlank() ||
+            if (
+                configToUpdate.name.isBlank() ||
                 configToUpdate.urlTemplate.isBlank() ||
                 !isValidTileUrlTemplate(configToUpdate.urlTemplate)
             ) {
@@ -113,11 +112,9 @@ class MapViewModel @Inject constructor(
                 return@launch
             }
             val existingConfigs = customTileProviderConfigs.value
-            if (existingConfigs.any {
-                    it.id != configToUpdate.id && it.name.equals(
-                        configToUpdate.name,
-                        ignoreCase = true
-                    )
+            if (
+                existingConfigs.any {
+                    it.id != configToUpdate.id && it.name.equals(configToUpdate.name, ignoreCase = true)
                 }
             ) {
                 _errorFlow.emit("Another custom tile provider with name '${configToUpdate.name}' already exists.")
@@ -126,8 +123,7 @@ class MapViewModel @Inject constructor(
 
             customTileProviderRepository.updateCustomTileProvider(configToUpdate)
 
-            val originalConfig =
-                customTileProviderRepository.getCustomTileProviderById(configToUpdate.id)
+            val originalConfig = customTileProviderRepository.getCustomTileProviderById(configToUpdate.id)
             if (
                 _selectedCustomTileProviderUrl.value != null &&
                 originalConfig?.urlTemplate == _selectedCustomTileProviderUrl.value
@@ -157,10 +153,7 @@ class MapViewModel @Inject constructor(
     fun selectCustomTileProvider(config: CustomTileProviderConfig?) {
         if (config != null) {
             if (!isValidTileUrlTemplate(config.urlTemplate)) {
-                Log.w(
-                    "MapViewModel",
-                    "Attempted to select invalid URL template: ${config.urlTemplate}"
-                )
+                Log.w("MapViewModel", "Attempted to select invalid URL template: ${config.urlTemplate}")
                 _selectedCustomTileProviderUrl.value = null
                 return
             }
@@ -179,18 +172,16 @@ class MapViewModel @Inject constructor(
 
     fun createUrlTileProvider(urlString: String): TileProvider? {
         if (!isValidTileUrlTemplate(urlString)) {
-            Log.e(
-                "MapViewModel",
-                "Tile URL does not contain valid {x}, {y}, and {z} placeholders: $urlString"
-            )
+            Log.e("MapViewModel", "Tile URL does not contain valid {x}, {y}, and {z} placeholders: $urlString")
             return null
         }
         return object : UrlTileProvider(TILE_SIZE, TILE_SIZE) {
             override fun getTileUrl(x: Int, y: Int, zoom: Int): URL? {
-                val formattedUrl = urlString
-                    .replace("{z}", zoom.toString(), ignoreCase = true)
-                    .replace("{x}", x.toString(), ignoreCase = true)
-                    .replace("{y}", y.toString(), ignoreCase = true)
+                val formattedUrl =
+                    urlString
+                        .replace("{z}", zoom.toString(), ignoreCase = true)
+                        .replace("{x}", x.toString(), ignoreCase = true)
+                        .replace("{y}", y.toString(), ignoreCase = true)
                 return try {
                     URL(formattedUrl)
                 } catch (e: MalformedURLException) {
@@ -201,21 +192,21 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    private fun isValidTileUrlTemplate(urlTemplate: String): Boolean {
-        return urlTemplate.contains("{z}", ignoreCase = true) &&
-                urlTemplate.contains("{x}", ignoreCase = true) &&
-                urlTemplate.contains("{y}", ignoreCase = true)
-    }
+    private fun isValidTileUrlTemplate(urlTemplate: String): Boolean = urlTemplate.contains("{z}", ignoreCase = true) &&
+        urlTemplate.contains("{x}", ignoreCase = true) &&
+        urlTemplate.contains("{y}", ignoreCase = true)
 
     private val onlyFavorites = MutableStateFlow(preferences.getBoolean("only-favorites", false))
     val nodes: StateFlow<List<Node>> =
-        nodeRepository.getNodes().onEach { it.filter { !it.isIgnored } }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = emptyList(),
-        )
-    private val showWaypointsOnMap =
-        MutableStateFlow(preferences.getBoolean("show-waypoints-on-map", true))
+        nodeRepository
+            .getNodes()
+            .onEach { it.filter { !it.isIgnored } }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList(),
+            )
+    private val showWaypointsOnMap = MutableStateFlow(preferences.getBoolean("show-waypoints-on-map", true))
     private val showPrecisionCircleOnMap =
         MutableStateFlow(preferences.getBoolean("show-precision-circle-on-map", true))
 
@@ -234,23 +225,21 @@ class MapViewModel @Inject constructor(
         preferences.edit { putBoolean("show-precision-circle-on-map", value) }
     }
 
-    data class MapFilterState(
-        val onlyFavorites: Boolean,
-        val showWaypoints: Boolean,
-        val showPrecisionCircle: Boolean,
-    )
+    data class MapFilterState(val onlyFavorites: Boolean, val showWaypoints: Boolean, val showPrecisionCircle: Boolean)
 
-    val mapFilterStateFlow: StateFlow<MapFilterState> = combine(
-        onlyFavorites,
-        showWaypointsOnMap,
-        showPrecisionCircleOnMap,
-    ) { favoritesOnly, showWaypoints, showPrecisionCircle ->
-        MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle)
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = MapFilterState(false, true, true)
-    )
+    val mapFilterStateFlow: StateFlow<MapFilterState> =
+        combine(onlyFavorites, showWaypointsOnMap, showPrecisionCircleOnMap) {
+                favoritesOnly,
+                showWaypoints,
+                showPrecisionCircle,
+            ->
+            MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle)
+        }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = MapFilterState(false, true, true),
+            )
 
     private val _mapLayers = MutableStateFlow<List<MapLayerItem>>(emptyList())
     val mapLayers: StateFlow<List<MapLayerItem>> = _mapLayers.asStateFlow()
@@ -267,23 +256,21 @@ class MapViewModel @Inject constructor(
                     val persistedLayerFiles = layersDir.listFiles()
 
                     if (persistedLayerFiles != null) {
-                        val loadedItems = persistedLayerFiles.mapNotNull { file ->
-                            if (file.isFile) {
-                                MapLayerItem(
-                                    name = file.nameWithoutExtension,
-                                    uri = Uri.fromFile(file),
-                                    isVisible = true
-                                )
-                            } else {
-                                null
+                        val loadedItems =
+                            persistedLayerFiles.mapNotNull { file ->
+                                if (file.isFile) {
+                                    MapLayerItem(
+                                        name = file.nameWithoutExtension,
+                                        uri = Uri.fromFile(file),
+                                        isVisible = true,
+                                    )
+                                } else {
+                                    null
+                                }
                             }
-                        }
                         _mapLayers.value = loadedItems
                         if (loadedItems.isNotEmpty()) {
-                            Log.i(
-                                "MapViewModel",
-                                "Loaded ${loadedItems.size} persisted map layers."
-                            )
+                            Log.i("MapViewModel", "Loaded ${loadedItems.size} persisted map layers.")
                         }
                     }
                 } else {
@@ -299,12 +286,10 @@ class MapViewModel @Inject constructor(
     fun addMapLayer(uri: Uri, fileName: String?) {
         viewModelScope.launch {
             val layerName = fileName ?: "Layer ${mapLayers.value.size + 1}"
-            val localFileUri =
-                copyFileToInternalStorage(uri, fileName ?: "layer_${UUID.randomUUID()}")
+            val localFileUri = copyFileToInternalStorage(uri, fileName ?: "layer_${UUID.randomUUID()}")
 
             if (localFileUri != null) {
-                val newItem =
-                    MapLayerItem(name = layerName, uri = localFileUri)
+                val newItem = MapLayerItem(name = layerName, uri = localFileUri)
                 _mapLayers.value = _mapLayers.value + newItem
             } else {
                 Log.e("MapViewModel", "Failed to copy KML/KMZ file to internal storage.")
@@ -312,43 +297,33 @@ class MapViewModel @Inject constructor(
         }
     }
 
-    private suspend fun copyFileToInternalStorage(uri: Uri, fileName: String): Uri? {
-        return withContext(Dispatchers.IO) {
-            try {
-                val inputStream = application.contentResolver.openInputStream(uri)
-                val directory = File(application.filesDir, "map_layers")
-                if (!directory.exists()) {
-                    directory.mkdirs()
-                }
-                val outputFile = File(directory, fileName)
-                val outputStream = FileOutputStream(outputFile)
-
-                inputStream?.use { input ->
-                    outputStream.use { output ->
-                        input.copyTo(output)
-                    }
-                }
-                Uri.fromFile(outputFile)
-            } catch (e: IOException) {
-                Log.e("MapViewModel", "Error copying file to internal storage", e)
-                null
+    private suspend fun copyFileToInternalStorage(uri: Uri, fileName: String): Uri? = withContext(Dispatchers.IO) {
+        try {
+            val inputStream = application.contentResolver.openInputStream(uri)
+            val directory = File(application.filesDir, "map_layers")
+            if (!directory.exists()) {
+                directory.mkdirs()
             }
+            val outputFile = File(directory, fileName)
+            val outputStream = FileOutputStream(outputFile)
+
+            inputStream?.use { input -> outputStream.use { output -> input.copyTo(output) } }
+            Uri.fromFile(outputFile)
+        } catch (e: IOException) {
+            Log.e("MapViewModel", "Error copying file to internal storage", e)
+            null
         }
     }
 
     fun toggleLayerVisibility(layerId: String) {
-        _mapLayers.value = _mapLayers.value.map {
-            if (it.id == layerId) it.copy(isVisible = !it.isVisible) else it
-        }
+        _mapLayers.value = _mapLayers.value.map { if (it.id == layerId) it.copy(isVisible = !it.isVisible) else it }
     }
 
     fun removeMapLayer(layerId: String) {
         viewModelScope.launch {
             val layerToRemove = _mapLayers.value.find { it.id == layerId }
             layerToRemove?.kmlLayerData?.removeLayerFromMap()
-            layerToRemove?.uri?.let { uri ->
-                deleteFileFromInternalStorage(uri)
-            }
+            layerToRemove?.uri?.let { uri -> deleteFileFromInternalStorage(uri) }
             _mapLayers.value = _mapLayers.value.filterNot { it.id == layerId }
         }
     }
@@ -369,14 +344,15 @@ class MapViewModel @Inject constructor(
     @Suppress("Recycle")
     suspend fun getInputStreamFromUri(layerItem: MapLayerItem): InputStream? {
         val uriToLoad = layerItem.uri ?: return null
-        val stream = withContext(Dispatchers.IO) {
-            try {
-                application.contentResolver.openInputStream(uriToLoad)
-            } catch (_: Exception) {
-                debug("MapViewModel: Error opening InputStream from URI: $uriToLoad")
-                null
+        val stream =
+            withContext(Dispatchers.IO) {
+                try {
+                    application.contentResolver.openInputStream(uriToLoad)
+                } catch (_: Exception) {
+                    debug("MapViewModel: Error opening InputStream from URI: $uriToLoad")
+                    null
+                }
             }
-        }
         return stream
     }
 
@@ -387,24 +363,14 @@ class MapViewModel @Inject constructor(
 
         return try {
             getInputStreamFromUri(layerItem)?.use { inputStream ->
-                val kmlLayer = KmlLayer(
-                    map,
-                    inputStream,
-                    application.applicationContext
-                )
+                val kmlLayer = KmlLayer(map, inputStream, application.applicationContext)
                 _mapLayers.update { currentLayers ->
-                    currentLayers.map {
-                        if (it.id == layerItem.id) it.copy(kmlLayerData = kmlLayer) else it
-                    }
+                    currentLayers.map { if (it.id == layerItem.id) it.copy(kmlLayerData = kmlLayer) else it }
                 }
                 kmlLayer
             }
         } catch (e: Exception) {
-            Log.e(
-                "MapViewModel",
-                "Error loading KML for ${layerItem.uri}",
-                e
-            )
+            Log.e("MapViewModel", "Error loading KML for ${layerItem.uri}", e)
             null
         }
     }
@@ -415,12 +381,12 @@ data class MapLayerItem(
     val name: String,
     val uri: Uri? = null,
     var isVisible: Boolean = true,
-    var kmlLayerData: KmlLayer? = null
+    var kmlLayerData: KmlLayer? = null,
 )
 
 @Serializable
 data class CustomTileProviderConfig(
     val id: String = UUID.randomUUID().toString(),
     val name: String,
-    val urlTemplate: String
+    val urlTemplate: String,
 )

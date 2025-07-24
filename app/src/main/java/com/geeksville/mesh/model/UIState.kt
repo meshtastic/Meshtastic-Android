@@ -103,51 +103,52 @@ fun getInitials(nameIn: String): String {
     val name = nameIn.trim().withoutEmojis()
     val words = name.split(Regex("\\s+")).filter { it.isNotEmpty() }
 
-    val initials = when (words.size) {
-        in 0 until minchars -> {
-            val nm = if (name.isNotEmpty()) {
-                name.first() + name.drop(1).filterNot { c -> c.lowercase() in "aeiou" }
-            } else {
-                ""
+    val initials =
+        when (words.size) {
+            in 0 until minchars -> {
+                val nm =
+                    if (name.isNotEmpty()) {
+                        name.first() + name.drop(1).filterNot { c -> c.lowercase() in "aeiou" }
+                    } else {
+                        ""
+                    }
+                if (nm.length >= nchars) nm else name
             }
-            if (nm.length >= nchars) nm else name
-        }
 
-        else -> words.map { it.first() }.joinToString("")
-    }
+            else -> words.map { it.first() }.joinToString("")
+        }
     return initials.take(nchars)
 }
 
 private fun String.withoutEmojis(): String = filterNot { char -> char.isSurrogate() }
 
 /**
- * Builds a [Channel] list from the difference between two [ChannelSettings] lists.
- * Only changes are included in the resulting list.
+ * Builds a [Channel] list from the difference between two [ChannelSettings] lists. Only changes are included in the
+ * resulting list.
  *
  * @param new The updated [ChannelSettings] list.
  * @param old The current [ChannelSettings] list (required when disabling unused channels).
  * @return A [Channel] list containing only the modified channels.
  */
-internal fun getChannelList(
-    new: List<ChannelSettings>,
-    old: List<ChannelSettings>,
-): List<ChannelProtos.Channel> = buildList {
-    for (i in 0..maxOf(old.lastIndex, new.lastIndex)) {
-        if (old.getOrNull(i) != new.getOrNull(i)) {
-            add(
-                channel {
-                    role = when (i) {
-                        0 -> ChannelProtos.Channel.Role.PRIMARY
-                        in 1..new.lastIndex -> ChannelProtos.Channel.Role.SECONDARY
-                        else -> ChannelProtos.Channel.Role.DISABLED
-                    }
-                    index = i
-                    settings = new.getOrNull(i) ?: channelSettings { }
-                }
-            )
+internal fun getChannelList(new: List<ChannelSettings>, old: List<ChannelSettings>): List<ChannelProtos.Channel> =
+    buildList {
+        for (i in 0..maxOf(old.lastIndex, new.lastIndex)) {
+            if (old.getOrNull(i) != new.getOrNull(i)) {
+                add(
+                    channel {
+                        role =
+                            when (i) {
+                                0 -> ChannelProtos.Channel.Role.PRIMARY
+                                in 1..new.lastIndex -> ChannelProtos.Channel.Role.SECONDARY
+                                else -> ChannelProtos.Channel.Role.DISABLED
+                            }
+                        index = i
+                        settings = new.getOrNull(i) ?: channelSettings {}
+                    },
+                )
+            }
         }
     }
-}
 
 data class NodesUiState(
     val sort: NodeSortOption = NodeSortOption.LAST_HEARD,
@@ -176,12 +177,14 @@ data class Contact(
     val messageCount: Int,
     val isMuted: Boolean,
     val isUnmessageable: Boolean,
-    val nodeColors: Pair<Int, Int>? = null
+    val nodeColors: Pair<Int, Int>? = null,
 )
 
-@Suppress("LongParameterList", "LargeClass")
+@Suppress("LongParameterList", "LargeClass", "UnusedPrivateProperty")
 @HiltViewModel
-class UIViewModel @Inject constructor(
+class UIViewModel
+@Inject
+constructor(
     private val app: Application,
     private val nodeDB: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
@@ -192,12 +195,13 @@ class UIViewModel @Inject constructor(
     private val locationRepository: LocationRepository,
     firmwareReleaseRepository: FirmwareReleaseRepository,
     private val preferences: SharedPreferences,
-    private val meshServiceNotifications: MeshServiceNotifications
-) : ViewModel(), Logging {
+    private val meshServiceNotifications: MeshServiceNotifications,
+) : ViewModel(),
+    Logging {
 
-    private val _theme =
-        MutableStateFlow(preferences.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM))
+    private val _theme = MutableStateFlow(preferences.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM))
     val theme: StateFlow<Int> = _theme.asStateFlow()
+
     fun setTheme(theme: Int) {
         _theme.value = theme
         preferences.edit { putInt("theme", theme) }
@@ -210,13 +214,10 @@ class UIViewModel @Inject constructor(
     val excludedModulesUnlocked: StateFlow<Boolean> = _excludedModulesUnlocked.asStateFlow()
 
     fun unlockExcludedModules() {
-        viewModelScope.launch {
-            _excludedModulesUnlocked.value = true
-        }
+        viewModelScope.launch { _excludedModulesUnlocked.value = true }
     }
 
-    val clientNotification: StateFlow<MeshProtos.ClientNotification?> =
-        radioConfigRepository.clientNotification
+    val clientNotification: StateFlow<MeshProtos.ClientNotification?> = radioConfigRepository.clientNotification
 
     fun clearClientNotification(notification: MeshProtos.ClientNotification) {
         radioConfigRepository.clearClientNotification()
@@ -252,9 +253,7 @@ class UIViewModel @Inject constructor(
                     onConfirm?.invoke()
                     dismissAlert()
                 },
-                onDismiss = {
-                    if (dismissable) dismissAlert()
-                },
+                onDismiss = { if (dismissable) dismissAlert() },
                 choices = choices,
             )
     }
@@ -265,52 +264,61 @@ class UIViewModel @Inject constructor(
 
     private val _title = MutableStateFlow("")
     val title: StateFlow<String> = _title.asStateFlow()
-    fun setTitle(title: String) {
-        viewModelScope.launch {
 
-            _title.value = title
-        }
+    fun setTitle(title: String) {
+        viewModelScope.launch { _title.value = title }
     }
 
-    val receivingLocationUpdates: StateFlow<Boolean> get() = locationRepository.receivingLocationUpdates
-    val meshService: IMeshService? get() = radioConfigRepository.meshService
+    val receivingLocationUpdates: StateFlow<Boolean>
+        get() = locationRepository.receivingLocationUpdates
 
-    val selectedBluetooth get() = radioInterfaceService.getDeviceAddress()?.getOrNull(0) == 'x'
+    val meshService: IMeshService?
+        get() = radioConfigRepository.meshService
+
+    val selectedBluetooth
+        get() = radioInterfaceService.getDeviceAddress()?.getOrNull(0) == 'x'
 
     private val _localConfig = MutableStateFlow<LocalConfig>(LocalConfig.getDefaultInstance())
     val localConfig: StateFlow<LocalConfig> = _localConfig
-    val config get() = _localConfig.value
+    val config
+        get() = _localConfig.value
 
-    private val _moduleConfig =
-        MutableStateFlow<LocalModuleConfig>(LocalModuleConfig.getDefaultInstance())
+    private val _moduleConfig = MutableStateFlow<LocalModuleConfig>(LocalModuleConfig.getDefaultInstance())
     val moduleConfig: StateFlow<LocalModuleConfig> = _moduleConfig
-    val module get() = _moduleConfig.value
+    val module
+        get() = _moduleConfig.value
 
     private val _channels = MutableStateFlow(channelSet {})
-    val channels: StateFlow<AppOnlyProtos.ChannelSet> get() = _channels
+    val channels: StateFlow<AppOnlyProtos.ChannelSet>
+        get() = _channels
 
     val quickChatActions
-        get() = quickChatActionRepository.getAllActions()
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+        get() =
+            quickChatActionRepository
+                .getAllActions()
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     private val nodeFilterText = MutableStateFlow("")
-    private val nodeSortOption = MutableStateFlow(
-        NodeSortOption.entries.getOrElse(
-            preferences.getInt("node-sort-option", NodeSortOption.VIA_FAVORITE.ordinal)
-        ) { NodeSortOption.VIA_FAVORITE }
-    )
+    private val nodeSortOption =
+        MutableStateFlow(
+            NodeSortOption.entries.getOrElse(
+                preferences.getInt("node-sort-option", NodeSortOption.VIA_FAVORITE.ordinal),
+            ) {
+                NodeSortOption.VIA_FAVORITE
+            },
+        )
     private val includeUnknown = MutableStateFlow(preferences.getBoolean("include-unknown", false))
     private val showDetails = MutableStateFlow(preferences.getBoolean("show-details", false))
     private val onlyOnline = MutableStateFlow(preferences.getBoolean("only-online", false))
     private val onlyDirect = MutableStateFlow(preferences.getBoolean("only-direct", false))
 
     private val onlyFavorites = MutableStateFlow(preferences.getBoolean("only-favorites", false))
-    private val showWaypointsOnMap =
-        MutableStateFlow(preferences.getBoolean("show-waypoints-on-map", true))
+    private val showWaypointsOnMap = MutableStateFlow(preferences.getBoolean("show-waypoints-on-map", true))
     private val showPrecisionCircleOnMap =
         MutableStateFlow(preferences.getBoolean("show-precision-circle-on-map", true))
 
     private val showIgnored = MutableStateFlow(preferences.getBoolean("show-ignored", false))
+
     fun toggleShowIgnored() {
         showIgnored.value = !showIgnored.value
         preferences.edit { putBoolean("show-ignored", showIgnored.value) }
@@ -349,184 +357,205 @@ class UIViewModel @Inject constructor(
         val showIgnored: Boolean,
     )
 
-    val nodeFilterStateFlow: Flow<NodeFilterState> = combine(
-        nodeFilterText,
-        includeUnknown,
-        onlyOnline,
-        onlyDirect,
-        showIgnored,
-    ) { filterText, includeUnknown, onlyOnline, onlyDirect, showIgnored ->
-        NodeFilterState(filterText, includeUnknown, onlyOnline, onlyDirect, showIgnored)
-    }
+    val nodeFilterStateFlow: Flow<NodeFilterState> =
+        combine(nodeFilterText, includeUnknown, onlyOnline, onlyDirect, showIgnored) {
+                filterText,
+                includeUnknown,
+                onlyOnline,
+                onlyDirect,
+                showIgnored,
+            ->
+            NodeFilterState(filterText, includeUnknown, onlyOnline, onlyDirect, showIgnored)
+        }
 
-    val nodesUiState: StateFlow<NodesUiState> = combine(
-        nodeFilterStateFlow,
-        nodeSortOption,
-        showDetails,
-        radioConfigRepository.deviceProfileFlow,
-    ) { filterFlow, sort, showDetails, profile ->
-        NodesUiState(
-            sort = sort,
-            filter = filterFlow.filterText,
-            includeUnknown = filterFlow.includeUnknown,
-            onlyOnline = filterFlow.onlyOnline,
-            onlyDirect = filterFlow.onlyDirect,
-            gpsFormat = profile.config.display.gpsFormat.number,
-            distanceUnits = profile.config.display.units.number,
-            tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
-            showDetails = showDetails,
-            showIgnored = filterFlow.showIgnored,
-        )
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = NodesUiState.Empty,
-    )
+    val nodesUiState: StateFlow<NodesUiState> =
+        combine(nodeFilterStateFlow, nodeSortOption, showDetails, radioConfigRepository.deviceProfileFlow) {
+                filterFlow,
+                sort,
+                showDetails,
+                profile,
+            ->
+            NodesUiState(
+                sort = sort,
+                filter = filterFlow.filterText,
+                includeUnknown = filterFlow.includeUnknown,
+                onlyOnline = filterFlow.onlyOnline,
+                onlyDirect = filterFlow.onlyDirect,
+                gpsFormat = profile.config.display.gpsFormat.number,
+                distanceUnits = profile.config.display.units.number,
+                tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
+                showDetails = showDetails,
+                showIgnored = filterFlow.showIgnored,
+            )
+        }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = NodesUiState.Empty,
+            )
 
-    val unfilteredNodeList: StateFlow<List<Node>> = nodeDB.getNodes().stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = emptyList(),
-    )
+    val unfilteredNodeList: StateFlow<List<Node>> =
+        nodeDB
+            .getNodes()
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList(),
+            )
 
-    val nodeList: StateFlow<List<Node>> = nodesUiState.flatMapLatest { state ->
-        nodeDB.getNodes(state.sort, state.filter, state.includeUnknown, state.onlyOnline, state.onlyDirect)
-            .map { list ->
-                list.filter { it.isIgnored == state.showIgnored }
+    val nodeList: StateFlow<List<Node>> =
+        nodesUiState
+            .flatMapLatest { state ->
+                nodeDB
+                    .getNodes(state.sort, state.filter, state.includeUnknown, state.onlyOnline, state.onlyDirect)
+                    .map { list -> list.filter { it.isIgnored == state.showIgnored } }
             }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = emptyList(),
-    )
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList(),
+            )
 
-    val onlineNodeCount = nodeDB.onlineNodeCount.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = 0,
-    )
+    val onlineNodeCount =
+        nodeDB.onlineNodeCount.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = 0,
+        )
 
-    val totalNodeCount = nodeDB.totalNodeCount.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = 0,
-    )
+    val totalNodeCount =
+        nodeDB.totalNodeCount.stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = 0,
+        )
 
     // hardware info about our local device (can be null)
-    val myNodeInfo: StateFlow<MyNodeEntity?> get() = nodeDB.myNodeInfo
-    val ourNodeInfo: StateFlow<Node?> get() = nodeDB.ourNodeInfo
+    val myNodeInfo: StateFlow<MyNodeEntity?>
+        get() = nodeDB.myNodeInfo
+
+    val ourNodeInfo: StateFlow<Node?>
+        get() = nodeDB.ourNodeInfo
 
     fun getNode(userId: String?) = nodeDB.getNode(userId ?: DataPacket.ID_BROADCAST)
+
     fun getUser(userId: String?) = nodeDB.getUser(userId ?: DataPacket.ID_BROADCAST)
 
     val snackbarState = SnackbarHostState()
+
     fun showSnackbar(text: Int) = showSnackbar(app.getString(text))
-    fun showSnackbar(text: String) = viewModelScope.launch {
-        snackbarState.showSnackbar(text)
-    }
+
+    fun showSnackbar(text: String) = viewModelScope.launch { snackbarState.showSnackbar(text) }
 
     init {
-        radioConfigRepository.errorMessage.filterNotNull().onEach {
-            showAlert(
-                title = app.getString(R.string.client_notification),
-                message = it,
-                onConfirm = {
-                    radioConfigRepository.clearErrorMessage()
-                },
-                dismissable = false
-            )
-        }.launchIn(viewModelScope)
+        radioConfigRepository.errorMessage
+            .filterNotNull()
+            .onEach {
+                showAlert(
+                    title = app.getString(R.string.client_notification),
+                    message = it,
+                    onConfirm = { radioConfigRepository.clearErrorMessage() },
+                    dismissable = false,
+                )
+            }
+            .launchIn(viewModelScope)
 
-        radioConfigRepository.localConfigFlow.onEach { config ->
-            _localConfig.value = config
-        }.launchIn(viewModelScope)
-        radioConfigRepository.moduleConfigFlow.onEach { config ->
-            _moduleConfig.value = config
-        }.launchIn(viewModelScope)
-        radioConfigRepository.channelSetFlow.onEach { channelSet ->
-            _channels.value = channelSet
-        }.launchIn(viewModelScope)
+        radioConfigRepository.localConfigFlow.onEach { config -> _localConfig.value = config }.launchIn(viewModelScope)
+        radioConfigRepository.moduleConfigFlow
+            .onEach { config -> _moduleConfig.value = config }
+            .launchIn(viewModelScope)
+        radioConfigRepository.channelSetFlow
+            .onEach { channelSet -> _channels.value = channelSet }
+            .launchIn(viewModelScope)
 
         debug("ViewModel created")
     }
 
-    val contactList = combine(
-        nodeDB.myNodeInfo,
-        packetRepository.getContacts(),
-        channels,
-        packetRepository.getContactSettings(),
-    ) { myNodeInfo, contacts, channelSet, settings ->
-        val myNodeNum = myNodeInfo?.myNodeNum ?: return@combine emptyList()
-        // Add empty channel placeholders (always show Broadcast contacts, even when empty)
-        val placeholder = (0 until channelSet.settingsCount).associate { ch ->
-            val contactKey = "$ch${DataPacket.ID_BROADCAST}"
-            val data = DataPacket(bytes = null, dataType = 1, time = 0L, channel = ch)
-            contactKey to Packet(0L, myNodeNum, 1, contactKey, 0L, true, data)
-        }
-
-        (contacts + (placeholder - contacts.keys)).values.map { packet ->
-            val data = packet.data
-            val contactKey = packet.contact_key
-
-            // Determine if this is my message (originated on this device)
-            val fromLocal = data.from == DataPacket.ID_LOCAL
-            val toBroadcast = data.to == DataPacket.ID_BROADCAST
-
-            // grab usernames from NodeInfo
-            val user = getUser(if (fromLocal) data.to else data.from)
-            val node = getNode(if (fromLocal) data.to else data.from)
-
-            val shortName = user.shortName
-            val longName = if (toBroadcast) {
-                channelSet.getChannel(data.channel)?.name ?: app.getString(R.string.channel_name)
-            } else {
-                user.longName
-            }
-
-            Contact(
-                contactKey = contactKey,
-                shortName = if (toBroadcast) "${data.channel}" else shortName,
-                longName = longName,
-                lastMessageTime = getShortDate(data.time),
-                lastMessageText = if (fromLocal) data.text else "$shortName: ${data.text}",
-                unreadCount = packetRepository.getUnreadCount(contactKey),
-                messageCount = packetRepository.getMessageCount(contactKey),
-                isMuted = settings[contactKey]?.isMuted == true,
-                isUnmessageable = user.isUnmessagable,
-                nodeColors = if (!toBroadcast) {
-                    node.colors
-                } else {
-                    null
+    val contactList =
+        combine(nodeDB.myNodeInfo, packetRepository.getContacts(), channels, packetRepository.getContactSettings()) {
+                myNodeInfo,
+                contacts,
+                channelSet,
+                settings,
+            ->
+            val myNodeNum = myNodeInfo?.myNodeNum ?: return@combine emptyList()
+            // Add empty channel placeholders (always show Broadcast contacts, even when empty)
+            val placeholder =
+                (0 until channelSet.settingsCount).associate { ch ->
+                    val contactKey = "$ch${DataPacket.ID_BROADCAST}"
+                    val data = DataPacket(bytes = null, dataType = 1, time = 0L, channel = ch)
+                    contactKey to Packet(0L, myNodeNum, 1, contactKey, 0L, true, data)
                 }
-            )
+
+            (contacts + (placeholder - contacts.keys)).values.map { packet ->
+                val data = packet.data
+                val contactKey = packet.contact_key
+
+                // Determine if this is my message (originated on this device)
+                val fromLocal = data.from == DataPacket.ID_LOCAL
+                val toBroadcast = data.to == DataPacket.ID_BROADCAST
+
+                // grab usernames from NodeInfo
+                val user = getUser(if (fromLocal) data.to else data.from)
+                val node = getNode(if (fromLocal) data.to else data.from)
+
+                val shortName = user.shortName
+                val longName =
+                    if (toBroadcast) {
+                        channelSet.getChannel(data.channel)?.name ?: app.getString(R.string.channel_name)
+                    } else {
+                        user.longName
+                    }
+
+                Contact(
+                    contactKey = contactKey,
+                    shortName = if (toBroadcast) "${data.channel}" else shortName,
+                    longName = longName,
+                    lastMessageTime = getShortDate(data.time),
+                    lastMessageText = if (fromLocal) data.text else "$shortName: ${data.text}",
+                    unreadCount = packetRepository.getUnreadCount(contactKey),
+                    messageCount = packetRepository.getMessageCount(contactKey),
+                    isMuted = settings[contactKey]?.isMuted == true,
+                    isUnmessageable = user.isUnmessagable,
+                    nodeColors =
+                    if (!toBroadcast) {
+                        node.colors
+                    } else {
+                        null
+                    },
+                )
+            }
         }
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = emptyList(),
-    )
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList(),
+            )
 
     fun getMessagesFrom(contactKey: String): StateFlow<List<Message>> {
-        _contactKeyForMessages.value = contactKey
+        contactKeyForMessages.value = contactKey
         return messagesForContactKey
     }
 
-    private val _contactKeyForMessages: MutableStateFlow<String?> = MutableStateFlow(null)
+    private val contactKeyForMessages: MutableStateFlow<String?> = MutableStateFlow(null)
     private val messagesForContactKey: StateFlow<List<Message>> =
-        _contactKeyForMessages.filterNotNull().flatMapLatest { contactKey ->
-            packetRepository.getMessagesFrom(contactKey, ::getNode)
-        }.stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
-            initialValue = emptyList(),
-        )
+        contactKeyForMessages
+            .filterNotNull()
+            .flatMapLatest { contactKey -> packetRepository.getMessagesFrom(contactKey, ::getNode) }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList(),
+            )
 
-    val waypoints = packetRepository.getWaypoints().mapLatest { list ->
-        list.associateBy { packet -> packet.data.waypoint!!.id }
-            .filterValues {
-                it.data.waypoint!!.expire == 0 || it.data.waypoint!!.expire > System.currentTimeMillis() / 1000
-            }
-    }
+    val waypoints =
+        packetRepository.getWaypoints().mapLatest { list ->
+            list
+                .associateBy { packet -> packet.data.waypoint!!.id }
+                .filterValues {
+                    it.data.waypoint!!.expire == 0 || it.data.waypoint!!.expire > System.currentTimeMillis() / 1000
+                }
+        }
 
     fun generatePacketId(): Int? {
         return try {
@@ -575,18 +604,16 @@ class UIViewModel @Inject constructor(
         radioConfigRepository.onServiceAction(ServiceAction.Reaction(emoji, replyId, contactKey))
     }
 
-    private val _sharedContactRequested: MutableStateFlow<AdminProtos.SharedContact?> =
-        MutableStateFlow(null)
-    val sharedContactRequested: StateFlow<AdminProtos.SharedContact?> get() = _sharedContactRequested.asStateFlow()
+    private val _sharedContactRequested: MutableStateFlow<AdminProtos.SharedContact?> = MutableStateFlow(null)
+    val sharedContactRequested: StateFlow<AdminProtos.SharedContact?>
+        get() = _sharedContactRequested.asStateFlow()
+
     fun setSharedContactRequested(sharedContact: AdminProtos.SharedContact?) {
-        viewModelScope.launch {
-            _sharedContactRequested.value = sharedContact
-        }
+        viewModelScope.launch { _sharedContactRequested.value = sharedContact }
     }
 
-    fun addSharedContact(sharedContact: AdminProtos.SharedContact) = viewModelScope.launch {
-        radioConfigRepository.onServiceAction(ServiceAction.AddSharedContact(sharedContact))
-    }
+    fun addSharedContact(sharedContact: AdminProtos.SharedContact) =
+        viewModelScope.launch { radioConfigRepository.onServiceAction(ServiceAction.AddSharedContact(sharedContact)) }
 
     fun requestTraceroute(destNum: Int) {
         info("Requesting traceroute for '$destNum'")
@@ -627,21 +654,16 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    fun setMuteUntil(contacts: List<String>, until: Long) = viewModelScope.launch(Dispatchers.IO) {
-        packetRepository.setMuteUntil(contacts, until)
-    }
+    fun setMuteUntil(contacts: List<String>, until: Long) =
+        viewModelScope.launch(Dispatchers.IO) { packetRepository.setMuteUntil(contacts, until) }
 
-    fun deleteContacts(contacts: List<String>) = viewModelScope.launch(Dispatchers.IO) {
-        packetRepository.deleteContacts(contacts)
-    }
+    fun deleteContacts(contacts: List<String>) =
+        viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteContacts(contacts) }
 
-    fun deleteMessages(uuidList: List<Long>) = viewModelScope.launch(Dispatchers.IO) {
-        packetRepository.deleteMessages(uuidList)
-    }
+    fun deleteMessages(uuidList: List<Long>) =
+        viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteMessages(uuidList) }
 
-    fun deleteWaypoint(id: Int) = viewModelScope.launch(Dispatchers.IO) {
-        packetRepository.deleteWaypoint(id)
-    }
+    fun deleteWaypoint(id: Int) = viewModelScope.launch(Dispatchers.IO) { packetRepository.deleteWaypoint(id) }
 
     fun clearUnreadCount(contact: String, timestamp: Long) = viewModelScope.launch(Dispatchers.IO) {
         packetRepository.clearUnreadCount(contact, timestamp)
@@ -655,27 +677,26 @@ class UIViewModel @Inject constructor(
     }
 
     // Connection state to our radio device
-    val connectionState get() = radioConfigRepository.connectionState
+    val connectionState
+        get() = radioConfigRepository.connectionState
+
     fun isConnected() = connectionState.value != MeshService.ConnectionState.DISCONNECTED
-    val isConnected =
-        radioConfigRepository.connectionState.map { it != MeshService.ConnectionState.DISCONNECTED }
+
+    val isConnected = radioConfigRepository.connectionState.map { it != MeshService.ConnectionState.DISCONNECTED }
 
     private val _requestChannelSet = MutableStateFlow<AppOnlyProtos.ChannelSet?>(null)
-    val requestChannelSet: StateFlow<AppOnlyProtos.ChannelSet?> get() = _requestChannelSet
+    val requestChannelSet: StateFlow<AppOnlyProtos.ChannelSet?>
+        get() = _requestChannelSet
 
-    fun requestChannelUrl(url: Uri) = runCatching {
-        _requestChannelSet.value = url.toChannelSet()
-    }.onFailure { ex ->
-        errormsg("Channel url error: ${ex.message}")
-        showSnackbar(R.string.channel_invalid)
-    }
+    fun requestChannelUrl(url: Uri) = runCatching { _requestChannelSet.value = url.toChannelSet() }
+        .onFailure { ex ->
+            errormsg("Channel url error: ${ex.message}")
+            showSnackbar(R.string.channel_invalid)
+        }
 
-    val latestStableFirmwareRelease =
-        firmwareReleaseRepository.stableRelease.mapNotNull { it?.asDeviceVersion() }
+    val latestStableFirmwareRelease = firmwareReleaseRepository.stableRelease.mapNotNull { it?.asDeviceVersion() }
 
-    /**
-     * Called immediately after activity observes requestChannelUrl
-     */
+    /** Called immediately after activity observes requestChannelUrl */
     fun clearRequestChannelUrl() {
         _requestChannelSet.value = null
     }
@@ -708,9 +729,7 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    fun handleNodeMenuAction(
-        action: NodeMenuAction,
-    ) {
+    fun handleNodeMenuAction(action: NodeMenuAction) {
         when (action) {
             is NodeMenuAction.Remove -> removeNode(action.node.num)
             is NodeMenuAction.Ignore -> ignoreNode(action.node)
@@ -727,10 +746,14 @@ class UIViewModel @Inject constructor(
     }
 
     // managed mode disables all access to configuration
-    val isManaged: Boolean get() = config.device.isManaged || config.security.isManaged
+    val isManaged: Boolean
+        get() = config.device.isManaged || config.security.isManaged
 
-    val myNodeNum get() = myNodeInfo.value?.myNodeNum
-    val maxChannels get() = myNodeInfo.value?.maxChannels ?: 8
+    val myNodeNum
+        get() = myNodeInfo.value?.myNodeNum
+
+    val maxChannels
+        get() = myNodeInfo.value?.maxChannels ?: 8
 
     override fun onCleared() {
         super.onCleared()
@@ -759,9 +782,7 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Set the radio config (also updates our saved copy in preferences).
-     */
+    /** Set the radio config (also updates our saved copy in preferences). */
     fun setChannels(channelSet: AppOnlyProtos.ChannelSet) = viewModelScope.launch {
         getChannelList(channelSet.settingsList, channels.value.settingsList).forEach(::setChannel)
         radioConfigRepository.replaceAllSettings(channelSet.settingsList)
@@ -771,9 +792,7 @@ class UIViewModel @Inject constructor(
     }
 
     fun refreshProvideLocation() {
-        viewModelScope.launch {
-            setProvideLocation(getProvidePref())
-        }
+        viewModelScope.launch { setProvideLocation(getProvidePref()) }
     }
 
     private fun getProvidePref(): Boolean {
@@ -781,9 +800,9 @@ class UIViewModel @Inject constructor(
         return value
     }
 
-    private val _provideLocation =
-        MutableStateFlow(getProvidePref())
-    val provideLocation: StateFlow<Boolean> get() = _provideLocation.asStateFlow()
+    private val _provideLocation = MutableStateFlow(getProvidePref())
+    val provideLocation: StateFlow<Boolean>
+        get() = _provideLocation.asStateFlow()
 
     fun setProvideLocation(value: Boolean) {
         viewModelScope.launch {
@@ -798,10 +817,11 @@ class UIViewModel @Inject constructor(
     }
 
     fun setOwner(name: String) {
-        val user = ourNodeInfo.value?.user?.copy {
-            longName = name
-            shortName = getInitials(name)
-        } ?: return
+        val user =
+            ourNodeInfo.value?.user?.copy {
+                longName = name
+                shortName = getInitials(name)
+            } ?: return
 
         try {
             // Note: we use ?. here because we might be running in the emulator
@@ -811,9 +831,7 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Write the persisted packet data out to a CSV file in the specified location.
-     */
+    /** Write the persisted packet data out to a CSV file in the specified location. */
     fun saveMessagesCSV(uri: Uri) {
         viewModelScope.launch(Dispatchers.Main) {
             // Extract distances to this device from position messages and put (node,SNR,distance) in
@@ -824,105 +842,104 @@ class UIViewModel @Inject constructor(
             val nodes = nodeDB.nodeDBbyNum.value
 
             val positionToPos: (MeshProtos.Position?) -> Position? = { meshPosition ->
-                meshPosition?.let { Position(it) }.takeIf {
-                    it?.isValid() == true
-                }
+                meshPosition?.let { Position(it) }.takeIf { it?.isValid() == true }
             }
 
             writeToUri(uri) { writer ->
                 val nodePositions = mutableMapOf<Int, MeshProtos.Position?>()
 
-                writer.appendLine("\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"distance\",\"hop limit\",\"payload\"")
+                @Suppress("MaxLineLength")
+                writer.appendLine(
+                    "\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"distance\",\"hop limit\",\"payload\"",
+                )
 
                 // Packets are ordered by time, we keep most recent position of
                 // our device in localNodePosition.
-                val dateFormat =
-                    SimpleDateFormat("\"yyyy-MM-dd\",\"HH:mm:ss\"", Locale.getDefault())
-                meshLogRepository.getAllLogsInReceiveOrder(Int.MAX_VALUE).first()
-                    .forEach { packet ->
-                        // If we get a NodeInfo packet, use it to update our position data (if valid)
-                        packet.nodeInfo?.let { nodeInfo ->
-                            positionToPos.invoke(nodeInfo.position)?.let {
-                                nodePositions[nodeInfo.num] = nodeInfo.position
+                val dateFormat = SimpleDateFormat("\"yyyy-MM-dd\",\"HH:mm:ss\"", Locale.getDefault())
+                meshLogRepository.getAllLogsInReceiveOrder(Int.MAX_VALUE).first().forEach { packet ->
+                    // If we get a NodeInfo packet, use it to update our position data (if valid)
+                    packet.nodeInfo?.let { nodeInfo ->
+                        positionToPos.invoke(nodeInfo.position)?.let { nodePositions[nodeInfo.num] = nodeInfo.position }
+                    }
+
+                    packet.meshPacket?.let { proto ->
+                        // If the packet contains position data then use it to update, if valid
+                        packet.position?.let { position ->
+                            positionToPos.invoke(position)?.let {
+                                nodePositions[proto.from.takeIf { it != 0 } ?: myNodeNum] = position
                             }
                         }
 
-                        packet.meshPacket?.let { proto ->
-                            // If the packet contains position data then use it to update, if valid
-                            packet.position?.let { position ->
-                                positionToPos.invoke(position)?.let {
-                                    nodePositions[proto.from.takeIf { it != 0 } ?: myNodeNum] =
-                                        position
-                                }
-                            }
+                        // Filter out of our results any packet that doesn't report SNR.  This
+                        // is primarily ADMIN_APP.
+                        if (proto.rxSnr != 0.0f) {
+                            val rxDateTime = dateFormat.format(packet.received_date)
+                            val rxFrom = proto.from.toUInt()
+                            val senderName = nodes[proto.from]?.user?.longName ?: ""
 
-                            // Filter out of our results any packet that doesn't report SNR.  This
-                            // is primarily ADMIN_APP.
-                            if (proto.rxSnr != 0.0f) {
-                                val rxDateTime = dateFormat.format(packet.received_date)
-                                val rxFrom = proto.from.toUInt()
-                                val senderName = nodes[proto.from]?.user?.longName ?: ""
+                            // sender lat & long
+                            val senderPosition = nodePositions[proto.from]
+                            val senderPos = positionToPos.invoke(senderPosition)
+                            val senderLat = senderPos?.latitude ?: ""
+                            val senderLong = senderPos?.longitude ?: ""
 
-                                // sender lat & long
-                                val senderPosition = nodePositions[proto.from]
-                                val senderPos = positionToPos.invoke(senderPosition)
-                                val senderLat = senderPos?.latitude ?: ""
-                                val senderLong = senderPos?.longitude ?: ""
+                            // rx lat, long, and elevation
+                            val rxPosition = nodePositions[myNodeNum]
+                            val rxPos = positionToPos.invoke(rxPosition)
+                            val rxLat = rxPos?.latitude ?: ""
+                            val rxLong = rxPos?.longitude ?: ""
+                            val rxAlt = rxPos?.altitude ?: ""
+                            val rxSnr = proto.rxSnr
 
-                                // rx lat, long, and elevation
-                                val rxPosition = nodePositions[myNodeNum]
-                                val rxPos = positionToPos.invoke(rxPosition)
-                                val rxLat = rxPos?.latitude ?: ""
-                                val rxLong = rxPos?.longitude ?: ""
-                                val rxAlt = rxPos?.altitude ?: ""
-                                val rxSnr = proto.rxSnr
+                            // Calculate the distance if both positions are valid
 
-                                // Calculate the distance if both positions are valid
-
-                                val dist = if (senderPos == null || rxPos == null) {
+                            val dist =
+                                if (senderPos == null || rxPos == null) {
                                     ""
                                 } else {
                                     positionToMeter(
                                         rxPosition!!, // Use rxPosition but only if rxPos was valid
-                                        senderPosition!! // Use senderPosition but only if senderPos was valid
-                                    ).roundToInt().toString()
+                                        senderPosition!!, // Use senderPosition but only if senderPos was valid
+                                    )
+                                        .roundToInt()
+                                        .toString()
                                 }
 
-                                val hopLimit = proto.hopLimit
+                            val hopLimit = proto.hopLimit
 
-                                val payload = when {
-                                    proto.decoded.portnumValue !in setOf(
-                                        Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
-                                        Portnums.PortNum.RANGE_TEST_APP_VALUE,
-                                    ) -> "<${proto.decoded.portnum}>"
+                            val payload =
+                                when {
+                                    proto.decoded.portnumValue !in
+                                        setOf(
+                                            Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                                            Portnums.PortNum.RANGE_TEST_APP_VALUE,
+                                        ) -> "<${proto.decoded.portnum}>"
 
-                                    proto.hasDecoded() -> proto.decoded.payload.toStringUtf8()
-                                        .replace("\"", "\"\"")
+                                    proto.hasDecoded() -> proto.decoded.payload.toStringUtf8().replace("\"", "\"\"")
 
                                     proto.hasEncrypted() -> "${proto.encrypted.size()} encrypted bytes"
                                     else -> ""
                                 }
 
-                                //  date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx elevation,rx snr,distance,hop limit,payload
-                                writer.appendLine("$rxDateTime,\"$rxFrom\",\"$senderName\",\"$senderLat\",\"$senderLong\",\"$rxLat\",\"$rxLong\",\"$rxAlt\",\"$rxSnr\",\"$dist\",\"$hopLimit\",\"$payload\"")
-                            }
+                            //  date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx elevation,rx
+                            // snr,distance,hop limit,payload
+                            @Suppress("MaxLineLength")
+                            writer.appendLine(
+                                "$rxDateTime,\"$rxFrom\",\"$senderName\",\"$senderLat\",\"$senderLong\",\"$rxLat\",\"$rxLong\",\"$rxAlt\",\"$rxSnr\",\"$dist\",\"$hopLimit\",\"$payload\"",
+                            )
                         }
                     }
+                }
             }
         }
     }
 
-    private suspend inline fun writeToUri(
-        uri: Uri,
-        crossinline block: suspend (BufferedWriter) -> Unit
-    ) {
+    private suspend inline fun writeToUri(uri: Uri, crossinline block: suspend (BufferedWriter) -> Unit) {
         withContext(Dispatchers.IO) {
             try {
                 app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
                     FileWriter(parcelFileDescriptor.fileDescriptor).use { fileWriter ->
-                        BufferedWriter(fileWriter).use { writer ->
-                            block.invoke(writer)
-                        }
+                        BufferedWriter(fileWriter).use { writer -> block.invoke(writer) }
                     }
                 }
             } catch (ex: FileNotFoundException) {
@@ -931,13 +948,11 @@ class UIViewModel @Inject constructor(
         }
     }
 
-    fun addQuickChatAction(action: QuickChatAction) = viewModelScope.launch(Dispatchers.IO) {
-        quickChatActionRepository.upsert(action)
-    }
+    fun addQuickChatAction(action: QuickChatAction) =
+        viewModelScope.launch(Dispatchers.IO) { quickChatActionRepository.upsert(action) }
 
-    fun deleteQuickChatAction(action: QuickChatAction) = viewModelScope.launch(Dispatchers.IO) {
-        quickChatActionRepository.delete(action)
-    }
+    fun deleteQuickChatAction(action: QuickChatAction) =
+        viewModelScope.launch(Dispatchers.IO) { quickChatActionRepository.delete(action) }
 
     fun updateActionPositions(actions: List<QuickChatAction>) {
         viewModelScope.launch(Dispatchers.IO) {

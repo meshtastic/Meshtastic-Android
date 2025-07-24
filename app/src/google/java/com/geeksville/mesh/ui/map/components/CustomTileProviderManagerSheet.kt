@@ -58,9 +58,7 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Suppress("LongMethod")
 @Composable
-fun CustomTileProviderManagerSheet(
-    mapViewModel: MapViewModel
-) {
+fun CustomTileProviderManagerSheet(mapViewModel: MapViewModel) {
     val customTileProviders by mapViewModel.customTileProviderConfigs.collectAsStateWithLifecycle()
     var editingConfig by remember { mutableStateOf<CustomTileProviderConfig?>(null) }
     var showEditDialog by remember { mutableStateOf(false) }
@@ -80,27 +78,20 @@ fun CustomTileProviderManagerSheet(
                 if (editingConfig == null) { // Adding new
                     mapViewModel.addCustomTileProvider(name, url)
                 } else { // Editing existing
-                    mapViewModel.updateCustomTileProvider(
-                        editingConfig!!.copy(
-                            name = name,
-                            urlTemplate = url
-                        )
-                    )
+                    mapViewModel.updateCustomTileProvider(editingConfig!!.copy(name = name, urlTemplate = url))
                 }
                 showEditDialog = false
             },
-            mapViewModel = mapViewModel
+            mapViewModel = mapViewModel,
         )
     }
 
-    LazyColumn(
-        contentPadding = PaddingValues(bottom = 16.dp)
-    ) {
+    LazyColumn(contentPadding = PaddingValues(bottom = 16.dp)) {
         item {
             Text(
                 text = stringResource(R.string.manage_custom_tile_sources),
                 style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier.padding(16.dp),
             )
             HorizontalDivider()
         }
@@ -110,38 +101,35 @@ fun CustomTileProviderManagerSheet(
                 Text(
                     text = stringResource(R.string.no_custom_tile_sources_found),
                     modifier = Modifier.padding(16.dp),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             }
         } else {
             items(customTileProviders, key = { it.id }) { config ->
                 ListItem(
                     headlineContent = { Text(config.name) },
-                    supportingContent = {
-                        Text(
-                            config.urlTemplate,
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    },
+                    supportingContent = { Text(config.urlTemplate, style = MaterialTheme.typography.bodySmall) },
                     trailingContent = {
                         Row {
-                            IconButton(onClick = {
-                                editingConfig = config
-                                showEditDialog = true
-                            }) {
+                            IconButton(
+                                onClick = {
+                                    editingConfig = config
+                                    showEditDialog = true
+                                },
+                            ) {
                                 Icon(
                                     Icons.Filled.Edit,
-                                    contentDescription = stringResource(R.string.edit_custom_tile_source)
+                                    contentDescription = stringResource(R.string.edit_custom_tile_source),
                                 )
                             }
                             IconButton(onClick = { mapViewModel.removeCustomTileProvider(config.id) }) {
                                 Icon(
                                     Icons.Filled.Delete,
-                                    contentDescription = stringResource(R.string.delete_custom_tile_source)
+                                    contentDescription = stringResource(R.string.delete_custom_tile_source),
                                 )
                             }
                         }
-                    }
+                    },
                 )
                 HorizontalDivider()
             }
@@ -153,9 +141,7 @@ fun CustomTileProviderManagerSheet(
                     editingConfig = null
                     showEditDialog = true
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
             ) {
                 Text(stringResource(R.string.add_custom_tile_source))
             }
@@ -169,7 +155,7 @@ private fun AddEditCustomTileProviderDialog(
     config: CustomTileProviderConfig?,
     onDismiss: () -> Unit,
     onSave: (String, String) -> Unit,
-    mapViewModel: MapViewModel
+    mapViewModel: MapViewModel,
 ) {
     var name by rememberSaveable { mutableStateOf(config?.name ?: "") }
     var url by rememberSaveable { mutableStateOf(config?.urlTemplate ?: "") }
@@ -184,15 +170,8 @@ private fun AddEditCustomTileProviderDialog(
 
     fun validateAndSave() {
         val currentNameError =
-            validateName(
-                name,
-                customTileProviders,
-                config?.id,
-                emptyNameError,
-                providerNameExistsError
-            )
-        val currentUrlError =
-            validateUrl(url, urlCannotBeEmptyError, urlMustContainPlaceholdersError)
+            validateName(name, customTileProviders, config?.id, emptyNameError, providerNameExistsError)
+        val currentUrlError = validateUrl(url, urlCannotBeEmptyError, urlMustContainPlaceholdersError)
 
         nameError = currentNameError
         urlError = currentUrlError
@@ -209,10 +188,8 @@ private fun AddEditCustomTileProviderDialog(
                 if (config == null) {
                     stringResource(R.string.add_custom_tile_source)
                 } else {
-                    stringResource(
-                        R.string.edit_custom_tile_source
-                    )
-                }
+                    stringResource(R.string.edit_custom_tile_source)
+                },
             )
         },
         text = {
@@ -226,7 +203,7 @@ private fun AddEditCustomTileProviderDialog(
                     label = { Text(stringResource(R.string.name)) },
                     isError = nameError != null,
                     supportingText = { nameError?.let { Text(it) } },
-                    singleLine = true
+                    singleLine = true,
                 )
                 OutlinedTextField(
                     value = url,
@@ -244,20 +221,12 @@ private fun AddEditCustomTileProviderDialog(
                         }
                     },
                     singleLine = false,
-                    maxLines = 2
+                    maxLines = 2,
                 )
             }
         },
-        confirmButton = {
-            Button(onClick = { validateAndSave() }) {
-                Text(stringResource(R.string.save))
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.cancel))
-            }
-        }
+        confirmButton = { Button(onClick = { validateAndSave() }) { Text(stringResource(R.string.save)) } },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
     )
 }
 
@@ -266,25 +235,20 @@ private fun validateName(
     providers: List<CustomTileProviderConfig>,
     currentId: String?,
     emptyNameError: String,
-    nameExistsError: String
-): String? {
-    return if (name.isBlank()) {
-        emptyNameError
-    } else if (providers.any { it.name.equals(name, ignoreCase = true) && it.id != currentId }) {
-        nameExistsError
-    } else {
-        null
-    }
+    nameExistsError: String,
+): String? = if (name.isBlank()) {
+    emptyNameError
+} else if (providers.any { it.name.equals(name, ignoreCase = true) && it.id != currentId }) {
+    nameExistsError
+} else {
+    null
 }
 
-private fun validateUrl(
-    url: String,
-    emptyUrlError: String,
-    mustContainPlaceholdersError: String
-): String? {
-    return if (url.isBlank()) {
+private fun validateUrl(url: String, emptyUrlError: String, mustContainPlaceholdersError: String): String? =
+    if (url.isBlank()) {
         emptyUrlError
-    } else if (!url.contains("{z}", ignoreCase = true) ||
+    } else if (
+        !url.contains("{z}", ignoreCase = true) ||
         !url.contains("{x}", ignoreCase = true) ||
         !url.contains("{y}", ignoreCase = true)
     ) {
@@ -292,4 +256,3 @@ private fun validateUrl(
     } else {
         null
     }
-}

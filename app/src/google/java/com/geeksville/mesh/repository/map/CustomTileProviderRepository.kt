@@ -22,8 +22,12 @@ import kotlinx.coroutines.flow.Flow
 
 interface CustomTileProviderRepository {
     fun getCustomTileProviders(): Flow<List<CustomTileProviderConfig>>
+
     suspend fun addCustomTileProvider(config: CustomTileProviderConfig)
+
     suspend fun updateCustomTileProvider(config: CustomTileProviderConfig)
+
     suspend fun deleteCustomTileProvider(configId: String)
+
     suspend fun getCustomTileProviderById(configId: String): CustomTileProviderConfig?
 }

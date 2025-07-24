@@ -38,23 +38,21 @@ internal fun MapTypeDropdown(
     expanded: Boolean,
     onDismissRequest: () -> Unit,
     mapViewModel: MapViewModel,
-    onManageCustomTileProvidersClicked: () -> Unit
+    onManageCustomTileProvidersClicked: () -> Unit,
 ) {
     val customTileProviders by mapViewModel.customTileProviderConfigs.collectAsStateWithLifecycle()
     val selectedCustomUrl by mapViewModel.selectedCustomTileProviderUrl.collectAsStateWithLifecycle()
     val selectedGoogleMapType by mapViewModel.selectedGoogleMapType.collectAsStateWithLifecycle()
 
-    val googleMapTypes = listOf(
-        stringResource(id = R.string.map_type_normal) to MapType.NORMAL,
-        stringResource(id = R.string.map_type_satellite) to MapType.SATELLITE,
-        stringResource(id = R.string.map_type_terrain) to MapType.TERRAIN,
-        stringResource(id = R.string.map_type_hybrid) to MapType.HYBRID,
-    )
+    val googleMapTypes =
+        listOf(
+            stringResource(id = R.string.map_type_normal) to MapType.NORMAL,
+            stringResource(id = R.string.map_type_satellite) to MapType.SATELLITE,
+            stringResource(id = R.string.map_type_terrain) to MapType.TERRAIN,
+            stringResource(id = R.string.map_type_hybrid) to MapType.HYBRID,
+        )
 
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = onDismissRequest
-    ) {
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
         googleMapTypes.forEach { (name, type) ->
             DropdownMenuItem(
                 text = { Text(name) },
@@ -62,16 +60,12 @@ internal fun MapTypeDropdown(
                     mapViewModel.setSelectedGoogleMapType(type)
                     onDismissRequest() // Close menu
                 },
-                trailingIcon = if (selectedCustomUrl == null && selectedGoogleMapType == type) {
-                    {
-                        Icon(
-                            Icons.Filled.Check,
-                            contentDescription = stringResource(R.string.selected_map_type)
-                        )
-                    }
+                trailingIcon =
+                if (selectedCustomUrl == null && selectedGoogleMapType == type) {
+                    { Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.selected_map_type)) }
                 } else {
                     null
-                }
+                },
             )
         }
 
@@ -84,16 +78,17 @@ internal fun MapTypeDropdown(
                         mapViewModel.selectCustomTileProvider(config)
                         onDismissRequest() // Close menu
                     },
-                    trailingIcon = if (selectedCustomUrl == config.urlTemplate) {
+                    trailingIcon =
+                    if (selectedCustomUrl == config.urlTemplate) {
                         {
                             Icon(
                                 Icons.Filled.Check,
-                                contentDescription = stringResource(R.string.selected_map_type)
+                                contentDescription = stringResource(R.string.selected_map_type),
                             )
                         }
                     } else {
                         null
-                    }
+                    },
                 )
             }
         }
@@ -103,7 +98,7 @@ internal fun MapTypeDropdown(
             onClick = {
                 onManageCustomTileProvidersClicked()
                 onDismissRequest()
-            }
+            },
         )
     }
 }

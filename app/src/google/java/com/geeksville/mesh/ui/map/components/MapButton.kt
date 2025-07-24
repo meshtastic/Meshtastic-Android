@@ -24,19 +24,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 
 @Composable
-fun MapButton(
-    icon: ImageVector,
-    contentDescription: String,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
-) {
-    FilledIconButton(
-        onClick = onClick,
-        modifier = modifier
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = contentDescription
-        )
+fun MapButton(icon: ImageVector, contentDescription: String, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    FilledIconButton(onClick = onClick, modifier = modifier) {
+        Icon(imageVector = icon, contentDescription = contentDescription)
     }
 }

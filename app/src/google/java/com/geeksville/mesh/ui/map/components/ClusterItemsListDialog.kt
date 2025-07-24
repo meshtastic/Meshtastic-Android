@@ -43,54 +43,33 @@ fun ClusterItemsListDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = {
-            Text(text = stringResource(R.string.nodes_at_this_location))
-        },
+        title = { Text(text = stringResource(R.string.nodes_at_this_location)) },
         text = {
             // Use a LazyColumn for potentially long lists of items
-            LazyColumn(
-                contentPadding = PaddingValues(vertical = 8.dp)
-            ) {
+            LazyColumn(contentPadding = PaddingValues(vertical = 8.dp)) {
                 items(items, key = { it.node.num }) { item ->
-                    ClusterDialogListItem(
-                        item = item,
-                        onClick = { onItemClick(item) }
-                    )
+                    ClusterDialogListItem(item = item, onClick = { onItemClick(item) })
                 }
             }
         },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.okay))
-            }
-        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.okay)) } },
     )
 }
 
 @Composable
-private fun ClusterDialogListItem(
-    item: NodeClusterItem,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun ClusterDialogListItem(item: NodeClusterItem, onClick: () -> Unit, modifier: Modifier = Modifier) {
     ListItem(
-        leadingContent = {
-            NodeChip(
-                node = item.node,
-                enabled = false,
-                isThisNode = false,
-                isConnected = false
-            ) { }
-        },
+        leadingContent = { NodeChip(node = item.node, enabled = false, isThisNode = false, isConnected = false) {} },
         headlineContent = { Text(item.nodeTitle) },
         supportingContent = {
             if (item.nodeSnippet.isNotBlank()) {
                 Text(item.nodeSnippet)
             }
         },
-        modifier = modifier
+        modifier =
+        modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 8.dp, vertical = 4.dp) // Add some padding around list items
+            .padding(horizontal = 8.dp, vertical = 4.dp), // Add some padding around list items
     )
 }

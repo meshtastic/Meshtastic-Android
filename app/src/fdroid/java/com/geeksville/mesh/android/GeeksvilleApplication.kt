@@ -25,20 +25,23 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import com.geeksville.mesh.analytics.AnalyticsProvider
 
-open class GeeksvilleApplication : Application(), Logging {
+open class GeeksvilleApplication :
+    Application(),
+    Logging {
 
     companion object {
         lateinit var analytics: AnalyticsProvider
     }
+
     val isGooglePlayAvailable: Boolean
         get() {
-          return false
+            return false
         }
+
     // / Are we running inside the testlab?
     val isInTestLab: Boolean
         get() {
-            val testLabSetting =
-                Settings.System.getString(contentResolver, "firebase.test.lab") ?: null
+            val testLabSetting = Settings.System.getString(contentResolver, "firebase.test.lab") ?: null
             if (testLabSetting != null) {
                 info("Testlab is $testLabSetting")
             }
@@ -52,9 +55,7 @@ open class GeeksvilleApplication : Application(), Logging {
     var isAnalyticsAllowed: Boolean
         get() = analyticsPrefs.getBoolean("allowed", true)
         set(value) {
-            analyticsPrefs.edit {
-                putBoolean("allowed", value)
-            }
+            analyticsPrefs.edit { putBoolean("allowed", value) }
 
             // Change the flag with the providers
             analytics.setEnabled(value && !isInTestLab) // Never do analytics in the test lab

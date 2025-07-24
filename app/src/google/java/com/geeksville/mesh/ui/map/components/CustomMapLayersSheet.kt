@@ -51,14 +51,12 @@ fun CustomMapLayersSheet(
     onRemoveLayer: (String) -> Unit,
     onAddLayerClicked: () -> Unit,
 ) {
-    LazyColumn(
-        contentPadding = PaddingValues(bottom = 16.dp)
-    ) {
+    LazyColumn(contentPadding = PaddingValues(bottom = 16.dp)) {
         item {
             Text(
                 modifier = Modifier.Companion.padding(16.dp),
                 text = stringResource(R.string.manage_map_layers),
-                style = MaterialTheme.typography.headlineSmall
+                style = MaterialTheme.typography.headlineSmall,
             )
             HorizontalDivider()
         }
@@ -68,7 +66,7 @@ fun CustomMapLayersSheet(
                 Text(
                     modifier = Modifier.Companion.padding(16.dp),
                     text = stringResource(R.string.no_map_layers_loaded),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
                 )
             }
         } else {
@@ -77,43 +75,38 @@ fun CustomMapLayersSheet(
                     headlineContent = { Text(layer.name) },
                     trailingContent = {
                         Row {
-                            IconButton(onClick = {
-                                onToggleVisibility(layer.id)
-                            }) {
+                            IconButton(onClick = { onToggleVisibility(layer.id) }) {
                                 Icon(
-                                    imageVector = if (layer.isVisible) {
+                                    imageVector =
+                                    if (layer.isVisible) {
                                         Icons.Filled.Visibility
                                     } else {
                                         Icons.Filled.VisibilityOff
                                     },
-                                    contentDescription = stringResource(
+                                    contentDescription =
+                                    stringResource(
                                         if (layer.isVisible) {
                                             R.string.hide_layer
                                         } else {
                                             R.string.show_layer
-                                        }
-                                    )
+                                        },
+                                    ),
                                 )
                             }
                             IconButton(onClick = { onRemoveLayer(layer.id) }) {
                                 Icon(
                                     imageVector = Icons.Filled.Delete,
-                                    contentDescription = stringResource(R.string.remove_layer)
+                                    contentDescription = stringResource(R.string.remove_layer),
                                 )
                             }
                         }
-                    }
+                    },
                 )
                 HorizontalDivider()
             }
         }
         item {
-            Button(
-                modifier = Modifier.Companion
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                onClick = onAddLayerClicked
-            ) {
+            Button(modifier = Modifier.Companion.fillMaxWidth().padding(16.dp), onClick = onAddLayerClicked) {
                 Text(stringResource(R.string.add_layer))
             }
         }

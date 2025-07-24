@@ -34,25 +34,21 @@ import androidx.compose.ui.res.stringResource
 import com.geeksville.mesh.R
 
 @Composable
-internal fun DownloadButton(
-    enabled: Boolean,
-    onClick: () -> Unit,
-) {
+internal fun DownloadButton(enabled: Boolean, onClick: () -> Unit) {
     AnimatedVisibility(
         visible = enabled,
-        enter = slideInHorizontally(
+        enter =
+        slideInHorizontally(
             initialOffsetX = { it },
-            animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing)
+            animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing),
         ),
-        exit = slideOutHorizontally(
+        exit =
+        slideOutHorizontally(
             targetOffsetX = { it },
-            animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing)
-        )
+            animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing),
+        ),
     ) {
-        FloatingActionButton(
-            onClick = onClick,
-            contentColor = MaterialTheme.colorScheme.primary,
-        ) {
+        FloatingActionButton(onClick = onClick, contentColor = MaterialTheme.colorScheme.primary) {
             Icon(
                 imageVector = Icons.Default.Download,
                 contentDescription = stringResource(R.string.map_download_region),
@@ -62,8 +58,8 @@ internal fun DownloadButton(
     }
 }
 
-//@Preview(showBackground = true)
-//@Composable
-//private fun DownloadButtonPreview() {
+// @Preview(showBackground = true)
+// @Composable
+// private fun DownloadButtonPreview() {
 //    DownloadButton(true, onClick = {})
-//}
+// }

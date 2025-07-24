@@ -34,23 +34,22 @@ import kotlinx.serialization.json.Json
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val PREFS_NAME_TILE =
-    "map_tile_provider_prefs" // Renamed to avoid conflict if PREFS_NAME is global
+private const val PREFS_NAME_TILE = "map_tile_provider_prefs" // Renamed to avoid conflict if PREFS_NAME is global
 private const val KEY_CUSTOM_TILE_PROVIDERS = "custom_tile_providers"
 
 @Singleton // Make it a singleton if managed by Hilt
-class SharedPreferencesCustomTileProviderRepository @Inject constructor(
+class SharedPreferencesCustomTileProviderRepository
+@Inject
+constructor(
     @ApplicationContext private val context: Context,
     private val json: Json, // Inject Json instance if configured globally, or create one here
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher // Inject dispatcher with qualifier
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher, // Inject dispatcher with qualifier
 ) : CustomTileProviderRepository {
 
-    private val sharedPreferences =
-        context.getSharedPreferences(PREFS_NAME_TILE, Context.MODE_PRIVATE)
+    private val sharedPreferences = context.getSharedPreferences(PREFS_NAME_TILE, Context.MODE_PRIVATE)
 
     // Use a MutableStateFlow internally to emit updates
-    private val _customTileProvidersFlow =
-        MutableStateFlow<List<CustomTileProviderConfig>>(emptyList())
+    private val customTileProvidersStateFlow = MutableStateFlow<List<CustomTileProviderConfig>>(emptyList())
 
     init {
         // Load initial data into the flow
@@ -61,19 +60,19 @@ class SharedPreferencesCustomTileProviderRepository @Inject constructor(
         val jsonString = sharedPreferences.getString(KEY_CUSTOM_TILE_PROVIDERS, null)
         if (jsonString != null) {
             try {
-                _customTileProvidersFlow.value =
-                    json.decodeFromString<List<CustomTileProviderConfig>>(jsonString)
+                customTileProvidersStateFlow.value = json.decodeFromString<List<CustomTileProviderConfig>>(jsonString)
             } catch (e: SerializationException) {
                 Log.e("TileRepo", "Error deserializing tile providers", e)
-                _customTileProvidersFlow.value = emptyList()
+                customTileProvidersStateFlow.value = emptyList()
             }
         } else {
-            _customTileProvidersFlow.value = emptyList()
+            customTileProvidersStateFlow.value = emptyList()
         }
     }
 
     private suspend fun saveDataToPrefs(providers: List<CustomTileProviderConfig>) {
-        withContext(ioDispatcher) { // Perform SharedPreferences write on IO dispatcher
+        withContext(ioDispatcher) {
+            // Perform SharedPreferences write on IO dispatcher
             try {
                 val jsonString = json.encodeToString(providers)
                 sharedPreferences.edit { putString(KEY_CUSTOM_TILE_PROVIDERS, jsonString) }
@@ -84,32 +83,29 @@ class SharedPreferencesCustomTileProviderRepository @Inject constructor(
     }
 
     override fun getCustomTileProviders(): Flow<List<CustomTileProviderConfig>> {
-        return _customTileProvidersFlow.asStateFlow() // Expose as StateFlow or just Flow
+        return customTileProvidersStateFlow.asStateFlow() // Expose as StateFlow or just Flow
     }
 
     override suspend fun addCustomTileProvider(config: CustomTileProviderConfig) {
         // Validation can be done here or in the ViewModel before calling add
         // For simplicity, assuming valid config is passed
-        val newList = _customTileProvidersFlow.value + config
-        _customTileProvidersFlow.value = newList
+        val newList = customTileProvidersStateFlow.value + config
+        customTileProvidersStateFlow.value = newList
         saveDataToPrefs(newList)
     }
 
     override suspend fun updateCustomTileProvider(config: CustomTileProviderConfig) {
-        val newList = _customTileProvidersFlow.value.map {
-            if (it.id == config.id) config else it
-        }
-        _customTileProvidersFlow.value = newList
+        val newList = customTileProvidersStateFlow.value.map { if (it.id == config.id) config else it }
+        customTileProvidersStateFlow.value = newList
         saveDataToPrefs(newList)
     }
 
     override suspend fun deleteCustomTileProvider(configId: String) {
-        val newList = _customTileProvidersFlow.value.filterNot { it.id == configId }
-        _customTileProvidersFlow.value = newList
+        val newList = customTileProvidersStateFlow.value.filterNot { it.id == configId }
+        customTileProvidersStateFlow.value = newList
         saveDataToPrefs(newList)
     }
 
-    override suspend fun getCustomTileProviderById(configId: String): CustomTileProviderConfig? {
-        return _customTileProvidersFlow.value.find { it.id == configId }
-    }
+    override suspend fun getCustomTileProviderById(configId: String): CustomTileProviderConfig? =
+        customTileProvidersStateFlow.value.find { it.id == configId }
 }

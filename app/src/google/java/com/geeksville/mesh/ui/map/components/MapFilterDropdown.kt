@@ -34,31 +34,24 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.map.MapViewModel
 
 @Composable
-internal fun MapFilterDropdown(
-    expanded: Boolean,
-    onDismissRequest: () -> Unit,
-    mapViewModel: MapViewModel,
-) {
+internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, mapViewModel: MapViewModel) {
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
-    DropdownMenu(
-        expanded = expanded,
-        onDismissRequest = onDismissRequest
-    ) {
+    DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
         DropdownMenuItem(
             text = { Text(stringResource(id = R.string.only_favorites)) },
             onClick = { mapViewModel.setOnlyFavorites(!mapFilterState.onlyFavorites) },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Filled.Favorite,
-                    contentDescription = stringResource(id = R.string.only_favorites)
+                    contentDescription = stringResource(id = R.string.only_favorites),
                 )
             },
             trailingIcon = {
                 Checkbox(
                     checked = mapFilterState.onlyFavorites,
-                    onCheckedChange = { mapViewModel.setOnlyFavorites(it) }
+                    onCheckedChange = { mapViewModel.setOnlyFavorites(it) },
                 )
-            }
+            },
         )
         DropdownMenuItem(
             text = { Text(stringResource(id = R.string.show_waypoints)) },
@@ -66,15 +59,15 @@ internal fun MapFilterDropdown(
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Filled.Place,
-                    contentDescription = stringResource(id = R.string.show_waypoints)
+                    contentDescription = stringResource(id = R.string.show_waypoints),
                 )
             },
             trailingIcon = {
                 Checkbox(
                     checked = mapFilterState.showWaypoints,
-                    onCheckedChange = { mapViewModel.setShowWaypointsOnMap(it) }
+                    onCheckedChange = { mapViewModel.setShowWaypointsOnMap(it) },
                 )
-            }
+            },
         )
         DropdownMenuItem(
             text = { Text(stringResource(id = R.string.show_precision_circle)) },
@@ -82,15 +75,15 @@ internal fun MapFilterDropdown(
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Outlined.RadioButtonUnchecked, // Placeholder icon
-                    contentDescription = stringResource(id = R.string.show_precision_circle)
+                    contentDescription = stringResource(id = R.string.show_precision_circle),
                 )
             },
             trailingIcon = {
                 Checkbox(
                     checked = mapFilterState.showPrecisionCircle,
-                    onCheckedChange = { mapViewModel.setShowPrecisionCircleOnMap(it) }
+                    onCheckedChange = { mapViewModel.setShowPrecisionCircleOnMap(it) },
                 )
-            }
+            },
         )
     }
 }

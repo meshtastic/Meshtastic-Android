@@ -26,21 +26,15 @@ import com.geeksville.mesh.ui.map.MapView
 import kotlinx.serialization.Serializable
 
 sealed class MapRoutes {
-    @Serializable
-    data object Map : Route
+    @Serializable data object Map : Route
 }
 
-fun NavGraphBuilder.mapGraph(
-    navController: NavHostController,
-    uiViewModel: UIViewModel,
-) {
+fun NavGraphBuilder.mapGraph(navController: NavHostController, uiViewModel: UIViewModel) {
     composable<MapRoutes.Map> {
         MapView(
             uiViewModel = uiViewModel,
             mapViewModel = hiltViewModel(),
-            navigateToNodeDetails = {
-                navController.navigate(NodesRoutes.NodeDetailGraph(it))
-            },
+            navigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
         )
     }
 }

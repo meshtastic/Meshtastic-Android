@@ -31,13 +31,14 @@ class DataPair(val name: String, valueIn: Any?) {
 
     // / An accumulating firebase event - only one allowed per event
     constructor(d: Double) : this(FirebaseAnalytics.Param.VALUE, d)
+
     constructor(d: Int) : this(FirebaseAnalytics.Param.VALUE, d)
 }
 
-/**
- * Implement our analytics API using Firebase Analytics
- */
-class FirebaseAnalytics(context: Context) : AnalyticsProvider, Logging {
+/** Implement our analytics API using Firebase Analytics */
+class FirebaseAnalytics(context: Context) :
+    AnalyticsProvider,
+    Logging {
 
     val t = Firebase.analytics
 
@@ -88,9 +89,7 @@ class FirebaseAnalytics(context: Context) : AnalyticsProvider, Logging {
         // Mint.logEvent("$name increment")
     }
 
-    /**
-     * Send a google analytics screen view event
-     */
+    /** Send a google analytics screen view event */
     override fun sendScreenView(name: String) {
         debug("Analytics: start screen $name")
         t.logEvent(FirebaseAnalytics.Event.SCREEN_VIEW) {

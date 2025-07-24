@@ -109,13 +109,11 @@ import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import kotlinx.coroutines.delay
 
-fun String?.isIPAddress(): Boolean {
-    return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-        @Suppress("DEPRECATION")
-        this != null && Patterns.IP_ADDRESS.matcher(this).matches()
-    } else {
-        InetAddresses.isNumericAddress(this.toString())
-    }
+fun String?.isIPAddress(): Boolean = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+    @Suppress("DEPRECATION")
+    this != null && Patterns.IP_ADDRESS.matcher(this).matches()
+} else {
+    InetAddresses.isNumericAddress(this.toString())
 }
 
 @Suppress("CyclomaticComplexMethod", "LongMethod", "MagicNumber")
@@ -127,7 +125,7 @@ fun ConnectionsScreen(
     radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
     onNavigateToRadioConfig: () -> Unit,
     onNavigateToNodeDetails: (Int) -> Unit,
-    onConfigNavigate: (Route) -> Unit
+    onConfigNavigate: (Route) -> Unit,
 ) {
     val radioConfigState by radioConfigViewModel.radioConfigState.collectAsStateWithLifecycle()
     val config by uiViewModel.localConfig.collectAsState()
@@ -143,7 +141,8 @@ fun ConnectionsScreen(
     val info by uiViewModel.myNodeInfo.collectAsState()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val bluetoothEnabled by bluetoothViewModel.enabled.observeAsState()
-    val regionUnset = currentRegion == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET &&
+    val regionUnset =
+        currentRegion == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET &&
             connectionState == MeshService.ConnectionState.CONNECTED
 
     /* Animate waiting for the configurations */
@@ -200,39 +199,41 @@ fun ConnectionsScreen(
     var showReportBugDialog by remember { mutableStateOf(false) }
 
     // Remember the permission launchers
-    val requestLocationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions(),
-        onResult = { permissions ->
-            if (permissions.entries.all { it.value }) {
-                uiViewModel.setProvideLocation(true)
-                uiViewModel.meshService?.startProvideLocation()
-            } else {
-                debug("User denied location permission")
-                uiViewModel.showSnackbar(context.getString(R.string.why_background_required))
-            }
-            bluetoothViewModel.permissionsUpdated()
-        }
-    )
+    val requestLocationPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestMultiplePermissions(),
+            onResult = { permissions ->
+                if (permissions.entries.all { it.value }) {
+                    uiViewModel.setProvideLocation(true)
+                    uiViewModel.meshService?.startProvideLocation()
+                } else {
+                    debug("User denied location permission")
+                    uiViewModel.showSnackbar(context.getString(R.string.why_background_required))
+                }
+                bluetoothViewModel.permissionsUpdated()
+            },
+        )
 
-    val requestBluetoothPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions(),
-        onResult = { permissions ->
-            if (permissions.entries.all { it.value }) {
-                info("Bluetooth permissions granted")
-                // We need to call the scan function which is in the Fragment
-                // Since we can't directly call scanLeDevice() from Composable,
-                // we might need to rethink how scanning is triggered or
-                // pass the scan trigger as a lambda.
-                // For now, let's assume we trigger the scan outside the Composable
-                // after permissions are granted. We can add a callback to the ViewModel.
-                scanModel.startScan()
-            } else {
-                warn("Bluetooth permissions denied")
-                uiViewModel.showSnackbar(context.permissionMissing)
-            }
-            bluetoothViewModel.permissionsUpdated()
-        }
-    )
+    val requestBluetoothPermissionLauncher =
+        rememberLauncherForActivityResult(
+            contract = ActivityResultContracts.RequestMultiplePermissions(),
+            onResult = { permissions ->
+                if (permissions.entries.all { it.value }) {
+                    info("Bluetooth permissions granted")
+                    // We need to call the scan function which is in the Fragment
+                    // Since we can't directly call scanLeDevice() from Composable,
+                    // we might need to rethink how scanning is triggered or
+                    // pass the scan trigger as a lambda.
+                    // For now, let's assume we trigger the scan outside the Composable
+                    // after permissions are granted. We can add a callback to the ViewModel.
+                    scanModel.startScan()
+                } else {
+                    warn("Bluetooth permissions denied")
+                    uiViewModel.showSnackbar(context.permissionMissing)
+                }
+                bluetoothViewModel.permissionsUpdated()
+            },
+        )
 
     // Observe scan results to show the dialog
     if (scanResults.isNotEmpty()) {
@@ -248,29 +249,21 @@ fun ConnectionsScreen(
             MeshService.ConnectionState.DISCONNECTED -> R.string.not_connected
             MeshService.ConnectionState.DEVICE_SLEEP -> R.string.connected_sleeping
         }.let {
-            val firmwareString =
-                info?.firmwareString ?: context.getString(R.string.unknown)
+            val firmwareString = info?.firmwareString ?: context.getString(R.string.unknown)
             scanModel.setErrorText(context.getString(it, firmwareString))
         }
     }
     var showSharedContact by remember { mutableStateOf<Node?>(null) }
     if (showSharedContact != null) {
-        SharedContactDialog(
-            contact = showSharedContact,
-            onDismiss = { showSharedContact = null }
-        )
+        SharedContactDialog(contact = showSharedContact, onDismiss = { showSharedContact = null })
     }
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)
-        ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
             Text(
                 text = scanStatusText.orEmpty(),
                 fontSize = 14.sp,
                 textAlign = TextAlign.Start,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -283,7 +276,7 @@ fun ConnectionsScreen(
                 ourNode?.let { node ->
                     Row(
                         modifier = Modifier.padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         NodeChip(
                             node = node,
@@ -307,15 +300,12 @@ fun ConnectionsScreen(
                         Text(
                             modifier = Modifier.weight(1f, fill = true),
                             text = node.user.longName,
-                            style = MaterialTheme.typography.titleLarge
+                            style = MaterialTheme.typography.titleLarge,
                         )
-                        IconButton(
-                            enabled = true,
-                            onClick = onNavigateToRadioConfig
-                        ) {
+                        IconButton(enabled = true, onClick = onNavigateToRadioConfig) {
                             Icon(
                                 imageVector = Icons.Default.Settings,
-                                contentDescription = stringResource(id = R.string.radio_configuration)
+                                contentDescription = stringResource(id = R.string.radio_configuration),
                             )
                         }
                     }
@@ -329,106 +319,64 @@ fun ConnectionsScreen(
                         onClick = {
                             isWaiting = true
                             radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
-                        }
+                        },
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     if (scanning) {
-                        LinearProgressIndicator(
-                            modifier = Modifier.fillMaxWidth()
-                        )
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                     }
                 }
             }
             var selectedDeviceType by remember { mutableStateOf(DeviceType.BLE) }
             LaunchedEffect(selectedDevice) {
-                DeviceType.fromAddress(selectedDevice)?.let { type ->
-                    selectedDeviceType = type
-                }
+                DeviceType.fromAddress(selectedDevice)?.let { type -> selectedDeviceType = type }
             }
-            SingleChoiceSegmentedButtonRow(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                 SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(
-                        DeviceType.BLE.ordinal,
-                        DeviceType.entries.size
-                    ),
-                    onClick = {
-                        selectedDeviceType = DeviceType.BLE
-                    },
+                    shape = SegmentedButtonDefaults.itemShape(DeviceType.BLE.ordinal, DeviceType.entries.size),
+                    onClick = { selectedDeviceType = DeviceType.BLE },
                     selected = (selectedDeviceType == DeviceType.BLE),
                     icon = {
                         Icon(
                             imageVector = Icons.Default.Bluetooth,
-                            contentDescription = stringResource(id = R.string.bluetooth)
+                            contentDescription = stringResource(id = R.string.bluetooth),
                         )
                     },
-                    label = {
-                        Text(text = stringResource(id = R.string.bluetooth))
-                    }
+                    label = { Text(text = stringResource(id = R.string.bluetooth)) },
                 )
                 SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(
-                        DeviceType.TCP.ordinal,
-                        DeviceType.entries.size
-                    ),
-                    onClick = {
-                        selectedDeviceType = DeviceType.TCP
-                    },
+                    shape = SegmentedButtonDefaults.itemShape(DeviceType.TCP.ordinal, DeviceType.entries.size),
+                    onClick = { selectedDeviceType = DeviceType.TCP },
                     selected = (selectedDeviceType == DeviceType.TCP),
                     icon = {
                         Icon(
                             imageVector = Icons.Default.Wifi,
-                            contentDescription = stringResource(id = R.string.network)
+                            contentDescription = stringResource(id = R.string.network),
                         )
                     },
-                    label = {
-                        Text(text = stringResource(id = R.string.network))
-                    }
+                    label = { Text(text = stringResource(id = R.string.network)) },
                 )
                 SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(
-                        DeviceType.USB.ordinal,
-                        DeviceType.entries.size
-                    ),
-                    onClick = {
-                        selectedDeviceType = DeviceType.USB
-                    },
+                    shape = SegmentedButtonDefaults.itemShape(DeviceType.USB.ordinal, DeviceType.entries.size),
+                    onClick = { selectedDeviceType = DeviceType.USB },
                     selected = (selectedDeviceType == DeviceType.USB),
                     icon = {
-                        Icon(
-                            imageVector = Icons.Default.Usb,
-                            contentDescription = stringResource(id = R.string.serial)
-                        )
+                        Icon(imageVector = Icons.Default.Usb, contentDescription = stringResource(id = R.string.serial))
                     },
-                    label = {
-                        Text(text = stringResource(id = R.string.serial))
-                    }
+                    label = { Text(text = stringResource(id = R.string.serial)) },
                 )
             }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(8.dp)
-                    .verticalScroll(scrollState)
-            ) {
+            Column(modifier = Modifier.fillMaxSize().padding(8.dp).verticalScroll(scrollState)) {
                 when (selectedDeviceType) {
                     DeviceType.BLE -> {
-
                         BLEDevices(
                             connectionState,
                             devices.values.filter { it.isBLE || it.isDisconnect },
                             selectedDevice,
-                            showBluetoothRationaleDialog = {
-                                showBluetoothRationaleDialog = true
-                            },
-                            requestBluetoothPermission = {
-                                requestBluetoothPermissionLauncher.launch(
-                                    it
-                                )
-                            },
-                            scanModel
+                            showBluetoothRationaleDialog = { showBluetoothRationaleDialog = true },
+                            requestBluetoothPermission = { requestBluetoothPermissionLauncher.launch(it) },
+                            scanModel,
                         )
                     }
 
@@ -437,7 +385,7 @@ fun ConnectionsScreen(
                             connectionState,
                             devices.values.filter { it.isTCP || it.isDisconnect },
                             selectedDevice,
-                            scanModel
+                            scanModel,
                         )
                     }
 
@@ -446,7 +394,7 @@ fun ConnectionsScreen(
                             connectionState,
                             devices.values.filter { it.isUSB || it.isDisconnect || it.isMock },
                             selectedDevice,
-                            scanModel
+                            scanModel,
                         )
                     }
                 }
@@ -471,27 +419,25 @@ fun ConnectionsScreen(
                         }
                     }
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
+                        modifier =
+                        Modifier.fillMaxWidth()
                             .toggleable(
                                 value = provideLocation,
-                                onValueChange = { checked ->
-                                    uiViewModel.setProvideLocation(checked)
-                                },
-                                enabled = !isGpsDisabled
+                                onValueChange = { checked -> uiViewModel.setProvideLocation(checked) },
+                                enabled = !isGpsDisabled,
                             )
                             .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Checkbox(
                             checked = receivingLocationUpdates,
                             onCheckedChange = null,
-                            enabled = !isGpsDisabled // Disable if GPS is disabled
+                            enabled = !isGpsDisabled, // Disable if GPS is disabled
                         )
                         Text(
                             text = stringResource(R.string.provide_location_to_mesh),
                             style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(start = 16.dp)
+                            modifier = Modifier.padding(start = 16.dp),
                         )
                     }
                 }
@@ -506,7 +452,7 @@ fun ConnectionsScreen(
                         text = stringResource(R.string.warning_not_paired),
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        modifier = Modifier.padding(horizontal = 16.dp),
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                 }
@@ -517,12 +463,10 @@ fun ConnectionsScreen(
                 val isAnalyticsAllowed = app.isAnalyticsAllowed && isGooglePlayAvailable
                 if (isGooglePlayAvailable) {
                     var loading by remember { mutableStateOf(false) }
-                    LaunchedEffect(isAnalyticsAllowed) {
-                        loading = false
-                    }
+                    LaunchedEffect(isAnalyticsAllowed) { loading = false }
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
+                        modifier =
+                        Modifier.fillMaxWidth()
                             .toggleable(
                                 value = isAnalyticsAllowed,
                                 onValueChange = {
@@ -531,32 +475,24 @@ fun ConnectionsScreen(
                                     loading = true
                                 },
                                 role = Role.Checkbox,
-                                enabled = isGooglePlayAvailable && !loading
+                                enabled = isGooglePlayAvailable && !loading,
                             )
                             .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Checkbox(
-                            enabled = isGooglePlayAvailable,
-                            checked = isAnalyticsAllowed,
-                            onCheckedChange = null
-                        )
+                        Checkbox(enabled = isGooglePlayAvailable, checked = isAnalyticsAllowed, onCheckedChange = null)
                         Text(
                             text = stringResource(R.string.analytics_okay),
                             style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(start = 16.dp)
+                            modifier = Modifier.padding(start = 16.dp),
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     // Report Bug Button
                     Button(
-                        onClick = {
-                            showReportBugDialog = true
-                        }, // Set state to show Report Bug dialog
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        enabled = isAnalyticsAllowed
+                        onClick = { showReportBugDialog = true }, // Set state to show Report Bug dialog
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                        enabled = isAnalyticsAllowed,
                     ) {
                         Text(stringResource(R.string.report_bug))
                     }
@@ -564,44 +500,48 @@ fun ConnectionsScreen(
             }
         }
 
-// Compose Device Scan Dialog
+        // Compose Device Scan Dialog
         if (showScanDialog) {
-            Dialog(onDismissRequest = {
-                showScanDialog = false
-                scanModel.clearScanResults()
-            }) {
+            Dialog(
+                onDismissRequest = {
+                    showScanDialog = false
+                    scanModel.clearScanResults()
+                },
+            ) {
                 Surface(shape = MaterialTheme.shapes.medium) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
                             text = "Select a Bluetooth device",
                             style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(bottom = 16.dp)
+                            modifier = Modifier.padding(bottom = 16.dp),
                         )
                         Column(modifier = Modifier.selectableGroup()) {
                             scanResults.values.forEach { device ->
                                 Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
+                                    modifier =
+                                    Modifier.fillMaxWidth()
                                         .selectable(
                                             selected = false, // No pre-selection in this dialog
                                             onClick = {
                                                 scanModel.onSelected(device)
                                                 scanModel.clearScanResults()
                                                 showScanDialog = false
-                                            }
+                                            },
                                         )
                                         .padding(vertical = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                    verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     Text(text = device.name)
                                 }
                             }
                         }
                         Spacer(modifier = Modifier.height(16.dp))
-                        TextButton(onClick = {
-                            scanModel.clearScanResults()
-                            showScanDialog = false
-                        }) {
+                        TextButton(
+                            onClick = {
+                                scanModel.clearScanResults()
+                                showScanDialog = false
+                            },
+                        ) {
                             Text(stringResource(R.string.cancel))
                         }
                     }
@@ -609,31 +549,31 @@ fun ConnectionsScreen(
             }
         }
 
-// Compose Location Permission Rationale Dialog
+        // Compose Location Permission Rationale Dialog
         if (showLocationRationaleDialog) {
             AlertDialog(
                 onDismissRequest = { showLocationRationaleDialog = false },
                 title = { Text(stringResource(R.string.background_required)) },
                 text = { Text(stringResource(R.string.why_background_required)) },
                 confirmButton = {
-                    Button(onClick = {
-                        showLocationRationaleDialog = false
-                        if (!context.hasLocationPermission()) {
-                            requestLocationPermissionLauncher.launch(context.getLocationPermissions())
-                        }
-                    }) {
+                    Button(
+                        onClick = {
+                            showLocationRationaleDialog = false
+                            if (!context.hasLocationPermission()) {
+                                requestLocationPermissionLauncher.launch(context.getLocationPermissions())
+                            }
+                        },
+                    ) {
                         Text(stringResource(R.string.accept))
                     }
                 },
                 dismissButton = {
-                    Button(onClick = { showLocationRationaleDialog = false }) {
-                        Text(stringResource(R.string.cancel))
-                    }
-                }
+                    Button(onClick = { showLocationRationaleDialog = false }) { Text(stringResource(R.string.cancel)) }
+                },
             )
         }
 
-// Compose Bluetooth Permission Rationale Dialog
+        // Compose Bluetooth Permission Rationale Dialog
         if (showBluetoothRationaleDialog) {
             val bluetoothPermissions = context.getBluetoothPermissions()
             AlertDialog(
@@ -641,49 +581,53 @@ fun ConnectionsScreen(
                 title = { Text(stringResource(R.string.required_permissions)) },
                 text = { Text(stringResource(R.string.permission_missing_31)) },
                 confirmButton = {
-                    Button(onClick = {
-                        showBluetoothRationaleDialog = false
-                        if (bluetoothPermissions.isNotEmpty()) {
-                            requestBluetoothPermissionLauncher.launch(bluetoothPermissions)
-                        } else {
-                            // If somehow no permissions are required, just scan
-                            scanModel.startScan()
-                        }
-                    }) {
+                    Button(
+                        onClick = {
+                            showBluetoothRationaleDialog = false
+                            if (bluetoothPermissions.isNotEmpty()) {
+                                requestBluetoothPermissionLauncher.launch(bluetoothPermissions)
+                            } else {
+                                // If somehow no permissions are required, just scan
+                                scanModel.startScan()
+                            }
+                        },
+                    ) {
                         Text(stringResource(R.string.okay))
                     }
                 },
                 dismissButton = {
-                    Button(onClick = { showBluetoothRationaleDialog = false }) {
-                        Text(stringResource(R.string.cancel))
-                    }
-                }
+                    Button(onClick = { showBluetoothRationaleDialog = false }) { Text(stringResource(R.string.cancel)) }
+                },
             )
         }
 
-// Compose Report Bug Dialog
+        // Compose Report Bug Dialog
         if (showReportBugDialog) {
             AlertDialog(
                 onDismissRequest = { showReportBugDialog = false },
                 title = { Text(stringResource(R.string.report_a_bug)) },
                 text = { Text(stringResource(R.string.report_bug_text)) },
                 confirmButton = {
-                    Button(onClick = {
-                        showReportBugDialog = false
-                        reportError("Clicked Report A Bug")
-                        uiViewModel.showSnackbar("Bug report sent!")
-                    }) {
+                    Button(
+                        onClick = {
+                            showReportBugDialog = false
+                            reportError("Clicked Report A Bug")
+                            uiViewModel.showSnackbar("Bug report sent!")
+                        },
+                    ) {
                         Text(stringResource(R.string.report))
                     }
                 },
                 dismissButton = {
-                    Button(onClick = {
-                        showReportBugDialog = false
-                        debug("Decided not to report a bug")
-                    }) {
+                    Button(
+                        onClick = {
+                            showReportBugDialog = false
+                            debug("Decided not to report a bug")
+                        },
+                    ) {
                         Text(stringResource(R.string.cancel))
                     }
-                }
+                },
             )
         }
     }
@@ -698,7 +642,8 @@ private tailrec fun Context.findActivity(): Activity = when (this) {
 private enum class DeviceType {
     BLE,
     TCP,
-    USB;
+    USB,
+    ;
 
     companion object {
         fun fromAddress(address: String): DeviceType? {

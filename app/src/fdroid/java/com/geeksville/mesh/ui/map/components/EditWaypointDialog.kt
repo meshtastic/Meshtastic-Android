@@ -85,6 +85,7 @@ internal fun EditWaypointDialog(
 ) {
     var waypointInput by remember { mutableStateOf(waypoint) }
     val title = if (waypoint.id == 0) R.string.waypoint_new else R.string.waypoint_edit
+
     @Suppress("MagicNumber")
     val emoji = if (waypointInput.icon == 0) 128205 else waypointInput.icon
     var showEmojiPickerView by remember { mutableStateOf(false) }
@@ -106,18 +107,20 @@ internal fun EditWaypointDialog(
 
     // Determine locale-specific date format
     val locale = Locale.getDefault()
-    val dateFormat = if (locale.country == "US") {
-        SimpleDateFormat("MM/dd/yyyy", locale)
-    } else {
-        SimpleDateFormat("dd/MM/yyyy", locale)
-    }
+    val dateFormat =
+        if (locale.country == "US") {
+            SimpleDateFormat("MM/dd/yyyy", locale)
+        } else {
+            SimpleDateFormat("dd/MM/yyyy", locale)
+        }
     // Check if 24-hour format is preferred
     val is24Hour = android.text.format.DateFormat.is24HourFormat(context)
-    val timeFormat = if (is24Hour) {
-        SimpleDateFormat("HH:mm", locale)
-    } else {
-        SimpleDateFormat("hh:mm a", locale)
-    }
+    val timeFormat =
+        if (is24Hour) {
+            SimpleDateFormat("HH:mm", locale)
+        } else {
+            SimpleDateFormat("hh:mm a", locale)
+        }
 
     // State to hold selected date and time
     var selectedDate by remember { mutableStateOf(dateFormat.format(calendar.time)) }
@@ -132,13 +135,12 @@ internal fun EditWaypointDialog(
                 Column(modifier = modifier.fillMaxWidth()) {
                     Text(
                         text = stringResource(title),
-                        style = MaterialTheme.typography.titleLarge.copy(
+                        style =
+                        MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Center,
                         ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp),
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
                     )
                     EditTextPreference(
                         title = stringResource(R.string.name),
@@ -146,17 +148,16 @@ internal fun EditWaypointDialog(
                         maxSize = 29,
                         enabled = true,
                         isError = false,
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(onDone = { }),
+                        keyboardOptions =
+                        KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = {}),
                         onValueChanged = { waypointInput = waypointInput.copy { name = it } },
                         trailingIcon = {
                             IconButton(onClick = { showEmojiPickerView = true }) {
                                 Text(
                                     text = String(Character.toChars(emoji)),
-                                    modifier = Modifier
-                                        .background(MaterialTheme.colorScheme.background, CircleShape)
+                                    modifier =
+                                    Modifier.background(MaterialTheme.colorScheme.background, CircleShape)
                                         .padding(4.dp),
                                     fontSize = 24.sp,
                                     color = Color.Unspecified.copy(alpha = 1f),
@@ -170,63 +171,60 @@ internal fun EditWaypointDialog(
                         maxSize = 99,
                         enabled = true,
                         isError = false,
-                        keyboardOptions = KeyboardOptions.Default.copy(
-                            keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(onDone = { }),
-                        onValueChanged = { waypointInput = waypointInput.copy { description = it } }
+                        keyboardOptions =
+                        KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+                        keyboardActions = KeyboardActions(onDone = {}),
+                        onValueChanged = { waypointInput = waypointInput.copy { description = it } },
                     )
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .size(48.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier = Modifier.fillMaxWidth().size(48.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Image(
-                            imageVector = Icons.Default.Lock,
-                            contentDescription = stringResource(R.string.locked),
-                        )
+                        Image(imageVector = Icons.Default.Lock, contentDescription = stringResource(R.string.locked))
                         Text(stringResource(R.string.locked))
                         Switch(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentWidth(Alignment.End),
+                            modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.End),
                             checked = waypointInput.lockedTo != 0,
-                            onCheckedChange = {
-                                waypointInput = waypointInput.copy { lockedTo = if (it) 1 else 0 }
-                            }
+                            onCheckedChange = { waypointInput = waypointInput.copy { lockedTo = if (it) 1 else 0 } },
                         )
                     }
-                    val datePickerDialog = DatePickerDialog(
-                        context,
-                        { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
-                            selectedDate = "$selectedDay/${selectedMonth + 1}/$selectedYear"
-                            calendar.set(selectedYear, selectedMonth, selectedDay)
-                            epochTime = calendar.timeInMillis
-                            if (epochTime != null) {
-                                selectedDate = dateFormat.format(calendar.time)
-                            }
-                        }, year, month, day
-                    )
+                    val datePickerDialog =
+                        DatePickerDialog(
+                            context,
+                            { _: DatePicker, selectedYear: Int, selectedMonth: Int, selectedDay: Int ->
+                                selectedDate = "$selectedDay/${selectedMonth + 1}/$selectedYear"
+                                calendar.set(selectedYear, selectedMonth, selectedDay)
+                                epochTime = calendar.timeInMillis
+                                if (epochTime != null) {
+                                    selectedDate = dateFormat.format(calendar.time)
+                                }
+                            },
+                            year,
+                            month,
+                            day,
+                        )
 
-                    val timePickerDialog = android.app.TimePickerDialog(
-                        context,
-                        { _: TimePicker, selectedHour: Int, selectedMinute: Int ->
-                            selectedTime = String.format(Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute)
-                            calendar.set(Calendar.HOUR_OF_DAY, selectedHour)
-                            calendar.set(Calendar.MINUTE, selectedMinute)
-                            epochTime = calendar.timeInMillis
+                    val timePickerDialog =
+                        android.app.TimePickerDialog(
+                            context,
+                            { _: TimePicker, selectedHour: Int, selectedMinute: Int ->
+                                selectedTime =
+                                    String.format(Locale.getDefault(), "%02d:%02d", selectedHour, selectedMinute)
+                                calendar.set(Calendar.HOUR_OF_DAY, selectedHour)
+                                calendar.set(Calendar.MINUTE, selectedMinute)
+                                epochTime = calendar.timeInMillis
                                 selectedTime = timeFormat.format(calendar.time)
-                            @Suppress("MagicNumber")
-                            waypointInput = waypointInput.copy { expire = (epochTime!! / 1000).toInt() }
-                        }, hour, minute, is24Hour
-                    )
+                                @Suppress("MagicNumber")
+                                waypointInput = waypointInput.copy { expire = (epochTime!! / 1000).toInt() }
+                            },
+                            hour,
+                            minute,
+                            is24Hour,
+                        )
 
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .size(48.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier = Modifier.fillMaxWidth().size(48.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Image(
                             imageVector = Icons.Default.CalendarMonth,
@@ -234,19 +232,20 @@ internal fun EditWaypointDialog(
                         )
                         Text(stringResource(R.string.expires))
                         Switch(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .wrapContentWidth(Alignment.End),
+                            modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.End),
                             checked = waypointInput.expire != Int.MAX_VALUE && waypointInput.expire != 0,
                             onCheckedChange = { isChecked ->
-                                waypointInput = waypointInput.copy {
-                                    expire = if (isChecked) {
-                                        @Suppress("MagicNumber")
-                                        calendar.timeInMillis / 1000
-                                    } else {
-                                        Int.MAX_VALUE
-                                    }.toInt()
-                                }
+                                waypointInput =
+                                    waypointInput.copy {
+                                        expire =
+                                            if (isChecked) {
+                                                @Suppress("MagicNumber")
+                                                calendar.timeInMillis / 1000
+                                            } else {
+                                                Int.MAX_VALUE
+                                            }
+                                                .toInt()
+                                    }
                                 if (isChecked) {
                                     selectedDate = dateFormat.format(calendar.time)
                                     selectedTime = timeFormat.format(calendar.time)
@@ -254,64 +253,59 @@ internal fun EditWaypointDialog(
                                     selectedDate = ""
                                     selectedTime = ""
                                 }
-                            }
+                            },
                         )
                     }
 
                     if (waypointInput.expire != Int.MAX_VALUE && waypointInput.expire != 0) {
-
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Button(onClick = { datePickerDialog.show() }) {
-                                        Text(stringResource(R.string.date))
-                                    }
-                                    Text(
-                                        modifier = Modifier.padding(top = 4.dp),
-                                        text = "$selectedDate",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        textAlign = TextAlign.Center,
-                                    )
-                                }
-                                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                    Button(onClick = { timePickerDialog.show() }) {
-                                        Text(stringResource(R.string.time))
-                                    }
-                                    Text(
-                                        modifier = Modifier.padding(top = 4.dp),
-                                        text = "$selectedTime",
-                                        style = MaterialTheme.typography.bodyMedium,
-                                        textAlign = TextAlign.Center,
-                                        )
-                                }
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Button(onClick = { datePickerDialog.show() }) { Text(stringResource(R.string.date)) }
+                                Text(
+                                    modifier = Modifier.padding(top = 4.dp),
+                                    text = "$selectedDate",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    textAlign = TextAlign.Center,
+                                )
                             }
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Button(onClick = { timePickerDialog.show() }) { Text(stringResource(R.string.time)) }
+                                Text(
+                                    modifier = Modifier.padding(top = 4.dp),
+                                    text = "$selectedTime",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    textAlign = TextAlign.Center,
+                                )
+                            }
+                        }
                     }
-                } },
+                }
+            },
             confirmButton = {
                 FlowRow(
                     modifier = modifier.padding(start = 20.dp, end = 20.dp, bottom = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    TextButton(
-                        modifier = modifier.weight(1f),
-                        onClick = onDismissRequest
-                    ) { Text(stringResource(R.string.cancel)) }
+                    TextButton(modifier = modifier.weight(1f), onClick = onDismissRequest) {
+                        Text(stringResource(R.string.cancel))
+                    }
                     if (waypoint.id != 0) {
                         Button(
                             modifier = modifier.weight(1f),
                             onClick = { onDeleteClicked(waypointInput) },
                             enabled = waypointInput.name.isNotEmpty(),
-                        ) { Text(stringResource(R.string.delete)) }
+                        ) {
+                            Text(stringResource(R.string.delete))
+                        }
                     }
-                    Button(
-                        modifier = modifier.weight(1f),
-                        onClick = { onSendClicked(waypointInput) },
-                        enabled = true,
-                    ) { Text(stringResource(R.string.send)) }
+                    Button(modifier = modifier.weight(1f), onClick = { onSendClicked(waypointInput) }, enabled = true) {
+                        Text(stringResource(R.string.send))
+                    }
                 }
             },
         )
@@ -329,16 +323,17 @@ internal fun EditWaypointDialog(
 private fun EditWaypointFormPreview() {
     AppTheme {
         EditWaypointDialog(
-            waypoint = waypoint {
+            waypoint =
+            waypoint {
                 id = 123
                 name = "Test 123"
                 description = "This is only a test"
                 icon = 128169
                 expire = (System.currentTimeMillis() / 1000 + 8 * 3600).toInt()
             },
-            onSendClicked = { },
-            onDeleteClicked = { },
-            onDismissRequest = { },
+            onSendClicked = {},
+            onDeleteClicked = {},
+            onDismissRequest = {},
         )
     }
 }
