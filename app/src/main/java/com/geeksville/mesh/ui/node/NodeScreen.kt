@@ -65,6 +65,8 @@ fun NodeScreen(
 
     val nodes by model.nodeList.collectAsStateWithLifecycle()
     val ourNode by model.ourNodeInfo.collectAsStateWithLifecycle()
+    val unfilteredNodes by model.unfilteredNodeList.collectAsStateWithLifecycle()
+    val ignoredNodeCount = unfilteredNodes.count { it.isIgnored }
 
     val listState = rememberLazyListState()
 
@@ -114,6 +116,9 @@ fun NodeScreen(
                     onToggleOnlyDirect = model::toggleOnlyDirect,
                     showDetails = state.showDetails,
                     onToggleShowDetails = model::toggleShowDetails,
+                    showIgnored = state.showIgnored,
+                    onToggleShowIgnored = model::toggleShowIgnored,
+                    ignoredNodeCount = ignoredNodeCount,
                 )
             }
 

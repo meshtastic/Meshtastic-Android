@@ -27,6 +27,7 @@
     <string name="node_filter_include_unknown">Näytä tuntemattomat</string>
     <string name="node_filter_only_online">Piilota ei yhteydessä olevat laitteet</string>
     <string name="node_filter_only_direct">Näytä vain suorat yhteydet</string>
+    <string name="node_filter_ignored">Katselet tällä hetkellä huomioimattomia laitteita,\nPaina palataksesi laitelistaan.</string>
     <string name="node_filter_show_details">Näytä lisätiedot</string>
     <string name="node_sort_button">Lajitteluvaihtoehdot</string>
     <string name="node_sort_alpha">A-Ö</string>
@@ -37,6 +38,7 @@
     <string name="node_sort_via_mqtt">MQTT:n kautta</string>
     <string name="via_mqtt">MQTT:n kautta</string>
     <string name="node_sort_via_favorite">Suosikkien kautta</string>
+    <string name="node_filter_show_ignored">Huomioimattomat laitteet</string>
     <string name="unrecognized">Tuntematon</string>
     <string name="message_status_enroute">Odottaa vahvistusta</string>
     <string name="message_status_queued">Jonossa lähetettäväksi</string>
@@ -98,7 +100,7 @@
     <string name="url_for_join">URL-linkki Meshtastic verkkoon liittymiseksi</string>
     <string name="accept">Hyväksy</string>
     <string name="cancel">Peruuta</string>
-    <string name="clear_changes">Tyhjennä muutokset</string>
+    <string name="clear_changes">Peru muutokset</string>
     <string name="change_channel">Vaihda kanavaa</string>
     <string name="are_you_sure_channel">Oletko varma, että haluat vaihtaa kanavaa? Kaikki yhteydet katkeavat, ennen kuin olet jakanut uudet kanavan asetukset.</string>
     <string name="new_channel_rcvd">Uusi kanavan URL-osoite vastaanotettu</string>
@@ -140,6 +142,7 @@
     <string name="text_messages">Tekstiviestit</string>
     <string name="channel_invalid">Kanavan URL-osoite on virheellinen, eikä sitä voida käyttää</string>
     <string name="debug_panel">Vianetsintäpaneeli</string>
+    <string name="debug_decoded_payload">Dekoodattu data:</string>
     <string name="debug_logs_export">Vie lokitiedot</string>
     <string name="debug_last_messages">500 viimeisintä viestiä</string>
     <string name="debug_filters">Suodattimet</string>
@@ -288,7 +291,7 @@
     <string name="temperature">Lämpötila</string>
     <string name="humidity">Kosteus</string>
     <string name="soil_temperature">Maaperän lämpötila</string>
-    <string name="soil_moisture">Määperän kosteus</string>
+    <string name="soil_moisture">Maaperän kosteus</string>
     <string name="logs">lokitietoa</string>
     <string name="hops_away">Hyppyjä</string>
     <string name="hops_away_template">Hyppyjä: %1$d</string>
@@ -750,4 +753,23 @@
     <string name="security_icon_help_show_all">Näytä kaikki merkitykset</string>
     <string name="security_icon_help_show_less">Näytä nykyinen tila</string>
     <string name="security_icon_help_dismiss">Hylkää</string>
+    <string name="confirm_delete_node">Oletko varma, että haluat poistaa tämän laitteen?</string>
+    <string name="replying_to">Vastataan käyttäjälle %1$s</string>
+    <string name="cancel_reply">Peruuta vastaus</string>
+    <string name="delete_messages_title">Poistetaanko viestit?</string>
+    <string name="clear_selection">Tyhjennä valinta</string>
+    <string name="message_input_label">Viesti</string>
+    <string name="type_a_message">Kirjoita viesti</string>
+    <string name="pax_metrics_log">PAX-laskurien lokitiedot</string>
+    <string name="pax">PAX</string>
+    <string name="no_pax_metrics_logs">PAX-laskurien lokitietoja ei ole saatavilla.</string>
+    <string name="wifi_devices">WiFi-laitteet</string>
+    <string name="ble_devices">Bluetooth-laitteet</string>
+    <string name="routing_error_rate_limit_exceeded">Käyttöraja ylitetty. Yritä myöhemmin uudelleen.</string>
+    <string name="view_release">Näytä versio</string>
+    <string name="download">Lataa</string>
+    <string name="installed_firmware_version">Asennettu</string>
+    <string name="latest_stable_firmware">Viimeisin vakaa (stable)</string>
+    <string name="latest_alpha_firmware">Viimeisin epävakaa (alpha)</string>
+    <string name="supported_by_community">Meshtastic-yhteisön tukema</string>
 </resources>

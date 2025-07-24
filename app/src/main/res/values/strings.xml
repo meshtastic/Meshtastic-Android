@@ -43,6 +43,7 @@
     <string name="node_filter_include_unknown">Include unknown</string>
     <string name="node_filter_only_online">Hide offline nodes</string>
     <string name="node_filter_only_direct">Only show direct nodes</string>
+    <string name="node_filter_ignored">You are viewing ignored nodes,\nPress to return to the node list.</string>
     <string name="node_filter_show_details">Show details</string>
     <string name="node_sort_button">Node sorting options</string>
     <string name="node_sort_alpha">A-Z</string>
@@ -53,7 +54,7 @@
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="via_mqtt">via MQTT</string>
     <string name="node_sort_via_favorite">via Favorite</string>
-
+    <string name="node_filter_show_ignored">Ignored Nodes</string>
     <string name="unrecognized">Unrecognized</string>
     <string name="message_status_enroute">Waiting to be acknowledged</string>
     <string name="message_status_queued">Queued for sending</string>
@@ -164,6 +165,7 @@
     <string name="text_messages">Text messages</string>
     <string name="channel_invalid">This Channel URL is invalid and can not be used</string>
     <string name="debug_panel">Debug Panel</string>
+    <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">Export Logs</string>
     <string name="debug_last_messages">500 last messages</string>
     <string name="debug_filters">Filters</string>
@@ -788,5 +790,17 @@
     <string name="clear_selection">Clear selection</string>
     <string name="message_input_label">Message</string>
     <string name="type_a_message">Type a message</string>
+    <string name="pax_metrics_log">PAX Metrics Log</string>
+    <string name="pax">PAX</string>
+    <string name="no_pax_metrics_logs">No PAX metrics logs available.</string>
+    <string name="wifi_devices">WiFi Devices</string>
+    <string name="ble_devices">BLE Devices</string>
 
+    <string name="routing_error_rate_limit_exceeded">Rate Limit Exceeded. Please try again later.</string>
+    <string name="view_release">View Release</string>
+    <string name="download">Download</string>
+    <string name="installed_firmware_version">Currently Installed</string>
+    <string name="latest_stable_firmware">Latest stable</string>
+    <string name="latest_alpha_firmware">Latest alpha</string>
+    <string name="supported_by_community">Supported by Meshtastic Community</string>
 </resources>

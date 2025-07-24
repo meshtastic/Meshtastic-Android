@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Memory
 import androidx.compose.material.icons.filled.PermScanWifi
+import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Power
 import androidx.compose.material.icons.filled.Router
 import androidx.compose.runtime.remember
@@ -42,6 +43,7 @@ import com.geeksville.mesh.ui.metrics.PositionLogScreen
 import com.geeksville.mesh.ui.metrics.PowerMetricsScreen
 import com.geeksville.mesh.ui.metrics.SignalMetricsScreen
 import com.geeksville.mesh.ui.metrics.TracerouteLogScreen
+import com.geeksville.mesh.ui.metrics.PaxMetricsScreen
 import com.geeksville.mesh.ui.node.NodeDetailScreen
 import com.geeksville.mesh.ui.node.NodeMapScreen
 import com.geeksville.mesh.ui.node.NodeScreen
@@ -86,6 +88,9 @@ sealed class NodeDetailRoutes {
 
     @Serializable
     data object HostMetricsLog : Route
+
+    @Serializable
+    data object PaxMetrics : Route
 }
 
 fun NavGraphBuilder.nodesGraph(
@@ -161,6 +166,7 @@ fun NavGraphBuilder.nodeDetailGraph(
 
                     NodeDetailRoute.POWER -> PowerMetricsScreen(hiltViewModel(parentEntry))
                     NodeDetailRoute.HOST -> HostMetricsLogScreen(hiltViewModel(parentEntry))
+                    NodeDetailRoute.PAX -> PaxMetricsScreen(hiltViewModel(parentEntry))
                 }
             }
         }
@@ -180,4 +186,5 @@ enum class NodeDetailRoute(
     TRACEROUTE(R.string.traceroute, NodeDetailRoutes.TracerouteLog, Icons.Default.PermScanWifi),
     POWER(R.string.power, NodeDetailRoutes.PowerMetrics, Icons.Default.Power),
     HOST(R.string.host, NodeDetailRoutes.HostMetricsLog, Icons.Default.Memory),
+    PAX(R.string.pax, NodeDetailRoutes.PaxMetrics, Icons.Default.People),
 }

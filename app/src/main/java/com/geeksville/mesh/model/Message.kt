@@ -42,6 +42,7 @@ fun getStringResFrom(routingError: Int): Int = when (routingError) {
     Routing.Error.PKI_UNKNOWN_PUBKEY_VALUE -> R.string.routing_error_pki_unknown_pubkey
     Routing.Error.ADMIN_BAD_SESSION_KEY_VALUE -> R.string.routing_error_admin_bad_session_key
     Routing.Error.ADMIN_PUBLIC_KEY_UNAUTHORIZED_VALUE -> R.string.routing_error_admin_public_key_unauthorized
+    Routing.Error.RATE_LIMIT_EXCEEDED_VALUE -> R.string.routing_error_rate_limit_exceeded
     else -> R.string.unrecognized
 }
 
