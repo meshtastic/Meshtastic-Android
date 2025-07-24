@@ -51,6 +51,8 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
+import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.ModemPreset
+import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.RegionCode
 import com.geeksville.mesh.R
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.copy
@@ -77,7 +79,7 @@ fun ScannedQrCodeDialog(
  * Enables the user to select which channels to accept after scanning a QR code.
  */
 @OptIn(ExperimentalLayoutApi::class)
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun ScannedQrCodeDialog(
     channels: ChannelSet,
@@ -89,11 +91,11 @@ fun ScannedQrCodeDialog(
 
     val channelSet = remember(shouldReplace) {
         if (shouldReplace) {
-            incoming
+            incoming.copy { loraConfig = loraConfig.copy { configOkToMqtt = channels.loraConfig.configOkToMqtt } }
         } else {
             channels.copy {
                 // To guarantee consistent ordering, using a LinkedHashSet which iterates through
-                // it's entries according to the order an item was *first* inserted.
+                // its entries according to the order an item was *first* inserted.
                 // https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-linked-hash-set/
                 val result = LinkedHashSet(settings + incoming.settingsList)
                 settings.clear()
@@ -113,6 +115,63 @@ fun ScannedQrCodeDialog(
         val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
         settings.clear()
         settings.addAll(result)
+    }
+
+    // Compute LoRa configuration changes when in replace mode
+    val loraChanges = remember(shouldReplace, channels, incoming) {
+        if (shouldReplace && incoming.hasLoraConfig()) {
+            val current = channels.loraConfig
+            val new = incoming.loraConfig
+            val changes = mutableListOf<String>()
+
+            if (current.hopLimit != new.hopLimit) {
+                changes.add("Hop Limit: ${current.hopLimit} -> ${new.hopLimit}")
+            }
+            if (current.getRegion().getNumber() != new.getRegion().getNumber()) {
+                val currentRegionDesc = RegionCode.forNumber(current.getRegion().getNumber())?.name ?: "Unknown"
+                val newRegionDesc = RegionCode.forNumber(new.getRegion().getNumber())?.name ?: "Unknown"
+                changes.add("Region: $currentRegionDesc -> $newRegionDesc")
+            }
+            if (current.getModemPreset().getNumber() != new.getModemPreset().getNumber()) {
+                val currentPresetDesc = ModemPreset.forNumber(current.getModemPreset().getNumber())?.name ?: "Unknown"
+                val newPresetDesc = ModemPreset.forNumber(new.getModemPreset().getNumber())?.name ?: "Unknown"
+                changes.add("Modem Preset: $currentPresetDesc -> $newPresetDesc")
+            }
+            if (current.usePreset != new.usePreset) {
+                changes.add("Use Preset: ${current.usePreset} -> ${new.usePreset}")
+            }
+            if (current.txEnabled != new.txEnabled) {
+                changes.add("Transmit Enabled: ${current.txEnabled} -> ${new.txEnabled}")
+            }
+            if (current.txPower != new.txPower) {
+                changes.add("Transmit Power: ${current.txPower}dBm -> ${new.txPower}dBm")
+            }
+            if (current.channelNum != new.channelNum) {
+                changes.add("Channel Number: ${current.channelNum} -> ${new.channelNum}")
+            }
+            if (current.bandwidth != new.bandwidth) {
+                changes.add("Bandwidth: ${current.bandwidth} -> ${new.bandwidth}")
+            }
+            if (current.codingRate != new.codingRate) {
+                changes.add("Coding Rate: ${current.codingRate} -> ${new.codingRate}")
+            }
+            if (current.spreadFactor != new.spreadFactor) {
+                changes.add("Spread Factor: ${current.spreadFactor} -> ${new.spreadFactor}")
+            }
+            if (current.sx126XRxBoostedGain != new.sx126XRxBoostedGain) {
+                changes.add("RX Boosted Gain: ${current.sx126XRxBoostedGain} -> ${new.sx126XRxBoostedGain}")
+            }
+            if (current.overrideFrequency != new.overrideFrequency) {
+                changes.add("Override Frequency: ${current.overrideFrequency} -> ${new.overrideFrequency}")
+            }
+            if (current.ignoreMqtt != new.ignoreMqtt) {
+                changes.add("Ignore MQTT: ${current.ignoreMqtt} -> ${new.ignoreMqtt}")
+            }
+
+            changes
+        } else {
+            emptyList()
+        }
     }
 
     Dialog(
@@ -149,6 +208,24 @@ fun ScannedQrCodeDialog(
                         },
                         channel = channelObj,
                     )
+                }
+
+                // Display LoRa configuration changes when in replace mode
+                if (shouldReplace && loraChanges.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "LoRa Configuration Changes:",
+                            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                        loraChanges.forEach { change ->
+                            Text(
+                                text = "• $change",
+                                modifier = Modifier.padding(start = 16.dp, bottom = 4.dp),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                    }
                 }
 
                 item {
