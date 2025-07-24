@@ -41,10 +41,14 @@ object GraphColors {
     val InfantryBlue = Color(red = 75, green = 119, blue = 190)
     val Purple = Color(0xFF9C27B0)
     val Pink = Color(red = 255, green = 102, blue = 204)
-    val Orange = Color(0xFFFF8800)
+    val Orange = Color
 
     val Green = Color.Green
     val Red = Color.Red
+    val Blue = Color.Blue
+    val Yellow = Color.Yellow
+    val Magenta = Color.Magenta
+    val Cyan = Color.Cyan
 }
 
 object StatusColors {
