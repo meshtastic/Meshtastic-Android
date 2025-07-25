@@ -293,6 +293,13 @@ enum class RegionInfo(
     KZ_863(RegionCode.KZ_863, "Kazakhstan 863MHz", 863.0f, 868.0f, wideLora = true),
 
     /**
+     * Nepal 865Mhz 865 - 868 Mhz
+     *
+     * @see [Firmware Issue #7380](https://github.com/meshtastic/firmware/pull/7380)
+     */
+    NP_865(RegionCode.NP_865, "Nepal 865Mhz", 865.0f, 868.0f, wideLora = false),
+
+    /**
      * Brazil 902MHz 902 - 907.5 MHz
      *
      * @see [Firmware Issue #7399](https://github.com/meshtastic/firmware/pull/7399)
