@@ -23,8 +23,8 @@ import com.geeksville.mesh.android.BuildUtils.isEmulator
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.util.Exceptions
-import com.google.firebase.crashlytics.crashlytics
 import com.google.firebase.Firebase
+import com.google.firebase.crashlytics.crashlytics
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
@@ -45,7 +45,8 @@ class MeshUtilApplication : GeeksvilleApplication() {
             val pref = AppPrefs(this)
             crashlytics.setUserId(pref.getInstallId()) // be able to group all bugs per anonymous user
 
-            // We always send our log messages to the crashlytics lib, but they only get sent to the server if we report an exception
+            // We always send our log messages to the crashlytics lib,
+            // but they only get sent to the server if we report an exception
             // This makes log messages work properly if someone turns on analytics just before they click report bug.
             // send all log messages through crashyltics, so if we do crash we'll have those in the report
             val standardLogger = Logging.printlog
@@ -55,8 +56,9 @@ class MeshUtilApplication : GeeksvilleApplication() {
             }
 
             fun sendCrashReports() {
-                if (isAnalyticsAllowed)
+                if (isAnalyticsAllowed) {
                     crashlytics.sendUnsentReports()
+                }
             }
 
             // Send any old reports if user approves

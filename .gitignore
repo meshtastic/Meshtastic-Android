@@ -27,5 +27,5 @@ keystore.properties
 # Kotlin compiler
 .kotlin
 
-# VS code
-.vscode/settings.json
+#project secrets
+/secrets.properties

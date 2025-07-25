@@ -28,6 +28,5 @@ class MeshUtilApplication : GeeksvilleApplication() {
         super.onCreate()
 
         Logging.showLogs = BuildConfig.DEBUG
-
     }
 }
