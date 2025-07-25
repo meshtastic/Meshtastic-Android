@@ -27,6 +27,7 @@
     <string name="node_filter_include_unknown">Unbekannte Stationen einbeziehen</string>
     <string name="node_filter_only_online">Offline Knoten ausblenden</string>
     <string name="node_filter_only_direct">Nur direkte Knoten anzeigen</string>
+    <string name="node_filter_ignored">Sie sehen ignorierte Knoten,\ndrücken um zur Knotenliste zurückzukehren.</string>
     <string name="node_filter_show_details">Details anzeigen</string>
     <string name="node_sort_button">Sortieroptionen</string>
     <string name="node_sort_alpha">A-Z</string>
@@ -37,6 +38,7 @@
     <string name="node_sort_via_mqtt">über MQTT</string>
     <string name="via_mqtt">über MQTT</string>
     <string name="node_sort_via_favorite">über Favorit</string>
+    <string name="node_filter_show_ignored">Ignorierte Knoten</string>
     <string name="unrecognized">Unbekannt</string>
     <string name="message_status_enroute">Warte auf Bestätigung</string>
     <string name="message_status_queued">zur Warteschlange für das Senden hinzugefügt</string>
@@ -753,6 +755,21 @@
     <string name="security_icon_help_dismiss">Tastatur ausblenden</string>
     <string name="confirm_delete_node">Willst du diesen Node wirklich löschen?</string>
     <string name="replying_to"></string>
+    <string name="cancel_reply">Antwort verwerfen</string>
+    <string name="delete_messages_title"> Nachrichten löschen?</string>
+    <string name="clear_selection">Auswahl entfernen</string>
     <string name="message_input_label">Nachricht</string>
+    <string name="type_a_message">Eine Nachricht schreiben</string>
+    <string name="pax_metrics_log">Protokoll Besucherzähler</string>
+    <string name="pax">Besucher</string>
+    <string name="no_pax_metrics_logs">Keine Daten für den Besucherzähler verfügbar.</string>
+    <string name="wifi_devices">WLAN Geräte</string>
+    <string name="ble_devices">BLE Geräte</string>
+    <string name="routing_error_rate_limit_exceeded">Sendebegrenzung überschritten. Bitte versuchen Sie es später erneut.</string>
+    <string name="view_release">Version ansehen</string>
     <string name="download">Herunterladen</string>
+    <string name="installed_firmware_version">Aktuell installiert</string>
+    <string name="latest_stable_firmware">Neueste stabile Version</string>
+    <string name="latest_alpha_firmware">Neueste Alpha Version</string>
+    <string name="supported_by_community">Unterstützt von der Meshtastic Gemeinschaft</string>
 </resources>

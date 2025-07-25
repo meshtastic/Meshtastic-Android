@@ -89,6 +89,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Switch
@@ -142,9 +143,10 @@ import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.common.theme.AppTheme
-import com.geeksville.mesh.ui.common.theme.Green
-import com.geeksville.mesh.ui.common.theme.Orange
-import com.geeksville.mesh.ui.common.theme.Yellow
+import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
+import com.geeksville.mesh.ui.common.theme.StatusColors.StatusOrange
+import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
+import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
 import com.geeksville.mesh.ui.node.components.NodeActionDialogs
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.radioconfig.NavCard
@@ -466,14 +468,14 @@ private fun AdministrationSection(
                 label = stringResource(R.string.latest_stable_firmware),
                 icon = Icons.Default.Memory,
                 value = latestStable.id.substringBeforeLast(".").replace("v", ""),
-                iconTint = Green,
+                iconTint = colorScheme.StatusGreen,
                 onClick = { onFirmwareSelected(latestStable) },
             )
             NodeDetailRow(
                 label = stringResource(R.string.latest_alpha_firmware),
                 icon = Icons.Default.Memory,
                 value = latestAlpha.id.substringBeforeLast(".").replace("v", ""),
-                iconTint = Yellow,
+                iconTint = colorScheme.StatusYellow,
                 onClick = { onFirmwareSelected(latestAlpha) },
             )
         }
@@ -488,11 +490,11 @@ private fun DeviceVersion.determineFirmwareStatusColor(
     val stableVersion = latestStable.asDeviceVersion()
     val alphaVersion = latestAlpha.asDeviceVersion()
     return when {
-        this < stableVersion -> MaterialTheme.colorScheme.error
-        this == stableVersion -> Green
-        this in stableVersion..alphaVersion -> Yellow
-        this > alphaVersion -> Orange
-        else -> MaterialTheme.colorScheme.onSurface
+        this < stableVersion -> colorScheme.StatusRed
+        this == stableVersion -> colorScheme.StatusGreen
+        this in stableVersion..alphaVersion -> colorScheme.StatusYellow
+        this > alphaVersion -> colorScheme.StatusOrange
+        else -> colorScheme.onSurface
     }
 }
 
@@ -667,7 +669,7 @@ private fun DeviceDetailsContent(state: MetricsState) {
         },
         icon = if (isSupported) Icons.TwoTone.Verified else ImageVector.vectorResource(R.drawable.unverified),
         value = "",
-        iconTint = if (isSupported) Color.Green else Color.Red,
+        iconTint = if (isSupported) colorScheme.StatusGreen else colorScheme.StatusRed,
     )
 }
 

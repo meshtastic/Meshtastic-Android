@@ -42,6 +42,7 @@ import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
@@ -98,6 +99,9 @@ import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
+import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
+import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
+import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
 import com.geeksville.mesh.ui.debug.DebugMenuActions
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
@@ -311,7 +315,6 @@ private fun VersionChecks(viewModel: UIViewModel) {
             }
         }
     }
-
     // Check if the device is running an old app version or firmware version
     LaunchedEffect(connectionState, myNodeInfo, firmwareEdition) {
         if (connectionState == MeshService.ConnectionState.CONNECTED) {
@@ -499,9 +502,9 @@ private fun MainMenuActions(isManaged: Boolean, onAction: (MainMenuAction) -> Un
 
 @Composable
 private fun MeshService.ConnectionState.getConnectionColor(): Color = when (this) {
-    MeshService.ConnectionState.CONNECTED -> Color(color = 0xFF30C047)
-    MeshService.ConnectionState.DEVICE_SLEEP -> MaterialTheme.colorScheme.tertiary
-    MeshService.ConnectionState.DISCONNECTED -> MaterialTheme.colorScheme.error
+    MeshService.ConnectionState.CONNECTED -> colorScheme.StatusGreen
+    MeshService.ConnectionState.DEVICE_SLEEP -> colorScheme.StatusYellow
+    MeshService.ConnectionState.DISCONNECTED -> colorScheme.StatusRed
 }
 
 private fun MeshService.ConnectionState.getConnectionIcon(): ImageVector = when (this) {

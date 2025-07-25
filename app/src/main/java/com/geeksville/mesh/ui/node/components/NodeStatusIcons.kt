@@ -36,24 +36,19 @@ import androidx.compose.material3.TooltipDefaults
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
+import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
+import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
+import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
 
 @Suppress("LongMethod")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NodeStatusIcons(
-    isThisNode: Boolean,
-    isUnmessageable: Boolean,
-    isFavorite: Boolean,
-    isConnected: Boolean
-) {
-    Row(
-        modifier = Modifier.padding(4.dp)
-    ) {
+fun NodeStatusIcons(isThisNode: Boolean, isUnmessageable: Boolean, isFavorite: Boolean, isConnected: Boolean) {
+    Row(modifier = Modifier.padding(4.dp)) {
         if (isThisNode) {
             TooltipBox(
                 positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
@@ -65,12 +60,12 @@ fun NodeStatusIcons(
                                     R.string.connected
                                 } else {
                                     R.string.disconnected
-                                }
-                            )
+                                },
+                            ),
                         )
                     }
                 },
-                state = rememberTooltipState()
+                state = rememberTooltipState(),
             ) {
                 if (isConnected) {
                     @Suppress("MagicNumber")
@@ -78,14 +73,14 @@ fun NodeStatusIcons(
                         imageVector = Icons.TwoTone.CloudDone,
                         contentDescription = stringResource(R.string.connected),
                         modifier = Modifier.size(24.dp), // Smaller size for badge
-                        tint = Color(0xFF4CAF50)
+                        tint = MaterialTheme.colorScheme.StatusGreen,
                     )
                 } else {
                     Icon(
                         imageVector = Icons.TwoTone.CloudOff,
                         contentDescription = stringResource(R.string.not_connected),
                         modifier = Modifier.size(24.dp), // Smaller size for badge
-                        tint = MaterialTheme.colorScheme.error
+                        tint = MaterialTheme.colorScheme.StatusRed,
                     )
                 }
             }
@@ -94,23 +89,14 @@ fun NodeStatusIcons(
         if (isUnmessageable) {
             TooltipBox(
                 positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
-                tooltip = {
-                    PlainTooltip {
-                        Text(stringResource(R.string.unmonitored_or_infrastructure))
-                    }
-                },
-                state = rememberTooltipState()
+                tooltip = { PlainTooltip { Text(stringResource(R.string.unmonitored_or_infrastructure)) } },
+                state = rememberTooltipState(),
             ) {
-                IconButton(
-                    onClick = {},
-                    modifier = Modifier
-                        .size(24.dp),
-                ) {
+                IconButton(onClick = {}, modifier = Modifier.size(24.dp)) {
                     Icon(
                         imageVector = Icons.Rounded.NoCell,
                         contentDescription = stringResource(R.string.unmessageable),
-                        modifier = Modifier
-                            .size(24.dp), // Smaller size for badge
+                        modifier = Modifier.size(24.dp), // Smaller size for badge
                     )
                 }
             }
@@ -118,24 +104,15 @@ fun NodeStatusIcons(
         if (isFavorite && !isThisNode) {
             TooltipBox(
                 positionProvider = TooltipDefaults.rememberTooltipPositionProvider(),
-                tooltip = {
-                    PlainTooltip {
-                        Text(stringResource(R.string.favorite))
-                    }
-                },
-                state = rememberTooltipState()
+                tooltip = { PlainTooltip { Text(stringResource(R.string.favorite)) } },
+                state = rememberTooltipState(),
             ) {
-                IconButton(
-                    onClick = {},
-                    modifier = Modifier
-                        .size(24.dp),
-                ) {
+                IconButton(onClick = {}, modifier = Modifier.size(24.dp)) {
                     Icon(
                         imageVector = Icons.Rounded.Star,
                         contentDescription = stringResource(R.string.favorite),
-                        modifier = Modifier
-                            .size(24.dp), // Smaller size for badge
-                        tint = Color(color = 0xFFFEC30A)
+                        modifier = Modifier.size(24.dp), // Smaller size for badge
+                        tint = MaterialTheme.colorScheme.StatusYellow,
                     )
                 }
             }
@@ -146,10 +123,5 @@ fun NodeStatusIcons(
 @Preview
 @Composable
 fun StatusIconsPreview() {
-    NodeStatusIcons(
-        isThisNode = true,
-        isUnmessageable = true,
-        isFavorite = true,
-        isConnected = false,
-    )
+    NodeStatusIcons(isThisNode = true, isUnmessageable = true, isFavorite = true, isConnected = false)
 }
