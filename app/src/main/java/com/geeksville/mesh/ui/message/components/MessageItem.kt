@@ -18,6 +18,7 @@
 package com.geeksville.mesh.ui.message.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
@@ -84,6 +85,7 @@ internal fun MessageItem(
         .fillMaxWidth()
         .background(color = if (selected) Color.Gray else MaterialTheme.colorScheme.background),
 ) {
+    val containsBel = message.text.contains('\u0007')
     val containerColor = Color(
         if (message.fromLocal) {
             ourNode.colors.second
@@ -95,7 +97,14 @@ internal fun MessageItem(
         containerColor = containerColor,
         contentColor = contentColorFor(containerColor)
     )
-    val messageModifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
+    val messageModifier = modifier
+        .fillMaxWidth()
+        .padding(start = 8.dp, top = 8.dp, end = 8.dp)
+        .then(
+            if (containsBel)
+                Modifier.border(2.dp, Color.Red.copy(alpha = 0.3f), shape = MaterialTheme.shapes.medium)
+            else Modifier
+        )
     Box {
         Card(
             modifier = Modifier
