@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.toArgb
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.ui.common.theme.MeshtasticGreen
+import kotlin.time.Duration.Companion.minutes
 
 /**
  * When printing strings to logs sometimes we want to print useful debugging information about users
@@ -80,7 +81,7 @@ fun getRecentTimeColor(recentTimeUnix: Int, currentTimeMillis: Long = System.cur
     // Meshtastic logo color according to: https://github.com/meshtastic/design
     val colorMostRecent: Int = MeshtasticGreen.toArgb()
     val colorStandard = Color.WHITE
-    val maxMinutes = 30 // 30 minutes is the maximum time we will show a color for.
+    val maxMinutes = 30.minutes.inWholeMinutes.toInt() // 30 minutes is the maximum time we will show a color for.
 
     // Interpolation logic:
     val t = diffMin.coerceIn(0, maxMinutes) / maxMinutes.toFloat()
