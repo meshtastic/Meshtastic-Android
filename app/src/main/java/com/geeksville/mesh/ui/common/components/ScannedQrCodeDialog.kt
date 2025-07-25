@@ -52,7 +52,6 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
 import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.ModemPreset
-import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.RegionCode
 import com.geeksville.mesh.R
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.copy
@@ -130,8 +129,7 @@ fun ScannedQrCodeDialog(
                     changes.add("Region: $currentRegionDesc -> $newRegionDesc")
                 }
                 if (current.modemPreset != new.modemPreset) {
-                    val currentPresetDesc =
-                        ModemPreset.forNumber(current.modemPreset.number)?.name ?: "Unknown"
+                    val currentPresetDesc = ModemPreset.forNumber(current.modemPreset.number)?.name ?: "Unknown"
                     val newPresetDesc = ModemPreset.forNumber(new.modemPreset.number)?.name ?: "Unknown"
                     changes.add("Modem Preset: $currentPresetDesc -> $newPresetDesc")
                 }
