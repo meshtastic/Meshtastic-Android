@@ -27,6 +27,7 @@
     <string name="node_sort_hops_away">Hopp unna</string>
     <string name="node_sort_last_heard">Sist hørt</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
+    <string name="via_mqtt">via MQTT</string>
     <string name="unrecognized">Ikke gjenkjent</string>
     <string name="message_status_enroute">Venter på bekreftelse</string>
     <string name="message_status_queued">I kø for å sende</string>
@@ -307,4 +308,9 @@
     <string name="private_key">Privat nøkkel</string>
     <string name="timeout">Tidsavbrudd</string>
     <string name="distance">Distanse</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="message_input_label">Melding</string>
 </resources>

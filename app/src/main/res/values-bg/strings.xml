@@ -27,6 +27,7 @@
     <string name="node_filter_include_unknown">Включително неизвестните</string>
     <string name="node_filter_only_online">Скриване на офлайн възлите</string>
     <string name="node_filter_only_direct">Показване само на директни възли</string>
+    <string name="node_filter_ignored">Преглеждате игнорирани възли.\nНатиснете , за да се върнете към списъка с възли.</string>
     <string name="node_filter_show_details">Показване на детайли</string>
     <string name="node_sort_button">Опции за сортиране на възлите</string>
     <string name="node_sort_alpha">А-Я</string>
@@ -35,7 +36,9 @@
     <string name="node_sort_hops_away">Брой хопове</string>
     <string name="node_sort_last_heard">Последно чут</string>
     <string name="node_sort_via_mqtt">с MQTT</string>
+    <string name="via_mqtt">с MQTT</string>
     <string name="node_sort_via_favorite">чрез Любим</string>
+    <string name="node_filter_show_ignored">Игнорирани възли</string>
     <string name="unrecognized">Неразпознат</string>
     <string name="routing_error_no_interface">Няма интерфейс</string>
     <string name="routing_error_no_channel">Няма канал</string>
@@ -506,10 +509,15 @@
     <string name="app_intro_done_button">Готово</string>
     <string name="app_intro_skip_button">Пропускане</string>
     <string name="security_icon_description">Състояние на сигурността</string>
-    <string name="security_icon_secure">- Сигурно</string>
-    <string name="security_icon_warning"> - ПРЕДУПРЕЖДЕНИЕ, несигурен MQTT</string>
-    <string name="security_icon_insecure"> - ПРЕДУПРЕЖДЕНИЕ, ключ с ниска ентропия</string>
     <string name="security_icon_insecure_precise"> - ПРЕДУПРЕЖДЕНИЕ, активирано е несигурно местоположение</string>
     <string name="unknown_channel">Неизвестен канал</string>
     <string name="warning">Предупреждение</string>
+    <string name="unknown">Неизвестно</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="security_icon_help_dismiss">Отхвърляне</string>
+    <string name="message_input_label">Съобщение</string>
+    <string name="download">Изтегляне</string>
 </resources>

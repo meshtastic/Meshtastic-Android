@@ -26,6 +26,7 @@
     <string name="node_sort_hops_away">Hop-e larg</string>
     <string name="node_sort_last_heard">I fundit që u dëgjua</string>
     <string name="node_sort_via_mqtt">përmes MQTT</string>
+    <string name="via_mqtt">përmes MQTT</string>
     <string name="unrecognized">I panjohur</string>
     <string name="message_status_enroute">Pritet të pranohet</string>
     <string name="message_status_queued">Në radhë për dërgim</string>
@@ -279,4 +280,9 @@
     <string name="traceroute_diff">Hops drejt %1$d Hops prapa %2$d</string>
     <string name="timeout">Koha e skaduar</string>
     <string name="distance">Distanca</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="message_input_label">Mesazh</string>
 </resources>

@@ -32,6 +32,7 @@
     <string name="node_sort_hops_away">ホップ数</string>
     <string name="node_sort_last_heard">最後の通信</string>
     <string name="node_sort_via_mqtt">MQTT 経由で</string>
+    <string name="via_mqtt">MQTT経由</string>
     <string name="node_sort_via_favorite">お気に入りから</string>
     <string name="unrecognized">不明</string>
     <string name="message_status_enroute">相手の受信確認待ち</string>
@@ -596,4 +597,9 @@
     <string name="unmute">ミュート解除</string>
     <string name="dynamic">動的</string>
     <string name="map">地図</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="message_input_label">メッセージ</string>
 </resources>

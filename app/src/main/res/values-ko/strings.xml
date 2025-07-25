@@ -35,6 +35,7 @@
     <string name="node_sort_hops_away">Hops 수</string>
     <string name="node_sort_last_heard">최근 수신</string>
     <string name="node_sort_via_mqtt">MQTT 경유</string>
+    <string name="via_mqtt">MQTT 경유</string>
     <string name="node_sort_via_favorite">즐겨찾기 우선</string>
     <string name="unrecognized">확인되지 않음</string>
     <string name="message_status_enroute">수락을 기다리는 중</string>
@@ -648,4 +649,12 @@
     <string name="no_network_devices">네트워크 장치를 찾을 수 없습니다.</string>
     <string name="no_usb_devices">USB 시리얼 장치를 찾을 수 없습니다.</string>
     <string name="meshtastic">Meshtastic</string>
+    <string name="unknown">알 수 없는</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="security_icon_help_dismiss">취소</string>
+    <string name="message_input_label">메시지</string>
+    <string name="download">다운로드</string>
 </resources>

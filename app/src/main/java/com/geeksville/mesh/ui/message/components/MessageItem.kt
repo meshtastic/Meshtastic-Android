@@ -27,7 +27,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
@@ -140,6 +142,13 @@ internal fun MessageItem(
                         style = MaterialTheme.typography.labelMedium,
                         modifier = Modifier.weight(1f, fill = true)
                     )
+                    if (message.viaMqtt) {
+                        Icon(
+                            Icons.Default.Cloud,
+                            contentDescription = stringResource(R.string.via_mqtt),
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                     MessageActions(
                         isLocal = message.fromLocal,
                         status = message.status,
@@ -218,7 +227,8 @@ private fun OriginalMessageSnippet(
     cardColors: CardColors = CardDefaults.cardColors(),
     onNavigateToOriginalMessage: (Int) -> Unit
 ) {
-    message.originalMessage?.let { originalMessage ->
+    val originalMessage = message.originalMessage
+    if (originalMessage != null && originalMessage.packetId != 0) {
         val originalMessageNode =
             if (originalMessage.fromLocal) ourNode else originalMessage.node
         OutlinedCard(
@@ -275,6 +285,7 @@ private fun MessageItemPreview() {
         packetId = 4545,
         emojis = listOf(),
         replyId = null,
+        viaMqtt = false,
     )
     val received = Message(
         text = "This is a received message",
@@ -292,6 +303,7 @@ private fun MessageItemPreview() {
         packetId = 4545,
         emojis = listOf(),
         replyId = null,
+        viaMqtt = false,
     )
     val receivedWithOriginalMessage = Message(
         text = "This is a received message w/ original, this is a longer message to test next-lining.",
@@ -310,6 +322,7 @@ private fun MessageItemPreview() {
         emojis = listOf(),
         replyId = null,
         originalMessage = received,
+        viaMqtt = true,
     )
     AppTheme {
         Column(

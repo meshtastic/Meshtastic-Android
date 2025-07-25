@@ -43,6 +43,7 @@
     <string name="node_filter_include_unknown">Include unknown</string>
     <string name="node_filter_only_online">Hide offline nodes</string>
     <string name="node_filter_only_direct">Only show direct nodes</string>
+    <string name="node_filter_ignored">You are viewing ignored nodes,\nPress to return to the node list.</string>
     <string name="node_filter_show_details">Show details</string>
     <string name="node_sort_button">Node sorting options</string>
     <string name="node_sort_alpha">A-Z</string>
@@ -51,8 +52,9 @@
     <string name="node_sort_hops_away">Hops away</string>
     <string name="node_sort_last_heard">Last heard</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
+    <string name="via_mqtt">via MQTT</string>
     <string name="node_sort_via_favorite">via Favorite</string>
-
+    <string name="node_filter_show_ignored">Ignored Nodes</string>
     <string name="unrecognized">Unrecognized</string>
     <string name="message_status_enroute">Waiting to be acknowledged</string>
     <string name="message_status_queued">Queued for sending</string>
@@ -163,6 +165,7 @@
     <string name="text_messages">Text messages</string>
     <string name="channel_invalid">This Channel URL is invalid and can not be used</string>
     <string name="debug_panel">Debug Panel</string>
+    <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">Export Logs</string>
     <string name="debug_last_messages">500 last messages</string>
     <string name="debug_filters">Filters</string>
@@ -725,12 +728,81 @@
     <string name="app_intro_done_button">Done</string>
     <string name="app_intro_skip_button">Skip</string>
     <string name="security_icon_description">Security Status</string>
-    <string name="security_icon_secure"> - Secure</string>
-    <string name="security_icon_warning"> - WARN, insecure MQTT</string>
-    <string name="security_icon_insecure"> - WARN, low entropy key</string>
+    <string name="security_icon_secure">Secure</string>
     <string name="security_icon_insecure_precise"> - WARNING, insecure location enabled</string>
+    <string name="security_icon_badge_warning_description">Warning Badge</string>
     <string name="unknown_channel">Unknown Channel</string>
     <string name="warning">Warning</string>
     <string name="overflow_menu">Overflow menu</string>
     <string name="uv_lux">UV Lux</string>
+    <string name="unknown">Unknown</string>
+    <string name="map_type_normal">Normal</string>
+    <string name="map_type_satellite">Satellite</string>
+    <string name="map_type_terrain">Terrain</string>
+    <string name="map_type_hybrid">Hybrid</string>
+    <string name="manage_map_layers">Manage Map Layers</string>
+    <string name="map_layers_title">Map Layers</string>
+    <string name="no_map_layers_loaded">No custom layers loaded.</string>
+    <string name="add_layer_button">Add Layer</string>
+    <string name="hide_layer">Hide Layer</string>
+    <string name="show_layer">Show Layer</string>
+    <string name="remove_layer">Remove Layer</string>
+    <string name="add_layer">Add Layer</string>
+    <string name="nodes_at_this_location">Nodes at this location</string>
+    <string name="selected_map_type">Selected Map Type</string>
+    <string name="manage_custom_tile_sources">Manage Custom Tile Sources</string>
+    <string name="add_custom_tile_source">Add Custom Tile Source</string>
+    <string name="no_custom_tile_sources_found">No Custom Tile Sources</string>
+    <string name="edit_custom_tile_source">Edit Custom Tile Source</string>
+    <string name="delete_custom_tile_source">Delete Custom Tile Source</string>
+    <string name="name_cannot_be_empty">Name cannot be empty.</string>
+    <string name="provider_name_exists">Provider name exists.</string>
+    <string name="url_cannot_be_empty">URL cannot be empty.</string>
+    <string name="url_must_contain_placeholders">URL must contain placeholders.</string>
+    <string name="url_template">URL Template</string>
+    <string name="url_template_hint">e.g. https://a.tile.openstreetmap.org/{z}/{x}/{y}.png</string>
+
+    <string name="security_icon_help_green_lock">A green lock means the channel is securely encrypted with either a 128 or 256 bit AES key.</string>
+
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <string name="security_icon_insecure_no_precise">Insecure Channel, Not Precise</string>
+    <string name="security_icon_help_yellow_open_lock">A yellow open lock means the channel is not securely encrypted, is not used for precise location data, and uses either no key at all or a 1 byte known key.</string>
+
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <string name="security_icon_insecure_precise_only">Insecure Channel, Precise Location</string>
+    <string name="security_icon_help_red_open_lock">A red open lock means the channel is not securely encrypted, is used for precise location data, and uses either no key at all or a 1 byte known key.</string>
+
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <string name="security_icon_warning_precise_mqtt">Warning: Insecure, Precise Location &amp; MQTT Uplink</string>
+    <string name="security_icon_help_warning_precise_mqtt">A red open lock with a warning means the channel is not securely encrypted, is used for precise location data which is being uplinked to the internet via MQTT, and uses either no key at all or a 1 byte known key.</string>
+
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="security_icon_help_title">Channel Security</string>
+    <string name="security_icon_help_title_all">Channel Security Meanings</string>
+    <string name="security_icon_help_show_all">Show All Meanings</string>
+    <string name="security_icon_help_show_less">Show Current Status</string>
+    <string name="security_icon_help_dismiss">Dismiss</string>
+
+    <string name="confirm_delete_node">Are you sure you want to delete this node?</string>
+
+    <string name="replying_to">Replying to %1$s</string>
+    <string name="cancel_reply">Cancel reply</string>
+    <string name="delete_messages_title">Delete Messages?</string>
+    <string name="clear_selection">Clear selection</string>
+    <string name="message_input_label">Message</string>
+    <string name="type_a_message">Type a message</string>
+    <string name="pax_metrics_log">PAX Metrics Log</string>
+    <string name="pax">PAX</string>
+    <string name="no_pax_metrics_logs">No PAX metrics logs available.</string>
+    <string name="wifi_devices">WiFi Devices</string>
+    <string name="ble_devices">BLE Devices</string>
+
+    <string name="routing_error_rate_limit_exceeded">Rate Limit Exceeded. Please try again later.</string>
+    <string name="view_release">View Release</string>
+    <string name="download">Download</string>
+    <string name="installed_firmware_version">Currently Installed</string>
+    <string name="latest_stable_firmware">Latest stable</string>
+    <string name="latest_alpha_firmware">Latest alpha</string>
+    <string name="supported_by_community">Supported by Meshtastic Community</string>
+    <string name="firmware_edition">Firmware Edition</string>
 </resources>

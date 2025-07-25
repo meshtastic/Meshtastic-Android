@@ -30,6 +30,7 @@
     <string name="node_sort_channel">عربي</string>
     <string name="node_sort_distance">المسافة</string>
     <string name="node_sort_hops_away">عربي</string>
+    <string name="via_mqtt">فقط شبكة MQTT</string>
     <string name="channel_name">اسم القناة</string>
     <string name="channel_options">خيارات القناة</string>
     <string name="qr_code">رمز الاستجابة السريع</string>
@@ -166,4 +167,9 @@
     <string name="messages">الرسائل</string>
     <string name="distance">المسافة</string>
     <string name="map">الخريطة</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="message_input_label">رسالة</string>
 </resources>

@@ -124,7 +124,7 @@ data class Node(
         val humidity = if (relativeHumidity != 0f) "%.0f%%".format(relativeHumidity) else null
         val soilTemperatureStr = if (soilTemperature != 0f) {
             if (isFahrenheit) {
-                "%.1f°F".format(celsiusToFahrenheit(temperature))
+                "%.1f°F".format(celsiusToFahrenheit(soilTemperature))
             } else {
                 "%.1f°C".format(soilTemperature)
             }

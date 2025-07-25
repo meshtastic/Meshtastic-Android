@@ -15,31 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-include(":app", ":network", ":mesh_service_example")
-rootProject.name = "Meshtastic Android"
+package com.geeksville.mesh.repository.datastore.recentaddresses
 
-plugins {
-    id("org.gradle.toolchains.foojay-resolver") version "1.0.0"
-    id("com.gradle.develocity") version("4.1")
-    id("com.gradle.common-custom-user-data-gradle-plugin") version "2.3"
-}
+import kotlinx.serialization.Serializable
 
-develocity {
-    buildScan {
-        capture {
-            fileFingerprints.set(true)
-        }
-        publishing.onlyIf { false }
-    }
-}
-
-@Suppress("UnstableApiUsage")
-toolchainManagement {
-    jvm {
-        javaRepositories {
-            repository("foojay") {
-                resolverClass.set(org.gradle.toolchains.foojay.FoojayToolchainResolver::class.java)
-            }
-        }
-    }
-}
+@Serializable data class RecentAddress(val address: String, val name: String)

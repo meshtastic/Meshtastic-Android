@@ -31,6 +31,7 @@
     <string name="node_sort_hops_away">Skokova daleko</string>
     <string name="node_sort_last_heard">Poslednji put viđeno</string>
     <string name="node_sort_via_mqtt">preko MQTT-a</string>
+    <string name="via_mqtt">preko MQTT-a</string>
     <string name="unrecognized">Nekategorisano</string>
     <string name="message_status_enroute">Čeka na potvrdu</string>
     <string name="message_status_queued">U redu za slanje</string>
@@ -410,4 +411,13 @@
     <string name="date">Датум</string>
     <string name="disconnect">Прекините везу</string>
     <string name="app_intro_back_button">Назад</string>
+    <string name="unknown">Непознато</string>
+    <string name="map_type_satellite">Сателит</string>
+    <string name="map_type_hybrid">Хибридни</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="security_icon_help_dismiss">Отпусти</string>
+    <string name="message_input_label">Порука</string>
 </resources>

@@ -29,6 +29,7 @@
     <string name="node_sort_hops_away">Antal hopp</string>
     <string name="node_sort_last_heard">Senast hörd</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
+    <string name="via_mqtt">via MQTT</string>
     <string name="unrecognized">Okänd</string>
     <string name="message_status_enroute">Inväntar kvittens</string>
     <string name="message_status_queued">Kvittens köad</string>
@@ -351,4 +352,12 @@
     <string name="nodes">Noder</string>
     <string name="reply">Svara</string>
     <string name="meshtastic">Meshtastic</string>
+    <string name="unknown">Okänd</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="security_icon_help_dismiss">Stäng</string>
+    <string name="message_input_label">Meddelande</string>
+    <string name="download">Ladda ner</string>
 </resources>

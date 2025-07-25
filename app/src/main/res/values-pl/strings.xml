@@ -32,6 +32,7 @@
     <string name="node_sort_hops_away">Liczba skoków</string>
     <string name="node_sort_last_heard">Aktywność</string>
     <string name="node_sort_via_mqtt">Przez MQTT</string>
+    <string name="via_mqtt">Przez MQTT</string>
     <string name="node_sort_via_favorite">Przez ulubione</string>
     <string name="unrecognized">Nierozpoznany</string>
     <string name="message_status_enroute">Oczekiwanie na potwierdzenie</string>
@@ -423,4 +424,13 @@
     <string name="reply">Odpowiedz</string>
     <string name="disconnect">Rozłącz</string>
     <string name="app_intro_back_button">Wstecz</string>
+    <string name="unknown">Nieznany</string>
+    <string name="map_type_satellite">Satelita</string>
+    <string name="map_type_hybrid">Hybrydowy</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="security_icon_help_dismiss">Zamknij</string>
+    <string name="message_input_label">Wiadomość</string>
 </resources>

@@ -35,6 +35,7 @@
     <string name="node_sort_hops_away">Distanza in Hop</string>
     <string name="node_sort_last_heard">Ricevuto più di recente</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
+    <string name="via_mqtt">via MQTT</string>
     <string name="node_sort_via_favorite">via Preferiti</string>
     <string name="unrecognized">Non riconosciuto</string>
     <string name="message_status_enroute">In attesa di conferma</string>
@@ -688,4 +689,12 @@
     <string name="app_intro_done_button">Fatto</string>
     <string name="app_intro_skip_button">Ignora</string>
     <string name="warning">Attenzione</string>
+    <string name="unknown">Sconosciuto</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="security_icon_help_dismiss">Annulla</string>
+    <string name="message_input_label">Messaggio</string>
+    <string name="download">Scarica</string>
 </resources>

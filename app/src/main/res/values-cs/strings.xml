@@ -34,6 +34,7 @@
     <string name="node_sort_hops_away">Počet skoků</string>
     <string name="node_sort_last_heard">Naposledy slyšen</string>
     <string name="node_sort_via_mqtt">přes MQTT</string>
+    <string name="via_mqtt">přes MQTT</string>
     <string name="node_sort_via_favorite">Oblíbené</string>
     <string name="unrecognized">Neznámý</string>
     <string name="message_status_enroute">Čeká na potvrzení</string>
@@ -646,4 +647,9 @@
     <string name="node_count_template">(%1$d online / %2$d celkem)</string>
     <string name="react">Odpovědět</string>
     <string name="warning">Varování</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="message_input_label">Zpráva</string>
 </resources>

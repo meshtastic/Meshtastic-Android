@@ -26,6 +26,7 @@
     <string name="node_sort_hops_away">Salts</string>
     <string name="node_sort_last_heard">Última notícia</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
+    <string name="via_mqtt">via MQTT</string>
     <string name="channel_name">Nom del canal</string>
     <string name="channel_options">Opcions del canal</string>
     <string name="qr_code">Codi QR</string>
@@ -200,4 +201,9 @@
     <string name="mute_1_week">1 setmana</string>
     <string name="mute_always">Sempre</string>
     <string name="distance">Distància</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="message_input_label">Missatge</string>
 </resources>

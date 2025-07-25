@@ -26,6 +26,7 @@
     <string name="node_sort_hops_away">Broj skokova</string>
     <string name="node_sort_last_heard">Posljednje čuo</string>
     <string name="node_sort_via_mqtt">putem MQTT</string>
+    <string name="via_mqtt">putem MQTT</string>
     <string name="channel_name">Naziv kanala</string>
     <string name="channel_options">Mogućnosti kanala</string>
     <string name="qr_code">QR kod</string>
@@ -201,4 +202,9 @@
     <string name="mute_1_week">1 tjedan</string>
     <string name="mute_always">Uvijek</string>
     <string name="distance">Udaljenost</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="message_input_label">Poruka</string>
 </resources>

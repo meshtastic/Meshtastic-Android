@@ -32,6 +32,7 @@
     <string name="node_sort_hops_away">Aantal sprongen</string>
     <string name="node_sort_last_heard">Laatst gehoord</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
+    <string name="via_mqtt">via MQTT</string>
     <string name="node_sort_via_favorite">Op Favoriet</string>
     <string name="unrecognized">Niet herkend</string>
     <string name="message_status_enroute">Wachten op bevestiging</string>
@@ -517,4 +518,9 @@
     <string name="request_metadata">Metadata opvragen</string>
     <string name="actions">Acties</string>
     <string name="map">Kaart</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="message_input_label">Bericht</string>
 </resources>

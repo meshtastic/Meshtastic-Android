@@ -31,6 +31,7 @@
     <string name="node_sort_hops_away">Ugrás Messzire</string>
     <string name="node_sort_last_heard">Utoljára hallott</string>
     <string name="node_sort_via_mqtt">MQTT-n Keresztül</string>
+    <string name="via_mqtt">MQTT-n Keresztül</string>
     <string name="unrecognized">Ismeretlen</string>
     <string name="message_status_enroute">Visszajelzésre vár</string>
     <string name="message_status_queued">Elküldésre vár</string>
@@ -259,4 +260,9 @@
     <string name="timeout">Időtúllépés</string>
     <string name="distance">Távolság</string>
     <string name="map">Térkép</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="message_input_label">Üzenet</string>
 </resources>

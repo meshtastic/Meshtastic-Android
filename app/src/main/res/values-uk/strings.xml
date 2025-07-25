@@ -31,6 +31,7 @@
     <string name="node_sort_channel">Канал</string>
     <string name="node_sort_distance">Відстань</string>
     <string name="node_sort_via_mqtt">через MQTT</string>
+    <string name="via_mqtt">через MQTT</string>
     <string name="node_sort_via_favorite">через Обране</string>
     <string name="routing_error_no_channel">Канал відсутній</string>
     <string name="routing_error_too_large">Пакет завеликий</string>
@@ -343,4 +344,9 @@
     <string name="only_favorites">Лише обрані</string>
     <string name="export_keys">Експортувати ключі</string>
     <string name="meshtastic">Meshtastic</string>
+    <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="message_input_label">Повідомлення</string>
 </resources>
