@@ -330,13 +330,6 @@ constructor(
         preferences.edit { putBoolean("show-ignored", showIgnored.value) }
     }
 
-    private val showIgnored = MutableStateFlow(preferences.getBoolean("show-ignored", false))
-
-    fun toggleShowIgnored() {
-        showIgnored.value = !showIgnored.value
-        preferences.edit { putBoolean("show-ignored", showIgnored.value) }
-    }
-
     fun setSortOption(sort: NodeSortOption) {
         nodeSortOption.value = sort
         preferences.edit { putInt("node-sort-option", sort.ordinal) }
@@ -480,7 +473,7 @@ constructor(
     )
 
     val mapFilterStateFlow: StateFlow<MapFilterState> =
-        combine(onlyFavorites, showWaypointsOnMap, showPrecisionCircleOnMap) {
+        combine(onlyFavorites, showWaypointsOnMap, showPrecisionCircleOnMap, colorizeRecentNodes) {
                 favoritesOnly,
                 showWaypoints,
                 showPrecisionCircle,
