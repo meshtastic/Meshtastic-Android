@@ -81,60 +81,57 @@ internal fun MessageItem(
     isConnected: Boolean,
     onNavigateToOriginalMessage: (Int) -> Unit = {},
 ) = Column(
-    modifier = modifier
+    modifier =
+    modifier
         .fillMaxWidth()
         .background(color = if (selected) Color.Gray else MaterialTheme.colorScheme.background),
 ) {
     val containsBel = message.text.contains('\u0007')
-    val containerColor = Color(
-        if (message.fromLocal) {
-            ourNode.colors.second
-        } else {
-            node.colors.second
-        }
-    ).copy(alpha = 0.2f)
-    val cardColors = CardDefaults.cardColors().copy(
-        containerColor = containerColor,
-        contentColor = contentColorFor(containerColor)
-    )
-    val messageModifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
-        .then(
-            if (containsBel)
-                Modifier.border(2.dp, Color.Red.copy(alpha = 0.3f), shape = MaterialTheme.shapes.medium)
-            else Modifier
+    val containerColor =
+        Color(
+            if (message.fromLocal) {
+                ourNode.colors.second
+            } else {
+                node.colors.second
+            },
         )
+            .copy(alpha = 0.2f)
+    val cardColors =
+        CardDefaults.cardColors()
+            .copy(containerColor = containerColor, contentColor = contentColorFor(containerColor))
+    val messageModifier =
+        Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
+            .then(
+                if (containsBel) {
+                    Modifier.border(2.dp, Color.Red.copy(alpha = 0.3f), shape = MaterialTheme.shapes.medium)
+                } else {
+                    Modifier
+                },
+            )
     Box {
         Card(
-            modifier = Modifier
-                .align(if (message.fromLocal) Alignment.BottomEnd else Alignment.BottomStart)
+            modifier =
+            Modifier.align(if (message.fromLocal) Alignment.BottomEnd else Alignment.BottomStart)
                 .padding(
                     top = 4.dp,
                     start = if (!message.fromLocal) 0.dp else 16.dp,
                     end = if (message.fromLocal) 0.dp else 16.dp,
                 )
-                .combinedClickable(
-                    onClick = onClick,
-                    onLongClick = onLongClick,
-                )
+                .combinedClickable(onClick = onClick, onLongClick = onLongClick)
                 .then(messageModifier),
             colors = cardColors,
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth(),
-            ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
                 OriginalMessageSnippet(
                     message = message,
                     ourNode = ourNode,
                     cardColors = cardColors,
-                    onNavigateToOriginalMessage = onNavigateToOriginalMessage
+                    onNavigateToOriginalMessage = onNavigateToOriginalMessage,
                 )
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 4.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     NodeChip(
                         node = if (message.fromLocal) ourNode else node,
@@ -147,13 +144,13 @@ internal fun MessageItem(
                         overflow = TextOverflow.Ellipsis,
                         maxLines = 1,
                         style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.weight(1f, fill = true)
+                        modifier = Modifier.weight(1f, fill = true),
                     )
                     if (message.viaMqtt) {
                         Icon(
                             Icons.Default.Cloud,
                             contentDescription = stringResource(R.string.via_mqtt),
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp),
                         )
                     }
                     MessageActions(
@@ -165,62 +162,42 @@ internal fun MessageItem(
                     )
                 }
 
-                Column(
-                    modifier = Modifier.padding(horizontal = 8.dp),
-                ) {
+                Column(modifier = Modifier.padding(horizontal = 8.dp)) {
                     AutoLinkText(
-                        modifier = Modifier
-                            .fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth(),
                         text = message.text,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = cardColors.contentColor
+                        color = cardColors.contentColor,
                     )
 
                     val topPadding = if (!message.fromLocal) 2.dp else 0.dp
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = topPadding, bottom = 4.dp),
+                        modifier = Modifier.fillMaxWidth().padding(top = topPadding, bottom = 4.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         if (!message.fromLocal) {
                             if (message.hopsAway == 0) {
-                                Row(
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                ) {
-                                    Snr(
-                                        message.snr,
-                                        fontSize = MaterialTheme.typography.labelSmall.fontSize
-                                    )
-                                    Rssi(
-                                        message.rssi,
-                                        fontSize = MaterialTheme.typography.labelSmall.fontSize
-                                    )
+                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    Snr(message.snr, fontSize = MaterialTheme.typography.labelSmall.fontSize)
+                                    Rssi(message.rssi, fontSize = MaterialTheme.typography.labelSmall.fontSize)
                                 }
                             } else {
                                 Text(
-                                    text = stringResource(
-                                        R.string.hops_away_template,
-                                        message.hopsAway
-                                    ),
+                                    text = stringResource(R.string.hops_away_template, message.hopsAway),
                                     style = MaterialTheme.typography.labelSmall,
                                 )
                             }
                         }
                         Spacer(modifier = Modifier.weight(1f))
-                        Text(
-                            text = message.time,
-                            style = MaterialTheme.typography.labelSmall,
-                        )
+                        Text(text = message.time, style = MaterialTheme.typography.labelSmall)
                     }
                 }
             }
         }
     }
     ReactionRow(
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         reactions = emojis,
         onSendReaction = sendReaction,
         onShowReactions = onShowReactions,
@@ -232,23 +209,22 @@ private fun OriginalMessageSnippet(
     message: Message,
     ourNode: Node,
     cardColors: CardColors = CardDefaults.cardColors(),
-    onNavigateToOriginalMessage: (Int) -> Unit
+    onNavigateToOriginalMessage: (Int) -> Unit,
 ) {
     val originalMessage = message.originalMessage
     if (originalMessage != null && originalMessage.packetId != 0) {
-        val originalMessageNode =
-            if (originalMessage.fromLocal) ourNode else originalMessage.node
+        val originalMessageNode = if (originalMessage.fromLocal) ourNode else originalMessage.node
         OutlinedCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(4.dp)
-                .clickable { onNavigateToOriginalMessage(originalMessage.packetId) },
+            modifier =
+            Modifier.fillMaxWidth().padding(4.dp).clickable {
+                onNavigateToOriginalMessage(originalMessage.packetId)
+            },
             colors = cardColors,
         ) {
             Row(
                 modifier = Modifier.padding(horizontal = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Icon(
                     Icons.Default.FormatQuote,
@@ -259,7 +235,7 @@ private fun OriginalMessageSnippet(
                     style = MaterialTheme.typography.labelMedium,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
                 )
                 Text(
                     modifier = Modifier.weight(1f, fill = true),
@@ -276,67 +252,66 @@ private fun OriginalMessageSnippet(
 @PreviewLightDark
 @Composable
 private fun MessageItemPreview() {
-    val sent = Message(
-        text = stringResource(R.string.sample_message),
-        time = "10:00",
-        fromLocal = true,
-        status = MessageStatus.DELIVERED,
-        snr = 20.5f,
-        rssi = 90,
-        hopsAway = 0,
-        uuid = 1L,
-        receivedTime = System.currentTimeMillis(),
-        node = NodePreviewParameterProvider().mickeyMouse,
-        read = false,
-        routingError = 0,
-        packetId = 4545,
-        emojis = listOf(),
-        replyId = null,
-        viaMqtt = false,
-    )
-    val received = Message(
-        text = "This is a received message",
-        time = "10:10",
-        fromLocal = false,
-        status = MessageStatus.RECEIVED,
-        snr = 2.5f,
-        rssi = 90,
-        hopsAway = 0,
-        uuid = 2L,
-        receivedTime = System.currentTimeMillis(),
-        node = NodePreviewParameterProvider().minnieMouse,
-        read = false,
-        routingError = 0,
-        packetId = 4545,
-        emojis = listOf(),
-        replyId = null,
-        viaMqtt = false,
-    )
-    val receivedWithOriginalMessage = Message(
-        text = "This is a received message w/ original, this is a longer message to test next-lining.",
-        time = "10:20",
-        fromLocal = false,
-        status = MessageStatus.RECEIVED,
-        snr = 2.5f,
-        rssi = 90,
-        hopsAway = 2,
-        uuid = 2L,
-        receivedTime = System.currentTimeMillis(),
-        node = NodePreviewParameterProvider().minnieMouse,
-        read = false,
-        routingError = 0,
-        packetId = 4545,
-        emojis = listOf(),
-        replyId = null,
-        originalMessage = received,
-        viaMqtt = true,
-    )
+    val sent =
+        Message(
+            text = stringResource(R.string.sample_message),
+            time = "10:00",
+            fromLocal = true,
+            status = MessageStatus.DELIVERED,
+            snr = 20.5f,
+            rssi = 90,
+            hopsAway = 0,
+            uuid = 1L,
+            receivedTime = System.currentTimeMillis(),
+            node = NodePreviewParameterProvider().mickeyMouse,
+            read = false,
+            routingError = 0,
+            packetId = 4545,
+            emojis = listOf(),
+            replyId = null,
+            viaMqtt = false,
+        )
+    val received =
+        Message(
+            text = "This is a received message",
+            time = "10:10",
+            fromLocal = false,
+            status = MessageStatus.RECEIVED,
+            snr = 2.5f,
+            rssi = 90,
+            hopsAway = 0,
+            uuid = 2L,
+            receivedTime = System.currentTimeMillis(),
+            node = NodePreviewParameterProvider().minnieMouse,
+            read = false,
+            routingError = 0,
+            packetId = 4545,
+            emojis = listOf(),
+            replyId = null,
+            viaMqtt = false,
+        )
+    val receivedWithOriginalMessage =
+        Message(
+            text = "This is a received message w/ original, this is a longer message to test next-lining.",
+            time = "10:20",
+            fromLocal = false,
+            status = MessageStatus.RECEIVED,
+            snr = 2.5f,
+            rssi = 90,
+            hopsAway = 2,
+            uuid = 2L,
+            receivedTime = System.currentTimeMillis(),
+            node = NodePreviewParameterProvider().minnieMouse,
+            read = false,
+            routingError = 0,
+            packetId = 4545,
+            emojis = listOf(),
+            replyId = null,
+            originalMessage = received,
+            viaMqtt = true,
+        )
     AppTheme {
-        Column(
-            modifier = Modifier
-                .background(MaterialTheme.colorScheme.background)
-                .padding(vertical = 16.dp),
-        ) {
+        Column(modifier = Modifier.background(MaterialTheme.colorScheme.background).padding(vertical = 16.dp)) {
             MessageItem(
                 message = sent,
                 node = sent.node,
