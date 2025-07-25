@@ -255,13 +255,16 @@ private fun handleNodeAction(
                     val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
                     navigateToMessages("$channel${node.user.id}")
                 }
+
                 is NodeMenuAction.Remove -> {
                     uiViewModel.handleNodeMenuAction(menuAction)
                     onNavigateUp()
                 }
+
                 else -> uiViewModel.handleNodeMenuAction(menuAction)
             }
         }
+
         is NodeDetailAction.ShareContact -> {
             /* Handled in NodeDetailContent */
         }
@@ -438,11 +441,19 @@ private fun AdministrationSection(
         }
     }
 
-    node.metadata?.firmwareVersion?.let { firmwareVersion ->
-        val latestStable = metricsState.latestStableFirmware
-        val latestAlpha = metricsState.latestAlphaFirmware
+    PreferenceCategory(stringResource(R.string.firmware)) {
+        val firmwareEdition = metricsState.firmwareEdition
+        firmwareEdition?.let {
+            NodeDetailRow(
+                label = stringResource(R.string.firmware_edition),
+                icon = Icons.Default.Download,
+                value = it.name,
+            )
+        }
+        node.metadata?.firmwareVersion?.let { firmwareVersion ->
+            val latestStable = metricsState.latestStableFirmware
+            val latestAlpha = metricsState.latestAlphaFirmware
 
-        PreferenceCategory(stringResource(R.string.firmware)) {
             val deviceVersion = DeviceVersion(firmwareVersion.substringBeforeLast("."))
             val statusColor = deviceVersion.determineFirmwareStatusColor(latestStable, latestAlpha)
 

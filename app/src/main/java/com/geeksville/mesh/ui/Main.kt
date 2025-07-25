@@ -78,7 +78,9 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.BuildConfig
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
@@ -293,9 +295,28 @@ private fun VersionChecks(viewModel: UIViewModel) {
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val myNodeInfo by viewModel.myNodeInfo.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    val firmwareEdition by viewModel.firmwareEdition.collectAsStateWithLifecycle(null)
+
     val latestStableFirmwareRelease by viewModel.latestStableFirmwareRelease.collectAsState(DeviceVersion("2.6.4"))
+    LaunchedEffect(connectionState, firmwareEdition) {
+        if (connectionState == MeshService.ConnectionState.CONNECTED) {
+            firmwareEdition?.let { edition ->
+                debug("FirmwareEdition: ${edition.name}")
+                when (edition) {
+                    MeshProtos.FirmwareEdition.VANILLA -> {
+                        // Handle any specific logic for VANILLA firmware edition if needed
+                    }
+
+                    else -> {
+                        // Handle other firmware editions if needed
+                    }
+                }
+            }
+        }
+    }
     // Check if the device is running an old app version or firmware version
-    LaunchedEffect(connectionState, myNodeInfo) {
+    LaunchedEffect(connectionState, myNodeInfo, firmwareEdition) {
         if (connectionState == MeshService.ConnectionState.CONNECTED) {
             myNodeInfo?.let { info ->
                 val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
