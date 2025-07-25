@@ -58,42 +58,50 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.R
+import com.geeksville.mesh.ui.common.theme.IAQColors.IAQDangerouslyPolluted
+import com.geeksville.mesh.ui.common.theme.IAQColors.IAQExcellent
+import com.geeksville.mesh.ui.common.theme.IAQColors.IAQExtremelyPolluted
+import com.geeksville.mesh.ui.common.theme.IAQColors.IAQGood
+import com.geeksville.mesh.ui.common.theme.IAQColors.IAQHeavilyPolluted
+import com.geeksville.mesh.ui.common.theme.IAQColors.IAQLightlyPolluted
+import com.geeksville.mesh.ui.common.theme.IAQColors.IAQModeratelyPolluted
+import com.geeksville.mesh.ui.common.theme.IAQColors.IAQSeverelyPolluted
 
 @Suppress("MagicNumber")
 enum class Iaq(val color: Color, val description: String, val range: IntRange) {
-    Excellent(Color(0xFF00E400), "Excellent", 0..50),
-    Good(Color(0xFF92D050), "Good", 51..100),
-    LightlyPolluted(Color(0xFFFFFF00), "Lightly Polluted", 101..150),
-    ModeratelyPolluted(Color(0xFFFF7300), "Moderately Polluted", 151..200),
-    HeavilyPolluted(Color(0xFFFF0000), "Heavily Polluted", 201..300),
-    SeverelyPolluted(Color(0xFF99004C), "Severely Polluted", 301..400),
-    ExtremelyPolluted(Color(0xFF663300), "Extremely Polluted", 401..500),
-    DangerouslyPolluted(Color(0xFF663300), "Dangerously Polluted", 501..Int.MAX_VALUE)
+    Excellent(IAQExcellent, "Excellent", 0..50),
+    Good(IAQGood, "Good", 51..100),
+    LightlyPolluted(IAQLightlyPolluted, "Lightly Polluted", 101..150),
+    ModeratelyPolluted(IAQModeratelyPolluted, "Moderately Polluted", 151..200),
+    HeavilyPolluted(IAQHeavilyPolluted, "Heavily Polluted", 201..300),
+    SeverelyPolluted(IAQSeverelyPolluted, "Severely Polluted", 301..400),
+    ExtremelyPolluted(IAQExtremelyPolluted, "Extremely Polluted", 401..500),
+    DangerouslyPolluted(IAQDangerouslyPolluted, "Dangerously Polluted", 501..Int.MAX_VALUE),
 }
 
-fun getIaq(iaq: Int): Iaq {
-    return when {
-        iaq in Iaq.Excellent.range -> Iaq.Excellent
-        iaq in Iaq.Good.range -> Iaq.Good
-        iaq in Iaq.LightlyPolluted.range -> Iaq.LightlyPolluted
-        iaq in Iaq.ModeratelyPolluted.range -> Iaq.ModeratelyPolluted
-        iaq in Iaq.HeavilyPolluted.range -> Iaq.HeavilyPolluted
-        iaq in Iaq.SeverelyPolluted.range -> Iaq.SeverelyPolluted
-        iaq in Iaq.ExtremelyPolluted.range -> Iaq.ExtremelyPolluted
-        else -> Iaq.DangerouslyPolluted
-    }
+fun getIaq(iaq: Int): Iaq = when {
+    iaq in Iaq.Excellent.range -> Iaq.Excellent
+    iaq in Iaq.Good.range -> Iaq.Good
+    iaq in Iaq.LightlyPolluted.range -> Iaq.LightlyPolluted
+    iaq in Iaq.ModeratelyPolluted.range -> Iaq.ModeratelyPolluted
+    iaq in Iaq.HeavilyPolluted.range -> Iaq.HeavilyPolluted
+    iaq in Iaq.SeverelyPolluted.range -> Iaq.SeverelyPolluted
+    iaq in Iaq.ExtremelyPolluted.range -> Iaq.ExtremelyPolluted
+    else -> Iaq.DangerouslyPolluted
 }
 
-private fun getIaqDescriptionWithRange(iaqEnum: Iaq): String {
-    return if (iaqEnum.range.last == Int.MAX_VALUE) {
-        "${iaqEnum.description} (${iaqEnum.range.first}+)"
-    } else {
-        "${iaqEnum.description} (${iaqEnum.range.first}-${iaqEnum.range.last})"
-    }
+private fun getIaqDescriptionWithRange(iaqEnum: Iaq): String = if (iaqEnum.range.last == Int.MAX_VALUE) {
+    "${iaqEnum.description} (${iaqEnum.range.first}+)"
+} else {
+    "${iaqEnum.description} (${iaqEnum.range.first}-${iaqEnum.range.last})"
 }
 
 enum class IaqDisplayMode {
-    Pill, Dot, Text, Gauge, Gradient
+    Pill,
+    Dot,
+    Text,
+    Gauge,
+    Gradient,
 }
 
 @Suppress("LongMethod", "UnusedPrivateProperty")
@@ -101,36 +109,28 @@ enum class IaqDisplayMode {
 fun IndoorAirQuality(iaq: Int, displayMode: IaqDisplayMode = IaqDisplayMode.Pill) {
     var isLegendOpen by remember { mutableStateOf(false) }
     val iaqEnum = getIaq(iaq)
-    val gradient = Brush.linearGradient(
-        colors = Iaq.entries.map { it.color },
-    )
+    val gradient = Brush.linearGradient(colors = Iaq.entries.map { it.color })
 
     Column {
         when (displayMode) {
             IaqDisplayMode.Pill -> {
                 Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(10.dp))
+                    modifier =
+                    Modifier.clip(RoundedCornerShape(10.dp))
                         .background(iaqEnum.color)
                         .width(125.dp)
                         .height(30.dp)
-                        .clickable { isLegendOpen = true }
+                        .clickable { isLegendOpen = true },
                 ) {
                     Row(
-                        modifier = Modifier
-                            .padding(4.dp)
-                            .align(Alignment.CenterStart),
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier = Modifier.padding(4.dp).align(Alignment.CenterStart),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Text(
-                            text = "IAQ $iaq",
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Text(text = "IAQ $iaq", color = Color.White, fontWeight = FontWeight.Bold)
                         Icon(
                             imageVector = if (iaq < 100) Icons.Default.ThumbUp else Icons.Filled.Warning,
                             contentDescription = stringResource(R.string.air_quality_icon),
-                            tint = Color.White
+                            tint = Color.White,
                         )
                     }
                 }
@@ -141,11 +141,7 @@ fun IndoorAirQuality(iaq: Int, displayMode: IaqDisplayMode = IaqDisplayMode.Pill
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(text = "$iaq")
                         Spacer(modifier = Modifier.width(4.dp))
-                        Box(
-                            modifier = Modifier
-                                .size(10.dp)
-                                .background(iaqEnum.color, shape = CircleShape)
-                        )
+                        Box(modifier = Modifier.size(10.dp).background(iaqEnum.color, shape = CircleShape))
                     }
                 }
             }
@@ -154,18 +150,16 @@ fun IndoorAirQuality(iaq: Int, displayMode: IaqDisplayMode = IaqDisplayMode.Pill
                 Text(
                     text = getIaqDescriptionWithRange(iaqEnum),
                     fontSize = 12.sp,
-                    modifier = Modifier.clickable { isLegendOpen = true }
+                    modifier = Modifier.clickable { isLegendOpen = true },
                 )
             }
 
             IaqDisplayMode.Gauge -> {
                 CircularProgressIndicator(
                     progress = iaq / 500f,
-                    modifier = Modifier
-                        .size(60.dp)
-                        .clickable { isLegendOpen = true },
+                    modifier = Modifier.size(60.dp).clickable { isLegendOpen = true },
                     strokeWidth = 8.dp,
-                    color = iaqEnum.color
+                    color = iaqEnum.color,
                 )
                 Text(text = "$iaq")
             }
@@ -173,13 +167,11 @@ fun IndoorAirQuality(iaq: Int, displayMode: IaqDisplayMode = IaqDisplayMode.Pill
             IaqDisplayMode.Gradient -> {
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.clickable { isLegendOpen = true }
+                    modifier = Modifier.clickable { isLegendOpen = true },
                 ) {
                     LinearProgressIndicator(
                         progress = iaq / 500f,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(20.dp),
+                        modifier = Modifier.fillMaxWidth().height(20.dp),
                         color = iaqEnum.color,
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -191,14 +183,10 @@ fun IndoorAirQuality(iaq: Int, displayMode: IaqDisplayMode = IaqDisplayMode.Pill
             AlertDialog(
                 onDismissRequest = { isLegendOpen = false },
                 shape = RoundedCornerShape(16.dp),
-                text = {
-                    IAQScale()
-                },
+                text = { IAQScale() },
                 confirmButton = {
-                    TextButton(onClick = { isLegendOpen = false }) {
-                        Text(text = stringResource(id = R.string.close))
-                    }
-                }
+                    TextButton(onClick = { isLegendOpen = false }) { Text(text = stringResource(id = R.string.close)) }
+                },
             )
         }
     }
@@ -210,28 +198,17 @@ fun IndoorAirQuality(iaq: Int, displayMode: IaqDisplayMode = IaqDisplayMode.Pill
 
 @Composable
 fun IAQScale(modifier: Modifier = Modifier) {
-    Column(
-        modifier = modifier
-            .padding(16.dp),
-        horizontalAlignment = Alignment.Start
-    ) {
+    Column(modifier = modifier.padding(16.dp), horizontalAlignment = Alignment.Start) {
         Text(
             text = stringResource(R.string.indoor_air_quality_iaq),
-            style = MaterialTheme.typography.titleLarge.copy(
-                fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center,
-            ),
+            style =
+            MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold, textAlign = TextAlign.Center),
             modifier = Modifier.fillMaxWidth(),
         )
         Spacer(modifier = Modifier.height(16.dp))
         for (iaq in Iaq.entries) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(20.dp, 15.dp)
-                        .clip(RoundedCornerShape(5.dp))
-                        .background(iaq.color)
-                )
+                Box(modifier = Modifier.size(20.dp, 15.dp).clip(RoundedCornerShape(5.dp)).background(iaq.color))
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(getIaqDescriptionWithRange(iaq), style = MaterialTheme.typography.bodyMedium)
             }

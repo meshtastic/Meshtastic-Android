@@ -19,51 +19,39 @@ package com.geeksville.mesh.model
 
 import androidx.compose.ui.graphics.Color
 import com.geeksville.mesh.TelemetryProtos.Telemetry
-import com.geeksville.mesh.ui.common.theme.InfantryBlue
-import com.geeksville.mesh.ui.common.theme.Orange
-import com.geeksville.mesh.ui.common.theme.Pink
-import com.geeksville.mesh.ui.common.theme.Purple
+import com.geeksville.mesh.ui.common.theme.GraphColors.InfantryBlue
+import com.geeksville.mesh.ui.common.theme.GraphColors.Orange
+import com.geeksville.mesh.ui.common.theme.GraphColors.Pink
+import com.geeksville.mesh.ui.common.theme.GraphColors.Purple
+import com.geeksville.mesh.ui.common.theme.GraphColors.Red
 import com.geeksville.mesh.util.UnitConversions
 
 enum class Environment(val color: Color) {
-    TEMPERATURE(Color.Red) {
-        override fun getValue(telemetry: Telemetry): Float {
-            return telemetry.environmentMetrics.temperature
-        }
+    TEMPERATURE(Red) {
+        override fun getValue(telemetry: Telemetry): Float = telemetry.environmentMetrics.temperature
     },
     HUMIDITY(InfantryBlue) {
-        override fun getValue(telemetry: Telemetry): Float {
-            return telemetry.environmentMetrics.relativeHumidity
-        }
+        override fun getValue(telemetry: Telemetry): Float = telemetry.environmentMetrics.relativeHumidity
     },
     SOIL_TEMPERATURE(Pink) {
-        override fun getValue(telemetry: Telemetry): Float {
-            return telemetry.environmentMetrics.soilTemperature
-        }
+        override fun getValue(telemetry: Telemetry): Float = telemetry.environmentMetrics.soilTemperature
     },
     SOIL_MOISTURE(Purple) {
-        override fun getValue(telemetry: Telemetry): Float {
-            return telemetry.environmentMetrics.soilMoisture.toFloat()
-        }
+        override fun getValue(telemetry: Telemetry): Float = telemetry.environmentMetrics.soilMoisture.toFloat()
     },
     IAQ(Color.Green) {
-        override fun getValue(telemetry: Telemetry): Float {
-            return telemetry.environmentMetrics.iaq.toFloat()
-        }
+        override fun getValue(telemetry: Telemetry): Float = telemetry.environmentMetrics.iaq.toFloat()
     },
     BAROMETRIC_PRESSURE(Orange) {
-        override fun getValue(telemetry: Telemetry): Float {
-            return telemetry.environmentMetrics.barometricPressure
-        }
-    };
+        override fun getValue(telemetry: Telemetry): Float = telemetry.environmentMetrics.barometricPressure
+    }, ;
 
     abstract fun getValue(telemetry: Telemetry): Float
 }
 
 /**
  * @param metrics the filtered [List]
- * @param shouldPlot a [List] the size of [Environment] used to determine if a metric
- * should be plotted
+ * @param shouldPlot a [List] the size of [Environment] used to determine if a metric should be plotted
  * @param leftMinMax [Pair] with the min and max of the barometric pressure
  * @param rightMinMax [Pair] with the combined min and max of: the temperature, humidity, and IAQ
  * @param times [Pair] with the oldest and newest times in that order
@@ -73,12 +61,10 @@ data class EnvironmentGraphingData(
     val shouldPlot: List<Boolean>,
     val leftMinMax: Pair<Float, Float> = Pair(0f, 0f),
     val rightMinMax: Pair<Float, Float> = Pair(0f, 0f),
-    val times: Pair<Int, Int> = Pair(0, 0)
+    val times: Pair<Int, Int> = Pair(0, 0),
 )
 
-data class EnvironmentMetricsState(
-    val environmentMetrics: List<Telemetry> = emptyList(),
-) {
+data class EnvironmentMetricsState(val environmentMetrics: List<Telemetry> = emptyList()) {
     fun hasEnvironmentMetrics() = environmentMetrics.isNotEmpty()
 
     /**
@@ -99,10 +85,11 @@ data class EnvironmentMetricsState(
         /* Grab the combined min and max for temp, humidity, soil_Temperature, soilMoisture and iaq. */
         val minValues = mutableListOf<Float>()
         val maxValues = mutableListOf<Float>()
-        val (minTemp, maxTemp) = Pair(
-            telemetries.minBy { it.environmentMetrics.temperature },
-            telemetries.maxBy { it.environmentMetrics.temperature }
-        )
+        val (minTemp, maxTemp) =
+            Pair(
+                telemetries.minBy { it.environmentMetrics.temperature },
+                telemetries.maxBy { it.environmentMetrics.temperature },
+            )
         var minTempValue = minTemp.environmentMetrics.temperature
         var maxTempValue = maxTemp.environmentMetrics.temperature
         if (useFahrenheit) {
@@ -115,12 +102,15 @@ data class EnvironmentMetricsState(
             shouldPlot[Environment.TEMPERATURE.ordinal] = true
         }
 
-        val (minHumidity, maxHumidity) = Pair(
-            telemetries.minBy { it.environmentMetrics.relativeHumidity },
-            telemetries.maxBy { it.environmentMetrics.relativeHumidity }
-        )
-        if (minHumidity.environmentMetrics.relativeHumidity != 0f ||
-            maxHumidity.environmentMetrics.relativeHumidity != 0f) {
+        val (minHumidity, maxHumidity) =
+            Pair(
+                telemetries.minBy { it.environmentMetrics.relativeHumidity },
+                telemetries.maxBy { it.environmentMetrics.relativeHumidity },
+            )
+        if (
+            minHumidity.environmentMetrics.relativeHumidity != 0f ||
+            maxHumidity.environmentMetrics.relativeHumidity != 0f
+        ) {
             minValues.add(minHumidity.environmentMetrics.relativeHumidity)
             maxValues.add(maxHumidity.environmentMetrics.relativeHumidity)
             shouldPlot[Environment.HUMIDITY.ordinal] = true
@@ -132,29 +122,29 @@ data class EnvironmentMetricsState(
             minSoilTemperatureValue = UnitConversions.celsiusToFahrenheit(minSoilTemperatureValue)
             maxSoilTemperatureValue = UnitConversions.celsiusToFahrenheit(maxSoilTemperatureValue)
         }
-        if (minTemp.environmentMetrics.soilTemperature != 0f ||
-            maxTemp.environmentMetrics.soilTemperature != 0f) {
+        if (minTemp.environmentMetrics.soilTemperature != 0f || maxTemp.environmentMetrics.soilTemperature != 0f) {
             minValues.add(minSoilTemperatureValue)
             maxValues.add(maxSoilTemperatureValue)
             shouldPlot[Environment.SOIL_TEMPERATURE.ordinal] = true
         }
 
-        val (minSoilMoisture, maxSoilMoisture) = Pair(
-            telemetries.minBy { it.environmentMetrics.soilMoisture },
-            telemetries.maxBy { it.environmentMetrics.soilMoisture }
-        )
+        val (minSoilMoisture, maxSoilMoisture) =
+            Pair(
+                telemetries.minBy { it.environmentMetrics.soilMoisture },
+                telemetries.maxBy { it.environmentMetrics.soilMoisture },
+            )
         val soilMoistureRange = 0..100
-        if (minSoilMoisture.environmentMetrics.soilMoisture in soilMoistureRange ||
-            maxSoilMoisture.environmentMetrics.soilMoisture in soilMoistureRange) {
+        if (
+            minSoilMoisture.environmentMetrics.soilMoisture in soilMoistureRange ||
+            maxSoilMoisture.environmentMetrics.soilMoisture in soilMoistureRange
+        ) {
             minValues.add(minSoilMoisture.environmentMetrics.soilMoisture.toFloat())
             maxValues.add(maxSoilMoisture.environmentMetrics.soilMoisture.toFloat())
             shouldPlot[Environment.SOIL_MOISTURE.ordinal] = true
         }
 
-        val (minIAQ, maxIAQ) = Pair(
-            telemetries.minBy { it.environmentMetrics.iaq },
-            telemetries.maxBy { it.environmentMetrics.iaq }
-        )
+        val (minIAQ, maxIAQ) =
+            Pair(telemetries.minBy { it.environmentMetrics.iaq }, telemetries.maxBy { it.environmentMetrics.iaq })
         if (minIAQ.environmentMetrics.iaq != 0 || maxIAQ.environmentMetrics.iaq != 0) {
             minValues.add(minIAQ.environmentMetrics.iaq.toFloat())
             maxValues.add(maxIAQ.environmentMetrics.iaq.toFloat())
@@ -164,28 +154,29 @@ data class EnvironmentMetricsState(
         val min = if (minValues.isEmpty()) 0f else minValues.minOf { it }
         val max = if (maxValues.isEmpty()) 0f else maxValues.maxOf { it }
 
-        val (minPressure, maxPressure) = Pair(
-            telemetries.minBy { it.environmentMetrics.barometricPressure },
-            telemetries.maxBy { it.environmentMetrics.barometricPressure }
-        )
-        if (minPressure.environmentMetrics.barometricPressure != 0.0F &&
-            maxPressure.environmentMetrics.barometricPressure != 0.0F) {
+        val (minPressure, maxPressure) =
+            Pair(
+                telemetries.minBy { it.environmentMetrics.barometricPressure },
+                telemetries.maxBy { it.environmentMetrics.barometricPressure },
+            )
+        if (
+            minPressure.environmentMetrics.barometricPressure != 0.0F &&
+            maxPressure.environmentMetrics.barometricPressure != 0.0F
+        ) {
             shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal] = true
         }
-        val (oldest, newest) = Pair(
-            telemetries.minBy { it.time },
-            telemetries.maxBy { it.time }
-        )
+        val (oldest, newest) = Pair(telemetries.minBy { it.time }, telemetries.maxBy { it.time })
 
         return EnvironmentGraphingData(
             metrics = telemetries,
             shouldPlot = shouldPlot.toList(),
-            leftMinMax = Pair(
+            leftMinMax =
+            Pair(
                 minPressure.environmentMetrics.barometricPressure,
-                maxPressure.environmentMetrics.barometricPressure
+                maxPressure.environmentMetrics.barometricPressure,
             ),
             rightMinMax = Pair(min, max),
-            times = Pair(oldest.time, newest.time)
+            times = Pair(oldest.time, newest.time),
         )
     }
 }

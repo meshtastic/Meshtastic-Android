@@ -55,6 +55,7 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -67,75 +68,70 @@ import com.geeksville.mesh.ui.common.components.BatteryInfo
 import com.geeksville.mesh.ui.common.components.OptionLabel
 import com.geeksville.mesh.ui.common.components.SlidingSelector
 import com.geeksville.mesh.ui.common.theme.AppTheme
-import com.geeksville.mesh.ui.common.theme.Orange
+import com.geeksville.mesh.ui.common.theme.GraphColors.Cyan
+import com.geeksville.mesh.ui.common.theme.GraphColors.Green
+import com.geeksville.mesh.ui.common.theme.GraphColors.Magenta
+import com.geeksville.mesh.ui.common.theme.GraphColors.Orange
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MAX_PERCENT_VALUE
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.plotPoint
-import androidx.compose.ui.tooling.preview.PreviewLightDark
 
 private enum class Device(val color: Color) {
-    BATTERY(Color.Green),
-    CH_UTIL(Color.Magenta),
-    AIR_UTIL(Color.Cyan)
+    BATTERY(Green),
+    CH_UTIL(Magenta),
+    AIR_UTIL(Cyan),
 }
 
 private const val CHART_WEIGHT = 1f
 private const val Y_AXIS_WEIGHT = 0.1f
 private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIGHT)
 
-private val LEGEND_DATA = listOf(
-    LegendData(nameRes = R.string.battery, color = Device.BATTERY.color, isLine = true),
-    LegendData(nameRes = R.string.channel_utilization, color = Device.CH_UTIL.color),
-    LegendData(nameRes = R.string.air_utilization, color = Device.AIR_UTIL.color),
-)
+private val LEGEND_DATA =
+    listOf(
+        LegendData(nameRes = R.string.battery, color = Device.BATTERY.color, isLine = true),
+        LegendData(nameRes = R.string.channel_utilization, color = Device.CH_UTIL.color),
+        LegendData(nameRes = R.string.air_utilization, color = Device.AIR_UTIL.color),
+    )
 
 @Composable
-fun DeviceMetricsScreen(
-    viewModel: MetricsViewModel = hiltViewModel(),
-) {
+fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     var displayInfoDialog by remember { mutableStateOf(false) }
     val selectedTimeFrame by viewModel.timeFrame.collectAsState()
     val data = state.deviceMetricsFiltered(selectedTimeFrame)
 
     Column {
-
         if (displayInfoDialog) {
             LegendInfoDialog(
-                pairedRes = listOf(
+                pairedRes =
+                listOf(
                     Pair(R.string.channel_utilization, R.string.ch_util_definition),
-                    Pair(R.string.air_utilization, R.string.air_util_definition)
+                    Pair(R.string.air_utilization, R.string.air_util_definition),
                 ),
-                onDismiss = { displayInfoDialog = false }
+                onDismiss = { displayInfoDialog = false },
             )
         }
 
         DeviceMetricsChart(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(fraction = 0.33f),
+            modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
             data.reversed(),
             selectedTimeFrame,
-            promptInfoDialog = { displayInfoDialog = true }
+            promptInfoDialog = { displayInfoDialog = true },
         )
 
         SlidingSelector(
             TimeFrame.entries.toList(),
             selectedTimeFrame,
-            onOptionSelected = { viewModel.setTimeFrame(it) }
+            onOptionSelected = { viewModel.setTimeFrame(it) },
         ) {
             OptionLabel(stringResource(it.strRes))
         }
 
         /* Device Metric Cards */
-        LazyColumn(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(data) { telemetry -> DeviceMetricsCard(telemetry) }
-        }
+        LazyColumn(modifier = Modifier.fillMaxSize()) { items(data) { telemetry -> DeviceMetricsCard(telemetry) } }
     }
 }
 
@@ -145,26 +141,20 @@ private fun DeviceMetricsChart(
     modifier: Modifier = Modifier,
     telemetries: List<Telemetry>,
     selectedTime: TimeFrame,
-    promptInfoDialog: () -> Unit
+    promptInfoDialog: () -> Unit,
 ) {
     val graphColor = MaterialTheme.colorScheme.onSurface
 
     ChartHeader(amount = telemetries.size)
     if (telemetries.isEmpty()) return
 
-    val (oldest, newest) = remember(key1 = telemetries) {
-        Pair(
-            telemetries.minBy { it.time },
-            telemetries.maxBy { it.time }
-        )
-    }
+    val (oldest, newest) =
+        remember(key1 = telemetries) { Pair(telemetries.minBy { it.time }, telemetries.maxBy { it.time }) }
     val timeDiff = newest.time - oldest.time
 
     val scrollState = rememberScrollState()
     val screenWidth = LocalWindowInfo.current.containerSize.width
-    val dp by remember(key1 = selectedTime) {
-        mutableStateOf(selectedTime.dp(screenWidth, time = timeDiff.toLong()))
-    }
+    val dp by remember(key1 = selectedTime) { mutableStateOf(selectedTime.dp(screenWidth, time = timeDiff.toLong())) }
 
     // Calculate visible time range based on scroll position and chart width
     val visibleTimeRange = run {
@@ -180,21 +170,15 @@ private fun DeviceMetricsChart(
         visibleOldest to visibleNewest
     }
 
-    TimeLabels(
-        oldest = visibleTimeRange.first,
-        newest = visibleTimeRange.second,
-    )
+    TimeLabels(oldest = visibleTimeRange.first, newest = visibleTimeRange.second)
 
     Spacer(modifier = Modifier.height(16.dp))
 
     Row {
         Box(
             contentAlignment = Alignment.TopStart,
-            modifier = Modifier
-                .horizontalScroll(state = scrollState, reverseScrolling = true)
-                .weight(weight = 1f)
+            modifier = Modifier.horizontalScroll(state = scrollState, reverseScrolling = true).weight(weight = 1f),
         ) {
-
             /*
              * The order of the colors are with respect to the ChUtil.
              * 25 - 49  Orange
@@ -205,16 +189,10 @@ private fun DeviceMetricsChart(
                 lineColors = listOf(graphColor, Orange, Color.Red, graphColor, graphColor),
             )
 
-            TimeAxisOverlay(
-                modifier.width(dp),
-                oldest = oldest.time,
-                newest = newest.time,
-                selectedTime.lineInterval()
-            )
+            TimeAxisOverlay(modifier.width(dp), oldest = oldest.time, newest = newest.time, selectedTime.lineInterval())
 
             /* Plot Battery Line, ChUtil, and AirUtilTx */
             Canvas(modifier = modifier.width(dp)) {
-
                 val height = size.height
                 val width = size.width
                 for (i in telemetries.indices) {
@@ -230,7 +208,7 @@ private fun DeviceMetricsChart(
                         color = Device.CH_UTIL.color,
                         x = x,
                         value = telemetry.deviceMetrics.channelUtilization,
-                        divisor = MAX_PERCENT_VALUE
+                        divisor = MAX_PERCENT_VALUE,
                     )
 
                     /* Air Utilization Transmit */
@@ -239,7 +217,7 @@ private fun DeviceMetricsChart(
                         color = Device.AIR_UTIL.color,
                         x = x,
                         value = telemetry.deviceMetrics.airUtilTx,
-                        divisor = MAX_PERCENT_VALUE
+                        divisor = MAX_PERCENT_VALUE,
                     )
                 }
 
@@ -247,37 +225,30 @@ private fun DeviceMetricsChart(
                 var index = 0
                 while (index < telemetries.size) {
                     val path = Path()
-                    index = createPath(
-                        telemetries = telemetries,
-                        index = index,
-                        path = path,
-                        oldestTime = oldest.time,
-                        timeRange = timeDiff,
-                        width = width,
-                        timeThreshold = selectedTime.timeThreshold()
-                    ) { i ->
-                        val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
-                        val ratio = telemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
-                        val y = height - (ratio * height)
-                        return@createPath y
-                    }
+                    index =
+                        createPath(
+                            telemetries = telemetries,
+                            index = index,
+                            path = path,
+                            oldestTime = oldest.time,
+                            timeRange = timeDiff,
+                            width = width,
+                            timeThreshold = selectedTime.timeThreshold(),
+                        ) { i ->
+                            val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
+                            val ratio = telemetry.deviceMetrics.batteryLevel / MAX_PERCENT_VALUE
+                            val y = height - (ratio * height)
+                            return@createPath y
+                        }
                     drawPath(
                         path = path,
                         color = Device.BATTERY.color,
-                        style = Stroke(
-                            width = GraphUtil.RADIUS,
-                            cap = StrokeCap.Round
-                        )
+                        style = Stroke(width = GraphUtil.RADIUS, cap = StrokeCap.Round),
                     )
                 }
             }
         }
-        YAxisLabels(
-            modifier = modifier.weight(weight = Y_AXIS_WEIGHT),
-            graphColor,
-            minValue = 0f,
-            maxValue = 100f
-        )
+        YAxisLabels(modifier = modifier.weight(weight = Y_AXIS_WEIGHT), graphColor, minValue = 0f, maxValue = 100f)
     }
     Spacer(modifier = Modifier.height(16.dp))
 
@@ -291,25 +262,26 @@ private fun DeviceMetricsChart(
 @Composable
 private fun DeviceMetricsChartPreview() {
     val now = (System.currentTimeMillis() / 1000).toInt()
-    val telemetries = List(20) { i ->
-        Telemetry.newBuilder()
-            .setTime(now - (19 - i) * 60 * 60) // 1-hour intervals, oldest first
-            .setDeviceMetrics(
-                TelemetryProtos.DeviceMetrics.newBuilder()
-                    .setBatteryLevel(80 - i)
-                    .setVoltage(3.7f - i * 0.02f)
-                    .setChannelUtilization(10f + i * 2)
-                    .setAirUtilTx(5f + i)
-                    .setUptimeSeconds(3600 + i * 300)
-            )
-            .build()
-    }
+    val telemetries =
+        List(20) { i ->
+            Telemetry.newBuilder()
+                .setTime(now - (19 - i) * 60 * 60) // 1-hour intervals, oldest first
+                .setDeviceMetrics(
+                    TelemetryProtos.DeviceMetrics.newBuilder()
+                        .setBatteryLevel(80 - i)
+                        .setVoltage(3.7f - i * 0.02f)
+                        .setChannelUtilization(10f + i * 2)
+                        .setAirUtilTx(5f + i)
+                        .setUptimeSeconds(3600 + i * 300),
+                )
+                .build()
+        }
     AppTheme {
         DeviceMetricsChart(
             modifier = Modifier.height(400.dp),
             telemetries = telemetries,
             selectedTime = TimeFrame.TWENTY_FOUR_HOURS,
-            promptInfoDialog = {}
+            promptInfoDialog = {},
         )
     }
 }
@@ -318,51 +290,32 @@ private fun DeviceMetricsChartPreview() {
 private fun DeviceMetricsCard(telemetry: Telemetry) {
     val deviceMetrics = telemetry.deviceMetrics
     val time = telemetry.time * MS_PER_SEC
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-    ) {
+    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
         Surface {
             SelectionContainer {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                     /* Time, Battery, and Voltage */
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(
                             text = DATE_TIME_FORMAT.format(time),
                             style = TextStyle(fontWeight = FontWeight.Bold),
-                            fontSize = MaterialTheme.typography.labelLarge.fontSize
+                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
                         )
 
-                        BatteryInfo(
-                            batteryLevel = deviceMetrics.batteryLevel,
-                            voltage = deviceMetrics.voltage
-                        )
+                        BatteryInfo(batteryLevel = deviceMetrics.batteryLevel, voltage = deviceMetrics.voltage)
                     }
 
                     Spacer(modifier = Modifier.height(4.dp))
 
                     /* Channel Utilization and Air Utilization Tx */
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        val text = stringResource(R.string.channel_air_util).format(
-                            deviceMetrics.channelUtilization,
-                            deviceMetrics.airUtilTx
-                        )
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        val text =
+                            stringResource(R.string.channel_air_util)
+                                .format(deviceMetrics.channelUtilization, deviceMetrics.airUtilTx)
                         Text(
                             text = text,
                             color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = MaterialTheme.typography.labelLarge.fontSize
+                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
                         )
                     }
                 }
@@ -376,20 +329,19 @@ private fun DeviceMetricsCard(telemetry: Telemetry) {
 @Composable
 private fun DeviceMetricsCardPreview() {
     val now = (System.currentTimeMillis() / 1000).toInt()
-    val telemetry = Telemetry.newBuilder()
-        .setTime(now)
-        .setDeviceMetrics(
-            TelemetryProtos.DeviceMetrics.newBuilder()
-                .setBatteryLevel(75)
-                .setVoltage(3.65f)
-                .setChannelUtilization(22.5f)
-                .setAirUtilTx(12.0f)
-                .setUptimeSeconds(7200)
-        )
-        .build()
-    AppTheme {
-        DeviceMetricsCard(telemetry = telemetry)
-    }
+    val telemetry =
+        Telemetry.newBuilder()
+            .setTime(now)
+            .setDeviceMetrics(
+                TelemetryProtos.DeviceMetrics.newBuilder()
+                    .setBatteryLevel(75)
+                    .setVoltage(3.65f)
+                    .setChannelUtilization(22.5f)
+                    .setAirUtilTx(12.0f)
+                    .setUptimeSeconds(7200),
+            )
+            .build()
+    AppTheme { DeviceMetricsCard(telemetry = telemetry) }
 }
 
 @Suppress("detekt:MagicNumber") // fake data
@@ -397,19 +349,20 @@ private fun DeviceMetricsCardPreview() {
 @Composable
 private fun DeviceMetricsScreenPreview() {
     val now = (System.currentTimeMillis() / 1000).toInt()
-    val telemetries = List(24) { i ->
-        Telemetry.newBuilder()
-            .setTime(now - (23 - i) * 60 * 60) // 1-hour intervals, oldest first
-            .setDeviceMetrics(
-                TelemetryProtos.DeviceMetrics.newBuilder()
-                    .setBatteryLevel(85 - i * 2) // Battery decreases over time
-                    .setVoltage(3.8f - i * 0.01f) // Voltage decreases slightly
-                    .setChannelUtilization(15f + i * 1.5f) // Channel utilization increases
-                    .setAirUtilTx(8f + i * 0.8f) // Air utilization increases
-                    .setUptimeSeconds(3600 + i * 3600) // Uptime increases by 1 hour each
-            )
-            .build()
-    }
+    val telemetries =
+        List(24) { i ->
+            Telemetry.newBuilder()
+                .setTime(now - (23 - i) * 60 * 60) // 1-hour intervals, oldest first
+                .setDeviceMetrics(
+                    TelemetryProtos.DeviceMetrics.newBuilder()
+                        .setBatteryLevel(85 - i * 2) // Battery decreases over time
+                        .setVoltage(3.8f - i * 0.01f) // Voltage decreases slightly
+                        .setChannelUtilization(15f + i * 1.5f) // Channel utilization increases
+                        .setAirUtilTx(8f + i * 0.8f) // Air utilization increases
+                        .setUptimeSeconds(3600 + i * 3600), // Uptime increases by 1 hour each
+                )
+                .build()
+        }
 
     AppTheme {
         Surface {
@@ -418,35 +371,32 @@ private fun DeviceMetricsScreenPreview() {
 
                 if (displayInfoDialog) {
                     LegendInfoDialog(
-                        pairedRes = listOf(
+                        pairedRes =
+                        listOf(
                             Pair(R.string.channel_utilization, R.string.ch_util_definition),
-                            Pair(R.string.air_utilization, R.string.air_util_definition)
+                            Pair(R.string.air_utilization, R.string.air_util_definition),
                         ),
-                        onDismiss = { displayInfoDialog = false }
+                        onDismiss = { displayInfoDialog = false },
                     )
                 }
 
                 DeviceMetricsChart(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .fillMaxHeight(fraction = 0.33f),
+                    modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
                     telemetries.reversed(),
                     TimeFrame.TWENTY_FOUR_HOURS,
-                    promptInfoDialog = { displayInfoDialog = true }
+                    promptInfoDialog = { displayInfoDialog = true },
                 )
 
                 SlidingSelector(
                     TimeFrame.entries.toList(),
                     TimeFrame.TWENTY_FOUR_HOURS,
-                    onOptionSelected = { /* Preview only */ }
+                    onOptionSelected = { /* Preview only */ },
                 ) {
                     OptionLabel(stringResource(it.strRes))
                 }
 
                 /* Device Metric Cards */
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize()
-                ) {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
                     items(telemetries) { telemetry -> DeviceMetricsCard(telemetry) }
                 }
             }
