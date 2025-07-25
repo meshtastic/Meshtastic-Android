@@ -124,9 +124,9 @@ fun ScannedQrCodeDialog(
                 if (current.hopLimit != new.hopLimit) {
                     changes.add("Hop Limit: ${current.hopLimit} -> ${new.hopLimit}")
                 }
-                if (current.getRegion().getNumber() != new.getRegion().getNumber()) {
-                    val currentRegionDesc = RegionCode.forNumber(current.getRegion().getNumber())?.name ?: "Unknown"
-                    val newRegionDesc = RegionCode.forNumber(new.getRegion().getNumber())?.name ?: "Unknown"
+                if (current.getRegion() != new.getRegion()) {
+                    val currentRegionDesc = current.getRegion()?.name ?: "Unknown"
+                    val newRegionDesc = new.getRegion()?.name ?: "Unknown"
                     changes.add("Region: $currentRegionDesc -> $newRegionDesc")
                 }
                 if (current.getModemPreset().getNumber() != new.getModemPreset().getNumber()) {
