@@ -70,7 +70,7 @@ object StatusColors {
                 Color(0xFFFFD54F)
             }
 
-    val ColorScheme.StatusOrange
+    val ColorScheme.StatusOrange: Color
         @Composable
         get() =
             if (isSystemInDarkTheme()) {
