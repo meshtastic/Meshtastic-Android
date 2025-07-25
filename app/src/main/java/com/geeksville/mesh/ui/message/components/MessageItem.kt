@@ -97,9 +97,7 @@ internal fun MessageItem(
         containerColor = containerColor,
         contentColor = contentColorFor(containerColor)
     )
-    val messageModifier = modifier
-        .fillMaxWidth()
-        .padding(start = 8.dp, top = 8.dp, end = 8.dp)
+    val messageModifier = Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
         .then(
             if (containsBel)
                 Modifier.border(2.dp, Color.Red.copy(alpha = 0.3f), shape = MaterialTheme.shapes.medium)
