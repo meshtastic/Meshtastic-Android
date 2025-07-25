@@ -129,10 +129,10 @@ fun ScannedQrCodeDialog(
                     val newRegionDesc = new.getRegion()?.name ?: "Unknown"
                     changes.add("Region: $currentRegionDesc -> $newRegionDesc")
                 }
-                if (current.getModemPreset().getNumber() != new.getModemPreset().getNumber()) {
+                if (current.modemPreset != new.modemPreset) {
                     val currentPresetDesc =
-                        ModemPreset.forNumber(current.getModemPreset().getNumber())?.name ?: "Unknown"
-                    val newPresetDesc = ModemPreset.forNumber(new.getModemPreset().getNumber())?.name ?: "Unknown"
+                        ModemPreset.forNumber(current.modemPreset.number)?.name ?: "Unknown"
+                    val newPresetDesc = ModemPreset.forNumber(new.modemPreset.number)?.name ?: "Unknown"
                     changes.add("Modem Preset: $currentPresetDesc -> $newPresetDesc")
                 }
                 if (current.usePreset != new.usePreset) {
