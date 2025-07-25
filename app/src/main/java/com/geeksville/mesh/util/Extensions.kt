@@ -17,9 +17,12 @@
 
 package com.geeksville.mesh.util
 
+import android.graphics.Color
 import android.widget.EditText
+import androidx.compose.ui.graphics.toArgb
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.ConfigProtos
+import com.geeksville.mesh.ui.common.theme.MeshtasticGreen
 
 /**
  * When printing strings to logs sometimes we want to print useful debugging information about users
@@ -67,6 +70,24 @@ fun formatAgo(lastSeenUnix: Int, currentTimeMillis: Long = System.currentTimeMil
         diffMin < 1440000 -> (diffMin / (60 * 24)).toString() + " d"
         else -> "?"
     }
+}
+
+fun getRecentTimeColor(recentTimeUnix: Int, currentTimeMillis: Long = System.currentTimeMillis()): Int {
+    val currentTime = (currentTimeMillis / 1000).toInt()
+    val diffMin = (currentTime - recentTimeUnix) / 60
+
+    // Linearly interpolate the color between Meshtastic green and standard white.
+    // Meshtastic logo color according to: https://github.com/meshtastic/design
+    val colorMostRecent: Int = MeshtasticGreen.toArgb()
+    val colorStandard = Color.WHITE
+    val maxMinutes = 30 // 30 minutes is the maximum time we will show a color for.
+
+    // Interpolation logic:
+    val t = diffMin.coerceIn(0, maxMinutes) / maxMinutes.toFloat()
+    val r = (Color.red(colorMostRecent) + ((Color.red(colorStandard) - Color.red(colorMostRecent)) * t)).toInt()
+    val g = (Color.green(colorMostRecent) + ((Color.green(colorStandard) - Color.green(colorMostRecent)) * t)).toInt()
+    val b = (Color.blue(colorMostRecent) + ((Color.blue(colorStandard) - Color.blue(colorMostRecent)) * t)).toInt()
+    return Color.rgb(r, g, b)
 }
 
 // Allows usage like email.onEditorAction(EditorInfo.IME_ACTION_NEXT, { confirm() })

@@ -51,6 +51,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.background
+import androidx.compose.material.icons.filled.ColorLens
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Text
@@ -87,6 +88,7 @@ import com.geeksville.mesh.util.addCopyright
 import com.geeksville.mesh.util.addScaleBarOverlay
 import com.geeksville.mesh.util.createLatLongGrid
 import com.geeksville.mesh.util.formatAgo
+import com.geeksville.mesh.util.getRecentTimeColor
 import com.geeksville.mesh.util.zoomIn
 import com.geeksville.mesh.waypoint
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -306,6 +308,10 @@ fun MapView(
 
     fun MapView.onNodesChanged(nodes: Collection<Node>): List<MarkerWithLabel> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
+            // Sort to ensures that the most recently heard nodes are displayed on top.
+            // FYI: the value shown in the UI is actually `lastLocationUpdate` instead.
+            .sortedBy { it.lastHeard }
+
         val ourNode = model.ourNodeInfo.value
         val gpsFormat = model.config.display.gpsFormat.number
         val displayUnits = model.config.display.units
@@ -341,6 +347,13 @@ fun MapView(
                 position = nodePosition
                 icon = markerIcon
                 setNodeColors(node.colors)
+
+                // Set the label color based on the node's lastHeard time.
+                if (mapFilterState.colorizeRecentNodes) {
+                    val color = getRecentTimeColor(node.lastHeard)
+                    setBgPaint(color)
+                }
+
                 if (!mapFilterState.showPrecisionCircle) {
                     setPrecisionBits(0)
                 } else {
@@ -705,6 +718,7 @@ fun MapView(
                                     model.setOnlyFavorites(!mapFilterState.onlyFavorites)
                                 }
                             )
+                            // Show Waypoints toggle
                             DropdownMenuItem(
                                 text = {
                                     Row(
@@ -732,6 +746,7 @@ fun MapView(
                                     model.setShowWaypointsOnMap(!mapFilterState.showWaypoints)
                                 }
                             )
+                            // Show Precision Circle toggle
                             DropdownMenuItem(
                                 text = {
                                     Row(
@@ -759,6 +774,36 @@ fun MapView(
                                 },
                                 onClick = {
                                     model.setShowPrecisionCircleOnMap(!mapFilterState.showPrecisionCircle)
+                                }
+                            )
+                            // Show colorize recently heard nodes toggle
+                            DropdownMenuItem(
+                                text = {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.ColorLens,
+                                            contentDescription = null,
+                                            modifier = Modifier.padding(end = 8.dp),
+                                            tint = MaterialTheme.colorScheme.onSurface
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.colorize_recent_nodes),
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                        Checkbox(
+                                            checked = mapFilterState.colorizeRecentNodes,
+                                            onCheckedChange = { enabled ->
+                                                model.setColorizeRecentNodes(enabled)
+                                            },
+                                            modifier = Modifier.padding(start = 8.dp)
+                                        )
+                                    }
+                                },
+                                onClick = {
+                                    model.setColorizeRecentNodes(!mapFilterState.colorizeRecentNodes)
                                 }
                             )
                         }

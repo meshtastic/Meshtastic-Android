@@ -309,6 +309,8 @@ class UIViewModel @Inject constructor(
         MutableStateFlow(preferences.getBoolean("show-waypoints-on-map", true))
     private val showPrecisionCircleOnMap =
         MutableStateFlow(preferences.getBoolean("show-precision-circle-on-map", true))
+    private val colorizeRecentNodes =
+        MutableStateFlow(preferences.getBoolean("colorize-recent-nodes", false))
 
     fun setSortOption(sort: NodeSortOption) {
         nodeSortOption.value = sort
@@ -348,6 +350,11 @@ class UIViewModel @Inject constructor(
     fun setShowPrecisionCircleOnMap(value: Boolean) {
         showPrecisionCircleOnMap.value = value
         preferences.edit { putBoolean("show-precision-circle-on-map", value) }
+    }
+
+    fun setColorizeRecentNodes(value: Boolean) {
+        colorizeRecentNodes.value = value
+        preferences.edit { putBoolean("colorize-recent-nodes", value) }
     }
 
     data class NodeFilterState(
@@ -429,18 +436,20 @@ class UIViewModel @Inject constructor(
         val onlyFavorites: Boolean,
         val showWaypoints: Boolean,
         val showPrecisionCircle: Boolean,
+        val colorizeRecentNodes: Boolean,
     )
 
     val mapFilterStateFlow: StateFlow<MapFilterState> = combine(
         onlyFavorites,
         showWaypointsOnMap,
         showPrecisionCircleOnMap,
-    ) { favoritesOnly, showWaypoints, showPrecisionCircle ->
-        MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle)
+        colorizeRecentNodes,
+    ) { favoritesOnly, showWaypoints, showPrecisionCircle, colorizeRecentNodes ->
+        MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle, colorizeRecentNodes)
     }.stateIn(
         scope = viewModelScope,
         started = SharingStarted.WhileSubscribed(5_000),
-        initialValue = MapFilterState(false, true, true)
+        initialValue = MapFilterState(false, true, true, false),
     )
 
     // hardware info about our local device (can be null)
