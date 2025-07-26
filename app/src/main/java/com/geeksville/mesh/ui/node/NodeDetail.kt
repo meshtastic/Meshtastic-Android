@@ -51,8 +51,10 @@ import androidx.compose.material.icons.filled.ChargingStation
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
+import androidx.compose.material.icons.filled.ForkLeft
 import androidx.compose.material.icons.filled.Height
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Icecream
 import androidx.compose.material.icons.filled.KeyOff
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Link
@@ -126,6 +128,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.FirmwareRelease
 import com.geeksville.mesh.database.entity.asDeviceVersion
@@ -444,11 +447,13 @@ private fun AdministrationSection(
     PreferenceCategory(stringResource(R.string.firmware)) {
         val firmwareEdition = metricsState.firmwareEdition
         firmwareEdition?.let {
-            NodeDetailRow(
-                label = stringResource(R.string.firmware_edition),
-                icon = Icons.Default.Download,
-                value = it.name,
-            )
+            val icon =
+                when (it) {
+                    MeshProtos.FirmwareEdition.VANILLA -> Icons.Default.Icecream
+                    else -> Icons.Default.ForkLeft
+                }
+
+            NodeDetailRow(label = stringResource(R.string.firmware_edition), icon = icon, value = it.name)
         }
         node.metadata?.firmwareVersion?.let { firmwareVersion ->
             val latestStable = metricsState.latestStableFirmware
