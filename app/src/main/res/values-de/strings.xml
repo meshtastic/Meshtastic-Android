@@ -38,7 +38,7 @@
     <string name="node_sort_via_mqtt">über MQTT</string>
     <string name="via_mqtt">über MQTT</string>
     <string name="node_sort_via_favorite">über Favorit</string>
-    <string name="node_filter_show_ignored">Ignorierte Knoten</string>
+    <string name="node_filter_show_ignored">Ignorierte Nodes</string>
     <string name="unrecognized">Unbekannt</string>
     <string name="message_status_enroute">Warte auf Bestätigung</string>
     <string name="message_status_queued">zur Warteschlange für das Senden hinzugefügt</string>
@@ -754,10 +754,10 @@
     <string name="security_icon_help_show_less">Aktuellen Status anzeigen</string>
     <string name="security_icon_help_dismiss">Tastatur ausblenden</string>
     <string name="confirm_delete_node">Willst du diesen Node wirklich löschen?</string>
-    <string name="replying_to"></string>
-    <string name="cancel_reply">Antwort verwerfen</string>
-    <string name="delete_messages_title"> Nachrichten löschen?</string>
-    <string name="clear_selection">Auswahl entfernen</string>
+    <string name="replying_to">Antworten auf %1$s</string>
+    <string name="cancel_reply">Antwort abbrechen</string>
+    <string name="delete_messages_title">Nachricht löschen?</string>
+    <string name="clear_selection">Auswahl löschen</string>
     <string name="message_input_label">Nachricht</string>
     <string name="type_a_message">Eine Nachricht schreiben</string>
     <string name="pax_metrics_log">Protokoll Besucherzähler</string>
