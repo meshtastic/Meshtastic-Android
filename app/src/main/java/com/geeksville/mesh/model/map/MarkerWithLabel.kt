@@ -94,6 +94,9 @@ class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) :
     }
 
     private val bgPaint = Paint().apply { color = Color.WHITE }
+    fun setBgPaint(color: Int) {
+        bgPaint.color = color
+    }
 
     private fun getTextBackgroundSize(text: String, x: Float, y: Float): RectF {
         val fontMetrics = textPaint.fontMetrics

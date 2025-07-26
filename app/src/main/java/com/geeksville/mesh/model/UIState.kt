@@ -320,6 +320,8 @@ constructor(
     private val showWaypointsOnMap = MutableStateFlow(preferences.getBoolean("show-waypoints-on-map", true))
     private val showPrecisionCircleOnMap =
         MutableStateFlow(preferences.getBoolean("show-precision-circle-on-map", true))
+    private val colorizeRecentNodes =
+        MutableStateFlow(preferences.getBoolean("colorize-recent-nodes", false))
 
     private val showIgnored = MutableStateFlow(preferences.getBoolean("show-ignored", false))
 
@@ -366,6 +368,11 @@ constructor(
     fun setShowPrecisionCircleOnMap(value: Boolean) {
         showPrecisionCircleOnMap.value = value
         preferences.edit { putBoolean("show-precision-circle-on-map", value) }
+    }
+
+    fun setColorizeRecentNodes(value: Boolean) {
+        colorizeRecentNodes.value = value
+        preferences.edit { putBoolean("colorize-recent-nodes", value) }
     }
 
     data class NodeFilterState(
@@ -458,20 +465,26 @@ constructor(
                 initialValue = emptyList(),
             )
 
-    data class MapFilterState(val onlyFavorites: Boolean, val showWaypoints: Boolean, val showPrecisionCircle: Boolean)
+    data class MapFilterState(
+        val onlyFavorites: Boolean,
+        val showWaypoints: Boolean,
+        val showPrecisionCircle: Boolean,
+        val colorizeRecentNodes: Boolean,
+    )
 
     val mapFilterStateFlow: StateFlow<MapFilterState> =
-        combine(onlyFavorites, showWaypointsOnMap, showPrecisionCircleOnMap) {
+        combine(onlyFavorites, showWaypointsOnMap, showPrecisionCircleOnMap, colorizeRecentNodes) {
                 favoritesOnly,
                 showWaypoints,
                 showPrecisionCircle,
+                colorizeRecentNodes,
             ->
-            MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle)
+            MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle, colorizeRecentNodes)
         }
             .stateIn(
                 scope = viewModelScope,
                 started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = MapFilterState(false, true, true),
+                initialValue = MapFilterState(false, true, true, false),
             )
 
     // hardware info about our local device (can be null)
