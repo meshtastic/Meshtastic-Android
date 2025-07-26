@@ -90,5 +90,5 @@ object StatusColors {
 }
 
 object MessageItemColors {
-    val Red = Color.Red.copy(alpha = 0.3f)
+    val Red = Color(0x4DFF0000)
 }
