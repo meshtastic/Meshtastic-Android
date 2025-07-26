@@ -59,6 +59,7 @@ import com.geeksville.mesh.ui.common.components.Rssi
 import com.geeksville.mesh.ui.common.components.Snr
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.common.theme.AppTheme
+import com.geeksville.mesh.ui.common.theme.MessageItemColors
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 
@@ -103,7 +104,7 @@ internal fun MessageItem(
         Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
             .then(
                 if (containsBel) {
-                    Modifier.border(2.dp, Color.Red.copy(alpha = 0.3f), shape = MaterialTheme.shapes.medium)
+                    Modifier.border(2.dp, MessageItemColors.Red, shape = MaterialTheme.shapes.medium)
                 } else {
                     Modifier
                 },
