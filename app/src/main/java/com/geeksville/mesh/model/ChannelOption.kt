@@ -279,7 +279,7 @@ enum class RegionInfo(
      *
      * @see [Firmware Issue #7380](https://github.com/meshtastic/firmware/pull/7380)
      */
-    NP_865(RegionCode.NP_865, "Nepal 865Mhz", 865.0f, 868.0f, wideLora = false),
+    NP_865(RegionCode.NP_865, "Nepal 865MHz", 865.0f, 868.0f, wideLora = false),
 
     /**
      * Brazil 902MHz 902 - 907.5 MHz
