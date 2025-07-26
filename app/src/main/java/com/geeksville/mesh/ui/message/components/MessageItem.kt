@@ -190,7 +190,12 @@ internal fun MessageItem(
                             }
                         }
                         Spacer(modifier = Modifier.weight(1f))
-                        Text(text = message.time, style = MaterialTheme.typography.labelSmall)
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (containsBel) {
+                                Text(text = "\uD83D\uDD14", modifier = Modifier.padding(end = 4.dp))
+                            }
+                            Text(text = message.time, style = MaterialTheme.typography.labelSmall)
+                        }
                     }
                 }
             }
