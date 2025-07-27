@@ -21,6 +21,7 @@ import android.content.Context
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -32,14 +33,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lens
 import androidx.compose.material.icons.filled.LocationDisabled
 import androidx.compose.material.icons.filled.PinDrop
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -50,10 +54,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.foundation.background
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.Text
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -116,7 +116,7 @@ import java.text.DateFormat
 private fun MapView.UpdateMarkers(
     nodeMarkers: List<MarkerWithLabel>,
     waypointMarkers: List<MarkerWithLabel>,
-    nodeClusterer: RadiusMarkerClusterer
+    nodeClusterer: RadiusMarkerClusterer,
 ) {
     debug("Showing on map: ${nodeMarkers.size} nodes ${waypointMarkers.size} waypoints")
     overlays.removeAll { it is MarkerWithLabel }
@@ -143,35 +143,28 @@ private fun MapView.UpdateMarkers(
 //        }
 //    }
 
-private fun cacheManagerCallback(
-    onTaskComplete: () -> Unit,
-    onTaskFailed: (Int) -> Unit,
-) = object : CacheManager.CacheManagerCallback {
-    override fun onTaskComplete() {
-        onTaskComplete()
-    }
+private fun cacheManagerCallback(onTaskComplete: () -> Unit, onTaskFailed: (Int) -> Unit) =
+    object : CacheManager.CacheManagerCallback {
+        override fun onTaskComplete() {
+            onTaskComplete()
+        }
 
-    override fun onTaskFailed(errors: Int) {
-        onTaskFailed(errors)
-    }
+        override fun onTaskFailed(errors: Int) {
+            onTaskFailed(errors)
+        }
 
-    override fun updateProgress(
-        progress: Int,
-        currentZoomLevel: Int,
-        zoomMin: Int,
-        zoomMax: Int
-    ) {
-        // NOOP since we are using the build in UI
-    }
+        override fun updateProgress(progress: Int, currentZoomLevel: Int, zoomMin: Int, zoomMax: Int) {
+            // NOOP since we are using the build in UI
+        }
 
-    override fun downloadStarted() {
-        // NOOP since we are using the build in UI
-    }
+        override fun downloadStarted() {
+            // NOOP since we are using the build in UI
+        }
 
-    override fun setPossibleTilesInArea(total: Int) {
-        // NOOP since we are using the build in UI
+        override fun setPossibleTilesInArea(total: Int) {
+            // NOOP since we are using the build in UI
+        }
     }
-}
 
 private fun Context.purgeTileSource(onResult: (String) -> Unit) {
     val cache = SqlTileWriterExt()
@@ -184,10 +177,7 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
     }
     val selected: BooleanArray? = null
     val selectedList = mutableListOf<Int>()
-    builder.setMultiChoiceItems(
-        sourceList.toTypedArray(),
-        selected
-    ) { _, i, b ->
+    builder.setMultiChoiceItems(sourceList.toTypedArray(), selected) { _, i, b ->
         if (b) {
             selectedList.add(i)
         } else {
@@ -203,7 +193,7 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
                     getString(R.string.map_purge_success, item.source)
                 } else {
                     getString(R.string.map_purge_fail)
-                }
+                },
             )
         }
     }
@@ -213,10 +203,7 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
-fun MapView(
-    model: UIViewModel = viewModel(),
-    navigateToNodeDetails: (Int) -> Unit,
-) {
+fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Unit) {
     var mapFilterExpanded by remember { mutableStateOf(false) }
 
     val mapFilterState by model.mapFilterStateFlow.collectAsState()
@@ -248,8 +235,7 @@ fun MapView(
         debug("mapStyleId from prefs: $id")
         return CustomTileSource.getTileSource(id).also {
             zoomLevelMax = it.maximumZoomLevel.toDouble()
-            showDownloadButton =
-                if (it is OnlineTileSourceBase) it.tileSourcePolicy.acceptsBulkDownload() else false
+            showDownloadButton = if (it is OnlineTileSourceBase) it.tileSourcePolicy.acceptsBulkDownload() else false
         }
     }
 
@@ -269,18 +255,19 @@ fun MapView(
         }
         debug("user clicked MyLocationNewOverlay ${myLocationOverlay == null}")
         if (myLocationOverlay == null) {
-            myLocationOverlay = MyLocationNewOverlay(this).apply {
-                enableMyLocation()
-                enableFollowLocation()
-                getBitmapFromVectorDrawable(context, R.drawable.ic_map_location_dot_24)?.let {
-                    setPersonIcon(it)
-                    setPersonAnchor(0.5f, 0.5f)
+            myLocationOverlay =
+                MyLocationNewOverlay(this).apply {
+                    enableMyLocation()
+                    enableFollowLocation()
+                    getBitmapFromVectorDrawable(context, R.drawable.ic_map_location_dot_24)?.let {
+                        setPersonIcon(it)
+                        setPersonAnchor(0.5f, 0.5f)
+                    }
+                    getBitmapFromVectorDrawable(context, R.drawable.ic_map_navigation_24)?.let {
+                        setDirectionIcon(it)
+                        setDirectionAnchor(0.5f, 0.5f)
+                    }
                 }
-                getBitmapFromVectorDrawable(context, R.drawable.ic_map_navigation_24)?.let {
-                    setDirectionIcon(it)
-                    setDirectionAnchor(0.5f, 0.5f)
-                }
-            }
             overlays.add(myLocationOverlay)
         } else {
             myLocationOverlay?.apply {
@@ -300,9 +287,7 @@ fun MapView(
     val nodes by model.filteredNodeList.collectAsStateWithLifecycle()
     val waypoints by model.waypoints.collectAsStateWithLifecycle(emptyMap())
 
-    val markerIcon = remember {
-        AppCompatResources.getDrawable(context, R.drawable.ic_baseline_location_on_24)
-    }
+    val markerIcon = remember { AppCompatResources.getDrawable(context, R.drawable.ic_baseline_location_on_24) }
 
     fun MapView.onNodesChanged(nodes: Collection<Node>): List<MarkerWithLabel> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
@@ -317,25 +302,19 @@ fun MapView(
 
             val (p, u) = node.position to node.user
             val nodePosition = GeoPoint(node.latitude, node.longitude)
-            MarkerWithLabel(
-                mapView = this,
-                label = "${u.shortName} ${formatAgo(p.time)}"
-            ).apply {
+            MarkerWithLabel(mapView = this, label = "${u.shortName} ${formatAgo(p.time)}").apply {
                 id = u.id
                 title = u.longName
-                snippet = context.getString(
-                    R.string.map_node_popup_details,
-                    node.gpsString(gpsFormat),
-                    formatAgo(node.lastHeard),
-                    formatAgo(p.time),
-                    if (node.batteryStr != "") node.batteryStr else "?"
-                )
-                ourNode?.distanceStr(node, displayUnits)?.let { dist ->
-                    subDescription = context.getString(
-                        R.string.map_subDescription,
-                        ourNode.bearing(node),
-                        dist
+                snippet =
+                    context.getString(
+                        R.string.map_node_popup_details,
+                        node.gpsString(gpsFormat),
+                        formatAgo(node.lastHeard),
+                        formatAgo(p.time),
+                        if (node.batteryStr != "") node.batteryStr else "?",
                     )
+                ourNode?.distanceStr(node, displayUnits)?.let { dist ->
+                    subDescription = context.getString(R.string.map_subDescription, ourNode.bearing(node), dist)
                 }
                 setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_BOTTOM)
                 position = nodePosition
@@ -357,9 +336,7 @@ fun MapView(
     fun showDeleteMarkerDialog(waypoint: Waypoint) {
         val builder = MaterialAlertDialogBuilder(context)
         builder.setTitle(R.string.waypoint_delete)
-        builder.setNeutralButton(R.string.cancel) { _, _ ->
-            debug("User canceled marker delete dialog")
-        }
+        builder.setNeutralButton(R.string.cancel) { _, _ -> debug("User canceled marker delete dialog") }
         builder.setNegativeButton(R.string.delete_for_me) { _, _ ->
             debug("User deleted waypoint ${waypoint.id} for me")
             model.deleteWaypoint(waypoint.id)
@@ -372,13 +349,18 @@ fun MapView(
             }
         }
         val dialog = builder.show()
-        for (button in setOf(
+        for (
+        button in
+        setOf(
             androidx.appcompat.app.AlertDialog.BUTTON_NEUTRAL,
             androidx.appcompat.app.AlertDialog.BUTTON_NEGATIVE,
-            androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE
-        )) with(dialog.getButton(button)) {
-            textSize = 12F
-            isAllCaps = false
+            androidx.appcompat.app.AlertDialog.BUTTON_POSITIVE,
+        )
+        ) {
+            with(dialog.getButton(button)) {
+                textSize = 12F
+                isAllCaps = false
+            }
         }
     }
 
@@ -412,24 +394,25 @@ fun MapView(
             val label = pt.name + " " + formatAgo((waypoint.received_time / 1000).toInt())
             val emoji = String(Character.toChars(if (pt.icon == 0) 128205 else pt.icon))
             val timeLeft = pt.expire * 1000L - System.currentTimeMillis()
-            val expireTimeStr = when {
-                pt.expire == 0 || pt.expire == Int.MAX_VALUE -> "Never"
-                timeLeft <= 0 -> "Expired"
-                timeLeft < 60_000 -> "${timeLeft / 1000} seconds"
-                timeLeft < 3_600_000 -> "${timeLeft / 60_000} minute${if (timeLeft / 60_000 != 1L) "s" else ""}"
-                timeLeft < 86_400_000 -> {
-                    val hours = (timeLeft / 3_600_000).toInt()
-                    val minutes = ((timeLeft % 3_600_000) / 60_000).toInt()
-                    if (minutes >= 30) {
-                        "${hours + 1} hour${if (hours + 1 != 1) "s" else ""}"
-                    } else if (minutes > 0) {
-                        "$hours hour${if (hours != 1) "s" else ""}, $minutes minute${if (minutes != 1) "s" else ""}"
-                    } else {
-                        "$hours hour${if (hours != 1) "s" else ""}"
+            val expireTimeStr =
+                when {
+                    pt.expire == 0 || pt.expire == Int.MAX_VALUE -> "Never"
+                    timeLeft <= 0 -> "Expired"
+                    timeLeft < 60_000 -> "${timeLeft / 1000} seconds"
+                    timeLeft < 3_600_000 -> "${timeLeft / 60_000} minute${if (timeLeft / 60_000 != 1L) "s" else ""}"
+                    timeLeft < 86_400_000 -> {
+                        val hours = (timeLeft / 3_600_000).toInt()
+                        val minutes = ((timeLeft % 3_600_000) / 60_000).toInt()
+                        if (minutes >= 30) {
+                            "${hours + 1} hour${if (hours + 1 != 1) "s" else ""}"
+                        } else if (minutes > 0) {
+                            "$hours hour${if (hours != 1) "s" else ""}, $minutes minute${if (minutes != 1) "s" else ""}"
+                        } else {
+                            "$hours hour${if (hours != 1) "s" else ""}"
+                        }
                     }
+                    else -> "${timeLeft / 86_400_000} day${if (timeLeft / 86_400_000 != 1L) "s" else ""}"
                 }
-                else -> "${timeLeft / 86_400_000} day${if (timeLeft / 86_400_000 != 1L) "s" else ""}"
-            }
             MarkerWithLabel(this, label, emoji).apply {
                 id = "${pt.id}"
                 title = "${pt.name} (${getUsername(waypoint.data.from)}$lock)"
@@ -451,11 +434,12 @@ fun MapView(
         val cacheCapacity = cacheManager.cacheCapacity()
         val currentCacheUsage = cacheManager.currentCacheUsage()
 
-        val mapCacheInfoText = context.getString(
-            R.string.map_cache_info,
-            cacheCapacity / (1024.0 * 1024.0),
-            currentCacheUsage / (1024.0 * 1024.0)
-        )
+        val mapCacheInfoText =
+            context.getString(
+                R.string.map_cache_info,
+                cacheCapacity / (1024.0 * 1024.0),
+                currentCacheUsage / (1024.0 * 1024.0),
+            )
 
         MaterialAlertDialogBuilder(context)
             .setTitle(R.string.map_cache_manager)
@@ -467,25 +451,26 @@ fun MapView(
             .show()
     }
 
-    val mapEventsReceiver = object : MapEventsReceiver {
-        override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
-            InfoWindow.closeAllInfoWindowsOn(map)
-            return true
-        }
-
-        override fun longPressHelper(p: GeoPoint): Boolean {
-            performHapticFeedback()
-            val enabled = model.isConnected() && downloadRegionBoundingBox == null
-
-            if (enabled) {
-                showEditWaypointDialog = waypoint {
-                    latitudeI = (p.latitude * 1e7).toInt()
-                    longitudeI = (p.longitude * 1e7).toInt()
-                }
+    val mapEventsReceiver =
+        object : MapEventsReceiver {
+            override fun singleTapConfirmedHelper(p: GeoPoint): Boolean {
+                InfoWindow.closeAllInfoWindowsOn(map)
+                return true
             }
-            return true
+
+            override fun longPressHelper(p: GeoPoint): Boolean {
+                performHapticFeedback()
+                val enabled = model.isConnected() && downloadRegionBoundingBox == null
+
+                if (enabled) {
+                    showEditWaypointDialog = waypoint {
+                        latitudeI = (p.latitude * 1e7).toInt()
+                        longitudeI = (p.longitude * 1e7).toInt()
+                    }
+                }
+                return true
+            }
         }
-    }
 
     fun MapView.drawOverlays() {
         if (overlays.none { it is MapEventsOverlay }) {
@@ -505,45 +490,37 @@ fun MapView(
         invalidate()
     }
 
-    with(map) {
-        UpdateMarkers(onNodesChanged(nodes), onWaypointChanged(waypoints.values), nodeClusterer)
-    }
+    with(map) { UpdateMarkers(onNodesChanged(nodes), onWaypointChanged(waypoints.values), nodeClusterer) }
 
-    /**
-     * Creates Box overlay showing what area can be downloaded
-     */
+    /** Creates Box overlay showing what area can be downloaded */
     fun MapView.generateBoxOverlay() {
         overlays.removeAll { it is Polygon }
         val zoomFactor = 1.3 // zoom difference between view and download area polygon
         zoomLevelMin = minOf(zoomLevelDouble, zoomLevelMax)
         downloadRegionBoundingBox = boundingBox.zoomIn(zoomFactor)
-        val polygon = Polygon().apply {
-            points = Polygon.pointsAsRect(downloadRegionBoundingBox).map {
-                GeoPoint(it.latitude, it.longitude)
+        val polygon =
+            Polygon().apply {
+                points = Polygon.pointsAsRect(downloadRegionBoundingBox).map { GeoPoint(it.latitude, it.longitude) }
             }
-        }
         overlays.add(polygon)
         invalidate()
-        val tileCount: Int = CacheManager(this).possibleTilesInArea(
-            downloadRegionBoundingBox,
-            zoomLevelMin.toInt(),
-            zoomLevelMax.toInt(),
-        )
+        val tileCount: Int =
+            CacheManager(this)
+                .possibleTilesInArea(downloadRegionBoundingBox, zoomLevelMin.toInt(), zoomLevelMax.toInt())
         cacheEstimate = context.getString(R.string.map_cache_tiles, tileCount)
     }
 
-    val boxOverlayListener = object : MapListener {
-        override fun onScroll(event: ScrollEvent): Boolean {
-            if (downloadRegionBoundingBox != null) {
-                event.source.generateBoxOverlay()
+    val boxOverlayListener =
+        object : MapListener {
+            override fun onScroll(event: ScrollEvent): Boolean {
+                if (downloadRegionBoundingBox != null) {
+                    event.source.generateBoxOverlay()
+                }
+                return true
             }
-            return true
-        }
 
-        override fun onZoom(event: ZoomEvent): Boolean {
-            return false
+            override fun onZoom(event: ZoomEvent): Boolean = false
         }
-    }
 
     fun startDownload() {
         val boundingBox = downloadRegionBoundingBox ?: return
@@ -571,7 +548,7 @@ fun MapView(
                         model.showSnackbar(context.getString(R.string.map_download_errors, errors))
                         writer.onDetach()
                     },
-                )
+                ),
             )
         } catch (ex: TileSourcePolicyException) {
             debug("Tile source does not allow archiving: ${ex.message}")
@@ -603,8 +580,8 @@ fun MapView(
                     getString(R.string.map_cache_size),
                     getString(R.string.map_download_region),
                     getString(R.string.map_clear_tiles),
-                    getString(R.string.cancel)
-                )
+                    getString(R.string.cancel),
+                ),
             ) { dialog, which ->
                 when (which) {
                     0 -> showCurrentCacheInfo = true
@@ -616,21 +593,16 @@ fun MapView(
                     2 -> purgeTileSource { model.showSnackbar(it) }
                     else -> dialog.dismiss()
                 }
-            }.show()
+            }
+            .show()
     }
 
     Scaffold(
         floatingActionButton = {
-            DownloadButton(showDownloadButton && downloadRegionBoundingBox == null) {
-                context.showCacheManagerDialog()
-            }
+            DownloadButton(showDownloadButton && downloadRegionBoundingBox == null) { context.showCacheManagerDialog() }
         },
     ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-        ) {
+        Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
             AndroidView(
                 factory = {
                     map.apply {
@@ -650,13 +622,11 @@ fun MapView(
                         map.overlays.removeAll { it is Polygon }
                         map.invalidate()
                     },
-                    modifier = Modifier.align(Alignment.BottomCenter)
+                    modifier = Modifier.align(Alignment.BottomCenter),
                 )
             } else {
                 Column(
-                    modifier = Modifier
-                        .padding(top = 16.dp, end = 16.dp)
-                        .align(Alignment.TopEnd),
+                    modifier = Modifier.padding(top = 16.dp, end = 16.dp).align(Alignment.TopEnd),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
                     MapButton(
@@ -673,99 +643,90 @@ fun MapView(
                         DropdownMenu(
                             expanded = mapFilterExpanded,
                             onDismissRequest = { mapFilterExpanded = false },
-                            modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surface),
                         ) {
                             // Only Favorites toggle
                             DropdownMenuItem(
                                 text = {
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically
+                                        verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Star,
                                             contentDescription = null,
                                             modifier = Modifier.padding(end = 8.dp),
-                                            tint = MaterialTheme.colorScheme.onSurface
+                                            tint = MaterialTheme.colorScheme.onSurface,
                                         )
                                         Text(
                                             text = stringResource(R.string.only_favorites),
-                                            modifier = Modifier.weight(1f)
+                                            modifier = Modifier.weight(1f),
                                         )
                                         Checkbox(
                                             checked = mapFilterState.onlyFavorites,
-                                            onCheckedChange = { enabled ->
-                                                model.setOnlyFavorites(enabled)
-                                            },
-                                            modifier = Modifier.padding(start = 8.dp)
+                                            onCheckedChange = { model.toggleOnlyFavorites() },
+                                            modifier = Modifier.padding(start = 8.dp),
                                         )
                                     }
                                 },
-                                onClick = {
-                                    model.setOnlyFavorites(!mapFilterState.onlyFavorites)
-                                }
+                                onClick = { model.toggleOnlyFavorites() },
                             )
                             DropdownMenuItem(
                                 text = {
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically
+                                        verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.PinDrop,
                                             contentDescription = null,
                                             modifier = Modifier.padding(end = 8.dp),
-                                            tint = MaterialTheme.colorScheme.onSurface
+                                            tint = MaterialTheme.colorScheme.onSurface,
                                         )
                                         Text(
                                             text = stringResource(R.string.show_waypoints),
-                                            modifier = Modifier.weight(1f)
+                                            modifier = Modifier.weight(1f),
                                         )
                                         Checkbox(
                                             checked = mapFilterState.showWaypoints,
-                                            onCheckedChange = model::setShowWaypointsOnMap,
-                                            modifier = Modifier.padding(start = 8.dp)
+                                            onCheckedChange = { model.toggleShowWaypointsOnMap() },
+                                            modifier = Modifier.padding(start = 8.dp),
                                         )
                                     }
                                 },
-                                onClick = {
-                                    model.setShowWaypointsOnMap(!mapFilterState.showWaypoints)
-                                }
+                                onClick = { model.toggleShowWaypointsOnMap() },
                             )
                             DropdownMenuItem(
                                 text = {
                                     Row(
                                         modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically
+                                        verticalAlignment = Alignment.CenterVertically,
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Lens,
                                             contentDescription = null,
                                             modifier = Modifier.padding(end = 8.dp),
-                                            tint = MaterialTheme.colorScheme.onSurface
+                                            tint = MaterialTheme.colorScheme.onSurface,
                                         )
                                         Text(
                                             text = stringResource(R.string.show_precision_circle),
-                                            modifier = Modifier.weight(1f)
+                                            modifier = Modifier.weight(1f),
                                         )
                                         Checkbox(
                                             checked = mapFilterState.showPrecisionCircle,
-                                            onCheckedChange = { enabled ->
-                                                model.setShowPrecisionCircleOnMap(enabled)
-                                            },
-                                            modifier = Modifier.padding(start = 8.dp)
+                                            onCheckedChange = { enabled -> model.toggleShowPrecisionCircleOnMap() },
+                                            modifier = Modifier.padding(start = 8.dp),
                                         )
                                     }
                                 },
-                                onClick = {
-                                    model.setShowPrecisionCircleOnMap(!mapFilterState.showPrecisionCircle)
-                                }
+                                onClick = { model.toggleShowPrecisionCircleOnMap() },
                             )
                         }
                     }
                     if (hasGps) {
                         MapButton(
-                            icon = if (myLocationOverlay == null) {
+                            icon =
+                            if (myLocationOverlay == null) {
                                 Icons.Outlined.MyLocation
                             } else {
                                 Icons.Default.LocationDisabled
@@ -797,7 +758,7 @@ fun MapView(
                         if (expire == 0) expire = Int.MAX_VALUE
                         lockedTo = if (waypoint.lockedTo != 0) model.myNodeNum ?: 0 else 0
                         if (waypoint.icon == 0) icon = 128205
-                    }
+                    },
                 )
             },
             onDeleteClicked = { waypoint ->

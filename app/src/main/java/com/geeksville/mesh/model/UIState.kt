@@ -347,40 +347,20 @@ constructor(
         preferences.edit { putInt("node-sort-option", sort.ordinal) }
     }
 
-    fun toggleShowDetails() {
-        showDetails.value = !showDetails.value
-        preferences.edit { putBoolean("show-details", showDetails.value) }
-    }
+    fun toggleShowDetails() = toggleBooleanPreference(showDetails, "show-details")
 
-    fun toggleIncludeUnknown() {
-        includeUnknown.value = !includeUnknown.value
-        preferences.edit { putBoolean("include-unknown", includeUnknown.value) }
-    }
+    fun toggleIncludeUnknown() = toggleBooleanPreference(includeUnknown, "include-unknown")
 
-    fun toggleOnlyOnline() {
-        onlyOnline.value = !onlyOnline.value
-        preferences.edit { putBoolean("only-online", onlyOnline.value) }
-    }
+    fun toggleOnlyOnline() = toggleBooleanPreference(onlyOnline, "only-online")
 
-    fun toggleOnlyDirect() {
-        onlyDirect.value = !onlyDirect.value
-        preferences.edit { putBoolean("only-direct", onlyDirect.value) }
-    }
+    fun toggleOnlyDirect() = toggleBooleanPreference(onlyDirect, "only-direct")
 
-    fun setOnlyFavorites(value: Boolean) {
-        onlyFavorites.value = value
-        preferences.edit { putBoolean("only-favorites", value) }
-    }
+    fun toggleOnlyFavorites() = toggleBooleanPreference(onlyFavorites, "only-favorites")
 
-    fun setShowWaypointsOnMap(value: Boolean) {
-        showWaypointsOnMap.value = value
-        preferences.edit { putBoolean("show-waypoints-on-map", value) }
-    }
+    fun toggleShowWaypointsOnMap() = toggleBooleanPreference(showWaypointsOnMap, "show-waypoints-on-map")
 
-    fun setShowPrecisionCircleOnMap(value: Boolean) {
-        showPrecisionCircleOnMap.value = value
-        preferences.edit { putBoolean("show-precision-circle-on-map", value) }
-    }
+    fun toggleShowPrecisionCircleOnMap() =
+        toggleBooleanPreference(showPrecisionCircleOnMap, "show-precision-circle-on-map")
 
     data class NodeFilterState(
         val filterText: String,
