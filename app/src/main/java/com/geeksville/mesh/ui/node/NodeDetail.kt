@@ -20,7 +20,8 @@ package com.geeksville.mesh.ui.node
 import android.content.Intent
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -163,7 +164,6 @@ import com.geeksville.mesh.util.toDistanceString
 import com.geeksville.mesh.util.toSmallDistanceString
 import com.geeksville.mesh.util.toSpeedString
 import com.mikepenz.markdown.m3.Markdown
-import kotlinx.coroutines.delay
 
 private data class VectorMetricInfo(
     @StringRes val label: Int,
@@ -445,15 +445,17 @@ private fun AdministrationSection(
     }
 
     PreferenceCategory(stringResource(R.string.firmware)) {
-        val firmwareEdition = metricsState.firmwareEdition
-        firmwareEdition?.let {
-            val icon =
-                when (it) {
-                    MeshProtos.FirmwareEdition.VANILLA -> Icons.Default.Icecream
-                    else -> Icons.Default.ForkLeft
-                }
+        if (metricsState.isLocal) {
+            val firmwareEdition = metricsState.firmwareEdition
+            firmwareEdition?.let {
+                val icon =
+                    when (it) {
+                        MeshProtos.FirmwareEdition.VANILLA -> Icons.Default.Icecream
+                        else -> Icons.Default.ForkLeft
+                    }
 
-            NodeDetailRow(label = stringResource(R.string.firmware_edition), icon = icon, value = it.name)
+                NodeDetailRow(label = stringResource(R.string.firmware_edition), icon = icon, value = it.name)
+            }
         }
         node.metadata?.firmwareVersion?.let { firmwareVersion ->
             val latestStable = metricsState.latestStableFirmware
@@ -1027,34 +1029,37 @@ private const val COOL_DOWN_TIME_MS = 30000L
 
 @Composable
 fun TracerouteActionButton(title: String, lastTracerouteTime: Long?, onClick: () -> Unit) {
-    var isCoolingDown by
-        remember(lastTracerouteTime) {
-            val timeSinceLast = System.currentTimeMillis() - (lastTracerouteTime ?: 0)
-            mutableStateOf(timeSinceLast < COOL_DOWN_TIME_MS)
-        }
+    val progress = remember { Animatable(0f) }
+    var isCoolingDown by remember { mutableStateOf(false) }
 
     LaunchedEffect(lastTracerouteTime) {
         val timeSinceLast = System.currentTimeMillis() - (lastTracerouteTime ?: 0)
-        if (timeSinceLast < COOL_DOWN_TIME_MS) {
-            delay(COOL_DOWN_TIME_MS - timeSinceLast)
+        isCoolingDown = timeSinceLast < COOL_DOWN_TIME_MS
+
+        if (isCoolingDown) {
+            val remainingTime = COOL_DOWN_TIME_MS - timeSinceLast
+            progress.snapTo(remainingTime / COOL_DOWN_TIME_MS.toFloat())
+            progress.animateTo(
+                targetValue = 0f,
+                animationSpec = tween(durationMillis = remainingTime.toInt(), easing = { it }),
+            )
             isCoolingDown = false
         }
     }
 
-    val progress by animateFloatAsState(targetValue = if (isCoolingDown) 1f else 0f, label = "TracerouteCooldown")
-
     Button(
         onClick = {
-            isCoolingDown = true
-            onClick()
+            if (!isCoolingDown) {
+                onClick()
+            }
         },
         enabled = !isCoolingDown,
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).height(48.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            if (progress > 0f) {
+            if (isCoolingDown) {
                 CircularProgressIndicator(
-                    progress = { progress },
+                    progress = { progress.value },
                     modifier = Modifier.size(24.dp),
                     strokeWidth = 2.dp,
                     trackColor = ProgressIndicatorDefaults.circularDeterminateTrackColor,
