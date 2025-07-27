@@ -33,19 +33,20 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.BTScanModel
+import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.service.MeshService
 
 @Composable
 fun UsbDevices(
     connectionState: MeshService.ConnectionState,
-    usbDevices: List<BTScanModel.DeviceListEntry>,
+    usbDevices: List<DeviceListEntry>,
     selectedDevice: String,
-    scanModel: BTScanModel
+    scanModel: BTScanModel,
 ) {
     Text(
         text = stringResource(R.string.serial),
         style = MaterialTheme.typography.titleLarge,
-        modifier = Modifier.padding(vertical = 8.dp)
+        modifier = Modifier.padding(vertical = 8.dp),
     )
     usbDevices.forEach { device ->
         DeviceListItem(
@@ -53,25 +54,20 @@ fun UsbDevices(
             device = device,
             selected = device.fullAddress == selectedDevice,
             onSelect = { scanModel.onSelected(device) },
-            modifier = Modifier
+            modifier = Modifier,
         )
     }
-    if (usbDevices.filterNot { it.isDisconnect || it.isMock }.isEmpty()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            horizontalAlignment = CenterHorizontally
-        ) {
+    if (usbDevices.filterNot { it is DeviceListEntry.Disconnect || it is DeviceListEntry.Mock }.isEmpty()) {
+        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalAlignment = CenterHorizontally) {
             Icon(
                 imageVector = Icons.Default.UsbOff,
                 contentDescription = stringResource(R.string.no_usb_devices),
-                modifier = Modifier.size(96.dp)
+                modifier = Modifier.size(96.dp),
             )
             Text(
                 text = stringResource(R.string.no_usb_devices),
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(vertical = 8.dp),
             )
         }
     }

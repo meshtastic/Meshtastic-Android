@@ -322,6 +322,14 @@ constructor(
         MutableStateFlow(preferences.getBoolean("show-precision-circle-on-map", true))
 
     private val showIgnored = MutableStateFlow(preferences.getBoolean("show-ignored", false))
+    private val _hasShownNotPairedWarning =
+        MutableStateFlow(preferences.getBoolean(HAS_SHOWN_NOT_PAIRED_WARNING_PREF, false))
+    val hasShownNotPairedWarning: StateFlow<Boolean> = _hasShownNotPairedWarning.asStateFlow()
+
+    fun suppressNoPairedWarning() {
+        _hasShownNotPairedWarning.value = true
+        preferences.edit { putBoolean(HAS_SHOWN_NOT_PAIRED_WARNING_PREF, true) }
+    }
 
     fun toggleShowIgnored() {
         showIgnored.value = !showIgnored.value
@@ -355,7 +363,7 @@ constructor(
 
     fun setOnlyFavorites(value: Boolean) {
         onlyFavorites.value = value
-        preferences.edit { putBoolean("only-favorites", onlyFavorites.value) }
+        preferences.edit { putBoolean("only-favorites", value) }
     }
 
     fun setShowWaypointsOnMap(value: Boolean) {
@@ -725,6 +733,8 @@ constructor(
     companion object {
         fun getPreferences(context: Context): SharedPreferences =
             context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
+
+        const val HAS_SHOWN_NOT_PAIRED_WARNING_PREF = "has_shown_not_paired_warning"
     }
 
     // Connection state to our radio device
