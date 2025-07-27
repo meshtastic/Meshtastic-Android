@@ -46,17 +46,21 @@ import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.filled.SpeakerNotes
 import androidx.compose.material.icons.filled.SpeakerNotesOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -129,6 +133,7 @@ internal fun MessageScreen(
     viewModel: UIViewModel = hiltViewModel(),
     navigateToMessages: (String) -> Unit,
     navigateToNodeDetails: (Int) -> Unit,
+    navigateToQuickChatOptions: () -> Unit,
     onNavigateBack: () -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
@@ -283,6 +288,7 @@ internal fun MessageScreen(
                     channelIndexParam = channelIndex,
                     showQuickChat = showQuickChat,
                     onToggleQuickChat = { showQuickChat = !showQuickChat },
+                    onNavigateToQuickChatOptions = navigateToQuickChatOptions,
                 )
             }
         },
@@ -571,6 +577,7 @@ private fun MessageTopBar(
     channelIndexParam: Int?,
     showQuickChat: Boolean,
     onToggleQuickChat: () -> Unit,
+    onNavigateToQuickChatOptions: () -> Unit = {},
 ) = TopAppBar(
     title = {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -591,22 +598,92 @@ private fun MessageTopBar(
         }
     },
     actions = {
-        IconButton(onClick = onToggleQuickChat) {
-            Icon(
-                imageVector = if (showQuickChat) Icons.Filled.SpeakerNotesOff else Icons.AutoMirrored.Filled.Chat,
-                contentDescription =
+        MessageTopBarActions(
+            showQuickChat,
+            onToggleQuickChat,
+            onNavigateToQuickChatOptions,
+            channelIndex,
+            mismatchKey,
+        )
+    },
+)
+
+@Composable
+private fun MessageTopBarActions(
+    showQuickChat: Boolean,
+    onToggleQuickChat: () -> Unit,
+    onNavigateToQuickChatOptions: () -> Unit,
+    channelIndex: Int?,
+    mismatchKey: Boolean,
+) {
+    if (channelIndex == DataPacket.PKC_CHANNEL_INDEX) {
+        NodeKeyStatusIcon(hasPKC = true, mismatchKey = mismatchKey)
+    }
+    var expanded by remember { mutableStateOf(false) }
+    Box {
+        IconButton(onClick = { expanded = true }, enabled = true) {
+            Icon(imageVector = Icons.Default.MoreVert, contentDescription = stringResource(id = R.string.overflow_menu))
+        }
+        OverFlowMenu(
+            expanded = expanded,
+            onDismiss = { expanded = false },
+            showQuickChat = showQuickChat,
+            onToggleQuickChat = onToggleQuickChat,
+            onNavigateToQuickChatOptions = onNavigateToQuickChatOptions,
+        )
+    }
+}
+
+@Composable
+private fun OverFlowMenu(
+    expanded: Boolean,
+    onDismiss: () -> Unit,
+    showQuickChat: Boolean,
+    onToggleQuickChat: () -> Unit,
+    onNavigateToQuickChatOptions: () -> Unit,
+) {
+    if (expanded) {
+        DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
+            val quickChatToggleTitle =
                 if (showQuickChat) {
-                    stringResource(id = R.string.quick_chat_hide)
+                    stringResource(R.string.quick_chat_hide)
                 } else {
-                    stringResource(id = R.string.quick_chat_show)
+                    stringResource(R.string.quick_chat_show)
+                }
+            DropdownMenuItem(
+                text = { Text(quickChatToggleTitle) },
+                onClick = {
+                    onDismiss()
+                    onToggleQuickChat()
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector =
+                        if (showQuickChat) {
+                            Icons.Default.SpeakerNotesOff
+                        } else {
+                            Icons.Default.SpeakerNotes
+                        },
+                        contentDescription = quickChatToggleTitle,
+                    )
+                },
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(id = R.string.quick_chat)) },
+                onClick = {
+                    onDismiss()
+                    onNavigateToQuickChatOptions()
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.ChatBubbleOutline,
+                        contentDescription = stringResource(id = R.string.quick_chat),
+                    )
                 },
             )
         }
-        if (channelIndex == DataPacket.PKC_CHANNEL_INDEX) {
-            NodeKeyStatusIcon(hasPKC = true, mismatchKey = mismatchKey)
-        }
-    },
-)
+    }
+}
 
 /**
  * A row of quick chat action buttons.
