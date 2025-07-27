@@ -143,21 +143,21 @@
     <string name="channel_invalid">Este link de canal é inválido e não pode ser usado</string>
     <string name="debug_panel">Painel de depuração</string>
     <string name="debug_decoded_payload">Pacote Decodificado:</string>
-    <string name="debug_logs_export">Exportar Registros</string>
+    <string name="debug_logs_export">Exportar Logs</string>
     <string name="debug_last_messages">500 últimas mensagens</string>
     <string name="debug_filters">Filtros</string>
     <string name="debug_active_filters">Filtros ativos</string>
-    <string name="debug_default_search">Pesquisar nos registros…</string>
+    <string name="debug_default_search">Pesquisar nos logs…</string>
     <string name="debug_search_next">Próxima correspondência</string>
     <string name="debug_search_prev">Correspondência anterior</string>
     <string name="debug_search_clear">Limpar busca</string>
     <string name="debug_filter_add">Adicionar filtro</string>
     <string name="debug_filter_included">Filtro incluído</string>
     <string name="debug_filter_clear">Limpar todos os filtros</string>
-    <string name="debug_clear">Limpar Registros</string>
+    <string name="debug_clear">Limpar Logs</string>
     <string name="match_any">Corresponda a Qualquer | Todos</string>
     <string name="match_all">Corresponda a Todos | Qualquer</string>
-    <string name="debug_clear_logs_confirm">Isto removerá todos os pacotes de registros e entradas de banco de dados do seu dispositivo - É uma redefinição completa e permanente.</string>
+    <string name="debug_clear_logs_confirm">Isto removerá todos os pacotes de log e entradas de banco de dados do seu dispositivo - É uma redefinição completa e permanente.</string>
     <string name="clear">Limpar</string>
     <string name="updating_firmware">Atualizando firmware, aguarde até 8 minutos…</string>
     <string name="update_successful">Atualização bem sucedida</string>
@@ -235,6 +235,8 @@
     <string name="quick_chat_edit">Editar chat rápido</string>
     <string name="quick_chat_append">Anexar à mensagem</string>
     <string name="quick_chat_instant">Enviar imediatamente</string>
+    <string name="quick_chat_show">Mostrar menu de chat rápido</string>
+    <string name="quick_chat_hide">Ocultar menu de chat rápido</string>
     <string name="factory_reset">Redefinição de fábrica</string>
     <string name="factory_reset_description">Isto limpará todas as configurações do dispositivo que você fez.</string>
     <string name="bluetooth_disabled">Bluetooth desativado</string>
@@ -353,7 +355,7 @@
     <string name="favorite">Favorito</string>
     <string name="favorite_add">Adicionar \'%s\' como um nó favorito?</string>
     <string name="favorite_remove">Remover \'%s\' como um nó favorito?</string>
-    <string name="power_metrics_log">Registro de Métricas de Energia</string>
+    <string name="power_metrics_log">Log de Métricas de Energia</string>
     <string name="channel_1">Canal 1</string>
     <string name="channel_2">Canal 2</string>
     <string name="channel_3">Canal 3</string>
@@ -369,7 +371,7 @@
     <string name="baro_pressure">Pressão Barométrica</string>
     <string name="mesh_via_udp_enabled">Mesh via UDP ativado</string>
     <string name="udp_config">Configuração UDP</string>
-    <string name="map_node_popup_details"><![CDATA[%1$s<br>Último ouvido: %2$s<br>Última posição: %3$s<br>Bateria: %4$s]]></string>
+    <string name="map_node_popup_details"><![CDATA[%1$s<br>Última vez: %2$s<br>Última posição: %3$s<br>Bateria: %4$s]]></string>
     <string name="toggle_my_position">Ativar minha posição</string>
     <string name="user">Usuário</string>
     <string name="channels">Canais</string>
@@ -398,10 +400,10 @@
     <string name="codec_2_enabled">CODEC 2 ativado</string>
     <string name="ptt_pin">Pino de PTT</string>
     <string name="codec2_sample_rate">Taxa de amostragem CODEC2</string>
-    <string name="i2s_word_select">Selecionar palavra I2S</string>
-    <string name="i2s_data_in">Entrada de dados I2S</string>
-    <string name="i2s_data_out">Saída de dados I2S</string>
-    <string name="i2s_clock">Relógio I2S</string>
+    <string name="i2s_word_select">CS I2S</string>
+    <string name="i2s_data_in">MOSI I2S</string>
+    <string name="i2s_data_out">MISO I2S</string>
+    <string name="i2s_clock">CLK I2S</string>
     <string name="bluetooth_config">Configuração Bluetooth</string>
     <string name="bluetooth_enabled">Bluetooth ativado</string>
     <string name="pairing_mode">Modo de pareamento</string>
@@ -409,7 +411,7 @@
     <string name="uplink_enabled">Uplink ativado</string>
     <string name="downlink_enabled">Downlink ativado</string>
     <string name="default_">Padrão</string>
-    <string name="position_enabled">Posição habilitada</string>
+    <string name="position_enabled">Posição ativada</string>
     <string name="gpio_pin">Pino GPIO</string>
     <string name="type">Tipo</string>
     <string name="hide_password">Ocultar Senha</string>
@@ -466,7 +468,7 @@
     <string name="wake_screen_on_tap_or_motion">Ligar a tela ao tocar ou mover</string>
     <string name="compass_orientation">Orientação da bússola</string>
     <string name="external_notification_config">Configuração de Notificação Externa</string>
-    <string name="external_notification_enabled">Notificações Externas habilitadas</string>
+    <string name="external_notification_enabled">Notificação Externa habilitada</string>
     <string name="notifications_on_message_receipt">Notificações no recibo de mensagem</string>
     <string name="alert_message_led">LED de mensagem de alerta</string>
     <string name="alert_message_buzzer">Som de mensagem de alerta</string>
@@ -500,7 +502,7 @@
     <string name="ignore_incoming">Ignorar entrada</string>
     <string name="sx126x_rx_boosted_gain">RX com ganho reforçado SX126X</string>
     <string name="override_frequency_mhz">Substituir a frequência (MHz)</string>
-    <string name="pa_fan_disabled">PA fan desativado</string>
+    <string name="pa_fan_disabled">Ventilador do PA desativado</string>
     <string name="ignore_mqtt">Ignorar MQTT</string>
     <string name="ok_to_mqtt">OK para MQTT</string>
     <string name="mqtt_config">Configuração MQTT</string>
@@ -572,7 +574,7 @@
     <string name="admin_key">Chave do Administrador</string>
     <string name="managed_mode">Modo Administrado</string>
     <string name="serial_console">Console serial</string>
-    <string name="debug_log_api_enabled">API de registros de depuração ativada</string>
+    <string name="debug_log_api_enabled">API de logs de depuração ativada</string>
     <string name="legacy_admin_channel">Canal de administração antigo</string>
     <string name="serial_config">Configuração Serial</string>
     <string name="serial_enabled">Serial ativado</string>
@@ -654,7 +656,7 @@
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Usar formato de relógio 12h</string>
     <string name="display_time_in_12h_format">Quando ativado, o dispositivo exibirá o tempo em formato de 12 horas na tela.</string>
-    <string name="host_metrics_log">Registro de métricas do Host</string>
+    <string name="host_metrics_log">Log de métricas do Host</string>
     <string name="host">Host</string>
     <string name="host_metrics">Métricas do Host</string>
     <string name="free_memory">Memória Livre</string>
@@ -753,7 +755,7 @@
     <string name="security_icon_help_show_all">Mostrar Todos os Significados</string>
     <string name="security_icon_help_show_less">Exibir Status Atual</string>
     <string name="security_icon_help_dismiss">Ignorar</string>
-    <string name="confirm_delete_node">Deseja mesmo excluir esse nó?</string>
+    <string name="confirm_delete_node">Tem certeza que deseja excluir este nó?</string>
     <string name="replying_to">Respondendo a %1$s</string>
     <string name="cancel_reply">Cancelar resposta</string>
     <string name="delete_messages_title">Excluir Mensagens?</string>
@@ -772,4 +774,5 @@
     <string name="latest_stable_firmware">Último estável</string>
     <string name="latest_alpha_firmware">Último alfa</string>
     <string name="supported_by_community">Apoiado pela Comunidade Meshtastic</string>
+    <string name="firmware_edition">Edição do Firmware</string>
 </resources>
