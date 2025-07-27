@@ -593,12 +593,12 @@ private fun MessageTopBar(
     actions = {
         IconButton(onClick = onToggleQuickChat) {
             Icon(
-                imageVector = if (showQuickChat) Icons.AutoMirrored.Filled.Chat else Icons.Filled.SpeakerNotesOff,
+                imageVector = if (showQuickChat) Icons.Filled.SpeakerNotesOff else Icons.AutoMirrored.Filled.Chat,
                 contentDescription =
                 if (showQuickChat) {
-                    stringResource(id = R.string.quick_chat_show)
-                } else {
                     stringResource(id = R.string.quick_chat_hide)
+                } else {
+                    stringResource(id = R.string.quick_chat_show)
                 },
             )
         }
