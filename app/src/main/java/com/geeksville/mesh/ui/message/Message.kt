@@ -152,7 +152,7 @@ internal fun MessageScreen(
     var sharedContact by rememberSaveable { mutableStateOf<Node?>(null) }
     val selectedMessageIds = rememberSaveable { mutableStateOf(emptySet<Long>()) }
     val messageInputState = rememberTextFieldState(message)
-    var showQuickChat by rememberSaveable { mutableStateOf(false) }
+    val showQuickChat by viewModel.showQuickChat.collectAsStateWithLifecycle()
 
     // Derived state, memoized for performance
     val channelInfo =
@@ -287,7 +287,7 @@ internal fun MessageScreen(
                     channels = channels,
                     channelIndexParam = channelIndex,
                     showQuickChat = showQuickChat,
-                    onToggleQuickChat = { showQuickChat = !showQuickChat },
+                    onToggleQuickChat = viewModel::toggleShowQuickChat,
                     onNavigateToQuickChatOptions = navigateToQuickChatOptions,
                 )
             }
