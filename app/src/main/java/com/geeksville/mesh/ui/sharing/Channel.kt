@@ -17,11 +17,11 @@
 
 package com.geeksville.mesh.ui.sharing
 
+import android.Manifest
 import android.content.ClipData
 import android.net.Uri
 import android.os.RemoteException
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -92,8 +92,6 @@ import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.errormsg
 import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.getCameraPermissions
-import com.geeksville.mesh.android.hasCameraPermission
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Channel
@@ -105,21 +103,29 @@ import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.ui.common.components.AdaptiveTwoPane
 import com.geeksville.mesh.ui.common.components.PreferenceFooter
+import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.ui.radioconfig.components.ChannelSelection
 import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
 
+/**
+ * Composable screen for managing and sharing Meshtastic channels. Allows users to view, edit, and share channel
+ * configurations via QR codes or URLs.
+ */
+@OptIn(ExperimentalPermissionsApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun ChannelScreen(
     viewModel: UIViewModel = hiltViewModel(),
     radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
-    onNavigate: (Route) -> Unit
+    onNavigate: (Route) -> Unit,
 ) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
@@ -131,12 +137,9 @@ fun ChannelScreen(
 
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     var channelSet by remember(channels) { mutableStateOf(channels) }
-    val modemPresetName by remember(channels) {
-        mutableStateOf(Channel(loraConfig = channels.loraConfig).name)
-    }
+    val modemPresetName by remember(channels) { mutableStateOf(Channel(loraConfig = channels.loraConfig).name) }
 
     var showResetDialog by remember { mutableStateOf(false) }
-    var showScanDialog by remember { mutableStateOf(false) }
 
     /* Animate waiting for the configurations */
     var isWaiting by remember { mutableStateOf(false) }
@@ -158,24 +161,24 @@ fun ChannelScreen(
     }
 
     /* Holds selections made by the user for QR generation. */
-    val channelSelections = rememberSaveable(
-        saver = listSaver(
-            save = { it.toList() },
-            restore = { it.toMutableStateList() }
-        )
-    ) { mutableStateListOf(elements = Array(size = 8, init = { true })) }
-
-    val selectedChannelSet = channelSet.copy {
-        val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
-        settings.clear()
-        settings.addAll(result)
-    }
-
-    val barcodeLauncher = rememberLauncherForActivityResult(ScanContract()) { result ->
-        if (result.contents != null) {
-            viewModel.requestChannelUrl(result.contents.toUri())
+    val channelSelections =
+        rememberSaveable(saver = listSaver(save = { it.toList() }, restore = { it.toMutableStateList() })) {
+            mutableStateListOf(elements = Array(size = 8, init = { true }))
         }
-    }
+
+    val selectedChannelSet =
+        channelSet.copy {
+            val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
+            settings.clear()
+            settings.addAll(result)
+        }
+
+    val barcodeLauncher =
+        rememberLauncherForActivityResult(ScanContract()) { result ->
+            if (result.contents != null) {
+                viewModel.requestChannelUrl(result.contents.toUri())
+            }
+        }
 
     fun zxingScan() {
         debug("Starting zxing QR code scanner")
@@ -187,30 +190,15 @@ fun ChannelScreen(
         barcodeLauncher.launch(zxingScan)
     }
 
-    val requestPermissionAndScanLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            if (permissions.entries.all { it.value }) zxingScan()
-        }
+    val cameraPermissionState = rememberPermissionState(Manifest.permission.CAMERA)
 
-    if (showScanDialog) {
-        AlertDialog(
-            onDismissRequest = {
-                debug("Camera permission denied")
-                showScanDialog = false
-            },
-            title = { Text(text = stringResource(id = R.string.camera_required)) },
-            text = { Text(text = stringResource(id = R.string.why_camera_required)) },
-            confirmButton = {
-                TextButton(onClick = { requestPermissionAndScanLauncher.launch(context.getCameraPermissions()) }) {
-                    Text(text = stringResource(id = R.string.accept))
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { debug("Camera permission denied") }) {
-                    Text(text = stringResource(id = R.string.cancel))
-                }
-            }
-        )
+    LaunchedEffect(cameraPermissionState.status) {
+        if (cameraPermissionState.status.isGranted) {
+            // If permission was granted as a result of a request, and not initially,
+            // we might want to trigger the scan. However, simple auto-triggering on grant
+            // might not always be desired UX. For now, rely on user re-click if needed.
+            // If auto-scan is desired after grant: add a flag to track if request was made.
+        }
     }
 
     // Send new channel settings to the device
@@ -229,10 +217,7 @@ fun ChannelScreen(
         }
     }
 
-    fun installSettings(
-        newChannel: ChannelProtos.ChannelSettings,
-        newLoRaConfig: ConfigProtos.Config.LoRaConfig
-    ) {
+    fun installSettings(newChannel: ChannelProtos.ChannelSettings, newLoRaConfig: ConfigProtos.Config.LoRaConfig) {
         val newSet = channelSet {
             settings.add(newChannel)
             loraConfig = newLoRaConfig
@@ -249,32 +234,37 @@ fun ChannelScreen(
             title = { Text(text = stringResource(id = R.string.reset_to_defaults)) },
             text = { Text(text = stringResource(id = R.string.are_you_sure_change_default)) },
             confirmButton = {
-                TextButton(onClick = {
-                    debug("Switching back to default channel")
-                    installSettings(
-                        Channel.default.settings,
-                        Channel.default.loraConfig.copy {
-                            region = viewModel.region
-                            txEnabled = viewModel.txEnabled
-                        }
-                    )
-                    showResetDialog = false
-                }) { Text(text = stringResource(id = R.string.apply)) }
+                TextButton(
+                    onClick = {
+                        debug("Switching back to default channel")
+                        installSettings(
+                            Channel.default.settings,
+                            Channel.default.loraConfig.copy {
+                                region = viewModel.region
+                                txEnabled = viewModel.txEnabled
+                            },
+                        )
+                        showResetDialog = false
+                    },
+                ) {
+                    Text(text = stringResource(id = R.string.apply))
+                }
             },
             dismissButton = {
-                TextButton(onClick = {
-                    channelSet = channels // throw away any edits
-                    showResetDialog = false
-                }) { Text(text = stringResource(id = R.string.cancel)) }
-            }
+                TextButton(
+                    onClick = {
+                        channelSet = channels // throw away any edits
+                        showResetDialog = false
+                    },
+                ) {
+                    Text(text = stringResource(id = R.string.cancel))
+                }
+            },
         )
     }
 
     val listState = rememberLazyListState()
-    LazyColumn(
-        state = listState,
-        contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
-    ) {
+    LazyColumn(state = listState, contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp)) {
         item {
             ChannelListView(
                 enabled = enabled,
@@ -284,22 +274,22 @@ fun ChannelScreen(
                 onClick = {
                     isWaiting = true
                     radioConfigViewModel.setResponseStateLoading(ConfigRoute.CHANNELS)
-                }
+                },
             )
             EditChannelUrl(
                 enabled = enabled,
                 channelUrl = selectedChannelSet.getChannelUrl(),
-                onConfirm = viewModel::requestChannelUrl
+                onConfirm = viewModel::requestChannelUrl,
             )
         }
         item {
-           ModemPresetInfo(
-               modemPresetName = modemPresetName,
-               onClick = {
-                   isWaiting = true
-                   radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
-               }
-           )
+            ModemPresetInfo(
+                modemPresetName = modemPresetName,
+                onClick = {
+                    isWaiting = true
+                    radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
+                },
+            )
         }
         item {
             PreferenceFooter(
@@ -312,8 +302,12 @@ fun ChannelScreen(
                 positiveText = R.string.scan,
                 onPositiveClicked = {
                     focusManager.clearFocus()
-                    if (context.hasCameraPermission()) zxingScan() else showScanDialog = true
-                }
+                    if (cameraPermissionState.status.isGranted) {
+                        zxingScan()
+                    } else {
+                        cameraPermissionState.launchPermissionRequest()
+                    }
+                },
             )
         }
     }
@@ -321,12 +315,7 @@ fun ChannelScreen(
 
 @Suppress("LongMethod")
 @Composable
-private fun EditChannelUrl(
-    enabled: Boolean,
-    channelUrl: Uri,
-    modifier: Modifier = Modifier,
-    onConfirm: (Uri) -> Unit
-) {
+private fun EditChannelUrl(enabled: Boolean, channelUrl: Uri, modifier: Modifier = Modifier, onConfirm: (Uri) -> Unit) {
     val focusManager = LocalFocusManager.current
     val clipboardManager = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
@@ -344,10 +333,12 @@ private fun EditChannelUrl(
     OutlinedTextField(
         value = valueState.toString(),
         onValueChange = {
-            isError = runCatching {
-                valueState = it.toUri()
-                valueState.toChannelSet()
-            }.isFailure
+            isError =
+                runCatching {
+                    valueState = it.toUri()
+                    valueState.toChannelSet()
+                }
+                    .isFailure
         },
         modifier = modifier.fillMaxWidth(),
         enabled = enabled,
@@ -357,77 +348,68 @@ private fun EditChannelUrl(
         trailingIcon = {
             val label = stringResource(R.string.url)
             val isUrlEqual = valueState == channelUrl
-            IconButton(onClick = {
-                when {
-                    isError -> {
-                        isError = false
-                        valueState = channelUrl
-                    }
+            IconButton(
+                onClick = {
+                    when {
+                        isError -> {
+                            isError = false
+                            valueState = channelUrl
+                        }
 
-                    !isUrlEqual -> {
-                        onConfirm(valueState)
-                        valueState = channelUrl
-                    }
+                        !isUrlEqual -> {
+                            onConfirm(valueState)
+                            valueState = channelUrl
+                        }
 
-                    else -> {
-                        // track how many times users share channels
-                        GeeksvilleApplication.analytics.track(
-                            "share", DataPair("content_type", "channel")
-                        )
-                        coroutineScope.launch {
-                            clipboardManager.setClipEntry(
-                                ClipEntry(
-                                    ClipData.newPlainText(
-                                        label,
-                                        valueState.toString()
-                                    )
+                        else -> {
+                            // track how many times users share channels
+                            GeeksvilleApplication.analytics.track("share", DataPair("content_type", "channel"))
+                            coroutineScope.launch {
+                                clipboardManager.setClipEntry(
+                                    ClipEntry(ClipData.newPlainText(label, valueState.toString())),
                                 )
-                            )
+                            }
                         }
                     }
-                }
-            }) {
+                },
+            ) {
                 Icon(
-                    imageVector = when {
+                    imageVector =
+                    when {
                         isError -> Icons.TwoTone.Close
                         !isUrlEqual -> Icons.TwoTone.Check
                         else -> Icons.TwoTone.ContentCopy
                     },
-                    contentDescription = when {
+                    contentDescription =
+                    when {
                         isError -> stringResource(R.string.copy)
                         !isUrlEqual -> stringResource(R.string.send)
                         else -> stringResource(R.string.copy)
                     },
-                    tint = if (isError) {
+                    tint =
+                    if (isError) {
                         MaterialTheme.colorScheme.error
                     } else {
                         LocalContentColor.current
-                    }
+                    },
                 )
             }
         },
         maxLines = 1,
         singleLine = true,
-        keyboardOptions = KeyboardOptions.Default.copy(
-            keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done
-        ),
+        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done),
         keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
     )
 }
 
 @Composable
-private fun QrCodeImage(
-    enabled: Boolean,
-    channelSet: ChannelSet,
-    modifier: Modifier = Modifier,
-) = Image(
-    painter = channelSet.qrCode
-        ?.let { BitmapPainter(it.asImageBitmap()) }
-        ?: painterResource(id = R.drawable.qrcode),
+private fun QrCodeImage(enabled: Boolean, channelSet: ChannelSet, modifier: Modifier = Modifier) = Image(
+    painter =
+    channelSet.qrCode?.let { BitmapPainter(it.asImageBitmap()) } ?: painterResource(id = R.drawable.qrcode),
     contentDescription = stringResource(R.string.qr_code),
     modifier = modifier,
     contentScale = ContentScale.Inside,
-    alpha = if (enabled) 1.0f else 0.7f
+    alpha = if (enabled) 1.0f else 0.7f,
     // colorFilter = ColorFilter.colorMatrix(ColorMatrix().apply { setToSaturation(0f) }),
 )
 
@@ -439,11 +421,12 @@ private fun ChannelListView(
     channelSelections: SnapshotStateList<Boolean>,
     onClick: () -> Unit = {},
 ) {
-    val selectedChannelSet = channelSet.copy {
-        val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
-        settings.clear()
-        settings.addAll(result)
-    }
+    val selectedChannelSet =
+        channelSet.copy {
+            val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
+            settings.clear()
+            settings.addAll(result)
+        }
 
     AdaptiveTwoPane(
         first = {
@@ -461,66 +444,47 @@ private fun ChannelListView(
                             channelSelections[index] = it
                         }
                     },
-                    channel = channelObj
+                    channel = channelObj,
                 )
             }
             OutlinedButton(
                 onClick = onClick,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = enabled,
-                colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                ),
-            ) { Text(text = stringResource(R.string.edit)) }
+                colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+            ) {
+                Text(text = stringResource(R.string.edit))
+            }
         },
         second = {
             QrCodeImage(
                 enabled = enabled,
                 channelSet = selectedChannelSet,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp)
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
             )
         },
     )
 }
 
 @Composable
-private fun ModemPresetInfo(
-    modemPresetName: String,
-    onClick: () -> Unit
-) {
+private fun ModemPresetInfo(modemPresetName: String, onClick: () -> Unit) {
     Row(
-        modifier = Modifier
-            .padding(top = 12.dp)
+        modifier =
+        Modifier.padding(top = 12.dp)
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .border(
-                1.dp,
-                MaterialTheme.colorScheme.onBackground,
-                RoundedCornerShape(8.dp)
-            ),
-        verticalAlignment = Alignment.CenterVertically
+            .border(1.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(8.dp)),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(16.dp)
-        ) {
-            Text(
-                text = stringResource(R.string.modem_preset),
-                fontSize = 16.sp,
-            )
-            Text(
-                text = modemPresetName,
-                fontSize = 14.sp,
-            )
+        Column(modifier = Modifier.weight(1f).padding(16.dp)) {
+            Text(text = stringResource(R.string.modem_preset), fontSize = 16.sp)
+            Text(text = modemPresetName, fontSize = 14.sp)
         }
         Spacer(modifier = Modifier.width(16.dp))
         Icon(
             imageVector = Icons.Default.ChevronRight,
             contentDescription = stringResource(R.string.navigate_into_label),
-            modifier = Modifier.padding(end = 16.dp)
+            modifier = Modifier.padding(end = 16.dp),
         )
     }
 }
@@ -528,10 +492,7 @@ private fun ModemPresetInfo(
 @Preview(showBackground = true)
 @Composable
 fun ModemPresetInfoPreview() {
-    ModemPresetInfo(
-        modemPresetName = "Long Fast",
-        onClick = {}
-    )
+    ModemPresetInfo(modemPresetName = "Long Fast", onClick = {})
 }
 
 @PreviewScreenSizes
@@ -539,7 +500,8 @@ fun ModemPresetInfoPreview() {
 private fun ChannelScreenPreview() {
     ChannelListView(
         enabled = true,
-        channelSet = channelSet {
+        channelSet =
+        channelSet {
             settings.add(Channel.default.settings)
             loraConfig = Channel.default.loraConfig
         },

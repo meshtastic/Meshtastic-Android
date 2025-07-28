@@ -40,7 +40,6 @@ import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.util.anonymize
 import com.hoho.android.usbserial.driver.UsbSerialDriver
 import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -53,6 +52,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @HiltViewModel
 @Suppress("LongParameterList", "TooManyFunctions")
@@ -67,7 +67,8 @@ constructor(
     private val networkRepository: NetworkRepository,
     private val radioInterfaceService: RadioInterfaceService,
     private val recentAddressesRepository: RecentAddressesRepository,
-) : ViewModel(), Logging {
+) : ViewModel(),
+    Logging {
     private val context: Context
         get() = application.applicationContext
 
@@ -94,23 +95,14 @@ constructor(
                     }
 
                     // Include a placeholder for \"None\"
-                    addDevice(
-                        DeviceListEntry(
-                            context.getString(R.string.none),
-                            NO_DEVICE_SELECTED,
-                            true,
-                        ),
-                    )
+                    addDevice(DeviceListEntry(context.getString(R.string.none), NO_DEVICE_SELECTED, true))
 
                     if (showMockInterface) {
                         addDevice(DeviceListEntry("Demo Mode", "m", true))
                     }
 
                     // Include paired Bluetooth devices
-                    ble.bondedDevices
-                        .map(::BLEDeviceListEntry)
-                        .sortedBy { it.name }
-                        .forEach(::addDevice)
+                    ble.bondedDevices.map(::BLEDeviceListEntry).sortedBy { it.name }.forEach(::addDevice)
 
                     // Include Network Service Discovery
                     tcp.forEach { service ->
@@ -122,8 +114,7 @@ constructor(
                         val shortName =
                             shortNameBytes?.let { String(it, Charsets.UTF_8) }
                                 ?: context.getString(R.string.meshtastic)
-                        val deviceId =
-                            idBytes?.let { String(it, Charsets.UTF_8) }?.replace("!", "")
+                        val deviceId = idBytes?.let { String(it, Charsets.UTF_8) }?.replace("!", "")
                         var displayName = shortName
                         if (deviceId != null) {
                             displayName += "_$deviceId"
@@ -135,9 +126,7 @@ constructor(
                     recent.forEach { addDevice(DeviceListEntry(it.name, it.address, true)) }
 
                     usb.forEach { (_, d) ->
-                        addDevice(
-                            USBDeviceListEntry(radioInterfaceService, usbManagerLazy.get(), d),
-                        )
+                        addDevice(USBDeviceListEntry(radioInterfaceService, usbManagerLazy.get(), d))
                     }
                 }
         }
@@ -186,12 +175,11 @@ constructor(
         radioInterfaceService: RadioInterfaceService,
         usbManager: UsbManager,
         val usb: UsbSerialDriver,
-    ) :
-        DeviceListEntry(
-            usb.device.deviceName,
-            radioInterfaceService.toInterfaceAddress(InterfaceId.SERIAL, usb.device.deviceName),
-            usbManager.hasPermission(usb.device),
-        )
+    ) : DeviceListEntry(
+        usb.device.deviceName,
+        radioInterfaceService.toInterfaceAddress(InterfaceId.SERIAL, usb.device.deviceName),
+        usbManager.hasPermission(usb.device),
+    )
 
     override fun onCleared() {
         super.onCleared()
@@ -228,14 +216,17 @@ constructor(
             try {
                 scanJob?.cancel()
             } catch (ex: Throwable) {
-                warn(
-                    "Ignoring error stopping scan, probably BT adapter was disabled suddenly: ${ex.message}",
-                )
+                warn("Ignoring error stopping scan, probably BT adapter was disabled suddenly: ${ex.message}")
             } finally {
                 scanJob = null
             }
         }
         _spinner.value = false
+    }
+
+    fun refreshPermissions() {
+        // Refresh the Bluetooth state to ensure we have the latest permissions
+        bluetoothRepository.refreshState()
     }
 
     fun startScan() {
@@ -247,10 +238,7 @@ constructor(
                 .scan()
                 .onEach { result ->
                     val fullAddress =
-                        radioInterfaceService.toInterfaceAddress(
-                            InterfaceId.BLUETOOTH,
-                            result.device.address,
-                        )
+                        radioInterfaceService.toInterfaceAddress(InterfaceId.BLUETOOTH, result.device.address)
                     // prevent log spam because we'll get lots of redundant scan results
                     val isBonded = result.device.bondState == BluetoothDevice.BOND_BONDED
                     val oldDevs = scanResult.value!!
@@ -262,19 +250,13 @@ constructor(
                         scanResult.value = oldDevs
                     }
                 }
-                .catch { ex ->
-                    serviceRepository.setErrorMessage(
-                        "Unexpected Bluetooth scan failure: ${ex.message}",
-                    )
-                }
+                .catch { ex -> serviceRepository.setErrorMessage("Unexpected Bluetooth scan failure: ${ex.message}") }
                 .launchIn(viewModelScope)
     }
 
     private fun changeDeviceAddress(address: String) {
         try {
-            serviceRepository.meshService?.let { service ->
-                MeshService.changeDeviceAddress(context, service, address)
-            }
+            serviceRepository.meshService?.let { service -> MeshService.changeDeviceAddress(context, service, address) }
             devices.value = devices.value // Force a GUI update
         } catch (ex: RemoteException) {
             errormsg("changeDeviceSelection failed, probably it is shutting down", ex)

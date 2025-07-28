@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.connections.components
 
+import android.Manifest
 import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -41,15 +42,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
-import com.geeksville.mesh.android.getBluetoothPermissions
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.service.MeshService
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
 /**
- * Composable that displays a list of Bluetooth Low Energy (BLE) devices and allows scanning.
- * It handles Bluetooth permissions using `accompanist-permissions`.
+ * Composable that displays a list of Bluetooth Low Energy (BLE) devices and allows scanning. It handles Bluetooth
+ * permissions using `accompanist-permissions`.
  *
  * @param connectionState The current connection state of the MeshService.
  * @param btDevices List of discovered BLE devices.
@@ -65,13 +65,31 @@ fun BLEDevices(
     selectedDevice: String,
     scanModel: BTScanModel,
 ) {
-    val context = LocalContext.current
+    LocalContext.current // Used implicitly by stringResource
     val isScanning by scanModel.spinner.collectAsStateWithLifecycle(false)
 
     // Define permissions needed for Bluetooth scanning based on Android version.
-    val bluetoothPermissions = remember { context.getBluetoothPermissions() }
+    val bluetoothPermissionsList = remember {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            listOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
+        } else {
+            // ACCESS_FINE_LOCATION is required for Bluetooth scanning on pre-S devices.
+            listOf(Manifest.permission.ACCESS_FINE_LOCATION)
+        }
+    }
 
-    val permissionsState = rememberMultiplePermissionsState(bluetoothPermissions)
+    val permissionsState =
+        rememberMultiplePermissionsState(
+            permissions = bluetoothPermissionsList,
+            onPermissionsResult = {
+                if (it.values.all { granted -> granted }) {
+                    scanModel.startScan()
+                    scanModel.refreshPermissions()
+                } else {
+                    // If permissions are not granted, we can show a message or handle it accordingly.
+                }
+            },
+        )
 
     Text(
         text = stringResource(R.string.bluetooth),
@@ -91,14 +109,10 @@ fun BLEDevices(
         }
         if (isScanning) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(96.dp),
-                )
+                CircularProgressIndicator(modifier = Modifier.size(96.dp))
                 Text(
                     text = stringResource(R.string.scanning),
                     style = MaterialTheme.typography.bodyMedium,
@@ -107,9 +121,7 @@ fun BLEDevices(
             }
         } else if (btDevices.filterNot { it.isDisconnect }.isEmpty()) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center,
             ) {
@@ -119,8 +131,7 @@ fun BLEDevices(
                     modifier = Modifier.size(96.dp),
                 )
                 Text(
-                    // Consider a more specific string if no devices are found vs. just not scanning
-                    text = stringResource(R.string.no_ble_devices_found), // Assuming R.string.no_ble_devices_found exists
+                    text = stringResource(R.string.no_ble_devices),
                     style = MaterialTheme.typography.bodyMedium,
                     modifier = Modifier.padding(vertical = 8.dp),
                 )
@@ -129,17 +140,16 @@ fun BLEDevices(
     } else {
         // Show a message and a button to grant permissions if not all granted
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
+            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            val textToShow = if (permissionsState.shouldShowRationale) {
-                stringResource(R.string.bluetooth_permission_rationale)
-            } else {
-                stringResource(R.string.bluetooth_permission_required_to_scan)
-            }
+            val textToShow =
+                if (permissionsState.shouldShowRationale) {
+                    stringResource(R.string.permission_missing)
+                } else {
+                    stringResource(R.string.permission_missing_31)
+                }
             Text(text = textToShow, style = MaterialTheme.typography.bodyMedium)
         }
     }
@@ -155,17 +165,13 @@ fun BLEDevices(
             }
         },
     ) {
-        Icon(
-            imageVector = Icons.Default.Bluetooth,
-            contentDescription = stringResource(R.string.scan_for_bluetooth_devices), // More descriptive
-        )
+        Icon(imageVector = Icons.Default.Bluetooth, contentDescription = stringResource(R.string.scan))
         Text(
             if (permissionsState.allPermissionsGranted) {
                 stringResource(R.string.scan)
             } else {
-                stringResource(R.string.grant_permissions_and_scan) // Assuming R.string.grant_permissions_and_scan exists
+                stringResource(R.string.grant_permissions_and_scan)
             },
         )
     }
 }
-

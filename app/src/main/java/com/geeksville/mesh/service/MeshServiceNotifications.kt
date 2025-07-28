@@ -38,16 +38,13 @@ import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.LocalStats
-import com.geeksville.mesh.android.notificationManager
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.navigation.DEEP_LINK_BASE_URI
 import com.geeksville.mesh.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
 import com.geeksville.mesh.util.formatUptime
 
 @Suppress("TooManyFunctions")
-class MeshServiceNotifications(
-    private val context: Context
-) {
+class MeshServiceNotifications(private val context: Context) {
 
     val notificationLightColor = Color.BLUE
 
@@ -56,7 +53,8 @@ class MeshServiceNotifications(
         const val MAX_BATTERY_LEVEL = 100
     }
 
-    private val notificationManager: NotificationManager get() = context.notificationManager
+    private val notificationManager: NotificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     // We have two notification channels: one for general service status and another one for messages
     val notifyId = 101
@@ -84,14 +82,11 @@ class MeshServiceNotifications(
         val channelId = "my_service"
         if (notificationManager.getNotificationChannel(channelId) == null) {
             val channelName = context.getString(R.string.meshtastic_service_notifications)
-            val channel = NotificationChannel(
-                channelId,
-                channelName,
-                NotificationManager.IMPORTANCE_MIN
-            ).apply {
-                lightColor = notificationLightColor
-                lockscreenVisibility = Notification.VISIBILITY_PRIVATE
-            }
+            val channel =
+                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_MIN).apply {
+                    lightColor = notificationLightColor
+                    lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+                }
             notificationManager.createNotificationChannel(channel)
         }
         return channelId
@@ -102,22 +97,19 @@ class MeshServiceNotifications(
         val channelId = "my_messages"
         if (notificationManager.getNotificationChannel(channelId) == null) {
             val channelName = context.getString(R.string.meshtastic_messages_notifications)
-            val channel = NotificationChannel(
-                channelId,
-                channelName,
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                lightColor = notificationLightColor
-                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                setShowBadge(true)
-                setSound(
-                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .build()
-                )
-            }
+            val channel =
+                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH).apply {
+                    lightColor = notificationLightColor
+                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                    setShowBadge(true)
+                    setSound(
+                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
+                        AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build(),
+                    )
+                }
             notificationManager.createNotificationChannel(channel)
         }
         return channelId
@@ -128,22 +120,19 @@ class MeshServiceNotifications(
         val channelId = "my_broadcasts"
         if (notificationManager.getNotificationChannel(channelId) == null) {
             val channelName = context.getString(R.string.meshtastic_broadcast_notifications)
-            val channel = NotificationChannel(
-                channelId,
-                channelName,
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {
-                lightColor = notificationLightColor
-                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                setShowBadge(true)
-                setSound(
-                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .build()
-                )
-            }
+            val channel =
+                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT).apply {
+                    lightColor = notificationLightColor
+                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                    setShowBadge(true)
+                    setSound(
+                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
+                        AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build(),
+                    )
+                }
             notificationManager.createNotificationChannel(channel)
         }
         return channelId
@@ -154,31 +143,31 @@ class MeshServiceNotifications(
         val channelId = "my_alerts"
         if (notificationManager.getNotificationChannel(channelId) == null) {
             val channelName = context.getString(R.string.meshtastic_alerts_notifications)
-            val channel = NotificationChannel(
-                channelId,
-                channelName,
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                enableLights(true)
-                enableVibration(true)
-                setBypassDnd(true)
-                lightColor = notificationLightColor
-                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                setShowBadge(true)
-                val alertSoundUri =
-                    (
+            val channel =
+                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH).apply {
+                    enableLights(true)
+                    enableVibration(true)
+                    setBypassDnd(true)
+                    lightColor = notificationLightColor
+                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                    setShowBadge(true)
+                    val alertSoundUri =
+                        (
                             ContentResolver.SCHEME_ANDROID_RESOURCE +
-                                    "://" + context.applicationContext.packageName +
-                                    "/" + R.raw.alert
-                            ).toUri()
-                setSound(
-                    alertSoundUri,
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .build()
-                )
-            }
+                                "://" +
+                                context.applicationContext.packageName +
+                                "/" +
+                                R.raw.alert
+                            )
+                            .toUri()
+                    setSound(
+                        alertSoundUri,
+                        AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build(),
+                    )
+                }
             notificationManager.createNotificationChannel(channel)
         }
         return channelId
@@ -189,22 +178,19 @@ class MeshServiceNotifications(
         val channelId = "new_nodes"
         if (notificationManager.getNotificationChannel(channelId) == null) {
             val channelName = context.getString(R.string.meshtastic_new_nodes_notifications)
-            val channel = NotificationChannel(
-                channelId,
-                channelName,
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                lightColor = notificationLightColor
-                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                setShowBadge(true)
-                setSound(
-                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .build()
-                )
-            }
+            val channel =
+                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH).apply {
+                    lightColor = notificationLightColor
+                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                    setShowBadge(true)
+                    setSound(
+                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
+                        AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build(),
+                    )
+                }
             notificationManager.createNotificationChannel(channel)
         }
         return channelId
@@ -215,22 +201,19 @@ class MeshServiceNotifications(
         val channelId = "low_battery"
         if (notificationManager.getNotificationChannel(channelId) == null) {
             val channelName = context.getString(R.string.meshtastic_low_battery_notifications)
-            val channel = NotificationChannel(
-                channelId,
-                channelName,
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                lightColor = notificationLightColor
-                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                setShowBadge(true)
-                setSound(
-                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .build()
-                )
-            }
+            val channel =
+                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH).apply {
+                    lightColor = notificationLightColor
+                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                    setShowBadge(true)
+                    setSound(
+                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
+                        AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build(),
+                    )
+                }
             notificationManager.createNotificationChannel(channel)
         }
         return channelId
@@ -242,25 +225,21 @@ class MeshServiceNotifications(
     private fun createLowBatteryRemoteNotificationChannel(): String {
         val channelId = "low_battery_remote"
         if (notificationManager.getNotificationChannel(channelId) == null) {
-            val channelName =
-                context.getString(R.string.meshtastic_low_battery_temporary_remote_notifications)
-            val channel = NotificationChannel(
-                channelId,
-                channelName,
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                lightColor = notificationLightColor
-                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                enableVibration(true)
-                setShowBadge(true)
-                setSound(
-                    RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
-                    AudioAttributes.Builder()
-                        .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                        .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                        .build()
-                )
-            }
+            val channelName = context.getString(R.string.meshtastic_low_battery_temporary_remote_notifications)
+            val channel =
+                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH).apply {
+                    lightColor = notificationLightColor
+                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                    enableVibration(true)
+                    setShowBadge(true)
+                    setSound(
+                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
+                        AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                            .build(),
+                    )
+                }
             notificationManager.createNotificationChannel(channel)
         }
         return channelId
@@ -271,15 +250,12 @@ class MeshServiceNotifications(
         val channelId = "client_notifications"
         if (notificationManager.getNotificationChannel(channelId) == null) {
             val channelName = context.getString(R.string.client_notification)
-            val channel = NotificationChannel(
-                channelId,
-                channelName,
-                NotificationManager.IMPORTANCE_HIGH
-            ).apply {
-                lightColor = notificationLightColor
-                lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                setShowBadge(true)
-            }
+            val channel =
+                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH).apply {
+                    lightColor = notificationLightColor
+                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
+                    setShowBadge(true)
+                }
             notificationManager.createNotificationChannel(channel)
         }
         return channelId
@@ -355,19 +331,23 @@ class MeshServiceNotifications(
         }
     }
 
-    private fun LocalStats?.formatToString(): String = this?.allFields?.mapNotNull { (k, v) ->
-        when (k.name) {
-            "num_online_nodes", "num_total_nodes" -> return@mapNotNull null
-            "uptime_seconds" -> "Uptime: ${formatUptime(v as Int)}"
-            "channel_utilization" -> "ChUtil: %.2f%%".format(v)
-            "air_util_tx" -> "AirUtilTX: %.2f%%".format(v)
-            else ->
-                "${
-                    k.name.replace('_', ' ').split(" ")
-                        .joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
-                }: $v"
+    private fun LocalStats?.formatToString(): String = this?.allFields
+        ?.mapNotNull { (k, v) ->
+            when (k.name) {
+                "num_online_nodes",
+                "num_total_nodes",
+                -> return@mapNotNull null
+                "uptime_seconds" -> "Uptime: ${formatUptime(v as Int)}"
+                "channel_utilization" -> "ChUtil: %.2f%%".format(v)
+                "air_util_tx" -> "AirUtilTX: %.2f%%".format(v)
+                else ->
+                    "${
+                        k.name.replace('_', ' ').split(" ")
+                            .joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
+                    }: $v"
+            }
         }
-    }?.joinToString("\n") ?: "No Local Stats"
+        ?.joinToString("\n") ?: "No Local Stats"
 
     fun updateServiceStateNotification(
         summaryString: String? = null,
@@ -379,8 +359,8 @@ class MeshServiceNotifications(
             createServiceStateNotification(
                 name = summaryString.orEmpty(),
                 message = localStats.formatToString(),
-                nextUpdateAt = currentStatsUpdatedAtMillis?.plus(FIFTEEN_MINUTES_IN_MILLIS)
-            )
+                nextUpdateAt = currentStatsUpdatedAtMillis?.plus(FIFTEEN_MINUTES_IN_MILLIS),
+            ),
         )
     }
 
@@ -391,27 +371,27 @@ class MeshServiceNotifications(
     fun updateMessageNotification(contactKey: String, name: String, message: String, isBroadcast: Boolean) =
         notificationManager.notify(
             contactKey.hashCode(), // show unique notifications,
-            createMessageNotification(contactKey, name, message, isBroadcast)
+            createMessageNotification(contactKey, name, message, isBroadcast),
         )
 
     fun showAlertNotification(contactKey: String, name: String, alert: String) {
         notificationManager.notify(
             name.hashCode(), // show unique notifications,
-            createAlertNotification(contactKey, name, alert)
+            createAlertNotification(contactKey, name, alert),
         )
     }
 
     fun showNewNodeSeenNotification(node: NodeEntity) {
         notificationManager.notify(
             node.num, // show unique notifications
-            createNewNodeSeenNotification(node.user.shortName, node.user.longName)
+            createNewNodeSeenNotification(node.user.shortName, node.user.longName),
         )
     }
 
     fun showOrUpdateLowBatteryNotification(node: NodeEntity, isRemote: Boolean) {
         notificationManager.notify(
             node.num, // show unique notifications
-            createLowBatteryNotification(node, isRemote)
+            createLowBatteryNotification(node, isRemote),
         )
     }
 
@@ -422,9 +402,10 @@ class MeshServiceNotifications(
     fun showClientNotification(notification: MeshProtos.ClientNotification) {
         notificationManager.notify(
             notification.toString().hashCode(), // show unique notifications
-            createClientNotification(context.getString(R.string.client_notification), notification.message)
+            createClientNotification(context.getString(R.string.client_notification), notification.message),
         )
     }
+
     fun clearClientNotification(notification: MeshProtos.ClientNotification) {
         notificationManager.cancel(notification.toString().hashCode())
     }
@@ -433,48 +414,40 @@ class MeshServiceNotifications(
         PendingIntent.getActivity(
             context,
             0,
-            Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-            },
-            PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            Intent(context, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_SINGLE_TOP },
+            PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
         )
     }
 
-    private fun createMessageReplyIntent(contactKey: String): Intent {
-        return Intent(context, ReplyReceiver::class.java).apply {
+    private fun createMessageReplyIntent(contactKey: String): Intent =
+        Intent(context, ReplyReceiver::class.java).apply {
             action = ReplyReceiver.REPLY_ACTION
             putExtra(ReplyReceiver.CONTACT_KEY, contactKey)
         }
-    }
 
     private fun createOpenMessageIntent(contactKey: String): PendingIntent {
         val intentFlags = Intent.FLAG_ACTIVITY_SINGLE_TOP
         val deepLink = "$DEEP_LINK_BASE_URI/messages/$contactKey"
-        val deepLinkIntent = Intent(
-            Intent.ACTION_VIEW,
-            deepLink.toUri(),
-            context,
-            MainActivity::class.java
-        ).apply {
-            flags = intentFlags
-        }
+        val deepLinkIntent =
+            Intent(Intent.ACTION_VIEW, deepLink.toUri(), context, MainActivity::class.java).apply {
+                flags = intentFlags
+            }
 
-        val deepLinkPendingIntent: PendingIntent = TaskStackBuilder.create(context).run {
-            addNextIntentWithParentStack(deepLinkIntent)
-            getPendingIntent(0, PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-        }
+        val deepLinkPendingIntent: PendingIntent =
+            TaskStackBuilder.create(context).run {
+                addNextIntentWithParentStack(deepLinkIntent)
+                getPendingIntent(0, PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+            }
 
         return deepLinkPendingIntent
     }
 
-    private fun commonBuilder(
-        channel: String,
-        contentIntent: PendingIntent? = null
-    ): NotificationCompat.Builder {
-        val builder = NotificationCompat.Builder(context, channel)
-            .setDefaults(NotificationCompat.DEFAULT_ALL)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            .setContentIntent(contentIntent ?: openAppIntent)
+    private fun commonBuilder(channel: String, contentIntent: PendingIntent? = null): NotificationCompat.Builder {
+        val builder =
+            NotificationCompat.Builder(context, channel)
+                .setDefaults(NotificationCompat.DEFAULT_ALL)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+                .setContentIntent(contentIntent ?: openAppIntent)
 
         builder.setSmallIcon(
             // vector form icons don't work reliably on older androids
@@ -482,16 +455,17 @@ class MeshServiceNotifications(
                 R.drawable.app_icon_novect
             } else {
                 R.drawable.app_icon
-            }
+            },
         )
         return builder
     }
 
     lateinit var serviceNotificationBuilder: NotificationCompat.Builder
+
     fun createServiceStateNotification(
         name: String,
         message: String? = null,
-        nextUpdateAt: Long? = null
+        nextUpdateAt: Long? = null,
     ): Notification {
         if (!::serviceNotificationBuilder.isInitialized) {
             serviceNotificationBuilder = commonBuilder(channelId)
@@ -503,10 +477,7 @@ class MeshServiceNotifications(
             setContentTitle(name)
             message?.let {
                 setContentText(it)
-                setStyle(
-                    NotificationCompat.BigTextStyle()
-                        .bigText(message),
-                )
+                setStyle(NotificationCompat.BigTextStyle().bigText(message))
             }
             nextUpdateAt?.let {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
@@ -514,9 +485,7 @@ class MeshServiceNotifications(
                     setUsesChronometer(true)
                     setChronometerCountDown(true)
                 }
-            } ?: {
-                setWhen(System.currentTimeMillis())
-            }
+            } ?: { setWhen(System.currentTimeMillis()) }
             setShowWhen(true)
         }
         return serviceNotificationBuilder.build()
@@ -535,10 +504,11 @@ class MeshServiceNotifications(
         val person = Person.Builder().setName(name).build()
         // Key for the string that's delivered in the action's intent.
         val replyLabel: String = context.getString(R.string.reply)
-        val remoteInput: RemoteInput = RemoteInput.Builder(KEY_TEXT_REPLY).run {
-            setLabel(replyLabel)
-            build()
-        }
+        val remoteInput: RemoteInput =
+            RemoteInput.Builder(KEY_TEXT_REPLY).run {
+                setLabel(replyLabel)
+                build()
+            }
 
         // Build a PendingIntent for the reply action to trigger.
         val replyPendingIntent: PendingIntent =
@@ -546,23 +516,19 @@ class MeshServiceNotifications(
                 context,
                 contactKey.hashCode(),
                 createMessageReplyIntent(contactKey),
-                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+                PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
             )
         // Create the reply action and add the remote input.
-        val action: NotificationCompat.Action = NotificationCompat.Action.Builder(
-            android.R.drawable.ic_menu_send,
-            replyLabel,
-            replyPendingIntent
-        ).addRemoteInput(remoteInput).build()
+        val action: NotificationCompat.Action =
+            NotificationCompat.Action.Builder(android.R.drawable.ic_menu_send, replyLabel, replyPendingIntent)
+                .addRemoteInput(remoteInput)
+                .build()
 
         with(messageNotificationBuilder) {
             priority = NotificationCompat.PRIORITY_DEFAULT
             setCategory(Notification.CATEGORY_MESSAGE)
             setAutoCancel(true)
-            setStyle(
-                NotificationCompat.MessagingStyle(person)
-                    .addMessage(message, System.currentTimeMillis(), person)
-            )
+            setStyle(NotificationCompat.MessagingStyle(person).addMessage(message, System.currentTimeMillis(), person))
             addAction(action)
             setWhen(System.currentTimeMillis())
             setShowWhen(true)
@@ -571,29 +537,23 @@ class MeshServiceNotifications(
     }
 
     lateinit var alertNotificationBuilder: NotificationCompat.Builder
-    private fun createAlertNotification(
-        contactKey: String,
-        name: String,
-        alert: String
-    ): Notification {
+
+    private fun createAlertNotification(contactKey: String, name: String, alert: String): Notification {
         if (!::alertNotificationBuilder.isInitialized) {
-            alertNotificationBuilder =
-                commonBuilder(alertChannelId, createOpenMessageIntent(contactKey))
+            alertNotificationBuilder = commonBuilder(alertChannelId, createOpenMessageIntent(contactKey))
         }
         val person = Person.Builder().setName(name).build()
         with(alertNotificationBuilder) {
             priority = NotificationCompat.PRIORITY_HIGH
             setCategory(Notification.CATEGORY_ALARM)
             setAutoCancel(true)
-            setStyle(
-                NotificationCompat.MessagingStyle(person)
-                    .addMessage(alert, System.currentTimeMillis(), person)
-            )
+            setStyle(NotificationCompat.MessagingStyle(person).addMessage(alert, System.currentTimeMillis(), person))
         }
         return alertNotificationBuilder.build()
     }
 
     lateinit var newNodeSeenNotificationBuilder: NotificationCompat.Builder
+
     private fun createNewNodeSeenNotification(name: String, message: String? = null): Notification {
         if (!::newNodeSeenNotificationBuilder.isInitialized) {
             newNodeSeenNotificationBuilder = commonBuilder(newNodeChannelId)
@@ -605,10 +565,7 @@ class MeshServiceNotifications(
             setContentTitle("New Node Seen: $name")
             message?.let {
                 setContentText(it)
-                setStyle(
-                    NotificationCompat.BigTextStyle()
-                        .bigText(message),
-                )
+                setStyle(NotificationCompat.BigTextStyle().bigText(message))
             }
             setWhen(System.currentTimeMillis())
             setShowWhen(true)
@@ -618,18 +575,20 @@ class MeshServiceNotifications(
 
     lateinit var lowBatteryRemoteNotificationBuilder: NotificationCompat.Builder
     lateinit var lowBatteryNotificationBuilder: NotificationCompat.Builder
+
     private fun createLowBatteryNotification(node: NodeEntity, isRemote: Boolean): Notification {
-        val tempNotificationBuilder: NotificationCompat.Builder = if (isRemote) {
-            if (!::lowBatteryRemoteNotificationBuilder.isInitialized) {
-                lowBatteryRemoteNotificationBuilder = commonBuilder(lowBatteryChannelId)
+        val tempNotificationBuilder: NotificationCompat.Builder =
+            if (isRemote) {
+                if (!::lowBatteryRemoteNotificationBuilder.isInitialized) {
+                    lowBatteryRemoteNotificationBuilder = commonBuilder(lowBatteryChannelId)
+                }
+                lowBatteryRemoteNotificationBuilder
+            } else {
+                if (!::lowBatteryNotificationBuilder.isInitialized) {
+                    lowBatteryNotificationBuilder = commonBuilder(lowBatteryRemoteChannelId)
+                }
+                lowBatteryNotificationBuilder
             }
-            lowBatteryRemoteNotificationBuilder
-        } else {
-            if (!::lowBatteryNotificationBuilder.isInitialized) {
-                lowBatteryNotificationBuilder = commonBuilder(lowBatteryRemoteChannelId)
-            }
-            lowBatteryNotificationBuilder
-        }
         with(tempNotificationBuilder) {
             priority = NotificationCompat.PRIORITY_DEFAULT
             setCategory(Notification.CATEGORY_STATUS)
@@ -638,21 +597,12 @@ class MeshServiceNotifications(
             setOnlyAlertOnce(true)
             setWhen(System.currentTimeMillis())
             setProgress(MAX_BATTERY_LEVEL, node.deviceMetrics.batteryLevel, false)
-            setContentTitle(
-                context.getString(R.string.low_battery_title).format(
-                    node.shortName
-                )
-            )
-            val message = context.getString(R.string.low_battery_message).format(
-                node.longName,
-                node.deviceMetrics.batteryLevel
-            )
+            setContentTitle(context.getString(R.string.low_battery_title).format(node.shortName))
+            val message =
+                context.getString(R.string.low_battery_message).format(node.longName, node.deviceMetrics.batteryLevel)
             message.let {
                 setContentText(it)
-                setStyle(
-                    NotificationCompat.BigTextStyle()
-                        .bigText(it),
-                )
+                setStyle(NotificationCompat.BigTextStyle().bigText(it))
             }
         }
         if (isRemote) {
@@ -677,10 +627,7 @@ class MeshServiceNotifications(
             setContentTitle(name)
             message?.let {
                 setContentText(it)
-                setStyle(
-                    NotificationCompat.BigTextStyle()
-                        .bigText(message),
-                )
+                setStyle(NotificationCompat.BigTextStyle().bigText(message))
             }
         }
         return clientNotificationBuilder.build()

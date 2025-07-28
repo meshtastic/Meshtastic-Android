@@ -17,14 +17,13 @@
 
 package com.geeksville.mesh.ui.connections
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.net.InetAddresses
 import android.os.Build
 import android.util.Patterns
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -82,11 +81,8 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.info
 import com.geeksville.mesh.android.BuildUtils.reportError
-import com.geeksville.mesh.android.BuildUtils.warn
 import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.getLocationPermissions
 import com.geeksville.mesh.android.gpsDisabled
-import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.android.isGooglePlayAvailable
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
@@ -106,21 +102,22 @@ import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.delay
 
-fun String?.isIPAddress(): Boolean {
-    return if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-        @Suppress("DEPRECATION")
-        this != null && Patterns.IP_ADDRESS.matcher(this).matches()
-    } else {
-        InetAddresses.isNumericAddress(this.toString())
-    }
+fun String?.isIPAddress(): Boolean = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+    @Suppress("DEPRECATION")
+    this != null && Patterns.IP_ADDRESS.matcher(this).matches()
+} else {
+    InetAddresses.isNumericAddress(this.toString())
 }
 
 /**
- * Composable screen for managing device connections (BLE, TCP, USB).
- * It handles permission requests for location and displays connection status.
+ * Composable screen for managing device connections (BLE, TCP, USB). It handles permission requests for location and
+ * displays connection status.
  */
+@OptIn(ExperimentalPermissionsApi::class)
 @Suppress("CyclomaticComplexMethod", "LongMethod", "MagicNumber")
 @Composable
 fun ConnectionsScreen(
@@ -145,9 +142,10 @@ fun ConnectionsScreen(
     val app = (context.applicationContext as GeeksvilleApplication)
     val info by uiViewModel.myNodeInfo.collectAsState()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
-    val bluetoothEnabled by bluetoothViewModel.enabled.observeAsState()
-    val regionUnset = currentRegion == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET &&
-        connectionState == MeshService.ConnectionState.CONNECTED
+    val bluetoothEnabled by bluetoothViewModel.enabled.collectAsStateWithLifecycle(true)
+    val regionUnset =
+        currentRegion == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET &&
+            connectionState == MeshService.ConnectionState.CONNECTED
 
     /* Animate waiting for the configurations */
     var isWaiting by remember { mutableStateOf(false) }
@@ -177,7 +175,7 @@ fun ConnectionsScreen(
         }
     }
     LaunchedEffect(bluetoothEnabled) {
-        if (bluetoothEnabled == false) {
+        if (!bluetoothEnabled) {
             uiViewModel.showSnackbar(context.getString(R.string.bluetooth_disabled))
         }
     }
@@ -193,26 +191,8 @@ fun ConnectionsScreen(
     var showScanDialog by remember { mutableStateOf(false) }
     val scanResults by scanModel.scanResult.observeAsState(emptyMap())
 
-    // State for the location permission rationale dialog
-    var showLocationRationaleDialog by remember { mutableStateOf(false) }
-
     // State for the Report Bug dialog
     var showReportBugDialog by remember { mutableStateOf(false) }
-
-    // Remember the permission launchers
-    val requestLocationPermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestMultiplePermissions(),
-        onResult = { permissions ->
-            if (permissions.entries.all { it.value }) {
-                uiViewModel.setProvideLocation(true)
-                uiViewModel.meshService?.startProvideLocation()
-            } else {
-                debug("User denied location permission")
-                uiViewModel.showSnackbar(context.getString(R.string.why_background_required))
-            }
-            bluetoothViewModel.permissionsUpdated() // Consider if this is still needed here
-        },
-    )
 
     // Observe scan results to show the dialog
     if (scanResults.isNotEmpty()) {
@@ -228,24 +208,38 @@ fun ConnectionsScreen(
             MeshService.ConnectionState.DISCONNECTED -> R.string.not_connected
             MeshService.ConnectionState.DEVICE_SLEEP -> R.string.connected_sleeping
         }.let {
-            val firmwareString =
-                info?.firmwareString ?: context.getString(R.string.unknown)
+            val firmwareString = info?.firmwareString ?: context.getString(R.string.unknown)
             scanModel.setErrorText(context.getString(it, firmwareString))
         }
     }
     var showSharedContact by remember { mutableStateOf<Node?>(null) }
     if (showSharedContact != null) {
-        SharedContactDialog(
-            contact = showSharedContact,
-            onDismiss = { showSharedContact = null },
-        )
+        SharedContactDialog(contact = showSharedContact, onDismiss = { showSharedContact = null })
     }
+
+    val locationPermissionsState =
+        rememberMultiplePermissionsState(permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION))
+    val provideLocation by uiViewModel.provideLocation.collectAsState(false)
+
+    LaunchedEffect(provideLocation, locationPermissionsState.allPermissionsGranted, isGpsDisabled) {
+        if (provideLocation) {
+            if (locationPermissionsState.allPermissionsGranted) {
+                if (!isGpsDisabled) {
+                    uiViewModel.meshService?.startProvideLocation()
+                } else {
+                    uiViewModel.showSnackbar(context.getString(R.string.location_disabled))
+                }
+            } else {
+                // Request permissions if not granted and user wants to provide location
+                locationPermissionsState.launchMultiplePermissionRequest()
+            }
+        } else {
+            uiViewModel.meshService?.stopProvideLocation()
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-        ) {
+        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
             Text(
                 text = scanStatusText.orEmpty(),
                 fontSize = 14.sp,
@@ -289,10 +283,7 @@ fun ConnectionsScreen(
                             text = node.user.longName,
                             style = MaterialTheme.typography.titleLarge,
                         )
-                        IconButton(
-                            enabled = true,
-                            onClick = onNavigateToRadioConfig,
-                        ) {
+                        IconButton(enabled = true, onClick = onNavigateToRadioConfig) {
                             Icon(
                                 imageVector = Icons.Default.Settings,
                                 contentDescription = stringResource(id = R.string.radio_configuration),
@@ -313,29 +304,18 @@ fun ConnectionsScreen(
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     if (scanning) {
-                        LinearProgressIndicator(
-                            modifier = Modifier.fillMaxWidth(),
-                        )
+                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                     }
                 }
             }
             var selectedDeviceType by remember { mutableStateOf(DeviceType.BLE) }
             LaunchedEffect(selectedDevice) {
-                DeviceType.fromAddress(selectedDevice)?.let { type ->
-                    selectedDeviceType = type
-                }
+                DeviceType.fromAddress(selectedDevice)?.let { type -> selectedDeviceType = type }
             }
-            SingleChoiceSegmentedButtonRow(
-                modifier = Modifier.fillMaxWidth(),
-            ) {
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                 SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(
-                        DeviceType.BLE.ordinal,
-                        DeviceType.entries.size,
-                    ),
-                    onClick = {
-                        selectedDeviceType = DeviceType.BLE
-                    },
+                    shape = SegmentedButtonDefaults.itemShape(DeviceType.BLE.ordinal, DeviceType.entries.size),
+                    onClick = { selectedDeviceType = DeviceType.BLE },
                     selected = (selectedDeviceType == DeviceType.BLE),
                     icon = {
                         Icon(
@@ -343,18 +323,11 @@ fun ConnectionsScreen(
                             contentDescription = stringResource(id = R.string.bluetooth),
                         )
                     },
-                    label = {
-                        Text(text = stringResource(id = R.string.bluetooth))
-                    },
+                    label = { Text(text = stringResource(id = R.string.bluetooth)) },
                 )
                 SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(
-                        DeviceType.TCP.ordinal,
-                        DeviceType.entries.size,
-                    ),
-                    onClick = {
-                        selectedDeviceType = DeviceType.TCP
-                    },
+                    shape = SegmentedButtonDefaults.itemShape(DeviceType.TCP.ordinal, DeviceType.entries.size),
+                    onClick = { selectedDeviceType = DeviceType.TCP },
                     selected = (selectedDeviceType == DeviceType.TCP),
                     icon = {
                         Icon(
@@ -362,37 +335,20 @@ fun ConnectionsScreen(
                             contentDescription = stringResource(id = R.string.network),
                         )
                     },
-                    label = {
-                        Text(text = stringResource(id = R.string.network))
-                    },
+                    label = { Text(text = stringResource(id = R.string.network)) },
                 )
                 SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(
-                        DeviceType.USB.ordinal,
-                        DeviceType.entries.size,
-                    ),
-                    onClick = {
-                        selectedDeviceType = DeviceType.USB
-                    },
+                    shape = SegmentedButtonDefaults.itemShape(DeviceType.USB.ordinal, DeviceType.entries.size),
+                    onClick = { selectedDeviceType = DeviceType.USB },
                     selected = (selectedDeviceType == DeviceType.USB),
                     icon = {
-                        Icon(
-                            imageVector = Icons.Default.Usb,
-                            contentDescription = stringResource(id = R.string.serial),
-                        )
+                        Icon(imageVector = Icons.Default.Usb, contentDescription = stringResource(id = R.string.serial))
                     },
-                    label = {
-                        Text(text = stringResource(id = R.string.serial))
-                    },
+                    label = { Text(text = stringResource(id = R.string.serial)) },
                 )
             }
 
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(8.dp)
-                    .verticalScroll(scrollState),
-            ) {
+            Column(modifier = Modifier.fillMaxSize().padding(8.dp).verticalScroll(scrollState)) {
                 when (selectedDeviceType) {
                     DeviceType.BLE -> {
                         BLEDevices(
@@ -430,33 +386,22 @@ fun ConnectionsScreen(
                     }
                 }
                 AnimatedVisibility(isConnected) {
-                    val provideLocation by uiViewModel.provideLocation.collectAsState(false)
-                    LaunchedEffect(provideLocation) {
-                        if (provideLocation) {
-                            if (!context.hasLocationPermission()) {
-                                debug("Requesting location permission for providing location")
-                                showLocationRationaleDialog = true
-                            } else if (isGpsDisabled) {
-                                uiViewModel.showSnackbar(context.getString(R.string.location_disabled))
-                            }
-                        }
-                    }
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
+                        modifier =
+                        Modifier.fillMaxWidth()
                             .toggleable(
                                 value = provideLocation,
-                                onValueChange = { checked ->
-                                    uiViewModel.setProvideLocation(checked)
-                                },
-                                enabled = !isGpsDisabled,
+                                onValueChange = { checked -> uiViewModel.setProvideLocation(checked) },
+                                enabled = !isGpsDisabled, // Still respect GPS disabled state for UI
                             )
                             .padding(horizontal = 16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Checkbox(
+                            // Checked state driven by receivingLocationUpdates for visual feedback
+                            // but toggle action drives provideLocation
                             checked = receivingLocationUpdates,
-                            onCheckedChange = null,
+                            onCheckedChange = null, // Toggleable handles the change
                             enabled = !isGpsDisabled, // Disable if GPS is disabled
                         )
                         Text(
@@ -488,12 +433,10 @@ fun ConnectionsScreen(
                 val isAnalyticsAllowed = app.isAnalyticsAllowed && isGooglePlayAvailable
                 if (isGooglePlayAvailable) {
                     var loading by remember { mutableStateOf(false) }
-                    LaunchedEffect(isAnalyticsAllowed) {
-                        loading = false
-                    }
+                    LaunchedEffect(isAnalyticsAllowed) { loading = false }
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
+                        modifier =
+                        Modifier.fillMaxWidth()
                             .toggleable(
                                 value = isAnalyticsAllowed,
                                 onValueChange = {
@@ -507,11 +450,7 @@ fun ConnectionsScreen(
                             .padding(horizontal = 16.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
-                        Checkbox(
-                            enabled = isGooglePlayAvailable,
-                            checked = isAnalyticsAllowed,
-                            onCheckedChange = null,
-                        )
+                        Checkbox(enabled = isGooglePlayAvailable, checked = isAnalyticsAllowed, onCheckedChange = null)
                         Text(
                             text = stringResource(R.string.analytics_okay),
                             style = MaterialTheme.typography.bodyLarge,
@@ -521,12 +460,8 @@ fun ConnectionsScreen(
                     Spacer(modifier = Modifier.height(16.dp))
                     // Report Bug Button
                     Button(
-                        onClick = {
-                            showReportBugDialog = true
-                        }, // Set state to show Report Bug dialog
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
+                        onClick = { showReportBugDialog = true }, // Set state to show Report Bug dialog
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                         enabled = isAnalyticsAllowed,
                     ) {
                         Text(stringResource(R.string.report_bug))
@@ -535,12 +470,14 @@ fun ConnectionsScreen(
             }
         }
 
-// Compose Device Scan Dialog
+        // Compose Device Scan Dialog
         if (showScanDialog) {
-            Dialog(onDismissRequest = {
-                showScanDialog = false
-                scanModel.clearScanResults()
-            }) {
+            Dialog(
+                onDismissRequest = {
+                    showScanDialog = false
+                    scanModel.clearScanResults()
+                },
+            ) {
                 Surface(shape = MaterialTheme.shapes.medium) {
                     Column(modifier = Modifier.padding(16.dp)) {
                         Text(
@@ -551,8 +488,8 @@ fun ConnectionsScreen(
                         Column(modifier = Modifier.selectableGroup()) {
                             scanResults.values.forEach { device ->
                                 Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
+                                    modifier =
+                                    Modifier.fillMaxWidth()
                                         .selectable(
                                             selected = false, // No pre-selection in this dialog
                                             onClick = {
@@ -569,10 +506,12 @@ fun ConnectionsScreen(
                             }
                         }
                         Spacer(modifier = Modifier.height(16.dp))
-                        TextButton(onClick = {
-                            scanModel.clearScanResults()
-                            showScanDialog = false
-                        }) {
+                        TextButton(
+                            onClick = {
+                                scanModel.clearScanResults()
+                                showScanDialog = false
+                            },
+                        ) {
                             Text(stringResource(R.string.cancel))
                         }
                     }
@@ -580,50 +519,30 @@ fun ConnectionsScreen(
             }
         }
 
-// Compose Location Permission Rationale Dialog
-        if (showLocationRationaleDialog) {
-            AlertDialog(
-                onDismissRequest = { showLocationRationaleDialog = false },
-                title = { Text(stringResource(R.string.background_required)) },
-                text = { Text(stringResource(R.string.why_background_required)) },
-                confirmButton = {
-                    Button(onClick = {
-                        showLocationRationaleDialog = false
-                        if (!context.hasLocationPermission()) {
-                            requestLocationPermissionLauncher.launch(context.getLocationPermissions())
-                        }
-                    }) {
-                        Text(stringResource(R.string.accept))
-                    }
-                },
-                dismissButton = {
-                    Button(onClick = { showLocationRationaleDialog = false }) {
-                        Text(stringResource(R.string.cancel))
-                    }
-                },
-            )
-        }
-
-// Compose Report Bug Dialog
+        // Compose Report Bug Dialog
         if (showReportBugDialog) {
             AlertDialog(
                 onDismissRequest = { showReportBugDialog = false },
                 title = { Text(stringResource(R.string.report_a_bug)) },
                 text = { Text(stringResource(R.string.report_bug_text)) },
                 confirmButton = {
-                    Button(onClick = {
-                        showReportBugDialog = false
-                        reportError("Clicked Report A Bug")
-                        uiViewModel.showSnackbar("Bug report sent!")
-                    }) {
+                    Button(
+                        onClick = {
+                            showReportBugDialog = false
+                            reportError("Clicked Report A Bug")
+                            uiViewModel.showSnackbar("Bug report sent!")
+                        },
+                    ) {
                         Text(stringResource(R.string.report))
                     }
                 },
                 dismissButton = {
-                    Button(onClick = {
-                        showReportBugDialog = false
-                        debug("Decided not to report a bug")
-                    }) {
+                    Button(
+                        onClick = {
+                            showReportBugDialog = false
+                            debug("Decided not to report a bug")
+                        },
+                    ) {
                         Text(stringResource(R.string.cancel))
                     }
                 },
@@ -641,7 +560,8 @@ private tailrec fun Context.findActivity(): Activity = when (this) {
 private enum class DeviceType {
     BLE,
     TCP,
-    USB;
+    USB,
+    ;
 
     companion object {
         fun fromAddress(address: String): DeviceType? {

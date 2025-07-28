@@ -17,6 +17,8 @@
 
 package com.geeksville.mesh.ui
 
+import android.Manifest
+import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -107,6 +109,10 @@ import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.radioconfig.RadioConfigMenuActions
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.accompanist.permissions.rememberPermissionState
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
     Contacts(R.string.contacts, Icons.AutoMirrored.TwoTone.Chat, ContactsRoutes.ContactsGraph),
@@ -131,7 +137,7 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun MainScreen(
@@ -143,6 +149,27 @@ fun MainScreen(
     val connectionState by uIViewModel.connectionState.collectAsStateWithLifecycle()
     val localConfig by uIViewModel.localConfig.collectAsStateWithLifecycle()
     val requestChannelSet by uIViewModel.requestChannelSet.collectAsStateWithLifecycle()
+
+    // Explicitly request notification permission on connection for Android 13+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
+        LaunchedEffect(connectionState, notificationPermissionState) {
+            if (connectionState.isConnected() && !notificationPermissionState.status.isGranted) {
+                notificationPermissionState.launchPermissionRequest()
+            }
+        }
+        val bluetoothPermissionsState =
+            rememberMultiplePermissionsState(
+                permissions =
+                listOf(
+                    Manifest.permission.BLUETOOTH_SCAN,
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                    Manifest.permission.ACCESS_FINE_LOCATION,
+                ),
+                onPermissionsResult = { resultMap -> bluetoothViewModel.permissionsUpdated() },
+            )
+    }
+
     if (connectionState.isConnected()) {
         requestChannelSet?.let { newChannelSet -> ScannedQrCodeDialog(uIViewModel, newChannelSet) }
     }
@@ -316,7 +343,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
         }
     }
     // Check if the device is running an old app version or firmware version
-    LaunchedEffect(connectionState, myNodeInfo, firmwareEdition) {
+    LaunchedEffect(connectionState, myNodeInfo) {
         if (connectionState == MeshService.ConnectionState.CONNECTED) {
             myNodeInfo?.let { info ->
                 val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
