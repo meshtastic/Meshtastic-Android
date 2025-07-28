@@ -433,6 +433,7 @@
     <string name="downlink_enabled">Downlink enabled</string>
     <string name="default_">Default</string>
     <string name="position_enabled">Position enabled</string>
+    <string name="precise_location">Precise location</string>
     <string name="gpio_pin">GPIO pin</string>
     <string name="type">Type</string>
     <string name="hide_password">Hide password</string>

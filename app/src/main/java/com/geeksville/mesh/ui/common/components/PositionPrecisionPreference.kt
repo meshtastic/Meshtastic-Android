@@ -28,9 +28,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.geeksville.mesh.R
 import com.geeksville.mesh.util.DistanceUnit
 import com.geeksville.mesh.util.toDistanceString
 import kotlin.math.pow
@@ -48,7 +50,6 @@ fun precisionBitsToMeters(bits: Int): Double = 23905787.925008 * 0.5.pow(bits.to
 
 @Composable
 fun PositionPrecisionPreference(
-    title: String,
     value: Int,
     enabled: Boolean,
     onValueChanged: (Int) -> Unit,
@@ -58,7 +59,7 @@ fun PositionPrecisionPreference(
 
     Column(modifier = modifier) {
         SwitchPreference(
-            title = title,
+            title = stringResource(R.string.position_enabled),
             checked = value != PositionDisabled,
             enabled = enabled,
             onCheckedChange = { enabled ->
@@ -69,7 +70,7 @@ fun PositionPrecisionPreference(
         )
         AnimatedVisibility(visible = value != PositionDisabled) {
             SwitchPreference(
-                title = "Precise location",
+                title = stringResource(R.string.precise_location),
                 checked = value == PositionEnabled,
                 enabled = enabled,
                 onCheckedChange = { enabled ->
@@ -108,7 +109,6 @@ fun PositionPrecisionPreference(
 @Composable
 private fun PositionPrecisionPreferencePreview() {
     PositionPrecisionPreference(
-        title = "Position enabled",
         value = PositionPrecisionDefault,
         enabled = true,
         onValueChanged = {},

@@ -127,7 +127,6 @@ fun EditChannelDialog(
                 )
 
                 PositionPrecisionPreference(
-                    title = stringResource(R.string.position_enabled),
                     enabled = true,
                     value = channelInput.moduleSettings.positionPrecision,
                     onValueChanged = {
