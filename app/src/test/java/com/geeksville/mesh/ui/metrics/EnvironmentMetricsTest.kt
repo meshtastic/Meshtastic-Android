@@ -32,39 +32,41 @@ class EnvironmentMetricsTest {
         val expectedTemperatureFahrenheit = celsiusToFahrenheit(initialTemperatureCelsius)
         val expectedSoilTemperatureFahrenheit = celsiusToFahrenheit(initialSoilTemperatureCelsius)
 
-        val telemetry = TelemetryProtos.Telemetry.newBuilder()
-            .setEnvironmentMetrics(
-                TelemetryProtos.EnvironmentMetrics.newBuilder()
-                    .setTemperature(initialTemperatureCelsius)
-                    .setSoilTemperature(initialSoilTemperatureCelsius)
-                    .build()
-            )
-            .setTime(1000)
-            .build()
+        val telemetry =
+            TelemetryProtos.Telemetry.newBuilder()
+                .setEnvironmentMetrics(
+                    TelemetryProtos.EnvironmentMetrics.newBuilder()
+                        .setTemperature(initialTemperatureCelsius)
+                        .setSoilTemperature(initialSoilTemperatureCelsius)
+                        .build(),
+                )
+                .setTime(1000)
+                .build()
 
         val data = listOf(telemetry)
 
         val isFahrenheit = true
 
-        val processedTelemetries = if (isFahrenheit) {
-            data.map { tel ->
-                val temperatureFahrenheit = celsiusToFahrenheit(tel.environmentMetrics.temperature)
-                val soilTemperatureFahrenheit = celsiusToFahrenheit(tel.environmentMetrics.soilTemperature)
-                tel.copy {
-                    environmentMetrics =
-                        tel.environmentMetrics.copy {
-                            temperature = temperatureFahrenheit
-                            soilTemperature = soilTemperatureFahrenheit
-                        }
+        val processedTelemetries =
+            if (isFahrenheit) {
+                data.map { tel ->
+                    val temperatureFahrenheit = celsiusToFahrenheit(tel.environmentMetrics.temperature)
+                    val soilTemperatureFahrenheit = celsiusToFahrenheit(tel.environmentMetrics.soilTemperature)
+                    tel.copy {
+                        environmentMetrics =
+                            tel.environmentMetrics.copy {
+                                temperature = temperatureFahrenheit
+                                soilTemperature = soilTemperatureFahrenheit
+                            }
+                    }
                 }
+            } else {
+                data
             }
-        } else {
-            data
-        }
 
         val resultTelemetry = processedTelemetries.first()
 
         assertEquals(expectedTemperatureFahrenheit, resultTelemetry.environmentMetrics.temperature, 0.01f)
         assertEquals(expectedSoilTemperatureFahrenheit, resultTelemetry.environmentMetrics.soilTemperature, 0.01f)
     }
-} 
+}
