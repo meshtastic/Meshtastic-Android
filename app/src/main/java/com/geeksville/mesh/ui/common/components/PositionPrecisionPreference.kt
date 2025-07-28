@@ -49,7 +49,7 @@ private const val POSITION_PRECISION_DEFAULT = 13
 fun precisionBitsToMeters(bits: Int): Double = 23905787.925008 * 0.5.pow(bits.toDouble())
 
 @Composable
-fun POSITION_PRECISION_Preference(
+fun PositionPrecisionPreference(
     value: Int,
     enabled: Boolean,
     onValueChanged: (Int) -> Unit,
@@ -105,8 +105,8 @@ fun POSITION_PRECISION_Preference(
 
 @Preview(showBackground = true)
 @Composable
-private fun POSITION_PRECISION_PreferencePreview() {
-    POSITION_PRECISION_Preference(
+private fun PositionPrecisionPreferencePreview() {
+    PositionPrecisionPreference(
         value = POSITION_PRECISION_DEFAULT,
         enabled = true,
         onValueChanged = {},
