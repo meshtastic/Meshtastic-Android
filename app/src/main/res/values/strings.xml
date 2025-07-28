@@ -138,6 +138,7 @@
     <string name="pairing_failed_try_again">Pairing failed, please select again</string>
     <string name="location_disabled">Location access is turned off, can not provide position to mesh.</string>
     <string name="share">Share</string>
+    <string name="new_node_seen">New Node Seen: %s</string>
     <string name="disconnected">Disconnected</string>
     <string name="device_sleeping">Device sleeping</string>
     <string name="connected_count">Connected: %1$s online</string>

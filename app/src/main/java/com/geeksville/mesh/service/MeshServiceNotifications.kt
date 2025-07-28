@@ -602,7 +602,7 @@ class MeshServiceNotifications(
             priority = NotificationCompat.PRIORITY_DEFAULT
             setCategory(Notification.CATEGORY_STATUS)
             setAutoCancel(true)
-            setContentTitle("New Node Seen: $name")
+            setContentTitle(context.getString(R.string.new_node_seen).format(name))
             message?.let {
                 setContentText(it)
                 setStyle(
