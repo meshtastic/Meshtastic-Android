@@ -100,7 +100,7 @@ private fun HeaderItem(compactWidth: Boolean) {
         PositionText(stringResource(R.string.sats), Weight10)
         PositionText(stringResource(R.string.alt), Weight15)
         if (!compactWidth) {
-            PositionText("Speed", Weight15)
+            PositionText(stringResource(R.string.speed), Weight15)
             PositionText(stringResource(R.string.heading), Weight15)
         }
         PositionText(stringResource(R.string.timestamp), Weight40)

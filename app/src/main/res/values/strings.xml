@@ -652,6 +652,7 @@
     <string name="firmware_version">Firmware version</string>
     <string name="timestamp">Timestamp</string>
     <string name="heading">Heading</string>
+    <string name="speed">Speed</string>
     <string name="sats">Sats</string>
     <string name="alt">Alt</string>
     <string name="freq">Freq</string>
