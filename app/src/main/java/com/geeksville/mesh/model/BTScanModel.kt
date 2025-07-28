@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.model
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.bluetooth.BluetoothDevice
 import android.content.Context
@@ -82,66 +81,66 @@ constructor(
 
     init {
         combine(
-                bluetoothRepository.state,
-                networkRepository.resolvedList,
-                recentIpAddresses,
-                usbRepository.serialDevicesWithDrivers,
-                showMockInterface,
-            ) { ble, tcp, recent, usb, showMockInterface ->
-                devices.value =
-                    mutableMapOf<String, DeviceListEntry>().apply {
-                        fun addDevice(entry: DeviceListEntry) {
-                            this[entry.fullAddress] = entry
-                        }
-
-                        // Include a placeholder for "None"
-                        addDevice(
-                            DeviceListEntry(
-                                context.getString(R.string.none),
-                                NO_DEVICE_SELECTED,
-                                true,
-                            )
-                        )
-
-                        if (showMockInterface) {
-                            addDevice(DeviceListEntry("Demo Mode", "m", true))
-                        }
-
-                        // Include paired Bluetooth devices
-                        ble.bondedDevices
-                            .map(::BLEDeviceListEntry)
-                            .sortedBy { it.name }
-                            .forEach(::addDevice)
-
-                        // Include Network Service Discovery
-                        tcp.forEach { service ->
-                            val address = service.toAddressString()
-                            val txtRecords = service.attributes // Map<String, ByteArray?>
-                            val shortNameBytes = txtRecords["shortname"]
-                            val idBytes = txtRecords["id"]
-
-                            val shortName =
-                                shortNameBytes?.let { String(it, Charsets.UTF_8) }
-                                    ?: context.getString(R.string.meshtastic)
-                            val deviceId =
-                                idBytes?.let { String(it, Charsets.UTF_8) }?.replace("!", "")
-                            var displayName = shortName
-                            if (deviceId != null) {
-                                displayName += "_$deviceId"
-                            }
-                            addDevice(DeviceListEntry(displayName, "t$address", true))
-                        }
-
-                        // Include saved IP connections
-                        recent.forEach { addDevice(DeviceListEntry(it.name, it.address, true)) }
-
-                        usb.forEach { (_, d) ->
-                            addDevice(
-                                USBDeviceListEntry(radioInterfaceService, usbManagerLazy.get(), d)
-                            )
-                        }
+            bluetoothRepository.state,
+            networkRepository.resolvedList,
+            recentIpAddresses,
+            usbRepository.serialDevicesWithDrivers,
+            showMockInterface,
+        ) { ble, tcp, recent, usb, showMockInterface ->
+            devices.value =
+                mutableMapOf<String, DeviceListEntry>().apply {
+                    fun addDevice(entry: DeviceListEntry) {
+                        this[entry.fullAddress] = entry
                     }
-            }
+
+                    // Include a placeholder for \"None\"
+                    addDevice(
+                        DeviceListEntry(
+                            context.getString(R.string.none),
+                            NO_DEVICE_SELECTED,
+                            true,
+                        ),
+                    )
+
+                    if (showMockInterface) {
+                        addDevice(DeviceListEntry("Demo Mode", "m", true))
+                    }
+
+                    // Include paired Bluetooth devices
+                    ble.bondedDevices
+                        .map(::BLEDeviceListEntry)
+                        .sortedBy { it.name }
+                        .forEach(::addDevice)
+
+                    // Include Network Service Discovery
+                    tcp.forEach { service ->
+                        val address = service.toAddressString()
+                        val txtRecords = service.attributes // Map<String, ByteArray?>
+                        val shortNameBytes = txtRecords["shortname"]
+                        val idBytes = txtRecords["id"]
+
+                        val shortName =
+                            shortNameBytes?.let { String(it, Charsets.UTF_8) }
+                                ?: context.getString(R.string.meshtastic)
+                        val deviceId =
+                            idBytes?.let { String(it, Charsets.UTF_8) }?.replace("!", "")
+                        var displayName = shortName
+                        if (deviceId != null) {
+                            displayName += "_$deviceId"
+                        }
+                        addDevice(DeviceListEntry(displayName, "t$address", true))
+                    }
+
+                    // Include saved IP connections
+                    recent.forEach { addDevice(DeviceListEntry(it.name, it.address, true)) }
+
+                    usb.forEach { (_, d) ->
+                        addDevice(
+                            USBDeviceListEntry(radioInterfaceService, usbManagerLazy.get(), d),
+                        )
+                    }
+                }
+        }
             .launchIn(viewModelScope)
 
         serviceRepository.statusMessage.onEach { errorText.value = it }.launchIn(viewModelScope)
@@ -176,7 +175,6 @@ constructor(
             get() = prefix == 'n'
     }
 
-    @SuppressLint("MissingPermission")
     class BLEDeviceListEntry(device: BluetoothDevice) :
         DeviceListEntry(
             device.name ?: "unnamed-${device.address}", // some devices might not have a name
@@ -231,7 +229,7 @@ constructor(
                 scanJob?.cancel()
             } catch (ex: Throwable) {
                 warn(
-                    "Ignoring error stopping scan, probably BT adapter was disabled suddenly: ${ex.message}"
+                    "Ignoring error stopping scan, probably BT adapter was disabled suddenly: ${ex.message}",
                 )
             } finally {
                 scanJob = null
@@ -240,7 +238,6 @@ constructor(
         _spinner.value = false
     }
 
-    @SuppressLint("MissingPermission")
     fun startScan() {
         debug("starting classic scan")
 
@@ -267,7 +264,7 @@ constructor(
                 }
                 .catch { ex ->
                     serviceRepository.setErrorMessage(
-                        "Unexpected Bluetooth scan failure: ${ex.message}"
+                        "Unexpected Bluetooth scan failure: ${ex.message}",
                     )
                 }
                 .launchIn(viewModelScope)
@@ -285,7 +282,6 @@ constructor(
         }
     }
 
-    @SuppressLint("MissingPermission")
     private fun requestBonding(it: DeviceListEntry) {
         val device = bluetoothRepository.getRemoteDevice(it.address) ?: return
         info("Starting bonding for ${device.anonymize}")

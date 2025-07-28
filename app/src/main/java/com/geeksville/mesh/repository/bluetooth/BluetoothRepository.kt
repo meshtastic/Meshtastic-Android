@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.repository.bluetooth
 
-import android.annotation.SuppressLint
 import android.app.Application
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
@@ -92,7 +91,6 @@ class BluetoothRepository @Inject constructor(
             ?.bluetoothLeScanner
     }
 
-    @SuppressLint("MissingPermission")
     fun scan(): Flow<ScanResult> {
         val filter = ScanFilter.Builder()
             // Samsung doesn't seem to filter properly by service so this can't work
@@ -112,7 +110,6 @@ class BluetoothRepository @Inject constructor(
     @RequiresPermission("android.permission.BLUETOOTH_CONNECT")
     fun createBond(device: BluetoothDevice): Flow<Int> = device.createBond(application)
 
-    @SuppressLint("MissingPermission")
     internal suspend fun updateBluetoothState() {
         val hasPerms = application.hasBluetoothPermission()
         val newState: BluetoothState = bluetoothAdapterLazy.get()?.let { adapter ->
