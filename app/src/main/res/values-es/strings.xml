@@ -70,7 +70,7 @@
     <string name="role_router_late">Nodo de infraestructura que permite la retransmisión de paquetes una vez posterior a los demás modos, asegurando cobertura adicional a los grupos locales. Es visible en la lista de nodos.</string>
     <string name="rebroadcast_mode_all">Si está en nuestro canal privado o desde otra red con los mismos parámetros lora, retransmite cualquier mensaje observado.</string>
     <string name="rebroadcast_mode_all_skip_decoding">Igual al comportamiento que TODOS pero omite la decodificación de paquetes y simplemente los retransmite. Sólo disponible en el rol repetidor. Establecer esto en cualquier otro rol dará como resultado TODOS los comportamientos.</string>
-    <string name="rebroadcast_mode_local_only">Ignora mensajes observados desde mallas foráneas que están abiertas o que no pueden descifrar. Sólo retransmite mensajes en los nodos locales principales / canales secundarios.</string>
+    <string name="rebroadcast_mode_local_only">Ignora mensajes observados desde mallas foráneas que están abiertas o que no pueden descifrar. Solo retransmite mensajes en los nodos locales principales / canales secundarios.</string>
     <string name="rebroadcast_mode_known_only">Ignora los mensajes recibidos de redes externas como LOCAL ONLY, pero ignora también mensajes de nodos que no están ya en la lista de nodos conocidos.</string>
     <string name="rebroadcast_mode_none">Solo permitido para los roles SENSOR, TRACKER y TAK_TRACKER, esto inhibirá todas las retransmisiones, no a diferencia del rol de CLIENT_MUTE.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">Trate un doble toque en acelerómetros soportados como una pulsación de botón de usuario.</string>
@@ -425,7 +425,7 @@ Rango de Valores 0 - 500.</string>
     <string name="role">Rol</string>
     <string name="redefine_pin_button">Redefinir PIN_BOTÓN (PIN_BUTTON)</string>
     <string name="redefine_pin_buzzer">Redefinir PIN_BUZZER</string>
-    <string name="rebroadcast_mode">Modo de retransmisión </string>
+    <string name="rebroadcast_mode">Modo de retransmisión</string>
     <string name="nodeinfo_broadcast_interval_seconds">Periodo entre transmisiones de la información del nodo (segundos)</string>
     <string name="double_tap_as_button_press">Tratar las dobles pulsaciones como una de botón</string>
     <string name="disable_triple_click">Desactivar pulsaciones triples</string>
@@ -450,7 +450,7 @@ Rango de Valores 0 - 500.</string>
     <string name="alert_message_vibra">Notificación con vibración al recibir un mensaje</string>
     <string name="notifications_on_alert_bell_receipt">Notificaciones al recibir una alerta/campana</string>
     <string name="alert_bell_led">Notificación LED al recibir una campana</string>
-    <string name="alert_bell_buzzer">Notificación con el buzzer al recibir una campana</string>
+    <string name="alert_bell_buzzer">Notificación con el zumbador al recibir una campana</string>
     <string name="alert_bell_vibra">Notificación con vibración al recibir una campana</string>
     <string name="output_led_gpio">Salida LED (pin GPIO)</string>
     <string name="output_buzzer_gpio">Salida buzzer (pin GPIO)</string>
@@ -458,6 +458,7 @@ Rango de Valores 0 - 500.</string>
     <string name="output_vibra_gpio">Salida vibratoria (pin GPIO)</string>
     <string name="output_duration_milliseconds">Duración en las salidas (milisegundos)</string>
     <string name="ringtone">Tono de notificación</string>
+    <string name="tx_enabled"></string>
     <string name="position_config">Configuración de la posición</string>
     <string name="public_key">Clave Pública</string>
     <string name="private_key">Clave privada</string>
