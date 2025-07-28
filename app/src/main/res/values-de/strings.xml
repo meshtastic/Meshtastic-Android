@@ -772,4 +772,5 @@
     <string name="latest_stable_firmware">Neueste stabile Version</string>
     <string name="latest_alpha_firmware">Neueste Alpha Version</string>
     <string name="supported_by_community">Unterstützt von der Meshtastic Gemeinschaft</string>
+    <string name="firmware_edition">Firmware-Version</string>
 </resources>
