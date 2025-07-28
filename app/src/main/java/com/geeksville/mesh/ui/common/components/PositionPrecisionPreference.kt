@@ -38,18 +38,18 @@ import com.geeksville.mesh.util.toDistanceString
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
-private const val PositionEnabled = 32
-private const val PositionDisabled = 0
+private const val POSITION_ENABLED = 32
+private const val POSITION_DISABLED = 0
 
-private const val PositionPrecisionMin = 10
-private const val PositionPrecisionMax = 19
-private const val PositionPrecisionDefault = 13
+private const val POSITION_PRECISION_MIN = 10
+private const val POSITION_PRECISION_MAX = 19
+private const val POSITION_PRECISION_DEFAULT = 13
 
 @Suppress("MagicNumber")
 fun precisionBitsToMeters(bits: Int): Double = 23905787.925008 * 0.5.pow(bits.toDouble())
 
 @Composable
-fun PositionPrecisionPreference(
+fun POSITION_PRECISION_Preference(
     value: Int,
     enabled: Boolean,
     onValueChanged: (Int) -> Unit,
@@ -60,36 +60,34 @@ fun PositionPrecisionPreference(
     Column(modifier = modifier) {
         SwitchPreference(
             title = stringResource(R.string.position_enabled),
-            checked = value != PositionDisabled,
+            checked = value != POSITION_DISABLED,
             enabled = enabled,
             onCheckedChange = { enabled ->
-                val newValue = if (enabled) PositionEnabled else PositionDisabled
+                val newValue = if (enabled) POSITION_ENABLED else POSITION_DISABLED
                 onValueChanged(newValue)
             },
-            padding = PaddingValues(0.dp)
+            padding = PaddingValues(0.dp),
         )
-        AnimatedVisibility(visible = value != PositionDisabled) {
+        AnimatedVisibility(visible = value != POSITION_DISABLED) {
             SwitchPreference(
                 title = stringResource(R.string.precise_location),
-                checked = value == PositionEnabled,
+                checked = value == POSITION_ENABLED,
                 enabled = enabled,
                 onCheckedChange = { enabled ->
-                    val newValue = if (enabled) PositionEnabled else PositionPrecisionDefault
+                    val newValue = if (enabled) POSITION_ENABLED else POSITION_PRECISION_DEFAULT
                     onValueChanged(newValue)
                 },
-                padding = PaddingValues(0.dp)
+                padding = PaddingValues(0.dp),
             )
         }
-        AnimatedVisibility(visible = value in (PositionDisabled + 1)..<PositionEnabled) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
+        AnimatedVisibility(visible = value in (POSITION_DISABLED + 1)..<POSITION_ENABLED) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Slider(
                     value = value.toFloat(),
                     onValueChange = { onValueChanged(it.roundToInt()) },
                     enabled = enabled,
-                    valueRange = PositionPrecisionMin.toFloat()..PositionPrecisionMax.toFloat(),
-                    steps = PositionPrecisionMax - PositionPrecisionMin - 1,
+                    valueRange = POSITION_PRECISION_MIN.toFloat()..POSITION_PRECISION_MAX.toFloat(),
+                    steps = POSITION_PRECISION_MAX - POSITION_PRECISION_MIN - 1,
                 )
 
                 val precisionMeters = precisionBitsToMeters(value).toInt()
@@ -107,11 +105,11 @@ fun PositionPrecisionPreference(
 
 @Preview(showBackground = true)
 @Composable
-private fun PositionPrecisionPreferencePreview() {
-    PositionPrecisionPreference(
-        value = PositionPrecisionDefault,
+private fun POSITION_PRECISION_PreferencePreview() {
+    POSITION_PRECISION_Preference(
+        value = POSITION_PRECISION_DEFAULT,
         enabled = true,
         onValueChanged = {},
-        modifier = Modifier.padding(horizontal = 16.dp)
+        modifier = Modifier.padding(horizontal = 16.dp),
     )
 }

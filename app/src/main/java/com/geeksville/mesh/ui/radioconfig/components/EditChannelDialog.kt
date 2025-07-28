@@ -77,15 +77,15 @@ fun EditChannelDialog(
                     maxSize = 11, // name max_size:12
                     enabled = true,
                     isError = false,
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
-                    ),
+                    keyboardOptions =
+                    KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = {
-                        channelInput = channelInput.copy {
-                            name = it.trim()
-                            if (psk == Channel.default.settings.psk) psk = Channel.getRandomKey()
-                        }
+                        channelInput =
+                            channelInput.copy {
+                                name = it.trim()
+                                if (psk == Channel.default.settings.psk) psk = Channel.getRandomKey()
+                            }
                     },
                     onFocusChanged = { isFocused = it.isFocused },
                 )
@@ -101,29 +101,23 @@ fun EditChannelDialog(
                             channelInput = channelInput.copy { psk = it }
                         }
                     },
-                    onGenerateKey = {
-                        channelInput = channelInput.copy { psk = Channel.getRandomKey() }
-                    },
+                    onGenerateKey = { channelInput = channelInput.copy { psk = Channel.getRandomKey() } },
                 )
 
                 SwitchPreference(
                     title = stringResource(R.string.uplink_enabled),
                     checked = channelInput.uplinkEnabled,
                     enabled = true,
-                    onCheckedChange = {
-                        channelInput = channelInput.copy { uplinkEnabled = it }
-                    },
-                    padding = PaddingValues(0.dp)
+                    onCheckedChange = { channelInput = channelInput.copy { uplinkEnabled = it } },
+                    padding = PaddingValues(0.dp),
                 )
 
                 SwitchPreference(
                     title = stringResource(R.string.downlink_enabled),
                     checked = channelInput.downlinkEnabled,
                     enabled = true,
-                    onCheckedChange = {
-                        channelInput = channelInput.copy { downlinkEnabled = it }
-                    },
-                    padding = PaddingValues(0.dp)
+                    onCheckedChange = { channelInput = channelInput.copy { downlinkEnabled = it } },
+                    padding = PaddingValues(0.dp),
                 )
 
                 PositionPrecisionPreference(
@@ -138,24 +132,17 @@ fun EditChannelDialog(
         },
         confirmButton = {
             FlowRow(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
+                modifier = modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
-                TextButton(
-                    modifier = modifier.weight(1f),
-                    onClick = onDismissRequest
-                ) { Text(stringResource(R.string.cancel)) }
-                Button(
-                    modifier = modifier.weight(1f),
-                    onClick = {
-                        onAddClick(channelInput)
-                    },
-                    enabled = true,
-                ) { Text(stringResource(R.string.save)) }
+                TextButton(modifier = modifier.weight(1f), onClick = onDismissRequest) {
+                    Text(stringResource(R.string.cancel))
+                }
+                Button(modifier = modifier.weight(1f), onClick = { onAddClick(channelInput) }, enabled = true) {
+                    Text(stringResource(R.string.save))
+                }
             }
-        }
+        },
     )
 }
 
@@ -163,11 +150,12 @@ fun EditChannelDialog(
 @Composable
 private fun EditChannelDialogPreview() {
     EditChannelDialog(
-        channelSettings = channelSettings {
+        channelSettings =
+        channelSettings {
             psk = Channel.default.settings.psk
             name = Channel.default.name
         },
-        onAddClick = { },
-        onDismissRequest = { },
+        onAddClick = {},
+        onDismissRequest = {},
     )
 }
