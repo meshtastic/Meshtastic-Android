@@ -68,50 +68,36 @@ import com.geeksville.mesh.ui.common.components.IaqDisplayMode
 import com.geeksville.mesh.ui.common.components.IndoorAirQuality
 import com.geeksville.mesh.ui.common.components.OptionLabel
 import com.geeksville.mesh.ui.common.components.SlidingSelector
-import com.geeksville.mesh.ui.common.theme.GraphColors.Blue
-import com.geeksville.mesh.ui.common.theme.GraphColors.Green
-import com.geeksville.mesh.ui.common.theme.GraphColors.Magenta
-import com.geeksville.mesh.ui.common.theme.GraphColors.Pink
-import com.geeksville.mesh.ui.common.theme.GraphColors.Purple
-import com.geeksville.mesh.ui.common.theme.GraphColors.Red
-import com.geeksville.mesh.ui.common.theme.GraphColors.Yellow
+import com.geeksville.mesh.ui.common.theme.GraphColors.InfantryBlue
+import com.geeksville.mesh.ui.common.theme.GraphColors.LightGreen
+import com.geeksville.mesh.ui.common.theme.GraphColors.Orange
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
+import com.geeksville.mesh.ui.metrics.CommonCharts.LegendData
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.drawPathWithGradient
 import com.geeksville.mesh.util.UnitConversions.celsiusToFahrenheit
-
-@Suppress("MagicNumber")
-private enum class Environment(val color: Color) {
-    TEMPERATURE(Red),
-    RELATIVE_HUMIDITY(Blue),
-    SOIL_TEMPERATURE(Pink),
-    SOIL_MOISTURE(Purple),
-    BAROMETRIC_PRESSURE(Green),
-    GAS_RESISTANCE(Yellow),
-    IAQ(Magenta),
-}
+import androidx.annotation.StringRes
 
 private const val CHART_WEIGHT = 1f
 private const val Y_AXIS_WEIGHT = 0.1f
-// EnvironmentMetrics can have 1 or 2 Y-axis labels depending on whether barometric pressure is plotted
-// We'll calculate this dynamically in the chart function
 
-private val LEGEND_DATA_1 =
-    listOf(
-        LegendData(nameRes = R.string.temperature, color = Environment.TEMPERATURE.color, isLine = true),
-        LegendData(nameRes = R.string.humidity, color = Environment.HUMIDITY.color, isLine = true),
-    )
-private val LEGEND_DATA_2 =
-    listOf(
-        LegendData(nameRes = R.string.iaq, color = Environment.IAQ.color, isLine = true),
-        LegendData(nameRes = R.string.baro_pressure, color = Environment.BAROMETRIC_PRESSURE.color, isLine = true),
-    )
-private val LEGEND_DATA_3 =
-    listOf(
-        LegendData(nameRes = R.string.soil_temperature, color = Environment.SOIL_TEMPERATURE.color, isLine = true),
-        LegendData(nameRes = R.string.soil_moisture, color = Environment.SOIL_MOISTURE.color, isLine = true),
-    )
+@Suppress("MagicNumber")
+private val LEGEND_DATA_1 = listOf(
+    LegendData(nameRes = R.string.temperature, color = Environment.TEMPERATURE.color, isLine = true, environmentMetric = Environment.TEMPERATURE),
+    LegendData(nameRes = R.string.humidity, color = Environment.HUMIDITY.color, isLine = true, environmentMetric = Environment.HUMIDITY),
+)
+private val LEGEND_DATA_2 = listOf(
+    LegendData(nameRes = R.string.iaq, color = Environment.IAQ.color, isLine = true, environmentMetric = Environment.IAQ),
+    LegendData(nameRes = R.string.baro_pressure, color = Environment.BAROMETRIC_PRESSURE.color, isLine = true, environmentMetric = Environment.BAROMETRIC_PRESSURE),
+    LegendData(nameRes = R.string.lux, color = Environment.LUX.color, isLine = true, environmentMetric = Environment.LUX),
+    LegendData(nameRes = R.string.uv_lux, color = Environment.UV_LUX.color, isLine = true, environmentMetric = Environment.UV_LUX),
+)
+
+private val LEGEND_DATA_3 = listOf(
+    LegendData(nameRes = R.string.soil_temperature, color = Environment.SOIL_TEMPERATURE.color, isLine = true, environmentMetric = Environment.SOIL_TEMPERATURE),
+    LegendData(nameRes = R.string.soil_moisture, color = Environment.SOIL_MOISTURE.color, isLine = true, environmentMetric = Environment.SOIL_MOISTURE),
+)
 
 @Composable
 fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel()) {
@@ -269,7 +255,7 @@ private fun EnvironmentMetricsChart(
                                 timeThreshold = selectedTime.timeThreshold(),
                             ) { i ->
                                 val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
-                                val ratio = (metric.getValue(telemetry) - min) / diff
+                                val ratio = ((metric.getValue(telemetry) ?: 0f) - min) / diff
                                 val y = height - (ratio * height)
                                 return@createPath y
                             }
@@ -294,9 +280,9 @@ private fun EnvironmentMetricsChart(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    Legend(LEGEND_DATA_1, displayInfoIcon = false)
-    Legend(LEGEND_DATA_3, displayInfoIcon = false)
-    Legend(LEGEND_DATA_2, promptInfoDialog = promptInfoDialog)
+    Legend(LEGEND_DATA_1.filter { graphData.shouldPlot[it.environmentMetric.ordinal] }, displayInfoIcon = false)
+    Legend(LEGEND_DATA_3.filter { graphData.shouldPlot[it.environmentMetric.ordinal] }, displayInfoIcon = false)
+    Legend(LEGEND_DATA_2.filter { graphData.shouldPlot[it.environmentMetric.ordinal] }, promptInfoDialog = promptInfoDialog)
 
     Spacer(modifier = Modifier.height(16.dp))
 }
@@ -317,66 +303,81 @@ private fun EnvironmentMetricsCard(telemetry: Telemetry, environmentDisplayFahre
                             style = TextStyle(fontWeight = FontWeight.Bold),
                             fontSize = MaterialTheme.typography.labelLarge.fontSize,
                         )
+                        envMetrics.temperature?.let { temperature ->
+                            if (!temperature.isNaN()) {
                         val textFormat = if (environmentDisplayFahrenheit) "%s %.1f°F" else "%s %.1f°C"
                         Text(
-                            text = textFormat.format(stringResource(id = R.string.temperature), envMetrics.temperature),
+                                    text = textFormat.format(stringResource(id = R.string.temperature), temperature),
                             color = MaterialTheme.colorScheme.onSurface,
                             fontSize = MaterialTheme.typography.labelLarge.fontSize,
                         )
+                            }
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(4.dp))
 
                     /* Humidity and Barometric Pressure */
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        envMetrics.relativeHumidity?.let { humidity ->
+                            if (!humidity.isNaN()) {
                         Text(
                             text =
-                            "%s %.2f%%".format(stringResource(id = R.string.humidity), envMetrics.relativeHumidity),
+                                    "%s %.2f%%".format(stringResource(id = R.string.humidity), humidity),
                             color = MaterialTheme.colorScheme.onSurface,
                             fontSize = MaterialTheme.typography.labelLarge.fontSize,
                         )
-                        if (envMetrics.barometricPressure > 0) {
+                            }
+                        }
+                        envMetrics.barometricPressure?.let { pressure ->
+                            if (!pressure.isNaN() && pressure > 0) { // Keep pressure > 0 check
                             Text(
-                                text = "%.2f hPa".format(envMetrics.barometricPressure),
+                                    text = "%.2f hPa".format(pressure),
                                 color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
                             )
+                            }
                         }
                     }
 
                     /* Soil Moisture and Soil Temperature */
-                    val soilMoistureRange = 0..100
-                    if (
-                        telemetry.environmentMetrics.hasSoilTemperature() ||
-                        telemetry.environmentMetrics.soilMoisture in soilMoistureRange
-                    ) {
+                    if (envMetrics.soilTemperature != null || (envMetrics.soilMoisture != null && envMetrics.soilMoisture != Int.MIN_VALUE)) {
                         Spacer(modifier = Modifier.height(4.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             val soilTemperatureTextFormat =
                                 if (environmentDisplayFahrenheit) "%s %.1f°F" else "%s %.1f°C"
                             val soilMoistureTextFormat = "%s %d%%"
+                            envMetrics.soilMoisture?.let { soilMoistureValue ->
+                                if (soilMoistureValue != Int.MIN_VALUE) {
                             Text(
                                 text =
                                 soilMoistureTextFormat.format(
                                     stringResource(R.string.soil_moisture),
-                                    envMetrics.soilMoisture,
+                                            soilMoistureValue,
                                 ),
                                 color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
                             )
+                                }
+                            }
+                            envMetrics.soilTemperature?.let { soilTemperature ->
+                                if (!soilTemperature.isNaN()) {
                             Text(
                                 text =
                                 soilTemperatureTextFormat.format(
                                     stringResource(R.string.soil_temperature),
-                                    envMetrics.soilTemperature,
+                                            soilTemperature,
                                 ),
                                 color = MaterialTheme.colorScheme.onSurface,
                                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
                             )
+                                }
+                            }
                         }
                     }
 
-                    if (telemetry.environmentMetrics.hasIaq()) {
+                    envMetrics.iaq?.let { iaqValue ->
+                        if (iaqValue != Int.MIN_VALUE) {
                         Spacer(modifier = Modifier.height(4.dp))
                         /* Air Quality */
                         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -386,7 +387,82 @@ private fun EnvironmentMetricsCard(telemetry: Telemetry, environmentDisplayFahre
                                 fontSize = MaterialTheme.typography.labelLarge.fontSize,
                             )
                             Spacer(modifier = Modifier.width(4.dp))
-                            IndoorAirQuality(iaq = telemetry.environmentMetrics.iaq, displayMode = IaqDisplayMode.Dot)
+                                IndoorAirQuality(iaq = iaqValue, displayMode = IaqDisplayMode.Dot)
+                            }
+                        }
+                    }
+
+                    envMetrics.lux?.let { luxValue ->
+                        if (!luxValue.isNaN()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text(
+                                    text = "%s %.0f lx".format(stringResource(R.string.lux), luxValue),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                                )
+                            }
+                        }
+                    }
+
+                    envMetrics.uvLux?.let { uvLuxValue ->
+                        if (!uvLuxValue.isNaN()) {
+                            Spacer(modifier = Modifier.height(4.dp))
+                            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                                Text(
+                                    text = "%s %.0f UVlx".format(stringResource(R.string.uv_lux), uvLuxValue),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontSize = MaterialTheme.typography.labelLarge.fontSize,
+                                )
+                            }
+                        }
+                    }
+
+                    envMetrics.voltage?.let { voltage ->
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            if (!voltage.isNaN()) {
+                                Text(
+                                    text = "%s %.2f V".format(stringResource(R.string.voltage), voltage),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontSize = MaterialTheme.typography.labelLarge.fontSize
+                                )
+                            }
+                        }
+                    }
+
+                    envMetrics.current?.let { current ->
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            if (!current.isNaN()) {
+                                Text(
+                                    text = "%s %.2f A".format(stringResource(R.string.current), current),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontSize = MaterialTheme.typography.labelLarge.fontSize
+                                )
+                            }
+                        }
+                    }
+
+                    envMetrics.gasResistance?.let { gasResistance ->
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            if (!gasResistance.isNaN()) {
+                                Text(
+                                    text = "%s %.2f Ohm".format(stringResource(R.string.gas_resistance), gasResistance),
+                                    color = MaterialTheme.colorScheme.onSurface,
+                                    fontSize = MaterialTheme.typography.labelLarge.fontSize
+                                )
+                            }
                         }
                     }
                 }

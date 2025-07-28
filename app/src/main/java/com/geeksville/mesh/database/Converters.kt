@@ -92,7 +92,7 @@ class Converters : Logging {
             TelemetryProtos.Telemetry.parseFrom(bytes)
         } catch (ex: InvalidProtocolBufferException) {
             errormsg("bytesToTelemetry TypeConverter error:", ex)
-            TelemetryProtos.Telemetry.getDefaultInstance()
+            TelemetryProtos.Telemetry.newBuilder().build() // Return an empty Telemetry object
         }
     }
 

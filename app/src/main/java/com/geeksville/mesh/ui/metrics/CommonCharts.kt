@@ -57,6 +57,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.Environment
 import com.geeksville.mesh.ui.metrics.CommonCharts.MAX_PERCENT_VALUE
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_MINUTE_FORMAT
@@ -69,6 +70,21 @@ object CommonCharts {
     val DATE_TIME_MINUTE_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
     const val MS_PER_SEC = 1000L
     const val MAX_PERCENT_VALUE = 100f
+
+    /**
+     * Data for the chart legend.
+     *
+     * @property nameRes The string resource ID for the legend name.
+     * @property color The color of the line/data in the chart.
+     * @property isLine True if the legend represents a line, false for a point/dot.
+     * @property environmentMetric The corresponding Environment enum for this legend entry.
+     */
+    data class LegendData(
+        val nameRes: Int,
+        val color: Color,
+        val isLine: Boolean = false,
+        val environmentMetric: Environment? = null, // Make this nullable with a default null value
+    )
 }
 
 private const val LINE_ON = 10f
@@ -79,7 +95,7 @@ private const val DATE_Y = 32f
 private const val LINE_LIMIT = 4
 private const val TEXT_PAINT_ALPHA = 192
 
-data class LegendData(val nameRes: Int, val color: Color, val isLine: Boolean = false)
+data class LegendData(val nameRes: Int, val color: Color, val isLine: Boolean = false, val environmentMetric: Environment)
 
 @Composable
 fun ChartHeader(amount: Int) {

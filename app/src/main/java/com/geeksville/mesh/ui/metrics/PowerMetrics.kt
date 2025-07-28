@@ -94,8 +94,8 @@ private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIG
 
 private val LEGEND_DATA =
     listOf(
-        LegendData(nameRes = R.string.current, color = Power.CURRENT.color, isLine = true),
-        LegendData(nameRes = R.string.voltage, color = Power.VOLTAGE.color, isLine = true),
+        LegendData(nameRes = R.string.current, color = Power.CURRENT.color, isLine = true, environmentMetric = null),
+        LegendData(nameRes = R.string.voltage, color = Power.VOLTAGE.color, isLine = true, environmentMetric = null),
     )
 
 @Composable

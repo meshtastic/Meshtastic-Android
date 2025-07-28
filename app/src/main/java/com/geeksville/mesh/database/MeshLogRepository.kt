@@ -50,6 +50,44 @@ constructor(
     private fun parseTelemetryLog(log: MeshLog): Telemetry? = runCatching {
         Telemetry.parseFrom(log.fromRadio.packet.decoded.payload)
             .toBuilder()
+            .apply {
+                // Handle float metrics that default to 0.0f when not explicitly set or when 0.0f means no data
+                if (!environmentMetrics.hasTemperature() || environmentMetrics.temperature == 0.0f) {
+                    environmentMetrics = environmentMetrics.toBuilder().setTemperature(Float.NaN).build()
+                }
+                if (!environmentMetrics.hasRelativeHumidity() || environmentMetrics.relativeHumidity == 0.0f) {
+                    environmentMetrics = environmentMetrics.toBuilder().setRelativeHumidity(Float.NaN).build()
+                }
+                if (!environmentMetrics.hasSoilTemperature() || environmentMetrics.soilTemperature == 0.0f) {
+                    environmentMetrics = environmentMetrics.toBuilder().setSoilTemperature(Float.NaN).build()
+                }
+                if (!environmentMetrics.hasBarometricPressure() || environmentMetrics.barometricPressure == 0.0f) {
+                    environmentMetrics = environmentMetrics.toBuilder().setBarometricPressure(Float.NaN).build()
+                }
+                if (!environmentMetrics.hasGasResistance() || environmentMetrics.gasResistance == 0.0f) {
+                    environmentMetrics = environmentMetrics.toBuilder().setGasResistance(Float.NaN).build()
+                }
+                if (!environmentMetrics.hasVoltage() || environmentMetrics.voltage == 0.0f) {
+                    environmentMetrics = environmentMetrics.toBuilder().setVoltage(Float.NaN).build()
+                }
+                if (!environmentMetrics.hasCurrent() || environmentMetrics.current == 0.0f) {
+                    environmentMetrics = environmentMetrics.toBuilder().setCurrent(Float.NaN).build()
+                }
+                if (!environmentMetrics.hasLux() || environmentMetrics.lux == 0.0f) {
+                    environmentMetrics = environmentMetrics.toBuilder().setLux(Float.NaN).build()
+                }
+                if (!environmentMetrics.hasUvLux() || environmentMetrics.uvLux == 0.0f) {
+                    environmentMetrics = environmentMetrics.toBuilder().setUvLux(Float.NaN).build()
+                }
+
+                // Handle uint32 metrics that default to 0 when not explicitly set or when 0 means no data
+                if (!environmentMetrics.hasIaq() || environmentMetrics.iaq == 0) {
+                    environmentMetrics = environmentMetrics.toBuilder().setIaq(Int.MIN_VALUE).build()
+                }
+                if (!environmentMetrics.hasSoilMoisture() || environmentMetrics.soilMoisture == 0) {
+                    environmentMetrics = environmentMetrics.toBuilder().setSoilMoisture(Int.MIN_VALUE).build()
+                }
+            }
             .setTime((log.received_date / MILLIS_TO_SECONDS).toInt())
             .build()
     }

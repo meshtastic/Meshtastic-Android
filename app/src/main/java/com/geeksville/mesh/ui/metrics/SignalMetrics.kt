@@ -83,8 +83,8 @@ private const val Y_AXIS_WEIGHT = 0.1f
 private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIGHT + Y_AXIS_WEIGHT)
 
 private val LEGEND_DATA = listOf(
-    LegendData(nameRes = R.string.rssi, color = Metric.RSSI.color),
-    LegendData(nameRes = R.string.snr, color = Metric.SNR.color)
+    LegendData(nameRes = R.string.rssi, color = Metric.RSSI.color, environmentMetric = null),
+    LegendData(nameRes = R.string.snr, color = Metric.SNR.color, environmentMetric = null)
 )
 
 @Composable
