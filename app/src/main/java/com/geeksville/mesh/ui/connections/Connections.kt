@@ -143,7 +143,7 @@ fun ConnectionsScreen(
     val app = (context.applicationContext as GeeksvilleApplication)
     val info by uiViewModel.myNodeInfo.collectAsState()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
-    val bluetoothEnabled by bluetoothViewModel.enabled.collectAsStateWithLifecycle(true)
+    val bluetoothEnabled by bluetoothViewModel.enabled.collectAsStateWithLifecycle(false)
     val regionUnset =
         currentRegion == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET &&
             connectionState == MeshService.ConnectionState.CONNECTED
