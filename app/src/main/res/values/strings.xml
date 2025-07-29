@@ -138,6 +138,7 @@
     <string name="pairing_failed_try_again">Pairing failed, please select again</string>
     <string name="location_disabled">Location access is turned off, can not provide position to mesh.</string>
     <string name="share">Share</string>
+    <string name="new_node_seen">New Node Seen: %s</string>
     <string name="disconnected">Disconnected</string>
     <string name="device_sleeping">Device sleeping</string>
     <string name="connected_count">Connected: %1$s online</string>
@@ -435,6 +436,7 @@
     <string name="downlink_enabled">Downlink enabled</string>
     <string name="default_">Default</string>
     <string name="position_enabled">Position enabled</string>
+    <string name="precise_location">Precise location</string>
     <string name="gpio_pin">GPIO pin</string>
     <string name="type">Type</string>
     <string name="hide_password">Hide password</string>
@@ -653,6 +655,7 @@
     <string name="firmware_version">Firmware version</string>
     <string name="timestamp">Timestamp</string>
     <string name="heading">Heading</string>
+    <string name="speed">Speed</string>
     <string name="sats">Sats</string>
     <string name="alt">Alt</string>
     <string name="freq">Freq</string>
