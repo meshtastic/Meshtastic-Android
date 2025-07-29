@@ -17,14 +17,13 @@
 
 package com.geeksville.mesh.ui.connections
 
+import android.Manifest
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
 import android.net.InetAddresses
 import android.os.Build
 import android.util.Patterns
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -82,14 +81,9 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.info
 import com.geeksville.mesh.android.BuildUtils.reportError
-import com.geeksville.mesh.android.BuildUtils.warn
 import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.getBluetoothPermissions
-import com.geeksville.mesh.android.getLocationPermissions
 import com.geeksville.mesh.android.gpsDisabled
-import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.android.isGooglePlayAvailable
-import com.geeksville.mesh.android.permissionMissing
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceListEntry
@@ -110,6 +104,8 @@ import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.delay
 
 fun String?.isIPAddress(): Boolean = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -119,6 +115,11 @@ fun String?.isIPAddress(): Boolean = if (Build.VERSION.SDK_INT < Build.VERSION_C
     InetAddresses.isNumericAddress(this.toString())
 }
 
+/**
+ * Composable screen for managing device connections (BLE, TCP, USB). It handles permission requests for location and
+ * displays connection status.
+ */
+@OptIn(ExperimentalPermissionsApi::class)
 @Suppress("CyclomaticComplexMethod", "LongMethod", "MagicNumber")
 @Composable
 fun ConnectionsScreen(
@@ -142,7 +143,7 @@ fun ConnectionsScreen(
     val app = (context.applicationContext as GeeksvilleApplication)
     val info by uiViewModel.myNodeInfo.collectAsState()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
-    val bluetoothEnabled by bluetoothViewModel.enabled.observeAsState()
+    val bluetoothEnabled by bluetoothViewModel.enabled.collectAsStateWithLifecycle(false)
     val regionUnset =
         currentRegion == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET &&
             connectionState == MeshService.ConnectionState.CONNECTED
@@ -180,7 +181,7 @@ fun ConnectionsScreen(
         }
     }
     LaunchedEffect(bluetoothEnabled) {
-        if (bluetoothEnabled == false) {
+        if (!bluetoothEnabled) {
             uiViewModel.showSnackbar(context.getString(R.string.bluetooth_disabled))
         }
     }
@@ -196,51 +197,8 @@ fun ConnectionsScreen(
     var showScanDialog by remember { mutableStateOf(false) }
     val scanResults by scanModel.scanResult.observeAsState(emptyMap())
 
-    // State for the location permission rationale dialog
-    var showLocationRationaleDialog by remember { mutableStateOf(false) }
-
-    // State for the Bluetooth permission rationale dialog
-    var showBluetoothRationaleDialog by remember { mutableStateOf(false) }
-
     // State for the Report Bug dialog
     var showReportBugDialog by remember { mutableStateOf(false) }
-
-    // Remember the permission launchers
-    val requestLocationPermissionLauncher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.RequestMultiplePermissions(),
-            onResult = { permissions ->
-                if (permissions.entries.all { it.value }) {
-                    uiViewModel.setProvideLocation(true)
-                    uiViewModel.meshService?.startProvideLocation()
-                } else {
-                    debug("User denied location permission")
-                    uiViewModel.showSnackbar(context.getString(R.string.why_background_required))
-                }
-                bluetoothViewModel.permissionsUpdated()
-            },
-        )
-
-    val requestBluetoothPermissionLauncher =
-        rememberLauncherForActivityResult(
-            contract = ActivityResultContracts.RequestMultiplePermissions(),
-            onResult = { permissions ->
-                if (permissions.entries.all { it.value }) {
-                    info("Bluetooth permissions granted")
-                    // We need to call the scan function which is in the Fragment
-                    // Since we can't directly call scanLeDevice() from Composable,
-                    // we might need to rethink how scanning is triggered or
-                    // pass the scan trigger as a lambda.
-                    // For now, let's assume we trigger the scan outside the Composable
-                    // after permissions are granted. We can add a callback to the ViewModel.
-                    scanModel.startScan()
-                } else {
-                    warn("Bluetooth permissions denied")
-                    uiViewModel.showSnackbar(context.permissionMissing)
-                }
-                bluetoothViewModel.permissionsUpdated()
-            },
-        )
 
     // Observe scan results to show the dialog
     if (scanResults.isNotEmpty()) {
@@ -264,6 +222,28 @@ fun ConnectionsScreen(
     if (showSharedContact != null) {
         SharedContactDialog(contact = showSharedContact, onDismiss = { showSharedContact = null })
     }
+
+    val locationPermissionsState =
+        rememberMultiplePermissionsState(permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION))
+    val provideLocation by uiViewModel.provideLocation.collectAsState(false)
+
+    LaunchedEffect(provideLocation, locationPermissionsState.allPermissionsGranted, isGpsDisabled) {
+        if (provideLocation) {
+            if (locationPermissionsState.allPermissionsGranted) {
+                if (!isGpsDisabled) {
+                    uiViewModel.meshService?.startProvideLocation()
+                } else {
+                    uiViewModel.showSnackbar(context.getString(R.string.location_disabled))
+                }
+            } else {
+                // Request permissions if not granted and user wants to provide location
+                locationPermissionsState.launchMultiplePermissionRequest()
+            }
+        } else {
+            uiViewModel.meshService?.stopProvideLocation()
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
             Text(
@@ -379,8 +359,6 @@ fun ConnectionsScreen(
                             connectionState = connectionState,
                             btDevices = bleDevices,
                             selectedDevice = selectedDevice,
-                            showBluetoothRationaleDialog = { showBluetoothRationaleDialog = true },
-                            requestBluetoothPermission = { requestBluetoothPermissionLauncher.launch(it) },
                             scanModel = scanModel,
                         )
                     }
@@ -413,17 +391,6 @@ fun ConnectionsScreen(
                     }
                 }
                 AnimatedVisibility(isConnected) {
-                    val provideLocation by uiViewModel.provideLocation.collectAsState(false)
-                    LaunchedEffect(provideLocation) {
-                        if (provideLocation) {
-                            if (!context.hasLocationPermission()) {
-                                debug("Requesting location permission for providing location")
-                                showLocationRationaleDialog = true
-                            } else if (isGpsDisabled) {
-                                uiViewModel.showSnackbar(context.getString(R.string.location_disabled))
-                            }
-                        }
-                    }
                     Row(
                         modifier =
                         Modifier.fillMaxWidth()
@@ -436,8 +403,10 @@ fun ConnectionsScreen(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Checkbox(
+                            // Checked state driven by receivingLocationUpdates for visual feedback
+                            // but toggle action drives provideLocation
                             checked = receivingLocationUpdates,
-                            onCheckedChange = null,
+                            onCheckedChange = null, // Toggleable handles the change
                             enabled = !isGpsDisabled, // Disable if GPS is disabled
                         )
                         Text(
@@ -559,58 +528,6 @@ fun ConnectionsScreen(
                     }
                 }
             }
-        }
-
-        // Compose Location Permission Rationale Dialog
-        if (showLocationRationaleDialog) {
-            AlertDialog(
-                onDismissRequest = { showLocationRationaleDialog = false },
-                title = { Text(stringResource(R.string.background_required)) },
-                text = { Text(stringResource(R.string.why_background_required)) },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            showLocationRationaleDialog = false
-                            if (!context.hasLocationPermission()) {
-                                requestLocationPermissionLauncher.launch(context.getLocationPermissions())
-                            }
-                        },
-                    ) {
-                        Text(stringResource(R.string.accept))
-                    }
-                },
-                dismissButton = {
-                    Button(onClick = { showLocationRationaleDialog = false }) { Text(stringResource(R.string.cancel)) }
-                },
-            )
-        }
-
-        // Compose Bluetooth Permission Rationale Dialog
-        if (showBluetoothRationaleDialog) {
-            val bluetoothPermissions = context.getBluetoothPermissions()
-            AlertDialog(
-                onDismissRequest = { showBluetoothRationaleDialog = false },
-                title = { Text(stringResource(R.string.required_permissions)) },
-                text = { Text(stringResource(R.string.permission_missing_31)) },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            showBluetoothRationaleDialog = false
-                            if (bluetoothPermissions.isNotEmpty()) {
-                                requestBluetoothPermissionLauncher.launch(bluetoothPermissions)
-                            } else {
-                                // If somehow no permissions are required, just scan
-                                scanModel.startScan()
-                            }
-                        },
-                    ) {
-                        Text(stringResource(R.string.okay))
-                    }
-                },
-                dismissButton = {
-                    Button(onClick = { showBluetoothRationaleDialog = false }) { Text(stringResource(R.string.cancel)) }
-                },
-            )
         }
 
         // Compose Report Bug Dialog

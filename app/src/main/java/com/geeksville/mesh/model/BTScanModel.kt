@@ -255,6 +255,11 @@ constructor(
         _spinner.value = false
     }
 
+    fun refreshPermissions() {
+        // Refresh the Bluetooth state to ensure we have the latest permissions
+        bluetoothRepository.refreshState()
+    }
+
     @SuppressLint("MissingPermission")
     fun startScan() {
         debug("starting classic scan")
@@ -292,7 +297,8 @@ constructor(
     }
 
     @SuppressLint("MissingPermission")
-    private fun requestBonding(device: BluetoothDevice) {
+    private fun requestBonding(it: DeviceListEntry) {
+        val device = bluetoothRepository.getRemoteDevice(it.address) ?: return
         info("Starting bonding for ${device.anonymize}")
 
         bluetoothRepository
@@ -350,7 +356,7 @@ constructor(
                     changeDeviceAddress(it.fullAddress)
                     true
                 } else {
-                    requestBonding(it.device)
+                    requestBonding(it)
                     false
                 }
             }

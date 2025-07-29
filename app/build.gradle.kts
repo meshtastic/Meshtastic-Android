@@ -224,6 +224,7 @@ dependencies {
     implementation(libs.usb.serial.android)
     implementation(libs.work.runtime.ktx)
     implementation(libs.core.location.altitude)
+    implementation(libs.accompanist.permissions)
 
     // Compose BOM
     implementation(platform(libs.compose.bom))

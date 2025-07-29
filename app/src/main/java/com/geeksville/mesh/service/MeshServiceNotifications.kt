@@ -38,7 +38,6 @@ import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.LocalStats
-import com.geeksville.mesh.android.notificationManager
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.navigation.DEEP_LINK_BASE_URI
 import com.geeksville.mesh.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
@@ -54,8 +53,8 @@ class MeshServiceNotifications(private val context: Context) {
         const val MAX_BATTERY_LEVEL = 100
     }
 
-    private val notificationManager: NotificationManager
-        get() = context.notificationManager
+    private val notificationManager: NotificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     // We have two notification channels: one for general service status and another one for messages
     val notifyId = 101
