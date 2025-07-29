@@ -53,8 +53,7 @@ class MeshServiceNotifications(private val context: Context) {
         const val MAX_BATTERY_LEVEL = 100
     }
 
-    private val notificationManager: NotificationManager
-        =
+    private val notificationManager: NotificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     // We have two notification channels: one for general service status and another one for messages

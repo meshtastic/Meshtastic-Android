@@ -125,29 +125,27 @@ constructor(
             .map { ble -> ble.bondedDevices.map { DeviceListEntry.Ble(it) }.sortedBy { it.name } }
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-                    // Flow for discovered TCP devices, using recent addresses for potential name enrichment
-                        private val processedDiscoveredTcpDevicesFlow: StateFlow<List<DeviceListEntry.Tcp>> =
+    // Flow for discovered TCP devices, using recent addresses for potential name enrichment
+    private val processedDiscoveredTcpDevicesFlow: StateFlow<List<DeviceListEntry.Tcp>> =
         combine(networkRepository.resolvedList, recentAddressesRepository.recentAddresses) { tcpServices, recentList ->
-                    val recentMap = recentList.associateBy({ it.address }, { it.name })
+            val recentMap = recentList.associateBy({ it.address }, { it.name })
             tcpServices
+                .map { service ->
+                    val address = "t${service.toAddressString()}"
+                    val txtRecords = service.attributes // Map<String, ByteArray?>
+                    val shortNameBytes = txtRecords["shortname"]
+                    val idBytes = txtRecords["id"]
 
-                    .map { service ->
-                        val address = "t${service.toAddressString()}"
-                        val txtRecords = service.attributes // Map<String, ByteArray?>
-                        val shortNameBytes = txtRecords["shortname"]
-                        val idBytes = txtRecords["id"]
-
-                        val shortName =
-                            shortNameBytes?.let { String(it, Charsets.UTF_8) }
-                                ?: context.getString(R.string.meshtastic)
-                        val deviceId = idBytes?.let { String(it, Charsets.UTF_8) }?.replace("!", "")
-                        var displayName = recentMap[address] ?:shortName
-                        if (deviceId != null&& !displayName.split("_").none { it == deviceId }) {
-                            displayName += "_$deviceId"
-                        }
-                        DeviceListEntry.Tcp(displayName, address)
+                    val shortName =
+                        shortNameBytes?.let { String(it, Charsets.UTF_8) } ?: context.getString(R.string.meshtastic)
+                    val deviceId = idBytes?.let { String(it, Charsets.UTF_8) }?.replace("!", "")
+                    var displayName = recentMap[address] ?: shortName
+                    if (deviceId != null && !displayName.split("_").none { it == deviceId }) {
+                        displayName += "_$deviceId"
+                    }
+                    DeviceListEntry.Tcp(displayName, address)
                 }
-                    .sortedBy { it.name }
+                .sortedBy { it.name }
         }
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
@@ -165,12 +163,12 @@ constructor(
         }
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-                    private val usbDevicesFlow: StateFlow<List<DeviceListEntry.Usb>> =
-                    usbRepository.serialDevicesWithDrivers
+    private val usbDevicesFlow: StateFlow<List<DeviceListEntry.Usb>> =
+        usbRepository.serialDevicesWithDrivers
             .map { usb -> usb.map { (_, d) -> DeviceListEntry.Usb(radioInterfaceService, usbManagerLazy.get(), d) } }
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-                    val disconnectDevice = DeviceListEntry.Disconnect(context.getString(R.string.none))
+    val disconnectDevice = DeviceListEntry.Disconnect(context.getString(R.string.none))
 
     val mockDevice = DeviceListEntry.Mock("Demo Mode")
 
@@ -195,10 +193,11 @@ constructor(
     val recentTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
         filteredRecentTcpDevicesFlow.stateIn(
             viewModelScope,
-                        SharingStarted.WhileSubscribed(SHARING_STARTED_TIMEOUT_MS),
-            listOf(),)
+            SharingStarted.WhileSubscribed(SHARING_STARTED_TIMEOUT_MS),
+            listOf(),
+        )
 
-                val usbDevicesForUi: StateFlow<List<DeviceListEntry>> =
+    val usbDevicesForUi: StateFlow<List<DeviceListEntry>> =
         combine(usbDevicesFlow, showMockInterface) { usb, showMock ->
             listOf(disconnectDevice) + usb + if (showMock) listOf(mockDevice) else emptyList()
         }
