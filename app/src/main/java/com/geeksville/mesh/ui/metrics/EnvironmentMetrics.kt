@@ -68,8 +68,13 @@ import com.geeksville.mesh.ui.common.components.IaqDisplayMode
 import com.geeksville.mesh.ui.common.components.IndoorAirQuality
 import com.geeksville.mesh.ui.common.components.OptionLabel
 import com.geeksville.mesh.ui.common.components.SlidingSelector
-import com.geeksville.mesh.ui.common.theme.Pink
-import com.geeksville.mesh.ui.common.theme.Purple
+import com.geeksville.mesh.ui.common.theme.GraphColors.Blue
+import com.geeksville.mesh.ui.common.theme.GraphColors.Green
+import com.geeksville.mesh.ui.common.theme.GraphColors.Magenta
+import com.geeksville.mesh.ui.common.theme.GraphColors.Pink
+import com.geeksville.mesh.ui.common.theme.GraphColors.Purple
+import com.geeksville.mesh.ui.common.theme.GraphColors.Red
+import com.geeksville.mesh.ui.common.theme.GraphColors.Yellow
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.util.GraphUtil.createPath
@@ -78,13 +83,13 @@ import com.geeksville.mesh.util.UnitConversions.celsiusToFahrenheit
 
 @Suppress("MagicNumber")
 private enum class Environment(val color: Color) {
-    TEMPERATURE(Color.Red),
-    RELATIVE_HUMIDITY(Color.Blue),
+    TEMPERATURE(Red),
+    RELATIVE_HUMIDITY(Blue),
     SOIL_TEMPERATURE(Pink),
     SOIL_MOISTURE(Purple),
-    BAROMETRIC_PRESSURE(Color.Green),
-    GAS_RESISTANCE(Color.Yellow),
-    IAQ(Color.Magenta)
+    BAROMETRIC_PRESSURE(Green),
+    GAS_RESISTANCE(Yellow),
+    IAQ(Magenta),
 }
 
 private const val CHART_WEIGHT = 1f
@@ -92,105 +97,74 @@ private const val Y_AXIS_WEIGHT = 0.1f
 // EnvironmentMetrics can have 1 or 2 Y-axis labels depending on whether barometric pressure is plotted
 // We'll calculate this dynamically in the chart function
 
-private val LEGEND_DATA_1 = listOf(
-    LegendData(
-        nameRes = R.string.temperature,
-        color = Environment.TEMPERATURE.color,
-        isLine = true
-    ),
-    LegendData(
-        nameRes = R.string.humidity,
-        color = Environment.HUMIDITY.color,
-        isLine = true
-    ),
-)
-private val LEGEND_DATA_2 = listOf(
-    LegendData(
-        nameRes = R.string.iaq,
-        color = Environment.IAQ.color,
-        isLine = true
-    ),
-    LegendData(
-        nameRes = R.string.baro_pressure,
-        color = Environment.BAROMETRIC_PRESSURE.color,
-        isLine = true
+private val LEGEND_DATA_1 =
+    listOf(
+        LegendData(nameRes = R.string.temperature, color = Environment.TEMPERATURE.color, isLine = true),
+        LegendData(nameRes = R.string.humidity, color = Environment.HUMIDITY.color, isLine = true),
     )
-)
-private val LEGEND_DATA_3 = listOf(
-    LegendData(
-        nameRes = R.string.soil_temperature,
-        color = Environment.SOIL_TEMPERATURE.color,
-        isLine = true
-    ),
-    LegendData(
-        nameRes = R.string.soil_moisture,
-        color = Environment.SOIL_MOISTURE.color,
-        isLine = true
-    ),
-)
+private val LEGEND_DATA_2 =
+    listOf(
+        LegendData(nameRes = R.string.iaq, color = Environment.IAQ.color, isLine = true),
+        LegendData(nameRes = R.string.baro_pressure, color = Environment.BAROMETRIC_PRESSURE.color, isLine = true),
+    )
+private val LEGEND_DATA_3 =
+    listOf(
+        LegendData(nameRes = R.string.soil_temperature, color = Environment.SOIL_TEMPERATURE.color, isLine = true),
+        LegendData(nameRes = R.string.soil_moisture, color = Environment.SOIL_MOISTURE.color, isLine = true),
+    )
 
 @Composable
-fun EnvironmentMetricsScreen(
-    viewModel: MetricsViewModel = hiltViewModel(),
-) {
+fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
     val selectedTimeFrame by viewModel.timeFrame.collectAsState()
     val graphData = environmentState.environmentMetricsFiltered(selectedTimeFrame, state.isFahrenheit)
     val data = graphData.metrics
 
-    val processedTelemetries: List<Telemetry> = if (state.isFahrenheit) {
-        data.map { telemetry ->
-            val temperatureFahrenheit =
-                celsiusToFahrenheit(telemetry.environmentMetrics.temperature)
-            val soilTemperatureFahrenheit =
-                celsiusToFahrenheit(telemetry.environmentMetrics.soilTemperature)
-            telemetry.copy {
-                environmentMetrics = telemetry.environmentMetrics.copy {
-                    temperature = temperatureFahrenheit }
-                environmentMetrics = telemetry.environmentMetrics.copy {
-                    soilTemperature = soilTemperatureFahrenheit }
+    val processedTelemetries: List<Telemetry> =
+        if (state.isFahrenheit) {
+            data.map { telemetry ->
+                val temperatureFahrenheit = celsiusToFahrenheit(telemetry.environmentMetrics.temperature)
+                val soilTemperatureFahrenheit = celsiusToFahrenheit(telemetry.environmentMetrics.soilTemperature)
+                telemetry.copy {
+                    environmentMetrics =
+                        telemetry.environmentMetrics.copy {
+                            temperature = temperatureFahrenheit
+                            soilTemperature = soilTemperatureFahrenheit
+                        }
+                }
             }
+        } else {
+            data
         }
-    } else {
-        data
-    }
 
     var displayInfoDialog by remember { mutableStateOf(false) }
     Column {
         if (displayInfoDialog) {
             LegendInfoDialog(
-                pairedRes = listOf(
-                    Pair(R.string.iaq, R.string.iaq_definition)
-                ),
-                onDismiss = { displayInfoDialog = false }
+                pairedRes = listOf(Pair(R.string.iaq, R.string.iaq_definition)),
+                onDismiss = { displayInfoDialog = false },
             )
         }
 
         EnvironmentMetricsChart(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(fraction = 0.33f),
+            modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
             telemetries = processedTelemetries.reversed(),
             graphData = graphData,
             selectedTimeFrame,
-            promptInfoDialog = { displayInfoDialog = true }
+            promptInfoDialog = { displayInfoDialog = true },
         )
 
         SlidingSelector(
             TimeFrame.entries.toList(),
             selectedTimeFrame,
-            onOptionSelected = { viewModel.setTimeFrame(it) }
+            onOptionSelected = { viewModel.setTimeFrame(it) },
         ) {
             OptionLabel(stringResource(it.strRes))
         }
 
-        LazyColumn(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            items(processedTelemetries) { telemetry ->
-                EnvironmentMetricsCard(telemetry, state.isFahrenheit)
-            }
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            items(processedTelemetries) { telemetry -> EnvironmentMetricsCard(telemetry, state.isFahrenheit) }
         }
     }
 }
@@ -203,7 +177,7 @@ private fun EnvironmentMetricsChart(
     telemetries: List<Telemetry>,
     graphData: EnvironmentGraphingData,
     selectedTime: TimeFrame,
-    promptInfoDialog: () -> Unit
+    promptInfoDialog: () -> Unit,
 ) {
     ChartHeader(amount = telemetries.size)
     if (telemetries.isEmpty()) {
@@ -215,9 +189,7 @@ private fun EnvironmentMetricsChart(
 
     val scrollState = rememberScrollState()
     val screenWidth = LocalWindowInfo.current.containerSize.width
-    val dp by remember(key1 = selectedTime) {
-        mutableStateOf(selectedTime.dp(screenWidth, time = timeDiff.toLong()))
-    }
+    val dp by remember(key1 = selectedTime) { mutableStateOf(selectedTime.dp(screenWidth, time = timeDiff.toLong())) }
 
     val shouldPlot = graphData.shouldPlot
 
@@ -237,10 +209,7 @@ private fun EnvironmentMetricsChart(
         visibleOldest to visibleNewest
     }
 
-    TimeLabels(
-        oldest = visibleTimeRange.first,
-        newest = visibleTimeRange.second
-    )
+    TimeLabels(oldest = visibleTimeRange.first, newest = visibleTimeRange.second)
 
     Spacer(modifier = Modifier.height(16.dp))
 
@@ -257,26 +226,20 @@ private fun EnvironmentMetricsChart(
                 modifier = modifier.weight(weight = Y_AXIS_WEIGHT),
                 Environment.BAROMETRIC_PRESSURE.color,
                 minValue = pressureMin,
-                maxValue = pressureMax
+                maxValue = pressureMax,
             )
         }
         Box(
             contentAlignment = Alignment.TopStart,
-            modifier = Modifier
-                .horizontalScroll(state = scrollState, reverseScrolling = true)
-                .weight(weight = 1f)
+            modifier = Modifier.horizontalScroll(state = scrollState, reverseScrolling = true).weight(weight = 1f),
         ) {
-
-            HorizontalLinesOverlay(
-                modifier.width(dp),
-                lineColors = List(size = 5) { graphColor }
-            )
+            HorizontalLinesOverlay(modifier.width(dp), lineColors = List(size = 5) { graphColor })
 
             TimeAxisOverlay(
                 modifier = modifier.width(dp),
                 oldest = oldest,
                 newest = newest,
-                selectedTime.lineInterval()
+                selectedTime.lineInterval(),
             )
 
             Canvas(modifier = modifier.width(dp)) {
@@ -286,7 +249,6 @@ private fun EnvironmentMetricsChart(
                 var index: Int
                 var first: Int
                 for (metric in Environment.entries) {
-
                     if (!shouldPlot[metric.ordinal]) {
                         continue
                     }
@@ -298,26 +260,27 @@ private fun EnvironmentMetricsChart(
                     while (index < telemetries.size) {
                         first = index
                         val path = Path()
-                        index = createPath(
-                            telemetries = telemetries,
-                            index = index,
-                            path = path,
-                            oldestTime = oldest,
-                            timeRange = timeDiff,
-                            width = width,
-                            timeThreshold = selectedTime.timeThreshold()
-                        ) { i ->
-                            val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
-                            val ratio = (metric.getValue(telemetry) - min) / diff
-                            val y = height - (ratio * height)
-                            return@createPath y
-                        }
+                        index =
+                            createPath(
+                                telemetries = telemetries,
+                                index = index,
+                                path = path,
+                                oldestTime = oldest,
+                                timeRange = timeDiff,
+                                width = width,
+                                timeThreshold = selectedTime.timeThreshold(),
+                            ) { i ->
+                                val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
+                                val ratio = (metric.getValue(telemetry) - min) / diff
+                                val y = height - (ratio * height)
+                                return@createPath y
+                            }
                         drawPathWithGradient(
                             path = path,
                             color = metric.color,
                             height = height,
                             x1 = ((telemetries[index - 1].time - oldest).toFloat() / timeDiff) * width,
-                            x2 = ((telemetries[first].time - oldest).toFloat() / timeDiff) * width
+                            x2 = ((telemetries[first].time - oldest).toFloat() / timeDiff) * width,
                         )
                     }
                 }
@@ -327,7 +290,7 @@ private fun EnvironmentMetricsChart(
             modifier = modifier.weight(weight = Y_AXIS_WEIGHT),
             graphColor,
             minValue = rightMin,
-            maxValue = rightMax
+            maxValue = rightMax,
         )
     }
 
@@ -345,91 +308,72 @@ private fun EnvironmentMetricsChart(
 private fun EnvironmentMetricsCard(telemetry: Telemetry, environmentDisplayFahrenheit: Boolean) {
     val envMetrics = telemetry.environmentMetrics
     val time = telemetry.time * MS_PER_SEC
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-    ) {
+    Card(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp)) {
         Surface {
             SelectionContainer {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(8.dp)
-                ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                     /* Time and Temperature */
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(
                             text = DATE_TIME_FORMAT.format(time),
                             style = TextStyle(fontWeight = FontWeight.Bold),
-                            fontSize = MaterialTheme.typography.labelLarge.fontSize
+                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
                         )
                         val textFormat = if (environmentDisplayFahrenheit) "%s %.1f°F" else "%s %.1f°C"
                         Text(
-                            text = textFormat.format(
-                                stringResource(id = R.string.temperature),
-                                envMetrics.temperature
-                            ),
+                            text = textFormat.format(stringResource(id = R.string.temperature), envMetrics.temperature),
                             color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = MaterialTheme.typography.labelLarge.fontSize
+                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
                         )
                     }
 
                     Spacer(modifier = Modifier.height(4.dp))
 
                     /* Humidity and Barometric Pressure */
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Text(
-                            text = "%s %.2f%%".format(
-                                stringResource(id = R.string.humidity),
-                                envMetrics.relativeHumidity,
-                            ),
+                            text =
+                            "%s %.2f%%".format(stringResource(id = R.string.humidity), envMetrics.relativeHumidity),
                             color = MaterialTheme.colorScheme.onSurface,
-                            fontSize = MaterialTheme.typography.labelLarge.fontSize
+                            fontSize = MaterialTheme.typography.labelLarge.fontSize,
                         )
                         if (envMetrics.barometricPressure > 0) {
                             Text(
                                 text = "%.2f hPa".format(envMetrics.barometricPressure),
                                 color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = MaterialTheme.typography.labelLarge.fontSize
+                                fontSize = MaterialTheme.typography.labelLarge.fontSize,
                             )
                         }
                     }
 
                     /* Soil Moisture and Soil Temperature */
                     val soilMoistureRange = 0..100
-                    if (telemetry.environmentMetrics.hasSoilTemperature() ||
-                        telemetry.environmentMetrics.soilMoisture in soilMoistureRange) {
+                    if (
+                        telemetry.environmentMetrics.hasSoilTemperature() ||
+                        telemetry.environmentMetrics.soilMoisture in soilMoistureRange
+                    ) {
                         Spacer(modifier = Modifier.height(4.dp))
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
+                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                             val soilTemperatureTextFormat =
                                 if (environmentDisplayFahrenheit) "%s %.1f°F" else "%s %.1f°C"
                             val soilMoistureTextFormat = "%s %d%%"
                             Text(
-                                text = soilMoistureTextFormat.format(
+                                text =
+                                soilMoistureTextFormat.format(
                                     stringResource(R.string.soil_moisture),
-                                    envMetrics.soilMoisture
+                                    envMetrics.soilMoisture,
                                 ),
                                 color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = MaterialTheme.typography.labelLarge.fontSize
+                                fontSize = MaterialTheme.typography.labelLarge.fontSize,
                             )
                             Text(
-                                text = soilTemperatureTextFormat.format(
+                                text =
+                                soilTemperatureTextFormat.format(
                                     stringResource(R.string.soil_temperature),
-                                    envMetrics.soilTemperature
+                                    envMetrics.soilTemperature,
                                 ),
                                 color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = MaterialTheme.typography.labelLarge.fontSize
+                                fontSize = MaterialTheme.typography.labelLarge.fontSize,
                             )
                         }
                     }
@@ -437,21 +381,14 @@ private fun EnvironmentMetricsCard(telemetry: Telemetry, environmentDisplayFahre
                     if (telemetry.environmentMetrics.hasIaq()) {
                         Spacer(modifier = Modifier.height(4.dp))
                         /* Air Quality */
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-
-                        ) {
+                        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                             Text(
                                 text = stringResource(R.string.iaq),
                                 color = MaterialTheme.colorScheme.onSurface,
-                                fontSize = MaterialTheme.typography.labelLarge.fontSize
+                                fontSize = MaterialTheme.typography.labelLarge.fontSize,
                             )
                             Spacer(modifier = Modifier.width(4.dp))
-                            IndoorAirQuality(
-                                iaq = telemetry.environmentMetrics.iaq,
-                                displayMode = IaqDisplayMode.Dot
-                            )
+                            IndoorAirQuality(iaq = telemetry.environmentMetrics.iaq, displayMode = IaqDisplayMode.Dot)
                         }
                     }
                 }

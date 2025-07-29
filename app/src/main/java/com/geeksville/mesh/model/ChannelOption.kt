@@ -22,13 +22,8 @@ import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.ModemPreset
 import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.RegionCode
 import kotlin.math.floor
 
-/**
- * hash a string into an integer using the djb2 algorithm by Dan Bernstein
- * http://www.cse.yorku.ca/~oz/hash.html
- */
-private fun hash(
-    name: String
-): UInt { // using UInt instead of Long to match RadioInterface.cpp results
+/** hash a string into an integer using the djb2 algorithm by Dan Bernstein http://www.cse.yorku.ca/~oz/hash.html */
+private fun hash(name: String): UInt { // using UInt instead of Long to match RadioInterface.cpp results
     var hash = 5381u
     for (c in name) {
         hash += (hash shl 5) + c.code.toUInt()
@@ -44,20 +39,19 @@ private val ModemPreset.bandwidth: Float
         return 0f
     }
 
-private fun LoRaConfig.bandwidth(regionInfo: RegionInfo?) =
-    if (usePreset) {
-        modemPreset.bandwidth * if (regionInfo?.wideLora == true) 3.25f else 1f
-    } else {
-        when (bandwidth) {
-            31 -> .03125f
-            62 -> .0625f
-            200 -> .203125f
-            400 -> .40625f
-            800 -> .8125f
-            1600 -> 1.6250f
-            else -> bandwidth / 1000f
-        }
+private fun LoRaConfig.bandwidth(regionInfo: RegionInfo?) = if (usePreset) {
+    modemPreset.bandwidth * if (regionInfo?.wideLora == true) 3.25f else 1f
+} else {
+    when (bandwidth) {
+        31 -> .03125f
+        62 -> .0625f
+        200 -> .203125f
+        400 -> .40625f
+        800 -> .8125f
+        1600 -> 1.6250f
+        else -> bandwidth / 1000f
     }
+}
 
 val LoRaConfig.numChannels: Int
     get() {
@@ -73,19 +67,17 @@ val LoRaConfig.numChannels: Int
         return if (num > 0) num.toInt() else 1
     }
 
-internal fun LoRaConfig.channelNum(primaryName: String): Int =
-    when {
-        channelNum != 0 -> channelNum
-        numChannels == 0 -> 0
-        else -> (hash(primaryName) % numChannels.toUInt()).toInt() + 1
-    }
+internal fun LoRaConfig.channelNum(primaryName: String): Int = when {
+    channelNum != 0 -> channelNum
+    numChannels == 0 -> 0
+    else -> (hash(primaryName) % numChannels.toUInt()).toInt() + 1
+}
 
 internal fun LoRaConfig.radioFreq(channelNum: Int): Float {
     if (overrideFrequency != 0f) return overrideFrequency + frequencyOffset
     val regionInfo = RegionInfo.fromRegionCode(region)
     return if (regionInfo != null) {
-        (regionInfo.freqStart + bandwidth(regionInfo) / 2) +
-            (channelNum - 1) * bandwidth(regionInfo)
+        (regionInfo.freqStart + bandwidth(regionInfo) / 2) + (channelNum - 1) * bandwidth(regionInfo)
     } else {
         0f
     }
@@ -127,11 +119,11 @@ enum class RegionInfo(
     /**
      * European Union 868MHz
      *
-     * Special Note: The link above describes LoRaWAN's band plan, stating a power limit of 16 dBm.
-     * This is their own suggested specification, we do not need to follow it. The European Union
-     * regulations clearly state that the power limit for this frequency range is 500 mW, or 27 dBm.
-     * It also states that we can use interference avoidance and spectrum access techniques (such as
-     * LBT + AFA) to avoid a duty cycle. (Please refer to line P page 22 of this document.)
+     * Special Note: The link above describes LoRaWAN's band plan, stating a power limit of 16 dBm. This is their own
+     * suggested specification, we do not need to follow it. The European Union regulations clearly state that the power
+     * limit for this frequency range is 500 mW, or 27 dBm. It also states that we can use interference avoidance and
+     * spectrum access techniques (such as LBT + AFA) to avoid a duty cycle. (Please refer to line P page 22 of this
+     * document.)
      *
      * @see
      *   [ETSI EN 300 220-2 V3.1.1](https://www.etsi.org/deliver/etsi_en/300200_300299/30022002/03.01.01_60/en_30022002v030101p.pdf)
@@ -152,8 +144,7 @@ enum class RegionInfo(
     /**
      * Australia / New Zealand
      *
-     * @see
-     *   [IoT Spectrum Fact Sheet](https://www.iot.org.au/wp/wp-content/uploads/2016/12/IoTSpectrumFactSheet.pdf)
+     * @see [IoT Spectrum Fact Sheet](https://www.iot.org.au/wp/wp-content/uploads/2016/12/IoTSpectrumFactSheet.pdf)
      * @see
      *   [IoT Spectrum in NZ Briefing Paper](https://iotalliance.org.nz/wp-content/uploads/sites/4/2019/05/IoT-Spectrum-in-NZ-Briefing-Paper.pdf)
      */
@@ -169,8 +160,8 @@ enum class RegionInfo(
     KR(RegionCode.KR, "Korea", 920.0f, 923.0f),
 
     /**
-     * Taiwan, 920-925Mhz, limited to 0.5W indoor or coastal, 1.0W outdoor. 5.8.1 in the Low-power
-     * Radio-frequency Devices Technical Regulations
+     * Taiwan, 920-925Mhz, limited to 0.5W indoor or coastal, 1.0W outdoor. 5.8.1 in the Low-power Radio-frequency
+     * Devices Technical Regulations
      *
      * @see [NCC Taiwan](https://www.ncc.gov.tw/english/files/23070/102_5190_230703_1_doc_C.PDF)
      * @see [National Gazette](https://gazette.nat.gov.tw/egFront/e_detail.do?metaid=147283)
@@ -181,8 +172,7 @@ enum class RegionInfo(
      * Russia Note:
      * - We do LBT, so 100% is allowed.
      *
-     * @see
-     *   [Digital.gov.ru](https://digital.gov.ru/uploaded/files/prilozhenie-12-k-reshenyu-gkrch-18-46-03-1.pdf)
+     * @see [Digital.gov.ru](https://digital.gov.ru/uploaded/files/prilozhenie-12-k-reshenyu-gkrch-18-46-03-1.pdf)
      */
     RU(RegionCode.RU, "Russia", 868.7f, 869.2f),
 
@@ -192,8 +182,7 @@ enum class RegionInfo(
     /**
      * New Zealand 865MHz
      *
-     * @see
-     *   [RSM NZ](https://rrf.rsm.govt.nz/smart-web/smart/page/-smart/domain/licence/LicenceSummary.wdk?id=219752)
+     * @see [RSM NZ](https://rrf.rsm.govt.nz/smart-web/smart/page/-smart/domain/licence/LicenceSummary.wdk?id=219752)
      * @see
      *   [IoT Spectrum in NZ Briefing Paper](https://iotalliance.org.nz/wp-content/uploads/sites/4/2019/05/IoT-Spectrum-in-NZ-Briefing-Paper.pdf)
      */
@@ -219,17 +208,15 @@ enum class RegionInfo(
     /**
      * Malaysia 433MHz 433 - 435 MHz at 100mW, no restrictions.
      *
-     * @see
-     *   [MCMC](https://www.mcmc.gov.my/skmmgovmy/media/General/pdf/Short-Range-Devices-Specification.pdf)
+     * @see [MCMC](https://www.mcmc.gov.my/skmmgovmy/media/General/pdf/Short-Range-Devices-Specification.pdf)
      */
     MY_433(RegionCode.MY_433, "Malaysia 433MHz", 433.0f, 435.0f),
 
     /**
-     * Malaysia 919MHz 919 - 923 Mhz at 500mW, no restrictions. 923 - 924 MHz at 500mW with 1% duty
-     * cycle OR frequency hopping. Frequency hopping is used for 919 - 923 MHz.
+     * Malaysia 919MHz 919 - 923 Mhz at 500mW, no restrictions. 923 - 924 MHz at 500mW with 1% duty cycle OR frequency
+     * hopping. Frequency hopping is used for 919 - 923 MHz.
      *
-     * @see
-     *   [MCMC](https://www.mcmc.gov.my/skmmgovmy/media/General/pdf/Short-Range-Devices-Specification.pdf)
+     * @see [MCMC](https://www.mcmc.gov.my/skmmgovmy/media/General/pdf/Short-Range-Devices-Specification.pdf)
      */
     MY_919(RegionCode.MY_919, "Malaysia 919MHz", 919.0f, 924.0f),
 
@@ -244,24 +231,21 @@ enum class RegionInfo(
     /**
      * Philippines 433MHz 433 - 434.7 MHz <10 mW erp, NTC approved device required
      *
-     * @see
-     *   [Firmware Issue #4948](https://github.com/meshtastic/firmware/issues/4948#issuecomment-2394926135)
+     * @see [Firmware Issue #4948](https://github.com/meshtastic/firmware/issues/4948#issuecomment-2394926135)
      */
     PH_433(RegionCode.PH_433, "Philippines 433MHz", 433.0f, 434.7f),
 
     /**
      * Philippines 868MHz 868 - 869.4 MHz <25 mW erp, NTC approved device required
      *
-     * @see
-     *   [Firmware Issue #4948](https://github.com/meshtastic/firmware/issues/4948#issuecomment-2394926135)
+     * @see [Firmware Issue #4948](https://github.com/meshtastic/firmware/issues/4948#issuecomment-2394926135)
      */
     PH_868(RegionCode.PH_868, "Philippines 868MHz", 868.0f, 869.4f),
 
     /**
      * Philippines 915MHz 915 - 918 MHz <250 mW EIRP, no external antenna allowed
      *
-     * @see
-     *   [Firmware Issue #4948](https://github.com/meshtastic/firmware/issues/4948#issuecomment-2394926135)
+     * @see [Firmware Issue #4948](https://github.com/meshtastic/firmware/issues/4948#issuecomment-2394926135)
      */
     PH_915(RegionCode.PH_915, "Philippines 915MHz", 915.0f, 918.0f),
 
@@ -271,8 +255,7 @@ enum class RegionInfo(
     /**
      * Australia / New Zealand 433MHz 433.05 - 434.79 MHz, 25mW EIRP max, No duty cycle restrictions
      *
-     * @see
-     *   [ACMA](https://www.acma.gov.au/licences/low-interference-potential-devices-lipd-class-licence)
+     * @see [ACMA](https://www.acma.gov.au/licences/low-interference-potential-devices-lipd-class-licence)
      * @see [NZ Gazette](https://gazette.govt.nz/notice/id/2022-go3100)
      */
     ANZ_433(RegionCode.ANZ_433, "Australia / New Zealand 433MHz", 433.05f, 434.79f),
@@ -285,23 +268,29 @@ enum class RegionInfo(
     KZ_433(RegionCode.KZ_433, "Kazakhstan 433MHz", 433.075f, 434.775f),
 
     /**
-     * Kazakhstan 863MHz 863 - 868 MHz <25 mW EIRP, 500kHz channels allowed, must not be used at
-     * airfields
+     * Kazakhstan 863MHz 863 - 868 MHz <25 mW EIRP, 500kHz channels allowed, must not be used at airfields
      *
      * @see [Firmware Issue #7204](https://github.com/meshtastic/firmware/issues/7204)
      */
     KZ_863(RegionCode.KZ_863, "Kazakhstan 863MHz", 863.0f, 868.0f, wideLora = true),
 
     /**
+     * Nepal 865Mhz 865 - 868 Mhz
+     *
+     * @see [Firmware Issue #7380](https://github.com/meshtastic/firmware/pull/7380)
+     */
+    NP_865(RegionCode.NP_865, "Nepal 865MHz", 865.0f, 868.0f, wideLora = false),
+
+    /**
      * Brazil 902MHz 902 - 907.5 MHz
      *
      * @see [Firmware Issue #7399](https://github.com/meshtastic/firmware/pull/7399)
      */
-    BR_902(RegionCode.BR_902, "Brazil 902MHz", 902.0f, 907.5f, wideLora = false);
+    BR_902(RegionCode.BR_902, "Brazil 902MHz", 902.0f, 907.5f, wideLora = false),
+    ;
 
     companion object {
-        fun fromRegionCode(regionCode: RegionCode): RegionInfo? =
-            entries.find { it.regionCode == regionCode }
+        fun fromRegionCode(regionCode: RegionCode): RegionInfo? = entries.find { it.regionCode == regionCode }
     }
 }
 

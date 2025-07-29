@@ -82,34 +82,29 @@ private fun RowScope.PositionText(text: String, weight: Float) {
     )
 }
 
-private const val Weight10 = .10f
-private const val Weight15 = .15f
-private const val Weight20 = .20f
-private const val Weight40 = .40f
+private const val WEIGHT_10 = .10f
+private const val WEIGHT_15 = .15f
+private const val WEIGHT_20 = .20f
+private const val WEIGHT_40 = .40f
 
 @Composable
 private fun HeaderItem(compactWidth: Boolean) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        PositionText(stringResource(R.string.latitude), Weight20)
-        PositionText(stringResource(R.string.longitude), Weight20)
-        PositionText(stringResource(R.string.sats), Weight10)
-        PositionText(stringResource(R.string.alt), Weight15)
+    Row(modifier = Modifier.fillMaxWidth().padding(8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+        PositionText(stringResource(R.string.latitude), WEIGHT_20)
+        PositionText(stringResource(R.string.longitude), WEIGHT_20)
+        PositionText(stringResource(R.string.sats), WEIGHT_10)
+        PositionText(stringResource(R.string.alt), WEIGHT_15)
         if (!compactWidth) {
-            PositionText("Speed", Weight15)
-            PositionText(stringResource(R.string.heading), Weight15)
+            PositionText(stringResource(R.string.speed), WEIGHT_15)
+            PositionText(stringResource(R.string.heading), WEIGHT_15)
         }
-        PositionText(stringResource(R.string.timestamp), Weight40)
+        PositionText(stringResource(R.string.timestamp), WEIGHT_40)
     }
 }
 
-private const val DegD = 1e-7
-private const val HeadingDeg = 1e-5
-private const val SecondsToMillis = 1000L
+private const val DEG_D = 1e-7
+private const val HEADING_DEG = 1e-5
+private const val SECONDS_TO_MILLIS = 1000L
 
 @Composable
 private fun PositionItem(
@@ -119,36 +114,32 @@ private fun PositionItem(
     system: DisplayUnits,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        PositionText("%.5f".format(position.latitudeI * DegD), Weight20)
-        PositionText("%.5f".format(position.longitudeI * DegD), Weight20)
-        PositionText(position.satsInView.toString(), Weight10)
-        PositionText(position.altitude.metersIn(system).toString(system), Weight15)
+        PositionText("%.5f".format(position.latitudeI * DEG_D), WEIGHT_20)
+        PositionText("%.5f".format(position.longitudeI * DEG_D), WEIGHT_20)
+        PositionText(position.satsInView.toString(), WEIGHT_10)
+        PositionText(position.altitude.metersIn(system).toString(system), WEIGHT_15)
         if (!compactWidth) {
-            PositionText("${position.groundSpeed} Km/h", Weight15)
-            PositionText("%.0f°".format(position.groundTrack * HeadingDeg), Weight15)
+            PositionText("${position.groundSpeed} Km/h", WEIGHT_15)
+            PositionText("%.0f°".format(position.groundTrack * HEADING_DEG), WEIGHT_15)
         }
-        PositionText(formatPositionTime(position, dateFormat), Weight40)
+        PositionText(formatPositionTime(position, dateFormat), WEIGHT_40)
     }
 }
 
 @Composable
-private fun formatPositionTime(
-    position: MeshProtos.Position,
-    dateFormat: DateFormat
-): String {
+private fun formatPositionTime(position: MeshProtos.Position, dateFormat: DateFormat): String {
     val currentTime = System.currentTimeMillis()
     val sixMonthsAgo = currentTime - 180.days.inWholeMilliseconds
-    val isOlderThanSixMonths = position.time * SecondsToMillis < sixMonthsAgo
-    val timeText = if (isOlderThanSixMonths) {
-        stringResource(id = R.string.unknown_age)
-    } else {
-        dateFormat.format(position.time * SecondsToMillis)
-    }
+    val isOlderThanSixMonths = position.time * SECONDS_TO_MILLIS < sixMonthsAgo
+    val timeText =
+        if (isOlderThanSixMonths) {
+            stringResource(id = R.string.unknown_age)
+        } else {
+            dateFormat.format(position.time * SECONDS_TO_MILLIS)
+        }
     return timeText
 }
 
@@ -161,9 +152,7 @@ private fun ActionButtons(
     modifier: Modifier = Modifier,
 ) {
     FlowRow(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 16.dp),
+        modifier = modifier.fillMaxWidth().padding(horizontal = 24.dp, vertical = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
@@ -171,63 +160,43 @@ private fun ActionButtons(
             modifier = Modifier.weight(1f),
             onClick = onClear,
             enabled = clearButtonEnabled,
-            colors = ButtonDefaults.outlinedButtonColors(
-                contentColor = MaterialTheme.colorScheme.error,
-            )
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.error),
         ) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = stringResource(id = R.string.clear),
-            )
+            Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(id = R.string.clear))
             Spacer(Modifier.width(8.dp))
-            Text(
-                text = stringResource(id = R.string.clear),
-            )
+            Text(text = stringResource(id = R.string.clear))
         }
 
-        OutlinedButton(
-            modifier = Modifier.weight(1f),
-            onClick = onSave,
-            enabled = saveButtonEnabled,
-        ) {
-            Icon(
-                imageVector = Icons.Default.Save,
-                contentDescription = stringResource(id = R.string.save),
-            )
+        OutlinedButton(modifier = Modifier.weight(1f), onClick = onSave, enabled = saveButtonEnabled) {
+            Icon(imageVector = Icons.Default.Save, contentDescription = stringResource(id = R.string.save))
             Spacer(Modifier.width(8.dp))
-            Text(
-                text = stringResource(id = R.string.save),
-            )
+            Text(text = stringResource(id = R.string.save))
         }
     }
 }
 
 @Composable
-fun PositionLogScreen(
-    viewModel: MetricsViewModel = hiltViewModel(),
-) {
+fun PositionLogScreen(viewModel: MetricsViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    val exportPositionLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
-        if (it.resultCode == Activity.RESULT_OK) {
-            it.data?.data?.let { uri -> viewModel.savePositionCSV(uri) }
+    val exportPositionLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == Activity.RESULT_OK) {
+                it.data?.data?.let { uri -> viewModel.savePositionCSV(uri) }
+            }
         }
-    }
 
-    var clearButtonEnabled by rememberSaveable(state.positionLogs) {
-        mutableStateOf(state.positionLogs.isNotEmpty())
-    }
+    var clearButtonEnabled by rememberSaveable(state.positionLogs) { mutableStateOf(state.positionLogs.isNotEmpty()) }
 
     BoxWithConstraints {
         val compactWidth = maxWidth < 600.dp
         Column {
-            val textStyle = if (compactWidth) {
-                MaterialTheme.typography.bodySmall
-            } else {
-                LocalTextStyle.current
-            }
+            val textStyle =
+                if (compactWidth) {
+                    MaterialTheme.typography.bodySmall
+                } else {
+                    LocalTextStyle.current
+                }
             CompositionLocalProvider(LocalTextStyle provides textStyle) {
                 HeaderItem(compactWidth)
                 PositionList(compactWidth, state.positionLogs, state.displayUnits)
@@ -241,11 +210,12 @@ fun PositionLogScreen(
                 },
                 saveButtonEnabled = state.hasPositionLogs(),
                 onSave = {
-                    val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "application/*"
-                        putExtra(Intent.EXTRA_TITLE, "position.csv")
-                    }
+                    val intent =
+                        Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            type = "application/*"
+                            putExtra(Intent.EXTRA_TITLE, "position.csv")
+                        }
                     exportPositionLauncher.launch(intent)
                 },
             )
@@ -259,28 +229,24 @@ private fun ColumnScope.PositionList(
     positions: List<MeshProtos.Position>,
     displayUnits: DisplayUnits,
 ) {
-    val dateFormat = remember {
-        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
-    }
+    val dateFormat = remember { DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM) }
 
-    LazyColumn(
-        modifier = Modifier.weight(1f),
-        horizontalAlignment = Alignment.CenterHorizontally,
-    ) {
-        items(positions) { position ->
-            PositionItem(compactWidth, position, dateFormat, displayUnits)
-        }
+    LazyColumn(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+        items(positions) { position -> PositionItem(compactWidth, position, dateFormat, displayUnits) }
     }
 }
 
 @Suppress("MagicNumber")
-private val testPosition = MeshProtos.Position.newBuilder().apply {
-    latitudeI = 297604270
-    longitudeI = -953698040
-    altitude = 1230
-    satsInView = 7
-    time = (System.currentTimeMillis() / 1000).toInt()
-}.build()
+private val testPosition =
+    MeshProtos.Position.newBuilder()
+        .apply {
+            latitudeI = 297604270
+            longitudeI = -953698040
+            altitude = 1230
+            satsInView = 7
+            time = (System.currentTimeMillis() / 1000).toInt()
+        }
+        .build()
 
 @Preview(showBackground = true)
 @Composable
@@ -300,12 +266,7 @@ private fun PositionItemPreview() {
 private fun ActionButtonsPreview() {
     AppTheme {
         Column(Modifier.fillMaxSize(), Arrangement.Bottom) {
-            ActionButtons(
-                clearButtonEnabled = true,
-                onClear = {},
-                saveButtonEnabled = true,
-                onSave = {},
-            )
+            ActionButtons(clearButtonEnabled = true, onClear = {}, saveButtonEnabled = true, onSave = {})
         }
     }
 }

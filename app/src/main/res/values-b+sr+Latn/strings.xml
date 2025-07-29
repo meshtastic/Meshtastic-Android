@@ -16,11 +16,6 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
-    <string name="main_tab_messages">Поруке</string>
-    <string name="main_tab_users">Корисници</string>
-    <string name="main_tab_map">Мапа</string>
-    <string name="main_tab_channel">Kanal</string>
-    <string name="main_tab_settings">Подешавања</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">očisti filter čvorova</string>
     <string name="node_filter_include_unknown">Uključi nepoznato</string>
@@ -74,79 +69,47 @@
     <string name="config_device_ledHeartbeatDisabled_summary">Kontroliše trepćući LED na uređaju. Kod većine uređaja ovo će kontrolisati jedan od do četiri LED-a, punjač i GPS LED-ovi nisu kontrolisani.</string>
     <string name="config_device_transmitOverLora_summary">Da li bi osim slanja na MQTT i PhoneAPI, naš NeighborInfo trebalo da se prenosi preko LoRa. Nije dostupno na kanalu sa podrazumevanim ključem i imenom.</string>
     <string name="config_security_public_key">Javni ključ</string>
-    <string name="config_security_private_key">Privatni ključ</string>
     <string name="channel_name">Naziv kanala</string>
-    <string name="channel_options">Opcije kanala</string>
     <string name="qr_code">QR kod</string>
-    <string name="unset">Ukloni</string>
-    <string name="connection_status">Status veze</string>
     <string name="application_icon">ikonica aplikacije</string>
     <string name="unknown_username">Nepoznato korisničko ime</string>
     <string name="send">Pošalji</string>
-    <string name="send_text">Pošalji tekst</string>
     <string name="warning_not_paired">Још нисте упарили Мештастик компатибилан радио са овим телефоном. Молимо вас да упарите уређај и поставите своје корисничко име.\n\nОва апликација отвореног кода је у развоју, ако нађете проблеме, молимо вас да их објавите на нашем форуму: https://github.com/orgs/meshtastic/discussions\n\nЗа више информација посетите нашу веб страницу - www.meshtastic.org.</string>
     <string name="you">Ti</string>
-    <string name="your_name">Tvoje ime</string>
     <string name="analytics_okay">Anonimne statistike korišćenja i izveštaji o greškama.</string>
-    <string name="looking_for_meshtastic_devices">Traže se Meshtastic uređaji…</string>
-    <string name="starting_pairing">Započinjem uparivanje</string>
-    <string name="url_for_join">URL za pridruživanje Meshtastic mreži</string>
     <string name="accept">Prihvati</string>
     <string name="cancel">Otkaži</string>
-    <string name="change_channel">Promeni kanal</string>
-    <string name="are_you_sure_channel">Da li ste sigurni da želite da promenite kanal? Sva komunikacija sa drugim čvorovima će prestati dok ne podelite nove postavke kanala.</string>
     <string name="new_channel_rcvd">Primljen novi link kanala</string>
     <string name="permission_missing">Meshtastic treba dozvolu za lokaciju i lokacija mora biti uključena da bi se pronašli novi uređaji preko Bluetooth-a. Možete je ponovo isključiti nakon toga.</string>
     <string name="report_bug">Prijavi grešku</string>
     <string name="report_a_bug">Prijavi grešku</string>
     <string name="report_bug_text">\"Da li ste sigurni da želite da prijavite grešku? Nakon prijavljivanja, molimo vas da postavite na https://github.com/orgs/meshtastic/discussions kako bismo mogli da povežemo izveštaj sa onim što ste pronašli.</string>
     <string name="report">Izveštaj</string>
-    <string name="not_paired_yet">Još uvek niste uparili radio uređaj.</string>
-    <string name="change_radio">Promeni radio uređaj</string>
     <string name="pairing_completed">Uparivanje završeno, pokrećem servis</string>
     <string name="pairing_failed_try_again">Uparivanje neuspešno, molim izaberite ponovo</string>
     <string name="location_disabled">Pristup lokaciji je isključen, ne može se obezbediti pozicija mreži.</string>
     <string name="share">Podeli</string>
     <string name="disconnected">Raskačeno</string>
     <string name="device_sleeping">Uređaj je u stanju spavanja</string>
-    <string name="update_firmware">Ažuriraj firmver</string>
     <string name="ip_address">IP adresa: </string>
     <string name="connected">Povezan na radio uređaj</string>
     <string name="connected_to">Povezan na radio uređaj (%s)</string>
     <string name="not_connected">Nije povezan</string>
     <string name="connected_sleeping">Povezan na radio uređaj, ali uređaj je u stanju spavanja</string>
-    <string name="update_to">Ažururaj do %s</string>
     <string name="app_too_old">Nepohodno je ažuriranje aplikacije </string>
     <string name="must_update">Morate da ažurirate ovu aplikaciju na prodavnici aplikacija (ili Github-u). Previše je stara da bi razgovarala sa ovim radio firmverom. Molimo vas da pročitate naše <a href="https://meshtastic.org/docs/software/android/installation">dokumente</a> o ovoj temi.</string>
     <string name="none">Ništa (onemogućeno)</string>
-    <string name="modem_config_turbo">Kratki domet / Turbo</string>
-    <string name="modem_config_short">Kratki domet / Brzo</string>
-    <string name="modem_config_medium">Medium Range / Fast</string>
-    <string name="modem_config_long">Dugi domet / Brzo</string>
-    <string name="modem_config_mod_long">Дуги домет / Умерено</string>
-    <string name="modem_config_very_long">Veoma dugi domet / Sporo</string>
-    <string name="modem_config_unrecognized">NIJE PREPOZNATO</string>
     <string name="meshtastic_service_notifications">Servisna obaveštenja</string>
-    <string name="location_disabled_warning">Lokacija mora biti uključena da bi se pronašli novi uređaji preko Bluetooth-a. Možete je ponovo isključiti nakon toga.</string>
     <string name="about">O nama</string>
-    <string name="text_messages">Tekstualna poruka</string>
     <string name="channel_invalid">Ovaj URL kanala je nevažeći i ne može se koristiti.</string>
     <string name="debug_panel">Panel za otklanjanje grešaka</string>
-    <string name="debug_last_messages">500 poslednjih poruka</string>
     <string name="clear">Očisti</string>
-    <string name="updating_firmware">Ažuriranje firmvera, sačekajte do osam minuta…</string>
-    <string name="update_successful">Ažuriranje uspešno izvršeno</string>
-    <string name="update_failed">Ažuriranje nije uspelo</string>
-    <string name="message_reception_time">vreme prijema poruke</string>
-    <string name="message_reception_state">status prijema poruke</string>
     <string name="message_delivery_status">Status prijema poruke</string>
     <string name="meshtastic_alerts_notifications">Обавештења о упозорењима</string>
-    <string name="protocol_stress_test">Тест стреса протокола</string>
     <string name="firmware_too_old">Ажурирање фирмвера је неопходно.</string>
     <string name="firmware_old">Радио фирмвер је превише стар да би комуницирао са овом апликацијом. За више информација о овоме погледајте <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">наш водич за инсталацију фирмвера</a>.</string>
     <string name="okay">Океј</string>
     <string name="must_set_region">Мораш одабрати регион!</string>
-    <string name="region">Регион</string>
     <string name="cant_change_no_radio">Није било могуће променити канал, јер радио још није повезан. Молимо покушајте поново.</string>
     <string name="save_messages">Извези rangetest.csv</string>
     <string name="reset">Поново покрени</string>
@@ -154,23 +117,12 @@
     <string name="are_you_sure_change_default">Да ли сте сигурни да желите да промените на подразумевани канал?</string>
     <string name="reset_to_defaults">Врати на подразумевана подешавања</string>
     <string name="apply">Примени</string>
-    <string name="no_app_found">Није пронађена апликација за слање URL-ова</string>
     <string name="theme">Тема</string>
     <string name="theme_light">Светла</string>
     <string name="theme_dark">Тамна</string>
     <string name="theme_system">Прати систем</string>
     <string name="choose_theme">Одабери тему</string>
-    <string name="background_required">Локација у позадини</string>
-    <string name="why_background_required">За ову функцију, морате дозволити приступ локацији опцијом \'Дозволи увек\'.\nОво омогућава Мештастику да чита вашу локацију са паметног телефона и шаље је другим члановима ваше мреже, чак и када је апликација затворена или није у употреби.</string>
-    <string name="required_permissions">Захтева пермисије</string>
     <string name="provide_location_to_mesh">Обезбедите локацију телефона меш мрежи</string>
-    <string name="camera_required">Дозволе за употребу камере</string>
-    <string name="why_camera_required">Мора нам бити омогућен приступ камери да бисмо читали QR кодове. Никакве слике или видео снимци неће бити сачувани.</string>
-    <string name="notification_required">Дозволе за обавештења</string>
-    <string name="why_notification_required">Мештастику је потребна дозвола за обавештења о услугама и порукама.</string>
-    <string name="notification_denied">Дозвола за обавештења је одбијена. Да бисте укључили обавештења, идите на: Подешавања Андроида &gt; Апликације &gt; Мештастик &gt; Обавештења.</string>
-    <string name="modem_config_slow_short">Кратки домет / Споро</string>
-    <string name="modem_config_slow_medium">Средњи домет / Споро</string>
     <plurals name="delete_messages">
         <item quantity="one">Обриши поруку?</item>
         <item quantity="few">Обриши %s порука?</item>
@@ -180,7 +132,6 @@
     <string name="delete_for_everyone">Обриши за све</string>
     <string name="delete_for_me">Обриши за мене</string>
     <string name="select_all">Изабери све</string>
-    <string name="modem_config_slow_long">Дуги домет / Споро</string>
     <string name="map_style_selection">Одабир стила</string>
     <string name="map_download_region">Регион за преузимање</string>
     <string name="name">Назив</string>
@@ -195,12 +146,6 @@
     <string name="reboot">Поново покрени</string>
     <string name="traceroute">Праћење руте</string>
     <string name="intro_show">Прикажи упутства</string>
-    <string name="intro_welcome">Добродошли на Мештастик</string>
-    <string name="intro_welcome_text">Мештастик је платформа за шифровану комуникацију отвореног кода која ради ван мреже. Мештастик радио уређаји формирају меш мрежу и комуницирају користећи LoRA протокол за слање текстуалних порука.</string>
-    <string name="intro_started">…Хајде да почнемо!</string>
-    <string name="intro_started_text">Повежите свој Мештастик уређај користећи блутут, серијску везу или ВајФај. \n\nМожете видети који су уређаји компатибилни на www.meshtastic.org/docs/hardware</string>
-    <string name="intro_encryption">"Постављање шифровања"</string>
-    <string name="intro_encryption_text">Подразумевано је подешен подразумевани кључ за шифровање. Да бисте омогућили сопствени канал и побољшано шифровање, идите на картицу канала и промените назив канала. Ово ће подесити случајни кључ за AES256 шифровање. \n\nДа бисте комуницирали са другим уређајима, они ће морати да скенирају ваш QR код или прате дељени линк за конфигурацију подешавања канала.</string>
     <string name="message">Порука</string>
     <string name="quick_chat">Опције за брзо ћаскање</string>
     <string name="quick_chat_new">Ново брзо ћаскање</string>
@@ -208,12 +153,10 @@
     <string name="quick_chat_append">Надодај на поруку</string>
     <string name="quick_chat_instant">Моментално пошаљи</string>
     <string name="factory_reset">Рестартовање на фабричка подешавања</string>
-    <string name="factory_reset_description">Ово ће избрисати сва подешавања уређаја која сте направили.</string>
     <string name="bluetooth_disabled">Блутут је онемогућен</string>
     <string name="permission_missing_31">Мештастик захтева дозволу за приступ уређајима у близини да би пронашли и повезали се са уређајима преко блутута. Можете га искључити када се не користи.</string>
     <string name="direct_message">Директне поруке</string>
     <string name="nodedb_reset">Ресетовање базе чворова</string>
-    <string name="nodedb_reset_description">Ово ће очистити све чворове са листе.</string>
     <string name="delivery_confirmed">Испорука потврђена</string>
     <string name="error">Грешка</string>
     <string name="ignore">Игнориши</string>
@@ -247,7 +190,6 @@
     <string name="error_duty_cycle">Достигнут је лимит циклуса рада. Не могу слати поруке тренутно, молимо вас покушајте касније.</string>
     <string name="remove">Уклони</string>
     <string name="remove_node_text">Овај чвор ће бити уклоњен са вашег списка док ваш чвор поново не добије податке од њега.</string>
-    <string name="mute">Утишај</string>
     <string name="mute_notifications">Утишај нотификације</string>
     <string name="mute_8_hours">8 сати</string>
     <string name="mute_1_week">1 седмица</string>
@@ -292,7 +234,6 @@
     <string name="good">Dobro</string>
     <string name="none_quality">Bez</string>
     <string name="share_to">Podeli na…</string>
-    <string name="share_message">Podeli poruku</string>
     <string name="signal">Signal</string>
     <string name="signal_quality">Kvalitet signala</string>
     <string name="traceroute_log">Dnevnik praćenja rute</string>
@@ -312,10 +253,6 @@
     <string name="unknown_age">Непозната старост</string>
     <string name="copy">Kopiraj</string>
     <string name="alert_bell_text">Karakter zvona za upozorenja!</string>
-    <string name="channel_settings">Подешавања канала</string>
-    <string name="samsung_instructions">Самсунг инструкције</string>
-    <string name="alerts_dnd_request_title">Омогућите критична упозорења да бисте заобишли поставке не узнемиравај</string>
-    <string name="alerts_dnd_request_text"><![CDATA[Да бисте дозволили критична упозорења док је ваш телефон на режиму не узнемиравај - омогућите „надгласати не узнемиравај” за канал упозорења у подешавањима обавештења апликације Месхтастиц.<br/><br/>Корисници компаније Самсунг ће можда морати да додају изузетак у системска подешавања пре него што га омогуће за канал упозорења. <a href="https://www.samsung.com/latin_en/support/mobile-devices/how-to-use-the-do-not-disturb-mode-on-your-galaxy-phone/">Посетите подршку компаније Самсунг за помоћ.</a>.]]></string>
     <string name="critical_alert">Критично упозорење!</string>
     <string name="favorite">Омиљени</string>
     <string name="favorite_add">Додај „%s” у омиљене чворове?</string>
@@ -397,6 +334,7 @@
     <string name="uptime">Време рада</string>
     <string name="timestamp">Временска ознака</string>
     <string name="heading">Смер</string>
+    <string name="speed">Брзина</string>
     <string name="sats">Сателита</string>
     <string name="alt">Висина</string>
     <string name="primary">Примарни</string>
@@ -410,10 +348,7 @@
     <string name="time">Време</string>
     <string name="date">Датум</string>
     <string name="disconnect">Прекините везу</string>
-    <string name="app_intro_back_button">Назад</string>
     <string name="unknown">Непознато</string>
-    <string name="map_type_satellite">Сателит</string>
-    <string name="map_type_hybrid">Хибридни</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->

@@ -17,9 +17,8 @@
 
 package com.geeksville.mesh.ui.map
 
+import android.Manifest // Added for Accompanist
 import android.content.Context
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -67,10 +66,8 @@ import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
-import com.geeksville.mesh.android.getLocationPermissions
 import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.android.hasGps
-import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.model.Node
@@ -89,6 +86,8 @@ import com.geeksville.mesh.util.createLatLongGrid
 import com.geeksville.mesh.util.formatAgo
 import com.geeksville.mesh.util.zoomIn
 import com.geeksville.mesh.waypoint
+import com.google.accompanist.permissions.ExperimentalPermissionsApi // Added for Accompanist
+import com.google.accompanist.permissions.rememberMultiplePermissionsState // Added for Accompanist
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
@@ -201,24 +200,28 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
     builder.show()
 }
 
+/**
+ * Main composable for displaying the map view, including nodes, waypoints, and user location. It handles user
+ * interactions for map manipulation, filtering, and offline caching.
+ *
+ * @param model The [UIViewModel] providing data and state for the map.
+ * @param navigateToNodeDetails Callback to navigate to the details screen of a selected node.
+ */
+@OptIn(ExperimentalPermissionsApi::class) // Added for Accompanist
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
-fun MapView(
-    uiViewModel: UIViewModel = viewModel(),
+fun MapView(uiViewModel: UIViewModel = viewModel(),
     mapViewModel: MapViewModel = viewModel(),
-    navigateToNodeDetails: (Int) -> Unit,
-) {
+    navigateToNodeDetails: (Int) -> Unit) {
     var mapFilterExpanded by remember { mutableStateOf(false) }
 
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsState()
 
-    // UI Elements
     var cacheEstimate by remember { mutableStateOf("") }
 
     var zoomLevelMin by remember { mutableDoubleStateOf(0.0) }
     var zoomLevelMax by remember { mutableDoubleStateOf(0.0) }
 
-    // Map Elements
     var downloadRegionBoundingBox: BoundingBox? by remember { mutableStateOf(null) }
     var myLocationOverlay: MyLocationNewOverlay? by remember { mutableStateOf(null) }
 
@@ -233,6 +236,11 @@ fun MapView(
     fun performHapticFeedback() = haptic.performHapticFeedback(HapticFeedbackType.LongPress)
 
     val hasGps = remember { context.hasGps() }
+
+    // Accompanist permissions state for location
+    val locationPermissionsState =
+        rememberMultiplePermissionsState(permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION))
+    var triggerLocationToggleAfterPermission by remember { mutableStateOf(false) }
 
     fun loadOnlineTileSourceBase(): ITileSource {
         val id = mapViewModel.mapStyleId
@@ -283,10 +291,13 @@ fun MapView(
         }
     }
 
-    val requestPermissionAndToggleLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            if (permissions.entries.all { it.value }) map.toggleMyLocation()
+    // Effect to toggle MyLocation after permission is granted
+    LaunchedEffect(locationPermissionsState.allPermissionsGranted) {
+        if (locationPermissionsState.allPermissionsGranted && triggerLocationToggleAfterPermission) {
+            map.toggleMyLocation()
+            triggerLocationToggleAfterPermission = false
         }
+    }
 
     val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by uiViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
@@ -298,9 +309,9 @@ fun MapView(
         val ourNode = uiViewModel.ourNodeInfo.value
         val gpsFormat = uiViewModel.config.display.gpsFormat.number
         val displayUnits = uiViewModel.config.display.units
-        val mapFilterState = mapViewModel.mapFilterStateFlow.value // Access mapFilterState directly
+        val mapFilterStateValue = mapViewModel.mapFilterStateFlow.value // Access mapFilterState directly
         return nodesWithPosition.mapNotNull { node ->
-            if (mapFilterState.onlyFavorites && !node.isFavorite && !node.equals(ourNode)) {
+            if (mapFilterStateValue.onlyFavorites && !node.isFavorite && !node.equals(ourNode)) {
                 return@mapNotNull null
             }
 
@@ -324,7 +335,7 @@ fun MapView(
                 position = nodePosition
                 icon = markerIcon
                 setNodeColors(node.colors)
-                if (!mapFilterState.showPrecisionCircle) {
+                if (!mapFilterStateValue.showPrecisionCircle) {
                     setPrecisionBits(0)
                 } else {
                     setPrecisionBits(p.precisionBits)
@@ -392,7 +403,7 @@ fun MapView(
         val dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
         return waypoints.mapNotNull { waypoint ->
             val pt = waypoint.data.waypoint ?: return@mapNotNull null
-            if (!mapFilterState.showWaypoints) return@mapNotNull null
+            if (!mapFilterState.showWaypoints) return@mapNotNull null // Use collected mapFilterState
             val lock = if (pt.lockedTo != 0) "\uD83D\uDD12" else ""
             val time = dateFormat.format(waypoint.received_time)
             val label = pt.name + " " + formatAgo((waypoint.received_time / 1000).toInt())
@@ -422,7 +433,7 @@ fun MapView(
                 title = "${pt.name} (${getUsername(waypoint.data.from)}$lock)"
                 snippet = "[$time] ${pt.description}  " + stringResource(R.string.expires) + ": $expireTimeStr"
                 position = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
-                setVisible(false)
+                setVisible(false) // This seems to be always false, was this intended?
                 setOnLongClickListener {
                     showMarkerLongPressDialog(pt.id)
                     true
@@ -434,7 +445,7 @@ fun MapView(
     LaunchedEffect(showCurrentCacheInfo) {
         if (!showCurrentCacheInfo) return@LaunchedEffect
         uiViewModel.showSnackbar(R.string.calculating)
-        val cacheManager = CacheManager(map) // Make sure CacheManager has latest from map
+        val cacheManager = CacheManager(map)
         val cacheCapacity = cacheManager.cacheCapacity()
         val currentCacheUsage = cacheManager.currentCacheUsage()
 
@@ -487,7 +498,7 @@ fun MapView(
             overlays.add(nodeClusterer)
         }
 
-        addCopyright() // Copyright is required for certain map sources
+        addCopyright()
         addScaleBarOverlay(density)
         createLatLongGrid(false)
 
@@ -496,10 +507,9 @@ fun MapView(
 
     with(map) { UpdateMarkers(onNodesChanged(nodes), onWaypointChanged(waypoints.values), nodeClusterer) }
 
-    /** Creates Box overlay showing what area can be downloaded */
     fun MapView.generateBoxOverlay() {
         overlays.removeAll { it is Polygon }
-        val zoomFactor = 1.3 // zoom difference between view and download area polygon
+        val zoomFactor = 1.3
         zoomLevelMin = minOf(zoomLevelDouble, zoomLevelMax)
         downloadRegionBoundingBox = boundingBox.zoomIn(zoomFactor)
         val polygon =
@@ -532,12 +542,10 @@ fun MapView(
             val outputName = buildString {
                 append(Configuration.getInstance().osmdroidBasePath.absolutePath)
                 append(File.separator)
-                append("mainFile.sqlite") // TODO: Accept filename input param from user
+                append("mainFile.sqlite")
             }
             val writer = SqliteArchiveTileWriter(outputName)
-            // Make sure cacheManager has latest from map
             val cacheManager = CacheManager(map, writer)
-            // this triggers the download
             cacheManager.downloadAreaAsync(
                 context,
                 boundingBox,
@@ -593,7 +601,6 @@ fun MapView(
                         map.generateBoxOverlay()
                         dialog.dismiss()
                     }
-
                     2 -> purgeTileSource { uiViewModel.showSnackbar(it) }
                     else -> dialog.dismiss()
                 }
@@ -610,12 +617,12 @@ fun MapView(
             AndroidView(
                 factory = {
                     map.apply {
-                        setDestroyMode(false) // keeps map instance alive when in the background
+                        setDestroyMode(false)
                         addMapListener(boxOverlayListener)
                     }
                 },
                 modifier = Modifier.fillMaxSize(),
-                update = { map -> map.drawOverlays() },
+                update = { mapView -> mapView.drawOverlays() }, // Renamed map to mapView to avoid conflict
             )
             if (downloadRegionBoundingBox != null) {
                 CacheLayout(
@@ -649,7 +656,6 @@ fun MapView(
                             onDismissRequest = { mapFilterExpanded = false },
                             modifier = Modifier.background(MaterialTheme.colorScheme.surface),
                         ) {
-                            // Only Favorites toggle
                             DropdownMenuItem(
                                 text = {
                                     Row(
@@ -668,12 +674,12 @@ fun MapView(
                                         )
                                         Checkbox(
                                             checked = mapFilterState.onlyFavorites,
-                                            onCheckedChange = { enabled -> mapViewModel.setOnlyFavorites(enabled) },
+                                            onCheckedChange = { model.toggleOnlyFavorites() },
                                             modifier = Modifier.padding(start = 8.dp),
                                         )
                                     }
                                 },
-                                onClick = { mapViewModel.setOnlyFavorites(!mapFilterState.onlyFavorites) },
+                                onClick = { mapViewModel.toggleOnlyFavorites() },
                             )
                             DropdownMenuItem(
                                 text = {
@@ -693,12 +699,12 @@ fun MapView(
                                         )
                                         Checkbox(
                                             checked = mapFilterState.showWaypoints,
-                                            onCheckedChange = mapViewModel::setShowWaypointsOnMap,
+                                            onCheckedChange = { model.toggleShowWaypointsOnMap() },
                                             modifier = Modifier.padding(start = 8.dp),
                                         )
                                     }
                                 },
-                                onClick = { mapViewModel.setShowWaypointsOnMap(!mapFilterState.showWaypoints) },
+                                onClick = { mapViewModel.toggleShowWaypointsOnMap() },
                             )
                             DropdownMenuItem(
                                 text = {
@@ -718,16 +724,12 @@ fun MapView(
                                         )
                                         Checkbox(
                                             checked = mapFilterState.showPrecisionCircle,
-                                            onCheckedChange = { enabled ->
-                                                mapViewModel.setShowPrecisionCircleOnMap(enabled)
-                                            },
+                                            onCheckedChange = { model.toggleShowPrecisionCircleOnMap() },
                                             modifier = Modifier.padding(start = 8.dp),
                                         )
                                     }
                                 },
-                                onClick = {
-                                    mapViewModel.setShowPrecisionCircleOnMap(!mapFilterState.showPrecisionCircle)
-                                },
+                                onClick = { mapViewModel.toggleShowPrecisionCircleOnMap() },
                             )
                         }
                     }
@@ -741,10 +743,11 @@ fun MapView(
                             },
                             contentDescription = stringResource(R.string.toggle_my_position),
                         ) {
-                            if (context.hasLocationPermission()) {
+                            if (locationPermissionsState.allPermissionsGranted) {
                                 map.toggleMyLocation()
                             } else {
-                                requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
+                                triggerLocationToggleAfterPermission = true
+                                locationPermissionsState.launchMultiplePermissionRequest()
                             }
                         }
                     }
@@ -755,7 +758,7 @@ fun MapView(
 
     if (showEditWaypointDialog != null) {
         EditWaypointDialog(
-            waypoint = showEditWaypointDialog ?: return,
+            waypoint = showEditWaypointDialog ?: return, // Safe call
             onSendClicked = { waypoint ->
                 debug("User clicked send waypoint ${waypoint.id}")
                 showEditWaypointDialog = null

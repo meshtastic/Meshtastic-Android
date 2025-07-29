@@ -16,17 +16,13 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
-    <string name="main_tab_messages">消息</string>
-    <string name="main_tab_users">用户</string>
-    <string name="main_tab_map">地图</string>
-    <string name="main_tab_channel">频道</string>
-    <string name="main_tab_settings">设置</string>
     <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">筛选</string>
     <string name="desc_node_filter_clear">清除筛选</string>
     <string name="node_filter_include_unknown">包括未知内容</string>
     <string name="node_filter_only_online">隐藏离线节点</string>
     <string name="node_filter_only_direct">仅显示直连节点</string>
+    <string name="node_filter_ignored">您正在查看被忽略的节点，\n点击返回到节点列表。</string>
     <string name="node_filter_show_details">显示详细信息</string>
     <string name="node_sort_button">节点排序选项</string>
     <string name="node_sort_alpha">字母顺序</string>
@@ -37,6 +33,7 @@
     <string name="node_sort_via_mqtt">通过 MQTT</string>
     <string name="via_mqtt">通过 MQTT</string>
     <string name="node_sort_via_favorite">通过收藏夹</string>
+    <string name="node_filter_show_ignored">忽略的节点</string>
     <string name="unrecognized">无法识别的</string>
     <string name="message_status_enroute">正在等待确认</string>
     <string name="message_status_queued">发送队列中</string>
@@ -79,36 +76,23 @@
     <string name="config_device_ledHeartbeatDisabled_summary">控制设备上的指示灯闪烁。对于大多数设备，这将控制最多 4 个指示灯，充电器和 GPS 指示灯无法控制。</string>
     <string name="config_device_transmitOverLora_summary">是否除了发送到 MQTT 和 PhoneAPI 外，还应通过 LoRa 传输我们的邻居信息（NeighborInfo）。在具有默认密钥和名称的通道上不可用。</string>
     <string name="config_security_public_key">公钥</string>
-    <string name="config_security_private_key">私钥</string>
     <string name="channel_name">频道名称</string>
-    <string name="channel_options">频道选项</string>
     <string name="qr_code">QR 码</string>
-    <string name="unset">取消设定</string>
-    <string name="connection_status">连线状态</string>
     <string name="application_icon">应用程序图标</string>
     <string name="unknown_username">未知的使用者名称</string>
     <string name="send">传送</string>
-    <string name="send_text">发送短信</string>
     <string name="warning_not_paired">您尚未将手机与 Meshtastic 兼容的装置配对。请先配对装置并设置您的用户名称。\n\n此开源应用程序仍在开发中，如有问题，请在我们的论坛 https://github.com/orgs/meshtastic/discussions 上面发文询问。\n\n 也可参阅我们的网页 - www.meshtastic.org。</string>
     <string name="you">你</string>
-    <string name="your_name">您的姓名</string>
     <string name="analytics_okay">匿名使用统计信息和故障报告</string>
-    <string name="looking_for_meshtastic_devices">正在寻找 Meshtastic 装置...</string>
-    <string name="starting_pairing">开始配对</string>
-    <string name="url_for_join">加入 Meshtastic 网状网络的 URL</string>
     <string name="accept">接受</string>
     <string name="cancel">取消</string>
     <string name="clear_changes">清除更改</string>
-    <string name="change_channel">切换频道</string>
-    <string name="are_you_sure_channel">您确定要更改频道吗？在您分享新的频道设定之前，与其他节点的所有通讯都将停止。</string>
     <string name="new_channel_rcvd">收到新的频道 URL</string>
     <string name="permission_missing">Meshtastic 需要位置权限并启用位置信息才能通过蓝牙查找新设备。找到之后可以再关闭这权限。</string>
     <string name="report_bug">报告 Bug</string>
     <string name="report_a_bug">报告 Bug 详细信息</string>
     <string name="report_bug_text">您确定要报告错误吗？报告后，请在 https://github.com/orgs/meshtastic/discussions 上贴文，以便我们可以将报告与您发现的问题匹配。</string>
     <string name="report">报告</string>
-    <string name="not_paired_yet">您还没有配对。</string>
-    <string name="change_radio">换设备</string>
     <string name="pairing_completed">配对完成，启动服务</string>
     <string name="pairing_failed_try_again">配对失败，请重新选择</string>
     <string name="location_disabled">位置访问已关闭，无法向网络提供位置信息</string>
@@ -116,32 +100,21 @@
     <string name="disconnected">已断开连接</string>
     <string name="device_sleeping">设备休眠中</string>
     <string name="connected_count">已连接：%1$s / 在线</string>
-    <string name="update_firmware">更新固件</string>
     <string name="ip_address">IP地址：</string>
     <string name="ip_port">端口：</string>
     <string name="connected">已连接至设备</string>
     <string name="connected_to">已连接至设备 (%s)</string>
     <string name="not_connected">尚未联机</string>
     <string name="connected_sleeping">已连接至设备，但设备正在休眠中</string>
-    <string name="update_to">更新到%s</string>
     <string name="app_too_old">需要更新应用程序</string>
     <string name="must_update">您必须在应用商店或 Github上更新此应用程序。程序太旧了以至于无法与此装置进行通讯。 请阅读有关此主题的 <a href="https://meshtastic.org/docs/software/android/installation">文档</a>。</string>
     <string name="none">无 (停用)</string>
-    <string name="modem_config_turbo">短距离 / 高速模式</string>
-    <string name="modem_config_short">短距离 / 快速模式</string>
-    <string name="modem_config_medium">中距离 / 快速模式</string>
-    <string name="modem_config_long">长距离 / 快速模式</string>
-    <string name="modem_config_mod_long">长距离 / 中速模式</string>
-    <string name="modem_config_very_long">超长距离 / 慢速模式</string>
-    <string name="modem_config_unrecognized">无法识别</string>
     <string name="meshtastic_service_notifications">服务通知</string>
-    <string name="location_disabled_warning">必须在设置中开启高精度定位服务</string>
     <string name="about">关于</string>
-    <string name="text_messages">短信</string>
     <string name="channel_invalid">此频道网址无效，无法使用</string>
     <string name="debug_panel">调试面板</string>
+    <string name="debug_decoded_payload">解码Payload：</string>
     <string name="debug_logs_export">导出程序日志</string>
-    <string name="debug_last_messages">500条最新消息</string>
     <string name="debug_filters">筛选器</string>
     <string name="debug_active_filters">启用的过滤器</string>
     <string name="debug_default_search">搜索日志…</string>
@@ -156,21 +129,14 @@
     <string name="match_all">匹配所有 | 任意</string>
     <string name="debug_clear_logs_confirm">这将从您的设备中移除所有日志数据包和数据库条目 - 完整重置，永久失去所有内容。</string>
     <string name="clear">清除</string>
-    <string name="updating_firmware">更新固件，请等待几分钟…</string>
-    <string name="update_successful">更新成功</string>
-    <string name="update_failed">更新失败</string>
-    <string name="message_reception_time">消息接收时间</string>
-    <string name="message_reception_state">消息接收状态</string>
     <string name="message_delivery_status">消息传递状态</string>
     <string name="meshtastic_messages_notifications">私信提醒</string>
     <string name="meshtastic_broadcast_notifications">广播消息提醒</string>
     <string name="meshtastic_alerts_notifications">提醒通知</string>
-    <string name="protocol_stress_test">协议压力测试</string>
     <string name="firmware_too_old">需要固件更新。</string>
     <string name="firmware_old">版本过旧，无法与此应用程序通讯。欲了解更多信息，请参阅 Meshtastic 网站上的<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">韧体安装指南</a>。</string>
     <string name="okay">确定</string>
     <string name="must_set_region">您必须先选择一个地区</string>
-    <string name="region">地区</string>
     <string name="cant_change_no_radio">无法更改频道，因为装置尚未连接。请再试一次。</string>
     <string name="save_messages">导出信号测试数据.csv</string>
     <string name="reset">重置</string>
@@ -178,23 +144,12 @@
     <string name="are_you_sure_change_default">您是否确定要改回默认频道？</string>
     <string name="reset_to_defaults">重置为默认设置</string>
     <string name="apply">申请</string>
-    <string name="no_app_found">找不到可用于发送 URL 的应用程序。</string>
     <string name="theme">主题</string>
     <string name="theme_light">浅色</string>
     <string name="theme_dark">深色</string>
     <string name="theme_system">系统默认设置</string>
     <string name="choose_theme">选择主题</string>
-    <string name="background_required">后台定位</string>
-    <string name="why_background_required">使用此功能，您必须授予「一直允许」的位置权限选项。\n这允许 Meshtastic 读取您的智能手机位置，并在应用程序关闭或未使用时，将位置发送给网状网络中的其他成员。</string>
-    <string name="required_permissions">所需权限：</string>
     <string name="provide_location_to_mesh">向网格提供手机位置</string>
-    <string name="camera_required">相机权限</string>
-    <string name="why_camera_required">我们必须有摄像头的权限才能扫二维码。应用不会保存任何图片或影片。</string>
-    <string name="notification_required">通知权限</string>
-    <string name="why_notification_required">Meshtastic 需要获得服务和消息通知的权限。</string>
-    <string name="notification_denied">通知权限被拒绝。要打开通知权限，访问：系统设置 &gt; 应用程序 &gt; Meshtastic &gt; 通知。</string>
-    <string name="modem_config_slow_short">短距離（速度慢）</string>
-    <string name="modem_config_slow_medium">中等距離（速度慢）</string>
     <plurals name="delete_messages">
         <item quantity="other">删除 消息?
 
@@ -206,7 +161,6 @@
     <string name="select_all">选择全部</string>
     <string name="close_selection">关闭选中</string>
     <string name="delete_selection">删除选中</string>
-    <string name="modem_config_slow_long">长距离（慢速）</string>
     <string name="map_style_selection">主题选择</string>
     <string name="map_download_region">下载区域</string>
     <string name="name">名称</string>
@@ -221,13 +175,6 @@
     <string name="reboot">重启</string>
     <string name="traceroute">路由追踪</string>
     <string name="intro_show">显示简介</string>
-    <string name="intro_welcome">欢迎来到Meshtastic</string>
-    <string name="intro_welcome_text">Meshtastic 是一个开源、离网、加密的通讯平台。Meshtastic 无线电组成网状网络，使用 LoRa 协议传送文字讯息进行通讯。</string>
-    <string name="intro_started">…让我们开始吧！</string>
-    <string name="intro_started_text">使用蓝牙、串行或WiFi连接您的 Meshtastic 设备。 \n\n您可以在www.meshtastic.org/docs/硬件上看到目前兼容的设备。
-Meshtastic中文社区 meshcn.net</string>
-    <string name="intro_encryption">"设置加密"</string>
-    <string name="intro_encryption_text">作为标准，已设置了默认加密密钥。 要启用您自己的频道和增强加密，请转到频道选项卡并更改频道名称，这将为 AES256 加密设置一个随机密钥。 \n\n要与其他设备通信，他们需要扫描您的二维码或点击共享链接来配置频道设置。</string>
     <string name="message">信息</string>
     <string name="quick_chat">快速聊天选项</string>
     <string name="quick_chat_new">新的快速聊天</string>
@@ -235,12 +182,10 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="quick_chat_append">附加到消息中</string>
     <string name="quick_chat_instant">立即发送</string>
     <string name="factory_reset">恢复出厂设置</string>
-    <string name="factory_reset_description">这将清除你作出的所有设备设置。</string>
     <string name="bluetooth_disabled">蓝牙已禁用</string>
     <string name="permission_missing_31">Meshtastic 需要附近设备许可才能通过蓝牙查找和连接设备。 您可以在不使用时将其关闭。</string>
     <string name="direct_message">私信</string>
     <string name="nodedb_reset">重置节点数据库</string>
-    <string name="nodedb_reset_description">这将从该列表中清除所有节点。</string>
     <string name="delivery_confirmed">已送达</string>
     <string name="error">错误</string>
     <string name="ignore">忽略</string>
@@ -275,7 +220,6 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="error_duty_cycle">触及占空比上限。暂时无法发送消息，请稍后再试。</string>
     <string name="remove">移除</string>
     <string name="remove_node_text">此节点将从您的列表中删除，直到您的节点再次收到它的数据。</string>
-    <string name="mute">静音</string>
     <string name="mute_notifications">消息免打扰</string>
     <string name="mute_8_hours">8 小时</string>
     <string name="mute_1_week">1周</string>
@@ -325,7 +269,6 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="good">良好</string>
     <string name="none_quality">无</string>
     <string name="share_to">分享到…</string>
-    <string name="share_message">分享消息</string>
     <string name="signal">信号</string>
     <string name="signal_quality">信号质量</string>
     <string name="traceroute_log">路由追踪日志</string>
@@ -343,10 +286,6 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="unknown_age">未知时长</string>
     <string name="copy">复制</string>
     <string name="alert_bell_text">警铃字符！</string>
-    <string name="channel_settings">频道设置</string>
-    <string name="samsung_instructions">三星指南</string>
-    <string name="alerts_dnd_request_title">告警频道无视勿扰模式</string>
-    <string name="alerts_dnd_request_text"><![CDATA[当你的手机处于勿扰模式下，- 在Meshtastic App的通知设置中启用“告警频道无视勿扰模式”。<br/><br/>三星手机用户可能需要在手机设置的通知中为告警频道额外添加规则 <a href="https://www.samsung.com/latin_en/support/mobile-devices/how-to-use-the-do-not-disturb-mode-on-your-galaxy-phone/">查阅三星帮助支持页面</a>。]]></string>
     <string name="critical_alert">关键告警！</string>
     <string name="favorite">收藏</string>
     <string name="favorite_add">添加 \'%s\'为收藏节点？</string>
@@ -623,7 +562,6 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="node_number">节点编号</string>
     <string name="user_id">用户 ID</string>
     <string name="uptime">正常运行时间</string>
-    <string name="firmware_version">固件版本</string>
     <string name="timestamp">时间戳</string>
     <string name="heading">航向</string>
     <string name="sats">卫星</string>
@@ -636,7 +574,6 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="secondary_no_telemetry">关闭定期广播遥测</string>
     <string name="manual_position_request">需要手动定位请求</string>
     <string name="press_and_drag">长按并拖动以重新排序</string>
-    <string name="set_region">设置区域</string>
     <string name="unmute">取消静音</string>
     <string name="dynamic">动态</string>
     <string name="scan_qr_code">扫描二维码</string>
@@ -654,7 +591,6 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="display_time_in_12h_format">如果启用，设备将在屏幕上以12小时制格式显示时间。</string>
     <string name="host_metrics_log">主机测量日志</string>
     <string name="host">主机</string>
-    <string name="host_metrics">主机测量</string>
     <string name="free_memory">可用内存</string>
     <string name="disk_free">可用存储</string>
     <string name="load">负载</string>
@@ -697,23 +633,49 @@ Meshtastic中文社区 meshcn.net</string>
     <string name="scroll_to_bottom">滚动到底部</string>
     <string name="meshtastic">Meshtastic</string>
     <string name="scanning">正在扫描</string>
-    <string name="app_intro_back_button">后退</string>
-    <string name="app_intro_next_button">下一步</string>
-    <string name="app_intro_done_button">完成</string>
-    <string name="app_intro_skip_button">跳过</string>
     <string name="security_icon_description">安全状态</string>
-    <string name="security_icon_insecure_precise"> - 警告，不安全位置</string>
+    <string name="security_icon_secure">安全</string>
+    <string name="security_icon_badge_warning_description">警告标志</string>
     <string name="unknown_channel">未知频道</string>
     <string name="warning">警告</string>
     <string name="overflow_menu">溢出菜单</string>
     <string name="uv_lux">紫外线强度</string>
     <string name="unknown">未知</string>
-    <string name="map_type_satellite">卫星</string>
-    <string name="map_type_hybrid">混合</string>
+    <string name="security_icon_help_green_lock">绿色锁意为频道安全加密，使用128 位或 256 位 AES密钥。</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
+    <string name="security_icon_insecure_no_precise">不安全的频道，无精准位置</string>
+    <string name="security_icon_help_yellow_open_lock">黄色开锁意为频道未安全加密， 未启用精准位置数据，且不使用任何密钥或使用1字节已知密钥。</string>
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <string name="security_icon_insecure_precise_only">不安全的频道，精准位置</string>
+    <string name="security_icon_help_red_open_lock">红色开锁意为频道未安全加密， 启用精确的位置数据，且不使用任何密钥或使用1字节已知密钥。</string>
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
+    <string name="security_icon_warning_precise_mqtt">警告：不安全，精准位置 &amp; MQTT Uplink</string>
+    <string name="security_icon_help_warning_precise_mqtt">带有警告的红色开锁意为频道未安全加密，启用精确的位置数据，正通过MQTT连接到互联网，且不使用任何密钥或使用1字节已知密钥。</string>
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="security_icon_help_title">频道安全</string>
+    <string name="security_icon_help_title_all">频道安全含义</string>
+    <string name="security_icon_help_show_all">显示所有含义</string>
+    <string name="security_icon_help_show_less">显示当前状态</string>
     <string name="security_icon_help_dismiss">收起键盘</string>
+    <string name="confirm_delete_node">您确定要删除此节点吗？</string>
+    <string name="replying_to">回复给 %1$s</string>
+    <string name="cancel_reply">取消回复</string>
+    <string name="delete_messages_title">删除消息？</string>
+    <string name="clear_selection">清除选择</string>
     <string name="message_input_label">信息</string>
+    <string name="type_a_message">输入一条消息</string>
+    <string name="pax_metrics_log">PAX 计量日志</string>
+    <string name="pax">PAX</string>
+    <string name="no_pax_metrics_logs">无可用的 PAX 计量日志。</string>
+    <string name="wifi_devices">WiFi 设备</string>
+    <string name="ble_devices">BLE 设备</string>
+    <string name="routing_error_rate_limit_exceeded">超过速率限制。请稍后再试。</string>
+    <string name="view_release">查看发行版</string>
+    <string name="download">下载</string>
+    <string name="installed_firmware_version">当前安装</string>
+    <string name="latest_stable_firmware">最新稳定版</string>
+    <string name="latest_alpha_firmware">最新测试版</string>
+    <string name="supported_by_community">由 Meshtastic 社区支持</string>
+    <string name="skip">跳过</string>
+    <string name="next">下一步</string>
 </resources>

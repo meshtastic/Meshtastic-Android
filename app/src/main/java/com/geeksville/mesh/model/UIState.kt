@@ -93,7 +93,8 @@ import java.util.Locale
 import javax.inject.Inject
 import kotlin.math.roundToInt
 
-// Given a human name, strip out the first letter of the first three words and return that as the initials for
+// Given a human name, strip out the first letter of the first three words and return that as the
+// initials for
 // that user, ignoring emojis. If the original name is only one word, strip vowels from the original
 // name and if the result is 3 or more characters, use the first three characters. If not, just take
 // the first 3 characters of the original name.
@@ -217,6 +218,8 @@ constructor(
         viewModelScope.launch { _excludedModulesUnlocked.value = true }
     }
 
+    val firmwareEdition = meshLogRepository.getMyNodeInfo().map { nodeInfo -> nodeInfo?.firmwareEdition }
+
     val clientNotification: StateFlow<MeshProtos.ClientNotification?> = radioConfigRepository.clientNotification
 
     fun clearClientNotification(notification: MeshProtos.ClientNotification) {
@@ -317,37 +320,56 @@ constructor(
     private val showPrecisionCircleOnMap =
         MutableStateFlow(preferences.getBoolean("show-precision-circle-on-map", true))
 
-    private val showIgnored = MutableStateFlow(preferences.getBoolean("show-ignored", false))
+    private val _showIgnored = MutableStateFlow(preferences.getBoolean("show-ignored", false))
+    val showIgnored: StateFlow<Boolean> = _showIgnored
 
-    fun toggleShowIgnored() {
-        showIgnored.value = !showIgnored.value
-        preferences.edit { putBoolean("show-ignored", showIgnored.value) }
+    private val _showQuickChat = MutableStateFlow(preferences.getBoolean("show-quick-chat", false))
+    val showQuickChat: StateFlow<Boolean> = _showQuickChat
+
+    private val _hasShownNotPairedWarning =
+        MutableStateFlow(preferences.getBoolean(HAS_SHOWN_NOT_PAIRED_WARNING_PREF, false))
+
+val hasShownNotPairedWarning: StateFlow<Boolean> = _hasShownNotPairedWarning.asStateFlow()
+
+    fun suppressNoPairedWarning() {
+        _hasShownNotPairedWarning.value = true
+        preferences.edit { putBoolean(HAS_SHOWN_NOT_PAIRED_WARNING_PREF, true) }
     }
+
+    private fun toggleBooleanPreference(
+        state: MutableStateFlow<Boolean>,
+        key: String,
+        onChanged: (Boolean) -> Unit = {},
+    ) {
+        val newValue = !state.value
+        state.value = newValue
+        preferences.edit { putBoolean(key, newValue) }
+        onChanged(newValue)
+    }
+
+    fun toggleShowIgnored() = toggleBooleanPreference(_showIgnored, "show-ignored")
+
+    fun toggleShowQuickChat() = toggleBooleanPreference(_showQuickChat, "show-quick-chat")
 
     fun setSortOption(sort: NodeSortOption) {
         nodeSortOption.value = sort
         preferences.edit { putInt("node-sort-option", sort.ordinal) }
     }
 
-    fun toggleShowDetails() {
-        showDetails.value = !showDetails.value
-        preferences.edit { putBoolean("show-details", showDetails.value) }
-    }
+    fun toggleShowDetails() = toggleBooleanPreference(showDetails, "show-details")
 
-    fun toggleIncludeUnknown() {
-        includeUnknown.value = !includeUnknown.value
-        preferences.edit { putBoolean("include-unknown", includeUnknown.value) }
-    }
+    fun toggleIncludeUnknown() = toggleBooleanPreference(includeUnknown, "include-unknown")
 
-    fun toggleOnlyOnline() {
-        onlyOnline.value = !onlyOnline.value
-        preferences.edit { putBoolean("only-online", onlyOnline.value) }
-    }
+    fun toggleOnlyOnline() = toggleBooleanPreference(onlyOnline, "only-online")
 
-    fun toggleOnlyDirect() {
-        onlyDirect.value = !onlyDirect.value
-        preferences.edit { putBoolean("only-direct", onlyDirect.value) }
-    }
+    fun toggleOnlyDirect() = toggleBooleanPreference(onlyDirect, "only-direct")
+
+    fun toggleOnlyFavorites() = toggleBooleanPreference(onlyFavorites, "only-favorites")
+
+    fun toggleShowWaypointsOnMap() = toggleBooleanPreference(showWaypointsOnMap, "show-waypoints-on-map")
+
+    fun toggleShowPrecisionCircleOnMap() =
+        toggleBooleanPreference(showPrecisionCircleOnMap, "show-precision-circle-on-map")
 
     data class NodeFilterState(
         val filterText: String,
@@ -430,9 +452,37 @@ constructor(
             initialValue = 0,
         )
 
+    val filteredNodeList: StateFlow<List<Node>> =
+        nodeList
+            .mapLatest { list -> list.filter { node -> !node.isIgnored } }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList(),
+            )
+
+    data class MapFilterState(val onlyFavorites: Boolean, val showWaypoints: Boolean, val showPrecisionCircle: Boolean)
+
+    val mapFilterStateFlow: StateFlow<MapFilterState> =
+        combine(onlyFavorites, showWaypointsOnMap, showPrecisionCircleOnMap) {
+                favoritesOnly,
+                showWaypoints,
+                showPrecisionCircle,
+            ->
+            MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle)
+        }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = MapFilterState(false, true, true),
+            )
+
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeEntity?>
         get() = nodeDB.myNodeInfo
+
+    val ourNodeInfo: StateFlow<Node?>
+        get() = nodeDB.ourNodeInfo
 
     val ourNodeInfo: StateFlow<Node?>
         get() = nodeDB.ourNodeInfo
@@ -674,6 +724,8 @@ constructor(
     companion object {
         fun getPreferences(context: Context): SharedPreferences =
             context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
+
+        const val HAS_SHOWN_NOT_PAIRED_WARNING_PREF = "has_shown_not_paired_warning"
     }
 
     // Connection state to our radio device
@@ -834,7 +886,8 @@ constructor(
     /** Write the persisted packet data out to a CSV file in the specified location. */
     fun saveMessagesCSV(uri: Uri) {
         viewModelScope.launch(Dispatchers.Main) {
-            // Extract distances to this device from position messages and put (node,SNR,distance) in
+            // Extract distances to this device from position messages and put (node,SNR,distance)
+            // in
             // the file_uri
             val myNodeNum = myNodeNum ?: return@launch
 
@@ -898,9 +951,12 @@ constructor(
                                     ""
                                 } else {
                                     positionToMeter(
-                                        rxPosition!!, // Use rxPosition but only if rxPos was valid
-                                        senderPosition!!, // Use senderPosition but only if senderPos was valid
+                                        rxPosition!!, // Use rxPosition but only if rxPos was
+                                        // valid
+                                        senderPosition!!, // Use senderPosition but only if
+                                        // senderPos was valid
                                     )
+
                                         .roundToInt()
                                         .toString()
                                 }
@@ -921,7 +977,8 @@ constructor(
                                     else -> ""
                                 }
 
-                            //  date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx elevation,rx
+                            //  date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx
+                            // elevation,rx
                             // snr,distance,hop limit,payload
                             @Suppress("MaxLineLength")
                             writer.appendLine(

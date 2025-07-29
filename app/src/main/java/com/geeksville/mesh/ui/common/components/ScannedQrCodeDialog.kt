@@ -51,6 +51,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
+import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.ModemPreset
 import com.geeksville.mesh.R
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.copy
@@ -59,10 +60,7 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.radioconfig.components.ChannelSelection
 
 @Composable
-fun ScannedQrCodeDialog(
-    viewModel: UIViewModel,
-    incoming: ChannelSet,
-) {
+fun ScannedQrCodeDialog(viewModel: UIViewModel, incoming: ChannelSet) {
     val channels by viewModel.channels.collectAsStateWithLifecycle()
 
     ScannedQrCodeDialog(
@@ -73,60 +71,117 @@ fun ScannedQrCodeDialog(
     )
 }
 
-/**
- * Enables the user to select which channels to accept after scanning a QR code.
- */
+/** Enables the user to select which channels to accept after scanning a QR code. */
 @OptIn(ExperimentalLayoutApi::class)
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun ScannedQrCodeDialog(
     channels: ChannelSet,
     incoming: ChannelSet,
     onDismiss: () -> Unit,
-    onConfirm: (ChannelSet) -> Unit
+    onConfirm: (ChannelSet) -> Unit,
 ) {
     var shouldReplace by remember { mutableStateOf(incoming.hasLoraConfig()) }
 
-    val channelSet = remember(shouldReplace) {
-        if (shouldReplace) {
-            incoming
-        } else {
-            channels.copy {
-                // To guarantee consistent ordering, using a LinkedHashSet which iterates through
-                // it's entries according to the order an item was *first* inserted.
-                // https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-linked-hash-set/
-                val result = LinkedHashSet(settings + incoming.settingsList)
-                settings.clear()
-                settings.addAll(result)
+    val channelSet =
+        remember(shouldReplace) {
+            if (shouldReplace) {
+                incoming.copy { loraConfig = loraConfig.copy { configOkToMqtt = channels.loraConfig.configOkToMqtt } }
+            } else {
+                channels.copy {
+                    // To guarantee consistent ordering, using a LinkedHashSet which iterates through
+                    // its entries according to the order an item was *first* inserted.
+                    // https://kotlinlang.org/api/latest/jvm/stdlib/kotlin.collections/-linked-hash-set/
+                    val result = LinkedHashSet(settings + incoming.settingsList)
+                    settings.clear()
+                    settings.addAll(result)
+                }
             }
         }
-    }
 
     val modemPresetName = Channel(loraConfig = channelSet.loraConfig).name
 
     /* Holds selections made by the user */
-    val channelSelections = remember(channelSet) {
-        mutableStateListOf(elements = Array(size = channelSet.settingsCount, init = { true }))
-    }
+    val channelSelections =
+        remember(channelSet) { mutableStateListOf(elements = Array(size = channelSet.settingsCount, init = { true })) }
 
-    val selectedChannelSet = channelSet.copy {
-        val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
-        settings.clear()
-        settings.addAll(result)
-    }
+    val selectedChannelSet =
+        channelSet.copy {
+            val result = settings.filterIndexed { i, _ -> channelSelections.getOrNull(i) == true }
+            settings.clear()
+            settings.addAll(result)
+        }
+
+    // Compute LoRa configuration changes when in replace mode
+    val loraChanges =
+        remember(shouldReplace, channels, incoming) {
+            if (shouldReplace && incoming.hasLoraConfig()) {
+                val current = channels.loraConfig
+                val new = incoming.loraConfig
+                val changes = mutableListOf<String>()
+
+                if (current.hopLimit != new.hopLimit) {
+                    changes.add("Hop Limit: ${current.hopLimit} -> ${new.hopLimit}")
+                }
+                if (current.getRegion() != new.getRegion()) {
+                    val currentRegionDesc = current.getRegion()?.name ?: "Unknown"
+                    val newRegionDesc = new.getRegion()?.name ?: "Unknown"
+                    changes.add("Region: $currentRegionDesc -> $newRegionDesc")
+                }
+                if (current.modemPreset != new.modemPreset) {
+                    val currentPresetDesc = ModemPreset.forNumber(current.modemPreset.number)?.name ?: "Unknown"
+                    val newPresetDesc = ModemPreset.forNumber(new.modemPreset.number)?.name ?: "Unknown"
+                    changes.add("Modem Preset: $currentPresetDesc -> $newPresetDesc")
+                }
+                if (current.usePreset != new.usePreset) {
+                    changes.add("Use Preset: ${current.usePreset} -> ${new.usePreset}")
+                }
+                if (current.txEnabled != new.txEnabled) {
+                    changes.add("Transmit Enabled: ${current.txEnabled} -> ${new.txEnabled}")
+                }
+                if (current.txPower != new.txPower) {
+                    changes.add("Transmit Power: ${current.txPower}dBm -> ${new.txPower}dBm")
+                }
+                if (current.channelNum != new.channelNum) {
+                    changes.add("Channel Number: ${current.channelNum} -> ${new.channelNum}")
+                }
+                if (current.bandwidth != new.bandwidth) {
+                    changes.add("Bandwidth: ${current.bandwidth} -> ${new.bandwidth}")
+                }
+                if (current.codingRate != new.codingRate) {
+                    changes.add("Coding Rate: ${current.codingRate} -> ${new.codingRate}")
+                }
+                if (current.spreadFactor != new.spreadFactor) {
+                    changes.add("Spread Factor: ${current.spreadFactor} -> ${new.spreadFactor}")
+                }
+                if (current.sx126XRxBoostedGain != new.sx126XRxBoostedGain) {
+                    changes.add("RX Boosted Gain: ${current.sx126XRxBoostedGain} -> ${new.sx126XRxBoostedGain}")
+                }
+                if (current.overrideFrequency != new.overrideFrequency) {
+                    changes.add("Override Frequency: ${current.overrideFrequency} -> ${new.overrideFrequency}")
+                }
+                if (current.ignoreMqtt != new.ignoreMqtt) {
+                    changes.add("Ignore MQTT: ${current.ignoreMqtt} -> ${new.ignoreMqtt}")
+                }
+
+                changes
+            } else {
+                emptyList()
+            }
+        }
 
     Dialog(
         onDismissRequest = { onDismiss() },
-        properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnBackPress = true)
+        properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnBackPress = true),
     ) {
         Surface(
             modifier = Modifier.widthIn(max = 600.dp),
             shape = RoundedCornerShape(16.dp),
-            color = MaterialTheme.colorScheme.background
+            color = MaterialTheme.colorScheme.background,
         ) {
             LazyColumn(
                 contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 item {
                     Text(
@@ -151,31 +206,46 @@ fun ScannedQrCodeDialog(
                     )
                 }
 
-                item {
-                    Row(
-                        modifier = Modifier.padding(vertical = 20.dp),
-                    ) {
-                        val selectedColors = ButtonDefaults.buttonColors()
-                        val unselectedColors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.onSurface,
+                // Display LoRa configuration changes when in replace mode
+                if (shouldReplace && loraChanges.isNotEmpty()) {
+                    item {
+                        Text(
+                            text = "LoRa Configuration Changes:",
+                            modifier = Modifier.padding(top = 16.dp, bottom = 8.dp),
+                            style = MaterialTheme.typography.titleMedium,
                         )
+                        loraChanges.forEach { change ->
+                            Text(
+                                text = "• $change",
+                                modifier = Modifier.padding(start = 16.dp, bottom = 4.dp),
+                                style = MaterialTheme.typography.bodyMedium,
+                            )
+                        }
+                    }
+                }
+
+                item {
+                    Row(modifier = Modifier.padding(vertical = 20.dp)) {
+                        val selectedColors = ButtonDefaults.buttonColors()
+                        val unselectedColors =
+                            ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
 
                         OutlinedButton(
                             onClick = { shouldReplace = false },
-                            modifier = Modifier
-                                .height(48.dp)
-                                .weight(1f),
+                            modifier = Modifier.height(48.dp).weight(1f),
                             colors = if (!shouldReplace) selectedColors else unselectedColors,
-                        ) { Text(text = stringResource(R.string.add)) }
+                        ) {
+                            Text(text = stringResource(R.string.add))
+                        }
 
                         OutlinedButton(
                             onClick = { shouldReplace = true },
-                            modifier = Modifier
-                                .height(48.dp)
-                                .weight(1f),
+                            modifier = Modifier.height(48.dp).weight(1f),
                             enabled = incoming.hasLoraConfig(),
                             colors = if (shouldReplace) selectedColors else unselectedColors,
-                        ) { Text(text = stringResource(R.string.replace)) }
+                        ) {
+                            Text(text = stringResource(R.string.replace))
+                        }
                     }
                 }
 
@@ -183,15 +253,9 @@ fun ScannedQrCodeDialog(
                 item {
                     FlowRow(
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 24.dp),
                     ) {
-                        TextButton(
-                            onClick = {
-                                onDismiss()
-                            },
-                        ) {
+                        TextButton(onClick = { onDismiss() }) {
                             Text(
                                 text = stringResource(id = R.string.cancel),
                                 color = MaterialTheme.colorScheme.onSurface,
@@ -227,11 +291,13 @@ fun ScannedQrCodeDialog(
 @Composable
 private fun ScannedQrCodeDialogPreview() {
     ScannedQrCodeDialog(
-        channels = channelSet {
+        channels =
+        channelSet {
             settings.add(Channel.default.settings)
             loraConfig = Channel.default.loraConfig
         },
-        incoming = channelSet {
+        incoming =
+        channelSet {
             settings.add(Channel.default.settings)
             loraConfig = Channel.default.loraConfig
         },
