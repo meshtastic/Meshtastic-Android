@@ -229,7 +229,7 @@ internal fun DebugItem(
                         isSelected = isSelected,
                         colorScheme = colorScheme,
                         searchText = searchText,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier
                     )
                 }
             }
