@@ -16,11 +16,6 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
-    <string name="main_tab_messages">Съобщения</string>
-    <string name="main_tab_users">Потребители</string>
-    <string name="main_tab_map">Карта</string>
-    <string name="main_tab_channel">Канал</string>
-    <string name="main_tab_settings">Настройки</string>
     <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Филтър</string>
     <string name="desc_node_filter_clear">clear node филтър</string>
@@ -54,36 +49,23 @@
     <string name="role_tracker">Излъчва приоритетно пакети за GPS позиция</string>
     <string name="role_sensor">Излъчва приоритетно телеметрични пакети.</string>
     <string name="config_security_public_key">Публичен ключ</string>
-    <string name="config_security_private_key">Частен ключ</string>
     <string name="channel_name">Име на канал</string>
-    <string name="channel_options">Настройки на канал</string>
     <string name="qr_code">QR код</string>
-    <string name="unset">Отказ</string>
-    <string name="connection_status">Състояние на връзката</string>
     <string name="application_icon">икона на приложението</string>
     <string name="unknown_username">Неизвестен потребител</string>
     <string name="send">Изпрати</string>
-    <string name="send_text">Текст за изпращане</string>
     <string name="warning_not_paired">Все още не сте сдвоили радио, съвместимо с Meshtastic, с този телефон. Моля, сдвоете устройство и задайте вашето потребителско име.\n\nТова приложение с отворен код е в процес на разработка, ако откриете проблеми, моля, публикувайте в нашия форум: https://github.com/orgs/meshtastic/discussions\n\nЗа повече информация вижте нашата уеб страница на адрес www.meshtastic.org.</string>
     <string name="you">Вие</string>
-    <string name="your_name">Вашето име</string>
     <string name="analytics_okay">Анонимна статистика за използване и доклади за сривове.</string>
-    <string name="looking_for_meshtastic_devices">Търсене на устройства, съвместими с Meshtastic…</string>
-    <string name="starting_pairing">Започване на сдвояването</string>
-    <string name="url_for_join">Връзка за присъединяване към Meshtastic мрежа</string>
     <string name="accept">Приеми</string>
     <string name="cancel">Отказ</string>
     <string name="clear_changes">Изчистване на промените</string>
-    <string name="change_channel">Промени канал</string>
-    <string name="are_you_sure_channel">Сигурни ли сте, че искате да смените канала? Цялата комуникация с други възли ще спре, докато не споделите новите настройки на канала.</string>
     <string name="new_channel_rcvd">Получен е URL адрес на нов канал</string>
     <string name="permission_missing">Meshtastic се нуждае от разрешение за местоположение. Местоположението трябва да е включено, за да намира нови устройства чрез Bluetooth. Можете да го изключите отново след това.</string>
     <string name="report_bug">Докладване за грешка</string>
     <string name="report_a_bug">Докладвайте грешка</string>
     <string name="report_bug_text">Сигурни ли сте, че искате да докладвате за грешка? След като докладвате, моля, публикувайте в https://github.com/orgs/meshtastic/discussions, за да можем да сравним доклада с това, което сте открили.</string>
     <string name="report">Докладвай</string>
-    <string name="not_paired_yet">Все още не сте сдвоили радио.</string>
-    <string name="change_radio">Смяна на радиото</string>
     <string name="pairing_completed">Сдвояването е завършено, услугата се стартира…</string>
     <string name="pairing_failed_try_again">Сдвояването не бе успешно, моля, опитайте отново</string>
     <string name="location_disabled">Достъпът до местоположението е изключен, не може да предостави позиция на мрежата.</string>
@@ -91,31 +73,20 @@
     <string name="disconnected">Прекъсната връзка</string>
     <string name="device_sleeping">Устройството спи</string>
     <string name="connected_count">Свързани: %1$s онлайн</string>
-    <string name="update_firmware">Актуализиране на фърмуера</string>
     <string name="ip_address">IP адрес:</string>
     <string name="ip_port">Порт:</string>
     <string name="connected">Свързан с радио</string>
     <string name="connected_to">Свързан с радио (%s)</string>
     <string name="not_connected">Няма връзка</string>
     <string name="connected_sleeping">Свързан е с радио, но рядиото е в режим на заспиване</string>
-    <string name="update_to">Актуализиране до %s</string>
     <string name="app_too_old">Изисква се актуализация на приложението</string>
     <string name="must_update">Трябва да актуализирате това приложение в магазина за приложения (или GitHub). Приложението е твърде старо, за да говори с този фърмуер на радиото. Моля, прочетете нашите <a href="https://meshtastic.org/docs/software/android/installation">документи</a> по тази тема.</string>
     <string name="none">Няма (деактивиране)</string>
-    <string name="modem_config_short">Къс обхват / Бърз</string>
-    <string name="modem_config_medium">Среден обхват / Бърз</string>
-    <string name="modem_config_long">Дълъг обхват / Бърз</string>
-    <string name="modem_config_mod_long">Дълъг обхват / Умерен</string>
-    <string name="modem_config_very_long">Много дълъг обхват / Бавен</string>
-    <string name="modem_config_unrecognized">НЕПОЗНАТ</string>
     <string name="meshtastic_service_notifications">Сервизни известия</string>
-    <string name="location_disabled_warning">Местоположението трябва да е включено, за да намерите нови устройства чрез Bluetooth. Можете да го изключите отново след това.</string>
     <string name="about">Относно</string>
-    <string name="text_messages">Текстови съобщения</string>
     <string name="channel_invalid">URL адресът на този канал е невалиден и не може да се използва</string>
     <string name="debug_panel">Панел за отстраняване на грешки</string>
     <string name="debug_logs_export">Експортиране на журнали</string>
-    <string name="debug_last_messages">Последни 500 съобщения</string>
     <string name="debug_filters">Филтри</string>
     <string name="debug_active_filters">Активни филтри</string>
     <string name="debug_default_search">Търсене в журналите…</string>
@@ -124,18 +95,11 @@
     <string name="debug_filter_clear">Изчистване на всички филтри</string>
     <string name="debug_clear">Изчистване на журналите</string>
     <string name="clear">Изчисти</string>
-    <string name="updating_firmware">Актуализиране на фърмуера, изчакайте до осем минути…</string>
-    <string name="update_successful">Обновлението е успешно</string>
-    <string name="update_failed">Неуспешна актуализация</string>
-    <string name="message_reception_time">време за получаване на съобщението</string>
-    <string name="message_reception_state">състояние на получаване на съобщението</string>
     <string name="message_delivery_status">Състояние на доставка на съобщението</string>
-    <string name="protocol_stress_test">Протоколен стрес тест</string>
     <string name="firmware_too_old">Необходима е актуализация на фърмуера.</string>
     <string name="firmware_old">Фърмуерът на радиото е твърде стар, за да общува с това приложение. За повече информация относно това вижте <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">нашето ръководство за инсталиране на фърмуер</a>.</string>
     <string name="okay">Добре</string>
     <string name="must_set_region">Трябва да зададете регион!</string>
-    <string name="region">Регион</string>
     <string name="cant_change_no_radio">Каналът не може да бъде сменен, тъй като радиото все още не е свързано. Моля, опитайте отново.</string>
     <string name="save_messages">Експорт на rangetest.csv</string>
     <string name="reset">Нулиране</string>
@@ -143,23 +107,12 @@
     <string name="are_you_sure_change_default">Сигурни ли сте, че искате да промените канала по подразбиране?</string>
     <string name="reset_to_defaults">Възстановяване на настройките по подразбиране</string>
     <string name="apply">Приложи</string>
-    <string name="no_app_found">Няма намерено приложение за изпращане на URL адреси</string>
     <string name="theme">Тема</string>
     <string name="theme_light">Светла</string>
     <string name="theme_dark">Тъмна</string>
     <string name="theme_system">По подразбиране на системата</string>
     <string name="choose_theme">Избор на тема</string>
-    <string name="background_required">Местоположение на заден план</string>
-    <string name="why_background_required">За тази функция трябва да предоставите опция за разрешение на местоположение „Разрешаване през цялото време“.\nТова позволява на Meshtastic да чете местоположението на вашето устройства и да го изпраща на други членове на вашата мрежа, дори когато приложението е затворено или не се използва.</string>
-    <string name="required_permissions">Необходими разрешения</string>
     <string name="provide_location_to_mesh">Изпращане на местоположение в мрежата</string>
-    <string name="camera_required">Разрешение за камерата</string>
-    <string name="why_camera_required">Трябва да ни бъде предоставен достъп до камерата, за да четем QR кодове. Няма да се запазват снимки или видеоклипове.</string>
-    <string name="notification_required">Разрешение за нотификация</string>
-    <string name="why_notification_required">Meshtastic има нужда от разрешение за сервизни и текстови нотификации.</string>
-    <string name="notification_denied">Няма разрешение за нотификации. За промяна отидете на Android Settings &gt; Apps &gt; Meshtastic &gt; Notifications.</string>
-    <string name="modem_config_slow_short">Къс обхват / Бавен</string>
-    <string name="modem_config_slow_medium">Среден обхват / Бавен</string>
     <plurals name="delete_messages">
         <item quantity="one">Изтриване на съочщение?</item>
         <item quantity="other">Изтриване на %s съобщения?</item>
@@ -170,7 +123,6 @@
     <string name="select_all">Избери всички</string>
     <string name="close_selection">Затваряне на избраните</string>
     <string name="delete_selection">Изтриване на избраните</string>
-    <string name="modem_config_slow_long">Дълго разстояние / Бавно</string>
     <string name="map_style_selection">Избор на стил</string>
     <string name="map_download_region">Сваляне на регион</string>
     <string name="name">Име</string>
@@ -185,12 +137,6 @@
     <string name="reboot">Рестартиране</string>
     <string name="traceroute">Трасиране на маршрут</string>
     <string name="intro_show">Показване на въведение</string>
-    <string name="intro_welcome">Добре дошли в Meshtastic</string>
-    <string name="intro_welcome_text">Meshtastic е криптирана комуникационна платформа с отворен код, извън мрежата. Радиостанциите Meshtastic образуват мрежа и комуникират с помощта на протокола LoRa за изпращане на текстови съобщения.</string>
-    <string name="intro_started">Нека да започваме!</string>
-    <string name="intro_started_text">Свържете вашето устройство Meshtastic чрез Bluetooth, серийна комуникация или WiFi.\n\nМожете да видите кои устройства са съвместими на www.meshtastic.org/docs/hardware</string>
-    <string name="intro_encryption">"Настройка на криптиране"</string>
-    <string name="intro_encryption_text">Стандартно е зададен ключ за криптиране по подразбиране. За да активирате свой собствен канал и подобрено криптиране, отидете в раздела на канала и променете името на канала, това ще зададе произволен ключ за AES256 криптиране.\n\nЗа да комуникират с други устройства, те ще трябва да сканират вашия QR код или да последват споделената връзка, за да конфигурират настройките на канала.</string>
     <string name="message">Съобщение</string>
     <string name="quick_chat">Опции за бърз разговор</string>
     <string name="quick_chat_new">Нов бърз разговор</string>
@@ -198,12 +144,10 @@
     <string name="quick_chat_append">Добавяне към съобщението</string>
     <string name="quick_chat_instant">Незабавно изпращане</string>
     <string name="factory_reset">Фабрично нулиране</string>
-    <string name="factory_reset_description">Това ще изчисти всички настройки на устройството, които сте направили.</string>
     <string name="bluetooth_disabled">Bluetooth изключен</string>
     <string name="permission_missing_31">Meshtastic се нуждае от разрешение за близки устройства, за да намери и свърже с устройства чрез Bluetooth. Можете да го изключите, когато не се използва.</string>
     <string name="direct_message">Директно съобщение</string>
     <string name="nodedb_reset">Нулиране на базата данни с възли</string>
-    <string name="nodedb_reset_description">Това ще изчисти всички възли от този списък.</string>
     <string name="delivery_confirmed">Съобщението е доставено</string>
     <string name="error">Грешка</string>
     <string name="ignore">Игнорирай</string>
@@ -237,7 +181,6 @@
     <string name="error_duty_cycle">Достигнат лимит на Duty Cycle. Не може да се изпрати съобщение сега, опитайте по-късно.</string>
     <string name="remove">Изтрий</string>
     <string name="remove_node_text">Този node ще бъде изтрит от твоят лист докато вашият node не получи отново съобшение от него.</string>
-    <string name="mute">Заглуши</string>
     <string name="mute_notifications">Заглуши нотификациите</string>
     <string name="mute_8_hours">8 часа</string>
     <string name="mute_1_week">1 седмица</string>
@@ -276,7 +219,6 @@
     <string name="fair">Задоволително</string>
     <string name="good">Добро</string>
     <string name="none_quality">Няма</string>
-    <string name="share_message">Споделяне на съобщение</string>
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Качество на сигнала</string>
     <string name="traceroute_direct">Директно</string>
@@ -292,8 +234,6 @@
     <string name="max">Макс</string>
     <string name="unknown_age">Неизвестна възраст</string>
     <string name="copy">Копиране</string>
-    <string name="channel_settings">Настройки на канала</string>
-    <string name="samsung_instructions">Инструкции на Samsung</string>
     <string name="critical_alert">Критичен сигнал!</string>
     <string name="favorite">Любим</string>
     <string name="favorite_add">Добавяне на \'%s\' като любим възел?</string>
@@ -456,7 +396,6 @@
     <string name="node_number">Номер на възела</string>
     <string name="user_id">ID на потребителя</string>
     <string name="uptime">Време на работа</string>
-    <string name="firmware_version">Версия на Фърмуера</string>
     <string name="timestamp">Времево клеймо</string>
     <string name="sats">Сат</string>
     <string name="alt">н.в.</string>
@@ -467,7 +406,6 @@
     <string name="secondary">Вторичен</string>
     <string name="secondary_no_telemetry">Без периодично излъчване на телеметрия</string>
     <string name="press_and_drag">Натиснете и плъзнете, за да пренаредите</string>
-    <string name="set_region">Задаване на регион</string>
     <string name="dynamic">Динамична</string>
     <string name="scan_qr_code">Сканиране на QR кода</string>
     <string name="share_contact">Споделяне на контакт</string>
@@ -509,31 +447,10 @@
     <string name="scroll_to_bottom">Превъртане до края</string>
     <string name="meshtastic">Meshtastic</string>
     <string name="scanning">Сканиране</string>
-    <string name="app_intro_back_button">Назад</string>
-    <string name="app_intro_next_button">Напред</string>
-    <string name="app_intro_done_button">Готово</string>
-    <string name="app_intro_skip_button">Пропускане</string>
     <string name="security_icon_description">Състояние на сигурността</string>
-    <string name="security_icon_insecure_precise"> - ПРЕДУПРЕЖДЕНИЕ, активирано е несигурно местоположение</string>
     <string name="unknown_channel">Неизвестен канал</string>
     <string name="warning">Предупреждение</string>
     <string name="unknown">Неизвестно</string>
-    <string name="map_type_normal">Нормален</string>
-    <string name="map_type_satellite">Сателит</string>
-    <string name="map_type_terrain">Терен</string>
-    <string name="map_type_hybrid">Хибриден</string>
-    <string name="manage_map_layers">Управление на слоевете на картата</string>
-    <string name="map_layers_title">Слоеве на картата</string>
-    <string name="no_map_layers_loaded">Няма заредени персонализирани слоеве.</string>
-    <string name="add_layer_button">Добавяне на слой</string>
-    <string name="hide_layer">Скриване на слоя</string>
-    <string name="show_layer">Показване на слой</string>
-    <string name="remove_layer">Премахване на слой</string>
-    <string name="add_layer">Добавяне на слой</string>
-    <string name="nodes_at_this_location">Възли на това място</string>
-    <string name="name_cannot_be_empty">Името не може да бъде празно.</string>
-    <string name="url_cannot_be_empty">URL не може да бъде празен.</string>
-    <string name="url_template_hint">напр. https://a.tile.openstreetmap.org/{z}/{x}/{y}.png</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
@@ -552,4 +469,6 @@
     <string name="latest_alpha_firmware">Най-новия алфа</string>
     <string name="supported_by_community">Поддържа се от общността Meshtastic</string>
     <string name="firmware_edition">Версия на фърмуера</string>
+    <string name="skip">Пропускане</string>
+    <string name="next">Напред</string>
 </resources>
