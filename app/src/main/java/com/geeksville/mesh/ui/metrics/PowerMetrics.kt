@@ -71,11 +71,12 @@ import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.createPath
+import kotlin.math.ceil
+import kotlin.math.floor
 
 @Suppress("MagicNumber")
 private enum class Power(val color: Color, val min: Float, val max: Float) {
     CURRENT(InfantryBlue, -500f, 500f),
-    VOLTAGE(Red, 0f, 20f),
     ;
 
     /** Difference between the metrics `max` and `min` values. */
@@ -92,10 +93,27 @@ private const val CHART_WEIGHT = 1f
 private const val Y_AXIS_WEIGHT = 0.1f
 private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIGHT + Y_AXIS_WEIGHT)
 
+private const val VOLTAGE_STICK_TO_ZERO_RANGE = 2f
+
+private val VOLTAGE_COLOR = Red
+
+fun minMaxGraphVoltage(valueMin: Float, valueMax: Float): Pair<Float, Float> {
+    val valueMin = floor(valueMin)
+    val min =
+        if (valueMin == 0f || (valueMin >= 0f && valueMin - VOLTAGE_STICK_TO_ZERO_RANGE <= 0f)) {
+            0f
+        } else {
+            valueMin - VOLTAGE_STICK_TO_ZERO_RANGE
+        }
+    val max = ceil(valueMax)
+
+    return Pair(min, max)
+}
+
 private val LEGEND_DATA =
     listOf(
         LegendData(nameRes = R.string.current, color = Power.CURRENT.color, isLine = true),
-        LegendData(nameRes = R.string.voltage, color = Power.VOLTAGE.color, isLine = true),
+        LegendData(nameRes = R.string.voltage, color = VOLTAGE_COLOR, isLine = true),
     )
 
 @Composable
@@ -173,7 +191,13 @@ private fun PowerMetricsChart(
 
     val graphColor = MaterialTheme.colorScheme.onSurface
     val currentDiff = Power.CURRENT.difference()
-    val voltageDiff = Power.VOLTAGE.difference()
+
+    val (voltageMin, voltageMax) =
+        minMaxGraphVoltage(
+            retrieveVoltage(selectedChannel, telemetries.minBy { retrieveVoltage(selectedChannel, it) }),
+            retrieveVoltage(selectedChannel, telemetries.maxBy { retrieveVoltage(selectedChannel, it) }),
+        )
+    val voltageDiff = voltageMax - voltageMin
 
     Row {
         YAxisLabels(
@@ -209,13 +233,13 @@ private fun PowerMetricsChart(
                             timeThreshold = selectedTime.timeThreshold(),
                         ) { i ->
                             val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
-                            val ratio = retrieveVoltage(selectedChannel, telemetry) / voltageDiff
+                            val ratio = (retrieveVoltage(selectedChannel, telemetry) - voltageMin) / voltageDiff
                             val y = height - (ratio * height)
                             return@createPath y
                         }
                     drawPath(
                         path = path,
-                        color = Power.VOLTAGE.color,
+                        color = VOLTAGE_COLOR,
                         style = Stroke(width = GraphUtil.RADIUS, cap = StrokeCap.Round),
                     )
                 }
@@ -248,9 +272,9 @@ private fun PowerMetricsChart(
         }
         YAxisLabels(
             modifier = modifier.weight(weight = Y_AXIS_WEIGHT),
-            Power.VOLTAGE.color,
-            minValue = Power.VOLTAGE.min,
-            maxValue = Power.VOLTAGE.max,
+            VOLTAGE_COLOR,
+            minValue = voltageMin,
+            maxValue = voltageMax,
         )
     }
 
