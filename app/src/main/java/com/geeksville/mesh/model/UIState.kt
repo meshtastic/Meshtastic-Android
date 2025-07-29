@@ -452,15 +452,6 @@ constructor(
             initialValue = 0,
         )
 
-    val filteredNodeList: StateFlow<List<Node>> =
-        nodeList
-            .mapLatest { list -> list.filter { node -> !node.isIgnored } }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList(),
-            )
-
     data class MapFilterState(val onlyFavorites: Boolean, val showWaypoints: Boolean, val showPrecisionCircle: Boolean)
 
     val mapFilterStateFlow: StateFlow<MapFilterState> =
