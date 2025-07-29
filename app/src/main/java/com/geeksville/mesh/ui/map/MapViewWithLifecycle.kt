@@ -46,56 +46,67 @@ import org.osmdroid.views.MapView
 
 @SuppressLint("WakelockTimeout")
 private fun PowerManager.WakeLock.safeAcquire() {
-    if (!isHeld) try {
-        acquire()
-    } catch (e: SecurityException) {
-        errormsg("WakeLock permission exception: ${e.message}")
-    } catch (e: IllegalStateException) {
-        errormsg("WakeLock acquire() exception: ${e.message}")
+    if (!isHeld) {
+        try {
+            acquire()
+        } catch (e: SecurityException) {
+            errormsg("WakeLock permission exception: ${e.message}")
+        } catch (e: IllegalStateException) {
+            errormsg("WakeLock acquire() exception: ${e.message}")
+        }
     }
 }
 
 private fun PowerManager.WakeLock.safeRelease() {
-    if (isHeld) try {
-        release()
-    } catch (e: IllegalStateException) {
-        errormsg("WakeLock release() exception: ${e.message}")
+    if (isHeld) {
+        try {
+            release()
+        } catch (e: IllegalStateException) {
+            errormsg("WakeLock release() exception: ${e.message}")
+        }
     }
 }
 
 const val MAP_STYLE_ID = "map_style_id"
 
-private const val MinZoomLevel = 1.5
-private const val MaxZoomLevel = 20.0
-private const val DefaultZoomLevel = 15.0
+private const val MIN_ZOOM_LEVEL = 1.5
+private const val MAX_ZOOM_LEVEL = 20.0
+private const val DEFAULT_ZOOM_LEVEL = 15.0
 
+@Suppress("MagicNumber")
 @Composable
 internal fun rememberMapViewWithLifecycle(
     box: BoundingBox,
     tileSource: ITileSource = TileSourceFactory.DEFAULT_TILE_SOURCE,
 ): MapView {
-    val zoom = if (box.requiredZoomLevel().isFinite()) {
-        (box.requiredZoomLevel() - 0.5).coerceAtLeast(MinZoomLevel)
-    } else {
-        DefaultZoomLevel
-    }
+    val zoom =
+        if (box.requiredZoomLevel().isFinite()) {
+            (box.requiredZoomLevel() - 0.5).coerceAtLeast(MIN_ZOOM_LEVEL)
+        } else {
+            DEFAULT_ZOOM_LEVEL
+        }
     val center = GeoPoint(box.centerLatitude, box.centerLongitude)
     return rememberMapViewWithLifecycle(zoom, center, tileSource)
 }
 
+@Suppress("LongMethod")
 @Composable
 internal fun rememberMapViewWithLifecycle(
-    zoomLevel: Double = MinZoomLevel,
+    zoomLevel: Double = MIN_ZOOM_LEVEL,
     mapCenter: GeoPoint = GeoPoint(0.0, 0.0),
     tileSource: ITileSource = TileSourceFactory.DEFAULT_TILE_SOURCE,
 ): MapView {
     var savedZoom by rememberSaveable { mutableDoubleStateOf(zoomLevel) }
-    var savedCenter by rememberSaveable(
-        stateSaver = Saver(
-            save = { mapOf("latitude" to it.latitude, "longitude" to it.longitude) },
-            restore = { GeoPoint(it["latitude"] ?: 0.0, it["longitude"] ?: .0) }
-        )
-    ) { mutableStateOf(mapCenter) }
+    var savedCenter by
+        rememberSaveable(
+            stateSaver =
+            Saver(
+                save = { mapOf("latitude" to it.latitude, "longitude" to it.longitude) },
+                restore = { GeoPoint(it["latitude"] ?: 0.0, it["longitude"] ?: .0) },
+            ),
+        ) {
+            mutableStateOf(mapCenter)
+        }
 
     val context = LocalContext.current
     val mapView = remember {
@@ -112,8 +123,8 @@ internal fun rememberMapViewWithLifecycle(
             // scales the map tiles to the display density of the screen
             isTilesScaledToDpi = true
             // sets the minimum zoom level (the furthest out you can zoom)
-            minZoomLevel = MinZoomLevel
-            maxZoomLevel = MaxZoomLevel
+            minZoomLevel = MIN_ZOOM_LEVEL
+            maxZoomLevel = MAX_ZOOM_LEVEL
             // Disables default +/- button for zooming
             zoomController.setVisibility(CustomZoomButtonsController.Visibility.SHOW_AND_FADEOUT)
 
@@ -126,8 +137,7 @@ internal fun rememberMapViewWithLifecycle(
         val powerManager = context.getSystemService(Context.POWER_SERVICE) as PowerManager
 
         @Suppress("DEPRECATION")
-        val wakeLock =
-            powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "Meshtastic:MapViewLock")
+        val wakeLock = powerManager.newWakeLock(PowerManager.FULL_WAKE_LOCK, "Meshtastic:MapViewLock")
 
         wakeLock.safeAcquire()
 
