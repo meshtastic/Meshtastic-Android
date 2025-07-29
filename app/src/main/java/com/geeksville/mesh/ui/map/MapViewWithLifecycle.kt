@@ -75,7 +75,7 @@ internal fun rememberMapViewWithLifecycle(
     tileSource: ITileSource = TileSourceFactory.DEFAULT_TILE_SOURCE,
 ): MapView {
     val zoom = if (box.requiredZoomLevel().isFinite()) {
-        box.requiredZoomLevel()
+        (box.requiredZoomLevel() - 0.5).coerceAtLeast(MinZoomLevel)
     } else {
         DefaultZoomLevel
     }
