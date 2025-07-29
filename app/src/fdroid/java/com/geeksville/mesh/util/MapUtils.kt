@@ -17,64 +17,10 @@
 
 package com.geeksville.mesh.util
 
-import android.annotation.SuppressLint
-import android.location.Location
-import com.geeksville.mesh.MeshProtos
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import kotlin.math.log2
 import kotlin.math.pow
-
-@SuppressLint("PropertyNaming")
-object GPSFormat {
-    fun toDec(latitude: Double, longitude: Double): String {
-        val lat = Location.convert(latitude, Location.FORMAT_DEGREES)
-        val lon = Location.convert(longitude, Location.FORMAT_DEGREES)
-        return "$lat $lon"
-    }
-}
-
-/** @return distance in meters along the surface of the earth (ish) */
-fun latLongToMeter(latitudeA: Double, longitudeA: Double, latitudeB: Double, longitudeB: Double): Double {
-    val locationA =
-        Location("").apply {
-            latitude = latitudeA
-            longitude = longitudeA
-        }
-    val locationB =
-        Location("").apply {
-            latitude = latitudeB
-            longitude = longitudeB
-        }
-    return locationA.distanceTo(locationB).toDouble()
-}
-
-// Same as above, but takes Mesh Position proto.
-fun positionToMeter(a: MeshProtos.Position, b: MeshProtos.Position): Double =
-    latLongToMeter(a.latitudeI * 1e-7, a.longitudeI * 1e-7, b.latitudeI * 1e-7, b.longitudeI * 1e-7)
-
-/**
- * Computes the bearing in degrees between two points on Earth.
- *
- * @param lat1 Latitude of the first point
- * @param lon1 Longitude of the first point
- * @param lat2 Latitude of the second point
- * @param lon2 Longitude of the second point
- * @return Bearing between the two points in degrees. A value of 0 means due north.
- */
-fun bearing(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-    val locationA =
-        Location("").apply {
-            latitude = lat1
-            longitude = lon1
-        }
-    val locationB =
-        Location("").apply {
-            latitude = lat2
-            longitude = lon2
-        }
-    return locationA.bearingTo(locationB).toDouble()
-}
 
 /**
  * Calculates the zoom level required to fit the entire [BoundingBox] inside the map view.

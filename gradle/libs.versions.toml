@@ -186,7 +186,7 @@ testing-room = ["room-testing"]
 osm = ["osmdroid-android", "osmbonuspack", "mgrs"]
 
 # Google Maps (Compose)
-maps-compose = ["location-services", "maps-compose", "maps-compose-utils", "maps-compose-widgets", "mgrs"]
+maps-compose = ["location-services", "maps-compose", "maps-compose-utils", "maps-compose-widgets"]
 
 # Firebase
 firebase = ["firebase-analytics", "firebase-crashlytics"]

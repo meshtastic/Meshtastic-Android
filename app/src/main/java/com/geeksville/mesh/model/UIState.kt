@@ -893,9 +893,9 @@ constructor(
                                     ""
                                 } else {
                                     positionToMeter(
-                                        rxPosition!!, // Use rxPosition but only if rxPos was
+                                        Position(rxPosition!!), // Use rxPosition but only if rxPos was
                                         // valid
-                                        senderPosition!!, // Use senderPosition but only if
+                                        Position(senderPosition!!), // Use senderPosition but only if
                                         // senderPos was valid
                                     )
                                         .roundToInt()
