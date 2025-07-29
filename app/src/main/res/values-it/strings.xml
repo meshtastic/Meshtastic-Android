@@ -16,11 +16,6 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
-    <string name="main_tab_messages">Messaggi</string>
-    <string name="main_tab_users">Utenti</string>
-    <string name="main_tab_map">Mappa</string>
-    <string name="main_tab_channel">Canale</string>
-    <string name="main_tab_settings">Impostazioni</string>
     <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Filtro</string>
     <string name="desc_node_filter_clear">elimina filtro nodi</string>
@@ -79,35 +74,22 @@
     <string name="config_device_ledHeartbeatDisabled_summary">Controlla il LED lampeggiante del dispositivo. Per la maggior parte dei dispositivi questo controllerà uno dei LED (fino a 4), il LED dell\'alimentazione e il LED del GPS non sono controllabili.</string>
     <string name="config_device_transmitOverLora_summary">Se oltre a inviarli tramite MQTT e PhoneAPI, i dati NeighborInfo devono essere trasmessi tramite LoRa. Non disponibile su un canale con chiave e nome predefiniti.</string>
     <string name="config_security_public_key">Chiave Pubblica</string>
-    <string name="config_security_private_key">Chiave Privata</string>
     <string name="channel_name">Nome del canale</string>
-    <string name="channel_options">Opzioni del canale</string>
     <string name="qr_code">Codice QR</string>
-    <string name="unset">Non impostato</string>
-    <string name="connection_status">Stato della Connessione</string>
     <string name="application_icon">Icona dell\'applicazione</string>
     <string name="unknown_username">Nome Utente Sconosciuto</string>
     <string name="send">Invia</string>
-    <string name="send_text">Invia Messaggio</string>
     <string name="warning_not_paired">Non è ancora stato abbinato un dispositivo radio compatibile Meshtastic a questo telefono. È necessario abbinare un dispositivo e impostare il nome utente.\n\nQuesta applicazione open-source è ancora in via di sviluppo, se si riscontrano problemi, rivolgersi al forum: https://github.com/orgs/meshtastic/discussions\n\nPer maggiori informazioni visitare la pagina web - www.meshtastic.org.</string>
     <string name="you">Tu</string>
-    <string name="your_name">Il tuo nome</string>
     <string name="analytics_okay">Invia statistiche di utilizzo anonime e rapporti sugli arresti anomali.</string>
-    <string name="looking_for_meshtastic_devices">Ricerca di dispositivi Meshtastic in corso…</string>
-    <string name="starting_pairing">Inizio abbinamento</string>
-    <string name="url_for_join">Una URL per unirsi a una rete Meshtastic</string>
     <string name="accept">Accetta</string>
     <string name="cancel">Annulla</string>
-    <string name="change_channel">Cambia canale</string>
-    <string name="are_you_sure_channel">Sei sicuro di voler cambiare canale ? Tutte le comunicazioni con gli altri nodi termineranno fino a quando non condividi le impostazioni del nuovo canale.</string>
     <string name="new_channel_rcvd">Ricevuta URL del Nuovo Canale</string>
     <string name="permission_missing">Meshtastic necessita dei permessi di geolocalizzazione e la geolocalizzazione deve essere attiva per cercare nuovi dispositivi via Bluetooth. È possibile disattivarla successivamente.</string>
     <string name="report_bug">Segnala Bug</string>
     <string name="report_a_bug">Segnalazione di bug</string>
     <string name="report_bug_text">Procedere con la segnalazione di bug? Dopo averlo segnalato, si prega di postarlo in https://github.com/orgs/meshtastic/discussions in modo che possiamo associare la segnalazione al problema riscontrato.</string>
     <string name="report">Invia Segnalazione</string>
-    <string name="not_paired_yet">Non è ancora stata associata nessuna radio.</string>
-    <string name="change_radio">Cambia radio</string>
     <string name="pairing_completed">Abbinamento completato, attivazione in corso del servizio</string>
     <string name="pairing_failed_try_again">Abbinamento fallito, effettuare una nuova selezione</string>
     <string name="location_disabled">L\'accesso alla posizione è disattivato, non è possibile fornire la posizione al mesh.</string>
@@ -115,32 +97,20 @@
     <string name="disconnected">Disconnesso</string>
     <string name="device_sleeping">Il dispositivo è inattivo</string>
     <string name="connected_count">Connesso: %1$s online</string>
-    <string name="update_firmware">Aggiorna Firmware</string>
     <string name="ip_address">Indirizzo IP:</string>
     <string name="ip_port">Porta:</string>
     <string name="connected">Connesso alla radio</string>
     <string name="connected_to">Connesso alla radio (%s)</string>
     <string name="not_connected">Non connesso</string>
     <string name="connected_sleeping">Connesso alla radio, ma sta dormendo</string>
-    <string name="update_to">Aggiornare a %s</string>
     <string name="app_too_old">Aggiornamento dell\'applicazione necessario</string>
     <string name="must_update">È necessario aggiornare questa applicazione nell\'app store (o Github). È troppo vecchio per parlare con questo firmware radio. Per favore leggi i nostri <a href="https://meshtastic.org/docs/software/android/installation">documenti</a> su questo argomento.</string>
     <string name="none">Nessuno (disattiva)</string>
-    <string name="modem_config_turbo">Distanza Breve / Turbo</string>
-    <string name="modem_config_short">Distanza Breve / Veloce</string>
-    <string name="modem_config_medium">Distanza Media / Veloce</string>
-    <string name="modem_config_long">Distanza Grande / Veloce</string>
-    <string name="modem_config_mod_long">Distanza Grande / Velocità Moderata</string>
-    <string name="modem_config_very_long">Distanza Molto Grande / Lento</string>
-    <string name="modem_config_unrecognized">NON RICONOSCIUTO</string>
     <string name="meshtastic_service_notifications">Notifiche di servizio</string>
-    <string name="location_disabled_warning">La localizzazione deve essere attiva per cercare nuovi dispositivi tramite Bluetooth. Può essere spenta di nuovo successivamente.</string>
     <string name="about">Informazioni</string>
-    <string name="text_messages">Messaggi di testo</string>
     <string name="channel_invalid">L\'URL di questo Canale non è valida e non può essere usata</string>
     <string name="debug_panel">Pannello Di Debug</string>
     <string name="debug_logs_export">Esporta i logs</string>
-    <string name="debug_last_messages">Ultimi 500 messaggi</string>
     <string name="debug_filters">Filtri</string>
     <string name="debug_active_filters">Filtri attivi</string>
     <string name="debug_default_search">Cerca nei log…</string>
@@ -149,21 +119,14 @@
     <string name="match_all">Trova tutte le corrispondenze | Qualsiasi</string>
     <string name="debug_clear_logs_confirm">Verranno rimossi tutti i pacchetti dei log e le voci del database dal dispositivo - Si tratta di un ripristino completo ed irreversibile.</string>
     <string name="clear">Svuota</string>
-    <string name="updating_firmware">Aggiornamento del firmware in corso, attendere fino a otto minuti…</string>
-    <string name="update_successful">Aggiornamento riuscito</string>
-    <string name="update_failed">Aggiornamento non riuscito</string>
-    <string name="message_reception_time">ora di ricezione messaggio</string>
-    <string name="message_reception_state">stato di ricezione messaggio</string>
     <string name="message_delivery_status">Stato di consegna messaggi</string>
     <string name="meshtastic_messages_notifications">Notifiche di messaggi diretti</string>
     <string name="meshtastic_broadcast_notifications">Notifiche di messaggi broadcast</string>
     <string name="meshtastic_alerts_notifications">Notifiche di allarme</string>
-    <string name="protocol_stress_test">Stress test del protocollo</string>
     <string name="firmware_too_old">È necessario aggiornare il firmware.</string>
     <string name="firmware_old">Il firmware radio è troppo vecchio per parlare con questa applicazione. Per ulteriori informazioni su questo vedi <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">la nostra guida all\'installazione del firmware</a>.</string>
     <string name="okay">Ok</string>
     <string name="must_set_region">Devi impostare una regione!</string>
-    <string name="region">Regione</string>
     <string name="cant_change_no_radio">Impossibile cambiare il canale, perché la radio non è ancora connessa. Riprova.</string>
     <string name="save_messages">Esporta rangetest.csv</string>
     <string name="reset">Reset</string>
@@ -171,23 +134,12 @@
     <string name="are_you_sure_change_default">Confermi di voler passare al canale predefinito?</string>
     <string name="reset_to_defaults">Ripristina impostazioni predefinite</string>
     <string name="apply">Applica</string>
-    <string name="no_app_found">Nessuna applicazione trovata per condividere l\'URI</string>
     <string name="theme">Tema</string>
     <string name="theme_light">Chiaro</string>
     <string name="theme_dark">Scuro</string>
     <string name="theme_system">Predefinito di sistema</string>
     <string name="choose_theme">Scegli tema</string>
-    <string name="background_required">Posizione in background</string>
-    <string name="why_background_required">Per questa funzione, è necessario concedere l\'opzione di autorizzazione posizione \"Consenti tutto il tempo\".\nQuesto permette a Meshtastic di leggere la posizione del tuo smartphone e inviarlo ad altri membri del tuo mesh, anche quando l\'applicazione è chiusa o non in uso.</string>
-    <string name="required_permissions">Autorizzazioni necessarie</string>
     <string name="provide_location_to_mesh">Fornire la posizione alla mesh</string>
-    <string name="camera_required">Autorizzazione fotocamera</string>
-    <string name="why_camera_required">È necessario consentire l\'accesso alla fotocamera per leggere i codici QR. Non verranno salvate foto o video.</string>
-    <string name="notification_required">Consentire le notifiche</string>
-    <string name="why_notification_required">Meshtastic ha bisogno dell\'autorizzazione per mostrare notifiche di servizio e messaggi.</string>
-    <string name="notification_denied">Permesso di notifica negato. Per attivare le notifiche, vai a: Impostazioni Android &gt; Apps &gt; Meshtastic &gt; Notifiche.</string>
-    <string name="modem_config_slow_short">Distanza Breve / Lento</string>
-    <string name="modem_config_slow_medium">Distanza Media / Lento</string>
     <plurals name="delete_messages">
         <item quantity="one">Eliminare il messaggio?</item>
         <item quantity="other">Eliminare %s messaggi?</item>
@@ -196,7 +148,6 @@
     <string name="delete_for_everyone">Elimina per tutti</string>
     <string name="delete_for_me">Elimina per me</string>
     <string name="select_all">Seleziona tutti</string>
-    <string name="modem_config_slow_long">Distanza Grande / Lento</string>
     <string name="map_style_selection">Selezione Stile</string>
     <string name="map_download_region">Scarica Regione</string>
     <string name="name">Nome</string>
@@ -211,12 +162,6 @@
     <string name="reboot">Riavvia</string>
     <string name="traceroute">Traceroute</string>
     <string name="intro_show">Mostra Guida introduttiva</string>
-    <string name="intro_welcome">Benvenuto su Meshtastic</string>
-    <string name="intro_welcome_text">Meshtastic è una piattaforma di comunicazione open-source, off-grid, crittografata. Le radio Meshtastic formano una rete mesh e comunicano utilizzando il protocollo LoRa per inviare messaggi.</string>
-    <string name="intro_started">…Iniziamo!</string>
-    <string name="intro_started_text">Collega il tuo dispositivo Meshtastic utilizzando Bluetooth, Serial o WiFi. \n\nPuoi vedere quali dispositivi sono compatibili su www.meshtastic.org/docs/hardware</string>
-    <string name="intro_encryption">"Impostazione della crittografia"</string>
-    <string name="intro_encryption_text">Come standard, è impostata una chiave di crittografia predefinita. Per abilitare il tuo canale e la crittografia migliorata, vai alla scheda del canale e cambia il nome del canale, questo imposterà una chiave casuale per la crittografia AES256. \n\nPer comunicare con altri dispositivi sarà necessario eseguire la scansione del codice QR o seguire il link condiviso per configurare le impostazioni del canale.</string>
     <string name="message">Messaggio</string>
     <string name="quick_chat">Opzioni chat rapida</string>
     <string name="quick_chat_new">Nuova chat rapida</string>
@@ -224,12 +169,10 @@
     <string name="quick_chat_append">Aggiungi al messaggio</string>
     <string name="quick_chat_instant">Invio immediato</string>
     <string name="factory_reset">Ripristina impostazioni di fabbrica</string>
-    <string name="factory_reset_description">Questo cancellerà tutta la configurazione del dispositivo che hai fatto.</string>
     <string name="bluetooth_disabled">Bluetooth disabilitato</string>
     <string name="permission_missing_31">Meshtastic ha bisogno del permesso di dispositivi nelle vicinanze per trovare e connettersi ai dispositivi tramite Bluetooth. Puoi disattivarlo quando non è in uso.</string>
     <string name="direct_message">Messaggio diretto</string>
     <string name="nodedb_reset">NodeDB reset</string>
-    <string name="nodedb_reset_description">Questo cancellerà tutti i nodi da questo elenco.</string>
     <string name="delivery_confirmed">Consegna confermata</string>
     <string name="error">Errore</string>
     <string name="ignore">Ignora</string>
@@ -264,7 +207,6 @@
     <string name="error_duty_cycle">Limite di Duty Cycle raggiunto. Impossibile inviare messaggi in questo momento, riprovare più tardi.</string>
     <string name="remove">Elimina</string>
     <string name="remove_node_text">Questo nodo verrà rimosso dalla tua lista fino a quando il tuo nodo non riceverà di nuovo dei dati.</string>
-    <string name="mute">Silenzia</string>
     <string name="mute_notifications">Disattiva notifiche</string>
     <string name="mute_8_hours">8 ore</string>
     <string name="mute_1_week">1 settimana</string>
@@ -312,7 +254,6 @@
     <string name="good">Buono</string>
     <string name="none_quality">Nessuno</string>
     <string name="share_to">Condividi con…</string>
-    <string name="share_message">Condividi messaggio</string>
     <string name="signal">Segnale</string>
     <string name="signal_quality">Qualità Segnale</string>
     <string name="traceroute_log">Registro Di Traceroute</string>
@@ -331,10 +272,6 @@
     <string name="unknown_age">Età sconosciuta</string>
     <string name="copy">Copia</string>
     <string name="alert_bell_text">Carattere Campana Di Allarme!</string>
-    <string name="channel_settings">Impostazioni Canale</string>
-    <string name="samsung_instructions">Istruzioni Samsung</string>
-    <string name="alerts_dnd_request_title">Abilita gli avvisi critici per bypassare Non disturbare</string>
-    <string name="alerts_dnd_request_text"><![CDATA[Per consentire gli avvisi critici mentre il telefono è in modalità Non disturbare, attivare la funzione di annullamento della modalità Non disturbare per il canale degli avvisi nelle impostazioni di notifica dell\'app Meshtastic.<br/><br/>Gli utenti Samsung potrebbero dover aggiungere un\'eccezione nelle impostazioni di sistema prima di attivarla per il canale degli avvisi. <a href="https://www.samsung.com/latin_en/support/mobile-devices/how-to-use-the-do-not-disturb-mode-on-your-galaxy-phone/">Visitare il Supporto Samsung per assistenza.</a>.]]></string>
     <string name="critical_alert">Avvisi critici</string>
     <string name="favorite">Preferito</string>
     <string name="favorite_add">Aggiungere \'%s\' ai nodi preferiti?</string>
@@ -610,7 +547,6 @@
     <string name="node_number">Numero Nodo</string>
     <string name="user_id">ID utente</string>
     <string name="uptime">Tempo di attività</string>
-    <string name="firmware_version">Versione firmware</string>
     <string name="timestamp">Data e ora</string>
     <string name="heading">Direzione</string>
     <string name="sats">Sat</string>
@@ -623,7 +559,6 @@
     <string name="secondary_no_telemetry">Nessuna trasmissione telemetria periodica</string>
     <string name="manual_position_request">Richiesta posizione manuale mandatoria</string>
     <string name="press_and_drag">Premi e trascina per riordinare</string>
-    <string name="set_region">Imposta Regione</string>
     <string name="unmute">Riattiva l\'audio</string>
     <string name="dynamic">Dinamico</string>
     <string name="scan_qr_code">Scansiona codice QR</string>
@@ -641,7 +576,6 @@
     <string name="display_time_in_12h_format">Se abilitato, il dispositivo visualizzerà il tempo in formato 12 ore sullo schermo.</string>
     <string name="host_metrics_log">Registro Metriche Host</string>
     <string name="host">Host</string>
-    <string name="host_metrics">Metriche Host</string>
     <string name="free_memory">Memoria libera</string>
     <string name="disk_free">Spazio disco libero</string>
     <string name="load">Carico</string>
@@ -684,10 +618,6 @@
     <string name="scroll_to_bottom">Scorri fino in fondo</string>
     <string name="meshtastic">Meshtastic</string>
     <string name="scanning">Scansione in corso</string>
-    <string name="app_intro_back_button">Indietro</string>
-    <string name="app_intro_next_button">Avanti</string>
-    <string name="app_intro_done_button">Fatto</string>
-    <string name="app_intro_skip_button">Ignora</string>
     <string name="warning">Attenzione</string>
     <string name="unknown">Sconosciuto</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
@@ -697,4 +627,6 @@
     <string name="security_icon_help_dismiss">Annulla</string>
     <string name="message_input_label">Messaggio</string>
     <string name="download">Scarica</string>
+    <string name="skip">Ignora</string>
+    <string name="next">Avanti</string>
 </resources>
