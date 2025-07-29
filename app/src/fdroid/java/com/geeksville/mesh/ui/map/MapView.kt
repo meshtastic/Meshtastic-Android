@@ -253,11 +253,13 @@ fun MapView(
         }
     }
 
-    val cameraView = remember {
-        val geoPoints = mapViewModel.nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
+    val initialCameraView = remember {
+        val nodes = mapViewModel.nodeList.value
+        val nodesWithPosition = nodes.filter { it.validPosition != null }
+        val geoPoints = nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
         BoundingBox.fromGeoPoints(geoPoints)
     }
-    val map = rememberMapViewWithLifecycle(cameraView, loadOnlineTileSourceBase())
+    val map = rememberMapViewWithLifecycle(initialCameraView, loadOnlineTileSourceBase())
 
     val nodeClusterer = remember { RadiusMarkerClusterer(context) }
 

@@ -71,6 +71,7 @@ private const val MIN_ZOOM_LEVEL = 1.5
 private const val MAX_ZOOM_LEVEL = 20.0
 private const val DEFAULT_ZOOM_LEVEL = 15.0
 
+@Suppress("MagicNumber")
 @Composable
 internal fun rememberMapViewWithLifecycle(
     box: BoundingBox,
@@ -78,7 +79,7 @@ internal fun rememberMapViewWithLifecycle(
 ): MapView {
     val zoom =
         if (box.requiredZoomLevel().isFinite()) {
-            box.requiredZoomLevel()
+            (box.requiredZoomLevel() - 0.5).coerceAtLeast(MIN_ZOOM_LEVEL)
         } else {
             DEFAULT_ZOOM_LEVEL
         }
