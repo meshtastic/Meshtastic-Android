@@ -115,6 +115,7 @@
     <string name="pairing_failed_try_again">Laiteparin muodostaminen epäonnistui, valitse uudelleen</string>
     <string name="location_disabled">Sijainnin käyttöoikeus on poistettu käytöstä, joten emme voi tarjota sijaintia mesh-verkkoon.</string>
     <string name="share">Jaa</string>
+    <string name="new_node_seen">Uusi laite nähty: %s</string>
     <string name="disconnected">Ei yhdistetty</string>
     <string name="device_sleeping">Laite on lepotilassa</string>
     <string name="connected_count">Yhdistetty: %1$s verkossa</string>
@@ -412,6 +413,7 @@
     <string name="downlink_enabled">Vastaanotto käytössä</string>
     <string name="default_">Oletus</string>
     <string name="position_enabled">Sijainti käytössä</string>
+    <string name="precise_location">Tarkka sijainti</string>
     <string name="gpio_pin">GPIO pinni</string>
     <string name="type">Kirjoita</string>
     <string name="hide_password">Piilota salasana</string>
@@ -630,6 +632,7 @@
     <string name="firmware_version">Laiteohjelmistoversio</string>
     <string name="timestamp">Aikaleima</string>
     <string name="heading">Suunta</string>
+    <string name="speed">Nopeus</string>
     <string name="sats">Satelliitit</string>
     <string name="alt">Korkeus </string>
     <string name="freq">Taajuus</string>
@@ -775,4 +778,6 @@
     <string name="latest_alpha_firmware">Viimeisin epävakaa (alpha)</string>
     <string name="supported_by_community">Meshtastic-yhteisön tukema</string>
     <string name="firmware_edition">Laiteohjelmistoversio</string>
+    <string name="recent_network_devices">Äskettäin havaitut verkkolaitteet</string>
+    <string name="discovered_network_devices">Löydetyt verkkolaitteet</string>
 </resources>

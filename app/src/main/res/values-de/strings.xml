@@ -630,6 +630,7 @@
     <string name="firmware_version">Firmwareversion</string>
     <string name="timestamp">Zeitstempel</string>
     <string name="heading">Überschrift</string>
+    <string name="speed">Geschwindigkeit</string>
     <string name="sats">Satelliten</string>
     <string name="alt">Höhe</string>
     <string name="freq">Frequenz</string>
