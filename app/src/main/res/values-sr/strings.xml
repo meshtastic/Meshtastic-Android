@@ -397,6 +397,7 @@
     <string name="uptime">Време рада</string>
     <string name="timestamp">Временска ознака</string>
     <string name="heading">Смер</string>
+    <string name="speed">Брзина</string>
     <string name="sats">Сателита</string>
     <string name="alt">Висина</string>
     <string name="primary">Примарни</string>
