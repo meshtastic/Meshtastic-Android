@@ -37,7 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.geeksville.mesh.R
-import com.geeksville.mesh.model.BTScanModel
+import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
@@ -46,40 +46,32 @@ import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 @Composable
 fun DeviceListItem(
     connectionState: MeshService.ConnectionState,
-    device: BTScanModel.DeviceListEntry,
+    device: DeviceListEntry,
     selected: Boolean,
     onSelect: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val icon =
-        if (device.isBLE) {
-            Icons.Default.Bluetooth
-        } else if (device.isUSB) {
-            Icons.Default.Usb
-        } else if (device.isTCP) {
-            Icons.Default.Wifi
-        } else if (device.isDisconnect) { // This is the "Disconnect" entry type
-            Icons.Default.Cancel
-        } else {
-            Icons.Default.Add
+        when (device) {
+            is DeviceListEntry.Ble -> Icons.Default.Bluetooth
+            is DeviceListEntry.Usb -> Icons.Default.Usb
+            is DeviceListEntry.Tcp -> Icons.Default.Wifi
+            is DeviceListEntry.Disconnect -> Icons.Default.Cancel
+            is DeviceListEntry.Mock -> Icons.Default.Add
         }
 
     val contentDescription =
-        if (device.isBLE) {
-            stringResource(R.string.bluetooth)
-        } else if (device.isUSB) {
-            stringResource(R.string.serial)
-        } else if (device.isTCP) {
-            stringResource(R.string.network)
-        } else if (device.isDisconnect) { // This is the "Disconnect" entry type
-            stringResource(R.string.disconnect)
-        } else {
-            stringResource(R.string.add)
+        when (device) {
+            is DeviceListEntry.Ble -> stringResource(R.string.bluetooth)
+            is DeviceListEntry.Usb -> stringResource(R.string.serial)
+            is DeviceListEntry.Tcp -> stringResource(R.string.network)
+            is DeviceListEntry.Disconnect -> stringResource(R.string.disconnect)
+            is DeviceListEntry.Mock -> stringResource(R.string.add)
         }
 
     val colors =
         when {
-            selected && device.isDisconnect -> {
+            selected && device is DeviceListEntry.Disconnect -> {
                 ListItemDefaults.colors(
                     containerColor = MaterialTheme.colorScheme.errorContainer,
                     headlineColor = MaterialTheme.colorScheme.onErrorContainer,
@@ -126,12 +118,12 @@ fun DeviceListItem(
             )
         },
         supportingContent = {
-            if (device.isTCP) {
+            if (device is DeviceListEntry.Tcp) {
                 Text(device.address)
             }
         },
         trailingContent = {
-            if (device.isDisconnect) {
+            if (device is DeviceListEntry.Disconnect) {
                 Icon(imageVector = Icons.Default.CloudOff, contentDescription = stringResource(R.string.disconnect))
             } else if (connectionState == MeshService.ConnectionState.CONNECTED) {
                 Icon(imageVector = Icons.Default.CloudDone, contentDescription = stringResource(R.string.connected))

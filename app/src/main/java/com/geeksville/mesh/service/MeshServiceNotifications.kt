@@ -53,7 +53,8 @@ class MeshServiceNotifications(private val context: Context) {
         const val MAX_BATTERY_LEVEL = 100
     }
 
-    private val notificationManager: NotificationManager =
+    private val notificationManager: NotificationManager
+        =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     // We have two notification channels: one for general service status and another one for messages
@@ -562,7 +563,7 @@ class MeshServiceNotifications(private val context: Context) {
             priority = NotificationCompat.PRIORITY_DEFAULT
             setCategory(Notification.CATEGORY_STATUS)
             setAutoCancel(true)
-            setContentTitle("New Node Seen: $name")
+            setContentTitle(context.getString(R.string.new_node_seen).format(name))
             message?.let {
                 setContentText(it)
                 setStyle(NotificationCompat.BigTextStyle().bigText(message))

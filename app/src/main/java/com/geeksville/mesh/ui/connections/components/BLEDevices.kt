@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.BTScanModel
+import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.service.MeshService
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -61,7 +62,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 @Composable
 fun BLEDevices(
     connectionState: MeshService.ConnectionState,
-    btDevices: List<BTScanModel.DeviceListEntry>,
+    btDevices: List<DeviceListEntry>,
     selectedDevice: String,
     scanModel: BTScanModel,
 ) {
@@ -119,7 +120,7 @@ fun BLEDevices(
                     modifier = Modifier.padding(vertical = 8.dp),
                 )
             }
-        } else if (btDevices.filterNot { it.isDisconnect }.isEmpty()) {
+        } else if (btDevices.filterNot { it is DeviceListEntry.Disconnect }.isEmpty()) {
             Column(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,

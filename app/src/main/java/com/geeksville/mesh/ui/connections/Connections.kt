@@ -86,6 +86,8 @@ import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.android.isGooglePlayAvailable
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
+import com.geeksville.mesh.model.DeviceListEntry
+import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.ConfigRoute
@@ -135,7 +137,6 @@ fun ConnectionsScreen(
     val scrollState = rememberScrollState()
     val scanStatusText by scanModel.errorText.observeAsState("")
     val connectionState by uiViewModel.connectionState.collectAsState(MeshService.ConnectionState.DISCONNECTED)
-    val devices by scanModel.devices.observeAsState(emptyMap())
     val scanning by scanModel.spinner.collectAsStateWithLifecycle(false)
     val receivingLocationUpdates by uiViewModel.receivingLocationUpdates.collectAsState(false)
     val context = LocalContext.current
@@ -146,6 +147,11 @@ fun ConnectionsScreen(
     val regionUnset =
         currentRegion == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET &&
             connectionState == MeshService.ConnectionState.CONNECTED
+
+    val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
+    val discoveredTcpDevices by scanModel.discoveredTcpDevicesForUi.collectAsStateWithLifecycle()
+    val recentTcpDevices by scanModel.recentTcpDevicesForUi.collectAsStateWithLifecycle()
+    val usbDevices by scanModel.usbDevicesForUi.collectAsStateWithLifecycle()
 
     /* Animate waiting for the configurations */
     var isWaiting by remember { mutableStateOf(false) }
@@ -251,8 +257,6 @@ fun ConnectionsScreen(
 
             val isConnected by uiViewModel.isConnected.collectAsState(false)
             val ourNode by uiViewModel.ourNodeInfo.collectAsState()
-            // Set the connected node long name for BTScanModel
-            scanModel.connectedNodeLongName = ourNode?.user?.longName
             if (isConnected) {
                 ourNode?.let { node ->
                     Row(
@@ -353,7 +357,7 @@ fun ConnectionsScreen(
                     DeviceType.BLE -> {
                         BLEDevices(
                             connectionState = connectionState,
-                            btDevices = devices.values.filter { it.isBLE || it.isDisconnect },
+                            btDevices = bleDevices,
                             selectedDevice = selectedDevice,
                             scanModel = scanModel,
                         )
@@ -361,19 +365,20 @@ fun ConnectionsScreen(
 
                     DeviceType.TCP -> {
                         NetworkDevices(
-                            connectionState,
-                            devices.values.filter { it.isTCP || it.isDisconnect },
-                            selectedDevice,
-                            scanModel,
+                            connectionState = connectionState,
+                            discoveredNetworkDevices = discoveredTcpDevices,
+                            recentNetworkDevices = recentTcpDevices,
+                            selectedDevice = selectedDevice,
+                            scanModel = scanModel,
                         )
                     }
 
                     DeviceType.USB -> {
                         UsbDevices(
-                            connectionState,
-                            devices.values.filter { it.isUSB || it.isDisconnect || it.isMock },
-                            selectedDevice,
-                            scanModel,
+                            connectionState = connectionState,
+                            usbDevices = usbDevices,
+                            selectedDevice = selectedDevice,
+                            scanModel = scanModel,
                         )
                     }
                 }
@@ -392,7 +397,7 @@ fun ConnectionsScreen(
                             .toggleable(
                                 value = provideLocation,
                                 onValueChange = { checked -> uiViewModel.setProvideLocation(checked) },
-                                enabled = !isGpsDisabled, // Still respect GPS disabled state for UI
+                                enabled = !isGpsDisabled,
                             )
                             .padding(horizontal = 16.dp),
                         verticalAlignment = Alignment.CenterVertically,
@@ -416,7 +421,11 @@ fun ConnectionsScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Warning Not Paired
-                val showWarningNotPaired = !devices.any { it.value.bonded }
+                val hasShownNotPairedWarning by uiViewModel.hasShownNotPairedWarning.collectAsStateWithLifecycle()
+                val showWarningNotPaired =
+                    !isConnected &&
+                        !hasShownNotPairedWarning &&
+                        bleDevices.none { it is DeviceListEntry.Ble && it.bonded }
                 if (showWarningNotPaired) {
                     Text(
                         text = stringResource(R.string.warning_not_paired),
@@ -425,6 +434,8 @@ fun ConnectionsScreen(
                         modifier = Modifier.padding(horizontal = 16.dp),
                     )
                     Spacer(modifier = Modifier.height(16.dp))
+
+                    LaunchedEffect(Unit) { uiViewModel.suppressNoPairedWarning() }
                 }
 
                 // Analytics Okay Checkbox
@@ -564,20 +575,17 @@ private enum class DeviceType {
     ;
 
     companion object {
-        fun fromAddress(address: String): DeviceType? {
-            if (address.isEmpty()) return null
-            val prefix = address[0]
-            val isBLE: Boolean = prefix == 'x'
-            val isUSB: Boolean = prefix == 's'
-            val isTCP: Boolean = prefix == 't'
-            val isMock: Boolean = prefix == 'm'
-            return when {
-                isBLE -> BLE
-                isUSB -> USB
-                isTCP -> TCP
-                isMock -> USB // Treat mock as USB for UI purposes
-                else -> null
-            }
+        fun fromAddress(address: String): DeviceType? = when (address.firstOrNull()) {
+            'x' -> BLE
+            's' -> USB
+            't' -> TCP
+            'm' -> USB // Treat mock as USB for UI purposes
+            'n' ->
+                when (address) {
+                    NO_DEVICE_SELECTED -> null
+                    else -> null
+                }
+            else -> null
         }
     }
 }

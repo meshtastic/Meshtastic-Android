@@ -28,27 +28,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.geeksville.mesh.R
 import com.geeksville.mesh.util.DistanceUnit
 import com.geeksville.mesh.util.toDistanceString
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
-private const val PositionEnabled = 32
-private const val PositionDisabled = 0
+private const val POSITION_ENABLED = 32
+private const val POSITION_DISABLED = 0
 
-private const val PositionPrecisionMin = 10
-private const val PositionPrecisionMax = 19
-private const val PositionPrecisionDefault = 13
+private const val POSITION_PRECISION_MIN = 10
+private const val POSITION_PRECISION_MAX = 19
+private const val POSITION_PRECISION_DEFAULT = 13
 
 @Suppress("MagicNumber")
 fun precisionBitsToMeters(bits: Int): Double = 23905787.925008 * 0.5.pow(bits.toDouble())
 
 @Composable
 fun PositionPrecisionPreference(
-    title: String,
     value: Int,
     enabled: Boolean,
     onValueChanged: (Int) -> Unit,
@@ -58,37 +59,35 @@ fun PositionPrecisionPreference(
 
     Column(modifier = modifier) {
         SwitchPreference(
-            title = title,
-            checked = value != PositionDisabled,
+            title = stringResource(R.string.position_enabled),
+            checked = value != POSITION_DISABLED,
             enabled = enabled,
             onCheckedChange = { enabled ->
-                val newValue = if (enabled) PositionEnabled else PositionDisabled
+                val newValue = if (enabled) POSITION_ENABLED else POSITION_DISABLED
                 onValueChanged(newValue)
             },
-            padding = PaddingValues(0.dp)
+            padding = PaddingValues(0.dp),
         )
-        AnimatedVisibility(visible = value != PositionDisabled) {
+        AnimatedVisibility(visible = value != POSITION_DISABLED) {
             SwitchPreference(
-                title = "Precise location",
-                checked = value == PositionEnabled,
+                title = stringResource(R.string.precise_location),
+                checked = value == POSITION_ENABLED,
                 enabled = enabled,
                 onCheckedChange = { enabled ->
-                    val newValue = if (enabled) PositionEnabled else PositionPrecisionDefault
+                    val newValue = if (enabled) POSITION_ENABLED else POSITION_PRECISION_DEFAULT
                     onValueChanged(newValue)
                 },
-                padding = PaddingValues(0.dp)
+                padding = PaddingValues(0.dp),
             )
         }
-        AnimatedVisibility(visible = value in (PositionDisabled + 1)..<PositionEnabled) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
+        AnimatedVisibility(visible = value in (POSITION_DISABLED + 1)..<POSITION_ENABLED) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Slider(
                     value = value.toFloat(),
                     onValueChange = { onValueChanged(it.roundToInt()) },
                     enabled = enabled,
-                    valueRange = PositionPrecisionMin.toFloat()..PositionPrecisionMax.toFloat(),
-                    steps = PositionPrecisionMax - PositionPrecisionMin - 1,
+                    valueRange = POSITION_PRECISION_MIN.toFloat()..POSITION_PRECISION_MAX.toFloat(),
+                    steps = POSITION_PRECISION_MAX - POSITION_PRECISION_MIN - 1,
                 )
 
                 val precisionMeters = precisionBitsToMeters(value).toInt()
@@ -108,10 +107,9 @@ fun PositionPrecisionPreference(
 @Composable
 private fun PositionPrecisionPreferencePreview() {
     PositionPrecisionPreference(
-        title = "Position enabled",
-        value = PositionPrecisionDefault,
+        value = POSITION_PRECISION_DEFAULT,
         enabled = true,
         onValueChanged = {},
-        modifier = Modifier.padding(horizontal = 16.dp)
+        modifier = Modifier.padding(horizontal = 16.dp),
     )
 }
