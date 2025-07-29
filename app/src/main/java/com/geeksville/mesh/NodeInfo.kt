@@ -19,7 +19,6 @@ package com.geeksville.mesh
 
 import android.graphics.Color
 import android.os.Parcelable
-import com.geeksville.mesh.util.GPSFormat
 import com.geeksville.mesh.util.anonymize
 import com.geeksville.mesh.util.bearing
 import com.geeksville.mesh.util.latLongToMeter
@@ -114,14 +113,6 @@ data class Position(
         longitude != 0.0 &&
         (latitude >= -90 && latitude <= 90.0) &&
         (longitude >= -180 && longitude <= 180)
-
-    fun gpsString(gpsFormat: Int): String = when (gpsFormat) {
-        ConfigProtos.Config.DisplayConfig.GpsCoordinateFormat.DEC_VALUE -> GPSFormat.dec(this)
-        ConfigProtos.Config.DisplayConfig.GpsCoordinateFormat.DMS_VALUE -> GPSFormat.dms(this)
-        ConfigProtos.Config.DisplayConfig.GpsCoordinateFormat.UTM_VALUE -> GPSFormat.utm(this)
-        ConfigProtos.Config.DisplayConfig.GpsCoordinateFormat.MGRS_VALUE -> GPSFormat.mgrs(this)
-        else -> GPSFormat.dec(this)
-    }
 
     override fun toString(): String =
         "Position(lat=${latitude.anonymize}, lon=${longitude.anonymize}, alt=${altitude.anonymize}, time=$time)"

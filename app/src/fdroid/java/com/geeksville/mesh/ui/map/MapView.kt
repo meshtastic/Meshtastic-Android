@@ -210,9 +210,11 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
 @OptIn(ExperimentalPermissionsApi::class) // Added for Accompanist
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
-fun MapView(uiViewModel: UIViewModel = viewModel(),
+fun MapView(
+    uiViewModel: UIViewModel = viewModel(),
     mapViewModel: MapViewModel = viewModel(),
-    navigateToNodeDetails: (Int) -> Unit) {
+    navigateToNodeDetails: (Int) -> Unit,
+) {
     var mapFilterExpanded by remember { mutableStateOf(false) }
 
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsState()
@@ -262,7 +264,7 @@ fun MapView(uiViewModel: UIViewModel = viewModel(),
     fun MapView.toggleMyLocation() {
         if (context.gpsDisabled()) {
             debug("Telling user we need location turned on for MyLocationNewOverlay")
-            uiViewModel.showSnackbar(R.string.location_disabled)
+            uiViewModel.showSnackBar(R.string.location_disabled)
             return
         }
         debug("user clicked MyLocationNewOverlay ${myLocationOverlay == null}")
@@ -307,7 +309,6 @@ fun MapView(uiViewModel: UIViewModel = viewModel(),
     fun MapView.onNodesChanged(nodes: Collection<Node>): List<MarkerWithLabel> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
         val ourNode = uiViewModel.ourNodeInfo.value
-        val gpsFormat = uiViewModel.config.display.gpsFormat.number
         val displayUnits = uiViewModel.config.display.units
         val mapFilterStateValue = mapViewModel.mapFilterStateFlow.value // Access mapFilterState directly
         return nodesWithPosition.mapNotNull { node ->
@@ -323,7 +324,7 @@ fun MapView(uiViewModel: UIViewModel = viewModel(),
                 snippet =
                     context.getString(
                         R.string.map_node_popup_details,
-                        node.gpsString(gpsFormat),
+                        node.gpsString(),
                         formatAgo(node.lastHeard),
                         formatAgo(p.time),
                         if (node.batteryStr != "") node.batteryStr else "?",
@@ -426,6 +427,7 @@ fun MapView(uiViewModel: UIViewModel = viewModel(),
                             "$hours hour${if (hours != 1) "s" else ""}"
                         }
                     }
+
                     else -> "${timeLeft / 86_400_000} day${if (timeLeft / 86_400_000 != 1L) "s" else ""}"
                 }
             MarkerWithLabel(this, label, emoji).apply {
@@ -444,7 +446,7 @@ fun MapView(uiViewModel: UIViewModel = viewModel(),
 
     LaunchedEffect(showCurrentCacheInfo) {
         if (!showCurrentCacheInfo) return@LaunchedEffect
-        uiViewModel.showSnackbar(R.string.calculating)
+        uiViewModel.showSnackBar(R.string.calculating)
         val cacheManager = CacheManager(map)
         val cacheCapacity = cacheManager.cacheCapacity()
         val currentCacheUsage = cacheManager.currentCacheUsage()
@@ -553,11 +555,11 @@ fun MapView(uiViewModel: UIViewModel = viewModel(),
                 zoomLevelMax.toInt(),
                 cacheManagerCallback(
                     onTaskComplete = {
-                        uiViewModel.showSnackbar(R.string.map_download_complete)
+                        uiViewModel.showSnackBar(R.string.map_download_complete)
                         writer.onDetach()
                     },
                     onTaskFailed = { errors ->
-                        uiViewModel.showSnackbar(context.getString(R.string.map_download_errors, errors))
+                        uiViewModel.showSnackBar(context.getString(R.string.map_download_errors, errors))
                         writer.onDetach()
                     },
                 ),
@@ -601,7 +603,8 @@ fun MapView(uiViewModel: UIViewModel = viewModel(),
                         map.generateBoxOverlay()
                         dialog.dismiss()
                     }
-                    2 -> purgeTileSource { uiViewModel.showSnackbar(it) }
+
+                    2 -> purgeTileSource { uiViewModel.showSnackBar(it) }
                     else -> dialog.dismiss()
                 }
             }
@@ -674,7 +677,7 @@ fun MapView(uiViewModel: UIViewModel = viewModel(),
                                         )
                                         Checkbox(
                                             checked = mapFilterState.onlyFavorites,
-                                            onCheckedChange = { model.toggleOnlyFavorites() },
+                                            onCheckedChange = { mapViewModel.toggleOnlyFavorites() },
                                             modifier = Modifier.padding(start = 8.dp),
                                         )
                                     }
@@ -699,7 +702,7 @@ fun MapView(uiViewModel: UIViewModel = viewModel(),
                                         )
                                         Checkbox(
                                             checked = mapFilterState.showWaypoints,
-                                            onCheckedChange = { model.toggleShowWaypointsOnMap() },
+                                            onCheckedChange = { mapViewModel.toggleShowWaypointsOnMap() },
                                             modifier = Modifier.padding(start = 8.dp),
                                         )
                                     }
@@ -724,7 +727,7 @@ fun MapView(uiViewModel: UIViewModel = viewModel(),
                                         )
                                         Checkbox(
                                             checked = mapFilterState.showPrecisionCircle,
-                                            onCheckedChange = { model.toggleShowPrecisionCircleOnMap() },
+                                            onCheckedChange = { mapViewModel.toggleShowPrecisionCircleOnMap() },
                                             modifier = Modifier.padding(start = 8.dp),
                                         )
                                     }

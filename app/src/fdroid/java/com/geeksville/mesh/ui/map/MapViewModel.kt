@@ -23,6 +23,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.model.toggleBooleanPreference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -30,7 +31,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @Suppress("TooManyFunctions")
@@ -48,7 +48,6 @@ constructor(
         get() = preferences.getInt(MAP_STYLE_ID, 0)
         set(value) = preferences.edit { putInt(MAP_STYLE_ID, value) }
 
-    private val onlyFavorites = MutableStateFlow(preferences.getBoolean("only-favorites", false))
     val nodes: StateFlow<List<Node>> =
         nodeRepository
             .getNodes()
@@ -58,35 +57,29 @@ constructor(
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = emptyList(),
             )
+
+    private val showOnlyFavorites = MutableStateFlow(preferences.getBoolean("only-favorites", false))
+
     private val showWaypointsOnMap = MutableStateFlow(preferences.getBoolean("show-waypoints-on-map", true))
     private val showPrecisionCircleOnMap =
         MutableStateFlow(preferences.getBoolean("show-precision-circle-on-map", true))
 
-    fun setOnlyFavorites(value: Boolean) {
-        viewModelScope.launch {
-            onlyFavorites.value = value
-            preferences.edit { putBoolean("only-favorites", onlyFavorites.value) }
-        }
-    }
+    fun toggleOnlyFavorites() =
+        toggleBooleanPreference(preferences = preferences, state = showOnlyFavorites, key = "only-favorites")
 
-    fun setShowWaypointsOnMap(value: Boolean) {
-        viewModelScope.launch {
-            showWaypointsOnMap.value = value
-            preferences.edit { putBoolean("show-waypoints-on-map", value) }
-        }
-    }
+    fun toggleShowWaypointsOnMap() =
+        toggleBooleanPreference(preferences = preferences, state = showWaypointsOnMap, key = "show-waypoints-on-map")
 
-    fun setShowPrecisionCircleOnMap(value: Boolean) {
-        viewModelScope.launch {
-            showPrecisionCircleOnMap.value = value
-            preferences.edit { putBoolean("show-precision-circle-on-map", value) }
-        }
-    }
+    fun toggleShowPrecisionCircleOnMap() = toggleBooleanPreference(
+        preferences = preferences,
+        state = showPrecisionCircleOnMap,
+        key = "show-precision-circle-on-map",
+    )
 
     data class MapFilterState(val onlyFavorites: Boolean, val showWaypoints: Boolean, val showPrecisionCircle: Boolean)
 
     val mapFilterStateFlow: StateFlow<MapFilterState> =
-        combine(onlyFavorites, showWaypointsOnMap, showPrecisionCircleOnMap) {
+        combine(showOnlyFavorites, showWaypointsOnMap, showPrecisionCircleOnMap) {
                 favoritesOnly,
                 showWaypoints,
                 showPrecisionCircle,

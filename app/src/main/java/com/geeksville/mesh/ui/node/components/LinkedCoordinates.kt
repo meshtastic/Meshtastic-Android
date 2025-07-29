@@ -39,10 +39,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.core.net.toUri
-import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.GpsCoordinateFormat
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.HyperlinkBlue
@@ -52,13 +49,7 @@ import java.net.URLEncoder
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun LinkedCoordinates(
-    modifier: Modifier = Modifier,
-    latitude: Double,
-    longitude: Double,
-    format: Int,
-    nodeName: String,
-) {
+fun LinkedCoordinates(modifier: Modifier = Modifier, latitude: Double, longitude: Double, nodeName: String) {
     val context = LocalContext.current
     val clipboard: Clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
@@ -69,7 +60,7 @@ fun LinkedCoordinates(
             textDecoration = TextDecoration.Underline,
         )
 
-    val annotatedString = rememberAnnotatedString(latitude, longitude, format, nodeName, style)
+    val annotatedString = rememberAnnotatedString(latitude, longitude, nodeName, style)
 
     Text(
         modifier =
@@ -87,33 +78,21 @@ fun LinkedCoordinates(
 }
 
 @Composable
-private fun rememberAnnotatedString(
-    latitude: Double,
-    longitude: Double,
-    format: Int,
-    nodeName: String,
-    style: SpanStyle,
-) = buildAnnotatedString {
-    pushStringAnnotation(
-        tag = "gps",
-        annotation =
-        "geo:0,0?q=$latitude,$longitude&z=17&label=${
-            URLEncoder.encode(nodeName, "utf-8")
-        }",
-    )
-    withStyle(style = style) {
-        val gpsString =
-            when (format) {
-                GpsCoordinateFormat.DEC_VALUE -> GPSFormat.toDec(latitude, longitude)
-                GpsCoordinateFormat.DMS_VALUE -> GPSFormat.toDms(latitude, longitude)
-                GpsCoordinateFormat.UTM_VALUE -> GPSFormat.toUtm(latitude, longitude)
-                GpsCoordinateFormat.MGRS_VALUE -> GPSFormat.toMgrs(latitude, longitude)
-                else -> GPSFormat.toDec(latitude, longitude)
-            }
-        append(gpsString)
+private fun rememberAnnotatedString(latitude: Double, longitude: Double, nodeName: String, style: SpanStyle) =
+    buildAnnotatedString {
+        pushStringAnnotation(
+            tag = "gps",
+            annotation =
+            "geo:0,0?q=$latitude,$longitude&z=17&label=${
+                URLEncoder.encode(nodeName, "utf-8")
+            }",
+        )
+        withStyle(style = style) {
+            val gpsString = GPSFormat.toDec(latitude, longitude)
+            append(gpsString)
+        }
+        pop()
     }
-    pop()
-}
 
 private fun handleClick(context: Context, annotatedString: AnnotatedString) {
     annotatedString.getStringAnnotations(tag = "gps", start = 0, end = annotatedString.length).firstOrNull()?.let {
@@ -134,13 +113,6 @@ private fun handleClick(context: Context, annotatedString: AnnotatedString) {
 
 @PreviewLightDark
 @Composable
-fun LinkedCoordinatesPreview(@PreviewParameter(GPSFormatPreviewParameterProvider::class) format: Int) {
-    AppTheme {
-        LinkedCoordinates(latitude = 37.7749, longitude = -122.4194, format = format, nodeName = "Test Node Name")
-    }
-}
-
-class GPSFormatPreviewParameterProvider : PreviewParameterProvider<Int> {
-    override val values: Sequence<Int>
-        get() = sequenceOf(0, 1, 2)
+fun LinkedCoordinatesPreview() {
+    AppTheme { LinkedCoordinates(latitude = 37.7749, longitude = -122.4194, nodeName = "Test Node Name") }
 }

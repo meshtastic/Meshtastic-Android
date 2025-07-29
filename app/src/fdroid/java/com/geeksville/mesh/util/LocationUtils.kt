@@ -18,192 +18,40 @@
 package com.geeksville.mesh.util
 
 import android.annotation.SuppressLint
+import android.location.Location
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.Position
-import mil.nga.grid.features.Point
-import mil.nga.mgrs.MGRS
-import mil.nga.mgrs.utm.UTM
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
-import kotlin.math.PI
-import kotlin.math.abs
-import kotlin.math.acos
-import kotlin.math.atan2
-import kotlin.math.cos
 import kotlin.math.log2
 import kotlin.math.pow
-import kotlin.math.sin
 
-/**
- * ****************************************************************************
- * Revive some of my old Gaggle source code...
- *
- * GNU Public License, version 2 All other distribution of Gaggle must conform to the terms of the GNU Public License,
- * version 2. The full text of this license is included in the Gaggle source, see assets/manual/gpl-2.0.txt.
- * ****************************************************************************
- */
 @SuppressLint("PropertyNaming")
 object GPSFormat {
-    @Suppress("ImplicitDefaultLocale")
-    fun dec(p: Position): String = String.format("%.5f %.5f", p.latitude, p.longitude).replace(",", ".")
-
-    fun dms(p: Position): String {
-        val lat = degreesToDMS(p.latitude, true)
-        val lon = degreesToDMS(p.longitude, false)
-        fun string(a: Array<String>) = String.format("%s°%s'%.5s\"%s", a[0], a[1], a[2], a[3])
-        return string(lat) + " " + string(lon)
+    fun toDec(latitude: Double, longitude: Double): String {
+        val lat = Location.convert(latitude, Location.FORMAT_DEGREES)
+        val lon = Location.convert(longitude, Location.FORMAT_DEGREES)
+        return "$lat $lon"
     }
-
-    @Suppress("ImplicitDefaultLocale")
-    fun utm(p: Position): String {
-        val utm = UTM.from(Point.point(p.longitude, p.latitude))
-        return String.format("%s%s %.6s %.7s", utm.zone, utm.toMGRS().band, utm.easting, utm.northing)
-    }
-
-    @Suppress("ImplicitDefaultLocale")
-    fun mgrs(p: Position): String {
-        val mgrs = MGRS.from(Point.point(p.longitude, p.latitude))
-        return String.format(
-            "%s%s %s%s %05d %05d",
-            mgrs.zone,
-            mgrs.band,
-            mgrs.column,
-            mgrs.row,
-            mgrs.easting,
-            mgrs.northing,
-        )
-    }
-
-    fun toDec(latitude: Double, longitude: Double): String = "%.5f %.5f".format(latitude, longitude).replace(",", ".")
-
-    fun toDms(latitude: Double, longitude: Double): String {
-        val lat = degreesToDMS(latitude, true)
-        val lon = degreesToDMS(longitude, false)
-        fun string(a: Array<String>) = "%s°%s'%.5s\"%s".format(a[0], a[1], a[2], a[3])
-        return string(lat) + " " + string(lon)
-    }
-
-    fun toUtm(latitude: Double, longitude: Double): String {
-        val utm = UTM.from(Point.point(longitude, latitude))
-        return "%s%s %.6s %.7s".format(utm.zone, utm.toMGRS().band, utm.easting, utm.northing)
-    }
-
-    fun toMgrs(latitude: Double, longitude: Double): String {
-        val mgrs = MGRS.from(Point.point(longitude, latitude))
-        return "%s%s %s%s %05d %05d".format(mgrs.zone, mgrs.band, mgrs.column, mgrs.row, mgrs.easting, mgrs.northing)
-    }
-}
-
-/**
- * Format as degrees, minutes, secs
- *
- * @param degIn
- * @param isLatitude
- * @return a string like 120deg
- */
-fun degreesToDMS(_degIn: Double, isLatitude: Boolean): Array<String> {
-    var degIn = _degIn
-    val isPos = degIn >= 0
-    val dirLetter =
-        if (isLatitude) if (isPos) 'N' else 'S'
-        else if (isPos) {
-            'E'
-        } else {
-            'W'
-        }
-    degIn = abs(degIn)
-    val degOut = degIn.toInt()
-    val minutes = 60 * (degIn - degOut)
-    val minwhole = minutes.toInt()
-    val seconds = (minutes - minwhole) * 60
-    return arrayOf(degOut.toString(), minwhole.toString(), seconds.toString(), dirLetter.toString())
-}
-
-fun degreesToDM(_degIn: Double, isLatitude: Boolean): Array<String> {
-    var degIn = _degIn
-    val isPos = degIn >= 0
-    val dirLetter =
-        if (isLatitude) if (isPos) 'N' else 'S'
-        else if (isPos) {
-            'E'
-        } else {
-            'W'
-        }
-    degIn = abs(degIn)
-    val degOut = degIn.toInt()
-    val minutes = 60 * (degIn - degOut)
-    val seconds = 0
-    return arrayOf(degOut.toString(), minutes.toString(), seconds.toString(), dirLetter.toString())
-}
-
-fun degreesToD(_degIn: Double, isLatitude: Boolean): Array<String> {
-    var degIn = _degIn
-    val isPos = degIn >= 0
-    val dirLetter =
-        if (isLatitude) if (isPos) 'N' else 'S'
-        else if (isPos) {
-            'E'
-        } else {
-            'W'
-        }
-    degIn = abs(degIn)
-    val degOut = degIn
-    val minutes = 0
-    val seconds = 0
-    return arrayOf(degOut.toString(), minutes.toString(), seconds.toString(), dirLetter.toString())
-}
-
-/**
- * A not super efficent mapping from a starting lat/long + a distance at a certain direction
- *
- * @param lat
- * @param longitude
- * @param distMeters
- * @param theta in radians, 0 == north
- * @return an array with lat and long
- */
-fun addDistance(lat: Double, longitude: Double, distMeters: Double, theta: Double): DoubleArray {
-    val dx = distMeters * sin(theta) // theta measured clockwise
-    // from due north
-    val dy = distMeters * cos(theta) // dx, dy same units as R
-    val dLong = dx / (111320 * cos(lat)) // dx, dy in meters
-    val dLat = dy / 110540 // result in degrees long/lat
-    return doubleArrayOf(lat + dLat, longitude + dLong)
 }
 
 /** @return distance in meters along the surface of the earth (ish) */
-fun latLongToMeter(lat_a: Double, lng_a: Double, lat_b: Double, lng_b: Double): Double {
-    val pk = (180 / PI)
-    val a1 = lat_a / pk
-    val a2 = lng_a / pk
-    val b1 = lat_b / pk
-    val b2 = lng_b / pk
-    val t1 = cos(a1) * cos(a2) * cos(b1) * cos(b2)
-    val t2 = cos(a1) * sin(a2) * cos(b1) * sin(b2)
-    val t3 = sin(a1) * sin(b1)
-    var tt = acos(t1 + t2 + t3)
-    if (java.lang.Double.isNaN(tt)) tt = 0.0 // Must have been the same point?
-    return 6366000 * tt
+fun latLongToMeter(latitudeA: Double, longitudeA: Double, latitudeB: Double, longitudeB: Double): Double {
+    val locationA =
+        Location("").apply {
+            latitude = latitudeA
+            longitude = longitudeA
+        }
+    val locationB =
+        Location("").apply {
+            latitude = latitudeB
+            longitude = longitudeB
+        }
+    return locationA.distanceTo(locationB).toDouble()
 }
 
 // Same as above, but takes Mesh Position proto.
 fun positionToMeter(a: MeshProtos.Position, b: MeshProtos.Position): Double =
     latLongToMeter(a.latitudeI * 1e-7, a.longitudeI * 1e-7, b.latitudeI * 1e-7, b.longitudeI * 1e-7)
-
-/**
- * Convert degrees/mins/secs to a single double
- *
- * @param degrees
- * @param minutes
- * @param seconds
- * @param isPostive
- * @return
- */
-fun dmsToDegrees(degrees: Int, minutes: Int, seconds: Float, isPostive: Boolean): Double =
-    (if (isPostive) 1 else -1) * (degrees + minutes / 60.0 + seconds / 3600.0)
-
-fun dmsToDegrees(degrees: Double, minutes: Double, seconds: Double, isPostive: Boolean): Double =
-    (if (isPostive) 1 else -1) * (degrees + minutes / 60.0 + seconds / 3600.0)
 
 /**
  * Computes the bearing in degrees between two points on Earth.
@@ -215,16 +63,18 @@ fun dmsToDegrees(degrees: Double, minutes: Double, seconds: Double, isPostive: B
  * @return Bearing between the two points in degrees. A value of 0 means due north.
  */
 fun bearing(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-    val lat1Rad = Math.toRadians(lat1)
-    val lat2Rad = Math.toRadians(lat2)
-    val deltaLonRad = Math.toRadians(lon2 - lon1)
-    val y = sin(deltaLonRad) * cos(lat2Rad)
-    val x = cos(lat1Rad) * sin(lat2Rad) - (sin(lat1Rad) * cos(lat2Rad) * cos(deltaLonRad))
-    return radToBearing(atan2(y, x))
+    val locationA =
+        Location("").apply {
+            latitude = lat1
+            longitude = lon1
+        }
+    val locationB =
+        Location("").apply {
+            latitude = lat2
+            longitude = lon2
+        }
+    return locationA.bearingTo(locationB).toDouble()
 }
-
-/** Converts an angle in radians to degrees */
-fun radToBearing(rad: Double): Double = (Math.toDegrees(rad) + 360) % 360
 
 /**
  * Calculates the zoom level required to fit the entire [BoundingBox] inside the map view.

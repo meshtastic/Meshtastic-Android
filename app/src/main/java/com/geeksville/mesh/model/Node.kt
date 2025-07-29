@@ -116,13 +116,7 @@ data class Node(
         else -> com.geeksville.mesh.util.bearing(latitude, longitude, o.latitude, o.longitude).toInt()
     }
 
-    fun gpsString(gpsFormat: Int): String = when (gpsFormat) {
-        DisplayConfig.GpsCoordinateFormat.DEC_VALUE -> GPSFormat.toDec(latitude, longitude)
-        DisplayConfig.GpsCoordinateFormat.DMS_VALUE -> GPSFormat.toDms(latitude, longitude)
-        DisplayConfig.GpsCoordinateFormat.UTM_VALUE -> GPSFormat.toUtm(latitude, longitude)
-        DisplayConfig.GpsCoordinateFormat.MGRS_VALUE -> GPSFormat.toMgrs(latitude, longitude)
-        else -> GPSFormat.toDec(latitude, longitude)
-    }
+    fun gpsString(): String = GPSFormat.toDec(latitude, longitude)
 
     private fun EnvironmentMetrics.getDisplayString(isFahrenheit: Boolean): String {
         val temp =
