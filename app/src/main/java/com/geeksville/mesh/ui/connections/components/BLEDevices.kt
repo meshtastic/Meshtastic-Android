@@ -42,24 +42,25 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.getBluetoothPermissions
 import com.geeksville.mesh.model.BTScanModel
+import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.service.MeshService
 
 @Suppress("LongMethod")
 @Composable
 fun BLEDevices(
     connectionState: MeshService.ConnectionState,
-    btDevices: List<BTScanModel.DeviceListEntry>,
+    btDevices: List<DeviceListEntry>,
     selectedDevice: String,
     showBluetoothRationaleDialog: () -> Unit,
     requestBluetoothPermission: (Array<String>) -> Unit,
-    scanModel: BTScanModel
+    scanModel: BTScanModel,
 ) {
     val context = LocalContext.current
     val isScanning by scanModel.spinner.collectAsStateWithLifecycle(false)
     Text(
         text = stringResource(R.string.bluetooth),
         style = MaterialTheme.typography.titleLarge,
-        modifier = Modifier.padding(vertical = 8.dp)
+        modifier = Modifier.padding(vertical = 8.dp),
     )
     btDevices.forEach { device ->
         DeviceListItem(
@@ -67,41 +68,29 @@ fun BLEDevices(
             device = device,
             selected = device.fullAddress == selectedDevice,
             onSelect = { scanModel.onSelected(device) },
-            modifier = Modifier
+            modifier = Modifier,
         )
     }
     if (isScanning) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            horizontalAlignment = CenterHorizontally
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(96.dp)
-            )
+        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalAlignment = CenterHorizontally) {
+            CircularProgressIndicator(modifier = Modifier.size(96.dp))
             Text(
                 text = stringResource(R.string.scanning),
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(vertical = 8.dp),
             )
         }
-    } else if (btDevices.filterNot { it.isDisconnect }.isEmpty()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp),
-            horizontalAlignment = CenterHorizontally
-        ) {
+    } else if (btDevices.filterNot { it is DeviceListEntry.Disconnect }.isEmpty()) {
+        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalAlignment = CenterHorizontally) {
             Icon(
                 imageVector = Icons.Default.BluetoothDisabled,
                 contentDescription = stringResource(R.string.no_ble_devices),
-                modifier = Modifier.size(96.dp)
+                modifier = Modifier.size(96.dp),
             )
             Text(
                 text = stringResource(R.string.no_ble_devices),
                 style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(vertical = 8.dp),
             )
         }
     }
@@ -114,11 +103,9 @@ fun BLEDevices(
                 // If no permissions needed, trigger the scan directly (or via ViewModel)
                 scanModel.startScan()
             } else {
-                if (bluetoothPermissions.any { permission ->
-                        ActivityCompat.shouldShowRequestPermissionRationale(
-                            context as Activity,
-                            permission
-                        )
+                if (
+                    bluetoothPermissions.any { permission ->
+                        ActivityCompat.shouldShowRequestPermissionRationale(context as Activity, permission)
                     }
                 ) {
                     showBluetoothRationaleDialog()
@@ -126,12 +113,9 @@ fun BLEDevices(
                     requestBluetoothPermission(bluetoothPermissions)
                 }
             }
-        }
+        },
     ) {
-        Icon(
-            imageVector = Icons.Default.Bluetooth,
-            contentDescription = stringResource(R.string.scan)
-        )
+        Icon(imageVector = Icons.Default.Bluetooth, contentDescription = stringResource(R.string.scan))
         Text(stringResource(R.string.scan))
     }
 }
