@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.connections.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -56,7 +57,7 @@ import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.connections.isIPAddress
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, androidx.compose.foundation.ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalFoundationApi::class)
 @Suppress("MagicNumber", "LongMethod")
 @Composable
 fun NetworkDevices(

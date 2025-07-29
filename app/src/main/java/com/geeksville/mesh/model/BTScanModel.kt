@@ -140,7 +140,7 @@ constructor(
                         shortNameBytes?.let { String(it, Charsets.UTF_8) } ?: context.getString(R.string.meshtastic)
                     val deviceId = idBytes?.let { String(it, Charsets.UTF_8) }?.replace("!", "")
                     var displayName = recentMap[address] ?: shortName
-                    if (deviceId != null && !displayName.contains(deviceId)) {
+                    if (deviceId != null && !displayName.split("_").none { it == deviceId }) {
                         displayName += "_$deviceId"
                     }
                     DeviceListEntry.Tcp(displayName, address)
@@ -186,7 +186,7 @@ constructor(
         processedDiscoveredTcpDevicesFlow.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(SHARING_STARTED_TIMEOUT_MS),
-            listOf(disconnectDevice),
+            listOf(),
         )
 
     /** UI StateFlow for recently connected TCP devices that are not currently discovered. */
@@ -194,7 +194,7 @@ constructor(
         filteredRecentTcpDevicesFlow.stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(SHARING_STARTED_TIMEOUT_MS),
-            listOf(disconnectDevice),
+            listOf(),
         )
 
     val usbDevicesForUi: StateFlow<List<DeviceListEntry>> =
