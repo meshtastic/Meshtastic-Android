@@ -280,6 +280,10 @@
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Качество на сигнала</string>
     <string name="traceroute_direct">Директно</string>
+    <plurals name="traceroute_hops">
+        <item quantity="one">1 хоп</item>
+        <item quantity="other">%d хопа</item>
+    </plurals>
     <string name="twenty_four_hours">24Ч</string>
     <string name="forty_eight_hours">48Ч</string>
     <string name="one_week">1С</string>
@@ -514,11 +518,38 @@
     <string name="unknown_channel">Неизвестен канал</string>
     <string name="warning">Предупреждение</string>
     <string name="unknown">Неизвестно</string>
+    <string name="map_type_normal">Нормален</string>
+    <string name="map_type_satellite">Сателит</string>
+    <string name="map_type_terrain">Терен</string>
+    <string name="map_type_hybrid">Хибриден</string>
+    <string name="manage_map_layers">Управление на слоевете на картата</string>
+    <string name="map_layers_title">Слоеве на картата</string>
+    <string name="no_map_layers_loaded">Няма заредени персонализирани слоеве.</string>
+    <string name="add_layer_button">Добавяне на слой</string>
+    <string name="hide_layer">Скриване на слоя</string>
+    <string name="show_layer">Показване на слой</string>
+    <string name="remove_layer">Премахване на слой</string>
+    <string name="add_layer">Добавяне на слой</string>
+    <string name="nodes_at_this_location">Възли на това място</string>
+    <string name="name_cannot_be_empty">Името не може да бъде празно.</string>
+    <string name="url_cannot_be_empty">URL не може да бъде празен.</string>
+    <string name="url_template_hint">напр. https://a.tile.openstreetmap.org/{z}/{x}/{y}.png</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="security_icon_help_title">Сигурност на канала</string>
+    <string name="security_icon_help_show_less">Показване на текущия статус</string>
     <string name="security_icon_help_dismiss">Отхвърляне</string>
+    <string name="confirm_delete_node">Сигурни ли сте, че искате да изтриете този възел?</string>
+    <string name="clear_selection">Изчистване на избора</string>
     <string name="message_input_label">Съобщение</string>
+    <string name="wifi_devices">WiFi устройства</string>
+    <string name="ble_devices">BLE устройства</string>
     <string name="download">Изтегляне</string>
+    <string name="installed_firmware_version">Текущия инсталиран</string>
+    <string name="latest_stable_firmware">Най-новия стабилен</string>
+    <string name="latest_alpha_firmware">Най-новия алфа</string>
+    <string name="supported_by_community">Поддържа се от общността Meshtastic</string>
+    <string name="firmware_edition">Версия на фърмуера</string>
 </resources>
