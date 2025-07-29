@@ -17,13 +17,11 @@
 
 package com.geeksville.mesh.ui.metrics
 
-import android.annotation.SuppressLint
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -70,7 +68,6 @@ import com.geeksville.mesh.ui.common.components.BatteryInfo
 import com.geeksville.mesh.ui.common.components.OptionLabel
 import com.geeksville.mesh.ui.common.components.SlidingSelector
 import com.geeksville.mesh.ui.common.theme.AppTheme
-import com.geeksville.mesh.ui.common.theme.GraphColors.Blue
 import com.geeksville.mesh.ui.common.theme.GraphColors.Cyan
 import com.geeksville.mesh.ui.common.theme.GraphColors.Green
 import com.geeksville.mesh.ui.common.theme.GraphColors.Magenta
@@ -78,11 +75,9 @@ import com.geeksville.mesh.ui.common.theme.GraphColors.Red
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MAX_PERCENT_VALUE
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
-import com.geeksville.mesh.ui.metrics.LegendData
 import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.plotPoint
-import com.geeksville.mesh.ui.common.theme.GraphColors.LightGreen
 
 private const val CHART_WEIGHT = 1f
 private const val Y_AXIS_WEIGHT = 0.1f
@@ -97,7 +92,7 @@ private enum class Device(val color: Color) {
     },
     AIR_UTIL(Cyan) {
         override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.airUtilTx
-    };
+    }, ;
 
     abstract fun getValue(telemetry: Telemetry): Float
 }
@@ -105,8 +100,18 @@ private enum class Device(val color: Color) {
 private val LEGEND_DATA =
     listOf(
         LegendData(nameRes = R.string.battery, color = Device.BATTERY.color, isLine = true, environmentMetric = null),
-        LegendData(nameRes = R.string.channel_utilization, color = Device.CH_UTIL.color, isLine = false, environmentMetric = null),
-        LegendData(nameRes = R.string.air_utilization, color = Device.AIR_UTIL.color, isLine = false, environmentMetric = null),
+        LegendData(
+            nameRes = R.string.channel_utilization,
+            color = Device.CH_UTIL.color,
+            isLine = false,
+            environmentMetric = null,
+        ),
+        LegendData(
+            nameRes = R.string.air_utilization,
+            color = Device.AIR_UTIL.color,
+            isLine = false,
+            environmentMetric = null,
+        ),
     )
 
 @Composable
