@@ -804,4 +804,6 @@
     <string name="latest_alpha_firmware">Latest alpha</string>
     <string name="supported_by_community">Supported by Meshtastic Community</string>
     <string name="firmware_edition">Firmware Edition</string>
+    <string name="recent_network_devices">Recent Network Devices</string>
+    <string name="discovered_network_devices">Discovered Network Devices</string>
 </resources>

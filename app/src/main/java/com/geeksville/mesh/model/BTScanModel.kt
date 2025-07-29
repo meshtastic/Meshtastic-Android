@@ -125,11 +125,12 @@ constructor(
             .map { ble -> ble.bondedDevices.map { DeviceListEntry.Ble(it) }.sortedBy { it.name } }
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    private val tcpDevicesFlow: StateFlow<List<DeviceListEntry.Tcp>> =
-        combine(networkRepository.resolvedList, recentAddressesRepository.recentAddresses) { tcp, recent ->
-            val recentMap = recent.associateBy({ it.address }, { it.name })
-            val tcpDevices =
-                tcp.map { service ->
+    // Flow for discovered TCP devices, using recent addresses for potential name enrichment
+    private val processedDiscoveredTcpDevicesFlow: StateFlow<List<DeviceListEntry.Tcp>> =
+        combine(networkRepository.resolvedList, recentAddressesRepository.recentAddresses) { tcpServices, recentList ->
+            val recentMap = recentList.associateBy({ it.address }, { it.name })
+            tcpServices
+                .map { service ->
                     val address = "t${service.toAddressString()}"
                     val txtRecords = service.attributes // Map<String, ByteArray?>
                     val shortNameBytes = txtRecords["shortname"]
@@ -144,14 +145,21 @@ constructor(
                     }
                     DeviceListEntry.Tcp(displayName, address)
                 }
+                .sortedBy { it.name }
+        }
+            .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-            val tcpAddresses = tcpDevices.map { it.fullAddress }
-            val recentDevices =
-                recent
-                    .map { DeviceListEntry.Tcp(it.name, it.address) }
-                    .filterNot { tcpAddresses.contains(it.fullAddress) }
-
-            (tcpDevices + recentDevices).sortedBy { it.name }
+    // Flow for recent TCP devices, filtered to exclude any currently discovered devices
+    private val filteredRecentTcpDevicesFlow: StateFlow<List<DeviceListEntry.Tcp>> =
+        combine(recentAddressesRepository.recentAddresses, processedDiscoveredTcpDevicesFlow) {
+                recentList,
+                discoveredDevices,
+            ->
+            val discoveredDeviceAddresses = discoveredDevices.map { it.fullAddress }.toSet()
+            recentList
+                .filterNot { recentAddress -> discoveredDeviceAddresses.contains(recentAddress.address) }
+                .map { recentAddress -> DeviceListEntry.Tcp(recentAddress.name, recentAddress.address) }
+                .sortedBy { it.name }
         }
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
@@ -160,25 +168,44 @@ constructor(
             .map { usb -> usb.map { (_, d) -> DeviceListEntry.Usb(radioInterfaceService, usbManagerLazy.get(), d) } }
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    private val disconnectDevice = DeviceListEntry.Disconnect(context.getString(R.string.none))
+    val disconnectDevice = DeviceListEntry.Disconnect(context.getString(R.string.none))
 
-    private val mockDevice = DeviceListEntry.Mock("Demo Mode")
+    val mockDevice = DeviceListEntry.Mock("Demo Mode")
 
     val bleDevicesForUi: StateFlow<List<DeviceListEntry>> =
         bleDevicesFlow
             .map { devices -> listOf(disconnectDevice) + devices }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), listOf(disconnectDevice))
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(SHARING_STARTED_TIMEOUT_MS),
+                listOf(disconnectDevice),
+            )
 
-    val tcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
-        tcpDevicesFlow
-            .map { devices -> listOf(disconnectDevice) + devices }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), listOf(disconnectDevice))
+    /** UI StateFlow for discovered TCP devices. */
+    val discoveredTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
+        processedDiscoveredTcpDevicesFlow.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(SHARING_STARTED_TIMEOUT_MS),
+            listOf(disconnectDevice),
+        )
+
+    /** UI StateFlow for recently connected TCP devices that are not currently discovered. */
+    val recentTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
+        filteredRecentTcpDevicesFlow.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(SHARING_STARTED_TIMEOUT_MS),
+            listOf(disconnectDevice),
+        )
 
     val usbDevicesForUi: StateFlow<List<DeviceListEntry>> =
         combine(usbDevicesFlow, showMockInterface) { usb, showMock ->
             listOf(disconnectDevice) + usb + if (showMock) listOf(mockDevice) else emptyList()
         }
-            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), listOf(disconnectDevice))
+            .stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(SHARING_STARTED_TIMEOUT_MS),
+                listOf(disconnectDevice),
+            )
 
     init {
         serviceRepository.statusMessage.onEach { errorText.value = it }.launchIn(viewModelScope)

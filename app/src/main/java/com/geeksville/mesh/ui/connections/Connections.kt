@@ -148,7 +148,8 @@ fun ConnectionsScreen(
             connectionState == MeshService.ConnectionState.CONNECTED
 
     val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
-    val tcpDevices by scanModel.tcpDevicesForUi.collectAsStateWithLifecycle()
+    val discoveredTcpDevices by scanModel.discoveredTcpDevicesForUi.collectAsStateWithLifecycle()
+    val recentTcpDevices by scanModel.recentTcpDevicesForUi.collectAsStateWithLifecycle()
     val usbDevices by scanModel.usbDevicesForUi.collectAsStateWithLifecycle()
 
     /* Animate waiting for the configurations */
@@ -387,7 +388,8 @@ fun ConnectionsScreen(
                     DeviceType.TCP -> {
                         NetworkDevices(
                             connectionState = connectionState,
-                            networkDevices = tcpDevices,
+                            discoveredNetworkDevices = discoveredTcpDevices,
+                            recentNetworkDevices = recentTcpDevices,
                             selectedDevice = selectedDevice,
                             scanModel = scanModel,
                         )

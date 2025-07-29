@@ -61,7 +61,8 @@ import com.geeksville.mesh.ui.connections.isIPAddress
 @Composable
 fun NetworkDevices(
     connectionState: MeshService.ConnectionState,
-    networkDevices: List<DeviceListEntry>,
+    discoveredNetworkDevices: List<DeviceListEntry>,
+    recentNetworkDevices: List<DeviceListEntry>,
     selectedDevice: String,
     scanModel: BTScanModel,
 ) {
@@ -74,27 +75,49 @@ fun NetworkDevices(
         style = MaterialTheme.typography.titleLarge,
         modifier = Modifier.padding(vertical = 8.dp),
     )
-    networkDevices.forEach { device ->
-        val isRecent = device is DeviceListEntry.Tcp && device.fullAddress.startsWith("t")
-        val modifier =
-            if (isRecent) {
+    DeviceListItem(
+        connectionState = connectionState,
+        device = scanModel.disconnectDevice,
+        selected = scanModel.disconnectDevice.fullAddress == selectedDevice,
+        onSelect = { scanModel.onSelected(scanModel.disconnectDevice) },
+    )
+    if (discoveredNetworkDevices.isNotEmpty()) {
+        Text(
+            text = stringResource(R.string.discovered_network_devices),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(vertical = 8.dp),
+        )
+        discoveredNetworkDevices.forEach { device ->
+            DeviceListItem(
+                connectionState,
+                device,
+                device.fullAddress == selectedDevice,
+                onSelect = { scanModel.onSelected(device) },
+            )
+        }
+    }
+    if (recentNetworkDevices.isNotEmpty()) {
+        Text(
+            text = stringResource(R.string.recent_network_devices),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.padding(vertical = 8.dp),
+        )
+        recentNetworkDevices.forEach { device ->
+            DeviceListItem(
+                connectionState,
+                device,
+                device.fullAddress == selectedDevice,
+                onSelect = { scanModel.onSelected(device) },
+                modifier =
                 Modifier.combinedClickable(
                     onClick = { scanModel.onSelected(device) },
                     onLongClick = {
                         deviceToDelete = device
                         showDeleteDialog = true
                     },
-                )
-            } else {
-                Modifier
-            }
-        DeviceListItem(
-            connectionState,
-            device,
-            device.fullAddress == selectedDevice,
-            onSelect = { scanModel.onSelected(device) },
-            modifier = modifier,
-        )
+                ),
+            )
+        }
     }
     if (showDeleteDialog && deviceToDelete != null) {
         AlertDialog(
@@ -116,7 +139,7 @@ fun NetworkDevices(
             },
         )
     }
-    if (networkDevices.filterNot { it is DeviceListEntry.Disconnect }.isEmpty()) {
+    if (discoveredNetworkDevices.isEmpty() && recentNetworkDevices.isEmpty()) {
         Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalAlignment = CenterHorizontally) {
             Icon(
                 imageVector = Icons.Default.WifiFind,
