@@ -127,6 +127,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
      * checks for necessary permissions (BLUETOOTH_CONNECT on API 31+, BLUETOOTH_ADMIN on older versions) before
      * attempting to disable and then re-enable the adapter.
      */
+    @Suppress("ReturnCount")
     fun restartBle() {
         GeeksvilleApplication.analytics.track("ble_restart") // record # of times we needed to use this nasty hack
         errormsg("Doing emergency BLE restart")
@@ -211,6 +212,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
      * responsible for reconnecting. This also prevents nasty races when sometimes both the upperlayer and this layer
      * decide to reconnect simultaneously.
      */
+    @Suppress("UnusedPrivateProperty")
     private val autoReconnect = false
 
     private val gattCallback =
@@ -569,6 +571,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
 
     // / Restart any previous connect attempts
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
+    @Suppress("UnusedPrivateMember")
     private fun reconnect() {
         // closeGatt() // Get rid of any old gatt
 

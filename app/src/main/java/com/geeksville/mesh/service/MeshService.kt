@@ -23,6 +23,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.ServiceInfo
+import android.os.Build
 import android.os.IBinder
 import android.os.RemoteException
 import androidx.core.app.ServiceCompat
@@ -419,10 +420,8 @@ class MeshService :
                     0
                 },
             )
-        } catch (ex: Exception) {
-            if (
-                ex is SecurityException && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU
-            ) {
+        } catch (ex: SecurityException) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 errormsg(
                     "startForeground failed, likely due to missing POST_NOTIFICATIONS permission on Android 13+",
                     ex,
@@ -1391,7 +1390,7 @@ class MeshService :
             } catch (ex: RadioNotConnectedException) {
                 // note: no need to call startDeviceSleep(), because this exception could only have reached us if it was
                 // already called
-                errormsg("Lost connection to radio during init - waiting for reconnect")
+                errormsg("Lost connection to radio during init - waiting for reconnect ${ex.message}")
             } catch (ex: RemoteException) {
                 // It seems that when the ESP32 goes offline it can briefly come back for a 100ms ish which
                 // causes the phone to try and reconnect.  If we fail downloading our initial radio state we don't want
@@ -1596,7 +1595,10 @@ class MeshService :
 
     private fun handleNodeInfo(info: MeshProtos.NodeInfo) {
         debug(
-            "Received nodeinfo num=${info.num}, hasUser=${info.hasUser()}, hasPosition=${info.hasPosition()}, hasDeviceMetrics=${info.hasDeviceMetrics()}",
+            "Received nodeinfo num=${info.num}," +
+                " hasUser=${info.hasUser()}," +
+                " hasPosition=${info.hasPosition()}," +
+                " hasDeviceMetrics=${info.hasDeviceMetrics()}",
         )
 
         val packetToSave =
@@ -1631,6 +1633,7 @@ class MeshService :
                             null,
                             MeshProtos.HardwareModel.UNSET,
                             -> null
+
                             else -> hwModel.name.replace('_', '-').replace('p', '.').lowercase()
                         },
                         firmwareVersion = metadata.firmwareVersion,
@@ -2059,7 +2062,8 @@ class MeshService :
                     if (p.id == 0) p.id = generatePacketId()
 
                     info(
-                        "sendData dest=${p.to}, id=${p.id} <- ${p.bytes!!.size} bytes (connectionState=$connectionState)",
+                        "sendData dest=${p.to}, id=${p.id} <- ${p.bytes!!.size} bytes" +
+                            " (connectionState=$connectionState)",
                     )
 
                     if (p.dataType == 0) {

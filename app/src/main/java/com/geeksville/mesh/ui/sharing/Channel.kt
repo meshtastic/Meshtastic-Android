@@ -71,7 +71,6 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -127,7 +126,6 @@ fun ChannelScreen(
     radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
     onNavigate: (Route) -> Unit,
 ) {
-    val context = LocalContext.current
     val focusManager = LocalFocusManager.current
 
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()

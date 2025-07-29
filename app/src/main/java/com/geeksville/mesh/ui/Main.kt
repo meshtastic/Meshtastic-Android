@@ -111,7 +111,6 @@ import com.geeksville.mesh.ui.radioconfig.RadioConfigMenuActions
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
@@ -150,7 +149,6 @@ fun MainScreen(
     val localConfig by uIViewModel.localConfig.collectAsStateWithLifecycle()
     val requestChannelSet by uIViewModel.requestChannelSet.collectAsStateWithLifecycle()
 
-    // Explicitly request notification permission on connection for Android 13+
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
         LaunchedEffect(connectionState, notificationPermissionState) {
@@ -158,16 +156,6 @@ fun MainScreen(
                 notificationPermissionState.launchPermissionRequest()
             }
         }
-        val bluetoothPermissionsState =
-            rememberMultiplePermissionsState(
-                permissions =
-                listOf(
-                    Manifest.permission.BLUETOOTH_SCAN,
-                    Manifest.permission.BLUETOOTH_CONNECT,
-                    Manifest.permission.ACCESS_FINE_LOCATION,
-                ),
-                onPermissionsResult = { resultMap -> bluetoothViewModel.permissionsUpdated() },
-            )
     }
 
     if (connectionState.isConnected()) {
