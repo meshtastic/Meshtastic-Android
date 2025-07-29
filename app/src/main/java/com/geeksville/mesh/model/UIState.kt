@@ -321,7 +321,12 @@ constructor(
     private val showPrecisionCircleOnMap =
         MutableStateFlow(preferences.getBoolean("show-precision-circle-on-map", true))
 
-    private val showIgnored = MutableStateFlow(preferences.getBoolean("show-ignored", false))
+    private val _showIgnored = MutableStateFlow(preferences.getBoolean("show-ignored", false))
+    val showIgnored: StateFlow<Boolean> = _showIgnored
+
+    private val _showQuickChat = MutableStateFlow(preferences.getBoolean("show-quick-chat", false))
+    val showQuickChat: StateFlow<Boolean> = _showQuickChat
+
     private val _hasShownNotPairedWarning =
         MutableStateFlow(preferences.getBoolean(HAS_SHOWN_NOT_PAIRED_WARNING_PREF, false))
     val hasShownNotPairedWarning: StateFlow<Boolean> = _hasShownNotPairedWarning.asStateFlow()
@@ -331,50 +336,40 @@ constructor(
         preferences.edit { putBoolean(HAS_SHOWN_NOT_PAIRED_WARNING_PREF, true) }
     }
 
-    fun toggleShowIgnored() {
-        showIgnored.value = !showIgnored.value
-        preferences.edit { putBoolean("show-ignored", showIgnored.value) }
+    private fun toggleBooleanPreference(
+        state: MutableStateFlow<Boolean>,
+        key: String,
+        onChanged: (Boolean) -> Unit = {},
+    ) {
+        val newValue = !state.value
+        state.value = newValue
+        preferences.edit { putBoolean(key, newValue) }
+        onChanged(newValue)
     }
+
+    fun toggleShowIgnored() = toggleBooleanPreference(_showIgnored, "show-ignored")
+
+    fun toggleShowQuickChat() = toggleBooleanPreference(_showQuickChat, "show-quick-chat")
 
     fun setSortOption(sort: NodeSortOption) {
         nodeSortOption.value = sort
         preferences.edit { putInt("node-sort-option", sort.ordinal) }
     }
 
-    fun toggleShowDetails() {
-        showDetails.value = !showDetails.value
-        preferences.edit { putBoolean("show-details", showDetails.value) }
-    }
+    fun toggleShowDetails() = toggleBooleanPreference(showDetails, "show-details")
 
-    fun toggleIncludeUnknown() {
-        includeUnknown.value = !includeUnknown.value
-        preferences.edit { putBoolean("include-unknown", includeUnknown.value) }
-    }
+    fun toggleIncludeUnknown() = toggleBooleanPreference(includeUnknown, "include-unknown")
 
-    fun toggleOnlyOnline() {
-        onlyOnline.value = !onlyOnline.value
-        preferences.edit { putBoolean("only-online", onlyOnline.value) }
-    }
+    fun toggleOnlyOnline() = toggleBooleanPreference(onlyOnline, "only-online")
 
-    fun toggleOnlyDirect() {
-        onlyDirect.value = !onlyDirect.value
-        preferences.edit { putBoolean("only-direct", onlyDirect.value) }
-    }
+    fun toggleOnlyDirect() = toggleBooleanPreference(onlyDirect, "only-direct")
 
-    fun setOnlyFavorites(value: Boolean) {
-        onlyFavorites.value = value
-        preferences.edit { putBoolean("only-favorites", value) }
-    }
+    fun toggleOnlyFavorites() = toggleBooleanPreference(onlyFavorites, "only-favorites")
 
-    fun setShowWaypointsOnMap(value: Boolean) {
-        showWaypointsOnMap.value = value
-        preferences.edit { putBoolean("show-waypoints-on-map", value) }
-    }
+    fun toggleShowWaypointsOnMap() = toggleBooleanPreference(showWaypointsOnMap, "show-waypoints-on-map")
 
-    fun setShowPrecisionCircleOnMap(value: Boolean) {
-        showPrecisionCircleOnMap.value = value
-        preferences.edit { putBoolean("show-precision-circle-on-map", value) }
-    }
+    fun toggleShowPrecisionCircleOnMap() =
+        toggleBooleanPreference(showPrecisionCircleOnMap, "show-precision-circle-on-map")
 
     data class NodeFilterState(
         val filterText: String,

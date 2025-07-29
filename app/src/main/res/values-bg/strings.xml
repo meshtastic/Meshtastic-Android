@@ -279,6 +279,7 @@
     <string name="share_message">Споделяне на съобщение</string>
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Качество на сигнала</string>
+    <string name="traceroute_direct">Директно</string>
     <string name="twenty_four_hours">24Ч</string>
     <string name="forty_eight_hours">48Ч</string>
     <string name="one_week">1С</string>

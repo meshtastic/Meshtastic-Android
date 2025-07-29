@@ -258,6 +258,8 @@
     <string name="quick_chat_edit">Edit quick chat</string>
     <string name="quick_chat_append">Append to message</string>
     <string name="quick_chat_instant">Instantly send</string>
+    <string name="quick_chat_show">Show quick chat menu</string>
+    <string name="quick_chat_hide">Hide quick chat menu</string>
     <string name="factory_reset">Factory reset</string>
     <string name="factory_reset_description">This will clear all device configuration you have done.</string>
     <string name="bluetooth_disabled">Bluetooth disabled</string>

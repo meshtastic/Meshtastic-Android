@@ -235,6 +235,8 @@
     <string name="quick_chat_edit">Muokkaa pikaviestiä</string>
     <string name="quick_chat_append">Lisää viestiin</string>
     <string name="quick_chat_instant">Lähetä välittömästi</string>
+    <string name="quick_chat_show">Näytä pikaviestivalikko</string>
+    <string name="quick_chat_hide">Piilota pikaviestivalikko</string>
     <string name="factory_reset">Palauta tehdasasetukset</string>
     <string name="factory_reset_description">Tämä tyhjentää kaikki laitteesi asetukset.</string>
     <string name="bluetooth_disabled">Bluetooth ei ole käytössä</string>
