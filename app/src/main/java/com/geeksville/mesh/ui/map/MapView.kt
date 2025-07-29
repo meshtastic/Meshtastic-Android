@@ -239,11 +239,13 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
         }
     }
 
-    val cameraView = remember {
-        val geoPoints = model.nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
+    val initialCameraView = remember {
+        val nodes = model.nodeList.value
+        val nodesWithPosition = nodes.filter { it.validPosition != null }
+        val geoPoints = nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
         BoundingBox.fromGeoPoints(geoPoints)
     }
-    val map = rememberMapViewWithLifecycle(cameraView, loadOnlineTileSourceBase())
+    val map = rememberMapViewWithLifecycle(initialCameraView, loadOnlineTileSourceBase())
 
     val nodeClusterer = remember { RadiusMarkerClusterer(context) }
 
@@ -284,7 +286,7 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
             if (permissions.entries.all { it.value }) map.toggleMyLocation()
         }
 
-    val nodes by model.filteredNodeList.collectAsStateWithLifecycle()
+    val nodes by model.nodeList.collectAsStateWithLifecycle()
     val waypoints by model.waypoints.collectAsStateWithLifecycle(emptyMap())
 
     val markerIcon = remember { AppCompatResources.getDrawable(context, R.drawable.ic_baseline_location_on_24) }
