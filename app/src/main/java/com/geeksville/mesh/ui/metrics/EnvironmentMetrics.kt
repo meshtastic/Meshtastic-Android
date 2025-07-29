@@ -73,7 +73,7 @@ import com.geeksville.mesh.ui.common.theme.GraphColors.LightGreen
 import com.geeksville.mesh.ui.common.theme.GraphColors.Orange
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
-import com.geeksville.mesh.ui.metrics.CommonCharts.LegendData
+import com.geeksville.mesh.ui.metrics.LegendData
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.drawPathWithGradient
 import com.geeksville.mesh.util.UnitConversions.celsiusToFahrenheit
@@ -239,6 +239,9 @@ private fun EnvironmentMetricsChart(
                     if (metric == Environment.BAROMETRIC_PRESSURE) {
                         diff = pressureMax - pressureMin
                         min = pressureMin
+                    } else { // Reset for other metrics to use rightMin/rightMax
+                        min = rightMin
+                        diff = rightMax - rightMin
                     }
                     index = 0
                     while (index < telemetries.size) {
@@ -255,8 +258,29 @@ private fun EnvironmentMetricsChart(
                                 timeThreshold = selectedTime.timeThreshold(),
                             ) { i ->
                                 val telemetry = telemetries.getOrNull(i) ?: telemetries.last()
-                                val ratio = ((metric.getValue(telemetry) ?: 0f) - min) / diff
-                                val y = height - (ratio * height)
+                                val rawValue = metric.getValue(telemetry) // This is Float?
+
+                                // Default to 0f if the actual value is null or NaN. This is a reasonable default for lux.
+                                val pointValue = if (rawValue != null && !rawValue.isNaN()) {
+                                    rawValue
+                                } else {
+                                    0f
+                                }
+
+                                // Use 'min' and 'diff' from the outer scope, which are specific to the current metric's scale group.
+                                val currentMin = min
+                                // Avoid division by zero if all values in the current y-axis range are the same.
+                                val currentDiff = if (diff == 0f) 1f else diff
+
+                                val ratio = (pointValue - currentMin) / currentDiff
+                                var y = height - (ratio * height)
+
+                                // Final check to ensure y is a valid, plottable coordinate.
+                                if (y.isNaN() || y.isInfinite()) {
+                                    y = height // Default to the bottom of the chart if calculation still results in an invalid number.
+                                } else {
+                                    y = y.coerceIn(0f, height) // Clamp to chart bounds to be safe.
+                                }
                                 return@createPath y
                             }
                         drawPathWithGradient(
@@ -280,9 +304,9 @@ private fun EnvironmentMetricsChart(
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    Legend(LEGEND_DATA_1.filter { graphData.shouldPlot[it.environmentMetric.ordinal] }, displayInfoIcon = false)
-    Legend(LEGEND_DATA_3.filter { graphData.shouldPlot[it.environmentMetric.ordinal] }, displayInfoIcon = false)
-    Legend(LEGEND_DATA_2.filter { graphData.shouldPlot[it.environmentMetric.ordinal] }, promptInfoDialog = promptInfoDialog)
+    Legend(LEGEND_DATA_1.filter { graphData.shouldPlot[it.environmentMetric?.ordinal ?: 0] }, displayInfoIcon = false)
+    Legend(LEGEND_DATA_3.filter { graphData.shouldPlot[it.environmentMetric?.ordinal ?: 0] }, displayInfoIcon = false)
+    Legend(LEGEND_DATA_2.filter { graphData.shouldPlot[it.environmentMetric?.ordinal ?: 0] }, promptInfoDialog = promptInfoDialog)
 
     Spacer(modifier = Modifier.height(16.dp))
 }

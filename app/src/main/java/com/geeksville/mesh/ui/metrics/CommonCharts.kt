@@ -70,21 +70,6 @@ object CommonCharts {
     val DATE_TIME_MINUTE_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
     const val MS_PER_SEC = 1000L
     const val MAX_PERCENT_VALUE = 100f
-
-    /**
-     * Data for the chart legend.
-     *
-     * @property nameRes The string resource ID for the legend name.
-     * @property color The color of the line/data in the chart.
-     * @property isLine True if the legend represents a line, false for a point/dot.
-     * @property environmentMetric The corresponding Environment enum for this legend entry.
-     */
-    data class LegendData(
-        val nameRes: Int,
-        val color: Color,
-        val isLine: Boolean = false,
-        val environmentMetric: Environment? = null, // Make this nullable with a default null value
-    )
 }
 
 private const val LINE_ON = 10f
@@ -95,7 +80,7 @@ private const val DATE_Y = 32f
 private const val LINE_LIMIT = 4
 private const val TEXT_PAINT_ALPHA = 192
 
-data class LegendData(val nameRes: Int, val color: Color, val isLine: Boolean = false, val environmentMetric: Environment)
+data class LegendData(val nameRes: Int, val color: Color, val isLine: Boolean = false, val environmentMetric: Environment? = null)
 
 @Composable
 fun ChartHeader(amount: Int) {
@@ -401,7 +386,10 @@ private fun LegendLabel(text: String, color: Color, isLine: Boolean = false) {
 private fun LegendPreview() {
     val data = listOf(
         LegendData(nameRes = R.string.rssi, color = Color.Red),
-        LegendData(nameRes = R.string.snr, color = Color.Green)
+        LegendData(
+            nameRes = R.string.snr,
+            color = Color.Green,
+        )
     )
     Legend(legendData = data, promptInfoDialog = {})
 }

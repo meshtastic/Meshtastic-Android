@@ -78,7 +78,7 @@ import com.geeksville.mesh.ui.common.theme.GraphColors.Red
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MAX_PERCENT_VALUE
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
-import com.geeksville.mesh.ui.metrics.CommonCharts.LegendData
+import com.geeksville.mesh.ui.metrics.LegendData
 import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.plotPoint
@@ -90,7 +90,7 @@ private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIG
 
 private enum class Device(val color: Color) {
     BATTERY(Green) {
-        override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.batteryLevel
+        override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.batteryLevel.toFloat()
     },
     CH_UTIL(Magenta) {
         override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.channelUtilization
