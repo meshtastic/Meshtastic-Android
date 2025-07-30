@@ -583,6 +583,8 @@
     <string name="node_number">Node Number</string>
     <string name="user_id">User ID</string>
     <string name="uptime">Uptime</string>
+    <string name="load_indexed">Load %1$d</string>
+    <string name="disk_free_indexed">Disk Free %1$d</string>
     <string name="timestamp">Timestamp</string>
     <string name="heading">Heading</string>
     <string name="speed">Speed</string>
