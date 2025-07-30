@@ -356,7 +356,8 @@ private fun VersionChecks(viewModel: UIViewModel) {
 enum class MainMenuAction(@StringRes val stringRes: Int) {
     DEBUG(R.string.debug_panel),
     RADIO_CONFIG(R.string.radio_configuration),
-    EXPORT_MESSAGES(R.string.save_messages),
+    EXPORT_MESSAGES(R.string.save_messages), // drop this one.
+    EXPORT_RANGETEST(R.string.save_rangetest),
     THEME(R.string.theme),
     LANGUAGE(R.string.preferences_language),
     SHOW_INTRO(R.string.intro_show),

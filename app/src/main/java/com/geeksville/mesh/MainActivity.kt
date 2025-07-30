@@ -69,8 +69,8 @@ import com.geeksville.mesh.ui.MainMenuAction
 import com.geeksville.mesh.ui.MainScreen
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.MODE_DYNAMIC
-import com.geeksville.mesh.ui.sharing.toSharedContact
 import com.geeksville.mesh.ui.intro.AppIntroductionScreen
+import com.geeksville.mesh.ui.sharing.toSharedContact
 import com.geeksville.mesh.util.Exceptions
 import com.geeksville.mesh.util.LanguageUtils
 import com.geeksville.mesh.util.getPackageInfoCompat
@@ -79,12 +79,13 @@ import kotlinx.coroutines.Job
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class MainActivity : AppCompatActivity(), Logging {
+class MainActivity :
+    AppCompatActivity(),
+    Logging {
     private val bluetoothViewModel: BluetoothViewModel by viewModels()
     private val model: UIViewModel by viewModels()
 
-    @Inject
-    internal lateinit var serviceRepository: ServiceRepository
+    @Inject internal lateinit var serviceRepository: ServiceRepository
 
     private var showAppIntro by mutableStateOf(false)
 
@@ -133,30 +134,28 @@ class MainActivity : AppCompatActivity(), Logging {
         setContent {
             val theme by model.theme.collectAsState()
             val dynamic = theme == MODE_DYNAMIC
-            val dark = when (theme) {
-                AppCompatDelegate.MODE_NIGHT_YES -> true
-                AppCompatDelegate.MODE_NIGHT_NO -> false
-                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> isSystemInDarkTheme()
-                else -> isSystemInDarkTheme()
-            }
+            val dark =
+                when (theme) {
+                    AppCompatDelegate.MODE_NIGHT_YES -> true
+                    AppCompatDelegate.MODE_NIGHT_NO -> false
+                    AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> isSystemInDarkTheme()
+                    else -> isSystemInDarkTheme()
+                }
 
-            AppTheme(
-                dynamicColor = dynamic,
-                darkTheme = dark,
-            ) {
+            AppTheme(dynamicColor = dynamic, darkTheme = dark) {
                 val view = LocalView.current
                 if (!view.isInEditMode) {
-                    SideEffect {
-                        AppCompatDelegate.setDefaultNightMode(theme)
-                    }
+                    SideEffect { AppCompatDelegate.setDefaultNightMode(theme) }
                 }
 
                 if (showAppIntro) {
-                    AppIntroductionScreen(onDone = {
-                        prefs.edit { putBoolean("app_intro_completed", true) }
-                        showAppIntro = false
-                        (application as GeeksvilleApplication).askToRate(this@MainActivity)
-                    })
+                    AppIntroductionScreen(
+                        onDone = {
+                            prefs.edit { putBoolean("app_intro_completed", true) }
+                            showAppIntro = false
+                            (application as GeeksvilleApplication).askToRate(this@MainActivity)
+                        },
+                    )
                 } else {
                     MainScreen(
                         uIViewModel = model,
@@ -182,14 +181,10 @@ class MainActivity : AppCompatActivity(), Logging {
             Intent.ACTION_VIEW -> {
                 appLinkData?.let {
                     debug("App link data: $it")
-                    if (it.path?.startsWith("/e/") == true ||
-                        it.path?.startsWith("/E/") == true
-                    ) {
+                    if (it.path?.startsWith("/e/") == true || it.path?.startsWith("/E/") == true) {
                         debug("App link data is a channel set")
                         model.requestChannelUrl(it)
-                    } else if (it.path?.startsWith("/v/") == true ||
-                        it.path?.startsWith("/V/") == true
-                    ) {
+                    } else if (it.path?.startsWith("/v/") == true || it.path?.startsWith("/V/") == true) {
                         val sharedContact = it.toSharedContact()
                         debug("App link data is a shared contact: ${sharedContact.user.longName}")
                         model.setSharedContactRequested(sharedContact)
@@ -204,8 +199,7 @@ class MainActivity : AppCompatActivity(), Logging {
                 showSettingsPage()
             }
 
-            Intent.ACTION_MAIN -> {
-            }
+            Intent.ACTION_MAIN -> {}
 
             Intent.ACTION_SEND -> {
                 val text = intent.getStringExtra(Intent.EXTRA_TEXT)
@@ -222,50 +216,52 @@ class MainActivity : AppCompatActivity(), Logging {
 
     private fun createShareIntent(message: String): PendingIntent {
         val deepLink = "$DEEP_LINK_BASE_URI/share?message=$message"
-        val startActivityIntent = Intent(
-            Intent.ACTION_VIEW, deepLink.toUri(),
-            this, MainActivity::class.java
-        ).apply {
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-        }
+        val startActivityIntent =
+            Intent(Intent.ACTION_VIEW, deepLink.toUri(), this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
 
-        val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
-            addNextIntentWithParentStack(startActivityIntent)
-            getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE)
-        }
+        val resultPendingIntent: PendingIntent? =
+            TaskStackBuilder.create(this).run {
+                addNextIntentWithParentStack(startActivityIntent)
+                getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE)
+            }
         return resultPendingIntent!!
     }
 
     private fun createSettingsIntent(): PendingIntent {
         val deepLink = "$DEEP_LINK_BASE_URI/connections"
-        val startActivityIntent = Intent(
-            Intent.ACTION_VIEW, deepLink.toUri(),
-            this, MainActivity::class.java
-        ).apply {
-            flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-        }
+        val startActivityIntent =
+            Intent(Intent.ACTION_VIEW, deepLink.toUri(), this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
+            }
 
-        val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(this).run {
-            addNextIntentWithParentStack(startActivityIntent)
-            getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE)
-        }
+        val resultPendingIntent: PendingIntent? =
+            TaskStackBuilder.create(this).run {
+                addNextIntentWithParentStack(startActivityIntent)
+                getPendingIntent(0, PendingIntent.FLAG_IMMUTABLE)
+            }
         return resultPendingIntent!!
     }
 
     private var requestedEnable = false
-    private val bleRequestEnable = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
-        requestedEnable = false
-    }
+    private val bleRequestEnable =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { requestedEnable = false }
 
-    private val createDocumentLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
-        if (it.resultCode == RESULT_OK) {
-            it.data?.data?.let { file_uri -> model.saveMessagesCSV(file_uri) }
+    private val createRangetestLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                it.data?.data?.let { file_uri -> model.saveRangetestCSV(file_uri) }
+            }
         }
-    }
+
+    // TODO: I'd like to get rid of this one.
+    private val createDocumentLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == RESULT_OK) {
+                it.data?.data?.let { file_uri -> model.saveMessagesCSV(file_uri) }
+            }
+        }
 
     private fun onMeshConnectionChanged(newConnection: MeshService.ConnectionState) {
         if (newConnection == MeshService.ConnectionState.CONNECTED) {
@@ -282,9 +278,7 @@ class MainActivity : AppCompatActivity(), Logging {
                 model.showAlert(
                     title = title,
                     message = message,
-                    onConfirm = {
-                        notificationPermissionsLauncher.launch(notificationPermissions)
-                    },
+                    onConfirm = { notificationPermissionsLauncher.launch(notificationPermissions) },
                 )
             } else {
                 notificationPermissionsLauncher.launch(notificationPermissions)
@@ -303,56 +297,53 @@ class MainActivity : AppCompatActivity(), Logging {
                 intent.putExtra(Settings.EXTRA_CHANNEL_ID, "my_alerts")
                 startActivity(intent)
             }
-            model.showAlert(
-                title = getString(R.string.alerts_dnd_request_title),
-                html = getString(R.string.alerts_dnd_request_text),
-                onConfirm = {
-                    showAlertAppNotificationSettings()
-                },
-            ).also {
-                prefs.edit { putBoolean("dnd_rationale_shown", true) }
-            }
+            model
+                .showAlert(
+                    title = getString(R.string.alerts_dnd_request_title),
+                    html = getString(R.string.alerts_dnd_request_text),
+                    onConfirm = { showAlertAppNotificationSettings() },
+                )
+                .also { prefs.edit { putBoolean("dnd_rationale_shown", true) } }
         }
     }
 
-    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-        return try {
-            super.dispatchTouchEvent(ev)
-        } catch (ex: Throwable) {
-            Exceptions.report(
-                ex,
-                "dispatchTouchEvent"
-            ) // hide this Compose error from the user but report to the mothership
-            false
-        }
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean = try {
+        super.dispatchTouchEvent(ev)
+    } catch (ex: Throwable) {
+        Exceptions.report(
+            ex,
+            "dispatchTouchEvent",
+        ) // hide this Compose error from the user but report to the mothership
+        false
     }
 
     private var serviceSetupJob: Job? = null
 
-    private val mesh = object : ServiceClient<IMeshService>(IMeshService.Stub::asInterface) {
-        override fun onConnected(service: IMeshService) {
-            serviceSetupJob?.cancel()
-            serviceSetupJob = lifecycleScope.handledLaunch {
-                serviceRepository.setMeshService(service)
+    private val mesh =
+        object : ServiceClient<IMeshService>(IMeshService.Stub::asInterface) {
+            override fun onConnected(service: IMeshService) {
+                serviceSetupJob?.cancel()
+                serviceSetupJob =
+                    lifecycleScope.handledLaunch {
+                        serviceRepository.setMeshService(service)
 
-                try {
-                    val connectionState =
-                        MeshService.ConnectionState.valueOf(service.connectionState())
+                        try {
+                            val connectionState = MeshService.ConnectionState.valueOf(service.connectionState())
 
-                    onMeshConnectionChanged(connectionState)
-                } catch (ex: RemoteException) {
-                    errormsg("Device error during init ${ex.message}")
-                }
+                            onMeshConnectionChanged(connectionState)
+                        } catch (ex: RemoteException) {
+                            errormsg("Device error during init ${ex.message}")
+                        }
 
-                debug("connected to mesh service, connectionState=${model.connectionState.value}")
+                        debug("connected to mesh service, connectionState=${model.connectionState.value}")
+                    }
+            }
+
+            override fun onDisconnected() {
+                serviceSetupJob?.cancel()
+                serviceRepository.setMeshService(null)
             }
         }
-
-        override fun onDisconnected() {
-            serviceSetupJob?.cancel()
-            serviceRepository.setMeshService(null)
-        }
-    }
 
     private fun bindMeshService() {
         debug("Binding to mesh service!")
@@ -362,11 +353,7 @@ class MainActivity : AppCompatActivity(), Logging {
             errormsg("Failed to start service from activity - but ignoring because bind will work ${ex.message}")
         }
 
-        mesh.connect(
-            this,
-            MeshService.createIntent(),
-            BIND_AUTO_CREATE + BIND_ABOVE_CLIENT
-        )
+        mesh.connect(this, MeshService.createIntent(), BIND_AUTO_CREATE + BIND_ABOVE_CLIENT)
     }
 
     override fun onStart() {
@@ -384,9 +371,7 @@ class MainActivity : AppCompatActivity(), Logging {
                     model.showAlert(
                         title = title,
                         message = message,
-                        onConfirm = {
-                            bluetoothPermissionsLauncher.launch(bluetoothPermissions)
-                        },
+                        onConfirm = { bluetoothPermissionsLauncher.launch(bluetoothPermissions) },
                     )
                 }
             }
@@ -409,13 +394,25 @@ class MainActivity : AppCompatActivity(), Logging {
                 getVersionInfo()
             }
 
+            // TODO: Remove ideally
             MainMenuAction.EXPORT_MESSAGES -> {
-                val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                    type = "application/csv"
-                    putExtra(Intent.EXTRA_TITLE, "rangetest.csv")
-                }
+                val intent =
+                    Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "application/csv"
+                        putExtra(Intent.EXTRA_TITLE, "Meshtastic_log.csv")
+                    }
                 createDocumentLauncher.launch(intent)
+            }
+
+            MainMenuAction.EXPORT_RANGETEST -> {
+                val intent =
+                    Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "application/csv"
+                        putExtra(Intent.EXTRA_TITLE, "rangetest.csv")
+                    }
+                createRangetestLauncher.launch(intent)
             }
 
             MainMenuAction.THEME -> {
@@ -445,12 +442,13 @@ class MainActivity : AppCompatActivity(), Logging {
     }
 
     private fun chooseThemeDialog() {
-        val styles = mapOf(
-            getString(R.string.dynamic) to MODE_DYNAMIC,
-            getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
-            getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
-            getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-        )
+        val styles =
+            mapOf(
+                getString(R.string.dynamic) to MODE_DYNAMIC,
+                getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
+                getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
+                getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+            )
 
         val prefs = UIViewModel.getPreferences(this)
         val theme = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
@@ -458,11 +456,7 @@ class MainActivity : AppCompatActivity(), Logging {
         model.showAlert(
             title = getString(R.string.choose_theme),
             message = "",
-            choices = styles.mapValues { (_, value) ->
-                {
-                    model.setTheme(value)
-                }
-            },
+            choices = styles.mapValues { (_, value) -> { model.setTheme(value) } },
         )
     }
 
@@ -470,16 +464,8 @@ class MainActivity : AppCompatActivity(), Logging {
         val languageTags = LanguageUtils.getLanguageTags(this)
         val lang = LanguageUtils.getLocale()
         debug("Lang from prefs: $lang")
-        val langMap = languageTags.mapValues { (_, value) ->
-            {
-                LanguageUtils.setLocale(value)
-            }
-        }
+        val langMap = languageTags.mapValues { (_, value) -> { LanguageUtils.setLocale(value) } }
 
-        model.showAlert(
-            title = getString(R.string.preferences_language),
-            message = "",
-            choices = langMap,
-        )
+        model.showAlert(title = getString(R.string.preferences_language), message = "", choices = langMap)
     }
 }
