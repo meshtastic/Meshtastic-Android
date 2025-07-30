@@ -17,6 +17,7 @@ changelog:
           - enhancement
           - dependencies
           - repo
+          - automation
 
     - title: 👷Dependencies
       labels:
@@ -25,3 +26,7 @@ changelog:
     - title: 🧱Repo
       labels:
         - repo
+
+    - title: 🤖Automated
+      labels:
+        - automation
