@@ -47,6 +47,13 @@ jobs:
       - name: Expose Version Code as Environment Variable
         run: echo "VERSION_CODE=${{ steps.calculate_version_code.outputs.versionCode }}" >> $GITHUB_ENV
 
+      - name: Load secrets
+        run: |
+          echo "datadogApplicationId=${{ secrets.DATADOG_APPLICATION_ID }}" >> ./secrets.properties
+          echo "datadogClientToken=${{ secrets.DATADOG_CLIENT_TOKEN }}" >> ./secrets.properties
+        env:
+          DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
+          DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
       - name: Run Spotless, Detekt, Build, Lint, and Local Tests
         run: ./gradlew :app:spotlessCheck :app:detekt :app:lintFdroidDebug :app:lintGoogleDebug :app:assembleDebug :app:testFdroidDebug :app:testGoogleDebug --configuration-cache --scan
         env:
