@@ -993,6 +993,12 @@ private fun EnvironmentMetrics(
     }
 }
 
+/**
+ * Displays environmental metrics for a node, including temperature, humidity, pressure, and other sensor data.
+ *
+ * WARNING: All metrics must be added in pairs (e.g., voltage and current for each channel) due to the display logic,
+ * which arranges metrics in columns of two. If an odd number of metrics is provided, the UI may not display as intended.
+ */
 @Composable
 private fun PowerMetrics(node: Node) {
     val metrics =
@@ -1019,8 +1025,16 @@ private fun PowerMetrics(node: Node) {
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalArrangement = Arrangement.SpaceEvenly,
     ) {
-        metrics.forEach { metric ->
-            InfoCard(icon = metric.icon, text = stringResource(metric.label), value = metric.value)
+        metrics.chunked(2).forEach { rowMetrics ->
+            Column {
+                rowMetrics.forEach { metric ->
+                    InfoCard(
+                        icon = metric.icon,
+                        text = stringResource(metric.label),
+                        value = metric.value,
+                    )
+                }
+            }
         }
     }
 }
