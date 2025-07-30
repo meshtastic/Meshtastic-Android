@@ -97,6 +97,7 @@
     <string name="pairing_failed_try_again">Pareamento falhou, favor selecionar novamente</string>
     <string name="location_disabled">Localização desativada, não será possível informar sua posição.</string>
     <string name="share">Compartilhar</string>
+    <string name="new_node_seen">Novo Nó Visto: %s</string>
     <string name="disconnected">Desconectado</string>
     <string name="device_sleeping">Dispositivo em suspensão (sleep)</string>
     <string name="connected_count">Conectado: %1$s ligado(s)</string>
@@ -349,6 +350,7 @@
     <string name="downlink_enabled">Downlink ativado</string>
     <string name="default_">Padrão</string>
     <string name="position_enabled">Posição ativada</string>
+    <string name="precise_location">Localização precisa</string>
     <string name="gpio_pin">Pino GPIO</string>
     <string name="type">Tipo</string>
     <string name="hide_password">Ocultar Senha</string>
@@ -566,6 +568,7 @@
     <string name="uptime">Tempo ativo</string>
     <string name="timestamp">Data e hora</string>
     <string name="heading">Direção</string>
+    <string name="speed">Velocidade</string>
     <string name="sats">Sats</string>
     <string name="alt">Alt</string>
     <string name="freq">Freq</string>
@@ -679,6 +682,45 @@
     <string name="latest_alpha_firmware">Último alfa</string>
     <string name="supported_by_community">Apoiado pela Comunidade Meshtastic</string>
     <string name="firmware_edition">Edição do Firmware</string>
+    <string name="recent_network_devices">Dispositivos de Rede Recentes</string>
+    <string name="discovered_network_devices">Dispositivos de Rede Descobertos</string>
+    <string name="get_started">Vamos começar</string>
+    <string name="intro_welcome">Bem-vindo à</string>
+    <string name="stay_connected_anywhere">Fique Conectado em Qualquer Lugar</string>
+    <string name="communicate_off_the_grid">Comunique-se off-grid com seus amigos e comunidades sem serviço de celular.</string>
+    <string name="create_your_own_networks">Crie Suas Próprias Redes</string>
+    <string name="easily_set_up_private_mesh_networks">Configure facilmente redes de malha privada para uma comunicação segura e fiável em áreas remotas.</string>
+    <string name="track_and_share_locations">Rastreie e Compartilhe Locais</string>
+    <string name="share_your_location_in_real_time">Compartilhe sua localização em tempo real e mantenha seu grupo coordenado com recursos integrados de GPS.</string>
+    <string name="app_notifications">Notificações do Aplicativo</string>
+    <string name="incoming_messages">Mensagens Recebidas</string>
+    <string name="notifications_for_channel_and_direct_messages">Notificações para canais e mensagens diretas.</string>
+    <string name="new_nodes">Novos Nós</string>
+    <string name="notifications_for_newly_discovered_nodes">Notificações para nós recém-descobertos.</string>
+    <string name="low_battery">Bateria Fraca</string>
+    <string name="notifications_for_low_battery_alerts">Notificações para alertas de bateria fraca para o dispositivo conectado.</string>
+    <string name="critical_alerts_description">Selecionar os pacotes enviados como críticos irá ignorar o seletor de mudo e as configurações do \"Não perturbe\" no centro de notificações do sistema operacional.</string>
+    <string name="configure_notification_permissions">Configurar permissões de notificação</string>
+    <string name="phone_location">Localização do Telefone</string>
+    <string name="phone_location_description">Meshtastic usa a localização do seu telefone para habilitar vários recursos. Você pode atualizar as permissões de localização a qualquer momento a partir das configurações.</string>
+    <string name="share_location">Compartilhar Localização</string>
+    <string name="share_location_description">Use o GPS do seu telefone para enviar locais para seu nó em vez de usar um módulo GPS no seu nó.</string>
+    <string name="distance_measurements">Medição de Distâncias</string>
+    <string name="distance_measurements_description">Exiba a distância entre o telefone e outros nós do Meshtastic com posições.</string>
+    <string name="distance_filters">Filtros de Distância</string>
+    <string name="distance_filters_description">Filtre a lista de nós e o mapa da malha baseado na proximidade do seu telefone.</string>
+    <string name="mesh_map_location">Mapa de Localização da Malha</string>
+    <string name="mesh_map_location_description">Permite o ponto de localização azul para o seu telefone no mapa da malha.</string>
+    <string name="configure_location_permissions">Configurar Permissões de Localização</string>
     <string name="skip">Pular</string>
+    <string name="settings">configurações</string>
+    <string name="critical_alerts">Alertas críticos</string>
+    <string name="critical_alerts_dnd_request_text">Para garantir que você receba alertas críticos, como mensagens de
+        SOS, mesmo quando o seu dispositivo estiver no modo \"Não Perturbe\", você precisa conceder
+        permissão especial. Por favor, habilite isso nas configurações de notificação.
+    </string>
+    <string name="configure_critical_alerts">Configurar Alertas Críticos</string>
+    <string name="notification_permissions_description">Meshtastic usa notificações para mantê-lo atualizado sobre novas mensagens e outros eventos importantes. Você pode atualizar suas permissões de notificação a qualquer momento nas configurações.</string>
     <string name="next">Avançar</string>
+    <string name="grant_permissions_and_scan">Conceder Permissões e Escanear</string>
 </resources>
