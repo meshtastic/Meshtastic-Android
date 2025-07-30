@@ -20,6 +20,9 @@ jobs:
   build_and_detekt:
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    env:
+      DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
+      DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -52,12 +55,12 @@ jobs:
         run: echo "VERSION_CODE=${{ steps.calculate_version_code.outputs.versionCode }}" >> $GITHUB_ENV
 
       - name: Load secrets
+        run: |
+          echo "datadogApplicationId=$DATADOG_APPLICATION_ID" >> ./secrets.properties
+          echo "datadogClientToken=$DATADOG_CLIENT_TOKEN" >> ./secrets.properties
         env:
           DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
           DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
-        run: |
-          echo "datadogApplicationId=${DATADOG_APPLICATION_ID}" >> ./secrets.properties
-          echo "datadogClientToken=${DATADOG_CLIENT_TOKEN}" >> ./secrets.properties
       - name: Run Spotless, Detekt, Build, Lint, and Local Tests
         run: ./gradlew :app:spotlessCheck :app:detekt :app:lintFdroidDebug :app:lintGoogleDebug :app:assembleDebug :app:testFdroidDebug :app:testGoogleDebug --configuration-cache --scan
         env:

@@ -99,6 +99,9 @@ jobs:
     needs: prepare-release-info # Depends on version info
     runs-on: ubuntu-latest
     if: github.repository == 'meshtastic/Meshtastic-Android'
+    env:
+      DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
+      DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
     outputs:
       aab_path: app/build/outputs/bundle/googleRelease/app-google-release.aab
       aab_name: googleRelease-${{ needs.prepare-release-info.outputs.versionNameBase }}-${{ needs.prepare-release-info.outputs.versionCode }}.aab
@@ -113,14 +116,13 @@ jobs:
           fetch-depth: 0
 
       - name: Load secrets
-        if: secrets.DATADOG_APPLICATION_ID != null && secrets.DATADOG_CLIENT_TOKEN != null && secrets.DATADOG_APPLICATION_ID != '' && secrets.DATADOG_CLIENT_TOKEN != ''
         run: |
           rm -f ./app/google-services.json # Ensure clean state
           echo $GSERVICES > ./app/google-services.json
           echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
-          echo "datadogApplicationId=${{ secrets.DATADOG_APPLICATION_ID }}" >> ./secrets.properties
-          echo "datadogClientToken=${{ secrets.DATADOG_CLIENT_TOKEN }}" >> ./secrets.properties
+          echo "datadogApplicationId=$DATADOG_APPLICATION_ID" >> ./secrets.properties
+          echo "datadogClientToken=$DATADOG_CLIENT_TOKEN" >> ./secrets.properties
         env:
           GSERVICES: ${{ secrets.GSERVICES }}
           KEYSTORE: ${{ secrets.KEYSTORE }}
