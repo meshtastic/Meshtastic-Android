@@ -181,6 +181,8 @@
     <string name="quick_chat_edit">编辑快速聊天</string>
     <string name="quick_chat_append">附加到消息中</string>
     <string name="quick_chat_instant">立即发送</string>
+    <string name="quick_chat_show">显示快速聊天菜单</string>
+    <string name="quick_chat_hide">隐藏快速聊天菜单</string>
     <string name="factory_reset">恢复出厂设置</string>
     <string name="bluetooth_disabled">蓝牙已禁用</string>
     <string name="permission_missing_31">Meshtastic 需要附近设备许可才能通过蓝牙查找和连接设备。 您可以在不使用时将其关闭。</string>
@@ -347,6 +349,7 @@
     <string name="downlink_enabled">启用下行</string>
     <string name="default_">默认</string>
     <string name="position_enabled">启用位置</string>
+    <string name="precise_location">精准位置</string>
     <string name="gpio_pin">GPIO 引脚</string>
     <string name="type">类型</string>
     <string name="hide_password">隐藏密码</string>
@@ -676,6 +679,21 @@
     <string name="latest_stable_firmware">最新稳定版</string>
     <string name="latest_alpha_firmware">最新测试版</string>
     <string name="supported_by_community">由 Meshtastic 社区支持</string>
+    <string name="recent_network_devices">最近使用的网络设备</string>
+    <string name="discovered_network_devices">发现的网络设备</string>
+    <string name="get_started">开始</string>
+    <string name="track_and_share_locations">追踪和分享位置</string>
+    <string name="app_notifications">应用通知</string>
+    <string name="new_nodes">新节点</string>
+    <string name="low_battery">电池电量低</string>
+    <string name="configure_notification_permissions">配置通知权限</string>
+    <string name="phone_location">手机位置</string>
+    <string name="share_location">分享位置</string>
+    <string name="distance_measurements">距离测量</string>
+    <string name="distance_filters">距离筛选器</string>
+    <string name="configure_location_permissions">配置位置权限</string>
     <string name="skip">跳过</string>
+    <string name="settings">设置</string>
     <string name="next">下一步</string>
+    <string name="grant_permissions_and_scan">授予权限并扫描</string>
 </resources>
