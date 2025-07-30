@@ -264,16 +264,6 @@ class MainActivity :
                 getVersionInfo()
             }
 
-            MainMenuAction.EXPORT_MESSAGES -> {
-                val intent =
-                    Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "application/csv"
-                        putExtra(Intent.EXTRA_TITLE, "MeshtasticMessages.csv")
-                    }
-                createDocumentLauncher.launch(intent)
-            }
-
             MainMenuAction.EXPORT_RANGETEST -> {
                 val intent =
                     Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
