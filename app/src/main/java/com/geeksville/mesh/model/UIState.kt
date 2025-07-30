@@ -327,6 +327,15 @@ constructor(
     private val _showQuickChat = MutableStateFlow(preferences.getBoolean("show-quick-chat", false))
     val showQuickChat: StateFlow<Boolean> = _showQuickChat
 
+    private val _hasShownNotPairedWarning =
+        MutableStateFlow(preferences.getBoolean(HAS_SHOWN_NOT_PAIRED_WARNING_PREF, false))
+    val hasShownNotPairedWarning: StateFlow<Boolean> = _hasShownNotPairedWarning.asStateFlow()
+
+    fun suppressNoPairedWarning() {
+        _hasShownNotPairedWarning.value = true
+        preferences.edit { putBoolean(HAS_SHOWN_NOT_PAIRED_WARNING_PREF, true) }
+    }
+
     private fun toggleBooleanPreference(
         state: MutableStateFlow<Boolean>,
         key: String,
@@ -442,15 +451,6 @@ constructor(
             started = SharingStarted.WhileSubscribed(5_000),
             initialValue = 0,
         )
-
-    val filteredNodeList: StateFlow<List<Node>> =
-        nodeList
-            .mapLatest { list -> list.filter { node -> !node.isIgnored } }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList(),
-            )
 
     data class MapFilterState(val onlyFavorites: Boolean, val showWaypoints: Boolean, val showPrecisionCircle: Boolean)
 
@@ -719,6 +719,8 @@ constructor(
     companion object {
         fun getPreferences(context: Context): SharedPreferences =
             context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
+
+        const val HAS_SHOWN_NOT_PAIRED_WARNING_PREF = "has_shown_not_paired_warning"
     }
 
     // Connection state to our radio device

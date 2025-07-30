@@ -25,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 val MeshtasticGreen = Color(0xFF67EA94)
 val MeshtasticAlt = Color(0xFF2C2D3C)
 val HyperlinkBlue = Color(0xFF43C3B0)
+val AnnotationColor = Color(0xFF039BE5)
 
 object IAQColors {
     val IAQExcellent = Color(0xFF00E400)

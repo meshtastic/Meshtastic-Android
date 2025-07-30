@@ -17,9 +17,8 @@
 
 package com.geeksville.mesh.ui.map
 
+import android.Manifest // Added for Accompanist
 import android.content.Context
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -67,10 +66,8 @@ import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
-import com.geeksville.mesh.android.getLocationPermissions
 import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.android.hasGps
-import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.model.Node
@@ -89,6 +86,8 @@ import com.geeksville.mesh.util.createLatLongGrid
 import com.geeksville.mesh.util.formatAgo
 import com.geeksville.mesh.util.zoomIn
 import com.geeksville.mesh.waypoint
+import com.google.accompanist.permissions.ExperimentalPermissionsApi // Added for Accompanist
+import com.google.accompanist.permissions.rememberMultiplePermissionsState // Added for Accompanist
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import org.osmdroid.bonuspack.utils.BonusPackHelper.getBitmapFromVectorDrawable
 import org.osmdroid.config.Configuration
@@ -201,6 +200,14 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
     builder.show()
 }
 
+/**
+ * Main composable for displaying the map view, including nodes, waypoints, and user location. It handles user
+ * interactions for map manipulation, filtering, and offline caching.
+ *
+ * @param model The [UIViewModel] providing data and state for the map.
+ * @param navigateToNodeDetails Callback to navigate to the details screen of a selected node.
+ */
+@OptIn(ExperimentalPermissionsApi::class) // Added for Accompanist
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @Composable
 fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Unit) {
@@ -208,13 +215,11 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
 
     val mapFilterState by model.mapFilterStateFlow.collectAsState()
 
-    // UI Elements
     var cacheEstimate by remember { mutableStateOf("") }
 
     var zoomLevelMin by remember { mutableDoubleStateOf(0.0) }
     var zoomLevelMax by remember { mutableDoubleStateOf(0.0) }
 
-    // Map Elements
     var downloadRegionBoundingBox: BoundingBox? by remember { mutableStateOf(null) }
     var myLocationOverlay: MyLocationNewOverlay? by remember { mutableStateOf(null) }
 
@@ -230,6 +235,11 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
 
     val hasGps = remember { context.hasGps() }
 
+    // Accompanist permissions state for location
+    val locationPermissionsState =
+        rememberMultiplePermissionsState(permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION))
+    var triggerLocationToggleAfterPermission by remember { mutableStateOf(false) }
+
     fun loadOnlineTileSourceBase(): ITileSource {
         val id = model.mapStyleId
         debug("mapStyleId from prefs: $id")
@@ -239,11 +249,13 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
         }
     }
 
-    val cameraView = remember {
-        val geoPoints = model.nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
+    val initialCameraView = remember {
+        val nodes = model.nodeList.value
+        val nodesWithPosition = nodes.filter { it.validPosition != null }
+        val geoPoints = nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
         BoundingBox.fromGeoPoints(geoPoints)
     }
-    val map = rememberMapViewWithLifecycle(cameraView, loadOnlineTileSourceBase())
+    val map = rememberMapViewWithLifecycle(initialCameraView, loadOnlineTileSourceBase())
 
     val nodeClusterer = remember { RadiusMarkerClusterer(context) }
 
@@ -279,12 +291,15 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
         }
     }
 
-    val requestPermissionAndToggleLauncher =
-        rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            if (permissions.entries.all { it.value }) map.toggleMyLocation()
+    // Effect to toggle MyLocation after permission is granted
+    LaunchedEffect(locationPermissionsState.allPermissionsGranted) {
+        if (locationPermissionsState.allPermissionsGranted && triggerLocationToggleAfterPermission) {
+            map.toggleMyLocation()
+            triggerLocationToggleAfterPermission = false
         }
+    }
 
-    val nodes by model.filteredNodeList.collectAsStateWithLifecycle()
+    val nodes by model.nodeList.collectAsStateWithLifecycle()
     val waypoints by model.waypoints.collectAsStateWithLifecycle(emptyMap())
 
     val markerIcon = remember { AppCompatResources.getDrawable(context, R.drawable.ic_baseline_location_on_24) }
@@ -294,9 +309,9 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
         val ourNode = model.ourNodeInfo.value
         val gpsFormat = model.config.display.gpsFormat.number
         val displayUnits = model.config.display.units
-        val mapFilterState = model.mapFilterStateFlow.value // Access mapFilterState directly
+        val mapFilterStateValue = model.mapFilterStateFlow.value // Access mapFilterState directly
         return nodesWithPosition.mapNotNull { node ->
-            if (mapFilterState.onlyFavorites && !node.isFavorite && !node.equals(ourNode)) {
+            if (mapFilterStateValue.onlyFavorites && !node.isFavorite && !node.equals(ourNode)) {
                 return@mapNotNull null
             }
 
@@ -320,7 +335,7 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
                 position = nodePosition
                 icon = markerIcon
                 setNodeColors(node.colors)
-                if (!mapFilterState.showPrecisionCircle) {
+                if (!mapFilterStateValue.showPrecisionCircle) {
                     setPrecisionBits(0)
                 } else {
                     setPrecisionBits(p.precisionBits)
@@ -388,7 +403,7 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
         val dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
         return waypoints.mapNotNull { waypoint ->
             val pt = waypoint.data.waypoint ?: return@mapNotNull null
-            if (!mapFilterState.showWaypoints) return@mapNotNull null
+            if (!mapFilterState.showWaypoints) return@mapNotNull null // Use collected mapFilterState
             val lock = if (pt.lockedTo != 0) "\uD83D\uDD12" else ""
             val time = dateFormat.format(waypoint.received_time)
             val label = pt.name + " " + formatAgo((waypoint.received_time / 1000).toInt())
@@ -418,7 +433,7 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
                 title = "${pt.name} (${getUsername(waypoint.data.from)}$lock)"
                 snippet = "[$time] ${pt.description}  " + stringResource(R.string.expires) + ": $expireTimeStr"
                 position = GeoPoint(pt.latitudeI * 1e-7, pt.longitudeI * 1e-7)
-                setVisible(false)
+                setVisible(false) // This seems to be always false, was this intended?
                 setOnLongClickListener {
                     showMarkerLongPressDialog(pt.id)
                     true
@@ -430,7 +445,7 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
     LaunchedEffect(showCurrentCacheInfo) {
         if (!showCurrentCacheInfo) return@LaunchedEffect
         model.showSnackbar(R.string.calculating)
-        val cacheManager = CacheManager(map) // Make sure CacheManager has latest from map
+        val cacheManager = CacheManager(map)
         val cacheCapacity = cacheManager.cacheCapacity()
         val currentCacheUsage = cacheManager.currentCacheUsage()
 
@@ -483,7 +498,7 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
             overlays.add(nodeClusterer)
         }
 
-        addCopyright() // Copyright is required for certain map sources
+        addCopyright()
         addScaleBarOverlay(density)
         createLatLongGrid(false)
 
@@ -492,10 +507,9 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
 
     with(map) { UpdateMarkers(onNodesChanged(nodes), onWaypointChanged(waypoints.values), nodeClusterer) }
 
-    /** Creates Box overlay showing what area can be downloaded */
     fun MapView.generateBoxOverlay() {
         overlays.removeAll { it is Polygon }
-        val zoomFactor = 1.3 // zoom difference between view and download area polygon
+        val zoomFactor = 1.3
         zoomLevelMin = minOf(zoomLevelDouble, zoomLevelMax)
         downloadRegionBoundingBox = boundingBox.zoomIn(zoomFactor)
         val polygon =
@@ -528,12 +542,10 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
             val outputName = buildString {
                 append(Configuration.getInstance().osmdroidBasePath.absolutePath)
                 append(File.separator)
-                append("mainFile.sqlite") // TODO: Accept filename input param from user
+                append("mainFile.sqlite")
             }
             val writer = SqliteArchiveTileWriter(outputName)
-            // Make sure cacheManager has latest from map
             val cacheManager = CacheManager(map, writer)
-            // this triggers the download
             cacheManager.downloadAreaAsync(
                 context,
                 boundingBox,
@@ -589,7 +601,6 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
                         map.generateBoxOverlay()
                         dialog.dismiss()
                     }
-
                     2 -> purgeTileSource { model.showSnackbar(it) }
                     else -> dialog.dismiss()
                 }
@@ -606,12 +617,12 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
             AndroidView(
                 factory = {
                     map.apply {
-                        setDestroyMode(false) // keeps map instance alive when in the background
+                        setDestroyMode(false)
                         addMapListener(boxOverlayListener)
                     }
                 },
                 modifier = Modifier.fillMaxSize(),
-                update = { map -> map.drawOverlays() },
+                update = { mapView -> mapView.drawOverlays() }, // Renamed map to mapView to avoid conflict
             )
             if (downloadRegionBoundingBox != null) {
                 CacheLayout(
@@ -645,7 +656,6 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
                             onDismissRequest = { mapFilterExpanded = false },
                             modifier = Modifier.background(MaterialTheme.colorScheme.surface),
                         ) {
-                            // Only Favorites toggle
                             DropdownMenuItem(
                                 text = {
                                     Row(
@@ -714,7 +724,7 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
                                         )
                                         Checkbox(
                                             checked = mapFilterState.showPrecisionCircle,
-                                            onCheckedChange = { enabled -> model.toggleShowPrecisionCircleOnMap() },
+                                            onCheckedChange = { model.toggleShowPrecisionCircleOnMap() },
                                             modifier = Modifier.padding(start = 8.dp),
                                         )
                                     }
@@ -733,10 +743,11 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
                             },
                             contentDescription = stringResource(R.string.toggle_my_position),
                         ) {
-                            if (context.hasLocationPermission()) {
+                            if (locationPermissionsState.allPermissionsGranted) {
                                 map.toggleMyLocation()
                             } else {
-                                requestPermissionAndToggleLauncher.launch(context.getLocationPermissions())
+                                triggerLocationToggleAfterPermission = true
+                                locationPermissionsState.launchMultiplePermissionRequest()
                             }
                         }
                     }
@@ -747,7 +758,7 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
 
     if (showEditWaypointDialog != null) {
         EditWaypointDialog(
-            waypoint = showEditWaypointDialog ?: return,
+            waypoint = showEditWaypointDialog ?: return, // Safe call
             onSendClicked = { waypoint ->
                 debug("User clicked send waypoint ${waypoint.id}")
                 showEditWaypointDialog = null

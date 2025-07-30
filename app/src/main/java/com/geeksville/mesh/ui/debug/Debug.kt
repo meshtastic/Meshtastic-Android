@@ -61,7 +61,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -83,6 +82,7 @@ import com.geeksville.mesh.model.DebugViewModel
 import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
 import com.geeksville.mesh.ui.common.components.CopyIconButton
 import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
+import com.geeksville.mesh.ui.common.theme.AnnotationColor
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
@@ -291,7 +291,7 @@ private fun rememberAnnotatedString(text: String, searchText: String): Annotated
 @Composable
 private fun rememberAnnotatedLogMessage(log: UiMeshLog, searchText: String): AnnotatedString {
     val theme = MaterialTheme.colorScheme
-    val style = SpanStyle(color = colorResource(id = R.color.colorAnnotation), fontStyle = FontStyle.Italic)
+    val style = SpanStyle(color = AnnotationColor, fontStyle = FontStyle.Italic)
     val highlightStyle = SpanStyle(background = theme.primary.copy(alpha = 0.3f), color = theme.onSurface)
 
     return remember(log.uuid, searchText) {
@@ -625,7 +625,7 @@ fun DebugMenuActions(viewModel: DebugViewModel = hiltViewModel(), modifier: Modi
 private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = withContext(Dispatchers.IO) {
     try {
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-        val fileName = "meshtastic_debug_$timestamp.log"
+        val fileName = "meshtastic_debug_$timestamp.txt"
 
         // Get the Downloads directory
         val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)

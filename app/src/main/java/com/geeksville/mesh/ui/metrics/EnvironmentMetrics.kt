@@ -77,9 +77,11 @@ fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel()) {
                 val temperatureFahrenheit = celsiusToFahrenheit(telemetry.environmentMetrics.temperature)
                 val soilTemperatureFahrenheit = celsiusToFahrenheit(telemetry.environmentMetrics.soilTemperature)
                 telemetry.copy {
-                    environmentMetrics = telemetry.environmentMetrics.copy { temperature = temperatureFahrenheit }
                     environmentMetrics =
-                        telemetry.environmentMetrics.copy { soilTemperature = soilTemperatureFahrenheit }
+                        telemetry.environmentMetrics.copy {
+                            temperature = temperatureFahrenheit
+                            soilTemperature = soilTemperatureFahrenheit
+                        }
                 }
             }
         } else {
