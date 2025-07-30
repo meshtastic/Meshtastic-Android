@@ -145,7 +145,7 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
                 IaqDisplayMode.Dot -> {
                     Column(modifier = Modifier.clickable { isLegendOpen = true }) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(text = "${iaqEnum.range.first}")
+                            Text(text = "$iaq")
                             Spacer(modifier = Modifier.width(4.dp))
                             Box(modifier = Modifier.size(10.dp).background(iaqEnum.color, shape = CircleShape))
                         }
