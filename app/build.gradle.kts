@@ -204,11 +204,9 @@ androidComponents {
         if (variant.flavorName == "google") {
             val variantNameCapped = variant.name.replaceFirstChar { it.uppercase() }
             val minifyTaskName = "minify${variantNameCapped}WithR8"
-            val uploadTaskName = "uploadMapping${variantNameCapped}"
+            val uploadTaskName = "uploadMapping$variantNameCapped"
             if (project.tasks.findByName(uploadTaskName) != null && project.tasks.findByName(minifyTaskName) != null) {
-                tasks.named(minifyTaskName).configure {
-                    finalizedBy(uploadTaskName)
-                }
+                tasks.named(minifyTaskName).configure { finalizedBy(uploadTaskName) }
             }
         }
     }

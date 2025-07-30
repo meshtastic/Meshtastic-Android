@@ -113,13 +113,14 @@ jobs:
           fetch-depth: 0
 
       - name: Load secrets
+        if: secrets.DATADOG_APPLICATION_ID != null && secrets.DATADOG_CLIENT_TOKEN != null && secrets.DATADOG_APPLICATION_ID != '' && secrets.DATADOG_CLIENT_TOKEN != ''
         run: |
           rm -f ./app/google-services.json # Ensure clean state
           echo $GSERVICES > ./app/google-services.json
           echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
-          echo "datadogApplicationId=$DATADOG_APPLICATION_ID" >> ./secrets.properties
-          echo "datadogClientToken=$DATADOG_CLIENT_TOKEN" >> ./secrets.properties
+          echo "datadogApplicationId=${{ secrets.DATADOG_APPLICATION_ID }}" >> ./secrets.properties
+          echo "datadogClientToken=${{ secrets.DATADOG_CLIENT_TOKEN }}" >> ./secrets.properties
         env:
           GSERVICES: ${{ secrets.GSERVICES }}
           KEYSTORE: ${{ secrets.KEYSTORE }}

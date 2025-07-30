@@ -15,6 +15,8 @@ jobs:
     uses: ./.github/workflows/reusable-android-build.yml
     secrets:
       GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+      DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
+      DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
     # inputs.upload_artifacts defaults to true, so no need to specify for PRs
 
   androidTest:
