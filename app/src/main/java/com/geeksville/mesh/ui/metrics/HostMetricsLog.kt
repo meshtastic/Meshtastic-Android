@@ -46,6 +46,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -62,62 +63,36 @@ import java.text.DecimalFormat
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun HostMetricsLogScreen(
-    metricsViewModel: MetricsViewModel = hiltViewModel(),
-) {
+fun HostMetricsLogScreen(metricsViewModel: MetricsViewModel = hiltViewModel()) {
     val state by metricsViewModel.state.collectAsStateWithLifecycle()
 
     val hostMetrics = state.hostMetrics
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 16.dp),
-    ) {
-        items(hostMetrics) { telemetry ->
-            HostMetricsItem(
-                telemetry = telemetry,
-            )
-        }
+    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 16.dp)) {
+        items(hostMetrics) { telemetry -> HostMetricsItem(telemetry = telemetry) }
     }
 }
 
-@Suppress("LongMethod")
+@Suppress("LongMethod", "MagicNumber")
 @Composable
-fun HostMetricsItem(
-    modifier: Modifier = Modifier,
-    telemetry: TelemetryProtos.Telemetry
-) {
+fun HostMetricsItem(modifier: Modifier = Modifier, telemetry: TelemetryProtos.Telemetry) {
     val hostMetrics = telemetry.hostMetrics
     val time = telemetry.time * CommonCharts.MS_PER_SEC
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .combinedClickable(onClick = { /* Handle click */ }),
+        modifier = modifier.fillMaxWidth().padding(vertical = 4.dp).combinedClickable(onClick = { /* Handle click */ }),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Icon(
-                imageVector = Icons.Default.DataArray,
-                contentDescription = null,
-                modifier = Modifier.width(24.dp),
-            )
+        Row(modifier = Modifier.padding(16.dp)) {
+            Icon(imageVector = Icons.Default.DataArray, contentDescription = null, modifier = Modifier.width(24.dp))
             Spacer(modifier = Modifier.width(16.dp))
             SelectionContainer {
-
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
+                Column(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
                         modifier = Modifier.fillMaxWidth(),
                         textAlign = TextAlign.End,
                         text = DATE_TIME_FORMAT.format(time),
                         style = TextStyle(fontWeight = FontWeight.Bold),
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize
+                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
                     )
                     LogLine(
                         label = stringResource(R.string.uptime),
@@ -130,72 +105,66 @@ fun HostMetricsItem(
                         modifier = Modifier.fillMaxWidth(),
                     )
                     LogLine(
-                        label = stringResource(R.string.disk_free) + " 1",
+                        label = stringResource(R.string.disk_free_indexed, 1),
                         value = formatBytes(hostMetrics.diskfree1Bytes),
                         modifier = Modifier.fillMaxWidth(),
                     )
                     if (hostMetrics.hasDiskfree2Bytes()) {
                         LogLine(
-                            label = stringResource(R.string.disk_free) + " 2",
+                            label = stringResource(R.string.disk_free_indexed, 2),
                             value = formatBytes(hostMetrics.diskfree2Bytes),
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
                     if (hostMetrics.hasDiskfree3Bytes()) {
                         LogLine(
-                            label = stringResource(R.string.disk_free) + " 3",
+                            label = stringResource(R.string.disk_free_indexed, 3),
                             value = formatBytes(hostMetrics.diskfree3Bytes),
                             modifier = Modifier.fillMaxWidth(),
                         )
                     }
                     LogLine(
-                        label = stringResource(R.string.load) + " 1",
+                        label = stringResource(R.string.load_indexed, 1),
                         value = (hostMetrics.load1 / 100.0).toString(),
                         modifier = Modifier.fillMaxWidth(),
                     )
                     LinearProgressIndicator(
-                        progress = { hostMetrics.load1 / 100.0f },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 4.dp),
+                        progress = { hostMetrics.load1 / 10000.0f },
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
                         color = ProgressIndicatorDefaults.linearColor,
                         trackColor = ProgressIndicatorDefaults.linearTrackColor,
                         strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
                     )
                     LogLine(
-                        label = stringResource(R.string.load) + " 5",
+                        label = stringResource(R.string.load_indexed, 5),
                         value = (hostMetrics.load5 / 100.0).toString(),
                         modifier = Modifier.fillMaxWidth(),
                     )
                     LinearProgressIndicator(
-                        progress = { hostMetrics.load5 / 100.0f },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 4.dp),
+                        progress = { hostMetrics.load5 / 10000.0f },
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
                         color = ProgressIndicatorDefaults.linearColor,
                         trackColor = ProgressIndicatorDefaults.linearTrackColor,
                         strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
                     )
                     LogLine(
-                        label = stringResource(R.string.load) + " 15",
+                        label = stringResource(R.string.load_indexed, 15),
                         value = (hostMetrics.load15 / 100.0).toString(),
                         modifier = Modifier.fillMaxWidth(),
                     )
                     LinearProgressIndicator(
-                        progress = { hostMetrics.load15 / 100.0f },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 4.dp),
+                        progress = { hostMetrics.load15 / 10000.0f },
+                        modifier = Modifier.fillMaxWidth().padding(bottom = 4.dp),
                         color = ProgressIndicatorDefaults.linearColor,
                         trackColor = ProgressIndicatorDefaults.linearTrackColor,
                         strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
                     )
                     if (hostMetrics.hasUserString()) {
-                        LogLine(
-                            label = stringResource(R.string.user_string),
-                            value = hostMetrics.userString,
-                            modifier = Modifier.fillMaxWidth(),
+                        Text(
+                            text = stringResource(R.string.user_string, hostMetrics.userString),
+                            style = MaterialTheme.typography.bodyMedium,
                         )
+                        Text(text = hostMetrics.userString, style = TextStyle(fontFamily = FontFamily.Monospace))
                     }
                 }
             }
@@ -204,23 +173,14 @@ fun HostMetricsItem(
 }
 
 @Composable
-fun LogLine(
-    modifier: Modifier = Modifier,
-    label: String,
-    value: String,
-) {
+fun LogLine(modifier: Modifier = Modifier, label: String, value: String) {
     Row(
-        modifier = modifier
-            .fillMaxWidth(),
+        modifier = modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        Text(
-            text = label,
-        )
-        Text(
-            text = value,
-        )
+        Text(text = label)
+        Text(text = value)
     }
 }
 
@@ -229,11 +189,12 @@ const val BYTES_IN_MB = BYTES_IN_KB * 1024.0
 const val BYTES_IN_GB = BYTES_IN_MB * 1024.0
 
 fun formatBytes(bytes: Long, decimalPlaces: Int = 2): String {
-    val formatter = DecimalFormat().apply {
-        maximumFractionDigits = decimalPlaces
-        minimumFractionDigits = 0
-        isGroupingUsed = false
-    }
+    val formatter =
+        DecimalFormat().apply {
+            maximumFractionDigits = decimalPlaces
+            minimumFractionDigits = 0
+            isGroupingUsed = false
+        }
     return when {
         bytes < 0 -> "N/A" // Handle negative bytes gracefully
         bytes == 0L -> "0 B"
@@ -248,22 +209,22 @@ fun formatBytes(bytes: Long, decimalPlaces: Int = 2): String {
 @PreviewLightDark
 @Composable
 private fun HostMetricsItemPreview() {
-    val hostMetrics = TelemetryProtos.HostMetrics.newBuilder()
-        .setUptimeSeconds(3600)
-        .setFreememBytes(2048000)
-        .setDiskfree1Bytes(104857600)
-        .setDiskfree2Bytes(2097915200)
-        .setDiskfree3Bytes(44444)
-        .setLoad1(30)
-        .setLoad5(75)
-        .setLoad15(19)
-        .setUserString("test")
-        .build()
-    val logs = TelemetryProtos.Telemetry.newBuilder()
-        .setTime((System.currentTimeMillis() / 1000L).toInt())
-        .setHostMetrics(hostMetrics)
-        .build()
-    AppTheme {
-        HostMetricsItem(telemetry = logs)
-    }
+    val hostMetrics =
+        TelemetryProtos.HostMetrics.newBuilder()
+            .setUptimeSeconds(3600)
+            .setFreememBytes(2048000)
+            .setDiskfree1Bytes(104857600)
+            .setDiskfree2Bytes(2097915200)
+            .setDiskfree3Bytes(44444)
+            .setLoad1(30)
+            .setLoad5(75)
+            .setLoad15(19)
+            .setUserString("test")
+            .build()
+    val logs =
+        TelemetryProtos.Telemetry.newBuilder()
+            .setTime((System.currentTimeMillis() / 1000L).toInt())
+            .setHostMetrics(hostMetrics)
+            .build()
+    AppTheme { HostMetricsItem(telemetry = logs) }
 }
