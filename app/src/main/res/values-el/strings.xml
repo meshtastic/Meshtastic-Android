@@ -67,7 +67,7 @@
     <string name="firmware_old">Το λογισμικό του πομποδεκτη είναι πολύ παλιό για να μιλήσει σε αυτήν την εφαρμογή. Για περισσότερες πληροφορίες σχετικά με αυτό ανατρέξτε στον <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">οδηγό εγκατάστασης του Firmware</a>.</string>
     <string name="okay">Εντάξει</string>
     <string name="must_set_region">Πρέπει να ορίσετε μια περιοχή!</string>
-    <string name="save_messages">Εξαγωγή rangetest.csv</string>
+    <string name="save_rangetest">Εξαγωγή rangetest.csv</string>
     <string name="reset">Επαναφορά</string>
     <string name="scan">Σάρωση</string>
     <string name="are_you_sure_change_default">Είστε σίγουροι ότι θέλετε να αλλάξετε στο προεπιλεγμένο κανάλι;</string>

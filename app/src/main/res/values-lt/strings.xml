@@ -103,7 +103,7 @@
     <string name="okay">Gerai</string>
     <string name="must_set_region">Turite nustatyti regioną!</string>
     <string name="cant_change_no_radio">Nepavyko pakeisti kanalo, nes radijas dar nėra prisijungęs. Bandykite dar kartą.</string>
-    <string name="save_messages">Eksportuoti rangetest.csv</string>
+    <string name="save_rangetest">Eksportuoti rangetest.csv</string>
     <string name="reset">Nustatyti iš naujo</string>
     <string name="scan">Skenuoti</string>
     <string name="are_you_sure_change_default">Ar tikrai norite pakeisti į numatytąjį kanalą?</string>

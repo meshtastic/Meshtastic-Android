@@ -139,7 +139,7 @@
     <string name="okay">OK</string>
     <string name="must_set_region">Sie müssen eine Region festlegen!</string>
     <string name="cant_change_no_radio">Konnte den Kanal nicht ändern, da das Funkgerät noch nicht verbunden ist. Bitte versuchen Sie es erneut.</string>
-    <string name="save_messages">Exportiere rangetest.csv</string>
+    <string name="save_rangetest">Exportiere rangetest.csv</string>
     <string name="reset">Zurücksetzen</string>
     <string name="scan">Scannen</string>
     <string name="are_you_sure_change_default">Sind Sie sicher, dass Sie in den Standardkanal wechseln möchten?</string>

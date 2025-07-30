@@ -113,7 +113,7 @@
     <string name="firmware_old">デバイスのファームウェアが古く、アプリと通信ができません。詳細は<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Firmware Installation guide</a> に記載されています。</string>
     <string name="must_set_region">リージョンを指定する必要があります。</string>
     <string name="cant_change_no_radio">デバイスが未接続のため、チャンネルが変更できませんでした。もう一度やり直してください。</string>
-    <string name="save_messages">rangetest.csvをエクスポート</string>
+    <string name="save_rangetest">rangetest.csv をエクスポート</string>
     <string name="reset">リセット</string>
     <string name="scan">スキャン</string>
     <string name="are_you_sure_change_default">デフォルトチャンネルに変更しますか？</string>

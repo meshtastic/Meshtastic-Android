@@ -102,7 +102,7 @@
     <string name="okay">Ceadaigh</string>
     <string name="must_set_region">Caithfidh tú réigiún a shocrú!</string>
     <string name="cant_change_no_radio">Ní féidir an cainéal a athrú, toisc nach bhfuil an raidió nasctha fós. Déan iarracht arís.</string>
-    <string name="save_messages">Onnmhairigh rangetest.csv</string>
+    <string name="save_rangetest">Onnmhairigh rangetest.csv</string>
     <string name="reset">Athshocraigh</string>
     <string name="scan">Scanadh</string>
     <string name="are_you_sure_change_default">An bhfuil tú cinnte gur mhaith leat an cainéal réamhshocraithe a athrú?</string>

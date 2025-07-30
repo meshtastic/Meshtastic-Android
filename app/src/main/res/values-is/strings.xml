@@ -57,7 +57,7 @@
     <string name="okay">Í lagi</string>
     <string name="must_set_region">Þú verður að velja svæði!</string>
     <string name="cant_change_no_radio">Gat ekki skipt um rás vegna þess að radíó er ekki enn tengt. Vinsamlegast reyndu aftur.</string>
-    <string name="save_messages">Flytja út skránna rangetest.csv</string>
+    <string name="save_rangetest">Flytja út skránna rangetest.csv</string>
     <string name="reset">Endurræsa</string>
     <string name="scan">Leita</string>
     <string name="are_you_sure_change_default">Ert þú viss um að þú viljir skipta yfir á sjálfgefna rás?</string>

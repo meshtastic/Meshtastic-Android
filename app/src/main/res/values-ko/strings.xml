@@ -123,7 +123,7 @@
     <string name="okay">확인</string>
     <string name="must_set_region">지역을 설정해 주세요!</string>
     <string name="cant_change_no_radio">장치가 연결되지않아 채널을 변경할 수 없습니다. 다시 시도해주세요.</string>
-    <string name="save_messages">rangetest.csv 내보내기</string>
+    <string name="save_rangetest">rangetest.csv 내보내기</string>
     <string name="reset">초기화</string>
     <string name="scan">스캔</string>
     <string name="are_you_sure_change_default">기본 채널로 변경하시겠습니까?</string>

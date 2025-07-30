@@ -139,7 +139,7 @@
     <string name="okay">OK</string>
     <string name="must_set_region">Sinun täytyy määrittää alue!</string>
     <string name="cant_change_no_radio">Kanavaa ei voitu vaihtaa, koska radiota ei ole vielä yhdistetty. Yritä uudelleen.</string>
-    <string name="save_messages">Vie rangetest.csv</string>
+    <string name="save_rangetest">Vie rangetest.csv</string>
     <string name="reset">Palauta</string>
     <string name="scan">Etsi</string>
     <string name="are_you_sure_change_default">Oletko varma, että haluat vaihtaa oletuskanavan?</string>

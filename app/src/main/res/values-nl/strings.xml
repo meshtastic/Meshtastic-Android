@@ -114,7 +114,7 @@
     <string name="okay">OK</string>
     <string name="must_set_region">Je moet een regio instellen!</string>
     <string name="cant_change_no_radio">Kon kanaal niet wijzigen, omdat de radio nog niet is aangesloten. Probeer het opnieuw.</string>
-    <string name="save_messages">Exporteer rangetest.csv</string>
+    <string name="save_rangetest">Exporteer rangetest.csv</string>
     <string name="reset">Reset</string>
     <string name="scan">Scan</string>
     <string name="are_you_sure_change_default">Weet je zeker dat je naar het standaard kanaal wilt wijzigen?</string>

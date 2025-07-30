@@ -113,7 +113,7 @@
     <string name="firmware_old">Firmvér vysielača je príliš zastaralý, aby dokázal komunikovať s aplikáciou. Viac informácií nájdete na <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">našom sprievodcovi inštaláciou firmvéru</a>.</string>
     <string name="must_set_region">Musíte nastaviť región!</string>
     <string name="cant_change_no_radio">Nie je možné zmeniť kanál, pretože vysielač ešte nie je pripojený. Skúste to neskôr.</string>
-    <string name="save_messages">Exportovať rangetest.csv</string>
+    <string name="save_rangetest">Exportovať rangetest.csv</string>
     <string name="reset">Obnoviť</string>
     <string name="scan">Skenovať</string>
     <string name="are_you_sure_change_default">Ste si istý, že sa chcete prepnúť na predvolený kanál?</string>

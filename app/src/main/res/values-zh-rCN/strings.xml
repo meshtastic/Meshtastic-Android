@@ -138,7 +138,7 @@
     <string name="okay">确定</string>
     <string name="must_set_region">您必须先选择一个地区</string>
     <string name="cant_change_no_radio">无法更改频道，因为装置尚未连接。请再试一次。</string>
-    <string name="save_messages">导出信号测试数据.csv</string>
+    <string name="save_rangetest">导出信号测试数据.csv</string>
     <string name="reset">重置</string>
     <string name="scan">扫描</string>
     <string name="are_you_sure_change_default">您是否确定要改回默认频道？</string>

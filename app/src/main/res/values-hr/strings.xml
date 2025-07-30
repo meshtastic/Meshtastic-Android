@@ -67,7 +67,7 @@
     <string name="okay">U redu</string>
     <string name="must_set_region">Potrebno je postaviti regiju!</string>
     <string name="cant_change_no_radio">Nije moguće promijeniti kanal jer radio još nije povezan. Molim pokušajte ponovno.</string>
-    <string name="save_messages">Izvezi rangetest.csv</string>
+    <string name="save_rangetest">Izvezi rangetest.csv</string>
     <string name="reset">Resetiraj</string>
     <string name="scan">Pretraži</string>
     <string name="are_you_sure_change_default">Jeste li sigurni da želite promijeniti na zadani kanal?</string>
