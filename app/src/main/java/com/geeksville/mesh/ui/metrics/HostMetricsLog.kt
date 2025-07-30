@@ -160,10 +160,7 @@ fun HostMetricsItem(modifier: Modifier = Modifier, telemetry: TelemetryProtos.Te
                         strokeCap = ProgressIndicatorDefaults.LinearStrokeCap,
                     )
                     if (hostMetrics.hasUserString()) {
-                        Text(
-                            text = stringResource(R.string.user_string, hostMetrics.userString),
-                            style = MaterialTheme.typography.bodyMedium,
-                        )
+                        Text(text = stringResource(R.string.user_string), style = MaterialTheme.typography.bodyMedium)
                         Text(text = hostMetrics.userString, style = TextStyle(fontFamily = FontFamily.Monospace))
                     }
                 }
