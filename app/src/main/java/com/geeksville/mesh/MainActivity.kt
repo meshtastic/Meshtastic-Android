@@ -28,7 +28,6 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -206,13 +205,6 @@ class MainActivity :
             }
         return resultPendingIntent!!
     }
-
-    private val createDocumentLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == RESULT_OK) {
-                it.data?.data?.let { file_uri -> model.saveMessagesCSV(file_uri) }
-            }
-        }
 
     private var serviceSetupJob: Job? = null
 
