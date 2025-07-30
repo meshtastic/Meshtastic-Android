@@ -196,8 +196,20 @@ protobuf {
 androidComponents {
     onVariants(selector().all()) { variant ->
         project.afterEvaluate {
-            val capName = variant.name.replaceFirstChar { it.uppercase() }
-            tasks.named("ksp${capName}Kotlin") { dependsOn("generate${capName}Proto") }
+            val variantNameCapped = variant.name.replaceFirstChar { it.uppercase() }
+            tasks.named("ksp${variantNameCapped}Kotlin") { dependsOn("generate${variantNameCapped}Proto") }
+        }
+    }
+    onVariants(selector().withBuildType("release")) { variant ->
+        if (variant.flavorName == "google") {
+            val variantNameCapped = variant.name.replaceFirstChar { it.uppercase() }
+            val minifyTaskName = "minify${variantNameCapped}WithR8"
+            val uploadTaskName = "uploadMapping${variantNameCapped}"
+            if (project.tasks.findByName(uploadTaskName) != null && project.tasks.findByName(minifyTaskName) != null) {
+                tasks.named(minifyTaskName).configure {
+                    finalizedBy(uploadTaskName)
+                }
+            }
         }
     }
 }
