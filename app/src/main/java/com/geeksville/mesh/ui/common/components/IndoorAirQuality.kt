@@ -131,7 +131,7 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
                             modifier = Modifier.padding(4.dp).align(Alignment.CenterStart),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            Text(text = "IAQ ${iaqEnum.range.first}", color = Color.White, fontWeight = FontWeight.Bold)
+                            Text(text = "IAQ $iaq", color = Color.White, fontWeight = FontWeight.Bold)
                             Icon(
                                 imageVector =
                                 if (iaqEnum.range.first < 100) Icons.Default.ThumbUp else Icons.Filled.Warning,
@@ -162,12 +162,12 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
 
                 IaqDisplayMode.Gauge -> {
                     CircularProgressIndicator(
-                        progress = iaqEnum.range.first / 500f,
+                        progress = iaq / 500f,
                         modifier = Modifier.size(60.dp).clickable { isLegendOpen = true },
                         strokeWidth = 8.dp,
                         color = iaqEnum.color,
                     )
-                    Text(text = "${iaqEnum.range.first}")
+                    Text(text = "${iaqEnum.description}")
                 }
 
                 IaqDisplayMode.Gradient -> {
@@ -176,7 +176,7 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
                         modifier = Modifier.clickable { isLegendOpen = true },
                     ) {
                         LinearProgressIndicator(
-                            progress = iaqEnum.range.first / 500f,
+                            progress = iaq / 500f,
                             modifier = Modifier.fillMaxWidth().height(20.dp),
                             color = iaqEnum.color,
                         )
