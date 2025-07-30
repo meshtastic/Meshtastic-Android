@@ -684,20 +684,43 @@
     <string name="firmware_edition">Firmware-Version</string>
     <string name="recent_network_devices">Kürzliche Netzwerkgeräte</string>
     <string name="discovered_network_devices">Entdeckte Netzwerkgeräte</string>
+    <string name="get_started">Erste Schritte</string>
+    <string name="intro_welcome">Willkommen bei</string>
     <string name="stay_connected_anywhere">Bleibe überall in Verbindung</string>
+    <string name="communicate_off_the_grid">Kommunizieren Sie außerhalb des Netzwerks mit Ihren Freunden und der Gemeinschaft ohne Mobilfunkdienst.</string>
     <string name="create_your_own_networks">Erstelle deine eigenen Netzwerke</string>
+    <string name="easily_set_up_private_mesh_networks">Leicht einzurichtende, private Netznetze für sichere und zuverlässige Kommunikation in entlegenen Gebieten.</string>
+    <string name="track_and_share_locations">Standort verfolgen und teilen</string>
+    <string name="share_your_location_in_real_time">Teilen Sie Ihren Standort in Echtzeit und koordinieren Sie Ihre Gruppe mit integrierten GPS Funktionen.</string>
     <string name="app_notifications">App-Benachrichtigungen</string>
     <string name="incoming_messages">Eingehende Nachrichten</string>
+    <string name="notifications_for_channel_and_direct_messages">Benachrichtigungen für Kanal und Direktnachrichten.</string>
     <string name="new_nodes">Neue Knoten</string>
     <string name="notifications_for_newly_discovered_nodes">Benachrichtigungen für neu entdeckte Knoten.</string>
     <string name="low_battery">Niedriger Akkustand</string>
+    <string name="notifications_for_low_battery_alerts">Benachrichtigungen für niedrige Akku-Warnungen des angeschlossenen Gerätes.</string>
+    <string name="critical_alerts_description">Pakete, die als kritisch gesendet werden, ignorieren den Lautlos und Ruhemodus in den Benachrichtigungseinstellungen.</string>
+    <string name="configure_notification_permissions">Benachrichtigungseinstellungen</string>
     <string name="phone_location">Telefonstandort</string>
+    <string name="phone_location_description">Meshtastic nutzt den Standort Ihres Telefons, um einige Funktionen zu aktivieren. Sie können Ihre Standortberechtigungen jederzeit in den Einstellungen aktualisieren.</string>
     <string name="share_location">Standort teilen</string>
+    <string name="share_location_description">Benutzen Sie das GPS Ihres Telefons um Standorte an Ihren Knoten zu senden, anstatt ein Hardware GPS in Ihrem Knoten zu verwenden.</string>
     <string name="distance_measurements">Entfernungsmessungen</string>
+    <string name="distance_measurements_description">Zeigt den Abstand zwischen Ihrem Telefon und anderen Meshtastic Knoten mit einem Standort an.</string>
     <string name="distance_filters">Entfernungsfilter</string>
     <string name="distance_filters_description">Filtern Sie die Knotenliste und die Mesh-Karte nach der Nähe zu Ihrem Telefon.</string>
+    <string name="mesh_map_location">Netzwerk Kartenstandort</string>
+    <string name="mesh_map_location_description">Aktiviert den blauen Punkt für Ihr Telefon in der Netzwerkkarte.</string>
     <string name="configure_location_permissions">Standortberechtigungen konfigurieren</string>
     <string name="skip">Überspringen</string>
+    <string name="settings">Einstellungen</string>
     <string name="critical_alerts">Kritische Warnungen</string>
+    <string name="critical_alerts_dnd_request_text">Um sicherzustellen, dass Sie kritische Benachrichtigungen wie
+        SOS-Nachrichten erhalten, auch wenn Ihr Gerät im \"Nicht stören\" Modus ist, müssen Sie eine spezielle
+        Berechtigung erteilen. Bitte aktivieren Sie dies in den Benachrichtigungseinstellungen.
+    </string>
+    <string name="configure_critical_alerts">Kritische Warnungen konfigurieren</string>
+    <string name="notification_permissions_description">Meshtastic verwendet Benachrichtigungen, um Sie über neue Nachrichten und andere wichtige Ereignisse auf dem Laufenden zu halten. Sie können Ihre Benachrichtigungsrechte jederzeit in den Einstellungen aktualisieren.</string>
     <string name="next">Weiter</string>
+    <string name="grant_permissions_and_scan">Berechtigungen und Suche erlauben</string>
 </resources>
