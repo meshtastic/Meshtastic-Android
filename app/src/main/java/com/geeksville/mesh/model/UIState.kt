@@ -879,6 +879,114 @@ constructor(
     }
 
     /** Write the persisted packet data out to a CSV file in the specified location. */
+    fun saveRangetestCSV(uri: Uri) {
+        viewModelScope.launch(Dispatchers.Main) {
+            // Extract distances to this device from position messages and put (node,SNR,distance)
+            // in
+            // the file_uri
+            val myNodeNum = myNodeNum ?: return@launch
+
+            // Capture the current node value while we're still on main thread
+            val nodes = nodeDB.nodeDBbyNum.value
+
+            val positionToPos: (MeshProtos.Position?) -> Position? = { meshPosition ->
+                meshPosition?.let { Position(it) }.takeIf { it?.isValid() == true }
+            }
+
+            writeToUri(uri) { writer ->
+                val nodePositions = mutableMapOf<Int, MeshProtos.Position?>()
+                @Suppress("MaxLineLength")
+                writer.appendLine(
+                    "\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"distance\",\"hop limit\",\"payload\"",
+                )
+
+                // Packets are ordered by time, we keep most recent position of
+                // our device in localNodePosition.
+                val dateFormat = SimpleDateFormat("\"yyyy-MM-dd\",\"HH:mm:ss\"", Locale.getDefault())
+                meshLogRepository.getAllLogsInReceiveOrder(Int.MAX_VALUE).first().forEach { packet ->
+                    // If we get a NodeInfo packet, use it to update our position data (if valid)
+                    packet.nodeInfo?.let { nodeInfo ->
+                        positionToPos.invoke(nodeInfo.position)?.let { nodePositions[nodeInfo.num] = nodeInfo.position }
+                    }
+
+                    packet.meshPacket?.let { proto ->
+                        // If the packet contains position data then use it to update, if valid
+                        packet.position?.let { position ->
+                            positionToPos.invoke(position)?.let {
+                                nodePositions[proto.from.takeIf { it != 0 } ?: myNodeNum] = position
+                            }
+                        }
+
+                        // Only look at range test messages, with SNR reported.
+                        if (
+                            proto.decoded.portnumValue == Portnums.PortNum.RANGE_TEST_APP_VALUE && proto.rxSnr != 0.0f
+                        ) {
+                            val rxDateTime = dateFormat.format(packet.received_date)
+                            val rxFrom = proto.from.toUInt()
+                            val senderName = nodes[proto.from]?.user?.longName ?: ""
+
+                            // sender lat & long
+                            val senderPosition = nodePositions[proto.from]
+                            val senderPos = positionToPos.invoke(senderPosition)
+                            val senderLat = senderPos?.latitude ?: ""
+                            val senderLong = senderPos?.longitude ?: ""
+
+                            // rx lat, long, and elevation
+                            val rxPosition = nodePositions[myNodeNum]
+                            val rxPos = positionToPos.invoke(rxPosition)
+                            val rxLat = rxPos?.latitude ?: ""
+                            val rxLong = rxPos?.longitude ?: ""
+                            val rxAlt = rxPos?.altitude ?: ""
+                            val rxSnr = proto.rxSnr
+
+                            // Calculate the distance if both positions are valid
+
+                            val dist =
+                                if (senderPos == null || rxPos == null) {
+                                    ""
+                                } else {
+                                    positionToMeter(
+                                        rxPosition!!, // Use rxPosition but only if rxPos was
+                                        // valid
+                                        senderPosition!!, // Use senderPosition but only if
+                                        // senderPos was valid
+                                    )
+                                        .roundToInt()
+                                        .toString()
+                                }
+
+                            val hopLimit = proto.hopLimit
+
+                            val payload =
+                                when {
+                                    proto.decoded.portnumValue !in
+                                        setOf(
+                                            Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
+                                            Portnums.PortNum.RANGE_TEST_APP_VALUE,
+                                        ) -> "<${proto.decoded.portnum}>"
+
+                                    proto.hasDecoded() -> proto.decoded.payload.toStringUtf8().replace("\"", "\"\"")
+
+                                    proto.hasEncrypted() -> "${proto.encrypted.size()} encrypted bytes"
+                                    else -> ""
+                                }
+
+                            //  date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx
+                            // elevation,rx snr,distance,hop limit,payload
+                            @Suppress("MaxLineLength")
+                            writer.appendLine(
+                                "$rxDateTime,\"$rxFrom\",\"$senderName\",\"$senderLat\",\"$senderLong\",\"$rxLat\",\"$rxLong\",\"$rxAlt\",\"$rxSnr\",\"$dist\",\"$hopLimit\",\"$payload\"",
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // TODO : get rid of.
+
+    /** Write the persisted packet data out to a CSV file in the specified location. */
     fun saveMessagesCSV(uri: Uri) {
         viewModelScope.launch(Dispatchers.Main) {
             // Extract distances to this device from position messages and put (node,SNR,distance)

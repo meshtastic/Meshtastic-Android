@@ -269,9 +269,19 @@ class MainActivity :
                     Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                         addCategory(Intent.CATEGORY_OPENABLE)
                         type = "application/csv"
-                        putExtra(Intent.EXTRA_TITLE, "rangetest.csv")
+                        putExtra(Intent.EXTRA_TITLE, "MeshtasticMessages.csv")
                     }
                 createDocumentLauncher.launch(intent)
+            }
+
+            MainMenuAction.EXPORT_RANGETEST -> {
+                val intent =
+                    Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "application/csv"
+                        putExtra(Intent.EXTRA_TITLE, "rangetest.csv")
+                    }
+                createRangetestLauncher.launch(intent)
             }
 
             MainMenuAction.THEME -> {
