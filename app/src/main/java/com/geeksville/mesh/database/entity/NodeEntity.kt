@@ -113,7 +113,7 @@ data class NodeEntity(
     @ColumnInfo(name = "is_favorite") var isFavorite: Boolean = false,
     @ColumnInfo(name = "is_ignored", defaultValue = "0") var isIgnored: Boolean = false,
     @ColumnInfo(name = "environment_metrics", typeAffinity = ColumnInfo.BLOB)
-    var environmentTelemetry: TelemetryProtos.Telemetry = TelemetryProtos.Telemetry.getDefaultInstance(),
+    var environmentTelemetry: TelemetryProtos.Telemetry = TelemetryProtos.Telemetry.newBuilder().build(),
     @ColumnInfo(name = "power_metrics", typeAffinity = ColumnInfo.BLOB)
     var powerTelemetry: TelemetryProtos.Telemetry = TelemetryProtos.Telemetry.getDefaultInstance(),
     @ColumnInfo(typeAffinity = ColumnInfo.BLOB)
@@ -192,17 +192,9 @@ data class NodeEntity(
         ),
         channel = channel,
         environmentMetrics =
-        EnvironmentMetrics(
-            time = environmentTelemetry.time,
-            temperature = environmentMetrics.temperature,
-            relativeHumidity = environmentMetrics.relativeHumidity,
-            soilTemperature = environmentMetrics.soilTemperature,
-            soilMoisture = environmentMetrics.soilMoisture,
-            barometricPressure = environmentMetrics.barometricPressure,
-            gasResistance = environmentMetrics.gasResistance,
-            voltage = environmentMetrics.voltage,
-            current = environmentMetrics.current,
-            iaq = environmentMetrics.iaq,
+        EnvironmentMetrics.fromTelemetryProto(
+            environmentTelemetry.environmentMetrics,
+            environmentTelemetry.time,
         ),
         hopsAway = hopsAway,
     )

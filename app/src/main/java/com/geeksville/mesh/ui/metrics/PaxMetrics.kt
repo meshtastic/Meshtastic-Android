@@ -184,9 +184,9 @@ fun PaxMetricsScreen(metricsViewModel: MetricsViewModel = hiltViewModel()) {
     val minValue = 0f
     val legendData =
         listOf(
-            LegendData(PaxSeries.PAX.legendRes, PaxSeries.PAX.color),
-            LegendData(PaxSeries.BLE.legendRes, PaxSeries.BLE.color),
-            LegendData(PaxSeries.WIFI.legendRes, PaxSeries.WIFI.color),
+            LegendData(PaxSeries.PAX.legendRes, PaxSeries.PAX.color, environmentMetric = null),
+            LegendData(PaxSeries.BLE.legendRes, PaxSeries.BLE.color, environmentMetric = null),
+            LegendData(PaxSeries.WIFI.legendRes, PaxSeries.WIFI.color, environmentMetric = null),
         )
 
     Column(modifier = Modifier.fillMaxSize()) {

@@ -57,6 +57,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.R
+import com.geeksville.mesh.model.Environment
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_MINUTE_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MAX_PERCENT_VALUE
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
@@ -78,7 +79,12 @@ private const val DATE_Y = 32f
 private const val LINE_LIMIT = 4
 private const val TEXT_PAINT_ALPHA = 192
 
-data class LegendData(val nameRes: Int, val color: Color, val isLine: Boolean = false)
+data class LegendData(
+    val nameRes: Int,
+    val color: Color,
+    val isLine: Boolean = false,
+    val environmentMetric: Environment? = null,
+)
 
 @Composable
 fun ChartHeader(amount: Int) {

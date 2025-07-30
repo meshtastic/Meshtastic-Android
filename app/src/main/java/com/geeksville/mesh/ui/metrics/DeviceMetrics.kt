@@ -71,7 +71,7 @@ import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.GraphColors.Cyan
 import com.geeksville.mesh.ui.common.theme.GraphColors.Green
 import com.geeksville.mesh.ui.common.theme.GraphColors.Magenta
-import com.geeksville.mesh.ui.common.theme.GraphColors.Orange
+import com.geeksville.mesh.ui.common.theme.GraphColors.Red
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MAX_PERCENT_VALUE
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
@@ -79,21 +79,39 @@ import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.plotPoint
 
-private enum class Device(val color: Color) {
-    BATTERY(Green),
-    CH_UTIL(Magenta),
-    AIR_UTIL(Cyan),
-}
-
 private const val CHART_WEIGHT = 1f
 private const val Y_AXIS_WEIGHT = 0.1f
-private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIGHT)
+private const val CHART_WIDTH_RATIO = CHART_WEIGHT / (CHART_WEIGHT + Y_AXIS_WEIGHT + Y_AXIS_WEIGHT)
+
+private enum class Device(val color: Color) {
+    BATTERY(Green) {
+        override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.batteryLevel.toFloat()
+    },
+    CH_UTIL(Magenta) {
+        override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.channelUtilization
+    },
+    AIR_UTIL(Cyan) {
+        override fun getValue(telemetry: Telemetry): Float = telemetry.deviceMetrics.airUtilTx
+    }, ;
+
+    abstract fun getValue(telemetry: Telemetry): Float
+}
 
 private val LEGEND_DATA =
     listOf(
-        LegendData(nameRes = R.string.battery, color = Device.BATTERY.color, isLine = true),
-        LegendData(nameRes = R.string.channel_utilization, color = Device.CH_UTIL.color),
-        LegendData(nameRes = R.string.air_utilization, color = Device.AIR_UTIL.color),
+        LegendData(nameRes = R.string.battery, color = Device.BATTERY.color, isLine = true, environmentMetric = null),
+        LegendData(
+            nameRes = R.string.channel_utilization,
+            color = Device.CH_UTIL.color,
+            isLine = false,
+            environmentMetric = null,
+        ),
+        LegendData(
+            nameRes = R.string.air_utilization,
+            color = Device.AIR_UTIL.color,
+            isLine = false,
+            environmentMetric = null,
+        ),
     )
 
 @Composable
@@ -117,7 +135,7 @@ fun DeviceMetricsScreen(viewModel: MetricsViewModel = hiltViewModel()) {
 
         DeviceMetricsChart(
             modifier = Modifier.fillMaxWidth().fillMaxHeight(fraction = 0.33f),
-            data.reversed(),
+            telemetries = data.reversed(),
             selectedTimeFrame,
             promptInfoDialog = { displayInfoDialog = true },
         )
@@ -186,7 +204,7 @@ private fun DeviceMetricsChart(
              */
             HorizontalLinesOverlay(
                 modifier.width(dp),
-                lineColors = listOf(graphColor, Orange, Color.Red, graphColor, graphColor),
+                lineColors = listOf(graphColor, Color.Yellow, Color.Red, graphColor, graphColor),
             )
 
             TimeAxisOverlay(modifier.width(dp), oldest = oldest.time, newest = newest.time, selectedTime.lineInterval())

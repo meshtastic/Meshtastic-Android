@@ -297,7 +297,8 @@ constructor(
                             environmentMetrics =
                             telemetry.filter {
                                 it.hasEnvironmentMetrics() &&
-                                    it.environmentMetrics.relativeHumidity >= 0f &&
+                                    it.environmentMetrics.hasRelativeHumidity() &&
+                                    it.environmentMetrics.hasTemperature() &&
                                     !it.environmentMetrics.temperature.isNaN()
                             },
                         )
