@@ -176,7 +176,7 @@ fun MapView(
         mapViewModel.nodes
             .map { nodes -> nodes.filter { node -> node.validPosition != null } }
             .collectAsStateWithLifecycle(listOf())
-    val waypoints by uiViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
+    val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val displayableWaypoints = waypoints.values.mapNotNull { it.data.waypoint }
 
     // State to track if the initial camera zoom has happened

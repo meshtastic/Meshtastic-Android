@@ -20,7 +20,7 @@ package com.geeksville.mesh.ui.map.components
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.graphics.Color
-import com.geeksville.mesh.ui.map.MapViewModel
+import com.geeksville.mesh.ui.map.BaseMapViewModel
 import com.geeksville.mesh.ui.map.NodeClusterItem
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.google.maps.android.clustering.Cluster
@@ -33,7 +33,7 @@ import com.google.maps.android.compose.clustering.Clustering
 @Composable
 fun NodeClusterMarkers(
     nodeClusterItems: List<NodeClusterItem>,
-    mapFilterState: MapViewModel.MapFilterState,
+    mapFilterState: BaseMapViewModel.MapFilterState,
     navigateToNodeDetails: (Int) -> Unit,
     onClusterClick: (Cluster<NodeClusterItem>) -> Boolean,
 ) {

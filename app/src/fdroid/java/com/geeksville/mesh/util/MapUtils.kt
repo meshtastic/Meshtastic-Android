@@ -22,6 +22,10 @@ import org.osmdroid.util.GeoPoint
 import kotlin.math.log2
 import kotlin.math.pow
 
+private const val DEGREES_IN_CIRCLE = 360.0
+private const val METERS_PER_DEGREE_LATITUDE = 111320.0
+private const val ZOOM_ADJUSTMENT_FACTOR = 0.8
+
 /**
  * Calculates the zoom level required to fit the entire [BoundingBox] inside the map view.
  *
@@ -32,9 +36,9 @@ fun BoundingBox.requiredZoomLevel(): Double {
     val bottomRight = GeoPoint(this.latSouth, this.lonEast)
     val latLonWidth = topLeft.distanceToAsDouble(GeoPoint(topLeft.latitude, bottomRight.longitude))
     val latLonHeight = topLeft.distanceToAsDouble(GeoPoint(bottomRight.latitude, topLeft.longitude))
-    val requiredLatZoom = log2(360.0 / (latLonHeight / 111320))
-    val requiredLonZoom = log2(360.0 / (latLonWidth / 111320))
-    return maxOf(requiredLatZoom, requiredLonZoom) * 0.8
+    val requiredLatZoom = log2(DEGREES_IN_CIRCLE / (latLonHeight / METERS_PER_DEGREE_LATITUDE))
+    val requiredLonZoom = log2(DEGREES_IN_CIRCLE / (latLonWidth / METERS_PER_DEGREE_LATITUDE))
+    return maxOf(requiredLatZoom, requiredLonZoom) * ZOOM_ADJUSTMENT_FACTOR
 }
 
 /**

@@ -22,7 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
-import com.geeksville.mesh.ui.map.MapViewModel
+import com.geeksville.mesh.ui.map.BaseMapViewModel
 import com.geeksville.mesh.ui.node.DEG_D
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.LatLng
@@ -32,7 +32,7 @@ import com.google.maps.android.compose.rememberUpdatedMarkerState
 @Composable
 fun WaypointMarkers(
     displayableWaypoints: List<MeshProtos.Waypoint>,
-    mapFilterState: MapViewModel.MapFilterState,
+    mapFilterState: BaseMapViewModel.MapFilterState,
     myNodeNum: Int,
     isConnected: Boolean,
     unicodeEmojiToBitmapProvider: (Int) -> BitmapDescriptor,

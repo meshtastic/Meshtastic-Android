@@ -39,7 +39,7 @@ internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, 
     DropdownMenu(expanded = expanded, onDismissRequest = onDismissRequest) {
         DropdownMenuItem(
             text = { Text(stringResource(id = R.string.only_favorites)) },
-            onClick = { mapViewModel.setOnlyFavorites(!mapFilterState.onlyFavorites) },
+            onClick = { mapViewModel.toggleOnlyFavorites() },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Filled.Favorite,
@@ -49,13 +49,13 @@ internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, 
             trailingIcon = {
                 Checkbox(
                     checked = mapFilterState.onlyFavorites,
-                    onCheckedChange = { mapViewModel.setOnlyFavorites(it) },
+                    onCheckedChange = { mapViewModel.toggleOnlyFavorites() },
                 )
             },
         )
         DropdownMenuItem(
             text = { Text(stringResource(id = R.string.show_waypoints)) },
-            onClick = { mapViewModel.setShowWaypointsOnMap(!mapFilterState.showWaypoints) },
+            onClick = { mapViewModel.toggleShowWaypointsOnMap() },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Filled.Place,
@@ -65,13 +65,13 @@ internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, 
             trailingIcon = {
                 Checkbox(
                     checked = mapFilterState.showWaypoints,
-                    onCheckedChange = { mapViewModel.setShowWaypointsOnMap(it) },
+                    onCheckedChange = { mapViewModel.toggleShowWaypointsOnMap() },
                 )
             },
         )
         DropdownMenuItem(
             text = { Text(stringResource(id = R.string.show_precision_circle)) },
-            onClick = { mapViewModel.setShowPrecisionCircleOnMap(!mapFilterState.showPrecisionCircle) },
+            onClick = { mapViewModel.toggleShowPrecisionCircleOnMap() },
             leadingIcon = {
                 Icon(
                     imageVector = Icons.Outlined.RadioButtonUnchecked, // Placeholder icon
@@ -81,7 +81,7 @@ internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, 
             trailingIcon = {
                 Checkbox(
                     checked = mapFilterState.showPrecisionCircle,
-                    onCheckedChange = { mapViewModel.setShowPrecisionCircleOnMap(it) },
+                    onCheckedChange = { mapViewModel.toggleShowPrecisionCircleOnMap() },
                 )
             },
         )

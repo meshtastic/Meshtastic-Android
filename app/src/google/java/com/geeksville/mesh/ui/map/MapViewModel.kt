@@ -21,12 +21,10 @@ import android.app.Application
 import android.content.SharedPreferences
 import android.net.Uri
 import android.util.Log
-import androidx.core.content.edit
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.database.NodeRepository
-import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.repository.map.CustomTileProviderRepository
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.TileProvider
@@ -42,8 +40,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -66,10 +62,11 @@ class MapViewModel
 @Inject
 constructor(
     private val application: Application,
-    private val preferences: SharedPreferences,
+    preferences: SharedPreferences,
     nodeRepository: NodeRepository,
+    packetRepository: PacketRepository,
     private val customTileProviderRepository: CustomTileProviderRepository,
-) : ViewModel() {
+) : BaseMapViewModel(preferences, nodeRepository, packetRepository) {
 
     private val _errorFlow = MutableSharedFlow<String>()
     val errorFlow: SharedFlow<String> = _errorFlow.asSharedFlow()
@@ -195,51 +192,6 @@ constructor(
     private fun isValidTileUrlTemplate(urlTemplate: String): Boolean = urlTemplate.contains("{z}", ignoreCase = true) &&
         urlTemplate.contains("{x}", ignoreCase = true) &&
         urlTemplate.contains("{y}", ignoreCase = true)
-
-    private val onlyFavorites = MutableStateFlow(preferences.getBoolean("only-favorites", false))
-    val nodes: StateFlow<List<Node>> =
-        nodeRepository
-            .getNodes()
-            .onEach { it.filter { !it.isIgnored } }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = emptyList(),
-            )
-    private val showWaypointsOnMap = MutableStateFlow(preferences.getBoolean("show-waypoints-on-map", true))
-    private val showPrecisionCircleOnMap =
-        MutableStateFlow(preferences.getBoolean("show-precision-circle-on-map", true))
-
-    fun setOnlyFavorites(value: Boolean) {
-        onlyFavorites.value = value
-        preferences.edit { putBoolean("only-favorites", onlyFavorites.value) }
-    }
-
-    fun setShowWaypointsOnMap(value: Boolean) {
-        showWaypointsOnMap.value = value
-        preferences.edit { putBoolean("show-waypoints-on-map", value) }
-    }
-
-    fun setShowPrecisionCircleOnMap(value: Boolean) {
-        showPrecisionCircleOnMap.value = value
-        preferences.edit { putBoolean("show-precision-circle-on-map", value) }
-    }
-
-    data class MapFilterState(val onlyFavorites: Boolean, val showWaypoints: Boolean, val showPrecisionCircle: Boolean)
-
-    val mapFilterStateFlow: StateFlow<MapFilterState> =
-        combine(onlyFavorites, showWaypointsOnMap, showPrecisionCircleOnMap) {
-                favoritesOnly,
-                showWaypoints,
-                showPrecisionCircle,
-            ->
-            MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle)
-        }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = MapFilterState(false, true, true),
-            )
 
     private val _mapLayers = MutableStateFlow<List<MapLayerItem>>(emptyList())
     val mapLayers: StateFlow<List<MapLayerItem>> = _mapLayers.asStateFlow()

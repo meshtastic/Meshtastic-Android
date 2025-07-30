@@ -78,7 +78,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
@@ -539,15 +538,6 @@ constructor(
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = emptyList(),
             )
-
-    val waypoints =
-        packetRepository.getWaypoints().mapLatest { list ->
-            list
-                .associateBy { packet -> packet.data.waypoint!!.id }
-                .filterValues {
-                    it.data.waypoint!!.expire == 0 || it.data.waypoint!!.expire > System.currentTimeMillis() / 1000
-                }
-        }
 
     fun generatePacketId(): Int? {
         return try {

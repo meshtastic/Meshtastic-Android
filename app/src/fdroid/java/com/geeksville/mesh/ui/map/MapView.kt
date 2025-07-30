@@ -254,7 +254,7 @@ fun MapView(
     }
 
     val initialCameraView = remember {
-        val nodes = mapViewModel.nodeList.value
+        val nodes = mapViewModel.nodes.value
         val nodesWithPosition = nodes.filter { it.validPosition != null }
         val geoPoints = nodesWithPosition.map { GeoPoint(it.latitude, it.longitude) }
         BoundingBox.fromGeoPoints(geoPoints)
@@ -304,7 +304,7 @@ fun MapView(
     }
 
     val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
-    val waypoints by uiViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
+    val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
 
     val markerIcon = remember { AppCompatResources.getDrawable(context, R.drawable.ic_baseline_location_on_24) }
 
