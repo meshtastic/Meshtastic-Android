@@ -57,14 +57,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.R
+import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_MINUTE_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MAX_PERCENT_VALUE
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
-import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_MINUTE_FORMAT
 import java.text.DateFormat
 
 object CommonCharts {
-    val DATE_TIME_FORMAT: DateFormat =
-        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
+    val DATE_TIME_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
     val TIME_MINUTE_FORMAT: DateFormat = DateFormat.getTimeInstance(DateFormat.SHORT)
     val DATE_TIME_MINUTE_FORMAT: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
     const val MS_PER_SEC = 1000L
@@ -86,13 +85,13 @@ fun ChartHeader(amount: Int) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = "$amount ${stringResource(R.string.logs)}",
             modifier = Modifier.wrapContentWidth(),
             style = TextStyle(fontWeight = FontWeight.Bold),
-            fontSize = MaterialTheme.typography.labelLarge.fontSize
+            fontSize = MaterialTheme.typography.labelLarge.fontSize,
         )
     }
 }
@@ -103,14 +102,10 @@ fun ChartHeader(amount: Int) {
  * @param lineColors A list of 5 [Color]s for the chart lines, 0 being the lowest line on the chart.
  */
 @Composable
-fun HorizontalLinesOverlay(
-    modifier: Modifier,
-    lineColors: List<Color>,
-) {
+fun HorizontalLinesOverlay(modifier: Modifier, lineColors: List<Color>) {
     /* 100 is a good number to divide into quarters */
     val verticalSpacing = MAX_PERCENT_VALUE / LINE_LIMIT
     Canvas(modifier = modifier) {
-
         val lineStart = 0f
         val height = size.height
         val width = size.width
@@ -125,72 +120,51 @@ fun HorizontalLinesOverlay(
                 color = lineColors[i],
                 strokeWidth = 1.dp.toPx(),
                 cap = StrokeCap.Round,
-                pathEffect = PathEffect.dashPathEffect(floatArrayOf(LINE_ON, LINE_OFF), 0f)
+                pathEffect = PathEffect.dashPathEffect(floatArrayOf(LINE_ON, LINE_OFF), 0f),
             )
             lineY += verticalSpacing
         }
     }
 }
 
-/**
- * Draws labels on the Y-axis with respect to the range. Defined by (`maxValue` - `minValue`).
- */
+/** Draws labels on the Y-axis with respect to the range. Defined by (`maxValue` - `minValue`). */
 @Composable
-fun YAxisLabels(
-    modifier: Modifier,
-    labelColor: Color,
-    minValue: Float,
-    maxValue: Float,
-) {
+fun YAxisLabels(modifier: Modifier, labelColor: Color, minValue: Float, maxValue: Float) {
     val range = maxValue - minValue
     val verticalSpacing = range / LINE_LIMIT
     val density = LocalDensity.current
     Canvas(modifier = modifier) {
-
         val height = size.height
 
         /* Y Labels */
-        val textPaint = Paint().apply {
-            color = labelColor.toArgb()
-            textAlign = Paint.Align.LEFT
-            textSize = density.run { 12.dp.toPx() }
-            typeface = setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD))
-            alpha = TEXT_PAINT_ALPHA
-        }
+        val textPaint =
+            Paint().apply {
+                color = labelColor.toArgb()
+                textAlign = Paint.Align.LEFT
+                textSize = density.run { 12.dp.toPx() }
+                typeface = setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD))
+                alpha = TEXT_PAINT_ALPHA
+            }
 
         drawContext.canvas.nativeCanvas.apply {
             var label = minValue
             repeat(LINE_LIMIT + 1) {
                 val ratio = (label - minValue) / range
                 val y = height - (ratio * height)
-                drawText(
-                    "${label.toInt()}",
-                    0f,
-                    y + 4.dp.toPx(),
-                    textPaint
-                )
+                drawText("${label.toInt()}", 0f, y + 4.dp.toPx(), textPaint)
                 label += verticalSpacing
             }
         }
     }
 }
 
-/**
- * Draws the vertical lines to help the user relate the plotted data within a time frame.
- */
+/** Draws the vertical lines to help the user relate the plotted data within a time frame. */
 @Composable
-fun TimeAxisOverlay(
-    modifier: Modifier,
-    oldest: Int,
-    newest: Int,
-    timeInterval: Long
-) {
-
+fun TimeAxisOverlay(modifier: Modifier, oldest: Int, newest: Int, timeInterval: Long) {
     val range = newest - oldest
     val density = LocalDensity.current
     val lineColor = MaterialTheme.colorScheme.onSurface
     Canvas(modifier = modifier) {
-
         val height = size.height
         val width = size.width
 
@@ -200,13 +174,14 @@ fun TimeAxisOverlay(
         current -= timeRemaining
         current += timeInterval
 
-        val textPaint = Paint().apply {
-            color = lineColor.toArgb()
-            textAlign = Paint.Align.LEFT
-            textSize = density.run { 12.dp.toPx() }
-            typeface = setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD))
-            alpha = TEXT_PAINT_ALPHA
-        }
+        val textPaint =
+            Paint().apply {
+                color = lineColor.toArgb()
+                textAlign = Paint.Align.LEFT
+                textSize = density.run { 12.dp.toPx() }
+                typeface = setTypeface(Typeface.create(Typeface.DEFAULT, Typeface.BOLD))
+                alpha = TEXT_PAINT_ALPHA
+            }
 
         /* Vertical Lines with labels */
         drawContext.canvas.nativeCanvas.apply {
@@ -219,39 +194,22 @@ fun TimeAxisOverlay(
                     color = lineColor,
                     strokeWidth = 1.dp.toPx(),
                     cap = StrokeCap.Round,
-                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(LINE_ON, LINE_OFF), 0f)
+                    pathEffect = PathEffect.dashPathEffect(floatArrayOf(LINE_ON, LINE_OFF), 0f),
                 )
 
                 /* Time */
-                drawText(
-                    TIME_FORMAT.format(current * MS_PER_SEC),
-                    x,
-                    0f,
-                    textPaint
-                )
+                drawText(TIME_FORMAT.format(current * MS_PER_SEC), x, 0f, textPaint)
                 /* Date */
-                drawText(
-                    DATE_FORMAT.format(current * MS_PER_SEC),
-                    x,
-                    DATE_Y,
-                    textPaint
-                )
+                drawText(DATE_FORMAT.format(current * MS_PER_SEC), x, DATE_Y, textPaint)
                 current += timeInterval
             }
         }
     }
 }
 
-/**
- * Draws the `oldest` and `newest` times for the respective telemetry data.
- * Expects time in seconds.
- */
+/** Draws the `oldest` and `newest` times for the respective telemetry data. Expects time in seconds. */
 @Composable
-fun TimeLabels(
-    oldest: Int,
-    newest: Int,
-) {
-
+fun TimeLabels(oldest: Int, newest: Int) {
     Row {
         Text(
             text = DATE_TIME_MINUTE_FORMAT.format(oldest * MS_PER_SEC),
@@ -264,7 +222,7 @@ fun TimeLabels(
             text = DATE_TIME_MINUTE_FORMAT.format(newest * MS_PER_SEC),
             modifier = Modifier.wrapContentWidth(),
             style = TextStyle(fontWeight = FontWeight.Bold),
-            fontSize = 12.sp
+            fontSize = 12.sp,
         )
     }
 }
@@ -276,22 +234,11 @@ fun TimeLabels(
  * @param promptInfoDialog Executes when the user presses the info icon.
  */
 @Composable
-fun Legend(
-    legendData: List<LegendData>,
-    displayInfoIcon: Boolean = true,
-    promptInfoDialog: () -> Unit = {}
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
+fun Legend(legendData: List<LegendData>, displayInfoIcon: Boolean = true, promptInfoDialog: () -> Unit = {}) {
+    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Spacer(modifier = Modifier.weight(1f))
         legendData.forEachIndexed { index, data ->
-            LegendLabel(
-                text = stringResource(data.nameRes),
-                color = data.color,
-                isLine = data.isLine
-            )
+            LegendLabel(text = stringResource(data.nameRes), color = data.color, isLine = data.isLine)
 
             if (index != legendData.lastIndex) {
                 Spacer(modifier = Modifier.weight(1f))
@@ -302,7 +249,7 @@ fun Legend(
             Icon(
                 imageVector = Icons.Default.Info,
                 modifier = Modifier.clickable { promptInfoDialog() },
-                contentDescription = stringResource(R.string.info)
+                contentDescription = stringResource(R.string.info),
             )
         }
 
@@ -320,11 +267,7 @@ fun Legend(
 fun LegendInfoDialog(pairedRes: List<Pair<Int, Int>>, onDismiss: () -> Unit) {
     AlertDialog(
         title = {
-            Text(
-                text = stringResource(R.string.info),
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
+            Text(text = stringResource(R.string.info), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
         },
         text = {
             Column {
@@ -332,32 +275,23 @@ fun LegendInfoDialog(pairedRes: List<Pair<Int, Int>>, onDismiss: () -> Unit) {
                     Text(
                         text = stringResource(pair.first),
                         style = TextStyle(fontWeight = FontWeight.Bold),
-                        textDecoration = TextDecoration.Underline
+                        textDecoration = TextDecoration.Underline,
                     )
-                    Text(
-                        text = stringResource(pair.second),
-                        style = TextStyle.Default,
-                    )
+                    Text(text = stringResource(pair.second), style = TextStyle.Default)
 
                     Spacer(modifier = Modifier.height(24.dp))
                 }
             }
         },
         onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(R.string.close))
-            }
-        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.close)) } },
         shape = RoundedCornerShape(16.dp),
     )
 }
 
 @Composable
 private fun LegendLabel(text: String, color: Color, isLine: Boolean = false) {
-    Canvas(
-        modifier = Modifier.size(4.dp)
-    ) {
+    Canvas(modifier = Modifier.size(4.dp)) {
         if (isLine) {
             drawLine(
                 color = color,
@@ -367,9 +301,7 @@ private fun LegendLabel(text: String, color: Color, isLine: Boolean = false) {
                 cap = StrokeCap.Round,
             )
         } else {
-            drawCircle(
-                color = color
-            )
+            drawCircle(color = color)
         }
     }
     Spacer(modifier = Modifier.width(4.dp))
@@ -383,9 +315,10 @@ private fun LegendLabel(text: String, color: Color, isLine: Boolean = false) {
 @Preview
 @Composable
 private fun LegendPreview() {
-    val data = listOf(
-        LegendData(nameRes = R.string.rssi, color = Color.Red),
-        LegendData(nameRes = R.string.snr, color = Color.Green)
-    )
+    val data =
+        listOf(
+            LegendData(nameRes = R.string.rssi, color = Color.Red),
+            LegendData(nameRes = R.string.snr, color = Color.Green),
+        )
     Legend(legendData = data, promptInfoDialog = {})
 }
