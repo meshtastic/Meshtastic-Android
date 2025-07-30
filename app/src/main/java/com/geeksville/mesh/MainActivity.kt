@@ -255,14 +255,6 @@ class MainActivity :
             }
         }
 
-    // TODO: I'd like to get rid of this one.
-    private val createDocumentLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == RESULT_OK) {
-                it.data?.data?.let { file_uri -> model.saveMessagesCSV(file_uri) }
-            }
-        }
-
     private fun onMeshConnectionChanged(newConnection: MeshService.ConnectionState) {
         if (newConnection == MeshService.ConnectionState.CONNECTED) {
             checkNotificationPermissions()
@@ -392,17 +384,6 @@ class MainActivity :
         when (action) {
             MainMenuAction.ABOUT -> {
                 getVersionInfo()
-            }
-
-            // TODO: Remove ideally
-            MainMenuAction.EXPORT_MESSAGES -> {
-                val intent =
-                    Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "application/csv"
-                        putExtra(Intent.EXTRA_TITLE, "Meshtastic_log.csv")
-                    }
-                createDocumentLauncher.launch(intent)
             }
 
             MainMenuAction.EXPORT_RANGETEST -> {
