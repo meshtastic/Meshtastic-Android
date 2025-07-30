@@ -28,6 +28,7 @@ plugins {
     alias(libs.plugins.protobuf)
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.secrets.gradle.plugin)
     alias(libs.plugins.spotless)
 }
 
@@ -120,6 +121,8 @@ android {
             // Enable Firebase Crashlytics for Google Play builds
             apply(plugin = libs.plugins.google.services.get().pluginId)
             apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
+            apply(plugin = libs.plugins.datadog.get().pluginId)
+            apply(plugin = libs.plugins.secrets.gradle.plugin.get().pluginId)
             versionName = "${Configs.VERSION_NAME_BASE} ($versionCode) google"
         }
     }
@@ -161,6 +164,11 @@ kotlin {
             "-Xannotation-default-target=param-property",
         )
     }
+}
+
+secrets {
+    defaultPropertiesFileName = "secrets.defaults.properties"
+    propertiesFileName = "secrets.properties"
 }
 
 // per protobuf-gradle-plugin docs, this is recommended for android
@@ -233,6 +241,7 @@ dependencies {
     // Firebase BOM
     "googleImplementation"(platform(libs.firebase.bom))
     "googleImplementation"(libs.bundles.firebase)
+    "googleImplementation"(libs.bundles.datadog)
 
     // ksp
     ksp(libs.room.compiler)
