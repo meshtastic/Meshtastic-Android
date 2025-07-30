@@ -23,6 +23,8 @@ import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -149,21 +151,15 @@ fun EnvironmentMetricsChart(
 
     TimeLabels(oldest = visibleTimeRange.first, newest = visibleTimeRange.second)
 
-    Spacer(modifier = modifier.height(16.dp))
-
-    val graphColor = MaterialTheme.colorScheme.onSurface
-
-    val (rightMin, rightMax) = graphData.rightMinMax
-
-    Row {
+    Row(modifier = modifier.fillMaxWidth().fillMaxHeight()) {
         BarometricPressureYAxisLabel(
-            modifier = Modifier.weight(weight = Y_AXIS_WEIGHT),
+            modifier = Modifier.weight(Y_AXIS_WEIGHT).fillMaxHeight(),
             shouldPlotBarometricPressure = shouldPlot[Environment.BAROMETRIC_PRESSURE.ordinal],
             minValue = graphData.leftMinMax.first,
             maxValue = graphData.leftMinMax.second,
         )
         ChartContent(
-            modifier = Modifier.weight(weight = CHART_WEIGHT),
+            modifier = Modifier.weight(CHART_WEIGHT).fillMaxHeight(),
             scrollState = scrollState,
             dp = dp,
             oldest = oldest,
@@ -171,15 +167,15 @@ fun EnvironmentMetricsChart(
             selectedTime = selectedTime,
             telemetries = telemetries,
             graphData = graphData,
-            rightMin = rightMin,
-            rightMax = rightMax,
+            rightMin = graphData.rightMinMax.first,
+            rightMax = graphData.rightMinMax.second,
             timeDiff = timeDiff,
         )
         YAxisLabels(
-            modifier = Modifier.weight(weight = Y_AXIS_WEIGHT),
-            graphColor,
-            minValue = rightMin,
-            maxValue = rightMax,
+            modifier = Modifier.weight(Y_AXIS_WEIGHT).fillMaxHeight(),
+            MaterialTheme.colorScheme.onSurface,
+            minValue = graphData.rightMinMax.first,
+            maxValue = graphData.rightMinMax.second,
         )
     }
 
