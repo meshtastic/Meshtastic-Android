@@ -118,8 +118,8 @@ jobs:
           echo $GSERVICES > ./app/google-services.json
           echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
-          echo "datadogApplicationId=${{ secrets.DATADOG_APPLICATION_ID }}" >> ./secrets.properties
-          echo "datadogClientToken=${{ secrets.DATADOG_CLIENT_TOKEN }}" >> ./secrets.properties
+          echo "datadogApplicationId=$DATADOG_APPLICATION_ID" >> ./secrets.properties
+          echo "datadogClientToken=$DATADOG_CLIENT_TOKEN" >> ./secrets.properties
         env:
           GSERVICES: ${{ secrets.GSERVICES }}
           KEYSTORE: ${{ secrets.KEYSTORE }}
