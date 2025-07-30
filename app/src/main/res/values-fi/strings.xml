@@ -566,6 +566,8 @@
     <string name="node_number">Laitteen numero</string>
     <string name="user_id">Käyttäjän ID</string>
     <string name="uptime">Käyttöaika</string>
+    <string name="load_indexed">Lataa %1$d</string>
+    <string name="disk_free_indexed">Vapaa levytila %1$d</string>
     <string name="timestamp">Aikaleima</string>
     <string name="heading">Suunta</string>
     <string name="speed">Nopeus</string>

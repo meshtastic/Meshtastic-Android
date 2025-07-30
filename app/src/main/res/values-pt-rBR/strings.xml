@@ -566,6 +566,8 @@
     <string name="node_number">Número do node</string>
     <string name="user_id">ID do utilizador</string>
     <string name="uptime">Tempo ativo</string>
+    <string name="load_indexed">Carga %1$d</string>
+    <string name="disk_free_indexed">Disco Livre %1$d</string>
     <string name="timestamp">Data e hora</string>
     <string name="heading">Direção</string>
     <string name="speed">Velocidade</string>
@@ -689,7 +691,7 @@
     <string name="stay_connected_anywhere">Fique Conectado em Qualquer Lugar</string>
     <string name="communicate_off_the_grid">Comunique-se off-grid com seus amigos e comunidades sem serviço de celular.</string>
     <string name="create_your_own_networks">Crie Suas Próprias Redes</string>
-    <string name="easily_set_up_private_mesh_networks">Configure facilmente redes de malha privada para uma comunicação segura e fiável em áreas remotas.</string>
+    <string name="easily_set_up_private_mesh_networks">Configure facilmente redes de malha privada para uma comunicação segura e confiável em áreas remotas.</string>
     <string name="track_and_share_locations">Rastreie e Compartilhe Locais</string>
     <string name="share_your_location_in_real_time">Compartilhe sua localização em tempo real e mantenha seu grupo coordenado com recursos integrados de GPS.</string>
     <string name="app_notifications">Notificações do Aplicativo</string>
