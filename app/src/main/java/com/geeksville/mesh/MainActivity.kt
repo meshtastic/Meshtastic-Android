@@ -207,10 +207,10 @@ class MainActivity :
         return resultPendingIntent!!
     }
 
-    private val createDocumentLauncher =
+    private val createRangetestLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == RESULT_OK) {
-                it.data?.data?.let { file_uri -> model.saveMessagesCSV(file_uri) }
+                it.data?.data?.let { file_uri -> model.saveRangetestCSV(file_uri) }
             }
         }
 
@@ -264,14 +264,14 @@ class MainActivity :
                 getVersionInfo()
             }
 
-            MainMenuAction.EXPORT_MESSAGES -> {
+            MainMenuAction.EXPORT_RANGETEST -> {
                 val intent =
                     Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                         addCategory(Intent.CATEGORY_OPENABLE)
                         type = "application/csv"
                         putExtra(Intent.EXTRA_TITLE, "rangetest.csv")
                     }
-                createDocumentLauncher.launch(intent)
+                createRangetestLauncher.launch(intent)
             }
 
             MainMenuAction.THEME -> {

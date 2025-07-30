@@ -879,7 +879,8 @@ constructor(
     }
 
     /** Write the persisted packet data out to a CSV file in the specified location. */
-    fun saveMessagesCSV(uri: Uri) {
+    @Suppress("detekt:CyclomaticComplexMethod", "detekt:LongMethod")
+    fun saveRangetestCSV(uri: Uri) {
         viewModelScope.launch(Dispatchers.Main) {
             // Extract distances to this device from position messages and put (node,SNR,distance)
             // in
@@ -917,9 +918,10 @@ constructor(
                             }
                         }
 
-                        // Filter out of our results any packet that doesn't report SNR.  This
-                        // is primarily ADMIN_APP.
-                        if (proto.rxSnr != 0.0f) {
+                        // Only look at range test messages, with SNR reported.
+                        if (
+                            proto.decoded.portnumValue == Portnums.PortNum.RANGE_TEST_APP_VALUE && proto.rxSnr != 0.0f
+                        ) {
                             val rxDateTime = dateFormat.format(packet.received_date)
                             val rxFrom = proto.from.toUInt()
                             val senderName = nodes[proto.from]?.user?.longName ?: ""
