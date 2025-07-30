@@ -28,6 +28,7 @@ plugins {
     alias(libs.plugins.protobuf)
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.datadog)
     alias(libs.plugins.secrets.gradle.plugin)
     alias(libs.plugins.spotless)
 }
@@ -169,6 +170,13 @@ kotlin {
 secrets {
     defaultPropertiesFileName = "secrets.defaults.properties"
     propertiesFileName = "secrets.properties"
+}
+
+datadog {
+    // TODO: investigate steup segregation for fdroid
+    // compose instrumentation is broken for kotlin 2.2.x - see:
+    // https://github.com/DataDog/dd-sdk-android-gradle-plugin/issues/407
+    //  composeInstrumentation = InstrumentationMode.AUTO
 }
 
 // per protobuf-gradle-plugin docs, this is recommended for android

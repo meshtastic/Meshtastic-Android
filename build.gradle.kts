@@ -37,7 +37,6 @@ plugins {
     alias(libs.plugins.kotlin.jvm) apply false
     alias(libs.plugins.devtools.ksp) apply false
     alias(libs.plugins.compose) apply false
-    alias(libs.plugins.datadog) apply false
 }
 
 allprojects {

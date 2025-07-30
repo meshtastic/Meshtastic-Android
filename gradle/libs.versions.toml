@@ -204,7 +204,7 @@ coil = ["coil", "coil-network-core", "coil-network-okhttp", "coil-svg"]
 [plugins]
 android-application = { id = "com.android.application" }
 compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
-datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version.ref = "dd-sdk-android-gradle-plugin" }
+datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin"}
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "devtools-ksp" }
 hilt = { id = "com.google.dagger.hilt.android" }
