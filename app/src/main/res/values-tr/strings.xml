@@ -115,7 +115,7 @@
     <string name="okay">Tamam</string>
     <string name="must_set_region">Bölge seçmelisin!</string>
     <string name="cant_change_no_radio">Radyo bağlı olmadığından, kanal değiştirilemedi. Lütfen tekrar deneyin.</string>
-    <string name="save_messages">Dışa aktar: rangetest.csv</string>
+    <string name="save_rangetest">Dışa aktar: rangetest.csv</string>
     <string name="reset">Sıfırla</string>
     <string name="scan">Tara</string>
     <string name="are_you_sure_change_default">Varsayılan kanala geçmek istediğinizden emin misiniz?</string>

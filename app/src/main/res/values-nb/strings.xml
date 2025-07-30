@@ -110,7 +110,7 @@
     <string name="okay">Ok</string>
     <string name="must_set_region">Du må angi en region!</string>
     <string name="cant_change_no_radio">Kunne ikke endre kanalen, fordi radio ikke er tilkoblet enda. Vennligst prøv på nytt.</string>
-    <string name="save_messages">Eksporter rekkeviddetest.csv</string>
+    <string name="save_rangetest">Eksporter rekkeviddetest.csv</string>
     <string name="reset">Nullstill</string>
     <string name="scan">Søk</string>
     <string name="are_you_sure_change_default">Er du sikker på at du vil endre til standardkanalen?</string>

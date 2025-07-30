@@ -116,7 +116,7 @@
     <string name="okay">Okay</string>
     <string name="must_set_region">Você deve informar uma região!</string>
     <string name="cant_change_no_radio">Não foi possível mudar de canal, rádio desligado. Tente novamente.</string>
-    <string name="save_messages">Exportar rangetest.csv</string>
+    <string name="save_rangetest">Exportar rangetest.csv</string>
     <string name="reset">Redefinir</string>
     <string name="scan">Digitalizar</string>
     <string name="are_you_sure_change_default">Tem certeza que quer mudar para o canal padrão?</string>

@@ -66,7 +66,7 @@
     <string name="okay">אישור</string>
     <string name="must_set_region">חובה לבחור אזור!</string>
     <string name="cant_change_no_radio">לא ניתן לשנות ערוץ כי אין מכשיר מחובר. בבקשה נסה שנית.</string>
-    <string name="save_messages">ייצא rangetest.csv</string>
+    <string name="save_rangetest">ייצא rangetest.csv</string>
     <string name="reset">איפוס</string>
     <string name="scan">סריקה</string>
     <string name="are_you_sure_change_default">לשנות לערוץ ברירת המחדל?</string>

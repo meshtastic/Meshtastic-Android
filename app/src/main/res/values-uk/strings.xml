@@ -77,7 +77,7 @@
     <string name="okay">Гаразд</string>
     <string name="must_set_region">Ви повинні встановити регіон!</string>
     <string name="cant_change_no_radio">Неможливо змінити канал, тому що радіо поки що не підключені. Будь ласка, спробуйте ще раз.</string>
-    <string name="save_messages">Експорт rangetest.csv</string>
+    <string name="save_rangetest">Експортувати rangetest.csv</string>
     <string name="reset">Скинути</string>
     <string name="scan">Сканувати</string>
     <string name="are_you_sure_change_default">Ви впевнені, що хочете змінити канал за умовчанням?</string>

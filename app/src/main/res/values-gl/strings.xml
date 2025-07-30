@@ -69,7 +69,7 @@
     <string name="okay">OK</string>
     <string name="must_set_region">Tes que seleccionar rexión!</string>
     <string name="cant_change_no_radio">Non se puido cambiar de canle, porque a radio aínda non está conectada. Por favor inténteo de novo.</string>
-    <string name="save_messages">Exportar rangetest.csv</string>
+    <string name="save_rangetest">Exportar rangetest.csv</string>
     <string name="reset">Restablecer</string>
     <string name="scan">Escanear</string>
     <string name="are_you_sure_change_default">Está seguro de que quere cambiar á canle predeterminada?</string>

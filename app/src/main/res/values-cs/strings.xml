@@ -123,7 +123,7 @@
     <string name="okay">OK</string>
     <string name="must_set_region">Musíte specifikovat region!</string>
     <string name="cant_change_no_radio">Kanál nelze změnit, protože rádio ještě není připojeno. Zkuste to znovu.</string>
-    <string name="save_messages">Exportovat rangetest.csv</string>
+    <string name="save_rangetest">Exportovat rangetest.csv</string>
     <string name="reset">Reset</string>
     <string name="scan">Skenovat</string>
     <string name="are_you_sure_change_default">Opravdu chcete změnit na výchozí kanál?</string>
