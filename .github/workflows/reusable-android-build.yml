@@ -8,6 +8,15 @@ on:
         required: false
         type: boolean
         default: true
+    secrets:
+      GRADLE_ENCRYPTION_KEY:
+        required: false
+      DATADOG_APPLICATION_ID:
+        required: false
+      DATADOG_CLIENT_TOKEN:
+        required: false
+      TEST_SECRET:
+        required: false
 
 jobs:
   build_and_detekt:
