@@ -47,3 +47,17 @@ jobs:
           }
           exit_on_result "build_and_detekt" "${{ needs.build_and_detekt.result }}"
           exit_on_result "androidTest" "${{ needs.androidTest.result }}"
+
+  check-label:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check for PR labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const labels = context.payload.pull_request.labels.map(label => label.name);
+            const requiredLabels = ['bugfix', 'enhancement', 'automation', 'dependencies', 'repo', 'release'];
+            const hasRequiredLabel = labels.some(label => requiredLabels.includes(label));
+            if (!hasRequiredLabel) {
+              core.setFailed(`PR must have at least one of the following labels before it can be merged: ${requiredLabels.join(', ')}.`);
+            }
