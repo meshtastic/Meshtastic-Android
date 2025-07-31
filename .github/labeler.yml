@@ -20,6 +20,6 @@ bug:
   - head-branch: ['/fix/i']
 
 # our fallback - bug except repo, feat, or automated pipelines
-bug:
+bug_fallthrough:
   - head-branch: ['^((?!feat).)*$', '^((?!repo).)*$', '^((?!renovate).)*$', '^((?!scheduled).)*$']
 
