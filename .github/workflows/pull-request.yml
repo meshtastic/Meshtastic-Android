@@ -10,6 +10,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  test_secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Test Secrets
+        run: echo "${{ secrets.TEST_SECRET }}"
+
   build_and_detekt:
     if: github.repository == 'meshtastic/Meshtastic-Android' && github.head_ref != 'scheduled-updates'
     uses: ./.github/workflows/reusable-android-build.yml
