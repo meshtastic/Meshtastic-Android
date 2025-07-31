@@ -50,17 +50,18 @@ interface NodeInfoDao {
                 if (nodeWithSamePK != null && nodeWithSamePK.num != node.num) {
                     // This is the impersonation attempt we want to block.
                     @Suppress("MaxLineLength")
-                    warn("NodeInfoDao: Blocking new node #${node.num} because its public key is already used by #${nodeWithSamePK.num}.")
+                    warn(
+                        "NodeInfoDao: Blocking new node #${node.num} because its public key is already used by #${nodeWithSamePK.num}.",
+                    )
                     return null // ABORT
                 }
             }
             // If we're here, the new node is safe to add.
-             node
+            node
         } else {
             // This is an update to an existing node.
-            val keyMatch =
-                existingNode.user.publicKey == node.user.publicKey || existingNode.user.publicKey.isEmpty
-             if (keyMatch) {
+            val keyMatch = existingNode.user.publicKey == node.user.publicKey || existingNode.user.publicKey.isEmpty
+            if (keyMatch) {
                 // Keys match, trust the incoming node completely.
                 // This allows for legit nodeId changes etc.
                 node
@@ -69,13 +70,15 @@ interface NodeInfoDao {
                 // Log it, and create a NEW entity based on the EXISTING trusted one,
                 // only updating dynamic data and setting the public key to EMPTY to signal a conflict.
                 @Suppress("MaxLineLength")
-                warn("NodeInfoDao: Received packet for #${node.num} with non-matching public key. Identity data ignored, key set to EMPTY.")
+                warn(
+                    "NodeInfoDao: Received packet for #${node.num} with non-matching public key. Identity data ignored, key set to EMPTY.",
+                )
                 existingNode.copy(
                     lastHeard = node.lastHeard,
                     snr = node.snr,
                     position = node.position,
                     user = existingNode.user.toBuilder().setPublicKey(ByteString.EMPTY).build(),
-                    publicKey = ByteString.EMPTY
+                    publicKey = ByteString.EMPTY,
                 )
             }
         }
@@ -98,10 +101,16 @@ interface NodeInfoDao {
             ELSE 1
         END,
         last_heard DESC
-        """
+        """,
     )
     @Transaction
-    fun nodeDBbyNum(): Flow<Map<@MapColumn(columnName = "num") Int, NodeWithRelations>>
+    fun nodeDBbyNum(): Flow<
+        Map<
+            @MapColumn(columnName = "num")
+            Int,
+            NodeWithRelations,
+            >,
+        >
 
     @Query(
         """
@@ -125,7 +134,7 @@ interface NodeInfoDao {
     END,
     CASE
         WHEN :sort = 'last_heard' THEN last_heard * -1
-        WHEN :sort = 'alpha' THEN UPPER(long_name) 
+        WHEN :sort = 'alpha' THEN UPPER(long_name)
         WHEN :sort = 'distance' THEN
             CASE
                 WHEN latitude IS NULL OR longitude IS NULL OR
@@ -147,7 +156,7 @@ interface NodeInfoDao {
         ELSE 0
     END ASC,
     last_heard DESC
-    """
+    """,
     )
     @Transaction
     fun getNodes(
@@ -178,8 +187,16 @@ interface NodeInfoDao {
     @Query("DELETE FROM nodes WHERE num=:num")
     fun deleteNode(num: Int)
 
-    @Upsert
-    fun upsert(meta: MetadataEntity)
+    @Query("DELETE FROM nodes WHERE num IN (:nodeNums)")
+    fun deleteNodes(nodeNums: List<Int>)
+
+    @Query("SELECT * FROM nodes WHERE last_heard < :lastHeard")
+    fun getNodesOlderThan(lastHeard: Int): List<NodeEntity>
+
+    @Query("SELECT * FROM nodes WHERE short_name IS NULL")
+    fun getUnknownNodes(): List<NodeEntity>
+
+    @Upsert fun upsert(meta: MetadataEntity)
 
     @Query("DELETE FROM metadata WHERE num=:num")
     fun deleteMetadata(num: Int)
@@ -191,8 +208,7 @@ interface NodeInfoDao {
     @Query("SELECT * FROM nodes WHERE public_key = :publicKey LIMIT 1")
     fun findNodeByPublicKey(publicKey: ByteString?): NodeEntity?
 
-    @Upsert
-    fun doUpsert(node: NodeEntity)
+    @Upsert fun doUpsert(node: NodeEntity)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun doPutAll(nodes: List<NodeEntity>)

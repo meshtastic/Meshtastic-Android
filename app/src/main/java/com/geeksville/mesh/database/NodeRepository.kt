@@ -44,55 +44,59 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class NodeRepository @Inject constructor(
+@Suppress("TooManyFunctions")
+class NodeRepository
+@Inject
+constructor(
     processLifecycle: Lifecycle,
     private val nodeInfoDao: NodeInfoDao,
     private val dispatchers: CoroutineDispatchers,
 ) {
     // hardware info about our local device (can be null)
-    val myNodeInfo: StateFlow<MyNodeEntity?> = nodeInfoDao.getMyNodeInfo()
-        .flowOn(dispatchers.io)
-        .stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, null)
+    val myNodeInfo: StateFlow<MyNodeEntity?> =
+        nodeInfoDao
+            .getMyNodeInfo()
+            .flowOn(dispatchers.io)
+            .stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, null)
 
     // our node info
     private val _ourNodeInfo = MutableStateFlow<Node?>(null)
-    val ourNodeInfo: StateFlow<Node?> get() = _ourNodeInfo
+    val ourNodeInfo: StateFlow<Node?>
+        get() = _ourNodeInfo
 
     // The unique userId of our node
     private val _myId = MutableStateFlow<String?>(null)
-    val myId: StateFlow<String?> get() = _myId
+    val myId: StateFlow<String?>
+        get() = _myId
 
-    fun getNodeDBbyNum() = nodeInfoDao.nodeDBbyNum()
-        .map { map -> map.mapValues { (_, it) -> it.toEntity() } }
+    fun getNodeDBbyNum() = nodeInfoDao.nodeDBbyNum().map { map -> map.mapValues { (_, it) -> it.toEntity() } }
 
     // A map from nodeNum to Node
-    val nodeDBbyNum: StateFlow<Map<Int, Node>> = nodeInfoDao.nodeDBbyNum()
-        .mapLatest { map -> map.mapValues { (_, it) -> it.toModel() } }
-        .onEach {
-            val ourNodeInfo = it.values.firstOrNull()
-            _ourNodeInfo.value = ourNodeInfo
-            _myId.value = ourNodeInfo?.user?.id
-        }
-        .flowOn(dispatchers.io)
-        .conflate()
-        .stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, emptyMap())
+    val nodeDBbyNum: StateFlow<Map<Int, Node>> =
+        nodeInfoDao
+            .nodeDBbyNum()
+            .mapLatest { map -> map.mapValues { (_, it) -> it.toModel() } }
+            .onEach {
+                val ourNodeInfo = it.values.firstOrNull()
+                _ourNodeInfo.value = ourNodeInfo
+                _myId.value = ourNodeInfo?.user?.id
+            }
+            .flowOn(dispatchers.io)
+            .conflate()
+            .stateIn(processLifecycle.coroutineScope, SharingStarted.Eagerly, emptyMap())
 
     fun getNode(userId: String): Node = nodeDBbyNum.value.values.find { it.user.id == userId }
-        ?: Node(
-            num = DataPacket.idToDefaultNodeNum(userId) ?: 0,
-            user = getUser(userId),
-        )
+        ?: Node(num = DataPacket.idToDefaultNodeNum(userId) ?: 0, user = getUser(userId))
 
     fun getUser(nodeNum: Int): MeshProtos.User = getUser(DataPacket.nodeNumToDefaultId(nodeNum))
 
-    fun getUser(userId: String): MeshProtos.User =
-        nodeDBbyNum.value.values.find { it.user.id == userId }?.user
-            ?: MeshProtos.User.newBuilder()
-                .setId(userId)
-                .setLongName("Meshtastic ${userId.takeLast(n = 4)}")
-                .setShortName(userId.takeLast(n = 4))
-                .setHwModel(MeshProtos.HardwareModel.UNSET)
-                .build()
+    fun getUser(userId: String): MeshProtos.User = nodeDBbyNum.value.values.find { it.user.id == userId }?.user
+        ?: MeshProtos.User.newBuilder()
+            .setId(userId)
+            .setLongName("Meshtastic ${userId.takeLast(n = 4)}")
+            .setShortName(userId.takeLast(n = 4))
+            .setHwModel(MeshProtos.HardwareModel.UNSET)
+            .build()
 
     fun getNodes(
         sort: NodeSortOption = NodeSortOption.LAST_HEARD,
@@ -100,21 +104,19 @@ class NodeRepository @Inject constructor(
         includeUnknown: Boolean = true,
         onlyOnline: Boolean = false,
         onlyDirect: Boolean = false,
-    ) = nodeInfoDao.getNodes(
-        sort = sort.sqlValue,
-        filter = filter,
-        includeUnknown = includeUnknown,
-        hopsAwayMax = if (onlyDirect) 0 else -1,
-        lastHeardMin = if (onlyOnline) onlineTimeThreshold() else -1,
-    ).mapLatest { list ->
-        list.map {
-            it.toModel()
-        }
-    }.flowOn(dispatchers.io).conflate()
+    ) = nodeInfoDao
+        .getNodes(
+            sort = sort.sqlValue,
+            filter = filter,
+            includeUnknown = includeUnknown,
+            hopsAwayMax = if (onlyDirect) 0 else -1,
+            lastHeardMin = if (onlyOnline) onlineTimeThreshold() else -1,
+        )
+        .mapLatest { list -> list.map { it.toModel() } }
+        .flowOn(dispatchers.io)
+        .conflate()
 
-    suspend fun upsert(node: NodeEntity) = withContext(dispatchers.io) {
-        nodeInfoDao.upsert(node)
-    }
+    suspend fun upsert(node: NodeEntity) = withContext(dispatchers.io) { nodeInfoDao.upsert(node) }
 
     suspend fun installNodeDB(mi: MyNodeEntity, nodes: List<NodeEntity>) = withContext(dispatchers.io) {
         nodeInfoDao.clearMyNodeInfo()
@@ -122,24 +124,32 @@ class NodeRepository @Inject constructor(
         nodeInfoDao.putAll(nodes)
     }
 
-    suspend fun clearNodeDB() = withContext(dispatchers.io) {
-        nodeInfoDao.clearNodeInfo()
-    }
+    suspend fun clearNodeDB() = withContext(dispatchers.io) { nodeInfoDao.clearNodeInfo() }
 
     suspend fun deleteNode(num: Int) = withContext(dispatchers.io) {
         nodeInfoDao.deleteNode(num)
         nodeInfoDao.deleteMetadata(num)
     }
 
-    suspend fun insertMetadata(metadata: MetadataEntity) = withContext(dispatchers.io) {
-        nodeInfoDao.upsert(metadata)
+    suspend fun deleteNodes(nodeNums: List<Int>) = withContext(dispatchers.io) {
+        nodeInfoDao.deleteNodes(nodeNums)
+        nodeNums.forEach { nodeInfoDao.deleteMetadata(it) }
     }
 
-    val onlineNodeCount: Flow<Int> = nodeInfoDao.nodeDBbyNum().mapLatest { map ->
-        map.values.count { it.node.lastHeard > onlineTimeThreshold() }
-    }.flowOn(dispatchers.io).conflate()
+    suspend fun getNodesOlderThan(lastHeard: Int): List<NodeEntity> =
+        withContext(dispatchers.io) { nodeInfoDao.getNodesOlderThan(lastHeard) }
 
-    val totalNodeCount: Flow<Int> = nodeInfoDao.nodeDBbyNum().mapLatest { map ->
-        map.values.count()
-    }.flowOn(dispatchers.io).conflate()
+    suspend fun getUnknownNodes(): List<NodeEntity> = withContext(dispatchers.io) { nodeInfoDao.getUnknownNodes() }
+
+    suspend fun insertMetadata(metadata: MetadataEntity) = withContext(dispatchers.io) { nodeInfoDao.upsert(metadata) }
+
+    val onlineNodeCount: Flow<Int> =
+        nodeInfoDao
+            .nodeDBbyNum()
+            .mapLatest { map -> map.values.count { it.node.lastHeard > onlineTimeThreshold() } }
+            .flowOn(dispatchers.io)
+            .conflate()
+
+    val totalNodeCount: Flow<Int> =
+        nodeInfoDao.nodeDBbyNum().mapLatest { map -> map.values.count() }.flowOn(dispatchers.io).conflate()
 }

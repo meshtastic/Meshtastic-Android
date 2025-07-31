@@ -1,0 +1,128 @@
+/*
+ * Copyright (c) 2025 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.geeksville.mesh.ui.radioconfig
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.geeksville.mesh.database.NodeRepository
+import com.geeksville.mesh.database.entity.NodeEntity
+import com.geeksville.mesh.repository.datastore.RadioConfigRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import javax.inject.Inject
+import kotlin.time.Duration.Companion.days
+import kotlin.time.Duration.Companion.milliseconds
+
+/**
+ * ViewModel for [CleanNodeDatabaseScreen]. Manages the state and logic for cleaning the node database based on
+ * specified criteria.
+ */
+@HiltViewModel
+class CleanNodeDatabaseViewModel
+@Inject
+constructor(
+    private val nodeRepository: NodeRepository,
+    private val radioConfigRepository: RadioConfigRepository,
+) : ViewModel() {
+
+    private val _olderThanDaysEnabled = MutableStateFlow(true)
+    val olderThanDaysEnabled = _olderThanDaysEnabled.asStateFlow()
+
+    private val _olderThanDays = MutableStateFlow(30f)
+    val olderThanDays = _olderThanDays.asStateFlow()
+
+    private val _onlyUnknownNodes = MutableStateFlow(false)
+    val onlyUnknownNodes = _onlyUnknownNodes.asStateFlow()
+
+    private val _nodesToDelete = MutableStateFlow<List<NodeEntity>>(emptyList())
+    val nodesToDelete = _nodesToDelete.asStateFlow()
+
+    fun onOlderThanDaysEnabledChanged(value: Boolean) {
+        _olderThanDaysEnabled.value = value
+    }
+
+    fun onOlderThanDaysChanged(value: Float) {
+        _olderThanDays.value = value
+    }
+
+    fun onOnlyUnknownNodesChanged(value: Boolean) {
+        _onlyUnknownNodes.value = value
+    }
+
+    /**
+     * Updates the list of nodes to be deleted based on the current filter criteria. The logic is as follows:
+     * - If both "older than X days" and "only unknown nodes" are enabled, nodes that are BOTH unknown AND older than X
+     *   days are selected.
+     * - If only "older than X days" is enabled, all nodes older than X days are selected.
+     * - If only "only unknown nodes" is enabled, all unknown nodes are selected.
+     * - If neither is enabled, no nodes are selected. Ignored nodes are always excluded from deletion.
+     */
+    fun getNodesToDelete() {
+        viewModelScope.launch {
+            val olderThanEnabled = _olderThanDaysEnabled.value
+            val onlyUnknownEnabled = _onlyUnknownNodes.value
+
+            val resultNodes =
+                when {
+                    olderThanEnabled && onlyUnknownEnabled -> {
+                        val olderThanTimestamp =
+                            (System.currentTimeMillis().milliseconds.inWholeSeconds) -
+                                _olderThanDays.value.toInt().days.inWholeSeconds
+                        val olderNodes = nodeRepository.getNodesOlderThan(olderThanTimestamp.toInt())
+                        val unknownNodes = nodeRepository.getUnknownNodes()
+                        olderNodes.filter { unknownNodes.any { unknownNode -> it.num == unknownNode.num } }
+                    }
+                    olderThanEnabled -> {
+                        val olderThanTimestamp =
+                            (System.currentTimeMillis().milliseconds.inWholeSeconds) -
+                                _olderThanDays.value.toInt().days.inWholeSeconds
+                        nodeRepository.getNodesOlderThan(olderThanTimestamp.toInt())
+                    }
+                    onlyUnknownEnabled -> {
+                        nodeRepository.getUnknownNodes()
+                    }
+                    else -> emptyList()
+                }
+            _nodesToDelete.value = resultNodes.filter { !it.isIgnored }
+        }
+    }
+
+    /**
+     * Deletes the nodes currently queued in [_nodesToDelete] from the database and instructs the mesh service to remove
+     * them.
+     */
+    fun cleanNodes() {
+        viewModelScope.launch {
+            val nodeNums = _nodesToDelete.value.map { it.num }
+            if (nodeNums.isNotEmpty()) {
+                nodeRepository.deleteNodes(nodeNums)
+
+                val service = radioConfigRepository.meshService
+                if (service != null) {
+                    for (nodeNum in nodeNums) {
+                        service.removeByNodenum(service.packetId, nodeNum)
+                    }
+                }
+            }
+            // Clear the list after deletion or if it was empty
+            _nodesToDelete.value = emptyList()
+        }
+    }
+}

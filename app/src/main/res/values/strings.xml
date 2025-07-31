@@ -666,6 +666,14 @@
     <string name="uv_lux">UV Lux</string>
     <string name="unknown">Unknown</string>
 
+    <string name="clean_node_database_title">Clean Node Database</string>
+    <string name="clean_nodes_older_than">Clean up nodes last seen older than %1$d days</string>
+    <string name="clean_unknown_nodes">Clean up only unknown nodes</string>
+    <string name="clean_low_interaction_nodes">Clean up nodes with low/no interaction</string>
+    <string name="clean_ignored_nodes">Clean up ignored nodes</string>
+    <string name="clean_now">Clean Now</string>
+    <string name="clean_node_database_confirmation">This will remove %1$d nodes from your database. This action cannot be undone.</string>
+
     <string name="security_icon_help_green_lock">A green lock means the channel is securely encrypted with either a 128 or 256 bit AES key.</string>
 
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
@@ -751,4 +759,6 @@
     <string name="notification_permissions_description">Meshtastic uses notifications to keep you updated on new messages and other important events. You can update your notification permissions at any time from settings.</string>
     <string name="next">Next</string>
     <string name="grant_permissions_and_scan">Grant Permissions and Scan</string>
+    <string name="nodes_queued_for_deletion">%d nodes queued for deletion:</string>
+    <string name="clean_node_database_description">Caution: This removes nodes from in-app and on-device databases.\nSelections are additive.</string>
 </resources>
