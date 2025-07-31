@@ -100,7 +100,7 @@ constructor(
                     }
                     else -> emptyList()
                 }
-            _nodesToDelete.value = resultNodes.filter { !it.isIgnored }
+            _nodesToDelete.value = resultNodes.filter { !it.isIgnored || !it.isFavorite }
         }
     }
 
