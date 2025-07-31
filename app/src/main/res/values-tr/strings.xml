@@ -81,6 +81,7 @@
     <string name="analytics_okay">Anonim kullanim istatistikleri ve hata raporları.</string>
     <string name="accept">Kabul et</string>
     <string name="cancel">İptal</string>
+    <string name="clear_changes">Değişiklikleri Temizle</string>
     <string name="new_channel_rcvd">Yeni Kanal Adresi(URL) alındı</string>
     <string name="permission_missing">Meshtastic\'in konum iznine ihtiyacı var ve Bluetooth ile yeni cihazlar bulmak için konumun açık olması gerekiyor. Daha sonra isterseniz kapatabilirsiniz.</string>
     <string name="report_bug">Hata Bildir</string>
@@ -107,6 +108,13 @@
     <string name="about">Hakkında</string>
     <string name="channel_invalid">Bu Kanal URL\' si geçersiz ve kullanılamaz</string>
     <string name="debug_panel">Hata Ayıklama Paneli</string>
+    <string name="debug_filters">Filtreler</string>
+    <string name="debug_active_filters">Aktif Filtreler</string>
+    <string name="debug_default_search">Loglarda ara…</string>
+    <string name="debug_search_next">Sonraki eşleşme</string>
+    <string name="debug_search_prev">Önceki eşleşme</string>
+    <string name="debug_search_clear">Aramayı sil</string>
+    <string name="debug_filter_add">Filtre ekle</string>
     <string name="clear">Temizle</string>
     <string name="message_delivery_status">Mesaj teslim durumu</string>
     <string name="meshtastic_alerts_notifications">Uyarı bildirimleri</string>
@@ -392,6 +400,7 @@
     <string name="use_i2s_as_buzzer">I2S\'yi zırnı olarak kullan</string>
     <string name="lora_config">LoRa Ayarı</string>
     <string name="use_modem_preset">Modem ön ayarını kullan</string>
+    <string name="modem_preset">Modem Ön Ayarı</string>
     <string name="bandwidth">Bant genişliği</string>
     <string name="spread_factor">Yayılma faktörü</string>
     <string name="coding_rate">Kodlama oranı</string>
@@ -500,6 +509,7 @@
     <string name="environment_metrics_use_fahrenheit">Çevre metrikleri Fahrenheit kullan</string>
     <string name="air_quality_metrics_module_enabled">Hava kalitesi metrikleri modülü etkin</string>
     <string name="air_quality_metrics_update_interval_seconds">Hava kalitesi metrikleri güncelleme aralığı (saniye)</string>
+    <string name="air_quality_icon">Hava kalitesi ikonu</string>
     <string name="power_metrics_module_enabled">Güç metrikleri modülü etkin</string>
     <string name="power_metrics_update_interval_seconds">Güç metrikleri güncelleme aralığı (saniye)</string>
     <string name="power_metrics_on_screen_enabled">Güç metrikleri ekran üzerinde etkin</string>
@@ -563,14 +573,33 @@
     <string name="load">Yükle</string>
     <string name="user_string">Kullanıcı Karakter Dizisi</string>
     <string name="map">Harita</string>
+    <string name="i_agree">Katılıyorum.</string>
+    <string name="time">Zaman</string>
+    <string name="date">Tarih</string>
+    <string name="map_filter">Harita Filtresi\n</string>
+    <string name="only_favorites">Sadece Favoriler</string>
+    <string name="scanning">Taranıyor</string>
+    <string name="security_icon_description">Güvenlik Durumu</string>
+    <string name="security_icon_secure">Güvenlik</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
+    <string name="security_icon_help_dismiss">Vazgeç</string>
+    <string name="confirm_delete_node">Bu node silinsin mi?</string>
     <string name="message_input_label">Mesaj</string>
+    <string name="type_a_message">Mesaj yaz</string>
+    <string name="download">İndir</string>
+    <string name="distance_measurements">Uzaklık Ölçüsü</string>
+    <string name="distance_filters">Mesafe Filtresi</string>
+    <string name="mesh_map_location">Mesh Harita Konumu</string>
+    <string name="mesh_map_location_description">Telefonunuz için mesh haritasında mavi konum noktasını etkinleştirir.</string>
+    <string name="configure_location_permissions">Konum İzinlerini Yapılandırın</string>
     <string name="skip">Atla</string>
     <string name="settings">ayarlar</string>
     <string name="critical_alerts">Kritik Uyarılar</string>
     <string name="configure_critical_alerts">Kritik Uyarı Yapılandır</string>
+    <string name="notification_permissions_description">Meshtastic, yeni mesajlar ve diğer önemli etkinlikler hakkında sizi bilgilendirmek için bildirimleri kullanır. Bildirim izinlerinizi istediğiniz zaman ayarlardan güncelleyebilirsiniz.</string>
     <string name="next">Sonraki</string>
+    <string name="grant_permissions_and_scan">İzinleri Verin ve Tarayın</string>
 </resources>
