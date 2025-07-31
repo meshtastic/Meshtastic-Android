@@ -1,0 +1,25 @@
+
+# - [ ] need to look at branch / title.     waiting on https://github.com/actions/labeler/pull/866
+# - [x] and an else. 
+
+
+# Add 'enhancement' label to any PR where the head branch name starts with `feat` or has a `feat` section in the name
+enhancement:
+ - head-branch: ['/feat/i']
+
+ # Add 'repo' label to any PR where the head branch name starts with `repo` or has a `repo` section in the name
+ # or files in the .github dir
+repo:
+- any:
+  - head-branch: ['/repo/i']
+  - changed-files:
+    - any-glob-to-any-file: '.github'
+
+ # Add 'bug' label to any PR where the head branch name starts with `fix` or has a `fix` section in the name
+bug:
+  - head-branch: ['/fix/i']
+
+# our fallback - bug except repo, feat, or automated pipelines
+bug:
+  - head-branch: ['^((?!feat).)*$', '^((?!repo).)*$', '^((?!renovate).)*$', '^((?!scheduled).)*$']
+
