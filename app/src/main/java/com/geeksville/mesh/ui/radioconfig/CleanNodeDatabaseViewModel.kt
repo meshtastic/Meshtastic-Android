@@ -34,7 +34,7 @@ private const val MIN_DAYS_THRESHOLD = 7f
 
 /**
  * ViewModel for [CleanNodeDatabaseScreen]. Manages the state and logic for cleaning the node database based on
- * specified criteria.
+ * specified criteria. The "older than X days" filter is always active.
  */
 @HiltViewModel
 class CleanNodeDatabaseViewModel
@@ -43,10 +43,6 @@ constructor(
     private val nodeRepository: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
 ) : ViewModel() {
-
-    private val _olderThanDaysEnabled = MutableStateFlow(true)
-    val olderThanDaysEnabled = _olderThanDaysEnabled.asStateFlow()
-
     private val _olderThanDays = MutableStateFlow(30f)
     val olderThanDays = _olderThanDays.asStateFlow()
 
@@ -55,10 +51,6 @@ constructor(
 
     private val _nodesToDelete = MutableStateFlow<List<NodeEntity>>(emptyList())
     val nodesToDelete = _nodesToDelete.asStateFlow()
-
-    fun onOlderThanDaysEnabledChanged(value: Boolean) {
-        _olderThanDaysEnabled.value = value
-    }
 
     fun onOlderThanDaysChanged(value: Float) {
         _olderThanDays.value = value
@@ -73,39 +65,28 @@ constructor(
 
     /**
      * Updates the list of nodes to be deleted based on the current filter criteria. The logic is as follows:
-     * - If both "older than X days" and "only unknown nodes" are enabled, nodes that are BOTH unknown AND older than X
-     *   days are selected.
-     * - If only "older than X days" is enabled, all nodes older than X days are selected.
-     * - If only "only unknown nodes" is enabled, all unknown nodes are selected.
-     * - If neither is enabled, no nodes are selected.
+     * - The "older than X days" filter (controlled by the slider) is always active.
+     * - If "only unknown nodes" is also enabled, nodes that are BOTH unknown AND older than X days are selected.
+     * - If "only unknown nodes" is not enabled, all nodes older than X days are selected.
      * - Nodes with an associated public key (PKI) heard from within the last 7 days are always excluded from deletion.
      * - Nodes marked as ignored or favorite are always excluded from deletion.
      */
     fun getNodesToDelete() {
         viewModelScope.launch {
-            val olderThanEnabled = _olderThanDaysEnabled.value
             val onlyUnknownEnabled = _onlyUnknownNodes.value
             val currentTimeSeconds = System.currentTimeMillis().milliseconds.inWholeSeconds
             val sevenDaysAgoSeconds = currentTimeSeconds - 7.days.inWholeSeconds
+            val olderThanTimestamp = currentTimeSeconds - _olderThanDays.value.toInt().days.inWholeSeconds
 
             val initialNodesToConsider =
-                when {
-                    olderThanEnabled && onlyUnknownEnabled -> {
-                        val olderThanTimestamp = currentTimeSeconds - _olderThanDays.value.toInt().days.inWholeSeconds
-                        val olderNodes = nodeRepository.getNodesOlderThan(olderThanTimestamp.toInt())
-                        val unknownNodes = nodeRepository.getUnknownNodes()
-                        olderNodes.filter { itNode ->
-                            unknownNodes.any { unknownNode -> itNode.num == unknownNode.num }
-                        }
-                    }
-                    olderThanEnabled -> {
-                        val olderThanTimestamp = currentTimeSeconds - _olderThanDays.value.toInt().days.inWholeSeconds
-                        nodeRepository.getNodesOlderThan(olderThanTimestamp.toInt())
-                    }
-                    onlyUnknownEnabled -> {
-                        nodeRepository.getUnknownNodes()
-                    }
-                    else -> emptyList()
+                if (onlyUnknownEnabled) {
+                    // Both "older than X days" and "only unknown nodes" filters apply
+                    val olderNodes = nodeRepository.getNodesOlderThan(olderThanTimestamp.toInt())
+                    val unknownNodes = nodeRepository.getUnknownNodes()
+                    olderNodes.filter { itNode -> unknownNodes.any { unknownNode -> itNode.num == unknownNode.num } }
+                } else {
+                    // Only "older than X days" filter applies
+                    nodeRepository.getNodesOlderThan(olderThanTimestamp.toInt())
                 }
 
             _nodesToDelete.value =

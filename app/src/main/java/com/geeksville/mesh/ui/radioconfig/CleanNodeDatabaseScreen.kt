@@ -56,13 +56,12 @@ import com.geeksville.mesh.ui.node.components.NodeChip
  */
 @Composable
 fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel = hiltViewModel()) {
-    val olderThanDaysEnabled by viewModel.olderThanDaysEnabled.collectAsState()
     val olderThanDays by viewModel.olderThanDays.collectAsState()
     val onlyUnknownNodes by viewModel.onlyUnknownNodes.collectAsState()
     val nodesToDelete by viewModel.nodesToDelete.collectAsState()
     var showConfirmationDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(olderThanDaysEnabled, olderThanDays, onlyUnknownNodes) { viewModel.getNodesToDelete() }
+    LaunchedEffect(olderThanDays, onlyUnknownNodes) { viewModel.getNodesToDelete() }
 
     if (showConfirmationDialog) {
         ConfirmationDialog(
@@ -81,10 +80,8 @@ fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel = hiltViewMode
         Spacer(modifier = Modifier.height(16.dp))
 
         DaysThresholdFilter(
-            olderThanDaysEnabled = olderThanDaysEnabled,
             olderThanDays = olderThanDays,
             onlyUnknownNodes = onlyUnknownNodes,
-            onEnabledChanged = viewModel::onOlderThanDaysEnabledChanged,
             onDaysChanged = viewModel::onOlderThanDaysChanged,
         )
 
@@ -108,41 +105,40 @@ fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel = hiltViewMode
     }
 }
 
+private const val MIN_UNKNOWN_DAYS_THRESHOLD = 0f
+private const val MIN_KNOWN_DAYS_THRESHOLD = 7f
+private const val MAX_DAYS_THRESHOLD = 365f
+
 /**
- * Composable for the "older than X days" filter.
+ * Composable for the "older than X days" filter. This filter is always active.
  *
- * @param olderThanDaysEnabled Whether the filter is enabled.
  * @param olderThanDays The number of days for the filter.
  * @param onlyUnknownNodes Whether the "only unknown nodes" filter is enabled.
- * @param onEnabledChanged Callback for when the enabled state changes.
  * @param onDaysChanged Callback for when the number of days changes.
  */
 @Composable
-private fun DaysThresholdFilter(
-    olderThanDaysEnabled: Boolean,
-    olderThanDays: Float,
-    onlyUnknownNodes: Boolean,
-    onEnabledChanged: (Boolean) -> Unit,
-    onDaysChanged: (Float) -> Unit,
-) {
-    val valueRange = if (onlyUnknownNodes) 0f..365f else 7f..365f
+private fun DaysThresholdFilter(olderThanDays: Float, onlyUnknownNodes: Boolean, onDaysChanged: (Float) -> Unit) {
+    val valueRange =
+        if (onlyUnknownNodes) {
+            MIN_UNKNOWN_DAYS_THRESHOLD..MAX_DAYS_THRESHOLD
+        } else {
+            MIN_KNOWN_DAYS_THRESHOLD..MAX_DAYS_THRESHOLD
+        }
     val steps = (valueRange.endInclusive - valueRange.start - 1).toInt().coerceAtLeast(0)
 
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+    Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-            modifier = Modifier.weight(1f).padding(end = 8.dp),
+            modifier = Modifier.padding(bottom = 8.dp),
             text = stringResource(R.string.clean_nodes_older_than, olderThanDays.toInt()),
         )
-        Switch(checked = olderThanDaysEnabled, onCheckedChange = onEnabledChanged)
+        Slider(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+            value = olderThanDays,
+            onValueChange = onDaysChanged,
+            valueRange = valueRange,
+            steps = steps,
+        )
     }
-    Slider(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-        value = olderThanDays,
-        onValueChange = onDaysChanged,
-        valueRange = valueRange,
-        steps = steps,
-        enabled = olderThanDaysEnabled,
-    )
 }
 
 /**
