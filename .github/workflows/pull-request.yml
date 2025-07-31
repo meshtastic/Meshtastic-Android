@@ -28,7 +28,7 @@ jobs:
       GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
   check-workflow-status:
-    name: Check Workflow Status # Matches another in merge-queue, and is required.
+    name: Check Workflow Status
     runs-on: ubuntu-latest
     needs:
       [
