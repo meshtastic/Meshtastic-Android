@@ -30,6 +30,8 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.milliseconds
 
+private const val MIN_DAYS_THRESHOLD = 7f
+
 /**
  * ViewModel for [CleanNodeDatabaseScreen]. Manages the state and logic for cleaning the node database based on
  * specified criteria.
@@ -64,6 +66,9 @@ constructor(
 
     fun onOnlyUnknownNodesChanged(value: Boolean) {
         _onlyUnknownNodes.value = value
+        if (!value && _olderThanDays.value < MIN_DAYS_THRESHOLD) {
+            _olderThanDays.value = MIN_DAYS_THRESHOLD
+        }
     }
 
     /**
@@ -72,27 +77,29 @@ constructor(
      *   days are selected.
      * - If only "older than X days" is enabled, all nodes older than X days are selected.
      * - If only "only unknown nodes" is enabled, all unknown nodes are selected.
-     * - If neither is enabled, no nodes are selected. Ignored nodes are always excluded from deletion.
+     * - If neither is enabled, no nodes are selected.
+     * - Nodes with an associated public key (PKI) heard from within the last 7 days are always excluded from deletion.
+     * - Nodes marked as ignored or favorite are always excluded from deletion.
      */
     fun getNodesToDelete() {
         viewModelScope.launch {
             val olderThanEnabled = _olderThanDaysEnabled.value
             val onlyUnknownEnabled = _onlyUnknownNodes.value
+            val currentTimeSeconds = System.currentTimeMillis().milliseconds.inWholeSeconds
+            val sevenDaysAgoSeconds = currentTimeSeconds - 7.days.inWholeSeconds
 
-            val resultNodes =
+            val initialNodesToConsider =
                 when {
                     olderThanEnabled && onlyUnknownEnabled -> {
-                        val olderThanTimestamp =
-                            (System.currentTimeMillis().milliseconds.inWholeSeconds) -
-                                _olderThanDays.value.toInt().days.inWholeSeconds
+                        val olderThanTimestamp = currentTimeSeconds - _olderThanDays.value.toInt().days.inWholeSeconds
                         val olderNodes = nodeRepository.getNodesOlderThan(olderThanTimestamp.toInt())
                         val unknownNodes = nodeRepository.getUnknownNodes()
-                        olderNodes.filter { unknownNodes.any { unknownNode -> it.num == unknownNode.num } }
+                        olderNodes.filter { itNode ->
+                            unknownNodes.any { unknownNode -> itNode.num == unknownNode.num }
+                        }
                     }
                     olderThanEnabled -> {
-                        val olderThanTimestamp =
-                            (System.currentTimeMillis().milliseconds.inWholeSeconds) -
-                                _olderThanDays.value.toInt().days.inWholeSeconds
+                        val olderThanTimestamp = currentTimeSeconds - _olderThanDays.value.toInt().days.inWholeSeconds
                         nodeRepository.getNodesOlderThan(olderThanTimestamp.toInt())
                     }
                     onlyUnknownEnabled -> {
@@ -100,7 +107,15 @@ constructor(
                     }
                     else -> emptyList()
                 }
-            _nodesToDelete.value = resultNodes.filter { !it.isIgnored || !it.isFavorite }
+
+            _nodesToDelete.value =
+                initialNodesToConsider.filterNot { node ->
+                    // Exclude nodes with PKI heard in the last 7 days
+                    (node.hasPKC && node.lastHeard >= sevenDaysAgoSeconds) ||
+                        // Exclude ignored or favorite nodes
+                        node.isIgnored ||
+                        node.isFavorite
+                }
         }
     }
 

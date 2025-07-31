@@ -83,6 +83,7 @@ fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel = hiltViewMode
         DaysThresholdFilter(
             olderThanDaysEnabled = olderThanDaysEnabled,
             olderThanDays = olderThanDays,
+            onlyUnknownNodes = onlyUnknownNodes,
             onEnabledChanged = viewModel::onOlderThanDaysEnabledChanged,
             onDaysChanged = viewModel::onOlderThanDaysChanged,
         )
@@ -112,6 +113,7 @@ fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel = hiltViewMode
  *
  * @param olderThanDaysEnabled Whether the filter is enabled.
  * @param olderThanDays The number of days for the filter.
+ * @param onlyUnknownNodes Whether the "only unknown nodes" filter is enabled.
  * @param onEnabledChanged Callback for when the enabled state changes.
  * @param onDaysChanged Callback for when the number of days changes.
  */
@@ -119,9 +121,13 @@ fun CleanNodeDatabaseScreen(viewModel: CleanNodeDatabaseViewModel = hiltViewMode
 private fun DaysThresholdFilter(
     olderThanDaysEnabled: Boolean,
     olderThanDays: Float,
+    onlyUnknownNodes: Boolean,
     onEnabledChanged: (Boolean) -> Unit,
     onDaysChanged: (Float) -> Unit,
 ) {
+    val valueRange = if (onlyUnknownNodes) 0f..365f else 7f..365f
+    val steps = (valueRange.endInclusive - valueRange.start - 1).toInt().coerceAtLeast(0)
+
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(
             modifier = Modifier.weight(1f).padding(end = 8.dp),
@@ -133,8 +139,8 @@ private fun DaysThresholdFilter(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         value = olderThanDays,
         onValueChange = onDaysChanged,
-        valueRange = 1f..365f,
-        steps = 364,
+        valueRange = valueRange,
+        steps = steps,
         enabled = olderThanDaysEnabled,
     )
 }
