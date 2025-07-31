@@ -566,6 +566,8 @@
     <string name="node_number">Knotennummer</string>
     <string name="user_id">Benutzer ID</string>
     <string name="uptime">Laufzeit</string>
+    <string name="load_indexed">Last %1$d</string>
+    <string name="disk_free_indexed">Laufwerkspeicher frei %1$d</string>
     <string name="timestamp">Zeitstempel</string>
     <string name="heading">Überschrift</string>
     <string name="speed">Geschwindigkeit</string>
