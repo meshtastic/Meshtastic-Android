@@ -8,13 +8,6 @@ on:
         required: false
         type: boolean
         default: true
-    secrets:
-      GRADLE_ENCRYPTION_KEY:
-        required: false
-      DATADOG_APPLICATION_ID:
-        required: false
-      DATADOG_CLIENT_TOKEN:
-        required: false
 
 jobs:
   build_and_detekt:
@@ -23,7 +16,11 @@ jobs:
     env:
       DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
       DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
+
     steps:
+      - name: Test Secrets
+        run: echo "${{ secrets.TEST_SECRET }}"
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
