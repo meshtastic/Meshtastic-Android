@@ -60,6 +60,12 @@ Comprehensive testing helps prevent regressions and ensures a stable experience 
 
 ## Pull Requests
 
+- branches should start with:
+    - bugfix
+    - enhancement
+    - dependencies
+    - repo
+    - reserved (release, automation)
 - Ensure your branch is up to date with the latest `main` branch before submitting a PR.
 - Provide a meaningful title and description for your PR.
 - Inlude information on how to test and/or replicate if it is not obvious.
