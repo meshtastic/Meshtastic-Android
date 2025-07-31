@@ -8,32 +8,19 @@ on:
         required: false
         type: boolean
         default: true
-    secrets:
-        datadog_application_id:
-            description: 'Datadog Application ID'
-            required: true
-        datadog_client_token:
-            description: 'Datadog Client Token'
-            required: true
-        gradle_encryption_key:
-            description: 'Gradle Encryption Key for caching'
-            required: true
-        test_secret:
-            description: 'Test secret for demonstration purposes'
-            required: false # Optional for testing, can be set in the workflow calling this action
 
 jobs:
   build_and_detekt:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
-      DATADOG_APPLICATION_ID: ${{ secrets.datadog_application_id }}
-      DATADOG_CLIENT_TOKEN: ${{ secrets.datadog_client_token }}
+      DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
+      DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
 
     steps:
       - name: Test Secrets
         env:
-          TEST_SECRET: ${{ secrets.test_secret }}
+          TEST_SECRET: ${{ secrets.TEST_SECRET }}
         run: echo "$TEST_SECRET"
 
       - name: Checkout code
@@ -53,7 +40,7 @@ jobs:
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          cache-encryption-key: ${{ secrets.gradle_encryption_key }}
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
           build-scan-publish: true
           build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
           build-scan-terms-of-use-agree: 'yes'
