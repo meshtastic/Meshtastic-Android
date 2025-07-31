@@ -8,19 +8,35 @@ on:
         required: false
         type: boolean
         default: true
+    secrets:
+        datadog_application_id:
+            description: 'Datadog Application ID'
+            required: true
+        datadog_client_token:
+            description: 'Datadog Client Token'
+            required: true
+        gradle_encryption_key:
+            description: 'Gradle Encryption Key for caching'
+            required: true
+        github_token:
+            description: 'GitHub Token for actions'
+            required: true
+        test_secret:
+            description: 'Test secret for demonstration purposes'
+            required: false # Optional for testing, can be set in the workflow calling this action
 
 jobs:
   build_and_detekt:
     runs-on: ubuntu-latest
     timeout-minutes: 35
     env:
-      DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
-      DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
+      DATADOG_APPLICATION_ID: ${{ secrets.datadog_application_id }}
+      DATADOG_CLIENT_TOKEN: ${{ secrets.datadog_client_token }}
 
     steps:
       - name: Test Secrets
         env:
-          TEST_SECRET: ${{ secrets.TEST_SECRET }}
+          TEST_SECRET: ${{ secrets.test_secret }}
         run: echo "$TEST_SECRET"
 
       - name: Checkout code
@@ -35,12 +51,12 @@ jobs:
           java-version: '21'
           distribution: 'jetbrains'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.github_token }}
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          cache-encryption-key: ${{ secrets.gradle_encryption_key }}
           build-scan-publish: true
           build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
           build-scan-terms-of-use-agree: 'yes'
