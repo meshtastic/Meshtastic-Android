@@ -21,11 +21,11 @@ repo:
     - any-glob-to-any-file: '.github'
 
  # Add 'bug' label to any PR where the head branch name contains `fix` or `bug`
-bug:
+bugfix:
   - head-branch: ['fix', 'bug']
 
 # our fallback - bug except repo, feat, or automated pipelines
-bug_fallthrough:
-- all:
-  - head-branch: ['^((?!feat).)*$', '^((?!repo).)*$', '^((?!renovate).)*$', '^((?!scheduled).)*$']
+# bug_fallthrough:
+# - all:
+#   - head-branch: ['^((?!feat).)*$', '^((?!repo).)*$', '^((?!renovate).)*$', '^((?!scheduled).)*$']
 
