@@ -17,13 +17,18 @@
 
 package com.geeksville.mesh.repository.radio
 
+import android.annotation.SuppressLint
 import android.app.Application
 import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothGattService
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
-import com.geeksville.mesh.service.*
+import com.geeksville.mesh.service.BLECharacteristicNotFoundException
+import com.geeksville.mesh.service.BLEConnectionClosing
+import com.geeksville.mesh.service.BLEException
+import com.geeksville.mesh.service.RadioNotConnectedException
+import com.geeksville.mesh.service.SafeBluetooth
 import com.geeksville.mesh.util.anonymize
 import com.geeksville.mesh.util.exceptionReporter
 import com.geeksville.mesh.util.ignoreException
@@ -33,8 +38,7 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import java.lang.reflect.Method
-import java.util.*
-
+import java.util.UUID
 
 /* Info for the esp32 device side code.  See that source for the 'gold' standard docs on this interface.
 
@@ -82,65 +86,66 @@ A variable keepAllPackets, if set to true will suppress this behavior and instea
 
  */
 
-
-
-
 /**
- * Handles the bluetooth link with a mesh radio device.  Does not cache any device state,
- * just does bluetooth comms etc...
+ * Handles the bluetooth link with a mesh radio device. Does not cache any device state, just does bluetooth comms
+ * etc...
  *
  * This service is not exposed outside of this process.
  *
- * Note - this class intentionally dumb.  It doesn't understand protobuf framing etc...
- * It is designed to be simple so it can be stubbed out with a simulated version as needed.
+ * Note - this class intentionally dumb. It doesn't understand protobuf framing etc... It is designed to be simple so it
+ * can be stubbed out with a simulated version as needed.
  */
-class BluetoothInterface @AssistedInject constructor(
+@SuppressLint("MissingPermission")
+class BluetoothInterface
+@AssistedInject
+constructor(
     context: Application,
     bluetoothRepository: BluetoothRepository,
     private val service: RadioInterfaceService,
     @Assisted val address: String,
-) : IRadioInterface, Logging {
+) : IRadioInterface,
+    Logging {
 
     companion object {
-        /// this service UUID is publicly visible for scanning
+        // / this service UUID is publicly visible for scanning
         val BTM_SERVICE_UUID: UUID = UUID.fromString("6ba1b218-15a8-461f-9fa8-5dcae273eafd")
 
-        val BTM_FROMRADIO_CHARACTER: UUID =
-            UUID.fromString("2c55e69e-4993-11ed-b878-0242ac120002")
-        val BTM_TORADIO_CHARACTER: UUID =
-            UUID.fromString("f75c76d2-129e-4dad-a1dd-7866124401e7")
-        val BTM_FROMNUM_CHARACTER: UUID =
-            UUID.fromString("ed9da18c-a800-4f66-a670-aa7547e34453")
+        val BTM_FROMRADIO_CHARACTER: UUID = UUID.fromString("2c55e69e-4993-11ed-b878-0242ac120002")
+        val BTM_TORADIO_CHARACTER: UUID = UUID.fromString("f75c76d2-129e-4dad-a1dd-7866124401e7")
+        val BTM_FROMNUM_CHARACTER: UUID = UUID.fromString("ed9da18c-a800-4f66-a670-aa7547e34453")
 
         /**
-         * this is created in onCreate()
-         * We do an ugly hack of keeping it in the singleton so we can share it for the rare software update case
+         * this is created in onCreate() We do an ugly hack of keeping it in the singleton so we can share it for the
+         * rare software update case
          */
-        @Volatile
-        var safe: SafeBluetooth? = null
+        @Volatile var safe: SafeBluetooth? = null
     }
 
-
-    /// Our BLE device
+    // / Our BLE device
     val device
-        get() = (safe ?: throw RadioNotConnectedException("No SafeBluetooth")).gatt
-            ?: throw RadioNotConnectedException("No GATT")
+        get() =
+            (safe ?: throw RadioNotConnectedException("No SafeBluetooth")).gatt
+                ?: throw RadioNotConnectedException("No GATT")
 
-    /// Our service - note - it is possible to get back a null response for getService if the device services haven't yet been found
+    // / Our service - note - it is possible to get back a null response for getService if the device services haven't
+    // yet been found
     private val bservice
-        get(): BluetoothGattService = device.getService(BTM_SERVICE_UUID)
-            ?: throw RadioNotConnectedException("BLE service not found")
+        get(): BluetoothGattService =
+            device.getService(BTM_SERVICE_UUID) ?: throw RadioNotConnectedException("BLE service not found")
+
+    @Volatile private var reconnectAttempts = 0
 
     private lateinit var fromNum: BluetoothGattCharacteristic
 
     /**
-     * With the new rev2 api, our first send is to start the configure readbacks.  In that case,
-     * rather than waiting for FromNum notifies - we try to just aggressively read all of the responses.
+     * With the new rev2 api, our first send is to start the configure readbacks. In that case, rather than waiting for
+     * FromNum notifies - we try to just aggressively read all of the responses.
      */
     private var isFirstSend = true
 
     // NRF52 targets do not need the nasty force refresh hack that ESP32 needs (because they keep their
-    // BLE handles stable.  So turn the hack off for these devices.  FIXME - find a better way to know that the board is NRF52 based
+    // BLE handles stable.  So turn the hack off for these devices.  FIXME - find a better way to know that the board is
+    // NRF52 based
     // and Amazon fire devices seem to not need this hack either
     // Build.MANUFACTURER != "Amazon" &&
     private var needForceRefresh = !address.startsWith("FD:10:04")
@@ -162,8 +167,7 @@ class BluetoothInterface @AssistedInject constructor(
         }
     }
 
-
-    /// Send a packet/command out the radio link
+    // / Send a packet/command out the radio link
     override fun handleSendToRadio(p: ByteArray) {
         try {
             safe?.let { s ->
@@ -193,12 +197,9 @@ class BluetoothInterface @AssistedInject constructor(
         }
     }
 
-    @Volatile
-    private var reconnectJob: Job? = null
+    @Volatile private var reconnectJob: Job? = null
 
-    /**
-     * We had some problem, schedule a reconnection attempt (if one isn't already queued)
-     */
+    /** We had some problem, schedule a reconnection attempt (if one isn't already queued) */
     private fun scheduleReconnect(reason: String) {
         if (reconnectJob == null) {
             warn("Scheduling reconnect because $reason")
@@ -208,14 +209,16 @@ class BluetoothInterface @AssistedInject constructor(
         }
     }
 
-    /// Attempt to read from the fromRadio mailbox, if data is found broadcast it to android apps
+    // / Attempt to read from the fromRadio mailbox, if data is found broadcast it to android apps
     private fun doReadFromRadio(firstRead: Boolean) {
         safe?.let { s ->
             val fromRadio = getCharacteristic(BTM_FROMRADIO_CHARACTER)
             s.asyncReadCharacteristic(fromRadio) {
                 try {
-                    val b = it.getOrThrow()
-                        .value.clone() // We clone the array just in case, I'm not sure if they keep reusing the array
+                    val b =
+                        it.getOrThrow()
+                            .value
+                            .clone() // We clone the array just in case, I'm not sure if they keep reusing the array
 
                     if (b.isNotEmpty()) {
                         debug("Received ${b.size} bytes from radio")
@@ -225,8 +228,10 @@ class BluetoothInterface @AssistedInject constructor(
                         doReadFromRadio(firstRead)
                     } else {
                         debug("Done reading from radio, fromradio is empty")
-                        if (firstRead) // If we just finished our initial download, now we want to start listening for notifies
+                        if (firstRead) {
+                            // If we just finished our initial download, now we want to start listening for notifies
                             startWatchingFromNum()
+                        }
                     }
                 } catch (ex: BLEException) {
                     scheduleReconnect("error during doReadFromRadio - disconnecting, ${ex.message}")
@@ -236,8 +241,8 @@ class BluetoothInterface @AssistedInject constructor(
     }
 
     /**
-     * Android caches old services.  But our service is still changing often, so force it to reread the service definitions every
-     * time
+     * Android caches old services. But our service is still changing often, so force it to reread the service
+     * definitions every time
      */
     private fun forceServiceRefresh() {
         exceptionReporter {
@@ -250,11 +255,12 @@ class BluetoothInterface @AssistedInject constructor(
         }
     }
 
-    /// We only force service refresh the _first_ time we connect to the device.  Thereafter it is assumed the firmware didn't change
+    // / We only force service refresh the _first_ time we connect to the device.  Thereafter it is assumed the firmware
+    // didn't change
+    @Suppress("UnusedPrivateMember")
     private var hasForcedRefresh = false
 
-    @Volatile
-    var fromNumChanged = false
+    @Volatile var fromNumChanged = false
 
     private fun startWatchingFromNum() {
         safe?.setNotify(fromNum, true) {
@@ -275,32 +281,43 @@ class BluetoothInterface @AssistedInject constructor(
         }
     }
 
+    private val maxReconnectionAttempts = 6
+
     /**
-     * Some buggy BLE stacks can fail on initial connect, with either missing services or missing characteristics.  If that happens we
-     * disconnect and try again when the device reenumerates.
+     * Some buggy BLE stacks can fail on initial connect, with either missing services or missing characteristics. If
+     * that happens we disconnect and try again when the device reenumerates.
      */
     private suspend fun retryDueToException() = try {
-        /// We gracefully handle safe being null because this can occur if someone has unpaired from our device - just abandon the reconnect attempt
+        // / We gracefully handle safe being null because this can occur if someone has unpaired from our device -
+        // just abandon the reconnect attempt
         val s = safe
         if (s != null) {
-            warn("Forcing disconnect and hopefully device will comeback (disabling forced refresh)")
+            val backoffMillis = (1000 * (1 shl reconnectAttempts.coerceAtMost(maxReconnectionAttempts))).toLong()
+            // Exponential backoff, capped at 64s
+            reconnectAttempts++
+            warn(
+                "Forcing disconnect and hopefully device will comeback" +
+                    " (disabling forced refresh). Reconnect attempt $reconnectAttempts," +
+                    " waiting ${backoffMillis}ms.",
+            )
 
-            // The following optimization is not currently correct - because the device might be sleeping and come back with different BLE handles
+            // The following optimization is not currently correct - because the device might be sleeping and come
+            // back with different BLE handles
             // hasForcedRefresh = true // We've already tossed any old service caches, no need to do it again
 
             // Make sure the old connection was killed
-            ignoreException {
-                s.closeConnection()
-            }
+            ignoreException { s.closeConnection() }
 
             service.onDisconnect(false) // assume we will fail
-            delay(1500) // Give some nasty time for buggy BLE stacks to shutdown (500ms was not enough)
+            delay(backoffMillis) // Give some nasty time for buggy BLE stacks to shutdown
             reconnectJob = null // Any new reconnect requests after this will be allowed to run
             warn("Attempting reconnect")
-            if (safe != null) // check again, because we just slept for 1sec, and someone might have closed our interface
+            if (safe != null) {
+                // check again, because we just slept, and someone might have closed our interface
                 startConnect()
-            else
+            } else {
                 warn("Not connecting, because safe==null, someone must have closed us")
+            }
         } else {
             warn("Abandoning reconnect because safe==null, someone must have closed the device")
         }
@@ -310,19 +327,19 @@ class BluetoothInterface @AssistedInject constructor(
         reconnectJob = null
     }
 
-    /// We only try to set MTU once, because some buggy implementations fail
-    @Volatile
-    private var shouldSetMtu = true
+    // / We only try to set MTU once, because some buggy implementations fail
+    @Volatile private var shouldSetMtu = true
 
-    /// For testing
+    // / For testing
+    @Suppress("UnusedPrivateMember")
     @Volatile
     private var isFirstTime = true
 
     private fun doDiscoverServicesAndInit() {
         val s = safe
-        if (s == null)
+        if (s == null) {
             warn("Interface is shutting down, so skipping discover")
-        else
+        } else {
             s.asyncDiscoverServices { discRes ->
                 try {
                     discRes.getOrThrow()
@@ -330,7 +347,10 @@ class BluetoothInterface @AssistedInject constructor(
                     service.serviceScope.handledLaunch {
                         try {
                             debug("Discovered services!")
-                            delay(1000) // android BLE is buggy and needs a 500ms sleep before calling getChracteristic, or you might get back null
+                            delay(
+                                1000,
+                            ) // android BLE is buggy and needs a 500ms sleep before calling getChracteristic, or you
+                            // might get back null
 
                             /* if (isFirstTime) {
                                 isFirstTime = false
@@ -348,20 +368,18 @@ class BluetoothInterface @AssistedInject constructor(
                             // Immediately broadcast any queued packets sitting on the device
                             doReadFromRadio(true)
                         } catch (ex: BLEException) {
-                            scheduleReconnect(
-                                "Unexpected error in initial device enumeration, forcing disconnect $ex"
-                            )
+                            scheduleReconnect("Unexpected error in initial device enumeration, forcing disconnect $ex")
                         }
                     }
                 } catch (ex: BLEException) {
-                    if (s.gatt == null)
+                    if (s.gatt == null) {
                         warn("GATT was closed while discovering, assume we are shutting down")
-                    else
-                        scheduleReconnect(
-                            "Unexpected error discovering services, forcing disconnect $ex"
-                        )
+                    } else {
+                        scheduleReconnect("Unexpected error discovering services, forcing disconnect $ex")
+                    }
                 }
             }
+        }
     }
 
     private fun onConnect(connRes: Result<Unit>) {
@@ -369,19 +387,29 @@ class BluetoothInterface @AssistedInject constructor(
 
         connRes.getOrThrow()
 
+        reconnectAttempts = 0 // Reset backoff on successful connection
+
         service.serviceScope.handledLaunch {
             info("Connected to radio!")
 
-            if (needForceRefresh) { // Our ESP32 code doesn't properly generate "service changed" indications.  Therefore we need to force a refresh on initial start
-                //needForceRefresh = false // In fact, because of tearing down BLE in sleep on the ESP32, our handle # assignments are not stable across sleep - so we much refetch every time
-                forceServiceRefresh() // this article says android should not be caching, but it does on some phones: https://punchthrough.com/attribute-caching-in-ble-advantages-and-pitfalls/
+            if (
+                needForceRefresh
+            ) { // Our ESP32 code doesn't properly generate "service changed" indications.  Therefore we need to force a
+                // refresh on initial start
+                // needForceRefresh = false // In fact, because of tearing down BLE in sleep on the ESP32, our handle #
+                // assignments are not stable across sleep - so we much refetch every time
+                forceServiceRefresh() // this article says android should not be caching, but it does on some phones:
+                // https://punchthrough.com/attribute-caching-in-ble-advantages-and-pitfalls/
 
-                delay(500) // From looking at the android C code it seems that we need to give some time for the refresh message to reach that worked _before_ we try to set mtu/get services
+                delay(
+                    500,
+                ) // From looking at the android C code it seems that we need to give some time for the refresh message
+                // to reach that worked _before_ we try to set mtu/get services
                 // 200ms was not enough on an Amazon Fire
             }
 
             // we begin by setting our MTU size as high as it can go (if we can)
-            if (shouldSetMtu)
+            if (shouldSetMtu) {
                 safe?.asyncRequestMtu(512) { mtuRes ->
                     try {
                         mtuRes.getOrThrow()
@@ -392,16 +420,14 @@ class BluetoothInterface @AssistedInject constructor(
                         doDiscoverServicesAndInit()
                     } catch (ex: BLEException) {
                         shouldSetMtu = false
-                        scheduleReconnect(
-                            "Giving up on setting MTUs, forcing disconnect $ex"
-                        )
+                        scheduleReconnect("Giving up on setting MTUs, forcing disconnect $ex")
                     }
                 }
-            else
+            } else {
                 doDiscoverServicesAndInit()
+            }
         }
     }
-
 
     override fun close() {
         reconnectJob?.cancel() // Cancel any queued reconnect attempts
@@ -409,8 +435,8 @@ class BluetoothInterface @AssistedInject constructor(
         if (safe != null) {
             info("Closing BluetoothInterface")
             val s = safe
-            safe =
-                null // We do this first, because if we throw we still want to mark that we no longer have a valid connection
+            safe = null // We do this first, because if we throw we still want to mark that we no longer have a valid
+            // connection
 
             try {
                 s?.close()
@@ -422,22 +448,16 @@ class BluetoothInterface @AssistedInject constructor(
         }
     }
 
-    /// Start a connection attempt
+    // / Start a connection attempt
     private fun startConnect() {
         // we pass in true for autoconnect - so we will autoconnect whenever the radio
         // comes in range (even if we made this connect call long ago when we got powered on)
         // see https://stackoverflow.com/questions/40156699/which-correct-flag-of-autoconnect-in-connectgatt-of-ble for
         // more info
-        safe!!.asyncConnect(true,
-            cb = ::onConnect,
-            lostConnectCb = { scheduleReconnect("connection dropped") })
+        safe!!.asyncConnect(true, cb = ::onConnect, lostConnectCb = { scheduleReconnect("connection dropped") })
     }
 
-
-    /**
-     * Get a chracteristic, but in a safe manner because some buggy BLE implementations might return null
-     */
+    /** Get a chracteristic, but in a safe manner because some buggy BLE implementations might return null */
     private fun getCharacteristic(uuid: UUID) =
         bservice.getCharacteristic(uuid) ?: throw BLECharacteristicNotFoundException(uuid)
-
 }
