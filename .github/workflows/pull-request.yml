@@ -4,6 +4,7 @@ on:
   pull_request:
     branches:
       - main
+      - test_PR
 
 concurrency:
   group: build-pr-${{ github.ref }}
