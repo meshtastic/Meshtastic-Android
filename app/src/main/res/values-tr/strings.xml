@@ -568,4 +568,9 @@
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="message_input_label">Mesaj</string>
+    <string name="skip">Atla</string>
+    <string name="settings">ayarlar</string>
+    <string name="critical_alerts">Kritik Uyarılar</string>
+    <string name="configure_critical_alerts">Kritik Uyarı Yapılandır</string>
+    <string name="next">Sonraki</string>
 </resources>
