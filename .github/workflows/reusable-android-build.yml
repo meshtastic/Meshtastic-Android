@@ -19,7 +19,9 @@ jobs:
 
     steps:
       - name: Test Secrets
-        run: echo "${{ secrets.TEST_SECRET }}"
+        env:
+          TEST_SECRET: ${{ secrets.TEST_SECRET }}
+        run: echo "$TEST_SECRET"
 
       - name: Checkout code
         uses: actions/checkout@v4
