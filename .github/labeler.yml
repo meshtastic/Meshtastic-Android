@@ -1,25 +1,31 @@
+# Auto Labeler rulse using https://github.com/actions/labeler
+#
 
-# - [ ] need to look at branch / title.     waiting on https://github.com/actions/labeler/pull/866
-# - [x] and an else. 
+# 'fix' in title/branch -> bug
+# 'feat' in title/branch -> enhancement
+# 'repo' in title/branch OR changes to ~/.github/ -> repo
+# 'bug_fallthrough' for everything else except auto 
+#
+# - [ ] need to look at title.     waiting on https://github.com/actions/labeler/pull/866
 
-
-# Add 'enhancement' label to any PR where the head branch name starts with `feat` or has a `feat` section in the name
+# Add 'enhancement' label to any PR where the head branch name contains `feat`
 enhancement:
- - head-branch: ['/feat/i']
+ - head-branch: ['feat']
 
- # Add 'repo' label to any PR where the head branch name starts with `repo` or has a `repo` section in the name
+ # Add 'repo' label to any PR where the head branch name contains `repo` 
  # or files in the .github dir
 repo:
 - any:
-  - head-branch: ['/repo/i']
+  - head-branch: ['repo']
   - changed-files:
     - any-glob-to-any-file: '.github'
 
- # Add 'bug' label to any PR where the head branch name starts with `fix` or has a `fix` section in the name
+ # Add 'bug' label to any PR where the head branch name contains `fix` or `bug`
 bug:
-  - head-branch: ['/fix/i']
+  - head-branch: ['fix', 'bug']
 
 # our fallback - bug except repo, feat, or automated pipelines
 bug_fallthrough:
+- all:
   - head-branch: ['^((?!feat).)*$', '^((?!repo).)*$', '^((?!renovate).)*$', '^((?!scheduled).)*$']
 
