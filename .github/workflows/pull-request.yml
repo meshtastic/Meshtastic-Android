@@ -26,7 +26,6 @@ jobs:
         gradle_encryption_key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
         datadog_application_id: ${{ secrets.DATADOG_APPLICATION_ID }}
         datadog_client_token: ${{ secrets.DATADOG_CLIENT_TOKEN }}
-        github_token: ${{ secrets.GITHUB_TOKEN }}
         test_secret: ${{ secrets.TEST_SECRET }} # Optional for testing, can be set in the workflow calling this action
 
   androidTest:
