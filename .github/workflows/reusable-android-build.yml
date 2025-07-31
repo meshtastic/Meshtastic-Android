@@ -18,9 +18,6 @@ on:
         gradle_encryption_key:
             description: 'Gradle Encryption Key for caching'
             required: true
-        github_token:
-            description: 'GitHub Token for actions'
-            required: true
         test_secret:
             description: 'Test secret for demonstration purposes'
             required: false # Optional for testing, can be set in the workflow calling this action
@@ -51,7 +48,7 @@ jobs:
           java-version: '21'
           distribution: 'jetbrains'
         env:
-          GITHUB_TOKEN: ${{ secrets.github_token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
