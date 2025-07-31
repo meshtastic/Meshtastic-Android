@@ -2,12 +2,6 @@ name: Reusable Android Build and Detekt
 
 on:
   workflow_call:
-    inputs:
-      upload_artifacts:
-        description: 'Whether to upload build and Detekt artifacts'
-        required: false
-        type: boolean
-        default: true
     secrets:
       GRADLE_ENCRYPTION_KEY:
         required: false
@@ -17,6 +11,12 @@ on:
         required: false
       TEST_SECRET:
         required: false
+    inputs:
+      upload_artifacts:
+        description: 'Whether to upload build and Detekt artifacts'
+        required: false
+        type: boolean
+        default: true
 
 jobs:
   build_and_detekt:
