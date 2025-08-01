@@ -349,7 +349,7 @@ constructor(
                             debug("Discovered services!")
                             delay(
                                 1000,
-                            ) // android BLE is buggy and needs a 500ms sleep before calling getChracteristic, or you
+                            ) // android BLE is buggy and needs a 1000ms sleep before calling getChracteristic, or you
                             // might get back null
 
                             /* if (isFirstTime) {
