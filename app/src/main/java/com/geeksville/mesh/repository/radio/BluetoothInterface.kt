@@ -127,7 +127,7 @@ constructor(
             (safe ?: throw RadioNotConnectedException("No SafeBluetooth")).gatt
                 ?: throw RadioNotConnectedException("No GATT")
 
-    // / Our service - note - it is possible to get back a null response for getService if the device services haven't
+    // Our service - note - it is possible to get back a null response for getService if the device services haven't
     // yet been found
     private val bservice
         get(): BluetoothGattService =
