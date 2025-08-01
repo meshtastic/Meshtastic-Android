@@ -107,7 +107,7 @@ constructor(
     Logging {
 
     companion object {
-        // / this service UUID is publicly visible for scanning
+        // this service UUID is publicly visible for scanning
         val BTM_SERVICE_UUID: UUID = UUID.fromString("6ba1b218-15a8-461f-9fa8-5dcae273eafd")
 
         val BTM_FROMRADIO_CHARACTER: UUID = UUID.fromString("2c55e69e-4993-11ed-b878-0242ac120002")
