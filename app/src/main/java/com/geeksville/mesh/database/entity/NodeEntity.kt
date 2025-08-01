@@ -155,6 +155,25 @@ data class NodeEntity(
         fun currentTime() = (System.currentTimeMillis() / 1000).toInt()
     }
 
+    fun toModel() = Node(
+        num = num,
+        user = user,
+        position = position,
+        snr = snr,
+        rssi = rssi,
+        lastHeard = lastHeard,
+        deviceMetrics = deviceTelemetry.deviceMetrics,
+        channel = channel,
+        viaMqtt = viaMqtt,
+        hopsAway = hopsAway,
+        isFavorite = isFavorite,
+        isIgnored = isIgnored,
+        environmentMetrics = environmentTelemetry.environmentMetrics,
+        powerMetrics = powerTelemetry.powerMetrics,
+        paxcounter = paxcounter,
+        publicKey = publicKey ?: user.publicKey,
+    )
+
     fun toNodeInfo() = NodeInfo(
         num = num,
         user =
