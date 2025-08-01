@@ -27,7 +27,9 @@ import kotlinx.coroutines.withContext
 import java.io.IOException
 import javax.inject.Inject
 
-class DeviceHardwareRepository @Inject constructor(
+class DeviceHardwareRepository
+@Inject
+constructor(
     private val apiDataSource: DeviceHardwareRemoteDataSource,
     private val localDataSource: DeviceHardwareLocalDataSource,
     private val jsonDataSource: DeviceHardwareJsonDataSource,
@@ -45,15 +47,13 @@ class DeviceHardwareRepository @Inject constructor(
             } else {
                 val cachedHardware = localDataSource.getByHwModel(hwModel)
                 if (cachedHardware != null && !isCacheExpired(cachedHardware.lastUpdated)) {
-                    debug("Using recent cached device hardware")
                     val externalModel = cachedHardware.asExternalModel()
                     return@withContext externalModel
                 }
             }
             try {
-                debug("Fetching device hardware from server")
-                val deviceHardware = apiDataSource.getAllDeviceHardware()
-                    ?: throw IOException("empty response from server")
+                val deviceHardware =
+                    apiDataSource.getAllDeviceHardware() ?: throw IOException("empty response from server")
                 localDataSource.insertAllDeviceHardware(deviceHardware)
                 val cachedHardware = localDataSource.getByHwModel(hwModel)
                 val externalModel = cachedHardware?.asExternalModel()
@@ -65,7 +65,6 @@ class DeviceHardwareRepository @Inject constructor(
                     debug("Using stale cached device hardware")
                     return@withContext cachedHardware.asExternalModel()
                 }
-                debug("Loading and caching device hardware from local JSON asset")
                 localDataSource.insertAllDeviceHardware(jsonDataSource.loadDeviceHardwareFromJsonAsset())
                 cachedHardware = localDataSource.getByHwModel(hwModel)
                 val externalModel = cachedHardware?.asExternalModel()
@@ -78,10 +77,7 @@ class DeviceHardwareRepository @Inject constructor(
         localDataSource.deleteAllDeviceHardware()
     }
 
-    /**
-     * Check if the cache is expired
-     */
-    private fun isCacheExpired(lastUpdated: Long): Boolean {
-        return System.currentTimeMillis() - lastUpdated > CACHE_EXPIRATION_TIME_MS
-    }
+    /** Check if the cache is expired */
+    private fun isCacheExpired(lastUpdated: Long): Boolean =
+        System.currentTimeMillis() - lastUpdated > CACHE_EXPIRATION_TIME_MS
 }

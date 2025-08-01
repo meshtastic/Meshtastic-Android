@@ -48,6 +48,7 @@ retrofit = "3.0.0"
 room = "2.7.2"
 secrets-gradle-plugin = "2.0.1"
 streamsupport-minifuture = "1.7.4"
+timber = "5.0.1"
 usb-serial-android = "3.9.0"
 work-runtime-ktx = "2.10.3"
 zxing-android-embedded = "4.3.0"
@@ -87,9 +88,10 @@ core-splashscreen = { group = "androidx.core", name = "core-splashscreen", versi
 datastore = { group = "androidx.datastore", name = "datastore", version.ref = "datastore" }
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
 dd-sdk-android-compose = { group = "com.datadoghq", name = "dd-sdk-android-compose", version.ref = "dd-sdk-android" }
+dd-sdk-android-gradle-plugin = { group = "com.datadoghq", name = "dd-sdk-android-gradle-plugin", version.ref = "dd-sdk-android-gradle-plugin" }
 dd-sdk-android-logs = { group = "com.datadoghq", name = "dd-sdk-android-logs", version.ref = "dd-sdk-android" }
 dd-sdk-android-rum = { group = "com.datadoghq", name = "dd-sdk-android-rum", version.ref = "dd-sdk-android" }
-dd-sdk-android-gradle-plugin = { group = "com.datadoghq", name = "dd-sdk-android-gradle-plugin", version.ref = "dd-sdk-android-gradle-plugin" }
+dd-sdk-android-timber = { group = "com.datadoghq", name = "dd-sdk-android-timber", version.ref = "dd-sdk-android" }
 detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name = "detekt-formatting", version.ref = "detekt" }
 emoji2-emojipicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
@@ -144,6 +146,7 @@ room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "
 room-testing = { group = "androidx.room", name = "room-testing", version.ref = "room" }
 secrets-gradle-plugin = { group = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", name = "secrets-gradle-plugin", version.ref = "secrets-gradle-plugin" }
 streamsupport-minifuture = { group = "net.sourceforge.streamsupport", name = "streamsupport-minifuture", version.ref = "streamsupport-minifuture" }
+timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
 usb-serial-android = { group = "com.github.mik3y", name = "usb-serial-for-android", version.ref = "usb-serial-android" }
 work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work-runtime-ktx" }
 zxing-android-embedded = { group = "com.journeyapps", name = "zxing-android-embedded", version.ref = "zxing-android-embedded" }
@@ -190,7 +193,7 @@ osm = ["osmdroid-android", "osmbonuspack", "mgrs"]
 firebase = ["firebase-analytics", "firebase-crashlytics"]
 
 # Datadog
-datadog = ["dd-sdk-android-compose", "dd-sdk-android-logs", "dd-sdk-android-rum"]
+datadog = ["dd-sdk-android-compose", "dd-sdk-android-logs", "dd-sdk-android-timber", "dd-sdk-android-rum"]
 
 # Protobuf
 protobuf = ["protobuf-kotlin"]

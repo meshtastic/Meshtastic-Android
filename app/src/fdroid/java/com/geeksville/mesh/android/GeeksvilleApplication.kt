@@ -23,21 +23,24 @@ import android.content.SharedPreferences
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
+import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.analytics.AnalyticsProvider
+import com.geeksville.mesh.model.DeviceHardware
+import timber.log.Timber
 
-open class GeeksvilleApplication : Application(), Logging {
+open class GeeksvilleApplication :
+    Application(),
+    Logging {
 
     companion object {
         lateinit var analytics: AnalyticsProvider
     }
 
-    /// Are we running inside the testlab?
+    // / Are we running inside the testlab?
     val isInTestLab: Boolean
         get() {
-            val testLabSetting =
-                Settings.System.getString(contentResolver, "firebase.test.lab") ?: null
-            if(testLabSetting != null)
-                info("Testlab is $testLabSetting")
+            val testLabSetting = Settings.System.getString(contentResolver, "firebase.test.lab") ?: null
+            if (testLabSetting != null) info("Testlab is $testLabSetting")
             return "true" == testLabSetting
         }
 
@@ -48,9 +51,7 @@ open class GeeksvilleApplication : Application(), Logging {
     var isAnalyticsAllowed: Boolean
         get() = analyticsPrefs.getBoolean("allowed", true)
         set(value) {
-            analyticsPrefs.edit {
-                putBoolean("allowed", value)
-            }
+            analyticsPrefs.edit { putBoolean("allowed", value) }
 
             // Change the flag with the providers
             analytics.setEnabled(value && !isInTestLab) // Never do analytics in the test lab
@@ -64,6 +65,10 @@ open class GeeksvilleApplication : Application(), Logging {
     override fun onCreate() {
         super.onCreate()
 
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
+
         val nopAnalytics = com.geeksville.mesh.analytics.NopAnalytics(this)
         analytics = nopAnalytics
         isAnalyticsAllowed = false
@@ -71,3 +76,7 @@ open class GeeksvilleApplication : Application(), Logging {
 }
 
 fun Context.isGooglePlayAvailable(): Boolean = false
+
+fun setAttributes(deviceVersion: String, deviceHardware: DeviceHardware) {
+    // No-op for F-Droid version
+}

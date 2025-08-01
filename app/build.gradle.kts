@@ -122,8 +122,6 @@ android {
             // Enable Firebase Crashlytics for Google Play builds
             apply(plugin = libs.plugins.google.services.get().pluginId)
             apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
-            apply(plugin = libs.plugins.datadog.get().pluginId)
-            apply(plugin = libs.plugins.secrets.gradle.plugin.get().pluginId)
             versionName = "${Configs.VERSION_NAME_BASE} ($versionCode) google"
         }
     }
@@ -173,7 +171,6 @@ secrets {
 }
 
 datadog {
-    // TODO: investigate steup segregation for fdroid
     // compose instrumentation is broken for kotlin 2.2.x - see:
     // https://github.com/DataDog/dd-sdk-android-gradle-plugin/issues/407
     //  composeInstrumentation = InstrumentationMode.AUTO
@@ -251,6 +248,7 @@ dependencies {
     implementation(libs.work.runtime.ktx)
     implementation(libs.core.location.altitude)
     implementation(libs.accompanist.permissions)
+    implementation(libs.timber)
 
     // Compose BOM
     implementation(platform(libs.compose.bom))
@@ -289,7 +287,7 @@ detekt {
     baseline = file("../config/detekt/detekt-baseline.xml")
 }
 
-val googleServiceKeywords = listOf("crashlytics", "google")
+val googleServiceKeywords = listOf("crashlytics", "google", "datadog")
 
 tasks.configureEach {
     if (

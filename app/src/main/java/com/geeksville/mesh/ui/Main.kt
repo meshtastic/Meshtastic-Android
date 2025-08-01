@@ -83,6 +83,7 @@ import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
+import com.geeksville.mesh.android.setAttributes
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
@@ -313,6 +314,10 @@ private fun VersionChecks(viewModel: UIViewModel) {
 
     val firmwareEdition by viewModel.firmwareEdition.collectAsStateWithLifecycle(null)
 
+    val currentFirmwareVersion by viewModel.firmwareVersion.collectAsStateWithLifecycle(null)
+
+    val currentDeviceHardware by viewModel.deviceHardware.collectAsStateWithLifecycle(null)
+
     val latestStableFirmwareRelease by viewModel.latestStableFirmwareRelease.collectAsState(DeviceVersion("2.6.4"))
     LaunchedEffect(connectionState, firmwareEdition) {
         if (connectionState == MeshService.ConnectionState.CONNECTED) {
@@ -330,6 +335,15 @@ private fun VersionChecks(viewModel: UIViewModel) {
             }
         }
     }
+
+    LaunchedEffect(connectionState, currentFirmwareVersion, currentDeviceHardware) {
+        if (connectionState == MeshService.ConnectionState.CONNECTED) {
+            if (currentDeviceHardware != null && currentFirmwareVersion != null) {
+                setAttributes(currentFirmwareVersion!!, currentDeviceHardware!!)
+            }
+        }
+    }
+
     // Check if the device is running an old app version or firmware version
     LaunchedEffect(connectionState, myNodeInfo) {
         if (connectionState == MeshService.ConnectionState.CONNECTED) {
