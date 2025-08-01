@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.repository.api
 
-import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.warn
 import com.geeksville.mesh.database.entity.FirmwareRelease
 import com.geeksville.mesh.database.entity.FirmwareReleaseType
@@ -28,7 +27,9 @@ import kotlinx.coroutines.flow.flow
 import java.io.IOException
 import javax.inject.Inject
 
-class FirmwareReleaseRepository @Inject constructor(
+class FirmwareReleaseRepository
+@Inject
+constructor(
     private val apiDataSource: FirmwareReleaseRemoteDataSource,
     private val localDataSource: FirmwareReleaseLocalDataSource,
     private val jsonDataSource: FirmwareReleaseJsonDataSource,
@@ -43,61 +44,50 @@ class FirmwareReleaseRepository @Inject constructor(
 
     val alphaRelease: Flow<FirmwareRelease?> = getLatestFirmware(FirmwareReleaseType.ALPHA)
 
-    private fun getLatestFirmware(
-        releaseType: FirmwareReleaseType,
-        refresh: Boolean = false
-    ): Flow<FirmwareRelease?> = flow {
-        if (refresh) {
-            invalidateCache()
-        } else {
-            val cachedRelease = localDataSource.getLatestRelease(releaseType)
-            if (cachedRelease != null && !isCacheExpired(cachedRelease.lastUpdated)) {
-                debug("Using recent cached firmware release")
-                val externalModel = cachedRelease.asExternalModel()
+    private fun getLatestFirmware(releaseType: FirmwareReleaseType, refresh: Boolean = false): Flow<FirmwareRelease?> =
+        flow {
+            if (refresh) {
+                invalidateCache()
+            } else {
+                val cachedRelease = localDataSource.getLatestRelease(releaseType)
+                if (cachedRelease != null && !isCacheExpired(cachedRelease.lastUpdated)) {
+                    val externalModel = cachedRelease.asExternalModel()
+                    emit(externalModel)
+                    return@flow
+                }
+            }
+            try {
+                val networkFirmwareReleases =
+                    apiDataSource.getFirmwareReleases() ?: throw IOException("empty response from server")
+                val releases =
+                    when (releaseType) {
+                        FirmwareReleaseType.STABLE -> networkFirmwareReleases.releases.stable
+                        FirmwareReleaseType.ALPHA -> networkFirmwareReleases.releases.alpha
+                    }
+                localDataSource.insertFirmwareReleases(releases, releaseType)
+                val cachedRelease = localDataSource.getLatestRelease(releaseType)
+                val externalModel = cachedRelease?.asExternalModel()
                 emit(externalModel)
-                return@flow
+            } catch (e: IOException) {
+                warn("Failed to fetch firmware releases from server: ${e.message}")
+                val jsonFirmwareReleases = jsonDataSource.loadFirmwareReleaseFromJsonAsset()
+                val releases =
+                    when (releaseType) {
+                        FirmwareReleaseType.STABLE -> jsonFirmwareReleases.releases.stable
+                        FirmwareReleaseType.ALPHA -> jsonFirmwareReleases.releases.alpha
+                    }
+                localDataSource.insertFirmwareReleases(releases, releaseType)
+                val cachedRelease = localDataSource.getLatestRelease(releaseType)
+                val externalModel = cachedRelease?.asExternalModel()
+                emit(externalModel)
             }
         }
-        try {
-            debug("Fetching firmware releases from server")
-            val networkFirmwareReleases = apiDataSource.getFirmwareReleases()
-                ?: throw IOException("empty response from server")
-            val releases = when (releaseType) {
-                FirmwareReleaseType.STABLE -> networkFirmwareReleases.releases.stable
-                FirmwareReleaseType.ALPHA -> networkFirmwareReleases.releases.alpha
-            }
-            localDataSource.insertFirmwareReleases(
-                releases,
-                releaseType
-            )
-            val cachedRelease = localDataSource.getLatestRelease(releaseType)
-            val externalModel = cachedRelease?.asExternalModel()
-            emit(externalModel)
-        } catch (e: IOException) {
-            warn("Failed to fetch firmware releases from server: ${e.message}")
-            val jsonFirmwareReleases = jsonDataSource.loadFirmwareReleaseFromJsonAsset()
-            val releases = when (releaseType) {
-                FirmwareReleaseType.STABLE -> jsonFirmwareReleases.releases.stable
-                FirmwareReleaseType.ALPHA -> jsonFirmwareReleases.releases.alpha
-            }
-            localDataSource.insertFirmwareReleases(
-                releases,
-                releaseType
-            )
-            val cachedRelease = localDataSource.getLatestRelease(releaseType)
-            val externalModel = cachedRelease?.asExternalModel()
-            emit(externalModel)
-        }
-    }
 
     suspend fun invalidateCache() {
         localDataSource.deleteAllFirmwareReleases()
     }
 
-    /**
-     * Check if the cache is expired
-     */
-    private fun isCacheExpired(lastUpdated: Long): Boolean {
-        return System.currentTimeMillis() - lastUpdated > CACHE_EXPIRATION_TIME_MS
-    }
+    /** Check if the cache is expired */
+    private fun isCacheExpired(lastUpdated: Long): Boolean =
+        System.currentTimeMillis() - lastUpdated > CACHE_EXPIRATION_TIME_MS
 }

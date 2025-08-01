@@ -56,6 +56,7 @@ import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.database.entity.asDeviceVersion
+import com.geeksville.mesh.repository.api.DeviceHardwareRepository
 import com.geeksville.mesh.repository.api.FirmwareReleaseRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
@@ -192,6 +193,7 @@ constructor(
     private val radioConfigRepository: RadioConfigRepository,
     private val radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: MeshLogRepository,
+    private val deviceHardwareRepository: DeviceHardwareRepository,
     private val packetRepository: PacketRepository,
     private val quickChatActionRepository: QuickChatActionRepository,
     private val locationRepository: LocationRepository,
@@ -219,7 +221,16 @@ constructor(
         viewModelScope.launch { _excludedModulesUnlocked.value = true }
     }
 
+    val firmwareVersion = myNodeInfo.mapNotNull { nodeInfo -> nodeInfo?.firmwareVersion }
+
     val firmwareEdition = meshLogRepository.getMyNodeInfo().map { nodeInfo -> nodeInfo?.firmwareEdition }
+
+    val deviceHardware: StateFlow<DeviceHardware?> =
+        ourNodeInfo
+            .mapNotNull { nodeInfo ->
+                nodeInfo?.user?.hwModel?.let { deviceHardwareRepository.getDeviceHardwareByModel(it.number) }
+            }
+            .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5_000), initialValue = null)
 
     val clientNotification: StateFlow<MeshProtos.ClientNotification?> = radioConfigRepository.clientNotification
 

@@ -12,12 +12,19 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  test_secrets:
+    runs-on: ubuntu-latest
+    env:
+        TEST_SECRET: ${{ secrets.TEST_SECRET }}
+    steps:
+      - name: Test Secrets
+        run: |
+          echo "$TEST_SECRET"
+
   build_and_detekt:
     if: github.repository == 'meshtastic/Meshtastic-Android' && github.head_ref != 'scheduled-updates'
     uses: ./.github/workflows/reusable-android-build.yml
-    secrets:
-      GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-    # inputs.upload_artifacts defaults to true, so no need to specify for PRs
+    secrets: inherit
 
   androidTest:
     # Assuming androidTest should also only run for the main repository

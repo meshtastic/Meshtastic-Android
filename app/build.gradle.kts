@@ -28,6 +28,8 @@ plugins {
     alias(libs.plugins.protobuf)
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.datadog)
+    alias(libs.plugins.secrets.gradle.plugin)
     alias(libs.plugins.spotless)
 }
 
@@ -163,6 +165,17 @@ kotlin {
     }
 }
 
+secrets {
+    defaultPropertiesFileName = "secrets.defaults.properties"
+    propertiesFileName = "secrets.properties"
+}
+
+datadog {
+    // compose instrumentation is broken for kotlin 2.2.x - see:
+    // https://github.com/DataDog/dd-sdk-android-gradle-plugin/issues/407
+    //  composeInstrumentation = InstrumentationMode.AUTO
+}
+
 // per protobuf-gradle-plugin docs, this is recommended for android
 protobuf {
     protoc { artifact = libs.protobuf.protoc.get().toString() }
@@ -180,8 +193,18 @@ protobuf {
 androidComponents {
     onVariants(selector().all()) { variant ->
         project.afterEvaluate {
-            val capName = variant.name.replaceFirstChar { it.uppercase() }
-            tasks.named("ksp${capName}Kotlin") { dependsOn("generate${capName}Proto") }
+            val variantNameCapped = variant.name.replaceFirstChar { it.uppercase() }
+            tasks.named("ksp${variantNameCapped}Kotlin") { dependsOn("generate${variantNameCapped}Proto") }
+        }
+    }
+    onVariants(selector().withBuildType("release")) { variant ->
+        if (variant.flavorName == "google") {
+            val variantNameCapped = variant.name.replaceFirstChar { it.uppercase() }
+            val minifyTaskName = "minify${variantNameCapped}WithR8"
+            val uploadTaskName = "uploadMapping$variantNameCapped"
+            if (project.tasks.findByName(uploadTaskName) != null && project.tasks.findByName(minifyTaskName) != null) {
+                tasks.named(minifyTaskName).configure { finalizedBy(uploadTaskName) }
+            }
         }
     }
 }
@@ -225,6 +248,7 @@ dependencies {
     implementation(libs.work.runtime.ktx)
     implementation(libs.core.location.altitude)
     implementation(libs.accompanist.permissions)
+    implementation(libs.timber)
 
     // Compose BOM
     implementation(platform(libs.compose.bom))
@@ -233,6 +257,7 @@ dependencies {
     // Firebase BOM
     "googleImplementation"(platform(libs.firebase.bom))
     "googleImplementation"(libs.bundles.firebase)
+    "googleImplementation"(libs.bundles.datadog)
 
     // ksp
     ksp(libs.room.compiler)
@@ -262,7 +287,7 @@ detekt {
     baseline = file("../config/detekt/detekt-baseline.xml")
 }
 
-val googleServiceKeywords = listOf("crashlytics", "google")
+val googleServiceKeywords = listOf("crashlytics", "google", "datadog")
 
 tasks.configureEach {
     if (
