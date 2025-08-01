@@ -97,6 +97,7 @@
     <string name="pairing_failed_try_again">Sidumine ebaõnnestus, vali palun uuesti</string>
     <string name="location_disabled">Juurdepääs asukohale on välja lülitatud, ei saa asukohta teistele jagada.</string>
     <string name="share">Jaga</string>
+    <string name="new_node_seen">Uus sõlm nähtud: %s</string>
     <string name="disconnected">Ühendus katkenud</string>
     <string name="device_sleeping">Seade on unerežiimis</string>
     <string name="connected_count">Ühendatud: %1$s aktiivsed</string>
@@ -180,6 +181,8 @@
     <string name="quick_chat_edit">Kiirvestluse muutmine</string>
     <string name="quick_chat_append">Lisa sõnumisse</string>
     <string name="quick_chat_instant">Saada kohe</string>
+    <string name="quick_chat_show">Kuva kiirsõnumite valik</string>
+    <string name="quick_chat_hide">Peida kiirsõnumite valik</string>
     <string name="factory_reset">Tehasesätted</string>
     <string name="bluetooth_disabled">Bluetooth väljas</string>
     <string name="permission_missing_31">Meshtastic vajab luba läheduses asuvate seadmete leidmiseks ja sinihamba ​​kaudu ühenduse loomiseks. Saad selle välja lülitada, kui seda ei kasutata.</string>
@@ -347,6 +350,7 @@
     <string name="downlink_enabled">Vastuvõtt lubatud</string>
     <string name="default_">Vaikesäte</string>
     <string name="position_enabled">Asukoht lubatud</string>
+    <string name="precise_location">Täpne asukoht</string>
     <string name="gpio_pin">GPIO klemm</string>
     <string name="type">Tüüp</string>
     <string name="hide_password">Peida parool</string>
@@ -562,8 +566,11 @@
     <string name="node_number">Sõlme number</string>
     <string name="user_id">Kasutaja ID</string>
     <string name="uptime">Töötamise aeg</string>
+    <string name="load_indexed">Lae %1$d</string>
+    <string name="disk_free_indexed">Vaba kettamaht %1$d</string>
     <string name="timestamp">Ajatempel</string>
     <string name="heading">Suund</string>
+    <string name="speed">Kiirus</string>
     <string name="sats">Sateliit</string>
     <string name="alt">Kõrgus</string>
     <string name="freq">Sagedus</string>
@@ -676,6 +683,46 @@
     <string name="latest_stable_firmware">Viimane stabiilne</string>
     <string name="latest_alpha_firmware">Viimane alfa</string>
     <string name="supported_by_community">Toetatud Meshtastic kommuuni poolt</string>
+    <string name="firmware_edition">Püsivara versioon</string>
+    <string name="recent_network_devices">Hiljuti nähtud seadmed</string>
+    <string name="discovered_network_devices">Avastatud seadmed</string>
+    <string name="get_started">Algusesse</string>
+    <string name="intro_welcome">Teretulemast</string>
+    <string name="stay_connected_anywhere">Igal pool ühenduses</string>
+    <string name="communicate_off_the_grid">Saada sõnumeid sõpradele ja kommuunile ilma võrguühenduse või mobiilivõrguta.</string>
+    <string name="create_your_own_networks">Loo oma võrk</string>
+    <string name="easily_set_up_private_mesh_networks">Loo hõlpsalt privaatseid meshtastic võrke turvaliseks ja usaldusväärseks suhtluseks asustamata piirkondades.</string>
+    <string name="track_and_share_locations">Jälgi ja jaga asukohta</string>
+    <string name="share_your_location_in_real_time">Jaga reaalajas oma asukohta ja hoia oma grupp ühtsena integreeritud GPS funktsioonide abil.</string>
+    <string name="app_notifications">Rakenduse märguanded</string>
+    <string name="incoming_messages">Sissetulevad sõnumid</string>
+    <string name="notifications_for_channel_and_direct_messages">Kanali märguanded ja otsesõnumid.</string>
+    <string name="new_nodes">Uus sõlm</string>
+    <string name="notifications_for_newly_discovered_nodes">Uue avastatud sõlme märguanded.</string>
+    <string name="low_battery">Madal akutase</string>
+    <string name="notifications_for_low_battery_alerts">Ühendatud seadme madala akutaseme märguanded.</string>
+    <string name="critical_alerts_description">Kriitilistena saadetud pakettide saatmisel ignoreeritakse operatsioonisüsteemi teavituskeskuse vaigistust ja režiimi „Ära sega” sätteid.</string>
+    <string name="configure_notification_permissions">Määra märguannete load</string>
+    <string name="phone_location">Telefoni asukoht</string>
+    <string name="phone_location_description">Meshtastic kasutab teie telefoni asukohta mitmete funktsioonide lubamiseks. Saate oma asukohalubasid igal ajal seadetes muuta.</string>
+    <string name="share_location">Jaga asukohta</string>
+    <string name="share_location_description">Kasuta asukohana oma telefoni GPS, mitte sõlme riistvaralist GPS.</string>
+    <string name="distance_measurements">Kauguse mõõtmised</string>
+    <string name="distance_measurements_description">Kuva telefoni ja teiste Meshtastic sõlmede asukoha vaheline kaugus.</string>
+    <string name="distance_filters">Kauguse filter</string>
+    <string name="distance_filters_description">Filtreeri sõlmede loendit ja sõlmede kaarti kauguse põhjal sinu telefonist.</string>
+    <string name="mesh_map_location">Meshtastic kaardi asukoht</string>
+    <string name="mesh_map_location_description">Lubab telefoni asukoha kuvamine sinisena sõlmede kaardil.</string>
+    <string name="configure_location_permissions">Muuda asukoha kasutusload</string>
     <string name="skip">Jäta vahele</string>
+    <string name="settings">sätted</string>
+    <string name="critical_alerts">Häiresõnumid</string>
+    <string name="critical_alerts_dnd_request_text">Et tagada teile kriitiliste teadete vastuvõtmine, näiteks
+        hädaabisõnumid, isegi siis, kui teie seade on „Ära sega” režiimis, pead lubama eri
+        load. Palun luba see teavitusseadetes.
+    </string>
+    <string name="configure_critical_alerts">Kriitiliste hoiatuste seadistamine</string>
+    <string name="notification_permissions_description">Meshtastic kasutab märguandeid, et hoida teid kursis uute sõnumite ja muude oluliste sündmustega. Saate oma märguannete õigusi igal ajal seadetes muuta.</string>
     <string name="next">Järgmine</string>
+    <string name="grant_permissions_and_scan">Anna õigused ja skanneeri</string>
 </resources>
