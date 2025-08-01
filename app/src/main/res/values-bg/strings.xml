@@ -70,6 +70,7 @@
     <string name="pairing_failed_try_again">Сдвояването не бе успешно, моля, опитайте отново</string>
     <string name="location_disabled">Достъпът до местоположението е изключен, не може да предостави позиция на мрежата.</string>
     <string name="share">Сподели</string>
+    <string name="new_node_seen">Видян нов възел: %s</string>
     <string name="disconnected">Прекъсната връзка</string>
     <string name="device_sleeping">Устройството спи</string>
     <string name="connected_count">Свързани: %1$s онлайн</string>
