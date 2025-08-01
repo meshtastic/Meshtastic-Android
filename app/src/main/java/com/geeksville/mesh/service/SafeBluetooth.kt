@@ -46,6 +46,8 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeoutOrNull
 import java.io.Closeable
 import java.util.Random
 import java.util.UUID
@@ -772,16 +774,18 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             try {
                 g.disconnect()
 
-                // Wait for our callback to run and handle hte disconnect
-                var msecsLeft = 1000
-                while (gatt != null && msecsLeft >= 0) {
-                    Thread.sleep(100)
-                    msecsLeft -= 100
+                // Wait for our callback to run and handle the disconnect, with a timeout.
+                runBlocking {
+                    withTimeoutOrNull(1000) {
+                        while (gatt != null) {
+                            delay(100)
+                        }
+                    }
                 }
 
                 gatt?.let { g2 ->
                     warn("Android onConnectionStateChange did not run, manually closing")
-                    gatt = null // clear gat before calling close, bcause close might throw dead object exception
+                    gatt = null // clear gatt before calling close, because close might throw dead object exception
                     g2.close()
                 }
             } catch (ex: NullPointerException) {
