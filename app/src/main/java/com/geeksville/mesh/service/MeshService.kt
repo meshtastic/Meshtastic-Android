@@ -59,7 +59,6 @@ import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.PacketRepository
@@ -494,9 +493,11 @@ class MeshService :
     // END OF MODEL
     //
 
+    @Suppress("UnusedPrivateMember")
     private val deviceVersion
         get() = DeviceVersion(myNodeInfo?.firmwareVersion ?: "")
 
+    @Suppress("UnusedPrivateMember")
     private val appVersion
         get() = BuildConfig.VERSION_CODE
 
@@ -1384,7 +1385,7 @@ class MeshService :
             // Do our startup init
             try {
                 connectTimeMsec = System.currentTimeMillis()
-                startConfig()
+                startConfigOnly()
             } catch (ex: InvalidProtocolBufferException) {
                 errormsg("Invalid protocol buffer sent by device - update device software and try again", ex)
             } catch (ex: RadioNotConnectedException) {
@@ -1456,6 +1457,7 @@ class MeshService :
         )
     }
 
+    @Suppress("CyclomaticComplexMethod")
     private fun onReceiveFromRadio(bytes: ByteArray) {
         try {
             val proto = MeshProtos.FromRadio.parseFrom(bytes)
@@ -1491,7 +1493,8 @@ class MeshService :
     private val newNodes = mutableListOf<MeshProtos.NodeInfo>()
 
     // Used to make sure we never get foold by old BLE packets
-    private var configNonce = 1
+    private var configOnlyNonce = 69420
+    private var nodeInfoNonce = 69421
 
     private fun handleDeviceConfig(config: ConfigProtos.Config) {
         debug("Received config ${config.toOneLineString()}")
@@ -1752,65 +1755,91 @@ class MeshService :
     private fun onHasSettings() {
         processQueuedPackets() // send any packets that were queued up
         startMqttClientProxy()
-
-        // broadcast an intent with our new connection state
         serviceBroadcasts.broadcastConnection()
-        onNodeDBChanged()
+        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { setTimeOnly = currentSecond() })
+        sendAnalytics()
         reportConnection()
     }
 
     private fun handleConfigComplete(configCompleteId: Int) {
-        if (configCompleteId == configNonce) {
-            val packetToSave =
-                MeshLog(
-                    uuid = UUID.randomUUID().toString(),
-                    message_type = "ConfigComplete",
-                    received_date = System.currentTimeMillis(),
-                    raw_message = configCompleteId.toString(),
-                    fromRadio = fromRadio { this.configCompleteId = configCompleteId },
-                )
-            insertMeshLog(packetToSave)
-
-            // This was our config request
-            if (newMyNodeInfo == null || newNodes.isEmpty()) {
-                errormsg("Did not receive a valid config")
-            } else {
-                discardNodeDB()
-                debug("Installing new node DB")
-                myNodeInfo = newMyNodeInfo
-
-                newNodes.forEach(::installNodeInfo)
-                newNodes.clear() // Just to save RAM ;-)
-
-                serviceScope.handledLaunch {
-                    radioConfigRepository.installNodeDB(myNodeInfo!!, nodeDBbyNodeNum.values.toList())
-                }
-
-                haveNodeDB = true // we now have nodes from real hardware
-
-                sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { setTimeOnly = currentSecond() })
-                sendAnalytics()
-
-                if (deviceVersion < minDeviceVersion || appVersion < minAppVersion) {
-                    info("Device firmware or app is too old, faking config so firmware update can occur")
-                    setLocalConfig(config { security = localConfig.security.copy { isManaged = true } })
-                }
-                onHasSettings()
-            }
+        if (configCompleteId == configOnlyNonce) {
+            debug("Received config complete for config-only nonce $configOnlyNonce")
+            handleConfigOnlyComplete()
+        } else if (configCompleteId == nodeInfoNonce) {
+            debug("Received node info complete for nonce $nodeInfoNonce")
+            handleNodeInfoComplete()
         } else {
-            warn("Ignoring stale config complete")
+            warn("Received unexpected config complete id $configCompleteId")
+        }
+    }
+
+    private fun handleConfigOnlyComplete() {
+        debug("Received config only complete for nonce $configOnlyNonce")
+        val packetToSave =
+            MeshLog(
+                uuid = UUID.randomUUID().toString(),
+                message_type = "ConfigOnlyComplete",
+                received_date = System.currentTimeMillis(),
+                raw_message = configOnlyNonce.toString(),
+                fromRadio = fromRadio { this.configCompleteId = configOnlyNonce },
+            )
+        insertMeshLog(packetToSave)
+
+        // This was our config request
+        if (newMyNodeInfo == null) {
+            errormsg("Did not receive a valid config")
+        } else {
+            myNodeInfo = newMyNodeInfo
+        }
+        startNodeInfoOnly()
+        onHasSettings()
+    }
+
+    private fun handleNodeInfoComplete() {
+        debug("Received node info complete for nonce $nodeInfoNonce")
+        val packetToSave =
+            MeshLog(
+                uuid = UUID.randomUUID().toString(),
+                message_type = "NodeInfoComplete",
+                received_date = System.currentTimeMillis(),
+                raw_message = nodeInfoNonce.toString(),
+                fromRadio = fromRadio { this.configCompleteId = nodeInfoNonce },
+            )
+        insertMeshLog(packetToSave)
+
+        // This was our config request
+        if (newNodes.isEmpty()) {
+            errormsg("Did not receive a valid node info")
+        } else {
+            newNodes.forEach(::installNodeInfo)
+            newNodes.clear() // Just to save RAM ;-)
+
+            serviceScope.handledLaunch {
+                radioConfigRepository.installNodeDB(myNodeInfo!!, nodeDBbyNodeNum.values.toList())
+            }
+
+            haveNodeDB = true // we now have nodes from real hardware
+
+            sendAnalytics()
+            onNodeDBChanged()
         }
     }
 
     /** Start the modern (REV2) API configuration flow */
-    private fun startConfig() {
-        configNonce += 1
-        newNodes.clear()
+    private fun startConfigOnly() {
         newMyNodeInfo = null
 
-        debug("Starting config nonce=$configNonce")
+        debug("Starting config only nonce=$configOnlyNonce")
 
-        sendToRadio(ToRadio.newBuilder().apply { this.wantConfigId = configNonce })
+        sendToRadio(ToRadio.newBuilder().apply { this.wantConfigId = configOnlyNonce })
+    }
+
+    private fun startNodeInfoOnly() {
+        newNodes.clear()
+
+        debug("Starting node info nonce=$nodeInfoNonce")
+
+        sendToRadio(ToRadio.newBuilder().apply { this.wantConfigId = nodeInfoNonce })
     }
 
     /** Send a position (typically from our built in GPS) into the mesh. */
