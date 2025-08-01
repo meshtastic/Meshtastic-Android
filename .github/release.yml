@@ -18,6 +18,7 @@ changelog:
           - dependencies
           - repo
           - automation
+          - release
 
     - title: 👷Dependencies
       labels:
@@ -30,3 +31,4 @@ changelog:
     - title: 🤖Automated
       labels:
         - automation
+        - release

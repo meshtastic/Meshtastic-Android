@@ -72,6 +72,7 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.AdminRoute
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.ModuleRoute
+import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
@@ -87,22 +88,21 @@ fun RadioConfigScreen(
     modifier: Modifier = Modifier,
     viewModel: RadioConfigViewModel = hiltViewModel(),
     uiViewModel: UIViewModel = hiltViewModel(),
-    onNavigate: (Route) -> Unit = {}
+    onNavigate: (Route) -> Unit = {},
 ) {
     val node by viewModel.destNode.collectAsStateWithLifecycle()
     val ourNode by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isLocal = node?.num == ourNode?.num
-    val nodeName: String? = node?.user?.longName?.let {
-        if (!isLocal) {
-            "$it (" + stringResource(R.string.remote) + ")"
-        } else {
-            it
+    val nodeName: String? =
+        node?.user?.longName?.let {
+            if (!isLocal) {
+                "$it (" + stringResource(R.string.remote) + ")"
+            } else {
+                it
+            }
         }
-    }
 
-    nodeName?.let {
-        uiViewModel.setTitle(it)
-    }
+    nodeName?.let { uiViewModel.setTitle(it) }
 
     val excludedModulesUnlocked by uiViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
 
@@ -128,28 +128,25 @@ fun RadioConfigScreen(
     var deviceProfile by remember { mutableStateOf<DeviceProfile?>(null) }
     var showEditDeviceProfileDialog by remember { mutableStateOf(false) }
 
-    val importConfigLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
-        if (it.resultCode == Activity.RESULT_OK) {
-            showEditDeviceProfileDialog = true
-            it.data?.data?.let { uri ->
-                viewModel.importProfile(uri) { profile -> deviceProfile = profile }
+    val importConfigLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == Activity.RESULT_OK) {
+                showEditDeviceProfileDialog = true
+                it.data?.data?.let { uri -> viewModel.importProfile(uri) { profile -> deviceProfile = profile } }
             }
         }
-    }
 
-    val exportConfigLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) {
-        if (it.resultCode == Activity.RESULT_OK) {
-            it.data?.data?.let { uri -> viewModel.exportProfile(uri, deviceProfile!!) }
+    val exportConfigLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == Activity.RESULT_OK) {
+                it.data?.data?.let { uri -> viewModel.exportProfile(uri, deviceProfile!!) }
+            }
         }
-    }
 
     if (showEditDeviceProfileDialog) {
         EditDeviceProfileDialog(
-            title = if (deviceProfile != null) {
+            title =
+            if (deviceProfile != null) {
                 stringResource(R.string.import_configuration)
             } else {
                 stringResource(R.string.export_configuration)
@@ -161,18 +158,19 @@ fun RadioConfigScreen(
                     viewModel.installProfile(it)
                 } else {
                     deviceProfile = it
-                    val intent = Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "application/*"
-                        putExtra(Intent.EXTRA_TITLE, "device_profile.cfg")
-                    }
+                    val intent =
+                        Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            type = "application/*"
+                            putExtra(Intent.EXTRA_TITLE, "device_profile.cfg")
+                        }
                     exportConfigLauncher.launch(intent)
                 }
             },
             onDismiss = {
                 showEditDeviceProfileDialog = false
                 deviceProfile = null
-            }
+            },
         )
     }
 
@@ -187,10 +185,11 @@ fun RadioConfigScreen(
         onImport = {
             viewModel.clearPacketResponse()
             deviceProfile = null
-            val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                addCategory(Intent.CATEGORY_OPENABLE)
-                type = "application/*"
-            }
+            val intent =
+                Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "application/*"
+                }
             importConfigLauncher.launch(intent)
         },
         onExport = {
@@ -198,44 +197,23 @@ fun RadioConfigScreen(
             deviceProfile = null
             showEditDeviceProfileDialog = true
         },
+        onNavigate = onNavigate,
     )
 }
 
 @Composable
-fun NavCard(
-    title: String,
-    enabled: Boolean,
-    icon: ImageVector? = null,
-    onClick: () -> Unit
-) {
-    Card(
-        onClick = onClick,
-        enabled = enabled,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 2.dp)
-    ) {
+fun NavCard(title: String, enabled: Boolean, icon: ImageVector? = null, onClick: () -> Unit) {
+    Card(onClick = onClick, enabled = enabled, modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp)) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp)
+            modifier = Modifier.padding(vertical = 12.dp, horizontal = 16.dp),
         ) {
             if (icon != null) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    modifier = Modifier.size(24.dp),
-                )
+                Icon(imageVector = icon, contentDescription = title, modifier = Modifier.size(24.dp))
                 Spacer(modifier = Modifier.width(8.dp))
             }
-            Text(
-                text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                modifier = Modifier.weight(1f)
-            )
-            Icon(
-                Icons.AutoMirrored.TwoTone.KeyboardArrowRight, "trailingIcon",
-                modifier = Modifier.wrapContentSize(),
-            )
+            Text(text = title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+            Icon(Icons.AutoMirrored.TwoTone.KeyboardArrowRight, "trailingIcon", modifier = Modifier.wrapContentSize())
         }
     }
 }
@@ -249,58 +227,48 @@ private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Un
             onDismissRequest = {},
             shape = RoundedCornerShape(16.dp),
             title = {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                ) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                     Icon(
                         imageVector = Icons.TwoTone.Warning,
                         contentDescription = stringResource(id = R.string.warning),
-                        modifier = Modifier.padding(end = 8.dp)
+                        modifier = Modifier.padding(end = 8.dp),
                     )
-                    Text(
-                        text = "${stringResource(title)}?\n"
-                    )
+                    Text(text = "${stringResource(title)}?\n")
                     Icon(
                         imageVector = Icons.TwoTone.Warning,
                         contentDescription = stringResource(id = R.string.warning),
-                        modifier = Modifier.padding(start = 8.dp)
+                        modifier = Modifier.padding(start = 8.dp),
                     )
                 }
             },
             confirmButton = {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    TextButton(
-                        modifier = Modifier.weight(1f),
-                        onClick = { showDialog = false },
-                    ) { Text(stringResource(R.string.cancel)) }
+                    TextButton(modifier = Modifier.weight(1f), onClick = { showDialog = false }) {
+                        Text(stringResource(R.string.cancel))
+                    }
                     Button(
                         modifier = Modifier.weight(1f),
                         onClick = {
                             showDialog = false
                             onClick()
                         },
-                    ) { Text(stringResource(R.string.send)) }
+                    ) {
+                        Text(stringResource(R.string.send))
+                    }
                 }
-            }
+            },
         )
     }
 
     Column {
         Spacer(modifier = Modifier.height(4.dp))
-        Button(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
-            enabled = enabled,
-            onClick = { showDialog = true },
-        ) { Text(text = stringResource(title)) }
+        Button(modifier = Modifier.fillMaxWidth().height(48.dp), enabled = enabled, onClick = { showDialog = true }) {
+            Text(text = stringResource(title))
+        }
     }
 }
 
@@ -312,6 +280,7 @@ private fun RadioConfigItemList(
     onRouteClick: (Enum<*>) -> Unit = {},
     onImport: () -> Unit = {},
     onExport: () -> Unit = {},
+    onNavigate: (Route) -> Unit,
 ) {
     val enabled = state.connected && !state.responseState.isWaiting()
     var modules by remember { mutableStateOf(ModuleRoute.filterExcludedFrom(state.metadata)) }
@@ -322,26 +291,15 @@ private fun RadioConfigItemList(
             modules = ModuleRoute.filterExcludedFrom(state.metadata)
         }
     }
-    LazyColumn(
-        modifier = modifier,
-        contentPadding = PaddingValues(horizontal = 16.dp),
-    ) {
+    LazyColumn(modifier = modifier, contentPadding = PaddingValues(horizontal = 16.dp)) {
         item { PreferenceCategory(stringResource(R.string.radio_configuration)) }
         items(ConfigRoute.filterExcludedFrom(state.metadata)) {
-            NavCard(
-                title = stringResource(it.title),
-                icon = it.icon,
-                enabled = enabled
-            ) { onRouteClick(it) }
+            NavCard(title = stringResource(it.title), icon = it.icon, enabled = enabled) { onRouteClick(it) }
         }
 
         item { PreferenceCategory(stringResource(R.string.module_settings)) }
         items(modules) {
-            NavCard(
-                title = stringResource(it.title),
-                icon = it.icon,
-                enabled = enabled
-            ) { onRouteClick(it) }
+            NavCard(title = stringResource(it.title), icon = it.icon, enabled = enabled) { onRouteClick(it) }
         }
 
         if (state.isLocal) {
@@ -363,6 +321,15 @@ private fun RadioConfigItemList(
         }
 
         items(AdminRoute.entries) { NavButton(it.title, enabled) { onRouteClick(it) } }
+
+        item {
+            PreferenceCategory("Advanced")
+            NavCard(
+                title = stringResource(R.string.clean_node_database_title),
+                enabled = enabled,
+                onClick = { onNavigate(RadioConfigRoutes.CleanNodeDb) },
+            )
+        }
     }
 }
 
@@ -370,10 +337,7 @@ private const val UNLOCK_CLICK_COUNT = 5 // Number of clicks required to unlock 
 private const val UNLOCK_TIMEOUT_SECONDS = 3 // Timeout in seconds to reset the click counter.
 
 @Composable
-fun RadioConfigMenuActions(
-    modifier: Modifier = Modifier,
-    viewModel: UIViewModel = hiltViewModel(),
-) {
+fun RadioConfigMenuActions(modifier: Modifier = Modifier, viewModel: UIViewModel = hiltViewModel()) {
     val context = LocalContext.current
     var counter by remember { mutableIntStateOf(0) }
     LaunchedEffect(counter) {
@@ -388,22 +352,15 @@ fun RadioConfigMenuActions(
             counter++
             if (counter == UNLOCK_CLICK_COUNT) {
                 viewModel.unlockExcludedModules()
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.modules_unlocked),
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(context, context.getString(R.string.modules_unlocked), Toast.LENGTH_LONG).show()
             }
         },
         modifier = modifier,
-    ) {
-    }
+    ) {}
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun RadioSettingsScreenPreview() = AppTheme {
-    RadioConfigItemList(
-        RadioConfigState(isLocal = true, connected = true)
-    )
+    RadioConfigItemList(state = RadioConfigState(isLocal = true, connected = true), onNavigate = { _ -> })
 }
