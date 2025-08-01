@@ -121,7 +121,7 @@ constructor(
         @Volatile var safe: SafeBluetooth? = null
     }
 
-    // / Our BLE device
+    // Our BLE device
     val device
         get() =
             (safe ?: throw RadioNotConnectedException("No SafeBluetooth")).gatt
