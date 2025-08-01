@@ -59,7 +59,6 @@ import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.concurrent.handledLaunch
-import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.PacketRepository
@@ -494,9 +493,11 @@ class MeshService :
     // END OF MODEL
     //
 
+    @Suppress("UnusedPrivateMember")
     private val deviceVersion
         get() = DeviceVersion(myNodeInfo?.firmwareVersion ?: "")
 
+    @Suppress("UnusedPrivateMember")
     private val appVersion
         get() = BuildConfig.VERSION_CODE
 
@@ -1456,23 +1457,14 @@ class MeshService :
         )
     }
 
+    @Suppress("CyclomaticComplexMethod")
     private fun onReceiveFromRadio(bytes: ByteArray) {
         try {
             val proto = MeshProtos.FromRadio.parseFrom(bytes)
             // info("Received from radio service: ${proto.toOneLineString()}")
             when (proto.payloadVariantCase.number) {
                 MeshProtos.FromRadio.PACKET_FIELD_NUMBER -> handleReceivedMeshPacket(proto.packet)
-                MeshProtos.FromRadio.CONFIG_COMPLETE_ID_FIELD_NUMBER -> {
-                    if (proto.configCompleteId == configOnlyNonce) {
-                        debug("Received config complete for config-only nonce $configOnlyNonce")
-                        handleConfigOnlyComplete()
-                    } else if (proto.configCompleteId == nodeInfoNonce) {
-                        debug("Received node info complete for nonce $nodeInfoNonce")
-                        handleNodeInfoComplete()
-                    } else {
-                        warn("Received unexpected config complete id ${proto.configCompleteId}")
-                    }
-                }
+                MeshProtos.FromRadio.CONFIG_COMPLETE_ID_FIELD_NUMBER -> handleConfigComplete(proto.configCompleteId)
                 MeshProtos.FromRadio.MY_INFO_FIELD_NUMBER -> handleMyInfo(proto.myInfo)
                 MeshProtos.FromRadio.NODE_INFO_FIELD_NUMBER -> handleNodeInfo(proto.nodeInfo)
                 MeshProtos.FromRadio.CHANNEL_FIELD_NUMBER -> handleChannel(proto.channel)
@@ -1767,6 +1759,18 @@ class MeshService :
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { setTimeOnly = currentSecond() })
         sendAnalytics()
         reportConnection()
+    }
+
+    private fun handleConfigComplete(configCompleteId: Int) {
+        if (configCompleteId == configOnlyNonce) {
+            debug("Received config complete for config-only nonce $configOnlyNonce")
+            handleConfigOnlyComplete()
+        } else if (configCompleteId == nodeInfoNonce) {
+            debug("Received node info complete for nonce $nodeInfoNonce")
+            handleNodeInfoComplete()
+        } else {
+            warn("Received unexpected config complete id $configCompleteId")
+        }
     }
 
     private fun handleConfigOnlyComplete() {
