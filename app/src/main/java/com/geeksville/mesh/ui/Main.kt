@@ -307,6 +307,7 @@ fun MainScreen(
 }
 
 @Composable
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 private fun VersionChecks(viewModel: UIViewModel) {
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val myNodeInfo by viewModel.myNodeInfo.collectAsStateWithLifecycle()
