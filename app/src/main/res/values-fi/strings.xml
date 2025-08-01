@@ -648,6 +648,13 @@
     <string name="overflow_menu">Lisävalikko</string>
     <string name="uv_lux">UV-valon voimakkuus</string>
     <string name="unknown">Tuntematon</string>
+    <string name="clean_node_database_title">Tyhjennä NodeDB-tietokanta</string>
+    <string name="clean_nodes_older_than">Poista laitteet, joita ei ole nähty yli %1$d päivään</string>
+    <string name="clean_unknown_nodes">Poista vain tuntemattomat laitteet</string>
+    <string name="clean_low_interaction_nodes">Poista laitteet, joilla on vähän tai ei yhtään yhteyksiä</string>
+    <string name="clean_ignored_nodes">Poista huomioimatta olevat laitteet</string>
+    <string name="clean_now">Poista nyt</string>
+    <string name="clean_node_database_confirmation">Tämä poistaa %1$d laitetta tietokannasta. Toimintoa ei voi peruuttaa.</string>
     <string name="security_icon_help_green_lock">Vihreä lukko tarkoittaa, että kanava on suojattu salauksella käyttäen joko 128- tai 256-bittistä AES-avainta.</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <string name="security_icon_insecure_no_precise">Kanava ei ole suojattu, tieto ei tarkkaa</string>
@@ -725,4 +732,6 @@
     <string name="notification_permissions_description">Meshtastic käyttää ilmoituksia tiedottaakseen uusista viesteistä ja muista tärkeistä tapahtumista. Voit muuttaa ilmoitusasetuksia milloin tahansa.</string>
     <string name="next">Seuraava</string>
     <string name="grant_permissions_and_scan">Salli käyttöoikeudet ja skannaa</string>
+    <string name="nodes_queued_for_deletion">%d laitetta jonossa poistettavaksi:</string>
+    <string name="clean_node_database_description">Varoitus: Tämä poistaa laitteet sovelluksen sekä laitteen tietokannoista.\nValinnat lisätään aiempiin.</string>
 </resources>
