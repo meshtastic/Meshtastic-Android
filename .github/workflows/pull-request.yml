@@ -61,11 +61,11 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
-    continue-on-error: true
     runs-on: ubuntu-latest
     steps:
     - id: label-the-PR
       uses: actions/labeler@v5
+      continue-on-error: true
 
   check-label:
     runs-on: ubuntu-latest
