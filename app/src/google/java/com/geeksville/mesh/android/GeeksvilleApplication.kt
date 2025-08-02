@@ -66,13 +66,6 @@ open class GeeksvilleApplication :
 
     private val analyticsPrefs: SharedPreferences by lazy { getSharedPreferences("analytics-prefs", MODE_PRIVATE) }
 
-    val isGooglePlayAvailable: Boolean
-        get() {
-            return GoogleApiAvailabilityLight.getInstance().isGooglePlayServicesAvailable(this).let {
-                it != ConnectionResult.SERVICE_MISSING && it != ConnectionResult.SERVICE_INVALID
-            }
-        }
-
     var isAnalyticsAllowed: Boolean
         get() = analyticsPrefs.getBoolean("allowed", true)
         set(value) {
@@ -126,8 +119,6 @@ open class GeeksvilleApplication :
                 .showIfMeetsConditions()
         }
     }
-
-    private val sampleRate = 100f
 
     override fun onCreate() {
         super.onCreate()
