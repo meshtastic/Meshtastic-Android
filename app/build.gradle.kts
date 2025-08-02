@@ -294,7 +294,7 @@ detekt {
 
 secrets {
     propertiesFileName = "secrets.properties"
-    defaultPropertiesFileName = "local.defaults.properties"
+    defaultPropertiesFileName = "secrets.defaults.properties"
 }
 
 val googleServiceKeywords = listOf("crashlytics", "google", "datadog")
