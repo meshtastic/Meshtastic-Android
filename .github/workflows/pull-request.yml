@@ -57,12 +57,24 @@ jobs:
           exit_on_result "build_and_detekt" "${{ needs.build_and_detekt.result }}"
           exit_on_result "androidTest" "${{ needs.androidTest.result }}"
 
+  labeler:
+    permissions:
+      contents: read
+      pull-requests: write
+    runs-on: ubuntu-latest
+    steps:
+    - id: label-the-PR
+      uses: actions/labeler@v5
+      continue-on-error: true
+
   check-label:
     runs-on: ubuntu-latest
     needs:
       [
         check-workflow-status,
+        labeler
       ]
+    if: always()
     steps:
       - name: Check for PR labels
         uses: actions/github-script@v7
