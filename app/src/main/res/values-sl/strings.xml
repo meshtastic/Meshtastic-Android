@@ -110,7 +110,7 @@
     <string name="okay">V redu</string>
     <string name="must_set_region">Nastavitev regije!</string>
     <string name="cant_change_no_radio">Menjava ni možna ni radia.</string>
-    <string name="save_messages">Izvozi rangetest.csv</string>
+    <string name="save_rangetest">Izvozi rangetest.csv</string>
     <string name="reset">Ponastavi</string>
     <string name="scan">Skeniraj</string>
     <string name="are_you_sure_change_default">Ali si prepričan spremeni na osnovno?</string>

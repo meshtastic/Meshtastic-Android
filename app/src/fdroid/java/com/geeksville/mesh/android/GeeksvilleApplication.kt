@@ -23,7 +23,10 @@ import android.content.SharedPreferences
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
+import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.analytics.AnalyticsProvider
+import com.geeksville.mesh.model.DeviceHardware
+import timber.log.Timber
 
 open class GeeksvilleApplication :
     Application(),
@@ -69,8 +72,18 @@ open class GeeksvilleApplication :
     override fun onCreate() {
         super.onCreate()
 
+        if (BuildConfig.DEBUG) {
+            Timber.plant(Timber.DebugTree())
+        }
+
         val nopAnalytics = com.geeksville.mesh.analytics.NopAnalytics(this)
         analytics = nopAnalytics
         isAnalyticsAllowed = false
     }
+}
+
+fun Context.isGooglePlayAvailable(): Boolean = false
+
+fun setAttributes(deviceVersion: String, deviceHardware: DeviceHardware) {
+    // No-op for F-Droid version
 }

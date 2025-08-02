@@ -97,6 +97,7 @@
     <string name="pairing_failed_try_again">Kopplung fehlgeschlagen, bitte wähle erneut</string>
     <string name="location_disabled">Standortzugriff ist deaktiviert, es kann keine Position zum Mesh bereitgestellt werden.</string>
     <string name="share">Teilen</string>
+    <string name="new_node_seen">Neuen Knoten gesehen: %s</string>
     <string name="disconnected">Verbindung getrennt</string>
     <string name="device_sleeping">Gerät schläft</string>
     <string name="connected_count">Verbunden: %1$s online</string>
@@ -138,7 +139,7 @@
     <string name="okay">OK</string>
     <string name="must_set_region">Sie müssen eine Region festlegen!</string>
     <string name="cant_change_no_radio">Konnte den Kanal nicht ändern, da das Funkgerät noch nicht verbunden ist. Bitte versuchen Sie es erneut.</string>
-    <string name="save_messages">Exportiere rangetest.csv</string>
+    <string name="save_rangetest">Exportiere rangetest.csv</string>
     <string name="reset">Zurücksetzen</string>
     <string name="scan">Scannen</string>
     <string name="are_you_sure_change_default">Sind Sie sicher, dass Sie in den Standardkanal wechseln möchten?</string>
@@ -349,6 +350,7 @@
     <string name="downlink_enabled">Downlink aktiviert</string>
     <string name="default_">Standard</string>
     <string name="position_enabled">Position aktiviert</string>
+    <string name="precise_location">Genauer Standort</string>
     <string name="gpio_pin">GPIO Pin</string>
     <string name="type">Typ</string>
     <string name="hide_password">Passwort verbergen</string>
@@ -564,6 +566,8 @@
     <string name="node_number">Knotennummer</string>
     <string name="user_id">Benutzer ID</string>
     <string name="uptime">Laufzeit</string>
+    <string name="load_indexed">Last %1$d</string>
+    <string name="disk_free_indexed">Laufwerkspeicher frei %1$d</string>
     <string name="timestamp">Zeitstempel</string>
     <string name="heading">Überschrift</string>
     <string name="speed">Geschwindigkeit</string>
@@ -619,7 +623,7 @@
     <string name="only_favorites">Nur Favoriten</string>
     <string name="show_waypoints">Zeige Wegpunkte</string>
     <string name="show_precision_circle">Präzisionskreise anzeigen</string>
-    <string name="client_notification">Kundenbenachrichtigung</string>
+    <string name="client_notification">Warnmeldung</string>
     <string name="compromised_keys">Kompromittierte Schlüssel erkannt, wählen Sie OK, um diese neu zu erstellen.</string>
     <string name="regenerate_private_key">Privaten Schlüssel neu erstellen</string>
     <string name="regenerate_keys_confirmation">Sind Sie sicher, dass Sie den privaten Schlüssel neu erstellen möchten?\n\nAndere Knoten, die bereits Schlüssel mit diesem Knoten ausgetauscht haben, müssen diesen entfernen und erneut austauschen, um eine sichere Kommunikation fortzusetzen.</string>
@@ -680,6 +684,45 @@
     <string name="latest_alpha_firmware">Neueste Alpha Version</string>
     <string name="supported_by_community">Unterstützt von der Meshtastic Gemeinschaft</string>
     <string name="firmware_edition">Firmware-Version</string>
+    <string name="recent_network_devices">Kürzliche Netzwerkgeräte</string>
+    <string name="discovered_network_devices">Entdeckte Netzwerkgeräte</string>
+    <string name="get_started">Erste Schritte</string>
+    <string name="intro_welcome">Willkommen bei</string>
+    <string name="stay_connected_anywhere">Bleibe überall in Verbindung</string>
+    <string name="communicate_off_the_grid">Kommunizieren Sie außerhalb des Netzwerks mit Ihren Freunden und der Gemeinschaft ohne Mobilfunkdienst.</string>
+    <string name="create_your_own_networks">Erstelle deine eigenen Netzwerke</string>
+    <string name="easily_set_up_private_mesh_networks">Leicht einzurichtende, private Netznetze für sichere und zuverlässige Kommunikation in entlegenen Gebieten.</string>
+    <string name="track_and_share_locations">Standort verfolgen und teilen</string>
+    <string name="share_your_location_in_real_time">Teilen Sie Ihren Standort in Echtzeit und koordinieren Sie Ihre Gruppe mit integrierten GPS Funktionen.</string>
+    <string name="app_notifications">App-Benachrichtigungen</string>
+    <string name="incoming_messages">Eingehende Nachrichten</string>
+    <string name="notifications_for_channel_and_direct_messages">Benachrichtigungen für Kanal und Direktnachrichten.</string>
+    <string name="new_nodes">Neue Knoten</string>
+    <string name="notifications_for_newly_discovered_nodes">Benachrichtigungen für neu entdeckte Knoten.</string>
+    <string name="low_battery">Niedriger Akkustand</string>
+    <string name="notifications_for_low_battery_alerts">Benachrichtigungen für niedrige Akku-Warnungen des angeschlossenen Gerätes.</string>
+    <string name="critical_alerts_description">Pakete, die als kritisch gesendet werden, ignorieren den Lautlos und Ruhemodus in den Benachrichtigungseinstellungen.</string>
+    <string name="configure_notification_permissions">Benachrichtigungseinstellungen</string>
+    <string name="phone_location">Telefonstandort</string>
+    <string name="phone_location_description">Meshtastic nutzt den Standort Ihres Telefons, um einige Funktionen zu aktivieren. Sie können Ihre Standortberechtigungen jederzeit in den Einstellungen aktualisieren.</string>
+    <string name="share_location">Standort teilen</string>
+    <string name="share_location_description">Benutzen Sie das GPS Ihres Telefons um Standorte an Ihren Knoten zu senden, anstatt ein Hardware GPS in Ihrem Knoten zu verwenden.</string>
+    <string name="distance_measurements">Entfernungsmessungen</string>
+    <string name="distance_measurements_description">Zeigt den Abstand zwischen Ihrem Telefon und anderen Meshtastic Knoten mit einem Standort an.</string>
+    <string name="distance_filters">Entfernungsfilter</string>
+    <string name="distance_filters_description">Filtern Sie die Knotenliste und die Mesh-Karte nach der Nähe zu Ihrem Telefon.</string>
+    <string name="mesh_map_location">Netzwerk Kartenstandort</string>
+    <string name="mesh_map_location_description">Aktiviert den blauen Punkt für Ihr Telefon in der Netzwerkkarte.</string>
+    <string name="configure_location_permissions">Standortberechtigungen konfigurieren</string>
     <string name="skip">Überspringen</string>
+    <string name="settings">Einstellungen</string>
+    <string name="critical_alerts">Kritische Warnungen</string>
+    <string name="critical_alerts_dnd_request_text">Um sicherzustellen, dass Sie kritische Benachrichtigungen wie
+        SOS-Nachrichten erhalten, auch wenn Ihr Gerät im \"Nicht stören\" Modus ist, müssen Sie eine spezielle
+        Berechtigung erteilen. Bitte aktivieren Sie dies in den Benachrichtigungseinstellungen.
+    </string>
+    <string name="configure_critical_alerts">Kritische Warnungen konfigurieren</string>
+    <string name="notification_permissions_description">Meshtastic verwendet Benachrichtigungen, um Sie über neue Nachrichten und andere wichtige Ereignisse auf dem Laufenden zu halten. Sie können Ihre Benachrichtigungsrechte jederzeit in den Einstellungen aktualisieren.</string>
     <string name="next">Weiter</string>
+    <string name="grant_permissions_and_scan">Berechtigungen und Suche erlauben</string>
 </resources>

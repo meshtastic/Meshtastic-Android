@@ -112,8 +112,8 @@ fun minMaxGraphVoltage(valueMin: Float, valueMax: Float): Pair<Float, Float> {
 
 private val LEGEND_DATA =
     listOf(
-        LegendData(nameRes = R.string.current, color = Power.CURRENT.color, isLine = true),
-        LegendData(nameRes = R.string.voltage, color = VOLTAGE_COLOR, isLine = true),
+        LegendData(nameRes = R.string.current, color = Power.CURRENT.color, isLine = true, environmentMetric = null),
+        LegendData(nameRes = R.string.voltage, color = VOLTAGE_COLOR, isLine = true, environmentMetric = null),
     )
 
 @Composable

@@ -85,7 +85,7 @@
     <string name="firmware_old">A rádió firmware túl régi ahhoz, hogy a programmal kommunikálni tudjon. További tudnivalókat a <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">firmware frissítés leírásában</a> talál, a Github-on.</string>
     <string name="must_set_region">Be kell állítania egy régiót</string>
     <string name="cant_change_no_radio">Nem lehet csatornát váltani, mert a rádió nincs csatlakoztatva. Kérem próbálja meg újra.</string>
-    <string name="save_messages">Rangetest.csv exportálása</string>
+    <string name="save_rangetest">Rangetest.csv exportálása</string>
     <string name="reset">Újraindítás</string>
     <string name="scan">Keresés</string>
     <string name="are_you_sure_change_default">Biztosan meg akarja változtatni az alapértelmezett csatornát?</string>

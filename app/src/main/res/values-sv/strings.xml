@@ -110,7 +110,7 @@
     <string name="okay">Okej</string>
     <string name="must_set_region">Du måste ställa in en region!</string>
     <string name="cant_change_no_radio">Det gick inte att byta kanal, eftersom radiomodulen ännu inte är ansluten. Försök igen.</string>
-    <string name="save_messages">Exportera rangetest.csv</string>
+    <string name="save_rangetest">Exportera rangetest.csv</string>
     <string name="reset">Nollställ</string>
     <string name="scan">Sök</string>
     <string name="are_you_sure_change_default">Är du säker på att du vill ändra till standardkanalen?</string>

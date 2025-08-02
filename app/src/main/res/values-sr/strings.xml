@@ -111,7 +111,7 @@
     <string name="okay">Океј</string>
     <string name="must_set_region">Мораш одабрати регион!</string>
     <string name="cant_change_no_radio">Није било могуће променити канал, јер радио још није повезан. Молимо покушајте поново.</string>
-    <string name="save_messages">Извези rangetest.csv</string>
+    <string name="save_rangetest">Извези rangetest.csv</string>
     <string name="reset">Поново покрени</string>
     <string name="scan">Скенирај</string>
     <string name="are_you_sure_change_default">Да ли сте сигурни да желите да промените на подразумевани канал?</string>

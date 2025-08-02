@@ -2,21 +2,36 @@ name: Reusable Android Build and Detekt
 
 on:
   workflow_call:
+    secrets:
+      GRADLE_ENCRYPTION_KEY:
+        required: false
+      DATADOG_APPLICATION_ID:
+        required: false
+      DATADOG_CLIENT_TOKEN:
+        required: false
+      TEST_SECRET:
+        required: false
     inputs:
       upload_artifacts:
         description: 'Whether to upload build and Detekt artifacts'
         required: false
         type: boolean
         default: true
-    secrets:
-      GRADLE_ENCRYPTION_KEY:
-        required: false
 
 jobs:
   build_and_detekt:
     runs-on: ubuntu-latest
     timeout-minutes: 35
+    env:
+      DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
+      DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
+
     steps:
+      - name: Test Secrets
+        env:
+          TEST_SECRET: ${{ secrets.TEST_SECRET }}
+        run: echo "$TEST_SECRET"
+
       - name: Checkout code
         uses: actions/checkout@v4
         with:
@@ -47,6 +62,11 @@ jobs:
       - name: Expose Version Code as Environment Variable
         run: echo "VERSION_CODE=${{ steps.calculate_version_code.outputs.versionCode }}" >> $GITHUB_ENV
 
+      - name: Load secrets
+        if: env.DATADOG_APPLICATION_ID != '' && env.DATADOG_CLIENT_TOKEN != ''
+        run: |
+          echo "datadogApplicationId=$DATADOG_APPLICATION_ID" >> ./secrets.properties
+          echo "datadogClientToken=$DATADOG_CLIENT_TOKEN" >> ./secrets.properties
       - name: Run Spotless, Detekt, Build, Lint, and Local Tests
         run: ./gradlew :app:spotlessCheck :app:detekt :app:lintFdroidDebug :app:lintGoogleDebug :app:assembleDebug :app:testFdroidDebug :app:testGoogleDebug --configuration-cache --scan
         env:

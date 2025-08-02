@@ -141,18 +141,37 @@ data class DeviceMetrics(
 @Parcelize
 data class EnvironmentMetrics(
     val time: Int = currentTime(), // default to current time in secs (NOT MILLISECONDS!)
-    val temperature: Float,
-    val relativeHumidity: Float,
-    val soilTemperature: Float,
-    val soilMoisture: Int,
-    val barometricPressure: Float,
-    val gasResistance: Float,
-    val voltage: Float,
-    val current: Float,
-    val iaq: Int,
+    val temperature: Float?,
+    val relativeHumidity: Float?,
+    val soilTemperature: Float?,
+    val soilMoisture: Int?,
+    val barometricPressure: Float?,
+    val gasResistance: Float?,
+    val voltage: Float?,
+    val current: Float?,
+    val iaq: Int?,
+    val lux: Float? = null,
+    val uvLux: Float? = null,
 ) : Parcelable {
     companion object {
         fun currentTime() = (System.currentTimeMillis() / 1000).toInt()
+
+        fun fromTelemetryProto(proto: TelemetryProtos.EnvironmentMetrics, time: Int): EnvironmentMetrics =
+            EnvironmentMetrics(
+                temperature = proto.temperature.takeIf { proto.hasTemperature() && !it.isNaN() },
+                relativeHumidity =
+                proto.relativeHumidity.takeIf { proto.hasRelativeHumidity() && !it.isNaN() && it != 0.0f },
+                soilTemperature = proto.soilTemperature.takeIf { proto.hasSoilTemperature() && !it.isNaN() },
+                soilMoisture = proto.soilMoisture.takeIf { proto.hasSoilMoisture() && it != Int.MIN_VALUE },
+                barometricPressure = proto.barometricPressure.takeIf { proto.hasBarometricPressure() && !it.isNaN() },
+                gasResistance = proto.gasResistance.takeIf { proto.hasGasResistance() && !it.isNaN() },
+                voltage = proto.voltage.takeIf { proto.hasVoltage() && !it.isNaN() },
+                current = proto.current.takeIf { proto.hasCurrent() && !it.isNaN() },
+                iaq = proto.iaq.takeIf { proto.hasIaq() && it != Int.MIN_VALUE },
+                lux = proto.lux.takeIf { proto.hasLux() && !it.isNaN() },
+                uvLux = proto.uvLux.takeIf { proto.hasUvLux() && !it.isNaN() },
+                time = time,
+            )
     }
 }
 

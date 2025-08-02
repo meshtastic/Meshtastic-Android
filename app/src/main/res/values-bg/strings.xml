@@ -70,6 +70,7 @@
     <string name="pairing_failed_try_again">Сдвояването не бе успешно, моля, опитайте отново</string>
     <string name="location_disabled">Достъпът до местоположението е изключен, не може да предостави позиция на мрежата.</string>
     <string name="share">Сподели</string>
+    <string name="new_node_seen">Видян нов възел: %s</string>
     <string name="disconnected">Прекъсната връзка</string>
     <string name="device_sleeping">Устройството спи</string>
     <string name="connected_count">Свързани: %1$s онлайн</string>
@@ -101,7 +102,7 @@
     <string name="okay">Добре</string>
     <string name="must_set_region">Трябва да зададете регион!</string>
     <string name="cant_change_no_radio">Каналът не може да бъде сменен, тъй като радиото все още не е свързано. Моля, опитайте отново.</string>
-    <string name="save_messages">Експорт на rangetest.csv</string>
+    <string name="save_rangetest">Експорт на rangetest.csv</string>
     <string name="reset">Нулиране</string>
     <string name="scan">Сканиране</string>
     <string name="are_you_sure_change_default">Сигурни ли сте, че искате да промените канала по подразбиране?</string>

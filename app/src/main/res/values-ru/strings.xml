@@ -135,7 +135,7 @@
     <string name="okay">Лады</string>
     <string name="must_set_region">Вы должны задать регион!</string>
     <string name="cant_change_no_radio">Не удалось изменить канал, потому что радио еще не подключено. Пожалуйста, попробуйте еще раз.</string>
-    <string name="save_messages">Экспортировать rangetest.csv</string>
+    <string name="save_rangetest">Экспортировать rangetest.csv</string>
     <string name="reset">Сброс</string>
     <string name="scan">Сканирования</string>
     <string name="are_you_sure_change_default">Вы уверены, что хотите перейти на канал по умолчанию?</string>

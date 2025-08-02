@@ -71,6 +71,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.size
 import androidx.compose.ui.unit.sp
 import androidx.datastore.core.IOException
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -624,7 +625,7 @@ fun DebugMenuActions(viewModel: DebugViewModel = hiltViewModel(), modifier: Modi
 private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = withContext(Dispatchers.IO) {
     try {
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-        val fileName = "meshtastic_debug_$timestamp.log"
+        val fileName = "meshtastic_debug_$timestamp.txt"
 
         // Get the Downloads directory
         val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)

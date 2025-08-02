@@ -103,7 +103,7 @@
     <string name="okay">Dakò</string>
     <string name="must_set_region">Ou dwe mete yon rejyon!</string>
     <string name="cant_change_no_radio">Nou pa t kapab chanje kanal la paske radyo a poko konekte. Tanpri eseye ankò.</string>
-    <string name="save_messages">Eksporte rangetest.csv</string>
+    <string name="save_rangetest">Eksporte rangetest.csv</string>
     <string name="reset">Reyajiste</string>
     <string name="scan">Eskane</string>
     <string name="are_you_sure_change_default">Eske ou sèten ou vle chanje pou kanal default la?</string>

@@ -26,9 +26,11 @@ buildscript {
         classpath(libs.kotlin.serialization)
         classpath(libs.google.services)
         classpath(libs.firebase.crashlytics.gradle)
-        classpath(libs.secrets)
+        classpath(libs.secrets.gradle.plugin)
         classpath(libs.protobuf.gradle.plugin)
         classpath(libs.hilt.android.gradle.plugin)
+        classpath(libs.secrets.gradle.plugin)
+        classpath(libs.dd.sdk.android.gradle.plugin)
     }
 }
 

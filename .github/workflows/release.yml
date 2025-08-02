@@ -55,6 +55,19 @@ jobs:
           ref: ${{ github.event.inputs.branch }}
           submodules: 'recursive'
           fetch-depth: 0
+
+      - name: Load secrets (only keystore for F-Droid)
+        run: |
+          echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
+          echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
+        env:
+          KEYSTORE: ${{ secrets.KEYSTORE }}
+          KEYSTORE_FILENAME: ${{ secrets.KEYSTORE_FILENAME }}
+          KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
           java-version: '21'
           distribution: 'jetbrains'
         env:
@@ -68,19 +81,6 @@ jobs:
           build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
           build-scan-terms-of-use-agree: 'yes'
           add-job-summary: always
-            ${{ runner.os }}-gradle-
-
-      - name: Validate Gradle wrapper
-        uses: gradle/actions/wrapper-validation@v4
-
-      - name: Load secrets (only keystore for F-Droid)
-        run: |
-          echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
-          echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
-        env:
-          KEYSTORE: ${{ secrets.KEYSTORE }}
-          KEYSTORE_FILENAME: ${{ secrets.KEYSTORE_FILENAME }}
-          KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
 
       - name: Build F-Droid release
         run: ./gradlew assembleFdroidRelease
@@ -99,6 +99,9 @@ jobs:
     needs: prepare-release-info # Depends on version info
     runs-on: ubuntu-latest
     if: github.repository == 'meshtastic/Meshtastic-Android'
+    env:
+      DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
+      DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
     outputs:
       aab_path: app/build/outputs/bundle/googleRelease/app-google-release.aab
       aab_name: googleRelease-${{ needs.prepare-release-info.outputs.versionNameBase }}-${{ needs.prepare-release-info.outputs.versionCode }}.aab
@@ -112,39 +115,38 @@ jobs:
           submodules: 'recursive'
           fetch-depth: 0
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      - name: Validate Gradle wrapper
-        uses: gradle/actions/wrapper-validation@v4
-
       - name: Load secrets
         run: |
           rm -f ./app/google-services.json # Ensure clean state
           echo $GSERVICES > ./app/google-services.json
           echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
+          echo "datadogApplicationId=$DATADOG_APPLICATION_ID" >> ./secrets.properties
+          echo "datadogClientToken=$DATADOG_CLIENT_TOKEN" >> ./secrets.properties
         env:
           GSERVICES: ${{ secrets.GSERVICES }}
           KEYSTORE: ${{ secrets.KEYSTORE }}
           KEYSTORE_FILENAME: ${{ secrets.KEYSTORE_FILENAME }}
           KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
+          DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
+          DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           java-version: '21'
           distribution: 'jetbrains'
-          cache: 'gradle'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+          build-scan-publish: true
+          build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
+          build-scan-terms-of-use-agree: 'yes'
+          add-job-summary: always
 
       - name: Build Play Store release
         run: ./gradlew bundleGoogleRelease assembleGoogleRelease

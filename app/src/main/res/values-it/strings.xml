@@ -128,7 +128,7 @@
     <string name="okay">Ok</string>
     <string name="must_set_region">Devi impostare una regione!</string>
     <string name="cant_change_no_radio">Impossibile cambiare il canale, perché la radio non è ancora connessa. Riprova.</string>
-    <string name="save_messages">Esporta rangetest.csv</string>
+    <string name="save_rangetest">Esporta rangetest.csv</string>
     <string name="reset">Reset</string>
     <string name="scan">Scan</string>
     <string name="are_you_sure_change_default">Confermi di voler passare al canale predefinito?</string>

@@ -133,7 +133,7 @@
     <string name="okay">好的</string>
     <string name="must_set_region">您必須設定一個區域！</string>
     <string name="cant_change_no_radio">無法更改頻道，因為裝置尚未連接。請再試一次。</string>
-    <string name="save_messages">匯出  範圍測試.csv</string>
+    <string name="save_rangetest">匯出範圍測試資料.csv</string>
     <string name="reset">重設</string>
     <string name="scan">掃描</string>
     <string name="are_you_sure_change_default">您確定要切換到預設頻道嗎？</string>

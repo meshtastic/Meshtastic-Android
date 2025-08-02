@@ -59,7 +59,7 @@
     <string name="okay">Ok</string>
     <string name="must_set_region">Trebuie să alegeți o regiune!</string>
     <string name="cant_change_no_radio">Nu s-a putut schimba canalul, deoarece radioul nu este conectat încă. Vă rugăm să încercați din nou.</string>
-    <string name="save_messages">Export rangetest.csv</string>
+    <string name="save_rangetest">Export rangetest.csv</string>
     <string name="reset">Resetare</string>
     <string name="scan">Scanare</string>
     <string name="are_you_sure_change_default">Ești sigur că vrei să revii la canalul implicit?</string>

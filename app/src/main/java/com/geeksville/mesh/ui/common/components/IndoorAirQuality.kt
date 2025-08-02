@@ -79,7 +79,8 @@ enum class Iaq(val color: Color, val description: String, val range: IntRange) {
     DangerouslyPolluted(IAQDangerouslyPolluted, "Dangerously Polluted", 501..Int.MAX_VALUE),
 }
 
-fun getIaq(iaq: Int): Iaq = when {
+fun getIaq(iaq: Int): Iaq? = when {
+    iaq == Int.MIN_VALUE -> null
     iaq in Iaq.Excellent.range -> Iaq.Excellent
     iaq in Iaq.Good.range -> Iaq.Good
     iaq in Iaq.LightlyPolluted.range -> Iaq.LightlyPolluted
@@ -106,88 +107,96 @@ enum class IaqDisplayMode {
 
 @Suppress("LongMethod", "UnusedPrivateProperty")
 @Composable
-fun IndoorAirQuality(iaq: Int, displayMode: IaqDisplayMode = IaqDisplayMode.Pill) {
+fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pill) {
+    if (iaq == null || iaq == Int.MIN_VALUE) {
+        return
+    }
     var isLegendOpen by remember { mutableStateOf(false) }
-    val iaqEnum = getIaq(iaq)
+    val iaqEnum = if (iaq != null) getIaq(iaq) else null
     val gradient = Brush.linearGradient(colors = Iaq.entries.map { it.color })
 
-    Column {
-        when (displayMode) {
-            IaqDisplayMode.Pill -> {
-                Box(
-                    modifier =
-                    Modifier.clip(RoundedCornerShape(10.dp))
-                        .background(iaqEnum.color)
-                        .width(125.dp)
-                        .height(30.dp)
-                        .clickable { isLegendOpen = true },
-                ) {
-                    Row(
-                        modifier = Modifier.padding(4.dp).align(Alignment.CenterStart),
-                        verticalAlignment = Alignment.CenterVertically,
+    if (iaqEnum != null) {
+        Column {
+            when (displayMode) {
+                IaqDisplayMode.Pill -> {
+                    Box(
+                        modifier =
+                        Modifier.clip(RoundedCornerShape(10.dp))
+                            .background(iaqEnum.color)
+                            .width(125.dp)
+                            .height(30.dp)
+                            .clickable { isLegendOpen = true },
                     ) {
-                        Text(text = "IAQ $iaq", color = Color.White, fontWeight = FontWeight.Bold)
-                        Icon(
-                            imageVector = if (iaq < 100) Icons.Default.ThumbUp else Icons.Filled.Warning,
-                            contentDescription = stringResource(R.string.air_quality_icon),
-                            tint = Color.White,
-                        )
+                        Row(
+                            modifier = Modifier.padding(4.dp).align(Alignment.CenterStart),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(text = "IAQ $iaq", color = Color.White, fontWeight = FontWeight.Bold)
+                            Icon(
+                                imageVector =
+                                if (iaqEnum.range.first < 100) Icons.Default.ThumbUp else Icons.Filled.Warning,
+                                contentDescription = stringResource(R.string.air_quality_icon),
+                                tint = Color.White,
+                            )
+                        }
                     }
                 }
-            }
 
-            IaqDisplayMode.Dot -> {
-                Column(modifier = Modifier.clickable { isLegendOpen = true }) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(text = "$iaq")
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Box(modifier = Modifier.size(10.dp).background(iaqEnum.color, shape = CircleShape))
+                IaqDisplayMode.Dot -> {
+                    Column(modifier = Modifier.clickable { isLegendOpen = true }) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(text = "$iaq")
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Box(modifier = Modifier.size(10.dp).background(iaqEnum.color, shape = CircleShape))
+                        }
                     }
                 }
-            }
 
-            IaqDisplayMode.Text -> {
-                Text(
-                    text = getIaqDescriptionWithRange(iaqEnum),
-                    fontSize = 12.sp,
-                    modifier = Modifier.clickable { isLegendOpen = true },
-                )
-            }
+                IaqDisplayMode.Text -> {
+                    Text(
+                        text = getIaqDescriptionWithRange(iaqEnum),
+                        fontSize = 12.sp,
+                        modifier = Modifier.clickable { isLegendOpen = true },
+                    )
+                }
 
-            IaqDisplayMode.Gauge -> {
-                CircularProgressIndicator(
-                    progress = iaq / 500f,
-                    modifier = Modifier.size(60.dp).clickable { isLegendOpen = true },
-                    strokeWidth = 8.dp,
-                    color = iaqEnum.color,
-                )
-                Text(text = "$iaq")
-            }
-
-            IaqDisplayMode.Gradient -> {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.clickable { isLegendOpen = true },
-                ) {
-                    LinearProgressIndicator(
+                IaqDisplayMode.Gauge -> {
+                    CircularProgressIndicator(
                         progress = iaq / 500f,
-                        modifier = Modifier.fillMaxWidth().height(20.dp),
+                        modifier = Modifier.size(60.dp).clickable { isLegendOpen = true },
+                        strokeWidth = 8.dp,
                         color = iaqEnum.color,
                     )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(text = iaqEnum.description, fontSize = 12.sp)
+                    Text(text = "${iaqEnum.description}")
+                }
+
+                IaqDisplayMode.Gradient -> {
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.clickable { isLegendOpen = true },
+                    ) {
+                        LinearProgressIndicator(
+                            progress = iaq / 500f,
+                            modifier = Modifier.fillMaxWidth().height(20.dp),
+                            color = iaqEnum.color,
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = iaqEnum.description, fontSize = 12.sp)
+                    }
                 }
             }
-        }
-        if (isLegendOpen) {
-            AlertDialog(
-                onDismissRequest = { isLegendOpen = false },
-                shape = RoundedCornerShape(16.dp),
-                text = { IAQScale() },
-                confirmButton = {
-                    TextButton(onClick = { isLegendOpen = false }) { Text(text = stringResource(id = R.string.close)) }
-                },
-            )
+            if (isLegendOpen) {
+                AlertDialog(
+                    onDismissRequest = { isLegendOpen = false },
+                    shape = RoundedCornerShape(16.dp),
+                    text = { IAQScale() },
+                    confirmButton = {
+                        TextButton(onClick = { isLegendOpen = false }) {
+                            Text(text = stringResource(id = R.string.close))
+                        }
+                    },
+                )
+            }
         }
     }
 }

@@ -103,7 +103,7 @@
     <string name="okay">Mirë</string>
     <string name="must_set_region">Duhet të vendosni një rajon!</string>
     <string name="cant_change_no_radio">Nuk mund të ndryshoni kanalin, sepse radioja ende nuk është lidhur. Ju lutemi provoni përsëri.</string>
-    <string name="save_messages">Eksporto rangetest.csv</string>
+    <string name="save_rangetest">Eksporto rangetest.csv</string>
     <string name="reset">Rivendos</string>
     <string name="scan">Skano</string>
     <string name="are_you_sure_change_default">A jeni të sigurt se doni të kaloni në kanalin e parazgjedhur?</string>

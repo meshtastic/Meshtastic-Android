@@ -113,7 +113,7 @@
     <string name="okay">OK</string>
     <string name="must_set_region">Musisz ustawić region!</string>
     <string name="cant_change_no_radio">Nie można zmienić kanału, ponieważ urządzenie nie jest jeszcze podłączone. Proszę, spróbuj ponownie.</string>
-    <string name="save_messages">Eksport rangetest.csv</string>
+    <string name="save_rangetest">Eksport rangetest.csv</string>
     <string name="reset">Zresetuj</string>
     <string name="scan">Skanowanie</string>
     <string name="are_you_sure_change_default">Czy na pewno chcesz zmienić kanał na domyślny?</string>

@@ -56,6 +56,7 @@ import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.database.entity.asDeviceVersion
+import com.geeksville.mesh.repository.api.DeviceHardwareRepository
 import com.geeksville.mesh.repository.api.FirmwareReleaseRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
@@ -187,6 +188,7 @@ constructor(
     private val nodeDB: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
     private val meshLogRepository: MeshLogRepository,
+    private val deviceHardwareRepository: DeviceHardwareRepository,
     private val packetRepository: PacketRepository,
     private val quickChatActionRepository: QuickChatActionRepository,
     private val locationRepository: LocationRepository,
@@ -214,7 +216,16 @@ constructor(
         viewModelScope.launch { _excludedModulesUnlocked.value = true }
     }
 
+    val firmwareVersion = myNodeInfo.mapNotNull { nodeInfo -> nodeInfo?.firmwareVersion }
+
     val firmwareEdition = meshLogRepository.getMyNodeInfo().map { nodeInfo -> nodeInfo?.firmwareEdition }
+
+    val deviceHardware: StateFlow<DeviceHardware?> =
+        ourNodeInfo
+            .mapNotNull { nodeInfo ->
+                nodeInfo?.user?.hwModel?.let { deviceHardwareRepository.getDeviceHardwareByModel(it.number) }
+            }
+            .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5_000), initialValue = null)
 
     val clientNotification: StateFlow<MeshProtos.ClientNotification?> = radioConfigRepository.clientNotification
 
@@ -816,7 +827,8 @@ constructor(
     }
 
     /** Write the persisted packet data out to a CSV file in the specified location. */
-    fun saveMessagesCSV(uri: Uri) {
+    @Suppress("detekt:CyclomaticComplexMethod", "detekt:LongMethod")
+    fun saveRangetestCSV(uri: Uri) {
         viewModelScope.launch(Dispatchers.Main) {
             // Extract distances to this device from position messages and put (node,SNR,distance)
             // in
@@ -855,9 +867,10 @@ constructor(
                             }
                         }
 
-                        // Filter out of our results any packet that doesn't report SNR.  This
-                        // is primarily ADMIN_APP.
-                        if (proto.rxSnr != 0.0f) {
+                        // Only look at range test messages, with SNR reported.
+                        if (
+                            proto.decoded.portnumValue == Portnums.PortNum.RANGE_TEST_APP_VALUE && proto.rxSnr != 0.0f
+                        ) {
                             val rxDateTime = dateFormat.format(packet.received_date)
                             val rxFrom = proto.from.toUInt()
                             val senderName = nodes[proto.from]?.user?.longName ?: ""

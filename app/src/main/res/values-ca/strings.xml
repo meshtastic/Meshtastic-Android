@@ -67,7 +67,7 @@
     <string name="okay">Acceptar</string>
     <string name="must_set_region">Has de configurar la regió!</string>
     <string name="cant_change_no_radio">No s\'ha pogut canviar el canal perquè la ràdio no està configurada correctament. Si us plau torna-ho a provar.</string>
-    <string name="save_messages">Exportat rangetest.csv</string>
+    <string name="save_rangetest">Exportat rangetest.csv</string>
     <string name="reset">Restablir</string>
     <string name="scan">Escanejar</string>
     <string name="are_you_sure_change_default">Estàs segur que vols canviar al canal per defecte?</string>
