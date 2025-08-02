@@ -82,6 +82,7 @@ import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.reportError
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.gpsDisabled
+import com.geeksville.mesh.android.isGooglePlayAvailable
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceListEntry
@@ -438,7 +439,7 @@ fun ConnectionsScreen(
 
                 // Analytics Okay Checkbox
 
-                val isGooglePlayAvailable = app.isGooglePlayAvailable
+                val isGooglePlayAvailable = context.isGooglePlayAvailable
                 val isAnalyticsAllowed = app.isAnalyticsAllowed && isGooglePlayAvailable
                 if (isGooglePlayAvailable) {
                     var loading by remember { mutableStateOf(false) }

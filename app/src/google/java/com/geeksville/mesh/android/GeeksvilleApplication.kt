@@ -77,6 +77,20 @@ open class GeeksvilleApplication :
         get() = analyticsPrefs.getBoolean("allowed", true)
         set(value) {
             analyticsPrefs.edit { putBoolean("allowed", value) }
+            val newConsent =
+                if (value && !isInTestLab) {
+                    TrackingConsent.GRANTED
+                } else {
+                    TrackingConsent.NOT_GRANTED
+                }
+
+            info(if (value) "Analytics enabled" else "Analytics disabled")
+
+            if (Datadog.isInitialized()) {
+                Datadog.setTrackingConsent(newConsent)
+            } else {
+                initDatadog()
+            }
 
             // Change the flag with the providers
             analytics.setEnabled(value && !isInTestLab) // Never do analytics in the test lab
@@ -118,6 +132,17 @@ open class GeeksvilleApplication :
     override fun onCreate() {
         super.onCreate()
 
+        val firebaseAnalytics = FirebaseAnalytics(this)
+        analytics = firebaseAnalytics
+
+        // Set analytics per prefs
+        isAnalyticsAllowed = isAnalyticsAllowed
+        initDatadog()
+    }
+
+    private val sampleRate = 100f
+
+    private fun initDatadog() {
         val logger =
             Logger.Builder()
                 .setNetworkInfoEnabled(true)
@@ -126,47 +151,41 @@ open class GeeksvilleApplication :
                 .setBundleWithTraceEnabled(true)
                 .setName("TimberLogger")
                 .build()
+        val configuration =
+            Configuration.Builder(
+                clientToken = BuildConfig.datadogClientToken,
+                env = if (BuildConfig.DEBUG) "debug" else "release",
+                variant = BuildConfig.FLAVOR,
+            )
+                .useSite(DatadogSite.US5)
+                .setCrashReportsEnabled(true)
+                .setUseDeveloperModeWhenDebuggable(true)
+                .build()
+        val consent =
+            if (isAnalyticsAllowed && !isInTestLab) {
+                TrackingConsent.GRANTED
+            } else {
+                TrackingConsent.NOT_GRANTED
+            }
+        Datadog.initialize(this, configuration, consent)
+        Datadog.setVerbosity(Log.VERBOSE)
 
-        val firebaseAnalytics = FirebaseAnalytics(this)
-        analytics = firebaseAnalytics
+        val rumConfiguration =
+            RumConfiguration.Builder(BuildConfig.datadogApplicationId)
+                .trackAnonymousUser(true)
+                .trackBackgroundEvents(true)
+                .trackFrustrations(true)
+                .trackLongTasks()
+                .trackNonFatalAnrs(true)
+                .trackUserInteractions()
+                .enableComposeActionTracking()
+                .build()
+        Rum.enable(rumConfiguration)
 
-        // Set analytics per prefs
-        isAnalyticsAllowed = isAnalyticsAllowed
-        if (isAnalyticsAllowed || BuildConfig.DEBUG) {
-            // datadog analytics
-            val configuration =
-                Configuration.Builder(
-                    clientToken = BuildConfig.datadogClientToken,
-                    env = if (BuildConfig.DEBUG) "debug" else "release",
-                    variant = BuildConfig.FLAVOR,
-                )
-                    .useSite(DatadogSite.US5)
-                    .setCrashReportsEnabled(true)
-                    .setUseDeveloperModeWhenDebuggable(true)
-                    .build()
-            val consent =
-                if (isAnalyticsAllowed) {
-                    TrackingConsent.GRANTED
-                } else {
-                    TrackingConsent.NOT_GRANTED
-                }
-            Datadog.initialize(this, configuration, consent)
-            Datadog.setVerbosity(Log.VERBOSE)
+        val logsConfig = LogsConfiguration.Builder().build()
+        Logs.enable(logsConfig)
 
-            val rumConfiguration =
-                RumConfiguration.Builder(BuildConfig.datadogApplicationId)
-                    .trackUserInteractions()
-                    .trackLongTasks()
-                    .trackBackgroundEvents(true)
-                    .enableComposeActionTracking()
-                    .build()
-            Rum.enable(rumConfiguration)
-
-            val logsConfig = LogsConfiguration.Builder().build()
-            Logs.enable(logsConfig)
-
-            Timber.plant(Timber.DebugTree(), DatadogTree(logger))
-        }
+        Timber.plant(Timber.DebugTree(), DatadogTree(logger))
     }
 }
 
@@ -175,7 +194,8 @@ fun setAttributes(firmwareVersion: String, deviceHardware: DeviceHardware) {
     GlobalRumMonitor.get().addAttribute("device_hardware", deviceHardware.hwModelSlug)
 }
 
-fun Context.isGooglePlayAvailable(): Boolean =
-    GoogleApiAvailabilityLight.getInstance().isGooglePlayServicesAvailable(this).let {
-        it != ConnectionResult.SERVICE_MISSING && it != ConnectionResult.SERVICE_INVALID
-    }
+val Context.isGooglePlayAvailable: Boolean
+    get() =
+        GoogleApiAvailabilityLight.getInstance().isGooglePlayServicesAvailable(this).let {
+            it != ConnectionResult.SERVICE_MISSING && it != ConnectionResult.SERVICE_INVALID
+        }

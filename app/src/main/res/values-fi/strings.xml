@@ -657,13 +657,13 @@
     <string name="clean_node_database_confirmation">Tämä poistaa %1$d laitetta tietokannasta. Toimintoa ei voi peruuttaa.</string>
     <string name="security_icon_help_green_lock">Vihreä lukko tarkoittaa, että kanava on suojattu salauksella käyttäen joko 128- tai 256-bittistä AES-avainta.</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
-    <string name="security_icon_insecure_no_precise">Kanava ei ole suojattu, tieto ei tarkkaa</string>
+    <string name="security_icon_insecure_no_precise">Kanava ei ole suojattu,  sijaintitieto ei ole tarkka</string>
     <string name="security_icon_help_yellow_open_lock">Keltainen avoin lukko osoittaa, että yhteys ei ole salattu turvallisesti. Sitä ei käytetä tarkkaan sijaintitietoon, ja se käyttää joko salaamatonta yhteyttä tai tunnettua yhden tavun avainta.</string>
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
-    <string name="security_icon_insecure_precise_only">Kanava ei ole suojattu, tarkka sijainti</string>
+    <string name="security_icon_insecure_precise_only">Kanava ei ole suojattu, sijaintitieto ei ole tarkka</string>
     <string name="security_icon_help_red_open_lock">Punainen avoin lukko osoittaa, että yhteys ei ole turvallisesti salattu, vaikka sitä käytetään tarkkojen sijaintitietojen siirtoon. Salaus on joko kokonaan puuttuva tai perustuu tunnettuun yhden tavun avaimen käyttöön.</string>
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
-    <string name="security_icon_warning_precise_mqtt">Varoitus: tarkka sijainti &amp; MQTT-lähetys käytössä</string>
+    <string name="security_icon_warning_precise_mqtt">Varoitus: Salaamaton yhteys, tarkka sijainti &amp; MQTT-lähetys käytössä</string>
     <string name="security_icon_help_warning_precise_mqtt">Punainen avoin lukko varoituksella tarkoittaa, että kanava ei ole suojattu salauksella, sitä käytetään tarkkoihin sijaintitietoihin, jotka lähetetään internetiin MQTT-protokallalla ja se käyttää joko ei lainkaan salausta tai tunnettua yhden tavun avainta.</string>
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="security_icon_help_title">Kanavan turvallisuus</string>
@@ -695,7 +695,7 @@
     <string name="discovered_network_devices">Löydetyt verkkolaitteet</string>
     <string name="get_started">Näin pääset alkuun</string>
     <string name="intro_welcome">Tervetuloa</string>
-    <string name="stay_connected_anywhere">Yhteys mukana kaikkialla</string>
+    <string name="stay_connected_anywhere">Pysy yhteydessä kaikkialla</string>
     <string name="communicate_off_the_grid">Viestitä ilman verkkoyhteyttä ystäviesi ja yhteisösi kanssa ilman matkapuhelinverkkoa.</string>
     <string name="create_your_own_networks">Luo omia verkkoja</string>
     <string name="easily_set_up_private_mesh_networks">Luo vaivattomasti yksityisiä meshtastic verkkoja turvalliseen ja luotettavaan viestintään kaukana asutuista paikoista.</string>
@@ -717,7 +717,7 @@
     <string name="distance_measurements">Etäisyyden mittaukset</string>
     <string name="distance_measurements_description">Näytä etäisyys puhelimen ja muiden sijainnin jakavien Meshtastic laitteiden välillä.</string>
     <string name="distance_filters">Etäisyyden suodattimet</string>
-    <string name="distance_filters_description">Suodata laiteista ja meshtastic kartta puhelimesi etäisyyden perusteella.</string>
+    <string name="distance_filters_description">Suodata laitelista ja meshtastic kartta puhelimesi läheisyyden perusteella.</string>
     <string name="mesh_map_location">Meshtastic kartan sijainti</string>
     <string name="mesh_map_location_description">Ottaa käyttöön puhelimen sijainnin sinisenä pisteenä meshtastic kartalla.</string>
     <string name="configure_location_permissions">Määritä sijainnin käyttöoikeudet</string>
