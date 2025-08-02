@@ -10,19 +10,19 @@
 
 # Add 'enhancement' label to any PR where the head branch name contains `feat`
 enhancement:
- - head-branch: ['feat']
+ - head-branch: [feat, Feat, FEAT]
 
  # Add 'repo' label to any PR where the head branch name contains `repo` 
  # or files in the .github dir
 repo:
 - any:
-  - head-branch: ['repo']
+  - head-branch: [repo, Repo]
   - changed-files:
-    - any-glob-to-any-file: '.github'
+    - any-glob-to-any-file: .github
 
  # Add 'bug' label to any PR where the head branch name contains `fix` or `bug`
 bugfix:
-  - head-branch: ['fix', 'bug']
+  - head-branch: [fix, bug, Fix, FIX, Bug, BUG]
 
 # our fallback - bug except repo, feat, or automated pipelines
 # bug_fallthrough:
