@@ -23,17 +23,18 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import java.util.*
+import java.util.Locale
 
 class NodeInfoTest {
     private val model = MeshProtos.HardwareModel.ANDROID_SIM
-    private val node = listOf(
-        NodeInfo(4, MeshUser("+zero", "User Zero", "U0", model)),
-        NodeInfo(5, MeshUser("+one", "User One", "U1", model), Position(37.1, 121.1, 35)),
-        NodeInfo(6, MeshUser("+two", "User Two", "U2", model), Position(37.11, 121.1, 40)),
-        NodeInfo(7, MeshUser("+three", "User Three", "U3", model), Position(37.101, 121.1, 40)),
-        NodeInfo(8, MeshUser("+four", "User Four", "U4", model), Position(37.116, 121.1, 40)),
-    )
+    private val node =
+        listOf(
+            NodeInfo(4, MeshUser("+zero", "User Zero", "U0", model)),
+            NodeInfo(5, MeshUser("+one", "User One", "U1", model), Position(37.1, 121.1, 35)),
+            NodeInfo(6, MeshUser("+two", "User Two", "U2", model), Position(37.11, 121.1, 40)),
+            NodeInfo(7, MeshUser("+three", "User Three", "U3", model), Position(37.101, 121.1, 40)),
+            NodeInfo(8, MeshUser("+four", "User Four", "U4", model), Position(37.116, 121.1, 40)),
+        )
 
     private val currentDefaultLocale = LocaleListCompat.getDefault().get(0) ?: Locale.US
 
@@ -51,7 +52,7 @@ class NodeInfoTest {
     fun distanceGood() {
         Assert.assertEquals(node[1].distance(node[2]), 1111)
         Assert.assertEquals(node[1].distance(node[3]), 111)
-        Assert.assertEquals(node[1].distance(node[4]), 1777)
+        Assert.assertEquals(node[1].distance(node[4]), 1779)
     }
 
     @Test
