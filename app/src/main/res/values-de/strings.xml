@@ -648,6 +648,13 @@
     <string name="overflow_menu">Überlaufmenü</string>
     <string name="uv_lux">UV Lux</string>
     <string name="unknown">Unbekannt</string>
+    <string name="clean_node_database_title">Knotendatenbank leeren</string>
+    <string name="clean_nodes_older_than">Knoten älter als %1$d Tage entfernen</string>
+    <string name="clean_unknown_nodes">Nur unbekannte Knoten entfernen</string>
+    <string name="clean_low_interaction_nodes">Knoten mit niedriger / ohne Aktivität entfernen</string>
+    <string name="clean_ignored_nodes">Ignorierte Knoten entfernen</string>
+    <string name="clean_now">Jetzt leeren</string>
+    <string name="clean_node_database_confirmation">Dies wird %1$d Knoten aus Ihrer Datenbank entfernen. Diese Aktion kann nicht rückgängig gemacht werden.</string>
     <string name="security_icon_help_green_lock">Ein grünes Schloss bedeutet, dass der Kanal sicher mit einem 128 oder 256 Bit AES-Schlüssel verschlüsselt ist.</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <string name="security_icon_insecure_no_precise">Unsicherer Kanal, nicht genau</string>
@@ -725,4 +732,6 @@
     <string name="notification_permissions_description">Meshtastic verwendet Benachrichtigungen, um Sie über neue Nachrichten und andere wichtige Ereignisse auf dem Laufenden zu halten. Sie können Ihre Benachrichtigungsrechte jederzeit in den Einstellungen aktualisieren.</string>
     <string name="next">Weiter</string>
     <string name="grant_permissions_and_scan">Berechtigungen und Suche erlauben</string>
+    <string name="nodes_queued_for_deletion">%d Knoten in der Warteschlange zum Löschen:</string>
+    <string name="clean_node_database_description">Achtung: Dies entfernt Knoten aus der App und Gerätedatenbank.\nDie Auswahl ist kumulativ.</string>
 </resources>

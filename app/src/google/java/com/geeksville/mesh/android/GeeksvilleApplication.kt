@@ -58,7 +58,7 @@ open class GeeksvilleApplication :
     // / Are we running inside the testlab?
     val isInTestLab: Boolean
         get() {
-            val testLabSetting = Settings.System.getString(contentResolver, "firebase.test.lab") ?: null
+            val testLabSetting = Settings.System.getString(contentResolver, "firebase.test.lab")
             if (testLabSetting != null) info("Testlab is $testLabSetting")
             return "true" == testLabSetting
         }
@@ -69,27 +69,49 @@ open class GeeksvilleApplication :
         get() = analyticsPrefs.getBoolean("allowed", true)
         set(value) {
             analyticsPrefs.edit { putBoolean("allowed", value) }
+            val newConsent =
+                if (value && !isInTestLab) {
+                    TrackingConsent.GRANTED
+                } else {
+                    TrackingConsent.NOT_GRANTED
+                }
+
+            info(if (value) "Analytics enabled" else "Analytics disabled")
+
+            if (Datadog.isInitialized()) {
+                Datadog.setTrackingConsent(newConsent)
+            } else {
+                initDatadog()
+            }
 
             // Change the flag with the providers
             analytics.setEnabled(value && !isInTestLab) // Never do analytics in the test lab
         }
 
+    private val minimumLaunchTimes: Int = 10
+    private val minimumDays: Int = 10
+    private val minimumLaunchTimesToShowAgain: Int = 5
+    private val minimumDaysToShowAgain: Int = 14
+
     /** Ask user to rate in play store */
+    @Suppress("MagicNumber")
     fun askToRate(activity: AppCompatActivity) {
-        if (!isGooglePlayAvailable()) return
+        if (!isGooglePlayAvailable) return
 
         exceptionReporter {
             // we don't want to crash our app because of bugs in this optional feature
             AppRating.Builder(activity)
-                .setMinimumLaunchTimes(10) // default is 5, 3 means app is launched 3 or more times
-                .setMinimumDays(10) // default is 5, 0 means install day, 10 means app is launched 10 or more days
+                .setMinimumLaunchTimes(minimumLaunchTimes) // default is 5, 3 means app is launched 3 or more times
+                .setMinimumDays(
+                    minimumDays,
+                ) // default is 5, 0 means install day, 10 means app is launched 10 or more days
                 // later than installation
                 .setMinimumLaunchTimesToShowAgain(
-                    5,
+                    minimumLaunchTimesToShowAgain,
                 ) // default is 5, 1 means app is launched 1 or more times after neutral button
                 // clicked
                 .setMinimumDaysToShowAgain(
-                    14,
+                    minimumDaysToShowAgain,
                 ) // default is 14, 1 means app is launched 1 or more days after neutral button
                 // clicked
                 .showIfMeetsConditions()
@@ -99,55 +121,60 @@ open class GeeksvilleApplication :
     override fun onCreate() {
         super.onCreate()
 
-        val logger =
-            Logger.Builder()
-                .setNetworkInfoEnabled(true)
-                .setLogcatLogsEnabled(true)
-                .setRemoteSampleRate(100f)
-                .setBundleWithTraceEnabled(true)
-                .setName("TimberLogger")
-                .build()
-
         val firebaseAnalytics = FirebaseAnalytics(this)
         analytics = firebaseAnalytics
 
         // Set analytics per prefs
         isAnalyticsAllowed = isAnalyticsAllowed
-        if (isAnalyticsAllowed || BuildConfig.DEBUG) {
-            // datadog analytics
-            val configuration =
-                Configuration.Builder(
-                    clientToken = BuildConfig.datadogClientToken,
-                    env = if (BuildConfig.DEBUG || true) "debug" else "release",
-                    variant = BuildConfig.FLAVOR,
-                )
-                    .useSite(DatadogSite.US5)
-                    .setCrashReportsEnabled(true)
-                    .setUseDeveloperModeWhenDebuggable(true)
-                    .build()
-            val consent =
-                if (isAnalyticsAllowed) {
-                    TrackingConsent.GRANTED
-                } else {
-                    TrackingConsent.NOT_GRANTED
-                }
-            Datadog.initialize(this, configuration, consent)
-            Datadog.setVerbosity(Log.VERBOSE)
+        initDatadog()
+    }
 
-            val rumConfiguration =
-                RumConfiguration.Builder(BuildConfig.datadogApplicationId)
-                    .trackUserInteractions()
-                    .trackLongTasks()
-                    .trackBackgroundEvents(true)
-                    .enableComposeActionTracking()
-                    .build()
-            Rum.enable(rumConfiguration)
+    private val sampleRate = 100f
 
-            val logsConfig = LogsConfiguration.Builder().build()
-            Logs.enable(logsConfig)
+    private fun initDatadog() {
+        val logger =
+            Logger.Builder()
+                .setNetworkInfoEnabled(true)
+                .setLogcatLogsEnabled(true)
+                .setRemoteSampleRate(sampleRate)
+                .setBundleWithTraceEnabled(true)
+                .setName("TimberLogger")
+                .build()
+        val configuration =
+            Configuration.Builder(
+                clientToken = BuildConfig.datadogClientToken,
+                env = if (BuildConfig.DEBUG) "debug" else "release",
+                variant = BuildConfig.FLAVOR,
+            )
+                .useSite(DatadogSite.US5)
+                .setCrashReportsEnabled(true)
+                .setUseDeveloperModeWhenDebuggable(true)
+                .build()
+        val consent =
+            if (isAnalyticsAllowed && !isInTestLab) {
+                TrackingConsent.GRANTED
+            } else {
+                TrackingConsent.NOT_GRANTED
+            }
+        Datadog.initialize(this, configuration, consent)
+        Datadog.setVerbosity(Log.VERBOSE)
 
-            Timber.plant(Timber.DebugTree(), DatadogTree(logger))
-        }
+        val rumConfiguration =
+            RumConfiguration.Builder(BuildConfig.datadogApplicationId)
+                .trackAnonymousUser(true)
+                .trackBackgroundEvents(true)
+                .trackFrustrations(true)
+                .trackLongTasks()
+                .trackNonFatalAnrs(true)
+                .trackUserInteractions()
+                .enableComposeActionTracking()
+                .build()
+        Rum.enable(rumConfiguration)
+
+        val logsConfig = LogsConfiguration.Builder().build()
+        Logs.enable(logsConfig)
+
+        Timber.plant(Timber.DebugTree(), DatadogTree(logger))
     }
 }
 
@@ -156,7 +183,8 @@ fun setAttributes(firmwareVersion: String, deviceHardware: DeviceHardware) {
     GlobalRumMonitor.get().addAttribute("device_hardware", deviceHardware.hwModelSlug)
 }
 
-fun Context.isGooglePlayAvailable(): Boolean =
-    GoogleApiAvailabilityLight.getInstance().isGooglePlayServicesAvailable(this).let {
-        it != ConnectionResult.SERVICE_MISSING && it != ConnectionResult.SERVICE_INVALID
-    }
+val Context.isGooglePlayAvailable: Boolean
+    get() =
+        GoogleApiAvailabilityLight.getInstance().isGooglePlayServicesAvailable(this).let {
+            it != ConnectionResult.SERVICE_MISSING && it != ConnectionResult.SERVICE_INVALID
+        }

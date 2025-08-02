@@ -45,7 +45,11 @@ sealed class ContactsRoutes {
 fun NavGraphBuilder.contactsGraph(navController: NavHostController, uiViewModel: UIViewModel) {
     navigation<ContactsRoutes.ContactsGraph>(startDestination = ContactsRoutes.Contacts) {
         composable<ContactsRoutes.Contacts> {
-            ContactsScreen(uiViewModel, onNavigateToMessages = { navController.navigate(ContactsRoutes.Messages(it)) })
+            ContactsScreen(
+                uiViewModel,
+                onNavigateToMessages = { navController.navigate(ContactsRoutes.Messages(it)) },
+                onNavigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
+            )
         }
         composable<ContactsRoutes.Messages>(
             deepLinks =
