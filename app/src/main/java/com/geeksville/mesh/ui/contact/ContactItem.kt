@@ -17,8 +17,6 @@
 
 package com.geeksville.mesh.ui.contact
 
-// import com.geeksville.mesh.ui.node.NodeChip
-// import com.geeksville.mesh.ui.node.components.NodeChip
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable

@@ -112,9 +112,8 @@ fun ContactsScreen(
                 // navigate to node details.
                 onNavigateToNodeDetails(node.num)
             }
-            // ints
         } else {
-            contact.contactKey
+            // Channels
         }
     }
 
