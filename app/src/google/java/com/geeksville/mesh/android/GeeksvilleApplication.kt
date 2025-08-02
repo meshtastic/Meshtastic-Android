@@ -74,27 +74,37 @@ open class GeeksvilleApplication :
             analytics.setEnabled(value && !isInTestLab) // Never do analytics in the test lab
         }
 
+    private val minimumLaunchTimes: Int = 10
+    private val minimumDays: Int = 10
+    private val minimumLaunchTimesToShowAgain: Int = 5
+    private val minimumDaysToShowAgain: Int = 14
+
     /** Ask user to rate in play store */
+    @Suppress("MagicNumber")
     fun askToRate(activity: AppCompatActivity) {
         if (!isGooglePlayAvailable()) return
 
         exceptionReporter {
             // we don't want to crash our app because of bugs in this optional feature
             AppRating.Builder(activity)
-                .setMinimumLaunchTimes(10) // default is 5, 3 means app is launched 3 or more times
-                .setMinimumDays(10) // default is 5, 0 means install day, 10 means app is launched 10 or more days
+                .setMinimumLaunchTimes(minimumLaunchTimes) // default is 5, 3 means app is launched 3 or more times
+                .setMinimumDays(
+                    minimumDays,
+                ) // default is 5, 0 means install day, 10 means app is launched 10 or more days
                 // later than installation
                 .setMinimumLaunchTimesToShowAgain(
-                    5,
+                    minimumLaunchTimesToShowAgain,
                 ) // default is 5, 1 means app is launched 1 or more times after neutral button
                 // clicked
                 .setMinimumDaysToShowAgain(
-                    14,
+                    minimumDaysToShowAgain,
                 ) // default is 14, 1 means app is launched 1 or more days after neutral button
                 // clicked
                 .showIfMeetsConditions()
         }
     }
+
+    private val sampleRate = 100f
 
     override fun onCreate() {
         super.onCreate()
@@ -103,7 +113,7 @@ open class GeeksvilleApplication :
             Logger.Builder()
                 .setNetworkInfoEnabled(true)
                 .setLogcatLogsEnabled(true)
-                .setRemoteSampleRate(100f)
+                .setRemoteSampleRate(sampleRate)
                 .setBundleWithTraceEnabled(true)
                 .setName("TimberLogger")
                 .build()
@@ -118,7 +128,7 @@ open class GeeksvilleApplication :
             val configuration =
                 Configuration.Builder(
                     clientToken = BuildConfig.datadogClientToken,
-                    env = if (BuildConfig.DEBUG || true) "debug" else "release",
+                    env = if (BuildConfig.DEBUG) "debug" else "release",
                     variant = BuildConfig.FLAVOR,
                 )
                     .useSite(DatadogSite.US5)

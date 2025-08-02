@@ -57,9 +57,9 @@ open class GeeksvilleApplication :
             analytics.setEnabled(value && !isInTestLab) // Never do analytics in the test lab
         }
 
-    @Suppress("UNUSED_PARAMETER")
+    @Suppress("UnusedParameter")
     fun askToRate(activity: AppCompatActivity) {
-        // do nothing
+        // No-op for F-Droid version
     }
 
     override fun onCreate() {
@@ -75,8 +75,10 @@ open class GeeksvilleApplication :
     }
 }
 
-fun Context.isGooglePlayAvailable(): Boolean = false
+@Suppress("MayBeConst")
+val Context.isGooglePlayAvailable: Boolean = false
 
+@Suppress("UnusedParameter")
 fun setAttributes(deviceVersion: String, deviceHardware: DeviceHardware) {
     // No-op for F-Droid version
 }
