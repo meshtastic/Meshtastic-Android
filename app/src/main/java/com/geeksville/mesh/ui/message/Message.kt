@@ -147,7 +147,7 @@ internal fun MessageScreen(
     val messages by viewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(initialValue = emptyList())
 
     // UI State managed within this Composable
-    var replyingTo by rememberSaveable { mutableStateOf<Message?>(null) }
+    var replyingToPacketId by rememberSaveable { mutableStateOf<Int?>(null) }
     var showDeleteDialog by rememberSaveable { mutableStateOf(false) }
     var sharedContact by rememberSaveable { mutableStateOf<Node?>(null) }
     val selectedMessageIds = rememberSaveable { mutableStateOf(emptySet<Long>()) }
@@ -192,7 +192,7 @@ internal fun MessageScreen(
                 when (event) {
                     is MessageScreenEvent.SendMessage -> {
                         viewModel.sendMessage(event.text, contactKey, event.replyingToPacketId)
-                        if (event.replyingToPacketId != null) replyingTo = null
+                        if (event.replyingToPacketId != null) replyingToPacketId = null
                         messageInputState.clearText()
                     }
 
@@ -304,7 +304,7 @@ internal fun MessageScreen(
                     onSendReaction = { emoji, id -> onEvent(MessageScreenEvent.SendReaction(emoji, id)) },
                     viewModel = viewModel,
                     contactKey = contactKey,
-                    onReply = { message -> replyingTo = message },
+                    onReply = { message -> replyingToPacketId = message?.packetId },
                     onNodeMenuAction = { action -> onEvent(MessageScreenEvent.HandleNodeMenuAction(action)) },
                 )
                 // Show FAB if we can scroll towards the newest messages (index 0).
@@ -325,14 +325,24 @@ internal fun MessageScreen(
                     },
                 )
             }
-            ReplySnippet(originalMessage = replyingTo, onClearReply = { replyingTo = null }, ourNode = ourNode)
+            val originalMessage by
+                remember(replyingToPacketId, messages) {
+                    derivedStateOf {
+                        replyingToPacketId?.let { messages.firstOrNull { it.packetId == replyingToPacketId } }
+                    }
+                }
+            ReplySnippet(
+                originalMessage = originalMessage,
+                onClearReply = { replyingToPacketId = null },
+                ourNode = ourNode,
+            )
             MessageInput(
                 isEnabled = isConnected,
                 textFieldState = messageInputState,
                 onSendMessage = {
                     val messageText = messageInputState.text.toString().trim()
                     if (messageText.isNotEmpty()) {
-                        onEvent(MessageScreenEvent.SendMessage(messageText, replyingTo?.packetId))
+                        onEvent(MessageScreenEvent.SendMessage(messageText, replyingToPacketId))
                     }
                 },
             )
