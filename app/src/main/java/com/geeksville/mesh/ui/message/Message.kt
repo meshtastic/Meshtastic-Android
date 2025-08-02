@@ -325,13 +325,12 @@ internal fun MessageScreen(
                     },
                 )
             }
-            val originalMessage by remember(replyingToPacketId, messages) {
-                derivedStateOf {
-                    replyingToPacketId?.let {
-                        messages.firstOrNull { it.packetId == replyingToPacketId }
+            val originalMessage by
+                remember(replyingToPacketId, messages) {
+                    derivedStateOf {
+                        replyingToPacketId?.let { messages.firstOrNull { it.packetId == replyingToPacketId } }
                     }
                 }
-            }
             ReplySnippet(
                 originalMessage = originalMessage,
                 onClearReply = { replyingToPacketId = null },
