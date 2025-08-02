@@ -79,7 +79,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
-import com.geeksville.mesh.android.BuildUtils.info
 import com.geeksville.mesh.android.BuildUtils.reportError
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.gpsDisabled
@@ -440,7 +439,7 @@ fun ConnectionsScreen(
 
                 // Analytics Okay Checkbox
 
-                val isGooglePlayAvailable = app.isGooglePlayAvailable()
+                val isGooglePlayAvailable = context.isGooglePlayAvailable
                 val isAnalyticsAllowed = app.isAnalyticsAllowed && isGooglePlayAvailable
                 if (isGooglePlayAvailable) {
                     var loading by remember { mutableStateOf(false) }

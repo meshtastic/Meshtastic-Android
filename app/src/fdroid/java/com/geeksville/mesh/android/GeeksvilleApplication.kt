@@ -25,6 +25,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.analytics.AnalyticsProvider
+import com.geeksville.mesh.analytics.NopAnalytics
 import com.geeksville.mesh.model.DeviceHardware
 import timber.log.Timber
 
@@ -44,9 +45,7 @@ open class GeeksvilleApplication :
             return "true" == testLabSetting
         }
 
-    private val analyticsPrefs: SharedPreferences by lazy {
-        getSharedPreferences("analytics-prefs", Context.MODE_PRIVATE)
-    }
+    private val analyticsPrefs: SharedPreferences by lazy { getSharedPreferences("analytics-prefs", MODE_PRIVATE) }
 
     var isAnalyticsAllowed: Boolean
         get() = analyticsPrefs.getBoolean("allowed", true)
@@ -57,9 +56,9 @@ open class GeeksvilleApplication :
             analytics.setEnabled(value && !isInTestLab) // Never do analytics in the test lab
         }
 
-    @Suppress("UNUSED_PARAMETER")
+    @Suppress("UnusedParameter")
     fun askToRate(activity: AppCompatActivity) {
-        // do nothing
+        // No-op for F-Droid version
     }
 
     override fun onCreate() {
@@ -69,14 +68,16 @@ open class GeeksvilleApplication :
             Timber.plant(Timber.DebugTree())
         }
 
-        val nopAnalytics = com.geeksville.mesh.analytics.NopAnalytics(this)
+        val nopAnalytics = NopAnalytics(this)
         analytics = nopAnalytics
         isAnalyticsAllowed = false
     }
 }
 
-fun Context.isGooglePlayAvailable(): Boolean = false
+val Context.isGooglePlayAvailable: Boolean
+    get() = false
 
+@Suppress("UnusedParameter")
 fun setAttributes(deviceVersion: String, deviceHardware: DeviceHardware) {
     // No-op for F-Droid version
 }
