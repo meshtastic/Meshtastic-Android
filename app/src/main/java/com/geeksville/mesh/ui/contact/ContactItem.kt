@@ -51,6 +51,8 @@ import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.ui.common.theme.AppTheme
+// import com.geeksville.mesh.ui.node.NodeChip
+// import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.common.components.SecurityIcon
 
 @Suppress("LongMethod")
@@ -89,6 +91,17 @@ fun ContactItem(
                 .padding(8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+
+            // Try to convert Contact to Node and show NodeChip if possible
+//            contact.asNode()?.let { node ->
+//            contact.asNode()?.let { node ->
+//                AvatarIcon(node = node)
+//                Spacer(modifier = Modifier.width(16.dp))
+//            } ?: run {
+                // Fallback if not a node, e.g. for channel contacts
+                // Consider adding a generic channel icon or placeholder here
+//            }
+
             AssistChip(
                 onClick = { },
                 modifier = Modifier
