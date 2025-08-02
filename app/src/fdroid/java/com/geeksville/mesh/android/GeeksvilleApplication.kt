@@ -25,6 +25,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.edit
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.analytics.AnalyticsProvider
+import com.geeksville.mesh.analytics.NopAnalytics
 import com.geeksville.mesh.model.DeviceHardware
 import timber.log.Timber
 
@@ -44,9 +45,7 @@ open class GeeksvilleApplication :
             return "true" == testLabSetting
         }
 
-    private val analyticsPrefs: SharedPreferences by lazy {
-        getSharedPreferences("analytics-prefs", Context.MODE_PRIVATE)
-    }
+    private val analyticsPrefs: SharedPreferences by lazy { getSharedPreferences("analytics-prefs", MODE_PRIVATE) }
 
     var isAnalyticsAllowed: Boolean
         get() = analyticsPrefs.getBoolean("allowed", true)
@@ -69,14 +68,14 @@ open class GeeksvilleApplication :
             Timber.plant(Timber.DebugTree())
         }
 
-        val nopAnalytics = com.geeksville.mesh.analytics.NopAnalytics(this)
+        val nopAnalytics = NopAnalytics(this)
         analytics = nopAnalytics
         isAnalyticsAllowed = false
     }
 }
 
-@Suppress("MayBeConst")
-val Context.isGooglePlayAvailable: Boolean = false
+val Context.isGooglePlayAvailable: Boolean
+    get() = false
 
 @Suppress("UnusedParameter")
 fun setAttributes(deviceVersion: String, deviceHardware: DeviceHardware) {

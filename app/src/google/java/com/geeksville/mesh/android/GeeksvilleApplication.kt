@@ -58,7 +58,7 @@ open class GeeksvilleApplication :
     // / Are we running inside the testlab?
     val isInTestLab: Boolean
         get() {
-            val testLabSetting = Settings.System.getString(contentResolver, "firebase.test.lab") ?: null
+            val testLabSetting = Settings.System.getString(contentResolver, "firebase.test.lab")
             if (testLabSetting != null) info("Testlab is $testLabSetting")
             return "true" == testLabSetting
         }
@@ -96,7 +96,7 @@ open class GeeksvilleApplication :
     /** Ask user to rate in play store */
     @Suppress("MagicNumber")
     fun askToRate(activity: AppCompatActivity) {
-        if (!isGooglePlayAvailable()) return
+        if (!isGooglePlayAvailable) return
 
         exceptionReporter {
             // we don't want to crash our app because of bugs in this optional feature
@@ -183,7 +183,8 @@ fun setAttributes(firmwareVersion: String, deviceHardware: DeviceHardware) {
     GlobalRumMonitor.get().addAttribute("device_hardware", deviceHardware.hwModelSlug)
 }
 
-fun Context.isGooglePlayAvailable(): Boolean =
-    GoogleApiAvailabilityLight.getInstance().isGooglePlayServicesAvailable(this).let {
-        it != ConnectionResult.SERVICE_MISSING && it != ConnectionResult.SERVICE_INVALID
-    }
+val Context.isGooglePlayAvailable: Boolean
+    get() =
+        GoogleApiAvailabilityLight.getInstance().isGooglePlayServicesAvailable(this).let {
+            it != ConnectionResult.SERVICE_MISSING && it != ConnectionResult.SERVICE_INVALID
+        }
