@@ -123,8 +123,8 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
 
     companion object {
         fun NavDestination.isTopLevel(): Boolean = listOf<Route>(
-            NodesRoutes.Nodes,
             ContactsRoutes.Contacts,
+            NodesRoutes.Nodes,
             MapRoutes.Map,
             ChannelsRoutes.Channels,
             ConnectionsRoutes.Connections,
