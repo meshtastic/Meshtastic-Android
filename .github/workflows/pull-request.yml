@@ -61,6 +61,7 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+    allow-failure: true
     runs-on: ubuntu-latest
     steps:
     - id: label-the-PR
