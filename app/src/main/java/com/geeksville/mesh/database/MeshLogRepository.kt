@@ -51,42 +51,54 @@ constructor(
         Telemetry.parseFrom(log.fromRadio.packet.decoded.payload)
             .toBuilder()
             .apply {
-                // Handle float metrics that default to 0.0f when not explicitly set or when 0.0f means no data
-                if (!environmentMetrics.hasTemperature()) {
-                    environmentMetrics = environmentMetrics.toBuilder().setTemperature(Float.NaN).build()
-                }
-                if (!environmentMetrics.hasRelativeHumidity()) {
-                    environmentMetrics = environmentMetrics.toBuilder().setRelativeHumidity(Float.NaN).build()
-                }
-                if (!environmentMetrics.hasSoilTemperature()) {
-                    environmentMetrics = environmentMetrics.toBuilder().setSoilTemperature(Float.NaN).build()
-                }
-                if (!environmentMetrics.hasBarometricPressure()) {
-                    environmentMetrics = environmentMetrics.toBuilder().setBarometricPressure(Float.NaN).build()
-                }
-                if (!environmentMetrics.hasGasResistance()) {
-                    environmentMetrics = environmentMetrics.toBuilder().setGasResistance(Float.NaN).build()
-                }
-                if (!environmentMetrics.hasVoltage()) {
-                    environmentMetrics = environmentMetrics.toBuilder().setVoltage(Float.NaN).build()
-                }
-                if (!environmentMetrics.hasCurrent()) {
-                    environmentMetrics = environmentMetrics.toBuilder().setCurrent(Float.NaN).build()
-                }
-                if (!environmentMetrics.hasLux()) {
-                    environmentMetrics = environmentMetrics.toBuilder().setLux(Float.NaN).build()
-                }
-                if (!environmentMetrics.hasUvLux()) {
-                    environmentMetrics = environmentMetrics.toBuilder().setUvLux(Float.NaN).build()
-                }
+                if (hasEnvironmentMetrics()) {
+                    // Handle float metrics that default to 0.0f when not explicitly set or when 0.0f means no
+                    // data
+                    if (!environmentMetrics.hasTemperature()) {
+                        environmentMetrics = environmentMetrics.toBuilder().setTemperature(Float.NaN).build()
+                    }
+                    if (!environmentMetrics.hasRelativeHumidity()) {
+                        environmentMetrics =
+                            environmentMetrics.toBuilder().setRelativeHumidity(Float.NaN).build()
+                    }
+                    if (!environmentMetrics.hasSoilTemperature()) {
+                        environmentMetrics =
+                            environmentMetrics.toBuilder().setSoilTemperature(Float.NaN).build()
+                    }
+                    if (!environmentMetrics.hasBarometricPressure()) {
+                        environmentMetrics =
+                            environmentMetrics.toBuilder().setBarometricPressure(Float.NaN).build()
+                    }
+                    if (!environmentMetrics.hasGasResistance()) {
+                        environmentMetrics = environmentMetrics.toBuilder().setGasResistance(Float.NaN).build()
+                    }
+                    if (!environmentMetrics.hasVoltage()) {
+                        environmentMetrics = environmentMetrics.toBuilder().setVoltage(Float.NaN).build()
+                    }
+                    if (!environmentMetrics.hasCurrent()) {
+                        environmentMetrics = environmentMetrics.toBuilder().setCurrent(Float.NaN).build()
+                    }
+                    if (!environmentMetrics.hasLux()) {
+                        environmentMetrics = environmentMetrics.toBuilder().setLux(Float.NaN).build()
+                    }
+                    if (!environmentMetrics.hasUvLux()) {
+                        environmentMetrics = environmentMetrics.toBuilder().setUvLux(Float.NaN).build()
+                    }
 
-                // Handle uint32 metrics that default to 0 when not explicitly set or when 0 means no data
-                if (!environmentMetrics.hasIaq()) {
-                    environmentMetrics = environmentMetrics.toBuilder().setIaq(Int.MIN_VALUE).build()
+                    // Handle uint32 metrics that default to 0 when not explicitly set or when 0 means no data
+                    if (!environmentMetrics.hasIaq()) {
+                        environmentMetrics = environmentMetrics.toBuilder().setIaq(Int.MIN_VALUE).build()
+                    }
+                    if (!environmentMetrics.hasSoilMoisture()) {
+                        environmentMetrics =
+                            environmentMetrics.toBuilder().setSoilMoisture(Int.MIN_VALUE).build()
+                    }
                 }
-                if (!environmentMetrics.hasSoilMoisture()) {
-                    environmentMetrics = environmentMetrics.toBuilder().setSoilMoisture(Int.MIN_VALUE).build()
-                }
+                // Leaving in case we have need of nulling any in device metrics.
+                //                if (hasDeviceMetrics()) {
+                //                    deviceMetrics =
+                // deviceMetrics.toBuilder().setBatteryLevel(Int.MIN_VALUE).build()
+                //                }
             }
             .setTime((log.received_date / MILLIS_TO_SECONDS).toInt())
             .build()
