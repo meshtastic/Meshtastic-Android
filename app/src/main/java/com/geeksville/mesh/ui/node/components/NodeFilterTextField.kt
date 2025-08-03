@@ -214,7 +214,7 @@ private fun NodeSortButton(
                 text = {
                     Text(
                         text = stringResource(id = sort.stringRes),
-                        fontWeight = if (sort == currentSortOption) FontWeight.Bold else null,
+                        fontWeight = if (sort == currentSortOption) FontWeight.ExtraBold else null,
                     )
                 }
             )
