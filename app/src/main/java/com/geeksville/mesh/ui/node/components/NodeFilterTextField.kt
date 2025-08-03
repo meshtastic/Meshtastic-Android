@@ -83,17 +83,14 @@ fun NodeFilterTextField(
 ) {
     Column(modifier = modifier.background(MaterialTheme.colorScheme.background)) {
         Row {
-            NodeFilterTextField(
-                filterText = filterText,
-                onTextChange = onTextChange,
-                modifier = Modifier.weight(1f)
-            )
+            NodeFilterTextField(filterText = filterText, onTextChange = onTextChange, modifier = Modifier.weight(1f))
 
             NodeSortButton(
                 modifier = Modifier.align(Alignment.CenterVertically),
                 currentSortOption = currentSortOption,
                 onSortSelect = onSortSelect,
-                toggles = NodeFilterToggles(
+                toggles =
+                NodeFilterToggles(
                     includeUnknown = includeUnknown,
                     onToggleIncludeUnknown = onToggleIncludeUnknown,
                     onlyOnline = onlyOnline,
@@ -110,11 +107,11 @@ fun NodeFilterTextField(
         }
         if (showIgnored) {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
+                modifier =
+                Modifier.fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surfaceDim)
                     .clickable { onToggleShowIgnored() }
-                    .padding(vertical = 16.dp, horizontal = 24.dp)
+                    .padding(vertical = 16.dp, horizontal = 24.dp),
             ) {
                 Text(
                     text = stringResource(id = R.string.node_filter_ignored),
@@ -129,31 +126,22 @@ fun NodeFilterTextField(
 }
 
 @Composable
-private fun NodeFilterTextField(
-    filterText: String,
-    onTextChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun NodeFilterTextField(filterText: String, onTextChange: (String) -> Unit, modifier: Modifier = Modifier) {
     val focusManager = LocalFocusManager.current
     var isFocused by remember { mutableStateOf(false) }
 
     OutlinedTextField(
-        modifier = modifier
-            .defaultMinSize(minHeight = 48.dp)
-            .onFocusEvent { isFocused = it.isFocused },
+        modifier = modifier.defaultMinSize(minHeight = 48.dp).onFocusEvent { isFocused = it.isFocused },
         value = filterText,
         placeholder = {
             Text(
                 text = stringResource(id = R.string.node_filter_placeholder),
                 style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.35F)
+                color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.35F),
             )
         },
         leadingIcon = {
-            Icon(
-                Icons.Default.Search,
-                contentDescription = stringResource(id = R.string.node_filter_placeholder),
-            )
+            Icon(Icons.Default.Search, contentDescription = stringResource(id = R.string.node_filter_placeholder))
         },
         onValueChange = onTextChange,
         trailingIcon = {
@@ -161,23 +149,18 @@ private fun NodeFilterTextField(
                 Icon(
                     Icons.Default.Clear,
                     contentDescription = stringResource(id = R.string.desc_node_filter_clear),
-                    modifier = Modifier.clickable {
+                    modifier =
+                    Modifier.clickable {
                         onTextChange("")
                         focusManager.clearFocus()
-                    }
+                    },
                 )
             }
         },
-        textStyle = MaterialTheme.typography.bodyLarge.copy(
-            color = MaterialTheme.colorScheme.onBackground
-        ),
+        textStyle = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onBackground),
         maxLines = 1,
-        keyboardOptions = KeyboardOptions(
-            imeAction = ImeAction.Done
-        ),
-        keyboardActions = KeyboardActions(
-            onDone = { focusManager.clearFocus() }
-        )
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
     )
 }
 
@@ -196,14 +179,14 @@ private fun NodeSortButton(
             imageVector = Icons.AutoMirrored.Filled.Sort,
             contentDescription = stringResource(R.string.node_sort_button),
             modifier = Modifier.heightIn(max = 48.dp),
-            tint = MaterialTheme.colorScheme.onSurface
+            tint = MaterialTheme.colorScheme.onSurface,
         )
     }
 
     DropdownMenu(
         expanded = expanded,
         onDismissRequest = { expanded = false },
-        modifier = Modifier.background(MaterialTheme.colorScheme.background.copy(alpha = 1f))
+        modifier = Modifier.background(MaterialTheme.colorScheme.background.copy(alpha = 1f)),
     ) {
         NodeSortOption.entries.forEach { sort ->
             DropdownMenuItem(
@@ -214,9 +197,9 @@ private fun NodeSortButton(
                 text = {
                     Text(
                         text = stringResource(id = sort.stringRes),
-                        fontWeight = if (sort == currentSortOption) FontWeight.Bold else null,
+                        fontWeight = if (sort == currentSortOption) FontWeight.ExtraBold else null,
                     )
-                }
+                },
             )
         }
         HorizontalDivider()
@@ -234,11 +217,9 @@ private fun NodeSortButton(
                             modifier = Modifier.padding(end = 4.dp),
                         )
                     }
-                    Text(
-                        text = stringResource(id = R.string.node_filter_include_unknown),
-                    )
+                    Text(text = stringResource(id = R.string.node_filter_include_unknown))
                 }
-            }
+            },
         )
         DropdownMenuItem(
             onClick = {
@@ -254,11 +235,9 @@ private fun NodeSortButton(
                             modifier = Modifier.padding(end = 4.dp),
                         )
                     }
-                    Text(
-                        text = stringResource(id = R.string.node_filter_only_online),
-                    )
+                    Text(text = stringResource(id = R.string.node_filter_only_online))
                 }
-            }
+            },
         )
         DropdownMenuItem(
             onClick = {
@@ -274,11 +253,9 @@ private fun NodeSortButton(
                             modifier = Modifier.padding(end = 4.dp),
                         )
                     }
-                    Text(
-                        text = stringResource(id = R.string.node_filter_only_direct),
-                    )
+                    Text(text = stringResource(id = R.string.node_filter_only_direct))
                 }
-            }
+            },
         )
         HorizontalDivider()
         DropdownMenuItem(
@@ -295,11 +272,9 @@ private fun NodeSortButton(
                             modifier = Modifier.padding(end = 4.dp),
                         )
                     }
-                    Text(
-                        text = stringResource(id = R.string.node_filter_show_details),
-                    )
+                    Text(text = stringResource(id = R.string.node_filter_show_details))
                 }
-            }
+            },
         )
         HorizontalDivider()
         DropdownMenuItem(
@@ -316,9 +291,7 @@ private fun NodeSortButton(
                             modifier = Modifier.padding(end = 4.dp),
                         )
                     }
-                    Text(
-                        text = stringResource(id = R.string.node_filter_show_ignored),
-                    )
+                    Text(text = stringResource(id = R.string.node_filter_show_ignored))
                     if (toggles.ignoredNodeCount > 0) {
                         Text(
                             text = " (${toggles.ignoredNodeCount})",
@@ -327,7 +300,7 @@ private fun NodeSortButton(
                         )
                     }
                 }
-            }
+            },
         )
     }
 }
