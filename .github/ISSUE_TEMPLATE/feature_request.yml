@@ -2,6 +2,7 @@ name: Feature Request
 description: File a request for new feature or functionality.
 title: "[Feature Request]: "
 labels: ["enhancement"]
+type: [Feature]
 projects: ["meshtastic/Meshtastic-Android"]
 body:
   - type: markdown
