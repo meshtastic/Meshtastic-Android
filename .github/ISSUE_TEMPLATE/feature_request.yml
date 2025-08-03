@@ -1,9 +1,9 @@
 name: Feature Request
 description: File a request for new feature or functionality.
 title: "[Feature Request]: "
-labels: ["enhancement"]
-type: [Feature]
-projects: ["meshtastic/Meshtastic-Android"]
+labels: [enhancement]
+type: Feature
+projects: [meshtastic/Meshtastic-Android]
 body:
   - type: markdown
     attributes:
@@ -23,7 +23,7 @@ body:
       label: Tell us your idea.
       description: Tell us what you'd like the app to do. Give as much detail as you can.
       placeholder: Your idea
-      value: "I'd like the app to..."
+      value: I'd like the app to...
     validations:
       required: true
   - type: textarea
