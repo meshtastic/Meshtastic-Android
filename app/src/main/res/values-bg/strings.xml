@@ -43,7 +43,7 @@
     <string name="routing_error_admin_public_key_unauthorized">Публичният ключ е неоторизиран</string>
     <string name="role_client">Свързано с приложение или самостоятелно устройство за съобщения.</string>
     <string name="role_client_mute">Устройство, което не препредава пакети от други устройства.</string>
-    <string name="role_router"></string>
+    <string name="role_router">Инфраструктурен възел за разширяване на мрежовото покритие чрез препредаване на съобщения. Вижда се в списъка с възли.</string>
     <string name="role_router_client">Комбинация от РУТЕР и КЛИЕНТ. Не е за мобилни устройства.</string>
     <string name="role_repeater">Инфраструктурен възел за разширяване на мрежовото покритие чрез препредаване на съобщения с минимални разходи. Не се вижда в списъка с възли.</string>
     <string name="role_tracker">Излъчва приоритетно пакети за GPS позиция</string>
@@ -216,9 +216,9 @@
     <string name="env_metrics_log">Журнал на показателите на околната среда</string>
     <string name="administration">Администриране</string>
     <string name="remote_admin">Отдалечено администриране</string>
-    <string name="bad">Лошо</string>
-    <string name="fair">Задоволително</string>
-    <string name="good">Добро</string>
+    <string name="bad">Лош</string>
+    <string name="fair">Задоволителен</string>
+    <string name="good">Добър</string>
     <string name="none_quality">Няма</string>
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Качество на сигнала</string>
@@ -470,6 +470,9 @@
     <string name="latest_alpha_firmware">Най-новия алфа</string>
     <string name="supported_by_community">Поддържа се от общността Meshtastic</string>
     <string name="firmware_edition">Версия на фърмуера</string>
+    <string name="incoming_messages">Входящи съобщения</string>
+    <string name="new_nodes">Нови възли</string>
+    <string name="low_battery">Изтощена батерия</string>
     <string name="skip">Пропускане</string>
     <string name="next">Напред</string>
 </resources>
