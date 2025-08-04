@@ -9,8 +9,6 @@ on:
         required: false
       DATADOG_CLIENT_TOKEN:
         required: false
-      TEST_SECRET:
-        required: false
     inputs:
       upload_artifacts:
         description: 'Whether to upload build and Detekt artifacts'
@@ -27,10 +25,6 @@ jobs:
       DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
 
     steps:
-      - name: Test Secrets
-        env:
-          TEST_SECRET: ${{ secrets.TEST_SECRET }}
-        run: echo "$TEST_SECRET"
 
       - name: Checkout code
         uses: actions/checkout@v4

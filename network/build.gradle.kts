@@ -55,6 +55,7 @@ dependencies {
     implementation(libs.bundles.hilt)
     implementation(libs.bundles.retrofit)
     implementation(libs.bundles.coil)
+    "googleImplementation"(libs.bundles.datadog)
     ksp(libs.hilt.compiler)
     implementation(libs.kotlinx.serialization.json)
     detektPlugins(libs.detekt.formatting)
