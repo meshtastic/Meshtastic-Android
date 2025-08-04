@@ -22,10 +22,14 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.Composable
 import androidx.core.content.edit
+import androidx.navigation.NavHostController
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.analytics.AnalyticsProvider
 import com.geeksville.mesh.analytics.NopAnalytics
+import com.geeksville.mesh.android.BuildUtils.debug
+import com.geeksville.mesh.android.BuildUtils.info
 import com.geeksville.mesh.model.DeviceHardware
 import timber.log.Timber
 
@@ -80,4 +84,13 @@ val Context.isGooglePlayAvailable: Boolean
 @Suppress("UnusedParameter")
 fun setAttributes(deviceVersion: String, deviceHardware: DeviceHardware) {
     // No-op for F-Droid version
+    info("Setting attributes: deviceVersion=$deviceVersion, deviceHardware=$deviceHardware")
+}
+
+@Composable
+fun AddNavigationTracking(navController: NavHostController) {
+    // No-op for F-Droid version
+    navController.addOnDestinationChangedListener { _, destination, _ ->
+        debug("Navigation changed to: ${destination.route}")
+    }
 }

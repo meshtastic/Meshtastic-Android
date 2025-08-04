@@ -90,8 +90,10 @@ datastore-preferences = { group = "androidx.datastore", name = "datastore-prefer
 dd-sdk-android-compose = { group = "com.datadoghq", name = "dd-sdk-android-compose", version.ref = "dd-sdk-android" }
 dd-sdk-android-gradle-plugin = { group = "com.datadoghq", name = "dd-sdk-android-gradle-plugin", version.ref = "dd-sdk-android-gradle-plugin" }
 dd-sdk-android-logs = { group = "com.datadoghq", name = "dd-sdk-android-logs", version.ref = "dd-sdk-android" }
+dd-sdk-android-okhttp = { group = "com.datadoghq", name = "dd-sdk-android-okhttp", version.ref = "dd-sdk-android" }
 dd-sdk-android-rum = { group = "com.datadoghq", name = "dd-sdk-android-rum", version.ref = "dd-sdk-android" }
 dd-sdk-android-timber = { group = "com.datadoghq", name = "dd-sdk-android-timber", version.ref = "dd-sdk-android" }
+dd-sdk-android-trace = { group = "com.datadoghq", name = "dd-sdk-android-trace", version.ref = "dd-sdk-android" }
 detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name = "detekt-formatting", version.ref = "detekt" }
 emoji2-emojipicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
@@ -193,7 +195,7 @@ osm = ["osmdroid-android", "osmbonuspack", "mgrs"]
 firebase = ["firebase-analytics", "firebase-crashlytics"]
 
 # Datadog
-datadog = ["dd-sdk-android-compose", "dd-sdk-android-logs", "dd-sdk-android-timber", "dd-sdk-android-rum"]
+datadog = ["dd-sdk-android-compose", "dd-sdk-android-logs", "dd-sdk-android-okhttp", "dd-sdk-android-rum", "dd-sdk-android-timber", "dd-sdk-android-trace"]
 
 # Protobuf
 protobuf = ["protobuf-kotlin"]

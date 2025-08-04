@@ -82,6 +82,7 @@ import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.AddNavigationTracking
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.setAttributes
 import com.geeksville.mesh.model.BluetoothViewModel
@@ -158,6 +159,8 @@ fun MainScreen(
             }
         }
     }
+
+    AddNavigationTracking(navController)
 
     if (connectionState.isConnected()) {
         requestChannelSet?.let { newChannelSet -> ScannedQrCodeDialog(uIViewModel, newChannelSet) }

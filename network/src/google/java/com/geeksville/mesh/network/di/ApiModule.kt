@@ -26,6 +26,8 @@ import coil3.request.crossfade
 import coil3.svg.SvgDecoder
 import coil3.util.DebugLogger
 import coil3.util.Logger
+import com.datadog.android.okhttp.DatadogEventListener
+import com.datadog.android.okhttp.DatadogInterceptor
 import com.geeksville.mesh.network.BuildConfig
 import com.geeksville.mesh.network.retrofit.ApiService
 import dagger.Module
@@ -49,13 +51,17 @@ class ApiModule {
     @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient {
+
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             if (BuildConfig.DEBUG) {
                 setLevel(HttpLoggingInterceptor.Level.BODY)
             }
         }
+        val tracedHosts = listOf("meshtastic.org")
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
+            .addInterceptor(DatadogInterceptor.Builder(tracedHosts).build())
+            .eventListenerFactory(DatadogEventListener.Factory())
             .build()
     }
 

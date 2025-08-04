@@ -21,11 +21,14 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.provider.Settings
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.Composable
 import androidx.core.content.edit
+import androidx.navigation.NavHostController
 import com.datadog.android.Datadog
 import com.datadog.android.DatadogSite
+import com.datadog.android.compose.ExperimentalTrackingApi
+import com.datadog.android.compose.NavigationViewTrackingEffect
 import com.datadog.android.compose.enableComposeActionTracking
 import com.datadog.android.core.configuration.Configuration
 import com.datadog.android.log.Logger
@@ -35,7 +38,11 @@ import com.datadog.android.privacy.TrackingConsent
 import com.datadog.android.rum.GlobalRumMonitor
 import com.datadog.android.rum.Rum
 import com.datadog.android.rum.RumConfiguration
+import com.datadog.android.rum.tracking.AcceptAllNavDestinations
 import com.datadog.android.timber.DatadogTree
+import com.datadog.android.trace.AndroidTracer
+import com.datadog.android.trace.Trace
+import com.datadog.android.trace.TraceConfiguration
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.analytics.AnalyticsProvider
 import com.geeksville.mesh.analytics.FirebaseAnalytics
@@ -44,6 +51,7 @@ import com.geeksville.mesh.util.exceptionReporter
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailabilityLight
 import com.suddenh4x.ratingdialog.AppRating
+import io.opentracing.util.GlobalTracer
 import timber.log.Timber
 
 /** Created by kevinh on 1/4/15. */
@@ -135,10 +143,9 @@ open class GeeksvilleApplication :
         val logger =
             Logger.Builder()
                 .setNetworkInfoEnabled(true)
-                .setLogcatLogsEnabled(true)
                 .setRemoteSampleRate(sampleRate)
                 .setBundleWithTraceEnabled(true)
-                .setName("TimberLogger")
+                .setBundleWithRumEnabled(true)
                 .build()
         val configuration =
             Configuration.Builder(
@@ -157,7 +164,6 @@ open class GeeksvilleApplication :
                 TrackingConsent.NOT_GRANTED
             }
         Datadog.initialize(this, configuration, consent)
-        Datadog.setVerbosity(Log.VERBOSE)
 
         val rumConfiguration =
             RumConfiguration.Builder(BuildConfig.datadogApplicationId)
@@ -166,13 +172,21 @@ open class GeeksvilleApplication :
                 .trackFrustrations(true)
                 .trackLongTasks()
                 .trackNonFatalAnrs(true)
-                .trackUserInteractions()
+                // Re-enable tracking when auto instrumentation available. See note in `app/build.gradle`
+                .disableUserInteractionTracking()
+                // .trackUserInteractions()
                 .enableComposeActionTracking()
                 .build()
         Rum.enable(rumConfiguration)
 
         val logsConfig = LogsConfiguration.Builder().build()
         Logs.enable(logsConfig)
+
+        val traceConfig = TraceConfiguration.Builder().build()
+        Trace.enable(traceConfig)
+
+        val tracer = AndroidTracer.Builder().build()
+        GlobalTracer.registerIfAbsent(tracer)
 
         Timber.plant(Timber.DebugTree(), DatadogTree(logger))
     }
@@ -188,3 +202,13 @@ val Context.isGooglePlayAvailable: Boolean
         GoogleApiAvailabilityLight.getInstance().isGooglePlayServicesAvailable(this).let {
             it != ConnectionResult.SERVICE_MISSING && it != ConnectionResult.SERVICE_INVALID
         }
+
+@OptIn(ExperimentalTrackingApi::class)
+@Composable
+fun AddNavigationTracking(navController: NavHostController) {
+    NavigationViewTrackingEffect(
+        navController = navController,
+        trackArguments = true,
+        destinationPredicate = AcceptAllNavDestinations(),
+    )
+}
