@@ -184,19 +184,19 @@ jobs:
           echo -e "versionCode=${{ env.versionCode }}\nversionNameBase=${{ env.versionNameBase }}" > ./version_info.txt
 
       - name: Download F-Droid APK
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: fdroid-apk
           path: ./fdroid-apk-download
 
       - name: Download Google AAB
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: google-aab
           path: ./google-aab-download
 
       - name: Download Google APK
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: google-apk
           path: ./google-apk-download
