@@ -99,9 +99,6 @@ jobs:
     needs: prepare-release-info # Depends on version info
     runs-on: ubuntu-latest
     if: github.repository == 'meshtastic/Meshtastic-Android'
-    env:
-      DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
-      DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
     outputs:
       aab_path: app/build/outputs/bundle/googleRelease/app-google-release.aab
       aab_name: googleRelease-${{ needs.prepare-release-info.outputs.versionNameBase }}-${{ needs.prepare-release-info.outputs.versionCode }}.aab
