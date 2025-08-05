@@ -73,12 +73,24 @@ body:
         - Firmware logs: Useful for all connection issues with nodes
           - These are piped to the USB serial port on the node, the most foolproof is to use the 'open serial' button on the web-flasher interface, and then save the output.
             - You need to be connecting to the node via Bluetooth or Network for this to work.
+  - type: markdown
+    attributes:
+      value: |
+
+        ### Relevant log output
+        <details>
+
+        <summary>Expand Logs ... </summary>
   - type: textarea
     id: logs
     attributes:
       label: Relevant log output
       description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
       render: shell
+  - type: markdown
+    attributes:
+      value: |
+        </details>
   - type: checkboxes
     id: terms
     attributes:
