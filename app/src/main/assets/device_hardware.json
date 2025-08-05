@@ -267,7 +267,7 @@
     "platformioTarget": "wio-tracker-wm1110",
     "architecture": "nrf52840",
     "activelySupported": true,
-    "supportLevel": 1,
+    "supportLevel": 3,
     "displayName": "Seeed Wio WM1110 Tracker",
     "tags": [
       "Seeed"
@@ -767,7 +767,7 @@
     "platformioTarget": "seeed-xiao-s3",
     "architecture": "esp32-s3",
     "activelySupported": true,
-    "supportLevel": 1,
+    "supportLevel": 3,
     "displayName": "Seeed Xiao ESP32-S3",
     "tags": [
       "Seeed"
