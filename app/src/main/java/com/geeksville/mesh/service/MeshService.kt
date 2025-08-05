@@ -36,6 +36,7 @@ import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.DeviceUIProtos
 import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
@@ -1479,6 +1480,10 @@ class MeshService :
                     handleClientNotification(proto.clientNotification)
                 }
 
+                MeshProtos.FromRadio.DEVICEUICONFIG_FIELD_NUMBER -> handleDevicUiConfig(proto.deviceuiConfig)
+
+                MeshProtos.FromRadio.FILEINFO_FIELD_NUMBER -> handleFileInfo(proto.fileInfo)
+
                 else -> errormsg("Unexpected FromRadio variant")
             }
         } catch (ex: InvalidProtocolBufferException) {
@@ -1687,6 +1692,32 @@ class MeshService :
             radioConfigRepository.clearLocalConfig()
             radioConfigRepository.clearLocalModuleConfig()
         }
+    }
+
+    private fun handleDevicUiConfig(deviceuiConfig: DeviceUIProtos.DeviceUIConfig) {
+        debug("Received DeviceUIConfig ${deviceuiConfig.toOneLineString()}")
+        val packetToSave =
+            MeshLog(
+                uuid = UUID.randomUUID().toString(),
+                message_type = "DeviceUIConfig",
+                received_date = System.currentTimeMillis(),
+                raw_message = deviceuiConfig.toString(),
+                fromRadio = fromRadio { this.deviceuiConfig = deviceuiConfig },
+            )
+        insertMeshLog(packetToSave)
+    }
+
+    private fun handleFileInfo(fileInfo: MeshProtos.FileInfo) {
+        debug("Received FileInfo ${fileInfo.toOneLineString()}")
+        val packetToSave =
+            MeshLog(
+                uuid = UUID.randomUUID().toString(),
+                message_type = "FileInfo",
+                received_date = System.currentTimeMillis(),
+                raw_message = fileInfo.toString(),
+                fromRadio = fromRadio { this.fileInfo = fileInfo },
+            )
+        insertMeshLog(packetToSave)
     }
 
     /** Update our DeviceMetadata */
