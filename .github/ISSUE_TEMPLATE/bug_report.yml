@@ -58,6 +58,21 @@ body:
       placeholder: 2.4.1.394e0e1 Beta
     validations:
       required: true
+
+  - type: markdown
+    attributes:
+      value: |
+        Logs help us to diagnose and reproduce issues, particularly when they are unique to your setup.
+        Depending on the issue, the following logs may be useful:
+        - App logs: This will help with most issues.
+            - Use logcat (with Android studio is simplest) and filter by com.geeksville.mesh
+        - Mesh logs:  UI issues, communication issues etc.
+            - ` App > Menu > Debug Panel > Export specific / export all `
+        - Android logs: Potentially useful if the issue goes beyond the app (connections, network etc.)
+            - Use logcat (with Android studio is simplest) and figure out what filters are needed to show us what is going wrong.
+        - Firmware logs: Useful for all connection issues with nodes
+          - These are piped to the USB serial port on the node, the most foolproof is to use the 'open serial' button on the web-flasher interface, and then save the output.
+            - You need to be connecting to the node via Bluetooth or Network for this to work.
   - type: textarea
     id: logs
     attributes:
