@@ -454,7 +454,7 @@ class MeshService :
     //
 
     private fun loadSettings() = serviceScope.handledLaunch {
-        discardNodeDB() // Get rid of any old state
+        discardNodeDB()
         myNodeInfo = radioConfigRepository.myNodeInfo.value
         nodeDBbyNodeNum.putAll(radioConfigRepository.getNodeDBbyNum())
     }

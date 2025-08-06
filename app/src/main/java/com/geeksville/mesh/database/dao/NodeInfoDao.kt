@@ -44,6 +44,19 @@ interface NodeInfoDao {
         val existingNode = getNodeByNum(node.num)?.node ?: findNodeByPublicKey(node.user.publicKey)
 
         return if (existingNode == null) {
+            // This is a new node. We must check if its public key is already claimed by another node.
+            if (node.publicKey != null && node.publicKey?.isEmpty == false) {
+                val nodeWithSamePK = findNodeByPublicKey(node.publicKey)
+                if (nodeWithSamePK != null && nodeWithSamePK.num != node.num) {
+                    // This is the impersonation attempt we want to block.
+                    @Suppress("MaxLineLength")
+                    warn(
+                        "NodeInfoDao: Blocking new node #${node.num} because its public key is already used by #${nodeWithSamePK.num}.",
+                    )
+                    return null // ABORT
+                }
+            }
+            // If we're here, the new node
             node
         } else {
             // This is an update to an existing node.
