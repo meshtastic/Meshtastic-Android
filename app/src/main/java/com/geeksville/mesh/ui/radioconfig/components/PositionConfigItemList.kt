@@ -19,6 +19,8 @@ package com.geeksville.mesh.ui.radioconfig.components
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.location.Location
+import android.os.Build
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
@@ -26,8 +28,10 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -35,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.location.LocationCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos
@@ -51,7 +56,6 @@ import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
 
@@ -60,16 +64,7 @@ import kotlinx.coroutines.launch
 fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
-    val locationPermissionState =
-        rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION) { granted ->
-            if (granted) {
-                coroutineScope.launch {
-                    @SuppressLint("MissingPermission")
-                    viewModel.getCurrentLocation()
-                }
-            }
-        }
-
+    var phoneLocation: Location? by remember { mutableStateOf(null) }
     val node by viewModel.destNode.collectAsStateWithLifecycle()
     val currentPosition =
         Position(
@@ -84,6 +79,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
     }
 
     PositionConfigItemList(
+        phoneLocation = phoneLocation,
         location = currentPosition,
         positionConfig = state.radioConfig.position,
         enabled = state.connected,
@@ -102,14 +98,8 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
             viewModel.setConfig(config)
         },
         onUseCurrentLocation = {
-            if (locationPermissionState.status.isGranted) {
-                coroutineScope.launch {
-                    @SuppressLint("MissingPermission")
-                    viewModel.getCurrentLocation()
-                }
-            } else {
-                locationPermissionState.launchPermissionRequest()
-            }
+            @SuppressLint("MissingPermission")
+            coroutineScope.launch { phoneLocation = viewModel.getCurrentLocation() }
         },
     )
 }
@@ -118,6 +108,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun PositionConfigItemList(
+    phoneLocation: Location? = null,
     location: Position,
     positionConfig: PositionConfig,
     enabled: Boolean,
@@ -126,9 +117,35 @@ fun PositionConfigItemList(
 ) {
     val focusManager = LocalFocusManager.current
     val coroutineScope = rememberCoroutineScope()
+    val locationPermissionState =
+        rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION) { granted ->
+            if (granted) {
+                coroutineScope.launch {
+                    // If permission is granted, we can use the current location
+                    onUseCurrentLocation()
+                }
+            }
+        }
     var locationInput by rememberSaveable { mutableStateOf(location) }
     var positionInput by rememberSaveable { mutableStateOf(positionConfig) }
 
+    LaunchedEffect(phoneLocation) {
+        if (phoneLocation != null) {
+            locationInput =
+                Position(
+                    latitude = phoneLocation.latitude,
+                    longitude = phoneLocation.longitude,
+                    altitude =
+                    LocationCompat.hasMslAltitude(phoneLocation).let {
+                        if (it && Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                            phoneLocation.mslAltitudeMeters.toInt()
+                        } else {
+                            phoneLocation.altitude.toInt()
+                        }
+                    },
+                )
+        }
+    }
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         item { PreferenceCategory(text = stringResource(R.string.position_config)) }
 
@@ -221,8 +238,11 @@ fun PositionConfigItemList(
                 )
             }
             item {
-                TextButton(enabled = true, onClick = { coroutineScope.launch { onUseCurrentLocation() } }) {
-                    Text(text = stringResource(R.string.position_config_use_current_location))
+                TextButton(
+                    enabled = true,
+                    onClick = { coroutineScope.launch { locationPermissionState.launchPermissionRequest() } },
+                ) {
+                    Text(text = stringResource(R.string.position_config_set_fixed_from_phone))
                 }
             }
         }
