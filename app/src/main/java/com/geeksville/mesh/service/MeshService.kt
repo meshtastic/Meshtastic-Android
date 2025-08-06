@@ -457,8 +457,6 @@ class MeshService :
         discardNodeDB() // Get rid of any old state
         myNodeInfo = radioConfigRepository.myNodeInfo.value
         nodeDBbyNodeNum.putAll(radioConfigRepository.getNodeDBbyNum())
-        // Note: we do not haveNodeDB = true because that means we've got a valid db from a real device (rather than
-        // this possibly stale hint)
     }
 
     /** discard entire node db & message state - used when downloading a new db from the device */
@@ -1806,6 +1804,7 @@ class MeshService :
         } else {
             myNodeInfo = newMyNodeInfo
         }
+        serviceScope.handledLaunch { radioConfigRepository.installMyNodeEntity(myNodeInfo!!) }
         startNodeInfoOnly()
         onHasSettings()
     }
