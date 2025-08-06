@@ -24,6 +24,7 @@ import android.location.Location
 import android.net.Uri
 import android.os.RemoteException
 import android.util.Base64
+import androidx.annotation.RequiresPermission
 import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
@@ -63,7 +64,6 @@ import com.google.protobuf.MessageLite
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -71,7 +71,6 @@ import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -101,7 +100,7 @@ constructor(
     savedStateHandle: SavedStateHandle,
     private val app: Application,
     private val radioConfigRepository: RadioConfigRepository,
-    locationRepository: LocationRepository,
+    private val locationRepository: LocationRepository,
 ) : ViewModel(),
     Logging {
     private val meshService: IMeshService?
@@ -120,15 +119,15 @@ constructor(
     val currentDeviceProfile
         get() = _currentDeviceProfile.value
 
-    val locationFlow: StateFlow<Location?> =
-        if (
-            ContextCompat.checkSelfPermission(app, Manifest.permission.ACCESS_FINE_LOCATION) ==
-            PackageManager.PERMISSION_GRANTED
-        ) {
-            locationRepository.getLocations().stateIn(viewModelScope, SharingStarted.WhileSubscribed(), null)
-        } else {
-            MutableStateFlow(null)
-        }
+    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+    suspend fun getCurrentLocation(): Location? = if (
+        ContextCompat.checkSelfPermission(app, Manifest.permission.ACCESS_FINE_LOCATION) ==
+        PackageManager.PERMISSION_GRANTED
+    ) {
+        locationRepository.getLocations().firstOrNull()
+    } else {
+        null
+    }
 
     init {
         radioConfigRepository.nodeDBbyNum
