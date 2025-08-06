@@ -17,10 +17,13 @@
 
 package com.geeksville.mesh.ui.radioconfig.components
 
+import android.location.Location
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.core.location.LocationCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos
@@ -47,28 +51,26 @@ import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 
 @Composable
-fun PositionConfigScreen(
-    viewModel: RadioConfigViewModel = hiltViewModel(),
-) {
+fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val phoneLocation by viewModel.locationFlow.collectAsStateWithLifecycle()
 
     val node by viewModel.destNode.collectAsStateWithLifecycle()
-    val currentPosition = Position(
-        latitude = node?.latitude ?: 0.0,
-        longitude = node?.longitude ?: 0.0,
-        altitude = node?.position?.altitude ?: 0,
-        time = 1, // ignore time for fixed_position
-    )
+    val currentPosition =
+        Position(
+            latitude = node?.latitude ?: 0.0,
+            longitude = node?.longitude ?: 0.0,
+            altitude = node?.position?.altitude ?: 0,
+            time = 1, // ignore time for fixed_position
+        )
 
     if (state.responseState.isWaiting()) {
-        PacketResponseStateDialog(
-            state = state.responseState,
-            onDismiss = viewModel::clearPacketResponse,
-        )
+        PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
     }
 
     PositionConfigItemList(
         location = currentPosition,
+        phoneLocation = phoneLocation,
         positionConfig = state.radioConfig.position,
         enabled = state.connected,
         onSaveClicked = { locationInput, positionInput ->
@@ -84,7 +86,7 @@ fun PositionConfigScreen(
             }
             val config = config { position = positionInput }
             viewModel.setConfig(config)
-        }
+        },
     )
 }
 
@@ -92,6 +94,7 @@ fun PositionConfigScreen(
 @Composable
 fun PositionConfigItemList(
     location: Position,
+    phoneLocation: Location?,
     positionConfig: PositionConfig,
     enabled: Boolean,
     onSaveClicked: (position: Position, config: PositionConfig) -> Unit,
@@ -100,9 +103,7 @@ fun PositionConfigItemList(
     var locationInput by rememberSaveable { mutableStateOf(location) }
     var positionInput by rememberSaveable { mutableStateOf(positionConfig) }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
         item { PreferenceCategory(text = stringResource(R.string.position_config)) }
 
         item {
@@ -111,9 +112,7 @@ fun PositionConfigItemList(
                 value = positionInput.positionBroadcastSecs,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = {
-                    positionInput = positionInput.copy { positionBroadcastSecs = it }
-                }
+                onValueChanged = { positionInput = positionInput.copy { positionBroadcastSecs = it } },
             )
         }
 
@@ -122,9 +121,7 @@ fun PositionConfigItemList(
                 title = stringResource(R.string.smart_position_enabled),
                 checked = positionInput.positionBroadcastSmartEnabled,
                 enabled = enabled,
-                onCheckedChange = {
-                    positionInput = positionInput.copy { positionBroadcastSmartEnabled = it }
-                }
+                onCheckedChange = { positionInput = positionInput.copy { positionBroadcastSmartEnabled = it } },
             )
         }
         item { HorizontalDivider() }
@@ -136,9 +133,7 @@ fun PositionConfigItemList(
                     value = positionInput.broadcastSmartMinimumDistance,
                     enabled = enabled,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = {
-                        positionInput = positionInput.copy { broadcastSmartMinimumDistance = it }
-                    }
+                    onValueChanged = { positionInput = positionInput.copy { broadcastSmartMinimumDistance = it } },
                 )
             }
 
@@ -148,9 +143,7 @@ fun PositionConfigItemList(
                     value = positionInput.broadcastSmartMinimumIntervalSecs,
                     enabled = enabled,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = {
-                        positionInput = positionInput.copy { broadcastSmartMinimumIntervalSecs = it }
-                    }
+                    onValueChanged = { positionInput = positionInput.copy { broadcastSmartMinimumIntervalSecs = it } },
                 )
             }
         }
@@ -160,7 +153,7 @@ fun PositionConfigItemList(
                 title = stringResource(R.string.use_fixed_position),
                 checked = positionInput.fixedPosition,
                 enabled = enabled,
-                onCheckedChange = { positionInput = positionInput.copy { fixedPosition = it } }
+                onCheckedChange = { positionInput = positionInput.copy { fixedPosition = it } },
             )
         }
         item { HorizontalDivider() }
@@ -176,7 +169,7 @@ fun PositionConfigItemList(
                         if (value >= -90 && value <= 90.0) {
                             locationInput = locationInput.copy(latitude = value)
                         }
-                    }
+                    },
                 )
             }
             item {
@@ -189,7 +182,7 @@ fun PositionConfigItemList(
                         if (value >= -180 && value <= 180.0) {
                             locationInput = locationInput.copy(longitude = value)
                         }
-                    }
+                    },
                 )
             }
             item {
@@ -198,10 +191,31 @@ fun PositionConfigItemList(
                     value = locationInput.altitude,
                     enabled = enabled,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { value ->
-                        locationInput = locationInput.copy(altitude = value)
-                    }
+                    onValueChanged = { value -> locationInput = locationInput.copy(altitude = value) },
                 )
+            }
+            item {
+                TextButton(
+                    enabled = phoneLocation != null,
+                    onClick = {
+                        phoneLocation?.let {
+                            val mslAltitude =
+                                if (LocationCompat.hasMslAltitude(it)) {
+                                    LocationCompat.getMslAltitudeMeters(it)
+                                } else {
+                                    it.altitude
+                                }
+                            locationInput =
+                                locationInput.copy(
+                                    latitude = it.latitude,
+                                    longitude = it.longitude,
+                                    altitude = mslAltitude.toInt(),
+                                )
+                        }
+                    },
+                ) {
+                    Text(text = stringResource(R.string.position_config_use_current_location))
+                }
             }
         }
 
@@ -209,11 +223,12 @@ fun PositionConfigItemList(
             DropDownPreference(
                 title = stringResource(R.string.gps_mode),
                 enabled = enabled,
-                items = ConfigProtos.Config.PositionConfig.GpsMode.entries
+                items =
+                ConfigProtos.Config.PositionConfig.GpsMode.entries
                     .filter { it != ConfigProtos.Config.PositionConfig.GpsMode.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = positionInput.gpsMode,
-                onItemSelected = { positionInput = positionInput.copy { gpsMode = it } }
+                onItemSelected = { positionInput = positionInput.copy { gpsMode = it } },
             )
         }
         item { HorizontalDivider() }
@@ -224,7 +239,7 @@ fun PositionConfigItemList(
                 value = positionInput.gpsUpdateInterval,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { positionInput = positionInput.copy { gpsUpdateInterval = it } }
+                onValueChanged = { positionInput = positionInput.copy { gpsUpdateInterval = it } },
             )
         }
 
@@ -233,10 +248,13 @@ fun PositionConfigItemList(
                 title = stringResource(R.string.position_flags),
                 value = positionInput.positionFlags,
                 enabled = enabled,
-                items = ConfigProtos.Config.PositionConfig.PositionFlags.entries
-                    .filter { it != PositionConfig.PositionFlags.UNSET && it != PositionConfig.PositionFlags.UNRECOGNIZED }
+                items =
+                ConfigProtos.Config.PositionConfig.PositionFlags.entries
+                    .filter {
+                        it != PositionConfig.PositionFlags.UNSET && it != PositionConfig.PositionFlags.UNRECOGNIZED
+                    }
                     .map { it.number to it.name },
-                onItemSelected = { positionInput = positionInput.copy { positionFlags = it } }
+                onItemSelected = { positionInput = positionInput.copy { positionFlags = it } },
             )
         }
         item { HorizontalDivider() }
@@ -247,7 +265,7 @@ fun PositionConfigItemList(
                 value = positionInput.rxGpio,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { positionInput = positionInput.copy { rxGpio = it } }
+                onValueChanged = { positionInput = positionInput.copy { rxGpio = it } },
             )
         }
 
@@ -257,7 +275,7 @@ fun PositionConfigItemList(
                 value = positionInput.txGpio,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { positionInput = positionInput.copy { txGpio = it } }
+                onValueChanged = { positionInput = positionInput.copy { txGpio = it } },
             )
         }
 
@@ -267,7 +285,7 @@ fun PositionConfigItemList(
                 value = positionInput.gpsEnGpio,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { positionInput = positionInput.copy { gpsEnGpio = it } }
+                onValueChanged = { positionInput = positionInput.copy { gpsEnGpio = it } },
             )
         }
 
@@ -282,7 +300,7 @@ fun PositionConfigItemList(
                 onSaveClicked = {
                     focusManager.clearFocus()
                     onSaveClicked(locationInput, positionInput)
-                }
+                },
             )
         }
     }
@@ -293,6 +311,7 @@ fun PositionConfigItemList(
 private fun PositionConfigPreview() {
     PositionConfigItemList(
         location = Position(0.0, 0.0, 0),
+        phoneLocation = null,
         positionConfig = PositionConfig.getDefaultInstance(),
         enabled = true,
         onSaveClicked = { _, _ -> },
