@@ -239,7 +239,7 @@ fun PositionConfigItemList(
             }
             item {
                 TextButton(
-                    enabled = true,
+                    enabled = enabled,
                     onClick = { coroutineScope.launch { locationPermissionState.launchPermissionRequest() } },
                 ) {
                     Text(text = stringResource(R.string.position_config_set_fixed_from_phone))
