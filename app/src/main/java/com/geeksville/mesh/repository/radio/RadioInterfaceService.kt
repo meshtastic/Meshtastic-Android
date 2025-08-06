@@ -394,7 +394,9 @@ constructor(
             // Check if radioIf is NopInterface because isStarted could be true
             // but the interface creation might have failed or it's intentionally Nop.
             warn(
-                "Ignoring setBondedDevice ${address.anonymize}, because we are already using that device and a valid interface is active.",
+                "Ignoring setBondedDevice ${address.anonymize}," +
+                    " because we are already using that device" +
+                    " and a valid interface is active.",
             )
             return false
         }
