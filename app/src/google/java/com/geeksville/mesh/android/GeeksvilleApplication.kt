@@ -196,8 +196,9 @@ open class GeeksvilleApplication :
     }
 }
 
+@Suppress("MagicNumber")
 fun setAttributes(firmwareVersion: String, deviceHardware: DeviceHardware) {
-    GlobalRumMonitor.get().addAttribute("firmware_version", firmwareVersion)
+    GlobalRumMonitor.get().addAttribute("firmware_version", firmwareVersion.split(".").take(3).joinToString("."))
     GlobalRumMonitor.get().addAttribute("device_hardware", deviceHardware.hwModelSlug)
 }
 
