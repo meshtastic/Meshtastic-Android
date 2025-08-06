@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.radioconfig.components
 
+import android.Manifest
 import android.location.Location
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -49,6 +50,9 @@ import com.geeksville.mesh.ui.common.components.PreferenceCategory
 import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
 
 @Composable
 fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
@@ -90,6 +94,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
     )
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun PositionConfigItemList(
@@ -100,6 +105,7 @@ fun PositionConfigItemList(
     onSaveClicked: (position: Position, config: PositionConfig) -> Unit,
 ) {
     val focusManager = LocalFocusManager.current
+    val locationPermissionState = rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION)
     var locationInput by rememberSaveable { mutableStateOf(location) }
     var positionInput by rememberSaveable { mutableStateOf(positionConfig) }
 
@@ -196,21 +202,25 @@ fun PositionConfigItemList(
             }
             item {
                 TextButton(
-                    enabled = phoneLocation != null,
+                    enabled = true,
                     onClick = {
-                        phoneLocation?.let {
-                            val mslAltitude =
-                                if (LocationCompat.hasMslAltitude(it)) {
-                                    LocationCompat.getMslAltitudeMeters(it)
-                                } else {
-                                    it.altitude
-                                }
-                            locationInput =
-                                locationInput.copy(
-                                    latitude = it.latitude,
-                                    longitude = it.longitude,
-                                    altitude = mslAltitude.toInt(),
-                                )
+                        if (locationPermissionState.status.isGranted) {
+                            phoneLocation?.let {
+                                val mslAltitude =
+                                    if (LocationCompat.hasMslAltitude(it)) {
+                                        LocationCompat.getMslAltitudeMeters(it)
+                                    } else {
+                                        it.altitude
+                                    }
+                                locationInput =
+                                    locationInput.copy(
+                                        latitude = it.latitude,
+                                        longitude = it.longitude,
+                                        altitude = mslAltitude.toInt(),
+                                    )
+                            }
+                        } else {
+                            locationPermissionState.launchPermissionRequest()
                         }
                     },
                 ) {
