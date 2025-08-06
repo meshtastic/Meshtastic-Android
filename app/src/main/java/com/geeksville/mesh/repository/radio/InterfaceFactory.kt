@@ -23,32 +23,37 @@ import javax.inject.Provider
 /**
  * Entry point for create radio backend instances given a specific address.
  *
- * This class is responsible for building and dissecting radio addresses based upon
- * their interface type and the "rest" of the address (which varies per implementation).
+ * This class is responsible for building and dissecting radio addresses based upon their interface type and the "rest"
+ * of the address (which varies per implementation).
  */
-class InterfaceFactory @Inject constructor(
+class InterfaceFactory
+@Inject
+constructor(
     private val nopInterfaceFactory: NopInterfaceFactory,
-    private val specMap: Map<InterfaceId, @JvmSuppressWildcards Provider<InterfaceSpec<*>>>
+    private val specMap: Map<InterfaceId, @JvmSuppressWildcards Provider<InterfaceSpec<*>>>,
 ) {
-    internal val nopInterface by lazy {
-        nopInterfaceFactory.create("")
-    }
+    internal val nopInterface by lazy { nopInterfaceFactory.create("") }
 
-    fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String {
-        return "${interfaceId.id}$rest"
-    }
+    fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String = "${interfaceId.id}$rest"
 
     fun createInterface(address: String): IRadioInterface {
         val (spec, rest) = splitAddress(address)
         return spec?.createInterface(rest) ?: nopInterface
     }
 
-    fun addressValid(address: String?): Boolean {
-        return address?.let {
-            val (spec, rest) = splitAddress(it)
-            spec?.addressValid(rest)
-        } ?: false
-    }
+    fun addressValid(address: String?): Boolean = address?.let {
+        val (spec, rest) = splitAddress(it)
+        spec?.addressValid(rest)
+    } ?: false
+
+    /**
+     * Extracts the [InterfaceId] from a given radio address string.
+     *
+     * @param address The radio address string (e.g., "bMAC_ADDRESS", "tIP_ADDRESS").
+     * @return The [InterfaceId] if the address is valid and parsable, null otherwise.
+     */
+    fun getInterfaceIdFromAddress(address: String?): InterfaceId? =
+        address?.firstOrNull()?.let { InterfaceId.forIdChar(it) }
 
     private fun splitAddress(address: String): Pair<InterfaceSpec<*>?, String> {
         val c = address[0].let { InterfaceId.forIdChar(it) }?.let { specMap[it]?.get() }

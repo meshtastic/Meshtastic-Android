@@ -464,9 +464,7 @@ class MeshService :
     /** discard entire node db & message state - used when downloading a new db from the device */
     private fun discardNodeDB() {
         debug("Discarding NodeDB")
-        myNodeInfo = null
         nodeDBbyNodeNum.clear()
-        haveNodeDB = false
     }
 
     private var myNodeInfo: MyNodeEntity? = null
@@ -478,9 +476,6 @@ class MeshService :
     private var localConfig: LocalConfig = LocalConfig.getDefaultInstance()
     private var moduleConfig: LocalModuleConfig = LocalModuleConfig.getDefaultInstance()
     private var channelSet: AppOnlyProtos.ChannelSet = AppOnlyProtos.ChannelSet.getDefaultInstance()
-
-    // True after we've done our initial node db init
-    @Volatile private var haveNodeDB = false
 
     // The database of active nodes, index is the node number
     private val nodeDBbyNodeNum = ConcurrentHashMap<Int, NodeEntity>()
@@ -578,7 +573,7 @@ class MeshService :
         val info = getOrCreateNodeInfo(nodeNum, channel)
         updateFn(info)
 
-        if (info.user.id.isNotEmpty() && haveNodeDB) {
+        if (info.user.id.isNotEmpty()) {
             serviceScope.handledLaunch { radioConfigRepository.upsert(info) }
         }
 
@@ -1097,23 +1092,16 @@ class MeshService :
 
     // Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedMeshPacket(packet: MeshPacket) {
-        if (haveNodeDB) {
-            processReceivedMeshPacket(
-                packet
-                    .toBuilder()
-                    .apply {
-                        // If the rxTime was not set by the device, update with current time
-                        if (packet.rxTime == 0) setRxTime(currentSecond())
-                    }
-                    .build(),
-            )
-            onNodeDBChanged()
-        } else {
-            warn("Ignoring early received packet: ${packet.toOneLineString()}")
-            // earlyReceivedPackets.add(packet)
-            // logAssert(earlyReceivedPackets.size < 128) // The max should normally be about 32, but if the device is
-            // messed up it might try to send forever
-        }
+        processReceivedMeshPacket(
+            packet
+                .toBuilder()
+                .apply {
+                    // If the rxTime was not set by the device, update with current time
+                    if (packet.rxTime == 0) setRxTime(currentSecond())
+                }
+                .build(),
+        )
+        onNodeDBChanged()
     }
 
     private val queuedPackets = ConcurrentLinkedQueue<MeshPacket>()
@@ -1494,9 +1482,6 @@ class MeshService :
     // A provisional MyNodeInfo that we will install if all of our node config downloads go okay
     private var newMyNodeInfo: MyNodeEntity? = null
 
-    // provisional NodeInfos we will install if all goes well
-    private val newNodes = mutableListOf<MeshProtos.NodeInfo>()
-
     // Used to make sure we never get foold by old BLE packets
     private var configOnlyNonce = 69420
     private var nodeInfoNonce = 69421
@@ -1619,8 +1604,8 @@ class MeshService :
             )
         insertMeshLog(packetToSave)
 
-        newNodes.add(info)
-        radioConfigRepository.setStatusMessage("Nodes (${newNodes.size})")
+        installNodeInfo(info)
+        radioConfigRepository.setStatusMessage("Nodes (${nodeDBbyNodeNum.size})")
     }
 
     private var rawMyNodeInfo: MeshProtos.MyNodeInfo? = null
@@ -1783,11 +1768,10 @@ class MeshService :
 
     // If we've received our initial config, our radio settings and all of our channels, send any queued packets and
     // broadcast connected to clients
-    private fun onHasSettings() {
-        processQueuedPackets() // send any packets that were queued up
+    private fun onHasSettings() { // send any packets that were queued up
         startMqttClientProxy()
         serviceBroadcasts.broadcastConnection()
-        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { setTimeOnly = currentSecond() })
+        radioInterfaceService.keepAlive(System.currentTimeMillis())
         sendAnalytics()
         reportConnection()
     }
@@ -1838,22 +1822,12 @@ class MeshService :
             )
         insertMeshLog(packetToSave)
 
-        // This was our config request
-        if (newNodes.isEmpty()) {
-            errormsg("Did not receive a valid node info")
-        } else {
-            newNodes.forEach(::installNodeInfo)
-            newNodes.clear() // Just to save RAM ;-)
-
-            serviceScope.handledLaunch {
-                radioConfigRepository.installNodeDB(myNodeInfo!!, nodeDBbyNodeNum.values.toList())
-            }
-
-            haveNodeDB = true // we now have nodes from real hardware
-
-            sendAnalytics()
-            onNodeDBChanged()
-        }
+        // This was our node info request, all nodes have been individually processed.
+        // We can now send analytics and fire a final DB change notification.
+        sendAnalytics()
+        onNodeDBChanged()
+        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { setTimeOnly = currentSecond() })
+        processQueuedPackets()
     }
 
     /** Start the modern (REV2) API configuration flow */
@@ -1866,11 +1840,10 @@ class MeshService :
     }
 
     private fun startNodeInfoOnly() {
-        newNodes.clear()
-
         debug("Starting node info nonce=$nodeInfoNonce")
-
         sendToRadio(ToRadio.newBuilder().apply { this.wantConfigId = nodeInfoNonce })
+        // Clear the existing DB to prepare for a full refresh.
+        discardNodeDB()
     }
 
     /** Send a position (typically from our built in GPS) into the mesh. */

@@ -39,6 +39,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -51,16 +52,18 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Handles the bluetooth link with a mesh radio device.  Does not cache any device state,
- * just does bluetooth comms etc...
+ * Handles the bluetooth link with a mesh radio device. Does not cache any device state, just does bluetooth comms
+ * etc...
  *
  * This service is not exposed outside of this process.
  *
- * Note - this class intentionally dumb.  It doesn't understand protobuf framing etc...
- * It is designed to be simple so it can be stubbed out with a simulated version as needed.
+ * Note - this class intentionally dumb. It doesn't understand protobuf framing etc... It is designed to be simple so it
+ * can be stubbed out with a simulated version as needed.
  */
 @Singleton
-class RadioInterfaceService @Inject constructor(
+class RadioInterfaceService
+@Inject
+constructor(
     private val context: Application,
     private val dispatchers: CoroutineDispatchers,
     private val bluetoothRepository: BluetoothRepository,
@@ -85,18 +88,15 @@ class RadioInterfaceService @Inject constructor(
     private lateinit var sentPacketsLog: BinaryLogFile // inited in onCreate
     private lateinit var receivedPacketsLog: BinaryLogFile
 
-    val mockInterfaceAddress: String by lazy {
-        toInterfaceAddress(InterfaceId.MOCK, "")
-    }
+    val mockInterfaceAddress: String by lazy { toInterfaceAddress(InterfaceId.MOCK, "") }
 
-    /**
-     * We recreate this scope each time we stop an interface
-     */
+    /** We recreate this scope each time we stop an interface */
     var serviceScope = CoroutineScope(Dispatchers.IO + Job())
 
-    private var radioIf: IRadioInterface = NopInterface("")
+    private var radioIf: IRadioInterface = interfaceFactory.nopInterface
 
-    /** true if we have started our interface
+    /**
+     * true if we have started our interface
      *
      * Note: an interface may be started without necessarily yet having a connection
      */
@@ -105,66 +105,100 @@ class RadioInterfaceService @Inject constructor(
     // true if our interface is currently connected to a device
     private var isConnected = false
 
-    private fun initStateListeners() {
-        bluetoothRepository.state.onEach { state ->
-            if (state.enabled) startInterface()
-            else if (radioIf is BluetoothInterface) stopInterface()
-        }.launchIn(processLifecycle.coroutineScope)
+    private var reconnectJob: Job? = null
 
-        networkRepository.networkAvailable.onEach { state ->
-            if (state) startInterface()
-            else if (radioIf is TCPInterface) stopInterface()
-        }.launchIn(processLifecycle.coroutineScope)
+    private fun initStateListeners() {
+        bluetoothRepository.state
+            .onEach { bluetoothState ->
+                val bondedAddress = getBondedDeviceAddress()
+                val configuredDeviceType = interfaceFactory.getInterfaceIdFromAddress(bondedAddress)
+
+                if (bluetoothState.enabled) {
+                    // Bluetooth is ON
+                    if (configuredDeviceType == InterfaceId.BLUETOOTH && radioIf !is BluetoothInterface) {
+                        // Bluetooth device is configured, but not the active interface type
+                        info("Bluetooth enabled and BT device configured, ensuring BT interface is active.")
+                        onInterfaceChange(bondedAddress)
+                    }
+                } else {
+                    // Bluetooth is OFF
+                    if (radioIf is BluetoothInterface) {
+                        // Active interface is Bluetooth, but BT is now off
+                        info("Bluetooth disabled, stopping Bluetooth interface.")
+                        onInterfaceChange(bondedAddress) // This will effectively stop/change the BT interface
+                    }
+                }
+            }
+            .launchIn(processLifecycle.coroutineScope)
+
+        networkRepository.networkAvailable
+            .onEach { networkAvailable ->
+                val bondedAddress = getBondedDeviceAddress()
+                val configuredDeviceType = interfaceFactory.getInterfaceIdFromAddress(bondedAddress)
+
+                if (networkAvailable) {
+                    // Network is AVAILABLE
+                    if (configuredDeviceType == InterfaceId.TCP && radioIf !is TCPInterface) {
+                        // TCP device is configured, but not the active interface type
+                        info("Network available and TCP device configured, ensuring TCP interface is active.")
+                        onInterfaceChange(bondedAddress)
+                    }
+                } else {
+                    // Network is UNAVAILABLE
+                    if (radioIf is TCPInterface) {
+                        // Active interface is TCP, but network is now unavailable
+                        info("Network unavailable, stopping TCP interface.")
+                        onInterfaceChange(bondedAddress) // This will effectively stop/change the TCP interface
+                    }
+                }
+            }
+            .launchIn(processLifecycle.coroutineScope)
     }
 
     companion object {
         const val DEVADDR_KEY = "devAddr2" // the new name for devaddr
         private const val HEARTBEAT_INTERVAL_MILLIS = 5 * 60 * 1000L
+        private const val RECONNECT_INTERVAL_MILLIS = 15 * 1000L
     }
 
     private var lastHeartbeatMillis = 0L
-    private fun keepAlive(now: Long) {
+
+    fun keepAlive(now: Long = System.currentTimeMillis()) {
         if (now - lastHeartbeatMillis > HEARTBEAT_INTERVAL_MILLIS) {
             info("Sending ToRadio heartbeat")
-            val heartbeat = MeshProtos.ToRadio.newBuilder()
-                .setHeartbeat(MeshProtos.Heartbeat.getDefaultInstance()).build()
+            val heartbeat =
+                MeshProtos.ToRadio.newBuilder().setHeartbeat(MeshProtos.Heartbeat.getDefaultInstance()).build()
             handleSendToRadio(heartbeat.toByteArray())
             lastHeartbeatMillis = now
         }
     }
 
-    /**
-     * Constructs a full radio address for the specific interface type.
-     */
-    fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String {
-        return interfaceFactory.toInterfaceAddress(interfaceId, rest)
-    }
+    /** Constructs a full radio address for the specific interface type. */
+    fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String =
+        interfaceFactory.toInterfaceAddress(interfaceId, rest)
 
-    fun isMockInterface(): Boolean {
-        return BuildConfig.DEBUG || (context as GeeksvilleApplication).isInTestLab
-    }
+    fun isMockInterface(): Boolean = BuildConfig.DEBUG || (context as GeeksvilleApplication).isInTestLab
 
     /**
-     * Determines whether to default to mock interface for device address.
-     * This keeps the decision logic separate and easy to extend.
+     * Determines whether to default to mock interface for device address. This keeps the decision logic separate and
+     * easy to extend.
      */
-    private fun shouldDefaultToMockInterface(): Boolean {
-        return BuildUtils.isEmulator
-    }
+    private fun shouldDefaultToMockInterface(): Boolean = BuildUtils.isEmulator
 
-    /** Return the device we are configured to use, or null for none
-     * device address strings are of the form:
+    /**
+     * Return the device we are configured to use, or null for none device address strings are of the form:
      *
      * at
      *
-     * where a is either x for bluetooth or s for serial
-     * and t is an interface specific address (macaddr or a device path)
+     * where a is either x for bluetooth or s for serial and t is an interface specific address (macaddr or a device
+     * path)
      */
     fun getDeviceAddress(): String? {
         // If the user has unpaired our device, treat things as if we don't have one
         var address = prefs.getString(DEVADDR_KEY, null)
 
-        // If we are running on the emulator we default to the mock interface, so we can have some data to show to the user
+        // If we are running on the emulator we default to the mock interface, so we can have some data to show to the
+        // user
         if (address == null && shouldDefaultToMockInterface()) {
             address = mockInterfaceAddress
         }
@@ -172,12 +206,13 @@ class RadioInterfaceService @Inject constructor(
         return address
     }
 
-    /** Like getDeviceAddress, but filtered to return only devices we are currently bonded with
+    /**
+     * Like getDeviceAddress, but filtered to return only devices we are currently bonded with
      *
      * at
      *
-     * where a is either x for bluetooth or s for serial
-     * and t is an interface specific address (macaddr or a device path)
+     * where a is either x for bluetooth or s for serial and t is an interface specific address (macaddr or a device
+     * path)
      */
     fun getBondedDeviceAddress(): String? {
         // If the user has unpaired our device, treat things as if we don't have one
@@ -193,9 +228,7 @@ class RadioInterfaceService @Inject constructor(
         debug("Broadcasting connection=$isConnected")
 
         processLifecycle.coroutineScope.launch(dispatchers.default) {
-            _connectionState.emit(
-                RadioServiceConnectionState(isConnected, isPermanent)
-            )
+            _connectionState.emit(RadioServiceConnectionState(isConnected, isPermanent))
         }
     }
 
@@ -217,13 +250,12 @@ class RadioInterfaceService @Inject constructor(
 
         // ignoreException { debug("FromRadio: ${MeshProtos.FromRadio.parseFrom(p)}") }
 
-        processLifecycle.coroutineScope.launch(dispatchers.io) {
-            _receivedData.emit(p)
-        }
+        processLifecycle.coroutineScope.launch(dispatchers.io) { _receivedData.emit(p) }
     }
 
     fun onConnect() {
         if (!isConnected) {
+            stopReconnectLoop("Connection established")
             isConnected = true
             broadcastConnectionChanged(isConnected = true, isPermanent = false)
         }
@@ -233,15 +265,25 @@ class RadioInterfaceService @Inject constructor(
         if (isConnected) {
             isConnected = false
             broadcastConnectionChanged(isConnected = false, isPermanent = isPermanent)
+
+            // For temporary disconnects (e.g., out of Bluetooth range), start trying to reconnect.
+            // This applies only if we have a bonded device.
+            if (!isPermanent && getBondedDeviceAddress() != null) {
+                startReconnectLoop()
+            }
+        }
+        // If this is a permanent disconnect (e.g., user unpairs, changes device), stop any
+        // reconnection attempts.
+        if (isPermanent) {
+            stopReconnectLoop("Permanent disconnect")
         }
     }
 
     /** Start our configured interface (if it isn't already running) */
-    private fun startInterface() {
+    private fun startInterface(address: String?) {
         if (radioIf !is NopInterface) {
             warn("Can't start interface - $radioIf is already running")
         } else {
-            val address = getBondedDeviceAddress()
             if (address == null) {
                 warn("No bonded mesh radio, can't start interface")
             } else {
@@ -260,7 +302,7 @@ class RadioInterfaceService @Inject constructor(
         }
     }
 
-    private fun stopInterface() {
+    private fun stopInterface(isFromReconnect: Boolean = false) {
         val r = radioIf
         info("stopping interface $r")
         isStarted = false
@@ -280,8 +322,65 @@ class RadioInterfaceService @Inject constructor(
 
         // Don't broadcast disconnects if we were just using the nop device
         if (r !is NopInterface) {
-            onDisconnect(isPermanent = true) // Tell any clients we are now offline
+            // A disconnect from a reconnect attempt is not permanent in the sense that we want to keep trying.
+            // A true permanent disconnect would be the user changing the device.
+            val isPermanent = !isFromReconnect
+            onDisconnect(isPermanent = isPermanent)
         }
+    }
+
+    private fun onInterfaceChange(address: String? = getBondedDeviceAddress(), isFromReconnect: Boolean = false) {
+        // If this is not a reconnect attempt, it's a user- or system-initiated change.
+        // We should stop any existing reconnect loop.
+        if (!isFromReconnect) {
+            stopReconnectLoop("Interface change initiated by user/system")
+        }
+        // Ignore any errors that happen while closing old device
+        ignoreException { stopInterface(isFromReconnect = isFromReconnect) }
+        startInterface(address)
+    }
+
+    /**
+     * Starts a background coroutine to periodically attempt to reconnect to the bonded device. The loop will be
+     * cancelled if a connection is established or a permanent disconnect is requested.
+     */
+    private fun startReconnectLoop() {
+        // Don't start a new loop if one is already running, or if we are already connected.
+        if (reconnectJob?.isActive == true || isConnected) return
+
+        val address = getBondedDeviceAddress()
+        if (address == null) {
+            info("Cannot start reconnect loop, no bonded device.")
+            return
+        }
+
+        info("Starting reconnect loop for ${address.anonymize}")
+        reconnectJob =
+            processLifecycle.coroutineScope.launch {
+                // We will loop until the job is cancelled (e.g., by connection success or permanent disconnect)
+                while (true) {
+                    if (!isConnected) {
+                        info("Attempting to reconnect...")
+                        // Trigger a reconnect attempt by re-initializing the interface.
+                        // Pass `isFromReconnect = true` to signal this is part of an auto-reconnect cycle.
+                        onInterfaceChange(address, isFromReconnect = true)
+                    }
+                    delay(RECONNECT_INTERVAL_MILLIS)
+                }
+            }
+    }
+
+    /**
+     * Stops the automatic reconnection loop if it is active.
+     *
+     * @param reason The reason for stopping the loop, used for logging.
+     */
+    private fun stopReconnectLoop(reason: String) {
+        if (reconnectJob?.isActive == true) {
+            info("Stopping reconnect loop: $reason")
+            reconnectJob?.cancel(reason)
+        }
+        reconnectJob = null
     }
 
     /**
@@ -290,49 +389,45 @@ class RadioInterfaceService @Inject constructor(
      * @return true if the device changed, false if no change
      */
     private fun setBondedDeviceAddress(address: String?): Boolean {
-        return if (getBondedDeviceAddress() == address && isStarted) {
-            warn("Ignoring setBondedDevice ${address.anonymize}, because we are already using that device")
-            false
-        } else {
-            // Record that this use has configured a new radio
-            GeeksvilleApplication.analytics.track(
-                "mesh_bond"
+        val currentBondedAddress = getBondedDeviceAddress()
+        if (currentBondedAddress == address && isStarted && radioIf !is NopInterface) {
+            // Check if radioIf is NopInterface because isStarted could be true
+            // but the interface creation might have failed or it's intentionally Nop.
+            warn(
+                "Ignoring setBondedDevice ${address.anonymize}, because we are already using that device and a valid interface is active.",
             )
-
-            // Ignore any errors that happen while closing old device
-            ignoreException {
-                stopInterface()
-            }
-
-            // The device address "n" can be used to mean none
-
-            debug("Setting bonded device to ${address.anonymize}")
-
-            prefs.edit {
-                if (address == null) {
-                    this.remove(DEVADDR_KEY)
-                } else {
-                    putString(DEVADDR_KEY, address)
-                }
-            }
-            _currentDeviceAddressFlow.value = address
-
-            // Force the service to reconnect
-            startInterface()
-            true
+            return false
         }
+
+        // Record that this user has configured a new radio
+        GeeksvilleApplication.analytics.track("mesh_bond")
+
+        debug("Setting bonded device to ${address.anonymize}")
+
+        prefs.edit {
+            if (address == null) {
+                this.remove(DEVADDR_KEY)
+            } else {
+                putString(DEVADDR_KEY, address)
+            }
+        }
+        _currentDeviceAddressFlow.value = address
+
+        // Force the service to reconnect. This is a user action, not an auto-reconnect.
+        onInterfaceChange(address, isFromReconnect = false)
+        return true
     }
 
-    fun setDeviceAddress(deviceAddr: String?): Boolean = toRemoteExceptions {
-        setBondedDeviceAddress(deviceAddr)
-    }
+    fun setDeviceAddress(deviceAddr: String?): Boolean = toRemoteExceptions { setBondedDeviceAddress(deviceAddr) }
 
-    /** If the service is not currently connected to the radio, try to connect now.  At boot the radio interface service will
-     * not connect to a radio until this call is received.  */
+    /**
+     * If the service is not currently connected to the radio, try to connect now. At boot the radio interface service
+     * will not connect to a radio until this call is received.
+     */
     fun connect() = toRemoteExceptions {
         // We don't start actually talking to our device until MeshService binds to us - this prevents
         // broadcasting connection events before MeshService is ready to receive them
-        startInterface()
+        onInterfaceChange(getBondedDeviceAddress())
         initStateListeners()
     }
 

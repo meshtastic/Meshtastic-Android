@@ -140,9 +140,13 @@ open class GeeksvilleApplication :
     private val sampleRate = 100f
 
     private fun initDatadog() {
+        if (Datadog.isInitialized()) {
+            return
+        }
         val logger =
             Logger.Builder()
                 .setNetworkInfoEnabled(true)
+                .setLogcatLogsEnabled(true)
                 .setRemoteSampleRate(sampleRate)
                 .setBundleWithTraceEnabled(true)
                 .setBundleWithRumEnabled(true)
@@ -188,7 +192,7 @@ open class GeeksvilleApplication :
         val tracer = AndroidTracer.Builder().build()
         GlobalTracer.registerIfAbsent(tracer)
 
-        Timber.plant(Timber.DebugTree(), DatadogTree(logger))
+        Timber.plant(DatadogTree(logger))
     }
 }
 
