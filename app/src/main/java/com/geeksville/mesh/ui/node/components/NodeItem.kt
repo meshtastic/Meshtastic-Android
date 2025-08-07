@@ -65,7 +65,6 @@ import com.geeksville.mesh.util.toDistanceString
 fun NodeItem(
     thisNode: Node?,
     thatNode: Node,
-    gpsFormat: Int,
     distanceUnits: Int,
     tempInFahrenheit: Boolean,
     modifier: Modifier = Modifier,
@@ -79,76 +78,64 @@ fun NodeItem(
     val longName = thatNode.user.longName.ifEmpty { stringResource(id = R.string.unknown_username) }
     val isThisNode = remember(thatNode) { thisNode?.num == thatNode.num }
     val system = remember(distanceUnits) { DisplayConfig.DisplayUnits.forNumber(distanceUnits) }
-    val distance = remember(thisNode, thatNode) {
-        thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system)
-    }
+    val distance =
+        remember(thisNode, thatNode) { thisNode?.distance(thatNode)?.takeIf { it > 0 }?.toDistanceString(system) }
 
-    val hwInfoString = when (val hwModel = thatNode.user.hwModel) {
-        MeshProtos.HardwareModel.UNSET -> MeshProtos.HardwareModel.UNSET.name
-        else -> hwModel.name.replace('_', '-').replace('p', '.').lowercase()
-    }
-    val roleName = if (thatNode.isUnknownUser) {
-        DeviceConfig.Role.UNRECOGNIZED.name
-    } else {
-        thatNode.user.role.name
-    }
+    val hwInfoString =
+        when (val hwModel = thatNode.user.hwModel) {
+            MeshProtos.HardwareModel.UNSET -> MeshProtos.HardwareModel.UNSET.name
+            else -> hwModel.name.replace('_', '-').replace('p', '.').lowercase()
+        }
+    val roleName =
+        if (thatNode.isUnknownUser) {
+            DeviceConfig.Role.UNRECOGNIZED.name
+        } else {
+            thatNode.user.role.name
+        }
 
-    val style = if (thatNode.isUnknownUser) {
-        LocalTextStyle.current.copy(fontStyle = FontStyle.Italic)
-    } else {
-        LocalTextStyle.current
-    }
+    val style =
+        if (thatNode.isUnknownUser) {
+            LocalTextStyle.current.copy(fontStyle = FontStyle.Italic)
+        } else {
+            LocalTextStyle.current
+        }
 
-    val cardColors = if (isThisNode) {
-        thisNode?.colors?.second
-    } else {
-        thatNode.colors.second
-    }?.let {
-        val containerColor = Color(it).copy(alpha = 0.2f)
-        CardDefaults.cardColors().copy(
-            containerColor = containerColor,
-            contentColor = contentColorFor(containerColor)
-        )
-    } ?: (CardDefaults.cardColors())
+    val cardColors =
+        if (isThisNode) {
+            thisNode?.colors?.second
+        } else {
+            thatNode.colors.second
+        }
+            ?.let {
+                val containerColor = Color(it).copy(alpha = 0.2f)
+                CardDefaults.cardColors()
+                    .copy(containerColor = containerColor, contentColor = contentColorFor(containerColor))
+            } ?: (CardDefaults.cardColors())
 
     val (detailsShown, showDetails) = remember { mutableStateOf(expanded) }
-    val unmessageable = remember(thatNode) {
-        when {
-            thatNode.user.hasIsUnmessagable() -> thatNode.user.isUnmessagable
-            else -> thatNode.user.role.isUnmessageableRole()
+    val unmessageable =
+        remember(thatNode) {
+            when {
+                thatNode.user.hasIsUnmessagable() -> thatNode.user.isUnmessagable
+                else -> thatNode.user.role.isUnmessageableRole()
+            }
         }
-    }
 
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp)
-            .defaultMinSize(minHeight = 80.dp),
+        modifier =
+        modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp).defaultMinSize(minHeight = 80.dp),
         onClick = { showDetails(!detailsShown) },
-        colors = cardColors
+        colors = cardColors,
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                NodeChip(
-                    node = thatNode,
-                    isThisNode = isThisNode,
-                    isConnected = isConnected,
-                    onAction = onAction,
-                )
+        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                NodeChip(node = thatNode, isThisNode = isThisNode, isConnected = isConnected, onAction = onAction)
 
                 NodeKeyStatusIcon(
                     hasPKC = thatNode.hasPKC,
                     mismatchKey = thatNode.mismatchKey,
                     publicKey = thatNode.user.publicKey,
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(32.dp),
                 )
                 Text(
                     modifier = Modifier.weight(1f),
@@ -157,34 +144,21 @@ fun NodeItem(
                     textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
                     softWrap = true,
                 )
-                LastHeardInfo(
-                    lastHeard = thatNode.lastHeard,
-                    currentTimeMillis = currentTimeMillis
-                )
+                LastHeardInfo(lastHeard = thatNode.lastHeard, currentTimeMillis = currentTimeMillis)
                 NodeStatusIcons(
                     isThisNode = isThisNode,
                     isFavorite = isFavorite,
                     isUnmessageable = unmessageable,
-                    isConnected = isConnected
+                    isConnected = isConnected,
                 )
             }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 if (distance != null) {
-                    Text(
-                        text = distance,
-                        fontSize = MaterialTheme.typography.labelLarge.fontSize,
-                    )
+                    Text(text = distance, fontSize = MaterialTheme.typography.labelLarge.fontSize)
                 } else {
                     Spacer(modifier = Modifier.width(16.dp))
                 }
-                BatteryInfo(
-                    batteryLevel = thatNode.batteryLevel,
-                    voltage = thatNode.voltage
-                )
+                BatteryInfo(batteryLevel = thatNode.batteryLevel, voltage = thatNode.voltage)
             }
             Spacer(modifier = Modifier.height(4.dp))
             Row(
@@ -192,10 +166,7 @@ fun NodeItem(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                SignalInfo(
-                    node = thatNode,
-                    isThisNode = isThisNode
-                )
+                SignalInfo(node = thatNode, isThisNode = isThisNode)
                 thatNode.validPosition?.let { position ->
                     val satCount = position.satsInView
                     if (satCount > 0) {
@@ -204,10 +175,7 @@ fun NodeItem(
                 }
             }
             Spacer(modifier = Modifier.height(4.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 val telemetryString = thatNode.getTelemetryString(tempInFahrenheit)
                 if (telemetryString.isNotEmpty()) {
                     Text(
@@ -222,31 +190,24 @@ fun NodeItem(
                 Spacer(modifier = Modifier.height(8.dp))
                 HorizontalDivider()
                 Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                     thatNode.validPosition?.let {
                         LinkedCoordinates(
                             latitude = thatNode.latitude,
                             longitude = thatNode.longitude,
-                            format = gpsFormat,
-                            nodeName = longName
+                            nodeName = longName,
                         )
                     }
                     thatNode.validPosition?.let { position ->
                         ElevationInfo(
                             altitude = position.altitude,
                             system = system,
-                            suffix = stringResource(id = R.string.elevation_suffix)
+                            suffix = stringResource(id = R.string.elevation_suffix),
                         )
                     }
                 }
                 Spacer(modifier = Modifier.height(4.dp))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
+                Row(modifier = Modifier.fillMaxWidth()) {
                     Text(
                         modifier = Modifier.weight(1f),
                         text = hwInfoString,
@@ -279,50 +240,29 @@ fun NodeInfoSimplePreview() {
     AppTheme {
         val thisNode = NodePreviewParameterProvider().values.first()
         val thatNode = NodePreviewParameterProvider().values.last()
-        NodeItem(
-            thisNode = thisNode,
-            thatNode = thatNode,
-            1,
-            0,
-            true,
-            currentTimeMillis = System.currentTimeMillis(),
-        )
+        NodeItem(thisNode = thisNode, thatNode = thatNode, 0, true, currentTimeMillis = System.currentTimeMillis())
     }
 }
 
 @Composable
-@Preview(
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-)
-fun NodeInfoPreview(
-    @PreviewParameter(NodePreviewParameterProvider::class)
-    thatNode: Node
-) {
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES)
+fun NodeInfoPreview(@PreviewParameter(NodePreviewParameterProvider::class) thatNode: Node) {
     AppTheme {
         val thisNode = NodePreviewParameterProvider().values.first()
         Column {
-            Text(
-                text = "Details Collapsed",
-                color = MaterialTheme.colorScheme.onBackground
-            )
+            Text(text = "Details Collapsed", color = MaterialTheme.colorScheme.onBackground)
             NodeItem(
                 thisNode = thisNode,
                 thatNode = thatNode,
-                gpsFormat = 0,
                 distanceUnits = 1,
                 tempInFahrenheit = true,
                 expanded = false,
                 currentTimeMillis = System.currentTimeMillis(),
             )
-            Text(
-                text = "Details Shown",
-                color = MaterialTheme.colorScheme.onBackground
-            )
+            Text(text = "Details Shown", color = MaterialTheme.colorScheme.onBackground)
             NodeItem(
                 thisNode = thisNode,
                 thatNode = thatNode,
-                gpsFormat = 0,
                 distanceUnits = 1,
                 tempInFahrenheit = true,
                 expanded = true,

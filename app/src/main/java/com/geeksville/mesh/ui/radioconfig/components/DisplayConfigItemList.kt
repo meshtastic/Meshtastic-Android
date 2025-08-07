@@ -44,16 +44,11 @@ import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 
 @Composable
-fun DisplayConfigScreen(
-    viewModel: RadioConfigViewModel = hiltViewModel(),
-) {
+fun DisplayConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
 
     if (state.responseState.isWaiting()) {
-        PacketResponseStateDialog(
-            state = state.responseState,
-            onDismiss = viewModel::clearPacketResponse,
-        )
+        PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
     }
 
     DisplayConfigItemList(
@@ -62,22 +57,17 @@ fun DisplayConfigScreen(
         onSaveClicked = { displayInput ->
             val config = config { display = displayInput }
             viewModel.setConfig(config)
-        }
+        },
     )
 }
 
+@Suppress("LongMethod")
 @Composable
-fun DisplayConfigItemList(
-    displayConfig: DisplayConfig,
-    enabled: Boolean,
-    onSaveClicked: (DisplayConfig) -> Unit,
-) {
+fun DisplayConfigItemList(displayConfig: DisplayConfig, enabled: Boolean, onSaveClicked: (DisplayConfig) -> Unit) {
     val focusManager = LocalFocusManager.current
     var displayInput by rememberSaveable { mutableStateOf(displayConfig) }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
         item { PreferenceCategory(text = stringResource(R.string.display_config)) }
 
         item {
@@ -86,21 +76,10 @@ fun DisplayConfigItemList(
                 value = displayInput.screenOnSecs,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { displayInput = displayInput.copy { screenOnSecs = it } }
+                onValueChanged = { displayInput = displayInput.copy { screenOnSecs = it } },
             )
         }
 
-        item {
-            DropDownPreference(
-                title = stringResource(R.string.gps_coordinates_format),
-                enabled = enabled,
-                items = DisplayConfig.GpsCoordinateFormat.entries
-                    .filter { it != DisplayConfig.GpsCoordinateFormat.UNRECOGNIZED }
-                    .map { it to it.name },
-                selectedItem = displayInput.gpsFormat,
-                onItemSelected = { displayInput = displayInput.copy { gpsFormat = it } }
-            )
-        }
         item { HorizontalDivider() }
 
         item {
@@ -109,9 +88,7 @@ fun DisplayConfigItemList(
                 value = displayInput.autoScreenCarouselSecs,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = {
-                    displayInput = displayInput.copy { autoScreenCarouselSecs = it }
-                }
+                onValueChanged = { displayInput = displayInput.copy { autoScreenCarouselSecs = it } },
             )
         }
 
@@ -120,7 +97,7 @@ fun DisplayConfigItemList(
                 title = stringResource(R.string.compass_north_top),
                 checked = displayInput.compassNorthTop,
                 enabled = enabled,
-                onCheckedChange = { displayInput = displayInput.copy { compassNorthTop = it } }
+                onCheckedChange = { displayInput = displayInput.copy { compassNorthTop = it } },
             )
         }
         item { HorizontalDivider() }
@@ -130,7 +107,7 @@ fun DisplayConfigItemList(
                 title = stringResource(R.string.flip_screen),
                 checked = displayInput.flipScreen,
                 enabled = enabled,
-                onCheckedChange = { displayInput = displayInput.copy { flipScreen = it } }
+                onCheckedChange = { displayInput = displayInput.copy { flipScreen = it } },
             )
         }
         item { HorizontalDivider() }
@@ -139,11 +116,12 @@ fun DisplayConfigItemList(
             DropDownPreference(
                 title = stringResource(R.string.display_units),
                 enabled = enabled,
-                items = DisplayConfig.DisplayUnits.entries
+                items =
+                DisplayConfig.DisplayUnits.entries
                     .filter { it != DisplayConfig.DisplayUnits.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = displayInput.units,
-                onItemSelected = { displayInput = displayInput.copy { units = it } }
+                onItemSelected = { displayInput = displayInput.copy { units = it } },
             )
         }
         item { HorizontalDivider() }
@@ -152,11 +130,12 @@ fun DisplayConfigItemList(
             DropDownPreference(
                 title = stringResource(R.string.override_oled_auto_detect),
                 enabled = enabled,
-                items = DisplayConfig.OledType.entries
+                items =
+                DisplayConfig.OledType.entries
                     .filter { it != DisplayConfig.OledType.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = displayInput.oled,
-                onItemSelected = { displayInput = displayInput.copy { oled = it } }
+                onItemSelected = { displayInput = displayInput.copy { oled = it } },
             )
         }
         item { HorizontalDivider() }
@@ -165,11 +144,12 @@ fun DisplayConfigItemList(
             DropDownPreference(
                 title = stringResource(R.string.display_mode),
                 enabled = enabled,
-                items = DisplayConfig.DisplayMode.entries
+                items =
+                DisplayConfig.DisplayMode.entries
                     .filter { it != DisplayConfig.DisplayMode.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = displayInput.displaymode,
-                onItemSelected = { displayInput = displayInput.copy { displaymode = it } }
+                onItemSelected = { displayInput = displayInput.copy { displaymode = it } },
             )
         }
         item { HorizontalDivider() }
@@ -179,7 +159,7 @@ fun DisplayConfigItemList(
                 title = stringResource(R.string.heading_bold),
                 checked = displayInput.headingBold,
                 enabled = enabled,
-                onCheckedChange = { displayInput = displayInput.copy { headingBold = it } }
+                onCheckedChange = { displayInput = displayInput.copy { headingBold = it } },
             )
         }
         item { HorizontalDivider() }
@@ -189,7 +169,7 @@ fun DisplayConfigItemList(
                 title = stringResource(R.string.wake_screen_on_tap_or_motion),
                 checked = displayInput.wakeOnTapOrMotion,
                 enabled = enabled,
-                onCheckedChange = { displayInput = displayInput.copy { wakeOnTapOrMotion = it } }
+                onCheckedChange = { displayInput = displayInput.copy { wakeOnTapOrMotion = it } },
             )
         }
         item { HorizontalDivider() }
@@ -198,11 +178,12 @@ fun DisplayConfigItemList(
             DropDownPreference(
                 title = stringResource(R.string.compass_orientation),
                 enabled = enabled,
-                items = DisplayConfig.CompassOrientation.entries
+                items =
+                DisplayConfig.CompassOrientation.entries
                     .filter { it != DisplayConfig.CompassOrientation.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = displayInput.compassOrientation,
-                onItemSelected = { displayInput = displayInput.copy { compassOrientation = it } }
+                onItemSelected = { displayInput = displayInput.copy { compassOrientation = it } },
             )
         }
         item { HorizontalDivider() }
@@ -213,7 +194,7 @@ fun DisplayConfigItemList(
                 summary = stringResource(R.string.display_time_in_12h_format),
                 enabled = enabled,
                 checked = displayInput.use12HClock,
-                onCheckedChange = { displayInput = displayInput.copy { use12HClock = it } }
+                onCheckedChange = { displayInput = displayInput.copy { use12HClock = it } },
             )
         }
         item { HorizontalDivider() }
@@ -228,7 +209,7 @@ fun DisplayConfigItemList(
                 onSaveClicked = {
                     focusManager.clearFocus()
                     onSaveClicked(displayInput)
-                }
+                },
             )
         }
     }
@@ -237,9 +218,5 @@ fun DisplayConfigItemList(
 @Preview(showBackground = true)
 @Composable
 private fun DisplayConfigPreview() {
-    DisplayConfigItemList(
-        displayConfig = DisplayConfig.getDefaultInstance(),
-        enabled = true,
-        onSaveClicked = { },
-    )
+    DisplayConfigItemList(displayConfig = DisplayConfig.getDefaultInstance(), enabled = true, onSaveClicked = {})
 }

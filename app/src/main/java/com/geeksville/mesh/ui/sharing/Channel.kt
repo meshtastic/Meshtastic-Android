@@ -211,7 +211,7 @@ fun ChannelScreen(
             channelSet = channels // Throw away user edits
 
             // Tell the user to try again
-            viewModel.showSnackbar(R.string.cant_change_no_radio)
+            viewModel.showSnackBar(R.string.cant_change_no_radio)
         }
     }
 

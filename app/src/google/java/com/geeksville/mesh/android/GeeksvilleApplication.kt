@@ -54,7 +54,6 @@ import com.suddenh4x.ratingdialog.AppRating
 import io.opentracing.util.GlobalTracer
 import timber.log.Timber
 
-/** Created by kevinh on 1/4/15. */
 open class GeeksvilleApplication :
     Application(),
     Logging {
@@ -67,7 +66,9 @@ open class GeeksvilleApplication :
     val isInTestLab: Boolean
         get() {
             val testLabSetting = Settings.System.getString(contentResolver, "firebase.test.lab")
-            if (testLabSetting != null) info("Testlab is $testLabSetting")
+            if (testLabSetting != null) {
+                info("Testlab is $testLabSetting")
+            }
             return "true" == testLabSetting
         }
 
@@ -106,6 +107,7 @@ open class GeeksvilleApplication :
     fun askToRate(activity: AppCompatActivity) {
         if (!isGooglePlayAvailable) return
 
+        @Suppress("MaxLineLength")
         exceptionReporter {
             // we don't want to crash our app because of bugs in this optional feature
             AppRating.Builder(activity)

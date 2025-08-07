@@ -41,11 +41,18 @@ open class GeeksvilleApplication :
         lateinit var analytics: AnalyticsProvider
     }
 
+    val isGooglePlayAvailable: Boolean
+        get() {
+            return false
+        }
+
     // / Are we running inside the testlab?
     val isInTestLab: Boolean
         get() {
             val testLabSetting = Settings.System.getString(contentResolver, "firebase.test.lab") ?: null
-            if (testLabSetting != null) info("Testlab is $testLabSetting")
+            if (testLabSetting != null) {
+                info("Testlab is $testLabSetting")
+            }
             return "true" == testLabSetting
         }
 

@@ -75,32 +75,19 @@ fun NodeScreen(
 
     var showSharedContact: Node? by remember { mutableStateOf(null) }
     if (showSharedContact != null) {
-        SharedContactDialog(
-            contact = showSharedContact,
-            onDismiss = { showSharedContact = null }
-        )
+        SharedContactDialog(contact = showSharedContact, onDismiss = { showSharedContact = null })
     }
 
-    val isScrollInProgress by remember {
-        derivedStateOf { listState.isScrollInProgress }
-    }
+    val isScrollInProgress by remember { derivedStateOf { listState.isScrollInProgress } }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        LazyColumn(
-            state = listState,
-            modifier = Modifier.fillMaxSize(),
-        ) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
             stickyHeader {
-                val animatedAlpha by animateFloatAsState(
-                    targetValue = if (!isScrollInProgress) 1.0f else 0f,
-                    label = "alpha"
-                )
+                val animatedAlpha by
+                    animateFloatAsState(targetValue = if (!isScrollInProgress) 1.0f else 0f, label = "alpha")
                 NodeFilterTextField(
-                    modifier = Modifier
-                        .fillMaxWidth()
+                    modifier =
+                    Modifier.fillMaxWidth()
                         .graphicsLayer(alpha = animatedAlpha)
                         .background(MaterialTheme.colorScheme.surfaceDim)
                         .padding(8.dp),
@@ -127,7 +114,6 @@ fun NodeScreen(
                     modifier = Modifier.animateItem(),
                     thisNode = ourNode,
                     thatNode = node,
-                    gpsFormat = state.gpsFormat,
                     distanceUnits = state.distanceUnits,
                     tempInFahrenheit = state.tempInFahrenheit,
                     onAction = { menuItem ->
@@ -137,8 +123,7 @@ fun NodeScreen(
                             is NodeMenuAction.Favorite -> model.favoriteNode(node)
                             is NodeMenuAction.DirectMessage -> {
                                 val hasPKC = model.ourNodeInfo.value?.hasPKC == true && node.hasPKC
-                                val channel =
-                                    if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
+                                val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
                                 navigateToMessages("$channel${node.user.id}")
                             }
 
@@ -161,19 +146,10 @@ fun NodeScreen(
 
         AnimatedVisibility(
             modifier = Modifier.align(Alignment.BottomEnd),
-            visible = !isScrollInProgress &&
-                    connectionState.isConnected() &&
-                    shareCapable
+            visible = !isScrollInProgress && connectionState.isConnected() && shareCapable,
         ) {
             @Suppress("NewApi")
-            (
-                AddContactFAB(
-                    model = model,
-                    onSharedContactImport = { contact ->
-                        model.addSharedContact(contact)
-                    }
-                )
-            )
+            (AddContactFAB(model = model, onSharedContactImport = { contact -> model.addSharedContact(contact) }))
         }
     }
 }

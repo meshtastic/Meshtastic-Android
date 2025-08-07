@@ -1,0 +1,106 @@
+/*
+ * Copyright (c) 2025 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.geeksville.mesh.ui.map
+
+import android.content.SharedPreferences
+import androidx.core.content.edit
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.geeksville.mesh.database.NodeRepository
+import com.geeksville.mesh.database.PacketRepository
+import com.geeksville.mesh.database.entity.Packet
+import com.geeksville.mesh.model.Node
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.mapLatest
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.stateIn
+
+@Suppress("TooManyFunctions")
+abstract class BaseMapViewModel(
+    protected val preferences: SharedPreferences,
+    nodeRepository: NodeRepository,
+    packetRepository: PacketRepository,
+) : ViewModel() {
+
+    val nodes: StateFlow<List<Node>> =
+        nodeRepository
+            .getNodes()
+            .onEach { it.filter { !it.isIgnored } }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue = emptyList(),
+            )
+
+    val waypoints: StateFlow<Map<Int, Packet>> =
+        packetRepository
+            .getWaypoints()
+            .mapLatest { list ->
+                list
+                    .associateBy { packet -> packet.data.waypoint!!.id }
+                    .filterValues {
+                        it.data.waypoint!!.expire == 0 || it.data.waypoint!!.expire > System.currentTimeMillis() / 1000
+                    }
+            }
+            .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5_000), initialValue = emptyMap())
+
+    private val showOnlyFavorites = MutableStateFlow(preferences.getBoolean("only-favorites", false))
+
+    private val showWaypointsOnMap = MutableStateFlow(preferences.getBoolean("show-waypoints-on-map", true))
+
+    private val showPrecisionCircleOnMap =
+        MutableStateFlow(preferences.getBoolean("show-precision-circle-on-map", true))
+
+    fun toggleOnlyFavorites() {
+        val current = showOnlyFavorites.value
+        preferences.edit { putBoolean("only-favorites", !current) }
+        showOnlyFavorites.value = !current
+    }
+
+    fun toggleShowWaypointsOnMap() {
+        val current = showWaypointsOnMap.value
+        preferences.edit { putBoolean("show-waypoints-on-map", !current) }
+        showWaypointsOnMap.value = !current
+    }
+
+    fun toggleShowPrecisionCircleOnMap() {
+        val current = showPrecisionCircleOnMap.value
+        preferences.edit { putBoolean("show-precision-circle-on-map", !current) }
+        showPrecisionCircleOnMap.value = !current
+    }
+
+    data class MapFilterState(val onlyFavorites: Boolean, val showWaypoints: Boolean, val showPrecisionCircle: Boolean)
+
+    val mapFilterStateFlow: StateFlow<MapFilterState> =
+        combine(showOnlyFavorites, showWaypointsOnMap, showPrecisionCircleOnMap) {
+                favoritesOnly,
+                showWaypoints,
+                showPrecisionCircle,
+            ->
+            MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle)
+        }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5_000),
+                initialValue =
+                MapFilterState(showOnlyFavorites.value, showWaypointsOnMap.value, showPrecisionCircleOnMap.value),
+            )
+}
