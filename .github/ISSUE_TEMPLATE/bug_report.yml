@@ -76,11 +76,12 @@ body:
   - type: markdown
     attributes:
       value: |
-
         ### Relevant log output
-        <details>
-
-        <summary>Expand Logs ... </summary>
+        <!--
+          uncomment this section to fold logs
+          <details>
+          <summary>Expand Logs ... </summary>
+        -->
   - type: textarea
     id: logs
     attributes:
@@ -90,7 +91,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        </details>
+        <!--
+          </details>
+        -->
   - type: checkboxes
     id: terms
     attributes:
