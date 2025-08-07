@@ -120,10 +120,7 @@ fun PositionConfigItemList(
     val locationPermissionState =
         rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION) { granted ->
             if (granted) {
-                coroutineScope.launch {
-                    // If permission is granted, we can use the current location
-                    onUseCurrentLocation()
-                }
+                coroutineScope.launch { onUseCurrentLocation() }
             }
         }
     var locationInput by rememberSaveable { mutableStateOf(location) }
