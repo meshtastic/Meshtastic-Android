@@ -60,6 +60,7 @@ import com.geeksville.mesh.repository.api.DeviceHardwareRepository
 import com.geeksville.mesh.repository.api.FirmwareReleaseRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
+import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.MeshServiceNotifications
@@ -72,6 +73,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -84,6 +86,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -238,6 +241,13 @@ constructor(
         radioConfigRepository.clearClientNotification()
         meshServiceNotifications.clearClientNotification(notification)
     }
+
+    /**
+     * Emits events for mesh network send/receive activity. This is a SharedFlow to ensure all events are delivered,
+     * even if they are the same.
+     */
+    val meshActivity: SharedFlow<MeshActivity> =
+        radioInterfaceService.meshActivity.shareIn(viewModelScope, SharingStarted.Eagerly, 0)
 
     data class AlertData(
         val title: String,
