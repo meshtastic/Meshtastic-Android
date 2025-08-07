@@ -20,9 +20,9 @@ repo:
   - changed-files:
     - any-glob-to-any-file: .github
 
- # Add 'bug' label to any PR where the head branch name contains `fix` or `bug`
+ # Add 'bug' label to any PR where the head branch name contains `fix` or `bug` as the prefix.
 bugfix:
-  - head-branch: [fix, bug, Fix, FIX, Bug, BUG]
+  - head-branch: [^fix, ^bug, ^Fix, ^FIX, ^Bug, ^BUG]
 
 # our fallback - bug except repo, feat, or automated pipelines
 # bug_fallthrough:
