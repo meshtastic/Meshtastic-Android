@@ -107,6 +107,7 @@ import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.showLongNameTitle
 import com.geeksville.mesh.repository.radio.MeshActivity
+import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
@@ -166,7 +167,7 @@ fun MainScreen(
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
         LaunchedEffect(connectionState, notificationPermissionState) {
-            if (connectionState.isConnected() && !notificationPermissionState.status.isGranted) {
+            if (connectionState == ConnectionState.CONNECTED && !notificationPermissionState.status.isGranted) {
                 notificationPermissionState.launchPermissionRequest()
             }
         }
@@ -174,7 +175,7 @@ fun MainScreen(
 
     AddNavigationTracking(navController)
 
-    if (connectionState.isConnected()) {
+    if (connectionState == ConnectionState.CONNECTED) {
         requestChannelSet?.let { newChannelSet -> ScannedQrCodeDialog(uIViewModel, newChannelSet) }
     }
 
@@ -421,7 +422,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
     val latestStableFirmwareRelease by
         viewModel.latestStableFirmwareRelease.collectAsStateWithLifecycle(DeviceVersion("2.6.4"))
     LaunchedEffect(connectionState, firmwareEdition) {
-        if (connectionState == MeshService.ConnectionState.CONNECTED) {
+        if (connectionState == ConnectionState.CONNECTED) {
             firmwareEdition?.let { edition ->
                 debug("FirmwareEdition: ${edition.name}")
                 when (edition) {
@@ -438,7 +439,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
     }
 
     LaunchedEffect(connectionState, currentFirmwareVersion, currentDeviceHardware) {
-        if (connectionState == MeshService.ConnectionState.CONNECTED) {
+        if (connectionState == ConnectionState.CONNECTED) {
             if (currentDeviceHardware != null && currentFirmwareVersion != null) {
                 setAttributes(currentFirmwareVersion!!, currentDeviceHardware!!)
             }
@@ -447,7 +448,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
 
     // Check if the device is running an old app version or firmware version
     LaunchedEffect(connectionState, myNodeInfo) {
-        if (connectionState == MeshService.ConnectionState.CONNECTED) {
+        if (connectionState == ConnectionState.CONNECTED) {
             myNodeInfo?.let { info ->
                 val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
                 val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
@@ -631,21 +632,24 @@ private fun MainMenuActions(isManaged: Boolean, onAction: (MainMenuAction) -> Un
 }
 
 @Composable
-private fun MeshService.ConnectionState.getConnectionColor(): Color = when (this) {
-    MeshService.ConnectionState.CONNECTED -> colorScheme.StatusGreen
-    MeshService.ConnectionState.DEVICE_SLEEP -> colorScheme.StatusYellow
-    MeshService.ConnectionState.DISCONNECTED -> colorScheme.StatusRed
+private fun ConnectionState.getConnectionColor(): Color = when (this) {
+    ConnectionState.CONNECTED -> colorScheme.StatusGreen
+    ConnectionState.DEVICE_SLEEP -> colorScheme.StatusYellow
+    ConnectionState.DISCONNECTED -> colorScheme.StatusRed
+    ConnectionState.CONNECTING -> colorScheme.StatusYellow
 }
 
-private fun MeshService.ConnectionState.getConnectionIcon(): ImageVector = when (this) {
-    MeshService.ConnectionState.CONNECTED -> Icons.TwoTone.CloudDone
-    MeshService.ConnectionState.DEVICE_SLEEP -> Icons.TwoTone.CloudUpload
-    MeshService.ConnectionState.DISCONNECTED -> Icons.TwoTone.CloudOff
+private fun ConnectionState.getConnectionIcon(): ImageVector = when (this) {
+    ConnectionState.CONNECTED -> Icons.TwoTone.CloudDone
+    ConnectionState.DEVICE_SLEEP -> Icons.TwoTone.CloudUpload
+    ConnectionState.DISCONNECTED -> Icons.TwoTone.CloudOff
+    ConnectionState.CONNECTING -> Icons.TwoTone.CloudUpload
 }
 
 @Composable
-private fun MeshService.ConnectionState.getTooltipString(): String = when (this) {
-    MeshService.ConnectionState.CONNECTED -> stringResource(R.string.connected)
-    MeshService.ConnectionState.DEVICE_SLEEP -> stringResource(R.string.device_sleeping)
-    MeshService.ConnectionState.DISCONNECTED -> stringResource(R.string.disconnected)
+private fun ConnectionState.getTooltipString(): String = when (this) {
+    ConnectionState.CONNECTED -> stringResource(R.string.connected)
+    ConnectionState.DEVICE_SLEEP -> stringResource(R.string.device_sleeping)
+    ConnectionState.DISCONNECTED -> stringResource(R.string.disconnected)
+    ConnectionState.CONNECTING -> stringResource(R.string.connecting_to_device)
 }

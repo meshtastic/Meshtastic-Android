@@ -78,7 +78,6 @@ import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.network.MQTTRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
-import com.geeksville.mesh.repository.radio.RadioServiceConnectionState
 import com.geeksville.mesh.telemetry
 import com.geeksville.mesh.user
 import com.geeksville.mesh.util.anonymize
@@ -91,7 +90,6 @@ import com.google.protobuf.InvalidProtocolBufferException
 import dagger.Lazy
 import dagger.hilt.android.AndroidEntryPoint
 import java8.util.concurrent.CompletableFuture
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -150,6 +148,8 @@ class MeshService :
 
     @Inject lateinit var serviceNotifications: MeshServiceNotifications
 
+    @Inject lateinit var connectionRouter: ConnectionRouter
+
     companion object : Logging {
 
         // Intents broadcast by MeshService
@@ -199,17 +199,6 @@ class MeshService :
         val absoluteMinDeviceVersion = DeviceVersion(BuildConfig.ABS_MIN_FW_VERSION)
     }
 
-    enum class ConnectionState {
-        DISCONNECTED,
-        CONNECTED,
-        DEVICE_SLEEP, // device is in LS sleep state, it will reconnected to us over bluetooth once it has data
-        ;
-
-        fun isConnected() = this == CONNECTED
-
-        fun isDisconnected() = this == DISCONNECTED
-    }
-
     private var previousSummary: String? = null
     private var previousStats: LocalStats? = null
 
@@ -217,11 +206,10 @@ class MeshService :
     private val clientPackages = mutableMapOf<String, String>()
     private val serviceBroadcasts =
         MeshServiceBroadcasts(this, clientPackages) {
-            connectionState.also { radioConfigRepository.setConnectionState(it) }
+            connectionRouter.connectionState.value.also { radioConfigRepository.setConnectionState(it) }
         }
     private val serviceJob = Job()
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
-    private var connectionState = ConnectionState.DISCONNECTED
 
     private var locationFlow: Job? = null
     private var mqttMessageFlow: Job? = null
@@ -240,11 +228,12 @@ class MeshService :
 
     private val notificationSummary
         get() =
-            when (connectionState) {
+            when (connectionRouter.connectionState.value) {
                 ConnectionState.CONNECTED -> getString(R.string.connected_count).format(numOnlineNodes)
 
                 ConnectionState.DISCONNECTED -> getString(R.string.disconnected)
                 ConnectionState.DEVICE_SLEEP -> getString(R.string.device_sleeping)
+                ConnectionState.CONNECTING -> getString(R.string.connecting_to_device)
             }
 
     private var localStatsTelemetry: TelemetryProtos.Telemetry? = null
@@ -361,9 +350,19 @@ class MeshService :
 
         info("Creating mesh service")
         serviceNotifications.initChannels()
+        connectionRouter.start()
         // Switch to the IO thread
         serviceScope.handledLaunch { radioInterfaceService.connect() }
-        radioInterfaceService.connectionState.onEach(::onRadioConnectionState).launchIn(serviceScope)
+        connectionRouter.connectionState
+            .onEach { state ->
+                when (state) {
+                    ConnectionState.CONNECTED -> startConnect()
+                    ConnectionState.DEVICE_SLEEP -> startDeviceSleep()
+                    ConnectionState.DISCONNECTED -> startDisconnect()
+                    else -> {}
+                }
+            }
+            .launchIn(serviceScope)
         radioInterfaceService.receivedData.onEach(::onReceiveFromRadio).launchIn(serviceScope)
         radioConfigRepository.localConfigFlow.onEach { localConfig = it }.launchIn(serviceScope)
         radioConfigRepository.moduleConfigFlow.onEach { moduleConfig = it }.launchIn(serviceScope)
@@ -447,6 +446,7 @@ class MeshService :
 
         super.onDestroy()
         serviceJob.cancel()
+        connectionRouter.stop()
     }
 
     //
@@ -1125,7 +1125,7 @@ class MeshService :
         val future = CompletableFuture<Boolean>()
         queueResponse[packet.id] = future
         try {
-            if (connectionState != ConnectionState.CONNECTED) throw RadioNotConnectedException()
+            if (connectionRouter.connectionState.value != ConnectionState.CONNECTED) throw RadioNotConnectedException()
             sendToRadio(ToRadio.newBuilder().apply { this.packet = packet })
         } catch (ex: Exception) {
             errormsg("sendToRadio error:", ex)
@@ -1139,7 +1139,7 @@ class MeshService :
         queueJob =
             serviceScope.handledLaunch {
                 debug("packet queueJob started")
-                while (connectionState == ConnectionState.CONNECTED) {
+                while (connectionRouter.connectionState.value == ConnectionState.CONNECTED) {
                     // take the first packet from the queue head
                     val packet = queuedPackets.poll() ?: break
                     try {
@@ -1324,101 +1324,61 @@ class MeshService :
         GeeksvilleApplication.analytics.setUserInfo(DataPair("num_nodes", numNodes), radioModel)
     }
 
-    private var sleepTimeout: Job? = null
-
     // msecs since 1970 we started this connection
     private var connectTimeMsec = 0L
 
-    // Called when we gain/lose connection to our radio
-    private fun onConnectionChanged(c: ConnectionState) {
-        debug("onConnectionChanged: $connectionState -> $c")
+    private fun startConnect() {
+        // Do our startup init
+        try {
+            connectTimeMsec = System.currentTimeMillis()
+            startConfigOnly()
+        } catch (ex: InvalidProtocolBufferException) {
+            errormsg("Invalid protocol buffer sent by device - update device software and try again", ex)
+        } catch (ex: RadioNotConnectedException) {
+            // note: no need to call startDeviceSleep(), because this exception could only have reached us if it was
+            // already called
+            errormsg("Lost connection to radio during init - waiting for reconnect ${ex.message}")
+        } catch (ex: RemoteException) {
+            // It seems that when the ESP32 goes offline it can briefly come back for a 100ms ish which
+            // causes the phone to try and reconnect.  If we fail downloading our initial radio state we don't want
+            // to
+            // claim we have a valid connection still
+            // This case should be handled by the ConnectionRouter now.
+            // For now, I'll just log an error.
+            errormsg("RemoteException during connect", ex)
+        }
+    }
 
-        // Perform all the steps needed once we start waiting for device sleep to complete
-        fun startDeviceSleep() {
-            stopPacketQueue()
-            stopLocationRequests()
-            stopMqttClientProxy()
+    private fun startDeviceSleep() {
+        stopPacketQueue()
+        stopLocationRequests()
+        stopMqttClientProxy()
 
-            if (connectTimeMsec != 0L) {
-                val now = System.currentTimeMillis()
-                connectTimeMsec = 0L
+        if (connectTimeMsec != 0L) {
+            val now = System.currentTimeMillis()
+            connectTimeMsec = 0L
 
-                GeeksvilleApplication.analytics.track("connected_seconds", DataPair((now - connectTimeMsec) / 1000.0))
-            }
-
-            // Have our timeout fire in the appropriate number of seconds
-            sleepTimeout =
-                serviceScope.handledLaunch {
-                    try {
-                        // If we have a valid timeout, wait that long (+30 seconds) otherwise, just wait 30 seconds
-                        val timeout = (localConfig.power?.lsSecs ?: 0) + 30
-
-                        debug("Waiting for sleeping device, timeout=$timeout secs")
-                        delay(timeout * 1000L)
-                        warn("Device timeout out, setting disconnected")
-                        onConnectionChanged(ConnectionState.DISCONNECTED)
-                    } catch (ex: CancellationException) {
-                        debug("device sleep timeout cancelled")
-                    }
-                }
-
-            // broadcast an intent with our new connection state
-            serviceBroadcasts.broadcastConnection()
+            GeeksvilleApplication.analytics.track("connected_seconds", DataPair((now - connectTimeMsec) / 1000.0))
         }
 
-        fun startDisconnect() {
-            stopPacketQueue()
-            stopLocationRequests()
-            stopMqttClientProxy()
+        // broadcast an intent with our new connection state
+        serviceBroadcasts.broadcastConnection()
+    }
 
-            GeeksvilleApplication.analytics.track(
-                "mesh_disconnect",
-                DataPair("num_nodes", numNodes),
-                DataPair("num_online", numOnlineNodes),
-            )
-            GeeksvilleApplication.analytics.track("num_nodes", DataPair(numNodes))
+    private fun startDisconnect() {
+        stopPacketQueue()
+        stopLocationRequests()
+        stopMqttClientProxy()
 
-            // broadcast an intent with our new connection state
-            serviceBroadcasts.broadcastConnection()
-        }
+        GeeksvilleApplication.analytics.track(
+            "mesh_disconnect",
+            DataPair("num_nodes", numNodes),
+            DataPair("num_online", numOnlineNodes),
+        )
+        GeeksvilleApplication.analytics.track("num_nodes", DataPair(numNodes))
 
-        fun startConnect() {
-            // Do our startup init
-            try {
-                connectTimeMsec = System.currentTimeMillis()
-                startConfigOnly()
-            } catch (ex: InvalidProtocolBufferException) {
-                errormsg("Invalid protocol buffer sent by device - update device software and try again", ex)
-            } catch (ex: RadioNotConnectedException) {
-                // note: no need to call startDeviceSleep(), because this exception could only have reached us if it was
-                // already called
-                errormsg("Lost connection to radio during init - waiting for reconnect ${ex.message}")
-            } catch (ex: RemoteException) {
-                // It seems that when the ESP32 goes offline it can briefly come back for a 100ms ish which
-                // causes the phone to try and reconnect.  If we fail downloading our initial radio state we don't want
-                // to
-                // claim we have a valid connection still
-                connectionState = ConnectionState.DEVICE_SLEEP
-                startDeviceSleep()
-                throw ex // Important to rethrow so that we don't tell the app all is well
-            }
-        }
-
-        // Cancel any existing timeouts
-        sleepTimeout?.let {
-            it.cancel()
-            sleepTimeout = null
-        }
-
-        connectionState = c
-        when (c) {
-            ConnectionState.CONNECTED -> startConnect()
-            ConnectionState.DEVICE_SLEEP -> startDeviceSleep()
-            ConnectionState.DISCONNECTED -> startDisconnect()
-        }
-
-        // Update the android notification in the status bar
-        maybeUpdateServiceStatusNotification()
+        // broadcast an intent with our new connection state
+        serviceBroadcasts.broadcastConnection()
     }
 
     private fun maybeUpdateServiceStatusNotification() {
@@ -1441,21 +1401,6 @@ class MeshService :
                 currentStatsUpdatedAtMillis = currentStatsUpdatedAtMillis,
             )
         }
-    }
-
-    private fun onRadioConnectionState(state: RadioServiceConnectionState) {
-        // sleep now disabled by default on ESP32, permanent is true unless light sleep enabled
-        val isRouter = localConfig.device.role == ConfigProtos.Config.DeviceConfig.Role.ROUTER
-        val lsEnabled = localConfig.power.isPowerSaving || isRouter
-        val connected = state.isConnected
-        val permanent = state.isPermanent || !lsEnabled
-        onConnectionChanged(
-            when {
-                connected -> ConnectionState.CONNECTED
-                permanent -> ConnectionState.DISCONNECTED
-                else -> ConnectionState.DEVICE_SLEEP
-            },
-        )
     }
 
     @Suppress("CyclomaticComplexMethod")
@@ -2067,11 +2012,9 @@ class MeshService :
             override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
                 debug("Passing through device change to radio service: ${deviceAddr.anonymize}")
                 updateLastAddress(deviceAddr)
-                val res = radioInterfaceService.setDeviceAddress(deviceAddr)
+                val res = connectionRouter.setDeviceAddress(deviceAddr)
                 if (res) {
                     discardNodeDB()
-                } else {
-                    serviceBroadcasts.broadcastConnection()
                 }
                 res
             }
@@ -2123,7 +2066,7 @@ class MeshService :
 
                     info(
                         "sendData dest=${p.to}, id=${p.id} <- ${p.bytes!!.size} bytes" +
-                            " (connectionState=$connectionState)",
+                            " (connectionState=${connectionRouter.connectionState.value})",
                     )
 
                     if (p.dataType == 0) {
@@ -2137,7 +2080,7 @@ class MeshService :
                         p.status = MessageStatus.QUEUED
                     }
 
-                    if (connectionState == ConnectionState.CONNECTED) {
+                    if (connectionRouter.connectionState.value == ConnectionState.CONNECTED) {
                         try {
                             sendNow(p)
                         } catch (ex: Exception) {
@@ -2265,7 +2208,7 @@ class MeshService :
             }
 
             override fun connectionState(): String = toRemoteExceptions {
-                val r = this@MeshService.connectionState
+                val r = this@MeshService.connectionRouter.connectionState.value
                 info("in connectionState=$r")
                 r.toString()
             }

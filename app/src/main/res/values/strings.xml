@@ -762,4 +762,5 @@
     <string name="grant_permissions_and_scan">Grant Permissions and Scan</string>
     <string name="nodes_queued_for_deletion">%d nodes queued for deletion:</string>
     <string name="clean_node_database_description">Caution: This removes nodes from in-app and on-device databases.\nSelections are additive.</string>
+    <string name="connecting_to_device">Connecting to device</string>
 </resources>
