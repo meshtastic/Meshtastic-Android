@@ -67,17 +67,11 @@ import java.text.DateFormat
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TracerouteLogScreen(
-    modifier: Modifier = Modifier,
-    viewModel: MetricsViewModel = hiltViewModel(),
-) {
+fun TracerouteLogScreen(modifier: Modifier = Modifier, viewModel: MetricsViewModel = hiltViewModel()) {
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val dateFormat = remember {
-        DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
-    }
+    val dateFormat = remember { DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM) }
 
-    fun getUsername(nodeNum: Int): String =
-        with(viewModel.getUser(nodeNum)) { "$longName ($shortName)" }
+    fun getUsername(nodeNum: Int): String = with(viewModel.getUser(nodeNum)) { "$longName ($shortName)" }
 
     var showDialog by remember { mutableStateOf<String?>(null) }
 
@@ -85,23 +79,17 @@ fun TracerouteLogScreen(
         val message = showDialog ?: return
         SimpleAlertDialog(
             title = R.string.traceroute,
-            text = {
-                SelectionContainer {
-                    Text(text = message)
-                }
-            },
-            onDismiss = { showDialog = null }
+            text = { SelectionContainer { Text(text = message) } },
+            onDismiss = { showDialog = null },
         )
     }
 
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = PaddingValues(horizontal = 16.dp),
-    ) {
+    LazyColumn(modifier = modifier.fillMaxSize(), contentPadding = PaddingValues(horizontal = 16.dp)) {
         items(state.tracerouteRequests, key = { it.uuid }) { log ->
-            val result = remember(state.tracerouteRequests) {
-                state.tracerouteResults.find { it.decoded.requestId == log.fromRadio.packet.id }
-            }
+            val result =
+                remember(state.tracerouteRequests) {
+                    state.tracerouteResults.find { it.decoded.requestId == log.fromRadio.packet.id }
+                }
             val route = remember(result) { result?.fullRouteDiscovery }
 
             val time = dateFormat.format(log.received_date)
@@ -112,18 +100,14 @@ fun TracerouteLogScreen(
                 TracerouteItem(
                     icon = icon,
                     text = "$time - $text",
-                    modifier = Modifier.combinedClickable(
-                        onLongClick = { expanded = true },
-                    ) {
+                    modifier =
+                    Modifier.combinedClickable(onLongClick = { expanded = true }) {
                         if (result != null) {
                             showDialog = result.getTracerouteResponse(::getUsername)
                         }
-                    }
+                    },
                 )
-                DropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false },
-                ) {
+                DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                     DeleteItem {
                         viewModel.deleteLog(log.uuid)
                         expanded = false
@@ -139,50 +123,29 @@ private fun DeleteItem(onClick: () -> Unit) {
     DropdownMenuItem(
         onClick = onClick,
         text = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = Icons.Default.Delete,
                     contentDescription = stringResource(id = R.string.delete),
                     tint = MaterialTheme.colorScheme.error,
                 )
                 Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    text = stringResource(id = R.string.delete),
-                    color = MaterialTheme.colorScheme.error,
-                )
+                Text(text = stringResource(id = R.string.delete), color = MaterialTheme.colorScheme.error)
             }
-        }
+        },
     )
 }
 
 @Composable
-private fun TracerouteItem(
-    icon: ImageVector,
-    text: String,
-    modifier: Modifier = Modifier,
-) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .heightIn(min = 56.dp)
-            .padding(vertical = 2.dp),
-    ) {
+private fun TracerouteItem(icon: ImageVector, text: String, modifier: Modifier = Modifier) {
+    Card(modifier = modifier.fillMaxWidth().heightIn(min = 56.dp).padding(vertical = 2.dp)) {
         Row(
-            modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp),
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = stringResource(id = R.string.traceroute)
-            )
+            Icon(imageVector = icon, contentDescription = stringResource(id = R.string.traceroute))
             Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = text,
-                style = MaterialTheme.typography.bodyLarge,
-            )
+            Text(text = text, style = MaterialTheme.typography.bodyLarge)
         }
     }
 }
@@ -213,9 +176,6 @@ private fun MeshProtos.RouteDiscovery?.getTextAndIcon(): Pair<String, ImageVecto
 private fun TracerouteItemPreview() {
     val dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
     AppTheme {
-        TracerouteItem(
-            icon = Icons.Default.Group,
-            text = "${dateFormat.format(System.currentTimeMillis())} - Direct"
-        )
+        TracerouteItem(icon = Icons.Default.Group, text = "${dateFormat.format(System.currentTimeMillis())} - Direct")
     }
 }
