@@ -388,7 +388,7 @@ fun MainScreen(
 }
 
 @Composable
-private fun TopLevelNavIcon(destination: TopLevelDestination, connectionState: MeshService.ConnectionState) {
+private fun TopLevelNavIcon(destination: TopLevelDestination, connectionState: ConnectionState) {
     val iconTint =
         when {
             destination == TopLevelDestination.Connections -> connectionState.getConnectionColor()
