@@ -139,16 +139,20 @@ private fun DeleteItem(onClick: () -> Unit) {
     DropdownMenuItem(
         onClick = onClick,
         text = {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = stringResource(id = R.string.delete),
-                tint = MaterialTheme.colorScheme.error,
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Text(
-                text = stringResource(id = R.string.delete),
-                color = MaterialTheme.colorScheme.error,
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = stringResource(id = R.string.delete),
+                    tint = MaterialTheme.colorScheme.error,
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = stringResource(id = R.string.delete),
+                    color = MaterialTheme.colorScheme.error,
+                )
+            }
         }
     )
 }
