@@ -32,6 +32,7 @@
     <string name="node_sort_via_mqtt">через MQTT</string>
     <string name="via_mqtt">через MQTT</string>
     <string name="node_sort_via_favorite">по фаворитам</string>
+    <string name="node_filter_show_ignored">Игнорируемые узлы</string>
     <string name="unrecognized">Нераспознанный</string>
     <string name="message_status_enroute">Ожидание подтверждения</string>
     <string name="message_status_queued">В очереди для отправки</string>
@@ -179,6 +180,8 @@
     <string name="quick_chat_edit">Редактировать быстрый чат</string>
     <string name="quick_chat_append">Добавить к сообщению</string>
     <string name="quick_chat_instant">Мгновенная отправка</string>
+    <string name="quick_chat_show">Показать меню быстрого чата</string>
+    <string name="quick_chat_hide">Скрыть меню быстрого чата</string>
     <string name="factory_reset">Сброс настроек к заводским настройкам</string>
     <string name="bluetooth_disabled">Bluetooth отключен</string>
     <string name="permission_missing_31">Meshtastic требует разрешение на поиск и подключение к устройствам через Bluetooth. Вы можете отключить его, когда он не используется.</string>
@@ -348,6 +351,7 @@
     <string name="downlink_enabled">Downlink включен</string>
     <string name="default_">По умолчанию</string>
     <string name="position_enabled">Позиция включена</string>
+    <string name="precise_location">Точность местоположения</string>
     <string name="gpio_pin">GPIO контакт</string>
     <string name="type">Тип</string>
     <string name="hide_password">Скрыть пароль</string>
@@ -563,8 +567,10 @@
     <string name="node_number">Номер узла</string>
     <string name="user_id">ID пользователя</string>
     <string name="uptime">Время работы</string>
+    <string name="load_indexed">Нагрузка %1$d</string>
     <string name="timestamp">Отметка времени</string>
     <string name="heading">Курс</string>
+    <string name="speed">Скорость</string>
     <string name="sats">Количество спутников</string>
     <string name="alt">Уровень моря</string>
     <string name="freq">Частота</string>
@@ -642,6 +648,7 @@
     <string name="overflow_menu">Переполнение меню</string>
     <string name="uv_lux">УФ Люкс</string>
     <string name="unknown">Неизвестно</string>
+    <string name="clean_now">Очистить сейчас</string>
     <string name="security_icon_help_green_lock">Зеленый замок означает, что канал надежно зашифрован либо 128, либо 256 битным ключом AES.</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <string name="security_icon_insecure_no_precise">Небезопасный канал, не точный</string>
@@ -658,7 +665,21 @@
     <string name="security_icon_help_show_all">Показать все значения</string>
     <string name="security_icon_help_show_less">Показать текущий статус</string>
     <string name="security_icon_help_dismiss">Отменить</string>
+    <string name="replying_to">Ответить %1$s</string>
+    <string name="cancel_reply">Отменить ответ</string>
+    <string name="delete_messages_title">Удалить сообщения?</string>
+    <string name="clear_selection">Очистить выбор</string>
     <string name="message_input_label">Сообщение</string>
+    <string name="pax">PAX</string>
+    <string name="wifi_devices">WiFi устройства</string>
+    <string name="view_release">Просмотреть релиз</string>
+    <string name="download">Скачать</string>
+    <string name="installed_firmware_version">Текущая версия:</string>
+    <string name="latest_stable_firmware">Последняя стабильная</string>
+    <string name="latest_alpha_firmware">Последняя альфа</string>
+    <string name="firmware_edition">Версия прошивки</string>
+    <string name="get_started">Начать работу</string>
+    <string name="incoming_messages">Входящие сообщения</string>
     <string name="skip">Пропустить</string>
     <string name="next">Далее</string>
 </resources>
