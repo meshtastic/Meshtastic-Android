@@ -103,6 +103,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.Random
 import java.util.UUID
@@ -222,7 +223,7 @@ class MeshService :
 
     private fun getSenderName(packet: DataPacket?): String {
         val nodeId = packet?.from ?: return getString(R.string.unknown_username)
-        return _nodeDBbyID[nodeId]?.user?.longName ?: getString(R.string.unknown_username)
+        return nodeDBbyID[nodeId]?.user?.longName ?: getString(R.string.unknown_username)
     }
 
     private val notificationSummary: String
@@ -350,7 +351,7 @@ class MeshService :
                     ConnectionState.CONNECTED -> startConnect()
                     ConnectionState.DEVICE_SLEEP -> startDeviceSleep()
                     ConnectionState.DISCONNECTED -> startDisconnect()
-                    else -> Unit // No action for other states
+                    else -> Unit
                 }
             }
             .launchIn(serviceScope)
@@ -415,7 +416,7 @@ class MeshService :
 
     // Node Database and Model Management
     private fun loadSettings() = serviceScope.handledLaunch {
-        discardNodeDB() // Clear previous state
+        resetState() // Clear previous state
         myNodeInfo = radioConfigRepository.myNodeInfo.value
         val nodesFromDb = radioConfigRepository.getNodeDBbyNum()
         nodeDBbyNodeNum.putAll(nodesFromDb)
@@ -426,15 +427,21 @@ class MeshService :
         }
     }
 
-    private fun discardNodeDB() {
+    private fun resetState() = serviceScope.launch {
         debug("Discarding NodeDB")
+        clearDatabases()
         myNodeInfo = null
+        rawMyNodeInfo = null
         nodeDBbyNodeNum.clear()
-        _nodeDBbyID.clear() // Also clear the ID-based map
-        haveNodeDB = false
+        _nodeDBbyID.clear()
+        radioConfigRepository.clearChannelSet()
+        radioConfigRepository.clearLocalConfig()
+        radioConfigRepository.clearLocalModuleConfig()
     }
 
     private var myNodeInfo: MyNodeEntity? = null
+    private var rawMyNodeInfo: MeshProtos.MyNodeInfo? = null
+    private var currentPacketId = Random(System.currentTimeMillis()).nextLong().absoluteValue
     private val configTotal by lazy { ConfigProtos.Config.getDescriptor().fields.size }
     private val moduleTotal by lazy { ModuleConfigProtos.ModuleConfig.getDescriptor().fields.size }
     private var sessionPasskey: ByteString = ByteString.EMPTY
@@ -442,18 +449,10 @@ class MeshService :
     private var moduleConfig: LocalModuleConfig = LocalModuleConfig.getDefaultInstance()
     private var channelSet: AppOnlyProtos.ChannelSet = AppOnlyProtos.ChannelSet.getDefaultInstance()
 
-    @Volatile private var haveNodeDB = false
-
     private val nodeDBbyNodeNum = ConcurrentHashMap<Int, NodeEntity>()
     private val _nodeDBbyID = ConcurrentHashMap<String, NodeEntity>() // Cached map for ID lookups
     val nodeDBbyID: Map<String, NodeEntity>
         get() = _nodeDBbyID // Expose immutable view if needed externally
-
-    private val deviceVersion: DeviceVersion
-        get() = DeviceVersion(myNodeInfo?.firmwareVersion ?: "")
-
-    private val minAppVersion: Int
-        get() = myNodeInfo?.minAppVersion ?: 0
 
     private fun toNodeInfo(nodeNum: Int): NodeEntity =
         nodeDBbyNodeNum[nodeNum] ?: throw NodeNumNotFoundException(nodeNum)
@@ -533,7 +532,7 @@ class MeshService :
             _nodeDBbyID[newUserId] = info
         }
 
-        if (info.user.id.isNotEmpty() && haveNodeDB) {
+        if (info.user.id.isNotEmpty()) {
             serviceScope.handledLaunch { radioConfigRepository.upsert(info) }
         }
 
@@ -543,7 +542,10 @@ class MeshService :
     }
 
     private val myNodeNum: Int
-        get() = myNodeInfo?.myNodeNum ?: throw RadioNotConnectedException("Local node information not yet available")
+        get() =
+            myNodeInfo?.myNodeNum
+                ?: rawMyNodeInfo?.myNodeNum
+                ?: throw RadioNotConnectedException("Local node information not yet available")
 
     private val myNodeID: String
         get() = toNodeID(myNodeNum)
@@ -561,12 +563,9 @@ class MeshService :
                         .coerceAtLeast(0)
             }
 
-    private fun newMeshPacketTo(nodeNum: Int): MeshPacket.Builder {
-        if (myNodeInfo == null) throw RadioNotConnectedException()
-        return MeshPacket.newBuilder().apply {
-            from = 0 // Device sets this to myNodeNum
-            to = nodeNum
-        }
+    private fun newMeshPacketTo(nodeNum: Int): MeshPacket.Builder = MeshPacket.newBuilder().apply {
+        from = 0 // Device sets this to myNodeNum
+        to = nodeNum
     }
 
     private fun newMeshPacketTo(id: String): MeshPacket.Builder = newMeshPacketTo(toNodeNum(id))
@@ -1048,6 +1047,7 @@ class MeshService :
             StoreAndForwardProtos.StoreAndForward.VariantCase.VARIANT_NOT_SET,
             null,
             -> Unit
+
             StoreAndForwardProtos.StoreAndForward.VariantCase.HEARTBEAT -> {}
         }
     }
@@ -1055,19 +1055,15 @@ class MeshService :
     private val offlineSentPackets = mutableListOf<DataPacket>()
 
     private fun handleReceivedMeshPacket(packet: MeshPacket) {
-        if (haveNodeDB) {
-            val processedPacket =
-                packet
-                    .toBuilder()
-                    .apply {
-                        if (rxTime == 0) setRxTime(currentSecond()) // Ensure rxTime is set
-                    }
-                    .build()
-            processReceivedMeshPacketInternal(processedPacket)
-            onNodeDBChanged()
-        } else {
-            warn("Ignoring early received packet (NodeDB not ready): ${packet.toOneLineString()}")
-        }
+        val processedPacket =
+            packet
+                .toBuilder()
+                .apply {
+                    if (rxTime == 0) setRxTime(currentSecond()) // Ensure rxTime is set
+                }
+                .build()
+        processReceivedMeshPacketInternal(processedPacket)
+        onNodeDBChanged()
     }
 
     private val queuedPackets = ConcurrentLinkedQueue<MeshPacket>()
@@ -1260,7 +1256,7 @@ class MeshService :
     private fun startConnect() {
         try {
             connectTimeMsec = System.currentTimeMillis()
-            startConfigOnly()
+            sendConfigOnlyRequest()
         } catch (ex: Exception) {
             when (ex) {
                 is InvalidProtocolBufferException,
@@ -1361,7 +1357,6 @@ class MeshService :
     }
 
     private var newMyNodeInfo: MyNodeEntity? = null
-    private val newNodes = mutableListOf<MeshProtos.NodeInfo>()
     private var configOnlyNonce = Random().nextInt()
     private var nodeInfoNonce = Random().nextInt()
 
@@ -1471,38 +1466,40 @@ class MeshService :
                 fromRadio = fromRadio { nodeInfo = info },
             ),
         )
-        newNodes.add(info)
-        radioConfigRepository.setStatusMessage("Nodes (${newNodes.size})")
+
+        installNodeInfo(info)
+        onNodeDBChanged()
+        radioConfigRepository.setStatusMessage("Nodes ($numNodes)")
     }
 
-    private var rawMyNodeInfo: MeshProtos.MyNodeInfo? = null
-    private var currentPacketId = Random(System.currentTimeMillis()).nextLong().absoluteValue
-
-    private fun regenMyNodeInfo(metadata: MeshProtos.DeviceMetadata) {
+    private fun regenMyNodeInfo(metadata: MeshProtos.DeviceMetadata? = null) {
         rawMyNodeInfo?.let { myInfo ->
             val mi =
                 with(myInfo) {
                     MyNodeEntity(
                         myNodeNum = myNodeNum,
                         model =
-                        when (val hwModel = metadata.hwModel) {
+                        when (val hwModel = metadata?.hwModel) {
                             null,
                             MeshProtos.HardwareModel.UNSET,
                             -> null
+
                             else -> hwModel.name.replace('_', '-').replace('p', '.').lowercase()
                         },
-                        firmwareVersion = metadata.firmwareVersion,
+                        firmwareVersion = metadata?.firmwareVersion,
                         couldUpdate = false,
-                        shouldUpdate = false, // TODO: Re-implement firmware update checks
+                        shouldUpdate = false,
                         currentPacketId = currentPacketId and 0xffffffffL,
                         messageTimeoutMsec = 5 * 60 * 1000,
                         minAppVersion = minAppVersion,
                         maxChannels = 8,
-                        hasWifi = metadata.hasWifi,
+                        hasWifi = metadata?.hasWifi == true,
                         deviceId = deviceId.toStringUtf8(),
                     )
                 }
-            serviceScope.handledLaunch { radioConfigRepository.insertMetadata(mi.myNodeNum, metadata) }
+            metadata?.let {
+                serviceScope.handledLaunch { radioConfigRepository.insertMetadata(mi.myNodeNum, metadata) }
+            } ?: run { serviceScope.handledLaunch { radioConfigRepository.installMyNodeInfo(mi) } }
             newMyNodeInfo = mi
         }
     }
@@ -1527,11 +1524,7 @@ class MeshService :
             ),
         )
         rawMyNodeInfo = myInfo
-        serviceScope.handledLaunch {
-            radioConfigRepository.clearChannelSet()
-            radioConfigRepository.clearLocalConfig()
-            radioConfigRepository.clearLocalModuleConfig()
-        }
+        regenMyNodeInfo()
     }
 
     private fun handleDevicUiConfig(deviceuiConfig: DeviceUIProtos.DeviceUIConfig) {
@@ -1616,24 +1609,26 @@ class MeshService :
             }
     }
 
-    private fun onHasSettings() {
+    private fun onConnected() {
+        // Start sending queued packets and other tasks
         processQueuedPackets()
         startMqttClientProxy()
+        onNodeDBChanged()
         serviceBroadcasts.broadcastConnection()
-        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { setTimeOnly = currentSecond() })
         sendAnalytics()
         reportConnection()
+        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { setTimeOnly = currentSecond() })
     }
 
     private fun handleConfigComplete(configCompleteId: Int) {
         when (configCompleteId) {
-            configOnlyNonce -> handleConfigOnlyComplete()
-            nodeInfoNonce -> handleNodeInfoComplete()
+            configOnlyNonce -> handleConfigOnlyNonceResponse()
+            nodeInfoNonce -> handleNodeInfoNonceResponse()
             else -> warn("Received unexpected config complete id $configCompleteId")
         }
     }
 
-    private fun handleConfigOnlyComplete() {
+    private fun handleConfigOnlyNonceResponse() {
         debug("Received config only complete for nonce $configOnlyNonce")
         insertMeshLog(
             MeshLog(
@@ -1644,18 +1639,14 @@ class MeshService :
                 fromRadio = fromRadio { this.configCompleteId = configOnlyNonce },
             ),
         )
-
-        myNodeInfo =
-            newMyNodeInfo
-                ?: run {
-                    errormsg("Did not receive a valid config, myNodeInfo is null.")
-                    return
-                }
-        startNodeInfoOnly()
-        onHasSettings()
+        // we have recieved the response to our ConfigOnly request
+        // send a heartbeat, then request NodeInfoOnly to get the nodeDb from the radio
+        serviceScope.handledLaunch { radioInterfaceService.keepAlive() }
+        sendNodeInfoOnlyRequest()
+        onConnected()
     }
 
-    private fun handleNodeInfoComplete() {
+    private fun handleNodeInfoNonceResponse() {
         debug("Received node info complete for nonce $nodeInfoNonce")
         insertMeshLog(
             MeshLog(
@@ -1666,31 +1657,15 @@ class MeshService :
                 fromRadio = fromRadio { this.configCompleteId = nodeInfoNonce },
             ),
         )
-
-        if (newNodes.isEmpty()) {
-            errormsg("Did not receive any valid node info")
-        } else {
-            newNodes.forEach(::installNodeInfo)
-            newNodes.clear() // Free RAM
-            serviceScope.handledLaunch {
-                radioConfigRepository.installNodeDB(myNodeInfo!!, nodeDBbyNodeNum.values.toList())
-            }
-            haveNodeDB = true // Nodes are from real hardware now
-            sendAnalytics()
-            onNodeDBChanged()
-        }
     }
 
-    private fun startConfigOnly() {
+    private fun sendConfigOnlyRequest() {
         newMyNodeInfo = null
-        configOnlyNonce = Random().nextInt() // New nonce for this request
         debug("Starting config only with nonce=$configOnlyNonce")
         sendToRadio(ToRadio.newBuilder().setWantConfigId(configOnlyNonce))
     }
 
-    private fun startNodeInfoOnly() {
-        newNodes.clear()
-        nodeInfoNonce = Random().nextInt() // New nonce for this request
+    private fun sendNodeInfoOnlyRequest() {
         debug("Starting node info with nonce=$nodeInfoNonce")
         sendToRadio(ToRadio.newBuilder().setWantConfigId(nodeInfoNonce))
     }
@@ -1722,7 +1697,7 @@ class MeshService :
     }
 
     private fun setOwner(packetId: Int, user: MeshProtos.User) {
-        val dest = _nodeDBbyID[user.id] ?: throw Exception("Can't set user without a NodeInfo")
+        val dest = nodeDBbyID[user.id] ?: throw Exception("Can't set user without a NodeInfo")
         if (user == dest.user) {
             debug("Ignoring nop owner change")
             return
@@ -1822,18 +1797,18 @@ class MeshService :
     fun clearDatabases() = serviceScope.handledLaunch {
         debug("Clearing nodeDB")
         radioConfigRepository.clearNodeDB()
-        discardNodeDB() // Keep service in-memory state consistent
     }
 
     private fun updateLastAddress(deviceAddr: String?) {
-        val currentAddr = _lastAddress.value
+        val currentAddr = lastAddress.value
         debug("setDeviceAddress: New: ${deviceAddr.anonymize}, Old: ${currentAddr.anonymize}")
 
         if (deviceAddr != currentAddr) {
             _lastAddress.value = deviceAddr ?: NO_DEVICE_SELECTED
             sharedPreferences.edit { putString(DEVICE_ADDRESS_KEY, deviceAddr) }
-            clearDatabases()
             clearNotifications()
+            clearDatabases()
+            resetState()
         }
     }
 
@@ -1846,8 +1821,12 @@ class MeshService :
             override fun setDeviceAddress(deviceAddr: String?) = toRemoteExceptions {
                 debug("Passing through device change to radio service: ${deviceAddr.anonymize}")
                 updateLastAddress(deviceAddr)
-                connectionRouter.setDeviceAddress(deviceAddr)
-                true
+                sharedPreferences.edit { putString("device_address", deviceAddr) }
+                val res = connectionRouter.setDeviceAddress(deviceAddr)
+                if (res) {
+                    //                    resetState()
+                }
+                res
             }
 
             override fun subscribeReceiver(packageName: String, receiverName: String) = toRemoteExceptions {
@@ -1856,9 +1835,7 @@ class MeshService :
 
             override fun getUpdateStatus(): Int = -4 // ProgressNotStarted (DEPRECATED)
 
-            override fun startFirmwareUpdate() = toRemoteExceptions {
-                // TODO: Reimplement firmware update mechanism
-            }
+            override fun startFirmwareUpdate() = toRemoteExceptions {}
 
             override fun getMyNodeInfo(): MyNodeInfo? = this@MeshService.myNodeInfo?.toMyNodeInfo()
 

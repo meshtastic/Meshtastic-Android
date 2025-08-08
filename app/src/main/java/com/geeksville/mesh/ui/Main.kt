@@ -413,6 +413,8 @@ private fun VersionChecks(viewModel: UIViewModel) {
     val myNodeInfo by viewModel.myNodeInfo.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
+    val myFirmwareVersion = myNodeInfo?.firmwareVersion
+
     val firmwareEdition by viewModel.firmwareEdition.collectAsStateWithLifecycle(null)
 
     val currentFirmwareVersion by viewModel.firmwareVersion.collectAsStateWithLifecycle(null)
@@ -451,7 +453,6 @@ private fun VersionChecks(viewModel: UIViewModel) {
         if (connectionState == ConnectionState.CONNECTED) {
             myNodeInfo?.let { info ->
                 val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
-                val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
                 if (isOld) {
                     viewModel.showAlert(
                         context.getString(R.string.app_too_old),
@@ -462,22 +463,28 @@ private fun VersionChecks(viewModel: UIViewModel) {
                             MeshService.changeDeviceAddress(context, service, "n")
                         },
                     )
-                } else if (curVer < MeshService.absoluteMinDeviceVersion) {
-                    val title = context.getString(R.string.firmware_too_old)
-                    val message = context.getString(R.string.firmware_old)
-                    viewModel.showAlert(
-                        title = title,
-                        html = message,
-                        dismissable = false,
-                        onConfirm = {
-                            val service = viewModel.meshService ?: return@showAlert
-                            MeshService.changeDeviceAddress(context, service, "n")
-                        },
-                    )
-                } else if (curVer < MeshService.minDeviceVersion) {
-                    val title = context.getString(R.string.should_update_firmware)
-                    val message = context.getString(R.string.should_update, latestStableFirmwareRelease.asString)
-                    viewModel.showAlert(title = title, message = message, dismissable = false, onConfirm = {})
+                } else {
+                    myFirmwareVersion?.let {
+                        val curVer = DeviceVersion(it)
+                        if (curVer < MeshService.absoluteMinDeviceVersion) {
+                            val title = context.getString(R.string.firmware_too_old)
+                            val message = context.getString(R.string.firmware_old)
+                            viewModel.showAlert(
+                                title = title,
+                                html = message,
+                                dismissable = false,
+                                onConfirm = {
+                                    val service = viewModel.meshService ?: return@showAlert
+                                    MeshService.changeDeviceAddress(context, service, "n")
+                                },
+                            )
+                        } else if (curVer < MeshService.minDeviceVersion) {
+                            val title = context.getString(R.string.should_update_firmware)
+                            val message =
+                                context.getString(R.string.should_update, latestStableFirmwareRelease.asString)
+                            viewModel.showAlert(title = title, message = message, dismissable = false, onConfirm = {})
+                        }
+                    }
                 }
             }
         }

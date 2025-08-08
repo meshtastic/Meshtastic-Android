@@ -135,7 +135,7 @@ constructor(
 
     private var lastHeartbeatMillis = 0L
 
-    private fun keepAlive(now: Long) {
+    fun keepAlive(now: Long = System.currentTimeMillis()) {
         if (now - lastHeartbeatMillis > HEARTBEAT_INTERVAL_MILLIS) {
             info("Sending ToRadio heartbeat")
             val heartbeat =

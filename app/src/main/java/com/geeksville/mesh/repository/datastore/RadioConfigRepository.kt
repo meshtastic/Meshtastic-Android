@@ -87,8 +87,8 @@ constructor(
 
     suspend fun upsert(node: NodeEntity) = nodeDB.upsert(node)
 
-    suspend fun installNodeDB(mi: MyNodeEntity, nodes: List<NodeEntity>) {
-        nodeDB.installNodeDB(mi, nodes)
+    suspend fun installMyNodeInfo(mi: MyNodeEntity) {
+        nodeDB.installMyNodeInfo(mi)
     }
 
     suspend fun insertMetadata(fromNum: Int, metadata: DeviceMetadata) {
