@@ -121,6 +121,7 @@ constructor(
     suspend fun installMyNodeInfo(mi: MyNodeEntity) = withContext(dispatchers.io) {
         nodeInfoDao.clearMyNodeInfo()
         nodeInfoDao.setMyNodeInfo(mi)
+        nodeInfoDao.clearNodeInfo()
     }
 
     suspend fun clearNodeDB() = withContext(dispatchers.io) { nodeInfoDao.clearNodeInfo() }
