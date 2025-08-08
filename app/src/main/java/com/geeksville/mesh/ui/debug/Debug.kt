@@ -98,6 +98,16 @@ import java.util.Locale
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
 
+// list of dict keys to redact when exporting logs (only on export all).
+//  These are evaluated as line.contains, so partials are fine.
+private var redactedKeys: List<String> = listOf(
+    "session_passkey",
+    "private_key",
+    "admin_key"
+)
+
+
+
 @Suppress("LongMethod")
 @Composable
 internal fun DebugScreen(viewModel: DebugViewModel = hiltViewModel()) {
@@ -110,10 +120,11 @@ internal fun DebugScreen(viewModel: DebugViewModel = hiltViewModel()) {
     var filterMode by remember { mutableStateOf(FilterMode.OR) }
 
     // Use the new filterLogs method to include decodedPayload in filtering
-    val filteredLogs =
+    val filteredLogsState by
         remember(logs, filterTexts, filterMode) {
-            viewModel.filterManager.filterLogs(logs, filterTexts, filterMode).toImmutableList()
+            derivedStateOf { viewModel.filterManager.filterLogs(logs, filterTexts, filterMode).toImmutableList() }
         }
+    val filteredLogs = filteredLogsState
 
     LaunchedEffect(filteredLogs) { viewModel.updateFilteredLogs(filteredLogs) }
 
@@ -597,10 +608,11 @@ private fun DebugScreenWithSampleDataPreview() {
 fun DebugMenuActions(viewModel: DebugViewModel = hiltViewModel(), modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val logs by viewModel.meshLog.collectAsStateWithLifecycle()
-    var showDeleteLogsDialog by remember { mutableStateOf(false) }
+    val filteredLogs by viewModel.filteredLogs.collectAsStateWithLifecycle()
 
-    IconButton(onClick = { scope.launch { exportAllLogs(context, logs) } }, modifier = modifier.padding(4.dp)) {
+    var showDeleteLogsDialog by remember { mutableStateOf(false) }
+    // when 'export all logs' is selected, pass the currently filtered logs to the export function
+    IconButton(onClick = { scope.launch { exportAllLogs(context, filteredLogs) } }, modifier = modifier.padding(4.dp)) {
         Icon(
             imageVector = Icons.Outlined.FileDownload,
             contentDescription = stringResource(id = R.string.debug_logs_export),
@@ -633,13 +645,28 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
 
         // Create the file and write logs
         OutputStreamWriter(FileOutputStream(logFile), StandardCharsets.UTF_8).use { writer ->
+            // Use all logs, not just isFiltered, since exportAllLogs should receive the filtered list as a param
             logs.forEach { log ->
                 writer.write("${log.formattedReceivedDate} [${log.messageType}]\n")
+
                 writer.write(log.logMessage)
                 if (!log.decodedPayload.isNullOrBlank()) {
                     writer.write("\n\nDecoded Payload:\n{")
                     writer.write("\n")
-                    writer.write(log.decodedPayload)
+                    log.decodedPayload.lineSequence().forEach { line ->
+                    
+                        var outputLine = line
+                        // redact if line is in the redacted list.
+                        val redacted = redactedKeys.firstOrNull { line.contains(it) }
+                        if (redacted != null) {
+                            val idx = line.indexOf(':')
+                            if (idx != -1) {
+                                outputLine = line.substring(0, idx + 1)
+                            }
+                        }
+                        writer.write(outputLine)
+                        writer.write("\n")
+                    }
                     writer.write("\n}")
                 }
                 writer.write("\n\n")
@@ -648,7 +675,7 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
 
         // Notify user of success
         withContext(Dispatchers.Main) {
-            Toast.makeText(context, "Logs exported to ${logFile.absolutePath}", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "${logs.size} logs exported to ${logFile.absolutePath}", Toast.LENGTH_LONG).show()
         }
     } catch (e: SecurityException) {
         withContext(Dispatchers.Main) {
