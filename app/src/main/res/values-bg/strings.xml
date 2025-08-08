@@ -39,7 +39,11 @@
     <string name="routing_error_no_channel">Няма канал</string>
     <string name="routing_error_too_large">Пакетът е твърде голям</string>
     <string name="routing_error_no_response">Няма отговор</string>
+    <string name="routing_error_bad_request">Невалидна заявка</string>
+    <string name="routing_error_duty_cycle_limit">Достигнат е регионален лимит на работния цикъл</string>
+    <string name="routing_error_not_authorized">Не е оторизиран</string>
     <string name="routing_error_pki_unknown_pubkey">Неизвестен публичен ключ</string>
+    <string name="routing_error_admin_bad_session_key">Невалиден ключ за сесия</string>
     <string name="routing_error_admin_public_key_unauthorized">Публичният ключ е неоторизиран</string>
     <string name="role_client">Свързано с приложение или самостоятелно устройство за съобщения.</string>
     <string name="role_client_mute">Устройство, което не препредава пакети от други устройства.</string>
@@ -97,6 +101,9 @@
     <string name="debug_clear">Изчистване на журналите</string>
     <string name="clear">Изчисти</string>
     <string name="message_delivery_status">Състояние на доставка на съобщението</string>
+    <string name="meshtastic_messages_notifications">Известия за директни съобщения</string>
+    <string name="meshtastic_broadcast_notifications">Известия за излъчвани съобщения</string>
+    <string name="meshtastic_alerts_notifications">Известия за предупреждения</string>
     <string name="firmware_too_old">Необходима е актуализация на фърмуера.</string>
     <string name="firmware_old">Фърмуерът на радиото е твърде стар, за да общува с това приложение. За повече информация относно това вижте <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">нашето ръководство за инсталиране на фърмуер</a>.</string>
     <string name="okay">Добре</string>
@@ -144,6 +151,8 @@
     <string name="quick_chat_edit">Редактиране на бърз разговор</string>
     <string name="quick_chat_append">Добавяне към съобщението</string>
     <string name="quick_chat_instant">Незабавно изпращане</string>
+    <string name="quick_chat_show">Показване на менюто за бърз чат</string>
+    <string name="quick_chat_hide">Скриване на менюто за бърз чат</string>
     <string name="factory_reset">Фабрично нулиране</string>
     <string name="bluetooth_disabled">Bluetooth изключен</string>
     <string name="permission_missing_31">Meshtastic се нуждае от разрешение за близки устройства, за да намери и свърже с устройства чрез Bluetooth. Можете да го изключите, когато не се използва.</string>
@@ -188,6 +197,7 @@
     <string name="mute_always">Винаги</string>
     <string name="replace">Замяна</string>
     <string name="wifi_qr_code_scan">Сканиране на QR код за WiFi</string>
+    <string name="wifi_qr_code_error">Невалиден формат на QR кода на идентификационните данни за WiFi</string>
     <string name="battery">Батерия</string>
     <string name="channel_utilization">Използване на канала</string>
     <string name="air_utilization">Използване на ефира</string>
@@ -281,6 +291,7 @@
     <string name="fixed_pin">Фиксиран ПИН</string>
     <string name="default_">По подразбиране</string>
     <string name="position_enabled">Позицията е активирана</string>
+    <string name="precise_location">Точно местоположение</string>
     <string name="gpio_pin">GPIO пин</string>
     <string name="type">Тип</string>
     <string name="hide_password">Скриване на паролата</string>
@@ -292,6 +303,9 @@
     <string name="green">Зелен</string>
     <string name="blue">Син</string>
     <string name="rotary_encoder_1_enabled">Ротационен енкодер #1 е активиран</string>
+    <string name="gpio_pin_for_rotary_encoder_a_port">GPIO пин за ротационен енкодер A порт</string>
+    <string name="gpio_pin_for_rotary_encoder_b_port">GPIO пин за ротационен енкодер Б порт</string>
+    <string name="gpio_pin_for_rotary_encoder_press_port">GPIO пин за ротационен енкодер Press порт</string>
     <string name="messages">Съобщения</string>
     <string name="friendly_name">Приятелско име</string>
     <string name="use_input_pullup_mode">Използване на режим INPUT_PULLUP</string>
@@ -319,6 +333,7 @@
     <string name="bandwidth">Широчина на честотната лента</string>
     <string name="frequency_offset_mhz">Отместване на честотата (MHz)</string>
     <string name="region_frequency_plan">Регион (честотен план)</string>
+    <string name="hop_limit">Лимит на хопове</string>
     <string name="tx_enabled">TX е активирано</string>
     <string name="tx_power_dbm">TX мощност (dBm)</string>
     <string name="frequency_slot">Честотен слот</string>
@@ -345,6 +360,8 @@
     <string name="gateway">Шлюз</string>
     <string name="paxcounter_config">Конфигурация на Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter е активиран</string>
+    <string name="wifi_rssi_threshold_defaults_to_80">Праг на WiFi RSSI (по подразбиране -80)</string>
+    <string name="ble_rssi_threshold_defaults_to_80">Праг на BLE RSSI (по подразбиране -80)</string>
     <string name="position_config">Конфигурация на позицията</string>
     <string name="position_broadcast_interval_seconds">Интервал на излъчване на позицията (секунди)</string>
     <string name="use_fixed_position">Използване на фиксирана позиция</string>
@@ -365,6 +382,7 @@
     <string name="public_key">Публичен ключ</string>
     <string name="private_key">Частен ключ</string>
     <string name="admin_key">Администраторски ключ</string>
+    <string name="managed_mode">Управляем режим</string>
     <string name="serial_console">Серийна конзола</string>
     <string name="serial_mode">Сериен режим</string>
     <string name="store_forward_enabled"><![CDATA[Съхраняване & препращане е активиран]]></string>
@@ -372,6 +390,11 @@
     <string name="server">Сървър</string>
     <string name="telemetry_config">Конфигурация на телеметрията</string>
     <string name="device_metrics_update_interval_seconds">Интервал на актуализиране на показателите на устройството (секунди)</string>
+    <string name="environment_metrics_update_interval_seconds">Интервал на актуализиране на показателите на околната среда (секунди)</string>
+    <string name="environment_metrics_module_enabled">Модулът за измерване на околната среда е активиран</string>
+    <string name="environment_metrics_on_screen_enabled">Показателите на околната среда на екрана са активирани</string>
+    <string name="environment_metrics_use_fahrenheit">Показателите на околната среда използват Фаренхайт</string>
+    <string name="air_quality_metrics_module_enabled">Модулът за показатели за качеството на въздуха е активиран</string>
     <string name="air_quality_icon">Икона за качество на въздуха</string>
     <string name="user_config">Конфигурация на потребителя</string>
     <string name="node_id">ID на възела</string>
@@ -398,6 +421,7 @@
     <string name="user_id">ID на потребителя</string>
     <string name="uptime">Време на работа</string>
     <string name="timestamp">Времево клеймо</string>
+    <string name="speed">Скорост</string>
     <string name="sats">Сат</string>
     <string name="alt">н.в.</string>
     <string name="freq">Чест.</string>
@@ -441,6 +465,7 @@
     <string name="regenerate_private_key">Регенериране на частния ключ</string>
     <string name="export_keys">Експортиране на ключовете</string>
     <string name="export_keys_confirmation">Експортира публичния и частния ключове във файл. Моля, съхранявайте го на сигурно място.</string>
+    <string name="remote">Отдалечен</string>
     <string name="node_count_template">(%1$d онлайн / %2$d общо)</string>
     <string name="no_ble_devices">Няма открити Bluetooth устройства</string>
     <string name="no_network_devices">Няма открити мрежови устройства.</string>
@@ -460,8 +485,11 @@
     <string name="security_icon_help_show_less">Показване на текущия статус</string>
     <string name="security_icon_help_dismiss">Отхвърляне</string>
     <string name="confirm_delete_node">Сигурни ли сте, че искате да изтриете този възел?</string>
+    <string name="delete_messages_title">Да се изтрият ли съобщенията?</string>
     <string name="clear_selection">Изчистване на избора</string>
     <string name="message_input_label">Съобщение</string>
+    <string name="type_a_message">Въвеждане на съобщение</string>
+    <string name="pax">PAX</string>
     <string name="wifi_devices">WiFi устройства</string>
     <string name="ble_devices">BLE устройства</string>
     <string name="download">Изтегляне</string>
@@ -470,9 +498,20 @@
     <string name="latest_alpha_firmware">Най-новия алфа</string>
     <string name="supported_by_community">Поддържа се от общността Meshtastic</string>
     <string name="firmware_edition">Версия на фърмуера</string>
+    <string name="create_your_own_networks">Създайте свои собствени мрежи</string>
+    <string name="easily_set_up_private_mesh_networks">Настройте лесно частни mesh мрежи за сигурна и надеждна комуникация в отдалечени райони.</string>
+    <string name="track_and_share_locations">Проследяване и споделяне на местоположения</string>
+    <string name="share_your_location_in_real_time">Споделяйте местоположението си в реално време и координирайте групата си с вградени GPS функции.</string>
     <string name="incoming_messages">Входящи съобщения</string>
     <string name="new_nodes">Нови възли</string>
+    <string name="notifications_for_newly_discovered_nodes">Известия за новооткрити възли.</string>
     <string name="low_battery">Изтощена батерия</string>
+    <string name="configure_notification_permissions">Конфигуриране на разрешенията за известия</string>
+    <string name="phone_location">Местоположение на телефона</string>
+    <string name="share_location">Споделяне на местоположение</string>
+    <string name="distance_measurements">Измервания на разстояния</string>
     <string name="skip">Пропускане</string>
+    <string name="settings">настройки</string>
+    <string name="critical_alerts">Критични предупреждения</string>
     <string name="next">Напред</string>
 </resources>
