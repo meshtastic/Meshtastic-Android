@@ -113,8 +113,8 @@ import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
+import com.geeksville.mesh.ui.common.theme.StatusColors.StatusBlue
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusOrange
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
 import com.geeksville.mesh.ui.debug.DebugMenuActions
@@ -242,8 +242,8 @@ fun MainScreen(
     val coroutineScope = rememberCoroutineScope()
     val capturedColorScheme = colorScheme // Capture current colorScheme instance for LaunchedEffect
 
-    val sendColor = capturedColorScheme.StatusOrange
-    val receiveColor = capturedColorScheme.StatusYellow
+    val sendColor = capturedColorScheme.StatusGreen
+    val receiveColor = capturedColorScheme.StatusBlue
     LaunchedEffect(uIViewModel.meshActivity, capturedColorScheme) {
         uIViewModel.meshActivity.collectLatest { activity ->
             debug("MeshActivity Event: $activity, Current Alpha: ${animatedGlowAlpha.value}")
