@@ -484,6 +484,7 @@
     <string name="latitude">Breitengrad</string>
     <string name="longitude">Längengrad</string>
     <string name="altitude_meters">Höhenmeter (Meter)</string>
+    <string name="position_config_set_fixed_from_phone">Vom aktuellen Telefonstandort festlegen</string>
     <string name="gps_mode">GPS Modus</string>
     <string name="gps_update_interval_seconds">GPS Aktualisierungsintervall (Sekunden)</string>
     <string name="redefine_gps_rx_pin">GPS RX PIN neu definieren</string>

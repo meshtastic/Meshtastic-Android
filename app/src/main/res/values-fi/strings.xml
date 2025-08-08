@@ -484,6 +484,7 @@
     <string name="latitude">Leveyspiiri</string>
     <string name="longitude">Pituuspiiri</string>
     <string name="altitude_meters">Korkeus (metriä)</string>
+    <string name="position_config_set_fixed_from_phone">Aseta nykyisestä puhelimen sijainnista</string>
     <string name="gps_mode">GSP tila</string>
     <string name="gps_update_interval_seconds">GPS päivitysväli (sekuntia)</string>
     <string name="redefine_gps_rx_pin">Määritä uudelleen GPS_RX_PIN</string>
