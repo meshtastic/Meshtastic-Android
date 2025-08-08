@@ -1526,6 +1526,7 @@ class MeshService :
                 radioConfigRepository.insertMetadata(mi.myNodeNum, metadata)
             }
             myNodeInfo = mi
+            onConnected()
         }
     }
 
@@ -1671,7 +1672,6 @@ class MeshService :
         // we have recieved the response to our ConfigOnly request
         // send a heartbeat, then request NodeInfoOnly to get the nodeDb from the radio
         serviceScope.handledLaunch { radioInterfaceService.keepAlive() }
-        onConnected()
         sendNodeInfoOnlyRequest()
     }
 
@@ -1686,7 +1686,6 @@ class MeshService :
                 fromRadio = fromRadio { this.configCompleteId = NODE_INFO_ONLY_NONCE },
             ),
         )
-        //        onConnected()
     }
 
     private fun sendConfigOnlyRequest() {
