@@ -28,13 +28,8 @@ import androidx.work.WorkerParameters
 import com.geeksville.mesh.BuildConfig
 import java.util.concurrent.TimeUnit
 
-/**
- * Helper that calls MeshService.startService()
- */
-class ServiceStarter(
-    appContext: Context,
-    workerParams: WorkerParameters
-) : Worker(appContext, workerParams) {
+/** Helper that calls MeshService.startService() */
+class ServiceStarter(appContext: Context, workerParams: WorkerParameters) : Worker(appContext, workerParams) {
 
     override fun doWork(): Result = try {
         MeshService.startService(this.applicationContext)
@@ -48,23 +43,23 @@ class ServiceStarter(
 }
 
 /**
- * Just after boot the android OS is super busy, so if we call startForegroundService then, our
- * thread might be stalled long enough to expose this Google/Samsung bug:
- * https://issuetracker.google.com/issues/76112072#comment56
+ * Just after boot the android OS is super busy, so if we call startForegroundService then, our thread might be stalled
+ * long enough to expose this Google/Samsung bug: https://issuetracker.google.com/issues/76112072#comment56
  */
 fun MeshService.Companion.startServiceLater(context: Context) {
     // No point in even starting the service if the user doesn't have a device bonded
     info("Received boot complete announcement, starting mesh service in two minutes")
-    val delayRequest = OneTimeWorkRequestBuilder<ServiceStarter>()
-        .setInitialDelay(2, TimeUnit.MINUTES)
-        .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 2, TimeUnit.MINUTES)
-        .addTag("startLater")
-        .build()
+    val delayRequest =
+        OneTimeWorkRequestBuilder<ServiceStarter>()
+            .setInitialDelay(2, TimeUnit.MINUTES)
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 2, TimeUnit.MINUTES)
+            .addTag("startLater")
+            .build()
 
     WorkManager.getInstance(context).enqueue(delayRequest)
 }
 
-/// Helper function to start running our service
+// / Helper function to start running our service
 fun MeshService.Companion.startService(context: Context) {
     // Bind to our service using the same mechanism an external client would use (for testing coverage)
     // The following would work for us, but not external users:
@@ -76,18 +71,14 @@ fun MeshService.Companion.startService(context: Context) {
     // to Signal or whatever.
     info("Trying to start service debug=${BuildConfig.DEBUG}")
 
-    val intent = createIntent()
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            try {
-                context.startForegroundService(intent)
-            } catch (ex: ForegroundServiceStartNotAllowedException) {
-                errormsg("Unable to start service: ${ex.message}")
-            }
-        } else {
+    val intent = createIntent(context)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        try {
             context.startForegroundService(intent)
+        } catch (ex: ForegroundServiceStartNotAllowedException) {
+            errormsg("Unable to start service: ${ex.message}")
         }
     } else {
-        context.startService(intent)
+        context.startForegroundService(intent)
     }
 }

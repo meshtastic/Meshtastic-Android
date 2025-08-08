@@ -27,20 +27,11 @@ import com.geeksville.mesh.NodeInfo
 class MeshServiceBroadcasts(
     private val context: Context,
     private val clientPackages: MutableMap<String, String>,
-    private val getConnectionState: () -> MeshService.ConnectionState
+    private val getConnectionState: () -> ConnectionState,
 ) {
-    /**
-     * Broadcast some received data
-     * Payload will be a DataPacket
-     */
+    /** Broadcast some received data Payload will be a DataPacket */
     fun broadcastReceivedData(payload: DataPacket) {
-
-        explicitBroadcast(
-            Intent(MeshService.actionReceived(payload.dataType)).putExtra(
-                EXTRA_PAYLOAD,
-                payload
-            )
-        )
+        explicitBroadcast(Intent(MeshService.actionReceived(payload.dataType)).putExtra(EXTRA_PAYLOAD, payload))
     }
 
     fun broadcastNodeChange(info: NodeInfo) {
@@ -57,22 +48,19 @@ class MeshServiceBroadcasts(
         } else {
             // Do not log, contains PII possibly
             // MeshService.debug("Broadcasting message status $p")
-            val intent = Intent(MeshService.ACTION_MESSAGE_STATUS).apply {
-                putExtra(EXTRA_PACKET_ID, id)
-                putExtra(EXTRA_STATUS, status as Parcelable)
-            }
+            val intent =
+                Intent(MeshService.ACTION_MESSAGE_STATUS).apply {
+                    putExtra(EXTRA_PACKET_ID, id)
+                    putExtra(EXTRA_STATUS, status as Parcelable)
+                }
             explicitBroadcast(intent)
         }
     }
 
-    /**
-     * Broadcast our current connection status
-     */
+    /** Broadcast our current connection status */
     fun broadcastConnection() {
-        val intent = Intent(MeshService.ACTION_MESH_CONNECTED).putExtra(
-            EXTRA_CONNECTED,
-            getConnectionState().toString()
-        )
+        val intent =
+            Intent(MeshService.ACTION_MESH_CONNECTED).putExtra(EXTRA_CONNECTED, getConnectionState().toString())
         explicitBroadcast(intent)
     }
 
@@ -86,7 +74,9 @@ class MeshServiceBroadcasts(
      *         because it implies we have assembled a valid node db.
      */
     private fun explicitBroadcast(intent: Intent) {
-        context.sendBroadcast(intent) // We also do a regular (not explicit broadcast) so any context-registered rceivers will work
+        context.sendBroadcast(
+            intent,
+        ) // We also do a regular (not explicit broadcast) so any context-registered rceivers will work
         clientPackages.forEach {
             intent.setClassName(it.value, it.key)
             context.sendBroadcast(intent)
