@@ -134,6 +134,7 @@ sealed class ServiceAction {
  * Note: This service will go away once all clients are unbound from it. Warning: Do not override toString, it causes
  * infinite recursion on some Android versions (because contextWrapper.getResources calls toString).
  */
+@Suppress("MagicNumber")
 @AndroidEntryPoint
 class MeshService :
     Service(),
@@ -855,6 +856,7 @@ class MeshService :
 
     // endregion
 
+    @Suppress("NestedBlockDepth")
     private fun handleReceivedAdmin(fromNodeNum: Int, adminMessage: AdminProtos.AdminMessage) {
         when (adminMessage.payloadVariantCase) {
             AdminProtos.AdminMessage.PayloadVariantCase.GET_CONFIG_RESPONSE -> {
@@ -1100,7 +1102,7 @@ class MeshService :
                         val success = sendPacket(packet).get(2, TimeUnit.MINUTES)
                         debug("Queue: Packet id=${packet.id.toUInt()} sent, success=$success")
                     } catch (e: TimeoutException) {
-                        debug("Queue: Packet id=${packet.id.toUInt()} timed out")
+                        debug("Queue: Packet id=${packet.id.toUInt()} timed out: ${e.message}")
                         queueResponse.remove(packet.id)?.complete(false)
                     } catch (e: Exception) {
                         debug("Queue: Packet id=${packet.id.toUInt()} failed: ${e.message}")
@@ -1692,7 +1694,7 @@ class MeshService :
                 )
             }
         } catch (ex: BLEException) {
-            warn("Ignoring disconnected radio during gps location update")
+            warn("Ignoring disconnected radio during gps location update: ${ex.message}")
         }
     }
 
@@ -1822,11 +1824,7 @@ class MeshService :
                 debug("Passing through device change to radio service: ${deviceAddr.anonymize}")
                 updateLastAddress(deviceAddr)
                 sharedPreferences.edit { putString("device_address", deviceAddr) }
-                val res = connectionRouter.setDeviceAddress(deviceAddr)
-                if (res) {
-                    //                    resetState()
-                }
-                res
+                connectionRouter.setDeviceAddress(deviceAddr)
             }
 
             override fun subscribeReceiver(packageName: String, receiverName: String) = toRemoteExceptions {
@@ -1874,8 +1872,8 @@ class MeshService :
                             "(connectionState=${connectionRouter.connectionState.value})",
                     )
 
-                    if (p.dataType == 0) throw Exception("Port numbers must be non-zero")
-                    if (p.bytes?.size ?: 0 >= MeshProtos.Constants.DATA_PAYLOAD_LEN_VALUE) {
+                    if (p.dataType == 0) throw InvalidProtocolBufferException("Port numbers must be non-zero")
+                    if ((p.bytes?.size ?: 0) >= MeshProtos.Constants.DATA_PAYLOAD_LEN_VALUE) {
                         p.status = MessageStatus.ERROR
                         throw RemoteException("Message too long")
                     } else {

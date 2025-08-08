@@ -19,6 +19,7 @@ package com.geeksville.mesh.service
 
 import com.geeksville.mesh.CoroutineDispatchers
 import com.geeksville.mesh.LocalOnlyProtos
+import com.geeksville.mesh.android.BuildUtils.warn
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.repository.radio.RadioServiceConnectionState
@@ -33,6 +34,9 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.coroutines.cancellation.CancellationException
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 
 @Singleton
 class ConnectionRouter
@@ -99,14 +103,13 @@ constructor(
                 routerScope.launch {
                     try {
                         // If we have a valid timeout, wait that long (+30 seconds) otherwise, just wait 30 seconds
-                        val timeout = (localConfig.power?.lsSecs ?: 0) + 30
-
+                        val timeout = (localConfig.power?.lsSecs ?: 0).milliseconds + 30.seconds
                         // Log.d(TAG, "Waiting for sleeping device, timeout=$timeout secs")
-                        delay(timeout * 1000L)
+                        delay(timeout)
                         // Log.w(TAG, "Device timeout out, setting disconnected")
                         onConnectionChanged(ConnectionState.DISCONNECTED)
-                    } catch (ex: kotlinx.coroutines.CancellationException) {
-                        // Log.d(TAG, "device sleep timeout cancelled")
+                    } catch (ex: CancellationException) {
+                        warn("Sleep timeout cancelled: ${ex.message}")
                     }
                 }
         }
