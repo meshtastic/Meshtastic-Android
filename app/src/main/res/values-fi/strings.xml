@@ -100,7 +100,7 @@
     <string name="new_node_seen">Uusi laite nähty: %s</string>
     <string name="disconnected">Ei yhdistetty</string>
     <string name="device_sleeping">Laite on lepotilassa</string>
-    <string name="connected_count">Yhdistetty: %1$d verkossa</string>
+    <string name="connected_count">Yhdistetty: %1$s verkossa</string>
     <string name="ip_address">IP-osoite:</string>
     <string name="ip_port">Portti:</string>
     <string name="connected">Yhdistetty radioon</string>

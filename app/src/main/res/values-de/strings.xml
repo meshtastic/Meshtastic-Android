@@ -100,7 +100,7 @@
     <string name="new_node_seen">Neuen Knoten gesehen: %s</string>
     <string name="disconnected">Verbindung getrennt</string>
     <string name="device_sleeping">Gerät schläft</string>
-    <string name="connected_count">Verbunden: %1$d online</string>
+    <string name="connected_count">Verbunden: %1$s online</string>
     <string name="ip_address">IP-Adresse:</string>
     <string name="ip_port">Port:</string>
     <string name="connected">Mit Funkgerät verbunden</string>

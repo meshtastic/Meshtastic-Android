@@ -93,6 +93,7 @@
     <string name="share">シェア</string>
     <string name="disconnected">切断</string>
     <string name="device_sleeping">デバイスはスリープ状態です</string>
+    <string name="connected_count">接続済み: %1$s オンライン</string>
     <string name="ip_address">IPアドレス</string>
     <string name="connected">Meshtasticデバイスに接続しました。</string>
     <string name="connected_to">Meshtasticデバイスに接続しました。
