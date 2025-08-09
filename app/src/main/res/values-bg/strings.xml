@@ -77,7 +77,6 @@
     <string name="new_node_seen">Видян нов възел: %s</string>
     <string name="disconnected">Прекъсната връзка</string>
     <string name="device_sleeping">Устройството спи</string>
-    <string name="connected_count">Свързани: %1$s онлайн</string>
     <string name="ip_address">IP адрес:</string>
     <string name="ip_port">Порт:</string>
     <string name="connected">Свързан с радио</string>
