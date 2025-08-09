@@ -103,7 +103,6 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.Random
 import java.util.UUID
@@ -233,7 +232,7 @@ class MeshService :
     private val notificationSummary: String
         get() =
             when (connectionRouter.connectionState.value) {
-                ConnectionState.CONNECTED -> getString(R.string.connected_count, numOnlineNodes)
+                ConnectionState.CONNECTED -> getString(R.string.connected_count, numOnlineNodes.toString())
                 ConnectionState.DISCONNECTED -> getString(R.string.disconnected)
                 ConnectionState.DEVICE_SLEEP -> getString(R.string.device_sleeping)
                 ConnectionState.CONNECTING -> getString(R.string.connecting_to_device)
@@ -436,7 +435,7 @@ class MeshService :
      * switching to a new device connection to prevent state from a previous session from affecting the new one. It
      * ensures a clean slate for node information, configurations, pending operations, and cached data.
      */
-    private fun resetState() = serviceScope.launch {
+    private fun resetState() = serviceScope.handledLaunch {
         debug("Discarding NodeDB and resetting all service state for new device connection")
         clearDatabases()
         // Core Node and Config data
@@ -464,6 +463,10 @@ class MeshService :
         previousStats = null
 
         batteryPercentCooldowns.clear()
+
+        radioConfigRepository.clearChannelSet()
+        radioConfigRepository.clearLocalConfig()
+        radioConfigRepository.clearLocalModuleConfig()
 
         info("MeshService state has been reset for a new device session.")
     }
@@ -1550,11 +1553,6 @@ class MeshService :
             ),
         )
         rawMyNodeInfo = myInfo
-        serviceScope.handledLaunch {
-            radioConfigRepository.clearChannelSet()
-            radioConfigRepository.clearLocalConfig()
-            radioConfigRepository.clearLocalModuleConfig()
-        }
     }
 
     private fun handleDeviceUiConfig(deviceuiConfig: DeviceUIProtos.DeviceUIConfig) {
@@ -1967,20 +1965,28 @@ class MeshService :
                 )
             }
 
-            override fun setRingtone(destNum: Int, ringtone: String?) {
-                TODO("Not yet implemented")
+            override fun setRingtone(destNum: Int, ringtone: String) = toRemoteExceptions {
+                sendToRadio(newMeshPacketTo(destNum).buildAdminPacket { setRingtoneMessage = ringtone })
             }
 
-            override fun getRingtone(requestId: Int, destNum: Int) {
-                TODO("Not yet implemented")
+            override fun getRingtone(id: Int, destNum: Int) = toRemoteExceptions {
+                sendToRadio(
+                    newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
+                        getRingtoneRequest = true
+                    },
+                )
             }
 
-            override fun setCannedMessages(destNum: Int, messages: String?) {
-                TODO("Not yet implemented")
+            override fun setCannedMessages(destNum: Int, messages: String) = toRemoteExceptions {
+                sendToRadio(newMeshPacketTo(destNum).buildAdminPacket { setCannedMessageModuleMessages = messages })
             }
 
-            override fun getCannedMessages(requestId: Int, destNum: Int) {
-                TODO("Not yet implemented")
+            override fun getCannedMessages(id: Int, destNum: Int) = toRemoteExceptions {
+                sendToRadio(
+                    newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
+                        getCannedMessageModuleMessagesRequest = true
+                    },
+                )
             }
 
             override fun setChannel(payload: ByteArray) = toRemoteExceptions {
