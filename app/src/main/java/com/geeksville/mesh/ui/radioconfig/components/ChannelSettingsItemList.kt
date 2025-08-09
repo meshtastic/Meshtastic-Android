@@ -75,11 +75,11 @@ import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
 import com.geeksville.mesh.ui.common.components.PreferenceFooter
+import com.geeksville.mesh.ui.common.components.SecurityIcon
 import com.geeksville.mesh.ui.common.components.dragContainer
 import com.geeksville.mesh.ui.common.components.dragDropItemsIndexed
 import com.geeksville.mesh.ui.common.components.rememberDragDropState
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
-import com.geeksville.mesh.ui.common.components.SecurityIcon
 
 @Composable
 private fun ChannelItem(
@@ -89,22 +89,12 @@ private fun ChannelItem(
     onClick: () -> Unit = {},
     content: @Composable RowScope.() -> Unit,
 ) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 2.dp)
-            .clickable(enabled = enabled) { onClick() },
-    ) {
+    Card(modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp).clickable(enabled = enabled) { onClick() }) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(vertical = 4.dp, horizontal = 4.dp)
+            modifier = Modifier.padding(vertical = 4.dp, horizontal = 4.dp),
         ) {
-
-            AssistChip(onClick = onClick, label = {
-                Text(
-                    text = "$index",
-                )
-            })
+            AssistChip(onClick = onClick, label = { Text(text = "$index") })
             Text(
                 text = title,
                 modifier = Modifier.weight(1f),
@@ -125,12 +115,7 @@ private fun ChannelCard(
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
     channel: Channel,
-) = ChannelItem(
-    index = index,
-    title = title,
-    enabled = enabled,
-    onClick = onEditClick,
-) {
+) = ChannelItem(index = index, title = title, enabled = enabled, onClick = onEditClick) {
     SecurityIcon(channel)
     Spacer(modifier = Modifier.width(10.dp))
     IconButton(onClick = { onDeleteClick() }) {
@@ -150,32 +135,18 @@ fun ChannelSelection(
     isSelected: Boolean,
     onSelected: (Boolean) -> Unit,
     channel: Channel,
-) = ChannelItem(
-    index = index,
-    title = title,
-    enabled = enabled,
-    onClick = {},
-) {
+) = ChannelItem(index = index, title = title, enabled = enabled, onClick = {}) {
     SecurityIcon(channel)
     Spacer(modifier = Modifier.width(10.dp))
-    Checkbox(
-        enabled = enabled,
-        checked = isSelected,
-        onCheckedChange = onSelected,
-    )
+    Checkbox(enabled = enabled, checked = isSelected, onCheckedChange = onSelected)
 }
 
 @Composable
-fun ChannelConfigScreen(
-    viewModel: RadioConfigViewModel = hiltViewModel(),
-) {
+fun ChannelConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
 
     if (state.responseState.isWaiting()) {
-        PacketResponseStateDialog(
-            state = state.responseState,
-            onDismiss = viewModel::clearPacketResponse,
-        )
+        PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
     }
 
     ChannelSettingsItemList(
@@ -183,9 +154,7 @@ fun ChannelConfigScreen(
         loraConfig = state.radioConfig.lora,
         enabled = state.connected,
         maxChannels = viewModel.maxChannels,
-        onPositiveClicked = { channelListInput ->
-            viewModel.updateChannels(channelListInput, state.channelList)
-        },
+        onPositiveClicked = { channelListInput -> viewModel.updateChannels(channelListInput, state.channelList) },
     )
 }
 
@@ -196,30 +165,29 @@ fun ChannelSettingsItemList(
     loraConfig: LoRaConfig,
     maxChannels: Int = 8,
     enabled: Boolean,
-    onNegativeClicked: () -> Unit = { },
+    onNegativeClicked: () -> Unit = {},
     onPositiveClicked: (List<ChannelSettings>) -> Unit,
 ) {
     val primarySettings = settingsList.getOrNull(0) ?: return
-    val modemPresetName by remember(loraConfig) {
-        mutableStateOf(Channel(loraConfig = loraConfig).name)
-    }
-    val primaryChannel by remember(loraConfig) {
-        mutableStateOf(Channel(primarySettings, loraConfig))
-    }
+    val modemPresetName by remember(loraConfig) { mutableStateOf(Channel(loraConfig = loraConfig).name) }
+    val primaryChannel by remember(loraConfig) { mutableStateOf(Channel(primarySettings, loraConfig)) }
 
     val focusManager = LocalFocusManager.current
-    val settingsListInput = rememberSaveable(
-        saver = listSaver(save = { it.toList() }, restore = { it.toMutableStateList() })
-    ) { settingsList.toMutableStateList() }
+    val settingsListInput =
+        rememberSaveable(saver = listSaver(save = { it.toList() }, restore = { it.toMutableStateList() })) {
+            settingsList.toMutableStateList()
+        }
 
     val listState = rememberLazyListState()
-    val dragDropState = rememberDragDropState(listState, headerCount = 1) { fromIndex, toIndex ->
-        if (toIndex in settingsListInput.indices && fromIndex in settingsListInput.indices) {
-            settingsListInput.apply { add(toIndex, removeAt(fromIndex)) }
+    val dragDropState =
+        rememberDragDropState(listState, headerCount = 1) { fromIndex, toIndex ->
+            if (toIndex in settingsListInput.indices && fromIndex in settingsListInput.indices) {
+                settingsListInput.apply { add(toIndex, removeAt(fromIndex)) }
+            }
         }
-    }
 
-    val isEditing: Boolean = settingsList.size != settingsListInput.size ||
+    val isEditing: Boolean =
+        settingsList.size != settingsListInput.size ||
             settingsList.zip(settingsListInput).any { (item1, item2) -> item1 != item2 }
 
     var showEditChannelDialog: Int? by rememberSaveable { mutableStateOf(null) }
@@ -227,9 +195,7 @@ fun ChannelSettingsItemList(
     if (showEditChannelDialog != null) {
         val index = showEditChannelDialog ?: return
         EditChannelDialog(
-            channelSettings = with(settingsListInput) {
-                if (size > index) get(index) else channelSettings { }
-            },
+            channelSettings = with(settingsListInput) { if (size > index) get(index) else channelSettings {} },
             modemPresetName = modemPresetName,
             onAddClick = {
                 if (settingsListInput.size > index) {
@@ -239,28 +205,25 @@ fun ChannelSettingsItemList(
                 }
                 showEditChannelDialog = null
             },
-            onDismissRequest = { showEditChannelDialog = null }
+            onDismissRequest = { showEditChannelDialog = null },
         )
     }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .clickable(onClick = { }, enabled = false)
-    ) {
+    Box(modifier = Modifier.fillMaxSize().clickable(onClick = {}, enabled = false)) {
         Column {
-
             ChannelsConfigHeader(
-                frequency = if (loraConfig.overrideFrequency != 0f) {
+                frequency =
+                if (loraConfig.overrideFrequency != 0f) {
                     loraConfig.overrideFrequency
                 } else {
                     primaryChannel.radioFreq
                 },
-                slot = if (loraConfig.channelNum != 0) {
+                slot =
+                if (loraConfig.channelNum != 0) {
                     loraConfig.channelNum
                 } else {
                     primaryChannel.channelNum
-                }
+                },
             )
             Text(
                 text = stringResource(R.string.press_and_drag),
@@ -273,17 +236,15 @@ fun ChannelSettingsItemList(
                 modifier = Modifier.padding(start = 16.dp),
             )
             LazyColumn(
-                modifier = Modifier.dragContainer(
-                    dragDropState = dragDropState,
-                    haptics = LocalHapticFeedback.current,
-                ),
+                modifier = Modifier.dragContainer(dragDropState = dragDropState, haptics = LocalHapticFeedback.current),
                 state = listState,
                 contentPadding = PaddingValues(horizontal = 16.dp),
             ) {
-                dragDropItemsIndexed(
-                    items = settingsListInput,
-                    dragDropState = dragDropState,
-                ) { index, channel, isDragging ->
+                dragDropItemsIndexed(items = settingsListInput, dragDropState = dragDropState) {
+                        index,
+                        channel,
+                        isDragging,
+                    ->
                     val channelObj = Channel(channel, loraConfig)
                     ChannelCard(
                         index = index,
@@ -291,7 +252,7 @@ fun ChannelSettingsItemList(
                         enabled = enabled,
                         onEditClick = { showEditChannelDialog = index },
                         onDeleteClick = { settingsListInput.removeAt(index) },
-                        channel = channelObj
+                        channel = channelObj,
                     )
                     if (index == 0 && !isDragging) {
                         Text(
@@ -300,10 +261,7 @@ fun ChannelSettingsItemList(
                             fontSize = 10.sp,
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = stringResource(R.string.secondary),
-                            color = MaterialTheme.colorScheme.onBackground
-                        )
+                        Text(text = stringResource(R.string.secondary), color = MaterialTheme.colorScheme.onBackground)
                     }
                 }
                 item {
@@ -334,7 +292,7 @@ fun ChannelSettingsItemList(
                         onPositiveClicked = {
                             focusManager.clearFocus()
                             onPositiveClicked(settingsListInput)
-                        }
+                        },
                     )
                 }
             }
@@ -343,51 +301,39 @@ fun ChannelSettingsItemList(
         AnimatedVisibility(
             visible = maxChannels > settingsListInput.size,
             modifier = Modifier.align(Alignment.BottomEnd),
-            enter = slideInHorizontally(
+            enter =
+            slideInHorizontally(
                 initialOffsetX = { it },
-                animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing)
+                animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing),
             ),
-            exit = slideOutHorizontally(
+            exit =
+            slideOutHorizontally(
                 targetOffsetX = { it },
-                animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing)
-            )
+                animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing),
+            ),
         ) {
             FloatingActionButton(
                 onClick = {
                     if (maxChannels > settingsListInput.size) {
-                        settingsListInput.add(
-                            channelSettings {
-                            psk = Channel.default.settings.psk
-                        }
-                        )
+                        settingsListInput.add(channelSettings { psk = Channel.default.settings.psk })
                         showEditChannelDialog = settingsListInput.lastIndex
                     }
                 },
-                modifier = Modifier.padding(16.dp)
-            ) { Icon(Icons.TwoTone.Add, stringResource(R.string.add)) }
+                modifier = Modifier.padding(16.dp),
+            ) {
+                Icon(Icons.TwoTone.Add, stringResource(R.string.add))
+            }
         }
     }
 }
 
 @Composable
-private fun ChannelsConfigHeader(
-    frequency: Float,
-    slot: Int
-) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
+private fun ChannelsConfigHeader(frequency: Float, slot: Int) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         PreferenceCategory(text = stringResource(R.string.channels))
         Column {
-            Text(
-                text = "${stringResource(R.string.freq)}: ${frequency}MHz",
-                fontSize = 11.sp,
-            )
-            Text(
-                text = "${stringResource(R.string.slot)}: $slot",
-                fontSize = 11.sp,
-            )
+            Text(text = "${stringResource(R.string.freq)}: ${frequency}MHz", fontSize = 11.sp)
+            Text(text = "${stringResource(R.string.slot)}: $slot", fontSize = 11.sp)
         }
     }
 }
@@ -396,17 +342,16 @@ private fun ChannelsConfigHeader(
 @Composable
 private fun ChannelSettingsPreview() {
     ChannelSettingsItemList(
-        settingsList = listOf(
+        settingsList =
+        listOf(
             channelSettings {
                 psk = Channel.default.settings.psk
                 name = Channel.default.name
             },
-            channelSettings {
-                name = stringResource(R.string.channel_name)
-            },
+            channelSettings { name = stringResource(R.string.channel_name) },
         ),
         loraConfig = Channel.default.loraConfig,
         enabled = true,
-        onPositiveClicked = { },
+        onPositiveClicked = {},
     )
 }
