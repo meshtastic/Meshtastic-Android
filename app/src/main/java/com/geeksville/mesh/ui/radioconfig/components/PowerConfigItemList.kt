@@ -60,6 +60,7 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
     )
 }
 
+@Suppress("LongMethod")
 @Composable
 fun PowerConfigItemList(powerConfig: PowerConfig, enabled: Boolean, onSaveClicked: (PowerConfig) -> Unit) {
     val focusManager = LocalFocusManager.current
