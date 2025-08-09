@@ -118,7 +118,7 @@ private fun ChannelItem(
 }
 
 @Composable
-fun ChannelCard(
+private fun ChannelCard(
     index: Int,
     title: String,
     enabled: Boolean,
@@ -200,6 +200,9 @@ fun ChannelSettingsItemList(
     onPositiveClicked: (List<ChannelSettings>) -> Unit,
 ) {
     val primarySettings = settingsList.getOrNull(0) ?: return
+    val modemPresetName by remember(loraConfig) {
+        mutableStateOf(Channel(loraConfig = loraConfig).name)
+    }
     val primaryChannel by remember(loraConfig) {
         mutableStateOf(Channel(primarySettings, loraConfig))
     }
@@ -227,7 +230,7 @@ fun ChannelSettingsItemList(
             channelSettings = with(settingsListInput) {
                 if (size > index) get(index) else channelSettings { }
             },
-            modemPresetName = primaryChannel.name,
+            modemPresetName = modemPresetName,
             onAddClick = {
                 if (settingsListInput.size > index) {
                     settingsListInput[index] = it
@@ -262,7 +265,12 @@ fun ChannelSettingsItemList(
             Text(
                 text = stringResource(R.string.press_and_drag),
                 fontSize = 11.sp,
-                modifier = Modifier.padding(start = 16.dp)
+                modifier = Modifier.padding(start = 16.dp),
+            )
+            Text(
+                text = stringResource(R.string.primary),
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(start = 16.dp),
             )
             LazyColumn(
                 modifier = Modifier.dragContainer(
@@ -272,12 +280,6 @@ fun ChannelSettingsItemList(
                 state = listState,
                 contentPadding = PaddingValues(horizontal = 16.dp),
             ) {
-                item {
-                    Text(
-                        text = stringResource(R.string.primary),
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
                 dragDropItemsIndexed(
                     items = settingsListInput,
                     dragDropState = dragDropState,
@@ -285,7 +287,7 @@ fun ChannelSettingsItemList(
                     val channelObj = Channel(channel, loraConfig)
                     ChannelCard(
                         index = index,
-                        title = channel.name.ifEmpty { primaryChannel.name },
+                        title = channel.name.ifEmpty { modemPresetName },
                         enabled = enabled,
                         onEditClick = { showEditChannelDialog = index },
                         onDeleteClick = { settingsListInput.removeAt(index) },
