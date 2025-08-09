@@ -100,7 +100,6 @@
     <string name="new_node_seen">Uus sõlm nähtud: %s</string>
     <string name="disconnected">Ühendus katkenud</string>
     <string name="device_sleeping">Seade on unerežiimis</string>
-    <string name="connected_count">Ühendatud: %1$s aktiivsed</string>
     <string name="ip_address">IP-aadress:</string>
     <string name="ip_port">Port:</string>
     <string name="connected">Ühendatud raadioga</string>

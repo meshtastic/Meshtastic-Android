@@ -100,7 +100,7 @@
     <string name="new_node_seen">Uusi laite nähty: %s</string>
     <string name="disconnected">Ei yhdistetty</string>
     <string name="device_sleeping">Laite on lepotilassa</string>
-    <string name="connected_count">Yhdistetty: %1$s verkossa</string>
+    <string name="connected_count">Yhdistetty: %1$d verkossa</string>
     <string name="ip_address">IP-osoite:</string>
     <string name="ip_port">Portti:</string>
     <string name="connected">Yhdistetty radioon</string>
@@ -735,4 +735,5 @@
     <string name="grant_permissions_and_scan">Salli käyttöoikeudet ja skannaa</string>
     <string name="nodes_queued_for_deletion">%d laitetta jonossa poistettavaksi:</string>
     <string name="clean_node_database_description">Varoitus: Tämä poistaa laitteet sovelluksen sekä laitteen tietokannoista.\nValinnat lisätään aiempiin.</string>
+    <string name="connecting_to_device">Yhdistetään laitteeseen</string>
 </resources>
