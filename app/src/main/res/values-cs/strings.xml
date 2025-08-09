@@ -95,7 +95,6 @@
     <string name="share">Sdílet</string>
     <string name="disconnected">Odpojeno</string>
     <string name="device_sleeping">Zařízení spí</string>
-    <string name="connected_count">Připojeno: %1$s online</string>
     <string name="ip_address">IP adresa:</string>
     <string name="ip_port">Port:</string>
     <string name="connected">Připojeno k vysílači</string>

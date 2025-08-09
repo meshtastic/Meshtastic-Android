@@ -96,7 +96,6 @@
     <string name="share">Condividi</string>
     <string name="disconnected">Disconnesso</string>
     <string name="device_sleeping">Il dispositivo è inattivo</string>
-    <string name="connected_count">Connesso: %1$s online</string>
     <string name="ip_address">Indirizzo IP:</string>
     <string name="ip_port">Porta:</string>
     <string name="connected">Connesso alla radio</string>

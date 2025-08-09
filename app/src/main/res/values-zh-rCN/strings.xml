@@ -99,7 +99,6 @@
     <string name="share">分享</string>
     <string name="disconnected">已断开连接</string>
     <string name="device_sleeping">设备休眠中</string>
-    <string name="connected_count">已连接：%1$s / 在线</string>
     <string name="ip_address">IP地址：</string>
     <string name="ip_port">端口：</string>
     <string name="connected">已连接至设备</string>

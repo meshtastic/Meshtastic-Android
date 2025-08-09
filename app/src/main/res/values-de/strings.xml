@@ -100,7 +100,7 @@
     <string name="new_node_seen">Neuen Knoten gesehen: %s</string>
     <string name="disconnected">Verbindung getrennt</string>
     <string name="device_sleeping">Gerät schläft</string>
-    <string name="connected_count">Verbunden: %1$s online</string>
+    <string name="connected_count">Verbunden: %1$d online</string>
     <string name="ip_address">IP-Adresse:</string>
     <string name="ip_port">Port:</string>
     <string name="connected">Mit Funkgerät verbunden</string>
@@ -735,4 +735,5 @@
     <string name="grant_permissions_and_scan">Berechtigungen und Suche erlauben</string>
     <string name="nodes_queued_for_deletion">%d Knoten in der Warteschlange zum Löschen:</string>
     <string name="clean_node_database_description">Achtung: Dies entfernt Knoten aus der App und Gerätedatenbank.\nDie Auswahl ist kumulativ.</string>
+    <string name="connecting_to_device">Verbinde mit Gerät</string>
 </resources>
