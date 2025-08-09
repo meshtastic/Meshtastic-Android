@@ -58,7 +58,7 @@ import com.geeksville.mesh.navigation.ModuleRoute
 import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
-import com.geeksville.mesh.service.MeshService.ConnectionState
+import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.util.UiText
 import com.google.protobuf.MessageLite
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -145,7 +145,7 @@ constructor(
 
         combine(radioConfigRepository.connectionState, radioConfigState) { connState, configState ->
             _radioConfigState.update { it.copy(connected = connState == ConnectionState.CONNECTED) }
-            if (connState.isDisconnected() && configState.responseState.isWaiting()) {
+            if (connState == ConnectionState.DISCONNECTED && configState.responseState.isWaiting()) {
                 sendError(R.string.disconnected)
             }
         }

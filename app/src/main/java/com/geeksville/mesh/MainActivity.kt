@@ -241,7 +241,7 @@ class MainActivity :
             errormsg("Failed to start service from activity - but ignoring because bind will work ${ex.message}")
         }
 
-        mesh.connect(this, MeshService.createIntent(), BIND_AUTO_CREATE + BIND_ABOVE_CLIENT)
+        mesh.connect(this, MeshService.createIntent(this), BIND_AUTO_CREATE + BIND_ABOVE_CLIENT)
     }
 
     override fun onStart() {

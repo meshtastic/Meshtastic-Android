@@ -39,6 +39,9 @@ import com.datadog.android.rum.GlobalRumMonitor
 import com.datadog.android.rum.Rum
 import com.datadog.android.rum.RumConfiguration
 import com.datadog.android.rum.tracking.AcceptAllNavDestinations
+import com.datadog.android.sessionreplay.SessionReplay
+import com.datadog.android.sessionreplay.SessionReplayConfiguration
+import com.datadog.android.sessionreplay.compose.ComposeExtensionSupport
 import com.datadog.android.timber.DatadogTree
 import com.datadog.android.trace.AndroidTracer
 import com.datadog.android.trace.Trace
@@ -188,12 +191,20 @@ open class GeeksvilleApplication :
         val tracer = AndroidTracer.Builder().build()
         GlobalTracer.registerIfAbsent(tracer)
 
+        val sessionReplayConfig =
+            SessionReplayConfiguration.Builder(sampleRate = 20.0f)
+                // in case you need Jetpack Compose support
+                .addExtensionSupport(ComposeExtensionSupport())
+                .build()
+
+        SessionReplay.enable(sessionReplayConfig)
+
         Timber.plant(Timber.DebugTree(), DatadogTree(logger))
     }
 }
 
 fun setAttributes(firmwareVersion: String, deviceHardware: DeviceHardware) {
-    GlobalRumMonitor.get().addAttribute("firmware_version", firmwareVersion)
+    GlobalRumMonitor.get().addAttribute("firmware_version", firmwareVersion.extractSemanticVersion())
     GlobalRumMonitor.get().addAttribute("device_hardware", deviceHardware.hwModelSlug)
 }
 
@@ -211,4 +222,12 @@ fun AddNavigationTracking(navController: NavHostController) {
         trackArguments = true,
         destinationPredicate = AcceptAllNavDestinations(),
     )
+}
+
+fun String.extractSemanticVersion(): String {
+    // Regex to capture up to three numeric parts separated by dots
+    val regex = """^(\d+)(?:\.(\d+))?(?:\.(\d+))?""".toRegex()
+    val matchResult = regex.find(this)
+    return matchResult?.groupValues?.drop(1)?.filter { it.isNotEmpty() }?.joinToString(".")
+        ?: this // Fallback to original if no match
 }

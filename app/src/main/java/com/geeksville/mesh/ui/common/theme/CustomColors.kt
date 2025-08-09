@@ -89,6 +89,15 @@ object StatusColors {
             } else {
                 Color(0xFFF44336)
             }
+
+    val ColorScheme.StatusBlue: Color
+        @Composable
+        get() = // If it might change based on theme
+            if (isSystemInDarkTheme()) {
+                Color(0xFF2196F3)
+            } else {
+                Color(0xFF42A5F5)
+            }
 }
 
 object MessageItemColors {
