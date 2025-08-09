@@ -101,7 +101,7 @@ import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
-import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.common.components.AdaptiveTwoPane
 import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
@@ -131,7 +131,7 @@ fun ChannelScreen(
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val radioConfigState by radioConfigViewModel.radioConfigState.collectAsStateWithLifecycle()
 
-    val enabled = connectionState == MeshService.ConnectionState.CONNECTED && !viewModel.isManaged
+    val enabled = connectionState == ConnectionState.CONNECTED && !viewModel.isManaged
 
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     var channelSet by remember(channels) { mutableStateOf(channels) }

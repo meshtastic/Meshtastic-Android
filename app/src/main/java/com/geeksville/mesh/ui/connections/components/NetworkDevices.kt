@@ -54,14 +54,14 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.repository.network.NetworkRepository
-import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.connections.isIPAddress
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalFoundationApi::class)
 @Suppress("MagicNumber", "LongMethod")
 @Composable
 fun NetworkDevices(
-    connectionState: MeshService.ConnectionState,
+    connectionState: ConnectionState,
     discoveredNetworkDevices: List<DeviceListEntry>,
     recentNetworkDevices: List<DeviceListEntry>,
     selectedDevice: String,

@@ -36,7 +36,7 @@ import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.getChannelUrl
-import com.geeksville.mesh.service.MeshService.ConnectionState
+import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.service.ServiceRepository
 import kotlinx.coroutines.coroutineScope
@@ -48,43 +48,47 @@ import kotlinx.coroutines.flow.first
 import javax.inject.Inject
 
 /**
- * Class responsible for radio configuration data.
- * Combines access to [nodeDB], [ChannelSet], [LocalConfig] & [LocalModuleConfig].
+ * Class responsible for radio configuration data. Combines access to [nodeDB], [ChannelSet], [LocalConfig] &
+ * [LocalModuleConfig].
  */
-class RadioConfigRepository @Inject constructor(
+class RadioConfigRepository
+@Inject
+constructor(
     private val serviceRepository: ServiceRepository,
     private val nodeDB: NodeRepository,
     private val channelSetRepository: ChannelSetRepository,
     private val localConfigRepository: LocalConfigRepository,
     private val moduleConfigRepository: ModuleConfigRepository,
 ) {
-    val meshService: IMeshService? get() = serviceRepository.meshService
+    val meshService: IMeshService?
+        get() = serviceRepository.meshService
 
     // Connection state to our radio device
-    val connectionState get() = serviceRepository.connectionState
+    val connectionState
+        get() = serviceRepository.connectionState
+
     fun setConnectionState(state: ConnectionState) = serviceRepository.setConnectionState(state)
 
-    /**
-     * Flow representing the unique userId of our node.
-     */
-    val myId: StateFlow<String?> get() = nodeDB.myId
+    /** Flow representing the unique userId of our node. */
+    val myId: StateFlow<String?>
+        get() = nodeDB.myId
 
-    /**
-     * Flow representing the [MyNodeEntity] database.
-     */
-    val myNodeInfo: StateFlow<MyNodeEntity?> get() = nodeDB.myNodeInfo
+    /** Flow representing the [MyNodeEntity] database. */
+    val myNodeInfo: StateFlow<MyNodeEntity?>
+        get() = nodeDB.myNodeInfo
 
-    /**
-     * Flow representing the [Node] database.
-     */
-    val nodeDBbyNum: StateFlow<Map<Int, Node>> get() = nodeDB.nodeDBbyNum
+    /** Flow representing the [Node] database. */
+    val nodeDBbyNum: StateFlow<Map<Int, Node>>
+        get() = nodeDB.nodeDBbyNum
 
     fun getUser(nodeNum: Int) = nodeDB.getUser(nodeNum)
 
     suspend fun getNodeDBbyNum() = nodeDB.getNodeDBbyNum().first()
+
     suspend fun upsert(node: NodeEntity) = nodeDB.upsert(node)
-    suspend fun installNodeDB(mi: MyNodeEntity, nodes: List<NodeEntity>) {
-        nodeDB.installNodeDB(mi, nodes)
+
+    suspend fun installMyNodeInfo(mi: MyNodeEntity) {
+        nodeDB.installMyNodeInfo(mi)
     }
 
     suspend fun insertMetadata(fromNum: Int, metadata: DeviceMetadata) {
@@ -95,50 +99,40 @@ class RadioConfigRepository @Inject constructor(
         nodeDB.clearNodeDB()
     }
 
-    /**
-     * Flow representing the [ChannelSet] data store.
-     */
+    /** Flow representing the [ChannelSet] data store. */
     val channelSetFlow: Flow<ChannelSet> = channelSetRepository.channelSetFlow
 
-    /**
-     * Clears the [ChannelSet] data in the data store.
-     */
+    /** Clears the [ChannelSet] data in the data store. */
     suspend fun clearChannelSet() {
         channelSetRepository.clearChannelSet()
     }
 
-    /**
-     * Replaces the [ChannelSettings] list with a new [settingsList].
-     */
+    /** Replaces the [ChannelSettings] list with a new [settingsList]. */
     suspend fun replaceAllSettings(settingsList: List<ChannelSettings>) {
         channelSetRepository.clearSettings()
         channelSetRepository.addAllSettings(settingsList)
     }
 
     /**
-     * Updates the [ChannelSettings] list with the provided channel and returns the index of the
-     * admin channel after the update (if not found, returns 0).
+     * Updates the [ChannelSettings] list with the provided channel and returns the index of the admin channel after the
+     * update (if not found, returns 0).
+     *
      * @param channel The [Channel] provided.
      * @return the index of the admin channel after the update (if not found, returns 0).
      */
-    suspend fun updateChannelSettings(channel: Channel) {
-        return channelSetRepository.updateChannelSettings(channel)
-    }
+    suspend fun updateChannelSettings(channel: Channel) = channelSetRepository.updateChannelSettings(channel)
 
-    /**
-     * Flow representing the [LocalConfig] data store.
-     */
+    /** Flow representing the [LocalConfig] data store. */
     val localConfigFlow: Flow<LocalConfig> = localConfigRepository.localConfigFlow
 
-    /**
-     * Clears the [LocalConfig] data in the data store.
-     */
+    /** Clears the [LocalConfig] data in the data store. */
     suspend fun clearLocalConfig() {
         localConfigRepository.clearLocalConfig()
     }
 
     /**
      * Updates [LocalConfig] from each [Config] oneOf.
+     *
      * @param config The [Config] to be set.
      */
     suspend fun setLocalConfig(config: Config) {
@@ -146,48 +140,44 @@ class RadioConfigRepository @Inject constructor(
         if (config.hasLora()) channelSetRepository.setLoraConfig(config.lora)
     }
 
-    /**
-     * Flow representing the [LocalModuleConfig] data store.
-     */
+    /** Flow representing the [LocalModuleConfig] data store. */
     val moduleConfigFlow: Flow<LocalModuleConfig> = moduleConfigRepository.moduleConfigFlow
 
-    /**
-     * Clears the [LocalModuleConfig] data in the data store.
-     */
+    /** Clears the [LocalModuleConfig] data in the data store. */
     suspend fun clearLocalModuleConfig() {
         moduleConfigRepository.clearLocalModuleConfig()
     }
 
     /**
      * Updates [LocalModuleConfig] from each [ModuleConfig] oneOf.
+     *
      * @param config The [ModuleConfig] to be set.
      */
     suspend fun setLocalModuleConfig(config: ModuleConfig) {
         moduleConfigRepository.setLocalModuleConfig(config)
     }
 
-    /**
-     * Flow representing the combined [DeviceProfile] protobuf.
-     */
-    val deviceProfileFlow: Flow<DeviceProfile> = combine(
-        nodeDB.ourNodeInfo,
-        channelSetFlow,
-        localConfigFlow,
-        moduleConfigFlow,
-    ) { node, channels, localConfig, localModuleConfig ->
-        deviceProfile {
-            node?.user?.let {
-                longName = it.longName
-                shortName = it.shortName
-            }
-            channelUrl = channels.getChannelUrl().toString()
-            config = localConfig
-            moduleConfig = localModuleConfig
-            if (node != null && localConfig.position.fixedPosition) {
-                fixedPosition = node.position
+    /** Flow representing the combined [DeviceProfile] protobuf. */
+    val deviceProfileFlow: Flow<DeviceProfile> =
+        combine(nodeDB.ourNodeInfo, channelSetFlow, localConfigFlow, moduleConfigFlow) {
+                node,
+                channels,
+                localConfig,
+                localModuleConfig,
+            ->
+            deviceProfile {
+                node?.user?.let {
+                    longName = it.longName
+                    shortName = it.shortName
+                }
+                channelUrl = channels.getChannelUrl().toString()
+                config = localConfig
+                moduleConfig = localModuleConfig
+                if (node != null && localConfig.position.fixedPosition) {
+                    fixedPosition = node.position
+                }
             }
         }
-    }
 
     val clientNotification = serviceRepository.clientNotification
 
@@ -199,7 +189,8 @@ class RadioConfigRepository @Inject constructor(
         serviceRepository.clearClientNotification()
     }
 
-    val errorMessage: StateFlow<String?> get() = serviceRepository.errorMessage
+    val errorMessage: StateFlow<String?>
+        get() = serviceRepository.errorMessage
 
     fun setErrorMessage(text: String) {
         serviceRepository.setErrorMessage(text)
@@ -213,19 +204,18 @@ class RadioConfigRepository @Inject constructor(
         serviceRepository.setStatusMessage(text)
     }
 
-    val meshPacketFlow: SharedFlow<MeshPacket> get() = serviceRepository.meshPacketFlow
+    val meshPacketFlow: SharedFlow<MeshPacket>
+        get() = serviceRepository.meshPacketFlow
 
-    suspend fun emitMeshPacket(packet: MeshPacket) = coroutineScope {
-        serviceRepository.emitMeshPacket(packet)
-    }
+    suspend fun emitMeshPacket(packet: MeshPacket) = coroutineScope { serviceRepository.emitMeshPacket(packet) }
 
-    val serviceAction: Flow<ServiceAction> get() = serviceRepository.serviceAction
+    val serviceAction: Flow<ServiceAction>
+        get() = serviceRepository.serviceAction
 
-    suspend fun onServiceAction(action: ServiceAction) = coroutineScope {
-        serviceRepository.onServiceAction(action)
-    }
+    suspend fun onServiceAction(action: ServiceAction) = coroutineScope { serviceRepository.onServiceAction(action) }
 
-    val tracerouteResponse: StateFlow<String?> get() = serviceRepository.tracerouteResponse
+    val tracerouteResponse: StateFlow<String?>
+        get() = serviceRepository.tracerouteResponse
 
     fun setTracerouteResponse(value: String?) {
         serviceRepository.setTracerouteResponse(value)

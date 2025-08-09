@@ -62,7 +62,6 @@ import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
-import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.map.MAP_STYLE_ID
@@ -748,9 +747,10 @@ constructor(
     val connectionState
         get() = radioConfigRepository.connectionState
 
-    fun isConnected() = connectionState.value != MeshService.ConnectionState.DISCONNECTED
+    fun isConnected() = connectionState.value != com.geeksville.mesh.service.ConnectionState.DISCONNECTED
 
-    val isConnected = radioConfigRepository.connectionState.map { it != MeshService.ConnectionState.DISCONNECTED }
+    val isConnected =
+        radioConfigRepository.connectionState.map { it != com.geeksville.mesh.service.ConnectionState.DISCONNECTED }
 
     private val _requestChannelSet = MutableStateFlow<AppOnlyProtos.ChannelSet?>(null)
     val requestChannelSet: StateFlow<AppOnlyProtos.ChannelSet?>
