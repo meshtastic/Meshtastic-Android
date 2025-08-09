@@ -31,6 +31,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.Chat
@@ -227,7 +229,7 @@ fun MainScreen(
     traceRouteResponse?.let { response ->
         SimpleAlertDialog(
             title = R.string.traceroute,
-            text = { Text(text = response) },
+            text = { Column(modifier = Modifier.verticalScroll(rememberScrollState())) { Text(text = response) } },
             dismissText = stringResource(id = R.string.okay),
             onDismiss = { uIViewModel.clearTracerouteResponse() },
         )
