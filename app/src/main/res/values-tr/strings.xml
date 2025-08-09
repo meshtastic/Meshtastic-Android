@@ -94,6 +94,7 @@
     <string name="share">Paylaş</string>
     <string name="disconnected">Bağlantı kesildi</string>
     <string name="device_sleeping">Cihaz uyku durumunda</string>
+    <string name="connected_count">Bağlı: %1$s çevrimiçi</string>
     <string name="ip_address">IP Adresi:</string>
     <string name="ip_port">Bağlantı noktası:</string>
     <string name="connected">Cihaza bağlandı</string>

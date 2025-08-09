@@ -100,6 +100,7 @@
     <string name="new_node_seen">Novo Nó Visto: %s</string>
     <string name="disconnected">Desconectado</string>
     <string name="device_sleeping">Dispositivo em suspensão (sleep)</string>
+    <string name="connected_count">Conectado: %1$s ligado(s)</string>
     <string name="ip_address">Endereço IP:</string>
     <string name="ip_port">Porta:</string>
     <string name="connected">Conectado ao rádio</string>

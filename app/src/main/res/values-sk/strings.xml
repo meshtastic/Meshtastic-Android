@@ -93,6 +93,7 @@
     <string name="share">Zdieľať</string>
     <string name="disconnected">Odpojené</string>
     <string name="device_sleeping">Vysielač uspaný</string>
+    <string name="connected_count">Pripojený: %1$s online</string>
     <string name="ip_address">IP adresa:</string>
     <string name="connected">Pripojené k vysielaču</string>
     <string name="connected_to">Pripojené k vysielaču (%s)</string>

@@ -92,6 +92,7 @@
     <string name="share">Deel</string>
     <string name="disconnected">Niet verbonden</string>
     <string name="device_sleeping">Apparaat in slaapstand</string>
+    <string name="connected_count">Verbonden: %1$s online</string>
     <string name="ip_address">IP-adres:</string>
     <string name="ip_port">Poort:</string>
     <string name="connected">Verbonden met radio</string>
