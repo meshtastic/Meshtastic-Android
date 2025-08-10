@@ -230,7 +230,9 @@ constructor(
     val deviceHardware: StateFlow<DeviceHardware?> =
         ourNodeInfo
             .mapNotNull { nodeInfo ->
-                nodeInfo?.user?.hwModel?.let { deviceHardwareRepository.getDeviceHardwareByModel(it.number) }
+                nodeInfo?.user?.hwModel?.let {
+                    deviceHardwareRepository.getDeviceHardwareByModel(it.number).getOrNull()
+                }
             }
             .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5_000), initialValue = null)
 

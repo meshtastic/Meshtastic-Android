@@ -19,65 +19,93 @@ package com.geeksville.mesh.repository.api
 
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.warn
+import com.geeksville.mesh.database.entity.DeviceHardwareEntity
 import com.geeksville.mesh.database.entity.asExternalModel
 import com.geeksville.mesh.model.DeviceHardware
 import com.geeksville.mesh.network.DeviceHardwareRemoteDataSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.IOException
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
+import javax.inject.Singleton
 
+// Annotating with Singleton to ensure a single instance manages the cache
+@Singleton
 class DeviceHardwareRepository
 @Inject
 constructor(
-    private val apiDataSource: DeviceHardwareRemoteDataSource,
+    private val remoteDataSource: DeviceHardwareRemoteDataSource,
     private val localDataSource: DeviceHardwareLocalDataSource,
     private val jsonDataSource: DeviceHardwareJsonDataSource,
 ) {
 
-    companion object {
-        // 1 day
-        private const val CACHE_EXPIRATION_TIME_MS = 24 * 60 * 60 * 1000L
-    }
-
-    suspend fun getDeviceHardwareByModel(hwModel: Int, refresh: Boolean = false): DeviceHardware? {
-        return withContext(Dispatchers.IO) {
-            if (refresh) {
-                invalidateCache()
+    /**
+     * Retrieves device hardware information by its model ID.
+     *
+     * This function implements a cache-aside pattern with a fallback mechanism:
+     * 1. Check for a valid, non-expired local cache entry.
+     * 2. If not found or expired, fetch fresh data from the remote API.
+     * 3. If the remote fetch fails, attempt to use stale data from the cache.
+     * 4. If the cache is empty, fall back to loading data from a bundled JSON asset.
+     *
+     * @param hwModel The hardware model identifier.
+     * @param forceRefresh If true, the local cache will be invalidated and data will be fetched remotely.
+     * @return A [Result] containing the [DeviceHardware] on success (or null if not found), or an exception on failure.
+     */
+    suspend fun getDeviceHardwareByModel(hwModel: Int, forceRefresh: Boolean = false): Result<DeviceHardware?> =
+        withContext(Dispatchers.IO) {
+            if (forceRefresh) {
+                localDataSource.deleteAllDeviceHardware()
             } else {
-                val cachedHardware = localDataSource.getByHwModel(hwModel)
-                if (cachedHardware != null && !isCacheExpired(cachedHardware.lastUpdated)) {
-                    val externalModel = cachedHardware.asExternalModel()
-                    return@withContext externalModel
+                // 1. Attempt to retrieve from cache first
+                val cachedEntity = localDataSource.getByHwModel(hwModel)
+                if (cachedEntity != null && !cachedEntity.isStale()) {
+                    debug("Using fresh cached device hardware for model $hwModel")
+                    return@withContext Result.success(cachedEntity.asExternalModel())
                 }
             }
-            try {
-                val deviceHardware =
-                    apiDataSource.getAllDeviceHardware() ?: throw IOException("empty response from server")
-                localDataSource.insertAllDeviceHardware(deviceHardware)
-                val cachedHardware = localDataSource.getByHwModel(hwModel)
-                val externalModel = cachedHardware?.asExternalModel()
-                return@withContext externalModel
-            } catch (e: IOException) {
-                warn("Failed to fetch device hardware from server: ${e.message}")
-                var cachedHardware = localDataSource.getByHwModel(hwModel)
-                if (cachedHardware != null) {
-                    debug("Using stale cached device hardware")
-                    return@withContext cachedHardware.asExternalModel()
-                }
-                localDataSource.insertAllDeviceHardware(jsonDataSource.loadDeviceHardwareFromJsonAsset())
-                cachedHardware = localDataSource.getByHwModel(hwModel)
-                val externalModel = cachedHardware?.asExternalModel()
-                return@withContext externalModel
+
+            // 2. Fetch from remote API
+            runCatching {
+                debug("Fetching device hardware from remote API.")
+                val remoteHardware =
+                    remoteDataSource.getAllDeviceHardware() ?: throw IOException("Empty response from server")
+
+                localDataSource.insertAllDeviceHardware(remoteHardware)
+                localDataSource.getByHwModel(hwModel)?.asExternalModel()
             }
+                .onSuccess {
+                    // Successfully fetched and found the model
+                    return@withContext Result.success(it)
+                }
+                .onFailure { e ->
+                    warn("Failed to fetch device hardware from server: ${e.message}")
+
+                    // 3. Attempt to use stale cache as a fallback
+                    val staleEntity = localDataSource.getByHwModel(hwModel)
+                    if (staleEntity != null) {
+                        debug("Using stale cached device hardware for model $hwModel")
+                        return@withContext Result.success(staleEntity.asExternalModel())
+                    }
+
+                    // 4. Fallback to bundled JSON if cache is empty
+                    debug("Cache is empty, falling back to bundled JSON asset.")
+                    return@withContext loadFromBundledJson(hwModel)
+                }
         }
+
+    private suspend fun loadFromBundledJson(hwModel: Int): Result<DeviceHardware?> = runCatching {
+        val jsonHardware = jsonDataSource.loadDeviceHardwareFromJsonAsset()
+        localDataSource.insertAllDeviceHardware(jsonHardware)
+        localDataSource.getByHwModel(hwModel)?.asExternalModel()
     }
 
-    suspend fun invalidateCache() {
-        localDataSource.deleteAllDeviceHardware()
-    }
+    /** Extension function to check if the cached entity is stale. */
+    private fun DeviceHardwareEntity.isStale(): Boolean =
+        (System.currentTimeMillis() - this.lastUpdated) > CACHE_EXPIRATION_TIME_MS
 
-    /** Check if the cache is expired */
-    private fun isCacheExpired(lastUpdated: Long): Boolean =
-        System.currentTimeMillis() - lastUpdated > CACHE_EXPIRATION_TIME_MS
+    companion object {
+        private val CACHE_EXPIRATION_TIME_MS = TimeUnit.DAYS.toMillis(1)
+    }
 }
