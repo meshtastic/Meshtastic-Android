@@ -199,6 +199,7 @@ class MeshService :
 
         private const val CONFIG_ONLY_NONCE = 69420
         private const val NODE_INFO_ONLY_NONCE = 69421
+        private const val CONFIG_WAIT_MS = 250L
     }
 
     private var previousSummary: String? = null
@@ -1667,9 +1668,9 @@ class MeshService :
         // we have recieved the response to our ConfigOnly request
         // send a heartbeat, then request NodeInfoOnly to get the nodeDb from the radio
         serviceScope.handledLaunch {
-            delay(250)
+            delay(CONFIG_WAIT_MS)
             radioInterfaceService.keepAlive()
-            delay(250)
+            delay(CONFIG_WAIT_MS)
             sendNodeInfoOnlyRequest()
         }
     }
