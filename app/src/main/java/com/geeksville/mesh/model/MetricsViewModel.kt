@@ -264,7 +264,11 @@ constructor(
                     val deviceHardware =
                         actualNode.user.hwModel.number.let { deviceHardwareRepository.getDeviceHardwareByModel(it) }
                     _state.update { state ->
-                        state.copy(node = actualNode, isLocal = destNum == ourNode, deviceHardware = deviceHardware)
+                        state.copy(
+                            node = actualNode,
+                            isLocal = destNum == ourNode,
+                            deviceHardware = deviceHardware.getOrNull(),
+                        )
                     }
                 }
                 .launchIn(viewModelScope)
