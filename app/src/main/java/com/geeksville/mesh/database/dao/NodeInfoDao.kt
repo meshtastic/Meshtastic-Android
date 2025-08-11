@@ -24,7 +24,6 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
-import com.geeksville.mesh.android.BuildUtils.warn
 import com.geeksville.mesh.database.entity.MetadataEntity
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
@@ -36,51 +35,65 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface NodeInfoDao {
 
-    // Helper function to contain all validation logic
-    private fun getVerifiedNodeForUpsert(node: NodeEntity): NodeEntity? {
-        // Populate the new publicKey field for lazy migration
-        node.publicKey = node.user.publicKey
+    /**
+     * Verifies a [NodeEntity] before an upsert operation. It handles populating the publicKey for lazy migration,
+     * checks for public key conflicts with new nodes, and manages updates to existing nodes, particularly in cases of
+     * public key mismatches to prevent potential impersonation or data corruption.
+     *
+     * @param incomingNode The node entity to be verified.
+     * @return A [NodeEntity] that is safe to upsert, or null if the upsert should be aborted (e.g., due to an
+     *   impersonation attempt, though this logic is currently commented out).
+     */
+    private fun getVerifiedNodeForUpsert(incomingNode: NodeEntity): NodeEntity {
+        // Populate the NodeEntity.publicKey field from the User.publicKey for consistency
+        // and to support lazy migration.
+        incomingNode.publicKey = incomingNode.user.publicKey
 
-        val existingNode = getNodeByNum(node.num)?.node
+        val existingNodeEntity = getNodeByNum(incomingNode.num)?.node
 
-        return if (existingNode == null) {
-            // This is a new node. We must check if its public key is already claimed by another node.
-            if (node.publicKey != null && node.publicKey?.isEmpty == false) {
-                val nodeWithSamePK = findNodeByPublicKey(node.publicKey)
-                if (nodeWithSamePK != null && nodeWithSamePK.num != node.num) {
-                    // This is the impersonation attempt we want to block.
-                    @Suppress("MaxLineLength")
-                    warn(
-                        "NodeInfoDao: Blocking new node #${node.num} because its public key is already used by #${nodeWithSamePK.num}.",
-                    )
-                    return null // ABORT
-                }
-            }
-            // If we're here, the new node is safe to add.
-            node
+        return if (existingNodeEntity == null) {
+            handleNewNodeUpsertValidation(incomingNode)
         } else {
-            // This is an update to an existing node.
-            val keyMatch = existingNode.user.publicKey == node.user.publicKey || existingNode.user.publicKey.isEmpty
-            if (keyMatch) {
-                // Keys match, trust the incoming node completely.
-                // This allows for legit nodeId changes etc.
-                node
-            } else {
-                // Keys do NOT match. This is a potential attack.
-                // Log it, and create a NEW entity based on the EXISTING trusted one,
-                // only updating dynamic data and setting the public key to EMPTY to signal a conflict.
-                @Suppress("MaxLineLength")
-                warn(
-                    "NodeInfoDao: Received packet for #${node.num} with non-matching public key. Identity data ignored, key set to EMPTY.",
-                )
-                existingNode.copy(
-                    lastHeard = node.lastHeard,
-                    snr = node.snr,
-                    position = node.position,
-                    user = existingNode.user.toBuilder().setPublicKey(ByteString.EMPTY).build(),
-                    publicKey = ByteString.EMPTY,
-                )
+            handleExistingNodeUpsertValidation(existingNodeEntity, incomingNode)
+        }
+    }
+
+    /** Validates a new node before it is inserted into the database. */
+    private fun handleNewNodeUpsertValidation(newNode: NodeEntity): NodeEntity {
+        // Check if the new node's public key (if present and not empty)
+        // is already claimed by another existing node.
+        if (newNode.publicKey?.isEmpty == false) {
+            val nodeWithSamePK = findNodeByPublicKey(newNode.publicKey)
+            if (nodeWithSamePK != null && nodeWithSamePK.num != newNode.num) {
+                // This is a potential impersonation attempt.
+                return nodeWithSamePK
             }
+        }
+        // If no conflicting public key is found, or if the impersonation check is not active,
+        // the new node is considered safe to add.
+        return newNode
+    }
+
+    private fun handleExistingNodeUpsertValidation(existingNode: NodeEntity, incomingNode: NodeEntity): NodeEntity {
+        // A public key is considered matching if the incoming key equals the existing key,
+        // OR if the existing key is empty (allowing a new key to be set or an update to proceed).
+        val isPublicKeyMatchingOrExistingIsEmpty =
+            existingNode.user.publicKey == incomingNode.publicKey || existingNode.user.publicKey.isEmpty
+
+        return if (isPublicKeyMatchingOrExistingIsEmpty) {
+            // Keys match or existing key was empty: trust the incoming node data completely.
+            // This allows for legitimate updates to user info and other fields.
+            incomingNode
+        } else {
+            existingNode.copy(
+                lastHeard = incomingNode.lastHeard,
+                snr = incomingNode.snr,
+                position = incomingNode.position,
+                // Preserve the existing user object, but update its internal public key to EMPTY
+                // to reflect the conflict state.
+                user = existingNode.user.toBuilder().setPublicKey(ByteString.EMPTY).build(),
+                publicKey = ByteString.EMPTY,
+            )
         }
     }
 
@@ -167,20 +180,6 @@ interface NodeInfoDao {
         lastHeardMin: Int,
     ): Flow<List<NodeWithRelations>>
 
-    @Transaction
-    fun upsert(node: NodeEntity) {
-        getVerifiedNodeForUpsert(node)?.let { doUpsert(it) }
-    }
-
-    @Suppress("NestedBlockDepth")
-    @Transaction
-    fun putAll(nodes: List<NodeEntity>) {
-        val safeNodes = nodes.mapNotNull { getVerifiedNodeForUpsert(it) }
-        if (safeNodes.isNotEmpty()) {
-            doPutAll(safeNodes)
-        }
-    }
-
     @Query("DELETE FROM nodes")
     fun clearNodeInfo()
 
@@ -210,6 +209,11 @@ interface NodeInfoDao {
 
     @Upsert fun doUpsert(node: NodeEntity)
 
+    fun upsert(node: NodeEntity) {
+        val verifiedNode = getVerifiedNodeForUpsert(node)
+        doUpsert(verifiedNode)
+    }
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun doPutAll(nodes: List<NodeEntity>)
+    fun putAll(nodes: List<NodeEntity>)
 }

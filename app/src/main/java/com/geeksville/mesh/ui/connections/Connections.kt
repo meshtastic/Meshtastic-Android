@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -71,6 +72,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -93,7 +96,7 @@ import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
-import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.connections.components.BLEDevices
 import com.geeksville.mesh.ui.connections.components.NetworkDevices
 import com.geeksville.mesh.ui.connections.components.UsbDevices
@@ -135,7 +138,7 @@ fun ConnectionsScreen(
     val currentRegion = config.lora.region
     val scrollState = rememberScrollState()
     val scanStatusText by scanModel.errorText.observeAsState("")
-    val connectionState by uiViewModel.connectionState.collectAsState(MeshService.ConnectionState.DISCONNECTED)
+    val connectionState by uiViewModel.connectionState.collectAsState(ConnectionState.DISCONNECTED)
     val scanning by scanModel.spinner.collectAsStateWithLifecycle(false)
     val receivingLocationUpdates by uiViewModel.receivingLocationUpdates.collectAsState(false)
     val context = LocalContext.current
@@ -144,8 +147,7 @@ fun ConnectionsScreen(
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val bluetoothEnabled by bluetoothViewModel.enabled.collectAsStateWithLifecycle(false)
     val regionUnset =
-        currentRegion == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET &&
-            connectionState == MeshService.ConnectionState.CONNECTED
+        currentRegion == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET && connectionState == ConnectionState.CONNECTED
 
     val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
     val discoveredTcpDevices by scanModel.discoveredTcpDevicesForUi.collectAsStateWithLifecycle()
@@ -206,12 +208,13 @@ fun ConnectionsScreen(
 
     LaunchedEffect(connectionState, regionUnset) {
         when (connectionState) {
-            MeshService.ConnectionState.CONNECTED -> {
+            ConnectionState.CONNECTED -> {
                 if (regionUnset) R.string.must_set_region else R.string.connected_to
             }
 
-            MeshService.ConnectionState.DISCONNECTED -> R.string.not_connected
-            MeshService.ConnectionState.DEVICE_SLEEP -> R.string.connected_sleeping
+            ConnectionState.DISCONNECTED -> R.string.not_connected
+            ConnectionState.DEVICE_SLEEP -> R.string.connected_sleeping
+            ConnectionState.CONNECTING -> R.string.connecting_to_device
         }.let {
             val firmwareString = info?.firmwareString ?: context.getString(R.string.unknown)
             scanModel.setErrorText(context.getString(it, firmwareString))
@@ -324,9 +327,19 @@ fun ConnectionsScreen(
                         Icon(
                             imageVector = Icons.Default.Bluetooth,
                             contentDescription = stringResource(id = R.string.bluetooth),
+                            modifier = Modifier.padding(end = 8.dp), // Add padding to separate icon from text
                         )
                     },
-                    label = { Text(text = stringResource(id = R.string.bluetooth)) },
+                    label = {
+                        Text(
+                            text = stringResource(id = R.string.bluetooth),
+                            modifier = Modifier.padding(top = 2.dp),
+                            maxLines = 1,
+                            softWrap = true,
+                            textAlign = TextAlign.Center,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    },
                 )
                 SegmentedButton(
                     shape = SegmentedButtonDefaults.itemShape(DeviceType.TCP.ordinal, DeviceType.entries.size),
@@ -336,18 +349,41 @@ fun ConnectionsScreen(
                         Icon(
                             imageVector = Icons.Default.Wifi,
                             contentDescription = stringResource(id = R.string.network),
+                            modifier = Modifier.padding(end = 8.dp), // Add padding to separate icon from text
                         )
                     },
-                    label = { Text(text = stringResource(id = R.string.network)) },
+                    label = {
+                        Text(
+                            text = stringResource(id = R.string.network),
+                            modifier = Modifier.padding(top = 2.dp),
+                            maxLines = 1,
+                            softWrap = true,
+                            textAlign = TextAlign.Center,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    },
                 )
                 SegmentedButton(
                     shape = SegmentedButtonDefaults.itemShape(DeviceType.USB.ordinal, DeviceType.entries.size),
                     onClick = { selectedDeviceType = DeviceType.USB },
                     selected = (selectedDeviceType == DeviceType.USB),
                     icon = {
-                        Icon(imageVector = Icons.Default.Usb, contentDescription = stringResource(id = R.string.serial))
+                        Icon(
+                            imageVector = Icons.Default.Usb,
+                            contentDescription = stringResource(id = R.string.serial),
+                            modifier = Modifier.padding(end = 8.dp), // Add padding to separate icon from text
+                        )
                     },
-                    label = { Text(text = stringResource(id = R.string.serial)) },
+                    label = {
+                        Text(
+                            text = stringResource(id = R.string.serial),
+                            modifier = Modifier.padding(top = 2.dp),
+                            maxLines = 1,
+                            softWrap = true,
+                            textAlign = TextAlign.Center,
+                            overflow = TextOverflow.Ellipsis,
+                        )
+                    },
                 )
             }
 
@@ -591,3 +627,101 @@ private enum class DeviceType {
 }
 
 private const val SCAN_PERIOD: Long = 10000 // 10 seconds
+
+@Preview(showBackground = true)
+@Composable
+private fun PreviewConnectionsSegmentedBar() {
+    MaterialTheme {
+        Column {
+            // Preview with a long string
+            var selectedDeviceTypeLong by remember { mutableStateOf(DeviceType.USB) }
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                DeviceType.entries.forEach { deviceType ->
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(deviceType.ordinal, DeviceType.entries.size),
+                        onClick = { selectedDeviceTypeLong = deviceType },
+                        selected = (selectedDeviceTypeLong == deviceType),
+                        icon = {
+                            Icon(
+                                imageVector =
+                                when (deviceType) {
+                                    DeviceType.BLE -> Icons.Default.Bluetooth
+                                    DeviceType.TCP -> Icons.Default.Wifi
+                                    DeviceType.USB -> Icons.Default.Usb
+                                },
+                                contentDescription = stringResource(id = R.string.bluetooth), // Placeholder
+                                modifier = Modifier.size(24.dp),
+                            )
+                        },
+                        label = {
+                            Text(
+                                text =
+                                when (deviceType) {
+                                    DeviceType.BLE -> stringResource(id = R.string.bluetooth)
+                                    DeviceType.TCP -> stringResource(id = R.string.network)
+                                    //                                DeviceType.USB -> stringResource(id =
+                                    // R.string.serial)
+                                    DeviceType.USB -> "Some outrageously long translation string that will happen"
+                                },
+                                modifier = Modifier.padding(top = 2.dp),
+                                maxLines = 1,
+                                softWrap = true,
+                                textAlign = TextAlign.Center,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        },
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp)) // Add some spacing for the second preview
+            // Preview with normal length strings
+            ConnectionsSegmentedBarInternal(initialSelection = DeviceType.BLE)
+        }
+    }
+}
+
+@Composable
+private fun ConnectionsSegmentedBarInternal(initialSelection: DeviceType) {
+    var selectedDeviceType by remember { mutableStateOf(initialSelection) }
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        DeviceType.entries.forEach { deviceType ->
+            SegmentedButton(
+                shape = SegmentedButtonDefaults.itemShape(deviceType.ordinal, DeviceType.entries.size),
+                onClick = { selectedDeviceType = deviceType },
+                selected = (selectedDeviceType == deviceType),
+                icon = {
+                    Icon(
+                        imageVector =
+                        when (deviceType) {
+                            DeviceType.BLE -> Icons.Default.Bluetooth
+                            DeviceType.TCP -> Icons.Default.Wifi
+                            DeviceType.USB -> Icons.Default.Usb
+                        },
+                        contentDescription =
+                        when (deviceType) {
+                            DeviceType.BLE -> stringResource(id = R.string.bluetooth)
+                            DeviceType.TCP -> stringResource(id = R.string.network)
+                            DeviceType.USB -> stringResource(id = R.string.serial)
+                        },
+                        modifier = Modifier.size(24.dp),
+                    )
+                },
+                label = {
+                    Text(
+                        text =
+                        when (deviceType) {
+                            DeviceType.BLE -> stringResource(id = R.string.bluetooth)
+                            DeviceType.TCP -> stringResource(id = R.string.network)
+                            DeviceType.USB -> stringResource(id = R.string.serial)
+                        },
+                        modifier = Modifier.padding(top = 2.dp),
+                        maxLines = 1,
+                        softWrap = true,
+                        textAlign = TextAlign.Center,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                },
+            )
+        }
+    }
+}

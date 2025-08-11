@@ -25,7 +25,7 @@ jobs:
       versionNameBase: ${{ steps.get_version.outputs.versionNameBase }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.inputs.branch }}
           submodules: 'recursive'
@@ -50,7 +50,7 @@ jobs:
       apk_name: fdroidRelease-${{ needs.prepare-release-info.outputs.versionNameBase }}-${{ needs.prepare-release-info.outputs.versionCode }}.apk
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.inputs.branch }}
           submodules: 'recursive'
@@ -99,9 +99,6 @@ jobs:
     needs: prepare-release-info # Depends on version info
     runs-on: ubuntu-latest
     if: github.repository == 'meshtastic/Meshtastic-Android'
-    env:
-      DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
-      DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
     outputs:
       aab_path: app/build/outputs/bundle/googleRelease/app-google-release.aab
       aab_name: googleRelease-${{ needs.prepare-release-info.outputs.versionNameBase }}-${{ needs.prepare-release-info.outputs.versionCode }}.aab
@@ -109,7 +106,7 @@ jobs:
       apk_name: googleRelease-${{ needs.prepare-release-info.outputs.versionNameBase }}-${{ needs.prepare-release-info.outputs.versionCode }}.apk
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.inputs.branch }}
           submodules: 'recursive'
@@ -171,6 +168,10 @@ jobs:
   create-github-release:
     needs: [ prepare-release-info, build-fdroid, build-google ]
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      attestations: write
     # Only run this job if the input create_github_release is true
     if: github.repository == 'meshtastic/Meshtastic-Android' && github.event.inputs.create_github_release == 'true'
     steps:
@@ -187,19 +188,19 @@ jobs:
           echo -e "versionCode=${{ env.versionCode }}\nversionNameBase=${{ env.versionNameBase }}" > ./version_info.txt
 
       - name: Download F-Droid APK
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: fdroid-apk
           path: ./fdroid-apk-download
 
       - name: Download Google AAB
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: google-aab
           path: ./google-aab-download
 
       - name: Download Google APK
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: google-apk
           path: ./google-apk-download
@@ -212,7 +213,7 @@ jobs:
           prerelease: true
           release_name: Meshtastic Android ${{ env.versionNameBase }} (${{ env.versionCode }}) alpha
           tag_name: v${{ env.versionNameBase }}
-          target_commitish: ${{ github.event.inputs.branch }}
+          commitish: ${{ github.event.inputs.branch }}
           body: |
             Version: ${{ env.versionNameBase }} (${{ env.versionCode }})
 
@@ -263,3 +264,11 @@ jobs:
           asset_path: ./version_info.txt
           asset_name: version_info.txt
           asset_content_type: text/plain
+
+      - name: Attest Build Provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            ./google-apk-download/app-google-release.apk
+            ./google-aab-download/app-google-release.aab
+            ./fdroid-apk-download/app-fdroid-release.apk

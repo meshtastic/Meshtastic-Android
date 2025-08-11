@@ -38,14 +38,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DeviceListEntry
-import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun DeviceListItem(
-    connectionState: MeshService.ConnectionState,
+    connectionState: ConnectionState,
     device: DeviceListEntry,
     selected: Boolean,
     onSelect: () -> Unit,
@@ -88,8 +88,8 @@ fun DeviceListItem(
                     leadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
                     trailingIconColor =
                     when (connectionState) {
-                        MeshService.ConnectionState.CONNECTED -> MaterialTheme.colorScheme.StatusGreen
-                        MeshService.ConnectionState.DISCONNECTED -> MaterialTheme.colorScheme.StatusRed
+                        ConnectionState.CONNECTED -> MaterialTheme.colorScheme.StatusGreen
+                        ConnectionState.DISCONNECTED -> MaterialTheme.colorScheme.StatusRed
                         else ->
                             MaterialTheme.colorScheme
                                 .onPrimaryContainer // Fallback for other states (e.g. connecting)
@@ -125,7 +125,7 @@ fun DeviceListItem(
         trailingContent = {
             if (device is DeviceListEntry.Disconnect) {
                 Icon(imageVector = Icons.Default.CloudOff, contentDescription = stringResource(R.string.disconnect))
-            } else if (connectionState == MeshService.ConnectionState.CONNECTED) {
+            } else if (connectionState == ConnectionState.CONNECTED) {
                 Icon(imageVector = Icons.Default.CloudDone, contentDescription = stringResource(R.string.connected))
             } else {
                 Icon(

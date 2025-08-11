@@ -17,11 +17,16 @@
 
 package com.geeksville.mesh.ui.radioconfig
 
+import android.Manifest
 import android.app.Application
+import android.content.pm.PackageManager
+import android.location.Location
 import android.net.Uri
 import android.os.RemoteException
 import android.util.Base64
+import androidx.annotation.RequiresPermission
 import androidx.annotation.StringRes
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -52,7 +57,8 @@ import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.ModuleRoute
 import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
-import com.geeksville.mesh.service.MeshService.ConnectionState
+import com.geeksville.mesh.repository.location.LocationRepository
+import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.util.UiText
 import com.google.protobuf.MessageLite
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -72,9 +78,7 @@ import org.json.JSONObject
 import java.io.FileOutputStream
 import javax.inject.Inject
 
-/**
- * Data class that represents the current RadioConfig state.
- */
+/** Data class that represents the current RadioConfig state. */
 data class RadioConfigState(
     val isLocal: Boolean = false,
     val connected: Boolean = false,
@@ -90,23 +94,40 @@ data class RadioConfigState(
 )
 
 @HiltViewModel
-class RadioConfigViewModel @Inject constructor(
+class RadioConfigViewModel
+@Inject
+constructor(
     savedStateHandle: SavedStateHandle,
     private val app: Application,
     private val radioConfigRepository: RadioConfigRepository,
-) : ViewModel(), Logging {
-    private val meshService: IMeshService? get() = radioConfigRepository.meshService
+    private val locationRepository: LocationRepository,
+) : ViewModel(),
+    Logging {
+    private val meshService: IMeshService?
+        get() = radioConfigRepository.meshService
 
     private val destNum = savedStateHandle.toRoute<RadioConfigRoutes.RadioConfig>().destNum
     private val _destNode = MutableStateFlow<Node?>(null)
-    val destNode: StateFlow<Node?> get() = _destNode
+    val destNode: StateFlow<Node?>
+        get() = _destNode
 
     private val requestIds = MutableStateFlow(hashSetOf<Int>())
     private val _radioConfigState = MutableStateFlow(RadioConfigState())
     val radioConfigState: StateFlow<RadioConfigState> = _radioConfigState
 
     private val _currentDeviceProfile = MutableStateFlow(deviceProfile {})
-    val currentDeviceProfile get() = _currentDeviceProfile.value
+    val currentDeviceProfile
+        get() = _currentDeviceProfile.value
+
+    @RequiresPermission(Manifest.permission.ACCESS_FINE_LOCATION)
+    suspend fun getCurrentLocation(): Location? = if (
+        ContextCompat.checkSelfPermission(app, Manifest.permission.ACCESS_FINE_LOCATION) ==
+        PackageManager.PERMISSION_GRANTED
+    ) {
+        locationRepository.getLocations().firstOrNull()
+    } else {
+        null
+    }
 
     init {
         radioConfigRepository.nodeDBbyNum
@@ -118,72 +139,76 @@ class RadioConfigViewModel @Inject constructor(
             }
             .launchIn(viewModelScope)
 
-        radioConfigRepository.deviceProfileFlow.onEach {
-            _currentDeviceProfile.value = it
-        }.launchIn(viewModelScope)
+        radioConfigRepository.deviceProfileFlow.onEach { _currentDeviceProfile.value = it }.launchIn(viewModelScope)
 
-        radioConfigRepository.meshPacketFlow.onEach(::processPacketResponse)
-            .launchIn(viewModelScope)
+        radioConfigRepository.meshPacketFlow.onEach(::processPacketResponse).launchIn(viewModelScope)
 
         combine(radioConfigRepository.connectionState, radioConfigState) { connState, configState ->
             _radioConfigState.update { it.copy(connected = connState == ConnectionState.CONNECTED) }
-            if (connState.isDisconnected() && configState.responseState.isWaiting()) {
+            if (connState == ConnectionState.DISCONNECTED && configState.responseState.isWaiting()) {
                 sendError(R.string.disconnected)
             }
-        }.launchIn(viewModelScope)
+        }
+            .launchIn(viewModelScope)
 
-        radioConfigRepository.myNodeInfo.onEach { ni ->
-            _radioConfigState.update { it.copy(isLocal = destNum == null || destNum == ni?.myNodeNum) }
-        }.launchIn(viewModelScope)
+        radioConfigRepository.myNodeInfo
+            .onEach { ni ->
+                _radioConfigState.update { it.copy(isLocal = destNum == null || destNum == ni?.myNodeNum) }
+            }
+            .launchIn(viewModelScope)
 
         debug("RadioConfigViewModel created")
     }
 
-    private val myNodeInfo: StateFlow<MyNodeEntity?> get() = radioConfigRepository.myNodeInfo
-    val myNodeNum get() = myNodeInfo.value?.myNodeNum
-    val maxChannels get() = myNodeInfo.value?.maxChannels ?: 8
+    private val myNodeInfo: StateFlow<MyNodeEntity?>
+        get() = radioConfigRepository.myNodeInfo
+
+    val myNodeNum
+        get() = myNodeInfo.value?.myNodeNum
+
+    val maxChannels
+        get() = myNodeInfo.value?.maxChannels ?: 8
 
     val hasPaFan: Boolean
-        get() = destNode.value?.user?.hwModel in setOf(
-            null,
-            MeshProtos.HardwareModel.UNRECOGNIZED,
-            MeshProtos.HardwareModel.UNSET,
-            MeshProtos.HardwareModel.BETAFPV_2400_TX,
-            MeshProtos.HardwareModel.RADIOMASTER_900_BANDIT_NANO,
-            MeshProtos.HardwareModel.RADIOMASTER_900_BANDIT,
-        )
+        get() =
+            destNode.value?.user?.hwModel in
+                setOf(
+                    null,
+                    MeshProtos.HardwareModel.UNRECOGNIZED,
+                    MeshProtos.HardwareModel.UNSET,
+                    MeshProtos.HardwareModel.BETAFPV_2400_TX,
+                    MeshProtos.HardwareModel.RADIOMASTER_900_BANDIT_NANO,
+                    MeshProtos.HardwareModel.RADIOMASTER_900_BANDIT,
+                )
 
     override fun onCleared() {
         super.onCleared()
         debug("RadioConfigViewModel cleared")
     }
 
-    private fun request(
-        destNum: Int,
-        requestAction: suspend (IMeshService, Int, Int) -> Unit,
-        errorMessage: String,
-    ) = viewModelScope.launch {
-        meshService?.let { service ->
-            val packetId = service.packetId
-            try {
-                requestAction(service, packetId, destNum)
-                requestIds.update { it.apply { add(packetId) } }
-                _radioConfigState.update { state ->
-                    if (state.responseState is ResponseState.Loading) {
-                        val total = maxOf(requestIds.value.size, state.responseState.total)
-                        state.copy(responseState = state.responseState.copy(total = total))
-                    } else {
-                        state.copy(
-                            route = "", // setter (response is PortNum.ROUTING_APP)
-                            responseState = ResponseState.Loading(),
-                        )
+    private fun request(destNum: Int, requestAction: suspend (IMeshService, Int, Int) -> Unit, errorMessage: String) =
+        viewModelScope.launch {
+            meshService?.let { service ->
+                val packetId = service.packetId
+                try {
+                    requestAction(service, packetId, destNum)
+                    requestIds.update { it.apply { add(packetId) } }
+                    _radioConfigState.update { state ->
+                        if (state.responseState is ResponseState.Loading) {
+                            val total = maxOf(requestIds.value.size, state.responseState.total)
+                            state.copy(responseState = state.responseState.copy(total = total))
+                        } else {
+                            state.copy(
+                                route = "", // setter (response is PortNum.ROUTING_APP)
+                                responseState = ResponseState.Loading(),
+                            )
+                        }
                     }
+                } catch (ex: RemoteException) {
+                    errormsg("$errorMessage: ${ex.message}")
                 }
-            } catch (ex: RemoteException) {
-                errormsg("$errorMessage: ${ex.message}")
             }
         }
-    }
 
     fun setOwner(user: MeshProtos.User) {
         setRemoteOwner(destNode.value?.num ?: return, user)
@@ -201,19 +226,14 @@ class RadioConfigViewModel @Inject constructor(
     private fun getOwner(destNum: Int) = request(
         destNum,
         { service, packetId, dest -> service.getRemoteOwner(packetId, dest) },
-        "Request getOwner error"
+        "Request getOwner error",
     )
 
-    fun updateChannels(
-        new: List<ChannelProtos.ChannelSettings>,
-        old: List<ChannelProtos.ChannelSettings>,
-    ) {
+    fun updateChannels(new: List<ChannelProtos.ChannelSettings>, old: List<ChannelProtos.ChannelSettings>) {
         val destNum = destNode.value?.num ?: return
         getChannelList(new, old).forEach { setRemoteChannel(destNum, it) }
 
-        if (destNum == myNodeNum) viewModelScope.launch {
-            radioConfigRepository.replaceAllSettings(new)
-        }
+        if (destNum == myNodeNum) viewModelScope.launch { radioConfigRepository.replaceAllSettings(new) }
         _radioConfigState.update { it.copy(channelList = new) }
     }
 
@@ -225,16 +245,14 @@ class RadioConfigViewModel @Inject constructor(
 
     private fun setRemoteChannel(destNum: Int, channel: ChannelProtos.Channel) = request(
         destNum,
-        { service, packetId, dest ->
-            service.setRemoteChannel(packetId, dest, channel.toByteArray())
-        },
-        "Request setRemoteChannel error"
+        { service, packetId, dest -> service.setRemoteChannel(packetId, dest, channel.toByteArray()) },
+        "Request setRemoteChannel error",
     )
 
     private fun getChannel(destNum: Int, index: Int) = request(
         destNum,
         { service, packetId, dest -> service.getRemoteChannel(packetId, dest, index) },
-        "Request getChannel error"
+        "Request getChannel error",
     )
 
     fun setConfig(config: ConfigProtos.Config) {
@@ -284,7 +302,7 @@ class RadioConfigViewModel @Inject constructor(
     private fun getRingtone(destNum: Int) = request(
         destNum,
         { service, packetId, dest -> service.getRingtone(packetId, dest) },
-        "Request getRingtone error"
+        "Request getRingtone error",
     )
 
     fun setCannedMessages(messages: String) {
@@ -296,26 +314,23 @@ class RadioConfigViewModel @Inject constructor(
     private fun getCannedMessages(destNum: Int) = request(
         destNum,
         { service, packetId, dest -> service.getCannedMessages(packetId, dest) },
-        "Request getCannedMessages error"
+        "Request getCannedMessages error",
     )
 
     private fun requestShutdown(destNum: Int) = request(
         destNum,
         { service, packetId, dest -> service.requestShutdown(packetId, dest) },
-        "Request shutdown error"
+        "Request shutdown error",
     )
 
-    private fun requestReboot(destNum: Int) = request(
-        destNum,
-        { service, packetId, dest -> service.requestReboot(packetId, dest) },
-        "Request reboot error"
-    )
+    private fun requestReboot(destNum: Int) =
+        request(destNum, { service, packetId, dest -> service.requestReboot(packetId, dest) }, "Request reboot error")
 
     private fun requestFactoryReset(destNum: Int) {
         request(
             destNum,
             { service, packetId, dest -> service.requestFactoryReset(packetId, dest) },
-            "Request factory reset error"
+            "Request factory reset error",
         )
         if (destNum == myNodeNum) {
             viewModelScope.launch { radioConfigRepository.clearNodeDB() }
@@ -326,7 +341,7 @@ class RadioConfigViewModel @Inject constructor(
         request(
             destNum,
             { service, packetId, dest -> service.requestNodedbReset(packetId, dest) },
-            "Request NodeDB reset error"
+            "Request NodeDB reset error",
         )
         if (destNum == myNodeNum) {
             viewModelScope.launch { radioConfigRepository.clearNodeDB() }
@@ -339,13 +354,14 @@ class RadioConfigViewModel @Inject constructor(
 
         when (route) {
             AdminRoute.REBOOT.name -> requestReboot(destNum)
-            AdminRoute.SHUTDOWN.name -> with(radioConfigState.value) {
-                if (metadata != null && !metadata.canShutdown) {
-                    sendError(R.string.cant_shutdown)
-                } else {
-                    requestShutdown(destNum)
+            AdminRoute.SHUTDOWN.name ->
+                with(radioConfigState.value) {
+                    if (metadata != null && !metadata.canShutdown) {
+                        sendError(R.string.cant_shutdown)
+                    } else {
+                        requestShutdown(destNum)
+                    }
                 }
-            }
 
             AdminRoute.FACTORY_RESET.name -> requestFactoryReset(destNum)
             AdminRoute.NODEDB_RESET.name -> requestNodedbReset(destNum)
@@ -363,10 +379,7 @@ class RadioConfigViewModel @Inject constructor(
 
     fun removeFixedPosition() = setFixedPosition(Position(0.0, 0.0, 0))
 
-    fun importProfile(
-        uri: Uri,
-        onResult: (DeviceProfile) -> Unit,
-    ) = viewModelScope.launch(Dispatchers.IO) {
+    fun importProfile(uri: Uri, onResult: (DeviceProfile) -> Unit) = viewModelScope.launch(Dispatchers.IO) {
         try {
             app.contentResolver.openInputStream(uri).use { inputStream ->
                 val bytes = inputStream?.readBytes()
@@ -379,9 +392,8 @@ class RadioConfigViewModel @Inject constructor(
         }
     }
 
-    fun exportProfile(uri: Uri, profile: DeviceProfile) = viewModelScope.launch {
-        writeToUri(uri, profile)
-    }
+    fun exportProfile(uri: Uri, profile: DeviceProfile) = viewModelScope.launch { writeToUri(uri, profile) }
+
     private suspend fun writeToUri(uri: Uri, message: MessageLite) = withContext(Dispatchers.IO) {
         try {
             app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
@@ -396,33 +408,31 @@ class RadioConfigViewModel @Inject constructor(
         }
     }
 
-    fun exportSecurityConfig(uri: Uri, securityConfig: SecurityConfig) = viewModelScope.launch {
-        writeSecurityKeysJsonToUri(uri, securityConfig)
-    }
+    fun exportSecurityConfig(uri: Uri, securityConfig: SecurityConfig) =
+        viewModelScope.launch { writeSecurityKeysJsonToUri(uri, securityConfig) }
 
     private val indentSpaces = 4
+
     private suspend fun writeSecurityKeysJsonToUri(uri: Uri, securityConfig: SecurityConfig) =
         withContext(Dispatchers.IO) {
             try {
-                val publicKeyBytes =
-                    securityConfig.publicKey.toByteArray()
-                val privateKeyBytes =
-                    securityConfig.privateKey.toByteArray()
+                val publicKeyBytes = securityConfig.publicKey.toByteArray()
+                val privateKeyBytes = securityConfig.privateKey.toByteArray()
 
                 // Convert byte arrays to Base64 strings for human readability in JSON
                 val publicKeyBase64 = Base64.encodeToString(publicKeyBytes, Base64.NO_WRAP)
                 val privateKeyBase64 = Base64.encodeToString(privateKeyBytes, Base64.NO_WRAP)
 
                 // Create a JSON object
-                val jsonObject = JSONObject().apply {
-                    put("timestamp", System.currentTimeMillis())
-                    put("public_key", publicKeyBase64)
-                    put("private_key", privateKeyBase64)
-                }
+                val jsonObject =
+                    JSONObject().apply {
+                        put("timestamp", System.currentTimeMillis())
+                        put("public_key", publicKeyBase64)
+                        put("private_key", privateKeyBase64)
+                    }
 
                 // Convert JSON object to a string
-                val jsonString =
-                    jsonObject.toString(indentSpaces)
+                val jsonString = jsonObject.toString(indentSpaces)
 
                 app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
                     FileOutputStream(parcelFileDescriptor.fileDescriptor).use { outputStream ->
@@ -436,16 +446,18 @@ class RadioConfigViewModel @Inject constructor(
                 sendError(ex.customMessage)
             }
         }
+
     fun installProfile(protobuf: DeviceProfile) = with(protobuf) {
         meshService?.beginEditSettings()
         if (hasLongName() || hasShortName()) {
             destNode.value?.user?.let {
-                val user = MeshProtos.User.newBuilder()
-                    .setId(it.id)
-                    .setLongName(if (hasLongName()) longName else it.longName)
-                    .setShortName(if (hasShortName()) shortName else it.shortName)
-                    .setIsLicensed(it.isLicensed)
-                    .build()
+                val user =
+                    MeshProtos.User.newBuilder()
+                        .setId(it.id)
+                        .setLongName(if (hasLongName()) longName else it.longName)
+                        .setShortName(if (hasShortName()) shortName else it.shortName)
+                        .setIsLicensed(it.isLicensed)
+                        .build()
                 setOwner(user)
             }
         }
@@ -460,9 +472,8 @@ class RadioConfigViewModel @Inject constructor(
         if (hasConfig()) {
             val descriptor = ConfigProtos.Config.getDescriptor()
             config.allFields.forEach { (field, value) ->
-                val newConfig = ConfigProtos.Config.newBuilder()
-                    .setField(descriptor.findFieldByName(field.name), value)
-                    .build()
+                val newConfig =
+                    ConfigProtos.Config.newBuilder().setField(descriptor.findFieldByName(field.name), value).build()
                 setConfig(newConfig)
             }
         }
@@ -472,9 +483,10 @@ class RadioConfigViewModel @Inject constructor(
         if (hasModuleConfig()) {
             val descriptor = ModuleConfigProtos.ModuleConfig.getDescriptor()
             moduleConfig.allFields.forEach { (field, value) ->
-                val newConfig = ModuleConfigProtos.ModuleConfig.newBuilder()
-                    .setField(descriptor.findFieldByName(field.name), value)
-                    .build()
+                val newConfig =
+                    ModuleConfigProtos.ModuleConfig.newBuilder()
+                        .setField(descriptor.findFieldByName(field.name), value)
+                        .build()
                 setModuleConfig(newConfig)
             }
         }
@@ -553,9 +565,13 @@ class RadioConfigViewModel @Inject constructor(
         }
     }
 
-    private val Exception.customMessage: String get() = "${javaClass.simpleName}: $message"
+    private val Exception.customMessage: String
+        get() = "${javaClass.simpleName}: $message"
+
     private fun sendError(error: String) = setResponseStateError(UiText.DynamicString(error))
+
     private fun sendError(@StringRes id: Int) = setResponseStateError(UiText.StringResource(id))
+
     private fun setResponseStateError(error: UiText) {
         _radioConfigState.update { it.copy(responseState = ResponseState.Error(error)) }
     }
@@ -612,9 +628,8 @@ class RadioConfigViewModel @Inject constructor(
                     if (response.role != ChannelProtos.Channel.Role.DISABLED) {
                         _radioConfigState.update { state ->
                             state.copy(
-                                channelList = state.channelList.toMutableList().apply {
-                                    add(response.index, response.settings)
-                                }
+                                channelList =
+                                state.channelList.toMutableList().apply { add(response.index, response.settings) },
                             )
                         }
                         incrementCompleted()

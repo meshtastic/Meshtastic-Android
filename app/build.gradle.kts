@@ -127,7 +127,7 @@ android {
         }
     }
     buildTypes {
-        named("release") {
+        release {
             if (keystoreProperties["storeFile"] != null) {
                 signingConfig = signingConfigs.named("release").get()
             }
@@ -135,7 +135,10 @@ android {
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
-        named("debug") { isPseudoLocalesEnabled = true }
+        debug {
+            isDebuggable = true
+            isPseudoLocalesEnabled = true
+        }
     }
     bundle { language { enableSplit = false } }
     buildFeatures {

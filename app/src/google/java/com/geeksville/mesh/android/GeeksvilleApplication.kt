@@ -21,11 +21,14 @@ import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
 import android.provider.Settings
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.runtime.Composable
 import androidx.core.content.edit
+import androidx.navigation.NavHostController
 import com.datadog.android.Datadog
 import com.datadog.android.DatadogSite
+import com.datadog.android.compose.ExperimentalTrackingApi
+import com.datadog.android.compose.NavigationViewTrackingEffect
 import com.datadog.android.compose.enableComposeActionTracking
 import com.datadog.android.core.configuration.Configuration
 import com.datadog.android.log.Logger
@@ -35,7 +38,14 @@ import com.datadog.android.privacy.TrackingConsent
 import com.datadog.android.rum.GlobalRumMonitor
 import com.datadog.android.rum.Rum
 import com.datadog.android.rum.RumConfiguration
+import com.datadog.android.rum.tracking.AcceptAllNavDestinations
+import com.datadog.android.sessionreplay.SessionReplay
+import com.datadog.android.sessionreplay.SessionReplayConfiguration
+import com.datadog.android.sessionreplay.compose.ComposeExtensionSupport
 import com.datadog.android.timber.DatadogTree
+import com.datadog.android.trace.AndroidTracer
+import com.datadog.android.trace.Trace
+import com.datadog.android.trace.TraceConfiguration
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.analytics.AnalyticsProvider
 import com.geeksville.mesh.analytics.FirebaseAnalytics
@@ -44,6 +54,7 @@ import com.geeksville.mesh.util.exceptionReporter
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailabilityLight
 import com.suddenh4x.ratingdialog.AppRating
+import io.opentracing.util.GlobalTracer
 import timber.log.Timber
 
 open class GeeksvilleApplication :
@@ -137,10 +148,9 @@ open class GeeksvilleApplication :
         val logger =
             Logger.Builder()
                 .setNetworkInfoEnabled(true)
-                .setLogcatLogsEnabled(true)
                 .setRemoteSampleRate(sampleRate)
                 .setBundleWithTraceEnabled(true)
-                .setName("TimberLogger")
+                .setBundleWithRumEnabled(true)
                 .build()
         val configuration =
             Configuration.Builder(
@@ -159,7 +169,6 @@ open class GeeksvilleApplication :
                 TrackingConsent.NOT_GRANTED
             }
         Datadog.initialize(this, configuration, consent)
-        Datadog.setVerbosity(Log.VERBOSE)
 
         val rumConfiguration =
             RumConfiguration.Builder(BuildConfig.datadogApplicationId)
@@ -168,7 +177,9 @@ open class GeeksvilleApplication :
                 .trackFrustrations(true)
                 .trackLongTasks()
                 .trackNonFatalAnrs(true)
-                .trackUserInteractions()
+                // Re-enable tracking when auto instrumentation available. See note in `app/build.gradle`
+                .disableUserInteractionTracking()
+                // .trackUserInteractions()
                 .enableComposeActionTracking()
                 .build()
         Rum.enable(rumConfiguration)
@@ -176,12 +187,26 @@ open class GeeksvilleApplication :
         val logsConfig = LogsConfiguration.Builder().build()
         Logs.enable(logsConfig)
 
+        val traceConfig = TraceConfiguration.Builder().build()
+        Trace.enable(traceConfig)
+
+        val tracer = AndroidTracer.Builder().build()
+        GlobalTracer.registerIfAbsent(tracer)
+
+        val sessionReplayConfig =
+            SessionReplayConfiguration.Builder(sampleRate = 20.0f)
+                // in case you need Jetpack Compose support
+                .addExtensionSupport(ComposeExtensionSupport())
+                .build()
+
+        SessionReplay.enable(sessionReplayConfig)
+
         Timber.plant(Timber.DebugTree(), DatadogTree(logger))
     }
 }
 
 fun setAttributes(firmwareVersion: String, deviceHardware: DeviceHardware) {
-    GlobalRumMonitor.get().addAttribute("firmware_version", firmwareVersion)
+    GlobalRumMonitor.get().addAttribute("firmware_version", firmwareVersion.extractSemanticVersion())
     GlobalRumMonitor.get().addAttribute("device_hardware", deviceHardware.hwModelSlug)
 }
 
@@ -190,3 +215,21 @@ val Context.isGooglePlayAvailable: Boolean
         GoogleApiAvailabilityLight.getInstance().isGooglePlayServicesAvailable(this).let {
             it != ConnectionResult.SERVICE_MISSING && it != ConnectionResult.SERVICE_INVALID
         }
+
+@OptIn(ExperimentalTrackingApi::class)
+@Composable
+fun AddNavigationTracking(navController: NavHostController) {
+    NavigationViewTrackingEffect(
+        navController = navController,
+        trackArguments = true,
+        destinationPredicate = AcceptAllNavDestinations(),
+    )
+}
+
+fun String.extractSemanticVersion(): String {
+    // Regex to capture up to three numeric parts separated by dots
+    val regex = """^(\d+)(?:\.(\d+))?(?:\.(\d+))?""".toRegex()
+    val matchResult = regex.find(this)
+    return matchResult?.groupValues?.drop(1)?.filter { it.isNotEmpty() }?.joinToString(".")
+        ?: this // Fallback to original if no match
+}

@@ -30,9 +30,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * Repository class for managing the [IMeshService] instance and connection state
- */
+/** Repository class for managing the [IMeshService] instance and connection state */
 @Suppress("TooManyFunctions")
 @Singleton
 class ServiceRepository @Inject constructor() : Logging {
@@ -44,15 +42,18 @@ class ServiceRepository @Inject constructor() : Logging {
     }
 
     // Connection state to our radio device
-    private val _connectionState = MutableStateFlow(MeshService.ConnectionState.DISCONNECTED)
-    val connectionState: StateFlow<MeshService.ConnectionState> get() = _connectionState
+    private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
+    val connectionState: StateFlow<ConnectionState>
+        get() = _connectionState
 
-    fun setConnectionState(connectionState: MeshService.ConnectionState) {
+    fun setConnectionState(connectionState: ConnectionState) {
         _connectionState.value = connectionState
     }
 
     private val _clientNotification = MutableStateFlow<MeshProtos.ClientNotification?>(null)
-    val clientNotification: StateFlow<MeshProtos.ClientNotification?> get() = _clientNotification
+    val clientNotification: StateFlow<MeshProtos.ClientNotification?>
+        get() = _clientNotification
+
     fun setClientNotification(notification: MeshProtos.ClientNotification?) {
         errormsg(notification?.message.orEmpty())
 
@@ -64,7 +65,8 @@ class ServiceRepository @Inject constructor() : Logging {
     }
 
     private val _errorMessage = MutableStateFlow<String?>(null)
-    val errorMessage: StateFlow<String?> get() = _errorMessage
+    val errorMessage: StateFlow<String?>
+        get() = _errorMessage
 
     fun setErrorMessage(text: String) {
         errormsg(text)
@@ -76,23 +78,26 @@ class ServiceRepository @Inject constructor() : Logging {
     }
 
     private val _statusMessage = MutableStateFlow<String?>(null)
-    val statusMessage: StateFlow<String?> get() = _statusMessage
+    val statusMessage: StateFlow<String?>
+        get() = _statusMessage
 
     fun setStatusMessage(text: String) {
-        if (connectionState.value != MeshService.ConnectionState.CONNECTED) {
+        if (connectionState.value != ConnectionState.CONNECTED) {
             _statusMessage.value = text
         }
     }
 
     private val _meshPacketFlow = MutableSharedFlow<MeshPacket>()
-    val meshPacketFlow: SharedFlow<MeshPacket> get() = _meshPacketFlow
+    val meshPacketFlow: SharedFlow<MeshPacket>
+        get() = _meshPacketFlow
 
     suspend fun emitMeshPacket(packet: MeshPacket) {
         _meshPacketFlow.emit(packet)
     }
 
     private val _tracerouteResponse = MutableStateFlow<String?>(null)
-    val tracerouteResponse: StateFlow<String?> get() = _tracerouteResponse
+    val tracerouteResponse: StateFlow<String?>
+        get() = _tracerouteResponse
 
     fun setTracerouteResponse(value: String?) {
         _tracerouteResponse.value = value

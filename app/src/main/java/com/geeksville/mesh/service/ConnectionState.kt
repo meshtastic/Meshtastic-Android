@@ -15,12 +15,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-object Configs {
-    const val APPLICATION_ID = "com.geeksville.mesh"
-    const val MIN_SDK = 26
-    const val TARGET_SDK = 36
-    const val COMPILE_SDK = 36
-    const val VERSION_NAME_BASE = "2.6.34"
-    const val MIN_FW_VERSION = "2.5.14" // Minimum device firmware version supported by this app
-    const val ABS_MIN_FW_VERSION = "2.3.15" // Minimum device firmware version supported by this app
+package com.geeksville.mesh.service
+
+enum class ConnectionState {
+    /** We are disconnected from the device, and we should be trying to reconnect. */
+    DISCONNECTED,
+
+    /** We are currently attempting to connect to the device. */
+    CONNECTING,
+
+    /** We are connected to the device and communicating normally. */
+    CONNECTED,
+
+    /** The device is in a light sleep state, and we are waiting for it to wake up and reconnect to us. */
+    DEVICE_SLEEP,
+
+    ;
+
+    fun isConnected() = this == CONNECTED
+
+    fun isDisconnected() = this == DISCONNECTED
 }

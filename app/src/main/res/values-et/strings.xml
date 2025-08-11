@@ -100,7 +100,7 @@
     <string name="new_node_seen">Uus sõlm nähtud: %s</string>
     <string name="disconnected">Ühendus katkenud</string>
     <string name="device_sleeping">Seade on unerežiimis</string>
-    <string name="connected_count">Ühendatud: %1$s aktiivsed</string>
+    <string name="connected_count">Ühendatud: %1$s aktiivset</string>
     <string name="ip_address">IP-aadress:</string>
     <string name="ip_port">Port:</string>
     <string name="connected">Ühendatud raadioga</string>
@@ -484,6 +484,7 @@
     <string name="latitude">Laiuskraad</string>
     <string name="longitude">Pikkuskraad</string>
     <string name="altitude_meters">Kõrgus (meetrites)</string>
+    <string name="position_config_set_fixed_from_phone">Kasuta telefoni hetkelist asukohta</string>
     <string name="gps_mode">GPS režiim</string>
     <string name="gps_update_interval_seconds">GPS värskendamise sagedus (sekund)</string>
     <string name="redefine_gps_rx_pin">Määra GPS_RX_PIN</string>
@@ -648,6 +649,13 @@
     <string name="overflow_menu">Lisa valikud</string>
     <string name="uv_lux">UV Luks</string>
     <string name="unknown">Tundmatu</string>
+    <string name="clean_node_database_title">Tühjenda sõlmede andmebaas</string>
+    <string name="clean_nodes_older_than">Eemalda sõlmed mida pole nähtud rohkem kui %1$d päeva</string>
+    <string name="clean_unknown_nodes">Eemalda tundmatud sõlmed</string>
+    <string name="clean_low_interaction_nodes">Eemalda vähe aktiivsed sõlmed</string>
+    <string name="clean_ignored_nodes">Eemalda ignooritud sõlmed</string>
+    <string name="clean_now">Eemalda nüüd</string>
+    <string name="clean_node_database_confirmation">See eemaldab %1$d seadet andmebaasist. Toimingut ei saa tagasi võtta.</string>
     <string name="security_icon_help_green_lock">Roheline lukk näitab, et kanal on turvaliselt krüpteeritud kas 128 või 256 bittise AES võtmega.</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <string name="security_icon_insecure_no_precise">Ebaturvaline kanal, ei ole täpne</string>
@@ -725,4 +733,7 @@
     <string name="notification_permissions_description">Meshtastic kasutab märguandeid, et hoida teid kursis uute sõnumite ja muude oluliste sündmustega. Saate oma märguannete õigusi igal ajal seadetes muuta.</string>
     <string name="next">Järgmine</string>
     <string name="grant_permissions_and_scan">Anna õigused ja skanneeri</string>
+    <string name="nodes_queued_for_deletion">%d eemaldatavat sõlme nimekirjas:</string>
+    <string name="clean_node_database_description">Hoiatus: See eemaldab sõlmed rakendusest, kui ka seadmest.\nValikud on lisaks eelnevale.</string>
+    <string name="connecting_to_device">Ühendan seadet</string>
 </resources>

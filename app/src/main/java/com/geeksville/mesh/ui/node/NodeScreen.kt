@@ -45,6 +45,7 @@ import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.common.components.rememberTimeTickWithLifecycle
 import com.geeksville.mesh.ui.node.components.NodeFilterTextField
 import com.geeksville.mesh.ui.node.components.NodeItem
@@ -146,7 +147,7 @@ fun NodeScreen(
 
         AnimatedVisibility(
             modifier = Modifier.align(Alignment.BottomEnd),
-            visible = !isScrollInProgress && connectionState.isConnected() && shareCapable,
+            visible = !isScrollInProgress && connectionState == ConnectionState.CONNECTED && shareCapable,
         ) {
             @Suppress("NewApi")
             (AddContactFAB(model = model, onSharedContactImport = { contact -> model.addSharedContact(contact) }))

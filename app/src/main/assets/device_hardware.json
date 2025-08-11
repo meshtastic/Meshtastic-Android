@@ -27,7 +27,7 @@
     "platformioTarget": "tlora-v2-1-1_6",
     "architecture": "esp32",
     "activelySupported": true,
-    "supportLevel": 1,
+    "supportLevel": 3,
     "displayName": "LILYGO T-LoRa V2.1-1.6",
     "tags": [
       "LilyGo"
@@ -42,7 +42,7 @@
     "platformioTarget": "tbeam",
     "architecture": "esp32",
     "activelySupported": true,
-    "supportLevel": 1,
+    "supportLevel": 3,
     "displayName": "LILYGO T-Beam",
     "tags": [
       "LilyGo"
@@ -163,6 +163,7 @@
     "platformioTarget": "rak11200",
     "architecture": "esp32",
     "activelySupported": true,
+    "supportLevel": 3,
     "displayName": "RAK WisBlock 11200",
     "tags": [
       "RAK"
@@ -189,7 +190,7 @@
     "platformioTarget": "tlora-v2-1-1_8",
     "architecture": "esp32",
     "activelySupported": true,
-    "supportLevel": 2,
+    "supportLevel": 3,
     "displayName": "LILYGO T-LoRa V2.1-1.8",
     "tags": [
       "LilyGo",
@@ -266,7 +267,7 @@
     "platformioTarget": "wio-tracker-wm1110",
     "architecture": "nrf52840",
     "activelySupported": true,
-    "supportLevel": 1,
+    "supportLevel": 3,
     "displayName": "Seeed Wio WM1110 Tracker",
     "tags": [
       "Seeed"
@@ -536,7 +537,7 @@
     "platformioTarget": "t-watch-s3",
     "architecture": "esp32-s3",
     "activelySupported": true,
-    "supportLevel": 1,
+    "supportLevel": 3,
     "displayName": "LILYGO T-Watch S3",
     "tags": [
       "LilyGo"
@@ -766,7 +767,7 @@
     "platformioTarget": "seeed-xiao-s3",
     "architecture": "esp32-s3",
     "activelySupported": true,
-    "supportLevel": 1,
+    "supportLevel": 3,
     "displayName": "Seeed Xiao ESP32-S3",
     "tags": [
       "Seeed"
@@ -776,6 +777,22 @@
     ],
     "requiresDfu": true,
     "partitionScheme": "8MB"
+  },
+  {
+    "hwModel": 105,
+    "hwModelSlug": "WISMESH_TAG",
+    "platformioTarget": "rak_wismeshtag",
+    "architecture": "nrf52840",
+    "activelySupported": true,
+    "supportLevel": 1,
+    "displayName": "RAK WisMesh Tag",
+    "tags": [
+      "RAK"
+    ],
+    "images": [
+      "rak_wismesh_tag.svg"
+    ],
+    "requiresDfu": true
   },
   {
     "hwModel": 84,
@@ -992,5 +1009,23 @@
     ],
     "partitionScheme": "16MB",
     "hasMui": true
+  },
+  {
+    "hwModel": 102,
+    "hwModelSlug": "T_DECK_PRO",
+    "platformioTarget": "t-deck-pro",
+    "architecture": "esp32-s3",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "LILYGO T-Deck Pro",
+    "tags": [
+      "LilyGo"
+    ],
+    "images": [
+      "tdeck_pro.svg"
+    ],
+    "requiresDfu": true,
+    "hasMui": false,
+    "partitionScheme": "16MB"
   }
 ]

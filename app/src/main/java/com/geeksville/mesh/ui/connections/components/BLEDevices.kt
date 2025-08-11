@@ -44,7 +44,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.DeviceListEntry
-import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.service.ConnectionState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 
@@ -61,7 +61,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
 @Suppress("LongMethod")
 @Composable
 fun BLEDevices(
-    connectionState: MeshService.ConnectionState,
+    connectionState: ConnectionState,
     btDevices: List<DeviceListEntry>,
     selectedDevice: String,
     scanModel: BTScanModel,

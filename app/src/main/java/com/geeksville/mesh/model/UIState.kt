@@ -60,7 +60,8 @@ import com.geeksville.mesh.repository.api.DeviceHardwareRepository
 import com.geeksville.mesh.repository.api.FirmwareReleaseRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
-import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.repository.radio.MeshActivity
+import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
@@ -70,6 +71,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -81,6 +83,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -187,6 +190,7 @@ constructor(
     private val app: Application,
     private val nodeDB: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
+    radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: MeshLogRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val packetRepository: PacketRepository,
@@ -223,7 +227,9 @@ constructor(
     val deviceHardware: StateFlow<DeviceHardware?> =
         ourNodeInfo
             .mapNotNull { nodeInfo ->
-                nodeInfo?.user?.hwModel?.let { deviceHardwareRepository.getDeviceHardwareByModel(it.number) }
+                nodeInfo?.user?.hwModel?.let {
+                    deviceHardwareRepository.getDeviceHardwareByModel(it.number).getOrNull()
+                }
             }
             .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5_000), initialValue = null)
 
@@ -233,6 +239,13 @@ constructor(
         radioConfigRepository.clearClientNotification()
         meshServiceNotifications.clearClientNotification(notification)
     }
+
+    /**
+     * Emits events for mesh network send/receive activity. This is a SharedFlow to ensure all events are delivered,
+     * even if they are the same.
+     */
+    val meshActivity: SharedFlow<MeshActivity> =
+        radioInterfaceService.meshActivity.shareIn(viewModelScope, SharingStarted.Eagerly, 0)
 
     data class AlertData(
         val title: String,
@@ -675,9 +688,10 @@ constructor(
     val connectionState
         get() = radioConfigRepository.connectionState
 
-    fun isConnected() = connectionState.value != MeshService.ConnectionState.DISCONNECTED
+    fun isConnected() = connectionState.value != com.geeksville.mesh.service.ConnectionState.DISCONNECTED
 
-    val isConnected = radioConfigRepository.connectionState.map { it != MeshService.ConnectionState.DISCONNECTED }
+    val isConnected =
+        radioConfigRepository.connectionState.map { it != com.geeksville.mesh.service.ConnectionState.DISCONNECTED }
 
     private val _requestChannelSet = MutableStateFlow<AppOnlyProtos.ChannelSet?>(null)
     val requestChannelSet: StateFlow<AppOnlyProtos.ChannelSet?>

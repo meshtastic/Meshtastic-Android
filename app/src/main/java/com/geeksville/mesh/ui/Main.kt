@@ -21,12 +21,18 @@ import android.Manifest
 import android.os.Build
 import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.Chat
@@ -43,6 +49,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.PlainTooltip
@@ -57,13 +64,16 @@ import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.material3.rememberTooltipState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithCache
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -82,6 +92,7 @@ import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.AddNavigationTracking
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.setAttributes
 import com.geeksville.mesh.model.BluetoothViewModel
@@ -97,11 +108,14 @@ import com.geeksville.mesh.navigation.NodesRoutes
 import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.showLongNameTitle
+import com.geeksville.mesh.repository.radio.MeshActivity
+import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
+import com.geeksville.mesh.ui.common.theme.StatusColors.StatusBlue
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
@@ -113,6 +127,8 @@ import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
     Contacts(R.string.contacts, Icons.AutoMirrored.TwoTone.Chat, ContactsRoutes.ContactsGraph),
@@ -124,8 +140,8 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
 
     companion object {
         fun NavDestination.isTopLevel(): Boolean = listOf<Route>(
-            NodesRoutes.Nodes,
             ContactsRoutes.Contacts,
+            NodesRoutes.Nodes,
             MapRoutes.Map,
             ChannelsRoutes.Channels,
             ConnectionsRoutes.Connections,
@@ -153,13 +169,15 @@ fun MainScreen(
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
         LaunchedEffect(connectionState, notificationPermissionState) {
-            if (connectionState.isConnected() && !notificationPermissionState.status.isGranted) {
+            if (connectionState == ConnectionState.CONNECTED && !notificationPermissionState.status.isGranted) {
                 notificationPermissionState.launchPermissionRequest()
             }
         }
     }
 
-    if (connectionState.isConnected()) {
+    AddNavigationTracking(navController)
+
+    if (connectionState == ConnectionState.CONNECTED) {
         requestChannelSet?.let { newChannelSet -> ScannedQrCodeDialog(uIViewModel, newChannelSet) }
     }
 
@@ -211,7 +229,7 @@ fun MainScreen(
     traceRouteResponse?.let { response ->
         SimpleAlertDialog(
             title = R.string.traceroute,
-            text = { Text(text = response) },
+            text = { Column(modifier = Modifier.verticalScroll(rememberScrollState())) { Text(text = response) } },
             dismissText = stringResource(id = R.string.okay),
             onDismiss = { uIViewModel.clearTracerouteResponse() },
         )
@@ -219,6 +237,39 @@ fun MainScreen(
     val navSuiteType = NavigationSuiteScaffoldDefaults.navigationSuiteType(currentWindowAdaptiveInfo())
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
     val topLevelDestination = TopLevelDestination.fromNavDestination(currentDestination)
+
+    // State for managing the glow animation around the Connections icon
+    var currentGlowColor by remember { mutableStateOf(Color.Transparent) }
+    val animatedGlowAlpha = remember { Animatable(0f) }
+    val coroutineScope = rememberCoroutineScope()
+    val capturedColorScheme = colorScheme // Capture current colorScheme instance for LaunchedEffect
+
+    val sendColor = capturedColorScheme.StatusGreen
+    val receiveColor = capturedColorScheme.StatusBlue
+    LaunchedEffect(uIViewModel.meshActivity, capturedColorScheme) {
+        uIViewModel.meshActivity.collectLatest { activity ->
+            debug("MeshActivity Event: $activity, Current Alpha: ${animatedGlowAlpha.value}")
+
+            val newTargetColor =
+                when (activity) {
+                    is MeshActivity.Send -> sendColor
+                    is MeshActivity.Receive -> receiveColor
+                }
+
+            currentGlowColor = newTargetColor
+            // Stop any existing animation and launch a new one.
+            // Launching in a new coroutine ensures the collect block is not suspended.
+            coroutineScope.launch {
+                animatedGlowAlpha.stop() // Stop before snapping/animating
+                animatedGlowAlpha.snapTo(1.0f) // Show glow instantly
+                animatedGlowAlpha.animateTo(
+                    targetValue = 0.0f, // Fade out
+                    animationSpec = tween(durationMillis = 1000, easing = LinearEasing),
+                )
+            }
+        }
+    }
+
     NavigationSuiteScaffold(
         modifier = Modifier.fillMaxSize(),
         navigationSuiteItems = {
@@ -242,7 +293,39 @@ fun MainScreen(
                             },
                             state = rememberTooltipState(),
                         ) {
-                            TopLevelNavIcon(destination, connectionState)
+                            val iconModifier =
+                                if (isConnectionsRoute) {
+                                    Modifier.drawWithCache {
+                                        onDrawWithContent {
+                                            drawContent()
+                                            if (animatedGlowAlpha.value > 0f) {
+                                                val glowRadius = size.minDimension
+                                                drawCircle(
+                                                    brush =
+                                                    Brush.radialGradient(
+                                                        colors =
+                                                        listOf(
+                                                            currentGlowColor.copy(
+                                                                alpha = 0.8f * animatedGlowAlpha.value,
+                                                            ),
+                                                            currentGlowColor.copy(
+                                                                alpha = 0.4f * animatedGlowAlpha.value,
+                                                            ),
+                                                            Color.Transparent,
+                                                        ),
+                                                        center = center,
+                                                        radius = glowRadius,
+                                                    ),
+                                                    radius = glowRadius,
+                                                    blendMode = BlendMode.Screen,
+                                                )
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    Modifier
+                                }
+                            Box(modifier = iconModifier) { TopLevelNavIcon(destination, connectionState) }
                         }
                     },
                     selected = isSelected,
@@ -307,11 +390,32 @@ fun MainScreen(
 }
 
 @Composable
+private fun TopLevelNavIcon(destination: TopLevelDestination, connectionState: ConnectionState) {
+    val iconTint =
+        when {
+            destination == TopLevelDestination.Connections -> connectionState.getConnectionColor()
+            else -> LocalContentColor.current
+        }
+    Icon(
+        imageVector =
+        if (destination == TopLevelDestination.Connections) {
+            connectionState.getConnectionIcon()
+        } else {
+            destination.icon
+        },
+        contentDescription = stringResource(id = destination.label),
+        tint = iconTint,
+    )
+}
+
+@Composable
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 private fun VersionChecks(viewModel: UIViewModel) {
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
     val myNodeInfo by viewModel.myNodeInfo.collectAsStateWithLifecycle()
     val context = LocalContext.current
+
+    val myFirmwareVersion = myNodeInfo?.firmwareVersion
 
     val firmwareEdition by viewModel.firmwareEdition.collectAsStateWithLifecycle(null)
 
@@ -319,9 +423,10 @@ private fun VersionChecks(viewModel: UIViewModel) {
 
     val currentDeviceHardware by viewModel.deviceHardware.collectAsStateWithLifecycle(null)
 
-    val latestStableFirmwareRelease by viewModel.latestStableFirmwareRelease.collectAsState(DeviceVersion("2.6.4"))
+    val latestStableFirmwareRelease by
+        viewModel.latestStableFirmwareRelease.collectAsStateWithLifecycle(DeviceVersion("2.6.4"))
     LaunchedEffect(connectionState, firmwareEdition) {
-        if (connectionState == MeshService.ConnectionState.CONNECTED) {
+        if (connectionState == ConnectionState.CONNECTED) {
             firmwareEdition?.let { edition ->
                 debug("FirmwareEdition: ${edition.name}")
                 when (edition) {
@@ -338,7 +443,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
     }
 
     LaunchedEffect(connectionState, currentFirmwareVersion, currentDeviceHardware) {
-        if (connectionState == MeshService.ConnectionState.CONNECTED) {
+        if (connectionState == ConnectionState.CONNECTED) {
             if (currentDeviceHardware != null && currentFirmwareVersion != null) {
                 setAttributes(currentFirmwareVersion!!, currentDeviceHardware!!)
             }
@@ -347,10 +452,9 @@ private fun VersionChecks(viewModel: UIViewModel) {
 
     // Check if the device is running an old app version or firmware version
     LaunchedEffect(connectionState, myNodeInfo) {
-        if (connectionState == MeshService.ConnectionState.CONNECTED) {
+        if (connectionState == ConnectionState.CONNECTED) {
             myNodeInfo?.let { info ->
                 val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
-                val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
                 if (isOld) {
                     viewModel.showAlert(
                         context.getString(R.string.app_too_old),
@@ -361,22 +465,28 @@ private fun VersionChecks(viewModel: UIViewModel) {
                             MeshService.changeDeviceAddress(context, service, "n")
                         },
                     )
-                } else if (curVer < MeshService.absoluteMinDeviceVersion) {
-                    val title = context.getString(R.string.firmware_too_old)
-                    val message = context.getString(R.string.firmware_old)
-                    viewModel.showAlert(
-                        title = title,
-                        html = message,
-                        dismissable = false,
-                        onConfirm = {
-                            val service = viewModel.meshService ?: return@showAlert
-                            MeshService.changeDeviceAddress(context, service, "n")
-                        },
-                    )
-                } else if (curVer < MeshService.minDeviceVersion) {
-                    val title = context.getString(R.string.should_update_firmware)
-                    val message = context.getString(R.string.should_update, latestStableFirmwareRelease.asString)
-                    viewModel.showAlert(title = title, message = message, dismissable = false, onConfirm = {})
+                } else {
+                    myFirmwareVersion?.let {
+                        val curVer = DeviceVersion(it)
+                        if (curVer < MeshService.absoluteMinDeviceVersion) {
+                            val title = context.getString(R.string.firmware_too_old)
+                            val message = context.getString(R.string.firmware_old)
+                            viewModel.showAlert(
+                                title = title,
+                                html = message,
+                                dismissable = false,
+                                onConfirm = {
+                                    val service = viewModel.meshService ?: return@showAlert
+                                    MeshService.changeDeviceAddress(context, service, "n")
+                                },
+                            )
+                        } else if (curVer < MeshService.minDeviceVersion) {
+                            val title = context.getString(R.string.should_update_firmware)
+                            val message =
+                                context.getString(R.string.should_update, latestStableFirmwareRelease.asString)
+                            viewModel.showAlert(title = title, message = message, dismissable = false, onConfirm = {})
+                        }
+                    }
                 }
             }
         }
@@ -416,7 +526,7 @@ private fun MainAppBar(
     val totalNodeCount by viewModel.totalNodeCount.collectAsStateWithLifecycle(0)
     TopAppBar(
         title = {
-            val title =
+            val titleText =
                 when {
                     currentDestination == null || currentDestination.isTopLevel() ->
                         stringResource(id = R.string.app_name)
@@ -432,7 +542,7 @@ private fun MainAppBar(
                     else -> stringResource(id = R.string.app_name)
                 }
             Text(
-                text = title,
+                text = titleText,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = MaterialTheme.typography.titleLarge,
@@ -511,7 +621,7 @@ private fun MainMenuActions(isManaged: Boolean, onAction: (MainMenuAction) -> Un
     DropdownMenu(
         expanded = showMenu,
         onDismissRequest = { showMenu = false },
-        modifier = Modifier.background(MaterialTheme.colorScheme.background.copy(alpha = 1f)),
+        modifier = Modifier.background(colorScheme.background.copy(alpha = 1f)),
     ) {
         MainMenuAction.entries.forEach { action ->
             DropdownMenuItem(
@@ -531,35 +641,24 @@ private fun MainMenuActions(isManaged: Boolean, onAction: (MainMenuAction) -> Un
 }
 
 @Composable
-private fun MeshService.ConnectionState.getConnectionColor(): Color = when (this) {
-    MeshService.ConnectionState.CONNECTED -> colorScheme.StatusGreen
-    MeshService.ConnectionState.DEVICE_SLEEP -> colorScheme.StatusYellow
-    MeshService.ConnectionState.DISCONNECTED -> colorScheme.StatusRed
+private fun ConnectionState.getConnectionColor(): Color = when (this) {
+    ConnectionState.CONNECTED -> colorScheme.StatusGreen
+    ConnectionState.DEVICE_SLEEP -> colorScheme.StatusYellow
+    ConnectionState.DISCONNECTED -> colorScheme.StatusRed
+    ConnectionState.CONNECTING -> colorScheme.StatusYellow
 }
 
-private fun MeshService.ConnectionState.getConnectionIcon(): ImageVector = when (this) {
-    MeshService.ConnectionState.CONNECTED -> Icons.TwoTone.CloudDone
-    MeshService.ConnectionState.DEVICE_SLEEP -> Icons.TwoTone.CloudUpload
-    MeshService.ConnectionState.DISCONNECTED -> Icons.TwoTone.CloudOff
-}
-
-@Composable
-private fun MeshService.ConnectionState.getTooltipString(): String = when (this) {
-    MeshService.ConnectionState.CONNECTED -> stringResource(R.string.connected)
-    MeshService.ConnectionState.DEVICE_SLEEP -> stringResource(R.string.device_sleeping)
-    MeshService.ConnectionState.DISCONNECTED -> stringResource(R.string.disconnected)
+private fun ConnectionState.getConnectionIcon(): ImageVector = when (this) {
+    ConnectionState.CONNECTED -> Icons.TwoTone.CloudDone
+    ConnectionState.DEVICE_SLEEP -> Icons.TwoTone.CloudUpload
+    ConnectionState.DISCONNECTED -> Icons.TwoTone.CloudOff
+    ConnectionState.CONNECTING -> Icons.TwoTone.CloudUpload
 }
 
 @Composable
-private fun TopLevelNavIcon(dest: TopLevelDestination, connectionState: MeshService.ConnectionState) {
-    when (dest) {
-        TopLevelDestination.Connections ->
-            Icon(
-                imageVector = connectionState.getConnectionIcon(),
-                contentDescription = stringResource(id = dest.label),
-                tint = connectionState.getConnectionColor(),
-            )
-
-        else -> Icon(imageVector = dest.icon, contentDescription = stringResource(id = dest.label))
-    }
+private fun ConnectionState.getTooltipString(): String = when (this) {
+    ConnectionState.CONNECTED -> stringResource(R.string.connected)
+    ConnectionState.DEVICE_SLEEP -> stringResource(R.string.device_sleeping)
+    ConnectionState.DISCONNECTED -> stringResource(R.string.disconnected)
+    ConnectionState.CONNECTING -> stringResource(R.string.connecting_to_device)
 }

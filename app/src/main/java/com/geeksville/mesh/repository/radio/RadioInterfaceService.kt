@@ -39,10 +39,12 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -51,16 +53,18 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Handles the bluetooth link with a mesh radio device.  Does not cache any device state,
- * just does bluetooth comms etc...
+ * Handles the bluetooth link with a mesh radio device. Does not cache any device state, just does bluetooth comms
+ * etc...
  *
  * This service is not exposed outside of this process.
  *
- * Note - this class intentionally dumb.  It doesn't understand protobuf framing etc...
- * It is designed to be simple so it can be stubbed out with a simulated version as needed.
+ * Note - this class intentionally dumb. It doesn't understand protobuf framing etc... It is designed to be simple so it
+ * can be stubbed out with a simulated version as needed.
  */
 @Singleton
-class RadioInterfaceService @Inject constructor(
+class RadioInterfaceService
+@Inject
+constructor(
     private val context: Application,
     private val dispatchers: CoroutineDispatchers,
     private val bluetoothRepository: BluetoothRepository,
@@ -85,18 +89,15 @@ class RadioInterfaceService @Inject constructor(
     private lateinit var sentPacketsLog: BinaryLogFile // inited in onCreate
     private lateinit var receivedPacketsLog: BinaryLogFile
 
-    val mockInterfaceAddress: String by lazy {
-        toInterfaceAddress(InterfaceId.MOCK, "")
-    }
+    val mockInterfaceAddress: String by lazy { toInterfaceAddress(InterfaceId.MOCK, "") }
 
-    /**
-     * We recreate this scope each time we stop an interface
-     */
+    /** We recreate this scope each time we stop an interface */
     var serviceScope = CoroutineScope(Dispatchers.IO + Job())
 
     private var radioIf: IRadioInterface = NopInterface("")
 
-    /** true if we have started our interface
+    /**
+     * true if we have started our interface
      *
      * Note: an interface may be started without necessarily yet having a connection
      */
@@ -106,15 +107,25 @@ class RadioInterfaceService @Inject constructor(
     private var isConnected = false
 
     private fun initStateListeners() {
-        bluetoothRepository.state.onEach { state ->
-            if (state.enabled) startInterface()
-            else if (radioIf is BluetoothInterface) stopInterface()
-        }.launchIn(processLifecycle.coroutineScope)
+        bluetoothRepository.state
+            .onEach { state ->
+                if (state.enabled) {
+                    startInterface()
+                } else if (radioIf is BluetoothInterface) {
+                    stopInterface()
+                }
+            }
+            .launchIn(processLifecycle.coroutineScope)
 
-        networkRepository.networkAvailable.onEach { state ->
-            if (state) startInterface()
-            else if (radioIf is TCPInterface) stopInterface()
-        }.launchIn(processLifecycle.coroutineScope)
+        networkRepository.networkAvailable
+            .onEach { state ->
+                if (state) {
+                    startInterface()
+                } else if (radioIf is TCPInterface) {
+                    stopInterface()
+                }
+            }
+            .launchIn(processLifecycle.coroutineScope)
     }
 
     companion object {
@@ -123,48 +134,43 @@ class RadioInterfaceService @Inject constructor(
     }
 
     private var lastHeartbeatMillis = 0L
-    private fun keepAlive(now: Long) {
+
+    fun keepAlive(now: Long = System.currentTimeMillis()) {
         if (now - lastHeartbeatMillis > HEARTBEAT_INTERVAL_MILLIS) {
             info("Sending ToRadio heartbeat")
-            val heartbeat = MeshProtos.ToRadio.newBuilder()
-                .setHeartbeat(MeshProtos.Heartbeat.getDefaultInstance()).build()
+            val heartbeat =
+                MeshProtos.ToRadio.newBuilder().setHeartbeat(MeshProtos.Heartbeat.getDefaultInstance()).build()
             handleSendToRadio(heartbeat.toByteArray())
             lastHeartbeatMillis = now
         }
     }
 
-    /**
-     * Constructs a full radio address for the specific interface type.
-     */
-    fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String {
-        return interfaceFactory.toInterfaceAddress(interfaceId, rest)
-    }
+    /** Constructs a full radio address for the specific interface type. */
+    fun toInterfaceAddress(interfaceId: InterfaceId, rest: String): String =
+        interfaceFactory.toInterfaceAddress(interfaceId, rest)
 
-    fun isMockInterface(): Boolean {
-        return BuildConfig.DEBUG || (context as GeeksvilleApplication).isInTestLab
-    }
+    fun isMockInterface(): Boolean = BuildConfig.DEBUG || (context as GeeksvilleApplication).isInTestLab
 
     /**
-     * Determines whether to default to mock interface for device address.
-     * This keeps the decision logic separate and easy to extend.
+     * Determines whether to default to mock interface for device address. This keeps the decision logic separate and
+     * easy to extend.
      */
-    private fun shouldDefaultToMockInterface(): Boolean {
-        return BuildUtils.isEmulator
-    }
+    private fun shouldDefaultToMockInterface(): Boolean = BuildUtils.isEmulator
 
-    /** Return the device we are configured to use, or null for none
-     * device address strings are of the form:
+    /**
+     * Return the device we are configured to use, or null for none device address strings are of the form:
      *
      * at
      *
-     * where a is either x for bluetooth or s for serial
-     * and t is an interface specific address (macaddr or a device path)
+     * where a is either x for bluetooth or s for serial and t is an interface specific address (macaddr or a device
+     * path)
      */
     fun getDeviceAddress(): String? {
         // If the user has unpaired our device, treat things as if we don't have one
         var address = prefs.getString(DEVADDR_KEY, null)
 
-        // If we are running on the emulator we default to the mock interface, so we can have some data to show to the user
+        // If we are running on the emulator we default to the mock interface, so we can have some data to show to the
+        // user
         if (address == null && shouldDefaultToMockInterface()) {
             address = mockInterfaceAddress
         }
@@ -172,12 +178,13 @@ class RadioInterfaceService @Inject constructor(
         return address
     }
 
-    /** Like getDeviceAddress, but filtered to return only devices we are currently bonded with
+    /**
+     * Like getDeviceAddress, but filtered to return only devices we are currently bonded with
      *
      * at
      *
-     * where a is either x for bluetooth or s for serial
-     * and t is an interface specific address (macaddr or a device path)
+     * where a is either x for bluetooth or s for serial and t is an interface specific address (macaddr or a device
+     * path)
      */
     fun getBondedDeviceAddress(): String? {
         // If the user has unpaired our device, treat things as if we don't have one
@@ -193,15 +200,14 @@ class RadioInterfaceService @Inject constructor(
         debug("Broadcasting connection=$isConnected")
 
         processLifecycle.coroutineScope.launch(dispatchers.default) {
-            _connectionState.emit(
-                RadioServiceConnectionState(isConnected, isPermanent)
-            )
+            _connectionState.emit(RadioServiceConnectionState(isConnected, isPermanent))
         }
     }
 
     // Send a packet/command out the radio link, this routine can block if it needs to
     private fun handleSendToRadio(p: ByteArray) {
         radioIf.handleSendToRadio(p)
+        emitSendActivity()
     }
 
     // Handle an incoming packet from the radio, broadcasts it as an android intent
@@ -217,9 +223,8 @@ class RadioInterfaceService @Inject constructor(
 
         // ignoreException { debug("FromRadio: ${MeshProtos.FromRadio.parseFrom(p)}") }
 
-        processLifecycle.coroutineScope.launch(dispatchers.io) {
-            _receivedData.emit(p)
-        }
+        processLifecycle.coroutineScope.launch(dispatchers.io) { _receivedData.emit(p) }
+        emitReceiveActivity()
     }
 
     fun onConnect() {
@@ -289,20 +294,16 @@ class RadioInterfaceService @Inject constructor(
      *
      * @return true if the device changed, false if no change
      */
-    private fun setBondedDeviceAddress(address: String?): Boolean {
-        return if (getBondedDeviceAddress() == address && isStarted) {
+    private fun setBondedDeviceAddress(address: String?): Boolean =
+        if (getBondedDeviceAddress() == address && isStarted) {
             warn("Ignoring setBondedDevice ${address.anonymize}, because we are already using that device")
             false
         } else {
             // Record that this use has configured a new radio
-            GeeksvilleApplication.analytics.track(
-                "mesh_bond"
-            )
+            GeeksvilleApplication.analytics.track("mesh_bond")
 
             // Ignore any errors that happen while closing old device
-            ignoreException {
-                stopInterface()
-            }
+            ignoreException { stopInterface() }
 
             // The device address "n" can be used to mean none
 
@@ -321,14 +322,13 @@ class RadioInterfaceService @Inject constructor(
             startInterface()
             true
         }
-    }
 
-    fun setDeviceAddress(deviceAddr: String?): Boolean = toRemoteExceptions {
-        setBondedDeviceAddress(deviceAddr)
-    }
+    fun setDeviceAddress(deviceAddr: String?): Boolean = toRemoteExceptions { setBondedDeviceAddress(deviceAddr) }
 
-    /** If the service is not currently connected to the radio, try to connect now.  At boot the radio interface service will
-     * not connect to a radio until this call is received.  */
+    /**
+     * If the service is not currently connected to the radio, try to connect now. At boot the radio interface service
+     * will not connect to a radio until this call is received.
+     */
     fun connect() = toRemoteExceptions {
         // We don't start actually talking to our device until MeshService binds to us - this prevents
         // broadcasting connection events before MeshService is ready to receive them
@@ -340,4 +340,33 @@ class RadioInterfaceService @Inject constructor(
         // Do this in the IO thread because it might take a while (and we don't care about the result code)
         serviceScope.handledLaunch { handleSendToRadio(a) }
     }
+
+    private val _meshActivity =
+        MutableSharedFlow<MeshActivity>(
+            replay = 0, // No replay needed for event-like emissions
+            extraBufferCapacity = 1, // Buffer one event to avoid loss on rapid emissions
+            onBufferOverflow = BufferOverflow.DROP_OLDEST, // Drop oldest if buffer overflows
+        )
+    val meshActivity: SharedFlow<MeshActivity> = _meshActivity.asSharedFlow()
+
+    private fun emitSendActivity() {
+        // Use tryEmit for SharedFlow as it's non-blocking
+        val emitted = _meshActivity.tryEmit(MeshActivity.Send)
+        if (!emitted) {
+            debug("MeshActivity.Send event was not emitted due to buffer overflow or no collectors")
+        }
+    }
+
+    private fun emitReceiveActivity() {
+        val emitted = _meshActivity.tryEmit(MeshActivity.Receive)
+        if (!emitted) {
+            debug("MeshActivity.Receive event was not emitted due to buffer overflow or no collectors")
+        }
+    }
+}
+
+sealed class MeshActivity {
+    data object Send : MeshActivity()
+
+    data object Receive : MeshActivity()
 }

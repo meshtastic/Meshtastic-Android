@@ -501,6 +501,7 @@
     <string name="latitude">Latitude</string>
     <string name="longitude">Longitude</string>
     <string name="altitude_meters">Altitude (meters)</string>
+    <string name="position_config_set_fixed_from_phone">Set from current phone location</string>
     <string name="gps_mode">GPS mode</string>
     <string name="gps_update_interval_seconds">GPS update interval (seconds)</string>
     <string name="redefine_gps_rx_pin">Redefine GPS_RX_PIN</string>
@@ -761,6 +762,7 @@
     <string name="grant_permissions_and_scan">Grant Permissions and Scan</string>
     <string name="nodes_queued_for_deletion">%d nodes queued for deletion:</string>
     <string name="clean_node_database_description">Caution: This removes nodes from in-app and on-device databases.\nSelections are additive.</string>
+    <string name="connecting_to_device">Connecting to device</string>
     <string name="map_type_normal">Normal</string>
     <string name="map_type_satellite">Satellite</string>
     <string name="map_type_terrain">Terrain</string>

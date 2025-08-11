@@ -125,7 +125,7 @@
     <string name="debug_filter_add">Lisää suodatin</string>
     <string name="debug_filter_included">Sisältää suodattimen</string>
     <string name="debug_filter_clear">Tyhjennä kaikki suodattimet</string>
-    <string name="debug_clear">Tyhjennä lokit</string>
+    <string name="debug_clear">Tyhjennä lokitiedot</string>
     <string name="match_any">Täsmää yhteen | kaikkiin</string>
     <string name="match_all">Täsmää yhteen | kaikkiin</string>
     <string name="debug_clear_logs_confirm">Tämä poistaa kaikki lokipaketit ja tietokantamerkinnät laitteestasi – Kyseessä on täydellinen nollaus, ja se on pysyvä.</string>
@@ -484,6 +484,7 @@
     <string name="latitude">Leveyspiiri</string>
     <string name="longitude">Pituuspiiri</string>
     <string name="altitude_meters">Korkeus (metriä)</string>
+    <string name="position_config_set_fixed_from_phone">Aseta nykyisestä puhelimen sijainnista</string>
     <string name="gps_mode">GSP tila</string>
     <string name="gps_update_interval_seconds">GPS päivitysväli (sekuntia)</string>
     <string name="redefine_gps_rx_pin">Määritä uudelleen GPS_RX_PIN</string>
@@ -629,7 +630,7 @@
     <string name="regenerate_keys_confirmation">Haluatko varmasti luoda yksityisen avaimen uudelleen?\n\nLaitteet, jotka ovat aiemmin vaihtaneet avaimia tämän laitteen kanssa, joutuvat poistamaan kyseisen laitteen ja vaihtamaan avaimet uudelleen, jotta suojattu viestintä voi jatkua.</string>
     <string name="export_keys">Vie avaimet</string>
     <string name="export_keys_confirmation">Vie julkiset ja yksityiset avaimet tiedostoon. Säilytä tiedosto turvallisessa paikassa.</string>
-    <string name="modules_unlocked">Lukittamattomat moduulit</string>
+    <string name="modules_unlocked">Lukitsemattomat moduulit</string>
     <string name="remote">Etäyhteys</string>
     <string name="node_count_template">(%1$d yhdistetty / %2$d yhteensä)</string>
     <string name="react">Reagoi</string>
@@ -734,4 +735,5 @@
     <string name="grant_permissions_and_scan">Salli käyttöoikeudet ja skannaa</string>
     <string name="nodes_queued_for_deletion">%d laitetta jonossa poistettavaksi:</string>
     <string name="clean_node_database_description">Varoitus: Tämä poistaa laitteet sovelluksen sekä laitteen tietokannoista.\nValinnat lisätään aiempiin.</string>
+    <string name="connecting_to_device">Yhdistetään laitteeseen</string>
 </resources>

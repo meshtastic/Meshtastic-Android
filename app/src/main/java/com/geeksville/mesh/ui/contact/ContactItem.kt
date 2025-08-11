@@ -50,8 +50,8 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Contact
-import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.components.SecurityIcon
+import com.geeksville.mesh.ui.common.theme.AppTheme
 
 @Suppress("LongMethod")
 @Composable
@@ -61,39 +61,32 @@ fun ContactItem(
     modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
+    onNodeChipClick: () -> Unit = {},
     channels: AppOnlyProtos.ChannelSet? = null,
 ) = with(contact) {
     Card(
-        modifier = modifier
-            .combinedClickable(
-                onClick = onClick,
-                onLongClick = onLongClick,
-            )
+        modifier =
+        modifier
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
             .background(color = if (selected) Color.Gray else MaterialTheme.colorScheme.background)
             .fillMaxWidth()
             .padding(horizontal = 8.dp, vertical = 6.dp),
         shape = RoundedCornerShape(12.dp),
     ) {
-        val colors = if (contact.nodeColors != null) {
-            AssistChipDefaults.assistChipColors(
-                labelColor = Color(contact.nodeColors.first),
-                containerColor = Color(contact.nodeColors.second),
-            )
-        } else {
-            AssistChipDefaults.assistChipColors()
-        }
+        val colors =
+            if (contact.nodeColors != null) {
+                AssistChipDefaults.assistChipColors(
+                    labelColor = Color(contact.nodeColors.first),
+                    containerColor = Color(contact.nodeColors.second),
+                )
+            } else {
+                AssistChipDefaults.assistChipColors()
+            }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
+        Row(modifier = Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
             AssistChip(
-                onClick = { },
-                modifier = Modifier
-                    .padding(end = 8.dp)
-                    .width(72.dp),
+                onClick = onNodeChipClick,
+                modifier = Modifier.padding(end = 8.dp).width(72.dp),
                 label = {
                     Text(
                         text = shortName,
@@ -103,29 +96,20 @@ fun ContactItem(
                         textAlign = TextAlign.Center,
                     )
                 },
-                colors = colors
+                colors = colors,
             )
-            Column(
-                modifier = Modifier.weight(1f),
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                ) {
-                    Text(
-                        text = longName,
-                        modifier = Modifier.weight(1f)
-                    )
+            Column(modifier = Modifier.weight(1f)) {
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    Text(text = longName, modifier = Modifier.weight(1f))
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         // Show unlock icon for broadcast with default PSK
-                        val isBroadcast = contact.contactKey.getOrNull(1) == '^' ||
-                             contact.contactKey.endsWith("^all") ||
-                             contact.contactKey.endsWith("^broadcast")
+                        val isBroadcast =
+                            contact.contactKey.getOrNull(1) == '^' ||
+                                contact.contactKey.endsWith("^all") ||
+                                contact.contactKey.endsWith("^broadcast")
                         if (isBroadcast && channels != null) {
                             val channelIndex = contact.contactKey[0].digitToIntOrNull()
-                            channelIndex?.let { index ->
-                                SecurityIcon(channels, index)
-                            }
+                            channelIndex?.let { index -> SecurityIcon(channels, index) }
                             Spacer(modifier = Modifier.width(8.dp))
                         }
                         Text(
@@ -137,9 +121,7 @@ fun ContactItem(
                     }
                 }
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -152,19 +134,13 @@ fun ContactItem(
                         maxLines = 2,
                     )
                     AnimatedVisibility(visible = isMuted) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.TwoTone.VolumeOff,
-                            contentDescription = null,
-                        )
+                        Icon(imageVector = Icons.AutoMirrored.TwoTone.VolumeOff, contentDescription = null)
                     }
                     AnimatedVisibility(visible = unreadCount > 0) {
                         Text(
                             text = unreadCount.toString(),
-                            modifier = Modifier
-                                .background(
-                                    MaterialTheme.colorScheme.primary,
-                                    shape = CircleShape
-                                )
+                            modifier =
+                            Modifier.background(MaterialTheme.colorScheme.primary, shape = CircleShape)
                                 .padding(horizontal = 6.dp, vertical = 3.dp),
                             color = MaterialTheme.colorScheme.onPrimary,
                             style = MaterialTheme.typography.bodySmall,
@@ -181,7 +157,8 @@ fun ContactItem(
 private fun ContactItemPreview() {
     AppTheme {
         ContactItem(
-            contact = Contact(
+            contact =
+            Contact(
                 contactKey = "0^all",
                 shortName = stringResource(R.string.some_username),
                 longName = stringResource(R.string.unknown_username),
@@ -190,7 +167,7 @@ private fun ContactItemPreview() {
                 unreadCount = 2,
                 messageCount = 10,
                 isMuted = true,
-                isUnmessageable = false
+                isUnmessageable = false,
             ),
             selected = false,
         )

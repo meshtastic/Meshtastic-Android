@@ -34,11 +34,11 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.DeviceListEntry
-import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.service.ConnectionState
 
 @Composable
 fun UsbDevices(
-    connectionState: MeshService.ConnectionState,
+    connectionState: ConnectionState,
     usbDevices: List<DeviceListEntry>,
     selectedDevice: String,
     scanModel: BTScanModel,
