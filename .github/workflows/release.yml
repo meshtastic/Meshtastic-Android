@@ -25,7 +25,7 @@ jobs:
       versionNameBase: ${{ steps.get_version.outputs.versionNameBase }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.inputs.branch }}
           submodules: 'recursive'
@@ -50,7 +50,7 @@ jobs:
       apk_name: fdroidRelease-${{ needs.prepare-release-info.outputs.versionNameBase }}-${{ needs.prepare-release-info.outputs.versionCode }}.apk
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.inputs.branch }}
           submodules: 'recursive'
@@ -106,7 +106,7 @@ jobs:
       apk_name: googleRelease-${{ needs.prepare-release-info.outputs.versionNameBase }}-${{ needs.prepare-release-info.outputs.versionCode }}.apk
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.inputs.branch }}
           submodules: 'recursive'
