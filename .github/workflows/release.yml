@@ -170,7 +170,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       id-token: write
-      contents: read
+      contents: write
       attestations: write
     # Only run this job if the input create_github_release is true
     if: github.repository == 'meshtastic/Meshtastic-Android' && github.event.inputs.create_github_release == 'true'
