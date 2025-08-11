@@ -213,7 +213,7 @@ jobs:
           prerelease: true
           release_name: Meshtastic Android ${{ env.versionNameBase }} (${{ env.versionCode }}) alpha
           tag_name: v${{ env.versionNameBase }}
-          target_commitish: ${{ github.event.inputs.branch }}
+          commitish: ${{ github.event.inputs.branch }}
           body: |
             Version: ${{ env.versionNameBase }} (${{ env.versionCode }})
 
