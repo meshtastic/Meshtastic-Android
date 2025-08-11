@@ -168,6 +168,10 @@ jobs:
   create-github-release:
     needs: [ prepare-release-info, build-fdroid, build-google ]
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      attestations: write
     # Only run this job if the input create_github_release is true
     if: github.repository == 'meshtastic/Meshtastic-Android' && github.event.inputs.create_github_release == 'true'
     steps:
@@ -260,3 +264,11 @@ jobs:
           asset_path: ./version_info.txt
           asset_name: version_info.txt
           asset_content_type: text/plain
+
+      - name: Attest Build Provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            ./google-apk-download/app-google-release.apk
+            ./google-aab-download/app-google-release.aab
+            ./fdroid-apk-download/app-fdroid-release.apk

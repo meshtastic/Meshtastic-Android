@@ -19,6 +19,10 @@ on:
 jobs:
   build_and_detekt:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+      attestations: write
     timeout-minutes: 35
     env:
       DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
@@ -79,6 +83,15 @@ jobs:
           name: googleDebug
           path: app/build/outputs/apk/google/debug/app-google-debug.apk
           retention-days: 14
+
+      - name: Attest Build Provenance
+        if: ${{ inputs.upload_artifacts && github.ref_name == 'main' && github.repository == 'meshtastic/Meshtastic-Android' }}
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            app/build/outputs/apk/google/debug/app-google-debug.apk
+            app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
+
       - name: Upload reports
         if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@v4
