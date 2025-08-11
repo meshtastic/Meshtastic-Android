@@ -85,7 +85,7 @@ jobs:
           retention-days: 14
 
       - name: Attest Build Provenance
-        if: ${{ inputs.upload_artifacts }}
+        if: ${{ inputs.upload_artifacts && github.ref_name == 'main' && github.repository == 'meshtastic/Meshtastic-Android' }}
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: |
