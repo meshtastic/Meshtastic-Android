@@ -85,6 +85,7 @@ jobs:
           retention-days: 14
 
       - name: Attest Build Provenance
+        if: ${{ inputs.upload_artifacts }}
         uses: actions/attest-build-provenance@v2
         with:
           subject-path: |
