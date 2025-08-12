@@ -19,8 +19,10 @@ package com.geeksville.mesh.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
@@ -43,32 +45,25 @@ enum class AdminRoute(@StringRes val title: Int) {
 
 const val DEEP_LINK_BASE_URI = "meshtastic://meshtastic"
 
-@Serializable
-sealed interface Graph : Route
+@Serializable sealed interface Graph : Route
+
 @Serializable
 sealed interface Route {
-    @Serializable
-    data object DebugPanel : Route
+    @Serializable data object DebugPanel : Route
 }
 
-fun NavDestination.isConfigRoute(): Boolean {
-    return ConfigRoute.entries.any { hasRoute(it.route::class) } ||
-            ModuleRoute.entries.any { hasRoute(it.route::class) }
-}
+fun NavDestination.isConfigRoute(): Boolean =
+    ConfigRoute.entries.any { hasRoute(it.route::class) } || ModuleRoute.entries.any { hasRoute(it.route::class) }
 
-fun NavDestination.isNodeDetailRoute(): Boolean {
-    return NodeDetailRoute.entries.any { hasRoute(it.route::class) }
-}
+fun NavDestination.isNodeDetailRoute(): Boolean = NodeDetailRoute.entries.any { hasRoute(it.route::class) }
 
-fun NavDestination.showLongNameTitle(): Boolean {
-
-    return !this.isTopLevel() && (
-            this.hasRoute<RadioConfigRoutes.RadioConfig>() ||
-                    this.hasRoute<NodesRoutes.NodeDetail>() ||
-                    this.isConfigRoute() ||
-                    this.isNodeDetailRoute()
-            )
-}
+fun NavDestination.showLongNameTitle(): Boolean = !this.isTopLevel() &&
+    (
+        this.hasRoute<RadioConfigRoutes.RadioConfig>() ||
+            this.hasRoute<NodesRoutes.NodeDetail>() ||
+            this.isConfigRoute() ||
+            this.isNodeDetailRoute()
+        )
 
 @Suppress("LongMethod")
 @Composable
@@ -78,9 +73,11 @@ fun NavGraph(
     bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController(),
 ) {
+    val isConnected by uIViewModel.isConnectedStateFlow.collectAsStateWithLifecycle(false)
     NavHost(
         navController = navController,
-        startDestination = if (uIViewModel.isConnected()) {
+        startDestination =
+        if (isConnected) {
             NodesRoutes.NodesGraph
         } else {
             ConnectionsRoutes.ConnectionsGraph
@@ -88,7 +85,7 @@ fun NavGraph(
         modifier = modifier,
     ) {
         contactsGraph(navController, uIViewModel)
-        nodesGraph(navController, uIViewModel,)
+        nodesGraph(navController, uIViewModel)
         mapGraph(navController, uIViewModel)
         channelsGraph(navController, uIViewModel)
         connectionsGraph(navController, uIViewModel, bluetoothViewModel)

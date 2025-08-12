@@ -442,6 +442,8 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
         }
     }
 
+    val isConnected = model.isConnectedStateFlow.collectAsStateWithLifecycle(false)
+
     LaunchedEffect(showCurrentCacheInfo) {
         if (!showCurrentCacheInfo) return@LaunchedEffect
         model.showSnackbar(R.string.calculating)
@@ -475,7 +477,7 @@ fun MapView(model: UIViewModel = viewModel(), navigateToNodeDetails: (Int) -> Un
 
             override fun longPressHelper(p: GeoPoint): Boolean {
                 performHapticFeedback()
-                val enabled = model.isConnected() && downloadRegionBoundingBox == null
+                val enabled = isConnected.value && downloadRegionBoundingBox == null
 
                 if (enabled) {
                     showEditWaypointDialog = waypoint {
