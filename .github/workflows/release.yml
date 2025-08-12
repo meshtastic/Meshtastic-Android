@@ -120,6 +120,7 @@ jobs:
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
           echo "datadogApplicationId=$DATADOG_APPLICATION_ID" >> ./secrets.properties
           echo "datadogClientToken=$DATADOG_CLIENT_TOKEN" >> ./secrets.properties
+          echo "MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> ./secrets.properties
         env:
           GSERVICES: ${{ secrets.GSERVICES }}
           KEYSTORE: ${{ secrets.KEYSTORE }}
