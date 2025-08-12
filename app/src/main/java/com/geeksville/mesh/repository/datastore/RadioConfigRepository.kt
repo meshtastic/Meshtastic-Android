@@ -91,6 +91,10 @@ constructor(
         nodeDB.installMyNodeInfo(mi)
     }
 
+    suspend fun installNodeDb(nodes: List<NodeEntity>) {
+        nodeDB.installNodeDb(nodes)
+    }
+
     suspend fun insertMetadata(fromNum: Int, metadata: DeviceMetadata) {
         nodeDB.insertMetadata(MetadataEntity(fromNum, metadata))
     }

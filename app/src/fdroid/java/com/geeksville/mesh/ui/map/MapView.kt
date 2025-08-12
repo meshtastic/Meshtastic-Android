@@ -446,6 +446,8 @@ fun MapView(
         }
     }
 
+    val isConnected = model.isConnectedStateFlow.collectAsStateWithLifecycle(false)
+
     LaunchedEffect(showCurrentCacheInfo) {
         if (!showCurrentCacheInfo) return@LaunchedEffect
         uiViewModel.showSnackBar(R.string.calculating)

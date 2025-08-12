@@ -35,6 +35,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -59,7 +61,10 @@ fun NodeChip(
     val inputChipInteractionSource = remember { MutableInteractionSource() }
     Box {
         ElevatedAssistChip(
-            modifier = modifier.width(IntrinsicSize.Min).defaultMinSize(minWidth = 72.dp),
+             modifier=
+            modifier.width(IntrinsicSize.Min).defaultMinSize(minWidth = 72.dp).semantics {
+                contentDescription = node.user.shortName.ifEmpty { "Node" }
+            },
             elevation = AssistChipDefaults.elevatedAssistChipElevation(),
             colors =
             AssistChipDefaults.elevatedAssistChipColors(
@@ -88,7 +93,8 @@ fun NodeChip(
                     onLongClick = { menuExpanded = true },
                     interactionSource = inputChipInteractionSource,
                     indication = null,
-                ),
+                )
+                .semantics { contentDescription = node.user.shortName.ifEmpty { "Node" } },
         )
     }
     NodeMenu(

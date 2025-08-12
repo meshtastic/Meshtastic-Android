@@ -593,7 +593,7 @@ private fun TopBarActions(
     onAction: (Any?) -> Unit,
 ) {
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val isConnected by viewModel.isConnected.collectAsStateWithLifecycle(false)
+    val isConnected by viewModel.isConnectedStateFlow.collectAsStateWithLifecycle(false)
     AnimatedVisibility(ourNode != null && currentDestination?.isTopLevel() == true && isConnected) {
         ourNode?.let { NodeChip(node = it, isThisNode = true, isConnected = isConnected, onAction = onAction) }
     }
@@ -645,14 +645,12 @@ private fun ConnectionState.getConnectionColor(): Color = when (this) {
     ConnectionState.CONNECTED -> colorScheme.StatusGreen
     ConnectionState.DEVICE_SLEEP -> colorScheme.StatusYellow
     ConnectionState.DISCONNECTED -> colorScheme.StatusRed
-    ConnectionState.CONNECTING -> colorScheme.StatusYellow
 }
 
 private fun ConnectionState.getConnectionIcon(): ImageVector = when (this) {
     ConnectionState.CONNECTED -> Icons.TwoTone.CloudDone
     ConnectionState.DEVICE_SLEEP -> Icons.TwoTone.CloudUpload
     ConnectionState.DISCONNECTED -> Icons.TwoTone.CloudOff
-    ConnectionState.CONNECTING -> Icons.TwoTone.CloudUpload
 }
 
 @Composable
@@ -660,5 +658,4 @@ private fun ConnectionState.getTooltipString(): String = when (this) {
     ConnectionState.CONNECTED -> stringResource(R.string.connected)
     ConnectionState.DEVICE_SLEEP -> stringResource(R.string.device_sleeping)
     ConnectionState.DISCONNECTED -> stringResource(R.string.disconnected)
-    ConnectionState.CONNECTING -> stringResource(R.string.connecting_to_device)
 }

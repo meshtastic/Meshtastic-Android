@@ -71,7 +71,7 @@ fun MeshService.Companion.startService(context: Context) {
     // to Signal or whatever.
     info("Trying to start service debug=${BuildConfig.DEBUG}")
 
-    val intent = createIntent(context)
+    val intent = createIntent()
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
         try {
             context.startForegroundService(intent)

@@ -42,6 +42,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -70,7 +72,8 @@ fun ContactItem(
             .combinedClickable(onClick = onClick, onLongClick = onLongClick)
             .background(color = if (selected) Color.Gray else MaterialTheme.colorScheme.background)
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 6.dp),
+            .padding(horizontal = 8.dp, vertical = 6.dp)
+            .semantics { contentDescription = shortName },
         shape = RoundedCornerShape(12.dp),
     ) {
         val colors =
@@ -86,7 +89,7 @@ fun ContactItem(
         Row(modifier = Modifier.fillMaxWidth().padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
             AssistChip(
                 onClick = onNodeChipClick,
-                modifier = Modifier.padding(end = 8.dp).width(72.dp),
+                modifier = Modifier.padding(end = 8.dp).width(72.dp).semantics { contentDescription = shortName },
                 label = {
                     Text(
                         text = shortName,
