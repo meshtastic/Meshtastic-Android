@@ -214,7 +214,6 @@ fun ConnectionsScreen(
 
             ConnectionState.DISCONNECTED -> R.string.not_connected
             ConnectionState.DEVICE_SLEEP -> R.string.connected_sleeping
-            ConnectionState.CONNECTING -> R.string.connecting_to_device
         }.let {
             val firmwareString = info?.firmwareString ?: context.getString(R.string.unknown)
             scanModel.setErrorText(context.getString(it, firmwareString))
@@ -257,7 +256,7 @@ fun ConnectionsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            val isConnected by uiViewModel.isConnected.collectAsState(false)
+            val isConnected by uiViewModel.isConnectedStateFlow.collectAsState(false)
             val ourNode by uiViewModel.ourNodeInfo.collectAsState()
             if (isConnected) {
                 ourNode?.let { node ->

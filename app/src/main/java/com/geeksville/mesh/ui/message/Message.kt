@@ -141,7 +141,7 @@ internal fun MessageScreen(
 
     // State from ViewModel
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val isConnected by viewModel.isConnected.collectAsStateWithLifecycle(initialValue = false)
+    val isConnected by viewModel.isConnectedStateFlow.collectAsStateWithLifecycle(initialValue = false)
     val channels by viewModel.channels.collectAsStateWithLifecycle()
     val quickChatActions by viewModel.quickChatActions.collectAsStateWithLifecycle(initialValue = emptyList())
     val messages by viewModel.getMessagesFrom(contactKey).collectAsStateWithLifecycle(initialValue = emptyList())

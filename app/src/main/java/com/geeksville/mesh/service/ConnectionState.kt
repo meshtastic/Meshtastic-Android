@@ -21,9 +21,6 @@ enum class ConnectionState {
     /** We are disconnected from the device, and we should be trying to reconnect. */
     DISCONNECTED,
 
-    /** We are currently attempting to connect to the device. */
-    CONNECTING,
-
     /** We are connected to the device and communicating normally. */
     CONNECTED,
 
@@ -32,7 +29,5 @@ enum class ConnectionState {
 
     ;
 
-    fun isConnected() = this == CONNECTED
-
-    fun isDisconnected() = this == DISCONNECTED
+    fun isConnected() = this != DISCONNECTED
 }

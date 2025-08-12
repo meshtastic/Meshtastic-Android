@@ -70,17 +70,15 @@ fun DeliveryInfo(
 ) = AlertDialog(
     onDismissRequest = onDismiss,
     dismissButton = {
-        FilledTonalButton(
-            onClick = onDismiss,
-            modifier = Modifier.padding(horizontal = 16.dp),
-        ) { Text(text = stringResource(id = R.string.close)) }
+        FilledTonalButton(onClick = onDismiss, modifier = Modifier.padding(horizontal = 16.dp)) {
+            Text(text = stringResource(id = R.string.close))
+        }
     },
     confirmButton = {
         if (resendOption) {
-            FilledTonalButton(
-                onClick = onConfirm,
-                modifier = Modifier.padding(horizontal = 16.dp),
-            ) { Text(text = stringResource(id = R.string.resend)) }
+            FilledTonalButton(onClick = onConfirm, modifier = Modifier.padding(horizontal = 16.dp)) {
+                Text(text = stringResource(id = R.string.resend))
+            }
         }
     },
     title = {
@@ -88,7 +86,7 @@ fun DeliveryInfo(
             text = stringResource(id = title),
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.headlineSmall
+            style = MaterialTheme.typography.headlineSmall,
         )
     },
     text = {
@@ -97,12 +95,12 @@ fun DeliveryInfo(
                 text = stringResource(id = it),
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.bodyMedium
+                style = MaterialTheme.typography.bodyMedium,
             )
         }
     },
     shape = RoundedCornerShape(16.dp),
-    containerColor = MaterialTheme.colorScheme.surface
+    containerColor = MaterialTheme.colorScheme.surface,
 )
 
 @Suppress("LongMethod")
@@ -138,7 +136,7 @@ internal fun MessageList(
                 viewModel.sendMessage(msg.text, contactKey)
             },
             onDismiss = { showStatusDialog = null },
-            resendOption = msg.status?.equals(MessageStatus.ERROR) ?: false
+            resendOption = msg.status?.equals(MessageStatus.ERROR) ?: false,
         )
     }
 
@@ -156,19 +154,13 @@ internal fun MessageList(
 
     val nodes by viewModel.nodeList.collectAsStateWithLifecycle()
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val isConnected by viewModel.isConnected.collectAsStateWithLifecycle(false)
+    val isConnected by viewModel.isConnectedStateFlow.collectAsStateWithLifecycle(false)
     val coroutineScope = rememberCoroutineScope()
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        state = listState,
-        reverseLayout = true,
-    ) {
+    LazyColumn(modifier = modifier.fillMaxSize(), state = listState, reverseLayout = true) {
         items(messages, key = { it.uuid }) { msg ->
             if (ourNode != null) {
                 val selected by remember { derivedStateOf { selectedIds.value.contains(msg.uuid) } }
-                val node by remember {
-                    derivedStateOf { nodes.find { it.num == msg.node.num } ?: msg.node }
-                }
+                val node by remember { derivedStateOf { nodes.find { it.num == msg.node.num } ?: msg.node } }
 
                 MessageItem(
                     modifier = Modifier.animateItem(),
@@ -195,7 +187,7 @@ internal fun MessageList(
                                 listState.animateScrollToItem(index = targetIndex)
                             }
                         }
-                    }
+                    },
                 )
             }
         }
@@ -203,11 +195,7 @@ internal fun MessageList(
 }
 
 @Composable
-private fun <T> AutoScrollToBottom(
-    listState: LazyListState,
-    list: List<T>,
-    itemThreshold: Int = 3,
-) = with(listState) {
+private fun <T> AutoScrollToBottom(listState: LazyListState, list: List<T>, itemThreshold: Int = 3) = with(listState) {
     val shouldAutoScroll by remember { derivedStateOf { firstVisibleItemIndex < itemThreshold } }
     if (shouldAutoScroll) {
         LaunchedEffect(list) {
@@ -220,11 +208,7 @@ private fun <T> AutoScrollToBottom(
 
 @OptIn(FlowPreview::class)
 @Composable
-private fun UpdateUnreadCount(
-    listState: LazyListState,
-    messages: List<Message>,
-    onUnreadChanged: (Long) -> Unit,
-) {
+private fun UpdateUnreadCount(listState: LazyListState, messages: List<Message>, onUnreadChanged: (Long) -> Unit) {
     LaunchedEffect(messages) {
         snapshotFlow { listState.firstVisibleItemIndex }
             .debounce(timeoutMillis = 500L)

@@ -124,6 +124,11 @@ constructor(
         nodeInfoDao.clearNodeInfo()
     }
 
+    suspend fun installNodeDb(nodes: List<NodeEntity>) = withContext(dispatchers.io) {
+        nodeInfoDao.clearNodeInfo()
+        nodeInfoDao.putAll(nodes)
+    }
+
     suspend fun clearNodeDB() = withContext(dispatchers.io) { nodeInfoDao.clearNodeInfo() }
 
     suspend fun deleteNode(num: Int) = withContext(dispatchers.io) {
