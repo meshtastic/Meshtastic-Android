@@ -45,7 +45,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableDoubleStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -217,7 +216,8 @@ fun MapView(
 ) {
     var mapFilterExpanded by remember { mutableStateOf(false) }
 
-    val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsState()
+    val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
+    val isConnected by uiViewModel.isConnectedStateFlow.collectAsStateWithLifecycle()
 
     var cacheEstimate by remember { mutableStateOf("") }
 
@@ -359,7 +359,7 @@ fun MapView(
             debug("User deleted waypoint ${waypoint.id} for me")
             uiViewModel.deleteWaypoint(waypoint.id)
         }
-        if (waypoint.lockedTo in setOf(0, uiViewModel.myNodeNum ?: 0) && uiViewModel.isConnected()) {
+        if (waypoint.lockedTo in setOf(0, uiViewModel.myNodeNum ?: 0) && isConnected) {
             builder.setPositiveButton(R.string.delete_for_everyone) { _, _ ->
                 debug("User deleted waypoint ${waypoint.id} for everyone")
                 uiViewModel.sendWaypoint(waypoint.copy { expire = 1 })
@@ -387,7 +387,7 @@ fun MapView(
         debug("marker long pressed id=$id")
         val waypoint = waypoints[id]?.data?.waypoint ?: return
         // edit only when unlocked or lockedTo myNodeNum
-        if (waypoint.lockedTo in setOf(0, uiViewModel.myNodeNum ?: 0) && uiViewModel.isConnected()) {
+        if (waypoint.lockedTo in setOf(0, uiViewModel.myNodeNum ?: 0) && isConnected) {
             showEditWaypointDialog = waypoint
         } else {
             showDeleteMarkerDialog(waypoint)
@@ -446,8 +446,6 @@ fun MapView(
         }
     }
 
-    val isConnected = model.isConnectedStateFlow.collectAsStateWithLifecycle(false)
-
     LaunchedEffect(showCurrentCacheInfo) {
         if (!showCurrentCacheInfo) return@LaunchedEffect
         uiViewModel.showSnackBar(R.string.calculating)
@@ -481,7 +479,7 @@ fun MapView(
 
             override fun longPressHelper(p: GeoPoint): Boolean {
                 performHapticFeedback()
-                val enabled = uiViewModel.isConnected() && downloadRegionBoundingBox == null
+                val enabled = isConnected && downloadRegionBoundingBox == null
 
                 if (enabled) {
                     showEditWaypointDialog = waypoint {

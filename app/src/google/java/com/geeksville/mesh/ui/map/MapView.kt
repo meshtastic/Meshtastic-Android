@@ -230,7 +230,7 @@ fun MapView(
                 nodeSnippet = "${node.user.longName}",
             )
         }
-    val isConnected by uiViewModel.isConnected.collectAsStateWithLifecycle(false)
+    val isConnected by uiViewModel.isConnectedStateFlow.collectAsStateWithLifecycle()
     val theme by uiViewModel.theme.collectAsStateWithLifecycle()
     val dark =
         when (theme) {

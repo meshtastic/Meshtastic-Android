@@ -688,8 +688,6 @@ constructor(
     val connectionState
         get() = radioConfigRepository.connectionState
 
-    fun isConnected() = isConnectedStateFlow.value
-
     val isConnectedStateFlow =
         radioConfigRepository.connectionState
             .map { it.isConnected() }
