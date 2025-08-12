@@ -35,6 +35,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
@@ -58,18 +60,19 @@ fun NodeChip(
     val inputChipInteractionSource = remember { MutableInteractionSource() }
     Box {
         ElevatedAssistChip(
-            modifier = modifier
-                .width(IntrinsicSize.Min)
-                .defaultMinSize(minWidth = 72.dp),
+            modifier =
+            modifier.width(IntrinsicSize.Min).defaultMinSize(minWidth = 72.dp).semantics {
+                contentDescription = node.user.shortName.ifEmpty { "Node" }
+            },
             elevation = AssistChipDefaults.elevatedAssistChipElevation(),
-            colors = AssistChipDefaults.elevatedAssistChipColors(
+            colors =
+            AssistChipDefaults.elevatedAssistChipColors(
                 containerColor = Color(nodeColor),
                 labelColor = Color(textColor),
             ),
             label = {
                 Text(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     text = node.user.shortName.ifEmpty { "???" },
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                     textDecoration = TextDecoration.LineThrough.takeIf { isIgnored },
@@ -81,14 +84,15 @@ fun NodeChip(
             interactionSource = inputChipInteractionSource,
         )
         Box(
-            modifier = Modifier
-                .matchParentSize()
+            modifier =
+            Modifier.matchParentSize()
                 .combinedClickable(
                     onClick = { onAction(NodeMenuAction.MoreDetails(node)) },
                     onLongClick = { menuExpanded = true },
                     interactionSource = inputChipInteractionSource,
                     indication = null,
                 )
+                .semantics { contentDescription = node.user.shortName.ifEmpty { "Node" } },
         )
     }
     NodeMenu(
@@ -99,7 +103,7 @@ fun NodeChip(
         onAction = {
             menuExpanded = false
             onAction(it)
-        }
+        },
     )
 }
 
@@ -107,22 +111,15 @@ fun NodeChip(
 @Preview
 @Composable
 fun NodeChipPreview() {
-    val user = MeshProtos.User.newBuilder()
-        .setShortName("\uD83E\uDEE0")
-        .setLongName("John Doe")
-        .build()
-    val node = Node(
-        num = 13444,
-        user = user,
-        isIgnored = false,
-        paxcounter = PaxcountProtos.Paxcount.newBuilder().setBle(10).setWifi(5).build(),
-        environmentMetrics = TelemetryProtos.EnvironmentMetrics.newBuilder().setTemperature(25f)
-            .setRelativeHumidity(60f).build()
-    )
-    NodeChip(
-        node = node,
-        isThisNode = false,
-        isConnected = true,
-        onAction = {}
-    )
+    val user = MeshProtos.User.newBuilder().setShortName("\uD83E\uDEE0").setLongName("John Doe").build()
+    val node =
+        Node(
+            num = 13444,
+            user = user,
+            isIgnored = false,
+            paxcounter = PaxcountProtos.Paxcount.newBuilder().setBle(10).setWifi(5).build(),
+            environmentMetrics =
+            TelemetryProtos.EnvironmentMetrics.newBuilder().setTemperature(25f).setRelativeHumidity(60f).build(),
+        )
+    NodeChip(node = node, isThisNode = false, isConnected = true, onAction = {})
 }
