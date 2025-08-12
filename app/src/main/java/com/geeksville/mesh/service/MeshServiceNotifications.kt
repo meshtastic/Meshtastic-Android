@@ -49,6 +49,7 @@ import com.geeksville.mesh.util.formatUptime
  * This class centralizes notification logic, including channel creation, builder configuration, and displaying
  * notifications for various events like new messages, alerts, and service status changes.
  */
+@Suppress("TooManyFunctions")
 class MeshServiceNotifications(private val context: Context) {
 
     private val notificationManager = context.getSystemService<NotificationManager>()!!

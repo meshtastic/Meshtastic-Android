@@ -41,6 +41,7 @@ import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.MeshProtos.FromRadio.PayloadVariantCase
 import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.ToRadio
 import com.geeksville.mesh.MeshUser
@@ -55,6 +56,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.StoreAndForwardProtos
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.TelemetryProtos.LocalStats
+import com.geeksville.mesh.XmodemProtos
 import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
@@ -1473,34 +1475,56 @@ class MeshService :
         )
     }
 
+    private val packetHandlers: Map<PayloadVariantCase, ((MeshProtos.FromRadio) -> Unit)> by lazy {
+        PayloadVariantCase.entries.associateWith { variant: PayloadVariantCase ->
+            when (variant) {
+                PayloadVariantCase.PACKET -> { proto: MeshProtos.FromRadio -> handleReceivedMeshPacket(proto.packet) }
+                PayloadVariantCase.CONFIG_COMPLETE_ID -> { proto: MeshProtos.FromRadio ->
+                    handleConfigComplete(proto.configCompleteId)
+                }
+                PayloadVariantCase.MY_INFO -> { proto: MeshProtos.FromRadio -> handleMyInfo(proto.myInfo) }
+                PayloadVariantCase.NODE_INFO -> { proto: MeshProtos.FromRadio -> handleNodeInfo(proto.nodeInfo) }
+                PayloadVariantCase.CHANNEL -> { proto: MeshProtos.FromRadio -> handleChannel(proto.channel) }
+                PayloadVariantCase.CONFIG -> { proto: MeshProtos.FromRadio -> handleDeviceConfig(proto.config) }
+                PayloadVariantCase.MODULECONFIG -> { proto: MeshProtos.FromRadio ->
+                    handleModuleConfig(proto.moduleConfig)
+                }
+                PayloadVariantCase.QUEUESTATUS -> { proto: MeshProtos.FromRadio ->
+                    handleQueueStatus(proto.queueStatus)
+                }
+                PayloadVariantCase.METADATA -> { proto: MeshProtos.FromRadio -> handleMetadata(proto.metadata) }
+                PayloadVariantCase.MQTTCLIENTPROXYMESSAGE -> { proto: MeshProtos.FromRadio ->
+                    handleMqttProxyMessage(proto.mqttClientProxyMessage)
+                }
+                PayloadVariantCase.DEVICEUICONFIG -> { proto: MeshProtos.FromRadio ->
+                    handleDeviceUiConfig(proto.deviceuiConfig)
+                }
+                PayloadVariantCase.FILEINFO -> { proto: MeshProtos.FromRadio -> handleFileInfo(proto.fileInfo) }
+                PayloadVariantCase.CLIENTNOTIFICATION -> { proto: MeshProtos.FromRadio ->
+                    handleClientNotification(proto.clientNotification)
+                }
+                PayloadVariantCase.LOG_RECORD -> { proto: MeshProtos.FromRadio -> handleLogReord(proto.logRecord) }
+                PayloadVariantCase.REBOOTED -> { proto: MeshProtos.FromRadio -> handleRebooted(proto.rebooted) }
+                PayloadVariantCase.XMODEMPACKET -> { proto: MeshProtos.FromRadio ->
+                    handleXmodemPacket(proto.xmodemPacket)
+                }
+
+                // Explicitly handle default/unwanted cases to satisfy the exhaustive `when`
+                PayloadVariantCase.PAYLOADVARIANT_NOT_SET -> { proto ->
+                    errormsg("Unexpected or unrecognized FromRadio variant: ${proto.payloadVariantCase}")
+                }
+            }
+        }
+    }
+
+    private fun MeshProtos.FromRadio.route() {
+        packetHandlers[this.payloadVariantCase]?.invoke(this)
+    }
+
     private fun onReceiveFromRadio(bytes: ByteArray) {
         try {
             val proto = MeshProtos.FromRadio.parseFrom(bytes)
-            when (proto.payloadVariantCase) {
-                MeshProtos.FromRadio.PayloadVariantCase.PACKET -> handleReceivedMeshPacket(proto.packet)
-                MeshProtos.FromRadio.PayloadVariantCase.CONFIG_COMPLETE_ID ->
-                    handleConfigComplete(proto.configCompleteId)
-                MeshProtos.FromRadio.PayloadVariantCase.MY_INFO -> handleMyInfo(proto.myInfo)
-                MeshProtos.FromRadio.PayloadVariantCase.NODE_INFO -> handleNodeInfo(proto.nodeInfo)
-                MeshProtos.FromRadio.PayloadVariantCase.CHANNEL -> handleChannel(proto.channel)
-                MeshProtos.FromRadio.PayloadVariantCase.CONFIG -> handleDeviceConfig(proto.config)
-                MeshProtos.FromRadio.PayloadVariantCase.MODULECONFIG -> handleModuleConfig(proto.moduleConfig)
-                MeshProtos.FromRadio.PayloadVariantCase.QUEUESTATUS -> handleQueueStatus(proto.queueStatus)
-                MeshProtos.FromRadio.PayloadVariantCase.METADATA -> handleMetadata(proto.metadata)
-                MeshProtos.FromRadio.PayloadVariantCase.MQTTCLIENTPROXYMESSAGE ->
-                    handleMqttProxyMessage(proto.mqttClientProxyMessage)
-
-                MeshProtos.FromRadio.PayloadVariantCase.DEVICEUICONFIG -> handleDeviceUiConfig(proto.deviceuiConfig)
-
-                MeshProtos.FromRadio.PayloadVariantCase.FILEINFO -> handleFileInfo(proto.fileInfo)
-
-                MeshProtos.FromRadio.PayloadVariantCase.CLIENTNOTIFICATION ->
-                    handleClientNotification(proto.clientNotification)
-
-                MeshProtos.FromRadio.PayloadVariantCase.LOG_RECORD -> handleLogReord(proto.logRecord)
-                MeshProtos.FromRadio.PayloadVariantCase.REBOOTED -> handleRebooted(proto.rebooted)
-                else -> errormsg("Unexpected FromRadio variant ${proto.payloadVariantCase}")
-            }
+            proto.route()
         } catch (ex: InvalidProtocolBufferException) {
             errormsg("Invalid Protobuf from radio, len=${bytes.size}", ex)
         }
@@ -1787,6 +1811,19 @@ class MeshService :
         insertMeshLog(packetToSave)
     }
 
+    private fun handleXmodemPacket(xmodemPacket: XmodemProtos.XModem) {
+        debug("Received XmodemPacket ${xmodemPacket.toOneLineString()}")
+        val packetToSave =
+            MeshLog(
+                uuid = UUID.randomUUID().toString(),
+                message_type = "XmodemPacket",
+                received_date = System.currentTimeMillis(),
+                raw_message = xmodemPacket.toString(),
+                fromRadio = fromRadio { this.xmodemPacket = xmodemPacket },
+            )
+        insertMeshLog(packetToSave)
+    }
+
     private fun handleDeviceUiConfig(deviceuiConfig: DeviceUIProtos.DeviceUIConfig) {
         debug("Received deviceUIConfig ${deviceuiConfig.toOneLineString()}")
         val packetToSave =
@@ -1861,6 +1898,11 @@ class MeshService :
             errormsg("Did not receive a valid config")
         } else {
             myNodeInfo = newMyNodeInfo
+        }
+        serviceScope.handledLaunch {
+            delay(CONFIG_WAIT_MS)
+            radioInterfaceService.keepAlive()
+            delay(CONFIG_WAIT_MS)
         }
         startNodeInfoOnly()
         onHasSettings()
