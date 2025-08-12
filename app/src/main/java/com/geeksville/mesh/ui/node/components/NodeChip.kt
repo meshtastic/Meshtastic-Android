@@ -61,7 +61,7 @@ fun NodeChip(
     val inputChipInteractionSource = remember { MutableInteractionSource() }
     Box {
         ElevatedAssistChip(
-             modifier=
+            modifier =
             modifier.width(IntrinsicSize.Min).defaultMinSize(minWidth = 72.dp).semantics {
                 contentDescription = node.user.shortName.ifEmpty { "Node" }
             },
