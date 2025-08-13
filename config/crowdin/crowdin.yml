@@ -30,7 +30,7 @@
       "sr-Latn": "b+sr+Latn",
     },
     "cleanup_mode": true,
-    "update_option:": "update_as_unapproved",
+    "update_option": "update_as_unapproved",
     "escape_quotes": 2,
     "escape_special_characters": 1,
     "type": "android",
