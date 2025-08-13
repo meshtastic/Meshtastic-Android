@@ -46,6 +46,12 @@ You can help translate the app into your native language using [Crowdin](https:/
 
 https://meshtastic.org/docs/development/android/
 
+Note: when building the `google` flavor locally you will need to supply your own [Google Maps Android SDK api key](https://developers.google.com/maps/documentation/android-sdk/get-api-key) `MAPS_API_KEY` in `local.properties` in order to use Google Maps.
+e.g.
+```properties
+MAPS_API_KEY=your_google_maps_api_key_here
+```
+
 ## Contributing guidelines
 
 For detailed instructions on how to contribute, please see our [CONTRIBUTING.md](CONTRIBUTING.md) file.
