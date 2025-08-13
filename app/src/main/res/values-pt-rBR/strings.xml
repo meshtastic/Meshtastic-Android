@@ -725,4 +725,20 @@
     <string name="notification_permissions_description">Meshtastic usa notificações para mantê-lo atualizado sobre novas mensagens e outros eventos importantes. Você pode atualizar suas permissões de notificação a qualquer momento nas configurações.</string>
     <string name="next">Avançar</string>
     <string name="grant_permissions_and_scan">Conceder Permissões e Escanear</string>
+    <string name="map_type_normal">Normal</string>
+    <string name="map_type_satellite">Satélite</string>
+    <string name="map_type_terrain">Terreno</string>
+    <string name="map_type_hybrid">Híbrido</string>
+    <string name="manage_map_layers">Gerenciar Camadas do Mapa</string>
+    <string name="no_map_layers_loaded">Nenhuma camada personalizada carregada.</string>
+    <string name="remove_layer">Remover Camada</string>
+    <string name="add_layer">Adicionar Camada</string>
+    <string name="nodes_at_this_location">Nós neste local</string>
+    <string name="selected_map_type">Tipo de Mapa Selecionado</string>
+    <string name="manage_custom_tile_sources">Gerenciar Fontes de Bloco Personalizados</string>
+    <string name="no_custom_tile_sources_found">Sem Fontes de Blocos Personalizadas</string>
+    <string name="edit_custom_tile_source">Editar Fonte do Bloco Personalizado</string>
+    <string name="provider_name_exists">O nome do provedor existe.</string>
+    <string name="url_must_contain_placeholders">A URL deve conter espaços reservados.</string>
+    <string name="url_template">Modelo de URL</string>
 </resources>

@@ -736,4 +736,20 @@
     <string name="nodes_queued_for_deletion">%d Knoten in der Warteschlange zum Löschen:</string>
     <string name="clean_node_database_description">Achtung: Dies entfernt Knoten aus der App und Gerätedatenbank.\nDie Auswahl ist kumulativ.</string>
     <string name="connecting_to_device">Verbinde mit Gerät</string>
+    <string name="map_type_normal">Normal</string>
+    <string name="map_type_satellite">Satellit</string>
+    <string name="map_type_terrain">Gelände</string>
+    <string name="map_type_hybrid">Hybrid</string>
+    <string name="manage_map_layers">Kartenebenen verwalten</string>
+    <string name="no_map_layers_loaded">Keine benutzerdefinierten Ebenen geladen.</string>
+    <string name="remove_layer">Ebene entfernen</string>
+    <string name="add_layer">Ebene hinzufügen</string>
+    <string name="nodes_at_this_location">Knoten an diesem Standort</string>
+    <string name="selected_map_type">Ausgewählter Kartentyp</string>
+    <string name="manage_custom_tile_sources">Benutzerdefinierte Kachelquellen verwalten</string>
+    <string name="no_custom_tile_sources_found">Keine benutzerdefinierten Kachelquellen</string>
+    <string name="edit_custom_tile_source">Benutzerdefinierte Kachelquelle bearbeiten</string>
+    <string name="provider_name_exists">Der Name des Anbieters existiert bereits.</string>
+    <string name="url_must_contain_placeholders">URL muss Platzhalter enthalten.</string>
+    <string name="url_template">URL Vorlage</string>
 </resources>

@@ -688,4 +688,20 @@
     <string name="critical_alerts">Алерты</string>
     <string name="critical_alerts_dnd_request_text"></string>
     <string name="next">Далее</string>
+    <string name="map_type_normal">Обычный</string>
+    <string name="map_type_satellite">Спутниковая</string>
+    <string name="map_type_terrain">Ландшафт</string>
+    <string name="map_type_hybrid">Смешанный</string>
+    <string name="manage_map_layers">Управление Слоями Карты</string>
+    <string name="no_map_layers_loaded">Пользовательские слои не загружены.</string>
+    <string name="remove_layer">Удалить слой</string>
+    <string name="add_layer">Добавить слой</string>
+    <string name="nodes_at_this_location">Узлы в этом месте</string>
+    <string name="selected_map_type">Выбранный тип карты</string>
+    <string name="manage_custom_tile_sources">Управление собственными источниками плиток</string>
+    <string name="no_custom_tile_sources_found">Нет пользовательских источников плиток</string>
+    <string name="edit_custom_tile_source">Изменить свой источник плиток</string>
+    <string name="provider_name_exists">Имя провайдера уже существует.</string>
+    <string name="url_must_contain_placeholders">URL должен содержать placeholders.</string>
+    <string name="url_template">Шаблон URL</string>
 </resources>
