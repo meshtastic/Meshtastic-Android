@@ -295,6 +295,7 @@ class MeshServiceNotifications(private val context: Context) {
             .setCategory(Notification.CATEGORY_MESSAGE)
             .setAutoCancel(true)
             .setStyle(style)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
             .setWhen(System.currentTimeMillis())
             .setShowWhen(true)
 
