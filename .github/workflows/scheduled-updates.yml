@@ -83,6 +83,7 @@ jobs:
           push_translations: false
           push_sources: false
           localization_branch_name: ${{ github.ref_name }}
+          export_only_approved: false
           # skip_ref_checkout: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
