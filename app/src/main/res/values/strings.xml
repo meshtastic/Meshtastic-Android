@@ -788,4 +788,5 @@
     <string name="url_must_contain_placeholders">URL must contain placeholders.</string>
     <string name="url_template">URL Template</string>
     <string name="url_template_hint" translatable="false">https://a.tile.openstreetmap.org/{z}/{x}/{y}.png</string>
+    <string name="track_point">track point</string>
 </resources>

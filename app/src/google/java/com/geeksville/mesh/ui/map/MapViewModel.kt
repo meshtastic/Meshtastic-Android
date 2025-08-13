@@ -22,9 +22,11 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.viewModelScope
+import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
+import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.map.CustomTileProviderRepository
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.model.CameraPosition
@@ -41,6 +43,8 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -75,6 +79,7 @@ constructor(
     preferences: SharedPreferences,
     nodeRepository: NodeRepository,
     packetRepository: PacketRepository,
+    radioConfigRepository: RadioConfigRepository,
     private val customTileProviderRepository: CustomTileProviderRepository,
 ) : BaseMapViewModel(preferences, nodeRepository, packetRepository) {
 
@@ -95,6 +100,15 @@ constructor(
     private val _cameraPosition = MutableStateFlow<MapCameraPosition?>(null)
 
     val cameraPosition: StateFlow<MapCameraPosition?> = _cameraPosition.asStateFlow()
+
+    val displayUnits =
+        radioConfigRepository.deviceProfileFlow
+            .mapNotNull { it.config.display.units }
+            .stateIn(
+                scope = viewModelScope,
+                started = SharingStarted.WhileSubscribed(5000),
+                initialValue = ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC,
+            )
 
     fun onCameraPositionChanged(cameraPosition: CameraPosition) {
         _cameraPosition.value =

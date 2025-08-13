@@ -22,24 +22,32 @@ package com.geeksville.mesh.ui.map
 import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Paint
+import android.location.Location
 import android.net.Uri
-import android.util.Log
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.animation.core.animate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.filled.TripOrigin
+import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.FloatingToolbarDefaults.ScreenOffset
 import androidx.compose.material3.FloatingToolbarExitDirection.Companion.End
+import androidx.compose.material3.Icon
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.material3.rememberFloatingToolbarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -52,14 +60,18 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.core.graphics.createBitmap
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.DisplayUnits
 import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.MeshProtos.Position
+import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.warn
@@ -73,9 +85,15 @@ import com.geeksville.mesh.ui.map.components.EditWaypointDialog
 import com.geeksville.mesh.ui.map.components.MapControlsOverlay
 import com.geeksville.mesh.ui.map.components.NodeClusterMarkers
 import com.geeksville.mesh.ui.map.components.WaypointMarkers
+import com.geeksville.mesh.ui.metrics.HEADING_DEG
+import com.geeksville.mesh.ui.metrics.formatPositionTime
 import com.geeksville.mesh.ui.node.DEG_D
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.util.formatAgo
+import com.geeksville.mesh.util.metersIn
+import com.geeksville.mesh.util.mpsToKmph
+import com.geeksville.mesh.util.mpsToMph
+import com.geeksville.mesh.util.toString
 import com.geeksville.mesh.waypoint
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptor
@@ -84,7 +102,9 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.JointType
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.google.android.gms.maps.model.RoundCap
 import com.google.maps.android.clustering.ClusterItem
+import com.google.maps.android.compose.CameraMoveStartedReason
 import com.google.maps.android.compose.ComposeMapColorScheme
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapEffect
@@ -92,8 +112,8 @@ import com.google.maps.android.compose.MapProperties
 import com.google.maps.android.compose.MapType
 import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.MapsComposeExperimentalApi
-import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.MarkerComposable
+import com.google.maps.android.compose.MarkerInfoWindowComposable
 import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.TileOverlay
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -101,6 +121,58 @@ import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.maps.android.compose.widgets.DisappearingScaleBar
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import timber.log.Timber
+import java.text.DateFormat
+
+private const val MIN_TRACK_POINT_DISTANCE_METERS = 20f
+
+@Suppress("ReturnCount")
+private fun filterNodeTrack(nodeTrack: List<Position>?): List<Position> {
+    if (nodeTrack.isNullOrEmpty()) return emptyList()
+
+    val sortedTrack = nodeTrack.sortedBy { it.time }
+    if (sortedTrack.size <= 2) return sortedTrack.map { it }
+
+    val filteredPoints = mutableListOf<MeshProtos.Position>()
+    var lastAddedPointProto = sortedTrack.first()
+    filteredPoints.add(lastAddedPointProto)
+
+    for (i in 1 until sortedTrack.size - 1) {
+        val currentPointProto = sortedTrack[i]
+        val currentPoint = currentPointProto.toLatLng()
+        val lastAddedPoint = lastAddedPointProto.toLatLng()
+        val distanceResults = FloatArray(1)
+        Location.distanceBetween(
+            lastAddedPoint.latitude,
+            lastAddedPoint.longitude,
+            currentPoint.latitude,
+            currentPoint.longitude,
+            distanceResults,
+        )
+        if (distanceResults[0] > MIN_TRACK_POINT_DISTANCE_METERS) {
+            filteredPoints.add(currentPointProto)
+            lastAddedPointProto = currentPointProto
+        }
+    }
+
+    val lastOriginalPointProto = sortedTrack.last()
+    if (filteredPoints.last() != lastOriginalPointProto) {
+        val distanceResults = FloatArray(1)
+        val lastAddedPoint = lastAddedPointProto.toLatLng()
+        val lastOriginalPoint = lastOriginalPointProto.toLatLng()
+        Location.distanceBetween(
+            lastAddedPoint.latitude,
+            lastAddedPoint.longitude,
+            lastOriginalPoint.latitude,
+            lastOriginalPoint.longitude,
+            distanceResults,
+        )
+        if (distanceResults[0] > MIN_TRACK_POINT_DISTANCE_METERS || filteredPoints.size == 1) {
+            filteredPoints.add(lastAddedPointProto)
+        }
+    }
+    return filteredPoints
+}
 
 @Suppress("CyclomaticComplexMethod", "LongMethod")
 @OptIn(MapsComposeExperimentalApi::class, ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
@@ -110,12 +182,13 @@ fun MapView(
     mapViewModel: MapViewModel = hiltViewModel(),
     navigateToNodeDetails: (Int) -> Unit,
     focusedNodeNum: Int? = null,
-    nodeTrack: List<MeshProtos.Position>? = null,
+    nodeTrack: List<Position>? = null,
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val mapLayers by mapViewModel.mapLayers.collectAsStateWithLifecycle()
     var hasLocationPermission by remember { mutableStateOf(false) }
+    val displayUnits by mapViewModel.displayUnits.collectAsStateWithLifecycle()
 
     LocationPermissionsHandler { isGranted -> hasLocationPermission = isGranted }
 
@@ -132,16 +205,14 @@ fun MapView(
     var mapFilterMenuExpanded by remember { mutableStateOf(false) }
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     val ourNodeInfo by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    var editingWaypoint by remember { mutableStateOf<MeshProtos.Waypoint?>(null) }
+    var editingWaypoint by remember { mutableStateOf<Waypoint?>(null) }
     val savedCameraPosition by mapViewModel.cameraPosition.collectAsStateWithLifecycle()
 
-    // Selected Google Map type from ViewModel
     val selectedGoogleMapType by mapViewModel.selectedGoogleMapType.collectAsStateWithLifecycle()
-    // Selected custom tile provider URL from ViewModel
     val currentCustomTileProviderUrl by mapViewModel.selectedCustomTileProviderUrl.collectAsStateWithLifecycle()
 
     var mapTypeMenuExpanded by remember { mutableStateOf(false) }
-    var showCustomTileManagerSheet by remember { mutableStateOf(false) } // State for bottom sheet
+    var showCustomTileManagerSheet by remember { mutableStateOf(false) }
 
     val defaultLatLng = LatLng(0.0, 0.0)
     val cameraPositionState = rememberCameraPositionState {
@@ -158,12 +229,8 @@ fun MapView(
     LaunchedEffect(cameraPositionState.isMoving, floatingToolbarState.offsetLimit) {
         val targetOffset =
             if (cameraPositionState.isMoving) {
-                // Hide: Use the offsetLimit (which is typically negative or zero).
-                // If heightOffsetLimit is 0f (toolbar not measured yet or has no height),
-                // this will effectively mean "don't move yet" if current offset is also 0.
                 floatingToolbarState.offsetLimit
             } else {
-                // Show: Offset is 0f
                 mapViewModel.onCameraPositionChanged(cameraPositionState.position)
                 0f
             }
@@ -185,11 +252,10 @@ fun MapView(
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val displayableWaypoints = waypoints.values.mapNotNull { it.data.waypoint }
 
-    // State to track if the initial camera zoom has happened
     var hasZoomed by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(allNodes, displayableWaypoints, nodeTrack) {
-        if (hasZoomed || cameraPositionState.position.target != defaultLatLng) {
+        if ((hasZoomed) || cameraPositionState.cameraMoveStartedReason != CameraMoveStartedReason.NO_MOVEMENT_YET) {
             if (!hasZoomed) hasZoomed = true
             return@LaunchedEffect
         }
@@ -207,11 +273,11 @@ fun MapView(
         if (pointsToBound.isNotEmpty()) {
             val bounds = LatLngBounds.builder().apply { pointsToBound.forEach(::include) }.build()
 
-            val padding = if (!nodeTrack.isNullOrEmpty()) 100 else 48
+            val padding = if (!pointsToBound.isEmpty()) 100 else 48
 
             try {
                 cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(bounds, padding))
-                hasZoomed = true // Mark that the initial auto-zoom is complete.
+                hasZoomed = true
             } catch (e: IllegalStateException) {
                 warn("MapView Could not animate to bounds: ${e.message}")
             }
@@ -311,26 +377,69 @@ fun MapView(
                 }
 
                 if (nodeTrack != null && focusedNodeNum != null) {
-                    val latLngs = nodeTrack.map { LatLng(it.latitudeI * DEG_D, it.longitudeI * DEG_D) }
+                    val originalLatLngs =
+                        nodeTrack.sortedBy { it.time }.map { LatLng(it.latitudeI * DEG_D, it.longitudeI * DEG_D) }
+                    val filteredLatLngs = filterNodeTrack(nodeTrack)
+
                     val focusedNode = allNodes.find { it.num == focusedNodeNum }
                     val polylineColor = focusedNode?.colors?.let { Color(it.first) } ?: Color.Blue
-
-                    latLngs.forEachIndexed { index, latLng ->
-                        if (index == latLngs.lastIndex) {
-                            focusedNode?.let {
-                                MarkerComposable(state = rememberUpdatedMarkerState(position = latLng)) {
-                                    NodeChip(node = it, isThisNode = false, isConnected = false, onAction = {})
-                                }
+                    if (originalLatLngs.isNotEmpty()) {
+                        focusedNode?.let {
+                            MarkerComposable(
+                                state = rememberUpdatedMarkerState(position = originalLatLngs.first()),
+                                zIndex = 1f,
+                            ) {
+                                NodeChip(node = it, isThisNode = false, isConnected = false, onAction = {})
                             }
+                        }
+                    }
+
+                    val pointsForMarkers =
+                        if (originalLatLngs.isNotEmpty() && focusedNode != null) {
+                            filteredLatLngs.drop(1)
                         } else {
-                            Marker(
-                                state = rememberUpdatedMarkerState(position = latLng),
-                                icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_map_location_dot_24),
-                                anchor = Offset(0.5f, 0.5f),
+                            filteredLatLngs
+                        }
+
+                    pointsForMarkers.forEachIndexed { index, position ->
+                        val markerState = rememberUpdatedMarkerState(position = position.toLatLng())
+                        val dateFormat = remember {
+                            DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM)
+                        }
+                        val alpha = 1 - (index.toFloat() / pointsForMarkers.size.toFloat())
+                        MarkerInfoWindowComposable(
+                            state = markerState,
+                            title = stringResource(R.string.position),
+                            snippet = formatAgo(position.time),
+                            zIndex = alpha,
+                            infoContent = {
+                                PositionInfoWindowContent(
+                                    position = position,
+                                    dateFormat = dateFormat,
+                                    displayUnits = displayUnits,
+                                )
+                            },
+                        ) {
+                            Icon(
+                                imageVector = androidx.compose.material.icons.Icons.Default.TripOrigin,
+                                contentDescription = stringResource(R.string.track_point),
+                                modifier = Modifier.padding(8.dp),
+                                tint = polylineColor.copy(alpha = alpha),
                             )
                         }
                     }
-                    Polyline(points = latLngs, jointType = JointType.ROUND, color = polylineColor, width = 8f)
+                    if (filteredLatLngs.size > 1) {
+                        Polyline(
+                            points = filteredLatLngs.map { it.toLatLng() },
+                            jointType = JointType.ROUND,
+                            endCap = RoundCap(),
+                            startCap = RoundCap(),
+                            geodesic = true,
+                            color = polylineColor,
+                            width = 8f,
+                            zIndex = 0f,
+                        )
+                    }
                 } else {
                     NodeClusterMarkers(
                         nodeClusterItems = nodeClusterItems,
@@ -390,7 +499,7 @@ fun MapView(
                             finalWp = finalWp.copy { id = uiViewModel.generatePacketId() ?: 0 }
                         }
                         if (updatedWp.icon == 0) {
-                            finalWp = finalWp.copy { icon = 0x1F4CD } // 📍 Round Pushpin
+                            finalWp = finalWp.copy { icon = 0x1F4CD }
                         }
 
                         uiViewModel.sendWaypoint(finalWp)
@@ -452,7 +561,7 @@ fun MapView(
 internal fun convertIntToEmoji(unicodeCodePoint: Int): String = try {
     String(Character.toChars(unicodeCodePoint))
 } catch (e: IllegalArgumentException) {
-    Log.e("Emoji_Conversion", "Invalid Unicode code point: $unicodeCodePoint", e)
+    Timber.w(e, "Invalid unicode code point: $unicodeCodePoint")
     "\uD83D\uDCCD"
 }
 
@@ -519,9 +628,72 @@ data class NodeClusterItem(val node: Node, val nodePosition: LatLng, val nodeTit
     }
 }
 
-// Helper extension functions for converting model objects to LatLng
-private fun MeshProtos.Position.toLatLng(): LatLng = LatLng(this.latitudeI * DEG_D, this.longitudeI * DEG_D)
+@Composable
+@Suppress("LongMethod")
+private fun PositionInfoWindowContent(
+    position: Position,
+    dateFormat: DateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM),
+    displayUnits: DisplayUnits = DisplayUnits.METRIC,
+) {
+    @Composable
+    fun PositionRow(label: String, value: String) {
+        Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(label)
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(value)
+        }
+    }
+
+    Card(modifier = Modifier.padding(8.dp)) {
+        Column {
+            PositionRow(
+                label = stringResource(R.string.latitude),
+                value = "%.5f".format(position.latitudeI * com.geeksville.mesh.ui.metrics.DEG_D),
+            )
+
+            PositionRow(
+                label = stringResource(R.string.longitude),
+                value = "%.5f".format(position.longitudeI * com.geeksville.mesh.ui.metrics.DEG_D),
+            )
+
+            PositionRow(label = stringResource(R.string.sats), value = position.satsInView.toString())
+
+            PositionRow(
+                label = stringResource(R.string.alt),
+                value = position.altitude.metersIn(displayUnits).toString(displayUnits),
+            )
+
+            PositionRow(label = stringResource(R.string.speed), value = speedFromPosition(position, displayUnits))
+
+            PositionRow(
+                label = stringResource(R.string.heading),
+                value = "%.0f°".format(position.groundTrack * HEADING_DEG),
+            )
+
+            PositionRow(label = stringResource(R.string.timestamp), value = formatPositionTime(position, dateFormat))
+        }
+    }
+}
+
+@Composable
+private fun speedFromPosition(position: Position, displayUnits: DisplayUnits): String {
+    val speedInMps = position.groundSpeed
+    val mpsText = "%d m/s".format(speedInMps)
+    val speedText =
+        if (speedInMps > 10) {
+            when (displayUnits) {
+                DisplayUnits.METRIC -> "%.1f Km/h".format(position.groundSpeed.mpsToKmph())
+                DisplayUnits.IMPERIAL -> "%.1f mph".format(position.groundSpeed.mpsToMph())
+                else -> mpsText // Fallback or handle UNRECOGNIZED
+            }
+        } else {
+            mpsText
+        }
+    return speedText
+}
+
+private fun Position.toLatLng(): LatLng = LatLng(this.latitudeI * DEG_D, this.longitudeI * DEG_D)
 
 private fun Node.toLatLng(): LatLng? = this.position.toLatLng()
 
-private fun MeshProtos.Waypoint.toLatLng(): LatLng = LatLng(this.latitudeI * DEG_D, this.longitudeI * DEG_D)
+private fun Waypoint.toLatLng(): LatLng = LatLng(this.latitudeI * DEG_D, this.longitudeI * DEG_D)
