@@ -17,9 +17,7 @@
 
 package com.geeksville.mesh.repository.map
 
-// import kotlinx.coroutines.Dispatchers // No longer needed for default value
 import android.content.Context
-import android.util.Log
 import androidx.core.content.edit
 import com.geeksville.mesh.di.IoDispatcher
 import com.geeksville.mesh.ui.map.CustomTileProviderConfig
@@ -31,28 +29,27 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val PREFS_NAME_TILE = "map_tile_provider_prefs" // Renamed to avoid conflict if PREFS_NAME is global
 private const val KEY_CUSTOM_TILE_PROVIDERS = "custom_tile_providers"
+private const val PREFS_NAME_TILE = "map_tile_provider_prefs"
 
-@Singleton // Make it a singleton if managed by Hilt
+@Singleton
 class SharedPreferencesCustomTileProviderRepository
 @Inject
 constructor(
     @ApplicationContext private val context: Context,
-    private val json: Json, // Inject Json instance if configured globally, or create one here
-    @IoDispatcher private val ioDispatcher: CoroutineDispatcher, // Inject dispatcher with qualifier
+    private val json: Json,
+    @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
 ) : CustomTileProviderRepository {
 
     private val sharedPreferences = context.getSharedPreferences(PREFS_NAME_TILE, Context.MODE_PRIVATE)
 
-    // Use a MutableStateFlow internally to emit updates
     private val customTileProvidersStateFlow = MutableStateFlow<List<CustomTileProviderConfig>>(emptyList())
 
     init {
-        // Load initial data into the flow
         loadDataFromPrefs()
     }
 
@@ -62,7 +59,7 @@ constructor(
             try {
                 customTileProvidersStateFlow.value = json.decodeFromString<List<CustomTileProviderConfig>>(jsonString)
             } catch (e: SerializationException) {
-                Log.e("TileRepo", "Error deserializing tile providers", e)
+                Timber.tag("TileRepo").e(e, "Error deserializing tile providers")
                 customTileProvidersStateFlow.value = emptyList()
             }
         } else {
@@ -72,23 +69,19 @@ constructor(
 
     private suspend fun saveDataToPrefs(providers: List<CustomTileProviderConfig>) {
         withContext(ioDispatcher) {
-            // Perform SharedPreferences write on IO dispatcher
             try {
                 val jsonString = json.encodeToString(providers)
                 sharedPreferences.edit { putString(KEY_CUSTOM_TILE_PROVIDERS, jsonString) }
             } catch (e: SerializationException) {
-                Log.e("TileRepo", "Error serializing tile providers", e)
+                Timber.tag("TileRepo").e(e, "Error serializing tile providers")
             }
         }
     }
 
-    override fun getCustomTileProviders(): Flow<List<CustomTileProviderConfig>> {
-        return customTileProvidersStateFlow.asStateFlow() // Expose as StateFlow or just Flow
-    }
+    override fun getCustomTileProviders(): Flow<List<CustomTileProviderConfig>> =
+        customTileProvidersStateFlow.asStateFlow()
 
     override suspend fun addCustomTileProvider(config: CustomTileProviderConfig) {
-        // Validation can be done here or in the ViewModel before calling add
-        // For simplicity, assuming valid config is passed
         val newList = customTileProvidersStateFlow.value + config
         customTileProvidersStateFlow.value = newList
         saveDataToPrefs(newList)

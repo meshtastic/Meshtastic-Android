@@ -30,7 +30,6 @@ import kotlinx.serialization.json.Json
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
-// Qualifiers
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
 annotation class IoDispatcher
@@ -41,9 +40,8 @@ annotation class DefaultDispatcher
 
 @Module
 @InstallIn(SingletonComponent::class)
-object MapModule { // Renamed from DispatchersModule for a more general name
+object MapModule {
 
-    // Dispatcher Providers (from original DispatchersModule)
     @Provides @DefaultDispatcher
     fun provideDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
 
@@ -56,10 +54,9 @@ object MapModule { // Renamed from DispatchersModule for a more general name
 }
 
 @Module
-@InstallIn(SingletonComponent::class) // Install in SingletonComponent for application-wide scope
-abstract class MapRepositoryModule { // Renamed from RepositoryModule, Binds methods need an abstract class/interface
+@InstallIn(SingletonComponent::class)
+abstract class MapRepositoryModule {
 
-    // Repository Binds (from original RepositoryModule)
     @Binds
     @Singleton
     abstract fun bindCustomTileProviderRepository(

@@ -46,27 +46,6 @@ class CustomTileSource {
                 "precipitation",
                 "",
             )
-        //
-        //        val RAIN_VIEWER = object : OnlineTileSourceBase(
-        //            "RainViewer", 1, 15, 256, ".png", arrayOf(
-        //                "https://tilecache.rainviewer.com/v2/coverage/"
-        //            ), "RainViewer",
-        //            TileSourcePolicy(
-        //                4,
-        //                TileSourcePolicy.FLAG_NO_BULK
-        //                        or TileSourcePolicy.FLAG_NO_PREVENTIVE
-        //                        or TileSourcePolicy.FLAG_USER_AGENT_MEANINGFUL
-        //                        or TileSourcePolicy.FLAG_USER_AGENT_NORMALIZED
-        //            )
-        //        ) {
-        //            override fun getTileURLString(pMapTileIndex: Long): String {
-        //                return baseUrl + (MapTileIndex.getZoom(pMapTileIndex)
-        //                    .toString() + "/" + MapTileIndex.getY(pMapTileIndex)
-        //                        + "/" + MapTileIndex.getX(pMapTileIndex)
-        //                        + mImageFilenameEnding)
-        //            }
-        //        }
-
         private val ESRI_IMAGERY =
             object :
                 OnlineTileSourceBase(
