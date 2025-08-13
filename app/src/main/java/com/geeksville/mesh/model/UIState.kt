@@ -67,6 +67,7 @@ import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.util.getShortDate
 import com.geeksville.mesh.util.positionToMeter
+import com.geeksville.mesh.util.toggleBooleanPreference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -348,22 +349,24 @@ constructor(
         preferences.edit { putBoolean(HAS_SHOWN_NOT_PAIRED_WARNING_PREF, true) }
     }
 
-    fun toggleShowIgnored() = toggleBooleanPreference(preferences, _showIgnored, "show-ignored")
+    fun toggleShowIgnored() = preferences.toggleBooleanPreference(_showIgnored, "show-ignored")
 
-    fun toggleShowQuickChat() = toggleBooleanPreference(preferences, _showQuickChat, "show-quick-chat")
+    fun toggleShowQuickChat() =
+        preferences.toggleBooleanPreference(_showQuickChat, "show-quick-chat")
 
     fun setSortOption(sort: NodeSortOption) {
         nodeSortOption.value = sort
         preferences.edit { putInt("node-sort-option", sort.ordinal) }
     }
 
-    fun toggleShowDetails() = toggleBooleanPreference(preferences, showDetails, "show-details")
+    fun toggleShowDetails() = preferences.toggleBooleanPreference(showDetails, "show-details")
 
-    fun toggleIncludeUnknown() = toggleBooleanPreference(preferences, includeUnknown, "include-unknown")
+    fun toggleIncludeUnknown() =
+        preferences.toggleBooleanPreference(includeUnknown, "include-unknown")
 
-    fun toggleOnlyOnline() = toggleBooleanPreference(preferences, onlyOnline, "only-online")
+    fun toggleOnlyOnline() = preferences.toggleBooleanPreference(onlyOnline, "only-online")
 
-    fun toggleOnlyDirect() = toggleBooleanPreference(preferences, onlyDirect, "only-direct")
+    fun toggleOnlyDirect() = preferences.toggleBooleanPreference(onlyDirect, "only-direct")
 
     data class NodeFilterState(
         val filterText: String,
@@ -989,14 +992,3 @@ constructor(
     }
 }
 
-fun toggleBooleanPreference(
-    preferences: SharedPreferences,
-    state: MutableStateFlow<Boolean>,
-    key: String,
-    onChanged: (Boolean) -> Unit = {},
-) {
-    val newValue = !state.value
-    state.value = newValue
-    preferences.edit { putBoolean(key, newValue) }
-    onChanged(newValue)
-}
