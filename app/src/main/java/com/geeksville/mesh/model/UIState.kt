@@ -351,8 +351,7 @@ constructor(
 
     fun toggleShowIgnored() = preferences.toggleBooleanPreference(_showIgnored, "show-ignored")
 
-    fun toggleShowQuickChat() =
-        preferences.toggleBooleanPreference(_showQuickChat, "show-quick-chat")
+    fun toggleShowQuickChat() = preferences.toggleBooleanPreference(_showQuickChat, "show-quick-chat")
 
     fun setSortOption(sort: NodeSortOption) {
         nodeSortOption.value = sort
@@ -361,8 +360,7 @@ constructor(
 
     fun toggleShowDetails() = preferences.toggleBooleanPreference(showDetails, "show-details")
 
-    fun toggleIncludeUnknown() =
-        preferences.toggleBooleanPreference(includeUnknown, "include-unknown")
+    fun toggleIncludeUnknown() = preferences.toggleBooleanPreference(includeUnknown, "include-unknown")
 
     fun toggleOnlyOnline() = preferences.toggleBooleanPreference(onlyOnline, "only-online")
 
@@ -991,4 +989,3 @@ constructor(
         nodeFilterText.value = text
     }
 }
-

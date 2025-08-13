@@ -62,6 +62,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
+import com.geeksville.mesh.android.BuildUtils.warn
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
@@ -132,6 +133,7 @@ fun MapView(
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     val ourNodeInfo by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     var editingWaypoint by remember { mutableStateOf<MeshProtos.Waypoint?>(null) }
+    val savedCameraPosition by mapViewModel.cameraPosition.collectAsStateWithLifecycle()
 
     // Selected Google Map type from ViewModel
     val selectedGoogleMapType by mapViewModel.selectedGoogleMapType.collectAsStateWithLifecycle()
@@ -141,9 +143,12 @@ fun MapView(
     var mapTypeMenuExpanded by remember { mutableStateOf(false) }
     var showCustomTileManagerSheet by remember { mutableStateOf(false) } // State for bottom sheet
 
-    val defaultLatLng = LatLng(40.7871508066057, -119.2041344866371)
+    val defaultLatLng = LatLng(0.0, 0.0)
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(defaultLatLng, 7f)
+        position =
+            savedCameraPosition?.let {
+                CameraPosition(LatLng(it.targetLat, it.targetLng), it.zoom, it.tilt, it.bearing)
+            } ?: CameraPosition.fromLatLngZoom(defaultLatLng, 7f)
     }
 
     val floatingToolbarState = rememberFloatingToolbarState()
@@ -159,6 +164,7 @@ fun MapView(
                 floatingToolbarState.offsetLimit
             } else {
                 // Show: Offset is 0f
+                mapViewModel.onCameraPositionChanged(cameraPositionState.position)
                 0f
             }
         if (floatingToolbarState.offset != targetOffset) {
@@ -182,37 +188,35 @@ fun MapView(
     // State to track if the initial camera zoom has happened
     var hasZoomed by rememberSaveable { mutableStateOf(false) }
 
-    // Effect to zoom to bounds of all items when map is first loaded
     LaunchedEffect(allNodes, displayableWaypoints, nodeTrack) {
-        if (!hasZoomed) {
-            if (nodeTrack != null && nodeTrack.isNotEmpty()) {
-                val latLngBounds =
-                    LatLngBounds.builder()
-                        .apply { nodeTrack.forEach { include(LatLng(it.latitudeI * DEG_D, it.longitudeI * DEG_D)) } }
-                        .build()
-                coroutineScope.launch {
-                    cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(latLngBounds, 100))
-                }
-                hasZoomed = true
-            } else if (allNodes.isNotEmpty() || displayableWaypoints.isNotEmpty()) {
-                val boundsBuilder = LatLngBounds.builder()
-                allNodes.forEach { node ->
-                    boundsBuilder.include(LatLng(node.position.latitudeI * DEG_D, node.position.longitudeI * DEG_D))
-                }
-                displayableWaypoints.forEach { waypoint ->
-                    boundsBuilder.include(LatLng(waypoint.latitudeI * DEG_D, waypoint.longitudeI * DEG_D))
-                }
-                try {
-                    cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(boundsBuilder.build(), 100))
-                    hasZoomed = true // Ensure this runs only once
-                } catch (e: IllegalStateException) {
-                    // Ignore cases where the bounds are empty or otherwise invalid
-                    Log.w("MapView", "Could not animate to bounds: ${e.message}")
-                }
+        if (hasZoomed || cameraPositionState.position.target != defaultLatLng) {
+            if (!hasZoomed) hasZoomed = true
+            return@LaunchedEffect
+        }
+
+        val pointsToBound: List<LatLng> =
+            when {
+                !nodeTrack.isNullOrEmpty() -> nodeTrack.map { it.toLatLng() }
+
+                allNodes.isNotEmpty() || displayableWaypoints.isNotEmpty() ->
+                    allNodes.mapNotNull { it.toLatLng() } + displayableWaypoints.map { it.toLatLng() }
+
+                else -> emptyList()
+            }
+
+        if (pointsToBound.isNotEmpty()) {
+            val bounds = LatLngBounds.builder().apply { pointsToBound.forEach(::include) }.build()
+
+            val padding = if (!nodeTrack.isNullOrEmpty()) 100 else 48
+
+            try {
+                cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(bounds, padding))
+                hasZoomed = true // Mark that the initial auto-zoom is complete.
+            } catch (e: IllegalStateException) {
+                warn("MapView Could not animate to bounds: ${e.message}")
             }
         }
     }
-
     val filteredNodes =
         if (mapFilterState.onlyFavorites) {
             allNodes.filter { it.isFavorite || it.num == ourNodeInfo?.num }
@@ -514,3 +518,10 @@ data class NodeClusterItem(val node: Node, val nodePosition: LatLng, val nodeTit
         return precisionMap[this.node.position.precisionBits]
     }
 }
+
+// Helper extension functions for converting model objects to LatLng
+private fun MeshProtos.Position.toLatLng(): LatLng = LatLng(this.latitudeI * DEG_D, this.longitudeI * DEG_D)
+
+private fun Node.toLatLng(): LatLng? = this.position.toLatLng()
+
+private fun MeshProtos.Waypoint.toLatLng(): LatLng = LatLng(this.latitudeI * DEG_D, this.longitudeI * DEG_D)
