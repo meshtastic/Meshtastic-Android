@@ -33,6 +33,8 @@ kotlinx-collections-immutable = "0.4.0"
 kotlinx-coroutines-android = "1.10.2"
 kotlinx-serialization-json = "1.9.0"
 lifecycle = "2.9.2"
+location-services = "21.3.0"
+maps-compose = "6.7.1"
 markdownRenderer = "0.35.0"
 material = "1.12.0"
 material3 = "1.5.0-alpha01"
@@ -126,6 +128,10 @@ lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-ru
 lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycle" }
 lifecycle-viewmodel-compose = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycle" }
+location-services = { group = "com.google.android.gms", name = "play-services-location", version.ref = "location-services" }
+maps-compose = { group = "com.google.maps.android", name = "maps-compose", version.ref = "maps-compose" }
+maps-compose-utils = { group = "com.google.maps.android", name = "maps-compose-utils", version.ref = "maps-compose" }
+maps-compose-widgets = { group = "com.google.maps.android", name = "maps-compose-widgets", version.ref = "maps-compose" }
 markdown-renderer = { group = "com.mikepenz", name = "multiplatform-markdown-renderer", version.ref = "markdownRenderer" }
 markdown-renderer-m3 = { group = "com.mikepenz", name = "multiplatform-markdown-renderer-m3", version.ref = "markdownRenderer" }
 markdown-renderer-android = { group = "com.mikepenz", name = "multiplatform-markdown-renderer-android", version.ref = "markdownRenderer" }
@@ -193,6 +199,9 @@ testing-room = ["room-testing"]
 # OSM
 osm = ["osmdroid-android", "osmbonuspack", "mgrs"]
 
+# Google Maps (Compose)
+maps-compose = ["location-services", "maps-compose", "maps-compose-utils", "maps-compose-widgets"]
+
 # Firebase
 firebase = ["firebase-analytics", "firebase-crashlytics"]
 
@@ -210,6 +219,7 @@ coil = ["coil", "coil-network-core", "coil-network-okhttp", "coil-svg"]
 
 [plugins]
 android-application = { id = "com.android.application" }
+android-library = { id = "com.android.library" }
 compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin"}
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
@@ -220,8 +230,8 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 kotlin-parcelize = { id = "org.jetbrains.kotlin.plugin.parcelize" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization" }
 protobuf = { id = "com.google.protobuf" }
-android-library = { id = "com.android.library" }
 google-services = { id = "com.google.gms.google-services" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics" }
 secrets-gradle-plugin = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin"}
 spotless = { id = "com.diffplug.spotless", version .ref= "spotless" }
+secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin" }

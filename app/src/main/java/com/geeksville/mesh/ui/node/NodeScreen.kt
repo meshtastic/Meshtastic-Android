@@ -115,7 +115,6 @@ fun NodeScreen(
                     modifier = Modifier.animateItem(),
                     thisNode = ourNode,
                     thatNode = node,
-                    gpsFormat = state.gpsFormat,
                     distanceUnits = state.distanceUnits,
                     tempInFahrenheit = state.tempInFahrenheit,
                     onAction = { menuItem ->

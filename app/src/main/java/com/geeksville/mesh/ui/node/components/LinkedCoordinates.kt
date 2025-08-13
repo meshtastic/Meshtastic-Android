@@ -39,10 +39,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.tooling.preview.PreviewParameter
-import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.core.net.toUri
-import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig.GpsCoordinateFormat
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.HyperlinkBlue
@@ -52,91 +49,61 @@ import java.net.URLEncoder
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun LinkedCoordinates(
-    modifier: Modifier = Modifier,
-    latitude: Double,
-    longitude: Double,
-    format: Int,
-    nodeName: String,
-) {
+fun LinkedCoordinates(modifier: Modifier = Modifier, latitude: Double, longitude: Double, nodeName: String) {
     val context = LocalContext.current
     val clipboard: Clipboard = LocalClipboard.current
     val coroutineScope = rememberCoroutineScope()
-    val style = SpanStyle(
-        color = HyperlinkBlue,
-        fontSize = MaterialTheme.typography.labelLarge.fontSize,
-        textDecoration = TextDecoration.Underline
-    )
+    val style =
+        SpanStyle(
+            color = HyperlinkBlue,
+            fontSize = MaterialTheme.typography.labelLarge.fontSize,
+            textDecoration = TextDecoration.Underline,
+        )
 
-    val annotatedString = rememberAnnotatedString(latitude, longitude, format, nodeName, style)
+    val annotatedString = rememberAnnotatedString(latitude, longitude, nodeName, style)
 
     Text(
-        modifier = modifier.combinedClickable(
-            onClick = {
-                handleClick(context, annotatedString)
-            },
+        modifier =
+        modifier.combinedClickable(
+            onClick = { handleClick(context, annotatedString) },
             onLongClick = {
                 coroutineScope.launch {
-                    clipboard.setClipEntry(
-                        ClipEntry(
-                            ClipData.newPlainText("", annotatedString)
-                        )
-                    )
+                    clipboard.setClipEntry(ClipEntry(ClipData.newPlainText("", annotatedString)))
                     debug("Copied to clipboard")
                 }
-            }
+            },
         ),
-        text = annotatedString
+        text = annotatedString,
     )
 }
 
 @Composable
-private fun rememberAnnotatedString(
-    latitude: Double,
-    longitude: Double,
-    format: Int,
-    nodeName: String,
-    style: SpanStyle
-) = buildAnnotatedString {
-    pushStringAnnotation(
-        tag = "gps",
-        annotation = "geo:0,0?q=$latitude,$longitude&z=17&label=${
-            URLEncoder.encode(nodeName, "utf-8")
-        }"
-    )
-    withStyle(style = style) {
-        val gpsString = when (format) {
-            GpsCoordinateFormat.DEC_VALUE -> GPSFormat.toDEC(latitude, longitude)
-            GpsCoordinateFormat.DMS_VALUE -> GPSFormat.toDMS(latitude, longitude)
-            GpsCoordinateFormat.UTM_VALUE -> GPSFormat.toUTM(latitude, longitude)
-            GpsCoordinateFormat.MGRS_VALUE -> GPSFormat.toMGRS(latitude, longitude)
-            else -> GPSFormat.toDEC(latitude, longitude)
+private fun rememberAnnotatedString(latitude: Double, longitude: Double, nodeName: String, style: SpanStyle) =
+    buildAnnotatedString {
+        pushStringAnnotation(
+            tag = "gps",
+            annotation =
+            "geo:0,0?q=$latitude,$longitude&z=17&label=${
+                URLEncoder.encode(nodeName, "utf-8")
+            }",
+        )
+        withStyle(style = style) {
+            val gpsString = GPSFormat.toDec(latitude, longitude)
+            append(gpsString)
         }
-        append(gpsString)
+        pop()
     }
-    pop()
-}
 
 private fun handleClick(context: Context, annotatedString: AnnotatedString) {
-    annotatedString.getStringAnnotations(
-        tag = "gps",
-        start = 0,
-        end = annotatedString.length
-    ).firstOrNull()?.let {
+    annotatedString.getStringAnnotations(tag = "gps", start = 0, end = annotatedString.length).firstOrNull()?.let {
         val uri = it.item.toUri()
-        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
+        val intent = Intent(Intent.ACTION_VIEW, uri).apply { addFlags(Intent.FLAG_ACTIVITY_NEW_TASK) }
 
         try {
             if (intent.resolveActivity(context.packageManager) != null) {
                 context.startActivity(intent)
             } else {
-                Toast.makeText(
-                    context,
-                    "No application available to open this location!",
-                    Toast.LENGTH_LONG
-                ).show()
+                Toast.makeText(context, "No application available to open this location!", Toast.LENGTH_LONG).show()
             }
         } catch (ex: ActivityNotFoundException) {
             debug("Failed to open geo intent: $ex")
@@ -146,20 +113,6 @@ private fun handleClick(context: Context, annotatedString: AnnotatedString) {
 
 @PreviewLightDark
 @Composable
-fun LinkedCoordinatesPreview(
-    @PreviewParameter(GPSFormatPreviewParameterProvider::class) format: Int
-) {
-    AppTheme {
-        LinkedCoordinates(
-            latitude = 37.7749,
-            longitude = -122.4194,
-            format = format,
-            nodeName = "Test Node Name"
-        )
-    }
-}
-
-class GPSFormatPreviewParameterProvider : PreviewParameterProvider<Int> {
-    override val values: Sequence<Int>
-        get() = sequenceOf(0, 1, 2)
+fun LinkedCoordinatesPreview() {
+    AppTheme { LinkedCoordinates(latitude = 37.7749, longitude = -122.4194, nodeName = "Test Node Name") }
 }

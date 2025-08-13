@@ -41,7 +41,9 @@ class MeshUtilApplication : GeeksvilleApplication() {
             crashlytics.setUserId(pref.getInstallId()) // be able to group all bugs per anonymous user
 
             fun sendCrashReports() {
-                if (isAnalyticsAllowed) crashlytics.sendUnsentReports()
+                if (isAnalyticsAllowed) {
+                    crashlytics.sendUnsentReports()
+                }
             }
 
             // Send any old reports if user approves

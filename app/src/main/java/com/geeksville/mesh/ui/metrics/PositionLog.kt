@@ -102,17 +102,12 @@ private fun HeaderItem(compactWidth: Boolean) {
     }
 }
 
-private const val DEG_D = 1e-7
-private const val HEADING_DEG = 1e-5
+const val DEG_D = 1e-7
+const val HEADING_DEG = 1e-5
 private const val SECONDS_TO_MILLIS = 1000L
 
 @Composable
-private fun PositionItem(
-    compactWidth: Boolean,
-    position: MeshProtos.Position,
-    dateFormat: DateFormat,
-    system: DisplayUnits,
-) {
+fun PositionItem(compactWidth: Boolean, position: MeshProtos.Position, dateFormat: DateFormat, system: DisplayUnits) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -130,7 +125,7 @@ private fun PositionItem(
 }
 
 @Composable
-private fun formatPositionTime(position: MeshProtos.Position, dateFormat: DateFormat): String {
+fun formatPositionTime(position: MeshProtos.Position, dateFormat: DateFormat): String {
     val currentTime = System.currentTimeMillis()
     val sixMonthsAgo = currentTime - 180.days.inWholeMilliseconds
     val isOlderThanSixMonths = position.time * SECONDS_TO_MILLIS < sixMonthsAgo

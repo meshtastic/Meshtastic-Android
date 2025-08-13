@@ -34,6 +34,7 @@ import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.debug.DebugScreen
+import com.geeksville.mesh.ui.map.MapViewModel
 import kotlinx.serialization.Serializable
 
 enum class AdminRoute(@StringRes val title: Int) {
@@ -71,6 +72,7 @@ fun NavGraph(
     modifier: Modifier = Modifier,
     uIViewModel: UIViewModel = hiltViewModel(),
     bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
+    mapViewModel: MapViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController(),
 ) {
     val isConnected by uIViewModel.isConnectedStateFlow.collectAsStateWithLifecycle(false)
@@ -86,7 +88,7 @@ fun NavGraph(
     ) {
         contactsGraph(navController, uIViewModel)
         nodesGraph(navController, uIViewModel)
-        mapGraph(navController, uIViewModel)
+        mapGraph(navController, uIViewModel, mapViewModel)
         channelsGraph(navController, uIViewModel)
         connectionsGraph(navController, uIViewModel, bluetoothViewModel)
         composable<Route.DebugPanel> { DebugScreen() }

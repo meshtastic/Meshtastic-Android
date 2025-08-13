@@ -29,4 +29,6 @@ keystore.properties
 
 # VS code
 .vscode/settings.json
+
+# Secrets
 /secrets.properties

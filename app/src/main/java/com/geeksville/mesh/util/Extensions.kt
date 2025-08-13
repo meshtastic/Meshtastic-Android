@@ -72,6 +72,21 @@ fun formatAgo(lastSeenUnix: Int, currentTimeMillis: Long = System.currentTimeMil
     }
 }
 
+private const val MPS_TO_KMPH = 3.6f
+private const val KM_TO_MILES = 0.621371f
+
+fun Int.mpsToKmph(): Float {
+    // Convert meters per second to kilometers per hour
+    val kmph = this * MPS_TO_KMPH
+    return kmph
+}
+
+fun Int.mpsToMph(): Float {
+    // Convert meters per second to miles per hour
+    val mph = this * MPS_TO_KMPH * KM_TO_MILES
+    return mph
+}
+
 // Allows usage like email.onEditorAction(EditorInfo.IME_ACTION_NEXT, { confirm() })
 fun EditText.onEditorAction(actionId: Int, func: () -> Unit) {
     setOnEditorActionListener { _, receivedActionId, _ ->

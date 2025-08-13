@@ -178,12 +178,12 @@ fun ConnectionsScreen(
     val isGpsDisabled = context.gpsDisabled()
     LaunchedEffect(isGpsDisabled) {
         if (isGpsDisabled) {
-            uiViewModel.showSnackbar(context.getString(R.string.location_disabled))
+            uiViewModel.showSnackBar(context.getString(R.string.location_disabled))
         }
     }
     LaunchedEffect(bluetoothEnabled) {
         if (!bluetoothEnabled) {
-            uiViewModel.showSnackbar(context.getString(R.string.bluetooth_disabled))
+            uiViewModel.showSnackBar(context.getString(R.string.bluetooth_disabled))
         }
     }
     // when scanning is true - wait 10000ms and then stop scanning
@@ -234,7 +234,7 @@ fun ConnectionsScreen(
                 if (!isGpsDisabled) {
                     uiViewModel.meshService?.startProvideLocation()
                 } else {
-                    uiViewModel.showSnackbar(context.getString(R.string.location_disabled))
+                    uiViewModel.showSnackBar(context.getString(R.string.location_disabled))
                 }
             } else {
                 // Request permissions if not granted and user wants to provide location
@@ -575,7 +575,7 @@ fun ConnectionsScreen(
                         onClick = {
                             showReportBugDialog = false
                             reportError("Clicked Report A Bug")
-                            uiViewModel.showSnackbar("Bug report sent!")
+                            uiViewModel.showSnackBar("Bug report sent!")
                         },
                     ) {
                         Text(stringResource(R.string.report))
@@ -619,6 +619,7 @@ private enum class DeviceType {
                     NO_DEVICE_SELECTED -> null
                     else -> null
                 }
+
             else -> null
         }
     }

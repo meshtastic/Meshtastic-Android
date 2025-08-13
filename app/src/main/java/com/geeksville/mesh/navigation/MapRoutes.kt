@@ -22,23 +22,19 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.map.MapView
+import com.geeksville.mesh.ui.map.MapViewModel
 import kotlinx.serialization.Serializable
 
 sealed class MapRoutes {
-    @Serializable
-    data object Map : Route
+    @Serializable data object Map : Route
 }
 
-fun NavGraphBuilder.mapGraph(
-    navController: NavHostController,
-    uiViewModel: UIViewModel,
-) {
+fun NavGraphBuilder.mapGraph(navController: NavHostController, uiViewModel: UIViewModel, mapViewModel: MapViewModel) {
     composable<MapRoutes.Map> {
         MapView(
-            model = uiViewModel,
-            navigateToNodeDetails = {
-                navController.navigate(NodesRoutes.NodeDetailGraph(it))
-            },
+            uiViewModel = uiViewModel,
+            mapViewModel = mapViewModel,
+            navigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
         )
     }
 }

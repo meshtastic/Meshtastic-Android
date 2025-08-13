@@ -64,10 +64,10 @@ import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceAction
-import com.geeksville.mesh.ui.map.MAP_STYLE_ID
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.util.getShortDate
 import com.geeksville.mesh.util.positionToMeter
+import com.geeksville.mesh.util.toggleBooleanPreference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -82,7 +82,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
@@ -102,27 +101,27 @@ import kotlin.math.roundToInt
 // that user, ignoring emojis. If the original name is only one word, strip vowels from the original
 // name and if the result is 3 or more characters, use the first three characters. If not, just take
 // the first 3 characters of the original name.
-fun getInitials(nameIn: String): String {
-    val nchars = 4
-    val minchars = 2
-    val name = nameIn.trim().withoutEmojis()
+fun getInitials(fullName: String): String {
+    val maxInitialLength = 4
+    val minWordCountForInitials = 2
+    val name = fullName.trim().withoutEmojis()
     val words = name.split(Regex("\\s+")).filter { it.isNotEmpty() }
 
     val initials =
         when (words.size) {
-            in 0 until minchars -> {
-                val nm =
+            in 0 until minWordCountForInitials -> {
+                val nameWithoutVowels =
                     if (name.isNotEmpty()) {
                         name.first() + name.drop(1).filterNot { c -> c.lowercase() in "aeiou" }
                     } else {
                         ""
                     }
-                if (nm.length >= nchars) nm else name
+                if (nameWithoutVowels.length >= maxInitialLength) nameWithoutVowels else name
             }
 
             else -> words.map { it.first() }.joinToString("")
         }
-    return initials.take(nchars)
+    return initials.take(maxInitialLength)
 }
 
 private fun String.withoutEmojis(): String = filterNot { char -> char.isSurrogate() }
@@ -161,7 +160,6 @@ data class NodesUiState(
     val includeUnknown: Boolean = false,
     val onlyOnline: Boolean = false,
     val onlyDirect: Boolean = false,
-    val gpsFormat: Int = 0,
     val distanceUnits: Int = 0,
     val tempInFahrenheit: Boolean = false,
     val showDetails: Boolean = false,
@@ -185,7 +183,7 @@ data class Contact(
     val nodeColors: Pair<Int, Int>? = null,
 )
 
-@Suppress("LongParameterList", "LargeClass")
+@Suppress("LongParameterList", "LargeClass", "UnusedPrivateProperty")
 @HiltViewModel
 class UIViewModel
 @Inject
@@ -193,7 +191,7 @@ constructor(
     private val app: Application,
     private val nodeDB: NodeRepository,
     private val radioConfigRepository: RadioConfigRepository,
-    private val radioInterfaceService: RadioInterfaceService,
+    radioInterfaceService: RadioInterfaceService,
     private val meshLogRepository: MeshLogRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val packetRepository: PacketRepository,
@@ -301,9 +299,6 @@ constructor(
     val meshService: IMeshService?
         get() = radioConfigRepository.meshService
 
-    val selectedBluetooth
-        get() = radioInterfaceService.getDeviceAddress()?.getOrNull(0) == 'x'
-
     private val _localConfig = MutableStateFlow<LocalConfig>(LocalConfig.getDefaultInstance())
     val localConfig: StateFlow<LocalConfig> = _localConfig
     val config
@@ -338,11 +333,6 @@ constructor(
     private val onlyOnline = MutableStateFlow(preferences.getBoolean("only-online", false))
     private val onlyDirect = MutableStateFlow(preferences.getBoolean("only-direct", false))
 
-    private val onlyFavorites = MutableStateFlow(preferences.getBoolean("only-favorites", false))
-    private val showWaypointsOnMap = MutableStateFlow(preferences.getBoolean("show-waypoints-on-map", true))
-    private val showPrecisionCircleOnMap =
-        MutableStateFlow(preferences.getBoolean("show-precision-circle-on-map", true))
-
     private val _showIgnored = MutableStateFlow(preferences.getBoolean("show-ignored", false))
     val showIgnored: StateFlow<Boolean> = _showIgnored
 
@@ -351,6 +341,7 @@ constructor(
 
     private val _hasShownNotPairedWarning =
         MutableStateFlow(preferences.getBoolean(HAS_SHOWN_NOT_PAIRED_WARNING_PREF, false))
+
     val hasShownNotPairedWarning: StateFlow<Boolean> = _hasShownNotPairedWarning.asStateFlow()
 
     fun suppressNoPairedWarning() {
@@ -358,40 +349,22 @@ constructor(
         preferences.edit { putBoolean(HAS_SHOWN_NOT_PAIRED_WARNING_PREF, true) }
     }
 
-    private fun toggleBooleanPreference(
-        state: MutableStateFlow<Boolean>,
-        key: String,
-        onChanged: (Boolean) -> Unit = {},
-    ) {
-        val newValue = !state.value
-        state.value = newValue
-        preferences.edit { putBoolean(key, newValue) }
-        onChanged(newValue)
-    }
+    fun toggleShowIgnored() = preferences.toggleBooleanPreference(_showIgnored, "show-ignored")
 
-    fun toggleShowIgnored() = toggleBooleanPreference(_showIgnored, "show-ignored")
-
-    fun toggleShowQuickChat() = toggleBooleanPreference(_showQuickChat, "show-quick-chat")
+    fun toggleShowQuickChat() = preferences.toggleBooleanPreference(_showQuickChat, "show-quick-chat")
 
     fun setSortOption(sort: NodeSortOption) {
         nodeSortOption.value = sort
         preferences.edit { putInt("node-sort-option", sort.ordinal) }
     }
 
-    fun toggleShowDetails() = toggleBooleanPreference(showDetails, "show-details")
+    fun toggleShowDetails() = preferences.toggleBooleanPreference(showDetails, "show-details")
 
-    fun toggleIncludeUnknown() = toggleBooleanPreference(includeUnknown, "include-unknown")
+    fun toggleIncludeUnknown() = preferences.toggleBooleanPreference(includeUnknown, "include-unknown")
 
-    fun toggleOnlyOnline() = toggleBooleanPreference(onlyOnline, "only-online")
+    fun toggleOnlyOnline() = preferences.toggleBooleanPreference(onlyOnline, "only-online")
 
-    fun toggleOnlyDirect() = toggleBooleanPreference(onlyDirect, "only-direct")
-
-    fun toggleOnlyFavorites() = toggleBooleanPreference(onlyFavorites, "only-favorites")
-
-    fun toggleShowWaypointsOnMap() = toggleBooleanPreference(showWaypointsOnMap, "show-waypoints-on-map")
-
-    fun toggleShowPrecisionCircleOnMap() =
-        toggleBooleanPreference(showPrecisionCircleOnMap, "show-precision-circle-on-map")
+    fun toggleOnlyDirect() = preferences.toggleBooleanPreference(onlyDirect, "only-direct")
 
     data class NodeFilterState(
         val filterText: String,
@@ -425,7 +398,6 @@ constructor(
                 includeUnknown = filterFlow.includeUnknown,
                 onlyOnline = filterFlow.onlyOnline,
                 onlyDirect = filterFlow.onlyDirect,
-                gpsFormat = profile.config.display.gpsFormat.number,
                 distanceUnits = profile.config.display.units.number,
                 tempInFahrenheit = profile.moduleConfig.telemetry.environmentDisplayFahrenheit,
                 showDetails = showDetails,
@@ -474,22 +446,6 @@ constructor(
             initialValue = 0,
         )
 
-    data class MapFilterState(val onlyFavorites: Boolean, val showWaypoints: Boolean, val showPrecisionCircle: Boolean)
-
-    val mapFilterStateFlow: StateFlow<MapFilterState> =
-        combine(onlyFavorites, showWaypointsOnMap, showPrecisionCircleOnMap) {
-                favoritesOnly,
-                showWaypoints,
-                showPrecisionCircle,
-            ->
-            MapFilterState(favoritesOnly, showWaypoints, showPrecisionCircle)
-        }
-            .stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = MapFilterState(false, true, true),
-            )
-
     // hardware info about our local device (can be null)
     val myNodeInfo: StateFlow<MyNodeEntity?>
         get() = nodeDB.myNodeInfo
@@ -497,22 +453,15 @@ constructor(
     val ourNodeInfo: StateFlow<Node?>
         get() = nodeDB.ourNodeInfo
 
-    val nodesWithPosition
-        get() = nodeDB.nodeDBbyNum.value.values.filter { it.validPosition != null }
-
-    var mapStyleId: Int
-        get() = preferences.getInt(MAP_STYLE_ID, 0)
-        set(value) = preferences.edit { putInt(MAP_STYLE_ID, value) }
-
     fun getNode(userId: String?) = nodeDB.getNode(userId ?: DataPacket.ID_BROADCAST)
 
     fun getUser(userId: String?) = nodeDB.getUser(userId ?: DataPacket.ID_BROADCAST)
 
-    val snackbarState = SnackbarHostState()
+    private val snackBarHostState = SnackbarHostState()
 
-    fun showSnackbar(text: Int) = showSnackbar(app.getString(text))
+    fun showSnackBar(text: Int) = showSnackBar(app.getString(text))
 
-    fun showSnackbar(text: String) = viewModelScope.launch { snackbarState.showSnackbar(text) }
+    fun showSnackBar(text: String) = viewModelScope.launch { snackBarHostState.showSnackbar(text) }
 
     init {
         radioConfigRepository.errorMessage
@@ -614,15 +563,6 @@ constructor(
                 started = SharingStarted.WhileSubscribed(5_000),
                 initialValue = emptyList(),
             )
-
-    val waypoints =
-        packetRepository.getWaypoints().mapLatest { list ->
-            list
-                .associateBy { packet -> packet.data.waypoint!!.id }
-                .filterValues {
-                    it.data.waypoint!!.expire == 0 || it.data.waypoint!!.expire > System.currentTimeMillis() / 1000
-                }
-        }
 
     fun generatePacketId(): Int? {
         return try {
@@ -749,8 +689,6 @@ constructor(
     val connectionState
         get() = radioConfigRepository.connectionState
 
-    fun isConnected() = isConnectedStateFlow.value
-
     val isConnectedStateFlow =
         radioConfigRepository.connectionState
             .map { it.isConnected() }
@@ -763,7 +701,7 @@ constructor(
     fun requestChannelUrl(url: Uri) = runCatching { _requestChannelSet.value = url.toChannelSet() }
         .onFailure { ex ->
             errormsg("Channel url error: ${ex.message}")
-            showSnackbar(R.string.channel_invalid)
+            showSnackBar(R.string.channel_invalid)
         }
 
     val latestStableFirmwareRelease = firmwareReleaseRepository.stableRelease.mapNotNull { it?.asDeviceVersion() }
@@ -921,6 +859,7 @@ constructor(
 
             writeToUri(uri) { writer ->
                 val nodePositions = mutableMapOf<Int, MeshProtos.Position?>()
+
                 @Suppress("MaxLineLength")
                 writer.appendLine(
                     "\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"distance\",\"hop limit\",\"payload\"",
@@ -939,7 +878,9 @@ constructor(
                         // If the packet contains position data then use it to update, if valid
                         packet.position?.let { position ->
                             positionToPos.invoke(position)?.let {
-                                nodePositions[proto.from.takeIf { it != 0 } ?: myNodeNum] = position
+                                nodePositions[
+                                    proto.from.takeIf { it != 0 } ?: myNodeNum,
+                                ] = position
                             }
                         }
 
@@ -972,9 +913,9 @@ constructor(
                                     ""
                                 } else {
                                     positionToMeter(
-                                        rxPosition!!, // Use rxPosition but only if rxPos was
+                                        Position(rxPosition!!), // Use rxPosition but only if rxPos was
                                         // valid
-                                        senderPosition!!, // Use senderPosition but only if
+                                        Position(senderPosition!!), // Use senderPosition but only if
                                         // senderPos was valid
                                     )
                                         .roundToInt()
@@ -998,7 +939,8 @@ constructor(
                                 }
 
                             //  date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx
-                            // elevation,rx snr,distance,hop limit,payload
+                            // elevation,rx
+                            // snr,distance,hop limit,payload
                             @Suppress("MaxLineLength")
                             writer.appendLine(
                                 "$rxDateTime,\"$rxFrom\",\"$senderName\",\"$senderLat\",\"$senderLong\",\"$rxLat\",\"$rxLong\",\"$rxAlt\",\"$rxSnr\",\"$dist\",\"$hopLimit\",\"$payload\"",
