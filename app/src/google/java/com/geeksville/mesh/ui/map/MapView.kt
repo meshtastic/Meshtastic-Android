@@ -45,6 +45,7 @@ import androidx.compose.material3.FloatingToolbarDefaults
 import androidx.compose.material3.FloatingToolbarDefaults.ScreenOffset
 import androidx.compose.material3.FloatingToolbarExitDirection.Companion.End
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -628,6 +629,7 @@ data class NodeClusterItem(val node: Node, val nodePosition: LatLng, val nodeTit
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 @Suppress("LongMethod")
 private fun PositionInfoWindowContent(
@@ -637,15 +639,15 @@ private fun PositionInfoWindowContent(
 ) {
     @Composable
     fun PositionRow(label: String, value: String) {
-        Row(modifier = Modifier.padding(8.dp), verticalAlignment = Alignment.CenterVertically) {
-            Text(label)
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(value)
+        Row(modifier = Modifier.padding(horizontal = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(label, style = MaterialTheme.typography.labelMedium)
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(value, style = MaterialTheme.typography.labelMediumEmphasized)
         }
     }
 
-    Card(modifier = Modifier.padding(8.dp)) {
-        Column {
+    Card {
+        Column(modifier = Modifier.padding(8.dp)) {
             PositionRow(
                 label = stringResource(R.string.latitude),
                 value = "%.5f".format(position.latitudeI * com.geeksville.mesh.ui.metrics.DEG_D),
