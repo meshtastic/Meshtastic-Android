@@ -736,4 +736,18 @@
     <string name="nodes_queued_for_deletion">%d eemaldatavat sõlme nimekirjas:</string>
     <string name="clean_node_database_description">Hoiatus: See eemaldab sõlmed rakendusest, kui ka seadmest.\nValikud on lisaks eelnevale.</string>
     <string name="connecting_to_device">Ühendan seadet</string>
+    <string name="map_type_normal">Normaalne</string>
+    <string name="map_type_satellite">Sateliit</string>
+    <string name="map_type_terrain">Maastik</string>
+    <string name="map_type_hybrid">Hübriid</string>
+    <string name="manage_map_layers">Halda kaardikihte</string>
+    <string name="no_map_layers_loaded">Kaardikihid laadimata.</string>
+    <string name="remove_layer">Eemalda kiht</string>
+    <string name="add_layer">Lisa kiht</string>
+    <string name="nodes_at_this_location">Sõlmed siin asukohas</string>
+    <string name="selected_map_type">Vali kaardi tüüp</string>
+    <string name="manage_custom_tile_sources">Halda kohandatud kardikihti</string>
+    <string name="no_custom_tile_sources_found">Kohandatud kardikihte ei ole</string>
+    <string name="edit_custom_tile_source">Muuda kohandatud kardikihti</string>
+    <string name="provider_name_exists">Teenusepakkuja nimi on olemas.</string>
 </resources>

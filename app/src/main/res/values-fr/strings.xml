@@ -97,6 +97,7 @@
     <string name="pairing_failed_try_again">Le jumelage a échoué, veuillez sélectionner à nouveau</string>
     <string name="location_disabled">L\'accès à la localisation est désactivé, impossible de fournir la position du maillage.</string>
     <string name="share">Partager</string>
+    <string name="new_node_seen">Nouveau noeud vu : %s</string>
     <string name="disconnected">Déconnecté</string>
     <string name="device_sleeping">Appareil en veille</string>
     <string name="connected_count">Connectés : %1$s sur en ligne</string>
@@ -180,6 +181,8 @@
     <string name="quick_chat_edit">Éditer le clavardage</string>
     <string name="quick_chat_append">Ajouter au message</string>
     <string name="quick_chat_instant">Envoi instantané</string>
+    <string name="quick_chat_show">Afficher le menu de discussion rapide</string>
+    <string name="quick_chat_hide">Masquer le menu de discussion rapide</string>
     <string name="factory_reset">Réinitialisation d\'usine</string>
     <string name="bluetooth_disabled">Le Bluetooth est désactivé</string>
     <string name="permission_missing_31">Meshtastic a besoin de la permission des appareils à proximité pour trouver et se connecter à des appareils via le Bluetooth. Vous pouvez le désactiver quand il n\'est pas utilisé.</string>
@@ -347,6 +350,7 @@
     <string name="downlink_enabled">Liaison descendante activé</string>
     <string name="default_">Défaut</string>
     <string name="position_enabled">Position activée</string>
+    <string name="precise_location">Emplacement précis</string>
     <string name="gpio_pin">Broche GPIO</string>
     <string name="type">Type</string>
     <string name="hide_password">Masquer le mot de passe</string>
@@ -480,6 +484,7 @@
     <string name="latitude">Latitude</string>
     <string name="longitude">Longitude</string>
     <string name="altitude_meters">Altitude (mètres)</string>
+    <string name="position_config_set_fixed_from_phone">Définir à partir de l\'emplacement actuel du téléphone</string>
     <string name="gps_mode">Mode GPS</string>
     <string name="gps_update_interval_seconds">Intervalle de mise à jour GPS (secondes)</string>
     <string name="redefine_gps_rx_pin">Redéfinir GPS_RX_PIN</string>
@@ -562,8 +567,11 @@
     <string name="node_number">Numéro de nœud</string>
     <string name="user_id">ID utilisateur</string>
     <string name="uptime">Durée de fonctionnement</string>
+    <string name="load_indexed">Charge %1$d</string>
+    <string name="disk_free_indexed">Disque libre %1$d</string>
     <string name="timestamp">Horodatage</string>
     <string name="heading">En-tête</string>
+    <string name="speed">Vitesse</string>
     <string name="sats">Sats</string>
     <string name="alt">Alt</string>
     <string name="freq">Fréq</string>
@@ -641,6 +649,13 @@
     <string name="overflow_menu">Menu supplémentaire</string>
     <string name="uv_lux">UV Lux</string>
     <string name="unknown">Inconnu</string>
+    <string name="clean_node_database_title">Nettoyer la base de données des nœuds</string>
+    <string name="clean_nodes_older_than">Nettoyer les nœuds vus pour la dernière fois depuis %1$d jours</string>
+    <string name="clean_unknown_nodes">Nettoyer uniquement les nœuds inconnus</string>
+    <string name="clean_low_interaction_nodes">Nettoyer les nœuds avec une interaction faible/sans interaction</string>
+    <string name="clean_ignored_nodes">Nettoyer les nœuds ignorés</string>
+    <string name="clean_now">Nettoyer maintenant</string>
+    <string name="clean_node_database_confirmation">Cela supprimera les %1$d nœuds  de votre base de données. Cette action ne peut pas être annulée.</string>
     <string name="security_icon_help_green_lock">Un cadenas vert signifie que le canal est chiffré de façon sécurisée avec une clé AES 128 ou 256 bits.</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <string name="security_icon_insecure_no_precise">Canal non sécurisé, non précisé</string>
@@ -676,6 +691,38 @@
     <string name="latest_stable_firmware">Dernière version stable</string>
     <string name="latest_alpha_firmware">Dernière version alpha</string>
     <string name="supported_by_community">Soutenu par la communauté Meshtastic</string>
+    <string name="firmware_edition">Version du micrologiciel</string>
+    <string name="recent_network_devices">Périphériques réseau récents</string>
+    <string name="discovered_network_devices">Appareils réseau découverts</string>
+    <string name="get_started">Commencer</string>
+    <string name="intro_welcome">Bienvenue sur</string>
+    <string name="stay_connected_anywhere">Restez connecté n\'importe où</string>
+    <string name="communicate_off_the_grid">Communiquez en dehors du réseau avec vos amis et votre communauté sans service cellulaire.</string>
+    <string name="create_your_own_networks">Créez vos propres réseaux</string>
+    <string name="easily_set_up_private_mesh_networks">Installez facilement des réseaux de maillage privé pour une communication sûre et fiable dans les régions éloignées.</string>
+    <string name="track_and_share_locations">Suivre et partager les emplacements</string>
+    <string name="share_your_location_in_real_time">Partagez votre position en temps réel et gardez votre groupe coordonné avec les fonctionnalités GPS intégrées.</string>
+    <string name="app_notifications">Notifications de l’application</string>
+    <string name="incoming_messages">Messages entrants</string>
+    <string name="notifications_for_channel_and_direct_messages">Notifications pour le canal et les messages directs.</string>
+    <string name="new_nodes">Nouveaux nœuds</string>
+    <string name="notifications_for_newly_discovered_nodes">Notifications pour les nouveaux nœuds découverts.</string>
     <string name="skip">Ignorer</string>
     <string name="next">Suivant</string>
+    <string name="map_type_normal">Normal</string>
+    <string name="map_type_satellite">Satellite</string>
+    <string name="map_type_terrain">Terrain</string>
+    <string name="map_type_hybrid">Hybride</string>
+    <string name="manage_map_layers">Gérer les calques de la carte</string>
+    <string name="no_map_layers_loaded">Aucun calque personnalisé chargé.</string>
+    <string name="remove_layer">Supprimer le calque</string>
+    <string name="add_layer">Ajouter un calque</string>
+    <string name="nodes_at_this_location">Nœuds à cet emplacement</string>
+    <string name="selected_map_type">Type de carte sélectionné</string>
+    <string name="manage_custom_tile_sources">Gérer les sources de tuiles personnalisées</string>
+    <string name="no_custom_tile_sources_found">Aucune source de tuiles personnalisée</string>
+    <string name="edit_custom_tile_source">Modifier la source de tuile personnalisée</string>
+    <string name="provider_name_exists">Le nom du fournisseur existe déjà.</string>
+    <string name="url_must_contain_placeholders">L\'URL doit contenir des espaces réservés.</string>
+    <string name="url_template">Modèle d\'URL</string>
 </resources>

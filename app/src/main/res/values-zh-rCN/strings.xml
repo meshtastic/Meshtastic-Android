@@ -696,4 +696,15 @@
     <string name="settings">设置</string>
     <string name="next">下一步</string>
     <string name="grant_permissions_and_scan">授予权限并扫描</string>
+    <string name="map_type_normal">普通</string>
+    <string name="map_type_satellite">卫星</string>
+    <string name="map_type_terrain">地形</string>
+    <string name="map_type_hybrid">混合</string>
+    <string name="manage_map_layers">管理地图图层</string>
+    <string name="no_map_layers_loaded">没有自定义图层被加载。</string>
+    <string name="remove_layer">移除图层</string>
+    <string name="add_layer">添加图层</string>
+    <string name="nodes_at_this_location">在此位置的节点</string>
+    <string name="selected_map_type">所选地图类型</string>
+    <string name="manage_custom_tile_sources">管理自定义瓦片源</string>
 </resources>

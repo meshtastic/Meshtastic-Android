@@ -736,4 +736,19 @@
     <string name="nodes_queued_for_deletion">%d laitetta jonossa poistettavaksi:</string>
     <string name="clean_node_database_description">Varoitus: Tämä poistaa laitteet sovelluksen sekä laitteen tietokannoista.\nValinnat lisätään aiempiin.</string>
     <string name="connecting_to_device">Yhdistetään laitteeseen</string>
+    <string name="map_type_normal">Normaali</string>
+    <string name="map_type_satellite">Satelliitti</string>
+    <string name="map_type_terrain">Maasto</string>
+    <string name="map_type_hybrid">Hybridi</string>
+    <string name="manage_map_layers">Hallitse Karttatasoja</string>
+    <string name="no_map_layers_loaded">Mukautettuja karttatasoja ei ladattu.</string>
+    <string name="remove_layer">Poista taso</string>
+    <string name="add_layer">Lisää taso</string>
+    <string name="nodes_at_this_location">Laitteet tässä sijainnissa</string>
+    <string name="selected_map_type">Valittu karttatyyppi</string>
+    <string name="manage_custom_tile_sources">Hallitse mukautettuja karttatasoja</string>
+    <string name="no_custom_tile_sources_found">Ei mukautettuja karttatasoja</string>
+    <string name="edit_custom_tile_source">Muokkaa mukautettua karttatasoa</string>
+    <string name="provider_name_exists">Palveluntarjoajan nimi on olemassa.</string>
+    <string name="url_must_contain_placeholders">URL-osoitteessa on oltava paikkamerkkejä.</string>
 </resources>

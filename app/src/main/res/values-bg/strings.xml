@@ -544,4 +544,13 @@
     <string name="notification_permissions_description">Meshtastic използва известия, за да ви държи в течение за нови съобщения и други важни събития. Можете да актуализирате разрешенията си за известия по всяко време от настройките.</string>
     <string name="next">Напред</string>
     <string name="connecting_to_device">Свързване с устройство</string>
+    <string name="map_type_normal">Нормален</string>
+    <string name="map_type_satellite">Сателит</string>
+    <string name="map_type_terrain">Терен</string>
+    <string name="map_type_hybrid">Хибриден</string>
+    <string name="manage_map_layers">Управление на слоевете на картата</string>
+    <string name="no_map_layers_loaded">Няма заредени персонализирани слоеве.</string>
+    <string name="remove_layer">Премахване на слой</string>
+    <string name="add_layer">Добавяне на слой</string>
+    <string name="nodes_at_this_location">Възли на това място</string>
 </resources>
