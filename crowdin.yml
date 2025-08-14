@@ -1,7 +1,6 @@
 pull_request_labels:
   - automation
   - l10n
-commit_message: "[skip ci] Update translations from Crowdin"
 files:
   - source: /*/src/main/res/values/strings.xml
     translation: /%original_path%-%two_letters_code%/strings.xml
