@@ -4,7 +4,13 @@ on:
   pull_request:
     branches:
       - main
-  workflow_dispatch:     # Allow manual triggering
+  workflow_dispatch:
+    inputs:
+      branch:
+        description: 'Branch to run checks against'
+        required: true
+        default: 'main'
+        type: string
 
 
 concurrency:
