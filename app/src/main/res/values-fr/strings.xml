@@ -692,13 +692,13 @@
     <string name="latest_alpha_firmware">Dernière version alpha</string>
     <string name="supported_by_community">Soutenu par la communauté Meshtastic</string>
     <string name="firmware_edition">Version du micrologiciel</string>
-    <string name="recent_network_devices">Périphériques réseau récents</string>
+    <string name="recent_network_devices">Périphériques réseaux récents</string>
     <string name="discovered_network_devices">Appareils réseau découverts</string>
     <string name="get_started">Commencer</string>
     <string name="intro_welcome">Bienvenue sur</string>
     <string name="stay_connected_anywhere">Restez connecté n\'importe où</string>
     <string name="communicate_off_the_grid">Communiquez en dehors du réseau avec vos amis et votre communauté sans service cellulaire.</string>
-    <string name="create_your_own_networks">Créez vos propres réseaux</string>
+    <string name="create_your_own_networks">Créez votre propre réseau</string>
     <string name="easily_set_up_private_mesh_networks">Installez facilement des réseaux de maillage privé pour une communication sûre et fiable dans les régions éloignées.</string>
     <string name="track_and_share_locations">Suivre et partager les emplacements</string>
     <string name="share_your_location_in_real_time">Partagez votre position en temps réel et gardez votre groupe coordonné avec les fonctionnalités GPS intégrées.</string>
@@ -716,6 +716,7 @@
     <string name="settings">Paramètres</string>
     <string name="critical_alerts">Alertes critiques</string>
     <string name="next">Suivant</string>
+    <string name="nodes_queued_for_deletion">%d nœuds en attente de suppression :</string>
     <string name="map_type_normal">Normal</string>
     <string name="map_type_satellite">Satellite</string>
     <string name="map_type_terrain">Terrain</string>
