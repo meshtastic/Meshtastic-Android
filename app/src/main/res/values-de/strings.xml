@@ -741,15 +741,23 @@
     <string name="map_type_terrain">Gelände</string>
     <string name="map_type_hybrid">Hybrid</string>
     <string name="manage_map_layers">Kartenebenen verwalten</string>
+    <string name="map_layers_title">Kartenebenen</string>
     <string name="no_map_layers_loaded">Keine benutzerdefinierten Ebenen geladen.</string>
+    <string name="add_layer_button">Ebene hinzufügen</string>
+    <string name="hide_layer">Ebene ausblenden</string>
+    <string name="show_layer">Ebene anzeigen</string>
     <string name="remove_layer">Ebene entfernen</string>
     <string name="add_layer">Ebene hinzufügen</string>
     <string name="nodes_at_this_location">Knoten an diesem Standort</string>
     <string name="selected_map_type">Ausgewählter Kartentyp</string>
     <string name="manage_custom_tile_sources">Benutzerdefinierte Kachelquellen verwalten</string>
+    <string name="add_custom_tile_source">Benutzerdefinierte Kachelquelle hinzufügen</string>
     <string name="no_custom_tile_sources_found">Keine benutzerdefinierten Kachelquellen</string>
     <string name="edit_custom_tile_source">Benutzerdefinierte Kachelquelle bearbeiten</string>
+    <string name="delete_custom_tile_source">Benutzerdefinierte Kachelquelle löschen</string>
+    <string name="name_cannot_be_empty">Name darf nicht leer sein.</string>
     <string name="provider_name_exists">Der Name des Anbieters existiert bereits.</string>
+    <string name="url_cannot_be_empty">URL darf nicht leer sein.</string>
     <string name="url_must_contain_placeholders">URL muss Platzhalter enthalten.</string>
     <string name="url_template">URL Vorlage</string>
 </resources>
