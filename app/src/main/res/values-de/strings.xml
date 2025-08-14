@@ -113,7 +113,7 @@
     <string name="meshtastic_service_notifications">Dienst-Benachrichtigungen</string>
     <string name="about">Über</string>
     <string name="channel_invalid">Diese Kanal-URL ist ungültig und kann nicht verwendet werden</string>
-    <string name="debug_panel">Debug Anzeige</string>
+    <string name="debug_panel">Debug-Ausgaben</string>
     <string name="debug_decoded_payload">Dekodiertes Payload:</string>
     <string name="debug_logs_export">Protokolle exportieren</string>
     <string name="debug_filters">Filter</string>
@@ -176,7 +176,7 @@
     <string name="traceroute">Traceroute</string>
     <string name="intro_show">Einführung zeigen</string>
     <string name="message">Nachricht</string>
-    <string name="quick_chat">Schnellchat-Optionen</string>
+    <string name="quick_chat">Schnellchat</string>
     <string name="quick_chat_new">Neuer Schnell-Chat</string>
     <string name="quick_chat_edit">Schnell-Chat bearbeiten</string>
     <string name="quick_chat_append">An Nachricht anhängen</string>
