@@ -581,7 +581,7 @@
     <string name="secondary">Sekundär</string>
     <string name="secondary_no_telemetry">Kein regelmäßiges senden der Telemetrie</string>
     <string name="manual_position_request">Manuelle Positionsanfrage erforderlich</string>
-    <string name="press_and_drag">Drücke und ziehe um neu zu sortieren</string>
+    <string name="press_and_drag">Drücken und ziehen, um neu zu sortieren</string>
     <string name="unmute">Stummschaltung aufheben</string>
     <string name="dynamic">Dynamisch</string>
     <string name="scan_qr_code">QR Code scannen</string>
