@@ -886,7 +886,7 @@
     "tags": [
       "Elecrow"
     ],
-    "requiresDfu": true,
+    "requiresDfu": false,
     "images": [
       "thinknode_m1.svg"
     ],
