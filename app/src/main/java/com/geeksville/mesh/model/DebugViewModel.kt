@@ -287,7 +287,7 @@ class DebugViewModel @Inject constructor(
     private fun annotateRawMessage(rawMessage: String, vararg nodeIds: Int): String {
         val msg = StringBuilder(rawMessage)
         var mutated = false
-        nodeIds.forEach { nodeId ->
+        nodeIds.toSet().forEach { nodeId ->
             mutated = mutated or msg.annotateNodeId(nodeId)
         }
         return if (mutated) {
@@ -303,8 +303,16 @@ class DebugViewModel @Inject constructor(
      */
     private fun StringBuilder.annotateNodeId(nodeId: Int): Boolean {
         val nodeIdStr = nodeId.toUInt().toString()
-        indexOf(nodeIdStr).takeIf { it >= 0 }?.let { idx ->
-            insert(idx + nodeIdStr.length, " (${nodeId.asNodeId()})")
+        // Only match if whitespace before and after
+        val regex = Regex("""(?<=\s|^)${Regex.escape(nodeIdStr)}(?=\s|$)""")
+        regex.find(this)?.let { matchResult ->
+            matchResult.groupValues
+                .let { _ ->
+                    regex.findAll(this).toList().asReversed().forEach { match ->
+                        val idx = match.range.last + 1
+                        insert(idx, " (${nodeId.asNodeId()})")
+                    }
+                }
             return true
         }
         return false
