@@ -57,6 +57,7 @@ MAPS_API_KEY=your_google_maps_api_key_here
 For detailed instructions on how to contribute, please see our [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 ## Repository Statistics
-![Alt](https://repobeats.axiom.co/api/embed/fdb0a61e65b85e53bf4b5f92e634b0f352953d00.svg "Repobeats analytics image")
+
+![Alt](https://repobeats.axiom.co/api/embed/1d75239069a6d671fe0b8f80b2e1bf590a98f0eb.svg "Repobeats analytics image")
 
 Copyright 2025, Meshtastic LLC. GPL-3.0 license
