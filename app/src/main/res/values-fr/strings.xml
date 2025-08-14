@@ -97,7 +97,7 @@
     <string name="pairing_failed_try_again">Le jumelage a échoué, veuillez sélectionner à nouveau</string>
     <string name="location_disabled">L\'accès à la localisation est désactivé, impossible de fournir la position du maillage.</string>
     <string name="share">Partager</string>
-    <string name="new_node_seen">Nouveau noeud vu : %s</string>
+    <string name="new_node_seen">Nouveau nœud vu : %s</string>
     <string name="disconnected">Déconnecté</string>
     <string name="device_sleeping">Appareil en veille</string>
     <string name="connected_count">Connectés : %1$s sur en ligne</string>
@@ -114,7 +114,7 @@
     <string name="about">A propros</string>
     <string name="channel_invalid">Cette URL de canal est invalide et ne peut pas être utilisée</string>
     <string name="debug_panel">Panneau de débogage</string>
-    <string name="debug_decoded_payload">Charge décodée:</string>
+    <string name="debug_decoded_payload">Charge décodée :</string>
     <string name="debug_logs_export">Exporter les logs</string>
     <string name="debug_filters">Filtres</string>
     <string name="debug_active_filters">Filtres actifs</string>
@@ -655,7 +655,7 @@
     <string name="clean_low_interaction_nodes">Nettoyer les nœuds avec une interaction faible/sans interaction</string>
     <string name="clean_ignored_nodes">Nettoyer les nœuds ignorés</string>
     <string name="clean_now">Nettoyer maintenant</string>
-    <string name="clean_node_database_confirmation">Cela supprimera les %1$d nœuds  de votre base de données. Cette action ne peut pas être annulée.</string>
+    <string name="clean_node_database_confirmation">Cela supprimera les %1$d nœuds de votre base de données. Cette action ne peut pas être annulée.</string>
     <string name="security_icon_help_green_lock">Un cadenas vert signifie que le canal est chiffré de façon sécurisée avec une clé AES 128 ou 256 bits.</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <string name="security_icon_insecure_no_precise">Canal non sécurisé, non précisé</string>
@@ -664,7 +664,7 @@
     <string name="security_icon_insecure_precise_only">Canal non sécurisé, localisation précise</string>
     <string name="security_icon_help_red_open_lock">Un cadenas rouge ouvert signifie que le canal n\'est pas crypté de manière sécurisée, est utilisé pour des données de localisation précises, et n\'utilise aucune clé du tout, ou une clé connue de 1 octet.</string>
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
-    <string name="security_icon_warning_precise_mqtt">Afficher l\'état actuel</string>
+    <string name="security_icon_warning_precise_mqtt">Attention : Localisation précise &amp; MQTT non sécurisée</string>
     <string name="security_icon_help_warning_precise_mqtt">Un cadenas rouge ouvert avec un avertissement signifie que le canal n\'est pas crypté de manière sécurisée, est utilisé pour des données de localisation précises qui sont placées sur Internet via MQTT, et n\'utilise aucune clé du tout, ou une clé connue de 1 octet.</string>
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="security_icon_help_title">Sécurité du canal</string>
@@ -672,7 +672,7 @@
     <string name="security_icon_help_show_all">Afficher toutes les significations</string>
     <string name="security_icon_help_show_less">Afficher l\'état actuel</string>
     <string name="security_icon_help_dismiss">Annuler</string>
-    <string name="confirm_delete_node">Êtes-vous sûr de vouloir supprimer ce nœud?</string>
+    <string name="confirm_delete_node">Êtes-vous sûr de vouloir supprimer ce nœud ?</string>
     <string name="replying_to">Répondre à %1$s</string>
     <string name="cancel_reply">Annuler la réponse</string>
     <string name="delete_messages_title">Supprimer les messages ?</string>
@@ -683,7 +683,7 @@
     <string name="pax">PAX</string>
     <string name="no_pax_metrics_logs">Aucun journal de métriques PAX disponible.</string>
     <string name="wifi_devices">Périphériques WiFi</string>
-    <string name="ble_devices">Apapreils BLE</string>
+    <string name="ble_devices">Appareils BLE</string>
     <string name="routing_error_rate_limit_exceeded">Limite de débit dépassée. Veuillez réessayer plus tard.</string>
     <string name="view_release">Voir la version</string>
     <string name="download">Télécharger</string>
@@ -707,7 +707,14 @@
     <string name="notifications_for_channel_and_direct_messages">Notifications pour le canal et les messages directs.</string>
     <string name="new_nodes">Nouveaux nœuds</string>
     <string name="notifications_for_newly_discovered_nodes">Notifications pour les nouveaux nœuds découverts.</string>
+    <string name="low_battery">Batterie faible</string>
+    <string name="phone_location">Localisation du téléphone</string>
+    <string name="share_location">Localisation partagée</string>
+    <string name="distance_measurements">Mesures de distance</string>
+    <string name="distance_filters">Filtres de distance</string>
     <string name="skip">Ignorer</string>
+    <string name="settings">Paramètres</string>
+    <string name="critical_alerts">Alertes critiques</string>
     <string name="next">Suivant</string>
     <string name="map_type_normal">Normal</string>
     <string name="map_type_satellite">Satellite</string>
