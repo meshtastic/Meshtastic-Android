@@ -693,15 +693,23 @@
     <string name="map_type_terrain">Ландшафт</string>
     <string name="map_type_hybrid">Смешанный</string>
     <string name="manage_map_layers">Управление Слоями Карты</string>
+    <string name="map_layers_title">Слои карты</string>
     <string name="no_map_layers_loaded">Пользовательские слои не загружены.</string>
+    <string name="add_layer_button">Добавить слой</string>
+    <string name="hide_layer">Скрыть слой</string>
+    <string name="show_layer">Показать слой</string>
     <string name="remove_layer">Удалить слой</string>
     <string name="add_layer">Добавить слой</string>
     <string name="nodes_at_this_location">Узлы в этом месте</string>
     <string name="selected_map_type">Выбранный тип карты</string>
     <string name="manage_custom_tile_sources">Управление собственными источниками плиток</string>
+    <string name="add_custom_tile_source">Добавить свой источник плиток</string>
     <string name="no_custom_tile_sources_found">Нет пользовательских источников плиток</string>
     <string name="edit_custom_tile_source">Изменить свой источник плиток</string>
+    <string name="delete_custom_tile_source">Удалить свой источник плиток</string>
+    <string name="name_cannot_be_empty">Имя не может быть пустым.</string>
     <string name="provider_name_exists">Имя провайдера уже существует.</string>
+    <string name="url_cannot_be_empty">URL не может быть пустым.</string>
     <string name="url_must_contain_placeholders">URL должен содержать placeholders.</string>
     <string name="url_template">Шаблон URL</string>
 </resources>
