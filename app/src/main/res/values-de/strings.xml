@@ -542,7 +542,7 @@
     <string name="power_metrics_update_interval_seconds">Aktualisierungsintervall für Energiedaten (Sekunden)</string>
     <string name="power_metrics_on_screen_enabled">Energiedatenanzeige aktiviert</string>
     <string name="user_config">Benutzer Einstellungen</string>
-    <string name="node_id">Knoten ID</string>
+    <string name="node_id">Knoten-ID</string>
     <string name="long_name">Vollständiger Name</string>
     <string name="short_name">Spitzname</string>
     <string name="hardware_model">Geräte-Modell</string>
