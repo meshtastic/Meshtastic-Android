@@ -279,6 +279,7 @@
     <string name="bluetooth">Bluetooth</string>
     <string name="security">Сигурност</string>
     <string name="mqtt">MQTT</string>
+    <string name="serial">Серийна</string>
     <string name="external_notification">Външно известие</string>
     <string name="store_forward"><![CDATA[Съхраняване & препращане]]></string>
     <string name="range_test">Тест на обхвата</string>
@@ -365,6 +366,7 @@
     <string name="ipv4_mode">Режим на IPv4</string>
     <string name="ip">IP</string>
     <string name="gateway">Шлюз</string>
+    <string name="subnet">Подмрежа</string>
     <string name="paxcounter_config">Конфигуриране на Paxcounter</string>
     <string name="paxcounter_enabled">Paxcounter е активиран</string>
     <string name="wifi_rssi_threshold_defaults_to_80">Праг на WiFi RSSI (по подразбиране -80)</string>
@@ -391,6 +393,9 @@
     <string name="admin_key">Администраторски ключ</string>
     <string name="managed_mode">Управляем режим</string>
     <string name="serial_console">Серийна конзола</string>
+    <string name="serial_config">Конфигуриране на серийната връзка</string>
+    <string name="serial_enabled">Серийната връзка е активирана</string>
+    <string name="serial_baud_rate">Серийна скорост на предаване</string>
     <string name="serial_mode">Сериен режим</string>
     <string name="store_forward_enabled"><![CDATA[Съхраняване & препращане е активиран]]></string>
     <string name="number_of_records">Брой записи</string>
@@ -557,6 +562,7 @@
     <string name="remove_layer">Премахване на слой</string>
     <string name="add_layer">Добавяне на слой</string>
     <string name="nodes_at_this_location">Възли на това място</string>
+    <string name="selected_map_type">Избран тип на картата</string>
     <string name="name_cannot_be_empty">Името не може да бъде празно.</string>
     <string name="url_cannot_be_empty">URL не може да бъде празен.</string>
 </resources>
