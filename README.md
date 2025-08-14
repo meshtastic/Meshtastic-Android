@@ -1,5 +1,5 @@
 <p align="center">
-  <a href=""><img width="200" height="200" src="https://raw.githubusercontent.com/meshtastic/Meshtastic-Android/refs/heads/main/app/src/main/res/mipmap-xxxhdpi/ic_launcher2.png"></a>
+  <a href=""><img width="200" height="200" src="https://raw.githubusercontent.com/meshtastic/Meshtastic-Android/refs/heads/main/logo.png"></a>
 </p>
 <h1 align="center">Meshtastic-Android</h1>
 
