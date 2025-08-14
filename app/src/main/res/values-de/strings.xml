@@ -33,7 +33,7 @@
     <string name="node_sort_via_mqtt">über MQTT</string>
     <string name="via_mqtt">über MQTT</string>
     <string name="node_sort_via_favorite">über Favorit</string>
-    <string name="node_filter_show_ignored">Ignorierte Nodes</string>
+    <string name="node_filter_show_ignored">Ignorierte Knoten</string>
     <string name="unrecognized">Unbekannt</string>
     <string name="message_status_enroute">Warte auf Bestätigung</string>
     <string name="message_status_queued">zur Warteschlange für das Senden hinzugefügt</string>
@@ -113,7 +113,7 @@
     <string name="meshtastic_service_notifications">Dienst-Benachrichtigungen</string>
     <string name="about">Über</string>
     <string name="channel_invalid">Diese Kanal-URL ist ungültig und kann nicht verwendet werden</string>
-    <string name="debug_panel">Debug Anzeige</string>
+    <string name="debug_panel">Debug-Ausgaben</string>
     <string name="debug_decoded_payload">Dekodiertes Payload:</string>
     <string name="debug_logs_export">Protokolle exportieren</string>
     <string name="debug_filters">Filter</string>
@@ -176,7 +176,7 @@
     <string name="traceroute">Traceroute</string>
     <string name="intro_show">Einführung zeigen</string>
     <string name="message">Nachricht</string>
-    <string name="quick_chat">Schnellchat-Optionen</string>
+    <string name="quick_chat">Schnellchat</string>
     <string name="quick_chat_new">Neuer Schnell-Chat</string>
     <string name="quick_chat_edit">Schnell-Chat bearbeiten</string>
     <string name="quick_chat_append">An Nachricht anhängen</string>
@@ -542,7 +542,7 @@
     <string name="power_metrics_update_interval_seconds">Aktualisierungsintervall für Energiedaten (Sekunden)</string>
     <string name="power_metrics_on_screen_enabled">Energiedatenanzeige aktiviert</string>
     <string name="user_config">Benutzer Einstellungen</string>
-    <string name="node_id">Knoten ID</string>
+    <string name="node_id">Knoten-ID</string>
     <string name="long_name">Vollständiger Name</string>
     <string name="short_name">Spitzname</string>
     <string name="hardware_model">Geräte-Modell</string>
@@ -623,7 +623,7 @@
     <string name="map_filter">Kartenfilter\n</string>
     <string name="only_favorites">Nur Favoriten</string>
     <string name="show_waypoints">Zeige Wegpunkte</string>
-    <string name="show_precision_circle">Präzisionskreise anzeigen</string>
+    <string name="show_precision_circle">Präzise Bereiche anzeigen</string>
     <string name="client_notification">Warnmeldung</string>
     <string name="compromised_keys">Kompromittierte Schlüssel erkannt, wählen Sie OK, um diese neu zu erstellen.</string>
     <string name="regenerate_private_key">Privaten Schlüssel neu erstellen</string>

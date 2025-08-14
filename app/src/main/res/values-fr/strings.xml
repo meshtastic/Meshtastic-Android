@@ -595,7 +595,7 @@
     <string name="request_metadata">Récupérer les métadonnées</string>
     <string name="actions">Actions</string>
     <string name="firmware">Micrologiciel</string>
-    <string name="use_12h_format">Utiliser le format horaire 12 h</string>
+    <string name="use_12h_format">Utiliser le format horaire 12h</string>
     <string name="display_time_in_12h_format">Affiche l’heure au format 12 h une fois activé.</string>
     <string name="host_metrics_log">Journal des métriques de l’hôte</string>
     <string name="host">Hôte</string>
