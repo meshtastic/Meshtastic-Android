@@ -21,8 +21,6 @@ devtools-ksp = "2.2.0-2.0.2"
 emoji2 = "1.5.0"
 espresso-core = "3.7.0"
 firebase-bom = "34.1.0"
-fragment-compose = "1.8.8"
-fragment-ktx = "1.8.9"
 google-services = "4.4.3"
 hilt = "2.57"
 hilt-navigation-compose = "1.2.0"
@@ -106,8 +104,6 @@ firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 firebase-crashlytics-gradle = { group = "com.google.firebase", name = "firebase-crashlytics-gradle", version.ref = "crashlytics" }
-fragment-compose = { module = "androidx.fragment:fragment-compose", version.ref = "fragment-compose" }
-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragment-ktx" }
 google-services = { group = "com.google.gms", name = "google-services", version.ref = "google-services" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-android-gradle-plugin = { group = "com.google.dagger", name = "hilt-android-gradle-plugin", version.ref = "hilt" }
@@ -164,7 +160,7 @@ zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing-c
 
 [bundles]
 # Core AndroidX
-androidx = ["core-ktx", "appcompat", "appcompat-resources", "fragment-ktx", "actvity-ktx", "fragment-compose", "activity-compose"]
+androidx = ["core-ktx", "appcompat", "appcompat-resources", "actvity-ktx", "activity-compose"]
 
 # UI
 ui = ["material", "constraintlayout", "compose-material3", "compose-material-icons-extended", "compose-ui-tooling-preview", "compose-runtime-livedata"]
