@@ -59,6 +59,8 @@ constructor(
         lifecycleOwner.lifecycle.addObserver(this)
     }
 
+    //region ServiceClient overrides
+
     override fun onConnected(service: IMeshService) {
         serviceSetupJob?.cancel()
         serviceSetupJob =
@@ -72,6 +74,10 @@ constructor(
         serviceSetupJob?.cancel()
         serviceRepository.setMeshService(null)
     }
+
+    //endregion
+
+    //region DefaultLifecycleObserver overrides
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
@@ -91,6 +97,8 @@ constructor(
         owner.lifecycle.removeObserver(this)
         debug("Removed self as LifecycleObserver to $lifecycleOwner")
     }
+
+    //endregion
 
     private fun bindMeshService() {
         debug("Binding to mesh service!")
