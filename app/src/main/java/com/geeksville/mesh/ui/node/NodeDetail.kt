@@ -292,7 +292,7 @@ sealed interface NodeDetailAction {
 
     data class TriggerServiceActionWithCallback(
         val action: ServiceAction,
-        val callback: (MeshProtos.DeviceMetadata?) -> Unit
+        val callback: (Any?) -> Unit
     ) : NodeDetailAction
 
     data class HandleNodeMenuAction(val action: NodeMenuAction) : NodeDetailAction
@@ -448,7 +448,7 @@ private fun AdministrationSection(
     
     PreferenceCategory(stringResource(id = R.string.administration)) {
         var showMetadataDialog by remember { mutableStateOf(false) }
-        var metadataResponse by remember { mutableStateOf<String?>(null) }
+        var metadataResponse by remember { mutableStateOf<Boolean?>(null) }
         var isWaitingForMetadata by remember { mutableStateOf(false) }
         var showTimeoutMessage by remember { mutableStateOf(false) }
 
@@ -464,21 +464,9 @@ private fun AdministrationSection(
                         ServiceAction.GetDeviceMetadata(node.num)
                     ) { response ->
                         isWaitingForMetadata = false
-                        metadataResponse = response?.let { metadata ->
-                            buildString {
-                                appendLine("Firmware Version: ${metadata.firmwareVersion}")
-                                appendLine("Device State Version: ${metadata.deviceStateVersion}")
-                                appendLine("Hardware Model: ${metadata.hwModel}")
-                                appendLine("Can Shutdown: ${metadata.canShutdown}")
-                                appendLine("Has WiFi: ${metadata.hasWifi}")
-                                appendLine("Has Bluetooth: ${metadata.hasBluetooth}")
-                                appendLine("Has Ethernet: ${metadata.hasEthernet}")
-                                appendLine("Role: ${metadata.role}")
-                                appendLine("Position Flags: ${metadata.positionFlags}")
-                                appendLine("Has Remote Hardware: ${metadata.hasRemoteHardware}")
-                                appendLine("Has PKC: ${metadata.hasPKC}")
-                                appendLine("Excluded Modules: ${metadata.excludedModules}")
-                            }
+                        val metadata = response as? MeshProtos.DeviceMetadata
+                        metadataResponse = metadata?.let { metadata ->
+                             true
                         }
                         showMetadataDialog = true
                     }
@@ -523,13 +511,13 @@ private fun AdministrationSection(
                 title = { Text(stringResource(id = R.string.request_metadata)) },
                 text = { 
                     Text(
-                        text = metadataResponse ?: "",
+                        text =  stringResource(id = R.string.request_metadata_success) ?: "",
                         modifier = Modifier.verticalScroll(rememberScrollState())
                     )
                 },
                 confirmButton = {
                     TextButton(onClick = { showMetadataDialog = false }) {
-                        Text(stringResource(id = android.R.string.ok))
+                        Text(stringResource(id = R.string.okay))
                     }
                 }
             )

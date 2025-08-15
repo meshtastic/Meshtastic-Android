@@ -243,13 +243,14 @@ constructor(
     }
 
     fun onServiceAction(action: ServiceAction) = viewModelScope.launch { radioConfigRepository.onServiceAction(action) }
-    // FIXME: this should not be hardcoded to a particular Meshproto.
-    fun onServiceActionWithCallback(action: ServiceAction, callback: (MeshProtos.DeviceMetadata?) -> Unit) = viewModelScope.launch { 
-        // For metadata requests, we need to handle the callback differently
+    
+    // Generic callback for service actions.
+    fun onServiceActionWithCallback(action: ServiceAction, callback: (Any?) -> Unit) = viewModelScope.launch {
         when (action) {
             is ServiceAction.GetDeviceMetadata -> {
-                // Create a new action with the callback
-                val actionWithCallback = ServiceAction.GetDeviceMetadata(action.destNum, callback)
+                // Wrap generic callback with typed one
+                val metadataCallback: (MeshProtos.DeviceMetadata?) -> Unit = { metadata -> callback(metadata) }
+                val actionWithCallback = ServiceAction.GetDeviceMetadata(action.destNum, metadataCallback)
                 radioConfigRepository.onServiceAction(actionWithCallback)
             }
             else -> radioConfigRepository.onServiceAction(action)
