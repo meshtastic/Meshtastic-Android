@@ -104,7 +104,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:hardwareAccelerated="true"
-        android:theme="@style/AppTheme"
+        android:theme="@style/SplashTheme"
         android:localeConfig="@xml/locales_config">
 
         <!-- Default crash collection and analytics off until we (possibly) turn it on in application.onCreate -->
