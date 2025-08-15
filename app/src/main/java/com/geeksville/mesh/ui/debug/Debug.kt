@@ -250,13 +250,6 @@ private fun DebugItemHeader(log: UiMeshLog, searchText: String, isSelected: Bool
                 }
             }
         CopyIconButton(valueToCopy = fullLogText, modifier = Modifier.padding(start = 8.dp))
-        Icon(
-            imageVector = Icons.Outlined.FileDownload,
-            contentDescription = stringResource(id = R.string.logs),
-            tint = Color.Gray.copy(alpha = 0.6f),
-            modifier = Modifier.padding(end = 8.dp),
-            // FIXME: this is disabled at the moment.
-        )
         val dateAnnotatedString = rememberAnnotatedString(text = log.formattedReceivedDate, searchText = searchText)
         Text(
             text = dateAnnotatedString,
