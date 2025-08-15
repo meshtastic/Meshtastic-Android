@@ -102,6 +102,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -451,6 +452,14 @@ private fun AdministrationSection(
         var metadataResponse by remember { mutableStateOf<Boolean?>(null) }
         var isWaitingForMetadata by remember { mutableStateOf(false) }
         var showTimeoutMessage by remember { mutableStateOf(false) }
+        var timeoutJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+        
+        // Cleanup timeout job when component is disposed
+        DisposableEffect(Unit) {
+            onDispose {
+                timeoutJob?.cancel()
+            }
+        }
 
         NodeActionButton(
             title = stringResource(id = R.string.request_metadata),
@@ -462,18 +471,20 @@ private fun AdministrationSection(
                 onAction(
                     NodeDetailAction.TriggerServiceActionWithCallback(
                         ServiceAction.GetDeviceMetadata(node.num)
-                    ) { response ->
+                                        ) { response ->
                         isWaitingForMetadata = false
+                        // Cancel the timeout job since we got a response
+                        timeoutJob?.cancel()
                         val metadata = response as? MeshProtos.DeviceMetadata
                         metadataResponse = metadata?.let { metadata ->
-                             true
+                            true
                         }
                         showMetadataDialog = true
                     }
                 )
                 
                 // Set a timeout to stop waiting after 5 seconds
-                coroutineScope.launch {
+                timeoutJob = coroutineScope.launch {
                     delay(5000)
                     if (isWaitingForMetadata) {
                         isWaitingForMetadata = false
@@ -489,7 +500,10 @@ private fun AdministrationSection(
         // Show waiting popup
         if (isWaitingForMetadata) {
             AlertDialog(
-                onDismissRequest = { },
+                onDismissRequest = { 
+                    isWaitingForMetadata = false
+                    timeoutJob?.cancel()
+                },
                 title = { Text("Requesting Metadata") },
                 text = { 
                     Column(
