@@ -652,6 +652,7 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
                             val idx = line.indexOf(':')
                             if (idx != -1) {
                                 outputLine = line.substring(0, idx + 1)
+                                outputLine += "<redacted>"
                             }
                         }
                         writer.write(outputLine)
