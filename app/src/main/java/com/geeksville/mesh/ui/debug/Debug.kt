@@ -633,12 +633,11 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
         OutputStreamWriter(FileOutputStream(logFile), StandardCharsets.UTF_8).use { writer ->
             logs.forEach { log ->
                 writer.write("${log.formattedReceivedDate} [${log.messageType}]\n")
-
                 writer.write(log.logMessage)
-
                 if (!log.decodedPayload.isNullOrBlank()) {
                     writer.write("\n\nDecoded Payload:\n{")
                     writer.write("\n")
+                    // Redact Decoded keys.
                     log.decodedPayload.lineSequence().forEach { line ->
                         var outputLine = line
                         val redacted = redactedKeys.firstOrNull { line.contains(it) }

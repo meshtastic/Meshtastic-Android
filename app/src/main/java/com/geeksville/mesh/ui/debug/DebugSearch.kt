@@ -107,12 +107,7 @@ internal fun DebugSearchBar(
         value = searchState.searchText,
         onValueChange = onSearchTextChange,
         modifier = modifier.then(Modifier.padding(end = 8.dp)),
-        placeholder = {
-            // Only show placeholder if the field is empty and not focused
-            if (searchState.searchText.isEmpty()) {
-                Text(stringResource(R.string.debug_default_search))
-            }
-        },
+        placeholder = { Text(stringResource(R.string.debug_default_search)) },
         singleLine = true,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
         keyboardActions =
@@ -122,28 +117,25 @@ internal fun DebugSearchBar(
             },
         ),
         trailingIcon = {
-            // Only show trailing icon(s) if there is text or matches, not at the same time as placeholder
-            if (searchState.searchText.isNotEmpty() || searchState.hasMatches) {
-                Row(
-                    modifier = Modifier.width(IntrinsicSize.Min),
-                    horizontalArrangement = Arrangement.spacedBy(2.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    if (searchState.hasMatches) {
-                        DebugSearchNavigation(
-                            searchState = searchState,
-                            onNextMatch = onNextMatch,
-                            onPreviousMatch = onPreviousMatch,
+            Row(
+                modifier = Modifier.width(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                if (searchState.hasMatches) {
+                    DebugSearchNavigation(
+                        searchState = searchState,
+                        onNextMatch = onNextMatch,
+                        onPreviousMatch = onPreviousMatch,
+                    )
+                }
+                if (searchState.searchText.isNotEmpty()) {
+                    IconButton(onClick = onClearSearch, modifier = Modifier.size(32.dp)) {
+                        Icon(
+                            imageVector = Icons.Default.Clear,
+                            contentDescription = stringResource(R.string.debug_search_clear),
+                            modifier = Modifier.size(16.dp),
                         )
-                    }
-                    if (searchState.searchText.isNotEmpty()) {
-                        IconButton(onClick = onClearSearch, modifier = Modifier.size(32.dp)) {
-                            Icon(
-                                imageVector = Icons.Default.Clear,
-                                contentDescription = stringResource(R.string.debug_search_clear),
-                                modifier = Modifier.size(16.dp),
-                            )
-                        }
                     }
                 }
             }
