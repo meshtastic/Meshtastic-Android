@@ -59,7 +59,7 @@ constructor(
         lifecycleOwner.lifecycle.addObserver(this)
     }
 
-    //region ServiceClient overrides
+    // region ServiceClient overrides
 
     override fun onConnected(service: IMeshService) {
         serviceSetupJob?.cancel()
@@ -75,9 +75,9 @@ constructor(
         serviceRepository.setMeshService(null)
     }
 
-    //endregion
+    // endregion
 
-    //region DefaultLifecycleObserver overrides
+    // region DefaultLifecycleObserver overrides
 
     override fun onStart(owner: LifecycleOwner) {
         super.onStart(owner)
@@ -86,7 +86,7 @@ constructor(
         try {
             bindMeshService()
         } catch (ex: BindFailedException) {
-            errormsg("Bind of MeshService failed${ex.message}")
+            errormsg("Bind of MeshService failed: ${ex.message}")
         }
     }
 
@@ -98,14 +98,14 @@ constructor(
         debug("Removed self as LifecycleObserver to $lifecycleOwner")
     }
 
-    //endregion
+    // endregion
 
     private fun bindMeshService() {
         debug("Binding to mesh service!")
         try {
             MeshService.startService(activity)
         } catch (ex: Exception) {
-            errormsg("Failed to start service from activity - but ignoring because bind will work ${ex.message}")
+            errormsg("Failed to start service from activity - but ignoring because bind will work: ${ex.message}")
         }
 
         connect(activity, MeshService.createIntent(), BIND_AUTO_CREATE + BIND_ABOVE_CLIENT)
