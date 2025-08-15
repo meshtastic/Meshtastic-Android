@@ -44,17 +44,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalView
 import androidx.core.content.edit
 import androidx.core.net.toUri
-import androidx.lifecycle.lifecycleScope
 import com.geeksville.mesh.android.BindFailedException
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.android.ServiceClient
-import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.DEEP_LINK_BASE_URI
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.service.ServiceRepository
 import com.geeksville.mesh.service.startService
 import com.geeksville.mesh.ui.MainMenuAction
 import com.geeksville.mesh.ui.MainScreen
@@ -65,7 +61,6 @@ import com.geeksville.mesh.ui.sharing.toSharedContact
 import com.geeksville.mesh.util.LanguageUtils
 import com.geeksville.mesh.util.getPackageInfoCompat
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Job
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -75,7 +70,7 @@ class MainActivity :
     private val bluetoothViewModel: BluetoothViewModel by viewModels()
     private val model: UIViewModel by viewModels()
 
-    @Inject internal lateinit var serviceRepository: ServiceRepository
+    @Inject internal lateinit var meshServiceClient: MeshServiceClient
 
     private var showAppIntro by mutableStateOf(false)
 
@@ -223,25 +218,6 @@ class MainActivity :
             }
         }
 
-    private var serviceSetupJob: Job? = null
-
-    private val mesh =
-        object : ServiceClient<IMeshService>(IMeshService.Stub::asInterface) {
-            override fun onConnected(service: IMeshService) {
-                serviceSetupJob?.cancel()
-                serviceSetupJob =
-                    lifecycleScope.handledLaunch {
-                        serviceRepository.setMeshService(service)
-                        debug("connected to mesh service, connectionState=${model.connectionState.value}")
-                    }
-            }
-
-            override fun onDisconnected() {
-                serviceSetupJob?.cancel()
-                serviceRepository.setMeshService(null)
-            }
-        }
-
     private fun bindMeshService() {
         debug("Binding to mesh service!")
         try {
@@ -250,7 +226,7 @@ class MainActivity :
             errormsg("Failed to start service from activity - but ignoring because bind will work ${ex.message}")
         }
 
-        mesh.connect(this, MeshService.createIntent(), BIND_AUTO_CREATE + BIND_ABOVE_CLIENT)
+        meshServiceClient.connect(this, MeshService.createIntent(), BIND_AUTO_CREATE + BIND_ABOVE_CLIENT)
     }
 
     override fun onStart() {
