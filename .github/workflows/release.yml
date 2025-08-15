@@ -25,7 +25,7 @@ jobs:
       versionNameBase: ${{ steps.get_version.outputs.versionNameBase }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.inputs.branch }}
           submodules: 'recursive'
@@ -50,7 +50,7 @@ jobs:
       apk_name: fdroidRelease-${{ needs.prepare-release-info.outputs.versionNameBase }}-${{ needs.prepare-release-info.outputs.versionCode }}.apk
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.inputs.branch }}
           submodules: 'recursive'
@@ -106,7 +106,7 @@ jobs:
       apk_name: googleRelease-${{ needs.prepare-release-info.outputs.versionNameBase }}-${{ needs.prepare-release-info.outputs.versionCode }}.apk
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ github.event.inputs.branch }}
           submodules: 'recursive'
@@ -120,6 +120,7 @@ jobs:
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
           echo "datadogApplicationId=$DATADOG_APPLICATION_ID" >> ./secrets.properties
           echo "datadogClientToken=$DATADOG_CLIENT_TOKEN" >> ./secrets.properties
+          echo "MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> ./secrets.properties
         env:
           GSERVICES: ${{ secrets.GSERVICES }}
           KEYSTORE: ${{ secrets.KEYSTORE }}
@@ -127,6 +128,7 @@ jobs:
           KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
           DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
           DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4
@@ -168,6 +170,10 @@ jobs:
   create-github-release:
     needs: [ prepare-release-info, build-fdroid, build-google ]
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: write
+      attestations: write
     # Only run this job if the input create_github_release is true
     if: github.repository == 'meshtastic/Meshtastic-Android' && github.event.inputs.create_github_release == 'true'
     steps:
@@ -209,7 +215,7 @@ jobs:
           prerelease: true
           release_name: Meshtastic Android ${{ env.versionNameBase }} (${{ env.versionCode }}) alpha
           tag_name: v${{ env.versionNameBase }}
-          target_commitish: ${{ github.event.inputs.branch }}
+          commitish: ${{ github.event.inputs.branch }}
           body: |
             Version: ${{ env.versionNameBase }} (${{ env.versionCode }})
 
@@ -260,3 +266,11 @@ jobs:
           asset_path: ./version_info.txt
           asset_name: version_info.txt
           asset_content_type: text/plain
+
+      - name: Attest Build Provenance
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            ./google-apk-download/app-google-release.apk
+            ./google-aab-download/app-google-release.aab
+            ./fdroid-apk-download/app-fdroid-release.apk

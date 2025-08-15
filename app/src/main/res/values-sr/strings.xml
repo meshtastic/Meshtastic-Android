@@ -355,4 +355,6 @@
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="security_icon_help_dismiss">Отпусти</string>
     <string name="message_input_label">Порука</string>
+    <string name="map_type_satellite">Сателит</string>
+    <string name="map_type_hybrid">Хибридни</string>
 </resources>

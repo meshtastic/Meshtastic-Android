@@ -31,6 +31,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.recalculateWindowInsets
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.Chat
@@ -107,13 +109,14 @@ import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.showLongNameTitle
 import com.geeksville.mesh.repository.radio.MeshActivity
+import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
+import com.geeksville.mesh.ui.common.theme.StatusColors.StatusBlue
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusOrange
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
 import com.geeksville.mesh.ui.debug.DebugMenuActions
@@ -166,7 +169,7 @@ fun MainScreen(
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         val notificationPermissionState = rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
         LaunchedEffect(connectionState, notificationPermissionState) {
-            if (connectionState.isConnected() && !notificationPermissionState.status.isGranted) {
+            if (connectionState == ConnectionState.CONNECTED && !notificationPermissionState.status.isGranted) {
                 notificationPermissionState.launchPermissionRequest()
             }
         }
@@ -174,7 +177,7 @@ fun MainScreen(
 
     AddNavigationTracking(navController)
 
-    if (connectionState.isConnected()) {
+    if (connectionState == ConnectionState.CONNECTED) {
         requestChannelSet?.let { newChannelSet -> ScannedQrCodeDialog(uIViewModel, newChannelSet) }
     }
 
@@ -226,7 +229,7 @@ fun MainScreen(
     traceRouteResponse?.let { response ->
         SimpleAlertDialog(
             title = R.string.traceroute,
-            text = { Text(text = response) },
+            text = { Column(modifier = Modifier.verticalScroll(rememberScrollState())) { Text(text = response) } },
             dismissText = stringResource(id = R.string.okay),
             onDismiss = { uIViewModel.clearTracerouteResponse() },
         )
@@ -241,8 +244,8 @@ fun MainScreen(
     val coroutineScope = rememberCoroutineScope()
     val capturedColorScheme = colorScheme // Capture current colorScheme instance for LaunchedEffect
 
-    val sendColor = capturedColorScheme.StatusOrange
-    val receiveColor = capturedColorScheme.StatusYellow
+    val sendColor = capturedColorScheme.StatusGreen
+    val receiveColor = capturedColorScheme.StatusBlue
     LaunchedEffect(uIViewModel.meshActivity, capturedColorScheme) {
         uIViewModel.meshActivity.collectLatest { activity ->
             debug("MeshActivity Event: $activity, Current Alpha: ${animatedGlowAlpha.value}")
@@ -387,7 +390,7 @@ fun MainScreen(
 }
 
 @Composable
-private fun TopLevelNavIcon(destination: TopLevelDestination, connectionState: MeshService.ConnectionState) {
+private fun TopLevelNavIcon(destination: TopLevelDestination, connectionState: ConnectionState) {
     val iconTint =
         when {
             destination == TopLevelDestination.Connections -> connectionState.getConnectionColor()
@@ -412,6 +415,8 @@ private fun VersionChecks(viewModel: UIViewModel) {
     val myNodeInfo by viewModel.myNodeInfo.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
+    val myFirmwareVersion = myNodeInfo?.firmwareVersion
+
     val firmwareEdition by viewModel.firmwareEdition.collectAsStateWithLifecycle(null)
 
     val currentFirmwareVersion by viewModel.firmwareVersion.collectAsStateWithLifecycle(null)
@@ -421,7 +426,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
     val latestStableFirmwareRelease by
         viewModel.latestStableFirmwareRelease.collectAsStateWithLifecycle(DeviceVersion("2.6.4"))
     LaunchedEffect(connectionState, firmwareEdition) {
-        if (connectionState == MeshService.ConnectionState.CONNECTED) {
+        if (connectionState == ConnectionState.CONNECTED) {
             firmwareEdition?.let { edition ->
                 debug("FirmwareEdition: ${edition.name}")
                 when (edition) {
@@ -438,7 +443,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
     }
 
     LaunchedEffect(connectionState, currentFirmwareVersion, currentDeviceHardware) {
-        if (connectionState == MeshService.ConnectionState.CONNECTED) {
+        if (connectionState == ConnectionState.CONNECTED) {
             if (currentDeviceHardware != null && currentFirmwareVersion != null) {
                 setAttributes(currentFirmwareVersion!!, currentDeviceHardware!!)
             }
@@ -447,10 +452,9 @@ private fun VersionChecks(viewModel: UIViewModel) {
 
     // Check if the device is running an old app version or firmware version
     LaunchedEffect(connectionState, myNodeInfo) {
-        if (connectionState == MeshService.ConnectionState.CONNECTED) {
+        if (connectionState == ConnectionState.CONNECTED) {
             myNodeInfo?.let { info ->
                 val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
-                val curVer = DeviceVersion(info.firmwareVersion ?: "0.0.0")
                 if (isOld) {
                     viewModel.showAlert(
                         context.getString(R.string.app_too_old),
@@ -461,22 +465,28 @@ private fun VersionChecks(viewModel: UIViewModel) {
                             MeshService.changeDeviceAddress(context, service, "n")
                         },
                     )
-                } else if (curVer < MeshService.absoluteMinDeviceVersion) {
-                    val title = context.getString(R.string.firmware_too_old)
-                    val message = context.getString(R.string.firmware_old)
-                    viewModel.showAlert(
-                        title = title,
-                        html = message,
-                        dismissable = false,
-                        onConfirm = {
-                            val service = viewModel.meshService ?: return@showAlert
-                            MeshService.changeDeviceAddress(context, service, "n")
-                        },
-                    )
-                } else if (curVer < MeshService.minDeviceVersion) {
-                    val title = context.getString(R.string.should_update_firmware)
-                    val message = context.getString(R.string.should_update, latestStableFirmwareRelease.asString)
-                    viewModel.showAlert(title = title, message = message, dismissable = false, onConfirm = {})
+                } else {
+                    myFirmwareVersion?.let {
+                        val curVer = DeviceVersion(it)
+                        if (curVer < MeshService.absoluteMinDeviceVersion) {
+                            val title = context.getString(R.string.firmware_too_old)
+                            val message = context.getString(R.string.firmware_old)
+                            viewModel.showAlert(
+                                title = title,
+                                html = message,
+                                dismissable = false,
+                                onConfirm = {
+                                    val service = viewModel.meshService ?: return@showAlert
+                                    MeshService.changeDeviceAddress(context, service, "n")
+                                },
+                            )
+                        } else if (curVer < MeshService.minDeviceVersion) {
+                            val title = context.getString(R.string.should_update_firmware)
+                            val message =
+                                context.getString(R.string.should_update, latestStableFirmwareRelease.asString)
+                            viewModel.showAlert(title = title, message = message, dismissable = false, onConfirm = {})
+                        }
+                    }
                 }
             }
         }
@@ -583,7 +593,7 @@ private fun TopBarActions(
     onAction: (Any?) -> Unit,
 ) {
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val isConnected by viewModel.isConnected.collectAsStateWithLifecycle(false)
+    val isConnected by viewModel.isConnectedStateFlow.collectAsStateWithLifecycle(false)
     AnimatedVisibility(ourNode != null && currentDestination?.isTopLevel() == true && isConnected) {
         ourNode?.let { NodeChip(node = it, isThisNode = true, isConnected = isConnected, onAction = onAction) }
     }
@@ -631,21 +641,21 @@ private fun MainMenuActions(isManaged: Boolean, onAction: (MainMenuAction) -> Un
 }
 
 @Composable
-private fun MeshService.ConnectionState.getConnectionColor(): Color = when (this) {
-    MeshService.ConnectionState.CONNECTED -> colorScheme.StatusGreen
-    MeshService.ConnectionState.DEVICE_SLEEP -> colorScheme.StatusYellow
-    MeshService.ConnectionState.DISCONNECTED -> colorScheme.StatusRed
+private fun ConnectionState.getConnectionColor(): Color = when (this) {
+    ConnectionState.CONNECTED -> colorScheme.StatusGreen
+    ConnectionState.DEVICE_SLEEP -> colorScheme.StatusYellow
+    ConnectionState.DISCONNECTED -> colorScheme.StatusRed
 }
 
-private fun MeshService.ConnectionState.getConnectionIcon(): ImageVector = when (this) {
-    MeshService.ConnectionState.CONNECTED -> Icons.TwoTone.CloudDone
-    MeshService.ConnectionState.DEVICE_SLEEP -> Icons.TwoTone.CloudUpload
-    MeshService.ConnectionState.DISCONNECTED -> Icons.TwoTone.CloudOff
+private fun ConnectionState.getConnectionIcon(): ImageVector = when (this) {
+    ConnectionState.CONNECTED -> Icons.TwoTone.CloudDone
+    ConnectionState.DEVICE_SLEEP -> Icons.TwoTone.CloudUpload
+    ConnectionState.DISCONNECTED -> Icons.TwoTone.CloudOff
 }
 
 @Composable
-private fun MeshService.ConnectionState.getTooltipString(): String = when (this) {
-    MeshService.ConnectionState.CONNECTED -> stringResource(R.string.connected)
-    MeshService.ConnectionState.DEVICE_SLEEP -> stringResource(R.string.device_sleeping)
-    MeshService.ConnectionState.DISCONNECTED -> stringResource(R.string.disconnected)
+private fun ConnectionState.getTooltipString(): String = when (this) {
+    ConnectionState.CONNECTED -> stringResource(R.string.connected)
+    ConnectionState.DEVICE_SLEEP -> stringResource(R.string.device_sleeping)
+    ConnectionState.DISCONNECTED -> stringResource(R.string.disconnected)
 }

@@ -28,11 +28,11 @@ import android.content.Intent
 import android.graphics.Color
 import android.media.AudioAttributes
 import android.media.RingtoneManager
-import android.os.Build
-import androidx.annotation.RequiresApi
+import androidx.annotation.StringRes
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
 import androidx.core.app.RemoteInput
+import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.MeshProtos
@@ -43,452 +43,240 @@ import com.geeksville.mesh.navigation.DEEP_LINK_BASE_URI
 import com.geeksville.mesh.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
 import com.geeksville.mesh.util.formatUptime
 
+/**
+ * Manages the creation and display of all app notifications.
+ *
+ * This class centralizes notification logic, including channel creation, builder configuration, and displaying
+ * notifications for various events like new messages, alerts, and service status changes.
+ */
 @Suppress("TooManyFunctions")
 class MeshServiceNotifications(private val context: Context) {
 
-    val notificationLightColor = Color.BLUE
+    private val notificationManager = context.getSystemService<NotificationManager>()!!
 
     companion object {
         private const val FIFTEEN_MINUTES_IN_MILLIS = 15L * 60 * 1000
         const val MAX_BATTERY_LEVEL = 100
+        const val SERVICE_NOTIFY_ID = 101
+        private val NOTIFICATION_LIGHT_COLOR = Color.BLUE
     }
 
-    private val notificationManager: NotificationManager =
-        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    /**
+     * Sealed class to define the properties of each notification channel. This centralizes channel configuration and
+     * makes it type-safe.
+     */
+    private sealed class NotificationType(
+        val channelId: String,
+        @StringRes val channelNameRes: Int,
+        val importance: Int,
+    ) {
+        object ServiceState :
+            NotificationType(
+                "my_service",
+                R.string.meshtastic_service_notifications,
+                NotificationManager.IMPORTANCE_MIN,
+            )
 
-    // We have two notification channels: one for general service status and another one for messages
-    val notifyId = 101
+        object DirectMessage :
+            NotificationType(
+                "my_messages",
+                R.string.meshtastic_messages_notifications,
+                NotificationManager.IMPORTANCE_HIGH,
+            )
+
+        object BroadcastMessage :
+            NotificationType(
+                "my_broadcasts",
+                R.string.meshtastic_broadcast_notifications,
+                NotificationManager.IMPORTANCE_DEFAULT,
+            )
+
+        object Alert :
+            NotificationType(
+                "my_alerts",
+                R.string.meshtastic_alerts_notifications,
+                NotificationManager.IMPORTANCE_HIGH,
+            )
+
+        object NewNode :
+            NotificationType(
+                "new_nodes",
+                R.string.meshtastic_new_nodes_notifications,
+                NotificationManager.IMPORTANCE_DEFAULT,
+            )
+
+        object LowBatteryLocal :
+            NotificationType(
+                "low_battery",
+                R.string.meshtastic_low_battery_notifications,
+                NotificationManager.IMPORTANCE_DEFAULT,
+            )
+
+        object LowBatteryRemote :
+            NotificationType(
+                "low_battery_remote",
+                R.string.meshtastic_low_battery_temporary_remote_notifications,
+                NotificationManager.IMPORTANCE_DEFAULT,
+            )
+
+        object Client :
+            NotificationType("client_notifications", R.string.client_notification, NotificationManager.IMPORTANCE_HIGH)
+
+        companion object {
+            // A list of all types for easy initialization.
+            fun allTypes() = listOf(
+                ServiceState,
+                DirectMessage,
+                BroadcastMessage,
+                Alert,
+                NewNode,
+                LowBatteryLocal,
+                LowBatteryRemote,
+                Client,
+            )
+        }
+    }
 
     fun clearNotifications() {
         notificationManager.cancelAll()
     }
 
+    /**
+     * Creates all necessary notification channels on devices running Android O or newer. This should be called once
+     * when the service is created.
+     */
     fun initChannels() {
-        // create notification channels on service creation
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createNotificationChannel()
-            createMessageNotificationChannel()
-            createBroadcastNotificationChannel()
-            createAlertNotificationChannel()
-            createNewNodeNotificationChannel()
-            createLowBatteryNotificationChannel()
-            createLowBatteryRemoteNotificationChannel()
-            createClientNotificationChannel()
-        }
+        NotificationType.allTypes().forEach { type -> createNotificationChannel(type) }
     }
 
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createNotificationChannel(): String {
-        val channelId = "my_service"
-        if (notificationManager.getNotificationChannel(channelId) == null) {
-            val channelName = context.getString(R.string.meshtastic_service_notifications)
-            val channel =
-                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_MIN).apply {
-                    lightColor = notificationLightColor
-                    lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+    private fun createNotificationChannel(type: NotificationType) {
+        if (notificationManager.getNotificationChannel(type.channelId) != null) return
+
+        val channelName = context.getString(type.channelNameRes)
+        val channel =
+            NotificationChannel(type.channelId, channelName, type.importance).apply {
+                lightColor = NOTIFICATION_LIGHT_COLOR
+                lockscreenVisibility = Notification.VISIBILITY_PUBLIC // Default, can be overridden
+
+                // Type-specific configurations
+                when (type) {
+                    NotificationType.ServiceState -> {
+                        lockscreenVisibility = Notification.VISIBILITY_PRIVATE
+                    }
+                    NotificationType.DirectMessage,
+                    NotificationType.BroadcastMessage,
+                    NotificationType.NewNode,
+                    NotificationType.LowBatteryLocal,
+                    NotificationType.LowBatteryRemote,
+                    -> {
+                        setShowBadge(true)
+                        setSound(
+                            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
+                            AudioAttributes.Builder()
+                                .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                                .build(),
+                        )
+                        if (type == NotificationType.LowBatteryRemote) enableVibration(true)
+                    }
+                    NotificationType.Alert -> {
+                        setShowBadge(true)
+                        enableLights(true)
+                        enableVibration(true)
+                        setBypassDnd(true)
+                        val alertSoundUri =
+                            "${ContentResolver.SCHEME_ANDROID_RESOURCE}://${context.packageName}/${R.raw.alert}".toUri()
+                        setSound(
+                            alertSoundUri,
+                            AudioAttributes.Builder()
+                                .setUsage(AudioAttributes.USAGE_ALARM) // More appropriate for an alert
+                                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                                .build(),
+                        )
+                    }
+                    NotificationType.Client -> {
+                        setShowBadge(true)
+                    }
                 }
-            notificationManager.createNotificationChannel(channel)
-        }
-        return channelId
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createMessageNotificationChannel(): String {
-        val channelId = "my_messages"
-        if (notificationManager.getNotificationChannel(channelId) == null) {
-            val channelName = context.getString(R.string.meshtastic_messages_notifications)
-            val channel =
-                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH).apply {
-                    lightColor = notificationLightColor
-                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                    setShowBadge(true)
-                    setSound(
-                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
-                        AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build(),
-                    )
-                }
-            notificationManager.createNotificationChannel(channel)
-        }
-        return channelId
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createBroadcastNotificationChannel(): String {
-        val channelId = "my_broadcasts"
-        if (notificationManager.getNotificationChannel(channelId) == null) {
-            val channelName = context.getString(R.string.meshtastic_broadcast_notifications)
-            val channel =
-                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_DEFAULT).apply {
-                    lightColor = notificationLightColor
-                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                    setShowBadge(true)
-                    setSound(
-                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
-                        AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build(),
-                    )
-                }
-            notificationManager.createNotificationChannel(channel)
-        }
-        return channelId
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createAlertNotificationChannel(): String {
-        val channelId = "my_alerts"
-        if (notificationManager.getNotificationChannel(channelId) == null) {
-            val channelName = context.getString(R.string.meshtastic_alerts_notifications)
-            val channel =
-                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH).apply {
-                    enableLights(true)
-                    enableVibration(true)
-                    setBypassDnd(true)
-                    lightColor = notificationLightColor
-                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                    setShowBadge(true)
-                    val alertSoundUri =
-                        (
-                            ContentResolver.SCHEME_ANDROID_RESOURCE +
-                                "://" +
-                                context.applicationContext.packageName +
-                                "/" +
-                                R.raw.alert
-                            )
-                            .toUri()
-                    setSound(
-                        alertSoundUri,
-                        AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build(),
-                    )
-                }
-            notificationManager.createNotificationChannel(channel)
-        }
-        return channelId
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createNewNodeNotificationChannel(): String {
-        val channelId = "new_nodes"
-        if (notificationManager.getNotificationChannel(channelId) == null) {
-            val channelName = context.getString(R.string.meshtastic_new_nodes_notifications)
-            val channel =
-                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH).apply {
-                    lightColor = notificationLightColor
-                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                    setShowBadge(true)
-                    setSound(
-                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
-                        AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build(),
-                    )
-                }
-            notificationManager.createNotificationChannel(channel)
-        }
-        return channelId
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createLowBatteryNotificationChannel(): String {
-        val channelId = "low_battery"
-        if (notificationManager.getNotificationChannel(channelId) == null) {
-            val channelName = context.getString(R.string.meshtastic_low_battery_notifications)
-            val channel =
-                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH).apply {
-                    lightColor = notificationLightColor
-                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                    setShowBadge(true)
-                    setSound(
-                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
-                        AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build(),
-                    )
-                }
-            notificationManager.createNotificationChannel(channel)
-        }
-        return channelId
-    }
-
-    // FIXME, Once we get a dedicated settings page in the app, this function should be removed and
-    //     the feature should be implemented in the regular low battery notification stuff
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createLowBatteryRemoteNotificationChannel(): String {
-        val channelId = "low_battery_remote"
-        if (notificationManager.getNotificationChannel(channelId) == null) {
-            val channelName = context.getString(R.string.meshtastic_low_battery_temporary_remote_notifications)
-            val channel =
-                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH).apply {
-                    lightColor = notificationLightColor
-                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                    enableVibration(true)
-                    setShowBadge(true)
-                    setSound(
-                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION),
-                        AudioAttributes.Builder()
-                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
-                            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                            .build(),
-                    )
-                }
-            notificationManager.createNotificationChannel(channel)
-        }
-        return channelId
-    }
-
-    @RequiresApi(Build.VERSION_CODES.O)
-    private fun createClientNotificationChannel(): String {
-        val channelId = "client_notifications"
-        if (notificationManager.getNotificationChannel(channelId) == null) {
-            val channelName = context.getString(R.string.client_notification)
-            val channel =
-                NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_HIGH).apply {
-                    lightColor = notificationLightColor
-                    lockscreenVisibility = Notification.VISIBILITY_PUBLIC
-                    setShowBadge(true)
-                }
-            notificationManager.createNotificationChannel(channel)
-        }
-        return channelId
-    }
-
-    private val channelId: String by lazy {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createNotificationChannel()
-        } else {
-            // If earlier version channel ID is not used
-            // https://developer.android.com/reference/android/support/v4/app/NotificationCompat.Builder.html#NotificationCompat.Builder(android.content.Context)
-            ""
-        }
-    }
-
-    private val messageChannelId: String by lazy {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createMessageNotificationChannel()
-        } else {
-            // If earlier version channel ID is not used
-            // https://developer.android.com/reference/android/support/v4/app/NotificationCompat.Builder.html#NotificationCompat.Builder(android.content.Context)
-            ""
-        }
-    }
-
-    private val broadcastChannelId: String by lazy {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createBroadcastNotificationChannel()
-        } else {
-            ""
-        }
-    }
-
-    private val alertChannelId: String by lazy {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createAlertNotificationChannel()
-        } else {
-            ""
-        }
-    }
-
-    private val newNodeChannelId: String by lazy {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createNewNodeNotificationChannel()
-        } else {
-            ""
-        }
-    }
-
-    private val lowBatteryChannelId: String by lazy {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createLowBatteryNotificationChannel()
-        } else {
-            ""
-        }
-    }
-
-    // FIXME, Once we get a dedicated settings page in the app, this function should be removed and
-    //     the feature should be implemented in the regular low battery notification stuff
-    private val lowBatteryRemoteChannelId: String by lazy {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createLowBatteryRemoteNotificationChannel()
-        } else {
-            ""
-        }
-    }
-
-    private val clientNotificationChannelId: String by lazy {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createClientNotificationChannel()
-        } else {
-            ""
-        }
-    }
-
-    private fun LocalStats?.formatToString(): String = this?.allFields
-        ?.mapNotNull { (k, v) ->
-            when (k.name) {
-                "num_online_nodes",
-                "num_total_nodes",
-                -> return@mapNotNull null
-                "uptime_seconds" -> "Uptime: ${formatUptime(v as Int)}"
-                "channel_utilization" -> "ChUtil: %.2f%%".format(v)
-                "air_util_tx" -> "AirUtilTX: %.2f%%".format(v)
-                else ->
-                    "${
-                        k.name.replace('_', ' ').split(" ")
-                            .joinToString(" ") { it.replaceFirstChar { char -> char.uppercase() } }
-                    }: $v"
             }
-        }
-        ?.joinToString("\n") ?: "No Local Stats"
+        notificationManager.createNotificationChannel(channel)
+    }
 
+    // region Public Notification Methods
     fun updateServiceStateNotification(
-        summaryString: String? = null,
+        summaryString: String?,
         localStats: LocalStats? = null,
-        currentStatsUpdatedAtMillis: Long? = null,
-    ) {
-        notificationManager.notify(
-            notifyId,
+        currentStatsUpdatedAtMillis: Long? = System.currentTimeMillis(),
+    ): Notification {
+        val notification =
             createServiceStateNotification(
                 name = summaryString.orEmpty(),
                 message = localStats.formatToString(),
                 nextUpdateAt = currentStatsUpdatedAtMillis?.plus(FIFTEEN_MINUTES_IN_MILLIS),
-            ),
-        )
+            )
+        notificationManager.notify(SERVICE_NOTIFY_ID, notification)
+        return notification
     }
 
-    fun cancelMessageNotification(contactKey: String) {
-        notificationManager.cancel(contactKey.hashCode())
+    fun updateMessageNotification(contactKey: String, name: String, message: String, isBroadcast: Boolean) {
+        val notification = createMessageNotification(contactKey, name, message, isBroadcast)
+        // Use a consistent, unique ID for each message conversation.
+        notificationManager.notify(contactKey.hashCode(), notification)
     }
-
-    fun updateMessageNotification(contactKey: String, name: String, message: String, isBroadcast: Boolean) =
-        notificationManager.notify(
-            contactKey.hashCode(), // show unique notifications,
-            createMessageNotification(contactKey, name, message, isBroadcast),
-        )
 
     fun showAlertNotification(contactKey: String, name: String, alert: String) {
-        notificationManager.notify(
-            name.hashCode(), // show unique notifications,
-            createAlertNotification(contactKey, name, alert),
-        )
+        val notification = createAlertNotification(contactKey, name, alert)
+        // Use a consistent, unique ID for each alert source.
+        notificationManager.notify(name.hashCode(), notification)
     }
 
     fun showNewNodeSeenNotification(node: NodeEntity) {
-        notificationManager.notify(
-            node.num, // show unique notifications
-            createNewNodeSeenNotification(node.user.shortName, node.user.longName),
-        )
+        val notification = createNewNodeSeenNotification(node.user.shortName, node.user.longName)
+        notificationManager.notify(node.num, notification)
     }
 
     fun showOrUpdateLowBatteryNotification(node: NodeEntity, isRemote: Boolean) {
-        notificationManager.notify(
-            node.num, // show unique notifications
-            createLowBatteryNotification(node, isRemote),
-        )
+        val notification = createLowBatteryNotification(node, isRemote)
+        notificationManager.notify(node.num, notification)
     }
 
-    fun cancelLowBatteryNotification(node: NodeEntity) {
-        notificationManager.cancel(node.num)
+    fun showClientNotification(clientNotification: MeshProtos.ClientNotification) {
+        val notification =
+            createClientNotification(context.getString(R.string.client_notification), clientNotification.message)
+        notificationManager.notify(clientNotification.toString().hashCode(), notification)
     }
 
-    fun showClientNotification(notification: MeshProtos.ClientNotification) {
-        notificationManager.notify(
-            notification.toString().hashCode(), // show unique notifications
-            createClientNotification(context.getString(R.string.client_notification), notification.message),
-        )
-    }
+    fun cancelMessageNotification(contactKey: String) = notificationManager.cancel(contactKey.hashCode())
 
-    fun clearClientNotification(notification: MeshProtos.ClientNotification) {
+    fun cancelLowBatteryNotification(node: NodeEntity) = notificationManager.cancel(node.num)
+
+    fun clearClientNotification(notification: MeshProtos.ClientNotification) =
         notificationManager.cancel(notification.toString().hashCode())
-    }
 
-    private val openAppIntent: PendingIntent by lazy {
-        PendingIntent.getActivity(
-            context,
-            0,
-            Intent(context, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_SINGLE_TOP },
-            PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-        )
-    }
+    // endregion
 
-    private fun createMessageReplyIntent(contactKey: String): Intent =
-        Intent(context, ReplyReceiver::class.java).apply {
-            action = ReplyReceiver.REPLY_ACTION
-            putExtra(ReplyReceiver.CONTACT_KEY, contactKey)
-        }
-
-    private fun createOpenMessageIntent(contactKey: String): PendingIntent {
-        val intentFlags = Intent.FLAG_ACTIVITY_SINGLE_TOP
-        val deepLink = "$DEEP_LINK_BASE_URI/messages/$contactKey"
-        val deepLinkIntent =
-            Intent(Intent.ACTION_VIEW, deepLink.toUri(), context, MainActivity::class.java).apply {
-                flags = intentFlags
-            }
-
-        val deepLinkPendingIntent: PendingIntent =
-            TaskStackBuilder.create(context).run {
-                addNextIntentWithParentStack(deepLinkIntent)
-                getPendingIntent(0, PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
-            }
-
-        return deepLinkPendingIntent
-    }
-
-    private fun commonBuilder(channel: String, contentIntent: PendingIntent? = null): NotificationCompat.Builder {
+    // region Notification Creation
+    private fun createServiceStateNotification(name: String, message: String?, nextUpdateAt: Long?): Notification {
         val builder =
-            NotificationCompat.Builder(context, channel)
-                .setDefaults(NotificationCompat.DEFAULT_ALL)
-                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-                .setContentIntent(contentIntent ?: openAppIntent)
+            commonBuilder(NotificationType.ServiceState)
+                .setPriority(NotificationCompat.PRIORITY_MIN)
+                .setCategory(Notification.CATEGORY_SERVICE)
+                .setOngoing(true)
+                .setContentTitle(name)
+                .setShowWhen(true)
 
-        builder.setSmallIcon(
-            // vector form icons don't work reliably on older androids
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
-                R.drawable.app_icon_novect
-            } else {
-                R.drawable.app_icon
-            },
-        )
-        return builder
-    }
-
-    lateinit var serviceNotificationBuilder: NotificationCompat.Builder
-
-    fun createServiceStateNotification(
-        name: String,
-        message: String? = null,
-        nextUpdateAt: Long? = null,
-    ): Notification {
-        if (!::serviceNotificationBuilder.isInitialized) {
-            serviceNotificationBuilder = commonBuilder(channelId)
+        message?.let {
+            builder.setContentText(it)
+            builder.setStyle(NotificationCompat.BigTextStyle().bigText(it))
         }
-        with(serviceNotificationBuilder) {
-            priority = NotificationCompat.PRIORITY_MIN
-            setCategory(Notification.CATEGORY_SERVICE)
-            setOngoing(true)
-            setContentTitle(name)
-            message?.let {
-                setContentText(it)
-                setStyle(NotificationCompat.BigTextStyle().bigText(message))
-            }
-            nextUpdateAt?.let {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                    setWhen(it)
-                    setUsesChronometer(true)
-                    setChronometerCountDown(true)
-                }
-            } ?: { setWhen(System.currentTimeMillis()) }
-            setShowWhen(true)
+
+        nextUpdateAt?.let {
+            builder.setWhen(it)
+            builder.setUsesChronometer(true)
+            builder.setChronometerCountDown(true)
         }
-        return serviceNotificationBuilder.build()
+
+        return builder.build()
     }
 
     private fun createMessageNotification(
@@ -497,139 +285,165 @@ class MeshServiceNotifications(private val context: Context) {
         message: String,
         isBroadcast: Boolean,
     ): Notification {
-        val channelId = if (isBroadcast) broadcastChannelId else messageChannelId
-        val messageNotificationBuilder: NotificationCompat.Builder =
-            commonBuilder(channelId, createOpenMessageIntent(contactKey))
+        val type = if (isBroadcast) NotificationType.BroadcastMessage else NotificationType.DirectMessage
+        val builder = commonBuilder(type, createOpenMessageIntent(contactKey))
 
         val person = Person.Builder().setName(name).build()
-        // Key for the string that's delivered in the action's intent.
-        val replyLabel: String = context.getString(R.string.reply)
-        val remoteInput: RemoteInput =
-            RemoteInput.Builder(KEY_TEXT_REPLY).run {
-                setLabel(replyLabel)
-                build()
+        val style = NotificationCompat.MessagingStyle(person).addMessage(message, System.currentTimeMillis(), person)
+
+        builder
+            .setCategory(Notification.CATEGORY_MESSAGE)
+            .setAutoCancel(true)
+            .setStyle(style)
+            .setVisibility(NotificationCompat.VISIBILITY_PRIVATE)
+            .setWhen(System.currentTimeMillis())
+            .setShowWhen(true)
+
+        // Only add reply action for direct messages, not broadcasts
+        if (!isBroadcast) {
+            builder.addAction(createReplyAction(contactKey))
+        }
+
+        return builder.build()
+    }
+
+    private fun createAlertNotification(contactKey: String, name: String, alert: String): Notification {
+        val person = Person.Builder().setName(name).build()
+        val style = NotificationCompat.MessagingStyle(person).addMessage(alert, System.currentTimeMillis(), person)
+
+        return commonBuilder(NotificationType.Alert, createOpenMessageIntent(contactKey))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(Notification.CATEGORY_ALARM)
+            .setAutoCancel(true)
+            .setStyle(style)
+            .build()
+    }
+
+    private fun createNewNodeSeenNotification(name: String, message: String?): Notification {
+        val title = context.getString(R.string.new_node_seen).format(name)
+        val builder =
+            commonBuilder(NotificationType.NewNode)
+                .setCategory(Notification.CATEGORY_STATUS)
+                .setAutoCancel(true)
+                .setContentTitle(title)
+                .setWhen(System.currentTimeMillis())
+                .setShowWhen(true)
+
+        message?.let {
+            builder.setContentText(it)
+            builder.setStyle(NotificationCompat.BigTextStyle().bigText(it))
+        }
+        return builder.build()
+    }
+
+    private fun createLowBatteryNotification(node: NodeEntity, isRemote: Boolean): Notification {
+        val type = if (isRemote) NotificationType.LowBatteryRemote else NotificationType.LowBatteryLocal
+        val title = context.getString(R.string.low_battery_title).format(node.shortName)
+        val message =
+            context.getString(R.string.low_battery_message).format(node.longName, node.deviceMetrics.batteryLevel)
+
+        return commonBuilder(type)
+            .setCategory(Notification.CATEGORY_STATUS)
+            .setOngoing(true)
+            .setOnlyAlertOnce(true)
+            .setProgress(MAX_BATTERY_LEVEL, node.deviceMetrics.batteryLevel, false)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            .setWhen(System.currentTimeMillis())
+            .setShowWhen(true)
+            .build()
+    }
+
+    private fun createClientNotification(name: String, message: String?): Notification =
+        commonBuilder(NotificationType.Client)
+            .setCategory(Notification.CATEGORY_ERROR)
+            .setAutoCancel(true)
+            .setContentTitle(name)
+            .apply {
+                message?.let {
+                    setContentText(it)
+                    setStyle(NotificationCompat.BigTextStyle().bigText(it))
+                }
+            }
+            .build()
+
+    // endregion
+
+    // region Helper/Builder Methods
+    private val openAppIntent: PendingIntent by lazy {
+        val intent = Intent(context, MainActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_SINGLE_TOP }
+        PendingIntent.getActivity(context, 0, intent, PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+    }
+
+    private fun createOpenMessageIntent(contactKey: String): PendingIntent {
+        val deepLinkUri = "$DEEP_LINK_BASE_URI/messages/$contactKey".toUri()
+        val deepLinkIntent =
+            Intent(Intent.ACTION_VIEW, deepLinkUri, context, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_SINGLE_TOP
             }
 
-        // Build a PendingIntent for the reply action to trigger.
-        val replyPendingIntent: PendingIntent =
+        return TaskStackBuilder.create(context).run {
+            addNextIntentWithParentStack(deepLinkIntent)
+            getPendingIntent(contactKey.hashCode(), PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+    }
+
+    private fun createReplyAction(contactKey: String): NotificationCompat.Action {
+        val replyLabel = context.getString(R.string.reply)
+        val remoteInput = RemoteInput.Builder(KEY_TEXT_REPLY).setLabel(replyLabel).build()
+
+        val replyIntent =
+            Intent(context, ReplyReceiver::class.java).apply {
+                action = ReplyReceiver.REPLY_ACTION
+                putExtra(ReplyReceiver.CONTACT_KEY, contactKey)
+            }
+        val replyPendingIntent =
             PendingIntent.getBroadcast(
                 context,
                 contactKey.hashCode(),
-                createMessageReplyIntent(contactKey),
+                replyIntent,
                 PendingIntent.FLAG_MUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
             )
-        // Create the reply action and add the remote input.
-        val action: NotificationCompat.Action =
-            NotificationCompat.Action.Builder(android.R.drawable.ic_menu_send, replyLabel, replyPendingIntent)
-                .addRemoteInput(remoteInput)
-                .build()
 
-        with(messageNotificationBuilder) {
-            priority = NotificationCompat.PRIORITY_DEFAULT
-            setCategory(Notification.CATEGORY_MESSAGE)
-            setAutoCancel(true)
-            setStyle(NotificationCompat.MessagingStyle(person).addMessage(message, System.currentTimeMillis(), person))
-            addAction(action)
-            setWhen(System.currentTimeMillis())
-            setShowWhen(true)
-        }
-        return messageNotificationBuilder.build()
+        return NotificationCompat.Action.Builder(android.R.drawable.ic_menu_send, replyLabel, replyPendingIntent)
+            .addRemoteInput(remoteInput)
+            .build()
     }
 
-    lateinit var alertNotificationBuilder: NotificationCompat.Builder
+    private fun commonBuilder(
+        type: NotificationType,
+        contentIntent: PendingIntent? = null,
+    ): NotificationCompat.Builder {
+        val smallIcon = R.drawable.app_icon
 
-    private fun createAlertNotification(contactKey: String, name: String, alert: String): Notification {
-        if (!::alertNotificationBuilder.isInitialized) {
-            alertNotificationBuilder = commonBuilder(alertChannelId, createOpenMessageIntent(contactKey))
-        }
-        val person = Person.Builder().setName(name).build()
-        with(alertNotificationBuilder) {
-            priority = NotificationCompat.PRIORITY_HIGH
-            setCategory(Notification.CATEGORY_ALARM)
-            setAutoCancel(true)
-            setStyle(NotificationCompat.MessagingStyle(person).addMessage(alert, System.currentTimeMillis(), person))
-        }
-        return alertNotificationBuilder.build()
+        return NotificationCompat.Builder(context, type.channelId)
+            .setSmallIcon(smallIcon)
+            .setColor(NOTIFICATION_LIGHT_COLOR)
+            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+            .setContentIntent(contentIntent ?: openAppIntent)
     }
+    // endregion
+}
 
-    lateinit var newNodeSeenNotificationBuilder: NotificationCompat.Builder
+// Extension function to format LocalStats into a readable string.
+private fun LocalStats?.formatToString(): String {
+    if (this == null) return "No Local Stats"
 
-    private fun createNewNodeSeenNotification(name: String, message: String? = null): Notification {
-        if (!::newNodeSeenNotificationBuilder.isInitialized) {
-            newNodeSeenNotificationBuilder = commonBuilder(newNodeChannelId)
-        }
-        with(newNodeSeenNotificationBuilder) {
-            priority = NotificationCompat.PRIORITY_DEFAULT
-            setCategory(Notification.CATEGORY_STATUS)
-            setAutoCancel(true)
-            setContentTitle(context.getString(R.string.new_node_seen).format(name))
-            message?.let {
-                setContentText(it)
-                setStyle(NotificationCompat.BigTextStyle().bigText(message))
-            }
-            setWhen(System.currentTimeMillis())
-            setShowWhen(true)
-        }
-        return newNodeSeenNotificationBuilder.build()
-    }
-
-    lateinit var lowBatteryRemoteNotificationBuilder: NotificationCompat.Builder
-    lateinit var lowBatteryNotificationBuilder: NotificationCompat.Builder
-
-    private fun createLowBatteryNotification(node: NodeEntity, isRemote: Boolean): Notification {
-        val tempNotificationBuilder: NotificationCompat.Builder =
-            if (isRemote) {
-                if (!::lowBatteryRemoteNotificationBuilder.isInitialized) {
-                    lowBatteryRemoteNotificationBuilder = commonBuilder(lowBatteryChannelId)
+    return this.allFields
+        .mapNotNull { (k, v) ->
+            when (k.name) {
+                "num_online_nodes",
+                "num_total_nodes",
+                -> null // Exclude these fields
+                "uptime_seconds" -> "Uptime: ${formatUptime(v as Int)}"
+                "channel_utilization" -> "ChUtil: %.2f%%".format(v)
+                "air_util_tx" -> "AirUtilTX: %.2f%%".format(v)
+                else -> {
+                    val formattedKey = k.name.replace('_', ' ').replaceFirstChar { it.titlecase() }
+                    "$formattedKey: $v"
                 }
-                lowBatteryRemoteNotificationBuilder
-            } else {
-                if (!::lowBatteryNotificationBuilder.isInitialized) {
-                    lowBatteryNotificationBuilder = commonBuilder(lowBatteryRemoteChannelId)
-                }
-                lowBatteryNotificationBuilder
-            }
-        with(tempNotificationBuilder) {
-            priority = NotificationCompat.PRIORITY_DEFAULT
-            setCategory(Notification.CATEGORY_STATUS)
-            setOngoing(true)
-            setShowWhen(true)
-            setOnlyAlertOnce(true)
-            setWhen(System.currentTimeMillis())
-            setProgress(MAX_BATTERY_LEVEL, node.deviceMetrics.batteryLevel, false)
-            setContentTitle(context.getString(R.string.low_battery_title).format(node.shortName))
-            val message =
-                context.getString(R.string.low_battery_message).format(node.longName, node.deviceMetrics.batteryLevel)
-            message.let {
-                setContentText(it)
-                setStyle(NotificationCompat.BigTextStyle().bigText(it))
             }
         }
-        if (isRemote) {
-            lowBatteryRemoteNotificationBuilder = tempNotificationBuilder
-            return lowBatteryRemoteNotificationBuilder.build()
-        } else {
-            lowBatteryNotificationBuilder = tempNotificationBuilder
-            return lowBatteryNotificationBuilder.build()
-        }
-    }
-
-    lateinit var clientNotificationBuilder: NotificationCompat.Builder
-
-    private fun createClientNotification(name: String, message: String? = null): Notification {
-        if (!::clientNotificationBuilder.isInitialized) {
-            clientNotificationBuilder = commonBuilder(clientNotificationChannelId)
-        }
-        with(clientNotificationBuilder) {
-            priority = NotificationCompat.PRIORITY_DEFAULT
-            setCategory(Notification.CATEGORY_ERROR)
-            setAutoCancel(true)
-            setContentTitle(name)
-            message?.let {
-                setContentText(it)
-                setStyle(NotificationCompat.BigTextStyle().bigText(message))
-            }
-        }
-        return clientNotificationBuilder.build()
-    }
+        .joinToString("\n")
 }

@@ -96,7 +96,7 @@ import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
-import com.geeksville.mesh.service.MeshService
+import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.connections.components.BLEDevices
 import com.geeksville.mesh.ui.connections.components.NetworkDevices
 import com.geeksville.mesh.ui.connections.components.UsbDevices
@@ -138,7 +138,7 @@ fun ConnectionsScreen(
     val currentRegion = config.lora.region
     val scrollState = rememberScrollState()
     val scanStatusText by scanModel.errorText.observeAsState("")
-    val connectionState by uiViewModel.connectionState.collectAsState(MeshService.ConnectionState.DISCONNECTED)
+    val connectionState by uiViewModel.connectionState.collectAsState(ConnectionState.DISCONNECTED)
     val scanning by scanModel.spinner.collectAsStateWithLifecycle(false)
     val receivingLocationUpdates by uiViewModel.receivingLocationUpdates.collectAsState(false)
     val context = LocalContext.current
@@ -147,8 +147,7 @@ fun ConnectionsScreen(
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val bluetoothEnabled by bluetoothViewModel.enabled.collectAsStateWithLifecycle(false)
     val regionUnset =
-        currentRegion == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET &&
-            connectionState == MeshService.ConnectionState.CONNECTED
+        currentRegion == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET && connectionState == ConnectionState.CONNECTED
 
     val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
     val discoveredTcpDevices by scanModel.discoveredTcpDevicesForUi.collectAsStateWithLifecycle()
@@ -179,12 +178,12 @@ fun ConnectionsScreen(
     val isGpsDisabled = context.gpsDisabled()
     LaunchedEffect(isGpsDisabled) {
         if (isGpsDisabled) {
-            uiViewModel.showSnackbar(context.getString(R.string.location_disabled))
+            uiViewModel.showSnackBar(context.getString(R.string.location_disabled))
         }
     }
     LaunchedEffect(bluetoothEnabled) {
         if (!bluetoothEnabled) {
-            uiViewModel.showSnackbar(context.getString(R.string.bluetooth_disabled))
+            uiViewModel.showSnackBar(context.getString(R.string.bluetooth_disabled))
         }
     }
     // when scanning is true - wait 10000ms and then stop scanning
@@ -209,12 +208,12 @@ fun ConnectionsScreen(
 
     LaunchedEffect(connectionState, regionUnset) {
         when (connectionState) {
-            MeshService.ConnectionState.CONNECTED -> {
+            ConnectionState.CONNECTED -> {
                 if (regionUnset) R.string.must_set_region else R.string.connected_to
             }
 
-            MeshService.ConnectionState.DISCONNECTED -> R.string.not_connected
-            MeshService.ConnectionState.DEVICE_SLEEP -> R.string.connected_sleeping
+            ConnectionState.DISCONNECTED -> R.string.not_connected
+            ConnectionState.DEVICE_SLEEP -> R.string.connected_sleeping
         }.let {
             val firmwareString = info?.firmwareString ?: context.getString(R.string.unknown)
             scanModel.setErrorText(context.getString(it, firmwareString))
@@ -235,7 +234,7 @@ fun ConnectionsScreen(
                 if (!isGpsDisabled) {
                     uiViewModel.meshService?.startProvideLocation()
                 } else {
-                    uiViewModel.showSnackbar(context.getString(R.string.location_disabled))
+                    uiViewModel.showSnackBar(context.getString(R.string.location_disabled))
                 }
             } else {
                 // Request permissions if not granted and user wants to provide location
@@ -257,7 +256,7 @@ fun ConnectionsScreen(
 
             Spacer(modifier = Modifier.height(8.dp))
 
-            val isConnected by uiViewModel.isConnected.collectAsState(false)
+            val isConnected by uiViewModel.isConnectedStateFlow.collectAsState(false)
             val ourNode by uiViewModel.ourNodeInfo.collectAsState()
             if (isConnected) {
                 ourNode?.let { node ->
@@ -576,7 +575,7 @@ fun ConnectionsScreen(
                         onClick = {
                             showReportBugDialog = false
                             reportError("Clicked Report A Bug")
-                            uiViewModel.showSnackbar("Bug report sent!")
+                            uiViewModel.showSnackBar("Bug report sent!")
                         },
                     ) {
                         Text(stringResource(R.string.report))
@@ -620,6 +619,7 @@ private enum class DeviceType {
                     NO_DEVICE_SELECTED -> null
                     else -> null
                 }
+
             else -> null
         }
     }

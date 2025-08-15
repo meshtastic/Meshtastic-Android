@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.library)
@@ -31,7 +32,7 @@ android {
     }
     compileSdk = Configs.COMPILE_SDK
     defaultConfig {
-        minSdk = Configs.MIN_SDK_VERSION
+        minSdk = Configs.MIN_SDK
     }
 
     namespace = "com.geeksville.mesh.network"
@@ -64,4 +65,11 @@ dependencies {
 detekt {
     config.setFrom("../config/detekt/detekt.yml")
     baseline = file("../config/detekt/detekt-baseline-network.xml")
+    source.setFrom(
+        files(
+            "src/main/java",
+            "google/main/java",
+            "fdroid/main/java",
+        )
+    )
 }

@@ -876,6 +876,23 @@
     "hasInkHud": true
   },
   {
+    "hwModel": 107,
+    "hwModelSlug": "THINKNODE_M5",
+    "platformioTarget": "thinknode_m5",
+    "architecture": "esp32-s3",
+    "activelySupported": true,
+    "supportLevel": 1,
+    "displayName": "ThinkNode M5",
+    "tags": [
+      "Elecrow"
+    ],
+    "requiresDfu": false,
+    "images": [
+      "thinknode_m1.svg"
+    ],
+    "hasInkHud": true
+  },
+  {
     "hwModel": 90,
     "hwModelSlug": "THINKNODE_M2",
     "platformioTarget": "thinknode_m2",
@@ -1009,5 +1026,23 @@
     ],
     "partitionScheme": "16MB",
     "hasMui": true
+  },
+  {
+    "hwModel": 102,
+    "hwModelSlug": "T_DECK_PRO",
+    "platformioTarget": "t-deck-pro",
+    "architecture": "esp32-s3",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "LILYGO T-Deck Pro",
+    "tags": [
+      "LilyGo"
+    ],
+    "images": [
+      "tdeck_pro.svg"
+    ],
+    "requiresDfu": true,
+    "hasMui": false,
+    "partitionScheme": "16MB"
   }
 ]

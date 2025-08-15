@@ -95,7 +95,7 @@
     <string name="share">Compartir</string>
     <string name="disconnected">Desconectado</string>
     <string name="device_sleeping">Dispositivo en reposo</string>
-    <string name="connected_count">Conectado: %1$s en línea</string>
+    <string name="connected_count">Conectado: %1$s Encendido</string>
     <string name="ip_address">Dirección IP:</string>
     <string name="ip_port">Puerto:</string>
     <string name="connected">Conectado a la radio</string>

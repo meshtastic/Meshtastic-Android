@@ -100,7 +100,7 @@
     <string name="new_node_seen">Uus sõlm nähtud: %s</string>
     <string name="disconnected">Ühendus katkenud</string>
     <string name="device_sleeping">Seade on unerežiimis</string>
-    <string name="connected_count">Ühendatud: %1$s aktiivsed</string>
+    <string name="connected_count">Ühendatud: %1$s aktiivset</string>
     <string name="ip_address">IP-aadress:</string>
     <string name="ip_port">Port:</string>
     <string name="connected">Ühendatud raadioga</string>
@@ -422,7 +422,7 @@
     <string name="use_pwm_buzzer">Kasuta PWM summerit</string>
     <string name="output_vibra_gpio">Väljund värin (GPIO)</string>
     <string name="output_duration_milliseconds">Väljundi kestvus (millisekundit)</string>
-    <string name="nag_timeout_seconds">Häire ajalõpp (sekund)</string>
+    <string name="nag_timeout_seconds">Häire ajalõpp (sekundit)</string>
     <string name="ringtone">Helin</string>
     <string name="use_i2s_as_buzzer">Kasuta I2S summerina</string>
     <string name="lora_config">LoRa sätted</string>
@@ -458,7 +458,7 @@
     <string name="map_reporting_interval_seconds">Kaardi raporti sagedus (sekundit)</string>
     <string name="neighbor_info_config">Naabri teabe sätted</string>
     <string name="neighbor_info_enabled">Naabri teave lubatud</string>
-    <string name="update_interval_seconds">Uuenduste sagedus (sekund)</string>
+    <string name="update_interval_seconds">Uuenduste sagedus (sekundit)</string>
     <string name="transmit_over_lora">Saada LoRa kaudu</string>
     <string name="network_config">Võrgu sätted</string>
     <string name="wifi_enabled">Wifi lubatud</string>
@@ -484,6 +484,7 @@
     <string name="latitude">Laiuskraad</string>
     <string name="longitude">Pikkuskraad</string>
     <string name="altitude_meters">Kõrgus (meetrites)</string>
+    <string name="position_config_set_fixed_from_phone">Kasuta telefoni hetkelist asukohta</string>
     <string name="gps_mode">GPS režiim</string>
     <string name="gps_update_interval_seconds">GPS värskendamise sagedus (sekund)</string>
     <string name="redefine_gps_rx_pin">Määra GPS_RX_PIN</string>
@@ -734,4 +735,30 @@
     <string name="grant_permissions_and_scan">Anna õigused ja skanneeri</string>
     <string name="nodes_queued_for_deletion">%d eemaldatavat sõlme nimekirjas:</string>
     <string name="clean_node_database_description">Hoiatus: See eemaldab sõlmed rakendusest, kui ka seadmest.\nValikud on lisaks eelnevale.</string>
+    <string name="connecting_to_device">Ühendan seadet</string>
+    <string name="map_type_normal">Normaalne</string>
+    <string name="map_type_satellite">Sateliit</string>
+    <string name="map_type_terrain">Maastik</string>
+    <string name="map_type_hybrid">Hübriid</string>
+    <string name="manage_map_layers">Halda kaardikihte</string>
+    <string name="map_layers_title">Kaardikihid</string>
+    <string name="no_map_layers_loaded">Kaardikihid laadimata.</string>
+    <string name="add_layer_button">Lisa kiht</string>
+    <string name="hide_layer">Peida kiht</string>
+    <string name="show_layer">Näita kiht</string>
+    <string name="remove_layer">Eemalda kiht</string>
+    <string name="add_layer">Lisa kiht</string>
+    <string name="nodes_at_this_location">Sõlmed siin asukohas</string>
+    <string name="selected_map_type">Vali kaardi tüüp</string>
+    <string name="manage_custom_tile_sources">Halda kohandatud kardikihti</string>
+    <string name="add_custom_tile_source">Lisa kohandatud kardikiht</string>
+    <string name="no_custom_tile_sources_found">Kohandatud kardikihte ei ole</string>
+    <string name="edit_custom_tile_source">Muuda kohandatud kardikihti</string>
+    <string name="delete_custom_tile_source">Kustuta kohandatud kardikiht</string>
+    <string name="name_cannot_be_empty">Nimi ei tohi olla tühi.</string>
+    <string name="provider_name_exists">Teenusepakkuja nimi on olemas.</string>
+    <string name="url_cannot_be_empty">URL ei tohi olla tühi.</string>
+    <string name="url_must_contain_placeholders">URL peab sisaldama vahesümboleid.</string>
+    <string name="url_template">URL mall</string>
+    <string name="track_point">jälgimispunkt</string>
 </resources>

@@ -17,10 +17,10 @@
 
 object Configs {
     const val APPLICATION_ID = "com.geeksville.mesh"
-    const val MIN_SDK_VERSION = 26
+    const val MIN_SDK = 26
     const val TARGET_SDK = 36
     const val COMPILE_SDK = 36
-    const val VERSION_NAME_BASE = "2.6.33"
+    const val VERSION_NAME_BASE = "2.6.34"
     const val MIN_FW_VERSION = "2.5.14" // Minimum device firmware version supported by this app
     const val ABS_MIN_FW_VERSION = "2.3.15" // Minimum device firmware version supported by this app
 }

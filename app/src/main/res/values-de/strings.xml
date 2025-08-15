@@ -33,7 +33,7 @@
     <string name="node_sort_via_mqtt">über MQTT</string>
     <string name="via_mqtt">über MQTT</string>
     <string name="node_sort_via_favorite">über Favorit</string>
-    <string name="node_filter_show_ignored">Ignorierte Nodes</string>
+    <string name="node_filter_show_ignored">Ignorierte Knoten</string>
     <string name="unrecognized">Unbekannt</string>
     <string name="message_status_enroute">Warte auf Bestätigung</string>
     <string name="message_status_queued">zur Warteschlange für das Senden hinzugefügt</string>
@@ -74,7 +74,7 @@
     <string name="config_device_doubleTapAsButtonPress_summary">Behandle Doppeltippen auf unterstützten Beschleunigungssensoren wie einen Benutzer-Tastendruck.</string>
     <string name="config_device_disableTripleClick_summary">Deaktiviert das dreifache Drücken der Benutzertaste zum Aktivieren oder Deaktivieren des GPS.</string>
     <string name="config_device_ledHeartbeatDisabled_summary">Steuert die blinkende LED auf dem Gerät. Bei den meisten Geräten wird damit eine von bis zu 4 LEDs gesteuert, die Lade- und GPS-LEDs sind jedoch nicht steuerbar.</string>
-    <string name="config_device_transmitOverLora_summary">Ob unsere Neighbor-Info zusätzlich zum Senden an MQTT und die Phone-API auch über LoRa übertragen werden soll. Nicht verfügbar auf einem Kanal mit Standardschlüssel und -name.</string>
+    <string name="config_device_transmitOverLora_summary">Ob unsere Nachbarinformation zusätzlich zum Senden an MQTT und die Phone-API auch über LoRa übertragen werden soll. Nicht verfügbar auf einem Kanal mit Standardschlüssel und -name.</string>
     <string name="config_security_public_key">Öffentlicher Schlüssel</string>
     <string name="channel_name">Kanalname</string>
     <string name="qr_code">QR-Code</string>
@@ -113,7 +113,7 @@
     <string name="meshtastic_service_notifications">Dienst-Benachrichtigungen</string>
     <string name="about">Über</string>
     <string name="channel_invalid">Diese Kanal-URL ist ungültig und kann nicht verwendet werden</string>
-    <string name="debug_panel">Debug Anzeige</string>
+    <string name="debug_panel">Debug-Ausgaben</string>
     <string name="debug_decoded_payload">Dekodiertes Payload:</string>
     <string name="debug_logs_export">Protokolle exportieren</string>
     <string name="debug_filters">Filter</string>
@@ -176,7 +176,7 @@
     <string name="traceroute">Traceroute</string>
     <string name="intro_show">Einführung zeigen</string>
     <string name="message">Nachricht</string>
-    <string name="quick_chat">Schnellchat-Optionen</string>
+    <string name="quick_chat">Schnellchat</string>
     <string name="quick_chat_new">Neuer Schnell-Chat</string>
     <string name="quick_chat_edit">Schnell-Chat bearbeiten</string>
     <string name="quick_chat_append">An Nachricht anhängen</string>
@@ -484,6 +484,7 @@
     <string name="latitude">Breitengrad</string>
     <string name="longitude">Längengrad</string>
     <string name="altitude_meters">Höhenmeter (Meter)</string>
+    <string name="position_config_set_fixed_from_phone">Vom aktuellen Telefonstandort festlegen</string>
     <string name="gps_mode">GPS Modus</string>
     <string name="gps_update_interval_seconds">GPS Aktualisierungsintervall (Sekunden)</string>
     <string name="redefine_gps_rx_pin">GPS RX PIN neu definieren</string>
@@ -541,7 +542,7 @@
     <string name="power_metrics_update_interval_seconds">Aktualisierungsintervall für Energiedaten (Sekunden)</string>
     <string name="power_metrics_on_screen_enabled">Energiedatenanzeige aktiviert</string>
     <string name="user_config">Benutzer Einstellungen</string>
-    <string name="node_id">Knoten ID</string>
+    <string name="node_id">Knoten-ID</string>
     <string name="long_name">Vollständiger Name</string>
     <string name="short_name">Spitzname</string>
     <string name="hardware_model">Geräte-Modell</string>
@@ -580,7 +581,7 @@
     <string name="secondary">Sekundär</string>
     <string name="secondary_no_telemetry">Kein regelmäßiges senden der Telemetrie</string>
     <string name="manual_position_request">Manuelle Positionsanfrage erforderlich</string>
-    <string name="press_and_drag">Drücke und ziehe um neu zu sortieren</string>
+    <string name="press_and_drag">Drücken und ziehen, um neu zu sortieren</string>
     <string name="unmute">Stummschaltung aufheben</string>
     <string name="dynamic">Dynamisch</string>
     <string name="scan_qr_code">QR Code scannen</string>
@@ -622,7 +623,7 @@
     <string name="map_filter">Kartenfilter\n</string>
     <string name="only_favorites">Nur Favoriten</string>
     <string name="show_waypoints">Zeige Wegpunkte</string>
-    <string name="show_precision_circle">Präzisionskreise anzeigen</string>
+    <string name="show_precision_circle">Präzise Bereiche anzeigen</string>
     <string name="client_notification">Warnmeldung</string>
     <string name="compromised_keys">Kompromittierte Schlüssel erkannt, wählen Sie OK, um diese neu zu erstellen.</string>
     <string name="regenerate_private_key">Privaten Schlüssel neu erstellen</string>
@@ -734,4 +735,30 @@
     <string name="grant_permissions_and_scan">Berechtigungen und Suche erlauben</string>
     <string name="nodes_queued_for_deletion">%d Knoten in der Warteschlange zum Löschen:</string>
     <string name="clean_node_database_description">Achtung: Dies entfernt Knoten aus der App und Gerätedatenbank.\nDie Auswahl ist kumulativ.</string>
+    <string name="connecting_to_device">Verbinde mit Gerät</string>
+    <string name="map_type_normal">Normal</string>
+    <string name="map_type_satellite">Satellit</string>
+    <string name="map_type_terrain">Gelände</string>
+    <string name="map_type_hybrid">Hybrid</string>
+    <string name="manage_map_layers">Kartenebenen verwalten</string>
+    <string name="map_layers_title">Kartenebenen</string>
+    <string name="no_map_layers_loaded">Keine benutzerdefinierten Ebenen geladen.</string>
+    <string name="add_layer_button">Ebene hinzufügen</string>
+    <string name="hide_layer">Ebene ausblenden</string>
+    <string name="show_layer">Ebene anzeigen</string>
+    <string name="remove_layer">Ebene entfernen</string>
+    <string name="add_layer">Ebene hinzufügen</string>
+    <string name="nodes_at_this_location">Knoten an diesem Standort</string>
+    <string name="selected_map_type">Ausgewählter Kartentyp</string>
+    <string name="manage_custom_tile_sources">Benutzerdefinierte Kachelquellen verwalten</string>
+    <string name="add_custom_tile_source">Benutzerdefinierte Kachelquelle hinzufügen</string>
+    <string name="no_custom_tile_sources_found">Keine benutzerdefinierten Kachelquellen</string>
+    <string name="edit_custom_tile_source">Benutzerdefinierte Kachelquelle bearbeiten</string>
+    <string name="delete_custom_tile_source">Benutzerdefinierte Kachelquelle löschen</string>
+    <string name="name_cannot_be_empty">Name darf nicht leer sein.</string>
+    <string name="provider_name_exists">Der Name des Anbieters existiert bereits.</string>
+    <string name="url_cannot_be_empty">URL darf nicht leer sein.</string>
+    <string name="url_must_contain_placeholders">URL muss Platzhalter enthalten.</string>
+    <string name="url_template">URL Vorlage</string>
+    <string name="track_point">Verlaufspunkt</string>
 </resources>

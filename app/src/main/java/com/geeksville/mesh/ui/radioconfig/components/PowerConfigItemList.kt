@@ -43,16 +43,11 @@ import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 
 @Composable
-fun PowerConfigScreen(
-    viewModel: RadioConfigViewModel = hiltViewModel(),
-) {
+fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
 
     if (state.responseState.isWaiting()) {
-        PacketResponseStateDialog(
-            state = state.responseState,
-            onDismiss = viewModel::clearPacketResponse,
-        )
+        PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
     }
 
     PowerConfigItemList(
@@ -61,22 +56,17 @@ fun PowerConfigScreen(
         onSaveClicked = { powerInput ->
             val config = config { power = powerInput }
             viewModel.setConfig(config)
-        }
+        },
     )
 }
 
+@Suppress("LongMethod")
 @Composable
-fun PowerConfigItemList(
-    powerConfig: PowerConfig,
-    enabled: Boolean,
-    onSaveClicked: (PowerConfig) -> Unit,
-) {
+fun PowerConfigItemList(powerConfig: PowerConfig, enabled: Boolean, onSaveClicked: (PowerConfig) -> Unit) {
     val focusManager = LocalFocusManager.current
     var powerInput by rememberSaveable { mutableStateOf(powerConfig) }
 
-    LazyColumn(
-        modifier = Modifier.fillMaxSize()
-    ) {
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
         item { PreferenceCategory(text = stringResource(R.string.power_config)) }
 
         item {
@@ -84,7 +74,7 @@ fun PowerConfigItemList(
                 title = stringResource(R.string.enable_power_saving_mode),
                 checked = powerInput.isPowerSaving,
                 enabled = enabled,
-                onCheckedChange = { powerInput = powerInput.copy { isPowerSaving = it } }
+                onCheckedChange = { powerInput = powerInput.copy { isPowerSaving = it } },
             )
         }
         item { HorizontalDivider() }
@@ -95,9 +85,7 @@ fun PowerConfigItemList(
                 value = powerInput.onBatteryShutdownAfterSecs,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = {
-                    powerInput = powerInput.copy { onBatteryShutdownAfterSecs = it }
-                }
+                onValueChanged = { powerInput = powerInput.copy { onBatteryShutdownAfterSecs = it } },
             )
         }
 
@@ -107,7 +95,7 @@ fun PowerConfigItemList(
                 value = powerInput.adcMultiplierOverride,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { powerInput = powerInput.copy { adcMultiplierOverride = it } }
+                onValueChanged = { powerInput = powerInput.copy { adcMultiplierOverride = it } },
             )
         }
 
@@ -117,7 +105,7 @@ fun PowerConfigItemList(
                 value = powerInput.waitBluetoothSecs,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { powerInput = powerInput.copy { waitBluetoothSecs = it } }
+                onValueChanged = { powerInput = powerInput.copy { waitBluetoothSecs = it } },
             )
         }
 
@@ -127,17 +115,7 @@ fun PowerConfigItemList(
                 value = powerInput.sdsSecs,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { powerInput = powerInput.copy { sdsSecs = it } }
-            )
-        }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.light_sleep_duration_seconds),
-                value = powerInput.lsSecs,
-                enabled = enabled,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { powerInput = powerInput.copy { lsSecs = it } }
+                onValueChanged = { powerInput = powerInput.copy { sdsSecs = it } },
             )
         }
 
@@ -147,7 +125,7 @@ fun PowerConfigItemList(
                 value = powerInput.minWakeSecs,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { powerInput = powerInput.copy { minWakeSecs = it } }
+                onValueChanged = { powerInput = powerInput.copy { minWakeSecs = it } },
             )
         }
 
@@ -157,7 +135,7 @@ fun PowerConfigItemList(
                 value = powerInput.deviceBatteryInaAddress,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { powerInput = powerInput.copy { deviceBatteryInaAddress = it } }
+                onValueChanged = { powerInput = powerInput.copy { deviceBatteryInaAddress = it } },
             )
         }
 
@@ -171,7 +149,7 @@ fun PowerConfigItemList(
                 onSaveClicked = {
                     focusManager.clearFocus()
                     onSaveClicked(powerInput)
-                }
+                },
             )
         }
     }
@@ -180,9 +158,5 @@ fun PowerConfigItemList(
 @Preview(showBackground = true)
 @Composable
 private fun PowerConfigPreview() {
-    PowerConfigItemList(
-        powerConfig = PowerConfig.getDefaultInstance(),
-        enabled = true,
-        onSaveClicked = { },
-    )
+    PowerConfigItemList(powerConfig = PowerConfig.getDefaultInstance(), enabled = true, onSaveClicked = {})
 }
