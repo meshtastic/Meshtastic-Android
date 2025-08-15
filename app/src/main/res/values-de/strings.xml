@@ -74,7 +74,7 @@
     <string name="config_device_doubleTapAsButtonPress_summary">Behandle Doppeltippen auf unterstützten Beschleunigungssensoren wie einen Benutzer-Tastendruck.</string>
     <string name="config_device_disableTripleClick_summary">Deaktiviert das dreifache Drücken der Benutzertaste zum Aktivieren oder Deaktivieren des GPS.</string>
     <string name="config_device_ledHeartbeatDisabled_summary">Steuert die blinkende LED auf dem Gerät. Bei den meisten Geräten wird damit eine von bis zu 4 LEDs gesteuert, die Lade- und GPS-LEDs sind jedoch nicht steuerbar.</string>
-    <string name="config_device_transmitOverLora_summary">Ob unsere Neighbor-Info zusätzlich zum Senden an MQTT und die Phone-API auch über LoRa übertragen werden soll. Nicht verfügbar auf einem Kanal mit Standardschlüssel und -name.</string>
+    <string name="config_device_transmitOverLora_summary">Ob unsere Nachbarinformation zusätzlich zum Senden an MQTT und die Phone-API auch über LoRa übertragen werden soll. Nicht verfügbar auf einem Kanal mit Standardschlüssel und -name.</string>
     <string name="config_security_public_key">Öffentlicher Schlüssel</string>
     <string name="channel_name">Kanalname</string>
     <string name="qr_code">QR-Code</string>
