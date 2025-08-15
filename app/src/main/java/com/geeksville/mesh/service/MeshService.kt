@@ -115,7 +115,7 @@ import javax.inject.Inject
 import kotlin.math.absoluteValue
 
 sealed class ServiceAction {
-    data class GetDeviceMetadata(val destNum: Int) : ServiceAction()
+    data class GetDeviceMetadata(val destNum: Int, val callback: ((MeshProtos.DeviceMetadata?) -> Unit)? = null) : ServiceAction()
 
     data class Favorite(val node: Node) : ServiceAction()
 
@@ -930,6 +930,9 @@ class MeshService :
                 debug("Admin: received DeviceMetadata from $fromNodeNum")
                 serviceScope.handledLaunch {
                     radioConfigRepository.insertMetadata(fromNodeNum, a.getDeviceMetadataResponse)
+                    
+                    // Execute the callback if there's one pending for this node
+                    pendingMetadataCallbacks.remove(fromNodeNum)?.invoke(a.getDeviceMetadataResponse)
                 }
             }
 
@@ -2040,7 +2043,7 @@ class MeshService :
     private fun onServiceAction(action: ServiceAction) {
         ignoreException {
             when (action) {
-                is ServiceAction.GetDeviceMetadata -> getDeviceMetadata(action.destNum)
+                is ServiceAction.GetDeviceMetadata -> getDeviceMetadata(action.destNum, action.callback)
                 is ServiceAction.Favorite -> favoriteNode(action.node)
                 is ServiceAction.Ignore -> ignoreNode(action.node)
                 is ServiceAction.Reaction -> sendReaction(action)
@@ -2049,13 +2052,25 @@ class MeshService :
         }
     }
 
+    // Map to store pending metadata request callbacks
+    private val pendingMetadataCallbacks = ConcurrentHashMap<Int, (MeshProtos.DeviceMetadata?) -> Unit>()
+
+    private fun getDeviceMetadata(destNum: Int, callback: ((MeshProtos.DeviceMetadata?) -> Unit)? = null) = toRemoteExceptions {
+        // Store the callback if provided
+        callback?.let { pendingMetadataCallbacks[destNum] = it }
+        
+        // Set a timeout to clean up the callback after 5 seconds
+        serviceScope.handledLaunch {
+            delay(5000) // 5 seconds timeout
+            pendingMetadataCallbacks.remove(destNum)?.invoke(null)
+        }
+        
+        sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(wantResponse = true) { getDeviceMetadataRequest = true })
+    }
+
     private fun importContact(contact: AdminProtos.SharedContact) {
         sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { addContact = contact })
         handleReceivedUser(contact.nodeNum, contact.user)
-    }
-
-    private fun getDeviceMetadata(destNum: Int) = toRemoteExceptions {
-        sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(wantResponse = true) { getDeviceMetadataRequest = true })
     }
 
     private fun favoriteNode(node: Node) = toRemoteExceptions {
