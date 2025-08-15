@@ -98,8 +98,7 @@ import java.util.Locale
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
 
-// list of dict keys to redact when exporting logs (only on export all).
-//  These are evaluated as line.contains, so partials are fine.
+// list of dict keys to redact when exporting logs. These are evaluated as line.contains, so partials are fine.
 private var redactedKeys: List<String> = listOf("session_passkey", "private_key", "admin_key")
 
 @Suppress("LongMethod")
@@ -115,7 +114,6 @@ internal fun DebugScreen(viewModel: DebugViewModel = hiltViewModel()) {
 
     var filterMode by remember { mutableStateOf(FilterMode.OR) }
 
-    // Use the new filterLogs method to include decodedPayload in filtering
     val filteredLogsState by
         remember(logs, filterTexts, filterMode) {
             derivedStateOf { viewModel.filterManager.filterLogs(logs, filterTexts, filterMode).toImmutableList() }
@@ -629,13 +627,10 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
         val fileName = "meshtastic_debug_$timestamp.txt"
 
-        // Get the Downloads directory
         val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         val logFile = File(downloadsDir, fileName)
 
-        // Create the file and write logs
         OutputStreamWriter(FileOutputStream(logFile), StandardCharsets.UTF_8).use { writer ->
-            // Use all logs, not just isFiltered, since exportAllLogs should receive the filtered list as a param
             logs.forEach { log ->
                 writer.write("${log.formattedReceivedDate} [${log.messageType}]\n")
 
@@ -646,7 +641,6 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
                     writer.write("\n")
                     log.decodedPayload.lineSequence().forEach { line ->
                         var outputLine = line
-                        // redact if line is in the redacted list.
                         val redacted = redactedKeys.firstOrNull { line.contains(it) }
                         if (redacted != null) {
                             val idx = line.indexOf(':')
@@ -664,7 +658,6 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
             }
         }
 
-        // Notify user of success
         withContext(Dispatchers.Main) {
             Toast.makeText(context, "${logs.size} logs exported to ${logFile.absolutePath}", Toast.LENGTH_LONG)
                 .show()
