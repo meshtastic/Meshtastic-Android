@@ -32,6 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.outlined.FileDownload
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -54,9 +55,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DebugViewModel
+import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
 import com.geeksville.mesh.model.LogSearchManager.SearchMatch
 import com.geeksville.mesh.model.LogSearchManager.SearchState
-import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
 import com.geeksville.mesh.ui.common.theme.AppTheme
 
 @Composable
@@ -64,38 +65,30 @@ internal fun DebugSearchNavigation(
     searchState: SearchState,
     onNextMatch: () -> Unit,
     onPreviousMatch: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Row(
         modifier = modifier.width(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.spacedBy(2.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = "${searchState.currentMatchIndex + 1}/${searchState.allMatches.size}",
             modifier = Modifier.padding(end = 4.dp),
-            style = TextStyle(fontSize = 12.sp)
+            style = TextStyle(fontSize = 12.sp),
         )
-        IconButton(
-            onClick = onPreviousMatch,
-            enabled = searchState.hasMatches,
-            modifier = Modifier.size(32.dp)
-        ) {
+        IconButton(onClick = onPreviousMatch, enabled = searchState.hasMatches, modifier = Modifier.size(32.dp)) {
             Icon(
                 imageVector = Icons.Default.KeyboardArrowUp,
                 contentDescription = stringResource(R.string.debug_search_prev),
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(16.dp),
             )
         }
-        IconButton(
-            onClick = onNextMatch,
-            enabled = searchState.hasMatches,
-            modifier = Modifier.size(32.dp)
-        ) {
+        IconButton(onClick = onNextMatch, enabled = searchState.hasMatches, modifier = Modifier.size(32.dp)) {
             Icon(
                 imageVector = Icons.Default.KeyboardArrowDown,
                 contentDescription = stringResource(R.string.debug_search_next),
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(16.dp),
             )
         }
     }
@@ -108,48 +101,53 @@ internal fun DebugSearchBar(
     onNextMatch: () -> Unit,
     onPreviousMatch: () -> Unit,
     onClearSearch: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     OutlinedTextField(
         value = searchState.searchText,
         onValueChange = onSearchTextChange,
-        modifier = modifier
-            .padding(end = 8.dp),
-        placeholder = { Text(stringResource(R.string.debug_default_search)) },
+        modifier = modifier.then(Modifier.padding(end = 8.dp)),
+        placeholder = {
+            // Only show placeholder if the field is empty and not focused
+            if (searchState.searchText.isEmpty()) {
+                Text(stringResource(R.string.debug_default_search))
+            }
+        },
         singleLine = true,
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-        keyboardActions = KeyboardActions(
+        keyboardActions =
+        KeyboardActions(
             onSearch = {
                 // Clear focus when search is performed
-            }
+            },
         ),
         trailingIcon = {
-            Row(
-                modifier = Modifier.width(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(2.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                if (searchState.hasMatches) {
-                    DebugSearchNavigation(
-                        searchState = searchState,
-                        onNextMatch = onNextMatch,
-                        onPreviousMatch = onPreviousMatch
-                    )
-                }
-                if (searchState.searchText.isNotEmpty()) {
-                    IconButton(
-                        onClick = onClearSearch,
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Clear,
-                            contentDescription = stringResource(R.string.debug_search_clear),
-                            modifier = Modifier.size(16.dp)
+            // Only show trailing icon(s) if there is text or matches, not at the same time as placeholder
+            if (searchState.searchText.isNotEmpty() || searchState.hasMatches) {
+                Row(
+                    modifier = Modifier.width(IntrinsicSize.Min),
+                    horizontalArrangement = Arrangement.spacedBy(2.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    if (searchState.hasMatches) {
+                        DebugSearchNavigation(
+                            searchState = searchState,
+                            onNextMatch = onNextMatch,
+                            onPreviousMatch = onPreviousMatch,
                         )
+                    }
+                    if (searchState.searchText.isNotEmpty()) {
+                        IconButton(onClick = onClearSearch, modifier = Modifier.size(32.dp)) {
+                            Icon(
+                                imageVector = Icons.Default.Clear,
+                                contentDescription = stringResource(R.string.debug_search_clear),
+                                modifier = Modifier.size(16.dp),
+                            )
+                        }
                     }
                 }
             }
-        }
+        },
     )
 }
 
@@ -167,30 +165,24 @@ internal fun DebugSearchState(
     onFilterTextsChange: (List<String>) -> Unit,
     filterMode: FilterMode,
     onFilterModeChange: (FilterMode) -> Unit,
+    onExportLogs: (() -> Unit)? = null,
 ) {
     val colorScheme = MaterialTheme.colorScheme
     var customFilterText by remember { mutableStateOf("") }
 
-    Column(
-        modifier = modifier
-            .background(
-                color = colorScheme.background.copy(alpha = 1.0f)
-            )
-            .padding(8.dp)
-    ) {
+    Column(modifier = modifier.background(color = colorScheme.background.copy(alpha = 1.0f)).padding(8.dp)) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(colorScheme.background.copy(alpha = 1.0f)),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth().background(colorScheme.background.copy(alpha = 1.0f)),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             DebugSearchBar(
+                modifier = Modifier.weight(1f),
                 searchState = searchState,
                 onSearchTextChange = onSearchTextChange,
                 onNextMatch = onNextMatch,
                 onPreviousMatch = onPreviousMatch,
-                onClearSearch = onClearSearch
+                onClearSearch = onClearSearch,
             )
             DebugFilterBar(
                 filterTexts = filterTexts,
@@ -198,16 +190,26 @@ internal fun DebugSearchState(
                 customFilterText = customFilterText,
                 onCustomFilterTextChange = { customFilterText = it },
                 presetFilters = presetFilters,
-                logs = logs
+                logs = logs,
+                modifier = Modifier,
             )
+            onExportLogs?.let { onExport ->
+                IconButton(onClick = onExport, modifier = Modifier) {
+                    Icon(
+                        imageVector = Icons.Outlined.FileDownload,
+                        contentDescription = stringResource(id = com.geeksville.mesh.R.string.debug_logs_export),
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
+            }
         }
-        DebugActiveFilters(
-            filterTexts = filterTexts,
-            onFilterTextsChange = onFilterTextsChange,
-            filterMode = filterMode,
-            onFilterModeChange = onFilterModeChange
-        )
     }
+    DebugActiveFilters(
+        filterTexts = filterTexts,
+        onFilterTextsChange = onFilterTextsChange,
+        filterMode = filterMode,
+        onFilterModeChange = onFilterModeChange,
+    )
 }
 
 @Composable
@@ -219,6 +221,7 @@ fun DebugSearchStateviewModelDefaults(
     logs: List<UiMeshLog>,
     filterMode: FilterMode,
     onFilterModeChange: (FilterMode) -> Unit,
+    onExportLogs: (() -> Unit)? = null,
 ) {
     val viewModel: DebugViewModel = hiltViewModel()
     DebugSearchState(
@@ -233,7 +236,8 @@ fun DebugSearchStateviewModelDefaults(
         onClearSearch = viewModel.searchManager::clearSearch,
         onFilterTextsChange = viewModel.filterManager::setFilterTexts,
         filterMode = filterMode,
-        onFilterModeChange = onFilterModeChange
+        onFilterModeChange = onFilterModeChange,
+        onExportLogs = onExportLogs,
     )
 }
 
@@ -242,18 +246,13 @@ fun DebugSearchStateviewModelDefaults(
 private fun DebugSearchBarEmptyPreview() {
     AppTheme {
         Surface {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 DebugSearchBar(
                     searchState = SearchState(),
-                    onSearchTextChange = { },
-                    onNextMatch = { },
-                    onPreviousMatch = { },
-                    onClearSearch = { }
+                    onSearchTextChange = {},
+                    onNextMatch = {},
+                    onPreviousMatch = {},
+                    onClearSearch = {},
                 )
             }
         }
@@ -266,23 +265,19 @@ private fun DebugSearchBarEmptyPreview() {
 private fun DebugSearchBarWithTextPreview() {
     AppTheme {
         Surface {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 DebugSearchBar(
-                    searchState = SearchState(
+                    searchState =
+                    SearchState(
                         searchText = "test message",
                         currentMatchIndex = 2,
                         allMatches = List(5) { SearchMatch(it, 0, 10, "message") },
-                        hasMatches = true
+                        hasMatches = true,
                     ),
-                    onSearchTextChange = { },
-                    onNextMatch = { },
-                    onPreviousMatch = { },
-                    onClearSearch = { }
+                    onSearchTextChange = {},
+                    onNextMatch = {},
+                    onPreviousMatch = {},
+                    onClearSearch = {},
                 )
             }
         }
@@ -295,23 +290,19 @@ private fun DebugSearchBarWithTextPreview() {
 private fun DebugSearchBarWithMatchesPreview() {
     AppTheme {
         Surface {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Row(modifier = Modifier.fillMaxWidth().padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
                 DebugSearchBar(
-                    searchState = SearchState(
+                    searchState =
+                    SearchState(
                         searchText = "error",
                         currentMatchIndex = 0,
                         allMatches = List(3) { SearchMatch(it, 0, 5, "message") },
-                        hasMatches = true
+                        hasMatches = true,
                     ),
-                    onSearchTextChange = { },
-                    onNextMatch = { },
-                    onPreviousMatch = { },
-                    onClearSearch = { }
+                    onSearchTextChange = {},
+                    onNextMatch = {},
+                    onPreviousMatch = {},
+                    onClearSearch = {},
                 )
             }
         }

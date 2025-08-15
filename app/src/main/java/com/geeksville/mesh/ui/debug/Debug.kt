@@ -100,13 +100,7 @@ private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOptio
 
 // list of dict keys to redact when exporting logs (only on export all).
 //  These are evaluated as line.contains, so partials are fine.
-private var redactedKeys: List<String> = listOf(
-    "session_passkey",
-    "private_key",
-    "admin_key"
-)
-
-
+private var redactedKeys: List<String> = listOf("session_passkey", "private_key", "admin_key")
 
 @Suppress("LongMethod")
 @Composable
@@ -116,6 +110,8 @@ internal fun DebugScreen(viewModel: DebugViewModel = hiltViewModel()) {
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
     val filterTexts by viewModel.filterTexts.collectAsStateWithLifecycle()
     val selectedLogId by viewModel.selectedLogId.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     var filterMode by remember { mutableStateOf(FilterMode.OR) }
 
@@ -155,6 +151,7 @@ internal fun DebugScreen(viewModel: DebugViewModel = hiltViewModel()) {
                     logs = logs,
                     filterMode = filterMode,
                     onFilterModeChange = { filterMode = it },
+                    onExportLogs = { scope.launch { exportAllLogs(context, filteredLogs) } },
                 )
             }
             items(filteredLogs, key = { it.uuid }) { log ->
@@ -608,16 +605,9 @@ private fun DebugScreenWithSampleDataPreview() {
 fun DebugMenuActions(viewModel: DebugViewModel = hiltViewModel(), modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val filteredLogs by viewModel.filteredLogs.collectAsStateWithLifecycle()
 
     var showDeleteLogsDialog by remember { mutableStateOf(false) }
-    // when 'export all logs' is selected, pass the currently filtered logs to the export function
-    IconButton(onClick = { scope.launch { exportAllLogs(context, filteredLogs) } }, modifier = modifier.padding(4.dp)) {
-        Icon(
-            imageVector = Icons.Outlined.FileDownload,
-            contentDescription = stringResource(id = R.string.debug_logs_export),
-        )
-    }
+
     IconButton(onClick = { showDeleteLogsDialog = true }, modifier = modifier.padding(4.dp)) {
         Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(id = R.string.debug_clear))
     }
@@ -650,11 +640,11 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
                 writer.write("${log.formattedReceivedDate} [${log.messageType}]\n")
 
                 writer.write(log.logMessage)
+
                 if (!log.decodedPayload.isNullOrBlank()) {
                     writer.write("\n\nDecoded Payload:\n{")
                     writer.write("\n")
                     log.decodedPayload.lineSequence().forEach { line ->
-                    
                         var outputLine = line
                         // redact if line is in the redacted list.
                         val redacted = redactedKeys.firstOrNull { line.contains(it) }
@@ -675,7 +665,8 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
 
         // Notify user of success
         withContext(Dispatchers.Main) {
-            Toast.makeText(context, "${logs.size} logs exported to ${logFile.absolutePath}", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "${logs.size} logs exported to ${logFile.absolutePath}", Toast.LENGTH_LONG)
+                .show()
         }
     } catch (e: SecurityException) {
         withContext(Dispatchers.Main) {
