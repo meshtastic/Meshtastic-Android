@@ -22,10 +22,13 @@ import android.app.TaskStackBuilder
 import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.hardware.usb.UsbManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
@@ -41,7 +44,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalView
 import androidx.core.content.edit
 import androidx.core.net.toUri
-import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import com.geeksville.mesh.android.BindFailedException
 import com.geeksville.mesh.android.GeeksvilleApplication
@@ -78,7 +80,15 @@ class MainActivity :
     private var showAppIntro by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
+        enableEdgeToEdge(
+            // Disable three-button navbar scrim on pre-Q devices
+            navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Disable three-button navbar scrim
+            window.setNavigationBarContrastEnforced(false)
+        }
+
         super.onCreate(savedInstanceState)
         val prefs = UIViewModel.getPreferences(this)
         if (savedInstanceState == null) {
@@ -93,7 +103,6 @@ class MainActivity :
             }
         }
 
-        WindowCompat.setDecorFitsSystemWindows(window, false)
         setContent {
             val theme by model.theme.collectAsState()
             val dynamic = theme == MODE_DYNAMIC

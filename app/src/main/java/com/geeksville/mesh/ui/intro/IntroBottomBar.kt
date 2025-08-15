@@ -17,15 +17,13 @@
 
 package com.geeksville.mesh.ui.intro
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.Button
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
@@ -47,17 +45,13 @@ internal fun IntroBottomBar(
     configureButtonText: String,
     showSkipButton: Boolean = true,
 ) {
-    Surface(shadowElevation = 8.dp) {
-        // Use Surface for elevation as per Material 3 guidelines
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 20.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = if (showSkipButton) Arrangement.SpaceBetween else Arrangement.End,
-        ) {
-            if (showSkipButton) {
-                Button(onClick = onSkip) { Text(skipButtonText) }
-            }
-            Button(onClick = onConfigure) { Text(configureButtonText) }
+    BottomAppBar(contentPadding = PaddingValues(horizontal = 16.dp, vertical = 20.dp)) {
+        if (showSkipButton) {
+            Button(onClick = onSkip) { Text(skipButtonText) }
         }
+
+        Spacer(modifier = Modifier.fillMaxWidth().weight(1f))
+
+        Button(onClick = onConfigure) { Text(configureButtonText) }
     }
 }
