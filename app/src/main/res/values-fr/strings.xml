@@ -722,6 +722,7 @@
     <string name="settings">Paramètres</string>
     <string name="critical_alerts">Alertes critiques</string>
     <string name="configure_critical_alerts">Configurer les alertes critiques</string>
+    <string name="notification_permissions_description">Meshtastic utilise les notifications pour vous tenir à jour sur les nouveaux messages et autres événements importants. Vous pouvez mettre à jour vos autorisations de notification à tout moment à partir des paramètres.</string>
     <string name="next">Suivant</string>
     <string name="nodes_queued_for_deletion">%d nœuds en attente de suppression :</string>
     <string name="connecting_to_device">Connexion à l\'appareil</string>
