@@ -98,6 +98,9 @@ import java.util.Locale
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
 
+// list of dict keys to redact when exporting logs. These are evaluated as line.contains, so partials are fine.
+private var redactedKeys: List<String> = listOf("session_passkey", "private_key", "admin_key")
+
 @Suppress("LongMethod")
 @Composable
 internal fun DebugScreen(viewModel: DebugViewModel = hiltViewModel()) {
@@ -106,14 +109,16 @@ internal fun DebugScreen(viewModel: DebugViewModel = hiltViewModel()) {
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
     val filterTexts by viewModel.filterTexts.collectAsStateWithLifecycle()
     val selectedLogId by viewModel.selectedLogId.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     var filterMode by remember { mutableStateOf(FilterMode.OR) }
 
-    // Use the new filterLogs method to include decodedPayload in filtering
-    val filteredLogs =
+    val filteredLogsState by
         remember(logs, filterTexts, filterMode) {
-            viewModel.filterManager.filterLogs(logs, filterTexts, filterMode).toImmutableList()
+            derivedStateOf { viewModel.filterManager.filterLogs(logs, filterTexts, filterMode).toImmutableList() }
         }
+    val filteredLogs = filteredLogsState
 
     LaunchedEffect(filteredLogs) { viewModel.updateFilteredLogs(filteredLogs) }
 
@@ -144,6 +149,7 @@ internal fun DebugScreen(viewModel: DebugViewModel = hiltViewModel()) {
                     logs = logs,
                     filterMode = filterMode,
                     onFilterModeChange = { filterMode = it },
+                    onExportLogs = { scope.launch { exportAllLogs(context, filteredLogs) } },
                 )
             }
             items(filteredLogs, key = { it.uuid }) { log ->
@@ -313,15 +319,9 @@ private fun rememberAnnotatedLogMessage(log: UiMeshLog, searchText: String): Ann
 fun DebugMenuActions(viewModel: DebugViewModel = hiltViewModel(), modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    val logs by viewModel.meshLog.collectAsStateWithLifecycle()
+
     var showDeleteLogsDialog by remember { mutableStateOf(false) }
 
-    IconButton(onClick = { scope.launch { exportAllLogs(context, logs) } }, modifier = modifier.padding(4.dp)) {
-        Icon(
-            imageVector = Icons.Outlined.FileDownload,
-            contentDescription = stringResource(id = R.string.debug_logs_export),
-        )
-    }
     IconButton(onClick = { showDeleteLogsDialog = true }, modifier = modifier.padding(4.dp)) {
         Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(id = R.string.debug_clear))
     }
@@ -343,11 +343,9 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
         val fileName = "meshtastic_debug_$timestamp.txt"
 
-        // Get the Downloads directory
         val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
         val logFile = File(downloadsDir, fileName)
 
-        // Create the file and write logs
         OutputStreamWriter(FileOutputStream(logFile), StandardCharsets.UTF_8).use { writer ->
             logs.forEach { log ->
                 writer.write("${log.formattedReceivedDate} [${log.messageType}]\n")
@@ -355,16 +353,29 @@ private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = wit
                 if (!log.decodedPayload.isNullOrBlank()) {
                     writer.write("\n\nDecoded Payload:\n{")
                     writer.write("\n")
-                    writer.write(log.decodedPayload)
+                    // Redact Decoded keys.
+                    log.decodedPayload.lineSequence().forEach { line ->
+                        var outputLine = line
+                        val redacted = redactedKeys.firstOrNull { line.contains(it) }
+                        if (redacted != null) {
+                            val idx = line.indexOf(':')
+                            if (idx != -1) {
+                                outputLine = line.substring(0, idx + 1)
+                                outputLine += "<redacted>"
+                            }
+                        }
+                        writer.write(outputLine)
+                        writer.write("\n")
+                    }
                     writer.write("\n}")
                 }
                 writer.write("\n\n")
             }
         }
 
-        // Notify user of success
         withContext(Dispatchers.Main) {
-            Toast.makeText(context, "Logs exported to ${logFile.absolutePath}", Toast.LENGTH_LONG).show()
+            Toast.makeText(context, "${logs.size} logs exported to ${logFile.absolutePath}", Toast.LENGTH_LONG)
+                .show()
         }
     } catch (e: SecurityException) {
         withContext(Dispatchers.Main) {
