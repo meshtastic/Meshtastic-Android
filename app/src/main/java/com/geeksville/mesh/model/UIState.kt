@@ -18,7 +18,6 @@
 package com.geeksville.mesh.model
 
 import android.app.Application
-import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.RemoteException
@@ -679,9 +678,6 @@ constructor(
     }
 
     companion object {
-        fun getPreferences(context: Context): SharedPreferences =
-            context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
-
         const val HAS_SHOWN_NOT_PAIRED_WARNING_PREF = "has_shown_not_paired_warning"
     }
 

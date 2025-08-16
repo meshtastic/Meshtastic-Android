@@ -20,6 +20,7 @@ package com.geeksville.mesh
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -78,6 +79,8 @@ class MainActivity :
 
     @Inject internal lateinit var serviceRepository: ServiceRepository
 
+    @Inject internal lateinit var uiPrefs: SharedPreferences
+
     private var showAppIntro by mutableStateOf(false)
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -92,13 +95,13 @@ class MainActivity :
         }
 
         super.onCreate(savedInstanceState)
-        val prefs = UIViewModel.getPreferences(this)
+
         if (savedInstanceState == null) {
-            val lang = prefs.getString("lang", LanguageUtils.SYSTEM_DEFAULT)
-            if (lang != LanguageUtils.SYSTEM_MANAGED) LanguageUtils.migrateLanguagePrefs(prefs)
+            val lang = uiPrefs.getString("lang", LanguageUtils.SYSTEM_DEFAULT)
+            if (lang != LanguageUtils.SYSTEM_MANAGED) LanguageUtils.migrateLanguagePrefs(uiPrefs)
             info("in-app language is ${LanguageUtils.getLocale()}")
 
-            if (!prefs.getBoolean("app_intro_completed", false)) {
+            if (!uiPrefs.getBoolean("app_intro_completed", false)) {
                 showAppIntro = true
             } else {
                 (application as GeeksvilleApplication).askToRate(this)
@@ -125,7 +128,7 @@ class MainActivity :
                 if (showAppIntro) {
                     AppIntroductionScreen(
                         onDone = {
-                            prefs.edit { putBoolean("app_intro_completed", true) }
+                            uiPrefs.edit { putBoolean("app_intro_completed", true) }
                             showAppIntro = false
                             (application as GeeksvilleApplication).askToRate(this@MainActivity)
                         },
@@ -320,8 +323,7 @@ class MainActivity :
                 getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
             )
 
-        val prefs = UIViewModel.getPreferences(this)
-        val theme = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        val theme = uiPrefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         debug("Theme from prefs: $theme")
         model.showAlert(
             title = getString(R.string.choose_theme),
