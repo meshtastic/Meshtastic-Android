@@ -19,16 +19,9 @@
 
     <!-- Shim in the system UI overrides -->
     <style name="SplashTheme.NightAdjusted" parent="Theme.SplashScreen">
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
-        <item name="windowSplashScreenBackground">#FFFFFF</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
+        <item name="windowSplashScreenBackground">#000000</item>
     </style>
-
-    <style name="SplashTheme" parent="SplashTheme.NightAdjusted">
-        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
-        <item name="postSplashScreenTheme">@style/AppTheme</item>
-    </style>
-
-    <style name="AppTheme" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar" />
 
 </resources>
