@@ -100,6 +100,7 @@ constructor(
 
     // endregion
 
+    @Suppress("TooGenericExceptionCaught")
     private fun bindMeshService() {
         debug("Binding to mesh service!")
         try {
