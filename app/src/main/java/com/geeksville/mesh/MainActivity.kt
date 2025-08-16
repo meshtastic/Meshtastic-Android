@@ -40,12 +40,10 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalView
-import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import com.geeksville.mesh.android.BindFailedException
 import com.geeksville.mesh.android.GeeksvilleApplication
@@ -81,8 +79,6 @@ class MainActivity :
 
     @Inject internal lateinit var uiPrefs: SharedPreferences
 
-    private var showAppIntro by mutableStateOf(false)
-
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         enableEdgeToEdge(
@@ -101,9 +97,7 @@ class MainActivity :
             if (lang != LanguageUtils.SYSTEM_MANAGED) LanguageUtils.migrateLanguagePrefs(uiPrefs)
             info("in-app language is ${LanguageUtils.getLocale()}")
 
-            if (!uiPrefs.getBoolean("app_intro_completed", false)) {
-                showAppIntro = true
-            } else {
+            if (uiPrefs.getBoolean("app_intro_completed", false)) {
                 (application as GeeksvilleApplication).askToRate(this)
             }
         }
@@ -125,11 +119,11 @@ class MainActivity :
                     SideEffect { AppCompatDelegate.setDefaultNightMode(theme) }
                 }
 
+                val showAppIntro by model.showAppIntro.collectAsStateWithLifecycle()
                 if (showAppIntro) {
                     AppIntroductionScreen(
                         onDone = {
-                            uiPrefs.edit { putBoolean("app_intro_completed", true) }
-                            showAppIntro = false
+                            model.onAppIntroCompleted()
                             (application as GeeksvilleApplication).askToRate(this@MainActivity)
                         },
                     )
@@ -296,11 +290,8 @@ class MainActivity :
                 chooseLangDialog()
             }
 
-            MainMenuAction.SHOW_INTRO -> {
-                showAppIntro = true
-            }
-
-            else -> {}
+            // Unhandled here, so delegate to the ViewModel
+            else -> model.onMainMenuAction(action)
         }
     }
 

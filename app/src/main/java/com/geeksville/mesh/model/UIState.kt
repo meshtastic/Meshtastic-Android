@@ -63,6 +63,7 @@ import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceAction
+import com.geeksville.mesh.ui.MainMenuAction
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.util.getShortDate
 import com.geeksville.mesh.util.positionToMeter
@@ -85,6 +86,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedWriter
@@ -986,4 +988,25 @@ constructor(
     fun setNodeFilterText(text: String) {
         nodeFilterText.value = text
     }
+
+    fun onMainMenuAction(action: MainMenuAction) {
+        when (action) {
+            MainMenuAction.SHOW_INTRO -> _showAppIntro.update { true }
+
+            else -> Unit
+        }
+    }
+
+    // region Show app intro logic
+
+    private val _showAppIntro: MutableStateFlow<Boolean> =
+        MutableStateFlow(preferences.getBoolean("app_intro_completed", false).not())
+    val showAppIntro: StateFlow<Boolean> = _showAppIntro.asStateFlow()
+
+    fun onAppIntroCompleted() {
+        preferences.edit { putBoolean("app_intro_completed", true) }
+        _showAppIntro.update { false }
+    }
+
+    // endregion
 }
