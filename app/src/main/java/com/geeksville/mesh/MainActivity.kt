@@ -290,8 +290,7 @@ class MainActivity :
                 chooseLangDialog()
             }
 
-            // Unhandled here, so delegate to the ViewModel
-            else -> model.onMainMenuAction(action)
+            else -> warn("Unexpected action: $action")
         }
     }
 
