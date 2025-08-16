@@ -989,6 +989,12 @@ constructor(
         nodeFilterText.value = text
     }
 
+    // region Main menu actions logic
+
+    private val _showAppIntro: MutableStateFlow<Boolean> =
+        MutableStateFlow(preferences.getBoolean("app_intro_completed", false).not())
+    val showAppIntro: StateFlow<Boolean> = _showAppIntro.asStateFlow()
+
     fun onMainMenuAction(action: MainMenuAction) {
         when (action) {
             MainMenuAction.SHOW_INTRO -> _showAppIntro.update { true }
@@ -997,16 +1003,10 @@ constructor(
         }
     }
 
-    // region Show app intro logic
-
-    private val _showAppIntro: MutableStateFlow<Boolean> =
-        MutableStateFlow(preferences.getBoolean("app_intro_completed", false).not())
-    val showAppIntro: StateFlow<Boolean> = _showAppIntro.asStateFlow()
+    // endregion
 
     fun onAppIntroCompleted() {
         preferences.edit { putBoolean("app_intro_completed", true) }
         _showAppIntro.update { false }
     }
-
-    // endregion
 }
