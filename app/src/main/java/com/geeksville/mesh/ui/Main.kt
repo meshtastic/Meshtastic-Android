@@ -359,6 +359,7 @@ fun MainScreen(
                             MainMenuAction.DEBUG -> navController.navigate(Route.DebugPanel)
                             MainMenuAction.RADIO_CONFIG -> navController.navigate(RadioConfigRoutes.RadioConfig())
                             MainMenuAction.QUICK_CHAT -> navController.navigate(ContactsRoutes.QuickChat)
+                            MainMenuAction.SHOW_INTRO -> uIViewModel.onMainMenuAction(action)
                             else -> onAction(action)
                         }
                     } else if (action is NodeMenuAction) {

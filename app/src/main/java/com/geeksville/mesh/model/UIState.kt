@@ -18,7 +18,6 @@
 package com.geeksville.mesh.model
 
 import android.app.Application
-import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.RemoteException
@@ -64,6 +63,7 @@ import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceAction
+import com.geeksville.mesh.ui.MainMenuAction
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.util.getShortDate
 import com.geeksville.mesh.util.positionToMeter
@@ -86,6 +86,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedWriter
@@ -679,9 +680,6 @@ constructor(
     }
 
     companion object {
-        fun getPreferences(context: Context): SharedPreferences =
-            context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
-
         const val HAS_SHOWN_NOT_PAIRED_WARNING_PREF = "has_shown_not_paired_warning"
     }
 
@@ -989,5 +987,26 @@ constructor(
 
     fun setNodeFilterText(text: String) {
         nodeFilterText.value = text
+    }
+
+    // region Main menu actions logic
+
+    private val _showAppIntro: MutableStateFlow<Boolean> =
+        MutableStateFlow(preferences.getBoolean("app_intro_completed", false).not())
+    val showAppIntro: StateFlow<Boolean> = _showAppIntro.asStateFlow()
+
+    fun onMainMenuAction(action: MainMenuAction) {
+        when (action) {
+            MainMenuAction.SHOW_INTRO -> _showAppIntro.update { true }
+
+            else -> Unit
+        }
+    }
+
+    // endregion
+
+    fun onAppIntroCompleted() {
+        preferences.edit { putBoolean("app_intro_completed", true) }
+        _showAppIntro.update { false }
     }
 }

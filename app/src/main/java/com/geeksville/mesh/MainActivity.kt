@@ -20,6 +20,7 @@ package com.geeksville.mesh
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Intent
+import android.content.SharedPreferences
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -39,12 +40,10 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalView
-import androidx.core.content.edit
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.model.BluetoothViewModel
@@ -71,7 +70,7 @@ class MainActivity :
     // This is aware of the Activity lifecycle and handles binding to the mesh service.
     @Inject internal lateinit var meshServiceClient: MeshServiceClient
 
-    private var showAppIntro by mutableStateOf(false)
+    @Inject internal lateinit var uiPrefs: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -85,15 +84,13 @@ class MainActivity :
         }
 
         super.onCreate(savedInstanceState)
-        val prefs = UIViewModel.getPreferences(this)
+
         if (savedInstanceState == null) {
-            val lang = prefs.getString("lang", LanguageUtils.SYSTEM_DEFAULT)
-            if (lang != LanguageUtils.SYSTEM_MANAGED) LanguageUtils.migrateLanguagePrefs(prefs)
+            val lang = uiPrefs.getString("lang", LanguageUtils.SYSTEM_DEFAULT)
+            if (lang != LanguageUtils.SYSTEM_MANAGED) LanguageUtils.migrateLanguagePrefs(uiPrefs)
             info("in-app language is ${LanguageUtils.getLocale()}")
 
-            if (!prefs.getBoolean("app_intro_completed", false)) {
-                showAppIntro = true
-            } else {
+            if (uiPrefs.getBoolean("app_intro_completed", false)) {
                 (application as GeeksvilleApplication).askToRate(this)
             }
         }
@@ -115,11 +112,11 @@ class MainActivity :
                     SideEffect { AppCompatDelegate.setDefaultNightMode(theme) }
                 }
 
+                val showAppIntro by model.showAppIntro.collectAsStateWithLifecycle()
                 if (showAppIntro) {
                     AppIntroductionScreen(
                         onDone = {
-                            prefs.edit { putBoolean("app_intro_completed", true) }
-                            showAppIntro = false
+                            model.onAppIntroCompleted()
                             (application as GeeksvilleApplication).askToRate(this@MainActivity)
                         },
                     )
@@ -246,11 +243,7 @@ class MainActivity :
                 chooseLangDialog()
             }
 
-            MainMenuAction.SHOW_INTRO -> {
-                showAppIntro = true
-            }
-
-            else -> {}
+            else -> warn("Unexpected action: $action")
         }
     }
 
@@ -273,8 +266,7 @@ class MainActivity :
                 getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
             )
 
-        val prefs = UIViewModel.getPreferences(this)
-        val theme = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        val theme = uiPrefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
         debug("Theme from prefs: $theme")
         model.showAlert(
             title = getString(R.string.choose_theme),
