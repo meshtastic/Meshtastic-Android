@@ -610,6 +610,7 @@
     <string name="public_key_changed">Public Key Changed</string>
     <string name="import_label">Import</string>
     <string name="request_metadata">Request Metadata</string>
+    <string name="request_metadata_success">Succeeded.\n You have Administrator Access to this node.</string>
     <string name="actions">Actions</string>
     <string name="firmware">Firmware</string>
     <string name="use_12h_format">Use 12h clock format</string>

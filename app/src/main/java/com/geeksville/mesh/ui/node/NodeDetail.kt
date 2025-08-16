@@ -84,6 +84,7 @@ import androidx.compose.material.icons.outlined.NoCell
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.twotone.Person
 import androidx.compose.material.icons.twotone.Verified
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
@@ -97,9 +98,11 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -125,6 +128,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.compose.runtime.rememberCoroutineScope
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import com.geeksville.mesh.ConfigProtos
@@ -164,6 +168,9 @@ import com.geeksville.mesh.util.toDistanceString
 import com.geeksville.mesh.util.toSmallDistanceString
 import com.geeksville.mesh.util.toSpeedString
 import com.mikepenz.markdown.m3.Markdown
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 private data class VectorMetricInfo(
     @StringRes val label: Int,
@@ -251,6 +258,11 @@ private fun handleNodeAction(
     when (action) {
         is NodeDetailAction.Navigate -> onNavigate(action.route)
         is NodeDetailAction.TriggerServiceAction -> viewModel.onServiceAction(action.action)
+        is NodeDetailAction.TriggerServiceActionWithCallback -> {
+            viewModel.onServiceActionWithCallback(action.action) { response ->
+                action.callback(response)
+            }
+        }
         is NodeDetailAction.HandleNodeMenuAction -> {
             when (val menuAction = action.action) {
                 is NodeMenuAction.DirectMessage -> {
@@ -278,6 +290,11 @@ sealed interface NodeDetailAction {
     data class Navigate(val route: Route) : NodeDetailAction
 
     data class TriggerServiceAction(val action: ServiceAction) : NodeDetailAction
+
+    data class TriggerServiceActionWithCallback(
+        val action: ServiceAction,
+        val callback: (Any?) -> Unit
+    ) : NodeDetailAction
 
     data class HandleNodeMenuAction(val action: NodeMenuAction) : NodeDetailAction
 
@@ -428,13 +445,113 @@ private fun AdministrationSection(
     onAction: (NodeDetailAction) -> Unit,
     onFirmwareSelected: (FirmwareRelease) -> Unit,
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    
     PreferenceCategory(stringResource(id = R.string.administration)) {
+        var showMetadataDialog by remember { mutableStateOf(false) }
+        var metadataResponse by remember { mutableStateOf<Boolean?>(null) }
+        var isWaitingForMetadata by remember { mutableStateOf(false) }
+        var showTimeoutMessage by remember { mutableStateOf(false) }
+        var timeoutJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+        
+        // Cleanup timeout job when component is disposed
+        DisposableEffect(Unit) {
+            onDispose {
+                timeoutJob?.cancel()
+            }
+        }
+
         NodeActionButton(
             title = stringResource(id = R.string.request_metadata),
             icon = Icons.Default.Memory,
-            enabled = true,
-            onClick = { onAction(NodeDetailAction.TriggerServiceAction(ServiceAction.GetDeviceMetadata(node.num))) },
+            enabled = !isWaitingForMetadata,
+            onClick = {
+                isWaitingForMetadata = true
+                // Call the action and show a dialog with the response
+                onAction(
+                    NodeDetailAction.TriggerServiceActionWithCallback(
+                        ServiceAction.GetDeviceMetadata(node.num)
+                                        ) { response ->
+                        isWaitingForMetadata = false
+                        // Cancel the timeout job since we got a response
+                        timeoutJob?.cancel()
+                        val metadata = response as? MeshProtos.DeviceMetadata
+                        metadataResponse = metadata?.let { metadata ->
+                            true
+                        }
+                        showMetadataDialog = true
+                    }
+                )
+                
+                // Set a timeout to stop waiting after 5 seconds
+                timeoutJob = coroutineScope.launch {
+                    delay(5000)
+                    if (isWaitingForMetadata) {
+                        isWaitingForMetadata = false
+                        showTimeoutMessage = true
+                        // Auto-clear the timeout message after 3 seconds
+                        delay(3000)
+                        showTimeoutMessage = false
+                    }
+                }
+            },
         )
+
+        // Show waiting popup
+        if (isWaitingForMetadata) {
+            AlertDialog(
+                onDismissRequest = { 
+                    isWaitingForMetadata = false
+                    timeoutJob?.cancel()
+                },
+                title = { Text("Requesting Metadata") },
+                text = { 
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.padding(16.dp)
+                        )
+                        Text("Waiting for response from node...")
+                    }
+                },
+                confirmButton = { }
+            )
+        }
+
+        if (showMetadataDialog && metadataResponse != null) {
+            AlertDialog(
+                onDismissRequest = { showMetadataDialog = false },
+                title = { Text(stringResource(id = R.string.request_metadata)) },
+                text = { 
+                    Text(
+                        text =  stringResource(id = R.string.request_metadata_success) ?: "",
+                        modifier = Modifier.verticalScroll(rememberScrollState())
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = { showMetadataDialog = false }) {
+                        Text(stringResource(id = R.string.okay))
+                    }
+                }
+            )
+        }
+
+        // Show timeout message when node doesn't respond
+        if (showTimeoutMessage) {
+            AlertDialog(
+                onDismissRequest = { showTimeoutMessage = false },
+                title = { Text("Request Timeout") },
+                text = { 
+                    Text("The node has not responded")
+                },
+                confirmButton = {
+                    TextButton(onClick = { showTimeoutMessage = false }) {
+                        Text(stringResource(id = android.R.string.ok))
+                    }
+                }
+            )
+        }
         NavCard(
             title = stringResource(id = R.string.remote_admin),
             icon = Icons.Default.Settings,
