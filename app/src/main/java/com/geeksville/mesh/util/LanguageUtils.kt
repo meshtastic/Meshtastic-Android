@@ -18,12 +18,11 @@
 package com.geeksville.mesh.util
 
 import android.content.Context
-import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.content.edit
 import androidx.core.os.LocaleListCompat
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.android.prefs.UiPrefs
 import org.xmlpull.v1.XmlPullParser
 import java.util.Locale
 
@@ -44,10 +43,10 @@ object LanguageUtils : Logging {
         )
     }
 
-    fun migrateLanguagePrefs(prefs: SharedPreferences) {
-        val currentLang = prefs.getString("lang", SYSTEM_DEFAULT) ?: SYSTEM_DEFAULT
+    fun migrateLanguagePrefs(uiPrefs: UiPrefs) {
+        val currentLang = uiPrefs.lang
         debug("Migrating in-app language prefs: $currentLang")
-        prefs.edit { putString("lang", SYSTEM_MANAGED) }
+        uiPrefs.lang = SYSTEM_MANAGED
         setLocale(currentLang)
     }
 
