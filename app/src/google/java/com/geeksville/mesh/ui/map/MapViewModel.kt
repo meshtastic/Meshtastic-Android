@@ -21,6 +21,7 @@ import android.app.Application
 import android.content.SharedPreferences
 import android.net.Uri
 import android.util.Log
+import androidx.core.content.edit
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.android.BuildUtils.debug
@@ -60,6 +61,8 @@ import java.util.UUID
 import javax.inject.Inject
 
 private const val TILE_SIZE = 256
+private const val PREF_SELECTED_GOOGLE_MAP_TYPE = "selected_google_map_type"
+private const val PREF_SELECTED_CUSTOM_TILE_URL = "selected_custom_tile_url"
 
 @Serializable
 data class MapCameraPosition(
@@ -182,6 +185,8 @@ constructor(
 
             if (configToRemove != null && _selectedCustomTileProviderUrl.value == configToRemove.urlTemplate) {
                 _selectedCustomTileProviderUrl.value = null
+                // Also clear from prefs
+                preferences.edit().remove(PREF_SELECTED_CUSTOM_TILE_URL).apply()
             }
         }
     }
@@ -191,19 +196,30 @@ constructor(
             if (!isValidTileUrlTemplate(config.urlTemplate)) {
                 Log.w("MapViewModel", "Attempted to select invalid URL template: ${config.urlTemplate}")
                 _selectedCustomTileProviderUrl.value = null
+                preferences.edit().remove(PREF_SELECTED_CUSTOM_TILE_URL).apply()
                 return
             }
             _selectedCustomTileProviderUrl.value = config.urlTemplate
+            _selectedGoogleMapType.value = MapType.NORMAL // Reset to a default or keep last? For now, reset.
+            preferences
+                .edit()
+                .putString(PREF_SELECTED_CUSTOM_TILE_URL, config.urlTemplate)
+                .remove(PREF_SELECTED_GOOGLE_MAP_TYPE)
+                .apply()
         } else {
             _selectedCustomTileProviderUrl.value = null
+            preferences.edit().remove(PREF_SELECTED_CUSTOM_TILE_URL).apply()
         }
     }
 
     fun setSelectedGoogleMapType(mapType: MapType) {
         _selectedGoogleMapType.value = mapType
-        if (_selectedCustomTileProviderUrl.value != null) {
-            _selectedCustomTileProviderUrl.value = null
-        }
+        _selectedCustomTileProviderUrl.value = null // Clear custom selection
+        preferences
+            .edit()
+            .putString(PREF_SELECTED_GOOGLE_MAP_TYPE, mapType.name)
+            .remove(PREF_SELECTED_CUSTOM_TILE_URL)
+            .apply()
     }
 
     fun createUrlTileProvider(urlString: String): TileProvider? {
@@ -237,6 +253,34 @@ constructor(
 
     init {
         loadPersistedLayers()
+        loadPersistedMapType()
+    }
+
+    private fun loadPersistedMapType() {
+        val savedCustomUrl = preferences.getString(PREF_SELECTED_CUSTOM_TILE_URL, null)
+        if (savedCustomUrl != null) {
+            // Check if this custom provider still exists
+            if (
+                customTileProviderConfigs.value.any { it.urlTemplate == savedCustomUrl } &&
+                isValidTileUrlTemplate(savedCustomUrl)
+            ) {
+                _selectedCustomTileProviderUrl.value = savedCustomUrl
+                _selectedGoogleMapType.value = MapType.NORMAL // Default, as custom is active
+            } else {
+                // The saved custom URL is no longer valid or doesn't exist, remove preference
+                preferences.edit { remove(PREF_SELECTED_CUSTOM_TILE_URL) }
+                // Fallback to default Google Map type
+                _selectedGoogleMapType.value = MapType.NORMAL
+            }
+        } else {
+            val savedGoogleMapTypeName = preferences.getString(PREF_SELECTED_GOOGLE_MAP_TYPE, MapType.NORMAL.name)
+            try {
+                _selectedGoogleMapType.value = MapType.valueOf(savedGoogleMapTypeName ?: MapType.NORMAL.name)
+            } catch (e: IllegalArgumentException) {
+                _selectedGoogleMapType.value = MapType.NORMAL // Fallback in case of invalid stored name
+                preferences.edit { remove(PREF_SELECTED_GOOGLE_MAP_TYPE) }
+            }
+        }
     }
 
     private fun loadPersistedLayers() {
