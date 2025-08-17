@@ -17,12 +17,8 @@
 
 package com.geeksville.mesh.repository.radio
 
-import android.app.Application
-import android.content.Context
-import android.content.SharedPreferences
 import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 import dagger.multibindings.IntoMap
@@ -49,11 +45,4 @@ abstract class RadioRepositoryModule {
 
     @[Binds IntoMap InterfaceMapKey(InterfaceId.TCP)]
     abstract fun bindTCPInterfaceSpec(spec: TCPInterfaceSpec): @JvmSuppressWildcards InterfaceSpec<*>
-
-    companion object {
-        @Provides
-        @RadioRepositoryQualifier
-        fun provideSharedPreferences(application: Application): SharedPreferences =
-            application.getSharedPreferences("radio-prefs", Context.MODE_PRIVATE)
-    }
 }
