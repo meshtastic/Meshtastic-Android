@@ -44,6 +44,7 @@ import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.Position
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.android.prefs.MapConsentPrefs
 import com.geeksville.mesh.config
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.deviceProfile
@@ -101,6 +102,7 @@ constructor(
     private val app: Application,
     private val radioConfigRepository: RadioConfigRepository,
     private val locationRepository: LocationRepository,
+    private val mapConsentPrefs: MapConsentPrefs,
 ) : ViewModel(),
     Logging {
     private val meshService: IMeshService?
@@ -543,6 +545,12 @@ constructor(
                 getModuleConfig(destNum, route.type)
             }
         }
+    }
+
+    fun shouldReportLocation(nodeNum: Int?) = mapConsentPrefs.shouldReportLocation(nodeNum)
+
+    fun setShouldReportLocation(nodeNum: Int?, shouldReportLocation: Boolean) {
+        mapConsentPrefs.setShouldReportLocation(nodeNum, shouldReportLocation)
     }
 
     private fun setResponseStateTotal(total: Int) {
