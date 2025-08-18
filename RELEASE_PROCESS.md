@@ -61,6 +61,8 @@ This phase involves creating a release candidate and deploying it to a limited a
 5.  **Monitor Feedback:** Actively collect feedback from closed testers. Address any critical bugs by committing fixes to the `release/x.x.x` branch and pushing them.
     *   For re-deployment: Manually re-trigger the `release.yml` GitHub Action as in step 3. Note: This will attempt to create the same tag. If the tag already exists, the GitHub Release creation might behave unexpectedly or require manual intervention (e.g., deleting the old tag and release before re-running, or the action might update the existing draft release if `actions/create-release@v1` is configured to do so – verify its behavior with existing tags). Then, manually upload the new AAB to the Closed Test Channel. Consider if `VERSION_NAME_BASE` needs a patch increment for subsequent canary builds if distinct tags are desired.
 
+**Note on Promoting Builds:** If the Canary testing phase was successful and no code changes (and thus no re-builds) were required, the AAB uploaded to the Closed Test Channel during step 4 can often be directly promoted to the Open Test Channel (Alpha) in the Google Play Console. If changes were made, proceed with a new build for Alpha as described below.
+
 ### Phase 2: Alpha Release (Open Testing)
 
 Once the canary release is stable and initial feedback is addressed, the release is promoted to a wider audience.
@@ -79,6 +81,8 @@ Once the canary release is stable and initial feedback is addressed, the release
     *   Manually upload this AAB to the **Open Test Channel (Alpha)** in the Google Play Console.
 
 4.  **Monitor Feedback:** Continue to monitor feedback. Address critical issues by committing fixes to `release/x.x.x`. For re-deployment, repeat step 2 and 3 of this Alpha phase.
+
+**Note on Promoting Builds:** If the Alpha testing phase was successful and no code changes (and thus no re-builds) were required beyond those already incorporated for this Alpha build, the AAB uploaded to the Open Test Channel (Alpha) during step 3 can often be directly promoted to the Production Channel in the Google Play Console. If changes were made, ensure all final changes are on the `main` branch before proceeding with the Production build as described below.
 
 ### Phase 3: Production Release
 
