@@ -15,19 +15,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh
+package com.geeksville.mesh.android.prefs
 
-import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.prefs.AnalyticsPrefs
-import dagger.hilt.android.HiltAndroidApp
-import javax.inject.Inject
+import android.content.SharedPreferences
+import androidx.core.content.edit
 
-@HiltAndroidApp
-class MeshUtilApplication : GeeksvilleApplication() {
+interface MapConsentPrefs {
+    fun shouldReportLocation(nodeNum: Int?): Boolean
 
-    @Inject override lateinit var analyticsPrefs: AnalyticsPrefs
+    fun setShouldReportLocation(nodeNum: Int?, value: Boolean)
+}
 
-    override fun onCreate() {
-        super.onCreate()
+class MapConsentPrefsImpl(private val prefs: SharedPreferences) : MapConsentPrefs {
+    override fun shouldReportLocation(nodeNum: Int?) = prefs.getBoolean(nodeNum.toString(), false)
+
+    override fun setShouldReportLocation(nodeNum: Int?, value: Boolean) {
+        prefs.edit { putBoolean(nodeNum.toString(), value) }
     }
 }

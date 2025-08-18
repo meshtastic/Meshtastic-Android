@@ -15,19 +15,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.util
+package com.geeksville.mesh.android.prefs
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
-import kotlinx.coroutines.flow.MutableStateFlow
 
-fun SharedPreferences.toggleBooleanPreference(
-    state: MutableStateFlow<Boolean>,
-    key: String,
-    onChanged: (Boolean) -> Unit = {},
-) {
-    val newValue = !state.value
-    state.value = newValue
-    this.edit { putBoolean(key, newValue) }
-    onChanged(newValue)
+interface MeshPrefs {
+    var deviceAddress: String?
+
+    fun shouldProvideNodeLocation(nodeNum: Int?): Boolean
+
+    fun setShouldProvideNodeLocation(nodeNum: Int?, value: Boolean)
+}
+
+class MeshPrefsImpl(private val prefs: SharedPreferences) : MeshPrefs {
+    override var deviceAddress: String? by NullableStringPrefDelegate(prefs, "device_address", null)
+
+    override fun shouldProvideNodeLocation(nodeNum: Int?): Boolean =
+        prefs.getBoolean(provideLocationKey(nodeNum), false)
+
+    override fun setShouldProvideNodeLocation(nodeNum: Int?, value: Boolean) {
+        prefs.edit { putBoolean(provideLocationKey(nodeNum), value) }
+    }
+
+    private fun provideLocationKey(nodeNum: Int?) = "provide-location-$nodeNum"
 }

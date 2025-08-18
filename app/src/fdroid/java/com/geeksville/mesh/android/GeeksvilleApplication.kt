@@ -19,21 +19,20 @@ package com.geeksville.mesh.android
 
 import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
-import androidx.core.content.edit
 import androidx.navigation.NavHostController
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.analytics.AnalyticsProvider
 import com.geeksville.mesh.analytics.NopAnalytics
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.info
+import com.geeksville.mesh.android.prefs.AnalyticsPrefs
 import com.geeksville.mesh.model.DeviceHardware
 import timber.log.Timber
 
-open class GeeksvilleApplication :
+abstract class GeeksvilleApplication :
     Application(),
     Logging {
 
@@ -56,12 +55,12 @@ open class GeeksvilleApplication :
             return "true" == testLabSetting
         }
 
-    private val analyticsPrefs: SharedPreferences by lazy { getSharedPreferences("analytics-prefs", MODE_PRIVATE) }
+    abstract val analyticsPrefs: AnalyticsPrefs
 
     var isAnalyticsAllowed: Boolean
-        get() = analyticsPrefs.getBoolean("allowed", true)
+        get() = analyticsPrefs.analyticsAllowed
         set(value) {
-            analyticsPrefs.edit { putBoolean("allowed", value) }
+            analyticsPrefs.analyticsAllowed = value
 
             // Change the flag with the providers
             analytics.setEnabled(value && !isInTestLab) // Never do analytics in the test lab

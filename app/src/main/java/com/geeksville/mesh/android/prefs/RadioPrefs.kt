@@ -15,19 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh
+package com.geeksville.mesh.android.prefs
 
-import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.prefs.AnalyticsPrefs
-import dagger.hilt.android.HiltAndroidApp
-import javax.inject.Inject
+import android.content.SharedPreferences
 
-@HiltAndroidApp
-class MeshUtilApplication : GeeksvilleApplication() {
+interface RadioPrefs {
+    var devAddr: String?
+}
 
-    @Inject override lateinit var analyticsPrefs: AnalyticsPrefs
-
-    override fun onCreate() {
-        super.onCreate()
-    }
+class RadioPrefsImpl(prefs: SharedPreferences) : RadioPrefs {
+    override var devAddr: String? by NullableStringPrefDelegate(prefs, "devAddr2", null)
 }

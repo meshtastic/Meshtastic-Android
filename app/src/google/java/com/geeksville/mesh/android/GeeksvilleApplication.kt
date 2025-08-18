@@ -19,11 +19,9 @@ package com.geeksville.mesh.android
 
 import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
-import androidx.core.content.edit
 import androidx.navigation.NavHostController
 import com.datadog.android.Datadog
 import com.datadog.android.DatadogSite
@@ -49,6 +47,7 @@ import com.datadog.android.trace.TraceConfiguration
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.analytics.AnalyticsProvider
 import com.geeksville.mesh.analytics.FirebaseAnalytics
+import com.geeksville.mesh.android.prefs.AnalyticsPrefs
 import com.geeksville.mesh.model.DeviceHardware
 import com.geeksville.mesh.util.exceptionReporter
 import com.google.android.gms.common.ConnectionResult
@@ -57,7 +56,7 @@ import com.suddenh4x.ratingdialog.AppRating
 import io.opentracing.util.GlobalTracer
 import timber.log.Timber
 
-open class GeeksvilleApplication :
+abstract class GeeksvilleApplication :
     Application(),
     Logging {
 
@@ -75,12 +74,12 @@ open class GeeksvilleApplication :
             return "true" == testLabSetting
         }
 
-    private val analyticsPrefs: SharedPreferences by lazy { getSharedPreferences("analytics-prefs", MODE_PRIVATE) }
+    abstract val analyticsPrefs: AnalyticsPrefs
 
     var isAnalyticsAllowed: Boolean
-        get() = analyticsPrefs.getBoolean("allowed", true)
+        get() = analyticsPrefs.analyticsAllowed
         set(value) {
-            analyticsPrefs.edit { putBoolean("allowed", value) }
+            analyticsPrefs.analyticsAllowed = value
             val newConsent =
                 if (value && !isInTestLab) {
                     TrackingConsent.GRANTED

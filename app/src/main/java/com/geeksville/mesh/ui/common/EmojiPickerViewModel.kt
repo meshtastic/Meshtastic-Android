@@ -15,19 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh
+package com.geeksville.mesh.ui.common
 
-import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.prefs.AnalyticsPrefs
-import dagger.hilt.android.HiltAndroidApp
+import androidx.lifecycle.ViewModel
+import com.geeksville.mesh.android.prefs.CustomEmojiPrefs
+import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
-@HiltAndroidApp
-class MeshUtilApplication : GeeksvilleApplication() {
+@HiltViewModel
+class EmojiPickerViewModel @Inject constructor(private val customEmojiPrefs: CustomEmojiPrefs) : ViewModel() {
 
-    @Inject override lateinit var analyticsPrefs: AnalyticsPrefs
-
-    override fun onCreate() {
-        super.onCreate()
-    }
+    var customEmojiFrequency: String?
+        get() = customEmojiPrefs.customEmojiFrequency
+        set(value) {
+            customEmojiPrefs.customEmojiFrequency = value
+        }
 }

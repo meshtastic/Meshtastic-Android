@@ -15,12 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.repository.radio
+package com.geeksville.mesh.android.prefs
 
-import javax.inject.Qualifier
+import android.content.SharedPreferences
 
-/**
- * Qualifier to distinguish radio repository- specific object instances.
- */
-@Qualifier
-annotation class RadioRepositoryQualifier
+interface AnalyticsPrefs {
+    var analyticsAllowed: Boolean
+}
+
+class AnalyticsPrefsImpl(prefs: SharedPreferences) : AnalyticsPrefs {
+    override var analyticsAllowed: Boolean by PrefDelegate(prefs, "allowed", true)
+}

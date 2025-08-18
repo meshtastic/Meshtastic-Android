@@ -18,13 +18,9 @@
 package com.geeksville.mesh.model
 
 import android.app.Application
-import android.content.Context
-import android.content.SharedPreferences
 import android.net.Uri
 import android.os.RemoteException
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.material3.SnackbarHostState
-import androidx.core.content.edit
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
@@ -43,6 +39,7 @@ import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.Position
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.android.prefs.UiPrefs
 import com.geeksville.mesh.channel
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.channelSettings
@@ -64,10 +61,10 @@ import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceAction
+import com.geeksville.mesh.ui.MainMenuAction
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.util.getShortDate
 import com.geeksville.mesh.util.positionToMeter
-import com.geeksville.mesh.util.toggleBooleanPreference
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -86,6 +83,7 @@ import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedWriter
@@ -198,17 +196,17 @@ constructor(
     private val quickChatActionRepository: QuickChatActionRepository,
     private val locationRepository: LocationRepository,
     firmwareReleaseRepository: FirmwareReleaseRepository,
-    private val preferences: SharedPreferences,
+    private val uiPrefs: UiPrefs,
     private val meshServiceNotifications: MeshServiceNotifications,
 ) : ViewModel(),
     Logging {
 
-    private val _theme = MutableStateFlow(preferences.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM))
+    private val _theme = MutableStateFlow(uiPrefs.theme)
     val theme: StateFlow<Int> = _theme.asStateFlow()
 
     fun setTheme(theme: Int) {
         _theme.value = theme
-        preferences.edit { putInt("theme", theme) }
+        uiPrefs.theme = theme
     }
 
     private val _lastTraceRouteTime = MutableStateFlow<Long?>(null)
@@ -321,50 +319,50 @@ constructor(
 
     private val nodeFilterText = MutableStateFlow("")
     private val nodeSortOption =
-        MutableStateFlow(
-            NodeSortOption.entries.getOrElse(
-                preferences.getInt("node-sort-option", NodeSortOption.VIA_FAVORITE.ordinal),
-            ) {
-                NodeSortOption.VIA_FAVORITE
-            },
-        )
-    private val includeUnknown = MutableStateFlow(preferences.getBoolean("include-unknown", false))
-    private val showDetails = MutableStateFlow(preferences.getBoolean("show-details", false))
-    private val onlyOnline = MutableStateFlow(preferences.getBoolean("only-online", false))
-    private val onlyDirect = MutableStateFlow(preferences.getBoolean("only-direct", false))
+        MutableStateFlow(NodeSortOption.entries.getOrElse(uiPrefs.nodeSortOption) { NodeSortOption.VIA_FAVORITE })
+    private val includeUnknown = MutableStateFlow(uiPrefs.includeUnknown)
+    private val showDetails = MutableStateFlow(uiPrefs.showDetails)
+    private val onlyOnline = MutableStateFlow(uiPrefs.onlyOnline)
+    private val onlyDirect = MutableStateFlow(uiPrefs.onlyDirect)
 
-    private val _showIgnored = MutableStateFlow(preferences.getBoolean("show-ignored", false))
+    private val _showIgnored = MutableStateFlow(uiPrefs.showIgnored)
     val showIgnored: StateFlow<Boolean> = _showIgnored
 
-    private val _showQuickChat = MutableStateFlow(preferences.getBoolean("show-quick-chat", false))
+    private val _showQuickChat = MutableStateFlow(uiPrefs.showQuickChat)
     val showQuickChat: StateFlow<Boolean> = _showQuickChat
 
-    private val _hasShownNotPairedWarning =
-        MutableStateFlow(preferences.getBoolean(HAS_SHOWN_NOT_PAIRED_WARNING_PREF, false))
+    private val _hasShownNotPairedWarning = MutableStateFlow(uiPrefs.hasShownNotPairedWarning)
 
     val hasShownNotPairedWarning: StateFlow<Boolean> = _hasShownNotPairedWarning.asStateFlow()
 
     fun suppressNoPairedWarning() {
         _hasShownNotPairedWarning.value = true
-        preferences.edit { putBoolean(HAS_SHOWN_NOT_PAIRED_WARNING_PREF, true) }
+        uiPrefs.hasShownNotPairedWarning = true
     }
 
-    fun toggleShowIgnored() = preferences.toggleBooleanPreference(_showIgnored, "show-ignored")
+    fun toggleShowIgnored() = toggle(_showIgnored) { uiPrefs.showIgnored = it }
 
-    fun toggleShowQuickChat() = preferences.toggleBooleanPreference(_showQuickChat, "show-quick-chat")
+    fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.showQuickChat = it }
 
     fun setSortOption(sort: NodeSortOption) {
         nodeSortOption.value = sort
-        preferences.edit { putInt("node-sort-option", sort.ordinal) }
+        uiPrefs.nodeSortOption = sort.ordinal
     }
 
-    fun toggleShowDetails() = preferences.toggleBooleanPreference(showDetails, "show-details")
+    fun toggleShowDetails() = toggle(showDetails) { uiPrefs.showDetails = it }
 
-    fun toggleIncludeUnknown() = preferences.toggleBooleanPreference(includeUnknown, "include-unknown")
+    fun toggleIncludeUnknown() = toggle(includeUnknown) { uiPrefs.includeUnknown = it }
 
-    fun toggleOnlyOnline() = preferences.toggleBooleanPreference(onlyOnline, "only-online")
+    fun toggleOnlyOnline() = toggle(onlyOnline) { uiPrefs.onlyOnline = it }
 
-    fun toggleOnlyDirect() = preferences.toggleBooleanPreference(onlyDirect, "only-direct")
+    fun toggleOnlyDirect() = toggle(onlyDirect) { uiPrefs.onlyDirect = it }
+
+    private fun toggle(state: MutableStateFlow<Boolean>, onChanged: (newValue: Boolean) -> Unit) {
+        (!state.value).let { toggled ->
+            state.update { toggled }
+            onChanged(toggled)
+        }
+    }
 
     data class NodeFilterState(
         val filterText: String,
@@ -678,13 +676,6 @@ constructor(
         if (unreadCount == 0) meshServiceNotifications.cancelMessageNotification(contact)
     }
 
-    companion object {
-        fun getPreferences(context: Context): SharedPreferences =
-            context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
-
-        const val HAS_SHOWN_NOT_PAIRED_WARNING_PREF = "has_shown_not_paired_warning"
-    }
-
     // Connection state to our radio device
     val connectionState
         get() = radioConfigRepository.connectionState
@@ -805,10 +796,7 @@ constructor(
         viewModelScope.launch { setProvideLocation(getProvidePref()) }
     }
 
-    private fun getProvidePref(): Boolean {
-        val value = preferences.getBoolean("provide-location-$myNodeNum", false)
-        return value
-    }
+    private fun getProvidePref(): Boolean = uiPrefs.shouldProvideNodeLocation(myNodeNum)
 
     private val _provideLocation = MutableStateFlow(getProvidePref())
     val provideLocation: StateFlow<Boolean>
@@ -816,7 +804,7 @@ constructor(
 
     fun setProvideLocation(value: Boolean) {
         viewModelScope.launch {
-            preferences.edit { putBoolean("provide-location-$myNodeNum", value) }
+            uiPrefs.setShouldProvideNodeLocation(myNodeNum, value)
             _provideLocation.value = value
             if (value) {
                 meshService?.startProvideLocation()
@@ -989,5 +977,25 @@ constructor(
 
     fun setNodeFilterText(text: String) {
         nodeFilterText.value = text
+    }
+
+    // region Main menu actions logic
+
+    private val _showAppIntro: MutableStateFlow<Boolean> = MutableStateFlow(!uiPrefs.appIntroCompleted)
+    val showAppIntro: StateFlow<Boolean> = _showAppIntro.asStateFlow()
+
+    fun onMainMenuAction(action: MainMenuAction) {
+        when (action) {
+            MainMenuAction.SHOW_INTRO -> _showAppIntro.update { true }
+
+            else -> Unit
+        }
+    }
+
+    // endregion
+
+    fun onAppIntroCompleted() {
+        uiPrefs.appIntroCompleted = true
+        _showAppIntro.update { false }
     }
 }

@@ -98,6 +98,9 @@ import java.util.Locale
 
 private val REGEX_ANNOTATED_NODE_ID = Regex("\\(![0-9a-fA-F]{8}\\)$", RegexOption.MULTILINE)
 
+// list of dict keys to redact when exporting logs. These are evaluated as line.contains, so partials are fine.
+private var redactedKeys: List<String> = listOf("session_passkey", "private_key", "admin_key")
+
 @Suppress("LongMethod")
 @Composable
 internal fun DebugScreen(viewModel: DebugViewModel = hiltViewModel()) {
@@ -106,14 +109,16 @@ internal fun DebugScreen(viewModel: DebugViewModel = hiltViewModel()) {
     val searchState by viewModel.searchState.collectAsStateWithLifecycle()
     val filterTexts by viewModel.filterTexts.collectAsStateWithLifecycle()
     val selectedLogId by viewModel.selectedLogId.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     var filterMode by remember { mutableStateOf(FilterMode.OR) }
 
-    // Use the new filterLogs method to include decodedPayload in filtering
-    val filteredLogs =
+    val filteredLogsState by
         remember(logs, filterTexts, filterMode) {
-            viewModel.filterManager.filterLogs(logs, filterTexts, filterMode).toImmutableList()
+            derivedStateOf { viewModel.filterManager.filterLogs(logs, filterTexts, filterMode).toImmutableList() }
         }
+    val filteredLogs = filteredLogsState
 
     LaunchedEffect(filteredLogs) { viewModel.updateFilteredLogs(filteredLogs) }
 
@@ -144,6 +149,7 @@ internal fun DebugScreen(viewModel: DebugViewModel = hiltViewModel()) {
                     logs = logs,
                     filterMode = filterMode,
                     onFilterModeChange = { filterMode = it },
+                    onExportLogs = { scope.launch { exportAllLogs(context, filteredLogs) } },
                 )
             }
             items(filteredLogs, key = { it.uuid }) { log ->
@@ -250,12 +256,6 @@ private fun DebugItemHeader(log: UiMeshLog, searchText: String, isSelected: Bool
                 }
             }
         CopyIconButton(valueToCopy = fullLogText, modifier = Modifier.padding(start = 8.dp))
-        Icon(
-            imageVector = Icons.Outlined.FileDownload,
-            contentDescription = stringResource(id = R.string.logs),
-            tint = Color.Gray.copy(alpha = 0.6f),
-            modifier = Modifier.padding(end = 8.dp),
-        )
         val dateAnnotatedString = rememberAnnotatedString(text = log.formattedReceivedDate, searchText = searchText)
         Text(
             text = dateAnnotatedString,
@@ -307,6 +307,136 @@ private fun rememberAnnotatedLogMessage(log: UiMeshLog, searchText: String): Ann
             if (searchText.isNotEmpty()) {
                 searchText.split(" ").forEach { term ->
                     Regex(Regex.escape(term), RegexOption.IGNORE_CASE).findAll(log.logMessage).forEach { match ->
+                        addStyle(style = highlightStyle, start = match.range.first, end = match.range.last + 1)
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DebugMenuActions(viewModel: DebugViewModel = hiltViewModel(), modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    var showDeleteLogsDialog by remember { mutableStateOf(false) }
+
+    IconButton(onClick = { showDeleteLogsDialog = true }, modifier = modifier.padding(4.dp)) {
+        Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(id = R.string.debug_clear))
+    }
+    if (showDeleteLogsDialog) {
+        SimpleAlertDialog(
+            title = R.string.debug_clear,
+            text = R.string.debug_clear_logs_confirm,
+            onConfirm = {
+                showDeleteLogsDialog = false
+                viewModel.deleteAllLogs()
+            },
+            onDismiss = { showDeleteLogsDialog = false },
+        )
+    }
+}
+
+private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = withContext(Dispatchers.IO) {
+    try {
+        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+        val fileName = "meshtastic_debug_$timestamp.txt"
+
+        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+        val logFile = File(downloadsDir, fileName)
+
+        OutputStreamWriter(FileOutputStream(logFile), StandardCharsets.UTF_8).use { writer ->
+            logs.forEach { log ->
+                writer.write("${log.formattedReceivedDate} [${log.messageType}]\n")
+                writer.write(log.logMessage)
+                if (!log.decodedPayload.isNullOrBlank()) {
+                    writer.write("\n\nDecoded Payload:\n{")
+                    writer.write("\n")
+                    // Redact Decoded keys.
+                    log.decodedPayload.lineSequence().forEach { line ->
+                        var outputLine = line
+                        val redacted = redactedKeys.firstOrNull { line.contains(it) }
+                        if (redacted != null) {
+                            val idx = line.indexOf(':')
+                            if (idx != -1) {
+                                outputLine = line.substring(0, idx + 1)
+                                outputLine += "<redacted>"
+                            }
+                        }
+                        writer.write(outputLine)
+                        writer.write("\n")
+                    }
+                    writer.write("\n}")
+                }
+                writer.write("\n\n")
+            }
+        }
+
+        withContext(Dispatchers.Main) {
+            Toast.makeText(context, "${logs.size} logs exported to ${logFile.absolutePath}", Toast.LENGTH_LONG)
+                .show()
+        }
+    } catch (e: SecurityException) {
+        withContext(Dispatchers.Main) {
+            Toast.makeText(context, "Permission denied: Cannot write to Downloads folder", Toast.LENGTH_LONG).show()
+            warn("Error:SecurityException: " + e.toString())
+        }
+    } catch (e: IOException) {
+        withContext(Dispatchers.Main) {
+            Toast.makeText(context, "Failed to write log file: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+        warn("Error:IOException: " + e.toString())
+    }
+}
+
+@Composable
+private fun DecodedPayloadBlock(
+    decodedPayload: String,
+    isSelected: Boolean,
+    colorScheme: ColorScheme,
+    searchText: String = "",
+    modifier: Modifier = Modifier,
+) {
+    val commonTextStyle =
+        TextStyle(fontSize = if (isSelected) 10.sp else 8.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
+
+    Column(modifier = modifier) {
+        Text(
+            text = stringResource(id = R.string.debug_decoded_payload),
+            style = commonTextStyle,
+            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
+        )
+        Text(text = "{", style = commonTextStyle, modifier = Modifier.padding(start = 8.dp, bottom = 2.dp))
+        val annotatedPayload = rememberAnnotatedDecodedPayload(decodedPayload, searchText, colorScheme)
+        Text(
+            text = annotatedPayload,
+            softWrap = true,
+            style =
+            TextStyle(
+                fontSize = if (isSelected) 10.sp else 8.sp,
+                fontFamily = FontFamily.Monospace,
+                color = colorScheme.onSurface.copy(alpha = 0.8f),
+            ),
+            modifier = Modifier.padding(start = 16.dp, bottom = 0.dp),
+        )
+        Text(text = "}", style = commonTextStyle, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
+    }
+}
+
+@Composable
+private fun rememberAnnotatedDecodedPayload(
+    decodedPayload: String,
+    searchText: String,
+    colorScheme: ColorScheme,
+): AnnotatedString {
+    val highlightStyle = SpanStyle(background = colorScheme.primary.copy(alpha = 0.3f), color = colorScheme.onSurface)
+    return remember(decodedPayload, searchText) {
+        buildAnnotatedString {
+            append(decodedPayload)
+            if (searchText.isNotEmpty()) {
+                searchText.split(" ").forEach { term ->
+                    Regex(Regex.escape(term), RegexOption.IGNORE_CASE).findAll(decodedPayload).forEach { match ->
                         addStyle(style = highlightStyle, start = match.range.first, end = match.range.last + 1)
                     }
                 }
@@ -588,131 +718,6 @@ private fun DebugScreenWithSampleDataPreview() {
                     }
                 }
                 items(sampleLogs) { log -> DebugItem(log = log) }
-            }
-        }
-    }
-}
-
-@Composable
-fun DebugMenuActions(viewModel: DebugViewModel = hiltViewModel(), modifier: Modifier = Modifier) {
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val logs by viewModel.meshLog.collectAsStateWithLifecycle()
-    var showDeleteLogsDialog by remember { mutableStateOf(false) }
-
-    IconButton(onClick = { scope.launch { exportAllLogs(context, logs) } }, modifier = modifier.padding(4.dp)) {
-        Icon(
-            imageVector = Icons.Outlined.FileDownload,
-            contentDescription = stringResource(id = R.string.debug_logs_export),
-        )
-    }
-    IconButton(onClick = { showDeleteLogsDialog = true }, modifier = modifier.padding(4.dp)) {
-        Icon(imageVector = Icons.Default.Delete, contentDescription = stringResource(id = R.string.debug_clear))
-    }
-    if (showDeleteLogsDialog) {
-        SimpleAlertDialog(
-            title = R.string.debug_clear,
-            text = R.string.debug_clear_logs_confirm,
-            onConfirm = {
-                showDeleteLogsDialog = false
-                viewModel.deleteAllLogs()
-            },
-            onDismiss = { showDeleteLogsDialog = false },
-        )
-    }
-}
-
-private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = withContext(Dispatchers.IO) {
-    try {
-        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-        val fileName = "meshtastic_debug_$timestamp.txt"
-
-        // Get the Downloads directory
-        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        val logFile = File(downloadsDir, fileName)
-
-        // Create the file and write logs
-        OutputStreamWriter(FileOutputStream(logFile), StandardCharsets.UTF_8).use { writer ->
-            logs.forEach { log ->
-                writer.write("${log.formattedReceivedDate} [${log.messageType}]\n")
-                writer.write(log.logMessage)
-                if (!log.decodedPayload.isNullOrBlank()) {
-                    writer.write("\n\nDecoded Payload:\n{")
-                    writer.write("\n")
-                    writer.write(log.decodedPayload)
-                    writer.write("\n}")
-                }
-                writer.write("\n\n")
-            }
-        }
-
-        // Notify user of success
-        withContext(Dispatchers.Main) {
-            Toast.makeText(context, "Logs exported to ${logFile.absolutePath}", Toast.LENGTH_LONG).show()
-        }
-    } catch (e: SecurityException) {
-        withContext(Dispatchers.Main) {
-            Toast.makeText(context, "Permission denied: Cannot write to Downloads folder", Toast.LENGTH_LONG).show()
-            warn("Error:SecurityException: " + e.toString())
-        }
-    } catch (e: IOException) {
-        withContext(Dispatchers.Main) {
-            Toast.makeText(context, "Failed to write log file: ${e.message}", Toast.LENGTH_LONG).show()
-        }
-        warn("Error:IOException: " + e.toString())
-    }
-}
-
-@Composable
-private fun DecodedPayloadBlock(
-    decodedPayload: String,
-    isSelected: Boolean,
-    colorScheme: ColorScheme,
-    searchText: String = "",
-    modifier: Modifier = Modifier,
-) {
-    val commonTextStyle =
-        TextStyle(fontSize = if (isSelected) 10.sp else 8.sp, fontWeight = FontWeight.Bold, color = colorScheme.primary)
-
-    Column(modifier = modifier) {
-        Text(
-            text = stringResource(id = R.string.debug_decoded_payload),
-            style = commonTextStyle,
-            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp),
-        )
-        Text(text = "{", style = commonTextStyle, modifier = Modifier.padding(start = 8.dp, bottom = 2.dp))
-        val annotatedPayload = rememberAnnotatedDecodedPayload(decodedPayload, searchText, colorScheme)
-        Text(
-            text = annotatedPayload,
-            softWrap = true,
-            style =
-            TextStyle(
-                fontSize = if (isSelected) 10.sp else 8.sp,
-                fontFamily = FontFamily.Monospace,
-                color = colorScheme.onSurface.copy(alpha = 0.8f),
-            ),
-            modifier = Modifier.padding(start = 16.dp, bottom = 0.dp),
-        )
-        Text(text = "}", style = commonTextStyle, modifier = Modifier.padding(start = 8.dp, bottom = 4.dp))
-    }
-}
-
-@Composable
-private fun rememberAnnotatedDecodedPayload(
-    decodedPayload: String,
-    searchText: String,
-    colorScheme: ColorScheme,
-): AnnotatedString {
-    val highlightStyle = SpanStyle(background = colorScheme.primary.copy(alpha = 0.3f), color = colorScheme.onSurface)
-    return remember(decodedPayload, searchText) {
-        buildAnnotatedString {
-            append(decodedPayload)
-            if (searchText.isNotEmpty()) {
-                searchText.split(" ").forEach { term ->
-                    Regex(Regex.escape(term), RegexOption.IGNORE_CASE).findAll(decodedPayload).forEach { match ->
-                        addStyle(style = highlightStyle, start = match.range.first, end = match.range.last + 1)
-                    }
-                }
             }
         }
     }
