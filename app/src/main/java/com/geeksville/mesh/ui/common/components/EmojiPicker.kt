@@ -28,17 +28,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.emoji2.emojipicker.RecentEmojiProviderAdapter
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.geeksville.mesh.ui.common.EmojiPickerViewModel
 import com.geeksville.mesh.util.CustomRecentEmojiProvider
 
 @Composable
-fun EmojiPicker(onDismiss: () -> Unit = {}, onConfirm: (String) -> Unit) {
+fun EmojiPicker(
+    viewModel: EmojiPickerViewModel = hiltViewModel(),
+    onDismiss: () -> Unit = {},
+    onConfirm: (String) -> Unit,
+) {
     Column(verticalArrangement = Arrangement.Bottom) {
         BackHandler { onDismiss() }
         AndroidView(
             factory = { context ->
                 androidx.emoji2.emojipicker.EmojiPickerView(context).apply {
                     clipToOutline = true
-                    setRecentEmojiProvider(RecentEmojiProviderAdapter(CustomRecentEmojiProvider(context)))
+                    setRecentEmojiProvider(
+                        RecentEmojiProviderAdapter(
+                            CustomRecentEmojiProvider(viewModel.customEmojiFrequency) { updatedValue ->
+                                viewModel.customEmojiFrequency = updatedValue
+                            },
+                        ),
+                    )
                     setOnEmojiPickedListener { emoji ->
                         onDismiss()
                         onConfirm(emoji.emoji)

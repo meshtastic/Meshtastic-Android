@@ -15,12 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.repository.radio
+package com.geeksville.mesh.ui.common
 
-import javax.inject.Qualifier
+import androidx.lifecycle.ViewModel
+import com.geeksville.mesh.android.prefs.CustomEmojiPrefs
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-/**
- * Qualifier to distinguish radio repository- specific object instances.
- */
-@Qualifier
-annotation class RadioRepositoryQualifier
+@HiltViewModel
+class EmojiPickerViewModel @Inject constructor(private val customEmojiPrefs: CustomEmojiPrefs) : ViewModel() {
+
+    var customEmojiFrequency: String?
+        get() = customEmojiPrefs.customEmojiFrequency
+        set(value) {
+            customEmojiPrefs.customEmojiFrequency = value
+        }
+}

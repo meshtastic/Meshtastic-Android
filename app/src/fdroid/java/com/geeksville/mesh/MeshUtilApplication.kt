@@ -18,10 +18,14 @@
 package com.geeksville.mesh
 
 import com.geeksville.mesh.android.GeeksvilleApplication
+import com.geeksville.mesh.android.prefs.AnalyticsPrefs
 import dagger.hilt.android.HiltAndroidApp
+import javax.inject.Inject
 
 @HiltAndroidApp
 class MeshUtilApplication : GeeksvilleApplication() {
+
+    @Inject override lateinit var analyticsPrefs: AnalyticsPrefs
 
     override fun onCreate() {
         super.onCreate()
