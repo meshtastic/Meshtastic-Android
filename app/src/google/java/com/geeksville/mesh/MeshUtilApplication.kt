@@ -21,14 +21,18 @@ import android.os.Debug
 import com.geeksville.mesh.android.AppPrefs
 import com.geeksville.mesh.android.BuildUtils.isEmulator
 import com.geeksville.mesh.android.GeeksvilleApplication
+import com.geeksville.mesh.android.prefs.AnalyticsPrefs
 import com.geeksville.mesh.util.Exceptions
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.crashlytics.setCustomKeys
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
+import javax.inject.Inject
 
 @HiltAndroidApp
 class MeshUtilApplication : GeeksvilleApplication() {
+
+    @Inject override lateinit var analyticsPrefs: AnalyticsPrefs
 
     override fun onCreate() {
         super.onCreate()
