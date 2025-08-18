@@ -60,6 +60,7 @@ import javax.inject.Singleton
  * Note - this class intentionally dumb. It doesn't understand protobuf framing etc... It is designed to be simple so it
  * can be stubbed out with a simulated version as needed.
  */
+@Suppress("LongParameterList")
 @Singleton
 class RadioInterfaceService
 @Inject
