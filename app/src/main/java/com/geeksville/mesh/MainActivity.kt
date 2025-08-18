@@ -20,7 +20,6 @@ package com.geeksville.mesh
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -46,6 +45,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.android.prefs.UiPrefs
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.DEEP_LINK_BASE_URI
@@ -70,7 +70,7 @@ class MainActivity :
     // This is aware of the Activity lifecycle and handles binding to the mesh service.
     @Inject internal lateinit var meshServiceClient: MeshServiceClient
 
-    @Inject internal lateinit var uiPrefs: SharedPreferences
+    @Inject internal lateinit var uiPrefs: UiPrefs
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -86,11 +86,11 @@ class MainActivity :
         super.onCreate(savedInstanceState)
 
         if (savedInstanceState == null) {
-            val lang = uiPrefs.getString("lang", LanguageUtils.SYSTEM_DEFAULT)
+            val lang = uiPrefs.lang
             if (lang != LanguageUtils.SYSTEM_MANAGED) LanguageUtils.migrateLanguagePrefs(uiPrefs)
             info("in-app language is ${LanguageUtils.getLocale()}")
 
-            if (uiPrefs.getBoolean("app_intro_completed", false)) {
+            if (uiPrefs.appIntroCompleted) {
                 (application as GeeksvilleApplication).askToRate(this)
             }
         }
@@ -266,7 +266,7 @@ class MainActivity :
                 getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
             )
 
-        val theme = uiPrefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        val theme = uiPrefs.theme
         debug("Theme from prefs: $theme")
         model.showAlert(
             title = getString(R.string.choose_theme),
