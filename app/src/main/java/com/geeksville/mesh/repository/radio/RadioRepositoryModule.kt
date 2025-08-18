@@ -33,8 +33,7 @@ import dagger.multibindings.Multibinds
 @InstallIn(SingletonComponent::class)
 abstract class RadioRepositoryModule {
 
-    @Multibinds
-    abstract fun interfaceMap(): Map<InterfaceId, @JvmSuppressWildcards InterfaceSpec<*>>
+    @Multibinds abstract fun interfaceMap(): Map<InterfaceId, @JvmSuppressWildcards InterfaceSpec<*>>
 
     @[Binds IntoMap InterfaceMapKey(InterfaceId.BLUETOOTH)]
     abstract fun bindBluetoothInterfaceSpec(spec: BluetoothInterfaceSpec): @JvmSuppressWildcards InterfaceSpec<*>
@@ -54,8 +53,7 @@ abstract class RadioRepositoryModule {
     companion object {
         @Provides
         @RadioRepositoryQualifier
-        fun provideSharedPreferences(application: Application): SharedPreferences {
-            return application.getSharedPreferences("radio-prefs", Context.MODE_PRIVATE)
-        }
+        fun provideSharedPreferences(application: Application): SharedPreferences =
+            application.getSharedPreferences("radio-prefs", Context.MODE_PRIVATE)
     }
 }

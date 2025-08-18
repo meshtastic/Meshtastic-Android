@@ -31,46 +31,27 @@ import androidx.emoji2.emojipicker.RecentEmojiProviderAdapter
 import com.geeksville.mesh.util.CustomRecentEmojiProvider
 
 @Composable
-fun EmojiPicker(
-    onDismiss: () -> Unit = {},
-    onConfirm: (String) -> Unit
-) {
-    Column(
-        verticalArrangement = Arrangement.Bottom
-    ) {
-        BackHandler {
-            onDismiss()
-        }
+fun EmojiPicker(onDismiss: () -> Unit = {}, onConfirm: (String) -> Unit) {
+    Column(verticalArrangement = Arrangement.Bottom) {
+        BackHandler { onDismiss() }
         AndroidView(
             factory = { context ->
                 androidx.emoji2.emojipicker.EmojiPickerView(context).apply {
                     clipToOutline = true
-                    setRecentEmojiProvider(
-                        RecentEmojiProviderAdapter(CustomRecentEmojiProvider(context))
-                    )
+                    setRecentEmojiProvider(RecentEmojiProviderAdapter(CustomRecentEmojiProvider(context)))
                     setOnEmojiPickedListener { emoji ->
                         onDismiss()
                         onConfirm(emoji.emoji)
                     }
                 }
             },
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(MaterialTheme.colorScheme.background)
+            modifier = Modifier.fillMaxWidth().background(MaterialTheme.colorScheme.background),
         )
     }
 }
 
 @Composable
-fun EmojiPickerDialog(
-    onDismiss: () -> Unit = {},
-    onConfirm: (String) -> Unit
-) = BottomSheetDialog(
-    onDismiss = onDismiss,
-    modifier = Modifier.fillMaxHeight(fraction = .4f),
-) {
-    EmojiPicker(
-        onConfirm = onConfirm,
-        onDismiss = onDismiss,
-    )
-}
+fun EmojiPickerDialog(onDismiss: () -> Unit = {}, onConfirm: (String) -> Unit) =
+    BottomSheetDialog(onDismiss = onDismiss, modifier = Modifier.fillMaxHeight(fraction = .4f)) {
+        EmojiPicker(onConfirm = onConfirm, onDismiss = onDismiss)
+    }
