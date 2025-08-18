@@ -36,6 +36,10 @@ private annotation class AnalyticsSharedPreferences
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
+private annotation class AppSharedPreferences
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
 private annotation class CustomEmojiSharedPreferences
 
 @Qualifier
@@ -68,6 +72,12 @@ object PrefsModule {
     @AnalyticsSharedPreferences
     fun provideAnalyticsSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
         context.getSharedPreferences("analytics-prefs", Context.MODE_PRIVATE)
+
+    @Provides
+    @Singleton
+    @AppSharedPreferences
+    fun provideAppSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
+        context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
 
     @Provides
     @Singleton
@@ -107,8 +117,10 @@ object PrefsModule {
 
     @Provides
     @Singleton
-    fun provideAnalyticsPrefs(@AnalyticsSharedPreferences sharedPreferences: SharedPreferences): AnalyticsPrefs =
-        AnalyticsPrefsImpl(sharedPreferences)
+    fun provideAnalyticsPrefs(
+        @AnalyticsSharedPreferences analyticsPreferences: SharedPreferences,
+        @AppSharedPreferences appPreferences: SharedPreferences,
+    ): AnalyticsPrefs = AnalyticsPrefsImpl(analyticsPreferences, appPreferences)
 
     @Provides
     @Singleton
