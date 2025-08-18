@@ -73,7 +73,7 @@ data class MapCameraPosition(
     val bearing: Float,
 )
 
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions", "LongParameterList")
 @HiltViewModel
 class MapViewModel
 @Inject
