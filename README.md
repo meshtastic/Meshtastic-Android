@@ -1,5 +1,5 @@
 <p align="center">
-  <a href=""><img width="200" height="200" src="https://raw.githubusercontent.com/meshtastic/Meshtastic-Android/refs/heads/main/logo.png"></a>
+  <img src=".github/meshtastic_logo.png" alt="Meshtastic Logo" width="200"/>
 </p>
 <h1 align="center">Meshtastic-Android</h1>
 
