@@ -18,7 +18,6 @@
 package com.geeksville.mesh.model
 
 import android.app.Application
-import android.content.SharedPreferences
 import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.compose.ui.unit.Dp
@@ -38,6 +37,7 @@ import com.geeksville.mesh.Portnums.PortNum
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.android.prefs.UiPrefs
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.entity.FirmwareRelease
 import com.geeksville.mesh.database.entity.MeshLog
@@ -47,7 +47,6 @@ import com.geeksville.mesh.repository.api.DeviceHardwareRepository
 import com.geeksville.mesh.repository.api.FirmwareReleaseRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.ServiceAction
-import com.geeksville.mesh.ui.map.MAP_STYLE_ID
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -204,7 +203,7 @@ constructor(
     private val radioConfigRepository: RadioConfigRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
-    private val preferences: SharedPreferences,
+    private val uiPrefs: UiPrefs,
 ) : ViewModel(),
     Logging {
     private val destNum = savedStateHandle.toRoute<NodesRoutes.NodeDetailGraph>().destNum
@@ -234,7 +233,7 @@ constructor(
     fun getUser(nodeNum: Int) = radioConfigRepository.getUser(nodeNum)
 
     val tileSource
-        get() = CustomTileSource.getTileSource(preferences.getInt(MAP_STYLE_ID, 0))
+        get() = CustomTileSource.getTileSource(uiPrefs.mapStyle)
 
     fun deleteLog(uuid: String) = viewModelScope.launch(dispatchers.io) { meshLogRepository.deleteLog(uuid) }
 
