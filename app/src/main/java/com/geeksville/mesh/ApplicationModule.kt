@@ -33,22 +33,15 @@ import dagger.hilt.components.SingletonComponent
 @Module
 object ApplicationModule {
     @Provides
-    fun provideSharedPreferences(application: Application): SharedPreferences {
-        return application.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
-    }
+    fun provideSharedPreferences(application: Application): SharedPreferences =
+        application.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
+
+    @Provides fun provideProcessLifecycleOwner(): LifecycleOwner = ProcessLifecycleOwner.get()
 
     @Provides
-    fun provideProcessLifecycleOwner(): LifecycleOwner {
-        return ProcessLifecycleOwner.get()
-    }
+    fun provideProcessLifecycle(processLifecycleOwner: LifecycleOwner): Lifecycle = processLifecycleOwner.lifecycle
 
     @Provides
-    fun provideProcessLifecycle(processLifecycleOwner: LifecycleOwner): Lifecycle {
-        return processLifecycleOwner.lifecycle
-    }
-
-    @Provides
-    fun providesMeshServiceNotifications(application: Application): MeshServiceNotifications {
-        return MeshServiceNotifications(application)
-    }
+    fun providesMeshServiceNotifications(application: Application): MeshServiceNotifications =
+        MeshServiceNotifications(application)
 }
