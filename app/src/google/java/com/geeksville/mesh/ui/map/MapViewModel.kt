@@ -20,7 +20,7 @@ package com.geeksville.mesh.ui.map
 import android.app.Application
 import android.content.SharedPreferences
 import android.net.Uri
-import android.util.Log
+import androidx.core.content.edit
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.android.BuildUtils.debug
@@ -43,13 +43,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -60,6 +60,8 @@ import java.util.UUID
 import javax.inject.Inject
 
 private const val TILE_SIZE = 256
+private const val PREF_SELECTED_GOOGLE_MAP_TYPE = "selected_google_map_type"
+private const val PREF_SELECTED_CUSTOM_TILE_URL = "selected_custom_tile_url"
 
 @Serializable
 data class MapCameraPosition(
@@ -94,7 +96,7 @@ constructor(
     private val _selectedCustomTileProviderUrl = MutableStateFlow<String?>(null)
     val selectedCustomTileProviderUrl: StateFlow<String?> = _selectedCustomTileProviderUrl.asStateFlow()
 
-    private val _selectedGoogleMapType = MutableStateFlow<MapType>(MapType.NORMAL)
+    private val _selectedGoogleMapType = MutableStateFlow(MapType.NORMAL)
     val selectedGoogleMapType: StateFlow<MapType> = _selectedGoogleMapType.asStateFlow()
 
     private val _cameraPosition = MutableStateFlow<MapCameraPosition?>(null)
@@ -182,6 +184,8 @@ constructor(
 
             if (configToRemove != null && _selectedCustomTileProviderUrl.value == configToRemove.urlTemplate) {
                 _selectedCustomTileProviderUrl.value = null
+                // Also clear from prefs
+                preferences.edit { remove(PREF_SELECTED_CUSTOM_TILE_URL) }
             }
         }
     }
@@ -189,26 +193,33 @@ constructor(
     fun selectCustomTileProvider(config: CustomTileProviderConfig?) {
         if (config != null) {
             if (!isValidTileUrlTemplate(config.urlTemplate)) {
-                Log.w("MapViewModel", "Attempted to select invalid URL template: ${config.urlTemplate}")
+                Timber.tag("MapViewModel").w("Attempted to select invalid URL template: ${config.urlTemplate}")
                 _selectedCustomTileProviderUrl.value = null
+                preferences.edit { remove(PREF_SELECTED_CUSTOM_TILE_URL) }
                 return
             }
             _selectedCustomTileProviderUrl.value = config.urlTemplate
+            _selectedGoogleMapType.value = MapType.NORMAL // Reset to a default or keep last? For now, reset.
+            preferences.edit {
+                putString(PREF_SELECTED_CUSTOM_TILE_URL, config.urlTemplate).remove(PREF_SELECTED_GOOGLE_MAP_TYPE)
+            }
         } else {
             _selectedCustomTileProviderUrl.value = null
+            preferences.edit { remove(PREF_SELECTED_CUSTOM_TILE_URL) }
         }
     }
 
     fun setSelectedGoogleMapType(mapType: MapType) {
         _selectedGoogleMapType.value = mapType
-        if (_selectedCustomTileProviderUrl.value != null) {
-            _selectedCustomTileProviderUrl.value = null
+        _selectedCustomTileProviderUrl.value = null // Clear custom selection
+        preferences.edit {
+            putString(PREF_SELECTED_GOOGLE_MAP_TYPE, mapType.name).remove(PREF_SELECTED_CUSTOM_TILE_URL)
         }
     }
 
     fun createUrlTileProvider(urlString: String): TileProvider? {
         if (!isValidTileUrlTemplate(urlString)) {
-            Log.e("MapViewModel", "Tile URL does not contain valid {x}, {y}, and {z} placeholders: $urlString")
+            Timber.tag("MapViewModel").e("Tile URL does not contain valid {x}, {y}, and {z} placeholders: $urlString")
             return null
         }
         return object : UrlTileProvider(TILE_SIZE, TILE_SIZE) {
@@ -221,7 +232,7 @@ constructor(
                 return try {
                     URL(formattedUrl)
                 } catch (e: MalformedURLException) {
-                    Log.e("MapViewModel", "Malformed URL: $formattedUrl", e)
+                    Timber.tag("MapViewModel").e(e, "Malformed URL: $formattedUrl")
                     null
                 }
             }
@@ -237,6 +248,35 @@ constructor(
 
     init {
         loadPersistedLayers()
+        loadPersistedMapType()
+    }
+
+    private fun loadPersistedMapType() {
+        val savedCustomUrl = preferences.getString(PREF_SELECTED_CUSTOM_TILE_URL, null)
+        if (savedCustomUrl != null) {
+            // Check if this custom provider still exists
+            if (
+                customTileProviderConfigs.value.any { it.urlTemplate == savedCustomUrl } &&
+                isValidTileUrlTemplate(savedCustomUrl)
+            ) {
+                _selectedCustomTileProviderUrl.value = savedCustomUrl
+                _selectedGoogleMapType.value = MapType.NORMAL // Default, as custom is active
+            } else {
+                // The saved custom URL is no longer valid or doesn't exist, remove preference
+                preferences.edit { remove(PREF_SELECTED_CUSTOM_TILE_URL) }
+                // Fallback to default Google Map type
+                _selectedGoogleMapType.value = MapType.NORMAL
+            }
+        } else {
+            val savedGoogleMapTypeName = preferences.getString(PREF_SELECTED_GOOGLE_MAP_TYPE, MapType.NORMAL.name)
+            try {
+                _selectedGoogleMapType.value = MapType.valueOf(savedGoogleMapTypeName ?: MapType.NORMAL.name)
+            } catch (e: IllegalArgumentException) {
+                Timber.e(e, "Invalid saved Google Map type: $savedGoogleMapTypeName")
+                _selectedGoogleMapType.value = MapType.NORMAL // Fallback in case of invalid stored name
+                preferences.edit { remove(PREF_SELECTED_GOOGLE_MAP_TYPE) }
+            }
+        }
     }
 
     private fun loadPersistedLayers() {
@@ -261,14 +301,14 @@ constructor(
                             }
                         _mapLayers.value = loadedItems
                         if (loadedItems.isNotEmpty()) {
-                            Log.i("MapViewModel", "Loaded ${loadedItems.size} persisted map layers.")
+                            Timber.tag("MapViewModel").i("Loaded ${loadedItems.size} persisted map layers.")
                         }
                     }
                 } else {
-                    Log.i("MapViewModel", "Map layers directory does not exist. No layers loaded.")
+                    Timber.tag("MapViewModel").i("Map layers directory does not exist. No layers loaded.")
                 }
             } catch (e: Exception) {
-                Log.e("MapViewModel", "Error loading persisted map layers", e)
+                Timber.tag("MapViewModel").e(e, "Error loading persisted map layers")
                 _mapLayers.value = emptyList()
             }
         }
@@ -283,7 +323,7 @@ constructor(
                 val newItem = MapLayerItem(name = layerName, uri = localFileUri)
                 _mapLayers.value = _mapLayers.value + newItem
             } else {
-                Log.e("MapViewModel", "Failed to copy KML/KMZ file to internal storage.")
+                Timber.tag("MapViewModel").e("Failed to copy KML/KMZ file to internal storage.")
             }
         }
     }
@@ -301,7 +341,7 @@ constructor(
             inputStream?.use { input -> outputStream.use { output -> input.copyTo(output) } }
             Uri.fromFile(outputFile)
         } catch (e: IOException) {
-            Log.e("MapViewModel", "Error copying file to internal storage", e)
+            Timber.tag("MapViewModel").e(e, "Error copying file to internal storage")
             null
         }
     }
@@ -327,7 +367,7 @@ constructor(
                     file.delete()
                 }
             } catch (e: Exception) {
-                Log.e("MapViewModel", "Error deleting file from internal storage", e)
+                Timber.tag("MapViewModel").e(e, "Error deleting file from internal storage")
             }
         }
     }
@@ -361,7 +401,7 @@ constructor(
                 kmlLayer
             }
         } catch (e: Exception) {
-            Log.e("MapViewModel", "Error loading KML for ${layerItem.uri}", e)
+            Timber.tag("MapViewModel").e(e, "Error loading KML for ${layerItem.uri}")
             null
         }
     }
