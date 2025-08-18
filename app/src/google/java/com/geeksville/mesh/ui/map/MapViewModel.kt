@@ -18,6 +18,7 @@
 package com.geeksville.mesh.ui.map
 
 import android.app.Application
+import android.content.SharedPreferences
 import android.net.Uri
 import androidx.core.content.edit
 import androidx.lifecycle.viewModelScope
@@ -79,6 +80,7 @@ class MapViewModel
 constructor(
     private val application: Application,
     uiPrefs: UiPrefs,
+    private val preferences: SharedPreferences,
     nodeRepository: NodeRepository,
     packetRepository: PacketRepository,
     radioConfigRepository: RadioConfigRepository,
