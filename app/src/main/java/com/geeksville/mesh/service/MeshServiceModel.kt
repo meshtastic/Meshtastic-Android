@@ -17,7 +17,12 @@
 
 package com.geeksville.mesh.service
 
+import com.geeksville.mesh.AppOnlyProtos
+import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
+import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
+import com.geeksville.mesh.ModuleConfigProtos
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
@@ -25,6 +30,7 @@ import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.MeshService.Companion.IdNotFoundException
 import com.geeksville.mesh.service.MeshService.Companion.InvalidNodeIdException
 import com.geeksville.mesh.service.MeshService.Companion.NodeNumNotFoundException
+import com.google.protobuf.ByteString
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -32,6 +38,14 @@ import javax.inject.Singleton
 @Singleton
 class MeshServiceModel @Inject constructor(private val radioConfigRepository: RadioConfigRepository) {
     private val hexIdRegex = """\!([0-9A-Fa-f]+)""".toRegex()
+
+    val configTotal by lazy { ConfigProtos.Config.getDescriptor().fields.size }
+    val moduleTotal by lazy { ModuleConfigProtos.ModuleConfig.getDescriptor().fields.size }
+    var sessionPasskey: ByteString = ByteString.EMPTY
+
+    var localConfig: LocalConfig = LocalConfig.getDefaultInstance()
+    var moduleConfig: LocalModuleConfig = LocalModuleConfig.getDefaultInstance()
+    var channelSet: AppOnlyProtos.ChannelSet = AppOnlyProtos.ChannelSet.getDefaultInstance()
 
     // True after we've done our initial node db init
     @Volatile var haveNodeDb = false
