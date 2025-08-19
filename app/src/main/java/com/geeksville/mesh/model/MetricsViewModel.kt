@@ -37,7 +37,7 @@ import com.geeksville.mesh.Portnums.PortNum
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.android.prefs.UiPrefs
+import com.geeksville.mesh.android.prefs.MapPrefs
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.entity.FirmwareRelease
 import com.geeksville.mesh.database.entity.MeshLog
@@ -203,7 +203,7 @@ constructor(
     private val radioConfigRepository: RadioConfigRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
-    private val uiPrefs: UiPrefs,
+    private val mapPrefs: MapPrefs,
 ) : ViewModel(),
     Logging {
     private val destNum = savedStateHandle.toRoute<NodesRoutes.NodeDetailGraph>().destNum
@@ -233,7 +233,7 @@ constructor(
     fun getUser(nodeNum: Int) = radioConfigRepository.getUser(nodeNum)
 
     val tileSource
-        get() = CustomTileSource.getTileSource(uiPrefs.mapStyle)
+        get() = CustomTileSource.getTileSource(mapPrefs.mapStyle)
 
     fun deleteLog(uuid: String) = viewModelScope.launch(dispatchers.io) { meshLogRepository.deleteLog(uuid) }
 

@@ -44,6 +44,10 @@ private annotation class CustomEmojiSharedPreferences
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
+private annotation class MapSharedPreferences
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
 private annotation class MapConsentSharedPreferences
 
 @Qualifier
@@ -87,6 +91,12 @@ object PrefsModule {
 
     @Provides
     @Singleton
+    @MapSharedPreferences
+    fun provideMapSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
+        context.getSharedPreferences("map_prefs", Context.MODE_PRIVATE)
+
+    @Provides
+    @Singleton
     @MapConsentSharedPreferences
     fun provideMapConsentSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
         context.getSharedPreferences("map_consent_preferences", Context.MODE_PRIVATE)
@@ -126,6 +136,11 @@ object PrefsModule {
     @Singleton
     fun provideCustomEmojiPrefs(@CustomEmojiSharedPreferences sharedPreferences: SharedPreferences): CustomEmojiPrefs =
         CustomEmojiPrefsImpl(sharedPreferences)
+
+    @Provides
+    @Singleton
+    fun provideMapPrefs(@MapSharedPreferences sharedPreferences: SharedPreferences): MapPrefs =
+        MapPrefsImpl(sharedPreferences)
 
     @Provides
     @Singleton

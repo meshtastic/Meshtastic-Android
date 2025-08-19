@@ -23,7 +23,7 @@ import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.prefs.GoogleMapsPrefs
-import com.geeksville.mesh.android.prefs.UiPrefs
+import com.geeksville.mesh.android.prefs.MapPrefs
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
@@ -76,13 +76,13 @@ class MapViewModel
 @Inject
 constructor(
     private val application: Application,
-    uiPrefs: UiPrefs,
+    mapPrefs: MapPrefs,
     private val googleMapsPrefs: GoogleMapsPrefs,
     nodeRepository: NodeRepository,
     packetRepository: PacketRepository,
     radioConfigRepository: RadioConfigRepository,
     private val customTileProviderRepository: CustomTileProviderRepository,
-) : BaseMapViewModel(uiPrefs, nodeRepository, packetRepository) {
+) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository) {
 
     private val _errorFlow = MutableSharedFlow<String>()
     val errorFlow: SharedFlow<String> = _errorFlow.asSharedFlow()

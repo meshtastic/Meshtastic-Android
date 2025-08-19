@@ -19,7 +19,7 @@ package com.geeksville.mesh.ui.map
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geeksville.mesh.android.prefs.UiPrefs
+import com.geeksville.mesh.android.prefs.MapPrefs
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.Packet
@@ -34,7 +34,7 @@ import kotlinx.coroutines.flow.stateIn
 
 @Suppress("TooManyFunctions")
 abstract class BaseMapViewModel(
-    protected val uiPrefs: UiPrefs,
+    protected val mapPrefs: MapPrefs,
     nodeRepository: NodeRepository,
     packetRepository: PacketRepository,
 ) : ViewModel() {
@@ -61,27 +61,27 @@ abstract class BaseMapViewModel(
             }
             .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5_000), initialValue = emptyMap())
 
-    private val showOnlyFavorites = MutableStateFlow(uiPrefs.showOnlyFavorites)
+    private val showOnlyFavorites = MutableStateFlow(mapPrefs.showOnlyFavorites)
 
-    private val showWaypointsOnMap = MutableStateFlow(uiPrefs.showWaypointsOnMap)
+    private val showWaypointsOnMap = MutableStateFlow(mapPrefs.showWaypointsOnMap)
 
-    private val showPrecisionCircleOnMap = MutableStateFlow(uiPrefs.showPrecisionCircleOnMap)
+    private val showPrecisionCircleOnMap = MutableStateFlow(mapPrefs.showPrecisionCircleOnMap)
 
     fun toggleOnlyFavorites() {
         val current = showOnlyFavorites.value
-        uiPrefs.showOnlyFavorites = !current
+        mapPrefs.showOnlyFavorites = !current
         showOnlyFavorites.value = !current
     }
 
     fun toggleShowWaypointsOnMap() {
         val current = showWaypointsOnMap.value
-        uiPrefs.showWaypointsOnMap = !current
+        mapPrefs.showWaypointsOnMap = !current
         showWaypointsOnMap.value = !current
     }
 
     fun toggleShowPrecisionCircleOnMap() {
         val current = showPrecisionCircleOnMap.value
-        uiPrefs.showPrecisionCircleOnMap = !current
+        mapPrefs.showPrecisionCircleOnMap = !current
         showPrecisionCircleOnMap.value = !current
     }
 

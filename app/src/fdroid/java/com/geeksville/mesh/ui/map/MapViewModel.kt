@@ -17,7 +17,7 @@
 
 package com.geeksville.mesh.ui.map
 
-import com.geeksville.mesh.android.prefs.UiPrefs
+import com.geeksville.mesh.android.prefs.MapPrefs
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,14 +27,14 @@ import javax.inject.Inject
 class MapViewModel
 @Inject
 constructor(
-    uiPrefs: UiPrefs,
+    mapPrefs: MapPrefs,
     packetRepository: PacketRepository,
     nodeRepository: NodeRepository,
-) : BaseMapViewModel(uiPrefs, nodeRepository, packetRepository) {
+) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository) {
 
     var mapStyleId: Int
-        get() = uiPrefs.mapStyle
+        get() = mapPrefs.mapStyle
         set(value) {
-            uiPrefs.mapStyle = value
+            mapPrefs.mapStyle = value
         }
 }

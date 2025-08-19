@@ -18,16 +18,18 @@
 package com.geeksville.mesh.android.prefs
 
 import android.content.SharedPreferences
-import com.google.maps.android.compose.MapType
 
-/** Interface for prefs specific to Google Maps. For general map prefs, see MapPrefs. */
-interface GoogleMapsPrefs {
-    var selectedGoogleMapType: String?
-    var selectedCustomTileUrl: String?
+/** Interface for general map prefs. For Google-specific prefs, see GoogleMapsPrefs. */
+interface MapPrefs {
+    var mapStyle: Int
+    var showOnlyFavorites: Boolean
+    var showWaypointsOnMap: Boolean
+    var showPrecisionCircleOnMap: Boolean
 }
 
-class GoogleMapsPrefsImpl(prefs: SharedPreferences) : GoogleMapsPrefs {
-    override var selectedGoogleMapType: String? by
-        NullableStringPrefDelegate(prefs, "selected_google_map_type", MapType.NORMAL.name)
-    override var selectedCustomTileUrl: String? by NullableStringPrefDelegate(prefs, "selected_custom_tile_url", null)
+class MapPrefsImpl(prefs: SharedPreferences) : MapPrefs {
+    override var mapStyle: Int by PrefDelegate(prefs, "map_style_id", 0)
+    override var showOnlyFavorites: Boolean by PrefDelegate(prefs, "show_only_favorites", false)
+    override var showWaypointsOnMap: Boolean by PrefDelegate(prefs, "show_waypoints", true)
+    override var showPrecisionCircleOnMap: Boolean by PrefDelegate(prefs, "show_precision_circle", true)
 }
