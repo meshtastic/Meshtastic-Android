@@ -602,7 +602,7 @@ private tailrec fun Context.findActivity(): Activity = when (this) {
     else -> error("No activity found")
 }
 
-private enum class DeviceType {
+enum class DeviceType {
     BLE,
     TCP,
     USB,
