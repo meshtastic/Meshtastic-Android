@@ -17,11 +17,16 @@
 
 package com.geeksville.mesh.service
 
+import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
+import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class ActiveNodeData {
+@Singleton
+class ActiveNodeData @Inject constructor(private val radioConfigRepository: RadioConfigRepository) {
     // True after we've done our initial node db init
     @Volatile var haveNodeDb = false
 
@@ -45,14 +50,6 @@ class ActiveNodeData {
     private val nodeDbById
         get() = nodeDbByNodeNum.mapKeys { it.value.user.id }
 
-    fun putAll(nodes: Map<Int, NodeEntity>) {
-        nodeDbByNodeNum.putAll(nodes)
-    }
-
-    fun clear() {
-        nodeDbByNodeNum.clear()
-    }
-
     fun getByNum(num: Int) = nodeDbByNodeNum[num]
 
     fun getOrPut(num: Int, node: () -> NodeEntity): NodeEntity = nodeDbByNodeNum.getOrPut(num) { node() }
@@ -61,5 +58,22 @@ class ActiveNodeData {
 
     fun remove(num: Int) {
         nodeDbByNodeNum.remove(num)
+    }
+
+    suspend fun refreshNodeDb() {
+        discardNodeDb() // Get rid of any old state
+        myNodeInfo = radioConfigRepository.myNodeInfo.value
+        nodeDbByNodeNum.putAll(radioConfigRepository.getNodeDBbyNum())
+        // Note: we do not haveNodeDB = true because that means we've got a valid db from a real
+        // device (rather than
+        // this possibly stale hint)
+    }
+
+    /** discard entire node db & message state - used when downloading a new db from the device */
+    fun discardNodeDb() {
+        debug("Discarding NodeDB")
+        myNodeInfo = null
+        nodeDbByNodeNum.clear()
+        haveNodeDb = false
     }
 }

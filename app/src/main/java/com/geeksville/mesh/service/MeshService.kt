@@ -152,6 +152,8 @@ class MeshService :
 
     @Inject lateinit var meshPrefs: MeshPrefs
 
+    @Inject lateinit var activeNodeData: ActiveNodeData
+
     companion object : Logging {
 
         // Intents broadcast by MeshService
@@ -366,7 +368,8 @@ class MeshService :
         radioConfigRepository.channelSetFlow.onEach { channelSet = it }.launchIn(serviceScope)
         radioConfigRepository.serviceAction.onEach(::onServiceAction).launchIn(serviceScope)
 
-        loadSettings() // Load our last known node DB
+        // Load our last known node DB
+        serviceScope.handledLaunch { activeNodeData.refreshNodeDb() }
 
         // the rest of our init will happen once we are in radioConnection.onServiceConnected
     }
@@ -450,23 +453,6 @@ class MeshService :
     // BEGINNING OF MODEL - FIXME, move elsewhere
     //
 
-    private fun loadSettings() = serviceScope.handledLaunch {
-        discardNodeDB() // Get rid of any old state
-        activeNodeData.myNodeInfo = radioConfigRepository.myNodeInfo.value
-        activeNodeData.putAll(radioConfigRepository.getNodeDBbyNum())
-        // Note: we do not haveNodeDB = true because that means we've got a valid db from a real
-        // device (rather than
-        // this possibly stale hint)
-    }
-
-    /** discard entire node db & message state - used when downloading a new db from the device */
-    private fun discardNodeDB() {
-        debug("Discarding NodeDB")
-        activeNodeData.myNodeInfo = null
-        activeNodeData.clear()
-        activeNodeData.haveNodeDb = false
-    }
-
     private val configTotal by lazy { ConfigProtos.Config.getDescriptor().fields.size }
     private val moduleTotal by lazy { ModuleConfigProtos.ModuleConfig.getDescriptor().fields.size }
     private var sessionPasskey: ByteString = ByteString.EMPTY
@@ -474,8 +460,6 @@ class MeshService :
     private var localConfig: LocalConfig = LocalConfig.getDefaultInstance()
     private var moduleConfig: LocalModuleConfig = LocalModuleConfig.getDefaultInstance()
     private var channelSet: AppOnlyProtos.ChannelSet = AppOnlyProtos.ChannelSet.getDefaultInstance()
-
-    private val activeNodeData: ActiveNodeData = ActiveNodeData()
 
     //
     // END OF MODEL
@@ -2137,7 +2121,7 @@ class MeshService :
                 updateLastAddress(deviceAddr)
                 val res = radioInterfaceService.setDeviceAddress(deviceAddr)
                 if (res) {
-                    discardNodeDB()
+                    activeNodeData.discardNodeDb()
                 } else {
                     serviceBroadcasts.broadcastConnection()
                 }
