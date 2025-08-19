@@ -491,12 +491,6 @@ class MeshService :
 
     private fun getUserName(num: Int): String = with(radioConfigRepository.getUser(num)) { "$longName ($shortName)" }
 
-    private fun toNodeNum(id: String): Int = when (id) {
-        DataPacket.ID_BROADCAST -> DataPacket.NODENUM_BROADCAST
-        DataPacket.ID_LOCAL -> activeNodeData.myNodeNum
-        else -> activeNodeData.getByIdOrThrow(id).num
-    }
-
     // A helper function that makes it easy to update node info objects
     private inline fun updateNodeInfo(
         nodeNum: Int,
@@ -544,7 +538,7 @@ class MeshService :
      *
      * If id is null we assume a broadcast message
      */
-    private fun newMeshPacketTo(id: String) = newMeshPacketTo(toNodeNum(id))
+    private fun newMeshPacketTo(id: String) = newMeshPacketTo(activeNodeData.numFromId(id))
 
     /** Helper to make it easy to build a subpacket in the proper protobufs */
     private fun MeshPacket.Builder.buildMeshPacket(

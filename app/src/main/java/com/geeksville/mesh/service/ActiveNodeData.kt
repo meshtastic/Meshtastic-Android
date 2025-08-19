@@ -104,6 +104,12 @@ class ActiveNodeData @Inject constructor(private val radioConfigRepository: Radi
         getByNum(num)?.user?.id ?: DataPacket.nodeNumToDefaultId(num)
     }
 
+    fun numFromId(id: String): Int = when (id) {
+        DataPacket.ID_BROADCAST -> DataPacket.NODENUM_BROADCAST
+        DataPacket.ID_LOCAL -> myNodeNum
+        else -> getByIdOrThrow(id).num
+    }
+
     fun remove(num: Int) {
         nodeDbByNodeNum.remove(num)
     }
