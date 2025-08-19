@@ -452,7 +452,7 @@ class MeshService :
 
     private fun loadSettings() = serviceScope.handledLaunch {
         discardNodeDB() // Get rid of any old state
-        myNodeInfo = radioConfigRepository.myNodeInfo.value
+        activeNodeData.myNodeInfo = radioConfigRepository.myNodeInfo.value
         activeNodeData.putAll(radioConfigRepository.getNodeDBbyNum())
         // Note: we do not haveNodeDB = true because that means we've got a valid db from a real
         // device (rather than
@@ -462,12 +462,10 @@ class MeshService :
     /** discard entire node db & message state - used when downloading a new db from the device */
     private fun discardNodeDB() {
         debug("Discarding NodeDB")
-        myNodeInfo = null
+        activeNodeData.myNodeInfo = null
         activeNodeData.clear()
         activeNodeData.haveNodeDb = false
     }
-
-    private var myNodeInfo: MyNodeEntity? = null
 
     private val configTotal by lazy { ConfigProtos.Config.getDescriptor().fields.size }
     private val moduleTotal by lazy { ModuleConfigProtos.ModuleConfig.getDescriptor().fields.size }
@@ -485,14 +483,14 @@ class MeshService :
 
     @Suppress("UnusedPrivateMember")
     private val deviceVersion
-        get() = DeviceVersion(myNodeInfo?.firmwareVersion ?: "")
+        get() = DeviceVersion(activeNodeData.myNodeInfo?.firmwareVersion ?: "")
 
     @Suppress("UnusedPrivateMember")
     private val appVersion
         get() = BuildConfig.VERSION_CODE
 
     private val minAppVersion
-        get() = myNodeInfo?.minAppVersion ?: 0
+        get() = activeNodeData.myNodeInfo?.minAppVersion ?: 0
 
     // Map a nodenum to a node, or throw an exception if not found
     private fun toNodeInfo(n: Int) = activeNodeData.getByNum(n) ?: throw NodeNumNotFoundException(n)
@@ -572,7 +570,8 @@ class MeshService :
 
     // My node num
     private val myNodeNum
-        get() = myNodeInfo?.myNodeNum ?: throw RadioNotConnectedException("We don't yet have our myNodeInfo")
+        get() =
+            activeNodeData.myNodeInfo?.myNodeNum ?: throw RadioNotConnectedException("We don't yet have our myNodeInfo")
 
     // My node ID string
     private val myNodeID
@@ -592,7 +591,7 @@ class MeshService :
 
     // Generate a new mesh packet builder with our node as the sender, and the specified node num
     private fun newMeshPacketTo(idNum: Int) = MeshPacket.newBuilder().apply {
-        if (myNodeInfo == null) {
+        if (activeNodeData.myNodeInfo == null) {
             throw RadioNotConnectedException()
         }
 
@@ -745,7 +744,7 @@ class MeshService :
 
     // Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedData(packet: MeshPacket) {
-        myNodeInfo?.let { myInfo ->
+        activeNodeData.myNodeInfo?.let { myInfo ->
             val data = packet.decoded
             val bytes = data.payload.toByteArray()
             val fromId = toNodeID(packet.from)
@@ -898,7 +897,7 @@ class MeshService :
 
             AdminProtos.AdminMessage.PayloadVariantCase.GET_CHANNEL_RESPONSE -> {
                 if (fromNodeNum == myNodeNum) {
-                    val mi = myNodeInfo
+                    val mi = activeNodeData.myNodeInfo
                     if (mi != null) {
                         val ch = a.getChannelResponse
                         debug("Admin: Received channel ${ch.index}")
@@ -1305,7 +1304,7 @@ class MeshService :
 
     /** Send in analytics about mesh connection */
     private fun reportConnection() {
-        val radioModel = DataPair("radio_model", myNodeInfo?.model ?: "unknown")
+        val radioModel = DataPair("radio_model", activeNodeData.myNodeInfo?.model ?: "unknown")
         GeeksvilleApplication.analytics.track(
             "mesh_connect",
             DataPair("num_nodes", activeNodeData.count),
@@ -1575,7 +1574,7 @@ class MeshService :
             )
         insertMeshLog(packetToSave)
         if (ch.role != ChannelProtos.Channel.Role.DISABLED) updateChannelSettings(ch)
-        val maxChannels = myNodeInfo?.maxChannels ?: 8
+        val maxChannels = activeNodeData.myNodeInfo?.maxChannels ?: 8
         radioConfigRepository.setStatusMessage("Channels (${ch.index + 1} / $maxChannels)")
     }
 
@@ -1682,7 +1681,7 @@ class MeshService :
 
     private fun sendAnalytics() {
         val myInfo = rawMyNodeInfo
-        val mi = myNodeInfo
+        val mi = activeNodeData.myNodeInfo
         if (myInfo != null && mi != null) {
             // Track types of devices and firmware versions in use
             GeeksvilleApplication.analytics.setUserInfo(
@@ -1881,7 +1880,7 @@ class MeshService :
         if (newMyNodeInfo == null) {
             errormsg("Did not receive a valid config")
         } else {
-            myNodeInfo = newMyNodeInfo
+            activeNodeData.myNodeInfo = newMyNodeInfo
         }
         serviceScope.handledLaunch {
             delay(CONFIG_WAIT_MS)
@@ -1912,7 +1911,7 @@ class MeshService :
             newNodes.clear() // Just to save RAM ;-)
 
             serviceScope.handledLaunch {
-                radioConfigRepository.installMyNodeInfo(myNodeInfo!!)
+                radioConfigRepository.installMyNodeInfo(activeNodeData.myNodeInfo!!)
                 radioConfigRepository.installNodeDb(activeNodeData.values.toList())
             }
 
@@ -1943,7 +1942,7 @@ class MeshService :
     /** Send a position (typically from our built in GPS) into the mesh. */
     private fun sendPosition(position: MeshProtos.Position, destNum: Int? = null, wantResponse: Boolean = false) {
         try {
-            val mi = myNodeInfo
+            val mi = activeNodeData.myNodeInfo
             if (mi != null) {
                 val idNum = destNum ?: mi.myNodeNum // when null we just send to the local node
                 debug("Sending our position/time to=$idNum ${Position(position)}")
@@ -2158,7 +2157,7 @@ class MeshService :
                 // TODO reimplement this after we have a new firmware update mechanism
             }
 
-            override fun getMyNodeInfo(): MyNodeInfo? = this@MeshService.myNodeInfo?.toMyNodeInfo()
+            override fun getMyNodeInfo(): MyNodeInfo? = this@MeshService.activeNodeData.myNodeInfo?.toMyNodeInfo()
 
             override fun getMyId() = toRemoteExceptions { myNodeID }
 

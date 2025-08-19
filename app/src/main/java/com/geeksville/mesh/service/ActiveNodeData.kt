@@ -17,12 +17,15 @@
 
 package com.geeksville.mesh.service
 
+import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import java.util.concurrent.ConcurrentHashMap
 
 class ActiveNodeData {
     // True after we've done our initial node db init
     @Volatile var haveNodeDb = false
+
+    var myNodeInfo: MyNodeEntity? = null
 
     // The database of active nodes, index is the node number
     private val nodeDbByNodeNum = ConcurrentHashMap<Int, NodeEntity>()
