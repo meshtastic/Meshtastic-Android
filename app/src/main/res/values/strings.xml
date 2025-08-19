@@ -120,7 +120,7 @@
     <string name="connected_count">Connected: %1$s online</string>
     <string name="ip_address">IP Address:</string>
     <string name="ip_port">Port:</string>
-    <string name="connected">Connected to radio</string>
+    <string name="connected">Connected</string>
     <string name="connected_to">Connected to radio (%s)</string>
     <string name="not_connected">Not connected</string>
     <string name="connected_sleeping">Connected to radio, but it is sleeping</string>
@@ -621,10 +621,11 @@
     <string name="load">Load</string>
     <string name="user_string">User String</string>
     <string name="navigate_into_label">Navigate Into</string>
-    <string name="connections">Connections</string>
-    <string name="map">Map</string>
-    <string name="contacts">Contacts</string>
+    <string name="connections">Connection</string>
+    <string name="map">Mesh Map</string>
+    <string name="contacts">Messages</string>
     <string name="nodes">Nodes</string>
+    <string name="bottom_nav_share">Share</string>
     <string name="set_your_region">Set your region</string>
     <string name="reply">Reply</string>
     <string name="map_reporting_summary">Your node will periodically send an unencrypted map report packet to the configured MQTT server, this includes id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset and primary channel name.</string>

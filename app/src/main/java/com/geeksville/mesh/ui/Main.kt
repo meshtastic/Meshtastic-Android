@@ -36,6 +36,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BluetoothConnected
 import androidx.compose.material.icons.rounded.BluetoothDisabled
+import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material.icons.rounded.Usb
 import androidx.compose.material.icons.rounded.UsbOff
 import androidx.compose.material.icons.rounded.Wifi
@@ -125,10 +126,10 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
-    Contacts(R.string.contacts, MeshtasticIcons.Outlined.Messages, ContactsRoutes.ContactsGraph),
+    Messages(R.string.contacts, MeshtasticIcons.Outlined.Messages, ContactsRoutes.ContactsGraph),
     Nodes(R.string.nodes, MeshtasticIcons.Outlined.Nodes, NodesRoutes.NodesGraph),
     Map(R.string.map, MeshtasticIcons.Outlined.Map, MapRoutes.Map),
-    Channels(R.string.channels, Icons.TwoTone.Contactless, ChannelsRoutes.ChannelsGraph),
+    Share(R.string.bottom_nav_share, Icons.Rounded.QrCode2, ChannelsRoutes.ChannelsGraph),
     Connections(R.string.connections, Icons.Rounded.Wifi, ConnectionsRoutes.ConnectionsGraph),
     ;
 
