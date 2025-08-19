@@ -464,7 +464,7 @@ class MeshService :
         debug("Discarding NodeDB")
         myNodeInfo = null
         activeNodeData.clear()
-        haveNodeDB = false
+        activeNodeData.haveNodeDb = false
     }
 
     private var myNodeInfo: MyNodeEntity? = null
@@ -476,9 +476,6 @@ class MeshService :
     private var localConfig: LocalConfig = LocalConfig.getDefaultInstance()
     private var moduleConfig: LocalModuleConfig = LocalModuleConfig.getDefaultInstance()
     private var channelSet: AppOnlyProtos.ChannelSet = AppOnlyProtos.ChannelSet.getDefaultInstance()
-
-    // True after we've done our initial node db init
-    @Volatile private var haveNodeDB = false
 
     private val activeNodeData: ActiveNodeData = ActiveNodeData()
 
@@ -564,7 +561,7 @@ class MeshService :
         val info = getOrCreateNodeInfo(nodeNum, channel)
         updateFn(info)
 
-        if (info.user.id.isNotEmpty() && haveNodeDB) {
+        if (info.user.id.isNotEmpty() && activeNodeData.haveNodeDb) {
             serviceScope.handledLaunch { radioConfigRepository.upsert(info) }
         }
 
@@ -1087,7 +1084,7 @@ class MeshService :
 
     // Update our model and resend as needed for a MeshPacket we just received from the radio
     private fun handleReceivedMeshPacket(packet: MeshPacket) {
-        if (haveNodeDB) {
+        if (activeNodeData.haveNodeDb) {
             processReceivedMeshPacket(
                 packet
                     .toBuilder()
@@ -1919,7 +1916,7 @@ class MeshService :
                 radioConfigRepository.installNodeDb(activeNodeData.values.toList())
             }
 
-            haveNodeDB = true // we now have nodes from real hardware
+            activeNodeData.haveNodeDb = true // we now have nodes from real hardware
 
             sendAnalytics()
             onNodeDBChanged()
