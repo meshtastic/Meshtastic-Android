@@ -106,7 +106,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeoutOrNull
 import java.util.Random
 import java.util.UUID
-import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -231,14 +230,14 @@ class MeshService :
     private val batteryPercentCooldowns: HashMap<Int, Long> = HashMap()
 
     private fun getSenderName(packet: DataPacket?): String {
-        val name = nodeDBbyID[packet?.from]?.user?.longName
+        val name = activeNodeData.getById(packet?.from)?.user?.longName
         return name ?: getString(R.string.unknown_username)
     }
 
     private val notificationSummary
         get() =
             when (connectionState) {
-                ConnectionState.CONNECTED -> getString(R.string.connected_count).format(numOnlineNodes)
+                ConnectionState.CONNECTED -> getString(R.string.connected_count).format(activeNodeData.onlineCount)
 
                 ConnectionState.DISCONNECTED -> getString(R.string.disconnected)
                 ConnectionState.DEVICE_SLEEP -> getString(R.string.device_sleeping)
@@ -454,7 +453,7 @@ class MeshService :
     private fun loadSettings() = serviceScope.handledLaunch {
         discardNodeDB() // Get rid of any old state
         myNodeInfo = radioConfigRepository.myNodeInfo.value
-        nodeDBbyNodeNum.putAll(radioConfigRepository.getNodeDBbyNum())
+        activeNodeData.putAll(radioConfigRepository.getNodeDBbyNum())
         // Note: we do not haveNodeDB = true because that means we've got a valid db from a real
         // device (rather than
         // this possibly stale hint)
@@ -464,7 +463,7 @@ class MeshService :
     private fun discardNodeDB() {
         debug("Discarding NodeDB")
         myNodeInfo = null
-        nodeDBbyNodeNum.clear()
+        activeNodeData.clear()
         haveNodeDB = false
     }
 
@@ -481,13 +480,7 @@ class MeshService :
     // True after we've done our initial node db init
     @Volatile private var haveNodeDB = false
 
-    // The database of active nodes, index is the node number
-    private val nodeDBbyNodeNum = ConcurrentHashMap<Int, NodeEntity>()
-
-    // The database of active nodes, index is the node user ID string
-    // NOTE: some NodeInfos might be in only nodeDBbyNodeNum (because we don't yet know an ID).
-    private val nodeDBbyID
-        get() = nodeDBbyNodeNum.mapKeys { it.value.user.id }
+    private val activeNodeData: ActiveNodeData = ActiveNodeData()
 
     //
     // END OF MODEL
@@ -505,7 +498,7 @@ class MeshService :
         get() = myNodeInfo?.minAppVersion ?: 0
 
     // Map a nodenum to a node, or throw an exception if not found
-    private fun toNodeInfo(n: Int) = nodeDBbyNodeNum[n] ?: throw NodeNumNotFoundException(n)
+    private fun toNodeInfo(n: Int) = activeNodeData.getByNum(n) ?: throw NodeNumNotFoundException(n)
 
     /**
      * Map a nodeNum to the nodeId string If we have a NodeInfo for this ID we prefer to return the string ID inside the
@@ -515,11 +508,11 @@ class MeshService :
     private fun toNodeID(n: Int): String = if (n == DataPacket.NODENUM_BROADCAST) {
         DataPacket.ID_BROADCAST
     } else {
-        nodeDBbyNodeNum[n]?.user?.id ?: DataPacket.nodeNumToDefaultId(n)
+        activeNodeData.getByNum(n)?.user?.id ?: DataPacket.nodeNumToDefaultId(n)
     }
 
     // given a nodeNum, return a db entry - creating if necessary
-    private fun getOrCreateNodeInfo(n: Int, channel: Int = 0) = nodeDBbyNodeNum.getOrPut(n) {
+    private fun getOrCreateNodeInfo(n: Int, channel: Int = 0) = activeNodeData.getOrPut(n) {
         val userId = DataPacket.nodeNumToDefaultId(n)
         val defaultUser = user {
             id = userId
@@ -541,12 +534,12 @@ class MeshService :
         // If this is a valid hexaddr will be !null
         val hexStr = hexIdRegex.matchEntire(id)?.groups?.get(1)?.value
 
-        return nodeDBbyID[id]
+        return activeNodeData.getById(id)
             ?: when {
                 id == DataPacket.ID_LOCAL -> toNodeInfo(myNodeNum)
                 hexStr != null -> {
                     val n = hexStr.toLong(16).toInt()
-                    nodeDBbyNodeNum[n] ?: throw IdNotFoundException(id)
+                    activeNodeData.getByNum(n) ?: throw IdNotFoundException(id)
                 }
 
                 else -> throw InvalidNodeIdException(id)
@@ -554,13 +547,6 @@ class MeshService :
     }
 
     private fun getUserName(num: Int): String = with(radioConfigRepository.getUser(num)) { "$longName ($shortName)" }
-
-    private val numNodes
-        get() = nodeDBbyNodeNum.size
-
-    /** How many nodes are currently online (including our local node) */
-    private val numOnlineNodes
-        get() = nodeDBbyNodeNum.values.count { it.isOnline }
 
     private fun toNodeNum(id: String): Int = when (id) {
         DataPacket.ID_BROADCAST -> DataPacket.NODENUM_BROADCAST
@@ -600,7 +586,7 @@ class MeshService :
         get() =
             when {
                 myNodeNum == to -> 0
-                nodeDBbyNodeNum[myNodeNum]?.hasPKC == true && nodeDBbyNodeNum[to]?.hasPKC == true ->
+                activeNodeData.getByNum(myNodeNum)?.hasPKC == true && activeNodeData.getByNum(to)?.hasPKC == true ->
                     DataPacket.PKC_CHANNEL_INDEX
 
                 else ->
@@ -641,7 +627,7 @@ class MeshService :
         decoded = MeshProtos.Data.newBuilder().also { initFn(it) }.build()
         if (channel == DataPacket.PKC_CHANNEL_INDEX) {
             pkiEncrypted = true
-            nodeDBbyNodeNum[to]?.user?.publicKey?.let { publicKey -> this.publicKey = publicKey }
+            activeNodeData.getByNum(to)?.user?.publicKey?.let { publicKey -> this.publicKey = publicKey }
         } else {
             this.channel = channel
         }
@@ -1325,8 +1311,8 @@ class MeshService :
         val radioModel = DataPair("radio_model", myNodeInfo?.model ?: "unknown")
         GeeksvilleApplication.analytics.track(
             "mesh_connect",
-            DataPair("num_nodes", numNodes),
-            DataPair("num_online", numOnlineNodes),
+            DataPair("num_nodes", activeNodeData.count),
+            DataPair("num_online", activeNodeData.onlineCount),
             radioModel,
         )
 
@@ -1335,7 +1321,7 @@ class MeshService :
         // this allows us to collect stats on what typical mesh size is and to tell difference
         // between users who just
         // downloaded the app, vs has connected it to some hardware.
-        GeeksvilleApplication.analytics.setUserInfo(DataPair("num_nodes", numNodes), radioModel)
+        GeeksvilleApplication.analytics.setUserInfo(DataPair("num_nodes", activeNodeData.count), radioModel)
     }
 
     private var sleepTimeout: Job? = null
@@ -1388,10 +1374,10 @@ class MeshService :
 
             GeeksvilleApplication.analytics.track(
                 "mesh_disconnect",
-                DataPair("num_nodes", numNodes),
-                DataPair("num_online", numOnlineNodes),
+                DataPair("num_nodes", activeNodeData.count),
+                DataPair("num_online", activeNodeData.onlineCount),
             )
-            GeeksvilleApplication.analytics.track("num_nodes", DataPair(numNodes))
+            GeeksvilleApplication.analytics.track("num_nodes", DataPair(activeNodeData.count))
 
             // broadcast an intent with our new connection state
             serviceBroadcasts.broadcastConnection()
@@ -1930,7 +1916,7 @@ class MeshService :
 
             serviceScope.handledLaunch {
                 radioConfigRepository.installMyNodeInfo(myNodeInfo!!)
-                radioConfigRepository.installNodeDb(nodeDBbyNodeNum.values.toList())
+                radioConfigRepository.installNodeDb(activeNodeData.values.toList())
             }
 
             haveNodeDB = true // we now have nodes from real hardware
@@ -1977,7 +1963,7 @@ class MeshService :
                         if (destNum == null) {
                             0
                         } else {
-                            nodeDBbyNodeNum[destNum]?.channel ?: 0
+                            activeNodeData.getByNum(destNum)?.channel ?: 0
                         },
                         priority = MeshPacket.Priority.BACKGROUND,
                     ) {
@@ -1994,7 +1980,9 @@ class MeshService :
 
     /** Send setOwner admin packet with [MeshProtos.User] protobuf */
     private fun setOwner(packetId: Int, user: MeshProtos.User) = with(user) {
-        val dest = nodeDBbyID[id] ?: throw Exception("Can't set user without a NodeInfo") // this shouldn't happen
+        val dest =
+            activeNodeData.getById(id)
+                ?: throw Exception("Can't set user without a NodeInfo") // this shouldn't happen
         val old = dest.user
 
         @Suppress("ComplexCondition")
@@ -2343,7 +2331,7 @@ class MeshService :
             override fun getChannelSet(): ByteArray = toRemoteExceptions { this@MeshService.channelSet.toByteArray() }
 
             override fun getNodes(): MutableList<NodeInfo> = toRemoteExceptions {
-                val r = nodeDBbyNodeNum.values.map { it.toNodeInfo() }.toMutableList()
+                val r = activeNodeData.values.map { it.toNodeInfo() }.toMutableList()
                 info("in getOnline, count=${r.size}")
                 // return arrayOf("+16508675309")
                 r
@@ -2360,17 +2348,19 @@ class MeshService :
             override fun stopProvideLocation() = toRemoteExceptions { stopLocationRequests() }
 
             override fun removeByNodenum(requestId: Int, nodeNum: Int) = toRemoteExceptions {
-                nodeDBbyNodeNum.remove(nodeNum)
+                activeNodeData.remove(nodeNum)
                 sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { removeByNodenum = nodeNum })
             }
 
             override fun requestUserInfo(destNum: Int) = toRemoteExceptions {
                 if (destNum != myNodeNum) {
                     sendToRadio(
-                        newMeshPacketTo(destNum).buildMeshPacket(channel = nodeDBbyNodeNum[destNum]?.channel ?: 0) {
+                        newMeshPacketTo(destNum).buildMeshPacket(
+                            channel = activeNodeData.getByNum(destNum)?.channel ?: 0,
+                        ) {
                             portnumValue = Portnums.PortNum.NODEINFO_APP_VALUE
                             wantResponse = true
-                            payload = nodeDBbyNodeNum[myNodeNum]!!.user.toByteString()
+                            payload = activeNodeData.getByNum(myNodeNum)!!.user.toByteString()
                         },
                     )
                 }
@@ -2387,7 +2377,12 @@ class MeshService :
                             provideLocation && position.isValid() -> position
                             // Otherwise use the last valid position from nodeDB (node GPS or
                             // static)
-                            else -> nodeDBbyNodeNum[myNodeNum]?.position?.let { Position(it) }?.takeIf { it.isValid() }
+                            else ->
+                                activeNodeData
+                                    .getByNum(myNodeNum)
+                                    ?.position
+                                    ?.let { Position(it) }
+                                    ?.takeIf { it.isValid() }
                         }
 
                     if (currentPosition == null) {
@@ -2405,7 +2400,7 @@ class MeshService :
 
                     sendToRadio(
                         newMeshPacketTo(destNum).buildMeshPacket(
-                            channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
+                            channel = activeNodeData.getByNum(destNum)?.channel ?: 0,
                             priority = MeshPacket.Priority.BACKGROUND,
                         ) {
                             portnumValue = Portnums.PortNum.POSITION_APP_VALUE
@@ -2439,7 +2434,7 @@ class MeshService :
                     newMeshPacketTo(destNum).buildMeshPacket(
                         wantAck = true,
                         id = requestId,
-                        channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
+                        channel = activeNodeData.getByNum(destNum)?.channel ?: 0,
                     ) {
                         portnumValue = Portnums.PortNum.TRACEROUTE_APP_VALUE
                         wantResponse = true

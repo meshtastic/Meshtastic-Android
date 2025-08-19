@@ -1,0 +1,59 @@
+/*
+ * Copyright (c) 2025 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package com.geeksville.mesh.service
+
+import com.geeksville.mesh.database.entity.NodeEntity
+import java.util.concurrent.ConcurrentHashMap
+
+class ActiveNodeData {
+    // The database of active nodes, index is the node number
+    private val nodeDbByNodeNum = ConcurrentHashMap<Int, NodeEntity>()
+
+    val values
+        get() = nodeDbByNodeNum.values
+
+    val count
+        get() = nodeDbByNodeNum.size
+
+    /** How many nodes are currently online (including our local node) */
+    val onlineCount
+        get() = nodeDbByNodeNum.values.count { it.isOnline }
+
+    // The database of active nodes, index is the node user ID string
+    // NOTE: some NodeInfos might be in only nodeDBbyNodeNum (because we don't yet know an ID).
+    private val nodeDbById
+        get() = nodeDbByNodeNum.mapKeys { it.value.user.id }
+
+    fun putAll(nodes: Map<Int, NodeEntity>) {
+        nodeDbByNodeNum.putAll(nodes)
+    }
+
+    fun clear() {
+        nodeDbByNodeNum.clear()
+    }
+
+    fun getByNum(num: Int) = nodeDbByNodeNum[num]
+
+    fun getOrPut(num: Int, node: () -> NodeEntity): NodeEntity = nodeDbByNodeNum.getOrPut(num) { node() }
+
+    fun getById(id: String?) = nodeDbById[id]
+
+    fun remove(num: Int) {
+        nodeDbByNodeNum.remove(num)
+    }
+}
