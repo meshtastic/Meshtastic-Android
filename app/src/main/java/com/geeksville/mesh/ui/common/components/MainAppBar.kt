@@ -43,6 +43,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -57,6 +59,7 @@ import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.showLongNameTitle
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
+import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.debug.DebugMenuActions
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.radioconfig.RadioConfigMenuActions
@@ -240,5 +243,22 @@ private fun MainMenuActions(isManaged: Boolean, onAction: (MainMenuAction) -> Un
                 },
             )
         }
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun MainAppBarPreview(@PreviewParameter(BooleanProvider::class) canNavigateUp: Boolean) {
+    AppTheme {
+        MainAppBar(
+            title = "Title",
+            subtitle = "Subtitle",
+            ourNode = previewNode,
+            isConnected = false,
+            showNodeChip = true,
+            canNavigateUp = canNavigateUp,
+            onNavigateUp = {},
+            actions = { MainMenuActions(isManaged = false, onAction = {}) },
+        ) {}
     }
 }
