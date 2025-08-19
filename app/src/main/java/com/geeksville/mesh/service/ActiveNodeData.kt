@@ -36,6 +36,9 @@ class ActiveNodeData @Inject constructor(private val radioConfigRepository: Radi
     val myNodeNum
         get() = myNodeInfo?.myNodeNum ?: throw RadioNotConnectedException("We don't yet have our myNodeInfo")
 
+    val myNodeId
+        get() = idFromNum(myNodeNum)
+
     // The database of active nodes, index is the node number
     private val nodeDbByNodeNum = ConcurrentHashMap<Int, NodeEntity>()
 

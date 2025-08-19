@@ -541,10 +541,6 @@ class MeshService :
         }
     }
 
-    // My node ID string
-    private val myNodeID
-        get() = activeNodeData.idFromNum(activeNodeData.myNodeNum)
-
     // Admin channel index
     private val MeshPacket.Builder.adminChannelIndex: Int
         get() =
@@ -2127,7 +2123,7 @@ class MeshService :
 
             override fun getMyNodeInfo(): MyNodeInfo? = this@MeshService.activeNodeData.myNodeInfo?.toMyNodeInfo()
 
-            override fun getMyId() = toRemoteExceptions { myNodeID }
+            override fun getMyId() = toRemoteExceptions { activeNodeData.myNodeId }
 
             override fun getPacketId() = toRemoteExceptions { generatePacketId() }
 
