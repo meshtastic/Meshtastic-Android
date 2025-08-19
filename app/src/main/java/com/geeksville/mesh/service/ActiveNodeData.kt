@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.service
 
+import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
@@ -58,6 +59,17 @@ class ActiveNodeData @Inject constructor(private val radioConfigRepository: Radi
     fun getOrPut(num: Int, node: () -> NodeEntity): NodeEntity = nodeDbByNodeNum.getOrPut(num) { node() }
 
     fun getById(id: String?) = nodeDbById[id]
+
+    /**
+     * Map a nodeNum to the nodeId string If we have a NodeInfo for this ID we prefer to return the string ID inside the
+     * user record. but some nodes might not have a user record at all (because not yet received), in that case, we
+     * return a hex version of the ID just based on the number
+     */
+    fun idFromNum(num: Int): String = if (num == DataPacket.NODENUM_BROADCAST) {
+        DataPacket.ID_BROADCAST
+    } else {
+        getByNum(num)?.user?.id ?: DataPacket.nodeNumToDefaultId(num)
+    }
 
     fun remove(num: Int) {
         nodeDbByNodeNum.remove(num)

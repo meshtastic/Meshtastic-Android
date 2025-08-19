@@ -479,17 +479,6 @@ class MeshService :
     // Map a nodenum to a node, or throw an exception if not found
     private fun toNodeInfo(n: Int) = activeNodeData.getByNum(n) ?: throw NodeNumNotFoundException(n)
 
-    /**
-     * Map a nodeNum to the nodeId string If we have a NodeInfo for this ID we prefer to return the string ID inside the
-     * user record. but some nodes might not have a user record at all (because not yet received), in that case, we
-     * return a hex version of the ID just based on the number
-     */
-    private fun toNodeID(n: Int): String = if (n == DataPacket.NODENUM_BROADCAST) {
-        DataPacket.ID_BROADCAST
-    } else {
-        activeNodeData.getByNum(n)?.user?.id ?: DataPacket.nodeNumToDefaultId(n)
-    }
-
     // given a nodeNum, return a db entry - creating if necessary
     private fun getOrCreateNodeInfo(n: Int, channel: Int = 0) = activeNodeData.getOrPut(n) {
         val userId = DataPacket.nodeNumToDefaultId(n)
@@ -554,7 +543,7 @@ class MeshService :
 
     // My node ID string
     private val myNodeID
-        get() = toNodeID(activeNodeData.myNodeNum)
+        get() = activeNodeData.idFromNum(activeNodeData.myNodeNum)
 
     // Admin channel index
     private val MeshPacket.Builder.adminChannelIndex: Int
@@ -637,8 +626,8 @@ class MeshService :
         val data = packet.decoded
 
         DataPacket(
-            from = toNodeID(packet.from),
-            to = toNodeID(packet.to),
+            from = activeNodeData.idFromNum(packet.from),
+            to = activeNodeData.idFromNum(packet.to),
             time = packet.rxTime * 1000L,
             id = packet.id,
             dataType = data.portnumValue,
@@ -677,7 +666,7 @@ class MeshService :
         val reaction =
             ReactionEntity(
                 replyId = packet.decoded.replyId,
-                userId = toNodeID(packet.from),
+                userId = activeNodeData.idFromNum(packet.from),
                 emoji = packet.decoded.payload.toByteArray().decodeToString(),
                 timestamp = System.currentTimeMillis(),
             )
@@ -726,7 +715,7 @@ class MeshService :
         activeNodeData.myNodeInfo?.let { myInfo ->
             val data = packet.decoded
             val bytes = data.payload.toByteArray()
-            val fromId = toNodeID(packet.from)
+            val fromId = activeNodeData.idFromNum(packet.from)
             val dataPacket = toDataPacket(packet)
 
             if (dataPacket != null) {
