@@ -101,13 +101,11 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.withTimeoutOrNull
-import java.util.Random
 import java.util.UUID
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
 import javax.inject.Inject
-import kotlin.math.absoluteValue
 
 sealed class ServiceAction {
     data class GetDeviceMetadata(val destNum: Int) : ServiceAction()
@@ -150,6 +148,8 @@ class MeshService :
     @Inject lateinit var meshPrefs: MeshPrefs
 
     @Inject lateinit var meshServiceModel: MeshServiceModel
+
+    @Inject lateinit var packetIdGenerator: PacketIdGenerator
 
     companion object : Logging {
 
@@ -508,7 +508,7 @@ class MeshService :
     /** Helper to make it easy to build a subpacket in the proper protobufs */
     private fun MeshPacket.Builder.buildMeshPacket(
         wantAck: Boolean = false,
-        id: Int = generatePacketId(), // always assign a packet ID if we didn't already have one
+        id: Int = packetIdGenerator.generate(), // always assign a packet ID if we didn't already have one
         hopLimit: Int = meshServiceModel.localConfig.lora.hopLimit,
         channel: Int = 0,
         priority: MeshPacket.Priority = MeshPacket.Priority.UNSET,
@@ -531,7 +531,7 @@ class MeshService :
 
     /** Helper to make it easy to build a subpacket in the proper protobufs */
     private fun MeshPacket.Builder.buildAdminPacket(
-        id: Int = generatePacketId(), // always assign a packet ID if we didn't already have one
+        id: Int = packetIdGenerator.generate(), // always assign a packet ID if we didn't already have one
         wantResponse: Boolean = false,
         initFn: AdminProtos.AdminMessage.Builder.() -> Unit,
     ): MeshPacket =
@@ -1564,7 +1564,7 @@ class MeshService :
                         firmwareVersion = metadata.firmwareVersion,
                         couldUpdate = false,
                         shouldUpdate = false, // TODO add check after re-implementing firmware updates
-                        currentPacketId = currentPacketId and 0xffffffffL,
+                        currentPacketId = packetIdGenerator.currentPacketId and 0xffffffffL,
                         messageTimeoutMsec = 5 * 60 * 1000, // constants from current firmware code
                         minAppVersion = minAppVersion,
                         maxChannels = 8,
@@ -1904,22 +1904,6 @@ class MeshService :
         }
     }
 
-    // Do not use directly, instead call generatePacketId()
-    private var currentPacketId = Random(System.currentTimeMillis()).nextLong().absoluteValue
-
-    /** Generate a unique packet ID (if we know enough to do so - otherwise return 0 so the device will do it) */
-    @Synchronized
-    private fun generatePacketId(): Int {
-        val numPacketIds = ((1L shl 32) - 1) // A mask for only the valid packet ID bits, either 255 or maxint
-
-        currentPacketId++
-
-        currentPacketId = currentPacketId and 0xffffffff // keep from exceeding 32 bits
-
-        // Use modulus and +1 to ensure we skip 0 on any values we return
-        return ((currentPacketId % numPacketIds) + 1L).toInt()
-    }
-
     private fun enqueueForSending(p: DataPacket) {
         if (p.dataType in rememberDataType) {
             offlineSentPackets.add(p)
@@ -2074,11 +2058,11 @@ class MeshService :
 
             override fun getMyId() = toRemoteExceptions { meshServiceModel.myNodeId }
 
-            override fun getPacketId() = toRemoteExceptions { generatePacketId() }
+            override fun getPacketId() = toRemoteExceptions { packetIdGenerator.generate() }
 
             override fun setOwner(user: MeshUser) = toRemoteExceptions {
                 setOwner(
-                    generatePacketId(),
+                    packetIdGenerator.generate(),
                     user {
                         id = user.id
                         longName = user.longName
@@ -2103,7 +2087,7 @@ class MeshService :
 
             override fun send(p: DataPacket) {
                 toRemoteExceptions {
-                    if (p.id == 0) p.id = generatePacketId()
+                    if (p.id == 0) p.id = packetIdGenerator.generate()
 
                     info(
                         "sendData dest=${p.to}, id=${p.id} <- ${p.bytes!!.size} bytes" +
@@ -2152,7 +2136,7 @@ class MeshService :
 
             /** Send our current radio config to the device */
             override fun setConfig(payload: ByteArray) = toRemoteExceptions {
-                setRemoteConfig(generatePacketId(), meshServiceModel.myNodeNum, payload)
+                setRemoteConfig(packetIdGenerator.generate(), meshServiceModel.myNodeNum, payload)
             }
 
             override fun setRemoteConfig(id: Int, num: Int, payload: ByteArray) = toRemoteExceptions {
@@ -2223,7 +2207,7 @@ class MeshService :
             }
 
             override fun setChannel(payload: ByteArray?) = toRemoteExceptions {
-                setRemoteChannel(generatePacketId(), meshServiceModel.myNodeNum, payload)
+                setRemoteChannel(packetIdGenerator.generate(), meshServiceModel.myNodeNum, payload)
             }
 
             override fun setRemoteChannel(id: Int, num: Int, payload: ByteArray?) = toRemoteExceptions {

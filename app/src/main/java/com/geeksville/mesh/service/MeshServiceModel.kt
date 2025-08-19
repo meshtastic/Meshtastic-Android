@@ -32,12 +32,13 @@ import com.geeksville.mesh.service.MeshService.Companion.IdNotFoundException
 import com.geeksville.mesh.service.MeshService.Companion.InvalidNodeIdException
 import com.geeksville.mesh.service.MeshService.Companion.NodeNumNotFoundException
 import com.google.protobuf.ByteString
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
-import javax.inject.Singleton
 
 @Suppress("TooManyFunctions")
-@Singleton
+@InstallIn(SingletonComponent::class)
 class MeshServiceModel @Inject constructor(private val radioConfigRepository: RadioConfigRepository) {
     private val hexIdRegex = """\!([0-9A-Fa-f]+)""".toRegex()
 
@@ -120,7 +121,7 @@ class MeshServiceModel @Inject constructor(private val radioConfigRepository: Ra
         getByNum(num)?.user?.id ?: DataPacket.nodeNumToDefaultId(num)
     }
 
-    fun numFromId(id: String): Int = when (id) {
+    private fun numFromId(id: String): Int = when (id) {
         DataPacket.ID_BROADCAST -> DataPacket.NODENUM_BROADCAST
         DataPacket.ID_LOCAL -> myNodeNum
         else -> getByIdOrThrow(id).num
