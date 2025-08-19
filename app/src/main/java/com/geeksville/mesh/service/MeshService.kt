@@ -489,34 +489,12 @@ class MeshService :
         NodeEntity(num = n, user = defaultUser, longName = defaultUser.longName, channel = channel)
     }
 
-    private val hexIdRegex = """\!([0-9A-Fa-f]+)""".toRegex()
-
-    // Map a userid to a node/ node num, or throw an exception if not found
-    // We prefer to find nodes based on their assigned IDs, but if no ID has been assigned to a
-    // node, we can also find
-    // it based on node number
-    private fun toNodeInfo(id: String): NodeEntity {
-        // If this is a valid hexaddr will be !null
-        val hexStr = hexIdRegex.matchEntire(id)?.groups?.get(1)?.value
-
-        return activeNodeData.getById(id)
-            ?: when {
-                id == DataPacket.ID_LOCAL -> activeNodeData.getByNumOrThrow(activeNodeData.myNodeNum)
-                hexStr != null -> {
-                    val n = hexStr.toLong(16).toInt()
-                    activeNodeData.getByNum(n) ?: throw IdNotFoundException(id)
-                }
-
-                else -> throw InvalidNodeIdException(id)
-            }
-    }
-
     private fun getUserName(num: Int): String = with(radioConfigRepository.getUser(num)) { "$longName ($shortName)" }
 
     private fun toNodeNum(id: String): Int = when (id) {
         DataPacket.ID_BROADCAST -> DataPacket.NODENUM_BROADCAST
         DataPacket.ID_LOCAL -> activeNodeData.myNodeNum
-        else -> toNodeInfo(id).num
+        else -> activeNodeData.getByIdOrThrow(id).num
     }
 
     // A helper function that makes it easy to update node info objects

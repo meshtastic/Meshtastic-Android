@@ -22,6 +22,8 @@ import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
+import com.geeksville.mesh.service.MeshService.Companion.IdNotFoundException
+import com.geeksville.mesh.service.MeshService.Companion.InvalidNodeIdException
 import com.geeksville.mesh.service.MeshService.Companion.NodeNumNotFoundException
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
@@ -29,6 +31,8 @@ import javax.inject.Singleton
 
 @Singleton
 class ActiveNodeData @Inject constructor(private val radioConfigRepository: RadioConfigRepository) {
+    private val hexIdRegex = """\!([0-9A-Fa-f]+)""".toRegex()
+
     // True after we've done our initial node db init
     @Volatile var haveNodeDb = false
 
@@ -66,6 +70,28 @@ class ActiveNodeData @Inject constructor(private val radioConfigRepository: Radi
     fun getOrPut(num: Int, node: () -> NodeEntity): NodeEntity = nodeDbByNodeNum.getOrPut(num) { node() }
 
     fun getById(id: String?) = nodeDbById[id]
+
+    /**
+     * Map a userid to a node/ node num, or throw an exception if not found We prefer to find nodes based on their
+     * assigned IDs, but if no ID has been assigned to a node, we can also find it based on node number
+     */
+    @Throws(NodeNumNotFoundException::class, IdNotFoundException::class, InvalidNodeIdException::class)
+    fun getByIdOrThrow(id: String): NodeEntity {
+        // If this is a valid hexaddr will be !null
+        val hexStr = hexIdRegex.matchEntire(id)?.groups?.get(1)?.value
+
+        return getById(id)
+            ?: when {
+                id == DataPacket.ID_LOCAL -> getByNumOrThrow(myNodeNum)
+                hexStr != null -> {
+                    @Suppress("MagicNumber")
+                    val n = hexStr.toLong(16).toInt()
+                    getByNum(n) ?: throw IdNotFoundException(id)
+                }
+
+                else -> throw InvalidNodeIdException(id)
+            }
+    }
 
     /**
      * Map a nodeNum to the nodeId string If we have a NodeInfo for this ID we prefer to return the string ID inside the
