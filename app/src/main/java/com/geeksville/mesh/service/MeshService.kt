@@ -476,9 +476,6 @@ class MeshService :
     private val minAppVersion
         get() = activeNodeData.myNodeInfo?.minAppVersion ?: 0
 
-    // Map a nodenum to a node, or throw an exception if not found
-    private fun toNodeInfo(n: Int) = activeNodeData.getByNum(n) ?: throw NodeNumNotFoundException(n)
-
     // given a nodeNum, return a db entry - creating if necessary
     private fun getOrCreateNodeInfo(n: Int, channel: Int = 0) = activeNodeData.getOrPut(n) {
         val userId = DataPacket.nodeNumToDefaultId(n)
@@ -504,7 +501,7 @@ class MeshService :
 
         return activeNodeData.getById(id)
             ?: when {
-                id == DataPacket.ID_LOCAL -> toNodeInfo(activeNodeData.myNodeNum)
+                id == DataPacket.ID_LOCAL -> activeNodeData.getByNumOrThrow(activeNodeData.myNodeNum)
                 hexStr != null -> {
                     val n = hexStr.toLong(16).toInt()
                     activeNodeData.getByNum(n) ?: throw IdNotFoundException(id)

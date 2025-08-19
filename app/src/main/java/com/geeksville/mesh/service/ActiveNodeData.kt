@@ -22,6 +22,7 @@ import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
+import com.geeksville.mesh.service.MeshService.Companion.NodeNumNotFoundException
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -58,6 +59,9 @@ class ActiveNodeData @Inject constructor(private val radioConfigRepository: Radi
         get() = nodeDbByNodeNum.mapKeys { it.value.user.id }
 
     fun getByNum(num: Int) = nodeDbByNodeNum[num]
+
+    @Throws(NodeNumNotFoundException::class)
+    fun getByNumOrThrow(num: Int) = getByNum(num) ?: throw NodeNumNotFoundException(num)
 
     fun getOrPut(num: Int, node: () -> NodeEntity): NodeEntity = nodeDbByNodeNum.getOrPut(num) { node() }
 
