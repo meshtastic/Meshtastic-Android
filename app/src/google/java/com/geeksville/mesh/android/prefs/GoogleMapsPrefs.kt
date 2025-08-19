@@ -15,26 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.map
+package com.geeksville.mesh.android.prefs
 
-import com.geeksville.mesh.android.prefs.MapPrefs
-import com.geeksville.mesh.database.NodeRepository
-import com.geeksville.mesh.database.PacketRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import android.content.SharedPreferences
+import com.google.maps.android.compose.MapType
 
-@HiltViewModel
-class MapViewModel
-@Inject
-constructor(
-    mapPrefs: MapPrefs,
-    packetRepository: PacketRepository,
-    nodeRepository: NodeRepository,
-) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository) {
+/** Interface for prefs specific to Google Maps. For general map prefs, see MapPrefs. */
+interface GoogleMapsPrefs {
+    var selectedGoogleMapType: String?
+    var selectedCustomTileUrl: String?
+}
 
-    var mapStyleId: Int
-        get() = mapPrefs.mapStyle
-        set(value) {
-            mapPrefs.mapStyle = value
-        }
+class GoogleMapsPrefsImpl(prefs: SharedPreferences) : GoogleMapsPrefs {
+    override var selectedGoogleMapType: String? by
+        NullableStringPrefDelegate(prefs, "selected_google_map_type", MapType.NORMAL.name)
+    override var selectedCustomTileUrl: String? by NullableStringPrefDelegate(prefs, "selected_custom_tile_url", null)
 }

@@ -36,15 +36,6 @@ interface UiPrefs {
     var showIgnored: Boolean
     var showQuickChat: Boolean
 
-    // region Map prefs
-
-    var showOnlyFavorites: Boolean
-    var showWaypointsOnMap: Boolean
-    var showPrecisionCircleOnMap: Boolean
-    var mapStyle: Int
-
-    // endregion
-
     fun shouldProvideNodeLocation(nodeNum: Int?): Boolean
 
     fun setShouldProvideNodeLocation(nodeNum: Int?, value: Boolean)
@@ -62,10 +53,6 @@ class UiPrefsImpl(private val prefs: SharedPreferences) : UiPrefs {
     override var onlyDirect: Boolean by PrefDelegate(prefs, "only-direct", false)
     override var showIgnored: Boolean by PrefDelegate(prefs, "show-ignored", false)
     override var showQuickChat: Boolean by PrefDelegate(prefs, "show-quick-chat", false)
-    override var showOnlyFavorites: Boolean by PrefDelegate(prefs, "only-favorites", false)
-    override var showWaypointsOnMap: Boolean by PrefDelegate(prefs, "show-waypoints-on-map", true)
-    override var showPrecisionCircleOnMap: Boolean by PrefDelegate(prefs, "show-precision-circle-on-map", true)
-    override var mapStyle: Int by PrefDelegate(prefs, "map_style_id", 0)
 
     override fun shouldProvideNodeLocation(nodeNum: Int?): Boolean =
         prefs.getBoolean(provideLocationKey(nodeNum), false)

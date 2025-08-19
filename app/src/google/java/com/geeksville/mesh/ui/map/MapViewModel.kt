@@ -18,13 +18,12 @@
 package com.geeksville.mesh.ui.map
 
 import android.app.Application
-import android.content.SharedPreferences
 import android.net.Uri
-import androidx.core.content.edit
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.android.BuildUtils.debug
-import com.geeksville.mesh.android.prefs.UiPrefs
+import com.geeksville.mesh.android.prefs.GoogleMapsPrefs
+import com.geeksville.mesh.android.prefs.MapPrefs
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
@@ -61,8 +60,6 @@ import java.util.UUID
 import javax.inject.Inject
 
 private const val TILE_SIZE = 256
-private const val PREF_SELECTED_GOOGLE_MAP_TYPE = "selected_google_map_type"
-private const val PREF_SELECTED_CUSTOM_TILE_URL = "selected_custom_tile_url"
 
 @Serializable
 data class MapCameraPosition(
@@ -79,13 +76,13 @@ class MapViewModel
 @Inject
 constructor(
     private val application: Application,
-    uiPrefs: UiPrefs,
-    private val preferences: SharedPreferences,
+    mapPrefs: MapPrefs,
+    private val googleMapsPrefs: GoogleMapsPrefs,
     nodeRepository: NodeRepository,
     packetRepository: PacketRepository,
     radioConfigRepository: RadioConfigRepository,
     private val customTileProviderRepository: CustomTileProviderRepository,
-) : BaseMapViewModel(uiPrefs, nodeRepository, packetRepository) {
+) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository) {
 
     private val _errorFlow = MutableSharedFlow<String>()
     val errorFlow: SharedFlow<String> = _errorFlow.asSharedFlow()
@@ -187,7 +184,7 @@ constructor(
             if (configToRemove != null && _selectedCustomTileProviderUrl.value == configToRemove.urlTemplate) {
                 _selectedCustomTileProviderUrl.value = null
                 // Also clear from prefs
-                preferences.edit { remove(PREF_SELECTED_CUSTOM_TILE_URL) }
+                googleMapsPrefs.selectedCustomTileUrl = null
             }
         }
     }
@@ -197,26 +194,24 @@ constructor(
             if (!isValidTileUrlTemplate(config.urlTemplate)) {
                 Timber.tag("MapViewModel").w("Attempted to select invalid URL template: ${config.urlTemplate}")
                 _selectedCustomTileProviderUrl.value = null
-                preferences.edit { remove(PREF_SELECTED_CUSTOM_TILE_URL) }
+                googleMapsPrefs.selectedCustomTileUrl = null
                 return
             }
             _selectedCustomTileProviderUrl.value = config.urlTemplate
             _selectedGoogleMapType.value = MapType.NORMAL // Reset to a default or keep last? For now, reset.
-            preferences.edit {
-                putString(PREF_SELECTED_CUSTOM_TILE_URL, config.urlTemplate).remove(PREF_SELECTED_GOOGLE_MAP_TYPE)
-            }
+            googleMapsPrefs.selectedCustomTileUrl = config.urlTemplate
+            googleMapsPrefs.selectedGoogleMapType = null
         } else {
             _selectedCustomTileProviderUrl.value = null
-            preferences.edit { remove(PREF_SELECTED_CUSTOM_TILE_URL) }
+            googleMapsPrefs.selectedCustomTileUrl = null
         }
     }
 
     fun setSelectedGoogleMapType(mapType: MapType) {
         _selectedGoogleMapType.value = mapType
         _selectedCustomTileProviderUrl.value = null // Clear custom selection
-        preferences.edit {
-            putString(PREF_SELECTED_GOOGLE_MAP_TYPE, mapType.name).remove(PREF_SELECTED_CUSTOM_TILE_URL)
-        }
+        googleMapsPrefs.selectedGoogleMapType = mapType.name
+        googleMapsPrefs.selectedCustomTileUrl = null
     }
 
     fun createUrlTileProvider(urlString: String): TileProvider? {
@@ -254,7 +249,7 @@ constructor(
     }
 
     private fun loadPersistedMapType() {
-        val savedCustomUrl = preferences.getString(PREF_SELECTED_CUSTOM_TILE_URL, null)
+        val savedCustomUrl = googleMapsPrefs.selectedCustomTileUrl
         if (savedCustomUrl != null) {
             // Check if this custom provider still exists
             if (
@@ -265,18 +260,18 @@ constructor(
                 _selectedGoogleMapType.value = MapType.NORMAL // Default, as custom is active
             } else {
                 // The saved custom URL is no longer valid or doesn't exist, remove preference
-                preferences.edit { remove(PREF_SELECTED_CUSTOM_TILE_URL) }
+                googleMapsPrefs.selectedCustomTileUrl = null
                 // Fallback to default Google Map type
                 _selectedGoogleMapType.value = MapType.NORMAL
             }
         } else {
-            val savedGoogleMapTypeName = preferences.getString(PREF_SELECTED_GOOGLE_MAP_TYPE, MapType.NORMAL.name)
+            val savedGoogleMapTypeName = googleMapsPrefs.selectedGoogleMapType
             try {
                 _selectedGoogleMapType.value = MapType.valueOf(savedGoogleMapTypeName ?: MapType.NORMAL.name)
             } catch (e: IllegalArgumentException) {
                 Timber.e(e, "Invalid saved Google Map type: $savedGoogleMapTypeName")
                 _selectedGoogleMapType.value = MapType.NORMAL // Fallback in case of invalid stored name
-                preferences.edit { remove(PREF_SELECTED_GOOGLE_MAP_TYPE) }
+                googleMapsPrefs.selectedGoogleMapType = null
             }
         }
     }

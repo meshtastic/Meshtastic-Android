@@ -18,19 +18,18 @@
 package com.geeksville.mesh.android.prefs
 
 import android.content.SharedPreferences
-import java.util.UUID
 
-interface AnalyticsPrefs {
-    var analyticsAllowed: Boolean
-    val installId: String
+/** Interface for general map prefs. For Google-specific prefs, see GoogleMapsPrefs. */
+interface MapPrefs {
+    var mapStyle: Int
+    var showOnlyFavorites: Boolean
+    var showWaypointsOnMap: Boolean
+    var showPrecisionCircleOnMap: Boolean
 }
 
-// Having an additional app prefs store is maintaining the existing behavior.
-class AnalyticsPrefsImpl(analyticsPrefs: SharedPreferences, appPrefs: SharedPreferences) : AnalyticsPrefs {
-    override var analyticsAllowed: Boolean by PrefDelegate(analyticsPrefs, "allowed", true)
-
-    private var _installId: String? by NullableStringPrefDelegate(appPrefs, "appPrefs_install_id", null)
-
-    override val installId: String
-        get() = _installId ?: UUID.randomUUID().toString().also { _installId = it }
+class MapPrefsImpl(prefs: SharedPreferences) : MapPrefs {
+    override var mapStyle: Int by PrefDelegate(prefs, "map_style_id", 0)
+    override var showOnlyFavorites: Boolean by PrefDelegate(prefs, "show_only_favorites", false)
+    override var showWaypointsOnMap: Boolean by PrefDelegate(prefs, "show_waypoints", true)
+    override var showPrecisionCircleOnMap: Boolean by PrefDelegate(prefs, "show_precision_circle", true)
 }

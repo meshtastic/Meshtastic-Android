@@ -36,7 +36,15 @@ private annotation class AnalyticsSharedPreferences
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
+private annotation class AppSharedPreferences
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
 private annotation class CustomEmojiSharedPreferences
+
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+private annotation class MapSharedPreferences
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
@@ -71,9 +79,21 @@ object PrefsModule {
 
     @Provides
     @Singleton
+    @AppSharedPreferences
+    fun provideAppSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
+        context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
+
+    @Provides
+    @Singleton
     @CustomEmojiSharedPreferences
     fun provideCustomEmojiSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
         context.getSharedPreferences("org.geeksville.emoji.prefs", Context.MODE_PRIVATE)
+
+    @Provides
+    @Singleton
+    @MapSharedPreferences
+    fun provideMapSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
+        context.getSharedPreferences("map_prefs", Context.MODE_PRIVATE)
 
     @Provides
     @Singleton
@@ -107,13 +127,20 @@ object PrefsModule {
 
     @Provides
     @Singleton
-    fun provideAnalyticsPrefs(@AnalyticsSharedPreferences sharedPreferences: SharedPreferences): AnalyticsPrefs =
-        AnalyticsPrefsImpl(sharedPreferences)
+    fun provideAnalyticsPrefs(
+        @AnalyticsSharedPreferences analyticsPreferences: SharedPreferences,
+        @AppSharedPreferences appPreferences: SharedPreferences,
+    ): AnalyticsPrefs = AnalyticsPrefsImpl(analyticsPreferences, appPreferences)
 
     @Provides
     @Singleton
     fun provideCustomEmojiPrefs(@CustomEmojiSharedPreferences sharedPreferences: SharedPreferences): CustomEmojiPrefs =
         CustomEmojiPrefsImpl(sharedPreferences)
+
+    @Provides
+    @Singleton
+    fun provideMapPrefs(@MapSharedPreferences sharedPreferences: SharedPreferences): MapPrefs =
+        MapPrefsImpl(sharedPreferences)
 
     @Provides
     @Singleton

@@ -133,7 +133,7 @@ abstract class GeeksvilleApplication :
     override fun onCreate() {
         super.onCreate()
 
-        val firebaseAnalytics = FirebaseAnalytics(this)
+        val firebaseAnalytics = FirebaseAnalytics(analyticsPrefs.installId)
         analytics = firebaseAnalytics
 
         // Set analytics per prefs
