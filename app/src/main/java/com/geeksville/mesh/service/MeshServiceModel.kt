@@ -22,6 +22,7 @@ import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
+import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.ModuleConfigProtos
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.database.entity.MyNodeEntity
@@ -35,6 +36,7 @@ import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@Suppress("TooManyFunctions")
 @Singleton
 class MeshServiceModel @Inject constructor(private val radioConfigRepository: RadioConfigRepository) {
     private val hexIdRegex = """\!([0-9A-Fa-f]+)""".toRegex()
@@ -143,5 +145,23 @@ class MeshServiceModel @Inject constructor(private val radioConfigRepository: Ra
         myNodeInfo = null
         nodeDbByNodeNum.clear()
         haveNodeDb = false
+    }
+
+    /**
+     * Generate a new mesh packet builder with our node as the sender, and the specified recipient
+     *
+     * If id is null we assume a broadcast message
+     */
+    fun newMeshPacketToId(id: String): MeshPacket.Builder = newMeshPacketToNum(numFromId(id))
+
+    /** Generate a new mesh packet builder with our node as the sender, and the specified node num */
+    fun newMeshPacketToNum(num: Int): MeshPacket.Builder = MeshPacket.newBuilder().apply {
+        if (myNodeInfo == null) {
+            throw RadioNotConnectedException()
+        }
+
+        from = 0 // don't add myNodeNum
+
+        to = num
     }
 }
