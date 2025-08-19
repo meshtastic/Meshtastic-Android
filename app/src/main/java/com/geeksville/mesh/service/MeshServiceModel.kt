@@ -32,13 +32,12 @@ import com.geeksville.mesh.service.MeshService.Companion.IdNotFoundException
 import com.geeksville.mesh.service.MeshService.Companion.InvalidNodeIdException
 import com.geeksville.mesh.service.MeshService.Companion.NodeNumNotFoundException
 import com.google.protobuf.ByteString
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
+import javax.inject.Singleton
 
 @Suppress("TooManyFunctions")
-@InstallIn(SingletonComponent::class)
+@Singleton
 class MeshServiceModel @Inject constructor(private val radioConfigRepository: RadioConfigRepository) {
     private val hexIdRegex = """\!([0-9A-Fa-f]+)""".toRegex()
 

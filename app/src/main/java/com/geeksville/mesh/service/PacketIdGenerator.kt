@@ -17,13 +17,12 @@
 
 package com.geeksville.mesh.service
 
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
 import java.util.Random
 import javax.inject.Inject
+import javax.inject.Singleton
 import kotlin.math.absoluteValue
 
-@InstallIn(SingletonComponent::class)
+@Singleton
 class PacketIdGenerator @Inject constructor() {
 
     // Do not use directly, instead call generatePacketId()
