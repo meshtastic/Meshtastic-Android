@@ -30,7 +30,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ActiveNodeData @Inject constructor(private val radioConfigRepository: RadioConfigRepository) {
+class MeshServiceModel @Inject constructor(private val radioConfigRepository: RadioConfigRepository) {
     private val hexIdRegex = """\!([0-9A-Fa-f]+)""".toRegex()
 
     // True after we've done our initial node db init
