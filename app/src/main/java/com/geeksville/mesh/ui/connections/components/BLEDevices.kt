@@ -23,12 +23,11 @@ import android.os.Build
 import android.provider.Settings.ACTION_BLUETOOTH_SETTINGS
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BluetoothDisabled
@@ -107,7 +106,11 @@ fun BLEDevices(
             // checkPermissionsAndScan(permissionsState, scanModel, bluetoothEnabled)
         }
 
-    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
         if (permissionsState.allPermissionsGranted) {
             when {
                 !bluetoothEnabled -> {
@@ -162,8 +165,6 @@ fun BLEDevices(
                             actionButton = scanButton,
                         )
                     } else {
-                        Spacer(modifier = Modifier.height(8.dp))
-
                         TitledCard(title = stringResource(R.string.bluetooth_paired_devices)) {
                             btDevices.forEach { device ->
                                 DeviceListItem(
@@ -175,8 +176,6 @@ fun BLEDevices(
                                 )
                             }
                         }
-
-                        Spacer(modifier = Modifier.weight(1f, true))
 
                         scanButton()
                     }
