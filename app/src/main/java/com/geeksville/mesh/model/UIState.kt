@@ -20,7 +20,9 @@ package com.geeksville.mesh.model
 import android.app.Application
 import android.net.Uri
 import android.os.RemoteException
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.asLiveData
@@ -455,11 +457,25 @@ constructor(
 
     fun getUser(userId: String?) = nodeDB.getUser(userId ?: DataPacket.ID_BROADCAST)
 
-    private val snackBarHostState = SnackbarHostState()
+    val snackBarHostState = SnackbarHostState()
 
     fun showSnackBar(text: Int) = showSnackBar(app.getString(text))
 
-    fun showSnackBar(text: String) = viewModelScope.launch { snackBarHostState.showSnackbar(text) }
+    fun showSnackBar(
+        text: String,
+        actionLabel: String? = null,
+        withDismissAction: Boolean = false,
+        duration: SnackbarDuration = if (actionLabel == null) SnackbarDuration.Short else SnackbarDuration.Indefinite,
+        onActionPerformed: (() -> Unit) = {},
+        onDismissed: (() -> Unit) = {},
+    ) = viewModelScope.launch {
+        snackBarHostState.showSnackbar(text, actionLabel, withDismissAction, duration).run {
+            when (this) {
+                SnackbarResult.ActionPerformed -> onActionPerformed()
+                SnackbarResult.Dismissed -> onDismissed()
+            }
+        }
+    }
 
     init {
         radioConfigRepository.errorMessage

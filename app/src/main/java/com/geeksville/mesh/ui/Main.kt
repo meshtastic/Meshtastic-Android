@@ -46,6 +46,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.PlainTooltip
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
@@ -330,48 +332,50 @@ fun MainScreen(
             }
         },
     ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            var sharedContact: Node? by remember { mutableStateOf(null) }
-            if (sharedContact != null) {
-                SharedContactDialog(contact = sharedContact, onDismiss = { sharedContact = null })
-            }
-            MainAppBar(
-                viewModel = uIViewModel,
-                isManaged = localConfig.security.isManaged,
-                navController = navController,
-                onAction = { action ->
-                    if (action is MainMenuAction) {
-                        when (action) {
-                            MainMenuAction.DEBUG -> navController.navigate(Route.DebugPanel)
-                            MainMenuAction.RADIO_CONFIG -> navController.navigate(RadioConfigRoutes.RadioConfig())
-                            MainMenuAction.QUICK_CHAT -> navController.navigate(ContactsRoutes.QuickChat)
-                            MainMenuAction.SHOW_INTRO -> uIViewModel.onMainMenuAction(action)
-                            else -> onAction(action)
-                        }
-                    } else if (action is NodeMenuAction) {
-                        when (action) {
-                            is NodeMenuAction.MoreDetails -> {
-                                navController.navigate(
-                                    NodesRoutes.NodeDetailGraph(action.node.num),
-                                    {
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    },
-                                )
+        Scaffold(snackbarHost = { SnackbarHost(uIViewModel.snackBarHostState) }) { _ ->
+            Column(modifier = Modifier.fillMaxSize()) {
+                var sharedContact: Node? by remember { mutableStateOf(null) }
+                if (sharedContact != null) {
+                    SharedContactDialog(contact = sharedContact, onDismiss = { sharedContact = null })
+                }
+                MainAppBar(
+                    viewModel = uIViewModel,
+                    isManaged = localConfig.security.isManaged,
+                    navController = navController,
+                    onAction = { action ->
+                        if (action is MainMenuAction) {
+                            when (action) {
+                                MainMenuAction.DEBUG -> navController.navigate(Route.DebugPanel)
+                                MainMenuAction.RADIO_CONFIG -> navController.navigate(RadioConfigRoutes.RadioConfig())
+                                MainMenuAction.QUICK_CHAT -> navController.navigate(ContactsRoutes.QuickChat)
+                                MainMenuAction.SHOW_INTRO -> uIViewModel.onMainMenuAction(action)
+                                else -> onAction(action)
                             }
+                        } else if (action is NodeMenuAction) {
+                            when (action) {
+                                is NodeMenuAction.MoreDetails -> {
+                                    navController.navigate(
+                                        NodesRoutes.NodeDetailGraph(action.node.num),
+                                        {
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        },
+                                    )
+                                }
 
-                            is NodeMenuAction.Share -> sharedContact = action.node
-                            else -> {}
+                                is NodeMenuAction.Share -> sharedContact = action.node
+                                else -> {}
+                            }
                         }
-                    }
-                },
-            )
-            NavGraph(
-                modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding().imePadding(),
-                uIViewModel = uIViewModel,
-                bluetoothViewModel = bluetoothViewModel,
-                navController = navController,
-            )
+                    },
+                )
+                NavGraph(
+                    modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding().imePadding(),
+                    uIViewModel = uIViewModel,
+                    bluetoothViewModel = bluetoothViewModel,
+                    navController = navController,
+                )
+            }
         }
     }
 }
