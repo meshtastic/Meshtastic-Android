@@ -189,12 +189,6 @@
   },
   "pullRequests": [
     {
-      "id": "7676",
-      "title": "Add Meshtiny device",
-      "page_url": "https://github.com/meshtastic/firmware/pull/7676",
-      "zip_url": "https://github.com/meshtastic/firmware/actions/runs/17071560962"
-    },
-    {
       "id": "7658",
       "title": "the original ZPS module from https://github.com/a-f-G-U-C/Meshtastic-ZPS",
       "page_url": "https://github.com/meshtastic/firmware/pull/7658",
