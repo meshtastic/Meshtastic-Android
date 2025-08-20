@@ -239,7 +239,7 @@
     <string name="soil_moisture">Bodenfeuchtigkeit</string>
     <string name="logs">Protokolle</string>
     <string name="hops_away">Zwischenschritte entfernt</string>
-    <string name="hops_away_template">Sprungweite: %1$d</string>
+    <string name="hops_away_template">Entfernung: %1$d Knoten</string>
     <string name="info">Information</string>
     <string name="ch_util_definition">Auslastung für den aktuellen Kanal, einschließlich gut geformtem TX, RX und fehlerhaftem RX (auch bekannt als Rauschen).</string>
     <string name="air_util_definition">Prozent der Sendezeit für die Übertragung innerhalb der letzten Stunde.</string>
@@ -493,7 +493,7 @@
     <string name="position_flags">Standort Optionen</string>
     <string name="power_config">Power Konfiguration</string>
     <string name="enable_power_saving_mode">Energiesparmodus aktivieren</string>
-    <string name="shutdown_on_battery_delay_seconds">Verzögerung Herunterfahren bei Akkubetrieb (Sekunden)</string>
+    <string name="shutdown_on_battery_delay_seconds">Verzögerung zum Herunterfahren bei Akkubetrieb (Sekunden)</string>
     <string name="adc_multiplier_override_ratio">ADC Multiplikator Überschreibungsverhältnis</string>
     <string name="wait_for_bluetooth_duration_seconds">Warte auf Bluetooth (Sekunden)</string>
     <string name="super_deep_sleep_duration_seconds">Supertiefeschlaf (Sekunden)</string>
