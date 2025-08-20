@@ -23,24 +23,25 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.filled.CloudDone
-import androidx.compose.material.icons.filled.CloudOff
-import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.Usb
 import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Bluetooth
+import androidx.compose.material.icons.rounded.Cancel
+import androidx.compose.material.icons.rounded.Usb
+import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.service.ConnectionState
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -53,11 +54,11 @@ fun DeviceListItem(
 ) {
     val icon =
         when (device) {
-            is DeviceListEntry.Ble -> Icons.Default.Bluetooth
-            is DeviceListEntry.Usb -> Icons.Default.Usb
-            is DeviceListEntry.Tcp -> Icons.Default.Wifi
-            is DeviceListEntry.Disconnect -> Icons.Default.Cancel
-            is DeviceListEntry.Mock -> Icons.Default.Add
+            is DeviceListEntry.Ble -> Icons.Rounded.Bluetooth
+            is DeviceListEntry.Usb -> Icons.Rounded.Usb
+            is DeviceListEntry.Tcp -> Icons.Rounded.Wifi
+            is DeviceListEntry.Disconnect -> Icons.Rounded.Cancel
+            is DeviceListEntry.Mock -> Icons.Rounded.Add
         }
 
     val contentDescription =
@@ -69,39 +70,6 @@ fun DeviceListItem(
             is DeviceListEntry.Mock -> stringResource(R.string.add)
         }
 
-    val colors =
-        when {
-            selected && device is DeviceListEntry.Disconnect -> {
-                ListItemDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.errorContainer,
-                    headlineColor = MaterialTheme.colorScheme.onErrorContainer,
-                    leadingIconColor = MaterialTheme.colorScheme.onErrorContainer,
-                    supportingColor = MaterialTheme.colorScheme.onErrorContainer,
-                    trailingIconColor = MaterialTheme.colorScheme.onErrorContainer,
-                )
-            }
-
-            selected -> { // Standard selection for other device types
-                ListItemDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    headlineColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    leadingIconColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    trailingIconColor =
-                    when (connectionState) {
-                        ConnectionState.CONNECTED -> MaterialTheme.colorScheme.StatusGreen
-                        ConnectionState.DISCONNECTED -> MaterialTheme.colorScheme.StatusRed
-                        else ->
-                            MaterialTheme.colorScheme
-                                .onPrimaryContainer // Fallback for other states (e.g. connecting)
-                    },
-                )
-            }
-
-            else -> {
-                ListItemDefaults.colors()
-            }
-        }
-
     val useSelectable = modifier == Modifier
     ListItem(
         modifier =
@@ -111,12 +79,7 @@ fun DeviceListItem(
             modifier.fillMaxWidth()
         },
         headlineContent = { Text(device.name) },
-        leadingContent = {
-            Icon(
-                icon, // icon is already CloudOff if device.isDisconnect
-                contentDescription,
-            )
-        },
+        leadingContent = { Icon(icon, contentDescription) },
         supportingContent = {
             if (device is DeviceListEntry.Tcp) {
                 Text(device.address)
@@ -124,16 +87,11 @@ fun DeviceListItem(
         },
         trailingContent = {
             if (device is DeviceListEntry.Disconnect) {
-                Icon(imageVector = Icons.Default.CloudOff, contentDescription = stringResource(R.string.disconnect))
-            } else if (connectionState == ConnectionState.CONNECTED) {
-                Icon(imageVector = Icons.Default.CloudDone, contentDescription = stringResource(R.string.connected))
+                RadioButton(selected = connectionState == ConnectionState.DISCONNECTED, onClick = null)
             } else {
-                Icon(
-                    imageVector = Icons.Default.CloudQueue,
-                    contentDescription = stringResource(R.string.not_connected),
-                )
+                RadioButton(selected = connectionState == ConnectionState.CONNECTED, onClick = null)
             }
         },
-        colors = colors,
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
     )
 }

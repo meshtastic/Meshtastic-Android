@@ -34,22 +34,22 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bluetooth
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Usb
 import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.rounded.Bluetooth
+import androidx.compose.material.icons.rounded.Usb
+import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
@@ -58,6 +58,7 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -75,7 +76,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -98,11 +98,9 @@ import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.connections.components.BLEDevices
+import com.geeksville.mesh.ui.connections.components.CurrentlyConnectedCard
 import com.geeksville.mesh.ui.connections.components.NetworkDevices
 import com.geeksville.mesh.ui.connections.components.UsbDevices
-import com.geeksville.mesh.ui.node.NodeActionButton
-import com.geeksville.mesh.ui.node.components.NodeChip
-import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
@@ -181,11 +179,6 @@ fun ConnectionsScreen(
             uiViewModel.showSnackBar(context.getString(R.string.location_disabled))
         }
     }
-    LaunchedEffect(bluetoothEnabled) {
-        if (!bluetoothEnabled) {
-            uiViewModel.showSnackBar(context.getString(R.string.bluetooth_disabled))
-        }
-    }
     // when scanning is true - wait 10000ms and then stop scanning
     LaunchedEffect(scanning) {
         if (scanning) {
@@ -246,77 +239,86 @@ fun ConnectionsScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            Text(
-                text = scanStatusText.orEmpty(),
-                fontSize = 14.sp,
-                textAlign = TextAlign.Start,
-                modifier = Modifier.fillMaxWidth(),
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
+        Column(modifier = Modifier.fillMaxSize().padding(start = 16.dp, end = 16.dp, bottom = 16.dp)) {
             val isConnected by uiViewModel.isConnectedStateFlow.collectAsState(false)
             val ourNode by uiViewModel.ourNodeInfo.collectAsState()
-            if (isConnected) {
-                ourNode?.let { node ->
-                    Row(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        NodeChip(
-                            node = node,
-                            isThisNode = true,
-                            isConnected = true,
-                            onAction = { action ->
-                                when (action) {
-                                    is NodeMenuAction.MoreDetails -> {
-                                        onNavigateToNodeDetails(node.num)
-                                    }
 
-                                    is NodeMenuAction.Share -> {
-                                        showSharedContact = node
-                                    }
-
-                                    else -> {}
-                                }
-                            },
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
+            AnimatedVisibility(visible = isConnected, modifier = Modifier.padding(bottom = 16.dp)) {
+                Column {
+                    ourNode?.let { node ->
                         Text(
-                            modifier = Modifier.weight(1f, fill = true),
-                            text = node.user.longName,
+                            stringResource(R.string.connected_device),
+                            modifier = Modifier.padding(horizontal = 16.dp),
                             style = MaterialTheme.typography.titleLarge,
                         )
-                        IconButton(enabled = true, onClick = onNavigateToRadioConfig) {
-                            Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = stringResource(id = R.string.radio_configuration),
+
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        CurrentlyConnectedCard(
+                            node = node,
+                            onNavigateToNodeDetails = onNavigateToNodeDetails,
+                            onSetShowSharedContact = { showSharedContact = it },
+                            onNavigateToRadioConfig = onNavigateToRadioConfig,
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    Card {
+                        Row(
+                            modifier =
+                            Modifier.fillMaxWidth()
+                                .toggleable(
+                                    value = provideLocation,
+                                    onValueChange = { checked -> uiViewModel.setProvideLocation(checked) },
+                                    enabled = !isGpsDisabled,
+                                )
+                                .minimumInteractiveComponentSize()
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Checkbox(
+                                // Checked state driven by receivingLocationUpdates for visual feedback
+                                // but toggle action drives provideLocation
+                                checked = receivingLocationUpdates,
+                                onCheckedChange = null, // Toggleable handles the change
+                                enabled = !isGpsDisabled, // Disable if GPS is disabled
                             )
+                            Text(
+                                text = stringResource(R.string.provide_location_to_mesh),
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.padding(start = 16.dp),
+                            )
+                        }
+
+                        if (scanning) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
                         }
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                if (regionUnset && selectedDevice != "m") {
-                    NodeActionButton(
-                        title = stringResource(id = R.string.set_your_region),
-                        icon = ConfigRoute.LORA.icon,
-                        enabled = true,
-                        onClick = {
+            }
+
+            val setRegionText = stringResource(id = R.string.set_your_region)
+            val actionText = stringResource(id = R.string.action_go)
+            LaunchedEffect(isConnected && regionUnset && selectedDevice != "m") {
+                if (isConnected && regionUnset && selectedDevice != "m") {
+                    uiViewModel.showSnackBar(
+                        text = setRegionText,
+                        actionLabel = actionText,
+                        onActionPerformed = {
                             isWaiting = true
                             radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
                         },
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    if (scanning) {
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                    }
                 }
             }
+
             var selectedDeviceType by remember { mutableStateOf(DeviceType.BLE) }
             LaunchedEffect(selectedDevice) {
                 DeviceType.fromAddress(selectedDevice)?.let { type -> selectedDeviceType = type }
             }
+
             SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                 SegmentedButton(
                     shape = SegmentedButtonDefaults.itemShape(DeviceType.BLE.ordinal, DeviceType.entries.size),
@@ -324,7 +326,7 @@ fun ConnectionsScreen(
                     selected = (selectedDeviceType == DeviceType.BLE),
                     icon = {
                         Icon(
-                            imageVector = Icons.Default.Bluetooth,
+                            imageVector = Icons.Rounded.Bluetooth,
                             contentDescription = stringResource(id = R.string.bluetooth),
                             modifier = Modifier.padding(end = 8.dp), // Add padding to separate icon from text
                         )
@@ -346,7 +348,7 @@ fun ConnectionsScreen(
                     selected = (selectedDeviceType == DeviceType.TCP),
                     icon = {
                         Icon(
-                            imageVector = Icons.Default.Wifi,
+                            imageVector = Icons.Rounded.Wifi,
                             contentDescription = stringResource(id = R.string.network),
                             modifier = Modifier.padding(end = 8.dp), // Add padding to separate icon from text
                         )
@@ -368,7 +370,7 @@ fun ConnectionsScreen(
                     selected = (selectedDeviceType == DeviceType.USB),
                     icon = {
                         Icon(
-                            imageVector = Icons.Default.Usb,
+                            imageVector = Icons.Rounded.Usb,
                             contentDescription = stringResource(id = R.string.serial),
                             modifier = Modifier.padding(end = 8.dp), // Add padding to separate icon from text
                         )
@@ -386,71 +388,47 @@ fun ConnectionsScreen(
                 )
             }
 
-            Column(modifier = Modifier.fillMaxSize().padding(8.dp).verticalScroll(scrollState)) {
-                when (selectedDeviceType) {
-                    DeviceType.BLE -> {
-                        BLEDevices(
-                            connectionState = connectionState,
-                            btDevices = bleDevices,
-                            selectedDevice = selectedDevice,
-                            scanModel = scanModel,
-                        )
-                    }
+            Spacer(modifier = Modifier.height(4.dp))
 
-                    DeviceType.TCP -> {
-                        NetworkDevices(
-                            connectionState = connectionState,
-                            discoveredNetworkDevices = discoveredTcpDevices,
-                            recentNetworkDevices = recentTcpDevices,
-                            selectedDevice = selectedDevice,
-                            scanModel = scanModel,
-                        )
-                    }
+            Column(modifier = Modifier.fillMaxSize()) {
+                Box(modifier = Modifier.fillMaxSize().weight(1f)) {
+                    when (selectedDeviceType) {
+                        DeviceType.BLE -> {
+                            BLEDevices(
+                                connectionState = connectionState,
+                                btDevices = bleDevices,
+                                selectedDevice = selectedDevice,
+                                scanModel = scanModel,
+                                bluetoothEnabled = bluetoothEnabled,
+                            )
+                        }
 
-                    DeviceType.USB -> {
-                        UsbDevices(
-                            connectionState = connectionState,
-                            usbDevices = usbDevices,
-                            selectedDevice = selectedDevice,
-                            scanModel = scanModel,
-                        )
+                        DeviceType.TCP -> {
+                            NetworkDevices(
+                                connectionState = connectionState,
+                                discoveredNetworkDevices = discoveredTcpDevices,
+                                recentNetworkDevices = recentTcpDevices,
+                                selectedDevice = selectedDevice,
+                                scanModel = scanModel,
+                            )
+                        }
+
+                        DeviceType.USB -> {
+                            UsbDevices(
+                                connectionState = connectionState,
+                                usbDevices = usbDevices,
+                                selectedDevice = selectedDevice,
+                                scanModel = scanModel,
+                            )
+                        }
                     }
                 }
-
-                Spacer(modifier = Modifier.weight(1f))
 
                 LaunchedEffect(ourNode) {
                     if (ourNode != null) {
                         uiViewModel.refreshProvideLocation()
                     }
                 }
-                AnimatedVisibility(isConnected) {
-                    Row(
-                        modifier =
-                        Modifier.fillMaxWidth()
-                            .toggleable(
-                                value = provideLocation,
-                                onValueChange = { checked -> uiViewModel.setProvideLocation(checked) },
-                                enabled = !isGpsDisabled,
-                            )
-                            .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Checkbox(
-                            // Checked state driven by receivingLocationUpdates for visual feedback
-                            // but toggle action drives provideLocation
-                            checked = receivingLocationUpdates,
-                            onCheckedChange = null, // Toggleable handles the change
-                            enabled = !isGpsDisabled, // Disable if GPS is disabled
-                        )
-                        Text(
-                            text = stringResource(R.string.provide_location_to_mesh),
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(start = 16.dp),
-                        )
-                    }
-                }
-                // Provide Location Checkbox
 
                 Spacer(modifier = Modifier.height(16.dp))
 
