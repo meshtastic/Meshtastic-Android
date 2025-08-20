@@ -52,7 +52,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -60,7 +59,6 @@ import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -71,6 +69,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -100,6 +99,7 @@ import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.service.ConnectionState
+import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.connections.components.BLEDevices
 import com.geeksville.mesh.ui.connections.components.CurrentlyConnectedCard
 import com.geeksville.mesh.ui.connections.components.NetworkDevices
@@ -271,36 +271,13 @@ fun ConnectionsScreen(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         Card {
-                            Row(
-                                modifier =
-                                Modifier.fillMaxWidth()
-                                    .toggleable(
-                                        value = provideLocation,
-                                        onValueChange = { checked -> uiViewModel.setProvideLocation(checked) },
-                                        enabled = !isGpsDisabled,
-                                    )
-                                    .minimumInteractiveComponentSize()
-                                    .padding(horizontal = 16.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                            ) {
-                                Checkbox(
-                                    // Checked state driven by receivingLocationUpdates for visual feedback
-                                    // but toggle action drives provideLocation
-                                    checked = receivingLocationUpdates,
-                                    onCheckedChange = null, // Toggleable handles the change
-                                    enabled = !isGpsDisabled, // Disable if GPS is disabled
-                                )
-                                Text(
-                                    text = stringResource(R.string.provide_location_to_mesh),
-                                    style = MaterialTheme.typography.bodyLarge,
-                                    modifier = Modifier.padding(start = 16.dp),
-                                )
-                            }
-
-                            if (scanning) {
-                                Spacer(modifier = Modifier.height(16.dp))
-                                LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                            }
+                            SwitchPreference(
+                                title = stringResource(R.string.provide_location_to_mesh),
+                                checked = provideLocation,
+                                enabled = !isGpsDisabled,
+                                onCheckedChange = { checked -> uiViewModel.setProvideLocation(checked) },
+                                containerColor = Color.Transparent,
+                            )
                         }
                     }
                 }
