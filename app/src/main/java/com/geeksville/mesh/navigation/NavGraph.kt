@@ -19,10 +19,8 @@ package com.geeksville.mesh.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
@@ -75,17 +73,7 @@ fun NavGraph(
     mapViewModel: MapViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController(),
 ) {
-    val isConnected by uIViewModel.isConnectedStateFlow.collectAsStateWithLifecycle(false)
-    NavHost(
-        navController = navController,
-        startDestination =
-        if (isConnected) {
-            NodesRoutes.NodesGraph
-        } else {
-            ConnectionsRoutes.ConnectionsGraph
-        },
-        modifier = modifier,
-    ) {
+    NavHost(navController = navController, startDestination = ConnectionsRoutes.ConnectionsGraph, modifier = modifier) {
         contactsGraph(navController, uIViewModel)
         nodesGraph(navController, uIViewModel)
         mapGraph(navController, uIViewModel, mapViewModel)
