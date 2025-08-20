@@ -15,12 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.repository.radio
+package com.geeksville.mesh.android.prefs
 
-import javax.inject.Qualifier
+import android.content.SharedPreferences
+import com.google.maps.android.compose.MapType
 
-/**
- * Qualifier to distinguish radio repository- specific object instances.
- */
-@Qualifier
-annotation class RadioRepositoryQualifier
+/** Interface for prefs specific to Google Maps. For general map prefs, see MapPrefs. */
+interface GoogleMapsPrefs {
+    var selectedGoogleMapType: String?
+    var selectedCustomTileUrl: String?
+}
+
+class GoogleMapsPrefsImpl(prefs: SharedPreferences) : GoogleMapsPrefs {
+    override var selectedGoogleMapType: String? by
+        NullableStringPrefDelegate(prefs, "selected_google_map_type", MapType.NORMAL.name)
+    override var selectedCustomTileUrl: String? by NullableStringPrefDelegate(prefs, "selected_custom_tile_url", null)
+}

@@ -15,19 +15,22 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh
+package com.geeksville.mesh.android.prefs
 
-import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.prefs.AnalyticsPrefs
-import dagger.hilt.android.HiltAndroidApp
-import javax.inject.Inject
+import android.content.SharedPreferences
+import java.util.UUID
 
-@HiltAndroidApp
-class MeshUtilApplication : GeeksvilleApplication() {
+interface AnalyticsPrefs {
+    var analyticsAllowed: Boolean
+    val installId: String
+}
 
-    @Inject override lateinit var analyticsPrefs: AnalyticsPrefs
+// Having an additional app prefs store is maintaining the existing behavior.
+class AnalyticsPrefsImpl(analyticsPrefs: SharedPreferences, appPrefs: SharedPreferences) : AnalyticsPrefs {
+    override var analyticsAllowed: Boolean by PrefDelegate(analyticsPrefs, "allowed", true)
 
-    override fun onCreate() {
-        super.onCreate()
-    }
+    private var _installId: String? by NullableStringPrefDelegate(appPrefs, "appPrefs_install_id", null)
+
+    override val installId: String
+        get() = _installId ?: UUID.randomUUID().toString().also { _installId = it }
 }

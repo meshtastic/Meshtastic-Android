@@ -15,26 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.map
+package com.geeksville.mesh.android.prefs
 
-import com.geeksville.mesh.android.prefs.MapPrefs
-import com.geeksville.mesh.database.NodeRepository
-import com.geeksville.mesh.database.PacketRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import android.content.SharedPreferences
 
-@HiltViewModel
-class MapViewModel
-@Inject
-constructor(
-    mapPrefs: MapPrefs,
-    packetRepository: PacketRepository,
-    nodeRepository: NodeRepository,
-) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository) {
+interface CustomEmojiPrefs {
+    var customEmojiFrequency: String?
+}
 
-    var mapStyleId: Int
-        get() = mapPrefs.mapStyle
-        set(value) {
-            mapPrefs.mapStyle = value
-        }
+class CustomEmojiPrefsImpl(prefs: SharedPreferences) : CustomEmojiPrefs {
+    override var customEmojiFrequency: String? by NullableStringPrefDelegate(prefs, "pref_key_custom_emoji_freq", null)
 }

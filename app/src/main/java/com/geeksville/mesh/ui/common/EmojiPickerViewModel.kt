@@ -15,26 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.map
+package com.geeksville.mesh.ui.common
 
-import com.geeksville.mesh.android.prefs.MapPrefs
-import com.geeksville.mesh.database.NodeRepository
-import com.geeksville.mesh.database.PacketRepository
+import androidx.lifecycle.ViewModel
+import com.geeksville.mesh.android.prefs.CustomEmojiPrefs
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 
 @HiltViewModel
-class MapViewModel
-@Inject
-constructor(
-    mapPrefs: MapPrefs,
-    packetRepository: PacketRepository,
-    nodeRepository: NodeRepository,
-) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository) {
+class EmojiPickerViewModel @Inject constructor(private val customEmojiPrefs: CustomEmojiPrefs) : ViewModel() {
 
-    var mapStyleId: Int
-        get() = mapPrefs.mapStyle
+    var customEmojiFrequency: String?
+        get() = customEmojiPrefs.customEmojiFrequency
         set(value) {
-            mapPrefs.mapStyle = value
+            customEmojiPrefs.customEmojiFrequency = value
         }
 }

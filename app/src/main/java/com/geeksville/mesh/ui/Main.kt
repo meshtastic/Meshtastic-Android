@@ -15,16 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+@file:Suppress("MatchingDeclarationName")
+
 package com.geeksville.mesh.ui
 
 import android.Manifest
 import android.os.Build
 import androidx.annotation.StringRes
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,29 +34,21 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.twotone.Chat
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.twotone.CloudDone
 import androidx.compose.material.icons.twotone.CloudOff
 import androidx.compose.material.icons.twotone.CloudUpload
 import androidx.compose.material.icons.twotone.Contactless
 import androidx.compose.material.icons.twotone.Map
 import androidx.compose.material.icons.twotone.People
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TooltipBox
 import androidx.compose.material3.TooltipDefaults
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
@@ -78,15 +70,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.BuildConfig
@@ -107,11 +96,11 @@ import com.geeksville.mesh.navigation.NavGraph
 import com.geeksville.mesh.navigation.NodesRoutes
 import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
-import com.geeksville.mesh.navigation.showLongNameTitle
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
+import com.geeksville.mesh.ui.common.components.MainAppBar
+import com.geeksville.mesh.ui.common.components.MainMenuAction
 import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
@@ -119,10 +108,7 @@ import com.geeksville.mesh.ui.common.theme.StatusColors.StatusBlue
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
-import com.geeksville.mesh.ui.debug.DebugMenuActions
-import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
-import com.geeksville.mesh.ui.radioconfig.RadioConfigMenuActions
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
@@ -490,153 +476,6 @@ private fun VersionChecks(viewModel: UIViewModel) {
                     }
                 }
             }
-        }
-    }
-}
-
-enum class MainMenuAction(@StringRes val stringRes: Int) {
-    DEBUG(R.string.debug_panel),
-    RADIO_CONFIG(R.string.radio_configuration),
-    EXPORT_RANGETEST(R.string.save_rangetest),
-    THEME(R.string.theme),
-    LANGUAGE(R.string.preferences_language),
-    SHOW_INTRO(R.string.intro_show),
-    QUICK_CHAT(R.string.quick_chat),
-    ABOUT(R.string.about),
-}
-
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
-@Suppress("LongMethod")
-@Composable
-private fun MainAppBar(
-    viewModel: UIViewModel = hiltViewModel(),
-    isManaged: Boolean,
-    navController: NavHostController,
-    modifier: Modifier = Modifier,
-    onAction: (Any?) -> Unit,
-) {
-    val backStackEntry by navController.currentBackStackEntryAsState()
-    val currentDestination = backStackEntry?.destination
-    val canNavigateBack = navController.previousBackStackEntry != null
-    val navigateUp: () -> Unit = navController::navigateUp
-    if (currentDestination?.hasRoute<ContactsRoutes.Messages>() == true) {
-        return
-    }
-    val title by viewModel.title.collectAsStateWithLifecycle("")
-    val onlineNodeCount by viewModel.onlineNodeCount.collectAsStateWithLifecycle(0)
-    val totalNodeCount by viewModel.totalNodeCount.collectAsStateWithLifecycle(0)
-    TopAppBar(
-        title = {
-            val titleText =
-                when {
-                    currentDestination == null || currentDestination.isTopLevel() ->
-                        stringResource(id = R.string.app_name)
-
-                    currentDestination.hasRoute<Route.DebugPanel>() -> stringResource(id = R.string.debug_panel)
-
-                    currentDestination.hasRoute<ContactsRoutes.QuickChat>() -> stringResource(id = R.string.quick_chat)
-
-                    currentDestination.hasRoute<ContactsRoutes.Share>() -> stringResource(id = R.string.share_to)
-
-                    currentDestination.showLongNameTitle() -> title
-
-                    else -> stringResource(id = R.string.app_name)
-                }
-            Text(
-                text = titleText,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleLarge,
-            )
-        },
-        subtitle = {
-            if (currentDestination?.hasRoute<NodesRoutes.Nodes>() == true) {
-                Text(text = stringResource(R.string.node_count_template, onlineNodeCount, totalNodeCount))
-            }
-        },
-        modifier = modifier,
-        navigationIcon =
-        if (canNavigateBack && currentDestination?.isTopLevel() == false) {
-            {
-                IconButton(onClick = navigateUp) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(id = R.string.navigate_back),
-                    )
-                }
-            }
-        } else {
-            {
-                IconButton(enabled = false, onClick = {}) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.app_icon),
-                        contentDescription = stringResource(id = R.string.application_icon),
-                    )
-                }
-            }
-        },
-        actions = {
-            TopBarActions(
-                viewModel = viewModel,
-                currentDestination = currentDestination,
-                isManaged = isManaged,
-                onAction = onAction,
-            )
-        },
-    )
-}
-
-@Composable
-private fun TopBarActions(
-    viewModel: UIViewModel = hiltViewModel(),
-    currentDestination: NavDestination?,
-    isManaged: Boolean,
-    onAction: (Any?) -> Unit,
-) {
-    val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val isConnected by viewModel.isConnectedStateFlow.collectAsStateWithLifecycle(false)
-    AnimatedVisibility(ourNode != null && currentDestination?.isTopLevel() == true && isConnected) {
-        ourNode?.let { NodeChip(node = it, isThisNode = true, isConnected = isConnected, onAction = onAction) }
-    }
-    currentDestination?.let {
-        when {
-            it.isTopLevel() -> MainMenuActions(isManaged, onAction)
-
-            currentDestination.hasRoute<Route.DebugPanel>() -> DebugMenuActions()
-
-            currentDestination.hasRoute<RadioConfigRoutes.RadioConfig>() ->
-                RadioConfigMenuActions(viewModel = viewModel)
-
-            else -> {}
-        }
-    }
-}
-
-@Composable
-private fun MainMenuActions(isManaged: Boolean, onAction: (MainMenuAction) -> Unit) {
-    var showMenu by remember { mutableStateOf(false) }
-    IconButton(onClick = { showMenu = true }) {
-        Icon(imageVector = Icons.Default.MoreVert, contentDescription = stringResource(R.string.overflow_menu))
-    }
-
-    DropdownMenu(
-        expanded = showMenu,
-        onDismissRequest = { showMenu = false },
-        modifier = Modifier.background(colorScheme.background.copy(alpha = 1f)),
-    ) {
-        MainMenuAction.entries.forEach { action ->
-            DropdownMenuItem(
-                text = { Text(stringResource(id = action.stringRes)) },
-                onClick = {
-                    onAction(action)
-                    showMenu = false
-                },
-                enabled =
-                when (action) {
-                    MainMenuAction.RADIO_CONFIG -> !isManaged
-                    else -> true
-                },
-            )
         }
     }
 }

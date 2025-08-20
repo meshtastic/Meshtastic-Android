@@ -15,6 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.map
+package com.geeksville.mesh.android.prefs
 
-const val MAP_STYLE_ID = "map_style_id"
+import android.content.SharedPreferences
+
+interface MapTileProviderPrefs {
+    var customTileProviders: String?
+}
+
+class MapTileProviderPrefsImpl(prefs: SharedPreferences) : MapTileProviderPrefs {
+    override var customTileProviders: String? by NullableStringPrefDelegate(prefs, "custom_tile_providers", null)
+}

@@ -15,26 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.map
+package com.geeksville.mesh.android.prefs
 
-import com.geeksville.mesh.android.prefs.MapPrefs
-import com.geeksville.mesh.database.NodeRepository
-import com.geeksville.mesh.database.PacketRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import android.content.SharedPreferences
 
-@HiltViewModel
-class MapViewModel
-@Inject
-constructor(
-    mapPrefs: MapPrefs,
-    packetRepository: PacketRepository,
-    nodeRepository: NodeRepository,
-) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository) {
+interface RadioPrefs {
+    var devAddr: String?
+}
 
-    var mapStyleId: Int
-        get() = mapPrefs.mapStyle
-        set(value) {
-            mapPrefs.mapStyle = value
-        }
+class RadioPrefsImpl(prefs: SharedPreferences) : RadioPrefs {
+    override var devAddr: String? by NullableStringPrefDelegate(prefs, "devAddr2", null)
 }

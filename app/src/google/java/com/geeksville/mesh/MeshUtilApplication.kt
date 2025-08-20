@@ -18,17 +18,20 @@
 package com.geeksville.mesh
 
 import android.os.Debug
-import com.geeksville.mesh.android.AppPrefs
 import com.geeksville.mesh.android.BuildUtils.isEmulator
 import com.geeksville.mesh.android.GeeksvilleApplication
+import com.geeksville.mesh.android.prefs.AnalyticsPrefs
 import com.geeksville.mesh.util.Exceptions
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import com.google.firebase.crashlytics.setCustomKeys
 import dagger.hilt.android.HiltAndroidApp
 import timber.log.Timber
+import javax.inject.Inject
 
 @HiltAndroidApp
 class MeshUtilApplication : GeeksvilleApplication() {
+
+    @Inject override lateinit var analyticsPrefs: AnalyticsPrefs
 
     override fun onCreate() {
         super.onCreate()
@@ -37,8 +40,7 @@ class MeshUtilApplication : GeeksvilleApplication() {
         // leave off when running in the debugger
         if (!isEmulator && (!BuildConfig.DEBUG || !Debug.isDebuggerConnected())) {
             val crashlytics = FirebaseCrashlytics.getInstance()
-            val pref = AppPrefs(this)
-            crashlytics.setUserId(pref.getInstallId()) // be able to group all bugs per anonymous user
+            crashlytics.setUserId(analyticsPrefs.installId) // be able to group all bugs per anonymous user
 
             fun sendCrashReports() {
                 if (isAnalyticsAllowed) {

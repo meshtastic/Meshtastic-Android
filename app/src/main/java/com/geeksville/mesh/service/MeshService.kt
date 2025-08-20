@@ -21,13 +21,11 @@ import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import android.os.RemoteException
 import androidx.core.app.ServiceCompat
-import androidx.core.content.edit
 import androidx.core.location.LocationCompat
 import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.AppOnlyProtos
@@ -61,6 +59,7 @@ import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.hasLocationPermission
+import com.geeksville.mesh.android.prefs.MeshPrefs
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.MeshLogRepository
@@ -151,6 +150,8 @@ class MeshService :
     @Inject lateinit var mqttRepository: MQTTRepository
 
     @Inject lateinit var serviceNotifications: MeshServiceNotifications
+
+    @Inject lateinit var meshPrefs: MeshPrefs
 
     companion object : Logging {
 
@@ -352,8 +353,8 @@ class MeshService :
 
     override fun onCreate() {
         super.onCreate()
-        sharedPreferences = getSharedPreferences("mesh-prefs", Context.MODE_PRIVATE)
-        _lastAddress.value = sharedPreferences.getString("device_address", null) ?: NO_DEVICE_SELECTED
+
+        _lastAddress.value = meshPrefs.deviceAddress ?: NO_DEVICE_SELECTED
 
         info("Creating mesh service")
         serviceNotifications.initChannels()
@@ -2108,8 +2109,6 @@ class MeshService :
     val lastAddress: StateFlow<String?>
         get() = _lastAddress.asStateFlow()
 
-    lateinit var sharedPreferences: SharedPreferences
-
     fun clearDatabases() = serviceScope.handledLaunch {
         debug("Clearing nodeDB")
         radioConfigRepository.clearNodeDB()
@@ -2123,7 +2122,7 @@ class MeshService :
             -> {
                 debug("SetDeviceAddress: No previous device address, setting new one")
                 _lastAddress.value = deviceAddr
-                sharedPreferences.edit { putString("device_address", deviceAddr) }
+                meshPrefs.deviceAddress = deviceAddr
             }
 
             lastAddress.value,
@@ -2135,7 +2134,7 @@ class MeshService :
             else -> {
                 debug("SetDeviceAddress: Device address changed from $lastAddress to $deviceAddr")
                 _lastAddress.value = deviceAddr
-                sharedPreferences.edit { putString("device_address", deviceAddr) }
+                meshPrefs.deviceAddress = deviceAddr
                 clearDatabases()
                 clearNotifications()
             }
@@ -2381,7 +2380,7 @@ class MeshService :
                 if (destNum != myNodeNum) {
                     // Determine the best position to send based on user preferences and available
                     // data
-                    val provideLocation = sharedPreferences.getBoolean("provide-location-$myNodeNum", false)
+                    val provideLocation = meshPrefs.shouldProvideNodeLocation(myNodeNum)
                     val currentPosition =
                         when {
                             // Use provided position if valid and user allows phone location sharing

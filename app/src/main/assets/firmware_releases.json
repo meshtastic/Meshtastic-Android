@@ -187,5 +187,30 @@
       }
     ]
   },
-  "pullRequests": []
+  "pullRequests": [
+    {
+      "id": "7676",
+      "title": "Add Meshtiny device",
+      "page_url": "https://github.com/meshtastic/firmware/pull/7676",
+      "zip_url": "https://github.com/meshtastic/firmware/actions/runs/17071560962"
+    },
+    {
+      "id": "7658",
+      "title": "the original ZPS module from https://github.com/a-f-G-U-C/Meshtastic-ZPS",
+      "page_url": "https://github.com/meshtastic/firmware/pull/7658",
+      "zip_url": "https://github.com/meshtastic/firmware/actions/runs/17074730483"
+    },
+    {
+      "id": "7583",
+      "title": "Update meshtastic/web to v2.6.6",
+      "page_url": "https://github.com/meshtastic/firmware/pull/7583",
+      "zip_url": "https://github.com/meshtastic/firmware/actions/runs/17070663764"
+    },
+    {
+      "id": "7523",
+      "title": "Update platformio/espressif32 to v6.12.0",
+      "page_url": "https://github.com/meshtastic/firmware/pull/7523",
+      "zip_url": "https://github.com/meshtastic/firmware/actions/runs/17070665161"
+    }
+  ]
 }

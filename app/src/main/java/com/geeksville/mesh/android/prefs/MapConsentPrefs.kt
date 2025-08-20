@@ -15,26 +15,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.map
+package com.geeksville.mesh.android.prefs
 
-import com.geeksville.mesh.android.prefs.MapPrefs
-import com.geeksville.mesh.database.NodeRepository
-import com.geeksville.mesh.database.PacketRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
+import android.content.SharedPreferences
+import androidx.core.content.edit
 
-@HiltViewModel
-class MapViewModel
-@Inject
-constructor(
-    mapPrefs: MapPrefs,
-    packetRepository: PacketRepository,
-    nodeRepository: NodeRepository,
-) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository) {
+interface MapConsentPrefs {
+    fun shouldReportLocation(nodeNum: Int?): Boolean
 
-    var mapStyleId: Int
-        get() = mapPrefs.mapStyle
-        set(value) {
-            mapPrefs.mapStyle = value
-        }
+    fun setShouldReportLocation(nodeNum: Int?, value: Boolean)
+}
+
+class MapConsentPrefsImpl(private val prefs: SharedPreferences) : MapConsentPrefs {
+    override fun shouldReportLocation(nodeNum: Int?) = prefs.getBoolean(nodeNum.toString(), false)
+
+    override fun setShouldReportLocation(nodeNum: Int?, value: Boolean) {
+        prefs.edit { putBoolean(nodeNum.toString(), value) }
+    }
 }

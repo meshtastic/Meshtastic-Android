@@ -17,10 +17,9 @@
 
 package com.geeksville.mesh.ui.map
 
-import android.content.SharedPreferences
-import androidx.core.content.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.geeksville.mesh.android.prefs.MapPrefs
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.Packet
@@ -35,7 +34,7 @@ import kotlinx.coroutines.flow.stateIn
 
 @Suppress("TooManyFunctions")
 abstract class BaseMapViewModel(
-    protected val preferences: SharedPreferences,
+    protected val mapPrefs: MapPrefs,
     nodeRepository: NodeRepository,
     packetRepository: PacketRepository,
 ) : ViewModel() {
@@ -62,28 +61,27 @@ abstract class BaseMapViewModel(
             }
             .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5_000), initialValue = emptyMap())
 
-    private val showOnlyFavorites = MutableStateFlow(preferences.getBoolean("only-favorites", false))
+    private val showOnlyFavorites = MutableStateFlow(mapPrefs.showOnlyFavorites)
 
-    private val showWaypointsOnMap = MutableStateFlow(preferences.getBoolean("show-waypoints-on-map", true))
+    private val showWaypointsOnMap = MutableStateFlow(mapPrefs.showWaypointsOnMap)
 
-    private val showPrecisionCircleOnMap =
-        MutableStateFlow(preferences.getBoolean("show-precision-circle-on-map", true))
+    private val showPrecisionCircleOnMap = MutableStateFlow(mapPrefs.showPrecisionCircleOnMap)
 
     fun toggleOnlyFavorites() {
         val current = showOnlyFavorites.value
-        preferences.edit { putBoolean("only-favorites", !current) }
+        mapPrefs.showOnlyFavorites = !current
         showOnlyFavorites.value = !current
     }
 
     fun toggleShowWaypointsOnMap() {
         val current = showWaypointsOnMap.value
-        preferences.edit { putBoolean("show-waypoints-on-map", !current) }
+        mapPrefs.showWaypointsOnMap = !current
         showWaypointsOnMap.value = !current
     }
 
     fun toggleShowPrecisionCircleOnMap() {
         val current = showPrecisionCircleOnMap.value
-        preferences.edit { putBoolean("show-precision-circle-on-map", !current) }
+        mapPrefs.showPrecisionCircleOnMap = !current
         showPrecisionCircleOnMap.value = !current
     }
 

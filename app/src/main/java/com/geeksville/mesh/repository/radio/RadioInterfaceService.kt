@@ -18,8 +18,6 @@
 package com.geeksville.mesh.repository.radio
 
 import android.app.Application
-import android.content.SharedPreferences
-import androidx.core.content.edit
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.coroutineScope
 import com.geeksville.mesh.BuildConfig
@@ -29,6 +27,7 @@ import com.geeksville.mesh.android.BinaryLogFile
 import com.geeksville.mesh.android.BuildUtils
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.android.prefs.RadioPrefs
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.network.NetworkRepository
@@ -61,6 +60,7 @@ import javax.inject.Singleton
  * Note - this class intentionally dumb. It doesn't understand protobuf framing etc... It is designed to be simple so it
  * can be stubbed out with a simulated version as needed.
  */
+@Suppress("LongParameterList")
 @Singleton
 class RadioInterfaceService
 @Inject
@@ -70,7 +70,7 @@ constructor(
     private val bluetoothRepository: BluetoothRepository,
     private val networkRepository: NetworkRepository,
     private val processLifecycle: Lifecycle,
-    @RadioRepositoryQualifier private val prefs: SharedPreferences,
+    private val radioPrefs: RadioPrefs,
     private val interfaceFactory: InterfaceFactory,
 ) : Logging {
 
@@ -81,7 +81,7 @@ constructor(
     val receivedData: SharedFlow<ByteArray> = _receivedData
 
     // Thread-safe StateFlow for tracking device address changes
-    private val _currentDeviceAddressFlow = MutableStateFlow<String?>(prefs.getString(DEVADDR_KEY, null))
+    private val _currentDeviceAddressFlow = MutableStateFlow(radioPrefs.devAddr)
     val currentDeviceAddressFlow: StateFlow<String?> = _currentDeviceAddressFlow.asStateFlow()
 
     private val logSends = false
@@ -129,7 +129,6 @@ constructor(
     }
 
     companion object {
-        const val DEVADDR_KEY = "devAddr2" // the new name for devaddr
         private const val HEARTBEAT_INTERVAL_MILLIS = 5 * 60 * 1000L
     }
 
@@ -167,7 +166,7 @@ constructor(
      */
     fun getDeviceAddress(): String? {
         // If the user has unpaired our device, treat things as if we don't have one
-        var address = prefs.getString(DEVADDR_KEY, null)
+        var address = radioPrefs.devAddr
 
         // If we are running on the emulator we default to the mock interface, so we can have some data to show to the
         // user
@@ -309,13 +308,8 @@ constructor(
 
             debug("Setting bonded device to ${address.anonymize}")
 
-            prefs.edit {
-                if (address == null) {
-                    this.remove(DEVADDR_KEY)
-                } else {
-                    putString(DEVADDR_KEY, address)
-                }
-            }
+            // Stores the address if non-null, otherwise removes the pref
+            radioPrefs.devAddr = address
             _currentDeviceAddressFlow.value = address
 
             // Force the service to reconnect
