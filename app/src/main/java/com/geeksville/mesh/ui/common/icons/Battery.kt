@@ -23,6 +23,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
+/**
+ * This is from Material Symbols.
+ *
+ * @see
+ *   [battery_android_0](https://fonts.google.com/icons?selected=Material+Symbols+Outlined:battery_android_0:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=battery&icon.set=Material+Symbols&icon.size=24&icon.color=%23000000&icon.platform=android)
+ */
 val BatteryEmpty: ImageVector
     get() {
         if (batteryEmpty != null) {
@@ -89,6 +95,12 @@ val BatteryEmpty: ImageVector
 
 private var batteryEmpty: ImageVector? = null
 
+/**
+ * This is from Material Symbols.
+ *
+ * @see
+ *   [battery_android_question](https://fonts.google.com/icons?selected=Material+Symbols+Outlined:battery_android_question:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=battery&icon.set=Material+Symbols&icon.size=24&icon.color=%23000000&icon.platform=android)
+ */
 val BatteryUnknown: ImageVector
     get() {
         if (batteryUnknown != null) {
@@ -169,5 +181,4 @@ val BatteryUnknown: ImageVector
         return batteryUnknown!!
     }
 
-@Suppress("ObjectPropertyName")
 private var batteryUnknown: ImageVector? = null
