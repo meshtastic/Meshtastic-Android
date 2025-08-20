@@ -159,6 +159,7 @@
     <string name="save_rangetest">Export rangetest.csv</string>
     <string name="reset">Reset</string>
     <string name="scan">Scan</string>
+    <string name="add_network_device">Add</string>
     <string name="are_you_sure_change_default">Are you sure you want to change to the default channel?</string>
     <string name="reset_to_defaults">Reset to defaults</string>
     <string name="apply">Apply</string>
