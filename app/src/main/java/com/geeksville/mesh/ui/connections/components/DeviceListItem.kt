@@ -77,7 +77,9 @@ fun DeviceListItem(
                 Text(device.address)
             }
         },
-        trailingContent = { RadioButton(selected = connectionState == ConnectionState.CONNECTED, onClick = null) },
+        trailingContent = {
+            RadioButton(selected = connectionState == ConnectionState.CONNECTED && selected, onClick = null)
+        },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
     )
 }
