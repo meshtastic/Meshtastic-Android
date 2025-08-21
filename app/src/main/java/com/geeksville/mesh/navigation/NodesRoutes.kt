@@ -102,6 +102,7 @@ fun NavGraphBuilder.nodesGraph(navController: NavHostController, uiViewModel: UI
     }
 }
 
+@Suppress("LongMethod")
 fun NavGraphBuilder.nodeDetailGraph(navController: NavHostController, uiViewModel: UIViewModel) {
     navigation<NodesRoutes.NodeDetailGraph>(startDestination = NodesRoutes.NodeDetail()) {
         composable<NodesRoutes.NodeDetail>(

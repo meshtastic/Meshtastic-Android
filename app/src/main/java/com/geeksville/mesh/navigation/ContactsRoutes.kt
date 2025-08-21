@@ -43,6 +43,7 @@ sealed class ContactsRoutes {
     @Serializable data object ContactsGraph : Graph
 }
 
+@Suppress("LongMethod")
 fun NavGraphBuilder.contactsGraph(navController: NavHostController, uiViewModel: UIViewModel) {
     navigation<ContactsRoutes.ContactsGraph>(startDestination = ContactsRoutes.Contacts) {
         composable<ContactsRoutes.Contacts>(
