@@ -17,11 +17,12 @@
 
 package com.geeksville.mesh.ui.connections.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Bluetooth
+import androidx.compose.material.icons.rounded.BluetoothConnected
 import androidx.compose.material.icons.rounded.Usb
 import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Icon
@@ -35,20 +36,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DeviceListEntry
-import com.geeksville.mesh.service.ConnectionState
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-fun DeviceListItem(
-    connectionState: ConnectionState,
-    device: DeviceListEntry,
-    selected: Boolean,
-    onSelect: () -> Unit,
-    modifier: Modifier = Modifier,
-) {
+fun DeviceListItem(connected: Boolean, device: DeviceListEntry, onSelect: () -> Unit, modifier: Modifier = Modifier) {
     val icon =
         when (device) {
-            is DeviceListEntry.Ble -> Icons.Rounded.Bluetooth
+            is DeviceListEntry.Ble ->
+                if (connected) {
+                    Icons.Rounded.BluetoothConnected
+                } else {
+                    Icons.Rounded.Bluetooth
+                }
             is DeviceListEntry.Usb -> Icons.Rounded.Usb
             is DeviceListEntry.Tcp -> Icons.Rounded.Wifi
             is DeviceListEntry.Mock -> Icons.Rounded.Add
@@ -66,7 +65,7 @@ fun DeviceListItem(
     ListItem(
         modifier =
         if (useSelectable) {
-            modifier.fillMaxWidth().selectable(selected = selected, onClick = onSelect)
+            modifier.fillMaxWidth().clickable(onClick = onSelect)
         } else {
             modifier.fillMaxWidth()
         },
@@ -77,9 +76,7 @@ fun DeviceListItem(
                 Text(device.address)
             }
         },
-        trailingContent = {
-            RadioButton(selected = connectionState == ConnectionState.CONNECTED && selected, onClick = null)
-        },
+        trailingContent = { RadioButton(selected = connected, onClick = null) },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
     )
 }

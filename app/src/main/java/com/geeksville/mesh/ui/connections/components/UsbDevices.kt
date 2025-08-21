@@ -59,9 +59,9 @@ private fun UsbDevices(
             TitledCard(title = "") {
                 usbDevices.forEach { device ->
                     DeviceListItem(
-                        connectionState = connectionState,
+                        connected =
+                        connectionState == ConnectionState.CONNECTED && device.fullAddress == selectedDevice,
                         device = device,
-                        selected = device.fullAddress == selectedDevice,
                         onSelect = { onDeviceSelected(device) },
                         modifier = Modifier,
                     )

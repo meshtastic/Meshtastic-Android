@@ -120,9 +120,10 @@ fun NetworkDevices(
                     TitledCard(title = stringResource(R.string.recent_network_devices)) {
                         recentNetworkDevices.forEach { device ->
                             DeviceListItem(
-                                connectionState,
-                                device,
-                                device.fullAddress == selectedDevice,
+                                connected =
+                                connectionState == ConnectionState.CONNECTED &&
+                                    device.fullAddress == selectedDevice,
+                                device = device,
                                 onSelect = { scanModel.onSelected(device) },
                                 modifier =
                                 Modifier.combinedClickable(
@@ -141,9 +142,10 @@ fun NetworkDevices(
                     TitledCard(title = stringResource(R.string.discovered_network_devices)) {
                         discoveredNetworkDevices.forEach { device ->
                             DeviceListItem(
-                                connectionState,
-                                device,
-                                device.fullAddress == selectedDevice,
+                                connected =
+                                connectionState == ConnectionState.CONNECTED &&
+                                    device.fullAddress == selectedDevice,
+                                device = device,
                                 onSelect = { scanModel.onSelected(device) },
                             )
                         }

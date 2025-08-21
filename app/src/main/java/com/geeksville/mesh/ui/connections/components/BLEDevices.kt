@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BluetoothDisabled
 import androidx.compose.material.icons.rounded.BluetoothDisabled
 import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material3.Button
@@ -65,7 +64,7 @@ import com.google.accompanist.permissions.rememberMultiplePermissionsState
  * @param scanModel The ViewModel responsible for Bluetooth scanning logic.
  */
 @OptIn(ExperimentalPermissionsApi::class)
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun BLEDevices(
     connectionState: ConnectionState,
@@ -167,10 +166,11 @@ fun BLEDevices(
                     } else {
                         TitledCard(title = stringResource(R.string.bluetooth_paired_devices)) {
                             btDevices.forEach { device ->
+                                val connected =
+                                    connectionState == ConnectionState.CONNECTED && device.fullAddress == selectedDevice
                                 DeviceListItem(
-                                    connectionState = connectionState,
+                                    connected = connected,
                                     device = device,
-                                    selected = device.fullAddress == selectedDevice,
                                     onSelect = { scanModel.onSelected(device) },
                                     modifier = Modifier,
                                 )
