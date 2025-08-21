@@ -52,7 +52,7 @@ private fun UsbDevices(
     onDeviceSelected: (DeviceListEntry) -> Unit,
 ) {
     when {
-        usbDevices.filterNot { it is DeviceListEntry.Disconnect || it is DeviceListEntry.Mock }.isEmpty() ->
+        usbDevices.isEmpty() ->
             EmptyStateContent(imageVector = Icons.Rounded.UsbOff, text = stringResource(R.string.no_usb_devices))
 
         else ->

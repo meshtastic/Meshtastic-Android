@@ -153,7 +153,7 @@ fun BLEDevices(
                         }
                     }
 
-                    if (btDevices.filterNot { it is DeviceListEntry.Disconnect }.isEmpty()) {
+                    if (btDevices.isEmpty()) {
                         EmptyStateContent(
                             imageVector = Icons.Rounded.BluetoothDisabled,
                             text =

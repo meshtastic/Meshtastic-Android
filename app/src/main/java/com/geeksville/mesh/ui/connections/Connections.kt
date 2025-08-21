@@ -265,6 +265,7 @@ fun ConnectionsScreen(
                                 onNavigateToNodeDetails = onNavigateToNodeDetails,
                                 onSetShowSharedContact = { showSharedContact = it },
                                 onNavigateToRadioConfig = onNavigateToRadioConfig,
+                                onClickDisconnect = { scanModel.disconnect() },
                             )
                         }
 

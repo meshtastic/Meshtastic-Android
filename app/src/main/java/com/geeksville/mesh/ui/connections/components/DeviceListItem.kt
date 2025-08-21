@@ -20,14 +20,8 @@ package com.geeksville.mesh.ui.connections.components
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Bluetooth
-import androidx.compose.material.icons.filled.Cancel
-import androidx.compose.material.icons.filled.Usb
-import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Bluetooth
-import androidx.compose.material.icons.rounded.Cancel
 import androidx.compose.material.icons.rounded.Usb
 import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Icon
@@ -57,7 +51,6 @@ fun DeviceListItem(
             is DeviceListEntry.Ble -> Icons.Rounded.Bluetooth
             is DeviceListEntry.Usb -> Icons.Rounded.Usb
             is DeviceListEntry.Tcp -> Icons.Rounded.Wifi
-            is DeviceListEntry.Disconnect -> Icons.Rounded.Cancel
             is DeviceListEntry.Mock -> Icons.Rounded.Add
         }
 
@@ -66,7 +59,6 @@ fun DeviceListItem(
             is DeviceListEntry.Ble -> stringResource(R.string.bluetooth)
             is DeviceListEntry.Usb -> stringResource(R.string.serial)
             is DeviceListEntry.Tcp -> stringResource(R.string.network)
-            is DeviceListEntry.Disconnect -> stringResource(R.string.disconnect)
             is DeviceListEntry.Mock -> stringResource(R.string.add)
         }
 
@@ -85,13 +77,7 @@ fun DeviceListItem(
                 Text(device.address)
             }
         },
-        trailingContent = {
-            if (device is DeviceListEntry.Disconnect) {
-                RadioButton(selected = connectionState == ConnectionState.DISCONNECTED, onClick = null)
-            } else {
-                RadioButton(selected = connectionState == ConnectionState.CONNECTED, onClick = null)
-            }
-        },
+        trailingContent = { RadioButton(selected = connectionState == ConnectionState.CONNECTED, onClick = null) },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
     )
 }

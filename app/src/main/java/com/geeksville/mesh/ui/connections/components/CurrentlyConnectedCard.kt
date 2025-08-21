@@ -20,9 +20,13 @@ package com.geeksville.mesh.ui.connections.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -31,6 +35,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -42,6 +48,7 @@ import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.ui.common.components.MaterialBatteryInfo
 import com.geeksville.mesh.ui.common.theme.AppTheme
+import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 
@@ -52,11 +59,15 @@ fun CurrentlyConnectedCard(
     onNavigateToNodeDetails: (Int) -> Unit,
     onSetShowSharedContact: (Node) -> Unit,
     onNavigateToRadioConfig: () -> Unit,
+    onClickDisconnect: () -> Unit,
 ) {
     Card(modifier = modifier) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Column {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
                     NodeChip(
                         node = node,
                         isThisNode = true,
@@ -94,6 +105,19 @@ fun CurrentlyConnectedCard(
                     )
                 }
             }
+
+            Button(
+                shape = RectangleShape,
+                modifier = Modifier.fillMaxWidth().height(40.dp),
+                colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.StatusRed,
+                    contentColor = Color.White,
+                ),
+                onClick = onClickDisconnect,
+            ) {
+                Text(stringResource(R.string.disconnect))
+            }
         }
     }
 }
@@ -119,6 +143,7 @@ private fun CurrentlyConnectedCardPreview() {
             onNavigateToNodeDetails = {},
             onSetShowSharedContact = {},
             onNavigateToRadioConfig = {},
+            onClickDisconnect = {},
         )
     }
 }
