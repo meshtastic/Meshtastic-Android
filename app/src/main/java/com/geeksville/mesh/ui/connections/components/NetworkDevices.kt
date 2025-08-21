@@ -168,6 +168,7 @@ private fun AddDeviceDialog(
 
     val scope = rememberCoroutineScope()
 
+    @Suppress("MagicNumber")
     ModalBottomSheet(onDismissRequest = onHideDialog, sheetState = sheetState) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -179,6 +180,7 @@ private fun AddDeviceDialog(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next),
                     modifier = Modifier.weight(.7f),
                 )
+
                 OutlinedTextField(
                     state = portState,
                     labelPosition = TextFieldLabelPosition.Above(),
