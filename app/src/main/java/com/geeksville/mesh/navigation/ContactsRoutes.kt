@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.navigation
 
+import android.content.Intent
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -44,7 +45,15 @@ sealed class ContactsRoutes {
 
 fun NavGraphBuilder.contactsGraph(navController: NavHostController, uiViewModel: UIViewModel) {
     navigation<ContactsRoutes.ContactsGraph>(startDestination = ContactsRoutes.Contacts) {
-        composable<ContactsRoutes.Contacts> {
+        composable<ContactsRoutes.Contacts>(
+            deepLinks =
+            listOf(
+                navDeepLink {
+                    uriPattern = "$DEEP_LINK_BASE_URI/contacts"
+                    action = Intent.ACTION_VIEW
+                },
+            ),
+        ) {
             ContactsScreen(
                 uiViewModel,
                 onNavigateToMessages = { navController.navigate(ContactsRoutes.Messages(it)) },
@@ -56,7 +65,7 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController, uiViewModel:
             listOf(
                 navDeepLink {
                     uriPattern = "$DEEP_LINK_BASE_URI/messages/{contactKey}?message={message}"
-                    action = "android.intent.action.VIEW"
+                    action = Intent.ACTION_VIEW
                 },
             ),
         ) { backStackEntry ->
@@ -77,7 +86,7 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController, uiViewModel:
         listOf(
             navDeepLink {
                 uriPattern = "$DEEP_LINK_BASE_URI/share?message={message}"
-                action = "android.intent.action.VIEW"
+                action = Intent.ACTION_VIEW
             },
         ),
     ) { backStackEntry ->
@@ -88,5 +97,15 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController, uiViewModel:
             }
         }
     }
-    composable<ContactsRoutes.QuickChat> { QuickChatScreen() }
+    composable<ContactsRoutes.QuickChat>(
+        deepLinks =
+        listOf(
+            navDeepLink {
+                uriPattern = "$DEEP_LINK_BASE_URI/quick_chat"
+                action = Intent.ACTION_VIEW
+            },
+        ),
+    ) {
+        QuickChatScreen()
+    }
 }

@@ -17,9 +17,11 @@
 
 package com.geeksville.mesh.navigation
 
+import android.content.Intent
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.map.MapView
 import com.geeksville.mesh.ui.map.MapViewModel
@@ -30,7 +32,15 @@ sealed class MapRoutes {
 }
 
 fun NavGraphBuilder.mapGraph(navController: NavHostController, uiViewModel: UIViewModel, mapViewModel: MapViewModel) {
-    composable<MapRoutes.Map> {
+    composable<MapRoutes.Map>(
+        deepLinks =
+        listOf(
+            navDeepLink {
+                uriPattern = "$DEEP_LINK_BASE_URI/map"
+                action = Intent.ACTION_VIEW
+            },
+        ),
+    ) {
         MapView(
             uiViewModel = uiViewModel,
             mapViewModel = mapViewModel,

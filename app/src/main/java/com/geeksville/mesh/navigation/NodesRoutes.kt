@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.navigation
 
+import android.content.Intent
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CellTower
@@ -34,6 +35,7 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
+import androidx.navigation.navDeepLink
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.metrics.DeviceMetricsScreen
@@ -60,7 +62,6 @@ sealed class NodesRoutes {
 }
 
 sealed class NodeDetailRoutes {
-
     @Serializable data object DeviceMetrics : Route
 
     @Serializable data object NodeMap : Route
@@ -82,7 +83,15 @@ sealed class NodeDetailRoutes {
 
 fun NavGraphBuilder.nodesGraph(navController: NavHostController, uiViewModel: UIViewModel) {
     navigation<NodesRoutes.NodesGraph>(startDestination = NodesRoutes.Nodes) {
-        composable<NodesRoutes.Nodes> {
+        composable<NodesRoutes.Nodes>(
+            deepLinks =
+            listOf(
+                navDeepLink {
+                    uriPattern = "$DEEP_LINK_BASE_URI/nodes"
+                    action = Intent.ACTION_VIEW
+                },
+            ),
+        ) {
             NodeScreen(
                 model = uiViewModel,
                 navigateToMessages = { navController.navigate(ContactsRoutes.Messages(it)) },
@@ -95,7 +104,19 @@ fun NavGraphBuilder.nodesGraph(navController: NavHostController, uiViewModel: UI
 
 fun NavGraphBuilder.nodeDetailGraph(navController: NavHostController, uiViewModel: UIViewModel) {
     navigation<NodesRoutes.NodeDetailGraph>(startDestination = NodesRoutes.NodeDetail()) {
-        composable<NodesRoutes.NodeDetail> { backStackEntry ->
+        composable<NodesRoutes.NodeDetail>(
+            deepLinks =
+            listOf(
+                navDeepLink {
+                    uriPattern = "$DEEP_LINK_BASE_URI/node/{destNum}"
+                    action = Intent.ACTION_VIEW
+                },
+                navDeepLink {
+                    uriPattern = "$DEEP_LINK_BASE_URI/node"
+                    action = Intent.ACTION_VIEW
+                },
+            ),
+        ) { backStackEntry ->
             val parentEntry =
                 remember(backStackEntry) {
                     val parentRoute = backStackEntry.destination.parent!!.route!!
@@ -110,7 +131,21 @@ fun NavGraphBuilder.nodeDetailGraph(navController: NavHostController, uiViewMode
             )
         }
         NodeDetailRoute.entries.forEach { nodeDetailRoute ->
-            composable(nodeDetailRoute.route::class) { backStackEntry ->
+            val pathSegment = nodeDetailRoute.name.lowercase()
+            composable(
+                route = nodeDetailRoute.route::class,
+                deepLinks =
+                listOf(
+                    navDeepLink {
+                        uriPattern = "$DEEP_LINK_BASE_URI/node/{destNum}/$pathSegment"
+                        action = Intent.ACTION_VIEW
+                    },
+                    navDeepLink {
+                        uriPattern = "$DEEP_LINK_BASE_URI/node/$pathSegment"
+                        action = Intent.ACTION_VIEW
+                    },
+                ),
+            ) { backStackEntry ->
                 val parentEntry =
                     remember(backStackEntry) {
                         val parentRoute = backStackEntry.destination.parent!!.route!!
@@ -121,10 +156,8 @@ fun NavGraphBuilder.nodeDetailGraph(navController: NavHostController, uiViewMode
                     NodeDetailRoute.NODE_MAP -> NodeMapScreen(uiViewModel, hiltViewModel(parentEntry))
                     NodeDetailRoute.POSITION_LOG -> PositionLogScreen(hiltViewModel(parentEntry))
                     NodeDetailRoute.ENVIRONMENT -> EnvironmentMetricsScreen(hiltViewModel(parentEntry))
-
                     NodeDetailRoute.SIGNAL -> SignalMetricsScreen(hiltViewModel(parentEntry))
                     NodeDetailRoute.TRACEROUTE -> TracerouteLogScreen(viewModel = hiltViewModel(parentEntry))
-
                     NodeDetailRoute.POWER -> PowerMetricsScreen(hiltViewModel(parentEntry))
                     NodeDetailRoute.HOST -> HostMetricsLogScreen(hiltViewModel(parentEntry))
                     NodeDetailRoute.PAX -> PaxMetricsScreen(hiltViewModel(parentEntry))

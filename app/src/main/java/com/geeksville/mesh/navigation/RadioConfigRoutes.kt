@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.navigation
 
+import android.content.Intent
 import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Forward
@@ -48,6 +49,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import com.geeksville.mesh.MeshProtos.DeviceMetadata
 import com.geeksville.mesh.R
@@ -138,7 +140,19 @@ fun getNavRouteFrom(routeName: String): Route? =
 
 fun NavGraphBuilder.radioConfigGraph(navController: NavHostController, uiViewModel: UIViewModel) {
     navigation<RadioConfigRoutes.RadioConfigGraph>(startDestination = RadioConfigRoutes.RadioConfig()) {
-        composable<RadioConfigRoutes.RadioConfig> { backStackEntry ->
+        composable<RadioConfigRoutes.RadioConfig>(
+            deepLinks =
+            listOf(
+                navDeepLink {
+                    uriPattern = "$DEEP_LINK_BASE_URI/radio_config/{destNum}"
+                    action = Intent.ACTION_VIEW
+                },
+                navDeepLink {
+                    uriPattern = "$DEEP_LINK_BASE_URI/radio_config"
+                    action = Intent.ACTION_VIEW
+                },
+            ),
+        ) { backStackEntry ->
             val parentEntry =
                 remember(backStackEntry) {
                     val parentRoute = backStackEntry.destination.parent!!.route!!
@@ -148,7 +162,17 @@ fun NavGraphBuilder.radioConfigGraph(navController: NavHostController, uiViewMod
                 navController.navigate(it) { popUpTo(RadioConfigRoutes.RadioConfig()) { inclusive = false } }
             }
         }
-        composable<RadioConfigRoutes.CleanNodeDb> { CleanNodeDatabaseScreen() }
+        composable<RadioConfigRoutes.CleanNodeDb>(
+            deepLinks =
+            listOf(
+                navDeepLink {
+                    uriPattern = "$DEEP_LINK_BASE_URI/radio_config/clean_node_db"
+                    action = Intent.ACTION_VIEW
+                },
+            ),
+        ) {
+            CleanNodeDatabaseScreen()
+        }
         configRoutes(navController)
         moduleRoutes(navController)
     }
@@ -156,7 +180,21 @@ fun NavGraphBuilder.radioConfigGraph(navController: NavHostController, uiViewMod
 
 private fun NavGraphBuilder.configRoutes(navController: NavHostController) {
     ConfigRoute.entries.forEach { configRoute ->
-        composable(configRoute.route::class) { backStackEntry ->
+        val pathSegment = configRoute.name.lowercase()
+        composable(
+            route = configRoute.route::class,
+            deepLinks =
+            listOf(
+                navDeepLink {
+                    uriPattern = "$DEEP_LINK_BASE_URI/radio_config/{destNum}/$pathSegment"
+                    action = Intent.ACTION_VIEW
+                },
+                navDeepLink {
+                    uriPattern = "$DEEP_LINK_BASE_URI/radio_config/$pathSegment"
+                    action = Intent.ACTION_VIEW
+                },
+            ),
+        ) { backStackEntry ->
             val parentEntry =
                 remember(backStackEntry) {
                     val parentRoute = backStackEntry.destination.parent!!.route!!
@@ -181,7 +219,21 @@ private fun NavGraphBuilder.configRoutes(navController: NavHostController) {
 @Suppress("CyclomaticComplexMethod")
 private fun NavGraphBuilder.moduleRoutes(navController: NavHostController) {
     ModuleRoute.entries.forEach { moduleRoute ->
-        composable(moduleRoute.route::class) { backStackEntry ->
+        val pathSegment = moduleRoute.name.lowercase()
+        composable(
+            route = moduleRoute.route::class,
+            deepLinks =
+            listOf(
+                navDeepLink {
+                    uriPattern = "$DEEP_LINK_BASE_URI/radio_config/{destNum}/$pathSegment"
+                    action = Intent.ACTION_VIEW
+                },
+                navDeepLink {
+                    uriPattern = "$DEEP_LINK_BASE_URI/radio_config/$pathSegment"
+                    action = Intent.ACTION_VIEW
+                },
+            ),
+        ) { backStackEntry ->
             val parentEntry =
                 remember(backStackEntry) {
                     val parentRoute = backStackEntry.destination.parent!!.route!!
@@ -191,20 +243,15 @@ private fun NavGraphBuilder.moduleRoutes(navController: NavHostController) {
                 ModuleRoute.MQTT -> MQTTConfigScreen(hiltViewModel(parentEntry))
                 ModuleRoute.SERIAL -> SerialConfigScreen(hiltViewModel(parentEntry))
                 ModuleRoute.EXT_NOTIFICATION -> ExternalNotificationConfigScreen(hiltViewModel(parentEntry))
-
                 ModuleRoute.STORE_FORWARD -> StoreForwardConfigScreen(hiltViewModel(parentEntry))
                 ModuleRoute.RANGE_TEST -> RangeTestConfigScreen(hiltViewModel(parentEntry))
                 ModuleRoute.TELEMETRY -> TelemetryConfigScreen(hiltViewModel(parentEntry))
                 ModuleRoute.CANNED_MESSAGE -> CannedMessageConfigScreen(hiltViewModel(parentEntry))
-
                 ModuleRoute.AUDIO -> AudioConfigScreen(hiltViewModel(parentEntry))
                 ModuleRoute.REMOTE_HARDWARE -> RemoteHardwareConfigScreen(hiltViewModel(parentEntry))
-
                 ModuleRoute.NEIGHBOR_INFO -> NeighborInfoConfigScreen(hiltViewModel(parentEntry))
                 ModuleRoute.AMBIENT_LIGHTING -> AmbientLightingConfigScreen(hiltViewModel(parentEntry))
-
                 ModuleRoute.DETECTION_SENSOR -> DetectionSensorConfigScreen(hiltViewModel(parentEntry))
-
                 ModuleRoute.PAXCOUNTER -> PaxcounterConfigScreen(hiltViewModel(parentEntry))
             }
         }
