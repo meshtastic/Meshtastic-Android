@@ -162,11 +162,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="meshtastic" />
-                <data android:host="meshtastic" />
-                <data android:pathPrefix="/messages" />
-                <data android:pathPrefix="/share" />
-                <data android:pathPrefix="/settings" />
+                <data android:scheme="meshtastic" android:host="meshtastic" />
             </intent-filter>
 
             <intent-filter android:autoVerify="true">
