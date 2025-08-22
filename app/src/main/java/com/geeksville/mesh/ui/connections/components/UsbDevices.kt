@@ -17,24 +17,17 @@
 
 package com.geeksville.mesh.ui.connections.components
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.UsbOff
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.rounded.UsbOff
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.service.ConnectionState
+import com.geeksville.mesh.ui.common.theme.AppTheme
 
 @Composable
 fun UsbDevices(
@@ -43,32 +36,49 @@ fun UsbDevices(
     selectedDevice: String,
     scanModel: BTScanModel,
 ) {
-    Text(
-        text = stringResource(R.string.serial),
-        style = MaterialTheme.typography.titleLarge,
-        modifier = Modifier.padding(vertical = 8.dp),
+    UsbDevices(
+        connectionState = connectionState,
+        usbDevices = usbDevices,
+        selectedDevice = selectedDevice,
+        onDeviceSelected = scanModel::onSelected,
     )
-    usbDevices.forEach { device ->
-        DeviceListItem(
-            connectionState = connectionState,
-            device = device,
-            selected = device.fullAddress == selectedDevice,
-            onSelect = { scanModel.onSelected(device) },
-            modifier = Modifier,
-        )
+}
+
+@Composable
+private fun UsbDevices(
+    connectionState: ConnectionState,
+    usbDevices: List<DeviceListEntry>,
+    selectedDevice: String,
+    onDeviceSelected: (DeviceListEntry) -> Unit,
+) {
+    when {
+        usbDevices.isEmpty() ->
+            EmptyStateContent(imageVector = Icons.Rounded.UsbOff, text = stringResource(R.string.no_usb_devices))
+
+        else ->
+            TitledCard(title = "") {
+                usbDevices.forEach { device ->
+                    DeviceListItem(
+                        connected =
+                        connectionState == ConnectionState.CONNECTED && device.fullAddress == selectedDevice,
+                        device = device,
+                        onSelect = { onDeviceSelected(device) },
+                        modifier = Modifier,
+                    )
+                }
+            }
     }
-    if (usbDevices.filterNot { it is DeviceListEntry.Disconnect || it is DeviceListEntry.Mock }.isEmpty()) {
-        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalAlignment = CenterHorizontally) {
-            Icon(
-                imageVector = Icons.Default.UsbOff,
-                contentDescription = stringResource(R.string.no_usb_devices),
-                modifier = Modifier.size(96.dp),
-            )
-            Text(
-                text = stringResource(R.string.no_usb_devices),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(vertical = 8.dp),
-            )
-        }
+}
+
+@PreviewLightDark
+@Composable
+private fun UsbDevicesPreview() {
+    AppTheme {
+        UsbDevices(
+            connectionState = ConnectionState.CONNECTED,
+            usbDevices = emptyList(),
+            selectedDevice = "",
+            onDeviceSelected = {},
+        )
     }
 }

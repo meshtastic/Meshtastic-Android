@@ -105,7 +105,7 @@
     <string name="cancel">Cancel</string>
     <string name="clear_changes">Clear changes</string>
     <string name="new_channel_rcvd">New Channel URL received</string>
-    <string name="permission_missing">Meshtastic needs location permission and location must be turned on to find new devices via Bluetooth. You can turn it off again afterwards.</string>
+    <string name="permission_missing">Meshtastic needs location permissions enabled to find new devices via Bluetooth. You can disable when not in use.</string>
     <string name="report_bug">Report Bug</string>
     <string name="report_a_bug">Report a bug</string>
     <string name="report_bug_text">Are you sure you want to report a bug? After reporting, please post in https://github.com/orgs/meshtastic/discussions so we can match up the report with what you found.</string>
@@ -159,6 +159,7 @@
     <string name="save_rangetest">Export rangetest.csv</string>
     <string name="reset">Reset</string>
     <string name="scan">Scan</string>
+    <string name="add_network_device">Add</string>
     <string name="are_you_sure_change_default">Are you sure you want to change to the default channel?</string>
     <string name="reset_to_defaults">Reset to defaults</string>
     <string name="apply">Apply</string>
@@ -201,8 +202,10 @@
     <string name="quick_chat_show">Show quick chat menu</string>
     <string name="quick_chat_hide">Hide quick chat menu</string>
     <string name="factory_reset">Factory reset</string>
-    <string name="bluetooth_disabled">Bluetooth disabled</string>
-    <string name="permission_missing_31">Meshtastic needs Nearby devices permission to find and connect to devices via Bluetooth. You can turn it off when not in use.</string>
+    <string name="bluetooth_disabled">Bluetooth is disabled. Please enable it in your device settings.</string>
+    <string name="open_settings">Open settings</string>
+    <string name="firmware_version">Firmware version: %1$s</string>
+    <string name="permission_missing_31">Meshtastic needs \"Nearby devices\" permissions enabled to find and connect to devices via Bluetooth. You can disable when not in use.</string>
     <string name="direct_message">Direct Message</string>
     <string name="nodedb_reset">NodeDB reset</string>
     <string name="delivery_confirmed">Delivery confirmed</string>
@@ -653,7 +656,8 @@
     <string name="node_count_template">(%1$d online / %2$d total)</string>
     <string name="react">React</string>
     <string name="disconnect">Disconnect</string>
-    <string name="no_ble_devices">No Bluetooth devices found.</string>
+    <string name="scanning_bluetooth">Scanning for Bluetooth devices…</string>
+    <string name="no_ble_devices">No paired Bluetooth devices.</string>
     <string name="no_network_devices">No Network devices found.</string>
     <string name="no_usb_devices">No USB Serial devices found.</string>
     <string name="scroll_to_bottom">Scroll to bottom</string>
@@ -710,6 +714,9 @@
     <string name="no_pax_metrics_logs">No PAX metrics logs available.</string>
     <string name="wifi_devices">WiFi Devices</string>
     <string name="ble_devices">BLE Devices</string>
+    <string name="bluetooth_paired_devices">Paired Devices</string>
+    <string name="connected_device">Connected Device</string>
+    <string name="action_go">Go</string>
 
     <string name="routing_error_rate_limit_exceeded">Rate Limit Exceeded. Please try again later.</string>
     <string name="view_release">View Release</string>
@@ -760,7 +767,7 @@
     <string name="configure_critical_alerts">Configure Critical Alerts</string>
     <string name="notification_permissions_description">Meshtastic uses notifications to keep you updated on new messages and other important events. You can update your notification permissions at any time from settings.</string>
     <string name="next">Next</string>
-    <string name="grant_permissions_and_scan">Grant Permissions and Scan</string>
+    <string name="grant_permissions">Grant Permissions</string>
     <string name="nodes_queued_for_deletion">%d nodes queued for deletion:</string>
     <string name="clean_node_database_description">Caution: This removes nodes from in-app and on-device databases.\nSelections are additive.</string>
     <string name="connecting_to_device">Connecting to device</string>

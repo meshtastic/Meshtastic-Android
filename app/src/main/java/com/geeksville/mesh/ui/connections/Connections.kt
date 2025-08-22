@@ -27,6 +27,7 @@ import android.util.Patterns
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -34,7 +35,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
@@ -42,15 +42,16 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bluetooth
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Usb
 import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.rounded.Bluetooth
+import androidx.compose.material.icons.rounded.Usb
+import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -68,6 +69,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
@@ -97,12 +99,11 @@ import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.service.ConnectionState
+import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.connections.components.BLEDevices
+import com.geeksville.mesh.ui.connections.components.CurrentlyConnectedCard
 import com.geeksville.mesh.ui.connections.components.NetworkDevices
 import com.geeksville.mesh.ui.connections.components.UsbDevices
-import com.geeksville.mesh.ui.node.NodeActionButton
-import com.geeksville.mesh.ui.node.components.NodeChip
-import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
 import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
@@ -181,11 +182,6 @@ fun ConnectionsScreen(
             uiViewModel.showSnackBar(context.getString(R.string.location_disabled))
         }
     }
-    LaunchedEffect(bluetoothEnabled) {
-        if (!bluetoothEnabled) {
-            uiViewModel.showSnackBar(context.getString(R.string.bluetooth_disabled))
-        }
-    }
     // when scanning is true - wait 10000ms and then stop scanning
     LaunchedEffect(scanning) {
         if (scanning) {
@@ -245,352 +241,329 @@ fun ConnectionsScreen(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            Text(
-                text = scanStatusText.orEmpty(),
-                fontSize = 14.sp,
-                textAlign = TextAlign.Start,
-                modifier = Modifier.fillMaxWidth(),
-            )
+    Column(modifier = Modifier.fillMaxSize()) {
+        Box(modifier = Modifier.fillMaxSize().weight(1f)) {
+            Column(
+                modifier = Modifier.fillMaxSize().verticalScroll(scrollState).height(IntrinsicSize.Max).padding(16.dp),
+            ) {
+                val isConnected by uiViewModel.isConnectedStateFlow.collectAsState(false)
+                val ourNode by uiViewModel.ourNodeInfo.collectAsState()
 
-            Spacer(modifier = Modifier.height(8.dp))
+                AnimatedVisibility(visible = isConnected, modifier = Modifier.padding(bottom = 16.dp)) {
+                    Column {
+                        ourNode?.let { node ->
+                            Text(
+                                stringResource(R.string.connected_device),
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                style = MaterialTheme.typography.titleLarge,
+                            )
 
-            val isConnected by uiViewModel.isConnectedStateFlow.collectAsState(false)
-            val ourNode by uiViewModel.ourNodeInfo.collectAsState()
-            if (isConnected) {
-                ourNode?.let { node ->
-                    Row(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        NodeChip(
-                            node = node,
-                            isThisNode = true,
-                            isConnected = true,
-                            onAction = { action ->
-                                when (action) {
-                                    is NodeMenuAction.MoreDetails -> {
-                                        onNavigateToNodeDetails(node.num)
-                                    }
+                            Spacer(modifier = Modifier.height(8.dp))
 
-                                    is NodeMenuAction.Share -> {
-                                        showSharedContact = node
-                                    }
+                            CurrentlyConnectedCard(
+                                node = node,
+                                onNavigateToNodeDetails = onNavigateToNodeDetails,
+                                onSetShowSharedContact = { showSharedContact = it },
+                                onNavigateToRadioConfig = onNavigateToRadioConfig,
+                                onClickDisconnect = { scanModel.disconnect() },
+                            )
+                        }
 
-                                    else -> {}
-                                }
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        Card {
+                            SwitchPreference(
+                                title = stringResource(R.string.provide_location_to_mesh),
+                                checked = provideLocation,
+                                enabled = !isGpsDisabled,
+                                onCheckedChange = { checked -> uiViewModel.setProvideLocation(checked) },
+                                containerColor = Color.Transparent,
+                            )
+                        }
+                    }
+                }
+
+                val setRegionText = stringResource(id = R.string.set_your_region)
+                val actionText = stringResource(id = R.string.action_go)
+                LaunchedEffect(isConnected && regionUnset && selectedDevice != "m") {
+                    if (isConnected && regionUnset && selectedDevice != "m") {
+                        uiViewModel.showSnackBar(
+                            text = setRegionText,
+                            actionLabel = actionText,
+                            onActionPerformed = {
+                                isWaiting = true
+                                radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
                             },
                         )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            modifier = Modifier.weight(1f, fill = true),
-                            text = node.user.longName,
-                            style = MaterialTheme.typography.titleLarge,
-                        )
-                        IconButton(enabled = true, onClick = onNavigateToRadioConfig) {
-                            Icon(
-                                imageVector = Icons.Default.Settings,
-                                contentDescription = stringResource(id = R.string.radio_configuration),
-                            )
-                        }
                     }
                 }
-                Spacer(modifier = Modifier.height(8.dp))
-                if (regionUnset && selectedDevice != "m") {
-                    NodeActionButton(
-                        title = stringResource(id = R.string.set_your_region),
-                        icon = ConfigRoute.LORA.icon,
-                        enabled = true,
-                        onClick = {
-                            isWaiting = true
-                            radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
+
+                var selectedDeviceType by remember { mutableStateOf(DeviceType.BLE) }
+                LaunchedEffect(selectedDevice) {
+                    DeviceType.fromAddress(selectedDevice)?.let { type -> selectedDeviceType = type }
+                }
+
+                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(DeviceType.BLE.ordinal, DeviceType.entries.size),
+                        onClick = { selectedDeviceType = DeviceType.BLE },
+                        selected = (selectedDeviceType == DeviceType.BLE),
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Rounded.Bluetooth,
+                                contentDescription = stringResource(id = R.string.bluetooth),
+                                // modifier = Modifier.padding(end = 8.dp), // Add padding to separate icon from text
+                            )
+                        },
+                        label = {
+                            Text(
+                                text = stringResource(id = R.string.bluetooth),
+                                maxLines = 1,
+                                softWrap = true,
+                                // textAlign = TextAlign.Center,
+                                overflow = TextOverflow.Ellipsis,
+                            )
                         },
                     )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    if (scanning) {
-                        LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
-                    }
-                }
-            }
-            var selectedDeviceType by remember { mutableStateOf(DeviceType.BLE) }
-            LaunchedEffect(selectedDevice) {
-                DeviceType.fromAddress(selectedDevice)?.let { type -> selectedDeviceType = type }
-            }
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(DeviceType.BLE.ordinal, DeviceType.entries.size),
-                    onClick = { selectedDeviceType = DeviceType.BLE },
-                    selected = (selectedDeviceType == DeviceType.BLE),
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Default.Bluetooth,
-                            contentDescription = stringResource(id = R.string.bluetooth),
-                            modifier = Modifier.padding(end = 8.dp), // Add padding to separate icon from text
-                        )
-                    },
-                    label = {
-                        Text(
-                            text = stringResource(id = R.string.bluetooth),
-                            modifier = Modifier.padding(top = 2.dp),
-                            maxLines = 1,
-                            softWrap = true,
-                            textAlign = TextAlign.Center,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    },
-                )
-                SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(DeviceType.TCP.ordinal, DeviceType.entries.size),
-                    onClick = { selectedDeviceType = DeviceType.TCP },
-                    selected = (selectedDeviceType == DeviceType.TCP),
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Default.Wifi,
-                            contentDescription = stringResource(id = R.string.network),
-                            modifier = Modifier.padding(end = 8.dp), // Add padding to separate icon from text
-                        )
-                    },
-                    label = {
-                        Text(
-                            text = stringResource(id = R.string.network),
-                            modifier = Modifier.padding(top = 2.dp),
-                            maxLines = 1,
-                            softWrap = true,
-                            textAlign = TextAlign.Center,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    },
-                )
-                SegmentedButton(
-                    shape = SegmentedButtonDefaults.itemShape(DeviceType.USB.ordinal, DeviceType.entries.size),
-                    onClick = { selectedDeviceType = DeviceType.USB },
-                    selected = (selectedDeviceType == DeviceType.USB),
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Default.Usb,
-                            contentDescription = stringResource(id = R.string.serial),
-                            modifier = Modifier.padding(end = 8.dp), // Add padding to separate icon from text
-                        )
-                    },
-                    label = {
-                        Text(
-                            text = stringResource(id = R.string.serial),
-                            modifier = Modifier.padding(top = 2.dp),
-                            maxLines = 1,
-                            softWrap = true,
-                            textAlign = TextAlign.Center,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    },
-                )
-            }
-
-            Column(modifier = Modifier.fillMaxSize().padding(8.dp).verticalScroll(scrollState)) {
-                when (selectedDeviceType) {
-                    DeviceType.BLE -> {
-                        BLEDevices(
-                            connectionState = connectionState,
-                            btDevices = bleDevices,
-                            selectedDevice = selectedDevice,
-                            scanModel = scanModel,
-                        )
-                    }
-
-                    DeviceType.TCP -> {
-                        NetworkDevices(
-                            connectionState = connectionState,
-                            discoveredNetworkDevices = discoveredTcpDevices,
-                            recentNetworkDevices = recentTcpDevices,
-                            selectedDevice = selectedDevice,
-                            scanModel = scanModel,
-                        )
-                    }
-
-                    DeviceType.USB -> {
-                        UsbDevices(
-                            connectionState = connectionState,
-                            usbDevices = usbDevices,
-                            selectedDevice = selectedDevice,
-                            scanModel = scanModel,
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.weight(1f))
-
-                LaunchedEffect(ourNode) {
-                    if (ourNode != null) {
-                        uiViewModel.refreshProvideLocation()
-                    }
-                }
-                AnimatedVisibility(isConnected) {
-                    Row(
-                        modifier =
-                        Modifier.fillMaxWidth()
-                            .toggleable(
-                                value = provideLocation,
-                                onValueChange = { checked -> uiViewModel.setProvideLocation(checked) },
-                                enabled = !isGpsDisabled,
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(DeviceType.TCP.ordinal, DeviceType.entries.size),
+                        onClick = { selectedDeviceType = DeviceType.TCP },
+                        selected = (selectedDeviceType == DeviceType.TCP),
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Rounded.Wifi,
+                                contentDescription = stringResource(id = R.string.network),
+                                modifier = Modifier.padding(end = 8.dp), // Add padding to separate icon from text
                             )
-                            .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Checkbox(
-                            // Checked state driven by receivingLocationUpdates for visual feedback
-                            // but toggle action drives provideLocation
-                            checked = receivingLocationUpdates,
-                            onCheckedChange = null, // Toggleable handles the change
-                            enabled = !isGpsDisabled, // Disable if GPS is disabled
-                        )
-                        Text(
-                            text = stringResource(R.string.provide_location_to_mesh),
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(start = 16.dp),
-                        )
-                    }
-                }
-                // Provide Location Checkbox
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Warning Not Paired
-                val hasShownNotPairedWarning by uiViewModel.hasShownNotPairedWarning.collectAsStateWithLifecycle()
-                val showWarningNotPaired =
-                    !isConnected &&
-                        !hasShownNotPairedWarning &&
-                        bleDevices.none { it is DeviceListEntry.Ble && it.bonded }
-                if (showWarningNotPaired) {
-                    Text(
-                        text = stringResource(R.string.warning_not_paired),
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.padding(horizontal = 16.dp),
+                        },
+                        label = {
+                            Text(
+                                text = stringResource(id = R.string.network),
+                                modifier = Modifier.padding(top = 2.dp),
+                                maxLines = 1,
+                                softWrap = true,
+                                textAlign = TextAlign.Center,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        },
                     )
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    LaunchedEffect(Unit) { uiViewModel.suppressNoPairedWarning() }
-                }
-
-                // Analytics Okay Checkbox
-
-                val isGooglePlayAvailable = context.isGooglePlayAvailable
-                val isAnalyticsAllowed = app.isAnalyticsAllowed && isGooglePlayAvailable
-                if (isGooglePlayAvailable) {
-                    var loading by remember { mutableStateOf(false) }
-                    LaunchedEffect(isAnalyticsAllowed) { loading = false }
-                    Row(
-                        modifier =
-                        Modifier.fillMaxWidth()
-                            .toggleable(
-                                value = isAnalyticsAllowed,
-                                onValueChange = {
-                                    debug("User changed analytics to $it")
-                                    app.isAnalyticsAllowed = it
-                                    loading = true
-                                },
-                                role = Role.Checkbox,
-                                enabled = isGooglePlayAvailable && !loading,
+                    SegmentedButton(
+                        shape = SegmentedButtonDefaults.itemShape(DeviceType.USB.ordinal, DeviceType.entries.size),
+                        onClick = { selectedDeviceType = DeviceType.USB },
+                        selected = (selectedDeviceType == DeviceType.USB),
+                        icon = {
+                            Icon(
+                                imageVector = Icons.Rounded.Usb,
+                                contentDescription = stringResource(id = R.string.serial),
+                                modifier = Modifier.padding(end = 8.dp), // Add padding to separate icon from text
                             )
-                            .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        Checkbox(enabled = isGooglePlayAvailable, checked = isAnalyticsAllowed, onCheckedChange = null)
-                        Text(
-                            text = stringResource(R.string.analytics_okay),
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.padding(start = 16.dp),
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    // Report Bug Button
-                    Button(
-                        onClick = { showReportBugDialog = true }, // Set state to show Report Bug dialog
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                        enabled = isAnalyticsAllowed,
-                    ) {
-                        Text(stringResource(R.string.report_bug))
-                    }
+                        },
+                        label = {
+                            Text(
+                                text = stringResource(id = R.string.serial),
+                                modifier = Modifier.padding(top = 2.dp),
+                                maxLines = 1,
+                                softWrap = true,
+                                textAlign = TextAlign.Center,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        },
+                    )
                 }
-            }
-        }
 
-        // Compose Device Scan Dialog
-        if (showScanDialog) {
-            Dialog(
-                onDismissRequest = {
-                    showScanDialog = false
-                    scanModel.clearScanResults()
-                },
-            ) {
-                Surface(shape = MaterialTheme.shapes.medium) {
-                    Column(modifier = Modifier.padding(16.dp)) {
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Column(modifier = Modifier.fillMaxSize()) {
+                    when (selectedDeviceType) {
+                        DeviceType.BLE -> {
+                            BLEDevices(
+                                connectionState = connectionState,
+                                btDevices = bleDevices,
+                                selectedDevice = selectedDevice,
+                                scanModel = scanModel,
+                                bluetoothEnabled = bluetoothEnabled,
+                            )
+                        }
+
+                        DeviceType.TCP -> {
+                            NetworkDevices(
+                                connectionState = connectionState,
+                                discoveredNetworkDevices = discoveredTcpDevices,
+                                recentNetworkDevices = recentTcpDevices,
+                                selectedDevice = selectedDevice,
+                                scanModel = scanModel,
+                            )
+                        }
+
+                        DeviceType.USB -> {
+                            UsbDevices(
+                                connectionState = connectionState,
+                                usbDevices = usbDevices,
+                                selectedDevice = selectedDevice,
+                                scanModel = scanModel,
+                            )
+                        }
+                    }
+
+                    LaunchedEffect(ourNode) {
+                        if (ourNode != null) {
+                            uiViewModel.refreshProvideLocation()
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Warning Not Paired
+                    val hasShownNotPairedWarning by uiViewModel.hasShownNotPairedWarning.collectAsStateWithLifecycle()
+                    val showWarningNotPaired =
+                        !isConnected &&
+                            !hasShownNotPairedWarning &&
+                            bleDevices.none { it is DeviceListEntry.Ble && it.bonded }
+                    if (showWarningNotPaired) {
                         Text(
-                            text = "Select a Bluetooth device",
-                            style = MaterialTheme.typography.titleLarge,
-                            modifier = Modifier.padding(bottom = 16.dp),
+                            text = stringResource(R.string.warning_not_paired),
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodyMedium,
+                            modifier = Modifier.padding(horizontal = 16.dp),
                         )
-                        Column(modifier = Modifier.selectableGroup()) {
-                            scanResults.values.forEach { device ->
-                                Row(
-                                    modifier =
-                                    Modifier.fillMaxWidth()
-                                        .selectable(
-                                            selected = false, // No pre-selection in this dialog
-                                            onClick = {
-                                                scanModel.onSelected(device)
-                                                scanModel.clearScanResults()
-                                                showScanDialog = false
-                                            },
-                                        )
-                                        .padding(vertical = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                ) {
-                                    Text(text = device.name)
-                                }
-                            }
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        LaunchedEffect(Unit) { uiViewModel.suppressNoPairedWarning() }
+                    }
+
+                    // Analytics Okay Checkbox
+
+                    val isGooglePlayAvailable = context.isGooglePlayAvailable
+                    val isAnalyticsAllowed = app.isAnalyticsAllowed && isGooglePlayAvailable
+                    if (isGooglePlayAvailable) {
+                        var loading by remember { mutableStateOf(false) }
+                        LaunchedEffect(isAnalyticsAllowed) { loading = false }
+                        Row(
+                            modifier =
+                            Modifier.fillMaxWidth()
+                                .toggleable(
+                                    value = isAnalyticsAllowed,
+                                    onValueChange = {
+                                        debug("User changed analytics to $it")
+                                        app.isAnalyticsAllowed = it
+                                        loading = true
+                                    },
+                                    role = Role.Checkbox,
+                                    enabled = isGooglePlayAvailable && !loading,
+                                )
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Checkbox(
+                                enabled = isGooglePlayAvailable,
+                                checked = isAnalyticsAllowed,
+                                onCheckedChange = null,
+                            )
+                            Text(
+                                text = stringResource(R.string.analytics_okay),
+                                style = MaterialTheme.typography.bodyLarge,
+                                modifier = Modifier.padding(start = 16.dp),
+                            )
                         }
                         Spacer(modifier = Modifier.height(16.dp))
-                        TextButton(
+                        // Report Bug Button
+                        Button(
+                            onClick = { showReportBugDialog = true }, // Set state to show Report Bug dialog
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                            enabled = isAnalyticsAllowed,
+                        ) {
+                            Text(stringResource(R.string.report_bug))
+                        }
+                    }
+                }
+            }
+
+            // Compose Device Scan Dialog
+            if (showScanDialog) {
+                Dialog(
+                    onDismissRequest = {
+                        showScanDialog = false
+                        scanModel.clearScanResults()
+                    },
+                ) {
+                    Surface(shape = MaterialTheme.shapes.medium) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "Select a Bluetooth device",
+                                style = MaterialTheme.typography.titleLarge,
+                                modifier = Modifier.padding(bottom = 16.dp),
+                            )
+                            Column(modifier = Modifier.selectableGroup()) {
+                                scanResults.values.forEach { device ->
+                                    Row(
+                                        modifier =
+                                        Modifier.fillMaxWidth()
+                                            .selectable(
+                                                selected = false, // No pre-selection in this dialog
+                                                onClick = {
+                                                    scanModel.onSelected(device)
+                                                    scanModel.clearScanResults()
+                                                    showScanDialog = false
+                                                },
+                                            )
+                                            .padding(vertical = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                    ) {
+                                        Text(text = device.name)
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                            TextButton(
+                                onClick = {
+                                    scanModel.clearScanResults()
+                                    showScanDialog = false
+                                },
+                            ) {
+                                Text(stringResource(R.string.cancel))
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Compose Report Bug Dialog
+            if (showReportBugDialog) {
+                AlertDialog(
+                    onDismissRequest = { showReportBugDialog = false },
+                    title = { Text(stringResource(R.string.report_a_bug)) },
+                    text = { Text(stringResource(R.string.report_bug_text)) },
+                    confirmButton = {
+                        Button(
                             onClick = {
-                                scanModel.clearScanResults()
-                                showScanDialog = false
+                                showReportBugDialog = false
+                                reportError("Clicked Report A Bug")
+                                uiViewModel.showSnackBar("Bug report sent!")
+                            },
+                        ) {
+                            Text(stringResource(R.string.report))
+                        }
+                    },
+                    dismissButton = {
+                        Button(
+                            onClick = {
+                                showReportBugDialog = false
+                                debug("Decided not to report a bug")
                             },
                         ) {
                             Text(stringResource(R.string.cancel))
                         }
-                    }
-                }
+                    },
+                )
             }
         }
 
-        // Compose Report Bug Dialog
-        if (showReportBugDialog) {
-            AlertDialog(
-                onDismissRequest = { showReportBugDialog = false },
-                title = { Text(stringResource(R.string.report_a_bug)) },
-                text = { Text(stringResource(R.string.report_bug_text)) },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            showReportBugDialog = false
-                            reportError("Clicked Report A Bug")
-                            uiViewModel.showSnackBar("Bug report sent!")
-                        },
-                    ) {
-                        Text(stringResource(R.string.report))
-                    }
-                },
-                dismissButton = {
-                    Button(
-                        onClick = {
-                            showReportBugDialog = false
-                            debug("Decided not to report a bug")
-                        },
-                    ) {
-                        Text(stringResource(R.string.cancel))
-                    }
-                },
+        Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+            Text(
+                text = scanStatusText.orEmpty(),
+                fontSize = 10.sp,
+                textAlign = TextAlign.End,
+                modifier = Modifier.fillMaxWidth(),
             )
         }
     }
