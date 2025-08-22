@@ -82,7 +82,6 @@
     <string name="accept">Akceptuj</string>
     <string name="cancel">Anuluj</string>
     <string name="new_channel_rcvd">Otrzymano nowy URL kanału</string>
-    <string name="permission_missing">Meshtastic potrzebuje zezwolenia na lokalizacje. Lokalizacja musi być włączona, aby można było znaleźć nowe urządzenia przez Bluetooth. Możesz je później wyłączyć.</string>
     <string name="report_bug">Zgłoś błąd</string>
     <string name="report_a_bug">Zgłoś błąd</string>
     <string name="report_bug_text">Czy na pewno chcesz zgłosić błąd? Po zgłoszeniu opublikuj post na https://github.com/orgs/meshtastic/discussions, abyśmy mogli dopasować zgłoszenie do tego, co znalazłeś.</string>
@@ -94,7 +93,7 @@
     <string name="disconnected">Rozłączono</string>
     <string name="device_sleeping">Urządzenie uśpione</string>
     <string name="ip_address">Adres IP:</string>
-    <string name="connected">Połączono z urządzeniem</string>
+    <string name="connected">Połączony</string>
     <string name="connected_to">Połączono z urządzeniem (%s)</string>
     <string name="not_connected">Nie połączono</string>
     <string name="connected_sleeping">Połączono z urządzeniem, ale jest ono w stanie uśpienia</string>
@@ -116,6 +115,7 @@
     <string name="save_rangetest">Eksport rangetest.csv</string>
     <string name="reset">Zresetuj</string>
     <string name="scan">Skanowanie</string>
+    <string name="add_network_device">Dodaj</string>
     <string name="are_you_sure_change_default">Czy na pewno chcesz zmienić kanał na domyślny?</string>
     <string name="reset_to_defaults">Przywróć domyślne</string>
     <string name="apply">Zastosuj</string>
@@ -156,8 +156,6 @@
     <string name="quick_chat_append">Dodaj do wiadomości</string>
     <string name="quick_chat_instant">Wyślij natychmiast</string>
     <string name="factory_reset">Ustawienia fabryczne</string>
-    <string name="bluetooth_disabled">Bluetooth wyłączony</string>
-    <string name="permission_missing_31">Meshtastic potrzebuje uprawnień do lokalizacji, aby znaleźć i połączyć się z urządzeniami przez Bluetooth. Możesz je wyłączyć, gdy nie jest używany.</string>
     <string name="direct_message">Bezpośrednia wiadomość</string>
     <string name="nodedb_reset">Zresetuj NodeDB</string>
     <string name="delivery_confirmed">Dostarczono</string>
@@ -356,7 +354,10 @@
     <string name="heading">Kierunek</string>
     <string name="primary">Podstawowy</string>
     <string name="secondary">Wtórny</string>
-    <string name="map">Mapa</string>
+    <string name="connections">Połączenie</string>
+    <string name="map">Mapa Sieci</string>
+    <string name="contacts">Wiadomości</string>
+    <string name="bottom_nav_share">Udostępnij</string>
     <string name="reply">Odpowiedz</string>
     <string name="disconnect">Rozłącz</string>
     <string name="unknown">Nieznany</string>

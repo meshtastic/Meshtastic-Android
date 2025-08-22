@@ -80,7 +80,6 @@
     <string name="accept">Прихвати</string>
     <string name="cancel">Откажи</string>
     <string name="new_channel_rcvd">Примљен нови линк канала</string>
-    <string name="permission_missing">Мештастик захтева дозволу за локацију и локација мора бити укључена да би се нашли нови уређаји преко блутута. Можете је поново искључити касније.</string>
     <string name="report_bug">Пријави грешку</string>
     <string name="report_a_bug">Пријави грешку</string>
     <string name="report_bug_text">Да ли сте сигурни да желите да пријавите грешку? Након пријаве, молимо вас да објавите на https://github.com/orgs/meshtastic/discussions како бисмо могли да упаримо извештај са оним што сте нашли.</string>
@@ -92,7 +91,7 @@
     <string name="disconnected">Раскачено</string>
     <string name="device_sleeping">Уређај је у стању спавања</string>
     <string name="ip_address">IP адреса:</string>
-    <string name="connected">Повезан на радио уређај</string>
+    <string name="connected">Блутут повезан</string>
     <string name="connected_to">Повезан на радио уређај (%s)</string>
     <string name="not_connected">Није повезан</string>
     <string name="connected_sleeping">Повезан на радио уређај, али уређај је у стању спавања</string>
@@ -114,6 +113,7 @@
     <string name="save_rangetest">Извези rangetest.csv</string>
     <string name="reset">Поново покрени</string>
     <string name="scan">Скенирај</string>
+    <string name="add_network_device">Додај</string>
     <string name="are_you_sure_change_default">Да ли сте сигурни да желите да промените на подразумевани канал?</string>
     <string name="reset_to_defaults">Врати на подразумевана подешавања</string>
     <string name="apply">Примени</string>
@@ -153,8 +153,6 @@
     <string name="quick_chat_append">Надодај на поруку</string>
     <string name="quick_chat_instant">Моментално пошаљи</string>
     <string name="factory_reset">Рестартовање на фабричка подешавања</string>
-    <string name="bluetooth_disabled">Блутут је онемогућен</string>
-    <string name="permission_missing_31">Мештастик захтева дозволу за приступ уређајима у близини да би пронашли и повезали се са уређајима преко блутута. Можете га искључити када се не користи.</string>
     <string name="direct_message">Директне поруке</string>
     <string name="nodedb_reset">Ресетовање базе чворова</string>
     <string name="delivery_confirmed">Испорука потврђена</string>
@@ -341,8 +339,10 @@
     <string name="secondary">Секундарни</string>
     <string name="actions">Акције</string>
     <string name="firmware">Фирмвер</string>
-    <string name="map">Мапа</string>
+    <string name="map">Мапа меша</string>
+    <string name="contacts">Поруке</string>
     <string name="nodes">Чворови</string>
+    <string name="bottom_nav_share">Подели</string>
     <string name="reply">Одговори</string>
     <string name="expires">Истиче</string>
     <string name="time">Време</string>

@@ -86,7 +86,6 @@
     <string name="cancel">取消</string>
     <string name="clear_changes">清除變更</string>
     <string name="new_channel_rcvd">收到新的頻道 URL</string>
-    <string name="permission_missing">Meshtastic 需要位置權限並啟用位置信息才能通過藍牙查找新設備。找到之後可以再關閉這權限。</string>
     <string name="report_bug">回報BUG</string>
     <string name="report_a_bug">回報問題</string>
     <string name="report_bug_text">您確定要報告錯誤嗎？報告後，請在 https://github.com/orgs/meshtastic/discussions 上貼文，以便我們可以將報告與您發現的問題匹配。</string>
@@ -100,7 +99,7 @@
     <string name="connected_count">已連接:%1$s 在線</string>
     <string name="ip_address">IP地址：</string>
     <string name="ip_port">埠號：</string>
-    <string name="connected">連接到設備</string>
+    <string name="connected">已连接</string>
     <string name="connected_to">已連接至設備 (%s)</string>
     <string name="not_connected">未連線</string>
     <string name="connected_sleeping">已連接至無線電，但它正在休眠中</string>
@@ -136,6 +135,7 @@
     <string name="save_rangetest">匯出範圍測試資料.csv</string>
     <string name="reset">重設</string>
     <string name="scan">掃描</string>
+    <string name="add_network_device">新增</string>
     <string name="are_you_sure_change_default">您確定要切換到預設頻道嗎？</string>
     <string name="reset_to_defaults">恢復預設設置</string>
     <string name="apply">套用</string>
@@ -173,8 +173,6 @@
     <string name="quick_chat_append">附加到訊息</string>
     <string name="quick_chat_instant">即時發送</string>
     <string name="factory_reset">恢復出廠設置</string>
-    <string name="bluetooth_disabled">藍牙已禁用</string>
-    <string name="permission_missing_31">Meshtastic 需要附近設備許可才能通過藍牙查找和連接設備。 您可以在不使用時將其關閉。</string>
     <string name="direct_message">直接發訊息</string>
     <string name="nodedb_reset">重設節點資料庫</string>
     <string name="delivery_confirmed">已確認送達</string>
@@ -454,8 +452,9 @@
     <string name="unmonitored_or_infrastructure">無監控裝置或基礎設施</string>
     <string name="firmware">韌體</string>
     <string name="load">載入</string>
-    <string name="map">地圖</string>
+    <string name="contacts">訊息</string>
     <string name="nodes">節點</string>
+    <string name="bottom_nav_share">分享</string>
     <string name="set_your_region">設定你的地區</string>
     <string name="reply">回復</string>
     <string name="i_agree">我同意。</string>
@@ -463,7 +462,6 @@
     <string name="date">日期</string>
     <string name="remote">遠端</string>
     <string name="disconnect">中斷連線</string>
-    <string name="no_ble_devices">找不到藍牙裝置。</string>
     <string name="no_network_devices">找不到網路裝置。</string>
     <string name="no_usb_devices">找不到 USB 序列裝置。</string>
     <string name="scroll_to_bottom">捲動至底部</string>

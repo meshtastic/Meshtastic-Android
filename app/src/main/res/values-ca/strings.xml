@@ -37,7 +37,6 @@
     <string name="accept">Acceptar</string>
     <string name="cancel">Cancel·lar</string>
     <string name="new_channel_rcvd">Nova URL de canal rebuda</string>
-    <string name="permission_missing">Meshtastic necessita permisos de posicionament i la posició ha d\'estar activada per trobar nous dispositius Bluetooth. Els podràs apagar posteriorment.</string>
     <string name="report_bug">Informar d\'error</string>
     <string name="report_a_bug">Informar d\'un error</string>
     <string name="report_bug_text">Estàs segur que vols informar d\'un error? Després d\'informar-ne, si us plau publica en https://github.com/orgs/meshtastic/discussions de tal manera que puguem emparellar l\'informe amb allò que has trobat.</string>
@@ -49,7 +48,6 @@
     <string name="disconnected">Desconnectat</string>
     <string name="device_sleeping">Dispositiu hivernant</string>
     <string name="ip_address">Adreça IP:</string>
-    <string name="connected">Connectat a ràdio</string>
     <string name="connected_to">Connectat a ràdio (%s)</string>
     <string name="not_connected">No connectat</string>
     <string name="connected_sleeping">Connectat a ràdio, però està hivernant</string>
@@ -70,6 +68,7 @@
     <string name="save_rangetest">Exportat rangetest.csv</string>
     <string name="reset">Restablir</string>
     <string name="scan">Escanejar</string>
+    <string name="add_network_device">Afegir</string>
     <string name="are_you_sure_change_default">Estàs segur que vols canviar al canal per defecte?</string>
     <string name="reset_to_defaults">Restablir els defectes</string>
     <string name="apply">Aplicar</string>
@@ -107,8 +106,6 @@
     <string name="quick_chat_append">Afegir a missatge</string>
     <string name="quick_chat_instant">Enviar instantàniament</string>
     <string name="factory_reset">Restauració dels paràmetres de fàbrica</string>
-    <string name="bluetooth_disabled">Bluetooth desactivat</string>
-    <string name="permission_missing_31">Meshtastic necessita permisos per accedir als dispositius propers per trobar i connectar-se a dispositius via Bluetooth. Pots apagar-ho quan no ho facis servir.</string>
     <string name="direct_message">Missatge directe</string>
     <string name="nodedb_reset">Restablir NodeDB</string>
     <string name="delivery_confirmed">Entrega confirmada</string>
@@ -149,6 +146,7 @@
     <string name="mute_1_week">1 setmana</string>
     <string name="mute_always">Sempre</string>
     <string name="distance">Distància</string>
+    <string name="bottom_nav_share">Compartir</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->

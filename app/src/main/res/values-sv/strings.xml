@@ -80,7 +80,6 @@
     <string name="accept">Acceptera</string>
     <string name="cancel">Avbryt</string>
     <string name="new_channel_rcvd">Ny kanal-länk mottagen</string>
-    <string name="permission_missing">Meshtastic behöver platsbehörighet och Plats måste vara aktiverad för att hitta nya enheter via Bluetooth. Du kan stänga av Plats igen efteråt.</string>
     <string name="report_bug">Rapportera bugg</string>
     <string name="report_a_bug">Rapportera bugg</string>
     <string name="report_bug_text">Är du säker på att du vill rapportera en bugg? Efter rapportering, vänligen posta i https://github.com/orgs/meshtastic/discussions så att vi kan matcha rapporten med buggen du hittat.</string>
@@ -92,7 +91,7 @@
     <string name="disconnected">Frånkopplad</string>
     <string name="device_sleeping">Enheten i sovläge</string>
     <string name="ip_address">IP-adress:</string>
-    <string name="connected">Ansluten till radioenhet</string>
+    <string name="connected">Ansluten</string>
     <string name="connected_to">Ansluten till radioenhet (%s)</string>
     <string name="not_connected">Ej ansluten</string>
     <string name="connected_sleeping">Ansluten till radioenhet, men den är i sovläge</string>
@@ -113,6 +112,7 @@
     <string name="save_rangetest">Exportera rangetest.csv</string>
     <string name="reset">Nollställ</string>
     <string name="scan">Sök</string>
+    <string name="add_network_device">Lägg till</string>
     <string name="are_you_sure_change_default">Är du säker på att du vill ändra till standardkanalen?</string>
     <string name="reset_to_defaults">Återställ till standardinställningar</string>
     <string name="apply">Verkställ</string>
@@ -151,8 +151,6 @@
     <string name="quick_chat_append">Lägg till i meddelandet</string>
     <string name="quick_chat_instant">Skicka direkt</string>
     <string name="factory_reset">Återställ till standardinställningar</string>
-    <string name="bluetooth_disabled">Bluetooth är inaktiverad</string>
-    <string name="permission_missing_31">Meshtastic behöver åtkomst till enheter i närheten för att hitta och ansluta till enheter via Bluetooth. Du kan stänga av det när den inte används.</string>
     <string name="direct_message">Direktmeddelande</string>
     <string name="nodedb_reset">Nollställ NodeDB</string>
     <string name="delivery_confirmed">Sändning bekräftad</string>
@@ -290,8 +288,10 @@
     <string name="primary">Primär</string>
     <string name="scan_qr_code">Skanna QR-kod</string>
     <string name="import_label">Importera</string>
-    <string name="map">Karta</string>
+    <string name="connections">Anslutning</string>
+    <string name="contacts">Meddelanden</string>
     <string name="nodes">Noder</string>
+    <string name="bottom_nav_share">Dela</string>
     <string name="reply">Svara</string>
     <string name="meshtastic">Meshtastic</string>
     <string name="unknown">Okänd</string>

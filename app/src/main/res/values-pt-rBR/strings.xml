@@ -88,7 +88,6 @@
     <string name="cancel">Cancelar</string>
     <string name="clear_changes">Limpar mudanças</string>
     <string name="new_channel_rcvd">Novo link de canal recebido</string>
-    <string name="permission_missing">Meshtastic precisa da permissão de localização e localização ativada para encontrar novos dispositivos via Bluetooth. Você pode desativar novamente depois.</string>
     <string name="report_bug">Informar Bug</string>
     <string name="report_a_bug">Informar um bug</string>
     <string name="report_bug_text">Tem certeza que deseja informar um erro? Após o envio, por favor envie uma mensagem em https://github.com/orgs/meshtastic/discussions para podermos comparar o relatório com o problema encontrado.</string>
@@ -103,7 +102,6 @@
     <string name="connected_count">Conectado: %1$s ligado(s)</string>
     <string name="ip_address">Endereço IP:</string>
     <string name="ip_port">Porta:</string>
-    <string name="connected">Conectado ao rádio</string>
     <string name="connected_to">Conectado ao rádio (%s)</string>
     <string name="not_connected">Não conectado</string>
     <string name="connected_sleeping">Conectado ao rádio, mas ele está em suspensão (sleep)</string>
@@ -142,6 +140,7 @@
     <string name="save_rangetest">Exportar rangetest.csv</string>
     <string name="reset">Redefinir</string>
     <string name="scan">Escanear</string>
+    <string name="add_network_device">Adicionar</string>
     <string name="are_you_sure_change_default">Tem certeza que quer mudar para o canal padrão?</string>
     <string name="reset_to_defaults">Redefinir para configurações originais</string>
     <string name="apply">Aplicar</string>
@@ -184,8 +183,6 @@
     <string name="quick_chat_show">Mostrar menu de chat rápido</string>
     <string name="quick_chat_hide">Ocultar menu de chat rápido</string>
     <string name="factory_reset">Redefinição de fábrica</string>
-    <string name="bluetooth_disabled">Bluetooth desativado</string>
-    <string name="permission_missing_31">Meshtastic precisa da permissão de Dispositivos por perto para encontrar e conectar a dispositivos via Bluetooth. Você pode desligá-lo quando não estiver em uso.</string>
     <string name="direct_message">Mensagem direta</string>
     <string name="nodedb_reset">Redefinir NodeDB</string>
     <string name="delivery_confirmed">Entrega confirmada</string>
@@ -603,10 +600,9 @@
     <string name="load">Carregar</string>
     <string name="user_string">String de Usuário</string>
     <string name="navigate_into_label">Navegar Em</string>
-    <string name="connections">Conexões</string>
-    <string name="map">Mapa</string>
-    <string name="contacts">Contatos</string>
+    <string name="contacts">Mensagens</string>
     <string name="nodes">Nós</string>
+    <string name="bottom_nav_share">Compartilhar</string>
     <string name="set_your_region">Defina sua região</string>
     <string name="reply">Responder</string>
     <string name="map_reporting_summary">Seu nó enviará periodicamente um pacote de relatório de mapa não criptografado para o servidor MQTT configurado, incluindo, id, nome longo e curto, localização aproximada, modelo de hardware, função de firmware, região de LoRa, predefinição de modem e nome de canal primário.</string>
@@ -634,7 +630,6 @@
     <string name="node_count_template">(%1$d online / %2$d total)</string>
     <string name="react">Reagir</string>
     <string name="disconnect">Desconectar</string>
-    <string name="no_ble_devices">Nenhum dispositivo Bluetooth encontrado</string>
     <string name="no_network_devices">Nenhum dispositivo de rede encontrado.</string>
     <string name="no_usb_devices">Nenhum dispositivo USB Serial encontrado.</string>
     <string name="scroll_to_bottom">Rolar para o final</string>
@@ -724,7 +719,6 @@
     <string name="configure_critical_alerts">Configurar Alertas Críticos</string>
     <string name="notification_permissions_description">Meshtastic usa notificações para mantê-lo atualizado sobre novas mensagens e outros eventos importantes. Você pode atualizar suas permissões de notificação a qualquer momento nas configurações.</string>
     <string name="next">Avançar</string>
-    <string name="grant_permissions_and_scan">Conceder Permissões e Escanear</string>
     <string name="map_type_normal">Normal</string>
     <string name="map_type_satellite">Satélite</string>
     <string name="map_type_terrain">Terreno</string>

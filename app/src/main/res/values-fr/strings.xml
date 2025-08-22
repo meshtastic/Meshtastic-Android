@@ -88,7 +88,6 @@
     <string name="cancel">Annuler</string>
     <string name="clear_changes">Annuler modifications</string>
     <string name="new_channel_rcvd">Réception de l\'URL d\'un nouveau cana</string>
-    <string name="permission_missing">Une permission indispensable manque, Meshtastic ne peut pas fonctionner. Veuillez modifier dans Réglages.</string>
     <string name="report_bug">Rapporter Bogue</string>
     <string name="report_a_bug">Rapporter un Bogue</string>
     <string name="report_bug_text">Êtes-vous certain de vouloir rapporter un bogue ? Après l\'envoi, veuillez poster dans https://github.com/orgs/meshtastic/discussions afin que nous puissions examiner ce que vous avez trouvé.</string>
@@ -103,7 +102,7 @@
     <string name="connected_count">Connectés : %1$s sur en ligne</string>
     <string name="ip_address">Adresse IP:</string>
     <string name="ip_port">Port :</string>
-    <string name="connected">Connecté à la radio</string>
+    <string name="connected">Connecté</string>
     <string name="connected_to">Connecté à la radio (%s)</string>
     <string name="not_connected">Non connecté</string>
     <string name="connected_sleeping">Connecté à la radio, mais en mode veille</string>
@@ -142,6 +141,7 @@
     <string name="save_rangetest">Exporter rangetest.csv</string>
     <string name="reset">Réinitialiser</string>
     <string name="scan">Scanner</string>
+    <string name="add_network_device">Ajouter</string>
     <string name="are_you_sure_change_default">Êtes-vous sûr de vouloir passer au canal par défaut ?</string>
     <string name="reset_to_defaults">Rétablir les valeurs par défaut</string>
     <string name="apply">Appliquer</string>
@@ -184,8 +184,6 @@
     <string name="quick_chat_show">Afficher le menu de discussion rapide</string>
     <string name="quick_chat_hide">Masquer le menu de discussion rapide</string>
     <string name="factory_reset">Réinitialisation d\'usine</string>
-    <string name="bluetooth_disabled">Le Bluetooth est désactivé</string>
-    <string name="permission_missing_31">Meshtastic a besoin de la permission des appareils à proximité pour trouver et se connecter à des appareils via le Bluetooth. Vous pouvez le désactiver quand il n\'est pas utilisé.</string>
     <string name="direct_message">Message direct</string>
     <string name="nodedb_reset">Reconfiguration de NodeDB</string>
     <string name="delivery_confirmed">Réception confirmée</string>
@@ -604,10 +602,11 @@
     <string name="load">Charge</string>
     <string name="user_string">Texte utilisateur</string>
     <string name="navigate_into_label">Naviguer vers</string>
-    <string name="connections">Connexions</string>
-    <string name="map">Carte</string>
-    <string name="contacts">Contacts</string>
+    <string name="connections">Connexion</string>
+    <string name="map">Carte de maillage</string>
+    <string name="contacts">Messages</string>
     <string name="nodes">Noeuds</string>
+    <string name="bottom_nav_share">Partager</string>
     <string name="set_your_region">Définir votre région</string>
     <string name="reply">Répondre</string>
     <string name="map_reporting_summary">Votre nœud enverra périodiquement un paquet de rapport de position non chiffré au serveur MQTT configuré. Ce paquet inclut l\'identifiant, les noms long et court, la position approximative, le modèle matériel, le rôle, la version du micrologiciel, la région LoRa, le préréglage du modem et le nom du canal principal.</string>
@@ -635,7 +634,6 @@
     <string name="node_count_template">(%1$d en ligne / %2$d total)</string>
     <string name="react">Réagir</string>
     <string name="disconnect">Déconnecter</string>
-    <string name="no_ble_devices">Aucun périphérique Bluetooth trouvé.</string>
     <string name="no_network_devices">Aucun périphérique réseau trouvé.</string>
     <string name="no_usb_devices">Aucun périphérique série USB détecté.</string>
     <string name="scroll_to_bottom">Défiler vers le bas</string>
@@ -729,7 +727,6 @@
     <string name="configure_critical_alerts">Configurer les alertes critiques</string>
     <string name="notification_permissions_description">Meshtastic utilise les notifications pour vous tenir à jour sur les nouveaux messages et autres événements importants. Vous pouvez mettre à jour vos autorisations de notification à tout moment à partir des paramètres.</string>
     <string name="next">Suivant</string>
-    <string name="grant_permissions_and_scan">Accorder les autorisations et le scan</string>
     <string name="nodes_queued_for_deletion">%d nœuds en attente de suppression :</string>
     <string name="clean_node_database_description">Attention : Ceci supprime les nœuds des bases de données in-app et on-device.\nLes sélections sont additionnelles.</string>
     <string name="connecting_to_device">Connexion à l\'appareil</string>

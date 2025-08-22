@@ -29,7 +29,6 @@
     <string name="accept">Accept</string>
     <string name="cancel">Renunta</string>
     <string name="new_channel_rcvd">Am primit un nou URL de canal</string>
-    <string name="permission_missing">O permisiune necesară lipsește, Meshtastic nu o să funcționeze corespunzător.  Te rugăm activează-o în setările Android.</string>
     <string name="report_bug">Raportează Bug</string>
     <string name="report_a_bug">Raportează un bug</string>
     <string name="report_bug_text">Ești sigur că vrei să raportezi un bug? După ce ai raportat, te rog postează în https://github.com/orgs/meshtastic/discussions că să reușim să potrivim reportul tău cu ce ai găsit.</string>
@@ -41,7 +40,6 @@
     <string name="disconnected">Deconectat</string>
     <string name="device_sleeping">Dispozitiv în sleep mode</string>
     <string name="ip_address">Adresa IP:</string>
-    <string name="connected">Connectat la dispozitiv</string>
     <string name="connected_to">Conectat la dispozitivul (%s)</string>
     <string name="not_connected">Neconectat</string>
     <string name="connected_sleeping">Connectat la dispozitivi, dar e în modul de sleep</string>
@@ -62,6 +60,7 @@
     <string name="save_rangetest">Export rangetest.csv</string>
     <string name="reset">Resetare</string>
     <string name="scan">Scanare</string>
+    <string name="add_network_device">Adaugă</string>
     <string name="are_you_sure_change_default">Ești sigur că vrei să revii la canalul implicit?</string>
     <string name="reset_to_defaults">Reinițializare la valorile implicite</string>
     <string name="apply">Aplică</string>
@@ -100,8 +99,6 @@
     <string name="quick_chat_append">Adaugă la mesaj</string>
     <string name="quick_chat_instant">Trimite instant</string>
     <string name="factory_reset">Resetare la setările din fabrică</string>
-    <string name="bluetooth_disabled">Bluetooth dezactivat</string>
-    <string name="permission_missing_31">Meshtastic are nevoie de permisiunea Nearby devices pentru a găsi și a se conecta la dispozitive prin Bluetooth. O poți dezactiva atunci când nu este în uz.</string>
     <string name="direct_message">Mesaj direct</string>
     <string name="nodedb_reset">Resetare NodeDB</string>
     <string name="ignore">Ignoră</string>
@@ -132,6 +129,7 @@
     <string name="waypoint_new">Waypoint nou</string>
     <string name="waypoint_received">Waypoint recepționat: $1%s</string>
     <string name="error_duty_cycle">Limita Duty Cycle a fost atinsă. Nu se pot trimite mesaje acum, vă rugăm să încercați din nou mai târziu.</string>
+    <string name="bottom_nav_share">Distribuie</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->

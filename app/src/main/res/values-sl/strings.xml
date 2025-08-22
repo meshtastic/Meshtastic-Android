@@ -80,7 +80,6 @@
     <string name="accept">Sprejmi</string>
     <string name="cancel">Prekliči/zavrzi</string>
     <string name="new_channel_rcvd">Prejet je bil novi URL kanala</string>
-    <string name="permission_missing">Meshtastic potrebuje dovoljenje za lokacijo in za iskanje novih naprav prek povezave Bluetooth mora biti lokacija vklopljena. Pozneje jo lahko znova izklopite.</string>
     <string name="report_bug">Prijavi napako</string>
     <string name="report_a_bug">Prijavite napako</string>
     <string name="report_bug_text">Ali ste prepričani, da želite prijaviti napako? Po poročanju objavite v https://github.com/orgs/meshtastic/discussions, da bomo lahko primerjali poročilo s tistim, kar ste našli.</string>
@@ -92,7 +91,6 @@
     <string name="disconnected">Prekinjeno</string>
     <string name="device_sleeping">Naprava je v \"spanju\"</string>
     <string name="ip_address">IP naslov:</string>
-    <string name="connected">Povezana z radiem</string>
     <string name="connected_to">Povezana z radiem (%s)</string>
     <string name="not_connected">Ni povezano</string>
     <string name="connected_sleeping">Povezan z radiem, vendar radio \"spi\"</string>
@@ -113,6 +111,7 @@
     <string name="save_rangetest">Izvozi rangetest.csv</string>
     <string name="reset">Ponastavi</string>
     <string name="scan">Skeniraj</string>
+    <string name="add_network_device">Dodaj</string>
     <string name="are_you_sure_change_default">Ali si prepričan spremeni na osnovno?</string>
     <string name="reset_to_defaults">Ponastavi na osnovno</string>
     <string name="apply">Uporabi</string>
@@ -153,8 +152,6 @@
     <string name="quick_chat_append">Dodaj v sporočilo</string>
     <string name="quick_chat_instant">Pošlji takoj</string>
     <string name="factory_reset">Povrnitev tovarniških nastavitev</string>
-    <string name="bluetooth_disabled">Bluetooth onemogočen</string>
-    <string name="permission_missing_31">Program Meshtastic potrebuje dovoljenje za bližnje naprave, da lahko poišče in se poveže z napravami prek povezave Bluetooth. Ko ga ne uporabljate, ga lahko izklopite.</string>
     <string name="direct_message">Direktno sporočilo</string>
     <string name="nodedb_reset">Ponastavi NodeDB</string>
     <string name="delivery_confirmed">Prejem potrjen</string>
@@ -257,6 +254,7 @@
     <string name="private_key">Zasebni ključ</string>
     <string name="timeout">Časovna omejitev</string>
     <string name="distance">Razdalja</string>
+    <string name="bottom_nav_share">Souporaba</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->

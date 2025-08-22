@@ -85,7 +85,6 @@
     <string name="accept">Accetta</string>
     <string name="cancel">Annulla</string>
     <string name="new_channel_rcvd">Ricevuta URL del Nuovo Canale</string>
-    <string name="permission_missing">Meshtastic necessita dei permessi di geolocalizzazione e la geolocalizzazione deve essere attiva per cercare nuovi dispositivi via Bluetooth. È possibile disattivarla successivamente.</string>
     <string name="report_bug">Segnala Bug</string>
     <string name="report_a_bug">Segnalazione di bug</string>
     <string name="report_bug_text">Procedere con la segnalazione di bug? Dopo averlo segnalato, si prega di postarlo in https://github.com/orgs/meshtastic/discussions in modo che possiamo associare la segnalazione al problema riscontrato.</string>
@@ -99,7 +98,7 @@
     <string name="connected_count">Connesso: %1$s online</string>
     <string name="ip_address">Indirizzo IP:</string>
     <string name="ip_port">Porta:</string>
-    <string name="connected">Connesso alla radio</string>
+    <string name="connected">Connesso</string>
     <string name="connected_to">Connesso alla radio (%s)</string>
     <string name="not_connected">Non connesso</string>
     <string name="connected_sleeping">Connesso alla radio, ma sta dormendo</string>
@@ -131,6 +130,7 @@
     <string name="save_rangetest">Esporta rangetest.csv</string>
     <string name="reset">Reset</string>
     <string name="scan">Scan</string>
+    <string name="add_network_device">Aggiungere</string>
     <string name="are_you_sure_change_default">Confermi di voler passare al canale predefinito?</string>
     <string name="reset_to_defaults">Ripristina impostazioni predefinite</string>
     <string name="apply">Applica</string>
@@ -169,8 +169,6 @@
     <string name="quick_chat_append">Aggiungi al messaggio</string>
     <string name="quick_chat_instant">Invio immediato</string>
     <string name="factory_reset">Ripristina impostazioni di fabbrica</string>
-    <string name="bluetooth_disabled">Bluetooth disabilitato</string>
-    <string name="permission_missing_31">Meshtastic ha bisogno del permesso di dispositivi nelle vicinanze per trovare e connettersi ai dispositivi tramite Bluetooth. Puoi disattivarlo quando non è in uso.</string>
     <string name="direct_message">Messaggio diretto</string>
     <string name="nodedb_reset">NodeDB reset</string>
     <string name="delivery_confirmed">Consegna confermata</string>
@@ -581,10 +579,10 @@
     <string name="load">Carico</string>
     <string name="user_string">Stringa Utente</string>
     <string name="navigate_into_label">Guidami Verso</string>
-    <string name="connections">Connessioni</string>
-    <string name="map">Mappa</string>
-    <string name="contacts">Contatti</string>
+    <string name="connections">Connessione</string>
+    <string name="contacts">Messaggi</string>
     <string name="nodes">Nodi</string>
+    <string name="bottom_nav_share">Condividi</string>
     <string name="set_your_region">Imposta la tua regione</string>
     <string name="reply">Rispondi</string>
     <string name="map_reporting_summary">Il nodo invierà periodicamente un pacchetto di report mappa non cifrato al server MQTT configurato, questo include il nome id lungo e breve, posizione approssimativa, modello hardware, ruolo, versione firmware, regione LoRa, configurazione modem e nome del canale primario.</string>
@@ -612,7 +610,6 @@
     <string name="node_count_template">(%1$d online / %2$d in totale)</string>
     <string name="react">Rispondi</string>
     <string name="disconnect">Disconnetti</string>
-    <string name="no_ble_devices">Nessun dispositivo Bluetooth trovato.</string>
     <string name="no_network_devices">Nessun dispositivo di rete trovato.</string>
     <string name="no_usb_devices">Nessun dispositivo trovato sulla seriale USB.</string>
     <string name="scroll_to_bottom">Scorri fino in fondo</string>

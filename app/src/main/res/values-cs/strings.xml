@@ -84,7 +84,6 @@
     <string name="accept">Přijmout</string>
     <string name="cancel">Zrušit</string>
     <string name="new_channel_rcvd">Nová URL kanálu přijata</string>
-    <string name="permission_missing">Chybí požadovaná oprávnění, Meshtastic nebude fungovat správně. Prosím změntě oprávnění pro aplikaci.</string>
     <string name="report_bug">Nahlášení chyby</string>
     <string name="report_a_bug">Nahlásit chybu</string>
     <string name="report_bug_text">Jste si jistý, že chcete nahlásit chybu? Po odeslání prosím přidejte zprávu do https://github.com/orgs/meshtastic/discussions abychom mohli přiřadit Vaši nahlášenou chybu k příspěvku.</string>
@@ -98,7 +97,6 @@
     <string name="connected_count">Připojeno: %1$s online</string>
     <string name="ip_address">IP adresa:</string>
     <string name="ip_port">Port:</string>
-    <string name="connected">Připojeno k vysílači</string>
     <string name="connected_to">Připojeno k vysílači (%s)</string>
     <string name="not_connected">Nepřipojeno</string>
     <string name="connected_sleeping">Připojené k uspanému vysílači</string>
@@ -126,6 +124,7 @@
     <string name="save_rangetest">Exportovat rangetest.csv</string>
     <string name="reset">Reset</string>
     <string name="scan">Skenovat</string>
+    <string name="add_network_device">Přidat</string>
     <string name="are_you_sure_change_default">Opravdu chcete změnit na výchozí kanál?</string>
     <string name="reset_to_defaults">Obnovit výchozí nastavení</string>
     <string name="apply">Použít</string>
@@ -166,8 +165,6 @@
     <string name="quick_chat_append">Připojit ke zprávě</string>
     <string name="quick_chat_instant">Okamžitě odesílat</string>
     <string name="factory_reset">Obnovení továrního nastavení</string>
-    <string name="bluetooth_disabled">Bluetooth je zakázáno</string>
-    <string name="permission_missing_31">Meshtastic vyžaduje oprávnění Zařízení v okolí k nalezení a připojení k zařízením přes Bluetooth. Pokud se nepoužívá, můžete jej vypnout.</string>
     <string name="direct_message">Přímá zpráva</string>
     <string name="nodedb_reset">Reset NodeDB</string>
     <string name="delivery_confirmed">Doručeno</string>
@@ -556,9 +553,9 @@
     <string name="display_time_in_12h_format">Pokud je povoleno, zařízení bude na obrazovce zobrazovat čas ve 12 hodinovém formátu.</string>
     <string name="free_memory">Volná paměť</string>
     <string name="load">Zatížení</string>
-    <string name="map">Mapa</string>
-    <string name="contacts">Kontakty</string>
+    <string name="contacts">Zprávy</string>
     <string name="nodes">Uzly</string>
+    <string name="bottom_nav_share">Sdílet</string>
     <string name="set_your_region">Nastavte svůj region</string>
     <string name="map_reporting_summary">Váš uzel bude pravidelně odesílat nešifrovaný mapový paket na konfigurovaný MQTT server, který zahrnuje id, dlouhé a krátké jméno. přibližné umístění, hardwarový model, role, verze firmwaru, region LoRa, předvolba modemu a název primárního kanálu.</string>
     <string name="map_reporting_consent_header">Souhlas se sdílením nešifrovaných dat uzlu prostřednictvím MQTT</string>
