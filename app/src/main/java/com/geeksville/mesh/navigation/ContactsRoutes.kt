@@ -49,6 +49,7 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController, uiViewModel:
                 uiViewModel,
                 onNavigateToMessages = { navController.navigate(ContactsRoutes.Messages(it)) },
                 onNavigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
+                onNavigateToShare = { navController.navigate(ChannelsRoutes.ChannelsGraph) },
             )
         }
         composable<ContactsRoutes.Messages>(

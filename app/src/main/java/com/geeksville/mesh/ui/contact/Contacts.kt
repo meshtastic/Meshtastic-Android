@@ -32,9 +32,11 @@ import androidx.compose.material.icons.automirrored.twotone.VolumeUp
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
@@ -70,6 +72,7 @@ fun ContactsScreen(
     uiViewModel: UIViewModel = hiltViewModel(),
     onNavigateToMessages: (String) -> Unit = {},
     onNavigateToNodeDetails: (Int) -> Unit = {},
+    onNavigateToShare: () -> Unit,
 ) {
     var showMuteDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -146,6 +149,9 @@ fun ContactsScreen(
                     isAllMuted = isAllMuted, // Pass the derived state
                 )
             }
+        },
+        floatingActionButton = {
+            FloatingActionButton(onClick = onNavigateToShare) { Icon(Icons.Rounded.QrCode2, contentDescription = null) }
         },
     ) { paddingValues ->
         val channels by uiViewModel.channels.collectAsStateWithLifecycle()
