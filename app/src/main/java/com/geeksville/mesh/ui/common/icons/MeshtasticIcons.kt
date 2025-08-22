@@ -17,7 +17,4 @@
 
 package com.geeksville.mesh.ui.common.icons
 
-object MeshtasticIcons {
-
-    object Outlined
-}
+object MeshtasticIcons

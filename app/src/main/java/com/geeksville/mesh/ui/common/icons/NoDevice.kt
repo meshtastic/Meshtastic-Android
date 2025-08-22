@@ -23,7 +23,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
-val MeshtasticIcons.Outlined.NoDevice: ImageVector
+/**
+ * This is from Material Symbols.
+ *
+ * @see
+ *   [router_off](https://fonts.google.com/icons?icon.query=router+off&icon.size=24&icon.color=%23e3e3e3&icon.style=Rounded)
+ */
+val MeshtasticIcons.NoDevice: ImageVector
     get() {
         if (noDevice != null) {
             return noDevice!!

@@ -23,7 +23,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
-val MeshtasticIcons.Outlined.Device: ImageVector
+/**
+ * This is from Material Symbols.
+ *
+ * @see
+ *   [router](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:router:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=router&icon.size=24&icon.color=%23e3e3e3&icon.platform=android&icon.style=Rounded)
+ */
+val MeshtasticIcons.Device: ImageVector
     get() {
         if (device != null) {
             return device!!

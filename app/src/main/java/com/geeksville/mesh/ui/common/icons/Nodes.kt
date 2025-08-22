@@ -23,7 +23,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
-val MeshtasticIcons.Outlined.Nodes: ImageVector
+/**
+ * This is from Material Symbols.
+ *
+ * @see
+ *   [graph_3](https://fonts.google.com/icons?icon.query=graph+3&icon.size=24&icon.color=%23e3e3e3&icon.style=Rounded)
+ */
+val MeshtasticIcons.Nodes: ImageVector
     get() {
         if (nodes != null) {
             return nodes!!

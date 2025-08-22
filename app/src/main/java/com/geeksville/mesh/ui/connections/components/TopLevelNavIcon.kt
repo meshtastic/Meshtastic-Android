@@ -75,10 +75,10 @@ private fun ConnectionsNavIcon(
 
     val (backgroundIcon, connectionTypeIcon) =
         when (connectionState) {
-            ConnectionState.DISCONNECTED -> MeshtasticIcons.Outlined.NoDevice to null
-            ConnectionState.DEVICE_SLEEP -> MeshtasticIcons.Outlined.Device to Icons.Rounded.Snooze
+            ConnectionState.DISCONNECTED -> MeshtasticIcons.NoDevice to null
+            ConnectionState.DEVICE_SLEEP -> MeshtasticIcons.Device to Icons.Rounded.Snooze
             else ->
-                MeshtasticIcons.Outlined.Device to
+                MeshtasticIcons.Device to
                     when (deviceType) {
                         DeviceType.BLE -> Icons.Rounded.Bluetooth
                         DeviceType.TCP -> Icons.Rounded.Wifi

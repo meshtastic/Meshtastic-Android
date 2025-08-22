@@ -42,6 +42,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ui.common.icons.BatteryEmpty
 import com.geeksville.mesh.ui.common.icons.BatteryUnknown
+import com.geeksville.mesh.ui.common.icons.MeshtasticIcons
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusOrange
@@ -72,7 +73,7 @@ fun MaterialBatteryInfo(modifier: Modifier = Modifier, level: Int) {
         } else if (level < 0) {
             Icon(
                 modifier = Modifier.size(SIZE_ICON.dp),
-                imageVector = BatteryUnknown,
+                imageVector = MeshtasticIcons.BatteryUnknown,
                 tint = MaterialTheme.colorScheme.onSurface,
                 contentDescription = null,
             )
@@ -104,7 +105,7 @@ fun MaterialBatteryInfo(modifier: Modifier = Modifier, level: Int) {
                         size = Size(fillWidth, availableHeight),
                     )
                 },
-                imageVector = BatteryEmpty,
+                imageVector = MeshtasticIcons.BatteryEmpty,
                 tint = MaterialTheme.colorScheme.onSurface,
                 contentDescription = null,
             )
