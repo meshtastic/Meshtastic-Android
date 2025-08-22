@@ -26,8 +26,13 @@ import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.errormsg
 import com.geeksville.mesh.android.BuildUtils.info
 import com.geeksville.mesh.concurrent.handledLaunch
+import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.PacketRepository
+import com.geeksville.mesh.database.entity.MeshLog
+import com.geeksville.mesh.fromRadio
+import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.util.toOneLineString
+import com.geeksville.mesh.util.toPIIString
 import dagger.Lazy
 import java8.util.concurrent.CompletableFuture
 import kotlinx.coroutines.CoroutineScope
@@ -35,6 +40,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeoutOrNull
+import java.util.UUID
 import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.TimeoutException
@@ -42,6 +48,8 @@ import java.util.concurrent.TimeoutException
 class PacketHandler(
     private val packetRepository: Lazy<PacketRepository>,
     private val serviceBroadcasts: MeshServiceBroadcasts,
+    private val radioInterfaceService: RadioInterfaceService,
+    private val meshLogRepository: Lazy<MeshLogRepository>,
 ) {
 
     private var queueJob: Job? = null
@@ -71,6 +79,42 @@ class PacketHandler(
                     }
                 }
             }
+    }
+
+    /**
+     * Send a command/packet to our radio. But cope with the possibility that we might start up before we are fully
+     * bound to the RadioInterfaceService
+     */
+    fun sendToRadio(p: ToRadio.Builder) {
+        val built = p.build()
+        debug("Sending to radio ${built.toPIIString()}")
+        val b = built.toByteArray()
+
+        radioInterfaceService.sendToRadio(b)
+        changeStatus(p.packet.id, MessageStatus.ENROUTE)
+
+        if (p.packet.hasDecoded()) {
+            val packetToSave =
+                MeshLog(
+                    uuid = UUID.randomUUID().toString(),
+                    message_type = "Packet",
+                    received_date = System.currentTimeMillis(),
+                    raw_message = p.packet.toString(),
+                    fromNum = p.packet.from,
+                    portNum = p.packet.decoded.portnumValue,
+                    fromRadio = fromRadio { packet = p.packet },
+                )
+            insertMeshLog(packetToSave)
+        }
+    }
+
+    /**
+     * Send a mesh packet to the radio, if the radio is not currently connected this function will throw
+     * NotConnectedException
+     */
+    fun sendToRadio(packet: MeshPacket, getConnectionState: () -> ConnectionState) {
+        queuedPackets.add(packet)
+        startPacketQueue(getConnectionState)
     }
 
     fun stopPacketQueue() {
@@ -106,8 +150,6 @@ class PacketHandler(
         }
     }
 
-    fun addPacket(packet: MeshPacket) = queuedPackets.add(packet)
-
     fun removeResponse(dataRequestId: Int, complete: Boolean) {
         queueResponse.remove(dataRequestId)?.complete(complete)
     }
@@ -134,5 +176,14 @@ class PacketHandler(
             future.complete(false)
         }
         return future
+    }
+
+    private fun insertMeshLog(packetToSave: MeshLog) {
+        scope.handledLaunch {
+            // Do not log, because might contain PII
+            // info("insert: ${packetToSave.message_type} =
+            // ${packetToSave.raw_message.toOneLineString()}")
+            meshLogRepository.get().insert(packetToSave)
+        }
     }
 }
