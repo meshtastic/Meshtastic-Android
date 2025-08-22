@@ -88,6 +88,7 @@
     <string name="cancel">Peruuta</string>
     <string name="clear_changes">Peru muutokset</string>
     <string name="new_channel_rcvd">Uusi kanavan URL-osoite vastaanotettu</string>
+    <string name="permission_missing">Meshtastic tarvitsee sijaintioikeudet, jotta se voi löytää uusia laitteita Bluetoothin kautta. Voit poistaa oikeuden käytöstä, kun et käytä sovellusta.</string>
     <string name="report_bug">Ilmoita virheestä</string>
     <string name="report_a_bug">Ilmoita virheestä</string>
     <string name="report_bug_text">Oletko varma, että haluat raportoida virheestä? Tee tämän jälkeen julkaisu https://github.com/orgs/meshtastic/discussions osoitteessa, jotta voimme yhdistää löytämäsi virheen raporttiin.</string>
@@ -184,6 +185,10 @@
     <string name="quick_chat_show">Näytä pikaviestivalikko</string>
     <string name="quick_chat_hide">Piilota pikaviestivalikko</string>
     <string name="factory_reset">Palauta tehdasasetukset</string>
+    <string name="bluetooth_disabled">Bluetooth on pois käytöstä. Ota se käyttöön laitteen asetuksista.</string>
+    <string name="open_settings">Avaa asetukset</string>
+    <string name="firmware_version">Firmwaren versio: %1$s</string>
+    <string name="permission_missing_31">Meshtastic tarvitsee \"lähistön laitteet\" -oikeudet, jotta se voi löytää ja yhdistää laitteisiin Bluetoothin kautta. Voit poistaa oikeuden käytöstä, kun et käytä sovellusta.</string>
     <string name="direct_message">Yksityisviesti</string>
     <string name="nodedb_reset">Tyhjennä NodeDB tietokanta</string>
     <string name="delivery_confirmed">Toimitus vahvistettu</string>
@@ -634,6 +639,8 @@
     <string name="node_count_template">(%1$d yhdistetty / %2$d yhteensä)</string>
     <string name="react">Reagoi</string>
     <string name="disconnect">Katkaise yhteys</string>
+    <string name="scanning_bluetooth">Etsitään bluetooth-laitteita…</string>
+    <string name="no_ble_devices">Ei paritettuja Bluetooth-laitteita.</string>
     <string name="no_network_devices">Verkkolaitteita ei löytynyt.</string>
     <string name="no_usb_devices">USB-sarjalaitteita ei löytynyt.</string>
     <string name="scroll_to_bottom">Siirry loppuun</string>
@@ -682,6 +689,9 @@
     <string name="no_pax_metrics_logs">PAX-laskurien lokitietoja ei ole saatavilla.</string>
     <string name="wifi_devices">WiFi-laitteet</string>
     <string name="ble_devices">Bluetooth-laitteet</string>
+    <string name="bluetooth_paired_devices">Paritetut laitteet</string>
+    <string name="connected_device">Yhdistetty laite</string>
+    <string name="action_go">Mene</string>
     <string name="routing_error_rate_limit_exceeded">Käyttöraja ylitetty. Yritä myöhemmin uudelleen.</string>
     <string name="view_release">Näytä versio</string>
     <string name="download">Lataa</string>
@@ -730,6 +740,7 @@
     <string name="configure_critical_alerts">Määritä kriittiset hälytykset</string>
     <string name="notification_permissions_description">Meshtastic käyttää ilmoituksia tiedottaakseen uusista viesteistä ja muista tärkeistä tapahtumista. Voit muuttaa ilmoitusasetuksia milloin tahansa.</string>
     <string name="next">Seuraava</string>
+    <string name="grant_permissions">Myönnä oikeudet</string>
     <string name="nodes_queued_for_deletion">%d laitetta jonossa poistettavaksi:</string>
     <string name="clean_node_database_description">Varoitus: Tämä poistaa laitteet sovelluksen sekä laitteen tietokannoista.\nValinnat lisätään aiempiin.</string>
     <string name="connecting_to_device">Yhdistetään laitteeseen</string>
