@@ -42,7 +42,6 @@
     <string name="accept">Прийняти</string>
     <string name="cancel">Скасувати</string>
     <string name="new_channel_rcvd">Отримано URL-адресу нового каналу</string>
-    <string name="permission_missing">Meshtastic потрібний дозвіл до геоданих для пошуку нових пристроїв через Bluetooth. Ви можете вимкнути його пізніше.</string>
     <string name="report_bug">Повідомити про помилку</string>
     <string name="report_a_bug">Повідомити про помилку</string>
     <string name="report_bug_text">Ви впевнені, що бажаєте повідомити про помилку? Після звіту опублікуйте його в https://github.com/orgs/meshtastic/discussions, щоб ми могли зіставити звіт із тим, що ви знайшли.</string>
@@ -55,7 +54,6 @@
     <string name="device_sleeping">Пристрій в режимі сну</string>
     <string name="ip_address">IP Адреса:</string>
     <string name="ip_port">Порт:</string>
-    <string name="connected">Підключено до радіомодуля</string>
     <string name="connected_to">Підключено до радіомодуля (%s)</string>
     <string name="not_connected">Не підключено</string>
     <string name="connected_sleeping">Підключено до радіомодуля, але він в режимі сну</string>
@@ -80,6 +78,7 @@
     <string name="save_rangetest">Експортувати rangetest.csv</string>
     <string name="reset">Скинути</string>
     <string name="scan">Сканувати</string>
+    <string name="add_network_device">Додати</string>
     <string name="are_you_sure_change_default">Ви впевнені, що хочете змінити канал за умовчанням?</string>
     <string name="reset_to_defaults">Відновити налаштування за замовчуванням</string>
     <string name="apply">Застосувати</string>
@@ -119,8 +118,6 @@
     <string name="quick_chat_append">Додати до повідомлення</string>
     <string name="quick_chat_instant">Миттєво відправити</string>
     <string name="factory_reset">Скидання до заводських налаштувань</string>
-    <string name="bluetooth_disabled">Bluetooth вимкнений.</string>
-    <string name="permission_missing_31">Meshtastic потребний дозвіл до Пристроїв поблизу для пошуку нових пристроїв через Bluetooth. Ви можете вимкнути його пізніше.</string>
     <string name="direct_message">Пряме повідомлення</string>
     <string name="nodedb_reset">Очищення бази вузлів</string>
     <string name="delivery_confirmed">Доставку підтверджено</string>
@@ -279,7 +276,8 @@
     <string name="actions">Дії</string>
     <string name="firmware">Прошивка</string>
     <string name="display_time_in_12h_format">Якщо увімкнено, пристрій буде показувати час у 12-годинному форматі на екрані.</string>
-    <string name="map">Мапа</string>
+    <string name="contacts">Повідомлення</string>
+    <string name="bottom_nav_share">Поділіться</string>
     <string name="i_agree">Погоджуюся.</string>
     <string name="time">Час</string>
     <string name="date">Дата</string>
