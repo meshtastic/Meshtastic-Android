@@ -58,29 +58,6 @@ class PacketHandler(
     private val queuedPackets = ConcurrentLinkedQueue<MeshPacket>()
     private val queueResponse = mutableMapOf<Int, CompletableFuture<Boolean>>()
 
-    fun startPacketQueue(getConnectionState: () -> ConnectionState) {
-        if (queueJob?.isActive == true) return
-        queueJob =
-            scope.handledLaunch {
-                debug("packet queueJob started")
-                while (getConnectionState() == ConnectionState.CONNECTED) {
-                    // take the first packet from the queue head
-                    val packet = queuedPackets.poll() ?: break
-                    try {
-                        // send packet to the radio and wait for response
-                        val response = sendPacket(packet, getConnectionState)
-                        debug("queueJob packet id=${packet.id.toUInt()} waiting")
-                        val success = response.get(2, TimeUnit.MINUTES)
-                        debug("queueJob packet id=${packet.id.toUInt()} success $success")
-                    } catch (e: TimeoutException) {
-                        debug("queueJob packet id=${packet.id.toUInt()} timeout")
-                    } catch (e: Exception) {
-                        debug("queueJob packet id=${packet.id.toUInt()} failed")
-                    }
-                }
-            }
-    }
-
     /**
      * Send a command/packet to our radio. But cope with the possibility that we might start up before we are fully
      * bound to the RadioInterfaceService
@@ -128,17 +105,6 @@ class PacketHandler(
         }
     }
 
-    /** Change the status on a DataPacket and update watchers */
-    fun changeStatus(packetId: Int, m: MessageStatus) = scope.handledLaunch {
-        if (packetId != 0) {
-            getDataPacketById(packetId)?.let { p ->
-                if (p.status == m) return@handledLaunch
-                packetRepository.get().updateMessageStatus(p, m)
-                serviceBroadcasts.broadcastMessageStatus(packetId, m)
-            }
-        }
-    }
-
     fun handleQueueStatus(queueStatus: MeshProtos.QueueStatus) {
         debug("queueStatus ${queueStatus.toOneLineString()}")
         val (success, isFull, requestId) = with(queueStatus) { Triple(res == 0, free == 0, meshPacketId) }
@@ -152,6 +118,40 @@ class PacketHandler(
 
     fun removeResponse(dataRequestId: Int, complete: Boolean) {
         queueResponse.remove(dataRequestId)?.complete(complete)
+    }
+
+    private fun startPacketQueue(getConnectionState: () -> ConnectionState) {
+        if (queueJob?.isActive == true) return
+        queueJob =
+            scope.handledLaunch {
+                debug("packet queueJob started")
+                while (getConnectionState() == ConnectionState.CONNECTED) {
+                    // take the first packet from the queue head
+                    val packet = queuedPackets.poll() ?: break
+                    try {
+                        // send packet to the radio and wait for response
+                        val response = sendPacket(packet, getConnectionState)
+                        debug("queueJob packet id=${packet.id.toUInt()} waiting")
+                        val success = response.get(2, TimeUnit.MINUTES)
+                        debug("queueJob packet id=${packet.id.toUInt()} success $success")
+                    } catch (e: TimeoutException) {
+                        debug("queueJob packet id=${packet.id.toUInt()} timeout")
+                    } catch (e: Exception) {
+                        debug("queueJob packet id=${packet.id.toUInt()} failed")
+                    }
+                }
+            }
+    }
+
+    /** Change the status on a DataPacket and update watchers */
+    private fun changeStatus(packetId: Int, m: MessageStatus) = scope.handledLaunch {
+        if (packetId != 0) {
+            getDataPacketById(packetId)?.let { p ->
+                if (p.status == m) return@handledLaunch
+                packetRepository.get().updateMessageStatus(p, m)
+                serviceBroadcasts.broadcastMessageStatus(packetId, m)
+            }
+        }
     }
 
     private suspend fun getDataPacketById(packetId: Int): DataPacket? = withTimeoutOrNull(1000) {
