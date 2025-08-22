@@ -20,8 +20,10 @@ package com.geeksville.mesh.service
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.MeshProtos.MeshPacket
+import com.geeksville.mesh.MeshProtos.ToRadio
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.android.BuildUtils.debug
+import com.geeksville.mesh.android.BuildUtils.errormsg
 import com.geeksville.mesh.android.BuildUtils.info
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.database.PacketRepository
@@ -106,10 +108,6 @@ class PacketHandler(
 
     fun addPacket(packet: MeshPacket) = queuedPackets.add(packet)
 
-    fun setResponse(packetId: Int, future: CompletableFuture<Boolean>) {
-        queueResponse[packetId] = future
-    }
-
     fun removeResponse(dataRequestId: Int, complete: Boolean) {
         queueResponse.remove(dataRequestId)?.complete(complete)
     }
@@ -121,5 +119,20 @@ class PacketHandler(
             if (dataPacket == null) delay(100)
         }
         dataPacket
+    }
+
+    private fun sendPacket(packet: MeshPacket, getConnectionState: () -> ConnectionState): CompletableFuture<Boolean> {
+        // send the packet to the radio and return a CompletableFuture that will be completed with
+        // the result
+        val future = CompletableFuture<Boolean>()
+        queueResponse[packet.id] = future
+        try {
+            if (getConnectionState() != ConnectionState.CONNECTED) throw RadioNotConnectedException()
+            sendToRadio(ToRadio.newBuilder().apply { this.packet = packet })
+        } catch (ex: Exception) {
+            errormsg("sendToRadio error:", ex)
+            future.complete(false)
+        }
+        return future
     }
 }
