@@ -82,7 +82,6 @@
     <string name="accept">Prijať</string>
     <string name="cancel">Odmietnuť</string>
     <string name="new_channel_rcvd">Prijatá nová URL kanálu</string>
-    <string name="permission_missing">Aplikácia Meshtastic nemá pridelené požadované oprávnenie a pravdepodobne nebude fungovať správne. Prosím povoľte tieto oprávnenia v nastaveniach aplikácie.</string>
     <string name="report_bug">Nahlásiť chybu</string>
     <string name="report_a_bug">Nahlásiť chybu</string>
     <string name="report_bug_text">Ste si istý, že chcete nahlásiť chybu? Po odoslaní prosím pridajte správu do https://github.com/orgs/meshtastic/discussions aby sme vedeli priradiť Vami nahlásenú chybu ku Vášmu príspevku.</string>
@@ -95,7 +94,6 @@
     <string name="device_sleeping">Vysielač uspaný</string>
     <string name="connected_count">Pripojený: %1$s online</string>
     <string name="ip_address">IP adresa:</string>
-    <string name="connected">Pripojené k vysielaču</string>
     <string name="connected_to">Pripojené k vysielaču (%s)</string>
     <string name="not_connected">Nepripojené</string>
     <string name="connected_sleeping">Pripojené k uspanému vysielaču</string>
@@ -116,6 +114,7 @@
     <string name="save_rangetest">Exportovať rangetest.csv</string>
     <string name="reset">Obnoviť</string>
     <string name="scan">Skenovať</string>
+    <string name="add_network_device">Pridať</string>
     <string name="are_you_sure_change_default">Ste si istý, že sa chcete prepnúť na predvolený kanál?</string>
     <string name="reset_to_defaults">Obnoviť na predvolené nastavenia</string>
     <string name="apply">Použiť</string>
@@ -156,8 +155,6 @@
     <string name="quick_chat_append">Pripojiť k správe</string>
     <string name="quick_chat_instant">Okamžite pošli</string>
     <string name="factory_reset">Obnova do výrobných nastavení</string>
-    <string name="bluetooth_disabled">Bluetooth vypnutý</string>
-    <string name="permission_missing_31">Meshtastic potrebuje povolenie Zariadenia v okolí, aby mohol nájsť zariadenia a pripojiť sa k nim cez Bluetooth. Môžete ho vypnúť, keď sa nepoužíva.</string>
     <string name="direct_message">Priama správa</string>
     <string name="nodedb_reset">Reset databázy uzlov</string>
     <string name="delivery_confirmed">Doručenie potvrdené</string>
@@ -320,7 +317,8 @@
     <string name="private_key">Súkromný kľúč</string>
     <string name="timeout">Časový limit</string>
     <string name="distance">Vzdialenosť</string>
-    <string name="map">Mapa</string>
+    <string name="contacts">Správy</string>
+    <string name="bottom_nav_share">Zdieľať</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
