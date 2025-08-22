@@ -72,7 +72,6 @@
     <string name="accept">Glac</string>
     <string name="cancel">Cealaigh</string>
     <string name="new_channel_rcvd">URL Cainéal nua faighte</string>
-    <string name="permission_missing">Tá cead riachtanach ar iarraidh, ní bheidh Meshtastic in ann oibriú i gceart. Cumasaigh i socruithe feidhmchláir le do thoil.</string>
     <string name="report_bug">Tuairiscigh fabht</string>
     <string name="report_a_bug">Tuairiscigh fabht</string>
     <string name="report_bug_text">An bhfuil tú cinnte gur mhaith leat fabht a thuairisciú? Tar éis tuairisciú a dhéanamh, cuir sa phost é le do thoil in https://github.com/orgs/meshtastic/discussions ionas gur féidir linn an tuarascáil a mheaitseáil leis an méid a d’aimsigh tú.</string>
@@ -84,7 +83,6 @@
     <string name="disconnected">Na ceangailte</string>
     <string name="device_sleeping">Gléas ina chodladh</string>
     <string name="ip_address">Seoladh IP:</string>
-    <string name="connected">Ceangailte le raidió</string>
     <string name="connected_to">Ceangailte le raidió (%s)</string>
     <string name="not_connected">Ní ceangailte</string>
     <string name="connected_sleeping">Ceangailte le raidió, ach tá sé ina chodladh</string>
@@ -105,6 +103,7 @@
     <string name="save_rangetest">Onnmhairigh rangetest.csv</string>
     <string name="reset">Athshocraigh</string>
     <string name="scan">Scanadh</string>
+    <string name="add_network_device">Cuir leis</string>
     <string name="are_you_sure_change_default">An bhfuil tú cinnte gur mhaith leat an cainéal réamhshocraithe a athrú?</string>
     <string name="reset_to_defaults">Athshocrú go dtí na réamhshocruithe</string>
     <string name="apply">Cuir i bhfeidhm</string>
@@ -146,8 +145,6 @@
     <string name="quick_chat_append">Cuir leis an teachtaireacht</string>
     <string name="quick_chat_instant">Seol láithreach</string>
     <string name="factory_reset">Athshocraigh an fhactaraí</string>
-    <string name="bluetooth_disabled">Bluetooth múchta</string>
-    <string name="permission_missing_31">Teastaíonn cead do Meshtastic maidir le Cinnteachtaí Cóngarach chun feistí a aimsiú agus nascadh trí Bluetooth. Is féidir leat é seo a mhúchadh nuair nach bhfuil sé á úsáid.</string>
     <string name="direct_message">Teachtaireacht dhíreach</string>
     <string name="nodedb_reset">Athshocraigh NodeDB</string>
     <string name="delivery_confirmed">Seachadadh deimhnithe</string>
@@ -238,6 +235,7 @@
     <string name="traceroute_diff">Céimeanna i dtreo %1$d Céimeanna ar ais %2$d</string>
     <string name="timeout">Am tráth</string>
     <string name="distance">Sáth</string>
+    <string name="bottom_nav_share">Roinn</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
