@@ -91,7 +91,6 @@ import com.google.protobuf.ByteString
 import com.google.protobuf.InvalidProtocolBufferException
 import dagger.Lazy
 import dagger.hilt.android.AndroidEntryPoint
-import java8.util.concurrent.CompletableFuture
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -1119,21 +1118,6 @@ class MeshService :
             // but if the device is
             // messed up it might try to send forever
         }
-    }
-
-    private fun sendPacket(packet: MeshPacket): CompletableFuture<Boolean> {
-        // send the packet to the radio and return a CompletableFuture that will be completed with
-        // the result
-        val future = CompletableFuture<Boolean>()
-        packetHandler.setResponse(packet.id, future)
-        try {
-            if (connectionState != ConnectionState.CONNECTED) throw RadioNotConnectedException()
-            sendToRadio(ToRadio.newBuilder().apply { this.packet = packet })
-        } catch (ex: Exception) {
-            errormsg("sendToRadio error:", ex)
-            future.complete(false)
-        }
-        return future
     }
 
     private fun sendNow(p: DataPacket) {
