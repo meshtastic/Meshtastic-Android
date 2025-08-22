@@ -80,7 +80,6 @@
     <string name="accept">Godta</string>
     <string name="cancel">Avbryt</string>
     <string name="new_channel_rcvd">Ny kanal URL mottatt</string>
-    <string name="permission_missing">En påkrevet tilgang mangler, Meshtastic vil ikke fungere korrekt.  Vennligst slå på i Android appliksjonsinstillinger.</string>
     <string name="report_bug">Rapporter Feil</string>
     <string name="report_a_bug">Rapporter en feil</string>
     <string name="report_bug_text">Er du sikker på at du vil rapportere en feil? Etter rapportering, vennligst posti https://github.com/orgs/meshtastic/discussions så vi kan matche rapporten med hva du fant.</string>
@@ -92,7 +91,6 @@
     <string name="disconnected">Frakoblet</string>
     <string name="device_sleeping">Enhet sover</string>
     <string name="ip_address">IP-adresse:</string>
-    <string name="connected">Tilkoblet radio</string>
     <string name="connected_to">Tilkoblet til radio (%s)</string>
     <string name="not_connected">Ikke tilkoblet</string>
     <string name="connected_sleeping">Tilkoblet radio, men den sover</string>
@@ -113,6 +111,7 @@
     <string name="save_rangetest">Eksporter rekkeviddetest.csv</string>
     <string name="reset">Nullstill</string>
     <string name="scan">Søk</string>
+    <string name="add_network_device">Legg til</string>
     <string name="are_you_sure_change_default">Er du sikker på at du vil endre til standardkanalen?</string>
     <string name="reset_to_defaults">Tilbakestill til standard</string>
     <string name="apply">Bruk</string>
@@ -151,8 +150,6 @@
     <string name="quick_chat_append">Tilføy meldingen</string>
     <string name="quick_chat_instant">Send øyeblikkelig</string>
     <string name="factory_reset">Tilbakestill til fabrikkstandard</string>
-    <string name="bluetooth_disabled">Bluetooth deaktivert</string>
-    <string name="permission_missing_31">Meshtastic trenger behov for \"Nearby devices\" for å finne og koble til enheter via Bluetooth. Du kan skru den av når den ikke er i bruk.</string>
     <string name="direct_message">Direktemelding</string>
     <string name="nodedb_reset">NodeDB reset</string>
     <string name="delivery_confirmed">Leveringen er bekreftet</string>
@@ -253,6 +250,7 @@
     <string name="private_key">Privat nøkkel</string>
     <string name="timeout">Tidsavbrudd</string>
     <string name="distance">Distanse</string>
+    <string name="bottom_nav_share">Del</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
