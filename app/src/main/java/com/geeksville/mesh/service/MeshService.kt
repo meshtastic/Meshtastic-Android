@@ -103,7 +103,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.withTimeoutOrNull
 import java.util.Random
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -216,6 +215,8 @@ class MeshService :
         MeshServiceBroadcasts(this, clientPackages) {
             connectionState.also { radioConfigRepository.setConnectionState(it) }
         }
+    private lateinit var packetHandler: PacketHandler
+
     private val serviceJob = Job()
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
     private var connectionState = ConnectionState.DISCONNECTED
@@ -299,7 +300,7 @@ class MeshService :
         val b = built.toByteArray()
 
         radioInterfaceService.sendToRadio(b)
-        changeStatus(p.packet.id, MessageStatus.ENROUTE)
+        packetHandler.changeStatus(p.packet.id, MessageStatus.ENROUTE)
 
         if (p.packet.hasDecoded()) {
             val packetToSave =
@@ -368,6 +369,8 @@ class MeshService :
         radioConfigRepository.serviceAction.onEach(::onServiceAction).launchIn(serviceScope)
 
         loadSettings() // Load our last known node DB
+
+        packetHandler = PacketHandler(packetRepository = packetRepository, serviceBroadcasts = serviceBroadcasts)
 
         // the rest of our init will happen once we are in radioConnection.onServiceConnected
     }
@@ -1192,26 +1195,6 @@ class MeshService :
             }
         }
         offlineSentPackets.removeAll(sentPackets)
-    }
-
-    private suspend fun getDataPacketById(packetId: Int): DataPacket? = withTimeoutOrNull(1000) {
-        var dataPacket: DataPacket? = null
-        while (dataPacket == null) {
-            dataPacket = packetRepository.get().getPacketById(packetId)?.data
-            if (dataPacket == null) delay(100)
-        }
-        dataPacket
-    }
-
-    /** Change the status on a DataPacket and update watchers */
-    private fun changeStatus(packetId: Int, m: MessageStatus) = serviceScope.handledLaunch {
-        if (packetId != 0) {
-            getDataPacketById(packetId)?.let { p ->
-                if (p.status == m) return@handledLaunch
-                packetRepository.get().updateMessageStatus(p, m)
-                serviceBroadcasts.broadcastMessageStatus(packetId, m)
-            }
-        }
     }
 
     /** Handle an ack/nak packet by updating sent message status */
