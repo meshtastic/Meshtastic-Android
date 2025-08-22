@@ -154,10 +154,7 @@ fun NavGraphBuilder.radioConfigGraph(navController: NavHostController, uiViewMod
             ),
         ) { backStackEntry ->
             val parentEntry =
-                remember(backStackEntry) {
-                    val parentRoute = backStackEntry.destination.parent!!.route!!
-                    navController.getBackStackEntry(parentRoute)
-                }
+                remember(backStackEntry) { navController.getBackStackEntry(RadioConfigRoutes.RadioConfigGraph::class) }
             RadioConfigScreen(uiViewModel = uiViewModel, viewModel = hiltViewModel(parentEntry)) {
                 navController.navigate(it) { popUpTo(RadioConfigRoutes.RadioConfig()) { inclusive = false } }
             }
@@ -196,10 +193,7 @@ private fun NavGraphBuilder.configRoutes(navController: NavHostController) {
             ),
         ) { backStackEntry ->
             val parentEntry =
-                remember(backStackEntry) {
-                    val parentRoute = backStackEntry.destination.parent!!.route!!
-                    navController.getBackStackEntry(parentRoute)
-                }
+                remember(backStackEntry) { navController.getBackStackEntry(RadioConfigRoutes.RadioConfigGraph::class) }
             when (configRoute) {
                 ConfigRoute.USER -> UserConfigScreen(hiltViewModel(parentEntry))
                 ConfigRoute.CHANNELS -> ChannelConfigScreen(hiltViewModel(parentEntry))
@@ -235,10 +229,7 @@ private fun NavGraphBuilder.moduleRoutes(navController: NavHostController) {
             ),
         ) { backStackEntry ->
             val parentEntry =
-                remember(backStackEntry) {
-                    val parentRoute = backStackEntry.destination.parent!!.route!!
-                    navController.getBackStackEntry(parentRoute)
-                }
+                remember(backStackEntry) { navController.getBackStackEntry(RadioConfigRoutes.RadioConfigGraph::class) }
             when (moduleRoute) {
                 ModuleRoute.MQTT -> MQTTConfigScreen(hiltViewModel(parentEntry))
                 ModuleRoute.SERIAL -> SerialConfigScreen(hiltViewModel(parentEntry))

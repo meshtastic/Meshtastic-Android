@@ -50,11 +50,7 @@ fun NavGraphBuilder.channelsGraph(navController: NavHostController, uiViewModel:
                 },
             ),
         ) { backStackEntry ->
-            val parentEntry =
-                remember(backStackEntry) {
-                    val parentRoute = backStackEntry.destination.parent!!.route!!
-                    navController.getBackStackEntry(parentRoute)
-                }
+            val parentEntry = remember(backStackEntry) { navController.getBackStackEntry(ChannelsRoutes.ChannelsGraph) }
             ChannelScreen(
                 viewModel = uiViewModel,
                 radioConfigViewModel = hiltViewModel(parentEntry),
@@ -68,11 +64,7 @@ fun NavGraphBuilder.channelsGraph(navController: NavHostController, uiViewModel:
 private fun NavGraphBuilder.configRoutes(navController: NavHostController) {
     ConfigRoute.entries.forEach { configRoute ->
         composable(configRoute.route::class) { backStackEntry ->
-            val parentEntry =
-                remember(backStackEntry) {
-                    val parentRoute = backStackEntry.destination.parent!!.route!!
-                    navController.getBackStackEntry(parentRoute)
-                }
+            val parentEntry = remember(backStackEntry) { navController.getBackStackEntry(ChannelsRoutes.ChannelsGraph) }
             when (configRoute) {
                 ConfigRoute.CHANNELS -> ChannelConfigScreen(hiltViewModel(parentEntry))
                 ConfigRoute.LORA -> LoRaConfigScreen(hiltViewModel(parentEntry))

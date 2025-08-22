@@ -119,10 +119,7 @@ fun NavGraphBuilder.nodeDetailGraph(navController: NavHostController, uiViewMode
             ),
         ) { backStackEntry ->
             val parentEntry =
-                remember(backStackEntry) {
-                    val parentRoute = backStackEntry.destination.parent!!.route!!
-                    navController.getBackStackEntry(parentRoute)
-                }
+                remember(backStackEntry) { navController.getBackStackEntry(NodesRoutes.NodeDetailGraph::class) }
             NodeDetailScreen(
                 uiViewModel = uiViewModel,
                 navigateToMessages = { navController.navigate(ContactsRoutes.Messages(it)) },
@@ -148,10 +145,7 @@ fun NavGraphBuilder.nodeDetailGraph(navController: NavHostController, uiViewMode
                 ),
             ) { backStackEntry ->
                 val parentEntry =
-                    remember(backStackEntry) {
-                        val parentRoute = backStackEntry.destination.parent!!.route!!
-                        navController.getBackStackEntry(parentRoute)
-                    }
+                    remember(backStackEntry) { navController.getBackStackEntry(NodesRoutes.NodeDetailGraph::class) }
                 when (nodeDetailRoute) {
                     NodeDetailRoute.DEVICE -> DeviceMetricsScreen(hiltViewModel(parentEntry))
                     NodeDetailRoute.NODE_MAP -> NodeMapScreen(uiViewModel, hiltViewModel(parentEntry))
