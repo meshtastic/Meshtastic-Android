@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.ui.connections.components
 
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Bluetooth
 import androidx.compose.material.icons.rounded.Snooze
