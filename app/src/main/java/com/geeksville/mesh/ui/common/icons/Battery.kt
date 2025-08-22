@@ -27,9 +27,9 @@ import androidx.compose.ui.unit.dp
  * This is from Material Symbols.
  *
  * @see
- *   [battery_android_0](https://fonts.google.com/icons?selected=Material+Symbols+Outlined:battery_android_0:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=battery&icon.set=Material+Symbols&icon.size=24&icon.color=%23000000&icon.platform=android)
+ *   [battery_android_0](https://fonts.google.com/icons?icon.query=battery+android+0&icon.size=24&icon.color=%23e3e3e3&icon.style=Rounded)
  */
-val BatteryEmpty: ImageVector
+val MeshtasticIcons.BatteryEmpty: ImageVector
     get() {
         if (batteryEmpty != null) {
             return batteryEmpty!!
@@ -99,9 +99,9 @@ private var batteryEmpty: ImageVector? = null
  * This is from Material Symbols.
  *
  * @see
- *   [battery_android_question](https://fonts.google.com/icons?selected=Material+Symbols+Outlined:battery_android_question:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=battery&icon.set=Material+Symbols&icon.size=24&icon.color=%23000000&icon.platform=android)
+ *   [battery_android_question](https://fonts.google.com/icons?icon.query=battery+android+question&icon.size=24&icon.color=%23e3e3e3&icon.style=Rounded)
  */
-val BatteryUnknown: ImageVector
+val MeshtasticIcons.BatteryUnknown: ImageVector
     get() {
         if (batteryUnknown != null) {
             return batteryUnknown!!

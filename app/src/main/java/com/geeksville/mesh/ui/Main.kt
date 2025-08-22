@@ -34,16 +34,9 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.twotone.Chat
-import androidx.compose.material.icons.twotone.CloudDone
-import androidx.compose.material.icons.twotone.CloudOff
-import androidx.compose.material.icons.twotone.CloudUpload
-import androidx.compose.material.icons.twotone.Contactless
-import androidx.compose.material.icons.twotone.Map
-import androidx.compose.material.icons.twotone.People
+import androidx.compose.material.icons.rounded.QrCode2
+import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
@@ -86,6 +79,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.android.AddNavigationTracking
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.setAttributes
+import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
@@ -106,10 +100,14 @@ import com.geeksville.mesh.ui.common.components.MainMenuAction
 import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
+import com.geeksville.mesh.ui.common.icons.Map
+import com.geeksville.mesh.ui.common.icons.MeshtasticIcons
+import com.geeksville.mesh.ui.common.icons.Messages
+import com.geeksville.mesh.ui.common.icons.Nodes
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusBlue
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
+import com.geeksville.mesh.ui.connections.DeviceType
+import com.geeksville.mesh.ui.connections.components.TopLevelNavIcon
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -119,11 +117,11 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
-    Contacts(R.string.contacts, Icons.AutoMirrored.TwoTone.Chat, ContactsRoutes.ContactsGraph),
-    Nodes(R.string.nodes, Icons.TwoTone.People, NodesRoutes.NodesGraph),
-    Map(R.string.map, Icons.TwoTone.Map, MapRoutes.Map),
-    Channels(R.string.channels, Icons.TwoTone.Contactless, ChannelsRoutes.ChannelsGraph),
-    Connections(R.string.connections, Icons.TwoTone.CloudOff, ConnectionsRoutes.ConnectionsGraph),
+    Messages(R.string.contacts, MeshtasticIcons.Messages, ContactsRoutes.ContactsGraph),
+    Nodes(R.string.nodes, MeshtasticIcons.Nodes, NodesRoutes.NodesGraph),
+    Map(R.string.map, MeshtasticIcons.Map, MapRoutes.Map),
+    Share(R.string.bottom_nav_share, Icons.Rounded.QrCode2, ChannelsRoutes.ChannelsGraph),
+    Connections(R.string.connections, Icons.Rounded.Wifi, ConnectionsRoutes.ConnectionsGraph),
     ;
 
     companion object {
@@ -147,6 +145,7 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
 fun MainScreen(
     uIViewModel: UIViewModel = hiltViewModel(),
     bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
+    scanModel: BTScanModel = hiltViewModel(),
     onAction: (MainMenuAction) -> Unit,
 ) {
     val navController = rememberNavController()
@@ -226,6 +225,9 @@ fun MainScreen(
     val currentDestination = navController.currentBackStackEntryAsState().value?.destination
     val topLevelDestination = TopLevelDestination.fromNavDestination(currentDestination)
 
+    // State for determining the connection type icon to display
+    val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
+
     // State for managing the glow animation around the Connections icon
     var currentGlowColor by remember { mutableStateOf(Color.Transparent) }
     val animatedGlowAlpha = remember { Animatable(0f) }
@@ -272,7 +274,11 @@ fun MainScreen(
                                 PlainTooltip {
                                     Text(
                                         if (isConnectionsRoute) {
-                                            connectionState.getTooltipString()
+                                            when (connectionState) {
+                                                ConnectionState.CONNECTED -> stringResource(R.string.connected)
+                                                ConnectionState.DEVICE_SLEEP -> stringResource(R.string.device_sleeping)
+                                                ConnectionState.DISCONNECTED -> stringResource(R.string.disconnected)
+                                            }
                                         } else {
                                             stringResource(id = destination.label)
                                         },
@@ -313,7 +319,9 @@ fun MainScreen(
                                 } else {
                                     Modifier
                                 }
-                            Box(modifier = iconModifier) { TopLevelNavIcon(destination, connectionState) }
+                            Box(modifier = iconModifier) {
+                                TopLevelNavIcon(destination, connectionState, DeviceType.fromAddress(selectedDevice))
+                            }
                         }
                     },
                     selected = isSelected,
@@ -378,25 +386,6 @@ fun MainScreen(
             }
         }
     }
-}
-
-@Composable
-private fun TopLevelNavIcon(destination: TopLevelDestination, connectionState: ConnectionState) {
-    val iconTint =
-        when {
-            destination == TopLevelDestination.Connections -> connectionState.getConnectionColor()
-            else -> LocalContentColor.current
-        }
-    Icon(
-        imageVector =
-        if (destination == TopLevelDestination.Connections) {
-            connectionState.getConnectionIcon()
-        } else {
-            destination.icon
-        },
-        contentDescription = stringResource(id = destination.label),
-        tint = iconTint,
-    )
 }
 
 @Composable
@@ -482,24 +471,4 @@ private fun VersionChecks(viewModel: UIViewModel) {
             }
         }
     }
-}
-
-@Composable
-private fun ConnectionState.getConnectionColor(): Color = when (this) {
-    ConnectionState.CONNECTED -> colorScheme.StatusGreen
-    ConnectionState.DEVICE_SLEEP -> colorScheme.StatusYellow
-    ConnectionState.DISCONNECTED -> colorScheme.StatusRed
-}
-
-private fun ConnectionState.getConnectionIcon(): ImageVector = when (this) {
-    ConnectionState.CONNECTED -> Icons.TwoTone.CloudDone
-    ConnectionState.DEVICE_SLEEP -> Icons.TwoTone.CloudUpload
-    ConnectionState.DISCONNECTED -> Icons.TwoTone.CloudOff
-}
-
-@Composable
-private fun ConnectionState.getTooltipString(): String = when (this) {
-    ConnectionState.CONNECTED -> stringResource(R.string.connected)
-    ConnectionState.DEVICE_SLEEP -> stringResource(R.string.device_sleeping)
-    ConnectionState.DISCONNECTED -> stringResource(R.string.disconnected)
 }
