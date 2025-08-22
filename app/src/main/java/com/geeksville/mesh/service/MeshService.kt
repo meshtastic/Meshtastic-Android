@@ -106,9 +106,6 @@ import kotlinx.coroutines.flow.onEach
 import java.util.Random
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 import kotlin.math.absoluteValue
 
@@ -322,8 +319,8 @@ class MeshService :
      * NotConnectedException
      */
     private fun sendToRadio(packet: MeshPacket) {
-        queuedPackets.add(packet)
-        startPacketQueue()
+        packetHandler.addPacket(packet)
+        packetHandler.startPacketQueue { connectionState }
     }
 
     private fun showAlertNotification(contactKey: String, dataPacket: DataPacket) {
@@ -851,7 +848,7 @@ class MeshService :
                         }
 
                         handleAckNak(data.requestId, fromId, u.errorReasonValue)
-                        queueResponse.remove(data.requestId)?.complete(true)
+                        packetHandler.removeResponse(data.requestId, complete = true)
                     }
 
                     Portnums.PortNum.ADMIN_APP_VALUE -> {
@@ -1124,15 +1121,11 @@ class MeshService :
         }
     }
 
-    private val queuedPackets = ConcurrentLinkedQueue<MeshPacket>()
-    private val queueResponse = mutableMapOf<Int, CompletableFuture<Boolean>>()
-    private var queueJob: Job? = null
-
     private fun sendPacket(packet: MeshPacket): CompletableFuture<Boolean> {
         // send the packet to the radio and return a CompletableFuture that will be completed with
         // the result
         val future = CompletableFuture<Boolean>()
-        queueResponse[packet.id] = future
+        packetHandler.setResponse(packet.id, future)
         try {
             if (connectionState != ConnectionState.CONNECTED) throw RadioNotConnectedException()
             sendToRadio(ToRadio.newBuilder().apply { this.packet = packet })
@@ -1141,40 +1134,6 @@ class MeshService :
             future.complete(false)
         }
         return future
-    }
-
-    private fun startPacketQueue() {
-        if (queueJob?.isActive == true) return
-        queueJob =
-            serviceScope.handledLaunch {
-                debug("packet queueJob started")
-                while (connectionState == ConnectionState.CONNECTED) {
-                    // take the first packet from the queue head
-                    val packet = queuedPackets.poll() ?: break
-                    try {
-                        // send packet to the radio and wait for response
-                        val response = sendPacket(packet)
-                        debug("queueJob packet id=${packet.id.toUInt()} waiting")
-                        val success = response.get(2, TimeUnit.MINUTES)
-                        debug("queueJob packet id=${packet.id.toUInt()} success $success")
-                    } catch (e: TimeoutException) {
-                        debug("queueJob packet id=${packet.id.toUInt()} timeout")
-                    } catch (e: Exception) {
-                        debug("queueJob packet id=${packet.id.toUInt()} failed")
-                    }
-                }
-            }
-    }
-
-    private fun stopPacketQueue() {
-        if (queueJob?.isActive == true) {
-            info("Stopping packet queueJob")
-            queueJob?.cancel()
-            queueJob = null
-            queuedPackets.clear()
-            queueResponse.entries.lastOrNull { !it.value.isDone }?.value?.complete(false)
-            queueResponse.clear()
-        }
     }
 
     private fun sendNow(p: DataPacket) {
@@ -1332,7 +1291,7 @@ class MeshService :
 
         // Perform all the steps needed once we start waiting for device sleep to complete
         fun startDeviceSleep() {
-            stopPacketQueue()
+            packetHandler.stopPacketQueue()
             stopLocationRequests()
             stopMqttClientProxy()
 
@@ -1365,7 +1324,7 @@ class MeshService :
         }
 
         fun startDisconnect() {
-            stopPacketQueue()
+            packetHandler.stopPacketQueue()
             stopLocationRequests()
             stopMqttClientProxy()
 
@@ -1474,7 +1433,7 @@ class MeshService :
                     handleModuleConfig(proto.moduleConfig)
                 }
                 PayloadVariantCase.QUEUESTATUS -> { proto: MeshProtos.FromRadio ->
-                    handleQueueStatus(proto.queueStatus)
+                    packetHandler.handleQueueStatus((proto.queueStatus))
                 }
                 PayloadVariantCase.METADATA -> { proto: MeshProtos.FromRadio -> handleMetadata(proto.metadata) }
                 PayloadVariantCase.MQTTCLIENTPROXYMESSAGE -> { proto: MeshProtos.FromRadio ->
@@ -1550,17 +1509,6 @@ class MeshService :
         setLocalModuleConfig(config)
         val moduleCount = moduleConfig.allFields.size
         radioConfigRepository.setStatusMessage("Module config ($moduleCount / $moduleTotal)")
-    }
-
-    private fun handleQueueStatus(queueStatus: MeshProtos.QueueStatus) {
-        debug("queueStatus ${queueStatus.toOneLineString()}")
-        val (success, isFull, requestId) = with(queueStatus) { Triple(res == 0, free == 0, meshPacketId) }
-        if (success && isFull) return // Queue is full, wait for free != 0
-        if (requestId != 0) {
-            queueResponse.remove(requestId)?.complete(success)
-        } else {
-            queueResponse.entries.lastOrNull { !it.value.isDone }?.value?.complete(success)
-        }
     }
 
     private fun handleChannel(ch: ChannelProtos.Channel) {
@@ -1753,7 +1701,7 @@ class MeshService :
         serviceNotifications.showClientNotification(notification)
         // if the future for the originating request is still in the queue, complete as unsuccessful
         // for now
-        queueResponse.remove(notification.replyId)?.complete(false)
+        packetHandler.removeResponse(notification.replyId, complete = false)
     }
 
     private fun handleFileInfo(fileInfo: MeshProtos.FileInfo) {
