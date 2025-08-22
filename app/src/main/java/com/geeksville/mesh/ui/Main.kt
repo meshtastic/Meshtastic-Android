@@ -34,16 +34,9 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.BluetoothConnected
-import androidx.compose.material.icons.rounded.BluetoothDisabled
 import androidx.compose.material.icons.rounded.QrCode2
-import androidx.compose.material.icons.rounded.Usb
-import androidx.compose.material.icons.rounded.UsbOff
 import androidx.compose.material.icons.rounded.Wifi
-import androidx.compose.material.icons.rounded.WifiOff
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.PlainTooltip
 import androidx.compose.material3.Scaffold
@@ -110,13 +103,11 @@ import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
 import com.geeksville.mesh.ui.common.icons.Map
 import com.geeksville.mesh.ui.common.icons.MeshtasticIcons
 import com.geeksville.mesh.ui.common.icons.Messages
-import com.geeksville.mesh.ui.common.icons.NoDevice
 import com.geeksville.mesh.ui.common.icons.Nodes
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusBlue
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
-import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
 import com.geeksville.mesh.ui.connections.DeviceType
+import com.geeksville.mesh.ui.connections.components.TopLevelNavIcon
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -283,7 +274,11 @@ fun MainScreen(
                                 PlainTooltip {
                                     Text(
                                         if (isConnectionsRoute) {
-                                            connectionState.getTooltipString()
+                                            when (connectionState) {
+                                                ConnectionState.CONNECTED -> stringResource(R.string.connected)
+                                                ConnectionState.DEVICE_SLEEP -> stringResource(R.string.device_sleeping)
+                                                ConnectionState.DISCONNECTED -> stringResource(R.string.disconnected)
+                                            }
                                         } else {
                                             stringResource(id = destination.label)
                                         },
@@ -394,29 +389,6 @@ fun MainScreen(
 }
 
 @Composable
-private fun TopLevelNavIcon(
-    destination: TopLevelDestination,
-    connectionState: ConnectionState,
-    deviceType: DeviceType?,
-) {
-    val iconTint =
-        when {
-            destination == TopLevelDestination.Connections -> connectionState.getConnectionColor()
-            else -> LocalContentColor.current
-        }
-    Icon(
-        imageVector =
-        if (destination == TopLevelDestination.Connections) {
-            connectionState.getConnectionIcon(deviceType)
-        } else {
-            destination.icon
-        },
-        contentDescription = stringResource(id = destination.label),
-        tint = iconTint,
-    )
-}
-
-@Composable
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 private fun VersionChecks(viewModel: UIViewModel) {
     val connectionState by viewModel.connectionState.collectAsStateWithLifecycle()
@@ -499,49 +471,4 @@ private fun VersionChecks(viewModel: UIViewModel) {
             }
         }
     }
-}
-
-@Composable
-private fun ConnectionState.getConnectionColor(): Color = when (this) {
-    ConnectionState.CONNECTED -> colorScheme.StatusGreen
-    ConnectionState.DEVICE_SLEEP -> colorScheme.StatusYellow
-    ConnectionState.DISCONNECTED -> colorScheme.StatusRed
-}
-
-private enum class ConnectionIcon(
-    val connected: ImageVector,
-    val deviceSleep: ImageVector,
-    val disconnected: ImageVector,
-) {
-    Default(MeshtasticIcons.Outlined.NoDevice, MeshtasticIcons.Outlined.NoDevice, MeshtasticIcons.Outlined.NoDevice),
-    Bluetooth(Icons.Rounded.BluetoothConnected, Icons.Rounded.BluetoothConnected, Icons.Rounded.BluetoothDisabled),
-    Tcp(Icons.Rounded.Wifi, Icons.Rounded.Wifi, Icons.Rounded.WifiOff),
-    Usb(Icons.Rounded.Usb, Icons.Rounded.Usb, Icons.Rounded.UsbOff),
-    ;
-
-    companion object {
-        fun get(deviceType: DeviceType?) = deviceType?.let {
-            when (it) {
-                DeviceType.BLE -> Bluetooth
-                DeviceType.TCP -> Tcp
-                DeviceType.USB -> Usb
-            }
-        } ?: Default
-    }
-}
-
-private fun ConnectionState.getConnectionIcon(deviceType: DeviceType?): ImageVector {
-    val connectionIcon = ConnectionIcon.get(deviceType)
-    return when (this) {
-        ConnectionState.CONNECTED -> connectionIcon.connected
-        ConnectionState.DEVICE_SLEEP -> connectionIcon.deviceSleep
-        ConnectionState.DISCONNECTED -> connectionIcon.disconnected
-    }
-}
-
-@Composable
-private fun ConnectionState.getTooltipString(): String = when (this) {
-    ConnectionState.CONNECTED -> stringResource(R.string.connected)
-    ConnectionState.DEVICE_SLEEP -> stringResource(R.string.device_sleeping)
-    ConnectionState.DISCONNECTED -> stringResource(R.string.disconnected)
 }
