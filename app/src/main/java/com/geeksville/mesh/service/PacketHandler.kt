@@ -120,6 +120,7 @@ class PacketHandler(
         queueResponse.remove(dataRequestId)?.complete(complete)
     }
 
+    @Suppress("TooGenericExceptionCaught", "SwallowedException")
     private fun startPacketQueue(getConnectionState: () -> ConnectionState) {
         if (queueJob?.isActive == true) return
         queueJob =
@@ -154,6 +155,7 @@ class PacketHandler(
         }
     }
 
+    @Suppress("MagicNumber")
     private suspend fun getDataPacketById(packetId: Int): DataPacket? = withTimeoutOrNull(1000) {
         var dataPacket: DataPacket? = null
         while (dataPacket == null) {
@@ -163,6 +165,7 @@ class PacketHandler(
         dataPacket
     }
 
+    @Suppress("TooGenericExceptionCaught")
     private fun sendPacket(packet: MeshPacket, getConnectionState: () -> ConnectionState): CompletableFuture<Boolean> {
         // send the packet to the radio and return a CompletableFuture that will be completed with
         // the result
