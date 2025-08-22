@@ -83,7 +83,6 @@
     <string name="accept">Aceitar</string>
     <string name="cancel">Cancelar</string>
     <string name="new_channel_rcvd">Novo Link Recebido do Canal</string>
-    <string name="permission_missing">Meshtastic precisa da permissão de localização e localização ativada para encontrar novos dispositivos via bluetooth. Você pode desativar novamente depois.</string>
     <string name="report_bug">Reportar Bug</string>
     <string name="report_a_bug">Reportar a bug</string>
     <string name="report_bug_text">Tem certeza de que deseja reportar um bug? Após o relatório, comunique também em https://github.com/orgs/meshtastic/discussions para que possamos comparar o relatório com o que encontrou.</string>
@@ -97,7 +96,7 @@
     <string name="connected_count">Ligado: %1$s “online”</string>
     <string name="ip_address">Endereço IP:</string>
     <string name="ip_port">Porta:</string>
-    <string name="connected">Ligado ao rádio</string>
+    <string name="connected">Ligado</string>
     <string name="connected_to">Ligado ao rádio (%s)</string>
     <string name="not_connected">Desligado</string>
     <string name="connected_sleeping">Ligado ao rádio, mas está a dormir</string>
@@ -119,6 +118,7 @@
     <string name="save_rangetest">Exportar rangetest.csv</string>
     <string name="reset">Redefinir</string>
     <string name="scan">Digitalizar</string>
+    <string name="add_network_device">Adicionar</string>
     <string name="are_you_sure_change_default">Tem certeza que quer mudar para o canal padrão?</string>
     <string name="reset_to_defaults">Redefinir para configurações originais</string>
     <string name="apply">Aplicar</string>
@@ -157,8 +157,6 @@
     <string name="quick_chat_append">Anexar à mensagem</string>
     <string name="quick_chat_instant">Enviar imediatamente</string>
     <string name="factory_reset">Redefinição de fábrica</string>
-    <string name="bluetooth_disabled">Bluetooth desativado</string>
-    <string name="permission_missing_31">Meshtastic precisa da permissão de Dispositivos por perto para encontrar e conectar a dispositivos via Bluetooth. Você pode desligá-lo quando não estiver em uso.</string>
     <string name="direct_message">Mensagem direta</string>
     <string name="nodedb_reset">Redefinir NodeDB</string>
     <string name="delivery_confirmed">Entrega confirmada</string>
@@ -551,10 +549,9 @@
     <string name="use_12h_format">Usar formato de relógio 12h</string>
     <string name="display_time_in_12h_format">Quando ativado, o dispositivo exibirá o tempo em formato de 12 horas no ecrã.</string>
     <string name="free_memory">Memória livre</string>
-    <string name="connections">Ligações</string>
-    <string name="map">Mapa</string>
-    <string name="contacts">Contactos</string>
+    <string name="contacts">Mensagens</string>
     <string name="nodes">Nodes</string>
+    <string name="bottom_nav_share">Partilha</string>
     <string name="i_agree">Estou de acordo.</string>
     <string name="should_update_firmware">Atualização de firmware recomendada.</string>
     <string name="should_update">Para beneficiar das últimas correções e funcionalidades, por favor, atualize o firmware do node.\n\nÚltima versão estável do firmware: %1$s</string>
