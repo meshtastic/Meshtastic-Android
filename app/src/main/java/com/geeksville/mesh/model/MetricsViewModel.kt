@@ -242,6 +242,19 @@ constructor(
     }
 
     fun onServiceAction(action: ServiceAction) = viewModelScope.launch { radioConfigRepository.onServiceAction(action) }
+    
+    // Generic callback for service actions.
+    fun onServiceActionWithCallback(action: ServiceAction, callback: (Any?) -> Unit) = viewModelScope.launch {
+        when (action) {
+            is ServiceAction.GetDeviceMetadata -> {
+                // Wrap generic callback with typed one
+                val metadataCallback: (MeshProtos.DeviceMetadata?) -> Unit = { metadata -> callback(metadata) }
+                val actionWithCallback = ServiceAction.GetDeviceMetadata(action.destNum, metadataCallback)
+                radioConfigRepository.onServiceAction(actionWithCallback)
+            }
+            else -> radioConfigRepository.onServiceAction(action)
+        }
+    }
 
     private val _state = MutableStateFlow(MetricsState.Empty)
     val state: StateFlow<MetricsState> = _state
