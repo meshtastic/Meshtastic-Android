@@ -549,7 +549,6 @@
     <string name="use_12h_format">12시간제 보기</string>
     <string name="display_time_in_12h_format">활성화 하면 장치의 디스플레이에서 시간이 12시간제로 표시됩니다.</string>
     <string name="connections">연결</string>
-    <string name="contacts">메시지기기</string>
     <string name="nodes">노드</string>
     <string name="bottom_nav_share">공유</string>
     <string name="set_your_region">지역을 설정하세요</string>
