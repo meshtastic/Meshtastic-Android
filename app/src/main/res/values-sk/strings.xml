@@ -317,7 +317,6 @@
     <string name="private_key">Súkromný kľúč</string>
     <string name="timeout">Časový limit</string>
     <string name="distance">Vzdialenosť</string>
-    <string name="contacts">Správy</string>
     <string name="bottom_nav_share">Zdieľať</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
