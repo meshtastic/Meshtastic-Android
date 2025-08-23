@@ -46,13 +46,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
+import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.MeshProtos.DeviceMetadata
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
@@ -374,36 +374,60 @@ enum class ConfigRoute(
         0,
         { vm -> ChannelConfigScreen(vm) },
     ),
-    DEVICE(R.string.device, RadioConfigRoutes.Device, Icons.Default.Router, 0, { vm -> DeviceConfigScreen(vm) }),
+    DEVICE(
+        R.string.device,
+        RadioConfigRoutes.Device,
+        Icons.Default.Router,
+        AdminProtos.AdminMessage.ConfigType.DEVICE_CONFIG_VALUE,
+        { vm -> DeviceConfigScreen(vm) },
+    ),
     POSITION(
         R.string.position,
         RadioConfigRoutes.Position,
         Icons.Default.LocationOn,
-        1,
+        AdminProtos.AdminMessage.ConfigType.POSITION_CONFIG_VALUE,
         { vm -> PositionConfigScreen(vm) },
     ),
-    POWER(R.string.power, RadioConfigRoutes.Power, Icons.Default.Power, 2, { vm -> PowerConfigScreen(vm) }),
-    NETWORK(R.string.network, RadioConfigRoutes.Network, Icons.Default.Wifi, 3, { vm -> NetworkConfigScreen(vm) }),
+    POWER(
+        R.string.power,
+        RadioConfigRoutes.Power,
+        Icons.Default.Power,
+        AdminProtos.AdminMessage.ConfigType.POWER_CONFIG_VALUE,
+        { vm -> PowerConfigScreen(vm) },
+    ),
+    NETWORK(
+        R.string.network,
+        RadioConfigRoutes.Network,
+        Icons.Default.Wifi,
+        AdminProtos.AdminMessage.ConfigType.NETWORK_CONFIG_VALUE,
+        { vm -> NetworkConfigScreen(vm) },
+    ),
     DISPLAY(
         R.string.display,
         RadioConfigRoutes.Display,
         Icons.Default.DisplaySettings,
-        4,
+        AdminProtos.AdminMessage.ConfigType.DISPLAY_CONFIG_VALUE,
         { vm -> DisplayConfigScreen(vm) },
     ),
-    LORA(R.string.lora, RadioConfigRoutes.LoRa, Icons.Default.CellTower, 5, { vm -> LoRaConfigScreen(vm) }),
+    LORA(
+        R.string.lora,
+        RadioConfigRoutes.LoRa,
+        Icons.Default.CellTower,
+        AdminProtos.AdminMessage.ConfigType.LORA_CONFIG_VALUE,
+        { vm -> LoRaConfigScreen(vm) },
+    ),
     BLUETOOTH(
         R.string.bluetooth,
         RadioConfigRoutes.Bluetooth,
         Icons.Default.Bluetooth,
-        6,
+        AdminProtos.AdminMessage.ConfigType.BLUETOOTH_CONFIG_VALUE,
         { vm -> BluetoothConfigScreen(vm) },
     ),
     SECURITY(
         R.string.security,
         RadioConfigRoutes.Security,
         Icons.Default.Security,
-        7,
+        AdminProtos.AdminMessage.ConfigType.SECURITY_CONFIG_VALUE,
         { vm -> SecurityConfigScreen(vm) },
     ),
     ;
@@ -428,83 +452,95 @@ enum class ModuleRoute(
     val type: Int = 0,
     val screenComposable: @Composable (viewModel: RadioConfigViewModel) -> Unit,
 ) {
-    MQTT(R.string.mqtt, RadioConfigRoutes.MQTT, Icons.Default.Cloud, 0, { vm -> MQTTConfigScreen(vm) }),
-    SERIAL(R.string.serial, RadioConfigRoutes.Serial, Icons.Default.Usb, 1, { vm -> SerialConfigScreen(vm) }),
+    MQTT(
+        R.string.mqtt,
+        RadioConfigRoutes.MQTT,
+        Icons.Default.Cloud,
+        AdminProtos.AdminMessage.ModuleConfigType.MQTT_CONFIG_VALUE,
+        { vm -> MQTTConfigScreen(vm) },
+    ),
+    SERIAL(
+        R.string.serial,
+        RadioConfigRoutes.Serial,
+        Icons.Default.Usb,
+        AdminProtos.AdminMessage.ModuleConfigType.SERIAL_CONFIG_VALUE,
+        { vm -> SerialConfigScreen(vm) },
+    ),
     EXT_NOTIFICATION(
         R.string.external_notification,
         RadioConfigRoutes.ExtNotification,
         Icons.Default.Notifications,
-        2,
+        AdminProtos.AdminMessage.ModuleConfigType.EXTNOTIF_CONFIG_VALUE,
         { vm -> ExternalNotificationConfigScreen(vm) },
     ),
     STORE_FORWARD(
         R.string.store_forward,
         RadioConfigRoutes.StoreForward,
         Icons.AutoMirrored.Default.Forward,
-        3,
+        AdminProtos.AdminMessage.ModuleConfigType.STOREFORWARD_CONFIG_VALUE,
         { vm -> StoreForwardConfigScreen(vm) },
     ),
     RANGE_TEST(
         R.string.range_test,
         RadioConfigRoutes.RangeTest,
         Icons.Default.Speed,
-        4,
+        AdminProtos.AdminMessage.ModuleConfigType.RANGETEST_CONFIG_VALUE,
         { vm -> RangeTestConfigScreen(vm) },
     ),
     TELEMETRY(
         R.string.telemetry,
         RadioConfigRoutes.Telemetry,
         Icons.Default.DataUsage,
-        5,
+        AdminProtos.AdminMessage.ModuleConfigType.TELEMETRY_CONFIG_VALUE,
         { vm -> TelemetryConfigScreen(vm) },
     ),
     CANNED_MESSAGE(
         R.string.canned_message,
         RadioConfigRoutes.CannedMessage,
         Icons.AutoMirrored.Default.Message,
-        6,
+        AdminProtos.AdminMessage.ModuleConfigType.CANNEDMSG_CONFIG_VALUE,
         { vm -> CannedMessageConfigScreen(vm) },
     ),
     AUDIO(
         R.string.audio,
         RadioConfigRoutes.Audio,
         Icons.AutoMirrored.Default.VolumeUp,
-        7,
+        AdminProtos.AdminMessage.ModuleConfigType.AUDIO_CONFIG_VALUE,
         { vm -> AudioConfigScreen(vm) },
     ),
     REMOTE_HARDWARE(
         R.string.remote_hardware,
         RadioConfigRoutes.RemoteHardware,
         Icons.Default.SettingsRemote,
-        8,
+        AdminProtos.AdminMessage.ModuleConfigType.REMOTEHARDWARE_CONFIG_VALUE,
         { vm -> RemoteHardwareConfigScreen(vm) },
     ),
     NEIGHBOR_INFO(
         R.string.neighbor_info,
         RadioConfigRoutes.NeighborInfo,
         Icons.Default.People,
-        9,
+        AdminProtos.AdminMessage.ModuleConfigType.NEIGHBORINFO_CONFIG_VALUE,
         { vm -> NeighborInfoConfigScreen(vm) },
     ),
     AMBIENT_LIGHTING(
         R.string.ambient_lighting,
         RadioConfigRoutes.AmbientLighting,
         Icons.Default.LightMode,
-        10,
+        AdminProtos.AdminMessage.ModuleConfigType.AMBIENTLIGHTING_CONFIG_VALUE,
         { vm -> AmbientLightingConfigScreen(vm) },
     ),
     DETECTION_SENSOR(
         R.string.detection_sensor,
         RadioConfigRoutes.DetectionSensor,
         Icons.Default.Sensors,
-        11,
+        AdminProtos.AdminMessage.ModuleConfigType.DETECTIONSENSOR_CONFIG_VALUE,
         { vm -> DetectionSensorConfigScreen(vm) },
     ),
     PAXCOUNTER(
         R.string.paxcounter,
         RadioConfigRoutes.Paxcounter,
         Icons.Default.PermScanWifi,
-        12,
+        AdminProtos.AdminMessage.ModuleConfigType.PAXCOUNTER_CONFIG_VALUE,
         { vm -> PaxcounterConfigScreen(vm) },
     ),
     ;
