@@ -27,6 +27,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
@@ -79,7 +80,11 @@ fun NavGraph(
         mapGraph(navController, uIViewModel, mapViewModel)
         channelsGraph(navController, uIViewModel)
         connectionsGraph(navController, uIViewModel, bluetoothViewModel)
-        composable<Route.DebugPanel> { DebugScreen() }
+        composable<Route.DebugPanel>(
+            deepLinks = listOf(navDeepLink<Route.DebugPanel>(basePath = "$DEEP_LINK_BASE_URI/debug_panel")),
+        ) {
+            DebugScreen()
+        }
         radioConfigGraph(navController, uIViewModel)
     }
 }
