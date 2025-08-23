@@ -29,14 +29,14 @@ import androidx.compose.ui.unit.dp
  * @see
  *   [forum](https://fonts.google.com/icons?selected=Material+Symbols+Rounded:forum:FILL@0;wght@400;GRAD@0;opsz@24&icon.query=forum&icon.size=24&icon.color=%23e3e3e3&icon.platform=android&icon.style=Rounded)
  */
-val MeshtasticIcons.Messages: ImageVector
+val MeshtasticIcons.Conversations: ImageVector
     get() {
-        if (messages != null) {
-            return messages!!
+        if (conversations != null) {
+            return conversations!!
         }
-        messages =
+        conversations =
             ImageVector.Builder(
-                name = "Outlined.Messages",
+                name = "Outlined.Conversations",
                 defaultWidth = 24.dp,
                 defaultHeight = 24.dp,
                 viewportWidth = 960f,
@@ -95,7 +95,7 @@ val MeshtasticIcons.Messages: ImageVector
                 }
                 .build()
 
-        return messages!!
+        return conversations!!
     }
 
-private var messages: ImageVector? = null
+private var conversations: ImageVector? = null

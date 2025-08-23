@@ -626,7 +626,7 @@
     <string name="navigate_into_label">Navigate Into</string>
     <string name="connections">Connection</string>
     <string name="map">Mesh Map</string>
-    <string name="contacts">Messages</string>
+    <string name="conversations">Conversations</string>
     <string name="nodes">Nodes</string>
     <string name="bottom_nav_share">Share</string>
     <string name="set_your_region">Set your region</string>

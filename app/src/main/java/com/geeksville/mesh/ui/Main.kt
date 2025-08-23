@@ -100,9 +100,9 @@ import com.geeksville.mesh.ui.common.components.MainMenuAction
 import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
+import com.geeksville.mesh.ui.common.icons.Conversations
 import com.geeksville.mesh.ui.common.icons.Map
 import com.geeksville.mesh.ui.common.icons.MeshtasticIcons
-import com.geeksville.mesh.ui.common.icons.Messages
 import com.geeksville.mesh.ui.common.icons.Nodes
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusBlue
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
@@ -117,7 +117,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
-    Messages(R.string.contacts, MeshtasticIcons.Messages, ContactsRoutes.ContactsGraph),
+    Conversations(R.string.conversations, MeshtasticIcons.Conversations, ContactsRoutes.ContactsGraph),
     Nodes(R.string.nodes, MeshtasticIcons.Nodes, NodesRoutes.NodesGraph),
     Map(R.string.map, MeshtasticIcons.Map, MapRoutes.Map),
     Share(R.string.bottom_nav_share, Icons.Rounded.QrCode2, ChannelsRoutes.ChannelsGraph),
