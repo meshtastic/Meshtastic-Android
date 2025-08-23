@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.navigation
 
-import android.content.Intent
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
@@ -42,13 +41,7 @@ sealed class ChannelsRoutes {
 fun NavGraphBuilder.channelsGraph(navController: NavHostController, uiViewModel: UIViewModel) {
     navigation<ChannelsRoutes.ChannelsGraph>(startDestination = ChannelsRoutes.Channels) {
         composable<ChannelsRoutes.Channels>(
-            deepLinks =
-            listOf(
-                navDeepLink {
-                    uriPattern = "$DEEP_LINK_BASE_URI/channels"
-                    action = Intent.ACTION_VIEW
-                },
-            ),
+            deepLinks = listOf(navDeepLink<ChannelsRoutes.Channels>(basePath = "$DEEP_LINK_BASE_URI/channels")),
         ) { backStackEntry ->
             val parentEntry = remember(backStackEntry) { navController.getBackStackEntry(ChannelsRoutes.ChannelsGraph) }
             ChannelScreen(
@@ -68,7 +61,7 @@ private fun NavGraphBuilder.configRoutes(navController: NavHostController) {
             when (configRoute) {
                 ConfigRoute.CHANNELS -> ChannelConfigScreen(hiltViewModel(parentEntry))
                 ConfigRoute.LORA -> LoRaConfigScreen(hiltViewModel(parentEntry))
-                else -> Unit
+                else -> Unit // Should not happen if ConfigRoute enum is exhaustive for this context
             }
         }
     }

@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.navigation
 
-import android.content.Intent
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -82,13 +81,7 @@ fun NavGraph(
         channelsGraph(navController, uIViewModel)
         connectionsGraph(navController, uIViewModel, bluetoothViewModel)
         composable<Route.DebugPanel>(
-            deepLinks =
-            listOf(
-                navDeepLink {
-                    uriPattern = "$DEEP_LINK_BASE_URI/debug_panel"
-                    action = Intent.ACTION_VIEW
-                },
-            ),
+            deepLinks = listOf(navDeepLink<Route.DebugPanel>(basePath = "$DEEP_LINK_BASE_URI/debug_panel")),
         ) {
             DebugScreen()
         }

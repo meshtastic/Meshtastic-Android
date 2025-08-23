@@ -47,10 +47,9 @@ fun NavGraphBuilder.connectionsGraph(
         composable<ConnectionsRoutes.Connections>(
             deepLinks =
             listOf(
-                navDeepLink {
-                    uriPattern = "$DEEP_LINK_BASE_URI/connections"
-                    action = "android.intent.action.VIEW"
-                },
+                navDeepLink<ConnectionsRoutes.Connections>(
+                    basePath = "$DEEP_LINK_BASE_URI/connections",
+                ),
             ),
         ) { backStackEntry ->
             val parentEntry =
