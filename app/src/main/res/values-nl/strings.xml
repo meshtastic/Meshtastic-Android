@@ -451,7 +451,6 @@
     <string name="import_label">Importeer</string>
     <string name="request_metadata">Metadata opvragen</string>
     <string name="actions">Acties</string>
-    <string name="contacts">Berichten</string>
     <string name="bottom_nav_share">Deel</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
