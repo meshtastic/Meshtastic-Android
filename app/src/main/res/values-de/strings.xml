@@ -88,6 +88,7 @@
     <string name="cancel">Abbrechen</string>
     <string name="clear_changes">Änderungen löschen</string>
     <string name="new_channel_rcvd">Neue Kanal-URL empfangen</string>
+    <string name="permission_missing">Meshtastic benötigt aktivierte Standortberechtigungen, um neue Geräte über Bluetooth zu finden. Sie können die Funktion deaktivieren, wenn sie nicht verwendet wird.</string>
     <string name="report_bug">Fehler melden</string>
     <string name="report_a_bug">Fehler melden</string>
     <string name="report_bug_text">Bist du sicher, dass du einen Fehler melden möchtest? Nach dem Melden bitte auf https://github.com/orgs/meshtastic/discussions eine Nachricht veröffentlichen, damit wir die Übereinstimmung der Fehlermeldung und dessen, was Sie gefunden haben, feststellen können.</string>
@@ -184,6 +185,10 @@
     <string name="quick_chat_show">Schnell-Chat Menü anzeigen</string>
     <string name="quick_chat_hide">Schnell-Chat-Menü ausblenden</string>
     <string name="factory_reset">Auf Werkseinstellungen zurücksetzen</string>
+    <string name="bluetooth_disabled">Bluetooth ist deaktiviert. Bitte aktivieren Sie es in Ihren Geräteeinstellungen.</string>
+    <string name="open_settings">Einstellungen öffnen</string>
+    <string name="firmware_version">Firmware Version: %1$s</string>
+    <string name="permission_missing_31">Meshtastic benötigt die Berechtigung „Geräte in der Nähe“, um Geräte über Bluetooth zu finden und eine Verbindung zu ihnen herzustellen. Sie können die Funktion deaktivieren, wenn sie nicht verwendet wird.</string>
     <string name="direct_message">Direktnachricht</string>
     <string name="nodedb_reset">Node-Datenbank zurücksetzen</string>
     <string name="delivery_confirmed">Zustellung Bestätigt</string>
@@ -634,6 +639,8 @@
     <string name="node_count_template">(%1$d Online / %2$d Gesamt)</string>
     <string name="react">Reagieren</string>
     <string name="disconnect">Trennen</string>
+    <string name="scanning_bluetooth">Suche nach Bluetooth Geräten…</string>
+    <string name="no_ble_devices">Keine gekoppelten Bluetooth Geräte.</string>
     <string name="no_network_devices">Keine Netzwerkgeräte gefunden.</string>
     <string name="no_usb_devices">Keine seriellen USB Geräte gefunden.</string>
     <string name="scroll_to_bottom">Zum Ende springen</string>
@@ -682,6 +689,9 @@
     <string name="no_pax_metrics_logs">Keine Daten für den Besucherzähler verfügbar.</string>
     <string name="wifi_devices">WLAN Geräte</string>
     <string name="ble_devices">BLE Geräte</string>
+    <string name="bluetooth_paired_devices">Gekoppelte Geräte</string>
+    <string name="connected_device">Verbundene Geräte</string>
+    <string name="action_go">Ausführen</string>
     <string name="routing_error_rate_limit_exceeded">Sendebegrenzung überschritten. Bitte versuchen Sie es später erneut.</string>
     <string name="view_release">Version ansehen</string>
     <string name="download">Herunterladen</string>
@@ -730,6 +740,7 @@
     <string name="configure_critical_alerts">Kritische Warnungen konfigurieren</string>
     <string name="notification_permissions_description">Meshtastic verwendet Benachrichtigungen, um Sie über neue Nachrichten und andere wichtige Ereignisse auf dem Laufenden zu halten. Sie können Ihre Benachrichtigungsrechte jederzeit in den Einstellungen aktualisieren.</string>
     <string name="next">Weiter</string>
+    <string name="grant_permissions">Berechtigungen erteilen</string>
     <string name="nodes_queued_for_deletion">%d Knoten in der Warteschlange zum Löschen:</string>
     <string name="clean_node_database_description">Achtung: Dies entfernt Knoten aus der App und Gerätedatenbank.\nDie Auswahl ist kumulativ.</string>
     <string name="connecting_to_device">Verbinde mit Gerät</string>
