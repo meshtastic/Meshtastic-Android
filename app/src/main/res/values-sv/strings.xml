@@ -289,7 +289,6 @@
     <string name="scan_qr_code">Skanna QR-kod</string>
     <string name="import_label">Importera</string>
     <string name="connections">Anslutning</string>
-    <string name="contacts">Meddelanden</string>
     <string name="nodes">Noder</string>
     <string name="bottom_nav_share">Dela</string>
     <string name="reply">Svara</string>
