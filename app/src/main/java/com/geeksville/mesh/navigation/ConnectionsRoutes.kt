@@ -43,13 +43,11 @@ fun NavGraphBuilder.connectionsGraph(
     uiViewModel: UIViewModel,
     bluetoothViewModel: BluetoothViewModel,
 ) {
+    @Suppress("ktlint:standard:max-line-length")
     navigation<ConnectionsRoutes.ConnectionsGraph>(startDestination = ConnectionsRoutes.Connections) {
         composable<ConnectionsRoutes.Connections>(
-            deepLinks =
-            listOf(
-                navDeepLink<ConnectionsRoutes.Connections>(
-                    basePath = "$DEEP_LINK_BASE_URI/connections",
-                ),
+            deepLinks = listOf(
+                navDeepLink<ConnectionsRoutes.Connections>(basePath = "$DEEP_LINK_BASE_URI/connections"),
             ),
         ) { backStackEntry ->
             val parentEntry =
