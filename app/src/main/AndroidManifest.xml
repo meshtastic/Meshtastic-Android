@@ -166,10 +166,11 @@
             </intent-filter>
 
             <intent-filter android:autoVerify="true">
-                <!-- The QR codes to share channel settings are shared as meshtastic URLS
+                <!-- The QR codes to share channel settings and contacts are shared as meshtastic URLS
 
                 an approximate example:
                 https://meshtastic.org/e/YXNkZnF3ZXJhc2RmcXdlcmFzZGZxd2Vy
+                https://meshtastic.org/v/#CNar9vwDEi0KCSEzZjgyOTVkNhIPV2F0ZXJmYWxsIDIg4piGGgPimaciBu2eP4KV1igJOAI
                 -->
                 <action android:name="android.intent.action.VIEW" />
 
