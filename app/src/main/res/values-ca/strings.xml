@@ -16,9 +16,15 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Filtre</string>
     <string name="desc_node_filter_clear">netejar filtre de node</string>
     <string name="node_filter_include_unknown">Incloure desconegut</string>
+    <string name="node_filter_only_online">Oculta nodes offline</string>
+    <string name="node_filter_only_direct">Només veure nodes directes</string>
+    <string name="node_filter_ignored">Estàs veient nodes ignorats, \n Prem per tornar al llistat de nodes</string>
+    <string name="node_filter_show_details">Veure detalls</string>
+    <string name="node_sort_button">Opcions per ordenar nodes</string>
     <string name="node_sort_alpha">A-Z</string>
     <string name="node_sort_channel">Canal</string>
     <string name="node_sort_distance">Distància</string>
@@ -26,6 +32,31 @@
     <string name="node_sort_last_heard">Última notícia</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="via_mqtt">via MQTT</string>
+    <string name="node_sort_via_favorite">via Favorits</string>
+    <string name="node_filter_show_ignored">Nodes Ignorats</string>
+    <string name="unrecognized">No reconeguts</string>
+    <string name="message_status_enroute">Esperant confirmació</string>
+    <string name="message_status_queued">En cua per enviar</string>
+    <string name="routing_error_none">Confirmat</string>
+    <string name="routing_error_no_route">Sense ruta</string>
+    <string name="routing_error_got_nak">Rebuda confirmació negativa</string>
+    <string name="routing_error_timeout">Temps esgotat</string>
+    <string name="routing_error_no_interface">Sense Interface</string>
+    <string name="routing_error_max_retransmit">Màx. retransmissions assolides</string>
+    <string name="routing_error_no_channel">Sense canal</string>
+    <string name="routing_error_too_large">Packet massa llarg</string>
+    <string name="routing_error_no_response">Sense resposta</string>
+    <string name="routing_error_bad_request">Sol·licitud errònia.</string>
+    <string name="routing_error_duty_cycle_limit">Límit regional de cicle de servei assolit</string>
+    <string name="routing_error_not_authorized">No Autoritzat</string>
+    <string name="routing_error_pki_failed">Falla d\'encriptació</string>
+    <string name="routing_error_pki_unknown_pubkey">Clau Pública Desconeguda</string>
+    <string name="routing_error_admin_bad_session_key">Clau de sessió incorrecta</string>
+    <string name="routing_error_admin_public_key_unauthorized">Clau Pública no autoritzada</string>
+    <string name="role_client">Dispositiu de missatgeria, connectat o autònom.</string>
+    <string name="role_client_mute">Dispositiu sense reenviament de paquets.</string>
+    <string name="role_router">Node d’infraestructura per ampliar cobertura. Apareix a la llista de nodes.</string>
+    <string name="role_router_client">Combinació ROUTER + CLIENT. No mòbils.</string>
     <string name="channel_name">Nom del canal</string>
     <string name="qr_code">Codi QR</string>
     <string name="application_icon">icona de l\'aplicació</string>
