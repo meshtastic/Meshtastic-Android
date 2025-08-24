@@ -191,7 +191,7 @@ fun MapView(
 
     LocationPermissionsHandler { isGranted -> hasLocationPermission = isGranted }
 
-    val kmlFilePickerLauncher =
+    val filePickerLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == android.app.Activity.RESULT_OK) {
                 result.data?.data?.let { uri ->
@@ -290,10 +290,17 @@ fun MapView(
             Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 type = "*/*"
-                val mimeTypes = arrayOf("application/vnd.google-earth.kml+xml", "application/vnd.google-earth.kmz")
+                val mimeTypes =
+                    arrayOf(
+                        "application/vnd.google-earth.kml+xml",
+                        "application/vnd.google-earth.kmz",
+                        "application/vnd.geo+json",
+                        "application/geo+json",
+                        "application/json",
+                    )
                 putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
             }
-        kmlFilePickerLauncher.launch(intent)
+        filePickerLauncher.launch(intent)
     }
     val onRemoveLayer = { layerId: String -> mapViewModel.removeMapLayer(layerId) }
     val onToggleVisibility = { layerId: String -> mapViewModel.toggleLayerVisibility(layerId) }
@@ -475,11 +482,27 @@ fun MapView(
 
                 MapEffect(mapLayers) { map ->
                     mapLayers.forEach { layerItem ->
-                        mapViewModel.loadKmlLayerIfNeeded(map, layerItem)?.let { kmlLayer ->
-                            if (layerItem.isVisible && !kmlLayer.isLayerOnMap) {
-                                kmlLayer.addLayerToMap()
-                            } else if (!layerItem.isVisible && kmlLayer.isLayerOnMap) {
-                                kmlLayer.removeLayerFromMap()
+                        coroutineScope.launch {
+                            mapViewModel.loadMapLayerIfNeeded(map, layerItem)
+                            when (layerItem.layerType) {
+                                LayerType.KML -> {
+                                    layerItem.kmlLayerData?.let { kmlLayer ->
+                                        if (layerItem.isVisible && !kmlLayer.isLayerOnMap) {
+                                            kmlLayer.addLayerToMap()
+                                        } else if (!layerItem.isVisible && kmlLayer.isLayerOnMap) {
+                                            kmlLayer.removeLayerFromMap()
+                                        }
+                                    }
+                                }
+                                LayerType.GEOJSON -> {
+                                    layerItem.geoJsonLayerData?.let { geoJsonLayer ->
+                                        if (layerItem.isVisible && !geoJsonLayer.isLayerOnMap) {
+                                            geoJsonLayer.addLayerToMap()
+                                        } else if (!layerItem.isVisible && geoJsonLayer.isLayerOnMap) {
+                                            geoJsonLayer.removeLayerFromMap()
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
