@@ -141,7 +141,6 @@
     <string name="error_duty_cycle">הגעת לרף ה-duty cycle. לא ניתן לשלוח הודעות כרגע, בבקשה נסה שוב מאוחר יותר.</string>
     <string name="messages">הודעות</string>
     <string name="distance">מרחק</string>
-    <string name="contacts">הודעות</string>
     <string name="bottom_nav_share">שתף</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->

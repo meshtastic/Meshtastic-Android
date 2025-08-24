@@ -609,7 +609,7 @@
     <string name="navigate_into_label">Siirry kohtaan</string>
     <string name="connections">Yhteys</string>
     <string name="map">Mesh-kartta</string>
-    <string name="contacts">Viestit</string>
+    <string name="conversations">Keskustelut</string>
     <string name="nodes">Laitteet</string>
     <string name="bottom_nav_share">Jaa</string>
     <string name="set_your_region">Määritä alue</string>

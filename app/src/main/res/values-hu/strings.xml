@@ -201,7 +201,6 @@
     <string name="messages">Üzenetek</string>
     <string name="timeout">Időtúllépés</string>
     <string name="distance">Távolság</string>
-    <string name="contacts">Üzenetek</string>
     <string name="bottom_nav_share">Megosztás</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->

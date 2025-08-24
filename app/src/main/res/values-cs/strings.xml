@@ -553,7 +553,6 @@
     <string name="display_time_in_12h_format">Pokud je povoleno, zařízení bude na obrazovce zobrazovat čas ve 12 hodinovém formátu.</string>
     <string name="free_memory">Volná paměť</string>
     <string name="load">Zatížení</string>
-    <string name="contacts">Zprávy</string>
     <string name="nodes">Uzly</string>
     <string name="bottom_nav_share">Sdílet</string>
     <string name="set_your_region">Nastavte svůj region</string>

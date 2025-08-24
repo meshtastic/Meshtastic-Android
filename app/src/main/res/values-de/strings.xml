@@ -609,7 +609,7 @@
     <string name="navigate_into_label">Navigieren zu</string>
     <string name="connections">Verbindung</string>
     <string name="map">Mesh Karte</string>
-    <string name="contacts">Nachrichten</string>
+    <string name="conversations">Konversationen</string>
     <string name="nodes">Knoten</string>
     <string name="bottom_nav_share">Teilen</string>
     <string name="set_your_region">Region festlegen</string>

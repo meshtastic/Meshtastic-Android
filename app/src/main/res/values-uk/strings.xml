@@ -276,7 +276,6 @@
     <string name="actions">Дії</string>
     <string name="firmware">Прошивка</string>
     <string name="display_time_in_12h_format">Якщо увімкнено, пристрій буде показувати час у 12-годинному форматі на екрані.</string>
-    <string name="contacts">Повідомлення</string>
     <string name="bottom_nav_share">Поділіться</string>
     <string name="i_agree">Погоджуюся.</string>
     <string name="time">Час</string>

@@ -134,7 +134,6 @@
     <string name="baro_pressure">الضغط الجوي</string>
     <string name="messages">الرسائل</string>
     <string name="distance">المسافة</string>
-    <string name="contacts">الرسائل</string>
     <string name="bottom_nav_share">مشاركة</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
