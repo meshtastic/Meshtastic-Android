@@ -19,6 +19,7 @@ package com.geeksville.mesh.ui.map
 
 import android.app.Application
 import android.net.Uri
+import androidx.core.net.toFile
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.android.BuildUtils.debug
@@ -33,6 +34,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.TileProvider
 import com.google.android.gms.maps.model.UrlTileProvider
 import com.google.maps.android.compose.MapType
+import com.google.maps.android.data.geojson.GeoJsonLayer
 import com.google.maps.android.data.kml.KmlLayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -49,6 +51,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import org.json.JSONObject
 import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
@@ -287,11 +290,25 @@ constructor(
                         val loadedItems =
                             persistedLayerFiles.mapNotNull { file ->
                                 if (file.isFile) {
-                                    MapLayerItem(
-                                        name = file.nameWithoutExtension,
-                                        uri = Uri.fromFile(file),
-                                        isVisible = true,
-                                    )
+                                    val layerType =
+                                        when (file.extension.lowercase()) {
+                                            "kml",
+                                            "kmz",
+                                            -> LayerType.KML
+                                            "geojson",
+                                            "json",
+                                            -> LayerType.GEOJSON
+                                            else -> null
+                                        }
+
+                                    layerType?.let {
+                                        MapLayerItem(
+                                            name = file.nameWithoutExtension,
+                                            uri = Uri.fromFile(file),
+                                            isVisible = true,
+                                            layerType = it,
+                                        )
+                                    }
                                 } else {
                                     null
                                 }
@@ -313,14 +330,41 @@ constructor(
 
     fun addMapLayer(uri: Uri, fileName: String?) {
         viewModelScope.launch {
-            val layerName = fileName ?: "Layer ${mapLayers.value.size + 1}"
-            val localFileUri = copyFileToInternalStorage(uri, fileName ?: "layer_${UUID.randomUUID()}")
+            val layerName = fileName?.substringBeforeLast('.') ?: "Layer ${mapLayers.value.size + 1}"
+
+            val extension =
+                fileName?.substringAfterLast('.', "")?.lowercase()
+                    ?: application.contentResolver.getType(uri)?.split('/')?.last()
+
+            val kmlExtensions = listOf("kml", "kmz", "vnd.google-earth.kml+xml", "vnd.google-earth.kmz")
+            val geoJsonExtensions = listOf("geojson", "json")
+
+            val layerType =
+                when (extension) {
+                    in kmlExtensions -> LayerType.KML
+                    in geoJsonExtensions -> LayerType.GEOJSON
+                    else -> null
+                }
+
+            if (layerType == null) {
+                Timber.tag("MapViewModel").e("Unsupported map layer file type: $extension")
+                return@launch
+            }
+
+            val finalFileName =
+                if (fileName != null) {
+                    "$layerName.$extension"
+                } else {
+                    "layer_${UUID.randomUUID()}.$extension"
+                }
+
+            val localFileUri = copyFileToInternalStorage(uri, finalFileName)
 
             if (localFileUri != null) {
-                val newItem = MapLayerItem(name = layerName, uri = localFileUri)
+                val newItem = MapLayerItem(name = layerName, uri = localFileUri, layerType = layerType)
                 _mapLayers.value = _mapLayers.value + newItem
             } else {
-                Timber.tag("MapViewModel").e("Failed to copy KML/KMZ file to internal storage.")
+                Timber.tag("MapViewModel").e("Failed to copy file to internal storage.")
             }
         }
     }
@@ -350,16 +394,20 @@ constructor(
     fun removeMapLayer(layerId: String) {
         viewModelScope.launch {
             val layerToRemove = _mapLayers.value.find { it.id == layerId }
-            layerToRemove?.kmlLayerData?.removeLayerFromMap()
-            layerToRemove?.uri?.let { uri -> deleteFileFromInternalStorage(uri) }
+            when (layerToRemove?.layerType) {
+                LayerType.KML -> layerToRemove.kmlLayerData?.removeLayerFromMap()
+                LayerType.GEOJSON -> layerToRemove.geoJsonLayerData?.removeLayerFromMap()
+                null -> {}
+            }
+            layerToRemove?.uri?.let { uri -> deleteFileToInternalStorage(uri) }
             _mapLayers.value = _mapLayers.value.filterNot { it.id == layerId }
         }
     }
 
-    private suspend fun deleteFileFromInternalStorage(uri: Uri) {
+    private suspend fun deleteFileToInternalStorage(uri: Uri) {
         withContext(Dispatchers.IO) {
             try {
-                val file = File(uri.path ?: return@withContext)
+                val file = uri.toFile()
                 if (file.exists()) {
                     file.delete()
                 }
@@ -370,38 +418,61 @@ constructor(
     }
 
     @Suppress("Recycle")
-    suspend fun getInputStreamFromUri(layerItem: MapLayerItem): InputStream? {
+    private suspend fun getInputStreamFromUri(layerItem: MapLayerItem): InputStream? {
         val uriToLoad = layerItem.uri ?: return null
-        val stream =
-            withContext(Dispatchers.IO) {
-                try {
-                    application.contentResolver.openInputStream(uriToLoad)
-                } catch (_: Exception) {
-                    debug("MapViewModel: Error opening InputStream from URI: $uriToLoad")
-                    null
-                }
+        return withContext(Dispatchers.IO) {
+            try {
+                application.contentResolver.openInputStream(uriToLoad)
+            } catch (_: Exception) {
+                debug("MapViewModel: Error opening InputStream from URI: $uriToLoad")
+                null
             }
-        return stream
+        }
     }
 
-    suspend fun loadKmlLayerIfNeeded(map: GoogleMap, layerItem: MapLayerItem): KmlLayer? {
-        if (layerItem.kmlLayerData != null) {
-            return layerItem.kmlLayerData
-        }
-
-        return try {
-            getInputStreamFromUri(layerItem)?.use { inputStream ->
-                val kmlLayer = KmlLayer(map, inputStream, application.applicationContext)
-                _mapLayers.update { currentLayers ->
-                    currentLayers.map { if (it.id == layerItem.id) it.copy(kmlLayerData = kmlLayer) else it }
+    suspend fun loadMapLayerIfNeeded(map: GoogleMap, layerItem: MapLayerItem) {
+        if (layerItem.kmlLayerData != null || layerItem.geoJsonLayerData != null) return
+        try {
+            when (layerItem.layerType) {
+                LayerType.KML -> {
+                    val kmlLayer =
+                        getInputStreamFromUri(layerItem)?.use { KmlLayer(map, it, application.applicationContext) }
+                    _mapLayers.update { currentLayers ->
+                        currentLayers.map {
+                            if (it.id == layerItem.id) {
+                                it.copy(kmlLayerData = kmlLayer)
+                            } else {
+                                it
+                            }
+                        }
+                    }
                 }
-                kmlLayer
+                LayerType.GEOJSON -> {
+                    val geoJsonLayer =
+                        getInputStreamFromUri(layerItem)?.use { inputStream ->
+                            val jsonObject = JSONObject(inputStream.bufferedReader().use { it.readText() })
+                            GeoJsonLayer(map, jsonObject)
+                        }
+                    _mapLayers.update { currentLayers ->
+                        currentLayers.map {
+                            if (it.id == layerItem.id) {
+                                it.copy(geoJsonLayerData = geoJsonLayer)
+                            } else {
+                                it
+                            }
+                        }
+                    }
+                }
             }
         } catch (e: Exception) {
-            Timber.tag("MapViewModel").e(e, "Error loading KML for ${layerItem.uri}")
-            null
+            Timber.tag("MapViewModel").e(e, "Error loading map layer for ${layerItem.uri}")
         }
     }
+}
+
+enum class LayerType {
+    KML,
+    GEOJSON,
 }
 
 data class MapLayerItem(
@@ -410,6 +481,8 @@ data class MapLayerItem(
     val uri: Uri? = null,
     var isVisible: Boolean = true,
     var kmlLayerData: KmlLayer? = null,
+    var geoJsonLayerData: GeoJsonLayer? = null,
+    val layerType: LayerType,
 )
 
 @Serializable
