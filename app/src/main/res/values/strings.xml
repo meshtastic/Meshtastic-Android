@@ -672,6 +672,7 @@
     <string name="uv_lux">UV Lux</string>
     <string name="unknown">Unknown</string>
 
+    <string name="message_device_managed">This radio is managed and can only be changed by a remote admin.</string>
     <string name="clean_node_database_title">Clean Node Database</string>
     <string name="clean_nodes_older_than">Clean up nodes last seen older than %1$d days</string>
     <string name="clean_unknown_nodes">Clean up only unknown nodes</string>

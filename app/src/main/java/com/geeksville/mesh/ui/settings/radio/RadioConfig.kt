@@ -75,8 +75,10 @@ import com.geeksville.mesh.navigation.ModuleRoute
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.navigation.getNavRouteFrom
-import com.geeksville.mesh.ui.common.components.PreferenceCategory
+import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.common.theme.AppTheme
+import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
+import com.geeksville.mesh.ui.settings.components.SettingsItem
 import com.geeksville.mesh.ui.settings.radio.components.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
 import kotlinx.coroutines.delay
@@ -105,6 +107,7 @@ fun RadioConfigScreen(
     nodeName?.let { uiViewModel.setTitle(it) }
 
     val excludedModulesUnlocked by uiViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
+    val localConfig by uiViewModel.localConfig.collectAsStateWithLifecycle()
 
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     var isWaiting by remember { mutableStateOf(false) }
@@ -177,6 +180,7 @@ fun RadioConfigScreen(
     RadioConfigItemList(
         modifier = modifier,
         state = state,
+        isManaged = localConfig.security.isManaged,
         excludedModulesUnlocked = excludedModulesUnlocked,
         onRouteClick = { route ->
             isWaiting = true
@@ -272,9 +276,11 @@ private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Un
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun RadioConfigItemList(
     state: RadioConfigState,
+    isManaged: Boolean,
     excludedModulesUnlocked: Boolean = false,
     modifier: Modifier = Modifier,
     onRouteClick: (Enum<*>) -> Unit = {},
@@ -282,7 +288,7 @@ private fun RadioConfigItemList(
     onExport: () -> Unit = {},
     onNavigate: (Route) -> Unit,
 ) {
-    val enabled = state.connected && !state.responseState.isWaiting()
+    val enabled = state.connected && !state.responseState.isWaiting() && !isManaged
     var modules by remember { mutableStateOf(ModuleRoute.filterExcludedFrom(state.metadata)) }
     LaunchedEffect(excludedModulesUnlocked) {
         if (excludedModulesUnlocked) {
@@ -291,44 +297,72 @@ private fun RadioConfigItemList(
             modules = ModuleRoute.filterExcludedFrom(state.metadata)
         }
     }
-    LazyColumn(modifier = modifier, contentPadding = PaddingValues(horizontal = 16.dp)) {
-        item { PreferenceCategory(stringResource(R.string.radio_configuration)) }
-        items(ConfigRoute.filterExcludedFrom(state.metadata)) {
-            NavCard(title = stringResource(it.title), icon = it.icon, enabled = enabled) { onRouteClick(it) }
+    LazyColumn(modifier = modifier, contentPadding = PaddingValues(16.dp)) {
+        item {
+            TitledCard(title = stringResource(R.string.radio_configuration)) {
+                if (isManaged) {
+                    ManagedMessage()
+                }
+
+                ConfigRoute.filterExcludedFrom(state.metadata).forEach {
+                    SettingsItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) {
+                        onRouteClick(it)
+                    }
+                }
+            }
         }
 
-        item { PreferenceCategory(stringResource(R.string.module_settings)) }
-        items(modules) {
-            NavCard(title = stringResource(it.title), icon = it.icon, enabled = enabled) { onRouteClick(it) }
+        item {
+            TitledCard(title = stringResource(R.string.module_settings), modifier = Modifier.padding(top = 16.dp)) {
+                if (isManaged) {
+                    ManagedMessage()
+                }
+
+                modules.forEach {
+                    SettingsItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) {
+                        onRouteClick(it)
+                    }
+                }
+            }
         }
 
         if (state.isLocal) {
             item {
-                PreferenceCategory(stringResource(R.string.backup_restore))
-                NavCard(
-                    title = stringResource(R.string.import_configuration),
-                    icon = Icons.Default.Download,
-                    enabled = enabled,
-                    onClick = onImport,
-                )
-                NavCard(
-                    title = stringResource(R.string.export_configuration),
-                    icon = Icons.Default.Upload,
-                    enabled = enabled,
-                    onClick = onExport,
-                )
+                TitledCard(title = stringResource(R.string.backup_restore), modifier = Modifier.padding(top = 16.dp)) {
+                    if (isManaged) {
+                        ManagedMessage()
+                    }
+
+                    SettingsItem(
+                        text = stringResource(R.string.import_configuration),
+                        leadingIcon = Icons.Default.Download,
+                        enabled = enabled,
+                        onClick = onImport,
+                    )
+                    SettingsItem(
+                        text = stringResource(R.string.export_configuration),
+                        leadingIcon = Icons.Default.Upload,
+                        enabled = enabled,
+                        onClick = onExport,
+                    )
+                }
             }
         }
 
         items(AdminRoute.entries) { NavButton(it.title, enabled) { onRouteClick(it) } }
 
         item {
-            PreferenceCategory("Advanced")
-            NavCard(
-                title = stringResource(R.string.clean_node_database_title),
-                enabled = enabled,
-                onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
-            )
+            TitledCard(title = "Advanced", modifier = Modifier.padding(top = 16.dp)) {
+                if (isManaged) {
+                    ManagedMessage()
+                }
+
+                SettingsItem(
+                    text = stringResource(R.string.clean_node_database_title),
+                    enabled = enabled,
+                    onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
+                )
+            }
         }
     }
 }
@@ -362,5 +396,28 @@ fun RadioConfigMenuActions(modifier: Modifier = Modifier, viewModel: UIViewModel
 @Preview(showBackground = true)
 @Composable
 private fun RadioSettingsScreenPreview() = AppTheme {
-    RadioConfigItemList(state = RadioConfigState(isLocal = true, connected = true), onNavigate = { _ -> })
+    RadioConfigItemList(
+        state = RadioConfigState(isLocal = true, connected = true),
+        isManaged = false,
+        onNavigate = { _ -> },
+    )
+}
+
+@Composable
+private fun ManagedMessage() {
+    Text(
+        text = stringResource(R.string.message_device_managed),
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        color = MaterialTheme.colorScheme.StatusRed,
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun RadioSettingsScreenManagedPreview() = AppTheme {
+    RadioConfigItemList(
+        state = RadioConfigState(isLocal = true, connected = true),
+        isManaged = true,
+        onNavigate = { _ -> },
+    )
 }

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.ui.connections.components
+package com.geeksville.mesh.ui.common.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ui.common.theme.AppTheme
 
 @Composable
-fun TitledCard(title: String, content: @Composable ColumnScope.() -> Unit) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+fun TitledCard(title: String, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             title,
             modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
@@ -49,6 +49,6 @@ fun TitledCard(title: String, content: @Composable ColumnScope.() -> Unit) {
 
 @PreviewLightDark
 @Composable
-fun TitledCardPreview() {
+private fun TitledCardPreview() {
     AppTheme { Surface { TitledCard(title = "Title") { Box(modifier = Modifier.fillMaxWidth().height(100.dp)) {} } } }
 }
