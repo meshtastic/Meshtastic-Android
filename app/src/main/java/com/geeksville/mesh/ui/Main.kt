@@ -150,7 +150,6 @@ fun MainScreen(
 ) {
     val navController = rememberNavController()
     val connectionState by uIViewModel.connectionState.collectAsStateWithLifecycle()
-    val localConfig by uIViewModel.localConfig.collectAsStateWithLifecycle()
     val requestChannelSet by uIViewModel.requestChannelSet.collectAsStateWithLifecycle()
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -348,13 +347,11 @@ fun MainScreen(
                 }
                 MainAppBar(
                     viewModel = uIViewModel,
-                    isManaged = localConfig.security.isManaged,
                     navController = navController,
                     onAction = { action ->
                         if (action is MainMenuAction) {
                             when (action) {
                                 MainMenuAction.DEBUG -> navController.navigate(Route.DebugPanel)
-                                MainMenuAction.RADIO_CONFIG -> navController.navigate(SettingsRoutes.Settings())
                                 MainMenuAction.QUICK_CHAT -> navController.navigate(ContactsRoutes.QuickChat)
                                 MainMenuAction.SHOW_INTRO -> uIViewModel.onMainMenuAction(action)
                                 else -> onAction(action)

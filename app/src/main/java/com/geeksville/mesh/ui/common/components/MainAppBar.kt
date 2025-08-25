@@ -70,7 +70,6 @@ fun MainAppBar(
     modifier: Modifier = Modifier,
     viewModel: UIViewModel = hiltViewModel(),
     navController: NavHostController,
-    isManaged: Boolean,
     onAction: (Any?) -> Unit,
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -119,7 +118,7 @@ fun MainAppBar(
         actions = {
             currentDestination?.let {
                 when {
-                    it.isTopLevel() -> MainMenuActions(isManaged, onAction)
+                    it.isTopLevel() -> MainMenuActions(onAction)
 
                     currentDestination.hasRoute<Route.DebugPanel>() -> DebugMenuActions()
 
@@ -208,7 +207,6 @@ private fun TopBarActions(
 
 enum class MainMenuAction(@StringRes val stringRes: Int) {
     DEBUG(R.string.debug_panel),
-    RADIO_CONFIG(R.string.radio_configuration),
     EXPORT_RANGETEST(R.string.save_rangetest),
     THEME(R.string.theme),
     LANGUAGE(R.string.preferences_language),
@@ -218,7 +216,7 @@ enum class MainMenuAction(@StringRes val stringRes: Int) {
 }
 
 @Composable
-private fun MainMenuActions(isManaged: Boolean, onAction: (MainMenuAction) -> Unit) {
+private fun MainMenuActions(onAction: (MainMenuAction) -> Unit) {
     var showMenu by remember { mutableStateOf(false) }
     IconButton(onClick = { showMenu = true }) {
         Icon(imageVector = Icons.Default.MoreVert, contentDescription = stringResource(R.string.overflow_menu))
@@ -236,11 +234,7 @@ private fun MainMenuActions(isManaged: Boolean, onAction: (MainMenuAction) -> Un
                     onAction(action)
                     showMenu = false
                 },
-                enabled =
-                when (action) {
-                    MainMenuAction.RADIO_CONFIG -> !isManaged
-                    else -> true
-                },
+                enabled = true,
             )
         }
     }
@@ -258,7 +252,7 @@ private fun MainAppBarPreview(@PreviewParameter(BooleanProvider::class) canNavig
             showNodeChip = true,
             canNavigateUp = canNavigateUp,
             onNavigateUp = {},
-            actions = { MainMenuActions(isManaged = false, onAction = {}) },
+            actions = { MainMenuActions(onAction = {}) },
         ) {}
     }
 }
