@@ -211,8 +211,14 @@ class MeshService :
         MeshServiceBroadcasts(this, clientPackages) {
             connectionState.also { radioConfigRepository.setConnectionState(it) }
         }
-    private lateinit var packetHandler: PacketHandler
-
+    private val packetHandler: PacketHandler by lazy {
+        PacketHandler(
+            packetRepository = packetRepository,
+            serviceBroadcasts = serviceBroadcasts,
+            radioInterfaceService = radioInterfaceService,
+            meshLogRepository = meshLogRepository,
+        )
+    }
     private val serviceJob = Job()
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
     private var connectionState = ConnectionState.DISCONNECTED
@@ -329,14 +335,6 @@ class MeshService :
         radioConfigRepository.serviceAction.onEach(::onServiceAction).launchIn(serviceScope)
 
         loadSettings() // Load our last known node DB
-
-        packetHandler =
-            PacketHandler(
-                packetRepository = packetRepository,
-                serviceBroadcasts = serviceBroadcasts,
-                radioInterfaceService = radioInterfaceService,
-                meshLogRepository = meshLogRepository,
-            )
 
         // the rest of our init will happen once we are in radioConnection.onServiceConnected
     }
