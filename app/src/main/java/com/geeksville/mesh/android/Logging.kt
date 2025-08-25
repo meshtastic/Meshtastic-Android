@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.android
 
-import com.geeksville.mesh.util.Exceptions
 import timber.log.Timber
 
 interface Logging {
@@ -50,10 +49,5 @@ interface Logging {
             // if(!Debug.isDebuggerConnected())
             throw ex
         }
-    }
-
-    // / Report an error (including messaging our crash reporter service if allowed
-    fun reportError(s: String) {
-        Exceptions.report(Exception("logging reportError: $s"), s)
     }
 }

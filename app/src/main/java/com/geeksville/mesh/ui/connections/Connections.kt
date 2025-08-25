@@ -47,8 +47,6 @@ import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.icons.rounded.Bluetooth
 import androidx.compose.material.icons.rounded.Usb
 import androidx.compose.material.icons.rounded.Wifi
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
@@ -84,7 +82,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
-import com.geeksville.mesh.android.BuildUtils.reportError
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.android.isGooglePlayAvailable
@@ -193,9 +190,6 @@ fun ConnectionsScreen(
     // State for the device scan dialog
     var showScanDialog by remember { mutableStateOf(false) }
     val scanResults by scanModel.scanResult.observeAsState(emptyMap())
-
-    // State for the Report Bug dialog
-    var showReportBugDialog by remember { mutableStateOf(false) }
 
     // Observe scan results to show the dialog
     if (scanResults.isNotEmpty()) {
@@ -465,15 +459,6 @@ fun ConnectionsScreen(
                                 modifier = Modifier.padding(start = 16.dp),
                             )
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
-                        // Report Bug Button
-                        Button(
-                            onClick = { showReportBugDialog = true }, // Set state to show Report Bug dialog
-                            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                            enabled = isAnalyticsAllowed,
-                        ) {
-                            Text(stringResource(R.string.report_bug))
-                        }
                     }
                 }
             }
@@ -525,36 +510,6 @@ fun ConnectionsScreen(
                         }
                     }
                 }
-            }
-
-            // Compose Report Bug Dialog
-            if (showReportBugDialog) {
-                AlertDialog(
-                    onDismissRequest = { showReportBugDialog = false },
-                    title = { Text(stringResource(R.string.report_a_bug)) },
-                    text = { Text(stringResource(R.string.report_bug_text)) },
-                    confirmButton = {
-                        Button(
-                            onClick = {
-                                showReportBugDialog = false
-                                reportError("Clicked Report A Bug")
-                                uiViewModel.showSnackBar("Bug report sent!")
-                            },
-                        ) {
-                            Text(stringResource(R.string.report))
-                        }
-                    },
-                    dismissButton = {
-                        Button(
-                            onClick = {
-                                showReportBugDialog = false
-                                debug("Decided not to report a bug")
-                            },
-                        ) {
-                            Text(stringResource(R.string.cancel))
-                        }
-                    },
-                )
             }
         }
 
