@@ -356,7 +356,7 @@
     <string name="secondary">Wtórny</string>
     <string name="connections">Połączenie</string>
     <string name="map">Mapa Sieci</string>
-    <string name="bottom_nav_share">Udostępnij</string>
+    <string name="bottom_nav_settings">Ustawienia</string>
     <string name="reply">Odpowiedz</string>
     <string name="disconnect">Rozłącz</string>
     <string name="unknown">Nieznany</string>
