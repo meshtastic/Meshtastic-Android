@@ -191,9 +191,6 @@ fun ConnectionsScreen(
     var showScanDialog by remember { mutableStateOf(false) }
     val scanResults by scanModel.scanResult.observeAsState(emptyMap())
 
-    // State for the Report Bug dialog
-    var showReportBugDialog by remember { mutableStateOf(false) }
-
     // Observe scan results to show the dialog
     if (scanResults.isNotEmpty()) {
         showScanDialog = true
