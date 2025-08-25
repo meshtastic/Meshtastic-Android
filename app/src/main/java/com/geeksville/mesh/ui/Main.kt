@@ -34,7 +34,6 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -104,6 +103,7 @@ import com.geeksville.mesh.ui.common.icons.Conversations
 import com.geeksville.mesh.ui.common.icons.Map
 import com.geeksville.mesh.ui.common.icons.MeshtasticIcons
 import com.geeksville.mesh.ui.common.icons.Nodes
+import com.geeksville.mesh.ui.common.icons.Settings
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusBlue
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
 import com.geeksville.mesh.ui.connections.DeviceType
@@ -120,7 +120,7 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
     Conversations(R.string.conversations, MeshtasticIcons.Conversations, ContactsRoutes.ContactsGraph),
     Nodes(R.string.nodes, MeshtasticIcons.Nodes, NodesRoutes.NodesGraph),
     Map(R.string.map, MeshtasticIcons.Map, MapRoutes.Map),
-    Share(R.string.bottom_nav_share, Icons.Rounded.QrCode2, ChannelsRoutes.ChannelsGraph),
+    Settings(R.string.bottom_nav_settings, MeshtasticIcons.Settings, ChannelsRoutes.ChannelsGraph),
     Connections(R.string.connections, Icons.Rounded.Wifi, ConnectionsRoutes.ConnectionsGraph),
     ;
 
