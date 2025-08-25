@@ -17,20 +17,22 @@
 
 package com.geeksville.mesh.ui.settings.components
 
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Android
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -44,35 +46,69 @@ import com.geeksville.mesh.ui.common.theme.AppTheme
 @Composable
 fun SettingsItem(
     text: String,
-    enabled: Boolean,
+    enabled: Boolean = true,
     leadingIcon: ImageVector? = null,
+    leadingIconTint: Color = LocalContentColor.current,
     trailingIcon: ImageVector? = Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+    trailingIconTint: Color = LocalContentColor.current,
     onClick: () -> Unit,
 ) {
+    ClickableWrapper(enabled = enabled, onClick = onClick) {
+        Content(
+            leading = { leadingIcon.Icon(leadingIconTint) },
+            text = text,
+            trailing = { trailingIcon.Icon(trailingIconTint) },
+        )
+    }
+}
+
+@Composable
+fun SettingsItemSwitch(
+    checked: Boolean,
+    text: String,
+    enabled: Boolean = true,
+    leadingIcon: ImageVector? = null,
+    leadingIconTint: Color = LocalContentColor.current,
+    onClick: () -> Unit,
+) {
+    ClickableWrapper(enabled = enabled, onClick = onClick) {
+        Content(
+            leading = { leadingIcon.Icon(leadingIconTint) },
+            text = text,
+            trailing = { Switch(checked = checked, enabled = enabled, onCheckedChange = null) },
+        )
+    }
+}
+
+/** A clickable Card wrapper used for all clickable settings items. */
+@Composable
+private fun ClickableWrapper(enabled: Boolean, onClick: () -> Unit, content: @Composable ColumnScope.() -> Unit) {
     Card(
         onClick = onClick,
         enabled = enabled,
-        colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent,
-            disabledContainerColor = Color.Transparent,
-        ),
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp, horizontal = 16.dp),
-        ) {
-            leadingIcon?.let {
-                Icon(imageVector = it, contentDescription = text, modifier = Modifier.size(24.dp))
-                Spacer(modifier = Modifier.width(16.dp))
-            }
-            Text(text = text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        colors =
+        CardDefaults.cardColors(containerColor = Color.Transparent, disabledContainerColor = Color.Transparent),
+        content = content,
+    )
+}
 
-            trailingIcon?.let {
-                Icon(imageVector = it, contentDescription = null, modifier = Modifier.wrapContentSize())
-            }
-        }
+/** The row content to display for a settings item. */
+@Composable
+private fun Content(leading: @Composable () -> Unit, text: String, trailing: @Composable RowScope.() -> Unit) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp, horizontal = 16.dp),
+    ) {
+        leading()
+        Text(text = text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        trailing()
     }
 }
+
+@Composable
+private fun ImageVector?.Icon(tint: Color = LocalContentColor.current) =
+    this?.let { Icon(imageVector = it, contentDescription = null, modifier = Modifier.size(24.dp), tint = tint) }
 
 @Preview(showBackground = true)
 @Composable
@@ -84,4 +120,10 @@ private fun SettingsItemPreview() {
 @Composable
 private fun SettingsItemDisabledPreview() {
     AppTheme { SettingsItem(text = "Text", leadingIcon = Icons.Rounded.Android, enabled = false) {} }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SettingsItemSwitchPreview() {
+    AppTheme { SettingsItemSwitch(text = "Text", leadingIcon = Icons.Rounded.Android, checked = true) {} }
 }

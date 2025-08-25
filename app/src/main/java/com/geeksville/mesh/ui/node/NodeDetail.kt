@@ -24,7 +24,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,7 +37,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -70,7 +68,6 @@ import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.Router
 import androidx.compose.material.icons.filled.Scale
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.SocialDistance
 import androidx.compose.material.icons.filled.Speed
@@ -82,6 +79,8 @@ import androidx.compose.material.icons.filled.Work
 import androidx.compose.material.icons.outlined.Navigation
 import androidx.compose.material.icons.outlined.NoCell
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material.icons.twotone.Person
 import androidx.compose.material.icons.twotone.Verified
 import androidx.compose.material3.Button
@@ -95,7 +94,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ProgressIndicatorDefaults
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -116,7 +114,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -155,6 +152,7 @@ import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
 import com.geeksville.mesh.ui.node.components.NodeActionDialogs
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.settings.components.SettingsItem
+import com.geeksville.mesh.ui.settings.components.SettingsItemSwitch
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.geeksville.mesh.util.UnitConversions
 import com.geeksville.mesh.util.UnitConversions.toTempString
@@ -410,10 +408,10 @@ private fun MetricsSection(
     }
 
     if (availableLogs.isNotEmpty()) {
-        TitledCard(title = stringResource(id = R.string.logs)) {
+        TitledCard(title = stringResource(id = R.string.logs), modifier = Modifier.padding(top = 16.dp)) {
             LogsType.entries.forEach { type ->
                 if (availableLogs.contains(type)) {
-                    SettingsItem(text = stringResource(type.titleRes), leadingIcon = type.icon, enabled = true) {
+                    SettingsItem(text = stringResource(type.titleRes), leadingIcon = type.icon) {
                         onAction(NodeDetailAction.Navigate(type.route))
                     }
                 }
@@ -434,7 +432,6 @@ private fun AdministrationSection(
             text = stringResource(id = R.string.request_metadata),
             leadingIcon = Icons.Default.Memory,
             trailingIcon = null,
-            enabled = true,
             onClick = { onAction(NodeDetailAction.TriggerServiceAction(ServiceAction.GetDeviceMetadata(node.num))) },
         )
         SettingsItem(
@@ -589,35 +586,34 @@ private fun DeviceActions(
         },
         onAction = { onAction(NodeDetailAction.HandleNodeMenuAction(it)) },
     )
-    PreferenceCategory(text = stringResource(R.string.actions)) {
-        NodeActionButton(
-            title = stringResource(id = R.string.share_contact),
-            icon = Icons.Default.Share,
-            enabled = true,
+    TitledCard(title = stringResource(R.string.actions), modifier = Modifier.padding(top = 16.dp)) {
+        SettingsItem(
+            text = stringResource(id = R.string.share_contact),
+            leadingIcon = Icons.Rounded.QrCode2,
+            trailingIcon = null,
             onClick = { onAction(NodeDetailAction.ShareContact) },
         )
         if (!isLocal) {
             RemoteDeviceActions(node = node, lastTracerouteTime = lastTracerouteTime, onAction = onAction)
         }
-        NodeActionSwitch(
-            title = stringResource(R.string.favorite),
-            icon = if (node.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
-            iconTint = if (node.isFavorite) Color.Yellow else LocalContentColor.current,
-            enabled = true,
+        SettingsItemSwitch(
+            text = stringResource(R.string.favorite),
+            leadingIcon = if (node.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
+            leadingIconTint = if (node.isFavorite) Color.Yellow else LocalContentColor.current,
             checked = node.isFavorite,
             onClick = { displayFavoriteDialog = true },
         )
-        NodeActionSwitch(
-            title = stringResource(R.string.ignore),
-            icon = if (node.isIgnored) Icons.AutoMirrored.Outlined.VolumeMute else Icons.AutoMirrored.Default.VolumeUp,
-            enabled = true,
+        SettingsItemSwitch(
+            text = stringResource(R.string.ignore),
+            leadingIcon =
+            if (node.isIgnored) Icons.AutoMirrored.Outlined.VolumeMute else Icons.AutoMirrored.Default.VolumeUp,
             checked = node.isIgnored,
             onClick = { displayIgnoreDialog = true },
         )
-        NodeActionButton(
-            title = stringResource(id = R.string.remove),
-            icon = Icons.Default.Delete,
-            enabled = true,
+        SettingsItem(
+            text = stringResource(id = R.string.remove),
+            leadingIcon = Icons.Rounded.Delete,
+            trailingIcon = null,
             onClick = { displayRemoveDialog = true },
         )
     }
@@ -626,23 +622,23 @@ private fun DeviceActions(
 @Composable
 private fun RemoteDeviceActions(node: Node, lastTracerouteTime: Long?, onAction: (NodeDetailAction) -> Unit) {
     if (!node.isEffectivelyUnmessageable) {
-        NodeActionButton(
-            title = stringResource(id = R.string.direct_message),
-            icon = Icons.AutoMirrored.TwoTone.Message,
-            enabled = true,
+        SettingsItem(
+            text = stringResource(id = R.string.direct_message),
+            leadingIcon = Icons.AutoMirrored.TwoTone.Message,
+            trailingIcon = null,
             onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.DirectMessage(node))) },
         )
     }
-    NodeActionButton(
-        title = stringResource(id = R.string.exchange_position),
-        icon = Icons.Default.LocationOn,
-        enabled = true,
+    SettingsItem(
+        text = stringResource(id = R.string.exchange_position),
+        leadingIcon = Icons.Default.LocationOn,
+        trailingIcon = null,
         onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestPosition(node))) },
     )
-    NodeActionButton(
-        title = stringResource(id = R.string.exchange_userinfo),
-        icon = Icons.Default.Person,
-        enabled = true,
+    SettingsItem(
+        text = stringResource(id = R.string.exchange_userinfo),
+        leadingIcon = Icons.Default.Person,
+        trailingIcon = null,
         onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestUserInfo(node))) },
     )
     TracerouteActionButton(
@@ -1112,45 +1108,6 @@ fun NodeActionButton(
                 Spacer(modifier = Modifier.width(8.dp))
             }
             Text(text = title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-        }
-    }
-}
-
-@Composable
-fun NodeActionSwitch(
-    title: String,
-    enabled: Boolean,
-    checked: Boolean,
-    icon: ImageVector? = null,
-    iconTint: Color? = null,
-    onClick: () -> Unit,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    Card(
-        modifier =
-        Modifier.fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .height(48.dp)
-            .toggleable(value = checked, enabled = enabled, role = Role.Switch, onValueChange = { onClick() }),
-        shape = MaterialTheme.shapes.large,
-        interactionSource = interactionSource,
-        onClick = onClick,
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp, horizontal = 16.dp),
-        ) {
-            if (icon != null) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    modifier = Modifier.size(24.dp),
-                    tint = iconTint ?: LocalContentColor.current,
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-            }
-            Text(text = title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-            Switch(checked = checked, onCheckedChange = null)
         }
     }
 }
