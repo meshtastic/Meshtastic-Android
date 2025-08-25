@@ -23,7 +23,6 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -141,7 +140,6 @@ import com.geeksville.mesh.navigation.NodeDetailRoutes
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.service.ServiceAction
-import com.geeksville.mesh.ui.common.components.PreferenceCategory
 import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.common.theme.AppTheme
@@ -152,6 +150,7 @@ import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
 import com.geeksville.mesh.ui.node.components.NodeActionDialogs
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.settings.components.SettingsItem
+import com.geeksville.mesh.ui.settings.components.SettingsItemDetail
 import com.geeksville.mesh.ui.settings.components.SettingsItemSwitch
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.geeksville.mesh.util.UnitConversions
@@ -358,11 +357,15 @@ private fun NodeDetailList(
         }
     }
 
-    Column(modifier = modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState())) {
+    Column(
+        modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
         if (metricsState.deviceHardware != null) {
-            PreferenceCategory(stringResource(R.string.device)) { DeviceDetailsContent(metricsState) }
+            TitledCard(title = stringResource(R.string.device)) { DeviceDetailsContent(metricsState) }
         }
-        PreferenceCategory(stringResource(R.string.details)) {
+
+        TitledCard(title = stringResource(R.string.details)) {
             NodeDetailsContent(node, ourNode, metricsState.displayUnits)
         }
 
@@ -396,19 +399,19 @@ private fun MetricsSection(
     onAction: (NodeDetailAction) -> Unit,
 ) {
     if (node.hasEnvironmentMetrics) {
-        PreferenceCategory(stringResource(R.string.environment))
+        TitledCard(stringResource(R.string.environment)) {}
         EnvironmentMetrics(node, metricsState.isFahrenheit, metricsState.displayUnits)
         Spacer(modifier = Modifier.height(8.dp))
     }
 
     if (node.hasPowerMetrics) {
-        PreferenceCategory(stringResource(R.string.power))
+        TitledCard(stringResource(R.string.power)) {}
         PowerMetrics(node)
         Spacer(modifier = Modifier.height(8.dp))
     }
 
     if (availableLogs.isNotEmpty()) {
-        TitledCard(title = stringResource(id = R.string.logs), modifier = Modifier.padding(top = 16.dp)) {
+        TitledCard(title = stringResource(id = R.string.logs)) {
             LogsType.entries.forEach { type ->
                 if (availableLogs.contains(type)) {
                     SettingsItem(text = stringResource(type.titleRes), leadingIcon = type.icon) {
@@ -420,6 +423,7 @@ private fun MetricsSection(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun AdministrationSection(
     node: Node,
@@ -427,7 +431,7 @@ private fun AdministrationSection(
     onAction: (NodeDetailAction) -> Unit,
     onFirmwareSelected: (FirmwareRelease) -> Unit,
 ) {
-    TitledCard(stringResource(id = R.string.administration), modifier = Modifier.padding(top = 16.dp)) {
+    TitledCard(stringResource(id = R.string.administration)) {
         SettingsItem(
             text = stringResource(id = R.string.request_metadata),
             leadingIcon = Icons.Default.Memory,
@@ -443,7 +447,7 @@ private fun AdministrationSection(
         }
     }
 
-    PreferenceCategory(stringResource(R.string.firmware)) {
+    TitledCard(stringResource(R.string.firmware)) {
         if (metricsState.isLocal) {
             val firmwareEdition = metricsState.firmwareEdition
             firmwareEdition?.let {
@@ -453,7 +457,11 @@ private fun AdministrationSection(
                         else -> Icons.Default.ForkLeft
                     }
 
-                NodeDetailRow(label = stringResource(R.string.firmware_edition), icon = icon, value = it.name)
+                SettingsItemDetail(
+                    text = stringResource(R.string.firmware_edition),
+                    icon = icon,
+                    trailingText = it.name,
+                )
             }
         }
         node.metadata?.firmwareVersion?.let { firmwareVersion ->
@@ -463,24 +471,24 @@ private fun AdministrationSection(
             val deviceVersion = DeviceVersion(firmwareVersion.substringBeforeLast("."))
             val statusColor = deviceVersion.determineFirmwareStatusColor(latestStable, latestAlpha)
 
-            NodeDetailRow(
-                label = stringResource(R.string.installed_firmware_version),
+            SettingsItemDetail(
+                text = stringResource(R.string.installed_firmware_version),
                 icon = Icons.Default.Memory,
-                value = firmwareVersion.substringBeforeLast("."),
+                trailingText = firmwareVersion.substringBeforeLast("."),
                 iconTint = statusColor,
             )
             HorizontalDivider()
-            NodeDetailRow(
-                label = stringResource(R.string.latest_stable_firmware),
+            SettingsItemDetail(
+                text = stringResource(R.string.latest_stable_firmware),
                 icon = Icons.Default.Memory,
-                value = latestStable.id.substringBeforeLast(".").replace("v", ""),
+                trailingText = latestStable.id.substringBeforeLast(".").replace("v", ""),
                 iconTint = colorScheme.StatusGreen,
                 onClick = { onFirmwareSelected(latestStable) },
             )
-            NodeDetailRow(
-                label = stringResource(R.string.latest_alpha_firmware),
+            SettingsItemDetail(
+                text = stringResource(R.string.latest_alpha_firmware),
                 icon = Icons.Default.Memory,
-                value = latestAlpha.id.substringBeforeLast(".").replace("v", ""),
+                trailingText = latestAlpha.id.substringBeforeLast(".").replace("v", ""),
                 iconTint = colorScheme.StatusYellow,
                 onClick = { onFirmwareSelected(latestAlpha) },
             )
@@ -542,28 +550,6 @@ private fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease) {
 }
 
 @Composable
-private fun NodeDetailRow(
-    modifier: Modifier = Modifier,
-    label: String,
-    icon: ImageVector,
-    value: String,
-    iconTint: Color = MaterialTheme.colorScheme.onSurface,
-    onClick: (() -> Unit)? = null,
-) {
-    Row(
-        modifier =
-        modifier.fillMaxWidth().thenIf(onClick != null) { clickable(onClick = onClick!!) }.padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Icon(imageVector = icon, contentDescription = label, modifier = Modifier.size(24.dp), tint = iconTint)
-        Text(label)
-        Spacer(modifier = Modifier.weight(1f))
-        Text(textAlign = TextAlign.End, text = value)
-    }
-}
-
-@Composable
 private fun DeviceActions(
     isLocal: Boolean = false,
     node: Node,
@@ -586,7 +572,7 @@ private fun DeviceActions(
         },
         onAction = { onAction(NodeDetailAction.HandleNodeMenuAction(it)) },
     )
-    TitledCard(title = stringResource(R.string.actions), modifier = Modifier.padding(top = 16.dp)) {
+    TitledCard(title = stringResource(R.string.actions)) {
         SettingsItem(
             text = stringResource(id = R.string.share_contact),
             leadingIcon = Icons.Rounded.QrCode2,
@@ -664,16 +650,20 @@ private fun DeviceDetailsContent(state: MetricsState) {
     ) {
         DeviceHardwareImage(deviceHardware, Modifier.fillMaxSize())
     }
-    NodeDetailRow(label = stringResource(R.string.hardware), icon = Icons.Default.Router, value = hwModelName)
-    NodeDetailRow(
-        label =
+    SettingsItemDetail(
+        text = stringResource(R.string.hardware),
+        icon = Icons.Default.Router,
+        trailingText = hwModelName,
+    )
+    SettingsItemDetail(
+        text =
         if (isSupported) {
             stringResource(R.string.supported)
         } else {
             stringResource(R.string.supported_by_community)
         },
         icon = if (isSupported) Icons.TwoTone.Verified else ImageVector.vectorResource(R.drawable.unverified),
-        value = "",
+        trailingText = "",
         iconTint = if (isSupported) colorScheme.StatusGreen else colorScheme.StatusRed,
     )
 }
@@ -731,53 +721,57 @@ private fun EncryptionErrorContent() {
 
 @Composable
 private fun MainNodeDetails(node: Node, ourNode: Node?, displayUnits: ConfigProtos.Config.DisplayConfig.DisplayUnits) {
-    NodeDetailRow(
-        label = stringResource(R.string.long_name),
+    SettingsItemDetail(
+        text = stringResource(R.string.long_name),
         icon = Icons.TwoTone.Person,
-        value = node.user.longName.ifEmpty { "???" },
+        trailingText = node.user.longName.ifEmpty { "???" },
     )
-    NodeDetailRow(
-        label = stringResource(R.string.short_name),
+    SettingsItemDetail(
+        text = stringResource(R.string.short_name),
         icon = Icons.Outlined.Person,
-        value = node.user.shortName.ifEmpty { "???" },
+        trailingText = node.user.shortName.ifEmpty { "???" },
     )
-    NodeDetailRow(
-        label = stringResource(R.string.node_number),
+    SettingsItemDetail(
+        text = stringResource(R.string.node_number),
         icon = Icons.Default.Numbers,
-        value = node.num.toUInt().toString(),
+        trailingText = node.num.toUInt().toString(),
     )
-    NodeDetailRow(label = stringResource(R.string.user_id), icon = Icons.Default.Person, value = node.user.id)
-    NodeDetailRow(label = stringResource(R.string.role), icon = Icons.Default.Work, value = node.user.role.name)
+    SettingsItemDetail(
+        text = stringResource(R.string.user_id),
+        icon = Icons.Default.Person,
+        trailingText = node.user.id,
+    )
+    SettingsItemDetail(
+        text = stringResource(R.string.role),
+        icon = Icons.Default.Work,
+        trailingText = node.user.role.name,
+    )
     if (node.isEffectivelyUnmessageable) {
-        NodeDetailRow(
-            label = stringResource(R.string.unmonitored_or_infrastructure),
-            icon = Icons.Outlined.NoCell,
-            value = "",
-        )
+        SettingsItemDetail(text = stringResource(R.string.unmonitored_or_infrastructure), icon = Icons.Outlined.NoCell)
     }
     if (node.deviceMetrics.uptimeSeconds > 0) {
-        NodeDetailRow(
-            label = stringResource(R.string.uptime),
+        SettingsItemDetail(
+            text = stringResource(R.string.uptime),
             icon = Icons.Default.CheckCircle,
-            value = formatUptime(node.deviceMetrics.uptimeSeconds),
+            trailingText = formatUptime(node.deviceMetrics.uptimeSeconds),
         )
     }
-    NodeDetailRow(
-        label = stringResource(R.string.node_sort_last_heard),
+    SettingsItemDetail(
+        text = stringResource(R.string.node_sort_last_heard),
         icon = Icons.Default.History,
-        value = formatAgo(node.lastHeard),
+        trailingText = formatAgo(node.lastHeard),
     )
     val distance = ourNode?.distance(node)?.toDistanceString(displayUnits)
     if (node != ourNode && distance != null) {
-        NodeDetailRow(
-            label = stringResource(R.string.node_sort_distance),
+        SettingsItemDetail(
+            text = stringResource(R.string.node_sort_distance),
             icon = Icons.Default.SocialDistance,
-            value = distance,
+            trailingText = distance,
         )
-        NodeDetailRow(
-            label = stringResource(R.string.last_position_update),
+        SettingsItemDetail(
+            text = stringResource(R.string.last_position_update),
             icon = Icons.Default.LocationOn,
-            value = formatAgo(node.position.time),
+            trailingText = formatAgo(node.position.time),
         )
     }
 }

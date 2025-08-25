@@ -18,12 +18,15 @@
 package com.geeksville.mesh.ui.settings.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Android
@@ -43,6 +46,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ui.common.theme.AppTheme
 
+/** A clickable settings button item. */
 @Composable
 fun SettingsItem(
     text: String,
@@ -62,6 +66,7 @@ fun SettingsItem(
     }
 }
 
+/** A toggleable settings switch item. */
 @Composable
 fun SettingsItemSwitch(
     checked: Boolean,
@@ -77,6 +82,27 @@ fun SettingsItemSwitch(
             text = text,
             trailing = { Switch(checked = checked, enabled = enabled, onCheckedChange = null) },
         )
+    }
+}
+
+/** A settings detail item. */
+@Composable
+fun SettingsItemDetail(
+    text: String,
+    icon: ImageVector? = null,
+    iconTint: Color = LocalContentColor.current,
+    trailingText: String? = null,
+    enabled: Boolean = true,
+    onClick: (() -> Unit)? = null,
+) {
+    val content: @Composable ColumnScope.() -> Unit = {
+        Content(leading = { icon.Icon(iconTint) }, text = text, trailing = { trailingText?.let { Text(text = it) } })
+    }
+
+    if (onClick != null) {
+        ClickableWrapper(enabled = enabled, onClick = onClick, content = content)
+    } else {
+        Column(content = content)
     }
 }
 
@@ -101,7 +127,8 @@ private fun Content(leading: @Composable () -> Unit, text: String, trailing: @Co
         modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp, horizontal = 16.dp),
     ) {
         leading()
-        Text(text = text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+        Text(text = text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.wrapContentWidth())
+        Spacer(modifier = Modifier.weight(1f))
         trailing()
     }
 }
@@ -126,4 +153,10 @@ private fun SettingsItemDisabledPreview() {
 @Composable
 private fun SettingsItemSwitchPreview() {
     AppTheme { SettingsItemSwitch(text = "Text", leadingIcon = Icons.Rounded.Android, checked = true) {} }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SettingsItemDetailPreview() {
+    AppTheme { SettingsItemDetail(text = "Text 1", icon = Icons.Rounded.Android, trailingText = "Text2") }
 }
