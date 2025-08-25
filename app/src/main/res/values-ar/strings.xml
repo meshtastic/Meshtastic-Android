@@ -134,7 +134,7 @@
     <string name="baro_pressure">الضغط الجوي</string>
     <string name="messages">الرسائل</string>
     <string name="distance">المسافة</string>
-    <string name="bottom_nav_share">مشاركة</string>
+    <string name="bottom_nav_settings">الإعدادات</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
