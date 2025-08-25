@@ -145,6 +145,7 @@ import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
+import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
@@ -153,6 +154,7 @@ import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
 import com.geeksville.mesh.ui.node.components.NodeActionDialogs
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
+import com.geeksville.mesh.ui.settings.components.SettingsItem
 import com.geeksville.mesh.ui.settings.radio.NavCard
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.geeksville.mesh.util.UnitConversions
@@ -409,10 +411,10 @@ private fun MetricsSection(
     }
 
     if (availableLogs.isNotEmpty()) {
-        PreferenceCategory(stringResource(id = R.string.logs)) {
+        TitledCard(title = stringResource(id = R.string.logs)) {
             LogsType.entries.forEach { type ->
                 if (availableLogs.contains(type)) {
-                    NavCard(title = stringResource(type.titleRes), icon = type.icon, enabled = true) {
+                    SettingsItem(text = stringResource(type.titleRes), leadingIcon = type.icon, enabled = true) {
                         onAction(NodeDetailAction.Navigate(type.route))
                     }
                 }
