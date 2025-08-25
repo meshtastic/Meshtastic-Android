@@ -402,7 +402,7 @@ Rango de Valores 0 - 500.</string>
     <string name="heartbeat">Pulso de vida</string>
     <string name="air_quality_icon">Icono de la calidad del aire</string>
     <string name="distance">Distancia</string>
-    <string name="bottom_nav_share">Compartir</string>
+    <string name="bottom_nav_settings">Ajustes</string>
     <string name="react">Reaccionar</string>
     <string name="uv_lux">Lux ultravioletas</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
