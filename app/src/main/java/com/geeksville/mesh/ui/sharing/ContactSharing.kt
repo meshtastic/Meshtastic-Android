@@ -108,7 +108,7 @@ fun AddContactFAB(
             }
         }
 
-    scannedContact?.let{ contactToImport ->
+    scannedContact?.let { contactToImport ->
         val nodeNum = scannedContact?.nodeNum
         val nodes by model.unfilteredNodeList.collectAsState()
         val node = nodes.find { it.num == nodeNum }
