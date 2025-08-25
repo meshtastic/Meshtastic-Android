@@ -605,7 +605,7 @@
     <string name="connections">Connexion</string>
     <string name="map">Carte de maillage</string>
     <string name="nodes">Noeuds</string>
-    <string name="bottom_nav_share">Partager</string>
+    <string name="bottom_nav_settings">Réglages</string>
     <string name="set_your_region">Définir votre région</string>
     <string name="reply">Répondre</string>
     <string name="map_reporting_summary">Votre nœud enverra périodiquement un paquet de rapport de position non chiffré au serveur MQTT configuré. Ce paquet inclut l\'identifiant, les noms long et court, la position approximative, le modèle matériel, le rôle, la version du micrologiciel, la région LoRa, le préréglage du modem et le nom du canal principal.</string>
