@@ -250,7 +250,6 @@
     <string name="private_key">Privat nøkkel</string>
     <string name="timeout">Tidsavbrudd</string>
     <string name="distance">Distanse</string>
-    <string name="bottom_nav_share">Del</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
