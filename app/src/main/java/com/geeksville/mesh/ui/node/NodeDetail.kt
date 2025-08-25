@@ -155,7 +155,6 @@ import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
 import com.geeksville.mesh.ui.node.components.NodeActionDialogs
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.settings.components.SettingsItem
-import com.geeksville.mesh.ui.settings.radio.NavCard
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.geeksville.mesh.util.UnitConversions
 import com.geeksville.mesh.util.UnitConversions.toTempString
@@ -430,16 +429,17 @@ private fun AdministrationSection(
     onAction: (NodeDetailAction) -> Unit,
     onFirmwareSelected: (FirmwareRelease) -> Unit,
 ) {
-    PreferenceCategory(stringResource(id = R.string.administration)) {
-        NodeActionButton(
-            title = stringResource(id = R.string.request_metadata),
-            icon = Icons.Default.Memory,
+    TitledCard(stringResource(id = R.string.administration), modifier = Modifier.padding(top = 16.dp)) {
+        SettingsItem(
+            text = stringResource(id = R.string.request_metadata),
+            leadingIcon = Icons.Default.Memory,
+            trailingIcon = null,
             enabled = true,
             onClick = { onAction(NodeDetailAction.TriggerServiceAction(ServiceAction.GetDeviceMetadata(node.num))) },
         )
-        NavCard(
-            title = stringResource(id = R.string.remote_admin),
-            icon = Icons.Default.Settings,
+        SettingsItem(
+            text = stringResource(id = R.string.remote_admin),
+            leadingIcon = Icons.Default.Settings,
             enabled = metricsState.isLocal || node.metadata != null,
         ) {
             onAction(NodeDetailAction.Navigate(SettingsRoutes.Settings(node.num)))
