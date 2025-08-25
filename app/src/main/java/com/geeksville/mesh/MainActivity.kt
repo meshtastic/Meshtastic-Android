@@ -20,14 +20,11 @@ package com.geeksville.mesh
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Intent
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.hardware.usb.UsbManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -56,7 +53,6 @@ import com.geeksville.mesh.ui.common.theme.MODE_DYNAMIC
 import com.geeksville.mesh.ui.intro.AppIntroductionScreen
 import com.geeksville.mesh.ui.sharing.toSharedContact
 import com.geeksville.mesh.util.LanguageUtils
-import com.geeksville.mesh.util.getPackageInfoCompat
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -221,10 +217,6 @@ class MainActivity :
 
     private fun onMainMenuAction(action: MainMenuAction) {
         when (action) {
-            MainMenuAction.ABOUT -> {
-                getVersionInfo()
-            }
-
             MainMenuAction.EXPORT_RANGETEST -> {
                 val intent =
                     Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
@@ -244,16 +236,6 @@ class MainActivity :
             }
 
             else -> warn("Unexpected action: $action")
-        }
-    }
-
-    private fun getVersionInfo() {
-        try {
-            val packageInfo: PackageInfo = packageManager.getPackageInfoCompat(packageName, 0)
-            val versionName = packageInfo.versionName
-            Toast.makeText(this, versionName, Toast.LENGTH_LONG).show()
-        } catch (e: PackageManager.NameNotFoundException) {
-            errormsg("Can not find the version: ${e.message}")
         }
     }
 

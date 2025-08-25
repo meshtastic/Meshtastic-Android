@@ -25,6 +25,7 @@ import android.net.InetAddresses
 import android.os.Build
 import android.util.Patterns
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -81,6 +82,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
@@ -559,12 +561,14 @@ fun ConnectionsScreen(
         }
 
         Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            Text(
-                text = scanStatusText.orEmpty(),
-                fontSize = 10.sp,
-                textAlign = TextAlign.End,
+            Row(
                 modifier = Modifier.fillMaxWidth(),
-            )
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(text = BuildConfig.VERSION_NAME, fontSize = 10.sp, textAlign = TextAlign.Start)
+                Text(text = scanStatusText.orEmpty(), fontSize = 10.sp, textAlign = TextAlign.End)
+            }
         }
     }
 }
