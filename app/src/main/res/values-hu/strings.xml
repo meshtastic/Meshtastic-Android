@@ -201,7 +201,7 @@
     <string name="messages">Üzenetek</string>
     <string name="timeout">Időtúllépés</string>
     <string name="distance">Távolság</string>
-    <string name="bottom_nav_share">Megosztás</string>
+    <string name="bottom_nav_settings">Beállítások</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->

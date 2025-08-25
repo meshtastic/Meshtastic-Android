@@ -242,7 +242,6 @@
     <string name="private_key">Privatus raktas</string>
     <string name="timeout">Baigėsi laikas</string>
     <string name="distance">Atstumas</string>
-    <string name="bottom_nav_share">Dalintis</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->

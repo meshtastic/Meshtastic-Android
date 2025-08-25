@@ -188,7 +188,7 @@
     <string name="distance">Απόσταση</string>
     <string name="weight">Βάρος</string>
     <string name="url">URL</string>
-    <string name="bottom_nav_share">Κοινοποίηση</string>
+    <string name="bottom_nav_settings">Ρυθμίσεις</string>
     <string name="reply">Απάντηση</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->

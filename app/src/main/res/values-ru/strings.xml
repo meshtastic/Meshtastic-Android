@@ -604,7 +604,7 @@
     <string name="user_string">Строка пользователя</string>
     <string name="navigate_into_label">Перейти в</string>
     <string name="nodes">Узлы</string>
-    <string name="bottom_nav_share">Поделиться</string>
+    <string name="bottom_nav_settings">Настройки</string>
     <string name="set_your_region">Установите ваш регион</string>
     <string name="reply">Ответить</string>
     <string name="map_reporting_summary">Ваш узел будет периодически отправлять незашифрованный пакет отчёта карты на настроенный MQTT-сервер, что включает идентификатор, полное и краткое имя, примерное местоположение, модель аппаратного обеспечения, роль, версия прошивки, регион LoRa, режим работы передатчика и имя основного канала.</string>

@@ -611,7 +611,7 @@
     <string name="map">Mesh-kartta</string>
     <string name="conversations">Keskustelut</string>
     <string name="nodes">Laitteet</string>
-    <string name="bottom_nav_share">Jaa</string>
+    <string name="bottom_nav_settings">Asetukset</string>
     <string name="set_your_region">Määritä alue</string>
     <string name="reply">Vastaa</string>
     <string name="map_reporting_summary">Laitteesi lähettää määräajoin salaamattoman karttaraporttipaketin määritettyyn MQTT-palvelimeen. Tämä paketti sisältää seuraavat tiedot: tunnisteen, pitkän ja lyhyen nimen, likimääräisen sijainnin, laitemallin, roolin, laiteohjelmiston version, LoRa-alueen, modeemiesiasetuksen ja ensisijaisen kanavan nimen.</string>
@@ -654,6 +654,7 @@
     <string name="overflow_menu">Lisävalikko</string>
     <string name="uv_lux">UV-valon voimakkuus</string>
     <string name="unknown">Tuntematon</string>
+    <string name="message_device_managed">Tätä radiota hallitaan etänä, ja sitä voi muuttaa vain etähallinnassa oleva ylläpitäjä.</string>
     <string name="clean_node_database_title">Tyhjennä NodeDB-tietokanta</string>
     <string name="clean_nodes_older_than">Poista laitteet, joita ei ole nähty yli %1$d päivään</string>
     <string name="clean_unknown_nodes">Poista vain tuntemattomat laitteet</string>

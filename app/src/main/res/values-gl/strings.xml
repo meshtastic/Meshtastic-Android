@@ -148,7 +148,6 @@
     <string name="mute_1_week">1 semana</string>
     <string name="mute_always">Sempre</string>
     <string name="distance">Distancia</string>
-    <string name="bottom_nav_share">Compartir</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->

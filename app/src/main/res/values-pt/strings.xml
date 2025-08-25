@@ -550,7 +550,7 @@
     <string name="display_time_in_12h_format">Quando ativado, o dispositivo exibirá o tempo em formato de 12 horas no ecrã.</string>
     <string name="free_memory">Memória livre</string>
     <string name="nodes">Nodes</string>
-    <string name="bottom_nav_share">Partilha</string>
+    <string name="bottom_nav_settings">Definições</string>
     <string name="i_agree">Estou de acordo.</string>
     <string name="should_update_firmware">Atualização de firmware recomendada.</string>
     <string name="should_update">Para beneficiar das últimas correções e funcionalidades, por favor, atualize o firmware do node.\n\nÚltima versão estável do firmware: %1$s</string>

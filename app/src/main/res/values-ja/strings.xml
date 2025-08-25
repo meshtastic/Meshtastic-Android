@@ -528,7 +528,7 @@
     <string name="alt">高度</string>
     <string name="unmute">ミュート解除</string>
     <string name="dynamic">動的</string>
-    <string name="bottom_nav_share">シェア</string>
+    <string name="bottom_nav_settings">設定</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->

@@ -604,7 +604,7 @@
     <string name="navigate_into_label">导航到</string>
     <string name="map">Mesh 地图</string>
     <string name="nodes">节点</string>
-    <string name="bottom_nav_share">分享</string>
+    <string name="bottom_nav_settings">设置</string>
     <string name="set_your_region">设置您的地区</string>
     <string name="reply">回复</string>
     <string name="map_reporting_summary">您的节点将定期向配置的MQTT服务器发送一个未加密的地图报告数据包，这包括id、长和短的名称， 大致位置、硬件型号、角色、固件版本、LoRa区域、调制解调器预设和主频道名称。</string>

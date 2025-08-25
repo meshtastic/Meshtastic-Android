@@ -603,7 +603,7 @@
     <string name="user_string">Kasutaja string</string>
     <string name="navigate_into_label">Mine asukohta</string>
     <string name="nodes">Sõlmed</string>
-    <string name="bottom_nav_share">Jaga</string>
+    <string name="bottom_nav_settings">Sätted</string>
     <string name="set_your_region">Määra regioon</string>
     <string name="reply">Vasta</string>
     <string name="map_reporting_summary">Teie sõlm saadab pidevalt määratletud MQTT serverile krüpteerimata kaardiaruande pakete, mis sisaldab ID-d, pikka- ja lühinime, ligikaudset asukohta, riistvaramudelit, rolli, püsivara versiooni, LoRa regiooni, modemi eelseadistust ja peamise kanali nime.</string>

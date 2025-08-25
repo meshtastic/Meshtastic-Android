@@ -601,7 +601,7 @@
     <string name="user_string">String de Usuário</string>
     <string name="navigate_into_label">Navegar Em</string>
     <string name="nodes">Nós</string>
-    <string name="bottom_nav_share">Compartilhar</string>
+    <string name="bottom_nav_settings">Configurações</string>
     <string name="set_your_region">Defina sua região</string>
     <string name="reply">Responder</string>
     <string name="map_reporting_summary">Seu nó enviará periodicamente um pacote de relatório de mapa não criptografado para o servidor MQTT configurado, incluindo, id, nome longo e curto, localização aproximada, modelo de hardware, função de firmware, região de LoRa, predefinição de modem e nome de canal primário.</string>

@@ -341,7 +341,7 @@
     <string name="firmware">Фирмвер</string>
     <string name="map">Мапа меша</string>
     <string name="nodes">Чворови</string>
-    <string name="bottom_nav_share">Podeli</string>
+    <string name="bottom_nav_settings">Подешавања</string>
     <string name="reply">Одговори</string>
     <string name="expires">Истиче</string>
     <string name="time">Време</string>

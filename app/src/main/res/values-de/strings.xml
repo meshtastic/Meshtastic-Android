@@ -611,7 +611,7 @@
     <string name="map">Mesh Karte</string>
     <string name="conversations">Konversationen</string>
     <string name="nodes">Knoten</string>
-    <string name="bottom_nav_share">Teilen</string>
+    <string name="bottom_nav_settings">Einstellungen</string>
     <string name="set_your_region">Region festlegen</string>
     <string name="reply">Antworten</string>
     <string name="map_reporting_summary">Ihr Knoten sendet in regelmäßigen Abständen eine unverschlüsselte Nachricht mit Kartenbericht an den konfigurierten MQTT-Server. Einschließlich ID, langen und kurzen Namen, ungefährer Standort, Hardwaremodell, Geräterolle, Firmware-Version, LoRa Region, Modem-Voreinstellung und Name des Primärkanal.</string>

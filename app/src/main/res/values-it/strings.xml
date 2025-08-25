@@ -581,7 +581,7 @@
     <string name="navigate_into_label">Guidami Verso</string>
     <string name="connections">Connessione</string>
     <string name="nodes">Nodi</string>
-    <string name="bottom_nav_share">Condividi</string>
+    <string name="bottom_nav_settings">Impostazioni</string>
     <string name="set_your_region">Imposta la tua regione</string>
     <string name="reply">Rispondi</string>
     <string name="map_reporting_summary">Il nodo invierà periodicamente un pacchetto di report mappa non cifrato al server MQTT configurato, questo include il nome id lungo e breve, posizione approssimativa, modello hardware, ruolo, versione firmware, regione LoRa, configurazione modem e nome del canale primario.</string>

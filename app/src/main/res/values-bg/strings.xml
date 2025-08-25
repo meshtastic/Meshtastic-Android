@@ -473,9 +473,8 @@
     <string name="host">Хост</string>
     <string name="free_memory">Свободна памет</string>
     <string name="disk_free">Свободен диск</string>
-    <string name="contacts">Съобщения</string>
     <string name="nodes">Възли</string>
-    <string name="bottom_nav_share">Сподели</string>
+    <string name="bottom_nav_settings">Настройки</string>
     <string name="set_your_region">Задайте вашия регион</string>
     <string name="reply">Отговор</string>
     <string name="i_agree">Съгласен съм.</string>
