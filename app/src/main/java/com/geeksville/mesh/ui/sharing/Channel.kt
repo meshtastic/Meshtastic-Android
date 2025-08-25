@@ -104,9 +104,9 @@ import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.common.components.AdaptiveTwoPane
 import com.geeksville.mesh.ui.common.components.PreferenceFooter
-import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
-import com.geeksville.mesh.ui.radioconfig.components.ChannelSelection
-import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
+import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
+import com.geeksville.mesh.ui.settings.radio.components.ChannelSelection
+import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState

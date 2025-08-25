@@ -141,8 +141,8 @@ import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.isUnmessageableRole
 import com.geeksville.mesh.navigation.NodeDetailRoutes
-import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
@@ -153,7 +153,7 @@ import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
 import com.geeksville.mesh.ui.node.components.NodeActionDialogs
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
-import com.geeksville.mesh.ui.radioconfig.NavCard
+import com.geeksville.mesh.ui.settings.radio.NavCard
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.geeksville.mesh.util.UnitConversions
 import com.geeksville.mesh.util.UnitConversions.toTempString
@@ -440,7 +440,7 @@ private fun AdministrationSection(
             icon = Icons.Default.Settings,
             enabled = metricsState.isLocal || node.metadata != null,
         ) {
-            onAction(NodeDetailAction.Navigate(RadioConfigRoutes.RadioConfig(node.num)))
+            onAction(NodeDetailAction.Navigate(SettingsRoutes.Settings(node.num)))
         }
     }
 

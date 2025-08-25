@@ -59,7 +59,7 @@ fun NavDestination.isNodeDetailRoute(): Boolean = NodeDetailRoute.entries.any { 
 
 fun NavDestination.showLongNameTitle(): Boolean = !this.isTopLevel() &&
     (
-        this.hasRoute<RadioConfigRoutes.RadioConfig>() ||
+        this.hasRoute<SettingsRoutes.Settings>() ||
             this.hasRoute<NodesRoutes.NodeDetail>() ||
             this.isConfigRoute() ||
             this.isNodeDetailRoute()
@@ -85,6 +85,6 @@ fun NavGraph(
         ) {
             DebugScreen()
         }
-        radioConfigGraph(navController, uIViewModel)
+        settingsGraph(navController, uIViewModel)
     }
 }
