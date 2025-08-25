@@ -27,7 +27,7 @@ import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.position
-import com.geeksville.mesh.ui.radioconfig.components.EditDeviceProfileDialog
+import com.geeksville.mesh.ui.settings.radio.components.EditDeviceProfileDialog
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -36,11 +36,9 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class EditDeviceProfileDialogTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+    @get:Rule val composeTestRule = createComposeRule()
 
-    private fun getString(id: Int): String =
-        InstrumentationRegistry.getInstrumentation().targetContext.getString(id)
+    private fun getString(id: Int): String = InstrumentationRegistry.getInstrumentation().targetContext.getString(id)
 
     private val title = "Export configuration"
     private val deviceProfile = deviceProfile {
@@ -54,17 +52,15 @@ class EditDeviceProfileDialogTest {
         }
     }
 
-    private fun testEditDeviceProfileDialog(
-        onDismiss: () -> Unit = {},
-        onConfirm: (DeviceProfile) -> Unit = {},
-    ) = composeTestRule.setContent {
-        EditDeviceProfileDialog(
-            title = title,
-            deviceProfile = deviceProfile,
-            onConfirm = onConfirm,
-            onDismiss = onDismiss,
-        )
-    }
+    private fun testEditDeviceProfileDialog(onDismiss: () -> Unit = {}, onConfirm: (DeviceProfile) -> Unit = {}) =
+        composeTestRule.setContent {
+            EditDeviceProfileDialog(
+                title = title,
+                deviceProfile = deviceProfile,
+                onConfirm = onConfirm,
+                onDismiss = onDismiss,
+            )
+        }
 
     @Test
     fun testEditDeviceProfileDialog_showsDialogTitle() {

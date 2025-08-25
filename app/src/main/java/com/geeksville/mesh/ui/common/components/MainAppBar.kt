@@ -62,7 +62,7 @@ import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.debug.DebugMenuActions
 import com.geeksville.mesh.ui.node.components.NodeChip
-import com.geeksville.mesh.ui.radioconfig.RadioConfigMenuActions
+import com.geeksville.mesh.ui.settings.radio.RadioConfigMenuActions
 
 @Suppress("CyclomaticComplexMethod")
 @Composable

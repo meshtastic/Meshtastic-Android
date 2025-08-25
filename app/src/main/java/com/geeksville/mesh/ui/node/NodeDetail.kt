@@ -153,7 +153,7 @@ import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
 import com.geeksville.mesh.ui.node.components.NodeActionDialogs
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
-import com.geeksville.mesh.ui.radioconfig.NavCard
+import com.geeksville.mesh.ui.settings.radio.NavCard
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.geeksville.mesh.util.UnitConversions
 import com.geeksville.mesh.util.UnitConversions.toTempString

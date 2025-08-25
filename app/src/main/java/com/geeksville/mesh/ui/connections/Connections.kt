@@ -104,8 +104,8 @@ import com.geeksville.mesh.ui.connections.components.BLEDevices
 import com.geeksville.mesh.ui.connections.components.CurrentlyConnectedCard
 import com.geeksville.mesh.ui.connections.components.NetworkDevices
 import com.geeksville.mesh.ui.connections.components.UsbDevices
-import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
-import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
+import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
+import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState

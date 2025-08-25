@@ -25,8 +25,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.radioconfig.components.ChannelConfigScreen
-import com.geeksville.mesh.ui.radioconfig.components.LoRaConfigScreen
+import com.geeksville.mesh.ui.settings.radio.components.ChannelConfigScreen
+import com.geeksville.mesh.ui.settings.radio.components.LoRaConfigScreen
 import com.geeksville.mesh.ui.sharing.ChannelScreen
 import kotlinx.serialization.Serializable
 

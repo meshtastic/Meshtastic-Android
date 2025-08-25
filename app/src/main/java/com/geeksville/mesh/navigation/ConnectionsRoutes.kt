@@ -27,7 +27,7 @@ import androidx.navigation.navigation
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.connections.ConnectionsScreen
-import com.geeksville.mesh.ui.radioconfig.components.LoRaConfigScreen
+import com.geeksville.mesh.ui.settings.radio.components.LoRaConfigScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
