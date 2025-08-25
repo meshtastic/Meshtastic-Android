@@ -56,7 +56,7 @@ fun NavGraphBuilder.connectionsGraph(
                 uiViewModel = uiViewModel,
                 bluetoothViewModel = bluetoothViewModel,
                 radioConfigViewModel = hiltViewModel(parentEntry),
-                onNavigateToRadioConfig = { navController.navigate(RadioConfigRoutes.RadioConfig()) },
+                onNavigateToSettings = { navController.navigate(SettingsRoutes.Settings()) },
                 onNavigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
                 onConfigNavigate = { route -> navController.navigate(route) },
             )
@@ -66,7 +66,7 @@ fun NavGraphBuilder.connectionsGraph(
 }
 
 private fun NavGraphBuilder.configRoutes(navController: NavHostController) {
-    composable<RadioConfigRoutes.LoRa> { backStackEntry ->
+    composable<SettingsRoutes.LoRa> { backStackEntry ->
         val parentEntry =
             remember(backStackEntry) { navController.getBackStackEntry(ConnectionsRoutes.ConnectionsGraph) }
         LoRaConfigScreen(hiltViewModel(parentEntry))

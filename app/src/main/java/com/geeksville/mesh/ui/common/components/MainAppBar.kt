@@ -55,8 +55,8 @@ import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.ContactsRoutes
 import com.geeksville.mesh.navigation.NodesRoutes
-import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.navigation.showLongNameTitle
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.common.theme.AppTheme
@@ -123,7 +123,7 @@ fun MainAppBar(
 
                     currentDestination.hasRoute<Route.DebugPanel>() -> DebugMenuActions()
 
-                    currentDestination.hasRoute<RadioConfigRoutes.RadioConfig>() ->
+                    currentDestination.hasRoute<SettingsRoutes.Settings>() ->
                         RadioConfigMenuActions(viewModel = viewModel)
 
                     else -> {}

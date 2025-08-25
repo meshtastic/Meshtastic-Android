@@ -84,10 +84,12 @@ import com.geeksville.mesh.ui.radioconfig.components.TelemetryConfigScreen
 import com.geeksville.mesh.ui.radioconfig.components.UserConfigScreen
 import kotlinx.serialization.Serializable
 
-sealed class RadioConfigRoutes {
-    @Serializable data class RadioConfigGraph(val destNum: Int? = null) : Graph
+sealed class SettingsRoutes {
+    @Serializable data class SettingsGraph(val destNum: Int? = null) : Graph
 
-    @Serializable data class RadioConfig(val destNum: Int? = null) : Route
+    @Serializable data class Settings(val destNum: Int? = null) : Route
+
+    // region radio Config Routes
 
     @Serializable data object User : Route
 
@@ -108,6 +110,10 @@ sealed class RadioConfigRoutes {
     @Serializable data object Bluetooth : Route
 
     @Serializable data object Security : Route
+
+    // endregion
+
+    // region module config routes
 
     @Serializable data object MQTT : Route
 
@@ -135,30 +141,35 @@ sealed class RadioConfigRoutes {
 
     @Serializable data object Paxcounter : Route
 
+    // endregion
+
+    // region advanced config routes
+
     @Serializable data object CleanNodeDb : Route
+
+    // endregion
 }
 
 fun getNavRouteFrom(routeName: String): Route? =
     ConfigRoute.entries.find { it.name == routeName }?.route ?: ModuleRoute.entries.find { it.name == routeName }?.route
 
 @Suppress("LongMethod")
-fun NavGraphBuilder.radioConfigGraph(navController: NavHostController, uiViewModel: UIViewModel) {
-    navigation<RadioConfigRoutes.RadioConfigGraph>(startDestination = RadioConfigRoutes.RadioConfig()) {
-        composable<RadioConfigRoutes.RadioConfig>(
-            deepLinks =
-            listOf(navDeepLink<RadioConfigRoutes.RadioConfig>(basePath = "$DEEP_LINK_BASE_URI/radio_config")),
+fun NavGraphBuilder.settingsGraph(navController: NavHostController, uiViewModel: UIViewModel) {
+    navigation<SettingsRoutes.SettingsGraph>(startDestination = SettingsRoutes.Settings()) {
+        composable<SettingsRoutes.Settings>(
+            deepLinks = listOf(navDeepLink<SettingsRoutes.Settings>(basePath = "$DEEP_LINK_BASE_URI/settings")),
         ) { backStackEntry ->
             val parentEntry =
-                remember(backStackEntry) { navController.getBackStackEntry(RadioConfigRoutes.RadioConfigGraph::class) }
+                remember(backStackEntry) { navController.getBackStackEntry(SettingsRoutes.SettingsGraph::class) }
             RadioConfigScreen(uiViewModel = uiViewModel, viewModel = hiltViewModel(parentEntry)) {
-                navController.navigate(it) { popUpTo(RadioConfigRoutes.RadioConfig()) { inclusive = false } }
+                navController.navigate(it) { popUpTo(SettingsRoutes.Settings()) { inclusive = false } }
             }
         }
-        composable<RadioConfigRoutes.CleanNodeDb>(
+        composable<SettingsRoutes.CleanNodeDb>(
             deepLinks =
             listOf(
-                navDeepLink<RadioConfigRoutes.CleanNodeDb>(
-                    basePath = "$DEEP_LINK_BASE_URI/radio_config/clean_node_db",
+                navDeepLink<SettingsRoutes.CleanNodeDb>(
+                    basePath = "$DEEP_LINK_BASE_URI/settings/radio/clean_node_db",
                 ),
             ),
         ) {
@@ -174,7 +185,7 @@ fun NavGraphBuilder.radioConfigGraph(navController: NavHostController, uiViewMod
  *
  * This function simplifies adding screens by handling common tasks like:
  * - Setting up deep links based on the route's name.
- * - Retrieving the parent [NavBackStackEntry] for the [RadioConfigRoutes.RadioConfigGraph].
+ * - Retrieving the parent [NavBackStackEntry] for the [SettingsRoutes.SettingsGraph].
  * - Providing the [RadioConfigViewModel] scoped to the parent graph, which the [screenContent] will use.
  *
  * @param R The type of the [Route] object, must be serializable.
@@ -191,12 +202,14 @@ private inline fun <reified R : Route> NavGraphBuilder.addRadioConfigScreenCompo
     composable<R>(
         deepLinks =
         listOf(
-            navDeepLink<R>(basePath = "$DEEP_LINK_BASE_URI/radio_config/{destNum}/${routeNameString.lowercase()}"),
-            navDeepLink<R>(basePath = "$DEEP_LINK_BASE_URI/radio_config/${routeNameString.lowercase()}"),
+            navDeepLink<R>(
+                basePath = "$DEEP_LINK_BASE_URI/settings/radio/{destNum}/${routeNameString.lowercase()}",
+            ),
+            navDeepLink<R>(basePath = "$DEEP_LINK_BASE_URI/settings/radio/${routeNameString.lowercase()}"),
         ),
     ) { backStackEntry ->
         val parentEntry =
-            remember(backStackEntry) { navController.getBackStackEntry(RadioConfigRoutes.RadioConfigGraph::class) }
+            remember(backStackEntry) { navController.getBackStackEntry(SettingsRoutes.SettingsGraph::class) }
         val viewModel = hiltViewModel<RadioConfigViewModel>(parentEntry)
         screenContent(viewModel)
     }
@@ -206,62 +219,46 @@ private inline fun <reified R : Route> NavGraphBuilder.addRadioConfigScreenCompo
 private fun NavGraphBuilder.configRoutesScreens(navController: NavHostController) {
     ConfigRoute.entries.forEach { entry ->
         when (entry.route) {
-            is RadioConfigRoutes.User ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.User>(
+            is SettingsRoutes.User ->
+                addRadioConfigScreenComposable<SettingsRoutes.User>(navController, entry.name, entry.screenComposable)
+            is SettingsRoutes.ChannelConfig ->
+                addRadioConfigScreenComposable<SettingsRoutes.ChannelConfig>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
-            is RadioConfigRoutes.ChannelConfig ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.ChannelConfig>(
+            is SettingsRoutes.Device ->
+                addRadioConfigScreenComposable<SettingsRoutes.Device>(navController, entry.name, entry.screenComposable)
+            is SettingsRoutes.Position ->
+                addRadioConfigScreenComposable<SettingsRoutes.Position>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
-            is RadioConfigRoutes.Device ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.Device>(
+            is SettingsRoutes.Power ->
+                addRadioConfigScreenComposable<SettingsRoutes.Power>(navController, entry.name, entry.screenComposable)
+            is SettingsRoutes.Network ->
+                addRadioConfigScreenComposable<SettingsRoutes.Network>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
-            is RadioConfigRoutes.Position ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.Position>(
+            is SettingsRoutes.Display ->
+                addRadioConfigScreenComposable<SettingsRoutes.Display>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
-            is RadioConfigRoutes.Power ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.Power>(
+            is SettingsRoutes.LoRa ->
+                addRadioConfigScreenComposable<SettingsRoutes.LoRa>(navController, entry.name, entry.screenComposable)
+            is SettingsRoutes.Bluetooth ->
+                addRadioConfigScreenComposable<SettingsRoutes.Bluetooth>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
-            is RadioConfigRoutes.Network ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.Network>(
-                    navController,
-                    entry.name,
-                    entry.screenComposable,
-                )
-            is RadioConfigRoutes.Display ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.Display>(
-                    navController,
-                    entry.name,
-                    entry.screenComposable,
-                )
-            is RadioConfigRoutes.LoRa ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.LoRa>(
-                    navController,
-                    entry.name,
-                    entry.screenComposable,
-                )
-            is RadioConfigRoutes.Bluetooth ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.Bluetooth>(
-                    navController,
-                    entry.name,
-                    entry.screenComposable,
-                )
-            is RadioConfigRoutes.Security ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.Security>(
+            is SettingsRoutes.Security ->
+                addRadioConfigScreenComposable<SettingsRoutes.Security>(
                     navController,
                     entry.name,
                     entry.screenComposable,
@@ -275,80 +272,68 @@ private fun NavGraphBuilder.configRoutesScreens(navController: NavHostController
 private fun NavGraphBuilder.moduleRoutesScreens(navController: NavHostController) {
     ModuleRoute.entries.forEach { entry ->
         when (entry.route) {
-            is RadioConfigRoutes.MQTT ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.MQTT>(
+            is SettingsRoutes.MQTT ->
+                addRadioConfigScreenComposable<SettingsRoutes.MQTT>(navController, entry.name, entry.screenComposable)
+            is SettingsRoutes.Serial ->
+                addRadioConfigScreenComposable<SettingsRoutes.Serial>(navController, entry.name, entry.screenComposable)
+            is SettingsRoutes.ExtNotification ->
+                addRadioConfigScreenComposable<SettingsRoutes.ExtNotification>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
-            is RadioConfigRoutes.Serial ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.Serial>(
+            is SettingsRoutes.StoreForward ->
+                addRadioConfigScreenComposable<SettingsRoutes.StoreForward>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
-            is RadioConfigRoutes.ExtNotification ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.ExtNotification>(
+            is SettingsRoutes.RangeTest ->
+                addRadioConfigScreenComposable<SettingsRoutes.RangeTest>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
-            is RadioConfigRoutes.StoreForward ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.StoreForward>(
+            is SettingsRoutes.Telemetry ->
+                addRadioConfigScreenComposable<SettingsRoutes.Telemetry>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
-            is RadioConfigRoutes.RangeTest ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.RangeTest>(
+            is SettingsRoutes.CannedMessage ->
+                addRadioConfigScreenComposable<SettingsRoutes.CannedMessage>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
-            is RadioConfigRoutes.Telemetry ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.Telemetry>(
+            is SettingsRoutes.Audio ->
+                addRadioConfigScreenComposable<SettingsRoutes.Audio>(navController, entry.name, entry.screenComposable)
+            is SettingsRoutes.RemoteHardware ->
+                addRadioConfigScreenComposable<SettingsRoutes.RemoteHardware>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
-            is RadioConfigRoutes.CannedMessage ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.CannedMessage>(
+            is SettingsRoutes.NeighborInfo ->
+                addRadioConfigScreenComposable<SettingsRoutes.NeighborInfo>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
-            is RadioConfigRoutes.Audio ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.Audio>(
+            is SettingsRoutes.AmbientLighting ->
+                addRadioConfigScreenComposable<SettingsRoutes.AmbientLighting>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
-            is RadioConfigRoutes.RemoteHardware ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.RemoteHardware>(
+            is SettingsRoutes.DetectionSensor ->
+                addRadioConfigScreenComposable<SettingsRoutes.DetectionSensor>(
                     navController,
                     entry.name,
                     entry.screenComposable,
                 )
-            is RadioConfigRoutes.NeighborInfo ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.NeighborInfo>(
-                    navController,
-                    entry.name,
-                    entry.screenComposable,
-                )
-            is RadioConfigRoutes.AmbientLighting ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.AmbientLighting>(
-                    navController,
-                    entry.name,
-                    entry.screenComposable,
-                )
-            is RadioConfigRoutes.DetectionSensor ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.DetectionSensor>(
-                    navController,
-                    entry.name,
-                    entry.screenComposable,
-                )
-            is RadioConfigRoutes.Paxcounter ->
-                addRadioConfigScreenComposable<RadioConfigRoutes.Paxcounter>(
+            is SettingsRoutes.Paxcounter ->
+                addRadioConfigScreenComposable<SettingsRoutes.Paxcounter>(
                     navController,
                     entry.name,
                     entry.screenComposable,
@@ -366,66 +351,66 @@ enum class ConfigRoute(
     val type: Int = 0,
     val screenComposable: @Composable (viewModel: RadioConfigViewModel) -> Unit,
 ) {
-    USER(R.string.user, RadioConfigRoutes.User, Icons.Default.Person, 0, { vm -> UserConfigScreen(vm) }),
+    USER(R.string.user, SettingsRoutes.User, Icons.Default.Person, 0, { vm -> UserConfigScreen(vm) }),
     CHANNELS(
         R.string.channels,
-        RadioConfigRoutes.ChannelConfig,
+        SettingsRoutes.ChannelConfig,
         Icons.AutoMirrored.Default.List,
         0,
         { vm -> ChannelConfigScreen(vm) },
     ),
     DEVICE(
         R.string.device,
-        RadioConfigRoutes.Device,
+        SettingsRoutes.Device,
         Icons.Default.Router,
         AdminProtos.AdminMessage.ConfigType.DEVICE_CONFIG_VALUE,
         { vm -> DeviceConfigScreen(vm) },
     ),
     POSITION(
         R.string.position,
-        RadioConfigRoutes.Position,
+        SettingsRoutes.Position,
         Icons.Default.LocationOn,
         AdminProtos.AdminMessage.ConfigType.POSITION_CONFIG_VALUE,
         { vm -> PositionConfigScreen(vm) },
     ),
     POWER(
         R.string.power,
-        RadioConfigRoutes.Power,
+        SettingsRoutes.Power,
         Icons.Default.Power,
         AdminProtos.AdminMessage.ConfigType.POWER_CONFIG_VALUE,
         { vm -> PowerConfigScreen(vm) },
     ),
     NETWORK(
         R.string.network,
-        RadioConfigRoutes.Network,
+        SettingsRoutes.Network,
         Icons.Default.Wifi,
         AdminProtos.AdminMessage.ConfigType.NETWORK_CONFIG_VALUE,
         { vm -> NetworkConfigScreen(vm) },
     ),
     DISPLAY(
         R.string.display,
-        RadioConfigRoutes.Display,
+        SettingsRoutes.Display,
         Icons.Default.DisplaySettings,
         AdminProtos.AdminMessage.ConfigType.DISPLAY_CONFIG_VALUE,
         { vm -> DisplayConfigScreen(vm) },
     ),
     LORA(
         R.string.lora,
-        RadioConfigRoutes.LoRa,
+        SettingsRoutes.LoRa,
         Icons.Default.CellTower,
         AdminProtos.AdminMessage.ConfigType.LORA_CONFIG_VALUE,
         { vm -> LoRaConfigScreen(vm) },
     ),
     BLUETOOTH(
         R.string.bluetooth,
-        RadioConfigRoutes.Bluetooth,
+        SettingsRoutes.Bluetooth,
         Icons.Default.Bluetooth,
         AdminProtos.AdminMessage.ConfigType.BLUETOOTH_CONFIG_VALUE,
         { vm -> BluetoothConfigScreen(vm) },
     ),
     SECURITY(
         R.string.security,
-        RadioConfigRoutes.Security,
+        SettingsRoutes.Security,
         Icons.Default.Security,
         AdminProtos.AdminMessage.ConfigType.SECURITY_CONFIG_VALUE,
         { vm -> SecurityConfigScreen(vm) },
@@ -454,91 +439,91 @@ enum class ModuleRoute(
 ) {
     MQTT(
         R.string.mqtt,
-        RadioConfigRoutes.MQTT,
+        SettingsRoutes.MQTT,
         Icons.Default.Cloud,
         AdminProtos.AdminMessage.ModuleConfigType.MQTT_CONFIG_VALUE,
         { vm -> MQTTConfigScreen(vm) },
     ),
     SERIAL(
         R.string.serial,
-        RadioConfigRoutes.Serial,
+        SettingsRoutes.Serial,
         Icons.Default.Usb,
         AdminProtos.AdminMessage.ModuleConfigType.SERIAL_CONFIG_VALUE,
         { vm -> SerialConfigScreen(vm) },
     ),
     EXT_NOTIFICATION(
         R.string.external_notification,
-        RadioConfigRoutes.ExtNotification,
+        SettingsRoutes.ExtNotification,
         Icons.Default.Notifications,
         AdminProtos.AdminMessage.ModuleConfigType.EXTNOTIF_CONFIG_VALUE,
         { vm -> ExternalNotificationConfigScreen(vm) },
     ),
     STORE_FORWARD(
         R.string.store_forward,
-        RadioConfigRoutes.StoreForward,
+        SettingsRoutes.StoreForward,
         Icons.AutoMirrored.Default.Forward,
         AdminProtos.AdminMessage.ModuleConfigType.STOREFORWARD_CONFIG_VALUE,
         { vm -> StoreForwardConfigScreen(vm) },
     ),
     RANGE_TEST(
         R.string.range_test,
-        RadioConfigRoutes.RangeTest,
+        SettingsRoutes.RangeTest,
         Icons.Default.Speed,
         AdminProtos.AdminMessage.ModuleConfigType.RANGETEST_CONFIG_VALUE,
         { vm -> RangeTestConfigScreen(vm) },
     ),
     TELEMETRY(
         R.string.telemetry,
-        RadioConfigRoutes.Telemetry,
+        SettingsRoutes.Telemetry,
         Icons.Default.DataUsage,
         AdminProtos.AdminMessage.ModuleConfigType.TELEMETRY_CONFIG_VALUE,
         { vm -> TelemetryConfigScreen(vm) },
     ),
     CANNED_MESSAGE(
         R.string.canned_message,
-        RadioConfigRoutes.CannedMessage,
+        SettingsRoutes.CannedMessage,
         Icons.AutoMirrored.Default.Message,
         AdminProtos.AdminMessage.ModuleConfigType.CANNEDMSG_CONFIG_VALUE,
         { vm -> CannedMessageConfigScreen(vm) },
     ),
     AUDIO(
         R.string.audio,
-        RadioConfigRoutes.Audio,
+        SettingsRoutes.Audio,
         Icons.AutoMirrored.Default.VolumeUp,
         AdminProtos.AdminMessage.ModuleConfigType.AUDIO_CONFIG_VALUE,
         { vm -> AudioConfigScreen(vm) },
     ),
     REMOTE_HARDWARE(
         R.string.remote_hardware,
-        RadioConfigRoutes.RemoteHardware,
+        SettingsRoutes.RemoteHardware,
         Icons.Default.SettingsRemote,
         AdminProtos.AdminMessage.ModuleConfigType.REMOTEHARDWARE_CONFIG_VALUE,
         { vm -> RemoteHardwareConfigScreen(vm) },
     ),
     NEIGHBOR_INFO(
         R.string.neighbor_info,
-        RadioConfigRoutes.NeighborInfo,
+        SettingsRoutes.NeighborInfo,
         Icons.Default.People,
         AdminProtos.AdminMessage.ModuleConfigType.NEIGHBORINFO_CONFIG_VALUE,
         { vm -> NeighborInfoConfigScreen(vm) },
     ),
     AMBIENT_LIGHTING(
         R.string.ambient_lighting,
-        RadioConfigRoutes.AmbientLighting,
+        SettingsRoutes.AmbientLighting,
         Icons.Default.LightMode,
         AdminProtos.AdminMessage.ModuleConfigType.AMBIENTLIGHTING_CONFIG_VALUE,
         { vm -> AmbientLightingConfigScreen(vm) },
     ),
     DETECTION_SENSOR(
         R.string.detection_sensor,
-        RadioConfigRoutes.DetectionSensor,
+        SettingsRoutes.DetectionSensor,
         Icons.Default.Sensors,
         AdminProtos.AdminMessage.ModuleConfigType.DETECTIONSENSOR_CONFIG_VALUE,
         { vm -> DetectionSensorConfigScreen(vm) },
     ),
     PAXCOUNTER(
         R.string.paxcounter,
-        RadioConfigRoutes.Paxcounter,
+        SettingsRoutes.Paxcounter,
         Icons.Default.PermScanWifi,
         AdminProtos.AdminMessage.ModuleConfigType.PAXCOUNTER_CONFIG_VALUE,
         { vm -> PaxcounterConfigScreen(vm) },

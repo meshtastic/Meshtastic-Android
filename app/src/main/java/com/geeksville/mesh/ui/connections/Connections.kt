@@ -95,8 +95,8 @@ import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.ConfigRoute
-import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.common.components.SwitchPreference
@@ -130,7 +130,7 @@ fun ConnectionsScreen(
     scanModel: BTScanModel = hiltViewModel(),
     bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
     radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
-    onNavigateToRadioConfig: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     onNavigateToNodeDetails: (Int) -> Unit,
     onConfigNavigate: (Route) -> Unit,
 ) {
@@ -168,8 +168,8 @@ fun ConnectionsScreen(
                 getNavRouteFrom(radioConfigState.route)?.let { route ->
                     isWaiting = false
                     radioConfigViewModel.clearPacketResponse()
-                    if (route == RadioConfigRoutes.LoRa) {
-                        onConfigNavigate(RadioConfigRoutes.LoRa)
+                    if (route == SettingsRoutes.LoRa) {
+                        onConfigNavigate(SettingsRoutes.LoRa)
                     }
                 }
             },
@@ -264,7 +264,7 @@ fun ConnectionsScreen(
                                 node = node,
                                 onNavigateToNodeDetails = onNavigateToNodeDetails,
                                 onSetShowSharedContact = { showSharedContact = it },
-                                onNavigateToRadioConfig = onNavigateToRadioConfig,
+                                onNavigateToSettings = onNavigateToSettings,
                                 onClickDisconnect = { scanModel.disconnect() },
                             )
                         }

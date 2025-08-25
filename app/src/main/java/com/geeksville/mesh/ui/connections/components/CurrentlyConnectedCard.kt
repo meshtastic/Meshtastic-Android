@@ -58,7 +58,7 @@ fun CurrentlyConnectedCard(
     modifier: Modifier = Modifier,
     onNavigateToNodeDetails: (Int) -> Unit,
     onSetShowSharedContact: (Node) -> Unit,
-    onNavigateToRadioConfig: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     onClickDisconnect: () -> Unit,
 ) {
     Card(modifier = modifier) {
@@ -98,7 +98,7 @@ fun CurrentlyConnectedCard(
                     }
                 }
 
-                IconButton(enabled = true, onClick = onNavigateToRadioConfig) {
+                IconButton(enabled = true, onClick = onNavigateToSettings) {
                     Icon(
                         imageVector = Icons.Default.Settings,
                         contentDescription = stringResource(id = R.string.radio_configuration),
@@ -142,7 +142,7 @@ private fun CurrentlyConnectedCardPreview() {
             ),
             onNavigateToNodeDetails = {},
             onSetShowSharedContact = {},
-            onNavigateToRadioConfig = {},
+            onNavigateToSettings = {},
             onClickDisconnect = {},
         )
     }

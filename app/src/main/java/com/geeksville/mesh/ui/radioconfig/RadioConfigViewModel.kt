@@ -56,7 +56,7 @@ import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.navigation.AdminRoute
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.ModuleRoute
-import com.geeksville.mesh.navigation.RadioConfigRoutes
+import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.service.ConnectionState
@@ -108,7 +108,7 @@ constructor(
     private val meshService: IMeshService?
         get() = radioConfigRepository.meshService
 
-    private val destNum = savedStateHandle.toRoute<RadioConfigRoutes.RadioConfig>().destNum
+    private val destNum = savedStateHandle.toRoute<SettingsRoutes.Settings>().destNum
     private val _destNode = MutableStateFlow<Node?>(null)
     val destNode: StateFlow<Node?>
         get() = _destNode

@@ -89,8 +89,8 @@ import com.geeksville.mesh.navigation.ContactsRoutes
 import com.geeksville.mesh.navigation.MapRoutes
 import com.geeksville.mesh.navigation.NavGraph
 import com.geeksville.mesh.navigation.NodesRoutes
-import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.service.MeshService
@@ -120,7 +120,7 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
     Conversations(R.string.conversations, MeshtasticIcons.Conversations, ContactsRoutes.ContactsGraph),
     Nodes(R.string.nodes, MeshtasticIcons.Nodes, NodesRoutes.NodesGraph),
     Map(R.string.map, MeshtasticIcons.Map, MapRoutes.Map),
-    Settings(R.string.bottom_nav_settings, MeshtasticIcons.Settings, ChannelsRoutes.ChannelsGraph),
+    Settings(R.string.bottom_nav_settings, MeshtasticIcons.Settings, SettingsRoutes.SettingsGraph()),
     Connections(R.string.connections, Icons.Rounded.Wifi, ConnectionsRoutes.ConnectionsGraph),
     ;
 
@@ -205,7 +205,7 @@ fun MainScreen(
             text = { Text(text = message) },
             onConfirm = {
                 if (compromisedKeys) {
-                    navController.navigate(RadioConfigRoutes.Security)
+                    navController.navigate(SettingsRoutes.Security)
                 }
                 uIViewModel.clearClientNotification(notification)
             },
@@ -354,7 +354,7 @@ fun MainScreen(
                         if (action is MainMenuAction) {
                             when (action) {
                                 MainMenuAction.DEBUG -> navController.navigate(Route.DebugPanel)
-                                MainMenuAction.RADIO_CONFIG -> navController.navigate(RadioConfigRoutes.RadioConfig())
+                                MainMenuAction.RADIO_CONFIG -> navController.navigate(SettingsRoutes.Settings())
                                 MainMenuAction.QUICK_CHAT -> navController.navigate(ContactsRoutes.QuickChat)
                                 MainMenuAction.SHOW_INTRO -> uIViewModel.onMainMenuAction(action)
                                 else -> onAction(action)

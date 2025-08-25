@@ -72,8 +72,8 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.AdminRoute
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.ModuleRoute
-import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
 import com.geeksville.mesh.ui.common.theme.AppTheme
@@ -327,7 +327,7 @@ private fun RadioConfigItemList(
             NavCard(
                 title = stringResource(R.string.clean_node_database_title),
                 enabled = enabled,
-                onClick = { onNavigate(RadioConfigRoutes.CleanNodeDb) },
+                onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
             )
         }
     }
