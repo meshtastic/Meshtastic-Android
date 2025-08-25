@@ -26,6 +26,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -362,7 +363,10 @@ private fun NodeDetailList(
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         if (metricsState.deviceHardware != null) {
-            TitledCard(title = stringResource(R.string.device)) { DeviceDetailsContent(metricsState) }
+            TitledCard(title = stringResource(R.string.device)) {
+                Spacer(modifier = Modifier.height(16.dp))
+                DeviceDetailsContent(metricsState)
+            }
         }
 
         TitledCard(title = stringResource(R.string.details)) {
@@ -635,21 +639,24 @@ private fun RemoteDeviceActions(node: Node, lastTracerouteTime: Long?, onAction:
 }
 
 @Composable
-private fun DeviceDetailsContent(state: MetricsState) {
+private fun ColumnScope.DeviceDetailsContent(state: MetricsState) {
     val node = state.node ?: return
     val deviceHardware = state.deviceHardware ?: return
     val hwModelName = deviceHardware.displayName
     val isSupported = deviceHardware.activelySupported
     Box(
         modifier =
-        Modifier.size(100.dp)
-            .padding(4.dp)
+        Modifier.align(Alignment.CenterHorizontally)
+            .size(100.dp)
             .clip(CircleShape)
             .background(color = Color(node.colors.second).copy(alpha = .5f), shape = CircleShape),
         contentAlignment = Alignment.Center,
     ) {
         DeviceHardwareImage(deviceHardware, Modifier.fillMaxSize())
     }
+
+    Spacer(modifier = Modifier.height(16.dp))
+
     SettingsItemDetail(
         text = stringResource(R.string.hardware),
         icon = Icons.Default.Router,
