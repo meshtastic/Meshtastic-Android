@@ -71,6 +71,7 @@ import com.google.zxing.WriterException
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import timber.log.Timber
 import java.net.MalformedURLException
 
 /**
@@ -155,7 +156,9 @@ fun AddContactFAB(
 
     LaunchedEffect(cameraPermissionState.status) {
         if (cameraPermissionState.status.isGranted) {
-            zxingScan()
+            Timber.d("Camera permission granted")
+        } else {
+            Timber.d("Camera permission denied")
         }
     }
 
