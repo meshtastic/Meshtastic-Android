@@ -630,7 +630,7 @@ constructor(
         get() = _sharedContactRequested.asStateFlow()
 
     fun setSharedContactRequested(sharedContact: AdminProtos.SharedContact?) {
-        viewModelScope.launch { _sharedContactRequested.value = sharedContact }
+        _sharedContactRequested.value = sharedContact
     }
 
     fun addSharedContact(sharedContact: AdminProtos.SharedContact) =
