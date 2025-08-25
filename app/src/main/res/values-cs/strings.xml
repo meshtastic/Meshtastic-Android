@@ -554,7 +554,7 @@
     <string name="free_memory">Volná paměť</string>
     <string name="load">Zatížení</string>
     <string name="nodes">Uzly</string>
-    <string name="bottom_nav_share">Sdílet</string>
+    <string name="bottom_nav_settings">Nastavení</string>
     <string name="set_your_region">Nastavte svůj region</string>
     <string name="map_reporting_summary">Váš uzel bude pravidelně odesílat nešifrovaný mapový paket na konfigurovaný MQTT server, který zahrnuje id, dlouhé a krátké jméno. přibližné umístění, hardwarový model, role, verze firmwaru, region LoRa, předvolba modemu a název primárního kanálu.</string>
     <string name="map_reporting_consent_header">Souhlas se sdílením nešifrovaných dat uzlu prostřednictvím MQTT</string>
