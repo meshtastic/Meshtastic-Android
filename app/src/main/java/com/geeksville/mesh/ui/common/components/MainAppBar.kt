@@ -55,14 +55,14 @@ import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.ContactsRoutes
 import com.geeksville.mesh.navigation.NodesRoutes
-import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.navigation.showLongNameTitle
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.debug.DebugMenuActions
 import com.geeksville.mesh.ui.node.components.NodeChip
-import com.geeksville.mesh.ui.radioconfig.RadioConfigMenuActions
+import com.geeksville.mesh.ui.settings.radio.RadioConfigMenuActions
 
 @Suppress("CyclomaticComplexMethod")
 @Composable
@@ -70,7 +70,6 @@ fun MainAppBar(
     modifier: Modifier = Modifier,
     viewModel: UIViewModel = hiltViewModel(),
     navController: NavHostController,
-    isManaged: Boolean,
     onAction: (Any?) -> Unit,
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -119,11 +118,11 @@ fun MainAppBar(
         actions = {
             currentDestination?.let {
                 when {
-                    it.isTopLevel() -> MainMenuActions(isManaged, onAction)
+                    it.isTopLevel() -> MainMenuActions(onAction)
 
                     currentDestination.hasRoute<Route.DebugPanel>() -> DebugMenuActions()
 
-                    currentDestination.hasRoute<RadioConfigRoutes.RadioConfig>() ->
+                    currentDestination.hasRoute<SettingsRoutes.Settings>() ->
                         RadioConfigMenuActions(viewModel = viewModel)
 
                     else -> {}
@@ -208,7 +207,6 @@ private fun TopBarActions(
 
 enum class MainMenuAction(@StringRes val stringRes: Int) {
     DEBUG(R.string.debug_panel),
-    RADIO_CONFIG(R.string.radio_configuration),
     EXPORT_RANGETEST(R.string.save_rangetest),
     THEME(R.string.theme),
     LANGUAGE(R.string.preferences_language),
@@ -217,7 +215,7 @@ enum class MainMenuAction(@StringRes val stringRes: Int) {
 }
 
 @Composable
-private fun MainMenuActions(isManaged: Boolean, onAction: (MainMenuAction) -> Unit) {
+private fun MainMenuActions(onAction: (MainMenuAction) -> Unit) {
     var showMenu by remember { mutableStateOf(false) }
     IconButton(onClick = { showMenu = true }) {
         Icon(imageVector = Icons.Default.MoreVert, contentDescription = stringResource(R.string.overflow_menu))
@@ -235,11 +233,7 @@ private fun MainMenuActions(isManaged: Boolean, onAction: (MainMenuAction) -> Un
                     onAction(action)
                     showMenu = false
                 },
-                enabled =
-                when (action) {
-                    MainMenuAction.RADIO_CONFIG -> !isManaged
-                    else -> true
-                },
+                enabled = true,
             )
         }
     }
@@ -257,7 +251,7 @@ private fun MainAppBarPreview(@PreviewParameter(BooleanProvider::class) canNavig
             showNodeChip = true,
             canNavigateUp = canNavigateUp,
             onNavigateUp = {},
-            actions = { MainMenuActions(isManaged = false, onAction = {}) },
+            actions = { MainMenuActions(onAction = {}) },
         ) {}
     }
 }

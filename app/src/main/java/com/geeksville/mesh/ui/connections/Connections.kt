@@ -94,8 +94,8 @@ import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.ConfigRoute
-import com.geeksville.mesh.navigation.RadioConfigRoutes
 import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.common.components.SwitchPreference
@@ -103,8 +103,8 @@ import com.geeksville.mesh.ui.connections.components.BLEDevices
 import com.geeksville.mesh.ui.connections.components.CurrentlyConnectedCard
 import com.geeksville.mesh.ui.connections.components.NetworkDevices
 import com.geeksville.mesh.ui.connections.components.UsbDevices
-import com.geeksville.mesh.ui.radioconfig.RadioConfigViewModel
-import com.geeksville.mesh.ui.radioconfig.components.PacketResponseStateDialog
+import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
+import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
@@ -129,7 +129,7 @@ fun ConnectionsScreen(
     scanModel: BTScanModel = hiltViewModel(),
     bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
     radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
-    onNavigateToRadioConfig: () -> Unit,
+    onNavigateToSettings: () -> Unit,
     onNavigateToNodeDetails: (Int) -> Unit,
     onConfigNavigate: (Route) -> Unit,
 ) {
@@ -167,8 +167,8 @@ fun ConnectionsScreen(
                 getNavRouteFrom(radioConfigState.route)?.let { route ->
                     isWaiting = false
                     radioConfigViewModel.clearPacketResponse()
-                    if (route == RadioConfigRoutes.LoRa) {
-                        onConfigNavigate(RadioConfigRoutes.LoRa)
+                    if (route == SettingsRoutes.LoRa) {
+                        onConfigNavigate(SettingsRoutes.LoRa)
                     }
                 }
             },
@@ -260,7 +260,7 @@ fun ConnectionsScreen(
                                 node = node,
                                 onNavigateToNodeDetails = onNavigateToNodeDetails,
                                 onSetShowSharedContact = { showSharedContact = it },
-                                onNavigateToRadioConfig = onNavigateToRadioConfig,
+                                onNavigateToSettings = onNavigateToSettings,
                                 onClickDisconnect = { scanModel.disconnect() },
                             )
                         }
