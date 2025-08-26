@@ -89,32 +89,26 @@ fun NodeScreen(
 
             AddContactFAB(
                 modifier =
-                    Modifier.animateFloatingActionButton(
-                        visible = !isScrollInProgress && connectionState == ConnectionState.CONNECTED && shareCapable,
-                        alignment = Alignment.BottomEnd,
-                    ),
+                Modifier.animateFloatingActionButton(
+                    visible = !isScrollInProgress && connectionState == ConnectionState.CONNECTED && shareCapable,
+                    alignment = Alignment.BottomEnd,
+                ),
                 model = model,
                 onSharedContactImport = { contact -> model.addSharedContact(contact) },
             )
         },
     ) { contentPadding ->
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(contentPadding)) {
+        Box(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
             LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
                 stickyHeader {
                     val animatedAlpha by
-                    animateFloatAsState(
-                        targetValue = if (!isScrollInProgress) 1.0f else 0f,
-                        label = "alpha"
-                    )
+                        animateFloatAsState(targetValue = if (!isScrollInProgress) 1.0f else 0f, label = "alpha")
                     NodeFilterTextField(
                         modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .graphicsLayer(alpha = animatedAlpha)
-                                .background(MaterialTheme.colorScheme.surfaceDim)
-                                .padding(8.dp),
+                        Modifier.fillMaxWidth()
+                            .graphicsLayer(alpha = animatedAlpha)
+                            .background(MaterialTheme.colorScheme.surfaceDim)
+                            .padding(8.dp),
                         filterText = state.filter,
                         onTextChange = model::setNodeFilterText,
                         currentSortOption = state.sort,
@@ -146,10 +140,8 @@ fun NodeScreen(
                                 is NodeMenuAction.Ignore -> model.ignoreNode(node)
                                 is NodeMenuAction.Favorite -> model.favoriteNode(node)
                                 is NodeMenuAction.DirectMessage -> {
-                                    val hasPKC =
-                                        model.ourNodeInfo.value?.hasPKC == true && node.hasPKC
-                                    val channel =
-                                        if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
+                                    val hasPKC = model.ourNodeInfo.value?.hasPKC == true && node.hasPKC
+                                    val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
                                     navigateToMessages("$channel${node.user.id}")
                                 }
 

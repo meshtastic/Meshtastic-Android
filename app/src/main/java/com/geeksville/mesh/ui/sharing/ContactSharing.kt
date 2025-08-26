@@ -163,6 +163,7 @@ fun AddContactFAB(
     }
 
     FloatingActionButton(
+        modifier = modifier,
         onClick = {
             if (cameraPermissionState.status.isGranted) {
                 zxingScan()
