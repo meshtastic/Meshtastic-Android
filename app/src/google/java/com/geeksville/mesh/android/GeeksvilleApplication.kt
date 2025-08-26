@@ -176,9 +176,7 @@ abstract class GeeksvilleApplication :
                 .trackFrustrations(true)
                 .trackLongTasks()
                 .trackNonFatalAnrs(true)
-                // Re-enable tracking when auto instrumentation available. See note in `app/build.gradle`
-                .disableUserInteractionTracking()
-                // .trackUserInteractions()
+                .trackUserInteractions()
                 .enableComposeActionTracking()
                 .build()
         Rum.enable(rumConfiguration)

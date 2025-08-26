@@ -15,6 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import com.datadog.gradle.plugin.InstrumentationMode
 import io.gitlab.arturbosch.detekt.Detekt
 import java.io.FileInputStream
 import java.util.Properties
@@ -175,9 +176,7 @@ secrets {
 }
 
 datadog {
-    // compose instrumentation is broken for kotlin 2.2.x - see:
-    // https://github.com/DataDog/dd-sdk-android-gradle-plugin/issues/407
-    //  composeInstrumentation = InstrumentationMode.AUTO
+    composeInstrumentation = InstrumentationMode.AUTO
 }
 
 // per protobuf-gradle-plugin docs, this is recommended for android
