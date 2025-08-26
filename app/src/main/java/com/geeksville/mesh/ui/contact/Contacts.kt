@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.contact
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -74,6 +75,7 @@ fun ContactsScreen(
     onNavigateToNodeDetails: (Int) -> Unit = {},
     onNavigateToShare: () -> Unit,
 ) {
+    val isConnected by uiViewModel.isConnectedStateFlow.collectAsStateWithLifecycle()
     var showMuteDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -151,7 +153,14 @@ fun ContactsScreen(
             }
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = onNavigateToShare) { Icon(Icons.Rounded.QrCode2, contentDescription = null) }
+            AnimatedVisibility(isConnected && !isSelectionModeActive) {
+                FloatingActionButton(onClick = onNavigateToShare) {
+                    Icon(
+                        Icons.Rounded.QrCode2,
+                        contentDescription = null
+                    )
+                }
+            }
         },
     ) { paddingValues ->
         val channels by uiViewModel.channels.collectAsStateWithLifecycle()
@@ -218,8 +227,11 @@ fun MuteNotificationsDialog(
                         val text = stringResource(stringRes)
                         Row(
                             modifier =
-                            Modifier.fillMaxWidth()
-                                .selectable(selected = isSelected, onClick = { selectedOptionIndex = index })
+                            Modifier
+                                .fillMaxWidth()
+                                .selectable(
+                                    selected = isSelected,
+                                    onClick = { selectedOptionIndex = index })
                                 .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
