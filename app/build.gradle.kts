@@ -175,9 +175,7 @@ secrets {
     propertiesFileName = "secrets.properties"
 }
 
-datadog {
-    composeInstrumentation = InstrumentationMode.AUTO
-}
+datadog { composeInstrumentation = InstrumentationMode.AUTO }
 
 // per protobuf-gradle-plugin docs, this is recommended for android
 protobuf {
