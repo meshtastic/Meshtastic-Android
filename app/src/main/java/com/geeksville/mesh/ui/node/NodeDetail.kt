@@ -23,11 +23,10 @@ import androidx.annotation.StringRes
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -38,7 +37,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -70,7 +68,6 @@ import androidx.compose.material.icons.filled.Route
 import androidx.compose.material.icons.filled.Router
 import androidx.compose.material.icons.filled.Scale
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.SocialDistance
 import androidx.compose.material.icons.filled.Speed
@@ -82,6 +79,8 @@ import androidx.compose.material.icons.filled.Work
 import androidx.compose.material.icons.outlined.Navigation
 import androidx.compose.material.icons.outlined.NoCell
 import androidx.compose.material.icons.outlined.Person
+import androidx.compose.material.icons.rounded.Delete
+import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material.icons.twotone.Person
 import androidx.compose.material.icons.twotone.Verified
 import androidx.compose.material3.Button
@@ -95,7 +94,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.ProgressIndicatorDefaults
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -116,7 +114,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -144,7 +141,7 @@ import com.geeksville.mesh.navigation.NodeDetailRoutes
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.service.ServiceAction
-import com.geeksville.mesh.ui.common.components.PreferenceCategory
+import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
@@ -153,7 +150,9 @@ import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
 import com.geeksville.mesh.ui.node.components.NodeActionDialogs
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
-import com.geeksville.mesh.ui.settings.radio.NavCard
+import com.geeksville.mesh.ui.settings.components.SettingsItem
+import com.geeksville.mesh.ui.settings.components.SettingsItemDetail
+import com.geeksville.mesh.ui.settings.components.SettingsItemSwitch
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.geeksville.mesh.util.UnitConversions
 import com.geeksville.mesh.util.UnitConversions.toTempString
@@ -359,11 +358,18 @@ private fun NodeDetailList(
         }
     }
 
-    Column(modifier = modifier.fillMaxSize().padding(16.dp).verticalScroll(rememberScrollState())) {
+    Column(
+        modifier = modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
         if (metricsState.deviceHardware != null) {
-            PreferenceCategory(stringResource(R.string.device)) { DeviceDetailsContent(metricsState) }
+            TitledCard(title = stringResource(R.string.device)) {
+                Spacer(modifier = Modifier.height(16.dp))
+                DeviceDetailsContent(metricsState)
+            }
         }
-        PreferenceCategory(stringResource(R.string.details)) {
+
+        TitledCard(title = stringResource(R.string.details)) {
             NodeDetailsContent(node, ourNode, metricsState.displayUnits)
         }
 
@@ -397,22 +403,22 @@ private fun MetricsSection(
     onAction: (NodeDetailAction) -> Unit,
 ) {
     if (node.hasEnvironmentMetrics) {
-        PreferenceCategory(stringResource(R.string.environment))
+        TitledCard(stringResource(R.string.environment)) {}
         EnvironmentMetrics(node, metricsState.isFahrenheit, metricsState.displayUnits)
         Spacer(modifier = Modifier.height(8.dp))
     }
 
     if (node.hasPowerMetrics) {
-        PreferenceCategory(stringResource(R.string.power))
+        TitledCard(stringResource(R.string.power)) {}
         PowerMetrics(node)
         Spacer(modifier = Modifier.height(8.dp))
     }
 
     if (availableLogs.isNotEmpty()) {
-        PreferenceCategory(stringResource(id = R.string.logs)) {
+        TitledCard(title = stringResource(id = R.string.logs)) {
             LogsType.entries.forEach { type ->
                 if (availableLogs.contains(type)) {
-                    NavCard(title = stringResource(type.titleRes), icon = type.icon, enabled = true) {
+                    SettingsItem(text = stringResource(type.titleRes), leadingIcon = type.icon) {
                         onAction(NodeDetailAction.Navigate(type.route))
                     }
                 }
@@ -421,6 +427,7 @@ private fun MetricsSection(
     }
 }
 
+@Suppress("LongMethod")
 @Composable
 private fun AdministrationSection(
     node: Node,
@@ -428,23 +435,23 @@ private fun AdministrationSection(
     onAction: (NodeDetailAction) -> Unit,
     onFirmwareSelected: (FirmwareRelease) -> Unit,
 ) {
-    PreferenceCategory(stringResource(id = R.string.administration)) {
-        NodeActionButton(
-            title = stringResource(id = R.string.request_metadata),
-            icon = Icons.Default.Memory,
-            enabled = true,
+    TitledCard(stringResource(id = R.string.administration)) {
+        SettingsItem(
+            text = stringResource(id = R.string.request_metadata),
+            leadingIcon = Icons.Default.Memory,
+            trailingIcon = null,
             onClick = { onAction(NodeDetailAction.TriggerServiceAction(ServiceAction.GetDeviceMetadata(node.num))) },
         )
-        NavCard(
-            title = stringResource(id = R.string.remote_admin),
-            icon = Icons.Default.Settings,
+        SettingsItem(
+            text = stringResource(id = R.string.remote_admin),
+            leadingIcon = Icons.Default.Settings,
             enabled = metricsState.isLocal || node.metadata != null,
         ) {
             onAction(NodeDetailAction.Navigate(SettingsRoutes.Settings(node.num)))
         }
     }
 
-    PreferenceCategory(stringResource(R.string.firmware)) {
+    TitledCard(stringResource(R.string.firmware)) {
         if (metricsState.isLocal) {
             val firmwareEdition = metricsState.firmwareEdition
             firmwareEdition?.let {
@@ -454,7 +461,11 @@ private fun AdministrationSection(
                         else -> Icons.Default.ForkLeft
                     }
 
-                NodeDetailRow(label = stringResource(R.string.firmware_edition), icon = icon, value = it.name)
+                SettingsItemDetail(
+                    text = stringResource(R.string.firmware_edition),
+                    icon = icon,
+                    trailingText = it.name,
+                )
             }
         }
         node.metadata?.firmwareVersion?.let { firmwareVersion ->
@@ -464,24 +475,24 @@ private fun AdministrationSection(
             val deviceVersion = DeviceVersion(firmwareVersion.substringBeforeLast("."))
             val statusColor = deviceVersion.determineFirmwareStatusColor(latestStable, latestAlpha)
 
-            NodeDetailRow(
-                label = stringResource(R.string.installed_firmware_version),
+            SettingsItemDetail(
+                text = stringResource(R.string.installed_firmware_version),
                 icon = Icons.Default.Memory,
-                value = firmwareVersion.substringBeforeLast("."),
+                trailingText = firmwareVersion.substringBeforeLast("."),
                 iconTint = statusColor,
             )
             HorizontalDivider()
-            NodeDetailRow(
-                label = stringResource(R.string.latest_stable_firmware),
+            SettingsItemDetail(
+                text = stringResource(R.string.latest_stable_firmware),
                 icon = Icons.Default.Memory,
-                value = latestStable.id.substringBeforeLast(".").replace("v", ""),
+                trailingText = latestStable.id.substringBeforeLast(".").replace("v", ""),
                 iconTint = colorScheme.StatusGreen,
                 onClick = { onFirmwareSelected(latestStable) },
             )
-            NodeDetailRow(
-                label = stringResource(R.string.latest_alpha_firmware),
+            SettingsItemDetail(
+                text = stringResource(R.string.latest_alpha_firmware),
                 icon = Icons.Default.Memory,
-                value = latestAlpha.id.substringBeforeLast(".").replace("v", ""),
+                trailingText = latestAlpha.id.substringBeforeLast(".").replace("v", ""),
                 iconTint = colorScheme.StatusYellow,
                 onClick = { onFirmwareSelected(latestAlpha) },
             )
@@ -543,28 +554,6 @@ private fun FirmwareReleaseSheetContent(firmwareRelease: FirmwareRelease) {
 }
 
 @Composable
-private fun NodeDetailRow(
-    modifier: Modifier = Modifier,
-    label: String,
-    icon: ImageVector,
-    value: String,
-    iconTint: Color = MaterialTheme.colorScheme.onSurface,
-    onClick: (() -> Unit)? = null,
-) {
-    Row(
-        modifier =
-        modifier.fillMaxWidth().thenIf(onClick != null) { clickable(onClick = onClick!!) }.padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        Icon(imageVector = icon, contentDescription = label, modifier = Modifier.size(24.dp), tint = iconTint)
-        Text(label)
-        Spacer(modifier = Modifier.weight(1f))
-        Text(textAlign = TextAlign.End, text = value)
-    }
-}
-
-@Composable
 private fun DeviceActions(
     isLocal: Boolean = false,
     node: Node,
@@ -587,35 +576,34 @@ private fun DeviceActions(
         },
         onAction = { onAction(NodeDetailAction.HandleNodeMenuAction(it)) },
     )
-    PreferenceCategory(text = stringResource(R.string.actions)) {
-        NodeActionButton(
-            title = stringResource(id = R.string.share_contact),
-            icon = Icons.Default.Share,
-            enabled = true,
+    TitledCard(title = stringResource(R.string.actions)) {
+        SettingsItem(
+            text = stringResource(id = R.string.share_contact),
+            leadingIcon = Icons.Rounded.QrCode2,
+            trailingIcon = null,
             onClick = { onAction(NodeDetailAction.ShareContact) },
         )
         if (!isLocal) {
             RemoteDeviceActions(node = node, lastTracerouteTime = lastTracerouteTime, onAction = onAction)
         }
-        NodeActionSwitch(
-            title = stringResource(R.string.favorite),
-            icon = if (node.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
-            iconTint = if (node.isFavorite) Color.Yellow else LocalContentColor.current,
-            enabled = true,
+        SettingsItemSwitch(
+            text = stringResource(R.string.favorite),
+            leadingIcon = if (node.isFavorite) Icons.Default.Star else Icons.Default.StarBorder,
+            leadingIconTint = if (node.isFavorite) Color.Yellow else LocalContentColor.current,
             checked = node.isFavorite,
             onClick = { displayFavoriteDialog = true },
         )
-        NodeActionSwitch(
-            title = stringResource(R.string.ignore),
-            icon = if (node.isIgnored) Icons.AutoMirrored.Outlined.VolumeMute else Icons.AutoMirrored.Default.VolumeUp,
-            enabled = true,
+        SettingsItemSwitch(
+            text = stringResource(R.string.ignore),
+            leadingIcon =
+            if (node.isIgnored) Icons.AutoMirrored.Outlined.VolumeMute else Icons.AutoMirrored.Default.VolumeUp,
             checked = node.isIgnored,
             onClick = { displayIgnoreDialog = true },
         )
-        NodeActionButton(
-            title = stringResource(id = R.string.remove),
-            icon = Icons.Default.Delete,
-            enabled = true,
+        SettingsItem(
+            text = stringResource(id = R.string.remove),
+            leadingIcon = Icons.Rounded.Delete,
+            trailingIcon = null,
             onClick = { displayRemoveDialog = true },
         )
     }
@@ -624,23 +612,23 @@ private fun DeviceActions(
 @Composable
 private fun RemoteDeviceActions(node: Node, lastTracerouteTime: Long?, onAction: (NodeDetailAction) -> Unit) {
     if (!node.isEffectivelyUnmessageable) {
-        NodeActionButton(
-            title = stringResource(id = R.string.direct_message),
-            icon = Icons.AutoMirrored.TwoTone.Message,
-            enabled = true,
+        SettingsItem(
+            text = stringResource(id = R.string.direct_message),
+            leadingIcon = Icons.AutoMirrored.TwoTone.Message,
+            trailingIcon = null,
             onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.DirectMessage(node))) },
         )
     }
-    NodeActionButton(
-        title = stringResource(id = R.string.exchange_position),
-        icon = Icons.Default.LocationOn,
-        enabled = true,
+    SettingsItem(
+        text = stringResource(id = R.string.exchange_position),
+        leadingIcon = Icons.Default.LocationOn,
+        trailingIcon = null,
         onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestPosition(node))) },
     )
-    NodeActionButton(
-        title = stringResource(id = R.string.exchange_userinfo),
-        icon = Icons.Default.Person,
-        enabled = true,
+    SettingsItem(
+        text = stringResource(id = R.string.exchange_userinfo),
+        leadingIcon = Icons.Default.Person,
+        trailingIcon = null,
         onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestUserInfo(node))) },
     )
     TracerouteActionButton(
@@ -651,31 +639,38 @@ private fun RemoteDeviceActions(node: Node, lastTracerouteTime: Long?, onAction:
 }
 
 @Composable
-private fun DeviceDetailsContent(state: MetricsState) {
+private fun ColumnScope.DeviceDetailsContent(state: MetricsState) {
     val node = state.node ?: return
     val deviceHardware = state.deviceHardware ?: return
     val hwModelName = deviceHardware.displayName
     val isSupported = deviceHardware.activelySupported
     Box(
         modifier =
-        Modifier.size(100.dp)
-            .padding(4.dp)
+        Modifier.align(Alignment.CenterHorizontally)
+            .size(100.dp)
             .clip(CircleShape)
             .background(color = Color(node.colors.second).copy(alpha = .5f), shape = CircleShape),
         contentAlignment = Alignment.Center,
     ) {
         DeviceHardwareImage(deviceHardware, Modifier.fillMaxSize())
     }
-    NodeDetailRow(label = stringResource(R.string.hardware), icon = Icons.Default.Router, value = hwModelName)
-    NodeDetailRow(
-        label =
+
+    Spacer(modifier = Modifier.height(16.dp))
+
+    SettingsItemDetail(
+        text = stringResource(R.string.hardware),
+        icon = Icons.Default.Router,
+        trailingText = hwModelName,
+    )
+    SettingsItemDetail(
+        text =
         if (isSupported) {
             stringResource(R.string.supported)
         } else {
             stringResource(R.string.supported_by_community)
         },
         icon = if (isSupported) Icons.TwoTone.Verified else ImageVector.vectorResource(R.drawable.unverified),
-        value = "",
+        trailingText = "",
         iconTint = if (isSupported) colorScheme.StatusGreen else colorScheme.StatusRed,
     )
 }
@@ -733,53 +728,57 @@ private fun EncryptionErrorContent() {
 
 @Composable
 private fun MainNodeDetails(node: Node, ourNode: Node?, displayUnits: ConfigProtos.Config.DisplayConfig.DisplayUnits) {
-    NodeDetailRow(
-        label = stringResource(R.string.long_name),
+    SettingsItemDetail(
+        text = stringResource(R.string.long_name),
         icon = Icons.TwoTone.Person,
-        value = node.user.longName.ifEmpty { "???" },
+        trailingText = node.user.longName.ifEmpty { "???" },
     )
-    NodeDetailRow(
-        label = stringResource(R.string.short_name),
+    SettingsItemDetail(
+        text = stringResource(R.string.short_name),
         icon = Icons.Outlined.Person,
-        value = node.user.shortName.ifEmpty { "???" },
+        trailingText = node.user.shortName.ifEmpty { "???" },
     )
-    NodeDetailRow(
-        label = stringResource(R.string.node_number),
+    SettingsItemDetail(
+        text = stringResource(R.string.node_number),
         icon = Icons.Default.Numbers,
-        value = node.num.toUInt().toString(),
+        trailingText = node.num.toUInt().toString(),
     )
-    NodeDetailRow(label = stringResource(R.string.user_id), icon = Icons.Default.Person, value = node.user.id)
-    NodeDetailRow(label = stringResource(R.string.role), icon = Icons.Default.Work, value = node.user.role.name)
+    SettingsItemDetail(
+        text = stringResource(R.string.user_id),
+        icon = Icons.Default.Person,
+        trailingText = node.user.id,
+    )
+    SettingsItemDetail(
+        text = stringResource(R.string.role),
+        icon = Icons.Default.Work,
+        trailingText = node.user.role.name,
+    )
     if (node.isEffectivelyUnmessageable) {
-        NodeDetailRow(
-            label = stringResource(R.string.unmonitored_or_infrastructure),
-            icon = Icons.Outlined.NoCell,
-            value = "",
-        )
+        SettingsItemDetail(text = stringResource(R.string.unmonitored_or_infrastructure), icon = Icons.Outlined.NoCell)
     }
     if (node.deviceMetrics.uptimeSeconds > 0) {
-        NodeDetailRow(
-            label = stringResource(R.string.uptime),
+        SettingsItemDetail(
+            text = stringResource(R.string.uptime),
             icon = Icons.Default.CheckCircle,
-            value = formatUptime(node.deviceMetrics.uptimeSeconds),
+            trailingText = formatUptime(node.deviceMetrics.uptimeSeconds),
         )
     }
-    NodeDetailRow(
-        label = stringResource(R.string.node_sort_last_heard),
+    SettingsItemDetail(
+        text = stringResource(R.string.node_sort_last_heard),
         icon = Icons.Default.History,
-        value = formatAgo(node.lastHeard),
+        trailingText = formatAgo(node.lastHeard),
     )
     val distance = ourNode?.distance(node)?.toDistanceString(displayUnits)
     if (node != ourNode && distance != null) {
-        NodeDetailRow(
-            label = stringResource(R.string.node_sort_distance),
+        SettingsItemDetail(
+            text = stringResource(R.string.node_sort_distance),
             icon = Icons.Default.SocialDistance,
-            value = distance,
+            trailingText = distance,
         )
-        NodeDetailRow(
-            label = stringResource(R.string.last_position_update),
+        SettingsItemDetail(
+            text = stringResource(R.string.last_position_update),
             icon = Icons.Default.LocationOn,
-            value = formatAgo(node.position.time),
+            trailingText = formatAgo(node.position.time),
         )
     }
 }
@@ -1110,45 +1109,6 @@ fun NodeActionButton(
                 Spacer(modifier = Modifier.width(8.dp))
             }
             Text(text = title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-        }
-    }
-}
-
-@Composable
-fun NodeActionSwitch(
-    title: String,
-    enabled: Boolean,
-    checked: Boolean,
-    icon: ImageVector? = null,
-    iconTint: Color? = null,
-    onClick: () -> Unit,
-) {
-    val interactionSource = remember { MutableInteractionSource() }
-    Card(
-        modifier =
-        Modifier.fillMaxWidth()
-            .padding(vertical = 4.dp)
-            .height(48.dp)
-            .toggleable(value = checked, enabled = enabled, role = Role.Switch, onValueChange = { onClick() }),
-        shape = MaterialTheme.shapes.large,
-        interactionSource = interactionSource,
-        onClick = onClick,
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp, horizontal = 16.dp),
-        ) {
-            if (icon != null) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = title,
-                    modifier = Modifier.size(24.dp),
-                    tint = iconTint ?: LocalContentColor.current,
-                )
-                Spacer(modifier = Modifier.width(8.dp))
-            }
-            Text(text = title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-            Switch(checked = checked, onCheckedChange = null)
         }
     }
 }
