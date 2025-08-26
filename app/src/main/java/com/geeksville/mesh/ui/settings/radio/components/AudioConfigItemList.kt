@@ -20,7 +20,6 @@ package com.geeksville.mesh.ui.settings.radio.components
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -103,7 +102,7 @@ fun AudioConfigItemList(audioConfig: AudioConfig, enabled: Boolean, onSaveClicke
                 onItemSelected = { audioInput = audioInput.copy { bitrate = it } },
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             EditTextPreference(
