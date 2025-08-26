@@ -134,16 +134,15 @@ fun ConnectionsScreen(
     onConfigNavigate: (Route) -> Unit,
 ) {
     val radioConfigState by radioConfigViewModel.radioConfigState.collectAsStateWithLifecycle()
-    val config by uiViewModel.localConfig.collectAsState()
+    val config by uiViewModel.localConfig.collectAsStateWithLifecycle()
     val currentRegion = config.lora.region
     val scrollState = rememberScrollState()
     val scanStatusText by scanModel.errorText.observeAsState("")
-    val connectionState by uiViewModel.connectionState.collectAsState(ConnectionState.DISCONNECTED)
+    val connectionState by uiViewModel.connectionState.collectAsStateWithLifecycle(ConnectionState.DISCONNECTED)
     val scanning by scanModel.spinner.collectAsStateWithLifecycle(false)
-    val receivingLocationUpdates by uiViewModel.receivingLocationUpdates.collectAsState(false)
     val context = LocalContext.current
     val app = (context.applicationContext as GeeksvilleApplication)
-    val info by uiViewModel.myNodeInfo.collectAsState()
+    val info by uiViewModel.myNodeInfo.collectAsStateWithLifecycle()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val bluetoothEnabled by bluetoothViewModel.enabled.collectAsStateWithLifecycle(false)
     val regionUnset =
