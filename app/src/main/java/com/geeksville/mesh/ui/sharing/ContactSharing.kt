@@ -163,6 +163,7 @@ fun AddContactFAB(
     }
 
     FloatingActionButton(
+        modifier = modifier,
         onClick = {
             if (cameraPermissionState.status.isGranted) {
                 zxingScan()
@@ -170,7 +171,6 @@ fun AddContactFAB(
                 cameraPermissionState.launchPermissionRequest()
             }
         },
-        modifier = modifier.padding(16.dp),
     ) {
         Icon(imageVector = Icons.TwoTone.QrCodeScanner, contentDescription = stringResource(R.string.scan_qr_code))
     }

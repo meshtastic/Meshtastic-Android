@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.ui.node
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -28,7 +27,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -54,7 +56,7 @@ import com.geeksville.mesh.ui.sharing.AddContactFAB
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.geeksville.mesh.ui.sharing.supportsQrCodeSharing
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun NodeScreen(
@@ -80,77 +82,82 @@ fun NodeScreen(
     }
 
     val isScrollInProgress by remember { derivedStateOf { listState.isScrollInProgress } }
+    Scaffold(
+        floatingActionButton = {
+            val firmwareVersion = DeviceVersion(ourNode?.metadata?.firmwareVersion ?: "0.0.0")
+            val shareCapable = firmwareVersion.supportsQrCodeSharing()
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
-            stickyHeader {
-                val animatedAlpha by
-                    animateFloatAsState(targetValue = if (!isScrollInProgress) 1.0f else 0f, label = "alpha")
-                NodeFilterTextField(
-                    modifier =
-                    Modifier.fillMaxWidth()
-                        .graphicsLayer(alpha = animatedAlpha)
-                        .background(MaterialTheme.colorScheme.surfaceDim)
-                        .padding(8.dp),
-                    filterText = state.filter,
-                    onTextChange = model::setNodeFilterText,
-                    currentSortOption = state.sort,
-                    onSortSelect = model::setSortOption,
-                    includeUnknown = state.includeUnknown,
-                    onToggleIncludeUnknown = model::toggleIncludeUnknown,
-                    onlyOnline = state.onlyOnline,
-                    onToggleOnlyOnline = model::toggleOnlyOnline,
-                    onlyDirect = state.onlyDirect,
-                    onToggleOnlyDirect = model::toggleOnlyDirect,
-                    showDetails = state.showDetails,
-                    onToggleShowDetails = model::toggleShowDetails,
-                    showIgnored = state.showIgnored,
-                    onToggleShowIgnored = model::toggleShowIgnored,
-                    ignoredNodeCount = ignoredNodeCount,
-                )
-            }
+            AddContactFAB(
+                modifier =
+                Modifier.animateFloatingActionButton(
+                    visible = !isScrollInProgress && connectionState == ConnectionState.CONNECTED && shareCapable,
+                    alignment = Alignment.BottomEnd,
+                ),
+                model = model,
+                onSharedContactImport = { contact -> model.addSharedContact(contact) },
+            )
+        },
+    ) { contentPadding ->
+        Box(modifier = Modifier.fillMaxSize().padding(contentPadding)) {
+            LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+                stickyHeader {
+                    val animatedAlpha by
+                        animateFloatAsState(targetValue = if (!isScrollInProgress) 1.0f else 0f, label = "alpha")
+                    NodeFilterTextField(
+                        modifier =
+                        Modifier.fillMaxWidth()
+                            .graphicsLayer(alpha = animatedAlpha)
+                            .background(MaterialTheme.colorScheme.surfaceDim)
+                            .padding(8.dp),
+                        filterText = state.filter,
+                        onTextChange = model::setNodeFilterText,
+                        currentSortOption = state.sort,
+                        onSortSelect = model::setSortOption,
+                        includeUnknown = state.includeUnknown,
+                        onToggleIncludeUnknown = model::toggleIncludeUnknown,
+                        onlyOnline = state.onlyOnline,
+                        onToggleOnlyOnline = model::toggleOnlyOnline,
+                        onlyDirect = state.onlyDirect,
+                        onToggleOnlyDirect = model::toggleOnlyDirect,
+                        showDetails = state.showDetails,
+                        onToggleShowDetails = model::toggleShowDetails,
+                        showIgnored = state.showIgnored,
+                        onToggleShowIgnored = model::toggleShowIgnored,
+                        ignoredNodeCount = ignoredNodeCount,
+                    )
+                }
 
-            items(nodes, key = { it.num }) { node ->
-                NodeItem(
-                    modifier = Modifier.animateItem(),
-                    thisNode = ourNode,
-                    thatNode = node,
-                    distanceUnits = state.distanceUnits,
-                    tempInFahrenheit = state.tempInFahrenheit,
-                    onAction = { menuItem ->
-                        when (menuItem) {
-                            is NodeMenuAction.Remove -> model.removeNode(node.num)
-                            is NodeMenuAction.Ignore -> model.ignoreNode(node)
-                            is NodeMenuAction.Favorite -> model.favoriteNode(node)
-                            is NodeMenuAction.DirectMessage -> {
-                                val hasPKC = model.ourNodeInfo.value?.hasPKC == true && node.hasPKC
-                                val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
-                                navigateToMessages("$channel${node.user.id}")
+                items(nodes, key = { it.num }) { node ->
+                    NodeItem(
+                        modifier = Modifier.animateItem(),
+                        thisNode = ourNode,
+                        thatNode = node,
+                        distanceUnits = state.distanceUnits,
+                        tempInFahrenheit = state.tempInFahrenheit,
+                        onAction = { menuItem ->
+                            when (menuItem) {
+                                is NodeMenuAction.Remove -> model.removeNode(node.num)
+                                is NodeMenuAction.Ignore -> model.ignoreNode(node)
+                                is NodeMenuAction.Favorite -> model.favoriteNode(node)
+                                is NodeMenuAction.DirectMessage -> {
+                                    val hasPKC = model.ourNodeInfo.value?.hasPKC == true && node.hasPKC
+                                    val channel = if (hasPKC) DataPacket.PKC_CHANNEL_INDEX else node.channel
+                                    navigateToMessages("$channel${node.user.id}")
+                                }
+
+                                is NodeMenuAction.RequestUserInfo -> model.requestUserInfo(node.num)
+                                is NodeMenuAction.RequestPosition -> model.requestPosition(node.num)
+                                is NodeMenuAction.TraceRoute -> model.requestTraceroute(node.num)
+                                is NodeMenuAction.MoreDetails -> navigateToNodeDetails(node.num)
+                                is NodeMenuAction.Share -> showSharedContact = node
                             }
-
-                            is NodeMenuAction.RequestUserInfo -> model.requestUserInfo(node.num)
-                            is NodeMenuAction.RequestPosition -> model.requestPosition(node.num)
-                            is NodeMenuAction.TraceRoute -> model.requestTraceroute(node.num)
-                            is NodeMenuAction.MoreDetails -> navigateToNodeDetails(node.num)
-                            is NodeMenuAction.Share -> showSharedContact = node
-                        }
-                    },
-                    expanded = state.showDetails,
-                    currentTimeMillis = currentTimeMillis,
-                    isConnected = connectionState.isConnected(),
-                )
+                        },
+                        expanded = state.showDetails,
+                        currentTimeMillis = currentTimeMillis,
+                        isConnected = connectionState.isConnected(),
+                    )
+                }
             }
-        }
-
-        val firmwareVersion = DeviceVersion(ourNode?.metadata?.firmwareVersion ?: "0.0.0")
-        val shareCapable = firmwareVersion.supportsQrCodeSharing()
-
-        AnimatedVisibility(
-            modifier = Modifier.align(Alignment.BottomEnd),
-            visible = !isScrollInProgress && connectionState == ConnectionState.CONNECTED && shareCapable,
-        ) {
-            @Suppress("NewApi")
-            (AddContactFAB(model = model, onSharedContactImport = { contact -> model.addSharedContact(contact) }))
         }
     }
 }
