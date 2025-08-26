@@ -39,69 +39,68 @@ fun MDText(
     style: TextStyle = MaterialTheme.typography.bodyMedium,
     color: Color = Color.Unspecified,
 ) {
-    val colors = DefaultMarkdownColors(
-        text = color,
-        codeText = color,
-        inlineCodeText = Color.Black,
-        linkText = HyperlinkBlue,
-        codeBackground = Color.LightGray,
-        inlineCodeBackground = Color.LightGray,
-        dividerColor = Color.DarkGray,
-        tableText = color,
-        tableBackground = Color.White
-    )
+    val colors =
+        DefaultMarkdownColors(
+            text = color,
+            codeText = color,
+            inlineCodeText = Color.Black,
+            linkText = HyperlinkBlue,
+            codeBackground = Color.LightGray,
+            inlineCodeBackground = Color.LightGray,
+            dividerColor = Color.DarkGray,
+            tableText = color,
+            tableBackground = Color.White,
+        )
 
-    val typography = DefaultMarkdownTypography(
-        // Restrict max size of the text
-        h1 = MaterialTheme.typography.headlineMedium.copy(color = color),
-        h2 = MaterialTheme.typography.headlineMedium.copy(color = color),
-        h3 = MaterialTheme.typography.headlineSmall.copy(color = color),
-        h4 = MaterialTheme.typography.titleLarge.copy(color = color),
-        h5 = MaterialTheme.typography.titleMedium.copy(color = color),
-        h6 = MaterialTheme.typography.titleSmall.copy(color = color),
-        text = style,
-        code = MaterialTheme.typography.bodyMedium.copy(
-            fontFamily = MaterialTheme.typography.labelMedium.fontFamily, color = color
-        ),
-        inlineCode = MaterialTheme.typography.bodyMedium.copy(
-            fontFamily = MaterialTheme.typography.labelMedium.fontFamily, color = Color.Black,
-            background = Color.LightGray
-        ),
-        quote = MaterialTheme.typography.bodyLarge.copy(color = color),
-        paragraph = MaterialTheme.typography.bodyMedium.copy(color = color),
-        ordered = MaterialTheme.typography.bodyMedium.copy(color = color),
-        bullet = MaterialTheme.typography.bodyMedium.copy(color = color),
-        list = MaterialTheme.typography.bodyMedium.copy(color = color),
-        link = TextStyle(
-            color = HyperlinkBlue,
-            textDecoration = TextDecoration.Underline,
-        ),
-        textLink = TextLinkStyles(
-            style = SpanStyle(
-                color = HyperlinkBlue,
-                textDecoration = TextDecoration.Underline,
+    val typography =
+        DefaultMarkdownTypography(
+            // Restrict max size of the text
+            h1 = MaterialTheme.typography.headlineMedium.copy(color = color),
+            h2 = MaterialTheme.typography.headlineMedium.copy(color = color),
+            h3 = MaterialTheme.typography.headlineSmall.copy(color = color),
+            h4 = MaterialTheme.typography.titleLarge.copy(color = color),
+            h5 = MaterialTheme.typography.titleMedium.copy(color = color),
+            h6 = MaterialTheme.typography.titleSmall.copy(color = color),
+            text = style,
+            code =
+            MaterialTheme.typography.bodyMedium.copy(
+                fontFamily = MaterialTheme.typography.labelMedium.fontFamily,
+                color = color,
             ),
-        ),
-        table = MaterialTheme.typography.bodyMedium.copy(color = color)
-    )
+            inlineCode =
+            MaterialTheme.typography.bodyMedium.copy(
+                fontFamily = MaterialTheme.typography.labelMedium.fontFamily,
+                color = Color.Black,
+                background = Color.LightGray,
+            ),
+            quote = MaterialTheme.typography.bodyLarge.copy(color = color),
+            paragraph = MaterialTheme.typography.bodyMedium.copy(color = color),
+            ordered = MaterialTheme.typography.bodyMedium.copy(color = color),
+            bullet = MaterialTheme.typography.bodyMedium.copy(color = color),
+            list = MaterialTheme.typography.bodyMedium.copy(color = color),
+            link = TextStyle(color = HyperlinkBlue, textDecoration = TextDecoration.Underline),
+            textLink =
+            TextLinkStyles(style = SpanStyle(color = HyperlinkBlue, textDecoration = TextDecoration.Underline)),
+            table = MaterialTheme.typography.bodyMedium.copy(color = color),
+        )
 
-        // Custom Markdown components to disable image rendering
-        val customComponents = markdownComponents(
-        image = { /* Empty composable to disable image rendering */ }
-    )
+    // Custom Markdown components to disable image rendering
+    val customComponents = markdownComponents(image = { /* Empty composable to disable image rendering */ })
 
     Markdown(
         content = text,
         modifier = modifier,
         colors = colors,
         typography = typography,
-        components = customComponents // Use custom components
+        components = customComponents, // Use custom components
     )
 }
 
 @Preview(showBackground = true)
 @Composable
 private fun AutoLinkTextPreview() {
-    MDText("A text containing a link https://example.com **bold** _Italics_" +
-            "\n # hello \n ## hello \n ### hello \n #### hello \n ##### hello \n ###### hello")
+    MDText(
+        "A text containing a link https://example.com **bold** _Italics_" +
+            "\n # hello \n ## hello \n ### hello \n #### hello \n ##### hello \n ###### hello",
+    )
 }
