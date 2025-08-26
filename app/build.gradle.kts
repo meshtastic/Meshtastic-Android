@@ -143,7 +143,6 @@ android {
     }
     bundle { language { enableSplit = false } }
     buildFeatures {
-        viewBinding = true
         compose = true
         aidl = true
         buildConfig = true
