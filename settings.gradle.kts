@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.maven
+
 /*
  * Copyright (c) 2025 Meshtastic LLC
  *
@@ -17,6 +19,25 @@
 
 include(":app", ":network", ":mesh_service_example")
 rootProject.name = "Meshtastic Android"
+
+pluginManagement {
+    repositories {
+        google()
+        mavenCentral()
+        gradlePluginPortal()
+        maven { url = uri("https://jitpack.io") }
+    }
+}
+
+@Suppress("UnstableApiUsage")
+dependencyResolutionManagement {
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+    repositories {
+        google()
+        mavenCentral()
+        maven { url = uri("https://jitpack.io") }
+    }
+}
 
 plugins {
     id("org.gradle.toolchains.foojay-resolver") version "1.0.0"

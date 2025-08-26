@@ -31,7 +31,7 @@ plugins {
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.detekt)
     alias(libs.plugins.datadog)
-    alias(libs.plugins.secrets.gradle.plugin)
+    alias(libs.plugins.secrets)
     alias(libs.plugins.spotless)
 }
 
@@ -292,8 +292,6 @@ ksp {
     //    arg("room.generateKotlin", "true")
     arg("room.schemaLocation", "$projectDir/schemas")
 }
-
-repositories { maven { url = uri("https://jitpack.io") } }
 
 detekt {
     config.setFrom("../config/detekt/detekt.yml")
