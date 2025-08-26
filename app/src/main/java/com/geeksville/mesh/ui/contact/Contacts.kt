@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.ui.contact
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -37,6 +36,7 @@ import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,6 +44,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -67,6 +68,7 @@ import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.model.UIViewModel
 import java.util.concurrent.TimeUnit
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod")
 @Composable
 fun ContactsScreen(
@@ -153,13 +155,11 @@ fun ContactsScreen(
             }
         },
         floatingActionButton = {
-            AnimatedVisibility(isConnected && !isSelectionModeActive) {
-                FloatingActionButton(onClick = onNavigateToShare) {
-                    Icon(
-                        Icons.Rounded.QrCode2,
-                        contentDescription = null
-                    )
-                }
+            FloatingActionButton(
+                modifier = Modifier.animateFloatingActionButton(visible = isConnected, alignment = Alignment.BottomEnd),
+                onClick = onNavigateToShare,
+            ) {
+                Icon(Icons.Rounded.QrCode2, contentDescription = null)
             }
         },
     ) { paddingValues ->
@@ -227,11 +227,8 @@ fun MuteNotificationsDialog(
                         val text = stringResource(stringRes)
                         Row(
                             modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .selectable(
-                                    selected = isSelected,
-                                    onClick = { selectedOptionIndex = index })
+                            Modifier.fillMaxWidth()
+                                .selectable(selected = isSelected, onClick = { selectedOptionIndex = index })
                                 .padding(vertical = 8.dp),
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
