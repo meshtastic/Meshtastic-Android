@@ -75,16 +75,14 @@ jobs:
           build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
           build-scan-terms-of-use-agree: 'yes'
 
-      - name: Load F-Droid secrets
-        env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE }}
-          KEYSTORE_FILENAME_SECRET: ${{ secrets.KEYSTORE_FILENAME }}
-          KEYSTORE_PROPERTIES_SECRET: ${{ secrets.KEYSTORE_PROPERTIES }}
+      - name: Load Fdroid secrets
         run: |
-          echo "Writing keystore file for F-Droid"
-          echo "$KEYSTORE_BASE64" | base64 --decode > ./app/$KEYSTORE_FILENAME_SECRET
-          echo "Writing keystore.properties for F-Droid"
-          echo "$KEYSTORE_PROPERTIES_SECRET" > ./keystore.properties
+          echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
+          echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
+        env:
+          KEYSTORE: ${{ secrets.KEYSTORE }}
+          KEYSTORE_FILENAME: ${{ secrets.KEYSTORE_FILENAME }}
+          KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
 
       - name: Build F-Droid Release APK
         run: |
@@ -126,24 +124,21 @@ jobs:
 
       - name: Load Google secrets
         env:
-          GSERVICES_BASE64: ${{ secrets.GSERVICES }}
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE }}
-          KEYSTORE_FILENAME_SECRET: ${{ secrets.KEYSTORE_FILENAME }}
-          KEYSTORE_PROPERTIES_SECRET: ${{ secrets.KEYSTORE_PROPERTIES }}
-          DATADOG_APPLICATION_ID_SECRET: ${{ secrets.DATADOG_APPLICATION_ID }}
-          DATADOG_CLIENT_TOKEN_SECRET: ${{ secrets.DATADOG_CLIENT_TOKEN }}
-          GOOGLE_MAPS_API_KEY_SECRET: ${{ secrets.GOOGLE_MAPS_API_KEY }}
+          GSERVICES: ${{ secrets.GSERVICES }}
+          KEYSTORE: ${{ secrets.KEYSTORE }}
+          KEYSTORE_FILENAME: ${{ secrets.KEYSTORE_FILENAME }}
+          KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
+          DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
+          DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
+          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
         run: |
-          echo "Writing google-services.json"
-          echo "$GSERVICES_BASE64" | base64 --decode > ./app/google-services.json
-          echo "Writing keystore file for Google"
-          echo "$KEYSTORE_BASE64" | base64 --decode > ./app/$KEYSTORE_FILENAME_SECRET
-          echo "Writing keystore.properties for Google"
-          echo "$KEYSTORE_PROPERTIES_SECRET" > ./keystore.properties
-          echo "Writing other secrets to secrets.properties"
-          echo "datadogApplicationId=$DATADOG_APPLICATION_ID_SECRET" >> ./secrets.properties
-          echo "datadogClientToken=$DATADOG_CLIENT_TOKEN_SECRET" >> ./secrets.properties
-          echo "MAPS_API_KEY=$GOOGLE_MAPS_API_KEY_SECRET" >> ./secrets.properties
+          rm -f ./app/google-services.json # Ensure clean state
+          echo $GSERVICES > ./app/google-services.json
+          echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
+          echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
+          echo "datadogApplicationId=$DATADOG_APPLICATION_ID" >> ./secrets.properties
+          echo "datadogClientToken=$DATADOG_CLIENT_TOKEN" >> ./secrets.properties
+          echo "MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> ./secrets.properties
 
       - name: Build Google Release Artifacts (AAB and APK)
         run: |
