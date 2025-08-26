@@ -252,9 +252,9 @@ jobs:
         run: |
           TAG_NAME="${{ github.ref_name }}"
           if [[ "$TAG_NAME" == *"-internal"* ]]; then
-            echo "track=qa" >> $GITHUB_OUTPUT
+            echo "track=internal" >> $GITHUB_OUTPUT
           elif [[ "$TAG_NAME" == *"-closed"* ]]; then
-            echo "track=newalpha" >> $GITHUB_OUTPUT
+            echo "track=NewAlpha" >> $GITHUB_OUTPUT
           elif [[ "$TAG_NAME" == *"-open"* ]]; then
             echo "track=beta" >> $GITHUB_OUTPUT
           else
