@@ -161,6 +161,13 @@ jobs:
           path: app/build/outputs/apk/google/release/app-google-release.apk
           retention-days: 1
 
+      - name: Upload Mapping File
+        uses: actions/upload-artifact@v4
+        with:
+          name: mapping
+          path: app/build/outputs/mapping/googleRelease/mapping.txt
+          retention-days: 1
+
   publish-release:
     runs-on: ubuntu-latest
     needs: [prepare-build-info, build-fdroid, build-google]
@@ -194,11 +201,16 @@ jobs:
           name: google-apk
           path: ./build-artifacts/google/apk
 
+      - name: Download Mapping File
+        uses: actions/download-artifact@v5
+        with:
+          name: mapping
+          path: ./build-artifacts/google/mapping
+
       - name: Generate Changelog
         id: generate_changelog
         uses: mikepenz/release-changelog-builder-action@v5
         with:
-          configuration: ".github/changelog-config.json"
           owner: ${{ github.repository_owner }}
           repo: ${{ github.event.repository.name }}
           ignorePreReleases: true
@@ -211,8 +223,7 @@ jobs:
         if: steps.generate_changelog.outputs.changelog != ''
         run: |
           mkdir -p play_store_release_notes/en-US
-          echo "${{ steps.generate_changelog.outputs.changelog }}" > play_store_release_notes/en-US/default.txt
-          echo "${{ steps.generate_changelog.outputs.changelog }}" > changelog.txt # Also create a root changelog.txt for GitHub release
+          echo "${{ steps.generate_changelog.outputs.changelog }}" > whatsnew/whatsnew-en-US/default.txt
 
       - name: Create version_info.txt
         run: |
@@ -225,7 +236,7 @@ jobs:
         with:
           tag_name: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
-          body: ${{ steps.generate_changelog.outputs.changelog }}
+          generate_release_notes: true
           files: |
             ./build-artifacts/google/bundle/app-google-release.aab
             ./build-artifacts/google/apk/app-google-release.apk
@@ -269,5 +280,6 @@ jobs:
           packageName: com.geeksville.mesh
           releaseFiles: ./build-artifacts/google/bundle/app-google-release.aab
           track: ${{ steps.get_track.outputs.track }}
-          status: 'draft'
-          whatsNewDirectory: ./play_store_release_notes/en-US/
+          status: ${{ steps.get_track.outputs.track == 'internal' && 'complete' || 'draft' }}
+          whatsNewDirectory: /whatsnew/
+          mappingFile: ./build-artifacts/google/mapping/mapping.txt
