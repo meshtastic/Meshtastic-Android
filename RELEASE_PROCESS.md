@@ -1,138 +1,144 @@
 # Meshtastic-Android Release Process
 
-This document outlines the steps for releasing a new version of the Meshtastic-Android application. Adhering to this process ensures consistency and helps manage the release lifecycle from initial testing to production deployment, leveraging automation via the `release.yml` GitHub Action for builds and initial GitHub Release drafting.
+zzThis document outlines the steps for releasing a new version of the Meshtastic-Android application. Adhering to this process ensures consistency and helps manage the release lifecycle, leveraging automation via the `release.yml` GitHub Action.
 
-**Note:** The `release.yml` GitHub Action is manually triggered. It builds artifacts and, if its `create_github_release` parameter is true (default), creates a Git tag and a **draft pre-release** on GitHub. Finalizing and publishing the GitHub Release, as well as uploads to the Google Play Console, are manual steps.
+**Note on Automation:** The `release.yml` GitHub Action is primarily triggered by **pushing a Git tag** matching the pattern `v*` (e.g., `v1.2.3`, `v1.2.3-open.1`). It can also be manually triggered via `workflow_dispatch` from the GitHub Actions UI (select the desired branch/tag/commit).
+
+The workflow automatically:
+*   Determines version information (version name from the tag, version code via a script).
+*   Builds F-Droid (APK) and Google (AAB, APK) artifacts in parallel.
+*   Generates a changelog.
+*   Creates a **draft GitHub Release**. The release is marked as a "pre-release" if the tag name contains `-internal`, `-closed`, or `-open`.
+*   Attaches build artifacts, `version_info.txt`, and `changelog.txt` to the draft GitHub Release.
+*   Attests build provenance for the artifacts.
+*   Uploads the AAB to the Google Play Console as a **draft** to a track determined by the tag name:
+    *   `internal` (for tags with `-internal`)
+    *   `NewAlpha` (for tags with `-closed`)
+    *   `beta` (for tags with `-open`)
+    *   `production` (for tags without these suffixes)
+
+Finalizing and publishing the GitHub Release and the Google Play Store submission are **manual steps**.
 
 ## Prerequisites
 
 Before initiating the release process, ensure the following are completed:
 
-1.  **Main Branch Stability:** The `main` branch must be stable, with all features and bug fixes intended for the release merged and thoroughly tested.
-2.  **Automated Testing:** All automated tests (unit, integration, UI) must be passing on the release candidate code, CI must be passing. No explicit tests will be run on the `release.yml` Github Action.
-3.  **Version Update:**
-    *   Update `VERSION_NAME_BASE` in the `buildSrc/src/main/kotlin/Configs.kt` file according to Semantic Versioning (e.g., `X.X.X`). This value will be used for the Git tag (e.g., `vX.X.X`) and the GitHub Release name. This update should be done on the release branch.
+1.  **Main Branch Stability:** The `main` branch (or your chosen release branch) must be stable, with all features and bug fixes intended for the release merged and thoroughly tested.
+2.  **Automated Testing:** All automated tests (unit, integration, UI) must be passing on the release candidate code, and CI checks on pull requests must be green.
+3.  **Versioning and Tagging Strategy:**
+    *   The primary source for the release version name in the CI workflow is the Git tag (e.g., `v1.2.3` results in version name `1.2.3`).
+    *   Tags **must** start with `v` and generally follow Semantic Versioning (e.g., `vX.X.X`).
+    *   For pre-releases, use suffixes that the workflow recognizes to set the GitHub pre-release flag and Play Store track:
+        *   **Internal/QA:** `vX.X.X-internal.Y` (e.g., `v1.2.3-internal.1`)
+        *   **Closed Alpha:** `vX.X.X-closed.Y` (e.g., `v1.2.3-closed.1`)
+        *   **Open Alpha/Beta:** `vX.X.X-open.Y` (e.g., `v1.2.3-open.1`)
+    *   **Production releases** use no suffix (e.g., `vX.X.X`). The `Y` in suffixes is an increment for iterations of the same pre-release type.
+    *   **Recommendation:** Before tagging, update `VERSION_NAME_BASE` in `buildSrc/src/main/kotlin/Configs.kt` to match the `X.X.X` part of your tag. This ensures consistency if the app uses this value internally. The CI workflow derives `APP_VERSION_NAME` directly from the tag and passes it to Gradle.
 4.  **Final Checks:** Perform thorough manual testing of critical user flows and new features on various devices and Android versions.
 
-## Release Steps
+## Core Release Workflow: Triggering via Tag Push
 
-The release process is divided into distinct phases. The `release.yml` GitHub Action is triggered manually for each phase that requires a build and GitHub Release object.
+The primary way to initiate a release is by creating and pushing a tag:
 
-### Phase 1: Closed Alpha Release (Closed Testing)
+1.  **Ensure Local Branch is Synced:**
+    ```bash
+    # Example: if releasing from main
+    git checkout main
+    git pull origin main 
+    ```
+2.  **Create and Push Tag:**
+    Tag the commit you intend to release (e.g., the head of `main` or a release branch).
+    ```bash
+    # Example for an open beta release
+    git tag v1.2.3-open.1
+    git push origin v1.2.3-open.1
+    ```
+    Or, for a production release:
+    ```bash
+    git tag v1.2.3
+    git push origin v1.2.3
+    ```
 
-This phase involves creating a release candidate and deploying it to a limited audience for initial feedback.
+Pushing the tag automatically triggers the `release.yml` GitHub Action, which performs the automated steps listed in the "Note on Automation" section at the beginning of this document.
 
-1.  **Create Release Branch:**
-    *   From the latest commit of the `main` branch, create a new branch named `release/x.x.x` (e.g., `release/1.2.3`).
-        ```bash
-        # Ensure you are on the latest main branch
-        git checkout main
-        git pull origin main
-        # Create the release branch
-        git checkout -b release/x.x.x
-        ```
-    *   Update `VERSION_NAME_BASE` in `buildSrc/src/main/kotlin/Configs.kt` on this branch (e.g., to `1.2.3`).
-    *   Commit and push the release branch:
-        ```bash
-        git add buildSrc/src/main/kotlin/Configs.kt
-        git commit -m "Set version for release 1.2.3"
-        git push origin release/x.x.x
-        ```
+## Managing Different Release Phases (Manual Steps Post-Workflow)
 
-2.  **Draft Pull Request (PR):**
-    *   On GitHub, create a **draft** Pull Request from the `release/x.x.x` branch targeting the `main` branch.
-    *   Set the PR title to `Release x.x.x` (e.g., `Release 1.2.3`).
-    *   In the PR description, summarize the key changes. This can serve as a basis for the release notes.
+After the `release.yml` workflow completes, manual actions are needed on GitHub and in the Google Play Console.
 
-3.  **Initiate Closed Alpha Build and Draft Release via `release.yml`:**
-    *   Manually trigger the `release.yml` GitHub Action (e.g., through the GitHub Actions UI).
-        *   Set the `branch` input to your `release/x.x.x` branch.
-        *   Set the `create_github_release` input to `false`. This prevents the action from creating a GitHub Release at this stage to keep visibility low during Closed Alpha testing.
-    *   The `release.yml` GitHub Action will:
-        *   Build signed release APK (F-Droid) and Android App Bundle/APK (Google) from the `release/x.x.x` branch.\
+### Phase 1: Internal / QA Release
+*   **Tag format:** `vX.X.X-internal.Y` (e.g., `v1.2.3-internal.1`)
+*   **Branching (Optional):**
+    *   Consider creating a `release/x.x.x` branch from `main`.
+    *   Update `Configs.kt` on this branch.
+    *   Create a draft PR from `release/x.x.x` to `main`. Tag a commit on this branch.
+*   **Manual Steps Post-Workflow:**
+    1.  **GitHub:**
+        *   Navigate to the "Releases" page of the repository.
+        *   Find the **draft release** (e.g., "Release v1.2.3-internal.1"). It will be marked as "pre-release".
+        *   Verify the attached artifacts.
+        *   You can choose to publish this pre-release if you want it formally listed, or simply use the artifacts from the draft for internal distribution.
+    2.  **Google Play Console:**
+        *   The AAB will be uploaded as a **draft** to the **`qa` track**.
+        *   Review the draft release in the Play Console and promote/submit it as needed for your internal testers.
 
-4.  **Manual Closed Alpha Deployment to Google Play:**
-    *   Download the AAB from the assets created during the previous step.
-    *   Manually upload this AAB to a **Closed Test Channel** in the Google Play Console.
+### Phase 2: Closed Alpha Release
+*   **Tag format:** `vX.X.X-closed.Y` (e.g., `v1.2.3-closed.1`)
+*   **Manual Steps Post-Workflow:**
+    1.  **GitHub:**
+        *   Find the **draft release**. It will be marked as "pre-release".
+        *   Verify artifacts. Consider publishing it as a pre-release for wider internal visibility if appropriate.
+    2.  **Google Play Console:**
+        *   The AAB will be a **draft** on the **`newalpha` track**.
+        *   Review and submit it for your closed alpha testers.
 
-5.  **Monitor Feedback:** Actively collect feedback from closed testers. Address any critical bugs by committing fixes to the `release/x.x.x` branch and pushing them.
-    *   For re-deployment: Manually re-trigger the `release.yml` GitHub Action as in step 3. Note: This will attempt to create the same tag. If the tag already exists, the GitHub Release creation might behave unexpectedly or require manual intervention (e.g., deleting the old tag and release before re-running, or the action might update the existing draft release if `actions/create-release@v1` is configured to do so – verify its behavior with existing tags). Then, manually upload the new AAB to the Closed Test Channel. Consider if `VERSION_NAME_BASE` needs a patch increment for subsequent Closed Alpha builds if distinct tags are desired.
+### Phase 3: Open Alpha / Beta Release
+*   **Tag format:** `vX.X.X-open.Y` (e.g., `v1.2.3-open.1`)
+*   **Manual Steps Post-Workflow:**
+    1.  **GitHub:**
+        *   Find the **draft release**. It will be marked as "pre-release".
+        *   Edit the release: Review the title (e.g., "Release v1.2.3-open.1") and the auto-generated changelog.
+        *   Ensure "This is a pre-release" is checked.
+        *   **Publish the release** on GitHub. This makes it visible to the public.
+    2.  **Google Play Console:**
+        *   The AAB will be a **draft** on the **`beta` track**.
+        *   Review, add release notes (can copy from GitHub changelog), and submit it for your open testers.
 
-**Note on Promoting Builds:** If the Closed Alpha testing phase was successful and no code changes (and thus no re-builds) were required, the AAB uploaded to the Closed Test Channel during step 4 can often be directly promoted to the Open Test Channel (Open Alpha) in the Google Play Console. If changes were made, proceed with a new build for Open Alpha as described below.
+### Phase 4: Production Release
+*   **Tag format:** `vX.X.X` (e.g., `v1.2.3`)
+*   **Branching:**
+    *   Ensure all changes for the release are merged into `main`.
+    *   Tag the final merge commit on `main`.
+*   **Manual Steps Post-Workflow:**
+    1.  **GitHub:**
+        *   Find the **draft release** (e.g., "Release v1.2.3").
+        *   Edit the release: Review title and changelog.
+        *   **Crucially, uncheck "This is a pre-release"**.
+        *   **Publish the release** on GitHub.
+    2.  **Google Play Console:**
+        *   The AAB will be a **draft** on the **`production` track**.
+        *   Review, add release notes.
+        *   **Start a staged rollout** or release to 100% of users.
 
-### Phase 2: Open Alpha Release (Open Testing)
+## Iterating on Pre-Releases
 
-Once the Closed Alpha release is stable and initial feedback is addressed, the release is promoted to a wider audience.
-
-1.  **Promote Pull Request:**
-    *   Change the status of the `Release x.x.x` PR from "Draft" to **"Ready for Review"**.
-    *   Incorporate any feedback from code reviews into the `release/x.x.x` branch and push the changes.
-
-2.  **Initiate Open Alpha Build and Draft Release via `release.yml`:**
-    *   Ensure the `release/x.x.x` branch contains all fixes and `VERSION_NAME_BASE` in `Configs.kt` reflects the intended version for this Open Alpha.
-    *   Manually trigger the `release.yml` GitHub Action as in Closed Alpha Phase (Step 3), ensuring `branch` points to `release/x.x.x`.
-    *   The `release.yml` GitHub Action will perform the same steps: build, tag (e.g., `vX.X.X`), and create/update a **draft pre-release** on GitHub titled "Meshtastic Android X.X.X (versionCode) alpha".
-
-3.  **Finalize GitHub Release (Manual):**
-    *   Navigate to the **draft pre-release** created by the GitHub Action.
-    *   **Edit the release:**
-        *   Change the title to reflect a production release (e.g., "Meshtastic Android X.X.X (versionCode) beta").
-        *   **Check "This is a pre-release"**.
-        *   (Re)generate release notes from the previous beta tag, the notes will be generated based on the template: `.github/release.yml`.
-        *   **Publish the release** (making it no longer a draft). This makes the alpha release and artifacts visible to the public and available for download via GitHub or third parties like Fdroid and Obtainium.
-
-4.  **Manual Open Alpha Deployment to Google Play:**
-    *   Download the AAB from the GitHub draft pre-release.
-    *   Manually upload this AAB to the **Open Test Channel (Alpha)** in the Google Play Console.
-
-5.  **Monitor Feedback:** Continue to monitor feedback. Address critical issues by committing fixes to `release/x.x.x`. For re-deployment, repeat step 2 and 3 of this Open Alpha phase.
-
-**Note on Promoting Builds:** If the Open Alpha testing phase was successful and no code changes (and thus no re-builds) were required beyond those already incorporated for this Open Alpha build, the AAB uploaded to the Open Test Channel (Alpha) during step 3 can often be directly promoted to the Production Channel in the Google Play Console. If changes were made, ensure all final changes are on the `main` branch before proceeding with the Production build as described below.
-
-### Phase 3: Production Release
-
-After successful Open Alpha testing and when the release candidate is considered stable.
-
-1.  **Final Review and Merge Pull Request:**
-    *   Conduct a final review of the `Release x.x.x` PR.
-    *   Ensure `VERSION_NAME_BASE` in `Configs.kt` on the `release/x.x.x` branch is the correct final version (e.g., `1.2.3`).
-    *   Once approved, **merge** the `release/x.x.x` PR into the `main` branch.
-
-2.  **Initiate Production Build and Draft GitHub Release via `release.yml`:**
-    *   Manually trigger the `release.yml` GitHub Action:
-        *   Set the `branch` input to `main`.
-        *   Ensure `create_github_release` input is `true`.
-    *   The `release.yml` GitHub Action will:
-        *   Build artifacts from the latest commit on the `main` branch (which now includes the merged release changes and correct `VERSION_NAME_BASE`).
-        *   Create the final Git tag (e.g., `v1.2.3`) on the merge commit on `main`.
-        *   Create/Update a **draft pre-release** on GitHub titled "Meshtastic Android X.X.X (versionCode) alpha" associated with this tag.
-        *   Attach the F-Droid/universal APK and Android App Bundle (AAB) to this draft pre-release. The AAB is suitable for Google Play Console uploads.
-
-
-3.  **Finalize GitHub Release (Manual):**
-    *   Navigate to the **draft pre-release** created by the GitHub Action.
-    *   **Edit the release:**
-        *   Change the title to reflect a production release (e.g., "Meshtastic Android X.X.X (versionCode) beta").
-        *   **Uncheck "This is a pre-release"**.
-        *   (Re)generate release notes from the previous beta tag, the notes will be generated based on the template: `.github/release.yml`.
-        *   **Publish the release** (making it no longer a draft). This makes the beta(production) release visible to the public and available for download via GitHub or third parties like Fdroid and Obtainium.
-
-4.  **Manual Production Deployment to Google Play:**
-    *   Download the AAB from the now-finalized GitHub Release assets.
-    *   Manually upload this AAB to the **Production Channel** in the Google Play Console, ideally using a **staged rollout**.
+If bugs are found in an internal, closed, or open alpha/beta:
+1.  Commit fixes to your development branch (e.g., `release/x.x.x` or `main`).
+2.  Create a new, incremented tag (e.g., if `v1.2.3-open.1` had bugs, use `v1.2.3-open.2`).
+3.  Push the new tag.
+4.  Follow the manual post-workflow steps for that release phase again.
 
 ## Post-Release Activities
 
-1.  **Monitoring:** Closely monitor app performance (e.g., using Datadog), crash reports (e.g., using Firebase Crashlytics), and user feedback.
-2.  **Communication:** Announce the new release to the user community.
-3.  **Hotfixes:** If critical bugs are discovered:
-    *   Create a hotfix branch (e.g., `hotfix/x.x.y`) from the production tag on `main` or directly from `main`.
-    *   Implement and test the fix. Update `VERSION_NAME_BASE` in `buildSrc/src/main/kotlin/Configs.kt` for the patch version (e.g., `1.2.4`).
-    *   Merge the hotfix into `main` (and cherry-pick to any active release branches if necessary).
-    *   Manually trigger the `release.yml` GitHub Action, setting the `branch` to `main` (or your hotfix branch if building before merge).
-    *   The action will build, create a new tag (e.g., `v1.2.4`), and create a new **draft pre-release** ("...alpha").
-    *   Manually finalize this GitHub release as in "Phase 3: Production Release - Step 3" (update title, uncheck pre-release/draft, add notes, publish).
-    *   Manually upload the generated AAB to the necessary Play Console tracks.
-4.  **Retrospective (Optional):** Conduct a team retrospective.
+1.  **Monitoring:** Closely monitor app performance, crash reports, and user feedback.
+2.  **Communication:** Announce the new release to the user community as appropriate.
+3.  **Hotfixes (for Production Releases):**
+    *   If a critical bug is found in a production release:
+        1.  Create a hotfix branch (e.g., `hotfix/x.x.y`) from `main` (or directly from the production tag `vX.X.X`).
+        2.  Implement and test the fix.
+        3.  Update `VERSION_NAME_BASE` in `buildSrc/src/main/kotlin/Configs.kt` for the patch version (e.g., `1.2.4`).
+        4.  Merge the hotfix branch into `main`.
+        5.  Tag the merge commit on `main` with the new patch version (e.g., `v1.2.4`).
+        6.  Push the new tag (e.g., `git push origin v1.2.4`). This triggers the `release.yml` workflow.
+        7.  Follow the **Manual Steps Post-Workflow** for a **Production Release** (uncheck "pre-release" on GitHub, manage production track draft in Play Console).
 
 ---

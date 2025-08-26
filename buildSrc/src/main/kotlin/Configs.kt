@@ -20,6 +20,20 @@ object Configs {
     const val MIN_SDK = 26
     const val TARGET_SDK = 36
     const val COMPILE_SDK = 36
+
+
+    /**
+     * This version string serves as a fallback for local development environments
+     * where the version cannot be automatically determined from Git tags (e.g., a fresh clone
+     * without fetching tags, or if Git is not accessible).
+     *
+     * On CI servers, the version is dynamically generated based on the current Git tag.
+     *
+     * Before creating a new release, this value should be updated manually
+     * to reflect the version number of the Git tag that will be created for that release.
+     * @see [RELEASE_PROCESS.md]
+     */
+    const val VERSION_NAME_BASE = "2.6.35"
     const val MIN_FW_VERSION = "2.5.14" // Minimum device firmware version supported by this app
     const val ABS_MIN_FW_VERSION = "2.3.15" // Minimum device firmware version supported by this app
 }
