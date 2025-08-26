@@ -32,7 +32,7 @@
     <string name="node_sort_last_heard">Última vez visto em</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="via_mqtt">via MQTT</string>
-    <string name="node_sort_via_favorite">Via favorito</string>
+    <string name="node_sort_via_favorite">via Favorito</string>
     <string name="node_filter_show_ignored">Nós Ignorados</string>
     <string name="unrecognized">Desconhecido</string>
     <string name="message_status_enroute">Esperando para ser reconhecido</string>
@@ -88,6 +88,7 @@
     <string name="cancel">Cancelar</string>
     <string name="clear_changes">Limpar mudanças</string>
     <string name="new_channel_rcvd">Novo link de canal recebido</string>
+    <string name="permission_missing">Meshtastic precisa de permissões de localização ativadas para encontrar novos dispositivos via Bluetooth. Você pode desativar quando não estiver usando.</string>
     <string name="report_bug">Informar Bug</string>
     <string name="report_a_bug">Informar um bug</string>
     <string name="report_bug_text">Tem certeza que deseja informar um erro? Após o envio, por favor envie uma mensagem em https://github.com/orgs/meshtastic/discussions para podermos comparar o relatório com o problema encontrado.</string>
@@ -102,6 +103,7 @@
     <string name="connected_count">Conectado: %1$s ligado(s)</string>
     <string name="ip_address">Endereço IP:</string>
     <string name="ip_port">Porta:</string>
+    <string name="connected">Conectado</string>
     <string name="connected_to">Conectado ao rádio (%s)</string>
     <string name="not_connected">Não conectado</string>
     <string name="connected_sleeping">Conectado ao rádio, mas ele está em suspensão (sleep)</string>
@@ -183,6 +185,10 @@
     <string name="quick_chat_show">Mostrar menu de chat rápido</string>
     <string name="quick_chat_hide">Ocultar menu de chat rápido</string>
     <string name="factory_reset">Redefinição de fábrica</string>
+    <string name="bluetooth_disabled">O Bluetooth está desativado. Por favor, ative-o nas configurações do seu dispositivo.</string>
+    <string name="open_settings">Abrir configurações</string>
+    <string name="firmware_version">Versão do firmware: %1$s</string>
+    <string name="permission_missing_31">Meshtastic precisa das permissões de \"Dispositivos próximos\" habilitadas para localizar e conectar a dispositivos via Bluetooth. Você pode desativar quando não estiver em uso.</string>
     <string name="direct_message">Mensagem direta</string>
     <string name="nodedb_reset">Redefinir NodeDB</string>
     <string name="delivery_confirmed">Entrega confirmada</string>
@@ -481,6 +487,7 @@
     <string name="latitude">Latitude</string>
     <string name="longitude">Longitude</string>
     <string name="altitude_meters">Altitude (metros)</string>
+    <string name="position_config_set_fixed_from_phone">Definir a partir da localização atual do telefone</string>
     <string name="gps_mode">Modo GPS</string>
     <string name="gps_update_interval_seconds">Intervalo de atualização do GPS (segundos)</string>
     <string name="redefine_gps_rx_pin">Redefinir GPS_RX_PIN</string>
@@ -600,6 +607,9 @@
     <string name="load">Carregar</string>
     <string name="user_string">String de Usuário</string>
     <string name="navigate_into_label">Navegar Em</string>
+    <string name="connections">Conexão</string>
+    <string name="map">Mapa Mesh</string>
+    <string name="conversations">Conversas</string>
     <string name="nodes">Nós</string>
     <string name="bottom_nav_settings">Configurações</string>
     <string name="set_your_region">Defina sua região</string>
@@ -629,6 +639,8 @@
     <string name="node_count_template">(%1$d online / %2$d total)</string>
     <string name="react">Reagir</string>
     <string name="disconnect">Desconectar</string>
+    <string name="scanning_bluetooth">Procurando dispositivos Bluetooth…</string>
+    <string name="no_ble_devices">Nenhum dispositivo Bluetooth pareado.</string>
     <string name="no_network_devices">Nenhum dispositivo de rede encontrado.</string>
     <string name="no_usb_devices">Nenhum dispositivo USB Serial encontrado.</string>
     <string name="scroll_to_bottom">Rolar para o final</string>
@@ -642,6 +654,14 @@
     <string name="overflow_menu">Menu Overflow</string>
     <string name="uv_lux">Luz UV</string>
     <string name="unknown">Desconhecido</string>
+    <string name="message_device_managed">Este rádio é gerenciado e só pode ser alterado por um administrador remoto.</string>
+    <string name="clean_node_database_title">Limpar Banco de Dados de Nó</string>
+    <string name="clean_nodes_older_than">Limpar nós vistos há mais de %1$d dias</string>
+    <string name="clean_unknown_nodes">Limpar somente nós desconhecidos</string>
+    <string name="clean_low_interaction_nodes">Limpar nós com baixa/nenhuma interação</string>
+    <string name="clean_ignored_nodes">Limpar nós ignorados</string>
+    <string name="clean_now">Limpar Agora</string>
+    <string name="clean_node_database_confirmation">Isto irá remover %1$d nós de seu banco de dados. Esta ação não pode ser desfeita.</string>
     <string name="security_icon_help_green_lock">Um cadeado verde significa que o canal é criptografado com uma chave AES de 128 ou 256 bits.</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <string name="security_icon_insecure_no_precise">Canal Inseguro, Impreciso</string>
@@ -670,6 +690,9 @@
     <string name="no_pax_metrics_logs">Não há logs de métricas de PAX disponíveis.</string>
     <string name="wifi_devices">Dispositivos WiFi</string>
     <string name="ble_devices">Dispositivos BLE</string>
+    <string name="bluetooth_paired_devices">Dispositivos Pareados</string>
+    <string name="connected_device">Dispositivo Conectado</string>
+    <string name="action_go">Ir</string>
     <string name="routing_error_rate_limit_exceeded">Limite excedido. Por favor, tente novamente mais tarde.</string>
     <string name="view_release">Ver Lançamento</string>
     <string name="download">Baixar</string>
@@ -718,6 +741,10 @@
     <string name="configure_critical_alerts">Configurar Alertas Críticos</string>
     <string name="notification_permissions_description">Meshtastic usa notificações para mantê-lo atualizado sobre novas mensagens e outros eventos importantes. Você pode atualizar suas permissões de notificação a qualquer momento nas configurações.</string>
     <string name="next">Avançar</string>
+    <string name="grant_permissions">Conceder Permissões</string>
+    <string name="nodes_queued_for_deletion">%d nós na fila para exclusão:</string>
+    <string name="clean_node_database_description">Cuidado: Isso irá remover nós dos bancos de dados do aplicativo e do dispositivo.\nSeleções são somadas.</string>
+    <string name="connecting_to_device">Conectando ao dispositivo</string>
     <string name="map_type_normal">Normal</string>
     <string name="map_type_satellite">Satélite</string>
     <string name="map_type_terrain">Terreno</string>
@@ -742,4 +769,5 @@
     <string name="url_cannot_be_empty">A URL não pode estar vazia.</string>
     <string name="url_must_contain_placeholders">A URL deve conter espaços reservados.</string>
     <string name="url_template">Modelo de URL</string>
+    <string name="track_point">ponto de rastreamento</string>
 </resources>
