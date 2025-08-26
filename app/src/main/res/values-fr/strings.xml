@@ -88,6 +88,7 @@
     <string name="cancel">Annuler</string>
     <string name="clear_changes">Annuler modifications</string>
     <string name="new_channel_rcvd">Réception de l\'URL d\'un nouveau cana</string>
+    <string name="permission_missing">Meshtastic a besoin d\'autorisations de localisation activées pour trouver de nouveaux appareils via Bluetooth. Vous pouvez désactiver lorsque la localisation n\'est pas utilisée.</string>
     <string name="report_bug">Rapporter Bogue</string>
     <string name="report_a_bug">Rapporter un Bogue</string>
     <string name="report_bug_text">Êtes-vous certain de vouloir rapporter un bogue ? Après l\'envoi, veuillez poster dans https://github.com/orgs/meshtastic/discussions afin que nous puissions examiner ce que vous avez trouvé.</string>
@@ -184,6 +185,10 @@
     <string name="quick_chat_show">Afficher le menu de discussion rapide</string>
     <string name="quick_chat_hide">Masquer le menu de discussion rapide</string>
     <string name="factory_reset">Réinitialisation d\'usine</string>
+    <string name="bluetooth_disabled">Le Bluetooth est désactivé. Veuillez l\'activer dans les paramètres de votre appareil.</string>
+    <string name="open_settings">Ouvrir les paramètres</string>
+    <string name="firmware_version">Version du firmware : %1$s</string>
+    <string name="permission_missing_31">Meshtastic a besoin des autorisations \"Périphériques à proximité\" activées pour trouver et se connecter à des appareils via Bluetooth. Vous pouvez désactiver la lorsque la localisation n\'est pas utilisée.</string>
     <string name="direct_message">Message direct</string>
     <string name="nodedb_reset">Reconfiguration de NodeDB</string>
     <string name="delivery_confirmed">Réception confirmée</string>
@@ -604,6 +609,7 @@
     <string name="navigate_into_label">Naviguer vers</string>
     <string name="connections">Connexion</string>
     <string name="map">Carte de maillage</string>
+    <string name="conversations">Conversations</string>
     <string name="nodes">Noeuds</string>
     <string name="bottom_nav_settings">Réglages</string>
     <string name="set_your_region">Définir votre région</string>
@@ -633,6 +639,8 @@
     <string name="node_count_template">(%1$d en ligne / %2$d total)</string>
     <string name="react">Réagir</string>
     <string name="disconnect">Déconnecter</string>
+    <string name="scanning_bluetooth">Recherche de périphériques Bluetooth…</string>
+    <string name="no_ble_devices">Aucun périphérique Bluetooth associé.</string>
     <string name="no_network_devices">Aucun périphérique réseau trouvé.</string>
     <string name="no_usb_devices">Aucun périphérique série USB détecté.</string>
     <string name="scroll_to_bottom">Défiler vers le bas</string>
@@ -646,6 +654,7 @@
     <string name="overflow_menu">Menu supplémentaire</string>
     <string name="uv_lux">UV Lux</string>
     <string name="unknown">Inconnu</string>
+    <string name="message_device_managed">Cette radio est gérée et ne peut être modifiée que par un administrateur distant.</string>
     <string name="clean_node_database_title">Nettoyer la base de données des nœuds</string>
     <string name="clean_nodes_older_than">Nettoyer les nœuds vus pour la dernière fois depuis %1$d jours</string>
     <string name="clean_unknown_nodes">Nettoyer uniquement les nœuds inconnus</string>
@@ -681,6 +690,9 @@
     <string name="no_pax_metrics_logs">Aucun journal de métriques PAX disponible.</string>
     <string name="wifi_devices">Périphériques WiFi</string>
     <string name="ble_devices">Appareils BLE</string>
+    <string name="bluetooth_paired_devices">Périphériques appairés</string>
+    <string name="connected_device">Périphérique connecté</string>
+    <string name="action_go">Go</string>
     <string name="routing_error_rate_limit_exceeded">Limite de débit dépassée. Veuillez réessayer plus tard.</string>
     <string name="view_release">Voir la version</string>
     <string name="download">Télécharger</string>
@@ -726,6 +738,7 @@
     <string name="configure_critical_alerts">Configurer les alertes critiques</string>
     <string name="notification_permissions_description">Meshtastic utilise les notifications pour vous tenir à jour sur les nouveaux messages et autres événements importants. Vous pouvez mettre à jour vos autorisations de notification à tout moment à partir des paramètres.</string>
     <string name="next">Suivant</string>
+    <string name="grant_permissions">Accorder les autorisations</string>
     <string name="nodes_queued_for_deletion">%d nœuds en attente de suppression :</string>
     <string name="clean_node_database_description">Attention : Ceci supprime les nœuds des bases de données in-app et on-device.\nLes sélections sont additionnelles.</string>
     <string name="connecting_to_device">Connexion à l\'appareil</string>
