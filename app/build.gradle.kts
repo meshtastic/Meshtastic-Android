@@ -62,7 +62,7 @@ android {
         versionCode =
             System.getenv("VERSION_CODE")?.toIntOrNull()
                 ?: (System.currentTimeMillis() / 1000).toInt() // Meshtastic Development Build
-        versionName = System.getenv("VERSION_NAME") ?: "Dev Build"
+        versionName = System.getenv("VERSION_NAME") ?: Configs.VERSION_NAME_BASE
         testInstrumentationRunner = "com.geeksville.mesh.TestRunner"
         buildConfigField("String", "MIN_FW_VERSION", "\"${Configs.MIN_FW_VERSION}\"")
         buildConfigField("String", "ABS_MIN_FW_VERSION", "\"${Configs.ABS_MIN_FW_VERSION}\"")

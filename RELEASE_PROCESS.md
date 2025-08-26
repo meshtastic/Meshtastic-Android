@@ -12,8 +12,8 @@ The workflow automatically:
 *   Attaches build artifacts, `version_info.txt`, and `changelog.txt` to the draft GitHub Release.
 *   Attests build provenance for the artifacts.
 *   Uploads the AAB to the Google Play Console as a **draft** to a track determined by the tag name:
-    *   `qa` (for tags with `-internal`)
-    *   `newalpha` (for tags with `-closed`)
+    *   `internal` (for tags with `-internal`)
+    *   `NewAlpha` (for tags with `-closed`)
     *   `beta` (for tags with `-open`)
     *   `production` (for tags without these suffixes)
 
