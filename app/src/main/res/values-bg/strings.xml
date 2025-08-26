@@ -478,6 +478,8 @@
     <string name="host">Хост</string>
     <string name="free_memory">Свободна памет</string>
     <string name="disk_free">Свободен диск</string>
+    <string name="map">Карта на Mesh</string>
+    <string name="conversations">Разговори</string>
     <string name="nodes">Възли</string>
     <string name="bottom_nav_settings">Настройки</string>
     <string name="set_your_region">Задайте вашия регион</string>
@@ -505,6 +507,7 @@
     <string name="unknown_channel">Неизвестен канал</string>
     <string name="warning">Предупреждение</string>
     <string name="unknown">Неизвестно</string>
+    <string name="message_device_managed">Това радио се управлява и може да бъде променяно само от отдалечен администратор.</string>
     <string name="clean_node_database_title">Почистване на базата данни с възлите</string>
     <string name="clean_nodes_older_than">Почистване на възлите, последно видяни преди повече от %1$d дни</string>
     <string name="clean_unknown_nodes">Почистване само на неизвестните възли</string>
@@ -514,6 +517,7 @@
     <string name="clean_node_database_confirmation">Това ще премахне %1$d възела от вашата база данни. Това действие не може да бъде отменено.</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <string name="security_icon_insecure_precise_only">Несигурен канал, прецизно местоположение</string>
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="security_icon_help_title">Сигурност на канала</string>
@@ -528,6 +532,9 @@
     <string name="pax">PAX</string>
     <string name="wifi_devices">WiFi устройства</string>
     <string name="ble_devices">BLE устройства</string>
+    <string name="bluetooth_paired_devices">Сдвоени устройства</string>
+    <string name="connected_device">Свързано устройство</string>
+    <string name="view_release">Преглед на изданието</string>
     <string name="download">Изтегляне</string>
     <string name="installed_firmware_version">Текущия инсталиран</string>
     <string name="latest_stable_firmware">Най-новия стабилен</string>
@@ -579,4 +586,5 @@
     <string name="selected_map_type">Избран тип на картата</string>
     <string name="name_cannot_be_empty">Името не може да бъде празно.</string>
     <string name="url_cannot_be_empty">URL не може да бъде празен.</string>
+    <string name="url_template">Шаблон за URL</string>
 </resources>
