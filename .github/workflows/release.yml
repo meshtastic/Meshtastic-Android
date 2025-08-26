@@ -182,19 +182,19 @@ jobs:
           submodules: 'recursive'
 
       - name: Download F-Droid APK
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: fdroid-apk
           path: ./build-artifacts/fdroid
 
       - name: Download Google AAB
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: google-aab
           path: ./build-artifacts/google/bundle
 
       - name: Download Google APK
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: google-apk
           path: ./build-artifacts/google/apk
@@ -242,6 +242,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      # Attest the build artifacts for supply chain security.
+      # See: https://github.com/meshtastic/Meshtastic-Android/attestations
       - name: Attest Build Provenance
         uses: actions/attest-build-provenance@v2
         with:
