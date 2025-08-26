@@ -15,37 +15,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-buildscript {
-    repositories {
-        google()
-        mavenCentral()
-    }
-    dependencies {
-        classpath(libs.agp)
-        classpath(libs.kotlin.gradle.plugin)
-        classpath(libs.kotlin.serialization)
-        classpath(libs.google.services)
-        classpath(libs.firebase.crashlytics.gradle)
-        classpath(libs.secrets.gradle.plugin)
-        classpath(libs.protobuf.gradle.plugin)
-        classpath(libs.hilt.android.gradle.plugin)
-        classpath(libs.secrets.gradle.plugin)
-        classpath(libs.dd.sdk.android.gradle.plugin)
-    }
-}
-
 plugins {
-    alias(libs.plugins.kotlin.jvm) apply false
-    alias(libs.plugins.devtools.ksp) apply false
+    alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.library) apply false
     alias(libs.plugins.compose) apply false
-}
-
-allprojects {
-    repositories {
-        google()
-        mavenCentral()
-        maven { url = uri("https://jitpack.io") }
-    }
+    alias(libs.plugins.datadog) apply false
+    alias(libs.plugins.devtools.ksp) apply false
+    alias(libs.plugins.firebase.crashlytics) apply false
+    alias(libs.plugins.google.services) apply false
+    alias(libs.plugins.hilt) apply false
+    alias(libs.plugins.kotlin.android) apply false
+    alias(libs.plugins.kotlin.jvm) apply false
+    alias(libs.plugins.kotlin.parcelize) apply false
+    alias(libs.plugins.kotlin.serialization) apply false
+    alias(libs.plugins.protobuf) apply false
+    alias(libs.plugins.secrets) apply false
 }
 
 tasks.register<Delete>("clean") {

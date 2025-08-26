@@ -654,6 +654,7 @@
     <string name="overflow_menu">Überlaufmenü</string>
     <string name="uv_lux">UV Lux</string>
     <string name="unknown">Unbekannt</string>
+    <string name="message_device_managed">Dieses Radio wird verwaltet und kann nur durch Fernverwaltung geändert werden.</string>
     <string name="clean_node_database_title">Knotendatenbank leeren</string>
     <string name="clean_nodes_older_than">Knoten älter als %1$d Tage entfernen</string>
     <string name="clean_unknown_nodes">Nur unbekannte Knoten entfernen</string>
