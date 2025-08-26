@@ -32,7 +32,6 @@ import com.mikepenz.markdown.m3.Markdown
 import com.mikepenz.markdown.model.DefaultMarkdownColors
 import com.mikepenz.markdown.model.DefaultMarkdownTypography
 
-
 @Composable
 fun MDText(
     text: String,
@@ -52,7 +51,7 @@ fun MDText(
         tableBackground = Color.White
     )
 
-    val typography  = DefaultMarkdownTypography(
+    val typography = DefaultMarkdownTypography(
         // Restrict max size of the text
         h1 = MaterialTheme.typography.headlineMedium.copy(color = color),
         h2 = MaterialTheme.typography.headlineMedium.copy(color = color),
@@ -73,7 +72,7 @@ fun MDText(
         ordered = MaterialTheme.typography.bodyMedium.copy(color = color),
         bullet = MaterialTheme.typography.bodyMedium.copy(color = color),
         list = MaterialTheme.typography.bodyMedium.copy(color = color),
-        link =    TextStyle(
+        link = TextStyle(
             color = HyperlinkBlue,
             textDecoration = TextDecoration.Underline,
         ),
@@ -105,5 +104,4 @@ fun MDText(
 private fun AutoLinkTextPreview() {
     MDText("A text containing a link https://example.com **bold** _Italics_" +
             "\n # hello \n ## hello \n ### hello \n #### hello \n ##### hello \n ###### hello")
-
 }
