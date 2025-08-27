@@ -162,7 +162,7 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
 
                 IaqDisplayMode.Gauge -> {
                     CircularProgressIndicator(
-                        progress = { iaq / 500f },
+                        progress = iaq / 500f,
                         modifier = Modifier.size(60.dp).clickable { isLegendOpen = true },
                         strokeWidth = 8.dp,
                         color = iaqEnum.color,
@@ -176,7 +176,7 @@ fun IndoorAirQuality(iaq: Int?, displayMode: IaqDisplayMode = IaqDisplayMode.Pil
                         modifier = Modifier.clickable { isLegendOpen = true },
                     ) {
                         LinearProgressIndicator(
-                            progress = { iaq / 500f },
+                            progress = iaq / 500f,
                             modifier = Modifier.fillMaxWidth().height(20.dp),
                             color = iaqEnum.color,
                         )
