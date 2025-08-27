@@ -222,7 +222,7 @@ jobs:
       - name: Prepare Play Store Release Notes
         if: steps.generate_changelog.outputs.changelog != ''
         run: |
-          mkdir -p play_store_release_notes/en-US
+          mkdir -p whatsnew/whatsnew-en-US
           echo "${{ steps.generate_changelog.outputs.changelog }}" > whatsnew/whatsnew-en-US/default.txt
 
       - name: Create version_info.txt
