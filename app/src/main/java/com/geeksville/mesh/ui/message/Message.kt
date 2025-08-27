@@ -48,7 +48,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Reply
 import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.automirrored.filled.SpeakerNotes
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Close
@@ -673,7 +672,7 @@ private fun OverFlowMenu(
                         if (showQuickChat) {
                             Icons.Default.SpeakerNotesOff
                         } else {
-                            Icons.AutoMirrored.Filled.SpeakerNotes
+                            Icons.Default.SpeakerNotes
                         },
                         contentDescription = quickChatToggleTitle,
                     )
