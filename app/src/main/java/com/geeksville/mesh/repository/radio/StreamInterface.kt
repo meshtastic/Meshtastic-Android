@@ -20,8 +20,7 @@ package com.geeksville.mesh.repository.radio
 import com.geeksville.mesh.android.Logging
 
 /**
- * An interface that assumes we are talking to a meshtastic device over some sort of stream connection (serial or TCP
- * probably)
+ * An interface that assumes we are talking to a meshtastic device over some sort of stream connection (serial or TCP probably)
  */
 abstract class StreamInterface(protected val service: RadioInterfaceService) :
     Logging,
@@ -47,16 +46,12 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) :
         onDeviceDisconnect(true)
     }
 
-    /**
-     * Tell MeshService our device has gone away, but wait for it to come back
+    /** Tell MeshService our device has gone away, but wait for it to come back
      *
-     * @param waitForStopped if true we should wait for the manager to finish - must be false if called from inside the
-     *   manager callbacks
-     */
+     * @param waitForStopped if true we should wait for the manager to finish - must be false if called from inside the manager callbacks
+     *  */
     protected open fun onDeviceDisconnect(waitForStopped: Boolean) {
-        service.onDisconnect(
-            isPermanent = true,
-        ) // if USB device disconnects it is definitely permanently gone, not sleeping)
+        service.onDisconnect(isPermanent = true) // if USB device disconnects it is definitely permanently gone, not sleeping)
     }
 
     protected open fun connect() {
@@ -89,13 +84,15 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) :
 
     /** Print device serial debug output somewhere */
     private fun debugOut(b: Byte) {
-        when (val c = b.toInt().toChar()) {
-            '\r' -> {} // ignore
+        when (val c = b.toChar()) {
+            '\r' -> {
+            } // ignore
             '\n' -> {
                 debug("DeviceLog: $debugLineBuf")
                 debugLineBuf.clear()
             }
-            else -> debugLineBuf.append(c)
+            else ->
+                debugLineBuf.append(c)
         }
     }
 
@@ -136,19 +133,16 @@ abstract class StreamInterface(protected val service: RadioInterfaceService) :
                 // We've read our header, do one big read for the packet itself
                 packetLen = (msb shl 8) or lsb
                 if (packetLen > MAX_TO_FROM_RADIO_SIZE) {
-                    lostSync() // If packet len is too long, the bytes must have been corrupted, start looking for
-                    // START1 again
+                    lostSync() // If packet len is too long, the bytes must have been corrupted, start looking for START1 again
                 } else if (packetLen == 0) {
-                    deliverPacket() // zero length packets are valid and should be delivered immediately (because there
-                    // won't be a next byte of payload)
+                    deliverPacket() // zero length packets are valid and should be delivered immediately (because there won't be a next byte of payload)
                 }
             }
             else -> {
                 // We are looking at the packet bytes now
                 rxPacket[ptr - 4] = c
 
-                // Note: we have to check if ptr +1 is equal to packet length (for example, for a 1 byte packetlen, this
-                // code will be run with ptr of4
+                // Note: we have to check if ptr +1 is equal to packet length (for example, for a 1 byte packetlen, this code will be run with ptr of4
                 if (ptr - 4 + 1 == packetLen) {
                     deliverPacket()
                 }

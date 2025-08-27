@@ -54,10 +54,7 @@ fun <T> PacketResponseStateDialog(state: ResponseState<T>, onDismiss: () -> Unit
                             label = "progress",
                         )
                     Text("%.0f%%".format(progress * 100))
-                    LinearProgressIndicator(
-                        progress = { progress },
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    )
+                    LinearProgressIndicator(progress = progress, modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
                     if (state.total == state.completed) onComplete()
                 }
                 if (state is ResponseState.Success) {
