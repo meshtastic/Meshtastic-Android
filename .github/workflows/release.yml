@@ -223,7 +223,7 @@ jobs:
         if: steps.generate_changelog.outputs.changelog != ''
         run: |
           mkdir -p whatsnew
-          echo "${{ steps.generate_changelog.outputs.changelog }}" > whatsnew/whatsnew-en-US.txt
+          echo "${{ steps.generate_changelog.outputs.changelog }}" > whatsnew/whatsnew-en-US
 
       - name: Create version_info.txt
         run: |
