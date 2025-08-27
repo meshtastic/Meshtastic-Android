@@ -207,24 +207,6 @@ jobs:
           name: mapping
           path: ./build-artifacts/google/mapping
 
-      - name: Generate Changelog
-        id: generate_changelog
-        uses: mikepenz/release-changelog-builder-action@v5
-        with:
-          owner: ${{ github.repository_owner }}
-          repo: ${{ github.event.repository.name }}
-          ignorePreReleases: true
-          failOnError: true
-          fetchViaCommits: true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Prepare Play Store Release Notes
-        if: steps.generate_changelog.outputs.changelog != ''
-        run: |
-          mkdir -p whatsnew
-          echo "${{ steps.generate_changelog.outputs.changelog }}" > whatsnew/whatsnew-en-US
-
       - name: Create version_info.txt
         run: |
           echo "versionNameBase=${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}" > ./version_info.txt
@@ -242,11 +224,16 @@ jobs:
             ./build-artifacts/google/apk/app-google-release.apk
             ./build-artifacts/fdroid/app-fdroid-release.apk
             ./version_info.txt
-            ./changelog.txt
           draft: true
           prerelease: ${{ contains(github.ref_name, '-internal') || contains(github.ref_name, '-closed') || contains(github.ref_name, '-open') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Play Store whatsnew File
+        run: |
+          mkdir -p whatsnew
+          echo "For detailed release notes, please visit: ${{ steps.create_gh_release.outputs.html_url }}" > whatsnew/whatsnew-en-US
+        shell: bash
 
       # Attest the build artifacts for supply chain security.
       # See: https://github.com/meshtastic/Meshtastic-Android/attestations
