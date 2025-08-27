@@ -232,7 +232,7 @@ jobs:
       - name: Create Play Store whatsnew File
         run: |
           mkdir -p whatsnew
-          echo "For detailed release notes, please visit: ${{ steps.create_gh_release.outputs.html_url }}" > whatsnew/whatsnew-en-US
+          echo "For detailed release notes, please visit: ${{ steps.create_gh_release.outputs.url }}" > whatsnew/whatsnew-en-US
         shell: bash
 
       # Attest the build artifacts for supply chain security.
