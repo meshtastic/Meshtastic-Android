@@ -298,7 +298,7 @@ private fun MessageItemPreview() {
         )
     val receivedWithOriginalMessage =
         Message(
-            text = "his is a received message w/ original, this is a longer message to test next-lining.",
+            text = "This is a received message w/ original, this is a longer message to test next-lining.",
             time = "10:20",
             fromLocal = false,
             status = MessageStatus.RECEIVED,

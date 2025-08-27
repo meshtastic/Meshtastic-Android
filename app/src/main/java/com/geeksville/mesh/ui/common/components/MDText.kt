@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ui.common.theme.HyperlinkBlue
@@ -42,14 +43,14 @@ fun MDText(
     val colors =
         DefaultMarkdownColors(
             text = color,
-            codeText = color,
-            inlineCodeText = Color.Black,
+            codeText = MaterialTheme.colorScheme.onSurface,
+            inlineCodeText = MaterialTheme.colorScheme.onSurface,
             linkText = HyperlinkBlue,
-            codeBackground = Color.LightGray,
-            inlineCodeBackground = Color.LightGray,
-            dividerColor = Color.DarkGray,
-            tableText = color,
-            tableBackground = Color.White,
+            codeBackground = MaterialTheme.colorScheme.surfaceContainerHigh,
+            inlineCodeBackground = MaterialTheme.colorScheme.surfaceContainerHigh,
+            dividerColor = MaterialTheme.colorScheme.onSurface,
+            tableText = MaterialTheme.colorScheme.onSurface,
+            tableBackground = MaterialTheme.colorScheme.surfaceContainer,
         )
 
     val typography =
@@ -64,14 +65,14 @@ fun MDText(
             text = style,
             code =
             MaterialTheme.typography.bodyMedium.copy(
-                fontFamily = MaterialTheme.typography.labelMedium.fontFamily,
-                color = color,
+                fontFamily = FontFamily.Monospace,
+                color = MaterialTheme.colorScheme.onSurface,
             ),
             inlineCode =
             MaterialTheme.typography.bodyMedium.copy(
-                fontFamily = MaterialTheme.typography.labelMedium.fontFamily,
-                color = Color.Black,
-                background = Color.LightGray,
+                fontFamily = FontFamily.Monospace,
+                color = MaterialTheme.colorScheme.onSurface,
+                background = MaterialTheme.colorScheme.surfaceContainerHigh,
             ),
             quote = MaterialTheme.typography.bodyLarge.copy(color = color),
             paragraph = MaterialTheme.typography.bodyMedium.copy(color = color),
@@ -81,7 +82,7 @@ fun MDText(
             link = TextStyle(color = HyperlinkBlue, textDecoration = TextDecoration.Underline),
             textLink =
             TextLinkStyles(style = SpanStyle(color = HyperlinkBlue, textDecoration = TextDecoration.Underline)),
-            table = MaterialTheme.typography.bodyMedium.copy(color = color),
+            table = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
         )
 
     // Custom Markdown components to disable image rendering
@@ -101,6 +102,6 @@ fun MDText(
 private fun AutoLinkTextPreview() {
     MDText(
         "A text containing a link https://example.com **bold** _Italics_" +
-            "\n # hello \n ## hello \n ### hello \n #### hello \n ##### hello \n ###### hello",
+            "\n # hello \n ## hello \n ### hello \n #### hello \n ##### hello \n ###### hello \n ```code```",
     )
 }
