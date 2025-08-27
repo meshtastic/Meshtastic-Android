@@ -30,6 +30,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -138,6 +139,8 @@ fun ChannelScreen(
     val modemPresetName by remember(channels) { mutableStateOf(Channel(loraConfig = channels.loraConfig).name) }
 
     var showResetDialog by remember { mutableStateOf(false) }
+
+    var shouldAddChannelsState by remember { mutableStateOf(false) }
 
     /* Animate waiting for the configurations */
     var isWaiting by remember { mutableStateOf(false) }
@@ -269,6 +272,7 @@ fun ChannelScreen(
                 channelSet = channelSet,
                 modemPresetName = modemPresetName,
                 channelSelections = channelSelections,
+                shouldAddChannel = shouldAddChannelsState,
                 onClick = {
                     isWaiting = true
                     radioConfigViewModel.setResponseStateLoading(ConfigRoute.CHANNELS)
@@ -276,9 +280,32 @@ fun ChannelScreen(
             )
             EditChannelUrl(
                 enabled = enabled,
-                channelUrl = selectedChannelSet.getChannelUrl(),
+                channelUrl = selectedChannelSet.getChannelUrl(shouldAdd = shouldAddChannelsState),
                 onConfirm = viewModel::requestChannelUrl,
             )
+        }
+        item {
+            Row(modifier = Modifier.padding(top = 12.dp)) {
+                val selectedColors = ButtonDefaults.buttonColors()
+                val unselectedColors =
+                    ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
+
+                OutlinedButton(
+                    onClick = { shouldAddChannelsState = true },
+                    modifier = Modifier.height(48.dp).weight(1f),
+                    colors = if (shouldAddChannelsState) selectedColors else unselectedColors,
+                ) {
+                    Text(text = stringResource(R.string.add))
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                OutlinedButton(
+                    onClick = { shouldAddChannelsState = false },
+                    modifier = Modifier.height(48.dp).weight(1f),
+                    colors = if (!shouldAddChannelsState) selectedColors else unselectedColors,
+                ) {
+                    Text(text = stringResource(R.string.replace))
+                }
+            }
         }
         item {
             ModemPresetInfo(
@@ -401,9 +428,15 @@ private fun EditChannelUrl(enabled: Boolean, channelUrl: Uri, modifier: Modifier
 }
 
 @Composable
-private fun QrCodeImage(enabled: Boolean, channelSet: ChannelSet, modifier: Modifier = Modifier) = Image(
+private fun QrCodeImage(
+    enabled: Boolean,
+    channelSet: ChannelSet,
+    modifier: Modifier = Modifier,
+    shouldAddChannel: Boolean = false,
+) = Image(
     painter =
-    channelSet.qrCode?.let { BitmapPainter(it.asImageBitmap()) } ?: painterResource(id = R.drawable.qrcode),
+    channelSet.qrCode(shouldAddChannel)?.let { BitmapPainter(it.asImageBitmap()) }
+        ?: painterResource(id = R.drawable.qrcode),
     contentDescription = stringResource(R.string.qr_code),
     modifier = modifier,
     contentScale = ContentScale.Inside,
@@ -417,6 +450,7 @@ private fun ChannelListView(
     channelSet: ChannelSet,
     modemPresetName: String,
     channelSelections: SnapshotStateList<Boolean>,
+    shouldAddChannel: Boolean = false,
     onClick: () -> Unit = {},
 ) {
     val selectedChannelSet =
@@ -459,6 +493,7 @@ private fun ChannelListView(
                 enabled = enabled,
                 channelSet = selectedChannelSet,
                 modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                shouldAddChannel = shouldAddChannel,
             )
         },
     )
