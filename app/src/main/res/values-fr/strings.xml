@@ -114,13 +114,13 @@
     <string name="about">A propros</string>
     <string name="channel_invalid">Cette URL de canal est invalide et ne peut pas être utilisée</string>
     <string name="debug_panel">Panneau de débogage</string>
-    <string name="debug_decoded_payload">Charge décodée :</string>
+    <string name="debug_decoded_payload">Contenu décodé :</string>
     <string name="debug_logs_export">Exporter les logs</string>
     <string name="debug_filters">Filtres</string>
     <string name="debug_active_filters">Filtres actifs</string>
     <string name="debug_default_search">Rechercher dans les journaux…</string>
-    <string name="debug_search_next">Prochaine occurrence</string>
-    <string name="debug_search_prev">Précédente occurrence</string>
+    <string name="debug_search_next">Occurrence suivante</string>
+    <string name="debug_search_prev">Occurrence précédente</string>
     <string name="debug_search_clear">Effacer la recherche</string>
     <string name="debug_filter_add">Ajouter un filtre</string>
     <string name="debug_filter_included">Filtre inclus</string>
