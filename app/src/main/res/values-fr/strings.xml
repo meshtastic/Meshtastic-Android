@@ -625,14 +625,14 @@
     <string name="time">Heure</string>
     <string name="date">Date</string>
     <string name="map_filter">Filtre de carte\n</string>
-    <string name="only_favorites">Seuls les favoris</string>
+    <string name="only_favorites">Juste les favoris</string>
     <string name="show_waypoints">Afficher les points de repère</string>
     <string name="show_precision_circle">Afficher les cercles de précision</string>
     <string name="client_notification">Notification client</string>
     <string name="compromised_keys">Clés compromises détectées, sélectionnez OK pour régénérer.</string>
     <string name="regenerate_private_key">Régénérer la clé privée</string>
     <string name="regenerate_keys_confirmation">Êtes-vous sûr de vouloir régénérer votre clé privée ?\n\nLes nœuds qui peuvent avoir précédemment échangé des clés avec ce nœud devront supprimer ce nœud et ré-échanger des clés afin de reprendre une communication sécurisée.</string>
-    <string name="export_keys">Exporter des clés</string>
+    <string name="export_keys">Exporter les clés</string>
     <string name="export_keys_confirmation">Exporte les clés publiques et privées vers un fichier. Veuillez stocker quelque part en toute sécurité.</string>
     <string name="modules_unlocked">Modules déverrouillés</string>
     <string name="remote">Distant</string>
@@ -664,14 +664,14 @@
     <string name="clean_node_database_confirmation">Cela supprimera les %1$d nœuds de votre base de données. Cette action ne peut pas être annulée.</string>
     <string name="security_icon_help_green_lock">Un cadenas vert signifie que le canal est chiffré de façon sécurisée avec une clé AES 128 ou 256 bits.</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
-    <string name="security_icon_insecure_no_precise">Canal non sécurisé, non précisé</string>
-    <string name="security_icon_help_yellow_open_lock">Un cadenas ouvert jaune signifie que le canal n\'est pas crypté de manière sécurisée, n\'est pas utilisé pour des données de localisation précises, et n\'utilise ni une clé du tout, ni une clé connue de 1 octet.</string>
+    <string name="security_icon_insecure_no_precise">Canal non sécurisé, localisation non précise</string>
+    <string name="security_icon_help_yellow_open_lock">Un cadenas ouvert jaune signifie que le canal n\'est pas crypté de manière sécurisée, n\'est pas utilisé pour des données de localisation précises, et n\'utilise aucune clé, ou une clé connue de 1 octet.</string>
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <string name="security_icon_insecure_precise_only">Canal non sécurisé, localisation précise</string>
-    <string name="security_icon_help_red_open_lock">Un cadenas rouge ouvert signifie que le canal n\'est pas crypté de manière sécurisée, est utilisé pour des données de localisation précises, et n\'utilise aucune clé du tout, ou une clé connue de 1 octet.</string>
+    <string name="security_icon_help_red_open_lock">Un cadenas rouge ouvert signifie que le canal n\'est pas crypté de manière sécurisée, est utilisé pour des données de localisation précises, et n\'utilise aucune clé, ou une clé connue de 1 octet.</string>
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
     <string name="security_icon_warning_precise_mqtt">Attention : Localisation précise &amp; MQTT non sécurisée</string>
-    <string name="security_icon_help_warning_precise_mqtt">Un cadenas rouge ouvert avec un avertissement signifie que le canal n\'est pas crypté de manière sécurisée, est utilisé pour des données de localisation précises qui sont placées sur Internet via MQTT, et n\'utilise aucune clé du tout, ou une clé connue de 1 octet.</string>
+    <string name="security_icon_help_warning_precise_mqtt">Un cadenas rouge ouvert avec un avertissement signifie que le canal n\'est pas crypté de manière sécurisée, est utilisé pour des données de localisation précises qui sont diffusées sur Internet via MQTT, et n\'utilise aucune clé, ou une clé connue de 1 octet.</string>
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="security_icon_help_title">Sécurité du canal</string>
     <string name="security_icon_help_title_all">Signification de la sécurité des canaux</string>
