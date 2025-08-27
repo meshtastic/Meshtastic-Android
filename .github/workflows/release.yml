@@ -280,6 +280,6 @@ jobs:
           packageName: com.geeksville.mesh
           releaseFiles: ./build-artifacts/google/bundle/app-google-release.aab
           track: ${{ steps.get_track.outputs.track }}
-          status: ${{ steps.get_track.outputs.track == 'internal' && 'complete' || 'draft' }}
+          status: ${{ steps.get_track.outputs.track == 'internal' && 'completed' || 'draft' }}
           whatsNewDirectory: /whatsnew/
           mappingFile: ./build-artifacts/google/mapping/mapping.txt
