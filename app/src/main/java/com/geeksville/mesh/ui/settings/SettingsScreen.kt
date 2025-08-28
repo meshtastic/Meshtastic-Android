@@ -27,27 +27,33 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.rounded.Language
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
+import com.geeksville.mesh.DeviceUIProtos.Language
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.common.components.TitledCard
+import com.geeksville.mesh.ui.settings.components.SettingsItem
 import com.geeksville.mesh.ui.settings.components.SettingsItemSwitch
 import com.geeksville.mesh.ui.settings.radio.RadioConfigItemList
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
+import com.geeksville.mesh.util.LanguageUtils
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -156,14 +162,29 @@ fun SettingsScreen(
             onNavigate = onNavigate,
         )
 
-        if (state.analyticsAvailable) {
-            TitledCard(title = stringResource(R.string.phone_settings), modifier = Modifier.padding(top = 16.dp)) {
+        TitledCard(title = stringResource(R.string.phone_settings), modifier = Modifier.padding(top = 16.dp)) {
+            if (state.analyticsAvailable) {
                 SettingsItemSwitch(
                     text = stringResource(R.string.analytics_okay),
                     checked = state.analyticsEnabled,
                     leadingIcon = Icons.Default.BugReport,
                     onClick = { viewModel.toggleAnalytics() },
                 )
+            }
+
+            val context = LocalContext.current
+            val languageTags = remember { LanguageUtils.getLanguageTags(context) }
+            val languageDialogTitle = stringResource(R.string.preferences_language)
+            SettingsItem(
+                text = stringResource(R.string.preferences_language),
+                leadingIcon = Icons.Rounded.Language,
+                trailingIcon = null,
+            ) {
+                val lang = LanguageUtils.getLocale()
+                debug("Lang from prefs: $lang")
+                val langMap = languageTags.mapValues { (_, value) -> { LanguageUtils.setLocale(value) } }
+
+                uiViewModel.showAlert(title = languageDialogTitle, message = "", choices = langMap)
             }
         }
     }

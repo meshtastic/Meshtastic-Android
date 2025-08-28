@@ -231,10 +231,6 @@ class MainActivity :
                 chooseThemeDialog()
             }
 
-            MainMenuAction.LANGUAGE -> {
-                chooseLangDialog()
-            }
-
             else -> warn("Unexpected action: $action")
         }
     }
@@ -255,14 +251,5 @@ class MainActivity :
             message = "",
             choices = styles.mapValues { (_, value) -> { model.setTheme(value) } },
         )
-    }
-
-    private fun chooseLangDialog() {
-        val languageTags = LanguageUtils.getLanguageTags(this)
-        val lang = LanguageUtils.getLocale()
-        debug("Lang from prefs: $lang")
-        val langMap = languageTags.mapValues { (_, value) -> { LanguageUtils.setLocale(value) } }
-
-        model.showAlert(title = getString(R.string.preferences_language), message = "", choices = langMap)
     }
 }
