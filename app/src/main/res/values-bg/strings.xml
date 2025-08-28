@@ -507,6 +507,7 @@
     <string name="warning">Предупреждение</string>
     <string name="unknown">Неизвестно</string>
     <string name="message_device_managed">Това радио се управлява и може да бъде променяно само от отдалечен администратор.</string>
+    <string name="advanced_title">Разширени</string>
     <string name="clean_node_database_title">Почистване на базата данни с възлите</string>
     <string name="clean_nodes_older_than">Почистване на възлите, последно видяни преди повече от %1$d дни</string>
     <string name="clean_unknown_nodes">Почистване само на неизвестните възли</string>
