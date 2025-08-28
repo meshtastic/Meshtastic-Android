@@ -182,9 +182,9 @@ secrets {
 }
 
 datadog {
-    if (!gradle.startParameter.taskNames.any { it.contains("fdroid", ignoreCase = true) }) {
-        composeInstrumentation = InstrumentationMode.AUTO
-    }
+//    if (!gradle.startParameter.taskNames.any { it.contains("fdroid", ignoreCase = true) }) {
+//        composeInstrumentation = InstrumentationMode.AUTO
+//    }
 }
 
 // per protobuf-gradle-plugin docs, this is recommended for android
