@@ -27,6 +27,7 @@
     <string name="node_sort_last_heard">Senast hörd</string>
     <string name="node_sort_via_mqtt">via MQTT</string>
     <string name="via_mqtt">via MQTT</string>
+    <string name="node_filter_show_ignored">Ignorerade noder</string>
     <string name="unrecognized">Okänd</string>
     <string name="message_status_enroute">Inväntar kvittens</string>
     <string name="message_status_queued">Kvittens köad</string>
