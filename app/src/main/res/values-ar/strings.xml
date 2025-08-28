@@ -32,7 +32,6 @@
     <string name="unknown_username">اسم المستخدم غير معروف</string>
     <string name="send">ارسل</string>
     <string name="you">أنت</string>
-    <string name="analytics_okay">إحصاءات الاستخدام المجهولة الهُوِيَّة وتقارير الأعطال.</string>
     <string name="accept">قبول</string>
     <string name="cancel">إلغاء</string>
     <string name="new_channel_rcvd">تم تلقي رابط القناة الجديدة</string>

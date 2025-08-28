@@ -68,7 +68,6 @@
     <string name="send">Seol</string>
     <string name="warning_not_paired">Níl raidió comhoiriúnach Meshtastic péireáilte leis an bhfón seo agat fós. Péireáil gléas le do thoil agus socraigh d’ainm úsáideora.\n\nTá an feidhmchlár foinse oscailte seo faoi alfa-thástáil, má aimsíonn tú fadhbanna cuir iad ar ár bhfóram: https://github.com/orgs/meshtastic/discussions\n\nLe haghaidh tuilleadh faisnéise féach ar ár leathanach gréasáin - www.meshtastic.org.</string>
     <string name="you">Tú</string>
-    <string name="analytics_okay">Staitisticí úsáide gan ainm agus tuairiscí tuairteála.</string>
     <string name="accept">Glac</string>
     <string name="cancel">Cealaigh</string>
     <string name="new_channel_rcvd">URL Cainéal nua faighte</string>

@@ -33,7 +33,6 @@
     <string name="send">Αποστολή</string>
     <string name="warning_not_paired">Δεν έχετε κάνει ακόμη pair μια συσκευή συμβατή με Meshtastic με το τηλέφωνο. Παρακαλώ κάντε pair μια συσκευή και ορίστε το όνομα χρήστη.\n\nΗ εφαρμογή ανοιχτού κώδικα βρίσκεται σε alpha-testing, αν εντοπίσετε προβλήματα παρακαλώ δημοσιεύστε τα στο forum: https://github.com/orgs/meshtastic/discussions\n\nΠερισσότερες πληροφορίες στην ιστοσελίδα - www.meshtastic.org.</string>
     <string name="you">Εσύ</string>
-    <string name="analytics_okay">Ανώνυμα στατιστικά στοιχεία χρήσης και αναφορές κατάρρευσης.</string>
     <string name="accept">Αποδοχή</string>
     <string name="cancel">Ακύρωση</string>
     <string name="new_channel_rcvd">Λήψη URL νέου καναλιού</string>

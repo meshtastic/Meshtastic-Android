@@ -81,7 +81,6 @@
     <string name="send">傳送</string>
     <string name="warning_not_paired">您尚未將手機與 Meshtastic 相容的裝置配對。請先配對裝置並設置您的使用者名稱。\n\n此開源應用程式仍在開發中，如有問題，請在我們的論壇 https://github.com/orgs/meshtastic/discussions 上面發文詢問。\n\n 也可參閱我們的網頁 - www.meshtastic.org。</string>
     <string name="you">你</string>
-    <string name="analytics_okay">匿名使用統計資訊和故障報告</string>
     <string name="accept">接受</string>
     <string name="cancel">取消</string>
     <string name="clear_changes">清除變更</string>
@@ -336,6 +335,7 @@
     <string name="red">紅色</string>
     <string name="green">綠色</string>
     <string name="blue">藍色</string>
+    <string name="rotary_encoder_1_enabled"></string>
     <string name="allow_input_source">允許輸入來源</string>
     <string name="send_bell">發送振鈴</string>
     <string name="messages">訊息</string>

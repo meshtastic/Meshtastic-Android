@@ -35,7 +35,6 @@
     <string name="send">Enviar</string>
     <string name="warning_not_paired">Aínda non enlazaches unha radio compatible con Meshtástic neste teléfono. Por favor enlaza un dispositivo e coloca o teu nome de usuario. \n\n Esta aplicación de código aberto está en desenvolvemento. Se atopas problemas por favor publícaos no noso foro: https://github.com/orgs/meshtastic/discussions\n\nPara máis información visita a nosa páxina - www.meshtastic.org.</string>
     <string name="you">Ti</string>
-    <string name="analytics_okay">Estadísticas de uso anónimo e informes de fallos.</string>
     <string name="accept">Aceptar</string>
     <string name="cancel">Cancelar</string>
     <string name="new_channel_rcvd">Novo enlace de canle recibida</string>

@@ -76,7 +76,6 @@
     <string name="send">Skicka</string>
     <string name="warning_not_paired">Du har ännu inte parat en Meshtastic-kompatibel radio med den här telefonen. Koppla ihop en enhet och ange ditt användarnamn.\n\nDetta öppna källkodsprogram (open source) är under utveckling, om du hittar problem, vänligen publicera det på vårt forum: https://github.com/orgs/meshtastic/discussions\n\nFör mer information se vår webbsida - www.meshtastic.org.</string>
     <string name="you">Du</string>
-    <string name="analytics_okay">Anonym användningsstatistik och kraschrapporter.</string>
     <string name="accept">Acceptera</string>
     <string name="cancel">Avbryt</string>
     <string name="new_channel_rcvd">Ny kanal-länk mottagen</string>

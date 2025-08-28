@@ -68,7 +68,6 @@
     <string name="send">Изпрати</string>
     <string name="warning_not_paired">Все още не сте сдвоили радио, съвместимо с Meshtastic, с този телефон. Моля, сдвоете устройство и задайте вашето потребителско име.\n\nТова приложение с отворен код е в процес на разработка, ако откриете проблеми, моля, публикувайте в нашия форум: https://github.com/orgs/meshtastic/discussions\n\nЗа повече информация вижте нашата уеб страница на адрес www.meshtastic.org.</string>
     <string name="you">Вие</string>
-    <string name="analytics_okay">Анонимна статистика за използване и доклади за сривове.</string>
     <string name="accept">Приеми</string>
     <string name="cancel">Отказ</string>
     <string name="clear_changes">Изчистване на промените</string>

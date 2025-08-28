@@ -30,7 +30,6 @@
     <string name="send">שלח</string>
     <string name="warning_not_paired">עוד לא צימדת מכשיר תומך משטסטיק לטלפון זה. בבקשה צמד מכשיר והגדר שם משתמש.\n\nאפליקציית קוד פתוח זה נמצא בפיתוח, במקשר של בעיות בבקשה גש לפורום: https://github.com/orgs/meshtastic/discussions\n\n למידע נוסף בקרו באתר - www.meshtastic.org.</string>
     <string name="you">אתה</string>
-    <string name="analytics_okay">שלח סטטיסטיקות שימוש אנונימיות ודוחות קריסה.</string>
     <string name="accept">אישור</string>
     <string name="cancel">בטל</string>
     <string name="new_channel_rcvd">התקבל כתובת ערוץ חדשה</string>

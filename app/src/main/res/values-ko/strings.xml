@@ -81,7 +81,6 @@
     <string name="send">보내기</string>
     <string name="warning_not_paired">아직 스마트폰과 Meshtastic 장치와 연결하지 않았습니다. 장치와 연결하고 사용자 이름을 정하세요. \n\n이 오픈소스 응용 프로그램은 개발 중입니다. 문제가 발견되면 포럼: https://github.com/orgs/meshtastic/discussions 을 통해 알려주세요.\n\n 자세한 정보는 웹페이지 - www.meshtastic.org 를 참조하세요.</string>
     <string name="you">나</string>
-    <string name="analytics_okay">익명의 진단보고와 오류 보고서</string>
     <string name="accept">수락</string>
     <string name="cancel">취소</string>
     <string name="new_channel_rcvd">새로운 채널 URL 수신</string>

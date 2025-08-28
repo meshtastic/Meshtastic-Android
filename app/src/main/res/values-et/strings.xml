@@ -83,7 +83,6 @@
     <string name="send">Saada</string>
     <string name="warning_not_paired">Ei ole veel ühendanud Meshtastic -kokku sobivat raadiot telefoniga. Seo seade selle telefoniga ja määra kasutajanimi.\n\nSee avatud lähtekoodiga programm on alpha-testi staatuses. Kui märkad vigu, saada palun sõnum meie foorumisse: https://github.com/orgs/meshtastic/discussions\n\nLisateave kodulehel - www.meshtastic.org.</string>
     <string name="you">Sina</string>
-    <string name="analytics_okay">Anonüümne kasutus statistika ja krahhiaruanded.</string>
     <string name="accept">Nõustu</string>
     <string name="cancel">Tühista</string>
     <string name="clear_changes">Võta tagasi</string>

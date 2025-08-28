@@ -83,7 +83,6 @@
     <string name="send">Enviar</string>
     <string name="warning_not_paired">Você ainda não pareou um rádio compatível ao Meshtastic com este smartphone. Por favor pareie um dispositivo e configure seu nome de usuário.\n\nEste aplicativo open source está em desenvolvimento, caso encontre algum problema por favor publique em nosso fórum: https://github.com/orgs/meshtastic/discussions\n\nPara mais informações acesse nossa página: www.meshtastic.org.</string>
     <string name="you">Você</string>
-    <string name="analytics_okay">Estatísticas de uso anônimas e relatórios de falhas.</string>
     <string name="accept">Aceitar</string>
     <string name="cancel">Cancelar</string>
     <string name="clear_changes">Limpar mudanças</string>

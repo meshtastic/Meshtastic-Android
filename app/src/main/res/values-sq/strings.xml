@@ -69,7 +69,6 @@
     <string name="send">Dërgo</string>
     <string name="warning_not_paired">Ju ende nuk keni lidhur një paisje radio Meshtastic me këtë telefon. Ju lutem lidhni një paisje radio dhe vendosni emrin e përdoruesit.\n\nKy aplikacion është software i lire \"open-source\" dhe në variantin Alpha për testim. Nëse hasni probleme, ju lutem shkruani në çatin e faqes tonë të internetit: https://github.com/orgs/meshtastic/discussions\n\nPër më shumë informacione vizitoni faqen tonë në internet - www.meshtastic.org.</string>
     <string name="you">Ju</string>
-    <string name="analytics_okay">Statistikat e përdorimit dhe raportet e keq funksionimit mblidhen në mënyrë krejtësisht anonime</string>
     <string name="accept">Prano</string>
     <string name="cancel">Anullo</string>
     <string name="new_channel_rcvd">Ju keni një kanal radio të ri URL</string>

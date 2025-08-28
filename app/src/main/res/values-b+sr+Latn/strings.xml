@@ -76,7 +76,6 @@
     <string name="send">Pošalji</string>
     <string name="warning_not_paired">Још нисте упарили Мештастик компатибилан радио са овим телефоном. Молимо вас да упарите уређај и поставите своје корисничко име.\n\nОва апликација отвореног кода је у развоју, ако нађете проблеме, молимо вас да их објавите на нашем форуму: https://github.com/orgs/meshtastic/discussions\n\nЗа више информација посетите нашу веб страницу - www.meshtastic.org.</string>
     <string name="you">Ti</string>
-    <string name="analytics_okay">Anonimne statistike korišćenja i izveštaji o greškama.</string>
     <string name="accept">Prihvati</string>
     <string name="cancel">Otkaži</string>
     <string name="new_channel_rcvd">Primljen novi link kanala</string>

@@ -33,7 +33,6 @@
     <string name="send">Potvrdi</string>
     <string name="warning_not_paired">Još niste povezali Meshtastic radio uređaj s ovim telefonom. Povežite uređaj i postavite svoje korisničko ime.\n\nOva aplikacija otvorenog koda je u razvoju, ako naiđete na probleme, objavite na našem forumu: https://github.com/orgs/meshtastic/discussions\n\nZa više informacija pogledajte našu web stranicu - www.meshtastic.org.</string>
     <string name="you">Vi</string>
-    <string name="analytics_okay">Anonimni statistički podaci o korištenju i izvješća o rušenju sustava.</string>
     <string name="accept">Prihvati</string>
     <string name="cancel">Odustani</string>
     <string name="new_channel_rcvd">Primljen je URL novog kanala</string>
