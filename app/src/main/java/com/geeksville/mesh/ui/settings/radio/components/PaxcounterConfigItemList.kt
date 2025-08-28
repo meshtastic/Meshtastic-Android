@@ -39,6 +39,7 @@ import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.ui.common.components.EditTextPreference
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
 import com.geeksville.mesh.ui.common.components.PreferenceFooter
+import com.geeksville.mesh.ui.common.components.SignedIntegerEditTextPreference
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 
@@ -94,7 +95,7 @@ fun PaxcounterConfigItemList(
         }
 
         item {
-            EditTextPreference(
+            SignedIntegerEditTextPreference(
                 title = stringResource(R.string.wifi_rssi_threshold_defaults_to_80),
                 value = paxcounterInput.wifiThreshold,
                 enabled = enabled,
@@ -104,7 +105,7 @@ fun PaxcounterConfigItemList(
         }
 
         item {
-            EditTextPreference(
+            SignedIntegerEditTextPreference(
                 title = stringResource(R.string.ble_rssi_threshold_defaults_to_80),
                 value = paxcounterInput.bleThreshold,
                 enabled = enabled,
