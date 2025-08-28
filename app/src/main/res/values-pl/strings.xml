@@ -78,7 +78,6 @@
     <string name="send">Wyślij</string>
     <string name="warning_not_paired">Nie sparowałeś jeszcze urządzenia Meshtastic z tym telefonem. Proszę sparować urządzenie i ustawić swoją nazwę użytkownika.\n\nTa aplikacja open-source jest w fazie rozwoju, jeśli znajdziesz problemy, napisz na naszym forum: https://github.com/orgs/meshtastic/discussions\n\nWięcej informacji znajdziesz na naszej stronie internetowej - www.meshtastic.org.</string>
     <string name="you">Ty</string>
-    <string name="analytics_okay">Anonimowe statystyki użycia i raporty o błędach.</string>
     <string name="accept">Akceptuj</string>
     <string name="cancel">Anuluj</string>
     <string name="new_channel_rcvd">Otrzymano nowy URL kanału</string>
