@@ -52,7 +52,6 @@
     <string name="send">Küldeni</string>
     <string name="warning_not_paired">Még nem párosított egyetlen Meshtastic rádiót sem ehhez a telefonhoz. Kérem pároztasson egyet és állítsa be a felhasználónevet.\n\nEz a szabad forráskódú alkalmazás fejlesztés alatt áll, ha hibát talál kérem írjon a projekt fórumába: https://github.com/orgs/meshtastic/discussions\n\nBővebb információért látogasson el a projekt weboldalára - www.meshtastic.org.</string>
     <string name="you">Te</string>
-    <string name="analytics_okay">Névtelen felhasználási statisztikák és hibajelentések.</string>
     <string name="accept">Elfogadni</string>
     <string name="cancel">Megszakítani</string>
     <string name="new_channel_rcvd">Új csatorna URL érkezett</string>
