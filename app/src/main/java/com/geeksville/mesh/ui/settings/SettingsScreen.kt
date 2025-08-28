@@ -52,19 +52,7 @@ fun SettingsScreen(
     uiViewModel: UIViewModel = hiltViewModel(),
     onNavigate: (Route) -> Unit = {},
 ) {
-    val node by viewModel.destNode.collectAsStateWithLifecycle()
-    val ourNode by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val isLocal = node?.num == ourNode?.num
-    val nodeName: String? =
-        node?.user?.longName?.let {
-            if (!isLocal) {
-                "$it (" + stringResource(R.string.remote) + ")"
-            } else {
-                it
-            }
-        }
-
-    nodeName?.let { uiViewModel.setTitle(it) }
+    uiViewModel.setTitle(stringResource(R.string.bottom_nav_settings))
 
     val excludedModulesUnlocked by uiViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
     val localConfig by uiViewModel.localConfig.collectAsStateWithLifecycle()
