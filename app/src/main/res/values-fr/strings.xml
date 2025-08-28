@@ -83,7 +83,6 @@
     <string name="send">Envoyer</string>
     <string name="warning_not_paired">Aucune radio Meshtastic compatible n\'a été jumelée à ce téléphone. Jumelez un appareil et spécifiez votre nom d\'utilisateur.\n\nL\'application open-source est en test alpha, si vous rencontrez des problèmes postez au chat sur notre site web.\n\nPour plus d\'information visitez notre site web - www.meshtastic.org.</string>
     <string name="you">Vous</string>
-    <string name="analytics_okay">Statistiques et rapports d\'erreur anonymes.</string>
     <string name="accept">Accepter</string>
     <string name="cancel">Annuler</string>
     <string name="clear_changes">Annuler modifications</string>
