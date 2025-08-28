@@ -25,6 +25,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -40,6 +42,8 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
+import com.geeksville.mesh.ui.common.components.TitledCard
+import com.geeksville.mesh.ui.settings.components.SettingsItemSwitch
 import com.geeksville.mesh.ui.settings.radio.RadioConfigItemList
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.EditDeviceProfileDialog
@@ -149,8 +153,18 @@ fun SettingsScreen(
                 deviceProfile = null
                 showEditDeviceProfileDialog = true
             },
-            onToggleAnalytics = { viewModel.toggleAnalytics() },
             onNavigate = onNavigate,
         )
+
+        if (state.analyticsAvailable) {
+            TitledCard(title = stringResource(R.string.phone_settings), modifier = Modifier.padding(top = 16.dp)) {
+                SettingsItemSwitch(
+                    text = stringResource(R.string.analytics_okay),
+                    checked = state.analyticsEnabled,
+                    leadingIcon = Icons.Default.BugReport,
+                    onClick = { viewModel.toggleAnalytics() },
+                )
+            }
+        }
     }
 }

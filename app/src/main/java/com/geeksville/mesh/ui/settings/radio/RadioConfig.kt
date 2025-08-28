@@ -28,7 +28,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.twotone.Warning
@@ -64,7 +63,6 @@ import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.settings.components.SettingsItem
-import com.geeksville.mesh.ui.settings.components.SettingsItemSwitch
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
@@ -131,7 +129,6 @@ fun RadioConfigItemList(
     onRouteClick: (Enum<*>) -> Unit = {},
     onImport: () -> Unit = {},
     onExport: () -> Unit = {},
-    onToggleAnalytics: () -> Unit = {},
     onNavigate: (Route) -> Unit,
 ) {
     val enabled = state.connected && !state.responseState.isWaiting() && !isManaged
@@ -206,17 +203,6 @@ fun RadioConfigItemList(
             enabled = enabled,
             onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
         )
-    }
-
-    if (state.analyticsAvailable) {
-        TitledCard(title = stringResource(R.string.phone_settings), modifier = Modifier.padding(top = 16.dp)) {
-            SettingsItemSwitch(
-                text = stringResource(R.string.analytics_okay),
-                checked = state.analyticsEnabled,
-                leadingIcon = Icons.Default.BugReport,
-                onClick = onToggleAnalytics,
-            )
-        }
     }
 }
 
