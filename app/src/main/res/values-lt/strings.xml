@@ -69,7 +69,6 @@
     <string name="send">Siųsti</string>
     <string name="warning_not_paired">Su šiuo telefonu dar nėra susietas joks Meshtastic įtaisais. Prašome suporuoti įrenginį ir nustatyti savo vartotojo vardą.\n\nŠi atvirojo kodo programa yra kūrimo stadijoje, jei pastebėsite problemas, prašome pranešti mūsų forume: https://github.com/orgs/meshtastic/discussions\n\nDaugiau informacijos rasite mūsų interneto svetainėje - www.meshtastic.org.</string>
     <string name="you">Tu</string>
-    <string name="analytics_okay">Siųsti anoniminę naudojimo statistika ir klaidų ataskaitas.</string>
     <string name="accept">Priimti</string>
     <string name="cancel">Atšaukti</string>
     <string name="new_channel_rcvd">Gautas naujo kanalo URL</string>
