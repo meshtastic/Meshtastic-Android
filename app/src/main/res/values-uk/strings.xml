@@ -282,6 +282,7 @@
     <string name="only_favorites">Лише обрані</string>
     <string name="export_keys">Експортувати ключі</string>
     <string name="meshtastic">Meshtastic</string>
+    <string name="advanced_title">Розширені</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
