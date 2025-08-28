@@ -83,6 +83,7 @@
     <string name="send">Senden</string>
     <string name="warning_not_paired">Sie haben noch kein zu Meshtastic kompatibles Funkgerät mit diesem Telefon gekoppelt. Bitte koppeln Sie ein Gerät und legen Sie Ihren Benutzernamen fest.\n\nDiese quelloffene App befindet sich im Test. Wenn Sie Probleme finden, veröffentlichen Sie diese bitte auf unserer Website im Chat.\n\nWeitere Informationen finden Sie auf unserer Webseite - www.meshtastic.org.</string>
     <string name="you">Du</string>
+    <string name="analytics_okay">Analyse und Absturzberichterstattung erlauben.</string>
     <string name="accept">Akzeptieren</string>
     <string name="cancel">Abbrechen</string>
     <string name="clear_changes">Änderungen löschen</string>
@@ -677,7 +678,7 @@
     <string name="security_icon_help_show_all">Alle Bedeutungen anzeigen</string>
     <string name="security_icon_help_show_less">Aktuellen Status anzeigen</string>
     <string name="security_icon_help_dismiss">Tastatur ausblenden</string>
-    <string name="confirm_delete_node">Willst du diesen Node wirklich löschen?</string>
+    <string name="confirm_delete_node">Möchten Sie diesen Knoten wirklich löschen?</string>
     <string name="replying_to">Antworten auf %1$s</string>
     <string name="cancel_reply">Antwort abbrechen</string>
     <string name="delete_messages_title">Nachricht löschen?</string>
@@ -749,6 +750,7 @@
     <string name="map_type_terrain">Gelände</string>
     <string name="map_type_hybrid">Hybrid</string>
     <string name="manage_map_layers">Kartenebenen verwalten</string>
+    <string name="map_layer_formats">Benutzerdefinierte Ebenen für .kml oder .kmz Dateien.</string>
     <string name="map_layers_title">Kartenebenen</string>
     <string name="no_map_layers_loaded">Keine benutzerdefinierten Ebenen geladen.</string>
     <string name="add_layer_button">Ebene hinzufügen</string>
@@ -769,4 +771,5 @@
     <string name="url_must_contain_placeholders">URL muss Platzhalter enthalten.</string>
     <string name="url_template">URL Vorlage</string>
     <string name="track_point">Verlaufspunkt</string>
+    <string name="phone_settings">Telefoneinstellungen</string>
 </resources>
