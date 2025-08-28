@@ -173,6 +173,15 @@ secrets {
 
 // workaround for https://github.com/google/ksp/issues/1590
 androidComponents {
+    onVariants(selector().all()) { variant ->
+        if(variant.name == "fdroidDebug") {
+            variant.applicationId = "com.geeksville.mesh.fdroid.debug"
+        }
+
+        if(variant.name == "googleDebug") {
+            variant.applicationId = "com.geeksville.mesh.google.debug"
+        }
+    }
     onVariants(selector().withBuildType("release")) { variant ->
         if (variant.flavorName == "google") {
             val variantNameCapped = variant.name.replaceFirstChar { it.uppercase() }
