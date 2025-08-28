@@ -83,7 +83,6 @@
     <string name="send">Отправить</string>
     <string name="warning_not_paired">Вы еще не подключили к телефону устройство, совместимое с Meshtastic радио. Пожалуйста, подключите устройство и задайте имя пользователя.\n\nЭто приложение с открытым исходным кодом находится в альфа-тестировании, если вы обнаружите проблемы, пожалуйста, напишите в чате на нашем сайте.\n\nДля получения дополнительной информации посетите нашу веб-страницу - www.meshtastic.org.</string>
     <string name="you">Вы</string>
-    <string name="analytics_okay">Анонимная статистика использования и отчеты о сбоях.</string>
     <string name="accept">Принять</string>
     <string name="cancel">Отмена</string>
     <string name="clear_changes">Отменить изменения</string>
