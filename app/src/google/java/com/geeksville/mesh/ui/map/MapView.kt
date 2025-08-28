@@ -539,7 +539,9 @@ fun MapView(
             }
 
             MapControlsOverlay(
-                modifier = Modifier.align(Alignment.CenterEnd).offset(x = -ScreenOffset),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 50.dp),
                 mapFilterMenuExpanded = mapFilterMenuExpanded,
                 onMapFilterMenuDismissRequest = { mapFilterMenuExpanded = false },
                 onToggleMapFilterMenu = { mapFilterMenuExpanded = true },
