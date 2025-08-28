@@ -80,7 +80,6 @@
     <string name="send">Odeslat</string>
     <string name="warning_not_paired">Ještě jste s tímto telefonem nespárovali rádio kompatibilní s Meshtastic. Spárujte prosím zařízení a nastavte své uživatelské jméno.\n\nTato open-source aplikace je ve vývoji, pokud narazíte na problémy, napište na naše fórum: https://github.com/orgs/meshtastic/discussions\n\nDalší informace naleznete na naší webové stránce - www. meshtastic.org.</string>
     <string name="you">Vy</string>
-    <string name="analytics_okay">Anonymní hlášení o používání aplikace a jejích chybách.</string>
     <string name="accept">Přijmout</string>
     <string name="cancel">Zrušit</string>
     <string name="new_channel_rcvd">Nová URL kanálu přijata</string>
