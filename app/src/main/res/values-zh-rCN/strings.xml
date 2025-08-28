@@ -644,6 +644,7 @@
     <string name="overflow_menu">溢出菜单</string>
     <string name="uv_lux">紫外线强度</string>
     <string name="unknown">未知</string>
+    <string name="advanced_title">高级</string>
     <string name="clean_node_database_title">清理节点数据库</string>
     <string name="clean_nodes_older_than">清理上次看到的 %1$d 天以上的节点</string>
     <string name="clean_unknown_nodes">仅清理未知节点</string>
