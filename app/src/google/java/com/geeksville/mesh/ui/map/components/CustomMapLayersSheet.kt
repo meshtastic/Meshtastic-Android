@@ -60,6 +60,13 @@ fun CustomMapLayersSheet(
             )
             HorizontalDivider()
         }
+        item {
+            Text(
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 0.dp),
+                text = stringResource(R.string.map_layer_formats),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
 
         if (mapLayers.isEmpty()) {
             item {
