@@ -78,7 +78,6 @@
     <string name="send">Gönder</string>
     <string name="warning_not_paired">Telefonu, Meshtastic uyumlu bir cihaz ile eşleştirmediniz. Bir cihazla eşleştirin ve kullanıcı adınızı belirleyin.\n\nAçık kaynaklı bu uygulama şu an alfa-test aşamasında, problem fark ederseniz forumda lütfen paylaşın: https://github.com/orgs/meshtastic/discussions\n\nDaha fazla bilgi için, sitemiz: www.meshtastic.org.</string>
     <string name="you">Siz</string>
-    <string name="analytics_okay">Anonim kullanim istatistikleri ve hata raporları.</string>
     <string name="accept">Kabul et</string>
     <string name="cancel">İptal</string>
     <string name="clear_changes">Değişiklikleri Temizle</string>
