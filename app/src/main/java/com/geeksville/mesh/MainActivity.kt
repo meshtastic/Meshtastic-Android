@@ -227,29 +227,7 @@ class MainActivity :
                 createRangetestLauncher.launch(intent)
             }
 
-            MainMenuAction.THEME -> {
-                chooseThemeDialog()
-            }
-
             else -> warn("Unexpected action: $action")
         }
-    }
-
-    private fun chooseThemeDialog() {
-        val styles =
-            mapOf(
-                getString(R.string.dynamic) to MODE_DYNAMIC,
-                getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
-                getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
-                getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
-            )
-
-        val theme = uiPrefs.theme
-        debug("Theme from prefs: $theme")
-        model.showAlert(
-            title = getString(R.string.choose_theme),
-            message = "",
-            choices = styles.mapValues { (_, value) -> { model.setTheme(value) } },
-        )
     }
 }

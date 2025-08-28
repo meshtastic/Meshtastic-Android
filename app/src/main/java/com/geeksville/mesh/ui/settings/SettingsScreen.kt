@@ -21,12 +21,14 @@ import android.app.Activity
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.rounded.FormatPaint
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -47,6 +49,7 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.common.components.TitledCard
+import com.geeksville.mesh.ui.common.theme.MODE_DYNAMIC
 import com.geeksville.mesh.ui.settings.components.SettingsItem
 import com.geeksville.mesh.ui.settings.components.SettingsItemSwitch
 import com.geeksville.mesh.ui.settings.radio.RadioConfigItemList
@@ -174,7 +177,6 @@ fun SettingsScreen(
 
             val context = LocalContext.current
             val languageTags = remember { LanguageUtils.getLanguageTags(context) }
-            val languageDialogTitle = stringResource(R.string.preferences_language)
             SettingsItem(
                 text = stringResource(R.string.preferences_language),
                 leadingIcon = Icons.Rounded.Language,
@@ -184,7 +186,31 @@ fun SettingsScreen(
                 debug("Lang from prefs: $lang")
                 val langMap = languageTags.mapValues { (_, value) -> { LanguageUtils.setLocale(value) } }
 
-                uiViewModel.showAlert(title = languageDialogTitle, message = "", choices = langMap)
+                uiViewModel.showAlert(
+                    title = context.getString(R.string.preferences_language),
+                    message = "",
+                    choices = langMap,
+                )
+            }
+
+            val themeMap = remember {
+                mapOf(
+                    context.getString(R.string.dynamic) to MODE_DYNAMIC,
+                    context.getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
+                    context.getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
+                    context.getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+                )
+            }
+            SettingsItem(
+                text = stringResource(R.string.theme),
+                leadingIcon = Icons.Rounded.FormatPaint,
+                trailingIcon = null,
+            ) {
+                uiViewModel.showAlert(
+                    title = context.getString(R.string.choose_theme),
+                    message = "",
+                    choices = themeMap.mapValues { (_, value) -> { uiViewModel.setTheme(value) } },
+                )
             }
         }
     }
