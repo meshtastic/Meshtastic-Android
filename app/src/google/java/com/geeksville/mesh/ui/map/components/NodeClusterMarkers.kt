@@ -20,6 +20,7 @@ package com.geeksville.mesh.ui.map.components
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import com.geeksville.mesh.ui.map.BaseMapViewModel
 import com.geeksville.mesh.ui.map.NodeClusterItem
 import com.geeksville.mesh.ui.node.components.NodeChip
@@ -64,7 +65,17 @@ fun NodeClusterMarkers(
             false
         },
         clusterItemContent = { clusterItem ->
-            NodeChip(node = clusterItem.node, enabled = false, isThisNode = false, isConnected = false) {}
-        },
+            val shortNames = nodeClusterItems.joinToString { it.node.user.shortName }
+            println("NodeClusterMarkers: nodeClusterItems size: ${nodeClusterItems.size}, items: $shortNames")
+            // Use a transparent, non-interactive Text to show the shortname, but don't intercept clicks
+            androidx.compose.material3.Text(
+                text = if (nodeClusterItems.size > 1) "..." else clusterItem.node.user.shortName,
+                color = Color(0xFFFFFF00), // Bright yellow for visibility
+                fontWeight = FontWeight.Bold
+            )
+        }
     )
 }
+
+private const val TAG = "NodeClusterMarkers"
+
