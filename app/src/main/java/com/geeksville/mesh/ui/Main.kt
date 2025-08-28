@@ -83,7 +83,6 @@ import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.navigation.ChannelsRoutes
 import com.geeksville.mesh.navigation.ConnectionsRoutes
 import com.geeksville.mesh.navigation.ContactsRoutes
 import com.geeksville.mesh.navigation.MapRoutes
@@ -115,6 +114,7 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlin.reflect.KClass
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
     Conversations(R.string.conversations, MeshtasticIcons.Conversations, ContactsRoutes.ContactsGraph),
@@ -125,14 +125,14 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
     ;
 
     companion object {
-        fun NavDestination.isTopLevel(): Boolean = listOf<Route>(
-            ContactsRoutes.Contacts,
-            NodesRoutes.Nodes,
-            MapRoutes.Map,
-            ChannelsRoutes.Channels,
-            ConnectionsRoutes.Connections,
+        fun NavDestination.isTopLevel(): Boolean = listOf<KClass<out Route>>(
+            ContactsRoutes.Contacts::class,
+            NodesRoutes.Nodes::class,
+            MapRoutes.Map::class,
+            ConnectionsRoutes.Connections::class,
+            SettingsRoutes.Settings::class,
         )
-            .any { this.hasRoute(it::class) }
+            .any { this.hasRoute(it) }
 
         fun fromNavDestination(destination: NavDestination?): TopLevelDestination? =
             entries.find { dest -> destination?.hierarchy?.any { it.hasRoute(dest.route::class) } == true }
