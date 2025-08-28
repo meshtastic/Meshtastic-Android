@@ -508,8 +508,12 @@ fun MapView(
                 }
             }
 
-            DisappearingScaleBar(cameraPositionState = cameraPositionState)
+            val currentCameraPosition = cameraPositionState.position
+            var displayedZoom by remember { mutableStateOf(currentCameraPosition.zoom) }
 
+            if (displayedZoom != 0f) {
+                DisappearingScaleBar(cameraPositionState = cameraPositionState)
+            }
             editingWaypoint?.let { waypointToEdit ->
                 EditWaypointDialog(
                     waypoint = waypointToEdit,
