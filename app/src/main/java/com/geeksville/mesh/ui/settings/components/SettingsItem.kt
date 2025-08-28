@@ -17,28 +17,23 @@
 
 package com.geeksville.mesh.ui.settings.components
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Android
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -67,6 +62,7 @@ fun SettingsItem(
 }
 
 /** A toggleable settings switch item. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsItemSwitch(
     checked: Boolean,
@@ -120,17 +116,14 @@ private fun ClickableWrapper(enabled: Boolean, onClick: () -> Unit, content: @Co
 
 /** The row content to display for a settings item. */
 @Composable
-private fun Content(leading: @Composable () -> Unit, text: String, trailing: @Composable RowScope.() -> Unit) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp, horizontal = 16.dp),
-    ) {
-        leading()
-        Text(text = text, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.wrapContentWidth())
-        Spacer(modifier = Modifier.weight(1f))
-        trailing()
-    }
+private fun Content(leading: @Composable () -> Unit, text: String, trailing: @Composable () -> Unit) {
+    ListItem(
+        modifier = Modifier.padding(horizontal = 8.dp),
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent),
+        headlineContent = { Text(text) },
+        leadingContent = { leading() },
+        trailingContent = { trailing() },
+    )
 }
 
 @Composable

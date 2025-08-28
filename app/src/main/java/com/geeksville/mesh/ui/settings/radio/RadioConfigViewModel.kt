@@ -43,7 +43,10 @@ import com.geeksville.mesh.ModuleConfigProtos
 import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.Position
 import com.geeksville.mesh.R
+import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
+import com.geeksville.mesh.android.isAnalyticsAvailable
+import com.geeksville.mesh.android.prefs.AnalyticsPrefs
 import com.geeksville.mesh.android.prefs.MapConsentPrefs
 import com.geeksville.mesh.config
 import com.geeksville.mesh.database.entity.MyNodeEntity
@@ -92,6 +95,8 @@ data class RadioConfigState(
     val ringtone: String = "",
     val cannedMessageMessages: String = "",
     val responseState: ResponseState<Boolean> = ResponseState.Empty,
+    val analyticsAvailable: Boolean = true,
+    val analyticsEnabled: Boolean = false,
 )
 
 @HiltViewModel
@@ -103,6 +108,7 @@ constructor(
     private val radioConfigRepository: RadioConfigRepository,
     private val locationRepository: LocationRepository,
     private val mapConsentPrefs: MapConsentPrefs,
+    private val analyticsPrefs: AnalyticsPrefs,
 ) : ViewModel(),
     Logging {
     private val meshService: IMeshService?
@@ -158,6 +164,8 @@ constructor(
                 _radioConfigState.update { it.copy(isLocal = destNum == null || destNum == ni?.myNodeNum) }
             }
             .launchIn(viewModelScope)
+
+        _radioConfigState.update { it.copy(analyticsAvailable = (app as GeeksvilleApplication).isAnalyticsAvailable) }
 
         debug("RadioConfigViewModel created")
     }
@@ -694,5 +702,10 @@ constructor(
             }
             requestIds.update { it.apply { remove(data.requestId) } }
         }
+    }
+
+    fun toggleAnalytics() {
+        analyticsPrefs.analyticsAllowed = !analyticsPrefs.analyticsAllowed
+        _radioConfigState.update { it.copy(analyticsEnabled = analyticsPrefs.analyticsAllowed) }
     }
 }

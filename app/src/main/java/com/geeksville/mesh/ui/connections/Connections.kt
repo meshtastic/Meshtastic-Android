@@ -39,7 +39,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bluetooth
@@ -49,7 +48,6 @@ import androidx.compose.material.icons.rounded.Bluetooth
 import androidx.compose.material.icons.rounded.Usb
 import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.Card
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
@@ -71,7 +69,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -83,10 +80,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
-import com.geeksville.mesh.android.BuildUtils.debug
-import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.gpsDisabled
-import com.geeksville.mesh.android.isGooglePlayAvailable
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceListEntry
@@ -141,7 +135,6 @@ fun ConnectionsScreen(
     val connectionState by uiViewModel.connectionState.collectAsStateWithLifecycle(ConnectionState.DISCONNECTED)
     val scanning by scanModel.spinner.collectAsStateWithLifecycle(false)
     val context = LocalContext.current
-    val app = (context.applicationContext as GeeksvilleApplication)
     val info by uiViewModel.myNodeInfo.collectAsStateWithLifecycle()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val bluetoothEnabled by bluetoothViewModel.enabled.collectAsStateWithLifecycle(false)
@@ -424,42 +417,6 @@ fun ConnectionsScreen(
                         Spacer(modifier = Modifier.height(16.dp))
 
                         LaunchedEffect(Unit) { uiViewModel.suppressNoPairedWarning() }
-                    }
-
-                    // Analytics Okay Checkbox
-
-                    val isGooglePlayAvailable = context.isGooglePlayAvailable
-                    val isAnalyticsAllowed = app.isAnalyticsAllowed && isGooglePlayAvailable
-                    if (isGooglePlayAvailable) {
-                        var loading by remember { mutableStateOf(false) }
-                        LaunchedEffect(isAnalyticsAllowed) { loading = false }
-                        Row(
-                            modifier =
-                            Modifier.fillMaxWidth()
-                                .toggleable(
-                                    value = isAnalyticsAllowed,
-                                    onValueChange = {
-                                        debug("User changed analytics to $it")
-                                        app.isAnalyticsAllowed = it
-                                        loading = true
-                                    },
-                                    role = Role.Checkbox,
-                                    enabled = isGooglePlayAvailable && !loading,
-                                )
-                                .padding(horizontal = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Checkbox(
-                                enabled = isGooglePlayAvailable,
-                                checked = isAnalyticsAllowed,
-                                onCheckedChange = null,
-                            )
-                            Text(
-                                text = stringResource(R.string.analytics_okay),
-                                style = MaterialTheme.typography.bodyLarge,
-                                modifier = Modifier.padding(start = 16.dp),
-                            )
-                        }
                     }
                 }
             }
