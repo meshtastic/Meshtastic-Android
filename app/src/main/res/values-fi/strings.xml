@@ -83,7 +83,6 @@
     <string name="send">Lähetä</string>
     <string name="warning_not_paired">Et ole vielä yhdistänyt Meshtastic -yhteensopivaa radiota tähän puhelimeen. Muodosta laitepari puhelimen kanssa ja aseta käyttäjänimesi.\n\nTämä avoimen lähdekoodin sovellus on vielä kehitysvaiheessa. Jos löydät virheen, lähetä siitä viesti foorumillemme: https://github.com/orgs/meshtastic/discussions\n\nLisätietoja saat verkkosivuiltamme - www.meshtastic.org.</string>
     <string name="you">Sinä</string>
-    <string name="analytics_okay">Nimettömät käyttötilastot ja kaatumisraportit.</string>
     <string name="accept">Hyväksy</string>
     <string name="cancel">Peruuta</string>
     <string name="clear_changes">Peru muutokset</string>
