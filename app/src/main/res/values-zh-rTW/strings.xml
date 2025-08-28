@@ -673,7 +673,7 @@
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="security_icon_help_title">頻道安全性</string>
     <string name="security_icon_help_title_all">頻道安全性説明</string>
-    <string name="security_icon_help_show_all">顯示全部內容</string>
+    <string name="security_icon_help_show_all">顯示全部狀態</string>
     <string name="security_icon_help_show_less">顯示目前狀態</string>
     <string name="security_icon_help_dismiss">關閉</string>
     <string name="confirm_delete_node">您確定要刪除此節點嗎？</string>
@@ -748,6 +748,7 @@
     <string name="map_type_terrain">地形</string>
     <string name="map_type_hybrid">混合</string>
     <string name="manage_map_layers">管理地圖圖層</string>
+    <string name="map_layer_formats">自定義圖層支援 .kml 或 .kmz 格式檔案。</string>
     <string name="map_layers_title">地圖圖層</string>
     <string name="no_map_layers_loaded">未載入自訂圖層。</string>
     <string name="add_layer_button">添加圖層</string>
