@@ -38,7 +38,7 @@ jobs:
           submodules: 'recursive'
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'jetbrains'
@@ -84,14 +84,6 @@ jobs:
           name: googleDebug
           path: app/build/outputs/apk/google/debug/app-google-debug.apk
           retention-days: 14
-
-      - name: Attest Build Provenance
-        if: ${{ inputs.upload_artifacts && github.ref_name == 'main' && github.repository == 'meshtastic/Meshtastic-Android' }}
-        uses: actions/attest-build-provenance@v2
-        with:
-          subject-path: |
-            app/build/outputs/apk/google/debug/app-google-debug.apk
-            app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
 
       - name: Upload reports
         if: ${{ inputs.upload_artifacts }}

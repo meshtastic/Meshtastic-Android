@@ -83,12 +83,11 @@
     <string name="send">Envoyer</string>
     <string name="warning_not_paired">Aucune radio Meshtastic compatible n\'a été jumelée à ce téléphone. Jumelez un appareil et spécifiez votre nom d\'utilisateur.\n\nL\'application open-source est en test alpha, si vous rencontrez des problèmes postez au chat sur notre site web.\n\nPour plus d\'information visitez notre site web - www.meshtastic.org.</string>
     <string name="you">Vous</string>
-    <string name="analytics_okay">Statistiques et rapports d\'erreur anonymes.</string>
     <string name="accept">Accepter</string>
     <string name="cancel">Annuler</string>
     <string name="clear_changes">Annuler modifications</string>
     <string name="new_channel_rcvd">Réception de l\'URL d\'un nouveau cana</string>
-    <string name="permission_missing">Une permission indispensable manque, Meshtastic ne peut pas fonctionner. Veuillez modifier dans Réglages.</string>
+    <string name="permission_missing">Meshtastic a besoin d\'autorisations de localisation activées pour trouver de nouveaux appareils via Bluetooth. Vous pouvez désactiver lorsque la localisation n\'est pas utilisée.</string>
     <string name="report_bug">Rapporter Bogue</string>
     <string name="report_a_bug">Rapporter un Bogue</string>
     <string name="report_bug_text">Êtes-vous certain de vouloir rapporter un bogue ? Après l\'envoi, veuillez poster dans https://github.com/orgs/meshtastic/discussions afin que nous puissions examiner ce que vous avez trouvé.</string>
@@ -103,7 +102,7 @@
     <string name="connected_count">Connectés : %1$s sur en ligne</string>
     <string name="ip_address">Adresse IP:</string>
     <string name="ip_port">Port :</string>
-    <string name="connected">Connecté à la radio</string>
+    <string name="connected">Connecté</string>
     <string name="connected_to">Connecté à la radio (%s)</string>
     <string name="not_connected">Non connecté</string>
     <string name="connected_sleeping">Connecté à la radio, mais en mode veille</string>
@@ -114,13 +113,13 @@
     <string name="about">A propros</string>
     <string name="channel_invalid">Cette URL de canal est invalide et ne peut pas être utilisée</string>
     <string name="debug_panel">Panneau de débogage</string>
-    <string name="debug_decoded_payload">Charge décodée :</string>
+    <string name="debug_decoded_payload">Contenu décodé :</string>
     <string name="debug_logs_export">Exporter les logs</string>
     <string name="debug_filters">Filtres</string>
     <string name="debug_active_filters">Filtres actifs</string>
     <string name="debug_default_search">Rechercher dans les journaux…</string>
-    <string name="debug_search_next">Prochaine occurrence</string>
-    <string name="debug_search_prev">Précédente occurrence</string>
+    <string name="debug_search_next">Occurrence suivante</string>
+    <string name="debug_search_prev">Occurrence précédente</string>
     <string name="debug_search_clear">Effacer la recherche</string>
     <string name="debug_filter_add">Ajouter un filtre</string>
     <string name="debug_filter_included">Filtre inclus</string>
@@ -142,6 +141,7 @@
     <string name="save_rangetest">Exporter rangetest.csv</string>
     <string name="reset">Réinitialiser</string>
     <string name="scan">Scanner</string>
+    <string name="add_network_device">Ajouter</string>
     <string name="are_you_sure_change_default">Êtes-vous sûr de vouloir passer au canal par défaut ?</string>
     <string name="reset_to_defaults">Rétablir les valeurs par défaut</string>
     <string name="apply">Appliquer</string>
@@ -184,8 +184,10 @@
     <string name="quick_chat_show">Afficher le menu de discussion rapide</string>
     <string name="quick_chat_hide">Masquer le menu de discussion rapide</string>
     <string name="factory_reset">Réinitialisation d\'usine</string>
-    <string name="bluetooth_disabled">Le Bluetooth est désactivé</string>
-    <string name="permission_missing_31">Meshtastic a besoin de la permission des appareils à proximité pour trouver et se connecter à des appareils via le Bluetooth. Vous pouvez le désactiver quand il n\'est pas utilisé.</string>
+    <string name="bluetooth_disabled">Le Bluetooth est désactivé. Veuillez l\'activer dans les paramètres de votre appareil.</string>
+    <string name="open_settings">Ouvrir les paramètres</string>
+    <string name="firmware_version">Version du firmware : %1$s</string>
+    <string name="permission_missing_31">Meshtastic a besoin des autorisations \"Périphériques à proximité\" activées pour trouver et se connecter à des appareils via Bluetooth. Vous pouvez désactiver la lorsque la localisation n\'est pas utilisée.</string>
     <string name="direct_message">Message direct</string>
     <string name="nodedb_reset">Reconfiguration de NodeDB</string>
     <string name="delivery_confirmed">Réception confirmée</string>
@@ -604,10 +606,11 @@
     <string name="load">Charge</string>
     <string name="user_string">Texte utilisateur</string>
     <string name="navigate_into_label">Naviguer vers</string>
-    <string name="connections">Connexions</string>
-    <string name="map">Carte</string>
-    <string name="contacts">Contacts</string>
+    <string name="connections">Connexion</string>
+    <string name="map">Carte de maillage</string>
+    <string name="conversations">Conversations</string>
     <string name="nodes">Noeuds</string>
+    <string name="bottom_nav_settings">Réglages</string>
     <string name="set_your_region">Définir votre région</string>
     <string name="reply">Répondre</string>
     <string name="map_reporting_summary">Votre nœud enverra périodiquement un paquet de rapport de position non chiffré au serveur MQTT configuré. Ce paquet inclut l\'identifiant, les noms long et court, la position approximative, le modèle matériel, le rôle, la version du micrologiciel, la région LoRa, le préréglage du modem et le nom du canal principal.</string>
@@ -621,21 +624,22 @@
     <string name="time">Heure</string>
     <string name="date">Date</string>
     <string name="map_filter">Filtre de carte\n</string>
-    <string name="only_favorites">Seuls les favoris</string>
+    <string name="only_favorites">Juste les favoris</string>
     <string name="show_waypoints">Afficher les points de repère</string>
     <string name="show_precision_circle">Afficher les cercles de précision</string>
     <string name="client_notification">Notification client</string>
     <string name="compromised_keys">Clés compromises détectées, sélectionnez OK pour régénérer.</string>
     <string name="regenerate_private_key">Régénérer la clé privée</string>
     <string name="regenerate_keys_confirmation">Êtes-vous sûr de vouloir régénérer votre clé privée ?\n\nLes nœuds qui peuvent avoir précédemment échangé des clés avec ce nœud devront supprimer ce nœud et ré-échanger des clés afin de reprendre une communication sécurisée.</string>
-    <string name="export_keys">Exporter des clés</string>
+    <string name="export_keys">Exporter les clés</string>
     <string name="export_keys_confirmation">Exporte les clés publiques et privées vers un fichier. Veuillez stocker quelque part en toute sécurité.</string>
     <string name="modules_unlocked">Modules déverrouillés</string>
     <string name="remote">Distant</string>
     <string name="node_count_template">(%1$d en ligne / %2$d total)</string>
     <string name="react">Réagir</string>
     <string name="disconnect">Déconnecter</string>
-    <string name="no_ble_devices">Aucun périphérique Bluetooth trouvé.</string>
+    <string name="scanning_bluetooth">Recherche de périphériques Bluetooth…</string>
+    <string name="no_ble_devices">Aucun périphérique Bluetooth associé.</string>
     <string name="no_network_devices">Aucun périphérique réseau trouvé.</string>
     <string name="no_usb_devices">Aucun périphérique série USB détecté.</string>
     <string name="scroll_to_bottom">Défiler vers le bas</string>
@@ -649,6 +653,7 @@
     <string name="overflow_menu">Menu supplémentaire</string>
     <string name="uv_lux">UV Lux</string>
     <string name="unknown">Inconnu</string>
+    <string name="message_device_managed">Cette radio est gérée et ne peut être modifiée que par un administrateur distant.</string>
     <string name="clean_node_database_title">Nettoyer la base de données des nœuds</string>
     <string name="clean_nodes_older_than">Nettoyer les nœuds vus pour la dernière fois depuis %1$d jours</string>
     <string name="clean_unknown_nodes">Nettoyer uniquement les nœuds inconnus</string>
@@ -658,14 +663,14 @@
     <string name="clean_node_database_confirmation">Cela supprimera les %1$d nœuds de votre base de données. Cette action ne peut pas être annulée.</string>
     <string name="security_icon_help_green_lock">Un cadenas vert signifie que le canal est chiffré de façon sécurisée avec une clé AES 128 ou 256 bits.</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
-    <string name="security_icon_insecure_no_precise">Canal non sécurisé, non précisé</string>
-    <string name="security_icon_help_yellow_open_lock">Un cadenas ouvert jaune signifie que le canal n\'est pas crypté de manière sécurisée, n\'est pas utilisé pour des données de localisation précises, et n\'utilise ni une clé du tout, ni une clé connue de 1 octet.</string>
+    <string name="security_icon_insecure_no_precise">Canal non sécurisé, localisation non précise</string>
+    <string name="security_icon_help_yellow_open_lock">Un cadenas ouvert jaune signifie que le canal n\'est pas crypté de manière sécurisée, n\'est pas utilisé pour des données de localisation précises, et n\'utilise aucune clé, ou une clé connue de 1 octet.</string>
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <string name="security_icon_insecure_precise_only">Canal non sécurisé, localisation précise</string>
-    <string name="security_icon_help_red_open_lock">Un cadenas rouge ouvert signifie que le canal n\'est pas crypté de manière sécurisée, est utilisé pour des données de localisation précises, et n\'utilise aucune clé du tout, ou une clé connue de 1 octet.</string>
+    <string name="security_icon_help_red_open_lock">Un cadenas rouge ouvert signifie que le canal n\'est pas crypté de manière sécurisée, est utilisé pour des données de localisation précises, et n\'utilise aucune clé, ou une clé connue de 1 octet.</string>
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
     <string name="security_icon_warning_precise_mqtt">Attention : Localisation précise &amp; MQTT non sécurisée</string>
-    <string name="security_icon_help_warning_precise_mqtt">Un cadenas rouge ouvert avec un avertissement signifie que le canal n\'est pas crypté de manière sécurisée, est utilisé pour des données de localisation précises qui sont placées sur Internet via MQTT, et n\'utilise aucune clé du tout, ou une clé connue de 1 octet.</string>
+    <string name="security_icon_help_warning_precise_mqtt">Un cadenas rouge ouvert avec un avertissement signifie que le canal n\'est pas crypté de manière sécurisée, est utilisé pour des données de localisation précises qui sont diffusées sur Internet via MQTT, et n\'utilise aucune clé, ou une clé connue de 1 octet.</string>
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="security_icon_help_title">Sécurité du canal</string>
     <string name="security_icon_help_title_all">Signification de la sécurité des canaux</string>
@@ -684,6 +689,9 @@
     <string name="no_pax_metrics_logs">Aucun journal de métriques PAX disponible.</string>
     <string name="wifi_devices">Périphériques WiFi</string>
     <string name="ble_devices">Appareils BLE</string>
+    <string name="bluetooth_paired_devices">Périphériques appairés</string>
+    <string name="connected_device">Périphérique connecté</string>
+    <string name="action_go">Go</string>
     <string name="routing_error_rate_limit_exceeded">Limite de débit dépassée. Veuillez réessayer plus tard.</string>
     <string name="view_release">Voir la version</string>
     <string name="download">Télécharger</string>
@@ -709,6 +717,7 @@
     <string name="notifications_for_newly_discovered_nodes">Notifications pour les nouveaux nœuds découverts.</string>
     <string name="low_battery">Batterie faible</string>
     <string name="notifications_for_low_battery_alerts">Notifications d\'alertes de batterie faible pour l\'appareil connecté.</string>
+    <string name="critical_alerts_description"></string>
     <string name="configure_notification_permissions">Configurer les autorisations de notification</string>
     <string name="phone_location">Localisation du téléphone</string>
     <string name="phone_location_description">Meshtastic utilise la localisation de votre téléphone pour activer un certain nombre de fonctionnalités. Vous pouvez mettre à jour vos autorisations de localisation à tout moment à partir des paramètres.</string>
@@ -717,13 +726,20 @@
     <string name="distance_measurements">Mesures de distance</string>
     <string name="distance_measurements_description">Afficher la distance entre votre téléphone et les autres nœuds Meshtastic avec des positions.</string>
     <string name="distance_filters">Filtres de distance</string>
+    <string name="distance_filters_description">Filtrer la liste de nœuds et la carte de maillage en fonction de la proximité de votre téléphone.</string>
+    <string name="mesh_map_location">Emplacement de la carte de maillage</string>
+    <string name="mesh_map_location_description">Active le point de localisation bleu de votre téléphone sur la carte de maillage.</string>
     <string name="configure_location_permissions">Configurer les autorisations de localisation</string>
     <string name="skip">Ignorer</string>
     <string name="settings">Paramètres</string>
     <string name="critical_alerts">Alertes critiques</string>
+    <string name="critical_alerts_dnd_request_text">Pour assurer la réception des alertes critiques, comme les messages de SOS, même lorsque votre périphérique est en mode \"Ne pas déranger\", vous devez donner les droits spéciaux. Activez cela dans les paramètres de notifications    </string>
     <string name="configure_critical_alerts">Configurer les alertes critiques</string>
+    <string name="notification_permissions_description">Meshtastic utilise les notifications pour vous tenir à jour sur les nouveaux messages et autres événements importants. Vous pouvez mettre à jour vos autorisations de notification à tout moment à partir des paramètres.</string>
     <string name="next">Suivant</string>
+    <string name="grant_permissions">Accorder les autorisations</string>
     <string name="nodes_queued_for_deletion">%d nœuds en attente de suppression :</string>
+    <string name="clean_node_database_description">Attention : Ceci supprime les nœuds des bases de données in-app et on-device.\nLes sélections sont additionnelles.</string>
     <string name="connecting_to_device">Connexion à l\'appareil</string>
     <string name="map_type_normal">Normal</string>
     <string name="map_type_satellite">Satellite</string>
@@ -749,4 +765,5 @@
     <string name="url_cannot_be_empty">URL ne peut être vide.</string>
     <string name="url_must_contain_placeholders">L\'URL doit contenir des espaces réservés.</string>
     <string name="url_template">Modèle d\'URL</string>
+    <string name="track_point">Point de suivi</string>
 </resources>

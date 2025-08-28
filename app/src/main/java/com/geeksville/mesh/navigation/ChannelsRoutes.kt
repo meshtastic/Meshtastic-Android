@@ -22,57 +22,46 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
+import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.radioconfig.components.ChannelConfigScreen
-import com.geeksville.mesh.ui.radioconfig.components.LoRaConfigScreen
+import com.geeksville.mesh.ui.settings.radio.components.ChannelConfigScreen
+import com.geeksville.mesh.ui.settings.radio.components.LoRaConfigScreen
 import com.geeksville.mesh.ui.sharing.ChannelScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
 sealed class ChannelsRoutes {
-    @Serializable
-    data object ChannelsGraph : Graph
+    @Serializable data object ChannelsGraph : Graph
 
-    @Serializable
-    data object Channels : Route
+    @Serializable data object Channels : Route
 }
 
-/**
- * Navigation graph for for the top level ChannelScreen - [ChannelsRoutes.Channels].
- */
+/** Navigation graph for for the top level ChannelScreen - [ChannelsRoutes.Channels]. */
 fun NavGraphBuilder.channelsGraph(navController: NavHostController, uiViewModel: UIViewModel) {
-    navigation<ChannelsRoutes.ChannelsGraph>(
-        startDestination = ChannelsRoutes.Channels,
-    ) {
-        composable<ChannelsRoutes.Channels> { backStackEntry ->
-            val parentEntry = remember(backStackEntry) {
-                val parentRoute = backStackEntry.destination.parent!!.route!!
-                navController.getBackStackEntry(parentRoute)
-            }
+    navigation<ChannelsRoutes.ChannelsGraph>(startDestination = ChannelsRoutes.Channels) {
+        composable<ChannelsRoutes.Channels>(
+            deepLinks = listOf(navDeepLink<ChannelsRoutes.Channels>(basePath = "$DEEP_LINK_BASE_URI/channels")),
+        ) { backStackEntry ->
+            val parentEntry = remember(backStackEntry) { navController.getBackStackEntry(ChannelsRoutes.ChannelsGraph) }
             ChannelScreen(
                 viewModel = uiViewModel,
                 radioConfigViewModel = hiltViewModel(parentEntry),
-                onNavigate = { route -> navController.navigate(route) }
+                onNavigate = { route -> navController.navigate(route) },
             )
         }
         configRoutes(navController)
     }
 }
 
-private fun NavGraphBuilder.configRoutes(
-    navController: NavHostController,
-) {
+private fun NavGraphBuilder.configRoutes(navController: NavHostController) {
     ConfigRoute.entries.forEach { configRoute ->
         composable(configRoute.route::class) { backStackEntry ->
-            val parentEntry = remember(backStackEntry) {
-                val parentRoute = backStackEntry.destination.parent!!.route!!
-                navController.getBackStackEntry(parentRoute)
-            }
+            val parentEntry = remember(backStackEntry) { navController.getBackStackEntry(ChannelsRoutes.ChannelsGraph) }
             when (configRoute) {
                 ConfigRoute.CHANNELS -> ChannelConfigScreen(hiltViewModel(parentEntry))
                 ConfigRoute.LORA -> LoRaConfigScreen(hiltViewModel(parentEntry))
-                else -> Unit
+                else -> Unit // Should not happen if ConfigRoute enum is exhaustive for this context
             }
         }
     }

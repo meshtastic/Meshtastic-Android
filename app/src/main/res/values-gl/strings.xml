@@ -35,11 +35,9 @@
     <string name="send">Enviar</string>
     <string name="warning_not_paired">Aínda non enlazaches unha radio compatible con Meshtástic neste teléfono. Por favor enlaza un dispositivo e coloca o teu nome de usuario. \n\n Esta aplicación de código aberto está en desenvolvemento. Se atopas problemas por favor publícaos no noso foro: https://github.com/orgs/meshtastic/discussions\n\nPara máis información visita a nosa páxina - www.meshtastic.org.</string>
     <string name="you">Ti</string>
-    <string name="analytics_okay">Estadísticas de uso anónimo e informes de fallos.</string>
     <string name="accept">Aceptar</string>
     <string name="cancel">Cancelar</string>
     <string name="new_channel_rcvd">Novo enlace de canle recibida</string>
-    <string name="permission_missing">Meshtástic precisa permisos de ubicación e ten que estar prendida para atopar novos dispositivos vía Bluetooth. Podes apagala despois.</string>
     <string name="report_bug">Reportar erro</string>
     <string name="report_a_bug">Reporta un erro</string>
     <string name="report_bug_text">Seguro que queres reportar un erro? Despois de reportar, por favor publica en https://github.com/orgs/meshtastic/discussions para poder unir o reporte co que atopaches.</string>
@@ -51,7 +49,6 @@
     <string name="disconnected">Desconectado</string>
     <string name="device_sleeping">Dispositivo durmindo</string>
     <string name="ip_address">Enderezo IP:</string>
-    <string name="connected">Conectado á radio</string>
     <string name="connected_to">Conectado á radio (%s)</string>
     <string name="not_connected">Non conectado</string>
     <string name="connected_sleeping">Conectado á radio, pero está durmindo</string>
@@ -72,6 +69,7 @@
     <string name="save_rangetest">Exportar rangetest.csv</string>
     <string name="reset">Restablecer</string>
     <string name="scan">Escanear</string>
+    <string name="add_network_device">Engadir</string>
     <string name="are_you_sure_change_default">Está seguro de que quere cambiar á canle predeterminada?</string>
     <string name="reset_to_defaults">Restablecer a por defecto</string>
     <string name="apply">Aplicar</string>
@@ -109,8 +107,6 @@
     <string name="quick_chat_append">Anexar a mensaxe</string>
     <string name="quick_chat_instant">Enviar instantaneamente</string>
     <string name="factory_reset">Restablecemento de fábrica</string>
-    <string name="bluetooth_disabled">Bluetooth desconectada</string>
-    <string name="permission_missing_31">Meshtástic precisa permiso de Dispositivos Próximos para atopar e conectar dispositivos vía Bluetooth. Podes apagalo cando está en desuso.</string>
     <string name="direct_message">Mensaxe directa</string>
     <string name="nodedb_reset">Restablecer NodeDB</string>
     <string name="delivery_confirmed">Entrega confirmada</string>

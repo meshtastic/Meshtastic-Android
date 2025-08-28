@@ -27,62 +27,48 @@ import androidx.navigation.navigation
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.connections.ConnectionsScreen
-import com.geeksville.mesh.ui.radioconfig.components.LoRaConfigScreen
+import com.geeksville.mesh.ui.settings.radio.components.LoRaConfigScreen
 import kotlinx.serialization.Serializable
 
 @Serializable
 sealed class ConnectionsRoutes {
-    @Serializable
-    data object ConnectionsGraph : Graph
+    @Serializable data object ConnectionsGraph : Graph
 
-    @Serializable
-    data object Connections : Route
+    @Serializable data object Connections : Route
 }
 
-/**
- * Navigation graph for for the top level ConnectionsScreen - [ConnectionsRoutes.Connections].
- */
+/** Navigation graph for for the top level ConnectionsScreen - [ConnectionsRoutes.Connections]. */
 fun NavGraphBuilder.connectionsGraph(
     navController: NavHostController,
     uiViewModel: UIViewModel,
-    bluetoothViewModel: BluetoothViewModel
+    bluetoothViewModel: BluetoothViewModel,
 ) {
-    navigation<ConnectionsRoutes.ConnectionsGraph>(
-        startDestination = ConnectionsRoutes.Connections,
-    ) {
+    @Suppress("ktlint:standard:max-line-length")
+    navigation<ConnectionsRoutes.ConnectionsGraph>(startDestination = ConnectionsRoutes.Connections) {
         composable<ConnectionsRoutes.Connections>(
             deepLinks = listOf(
-                navDeepLink {
-                    uriPattern = "$DEEP_LINK_BASE_URI/connections"
-                    action = "android.intent.action.VIEW"
-                }
-            )
+                navDeepLink<ConnectionsRoutes.Connections>(basePath = "$DEEP_LINK_BASE_URI/connections"),
+            ),
         ) { backStackEntry ->
-            val parentEntry = remember(backStackEntry) {
-                val parentRoute = backStackEntry.destination.parent!!.route!!
-                navController.getBackStackEntry(parentRoute)
-            }
+            val parentEntry =
+                remember(backStackEntry) { navController.getBackStackEntry(ConnectionsRoutes.ConnectionsGraph) }
             ConnectionsScreen(
                 uiViewModel = uiViewModel,
                 bluetoothViewModel = bluetoothViewModel,
                 radioConfigViewModel = hiltViewModel(parentEntry),
-                onNavigateToRadioConfig = { navController.navigate(RadioConfigRoutes.RadioConfig()) },
+                onNavigateToSettings = { navController.navigate(SettingsRoutes.Settings()) },
                 onNavigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
-                onConfigNavigate = { route -> navController.navigate(route) }
+                onConfigNavigate = { route -> navController.navigate(route) },
             )
         }
         configRoutes(navController)
     }
 }
 
-private fun NavGraphBuilder.configRoutes(
-    navController: NavHostController,
-) {
-    composable<RadioConfigRoutes.LoRa> { backStackEntry ->
-        val parentEntry = remember(backStackEntry) {
-            val parentRoute = backStackEntry.destination.parent!!.route!!
-            navController.getBackStackEntry(parentRoute)
-        }
+private fun NavGraphBuilder.configRoutes(navController: NavHostController) {
+    composable<SettingsRoutes.LoRa> { backStackEntry ->
+        val parentEntry =
+            remember(backStackEntry) { navController.getBackStackEntry(ConnectionsRoutes.ConnectionsGraph) }
         LoRaConfigScreen(hiltViewModel(parentEntry))
     }
 }

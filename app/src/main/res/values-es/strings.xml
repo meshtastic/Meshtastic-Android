@@ -79,12 +79,10 @@
     <string name="send">Enviar</string>
     <string name="warning_not_paired">Aún no ha emparejado una radio compatible con Meshtastic con este teléfono. Empareje un dispositivo y configure su nombre de usuario. \n\nEsta aplicación de código abierto es una prueba alfa; si encuentra un problema publiquelo en el foro: https://github.com/orgs/meshtastic/discussions\n\nPara obtener más información visite nuestra página web - www.meshtastic.org.</string>
     <string name="you">Usted</string>
-    <string name="analytics_okay">Estadísticas de uso anónimo e informes de fallos.</string>
     <string name="accept">Aceptar</string>
     <string name="cancel">Cancelar</string>
     <string name="clear_changes">Borrar cambios</string>
     <string name="new_channel_rcvd">Nueva URL de canal recibida</string>
-    <string name="permission_missing">Meshtastic necesita permiso de ubicación y la ubicación debe estar encendida para encontrar nuevos dispositivos a través de Bluetooth. Puedes apagarla después.</string>
     <string name="report_bug">Informar de un fallo</string>
     <string name="report_a_bug">Informar de un fallo</string>
     <string name="report_bug_text">¿Está seguro de que quiere informar de un error? Después de informar por favor publique en https://github.com/orgs/meshtastic/discussions para que podamos comparar el informe con lo que encontró.</string>
@@ -98,7 +96,7 @@
     <string name="connected_count">Conectado: %1$s Encendido</string>
     <string name="ip_address">Dirección IP:</string>
     <string name="ip_port">Puerto:</string>
-    <string name="connected">Conectado a la radio</string>
+    <string name="connected">Conectado</string>
     <string name="connected_to">Conectado a la radio (%s)</string>
     <string name="not_connected">No está conectado</string>
     <string name="connected_sleeping">Conectado a la radio, pero está en reposo</string>
@@ -136,6 +134,7 @@
     <string name="save_rangetest">Guardar rangetest.csv</string>
     <string name="reset">Reiniciar</string>
     <string name="scan">Escanear</string>
+    <string name="add_network_device">Añadir</string>
     <string name="are_you_sure_change_default">¿Estás seguro de que quieres cambiar al canal por defecto?</string>
     <string name="reset_to_defaults">Restablecer los valores predeterminados</string>
     <string name="apply">Aplique</string>
@@ -176,8 +175,6 @@
     <string name="quick_chat_append">Añadir al mensaje</string>
     <string name="quick_chat_instant">Envía instantáneo</string>
     <string name="factory_reset">Restablecer los valores de fábrica</string>
-    <string name="bluetooth_disabled">Bluetooth desactivado</string>
-    <string name="permission_missing_31">Meshtastic necesita permiso de dispositivos cercanos para encontrar y conectarse a dispositivos mediante Bluetooth. Puede apagarlo cuando no esté en uso.</string>
     <string name="direct_message">Mensaje Directo</string>
     <string name="nodedb_reset">Reinicio de NodeDB</string>
     <string name="delivery_confirmed">Envío confirmado</string>
@@ -404,7 +401,7 @@ Rango de Valores 0 - 500.</string>
     <string name="heartbeat">Pulso de vida</string>
     <string name="air_quality_icon">Icono de la calidad del aire</string>
     <string name="distance">Distancia</string>
-    <string name="map">Mapa</string>
+    <string name="bottom_nav_settings">Ajustes</string>
     <string name="react">Reaccionar</string>
     <string name="uv_lux">Lux ultravioletas</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->

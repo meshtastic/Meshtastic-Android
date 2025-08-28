@@ -83,12 +83,10 @@
     <string name="send">Отправить</string>
     <string name="warning_not_paired">Вы еще не подключили к телефону устройство, совместимое с Meshtastic радио. Пожалуйста, подключите устройство и задайте имя пользователя.\n\nЭто приложение с открытым исходным кодом находится в альфа-тестировании, если вы обнаружите проблемы, пожалуйста, напишите в чате на нашем сайте.\n\nДля получения дополнительной информации посетите нашу веб-страницу - www.meshtastic.org.</string>
     <string name="you">Вы</string>
-    <string name="analytics_okay">Анонимная статистика использования и отчеты о сбоях.</string>
     <string name="accept">Принять</string>
     <string name="cancel">Отмена</string>
     <string name="clear_changes">Отменить изменения</string>
     <string name="new_channel_rcvd">URL нового канала получен</string>
-    <string name="permission_missing">Требуемое разрешение отсутствует, Meshtastic не сможет работать должным образом. Пожалуйста, включите в настройках приложения.</string>
     <string name="report_bug">Сообщить об ошибке</string>
     <string name="report_a_bug">Сообщить об ошибке</string>
     <string name="report_bug_text">Вы уверены, что хотите сообщить об ошибке? После сообщения, пожалуйста, напишите в https://github.com/orgs/meshtastic/discussions, чтобы мы могли сопоставить отчет с тем, что вы нашли.</string>
@@ -103,7 +101,7 @@
     <string name="connected_count">Подключено: %1$s в сети</string>
     <string name="ip_address">IP-адрес:</string>
     <string name="ip_port">Порт:</string>
-    <string name="connected">Подключен к радио</string>
+    <string name="connected">Подключено</string>
     <string name="connected_to">Подключен к радио (%s)</string>
     <string name="not_connected">Нет соединения</string>
     <string name="connected_sleeping">Подключено к радио, но оно спит</string>
@@ -141,6 +139,7 @@
     <string name="save_rangetest">Экспортировать rangetest.csv</string>
     <string name="reset">Сброс</string>
     <string name="scan">Сканирования</string>
+    <string name="add_network_device">Добавить</string>
     <string name="are_you_sure_change_default">Вы уверены, что хотите перейти на канал по умолчанию?</string>
     <string name="reset_to_defaults">Сброс значений по умолчанию</string>
     <string name="apply">Применить</string>
@@ -185,8 +184,6 @@
     <string name="quick_chat_show">Показать меню быстрого чата</string>
     <string name="quick_chat_hide">Скрыть меню быстрого чата</string>
     <string name="factory_reset">Сброс настроек к заводским настройкам</string>
-    <string name="bluetooth_disabled">Bluetooth отключен</string>
-    <string name="permission_missing_31">Meshtastic требует разрешение на поиск и подключение к устройствам через Bluetooth. Вы можете отключить его, когда он не используется.</string>
     <string name="direct_message">Прямое сообщение</string>
     <string name="nodedb_reset">Очистка списка узлов сети</string>
     <string name="delivery_confirmed">Доставка подтверждена</string>
@@ -605,10 +602,8 @@
     <string name="load">Загрузка</string>
     <string name="user_string">Строка пользователя</string>
     <string name="navigate_into_label">Перейти в</string>
-    <string name="connections">Соединения</string>
-    <string name="map">Карта</string>
-    <string name="contacts">Контакты</string>
     <string name="nodes">Узлы</string>
+    <string name="bottom_nav_settings">Настройки</string>
     <string name="set_your_region">Установите ваш регион</string>
     <string name="reply">Ответить</string>
     <string name="map_reporting_summary">Ваш узел будет периодически отправлять незашифрованный пакет отчёта карты на настроенный MQTT-сервер, что включает идентификатор, полное и краткое имя, примерное местоположение, модель аппаратного обеспечения, роль, версия прошивки, регион LoRa, режим работы передатчика и имя основного канала.</string>
@@ -636,7 +631,6 @@
     <string name="node_count_template">(%1$d в сети / всего %2$d)</string>
     <string name="react">Среагировать</string>
     <string name="disconnect">Отключиться</string>
-    <string name="no_ble_devices">Устройства Bluetooth не найдены.</string>
     <string name="no_network_devices">Сетевые устройства не найдены.</string>
     <string name="no_usb_devices">USB-устройства COM-порта не найдены.</string>
     <string name="scroll_to_bottom">Прокрутить вниз</string>

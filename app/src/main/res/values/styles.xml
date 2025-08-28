@@ -15,8 +15,20 @@
      along with this program.  If not, see <https://www.gnu.org/licenses/>.
 -->
 
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
-    <style name="AppTheme" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar"/>
+    <!-- Shim in the system UI overrides -->
+    <style name="SplashTheme.NightAdjusted" parent="Theme.SplashScreen">
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
+        <item name="windowSplashScreenBackground">#FFFFFF</item>
+    </style>
+
+    <style name="SplashTheme" parent="SplashTheme.NightAdjusted">
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_splash</item>
+        <item name="postSplashScreenTheme">@style/AppTheme</item>
+    </style>
+
+    <style name="AppTheme" parent="Theme.Material3.DynamicColors.DayNight.NoActionBar" />
 
 </resources>

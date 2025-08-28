@@ -69,11 +69,9 @@
     <string name="send">Dërgo</string>
     <string name="warning_not_paired">Ju ende nuk keni lidhur një paisje radio Meshtastic me këtë telefon. Ju lutem lidhni një paisje radio dhe vendosni emrin e përdoruesit.\n\nKy aplikacion është software i lire \"open-source\" dhe në variantin Alpha për testim. Nëse hasni probleme, ju lutem shkruani në çatin e faqes tonë të internetit: https://github.com/orgs/meshtastic/discussions\n\nPër më shumë informacione vizitoni faqen tonë në internet - www.meshtastic.org.</string>
     <string name="you">Ju</string>
-    <string name="analytics_okay">Statistikat e përdorimit dhe raportet e keq funksionimit mblidhen në mënyrë krejtësisht anonime</string>
     <string name="accept">Prano</string>
     <string name="cancel">Anullo</string>
     <string name="new_channel_rcvd">Ju keni një kanal radio të ri URL</string>
-    <string name="permission_missing">Meshtastic ka nevojë për leje vendndodhjeje dhe vendndodhja duhet të jetë e aktivizuar për të gjetur paisje të reja përmes Bluetooth. Mund ta fikni përsëri pas kësaj.</string>
     <string name="report_bug">Raporto Bug</string>
     <string name="report_a_bug">Raporto një bug</string>
     <string name="report_bug_text">Jeni të sigurtë që dëshironi të raportoni një bug? Pas raportimit, ju lutem postoni në https://github.com/orgs/meshtastic/discussions që të mund të lidhim raportin me atë që keni gjetur.</string>
@@ -85,7 +83,6 @@
     <string name="disconnected">I shkëputur</string>
     <string name="device_sleeping">Pajisja po fle</string>
     <string name="ip_address">Adresa IP:</string>
-    <string name="connected">E lidhur me radio</string>
     <string name="connected_to">E lidhur me radio (%s)</string>
     <string name="not_connected">Nuk është lidhur</string>
     <string name="connected_sleeping">E lidhur me radio, por është në gjumë</string>
@@ -106,6 +103,7 @@
     <string name="save_rangetest">Eksporto rangetest.csv</string>
     <string name="reset">Rivendos</string>
     <string name="scan">Skano</string>
+    <string name="add_network_device">Shto</string>
     <string name="are_you_sure_change_default">A jeni të sigurt se doni të kaloni në kanalin e parazgjedhur?</string>
     <string name="reset_to_defaults">Rivendos në parazgjedhje</string>
     <string name="apply">Apliko</string>
@@ -143,8 +141,6 @@
     <string name="quick_chat_append">Shto në mesazh</string>
     <string name="quick_chat_instant">Dërgo menjëherë</string>
     <string name="factory_reset">Përditësim i fabrikës</string>
-    <string name="bluetooth_disabled">Bluetooth i çaktivizuar</string>
-    <string name="permission_missing_31">Meshtastic ka nevojë për leje për pajisjet afër për të gjetur dhe lidhur me pajisje përmes Bluetooth. Mund ta çaktivizoni atë kur nuk është në përdorim.</string>
     <string name="direct_message">Mesazh i drejtpërdrejtë</string>
     <string name="nodedb_reset">Përditësimi i NodeDB</string>
     <string name="delivery_confirmed">Dërgimi i konfirmuar</string>

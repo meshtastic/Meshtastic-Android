@@ -17,67 +17,16 @@
 
 package com.geeksville.mesh
 
-import android.os.Debug
-import com.geeksville.mesh.android.AppPrefs
-import com.geeksville.mesh.android.BuildUtils.isEmulator
 import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.util.Exceptions
-import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.google.firebase.crashlytics.setCustomKeys
+import com.geeksville.mesh.android.prefs.AnalyticsPrefs
 import dagger.hilt.android.HiltAndroidApp
-import timber.log.Timber
+import javax.inject.Inject
 
 @HiltAndroidApp
 class MeshUtilApplication : GeeksvilleApplication() {
+    @Inject override lateinit var analyticsPrefs: AnalyticsPrefs
 
     override fun onCreate() {
         super.onCreate()
-
-        // We default to off in the manifest - we turn on here if the user approves
-        // leave off when running in the debugger
-        if (!isEmulator && (!BuildConfig.DEBUG || !Debug.isDebuggerConnected())) {
-            val crashlytics = FirebaseCrashlytics.getInstance()
-            val pref = AppPrefs(this)
-            crashlytics.setUserId(pref.getInstallId()) // be able to group all bugs per anonymous user
-
-            fun sendCrashReports() {
-                if (isAnalyticsAllowed) {
-                    crashlytics.sendUnsentReports()
-                }
-            }
-
-            // Send any old reports if user approves
-            sendCrashReports()
-
-            // Attach to our exception wrapper
-            Exceptions.reporter = { exception, _, _ ->
-                crashlytics.recordException(exception)
-                sendCrashReports() // Send the new report
-            }
-            Timber.plant(CrashlyticsTree())
-        }
-    }
-}
-
-class CrashlyticsTree : Timber.Tree() {
-
-    companion object {
-        private const val KEY_PRIORITY = "priority"
-        private const val KEY_TAG = "tag"
-        private const val KEY_MESSAGE = "message"
-    }
-
-    override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
-        FirebaseCrashlytics.getInstance().setCustomKeys {
-            key(KEY_PRIORITY, priority)
-            key(KEY_TAG, tag ?: "No Tag")
-            key(KEY_MESSAGE, message)
-        }
-
-        if (t == null) {
-            FirebaseCrashlytics.getInstance().recordException(Exception(message))
-        } else {
-            FirebaseCrashlytics.getInstance().recordException(t)
-        }
     }
 }

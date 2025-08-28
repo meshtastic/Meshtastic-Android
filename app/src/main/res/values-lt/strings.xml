@@ -69,11 +69,9 @@
     <string name="send">Siųsti</string>
     <string name="warning_not_paired">Su šiuo telefonu dar nėra susietas joks Meshtastic įtaisais. Prašome suporuoti įrenginį ir nustatyti savo vartotojo vardą.\n\nŠi atvirojo kodo programa yra kūrimo stadijoje, jei pastebėsite problemas, prašome pranešti mūsų forume: https://github.com/orgs/meshtastic/discussions\n\nDaugiau informacijos rasite mūsų interneto svetainėje - www.meshtastic.org.</string>
     <string name="you">Tu</string>
-    <string name="analytics_okay">Siųsti anoniminę naudojimo statistika ir klaidų ataskaitas.</string>
     <string name="accept">Priimti</string>
     <string name="cancel">Atšaukti</string>
     <string name="new_channel_rcvd">Gautas naujo kanalo URL</string>
-    <string name="permission_missing">Meshtastic reikalauja vietos nustatymo leidimo, ir vietos nustatymas turi būti įjungtas, kad būtų galima rasti naujus įrenginius per „Bluetooth“. Vėliau jį galite išjungti.</string>
     <string name="report_bug">Pranešti apie klaidą</string>
     <string name="report_a_bug">Pranešti apie klaidą</string>
     <string name="report_bug_text">Ar tikrai norite pranešti apie klaidą? Po pranešimo prašome parašyti forume https://github.com/orgs/meshtastic/discussions, kad galėtume suderinti pranešimą su jūsų pastebėjimais.</string>
@@ -85,7 +83,6 @@
     <string name="disconnected">Atsijungta</string>
     <string name="device_sleeping">Įrenginys miega</string>
     <string name="ip_address">IP adresas:</string>
-    <string name="connected">Prisijungta prie radijo</string>
     <string name="connected_to">Prisijungta prie radijo (%s)</string>
     <string name="not_connected">Neprijungtas</string>
     <string name="connected_sleeping">Prisijungta prie radijo, bet jis yra miego režime</string>
@@ -106,6 +103,7 @@
     <string name="save_rangetest">Eksportuoti rangetest.csv</string>
     <string name="reset">Nustatyti iš naujo</string>
     <string name="scan">Skenuoti</string>
+    <string name="add_network_device">Pridėti</string>
     <string name="are_you_sure_change_default">Ar tikrai norite pakeisti į numatytąjį kanalą?</string>
     <string name="reset_to_defaults">Atkurti numatytuosius parametrus</string>
     <string name="apply">Taikyti</string>
@@ -146,8 +144,6 @@
     <string name="quick_chat_append">Pridėti prie žinutės</string>
     <string name="quick_chat_instant">Siųsti nedelsiant</string>
     <string name="factory_reset">Gamyklinis atstatymas</string>
-    <string name="bluetooth_disabled">Bluetooth išjungtas</string>
-    <string name="permission_missing_31">„Meshtastic“ reikia „Netoliese esančių įrenginių“ leidimo, kad galėtų rasti ir prisijungti prie įrenginių per „Bluetooth“. Galite išjungti, kai nenaudojate.</string>
     <string name="direct_message">Tiesioginė žinutė</string>
     <string name="nodedb_reset">NodeDB perkrauti</string>
     <string name="delivery_confirmed">Nustatymas įkeltas</string>

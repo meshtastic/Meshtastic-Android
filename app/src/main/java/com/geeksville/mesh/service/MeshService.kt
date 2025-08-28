@@ -21,13 +21,11 @@ import android.annotation.SuppressLint
 import android.app.Service
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
 import android.os.RemoteException
 import androidx.core.app.ServiceCompat
-import androidx.core.content.edit
 import androidx.core.location.LocationCompat
 import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.AppOnlyProtos
@@ -61,6 +59,7 @@ import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.hasLocationPermission
+import com.geeksville.mesh.android.prefs.MeshPrefs
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.MeshLogRepository
@@ -92,7 +91,6 @@ import com.google.protobuf.ByteString
 import com.google.protobuf.InvalidProtocolBufferException
 import dagger.Lazy
 import dagger.hilt.android.AndroidEntryPoint
-import java8.util.concurrent.CompletableFuture
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -104,13 +102,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.withTimeoutOrNull
 import java.util.Random
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentLinkedQueue
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 import javax.inject.Inject
 import kotlin.math.absoluteValue
 
@@ -151,6 +145,8 @@ class MeshService :
     @Inject lateinit var mqttRepository: MQTTRepository
 
     @Inject lateinit var serviceNotifications: MeshServiceNotifications
+
+    @Inject lateinit var meshPrefs: MeshPrefs
 
     companion object : Logging {
 
@@ -215,6 +211,14 @@ class MeshService :
         MeshServiceBroadcasts(this, clientPackages) {
             connectionState.also { radioConfigRepository.setConnectionState(it) }
         }
+    private val packetHandler: PacketHandler by lazy {
+        PacketHandler(
+            packetRepository = packetRepository,
+            serviceBroadcasts = serviceBroadcasts,
+            radioInterfaceService = radioInterfaceService,
+            meshLogRepository = meshLogRepository,
+        )
+    }
     private val serviceJob = Job()
     private val serviceScope = CoroutineScope(Dispatchers.IO + serviceJob)
     private var connectionState = ConnectionState.DISCONNECTED
@@ -288,42 +292,6 @@ class MeshService :
         }
     }
 
-    /**
-     * Send a command/packet to our radio. But cope with the possibility that we might start up before we are fully
-     * bound to the RadioInterfaceService
-     */
-    private fun sendToRadio(p: ToRadio.Builder) {
-        val built = p.build()
-        debug("Sending to radio ${built.toPIIString()}")
-        val b = built.toByteArray()
-
-        radioInterfaceService.sendToRadio(b)
-        changeStatus(p.packet.id, MessageStatus.ENROUTE)
-
-        if (p.packet.hasDecoded()) {
-            val packetToSave =
-                MeshLog(
-                    uuid = UUID.randomUUID().toString(),
-                    message_type = "Packet",
-                    received_date = System.currentTimeMillis(),
-                    raw_message = p.packet.toString(),
-                    fromNum = p.packet.from,
-                    portNum = p.packet.decoded.portnumValue,
-                    fromRadio = fromRadio { packet = p.packet },
-                )
-            insertMeshLog(packetToSave)
-        }
-    }
-
-    /**
-     * Send a mesh packet to the radio, if the radio is not currently connected this function will throw
-     * NotConnectedException
-     */
-    private fun sendToRadio(packet: MeshPacket) {
-        queuedPackets.add(packet)
-        startPacketQueue()
-    }
-
     private fun showAlertNotification(contactKey: String, dataPacket: DataPacket) {
         serviceNotifications.showAlertNotification(
             contactKey,
@@ -352,8 +320,8 @@ class MeshService :
 
     override fun onCreate() {
         super.onCreate()
-        sharedPreferences = getSharedPreferences("mesh-prefs", Context.MODE_PRIVATE)
-        _lastAddress.value = sharedPreferences.getString("device_address", null) ?: NO_DEVICE_SELECTED
+
+        _lastAddress.value = meshPrefs.deviceAddress ?: NO_DEVICE_SELECTED
 
         info("Creating mesh service")
         serviceNotifications.initChannels()
@@ -847,7 +815,7 @@ class MeshService :
                         }
 
                         handleAckNak(data.requestId, fromId, u.errorReasonValue)
-                        queueResponse.remove(data.requestId)?.complete(true)
+                        packetHandler.removeResponse(data.requestId, complete = true)
                     }
 
                     Portnums.PortNum.ADMIN_APP_VALUE -> {
@@ -1120,64 +1088,11 @@ class MeshService :
         }
     }
 
-    private val queuedPackets = ConcurrentLinkedQueue<MeshPacket>()
-    private val queueResponse = mutableMapOf<Int, CompletableFuture<Boolean>>()
-    private var queueJob: Job? = null
-
-    private fun sendPacket(packet: MeshPacket): CompletableFuture<Boolean> {
-        // send the packet to the radio and return a CompletableFuture that will be completed with
-        // the result
-        val future = CompletableFuture<Boolean>()
-        queueResponse[packet.id] = future
-        try {
-            if (connectionState != ConnectionState.CONNECTED) throw RadioNotConnectedException()
-            sendToRadio(ToRadio.newBuilder().apply { this.packet = packet })
-        } catch (ex: Exception) {
-            errormsg("sendToRadio error:", ex)
-            future.complete(false)
-        }
-        return future
-    }
-
-    private fun startPacketQueue() {
-        if (queueJob?.isActive == true) return
-        queueJob =
-            serviceScope.handledLaunch {
-                debug("packet queueJob started")
-                while (connectionState == ConnectionState.CONNECTED) {
-                    // take the first packet from the queue head
-                    val packet = queuedPackets.poll() ?: break
-                    try {
-                        // send packet to the radio and wait for response
-                        val response = sendPacket(packet)
-                        debug("queueJob packet id=${packet.id.toUInt()} waiting")
-                        val success = response.get(2, TimeUnit.MINUTES)
-                        debug("queueJob packet id=${packet.id.toUInt()} success $success")
-                    } catch (e: TimeoutException) {
-                        debug("queueJob packet id=${packet.id.toUInt()} timeout")
-                    } catch (e: Exception) {
-                        debug("queueJob packet id=${packet.id.toUInt()} failed")
-                    }
-                }
-            }
-    }
-
-    private fun stopPacketQueue() {
-        if (queueJob?.isActive == true) {
-            info("Stopping packet queueJob")
-            queueJob?.cancel()
-            queueJob = null
-            queuedPackets.clear()
-            queueResponse.entries.lastOrNull { !it.value.isDone }?.value?.complete(false)
-            queueResponse.clear()
-        }
-    }
-
     private fun sendNow(p: DataPacket) {
         val packet = toMeshPacket(p)
         p.time = System.currentTimeMillis() // update time to the actual time we started sending
         // debug("Sending to radio: ${packet.toPIIString()}")
-        sendToRadio(packet)
+        packetHandler.sendToRadio(packet) { connectionState }
     }
 
     private fun processQueuedPackets() {
@@ -1191,26 +1106,6 @@ class MeshService :
             }
         }
         offlineSentPackets.removeAll(sentPackets)
-    }
-
-    private suspend fun getDataPacketById(packetId: Int): DataPacket? = withTimeoutOrNull(1000) {
-        var dataPacket: DataPacket? = null
-        while (dataPacket == null) {
-            dataPacket = packetRepository.get().getPacketById(packetId)?.data
-            if (dataPacket == null) delay(100)
-        }
-        dataPacket
-    }
-
-    /** Change the status on a DataPacket and update watchers */
-    private fun changeStatus(packetId: Int, m: MessageStatus) = serviceScope.handledLaunch {
-        if (packetId != 0) {
-            getDataPacketById(packetId)?.let { p ->
-                if (p.status == m) return@handledLaunch
-                packetRepository.get().updateMessageStatus(p, m)
-                serviceBroadcasts.broadcastMessageStatus(packetId, m)
-            }
-        }
     }
 
     /** Handle an ack/nak packet by updating sent message status */
@@ -1348,7 +1243,7 @@ class MeshService :
 
         // Perform all the steps needed once we start waiting for device sleep to complete
         fun startDeviceSleep() {
-            stopPacketQueue()
+            packetHandler.stopPacketQueue()
             stopLocationRequests()
             stopMqttClientProxy()
 
@@ -1381,7 +1276,7 @@ class MeshService :
         }
 
         fun startDisconnect() {
-            stopPacketQueue()
+            packetHandler.stopPacketQueue()
             stopLocationRequests()
             stopMqttClientProxy()
 
@@ -1490,7 +1385,7 @@ class MeshService :
                     handleModuleConfig(proto.moduleConfig)
                 }
                 PayloadVariantCase.QUEUESTATUS -> { proto: MeshProtos.FromRadio ->
-                    handleQueueStatus(proto.queueStatus)
+                    packetHandler.handleQueueStatus((proto.queueStatus))
                 }
                 PayloadVariantCase.METADATA -> { proto: MeshProtos.FromRadio -> handleMetadata(proto.metadata) }
                 PayloadVariantCase.MQTTCLIENTPROXYMESSAGE -> { proto: MeshProtos.FromRadio ->
@@ -1566,17 +1461,6 @@ class MeshService :
         setLocalModuleConfig(config)
         val moduleCount = moduleConfig.allFields.size
         radioConfigRepository.setStatusMessage("Module config ($moduleCount / $moduleTotal)")
-    }
-
-    private fun handleQueueStatus(queueStatus: MeshProtos.QueueStatus) {
-        debug("queueStatus ${queueStatus.toOneLineString()}")
-        val (success, isFull, requestId) = with(queueStatus) { Triple(res == 0, free == 0, meshPacketId) }
-        if (success && isFull) return // Queue is full, wait for free != 0
-        if (requestId != 0) {
-            queueResponse.remove(requestId)?.complete(success)
-        } else {
-            queueResponse.entries.lastOrNull { !it.value.isDone }?.value?.complete(success)
-        }
     }
 
     private fun handleChannel(ch: ChannelProtos.Channel) {
@@ -1769,7 +1653,7 @@ class MeshService :
         serviceNotifications.showClientNotification(notification)
         // if the future for the originating request is still in the queue, complete as unsuccessful
         // for now
-        queueResponse.remove(notification.replyId)?.complete(false)
+        packetHandler.removeResponse(notification.replyId, complete = false)
     }
 
     private fun handleFileInfo(fileInfo: MeshProtos.FileInfo) {
@@ -1843,7 +1727,9 @@ class MeshService :
         if (moduleConfig.mqtt.enabled && moduleConfig.mqtt.proxyToClientEnabled) {
             mqttMessageFlow =
                 mqttRepository.proxyMessageFlow
-                    .onEach { message -> sendToRadio(ToRadio.newBuilder().apply { mqttClientProxyMessage = message }) }
+                    .onEach { message ->
+                        packetHandler.sendToRadio(ToRadio.newBuilder().apply { mqttClientProxyMessage = message })
+                    }
                     .catch { throwable -> radioConfigRepository.setErrorMessage("MqttClientProxy failed: $throwable") }
                     .launchIn(serviceScope)
         }
@@ -1864,7 +1750,9 @@ class MeshService :
         processQueuedPackets() // send any packets that were queued up
         startMqttClientProxy()
         serviceBroadcasts.broadcastConnection()
-        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { setTimeOnly = currentSecond() })
+        packetHandler.sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { setTimeOnly = currentSecond() }) {
+            connectionState
+        }
         sendAnalytics()
         reportConnection()
     }
@@ -1945,7 +1833,7 @@ class MeshService :
 
         debug("Starting config only nonce=$CONFIG_ONLY_NONCE")
 
-        sendToRadio(ToRadio.newBuilder().apply { this.wantConfigId = CONFIG_ONLY_NONCE })
+        packetHandler.sendToRadio(ToRadio.newBuilder().apply { this.wantConfigId = CONFIG_ONLY_NONCE })
     }
 
     private fun startNodeInfoOnly() {
@@ -1953,7 +1841,7 @@ class MeshService :
 
         debug("Starting node info nonce=$NODE_INFO_ONLY_NONCE")
 
-        sendToRadio(ToRadio.newBuilder().apply { this.wantConfigId = NODE_INFO_ONLY_NONCE })
+        packetHandler.sendToRadio(ToRadio.newBuilder().apply { this.wantConfigId = NODE_INFO_ONLY_NONCE })
     }
 
     /** Send a position (typically from our built in GPS) into the mesh. */
@@ -1970,7 +1858,7 @@ class MeshService :
                     handleReceivedPosition(mi.myNodeNum, position)
                 }
 
-                sendToRadio(
+                packetHandler.sendToRadio(
                     newMeshPacketTo(idNum).buildMeshPacket(
                         channel =
                         if (destNum == null) {
@@ -1984,7 +1872,9 @@ class MeshService :
                         payload = position.toByteString()
                         this.wantResponse = wantResponse
                     },
-                )
+                ) {
+                    connectionState
+                }
             }
         } catch (ex: BLEException) {
             warn("Ignoring disconnected radio during gps location update")
@@ -2011,7 +1901,11 @@ class MeshService :
             handleReceivedUser(dest.num, user)
 
             // encapsulate our payload in the proper protobuf and fire it off
-            sendToRadio(newMeshPacketTo(dest.num).buildAdminPacket(id = packetId) { setOwner = user })
+            packetHandler.sendToRadio(
+                newMeshPacketTo(dest.num).buildAdminPacket(id = packetId) { setOwner = user },
+            ) {
+                connectionState
+            }
         }
     }
 
@@ -2050,16 +1944,22 @@ class MeshService :
     }
 
     private fun importContact(contact: AdminProtos.SharedContact) {
-        sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { addContact = contact })
+        packetHandler.sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { addContact = contact }) {
+            connectionState
+        }
         handleReceivedUser(contact.nodeNum, contact.user)
     }
 
     private fun getDeviceMetadata(destNum: Int) = toRemoteExceptions {
-        sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(wantResponse = true) { getDeviceMetadataRequest = true })
+        packetHandler.sendToRadio(
+            newMeshPacketTo(destNum).buildAdminPacket(wantResponse = true) { getDeviceMetadataRequest = true },
+        ) {
+            connectionState
+        }
     }
 
     private fun favoriteNode(node: Node) = toRemoteExceptions {
-        sendToRadio(
+        packetHandler.sendToRadio(
             newMeshPacketTo(myNodeNum).buildAdminPacket {
                 if (node.isFavorite) {
                     debug("removing node ${node.num} from favorite list")
@@ -2069,12 +1969,14 @@ class MeshService :
                     setFavoriteNode = node.num
                 }
             },
-        )
+        ) {
+            connectionState
+        }
         updateNodeInfo(node.num) { it.isFavorite = !node.isFavorite }
     }
 
     private fun ignoreNode(node: Node) = toRemoteExceptions {
-        sendToRadio(
+        packetHandler.sendToRadio(
             newMeshPacketTo(myNodeNum).buildAdminPacket {
                 if (node.isIgnored) {
                     debug("removing node ${node.num} from ignore list")
@@ -2084,7 +1986,9 @@ class MeshService :
                     setIgnoredNode = node.num
                 }
             },
-        )
+        ) {
+            connectionState
+        }
         updateNodeInfo(node.num) { it.isIgnored = !node.isIgnored }
     }
 
@@ -2100,15 +2004,13 @@ class MeshService :
                 portnumValue = Portnums.PortNum.TEXT_MESSAGE_APP_VALUE
                 payload = ByteString.copyFrom(reaction.emoji.encodeToByteArray())
             }
-        sendToRadio(packet)
+        packetHandler.sendToRadio(packet) { connectionState }
         rememberReaction(packet.copy { from = myNodeNum })
     }
 
     private val _lastAddress: MutableStateFlow<String?> = MutableStateFlow(null)
     val lastAddress: StateFlow<String?>
         get() = _lastAddress.asStateFlow()
-
-    lateinit var sharedPreferences: SharedPreferences
 
     fun clearDatabases() = serviceScope.handledLaunch {
         debug("Clearing nodeDB")
@@ -2123,7 +2025,7 @@ class MeshService :
             -> {
                 debug("SetDeviceAddress: No previous device address, setting new one")
                 _lastAddress.value = deviceAddr
-                sharedPreferences.edit { putString("device_address", deviceAddr) }
+                meshPrefs.deviceAddress = deviceAddr
             }
 
             lastAddress.value,
@@ -2135,7 +2037,7 @@ class MeshService :
             else -> {
                 debug("SetDeviceAddress: Device address changed from $lastAddress to $deviceAddr")
                 _lastAddress.value = deviceAddr
-                sharedPreferences.edit { putString("device_address", deviceAddr) }
+                meshPrefs.deviceAddress = deviceAddr
                 clearDatabases()
                 clearNotifications()
             }
@@ -2198,9 +2100,11 @@ class MeshService :
             }
 
             override fun getRemoteOwner(id: Int, destNum: Int) = toRemoteExceptions {
-                sendToRadio(
+                packetHandler.sendToRadio(
                     newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) { getOwnerRequest = true },
-                )
+                ) {
+                    connectionState
+                }
             }
 
             override fun send(p: DataPacket) {
@@ -2260,12 +2164,14 @@ class MeshService :
             override fun setRemoteConfig(id: Int, num: Int, payload: ByteArray) = toRemoteExceptions {
                 debug("Setting new radio config!")
                 val config = ConfigProtos.Config.parseFrom(payload)
-                sendToRadio(newMeshPacketTo(num).buildAdminPacket(id = id) { setConfig = config })
+                packetHandler.sendToRadio(newMeshPacketTo(num).buildAdminPacket(id = id) { setConfig = config }) {
+                    connectionState
+                }
                 if (num == myNodeNum) setLocalConfig(config) // Update our local copy
             }
 
             override fun getRemoteConfig(id: Int, destNum: Int, config: Int) = toRemoteExceptions {
-                sendToRadio(
+                packetHandler.sendToRadio(
                     newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
                         if (config == AdminProtos.AdminMessage.ConfigType.SESSIONKEY_CONFIG_VALUE) {
                             getDeviceMetadataRequest = true
@@ -2273,47 +2179,63 @@ class MeshService :
                             getConfigRequestValue = config
                         }
                     },
-                )
+                ) {
+                    connectionState
+                }
             }
 
             /** Send our current module config to the device */
             override fun setModuleConfig(id: Int, num: Int, payload: ByteArray) = toRemoteExceptions {
                 debug("Setting new module config!")
                 val config = ModuleConfigProtos.ModuleConfig.parseFrom(payload)
-                sendToRadio(newMeshPacketTo(num).buildAdminPacket(id = id) { setModuleConfig = config })
+                packetHandler.sendToRadio(newMeshPacketTo(num).buildAdminPacket(id = id) { setModuleConfig = config }) {
+                    connectionState
+                }
                 if (num == myNodeNum) setLocalModuleConfig(config) // Update our local copy
             }
 
             override fun getModuleConfig(id: Int, destNum: Int, config: Int) = toRemoteExceptions {
-                sendToRadio(
+                packetHandler.sendToRadio(
                     newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
                         getModuleConfigRequestValue = config
                     },
-                )
+                ) {
+                    connectionState
+                }
             }
 
             override fun setRingtone(destNum: Int, ringtone: String) = toRemoteExceptions {
-                sendToRadio(newMeshPacketTo(destNum).buildAdminPacket { setRingtoneMessage = ringtone })
+                packetHandler.sendToRadio(newMeshPacketTo(destNum).buildAdminPacket { setRingtoneMessage = ringtone }) {
+                    connectionState
+                }
             }
 
             override fun getRingtone(id: Int, destNum: Int) = toRemoteExceptions {
-                sendToRadio(
+                packetHandler.sendToRadio(
                     newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
                         getRingtoneRequest = true
                     },
-                )
+                ) {
+                    connectionState
+                }
             }
 
             override fun setCannedMessages(destNum: Int, messages: String) = toRemoteExceptions {
-                sendToRadio(newMeshPacketTo(destNum).buildAdminPacket { setCannedMessageModuleMessages = messages })
+                packetHandler.sendToRadio(
+                    newMeshPacketTo(destNum).buildAdminPacket { setCannedMessageModuleMessages = messages },
+                ) {
+                    connectionState
+                }
             }
 
             override fun getCannedMessages(id: Int, destNum: Int) = toRemoteExceptions {
-                sendToRadio(
+                packetHandler.sendToRadio(
                     newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
                         getCannedMessageModuleMessagesRequest = true
                     },
-                )
+                ) {
+                    connectionState
+                }
             }
 
             override fun setChannel(payload: ByteArray?) = toRemoteExceptions {
@@ -2322,23 +2244,31 @@ class MeshService :
 
             override fun setRemoteChannel(id: Int, num: Int, payload: ByteArray?) = toRemoteExceptions {
                 val channel = ChannelProtos.Channel.parseFrom(payload)
-                sendToRadio(newMeshPacketTo(num).buildAdminPacket(id = id) { setChannel = channel })
+                packetHandler.sendToRadio(newMeshPacketTo(num).buildAdminPacket(id = id) { setChannel = channel }) {
+                    connectionState
+                }
             }
 
             override fun getRemoteChannel(id: Int, destNum: Int, index: Int) = toRemoteExceptions {
-                sendToRadio(
+                packetHandler.sendToRadio(
                     newMeshPacketTo(destNum).buildAdminPacket(id = id, wantResponse = true) {
                         getChannelRequest = index + 1
                     },
-                )
+                ) {
+                    connectionState
+                }
             }
 
             override fun beginEditSettings() = toRemoteExceptions {
-                sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { beginEditSettings = true })
+                packetHandler.sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { beginEditSettings = true }) {
+                    connectionState
+                }
             }
 
             override fun commitEditSettings() = toRemoteExceptions {
-                sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { commitEditSettings = true })
+                packetHandler.sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { commitEditSettings = true }) {
+                    connectionState
+                }
             }
 
             override fun getChannelSet(): ByteArray = toRemoteExceptions { this@MeshService.channelSet.toByteArray() }
@@ -2362,18 +2292,22 @@ class MeshService :
 
             override fun removeByNodenum(requestId: Int, nodeNum: Int) = toRemoteExceptions {
                 nodeDBbyNodeNum.remove(nodeNum)
-                sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { removeByNodenum = nodeNum })
+                packetHandler.sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { removeByNodenum = nodeNum }) {
+                    connectionState
+                }
             }
 
             override fun requestUserInfo(destNum: Int) = toRemoteExceptions {
                 if (destNum != myNodeNum) {
-                    sendToRadio(
+                    packetHandler.sendToRadio(
                         newMeshPacketTo(destNum).buildMeshPacket(channel = nodeDBbyNodeNum[destNum]?.channel ?: 0) {
                             portnumValue = Portnums.PortNum.NODEINFO_APP_VALUE
                             wantResponse = true
                             payload = nodeDBbyNodeNum[myNodeNum]!!.user.toByteString()
                         },
-                    )
+                    ) {
+                        connectionState
+                    }
                 }
             }
 
@@ -2381,7 +2315,7 @@ class MeshService :
                 if (destNum != myNodeNum) {
                     // Determine the best position to send based on user preferences and available
                     // data
-                    val provideLocation = sharedPreferences.getBoolean("provide-location-$myNodeNum", false)
+                    val provideLocation = meshPrefs.shouldProvideNodeLocation(myNodeNum)
                     val currentPosition =
                         when {
                             // Use provided position if valid and user allows phone location sharing
@@ -2404,7 +2338,7 @@ class MeshService :
                         time = currentSecond()
                     }
 
-                    sendToRadio(
+                    packetHandler.sendToRadio(
                         newMeshPacketTo(destNum).buildMeshPacket(
                             channel = nodeDBbyNodeNum[destNum]?.channel ?: 0,
                             priority = MeshPacket.Priority.BACKGROUND,
@@ -2413,7 +2347,9 @@ class MeshService :
                             payload = meshPosition.toByteString()
                             wantResponse = true
                         },
-                    )
+                    ) {
+                        connectionState
+                    }
                 }
             }
 
@@ -2423,7 +2359,7 @@ class MeshService :
                     longitudeI = Position.degI(position.longitude)
                     altitude = position.altitude
                 }
-                sendToRadio(
+                packetHandler.sendToRadio(
                     newMeshPacketTo(destNum).buildAdminPacket {
                         if (position != Position(0.0, 0.0, 0)) {
                             setFixedPosition = pos
@@ -2431,12 +2367,14 @@ class MeshService :
                             removeFixedPosition = true
                         }
                     },
-                )
+                ) {
+                    connectionState
+                }
                 updateNodeInfo(destNum) { it.setPosition(pos, currentSecond()) }
             }
 
             override fun requestTraceroute(requestId: Int, destNum: Int) = toRemoteExceptions {
-                sendToRadio(
+                packetHandler.sendToRadio(
                     newMeshPacketTo(destNum).buildMeshPacket(
                         wantAck = true,
                         id = requestId,
@@ -2445,23 +2383,41 @@ class MeshService :
                         portnumValue = Portnums.PortNum.TRACEROUTE_APP_VALUE
                         wantResponse = true
                     },
-                )
+                ) {
+                    connectionState
+                }
             }
 
             override fun requestShutdown(requestId: Int, destNum: Int) = toRemoteExceptions {
-                sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = requestId) { shutdownSeconds = 5 })
+                packetHandler.sendToRadio(
+                    newMeshPacketTo(destNum).buildAdminPacket(id = requestId) { shutdownSeconds = 5 },
+                ) {
+                    connectionState
+                }
             }
 
             override fun requestReboot(requestId: Int, destNum: Int) = toRemoteExceptions {
-                sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = requestId) { rebootSeconds = 5 })
+                packetHandler.sendToRadio(
+                    newMeshPacketTo(destNum).buildAdminPacket(id = requestId) { rebootSeconds = 5 },
+                ) {
+                    connectionState
+                }
             }
 
             override fun requestFactoryReset(requestId: Int, destNum: Int) = toRemoteExceptions {
-                sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = requestId) { factoryResetDevice = 1 })
+                packetHandler.sendToRadio(
+                    newMeshPacketTo(destNum).buildAdminPacket(id = requestId) { factoryResetDevice = 1 },
+                ) {
+                    connectionState
+                }
             }
 
             override fun requestNodedbReset(requestId: Int, destNum: Int) = toRemoteExceptions {
-                sendToRadio(newMeshPacketTo(destNum).buildAdminPacket(id = requestId) { nodedbReset = 1 })
+                packetHandler.sendToRadio(
+                    newMeshPacketTo(destNum).buildAdminPacket(id = requestId) { nodedbReset = 1 },
+                ) {
+                    connectionState
+                }
             }
         }
 }

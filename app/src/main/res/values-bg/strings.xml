@@ -35,13 +35,20 @@
     <string name="node_sort_via_favorite">чрез Любим</string>
     <string name="node_filter_show_ignored">Игнорирани възли</string>
     <string name="unrecognized">Неразпознат</string>
+    <string name="message_status_enroute">Изчакване за потвърждение</string>
+    <string name="message_status_queued">Наредено на опашка за изпращане</string>
+    <string name="routing_error_none">Признато</string>
+    <string name="routing_error_no_route">Няма маршрут</string>
+    <string name="routing_error_got_nak">Получено отрицателно потвърждение</string>
     <string name="routing_error_no_interface">Няма интерфейс</string>
+    <string name="routing_error_max_retransmit">Достигнат максимален брой препращания</string>
     <string name="routing_error_no_channel">Няма канал</string>
     <string name="routing_error_too_large">Пакетът е твърде голям</string>
     <string name="routing_error_no_response">Няма отговор</string>
     <string name="routing_error_bad_request">Невалидна заявка</string>
     <string name="routing_error_duty_cycle_limit">Достигнат е регионален лимит на работния цикъл</string>
     <string name="routing_error_not_authorized">Не е оторизиран</string>
+    <string name="routing_error_pki_failed">Провалено шифрирано изпращане</string>
     <string name="routing_error_pki_unknown_pubkey">Неизвестен публичен ключ</string>
     <string name="routing_error_admin_bad_session_key">Невалиден ключ за сесия</string>
     <string name="routing_error_admin_public_key_unauthorized">Публичният ключ е неоторизиран</string>
@@ -61,12 +68,10 @@
     <string name="send">Изпрати</string>
     <string name="warning_not_paired">Все още не сте сдвоили радио, съвместимо с Meshtastic, с този телефон. Моля, сдвоете устройство и задайте вашето потребителско име.\n\nТова приложение с отворен код е в процес на разработка, ако откриете проблеми, моля, публикувайте в нашия форум: https://github.com/orgs/meshtastic/discussions\n\nЗа повече информация вижте нашата уеб страница на адрес www.meshtastic.org.</string>
     <string name="you">Вие</string>
-    <string name="analytics_okay">Анонимна статистика за използване и доклади за сривове.</string>
     <string name="accept">Приеми</string>
     <string name="cancel">Отказ</string>
     <string name="clear_changes">Изчистване на промените</string>
     <string name="new_channel_rcvd">Получен е URL адрес на нов канал</string>
-    <string name="permission_missing">Meshtastic се нуждае от разрешение за местоположение. Местоположението трябва да е включено, за да намира нови устройства чрез Bluetooth. Можете да го изключите отново след това.</string>
     <string name="report_bug">Докладване за грешка</string>
     <string name="report_a_bug">Докладвайте грешка</string>
     <string name="report_bug_text">Сигурни ли сте, че искате да докладвате за грешка? След като докладвате, моля, публикувайте в https://github.com/orgs/meshtastic/discussions, за да можем да сравним доклада с това, което сте открили.</string>
@@ -81,7 +86,7 @@
     <string name="connected_count">Свързани: %1$s онлайн</string>
     <string name="ip_address">IP адрес:</string>
     <string name="ip_port">Порт:</string>
-    <string name="connected">Свързан с радио</string>
+    <string name="connected">Свързано</string>
     <string name="connected_to">Свързан с радио (%s)</string>
     <string name="not_connected">Няма връзка</string>
     <string name="connected_sleeping">Свързан е с радио, но рядиото е в режим на заспиване</string>
@@ -115,6 +120,7 @@
     <string name="save_rangetest">Експорт на rangetest.csv</string>
     <string name="reset">Нулиране</string>
     <string name="scan">Сканиране</string>
+    <string name="add_network_device">Добавяне</string>
     <string name="are_you_sure_change_default">Сигурни ли сте, че искате да промените канала по подразбиране?</string>
     <string name="reset_to_defaults">Възстановяване на настройките по подразбиране</string>
     <string name="apply">Приложи</string>
@@ -157,8 +163,10 @@
     <string name="quick_chat_show">Показване на менюто за бърз чат</string>
     <string name="quick_chat_hide">Скриване на менюто за бърз чат</string>
     <string name="factory_reset">Фабрично нулиране</string>
-    <string name="bluetooth_disabled">Bluetooth изключен</string>
-    <string name="permission_missing_31">Meshtastic се нуждае от разрешение за близки устройства, за да намери и свърже с устройства чрез Bluetooth. Можете да го изключите, когато не се използва.</string>
+    <string name="bluetooth_disabled">Bluetooth е дезактивиран. Моля, активирайте го в настройките на устройството си.</string>
+    <string name="open_settings">Отваряне на настройките</string>
+    <string name="firmware_version">Версия на фърмуера: %1$s</string>
+    <string name="permission_missing_31">Meshtastic се нуждае от активирани разрешения за \"Устройства наблизо\", за да намира и да се свързва с устройства чрез Bluetooth. Можете да ги дезактивирате, когато не се използват.</string>
     <string name="direct_message">Директно съобщение</string>
     <string name="nodedb_reset">Нулиране на базата данни с възли</string>
     <string name="delivery_confirmed">Съобщението е доставено</string>
@@ -169,6 +177,7 @@
     <string name="map_select_download_region">Избор на регион за сваляне</string>
     <string name="map_tile_download_estimate">Прогноза за изтегляне на картинки:</string>
     <string name="map_start_download">Започни свалянето</string>
+    <string name="exchange_position">Размяна на позиция</string>
     <string name="close">Затвори</string>
     <string name="radio_configuration">Конфигурация на радиото</string>
     <string name="module_settings">Конфигурация на модула</string>
@@ -209,7 +218,10 @@
     <string name="soil_temperature">Температура на почвата</string>
     <string name="soil_moisture">Влажност на почвата</string>
     <string name="logs">Журнали</string>
+    <string name="hops_away">Брой отскоци</string>
+    <string name="hops_away_template">Брой отскоци: %1$d</string>
     <string name="info">Информация</string>
+    <string name="ch_util_definition">Използване на текущия канал, включително добре формулиан TX, RX и деформиран RX (така наречен шум).</string>
     <string name="air_util_definition">Процент от ефирното време за предаване, използвано през последния час.</string>
     <string name="iaq">IAQ</string>
     <string name="encryption_psk">Споделен ключ</string>
@@ -218,6 +230,7 @@
     <string name="encryption_pkc_text">Директните съобщения използват новата инфраструктура с публичен ключ за криптиране. Изисква се фърмуер версия 2.5 или по-нова.</string>
     <string name="encryption_error">Несъответствие на публичния ключ</string>
     <string name="encryption_error_text">Публичният ключ не съвпада със записания ключ. Можете да премахнете възела и да го оставите да обмени ключове отново, но това може да означава по-сериозен проблем със сигурността. Свържете се с потребителя чрез друг надежден канал, за да определите дали промяната на ключа се дължи на фабрично нулиране или друго умишлено действие.</string>
+    <string name="exchange_userinfo">Обмяна на потребителска информация</string>
     <string name="meshtastic_new_nodes_notifications">Известия за нови възли</string>
     <string name="more_details">Повече подробности</string>
     <string name="snr">SNR</string>
@@ -233,6 +246,7 @@
     <string name="fair">Задоволителен</string>
     <string name="good">Добър</string>
     <string name="none_quality">Няма</string>
+    <string name="share_to">Сподели с…</string>
     <string name="signal">Сигнал</string>
     <string name="signal_quality">Качество на сигнала</string>
     <string name="traceroute_direct">Директно</string>
@@ -240,6 +254,7 @@
         <item quantity="one">1 хоп</item>
         <item quantity="other">%d хопа</item>
     </plurals>
+    <string name="traceroute_diff">Отскоци към %1$d Отскоци на връщане %2$d</string>
     <string name="twenty_four_hours">24Ч</string>
     <string name="forty_eight_hours">48Ч</string>
     <string name="one_week">1С</string>
@@ -259,6 +274,7 @@
     <string name="current">Текущ</string>
     <string name="voltage">Напрежение</string>
     <string name="are_you_sure">Сигурни ли сте?</string>
+    <string name="router_role_confirmation_text"><![CDATA[Прочетох <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Документацията за ролите на устройствата</a> и публикацията в блога за <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Избор на правилната роля на устройството</a>.]]></string>
     <string name="i_know_what_i_m_doing">Знам какво правя.</string>
     <string name="low_battery_message">Възелът %1$s има изтощена батерия (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Известия за изтощена батерия</string>
@@ -461,10 +477,10 @@
     <string name="host">Хост</string>
     <string name="free_memory">Свободна памет</string>
     <string name="disk_free">Свободен диск</string>
-    <string name="connections">Връзки</string>
-    <string name="map">Карта</string>
-    <string name="contacts">Контакти</string>
+    <string name="map">Карта на Mesh</string>
+    <string name="conversations">Разговори</string>
     <string name="nodes">Възли</string>
+    <string name="bottom_nav_settings">Настройки</string>
     <string name="set_your_region">Задайте вашия регион</string>
     <string name="reply">Отговор</string>
     <string name="i_agree">Съгласен съм.</string>
@@ -481,7 +497,6 @@
     <string name="export_keys_confirmation">Експортира публичния и частния ключове във файл. Моля, съхранявайте го на сигурно място.</string>
     <string name="remote">Отдалечен</string>
     <string name="node_count_template">(%1$d онлайн / %2$d общо)</string>
-    <string name="no_ble_devices">Няма открити Bluetooth устройства</string>
     <string name="no_network_devices">Няма открити мрежови устройства.</string>
     <string name="no_usb_devices">Няма открити USB серийни устройства.</string>
     <string name="scroll_to_bottom">Превъртане до края</string>
@@ -491,6 +506,7 @@
     <string name="unknown_channel">Неизвестен канал</string>
     <string name="warning">Предупреждение</string>
     <string name="unknown">Неизвестно</string>
+    <string name="message_device_managed">Това радио се управлява и може да бъде променяно само от отдалечен администратор.</string>
     <string name="clean_node_database_title">Почистване на базата данни с възлите</string>
     <string name="clean_nodes_older_than">Почистване на възлите, последно видяни преди повече от %1$d дни</string>
     <string name="clean_unknown_nodes">Почистване само на неизвестните възли</string>
@@ -500,6 +516,7 @@
     <string name="clean_node_database_confirmation">Това ще премахне %1$d възела от вашата база данни. Това действие не може да бъде отменено.</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
+    <string name="security_icon_insecure_precise_only">Несигурен канал, прецизно местоположение</string>
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
     <!-- Security Help Dialog Titles and Buttons (from your existing code structure) -->
     <string name="security_icon_help_title">Сигурност на канала</string>
@@ -514,6 +531,9 @@
     <string name="pax">PAX</string>
     <string name="wifi_devices">WiFi устройства</string>
     <string name="ble_devices">BLE устройства</string>
+    <string name="bluetooth_paired_devices">Сдвоени устройства</string>
+    <string name="connected_device">Свързано устройство</string>
+    <string name="view_release">Преглед на изданието</string>
     <string name="download">Изтегляне</string>
     <string name="installed_firmware_version">Текущия инсталиран</string>
     <string name="latest_stable_firmware">Най-новия стабилен</string>
@@ -565,4 +585,5 @@
     <string name="selected_map_type">Избран тип на картата</string>
     <string name="name_cannot_be_empty">Името не може да бъде празно.</string>
     <string name="url_cannot_be_empty">URL не може да бъде празен.</string>
+    <string name="url_template">Шаблон за URL</string>
 </resources>

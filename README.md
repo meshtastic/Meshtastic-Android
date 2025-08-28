@@ -1,10 +1,10 @@
 <p align="center">
-  <a href=""><img width="200" height="200" src="https://raw.githubusercontent.com/meshtastic/Meshtastic-Android/refs/heads/main/logo.png"></a>
+  <img src=".github/meshtastic_logo.png" alt="Meshtastic Logo" width="200"/>
 </p>
 <h1 align="center">Meshtastic-Android</h1>
 
 ![GitHub all releases](https://img.shields.io/github/downloads/meshtastic/meshtastic-android/total)
-[![Android CI](https://github.com/meshtastic/Meshtastic-Android/actions/workflows/android.yml/badge.svg)](https://github.com/meshtastic/Meshtastic-Android/actions/workflows/android.yml)
+[![Android CI](https://github.com/meshtastic/Meshtastic-Android/actions/workflows/pull-request.yml/badge.svg?branch=main)](https://github.com/meshtastic/Meshtastic-Android/actions/workflows/pull-request.yml)
 [![Crowdin](https://badges.crowdin.net/e/f440f1a5e094a5858dd86deb1adfe83d/localized.svg)](https://crowdin.meshtastic.org/android)
 [![CLA assistant](https://cla-assistant.io/readme/badge/meshtastic/Meshtastic-Android)](https://cla-assistant.io/meshtastic/Meshtastic-Android)
 [![Fiscal Contributors](https://opencollective.com/meshtastic/tiers/badge.svg?label=Fiscal%20Contributors&color=deeppink)](https://opencollective.com/meshtastic/)
@@ -36,7 +36,7 @@ alt="Download at https://play.google.com/store/apps/details?id=com.geeksville.me
 width="24%">](https://play.google.com/store/apps/details?id=com.geeksville.mesh&referrer=utm_source%3Dgithub-android-readme)
 
 The play store is the last to update of these options, but if you want to join the Play Store testing program go to [this URL](https://play.google.com/apps/testing/com.geeksville.mesh) and opt-in to become a tester.
-If you encounter any problems or have questions, [post in the forum](https://github.com/orgs/meshtastic/discussions) and we'll help.
+If you encounter any problems or have questions, [ask us on the discord](https://discord.gg/meshtastic), [create an issue](https://github.com/meshtastic/Meshtastic-Android/issues), or [post in the forum](https://github.com/orgs/meshtastic/discussions) and we'll help as we can.
 
 ## Translations
 
@@ -55,6 +55,7 @@ MAPS_API_KEY=your_google_maps_api_key_here
 ## Contributing guidelines
 
 For detailed instructions on how to contribute, please see our [CONTRIBUTING.md](CONTRIBUTING.md) file.
+For details on our release process, see the [RELEASE_PROCESS.md](RELEASE_PROCESS.md) file.
 
 ## Repository Statistics
 

@@ -19,32 +19,26 @@ package com.geeksville.mesh.android
 
 import android.app.Application
 import android.content.Context
-import android.content.SharedPreferences
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
-import androidx.core.content.edit
 import androidx.navigation.NavHostController
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.analytics.AnalyticsProvider
 import com.geeksville.mesh.analytics.NopAnalytics
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.info
+import com.geeksville.mesh.android.prefs.AnalyticsPrefs
 import com.geeksville.mesh.model.DeviceHardware
 import timber.log.Timber
 
-open class GeeksvilleApplication :
+abstract class GeeksvilleApplication :
     Application(),
     Logging {
 
     companion object {
         lateinit var analytics: AnalyticsProvider
     }
-
-    val isGooglePlayAvailable: Boolean
-        get() {
-            return false
-        }
 
     // / Are we running inside the testlab?
     val isInTestLab: Boolean
@@ -56,21 +50,10 @@ open class GeeksvilleApplication :
             return "true" == testLabSetting
         }
 
-    private val analyticsPrefs: SharedPreferences by lazy { getSharedPreferences("analytics-prefs", MODE_PRIVATE) }
+    abstract val analyticsPrefs: AnalyticsPrefs
 
-    var isAnalyticsAllowed: Boolean
-        get() = analyticsPrefs.getBoolean("allowed", true)
-        set(value) {
-            analyticsPrefs.edit { putBoolean("allowed", value) }
-
-            // Change the flag with the providers
-            analytics.setEnabled(value && !isInTestLab) // Never do analytics in the test lab
-        }
-
-    @Suppress("UnusedParameter")
-    fun askToRate(activity: AppCompatActivity) {
-        // No-op for F-Droid version
-    }
+    @Suppress("EmptyFunctionBlock", "UnusedParameter")
+    fun askToRate(application: AppCompatActivity) {}
 
     override fun onCreate() {
         super.onCreate()
@@ -81,12 +64,8 @@ open class GeeksvilleApplication :
 
         val nopAnalytics = NopAnalytics(this)
         analytics = nopAnalytics
-        isAnalyticsAllowed = false
     }
 }
-
-val Context.isGooglePlayAvailable: Boolean
-    get() = false
 
 @Suppress("UnusedParameter")
 fun setAttributes(deviceVersion: String, deviceHardware: DeviceHardware) {
@@ -101,3 +80,6 @@ fun AddNavigationTracking(navController: NavHostController) {
         debug("Navigation changed to: ${destination.route}")
     }
 }
+
+val Context.isAnalyticsAvailable: Boolean
+    get() = false

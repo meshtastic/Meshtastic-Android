@@ -20,14 +20,11 @@ package com.geeksville.mesh
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
 import android.content.Intent
-import android.content.pm.PackageInfo
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.hardware.usb.UsbManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.widget.Toast
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -39,33 +36,24 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalView
-import androidx.core.content.edit
 import androidx.core.net.toUri
-import androidx.lifecycle.lifecycleScope
-import com.geeksville.mesh.android.BindFailedException
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.android.ServiceClient
-import com.geeksville.mesh.concurrent.handledLaunch
+import com.geeksville.mesh.android.prefs.UiPrefs
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.DEEP_LINK_BASE_URI
-import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.service.ServiceRepository
-import com.geeksville.mesh.service.startService
-import com.geeksville.mesh.ui.MainMenuAction
 import com.geeksville.mesh.ui.MainScreen
+import com.geeksville.mesh.ui.common.components.MainMenuAction
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.MODE_DYNAMIC
 import com.geeksville.mesh.ui.intro.AppIntroductionScreen
 import com.geeksville.mesh.ui.sharing.toSharedContact
 import com.geeksville.mesh.util.LanguageUtils
-import com.geeksville.mesh.util.getPackageInfoCompat
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Job
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -75,11 +63,13 @@ class MainActivity :
     private val bluetoothViewModel: BluetoothViewModel by viewModels()
     private val model: UIViewModel by viewModels()
 
-    @Inject internal lateinit var serviceRepository: ServiceRepository
+    // This is aware of the Activity lifecycle and handles binding to the mesh service.
+    @Inject internal lateinit var meshServiceClient: MeshServiceClient
 
-    private var showAppIntro by mutableStateOf(false)
+    @Inject internal lateinit var uiPrefs: UiPrefs
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        installSplashScreen()
         enableEdgeToEdge(
             // Disable three-button navbar scrim on pre-Q devices
             navigationBarStyle = SystemBarStyle.auto(Color.TRANSPARENT, Color.TRANSPARENT),
@@ -90,15 +80,13 @@ class MainActivity :
         }
 
         super.onCreate(savedInstanceState)
-        val prefs = UIViewModel.getPreferences(this)
+
         if (savedInstanceState == null) {
-            val lang = prefs.getString("lang", LanguageUtils.SYSTEM_DEFAULT)
-            if (lang != LanguageUtils.SYSTEM_MANAGED) LanguageUtils.migrateLanguagePrefs(prefs)
+            val lang = uiPrefs.lang
+            if (lang != LanguageUtils.SYSTEM_MANAGED) LanguageUtils.migrateLanguagePrefs(uiPrefs)
             info("in-app language is ${LanguageUtils.getLocale()}")
 
-            if (!prefs.getBoolean("app_intro_completed", false)) {
-                showAppIntro = true
-            } else {
+            if (uiPrefs.appIntroCompleted) {
                 (application as GeeksvilleApplication).askToRate(this)
             }
         }
@@ -120,11 +108,11 @@ class MainActivity :
                     SideEffect { AppCompatDelegate.setDefaultNightMode(theme) }
                 }
 
+                val showAppIntro by model.showAppIntro.collectAsStateWithLifecycle()
                 if (showAppIntro) {
                     AppIntroductionScreen(
                         onDone = {
-                            prefs.edit { putBoolean("app_intro_completed", true) }
-                            showAppIntro = false
+                            model.onAppIntroCompleted()
                             (application as GeeksvilleApplication).askToRate(this@MainActivity)
                         },
                     )
@@ -223,56 +211,12 @@ class MainActivity :
             }
         }
 
-    private var serviceSetupJob: Job? = null
-
-    private val mesh =
-        object : ServiceClient<IMeshService>(IMeshService.Stub::asInterface) {
-            override fun onConnected(service: IMeshService) {
-                serviceSetupJob?.cancel()
-                serviceSetupJob =
-                    lifecycleScope.handledLaunch {
-                        serviceRepository.setMeshService(service)
-                        debug("connected to mesh service, connectionState=${model.connectionState.value}")
-                    }
-            }
-
-            override fun onDisconnected() {
-                serviceSetupJob?.cancel()
-                serviceRepository.setMeshService(null)
-            }
-        }
-
-    private fun bindMeshService() {
-        debug("Binding to mesh service!")
-        try {
-            MeshService.startService(this)
-        } catch (ex: Exception) {
-            errormsg("Failed to start service from activity - but ignoring because bind will work ${ex.message}")
-        }
-
-        mesh.connect(this, MeshService.createIntent(), BIND_AUTO_CREATE + BIND_ABOVE_CLIENT)
-    }
-
-    override fun onStart() {
-        super.onStart()
-
-        try {
-            bindMeshService()
-        } catch (ex: BindFailedException) {
-            errormsg("Bind of MeshService failed${ex.message}")
-        }
-    }
-
     private fun showSettingsPage() {
         createSettingsIntent().send()
     }
 
     private fun onMainMenuAction(action: MainMenuAction) {
         when (action) {
-            MainMenuAction.ABOUT -> {
-                getVersionInfo()
-            }
-
             MainMenuAction.EXPORT_RANGETEST -> {
                 val intent =
                     Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
@@ -291,21 +235,7 @@ class MainActivity :
                 chooseLangDialog()
             }
 
-            MainMenuAction.SHOW_INTRO -> {
-                showAppIntro = true
-            }
-
-            else -> {}
-        }
-    }
-
-    private fun getVersionInfo() {
-        try {
-            val packageInfo: PackageInfo = packageManager.getPackageInfoCompat(packageName, 0)
-            val versionName = packageInfo.versionName
-            Toast.makeText(this, versionName, Toast.LENGTH_LONG).show()
-        } catch (e: PackageManager.NameNotFoundException) {
-            errormsg("Can not find the version: ${e.message}")
+            else -> warn("Unexpected action: $action")
         }
     }
 
@@ -318,8 +248,7 @@ class MainActivity :
                 getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
             )
 
-        val prefs = UIViewModel.getPreferences(this)
-        val theme = prefs.getInt("theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        val theme = uiPrefs.theme
         debug("Theme from prefs: $theme")
         model.showAlert(
             title = getString(R.string.choose_theme),

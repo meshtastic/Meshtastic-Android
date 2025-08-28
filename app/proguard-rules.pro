@@ -14,7 +14,7 @@
 
 # Uncomment this to preserve the line number information for
 # debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+-keepattributes SourceFile,LineNumberTable
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
@@ -27,9 +27,6 @@
 # eclipse.paho.client
 -keep class org.eclipse.paho.client.mqttv3.logging.JSR47Logger { *; }
 
-# ormlite
--dontwarn com.j256.ormlite.**
-
 # OkHttp
 -dontwarn okhttp3.internal.platform.**
 -dontwarn org.conscrypt.**
@@ -37,7 +34,6 @@
 -dontwarn org.openjsse.**
 
 # ?
--dontwarn java.awt.image.**
 -dontwarn java.lang.reflect.**
 -dontwarn com.google.errorprone.annotations.**
 

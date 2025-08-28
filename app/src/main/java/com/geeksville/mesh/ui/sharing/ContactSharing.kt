@@ -71,6 +71,7 @@ import com.google.zxing.WriterException
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
+import timber.log.Timber
 import java.net.MalformedURLException
 
 /**
@@ -89,7 +90,7 @@ fun AddContactFAB(
     model: UIViewModel = hiltViewModel(),
     onSharedContactImport: (AdminProtos.SharedContact) -> Unit = {},
 ) {
-    val contactToImport: AdminProtos.SharedContact? by model.sharedContactRequested.collectAsStateWithLifecycle(null)
+    val scannedContact: AdminProtos.SharedContact? by model.sharedContactRequested.collectAsStateWithLifecycle(null)
 
     val barcodeLauncher =
         rememberLauncherForActivityResult(ScanContract()) { result ->
@@ -108,8 +109,8 @@ fun AddContactFAB(
             }
         }
 
-    if (contactToImport != null) {
-        val nodeNum = contactToImport?.nodeNum
+    scannedContact?.let { contactToImport ->
+        val nodeNum = scannedContact?.nodeNum
         val nodes by model.unfilteredNodeList.collectAsState()
         val node = nodes.find { it.num == nodeNum }
         SimpleAlertDialog(
@@ -118,16 +119,16 @@ fun AddContactFAB(
                 Column {
                     if (node != null) {
                         Text(text = stringResource(R.string.import_known_shared_contact_text))
-                        if (node.user.publicKey.size() > 0 && node.user.publicKey != contactToImport?.user?.publicKey) {
+                        if (node.user.publicKey.size() > 0 && node.user.publicKey != contactToImport.user?.publicKey) {
                             Text(
                                 text = stringResource(R.string.public_key_changed),
                                 color = MaterialTheme.colorScheme.error,
                             )
                         }
                         HorizontalDivider()
-                        Text(text = compareUsers(node.user, contactToImport!!.user))
+                        Text(text = compareUsers(node.user, contactToImport.user))
                     } else {
-                        Text(text = userFieldsToString(contactToImport!!.user))
+                        Text(text = userFieldsToString(contactToImport.user))
                     }
                 }
             },
@@ -135,7 +136,7 @@ fun AddContactFAB(
             onDismiss = { model.setSharedContactRequested(null) },
             confirmText = stringResource(R.string.import_label),
             onConfirm = {
-                onSharedContactImport(contactToImport!!)
+                onSharedContactImport(contactToImport)
                 model.setSharedContactRequested(null)
             },
         )
@@ -155,13 +156,14 @@ fun AddContactFAB(
 
     LaunchedEffect(cameraPermissionState.status) {
         if (cameraPermissionState.status.isGranted) {
-            // If permission was granted as a result of a request, and not initially,
-            // we might want to trigger the scan. However, simple auto-triggering on grant
-            // might not always be desired UX. For now, rely on user re-click if needed.
+            Timber.d("Camera permission granted")
+        } else {
+            Timber.d("Camera permission denied")
         }
     }
 
     FloatingActionButton(
+        modifier = modifier,
         onClick = {
             if (cameraPermissionState.status.isGranted) {
                 zxingScan()
@@ -169,7 +171,6 @@ fun AddContactFAB(
                 cameraPermissionState.launchPermissionRequest()
             }
         },
-        modifier = modifier.padding(16.dp),
     ) {
         Icon(imageVector = Icons.TwoTone.QrCodeScanner, contentDescription = stringResource(R.string.scan_qr_code))
     }

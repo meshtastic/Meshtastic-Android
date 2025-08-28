@@ -42,7 +42,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarDefaults
-import androidx.compose.material3.FloatingToolbarDefaults.ScreenOffset
 import androidx.compose.material3.FloatingToolbarExitDirection.Companion.End
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -57,7 +56,6 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -105,7 +103,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.RoundCap
 import com.google.maps.android.clustering.ClusterItem
-import com.google.maps.android.compose.CameraMoveStartedReason
 import com.google.maps.android.compose.ComposeMapColorScheme
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.MapEffect
@@ -193,7 +190,7 @@ fun MapView(
 
     LocationPermissionsHandler { isGranted -> hasLocationPermission = isGranted }
 
-    val kmlFilePickerLauncher =
+    val filePickerLauncher =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == android.app.Activity.RESULT_OK) {
                 result.data?.data?.let { uri ->
@@ -253,37 +250,6 @@ fun MapView(
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
     val displayableWaypoints = waypoints.values.mapNotNull { it.data.waypoint }
 
-    var hasZoomed by rememberSaveable { mutableStateOf(false) }
-
-    LaunchedEffect(allNodes, displayableWaypoints, nodeTrack) {
-        if ((hasZoomed) || cameraPositionState.cameraMoveStartedReason != CameraMoveStartedReason.NO_MOVEMENT_YET) {
-            if (!hasZoomed) hasZoomed = true
-            return@LaunchedEffect
-        }
-
-        val pointsToBound: List<LatLng> =
-            when {
-                !nodeTrack.isNullOrEmpty() -> nodeTrack.map { it.toLatLng() }
-
-                allNodes.isNotEmpty() || displayableWaypoints.isNotEmpty() ->
-                    allNodes.mapNotNull { it.toLatLng() } + displayableWaypoints.map { it.toLatLng() }
-
-                else -> emptyList()
-            }
-
-        if (pointsToBound.isNotEmpty()) {
-            val bounds = LatLngBounds.builder().apply { pointsToBound.forEach(::include) }.build()
-
-            val padding = if (!pointsToBound.isEmpty()) 100 else 48
-
-            try {
-                cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(bounds, padding))
-                hasZoomed = true
-            } catch (e: IllegalStateException) {
-                warn("MapView Could not animate to bounds: ${e.message}")
-            }
-        }
-    }
     val filteredNodes =
         if (mapFilterState.onlyFavorites) {
             allNodes.filter { it.isFavorite || it.num == ourNodeInfo?.num }
@@ -323,10 +289,17 @@ fun MapView(
             Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
                 addCategory(Intent.CATEGORY_OPENABLE)
                 type = "*/*"
-                val mimeTypes = arrayOf("application/vnd.google-earth.kml+xml", "application/vnd.google-earth.kmz")
+                val mimeTypes =
+                    arrayOf(
+                        "application/vnd.google-earth.kml+xml",
+                        "application/vnd.google-earth.kmz",
+                        "application/vnd.geo+json",
+                        "application/geo+json",
+                        "application/json",
+                    )
                 putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
             }
-        kmlFilePickerLauncher.launch(intent)
+        filePickerLauncher.launch(intent)
     }
     val onRemoveLayer = { layerId: String -> mapViewModel.removeMapLayer(layerId) }
     val onToggleVisibility = { layerId: String -> mapViewModel.toggleLayerVisibility(layerId) }
@@ -366,6 +339,36 @@ fun MapView(
                             longitudeI = (latLng.longitude / DEG_D).toInt()
                         }
                         editingWaypoint = newWaypoint
+                    }
+                },
+                onMapLoaded = {
+                    if (
+                        savedCameraPosition?.targetLat == defaultLatLng.latitude &&
+                        savedCameraPosition?.targetLng == defaultLatLng.longitude
+                    ) {
+                        val pointsToBound: List<LatLng> =
+                            when {
+                                !nodeTrack.isNullOrEmpty() -> nodeTrack.map { it.toLatLng() }
+
+                                allNodes.isNotEmpty() || displayableWaypoints.isNotEmpty() ->
+                                    allNodes.mapNotNull { it.toLatLng() } + displayableWaypoints.map { it.toLatLng() }
+
+                                else -> emptyList()
+                            }
+
+                        if (pointsToBound.isNotEmpty()) {
+                            val bounds = LatLngBounds.builder().apply { pointsToBound.forEach(::include) }.build()
+
+                            val padding = if (!pointsToBound.isEmpty()) 100 else 48
+
+                            try {
+                                coroutineScope.launch {
+                                    cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(bounds, padding))
+                                }
+                            } catch (e: IllegalStateException) {
+                                warn("MapView Could not animate to bounds: ${e.message}")
+                            }
+                        }
                     }
                 },
             ) {
@@ -478,19 +481,39 @@ fun MapView(
 
                 MapEffect(mapLayers) { map ->
                     mapLayers.forEach { layerItem ->
-                        mapViewModel.loadKmlLayerIfNeeded(map, layerItem)?.let { kmlLayer ->
-                            if (layerItem.isVisible && !kmlLayer.isLayerOnMap) {
-                                kmlLayer.addLayerToMap()
-                            } else if (!layerItem.isVisible && kmlLayer.isLayerOnMap) {
-                                kmlLayer.removeLayerFromMap()
+                        coroutineScope.launch {
+                            mapViewModel.loadMapLayerIfNeeded(map, layerItem)
+                            when (layerItem.layerType) {
+                                LayerType.KML -> {
+                                    layerItem.kmlLayerData?.let { kmlLayer ->
+                                        if (layerItem.isVisible && !kmlLayer.isLayerOnMap) {
+                                            kmlLayer.addLayerToMap()
+                                        } else if (!layerItem.isVisible && kmlLayer.isLayerOnMap) {
+                                            kmlLayer.removeLayerFromMap()
+                                        }
+                                    }
+                                }
+                                LayerType.GEOJSON -> {
+                                    layerItem.geoJsonLayerData?.let { geoJsonLayer ->
+                                        if (layerItem.isVisible && !geoJsonLayer.isLayerOnMap) {
+                                            geoJsonLayer.addLayerToMap()
+                                        } else if (!layerItem.isVisible && geoJsonLayer.isLayerOnMap) {
+                                            geoJsonLayer.removeLayerFromMap()
+                                        }
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
 
-            DisappearingScaleBar(cameraPositionState = cameraPositionState)
+            val currentCameraPosition = cameraPositionState.position
+            var displayedZoom by remember { mutableStateOf(currentCameraPosition.zoom) }
 
+            if (displayedZoom != 0f) {
+                DisappearingScaleBar(cameraPositionState = cameraPositionState)
+            }
             editingWaypoint?.let { waypointToEdit ->
                 EditWaypointDialog(
                     waypoint = waypointToEdit,
@@ -519,7 +542,7 @@ fun MapView(
             }
 
             MapControlsOverlay(
-                modifier = Modifier.align(Alignment.CenterEnd).offset(x = -ScreenOffset),
+                modifier = Modifier.align(Alignment.TopEnd).padding(top = 50.dp),
                 mapFilterMenuExpanded = mapFilterMenuExpanded,
                 onMapFilterMenuDismissRequest = { mapFilterMenuExpanded = false },
                 onToggleMapFilterMenu = { mapFilterMenuExpanded = true },

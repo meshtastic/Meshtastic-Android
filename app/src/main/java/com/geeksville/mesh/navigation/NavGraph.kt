@@ -19,16 +19,15 @@ package com.geeksville.mesh.navigation
 
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navDeepLink
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
@@ -60,7 +59,7 @@ fun NavDestination.isNodeDetailRoute(): Boolean = NodeDetailRoute.entries.any { 
 
 fun NavDestination.showLongNameTitle(): Boolean = !this.isTopLevel() &&
     (
-        this.hasRoute<RadioConfigRoutes.RadioConfig>() ||
+        this.hasRoute<SettingsRoutes.Settings>() ||
             this.hasRoute<NodesRoutes.NodeDetail>() ||
             this.isConfigRoute() ||
             this.isNodeDetailRoute()
@@ -75,23 +74,17 @@ fun NavGraph(
     mapViewModel: MapViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController(),
 ) {
-    val isConnected by uIViewModel.isConnectedStateFlow.collectAsStateWithLifecycle(false)
-    NavHost(
-        navController = navController,
-        startDestination =
-        if (isConnected) {
-            NodesRoutes.NodesGraph
-        } else {
-            ConnectionsRoutes.ConnectionsGraph
-        },
-        modifier = modifier,
-    ) {
+    NavHost(navController = navController, startDestination = ConnectionsRoutes.ConnectionsGraph, modifier = modifier) {
         contactsGraph(navController, uIViewModel)
         nodesGraph(navController, uIViewModel)
         mapGraph(navController, uIViewModel, mapViewModel)
         channelsGraph(navController, uIViewModel)
         connectionsGraph(navController, uIViewModel, bluetoothViewModel)
-        composable<Route.DebugPanel> { DebugScreen() }
-        radioConfigGraph(navController, uIViewModel)
+        composable<Route.DebugPanel>(
+            deepLinks = listOf(navDeepLink<Route.DebugPanel>(basePath = "$DEEP_LINK_BASE_URI/debug_panel")),
+        ) {
+            DebugScreen()
+        }
+        settingsGraph(navController, uIViewModel)
     }
 }

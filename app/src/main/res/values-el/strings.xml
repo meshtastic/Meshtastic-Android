@@ -33,11 +33,9 @@
     <string name="send">Αποστολή</string>
     <string name="warning_not_paired">Δεν έχετε κάνει ακόμη pair μια συσκευή συμβατή με Meshtastic με το τηλέφωνο. Παρακαλώ κάντε pair μια συσκευή και ορίστε το όνομα χρήστη.\n\nΗ εφαρμογή ανοιχτού κώδικα βρίσκεται σε alpha-testing, αν εντοπίσετε προβλήματα παρακαλώ δημοσιεύστε τα στο forum: https://github.com/orgs/meshtastic/discussions\n\nΠερισσότερες πληροφορίες στην ιστοσελίδα - www.meshtastic.org.</string>
     <string name="you">Εσύ</string>
-    <string name="analytics_okay">Ανώνυμα στατιστικά στοιχεία χρήσης και αναφορές κατάρρευσης.</string>
     <string name="accept">Αποδοχή</string>
     <string name="cancel">Ακύρωση</string>
     <string name="new_channel_rcvd">Λήψη URL νέου καναλιού</string>
-    <string name="permission_missing">Λείπει μια απαιτούμενη άδεια, Meshtastic δεν θα λειτοργεί σωστά.  Ενεργοποιήστε τις ρυθμίσεις εφαρμογής Android.</string>
     <string name="report_bug">Αναφορά Σφάλματος</string>
     <string name="report_a_bug">Αναφέρετε ένα σφάλμα</string>
     <string name="report_bug_text">Είστε σίγουροι ότι θέλετε να αναφέρετε ένα σφαλμα? Μετά την αναφορά δημοσιεύστε στο https://github.com/orgs/meshtastic/discussions ώστε να συνδέσουμε την αναφορά με το συμβάν.</string>
@@ -50,7 +48,6 @@
     <string name="device_sleeping">Συσκευή σε ύπνωση</string>
     <string name="ip_address">IP διεύθυνση:</string>
     <string name="ip_port">Θύρα:</string>
-    <string name="connected">Συνδεδεμένο στο radio</string>
     <string name="connected_to">Συνδεδεμένο στο radio (%s)</string>
     <string name="not_connected">Αποσυνδεδεμένο</string>
     <string name="connected_sleeping">Συνδεδεμένο στο radio, αλλά βρίσκεται σε ύπνωση</string>
@@ -70,6 +67,7 @@
     <string name="save_rangetest">Εξαγωγή rangetest.csv</string>
     <string name="reset">Επαναφορά</string>
     <string name="scan">Σάρωση</string>
+    <string name="add_network_device">Προσθήκη</string>
     <string name="are_you_sure_change_default">Είστε σίγουροι ότι θέλετε να αλλάξετε στο προεπιλεγμένο κανάλι;</string>
     <string name="reset_to_defaults">Επαναφορά προεπιλογών</string>
     <string name="apply">Εφαρμογή</string>
@@ -106,8 +104,6 @@
     <string name="quick_chat_edit">Επεξεργασία ταχείας συνομιλίας</string>
     <string name="quick_chat_instant">Άμεση αποστολή</string>
     <string name="factory_reset">Επαναφορά εργοστασιακών ρυθμίσεων</string>
-    <string name="bluetooth_disabled">Bluetooth απενεργοποιημένο</string>
-    <string name="permission_missing_31">Το Meshtastic χρειάζεται την άδεια των κοντινών συσκευών για να βρείτε και να συνδεθείτε σε συσκευές μέσω Bluetooth. Μπορείτε να το απενεργοποιήσετε όταν δεν χρησιμοποιείται.</string>
     <string name="direct_message">Άμεσο Μήνυμα</string>
     <string name="error">Σφάλμα</string>
     <string name="ignore">Παράβλεψη</string>
@@ -191,8 +187,7 @@
     <string name="distance">Απόσταση</string>
     <string name="weight">Βάρος</string>
     <string name="url">URL</string>
-    <string name="map">Χάρτης</string>
-    <string name="contacts">Επαφές</string>
+    <string name="bottom_nav_settings">Ρυθμίσεις</string>
     <string name="reply">Απάντηση</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->

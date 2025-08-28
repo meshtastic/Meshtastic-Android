@@ -52,11 +52,9 @@
     <string name="send">Küldeni</string>
     <string name="warning_not_paired">Még nem párosított egyetlen Meshtastic rádiót sem ehhez a telefonhoz. Kérem pároztasson egyet és állítsa be a felhasználónevet.\n\nEz a szabad forráskódú alkalmazás fejlesztés alatt áll, ha hibát talál kérem írjon a projekt fórumába: https://github.com/orgs/meshtastic/discussions\n\nBővebb információért látogasson el a projekt weboldalára - www.meshtastic.org.</string>
     <string name="you">Te</string>
-    <string name="analytics_okay">Névtelen felhasználási statisztikák és hibajelentések.</string>
     <string name="accept">Elfogadni</string>
     <string name="cancel">Megszakítani</string>
     <string name="new_channel_rcvd">Új csatorna URL érkezett</string>
-    <string name="permission_missing">Egy szükséges engedély hiányzik, ezért a Meshtastic nem fog tudni rendesen működni. Kérem engedélyezze az Android alkalmazások beállításai között.</string>
     <string name="report_bug">Hiba jelentése</string>
     <string name="report_a_bug">Hiba jelentése</string>
     <string name="report_bug_text">Biztosan jelenteni akarja a hibát? Bejelentés után kérem írjon a https://github.com/orgs/meshtastic/discussions fórumba, hogy így össze tudjuk hangolni a jelentést azzal, amit talált.</string>
@@ -68,7 +66,6 @@
     <string name="disconnected">Szétkapcsolva</string>
     <string name="device_sleeping">Az eszköz alszik</string>
     <string name="ip_address">IP cím:</string>
-    <string name="connected">Kapcsolódva a rádióhoz</string>
     <string name="connected_to">Kapcsolódva a(z) %s rádióhoz</string>
     <string name="not_connected">Nincs kapcsolat</string>
     <string name="connected_sleeping">Kapcsolódva a rádióhoz, de az alvó üzemmódban van</string>
@@ -88,6 +85,7 @@
     <string name="save_rangetest">Rangetest.csv exportálása</string>
     <string name="reset">Újraindítás</string>
     <string name="scan">Keresés</string>
+    <string name="add_network_device">Új hozzáadása</string>
     <string name="are_you_sure_change_default">Biztosan meg akarja változtatni az alapértelmezett csatornát?</string>
     <string name="reset_to_defaults">Alapértelmezett beállítások visszaállítása</string>
     <string name="apply">Alkalmaz</string>
@@ -126,8 +124,6 @@
     <string name="quick_chat_append">Hozzáfűzés az üzenethez</string>
     <string name="quick_chat_instant">Azonnali küldés</string>
     <string name="factory_reset">Gyári beállítások visszaállítása</string>
-    <string name="bluetooth_disabled">Bluetooth kikapcsolva</string>
-    <string name="permission_missing_31">A meshtastic-nak szüksége van a \"közeli eszközök\" engedélyre, hogy kapcsolódni tudjon a bluetooth eszközökhöz. Kikapcsolhatod, ha nincs használatban.</string>
     <string name="direct_message">Közvetlen üzenet</string>
     <string name="nodedb_reset">NodeDB törlése</string>
     <string name="delivery_confirmed">Kézbesítés sikeres</string>
@@ -204,7 +200,7 @@
     <string name="messages">Üzenetek</string>
     <string name="timeout">Időtúllépés</string>
     <string name="distance">Távolság</string>
-    <string name="map">Térkép</string>
+    <string name="bottom_nav_settings">Beállítások</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->

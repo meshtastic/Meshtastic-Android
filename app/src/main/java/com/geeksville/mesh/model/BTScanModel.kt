@@ -92,8 +92,6 @@ sealed class DeviceListEntry(open val name: String, open val fullAddress: String
     data class Tcp(override val name: String, override val fullAddress: String) :
         DeviceListEntry(name, fullAddress, true)
 
-    data class Disconnect(override val name: String) : DeviceListEntry(name, NO_DEVICE_SELECTED, true)
-
     data class Mock(override val name: String) : DeviceListEntry(name, "m", true)
 }
 
@@ -168,18 +166,10 @@ constructor(
             .map { usb -> usb.map { (_, d) -> DeviceListEntry.Usb(radioInterfaceService, usbManagerLazy.get(), d) } }
             .stateIn(viewModelScope, SharingStarted.Lazily, emptyList())
 
-    val disconnectDevice = DeviceListEntry.Disconnect(context.getString(R.string.none))
-
     val mockDevice = DeviceListEntry.Mock("Demo Mode")
 
     val bleDevicesForUi: StateFlow<List<DeviceListEntry>> =
-        bleDevicesFlow
-            .map { devices -> listOf(disconnectDevice) + devices }
-            .stateIn(
-                viewModelScope,
-                SharingStarted.WhileSubscribed(SHARING_STARTED_TIMEOUT_MS),
-                listOf(disconnectDevice),
-            )
+        bleDevicesFlow.stateIn(viewModelScope, SharingStarted.WhileSubscribed(SHARING_STARTED_TIMEOUT_MS), emptyList())
 
     /** UI StateFlow for discovered TCP devices. */
     val discoveredTcpDevicesForUi: StateFlow<List<DeviceListEntry>> =
@@ -199,12 +189,12 @@ constructor(
 
     val usbDevicesForUi: StateFlow<List<DeviceListEntry>> =
         combine(usbDevicesFlow, showMockInterface) { usb, showMock ->
-            listOf(disconnectDevice) + usb + if (showMock) listOf(mockDevice) else emptyList()
+            usb + if (showMock) listOf(mockDevice) else emptyList()
         }
             .stateIn(
                 viewModelScope,
                 SharingStarted.WhileSubscribed(SHARING_STARTED_TIMEOUT_MS),
-                listOf(disconnectDevice),
+                if (showMockInterface.value) listOf(mockDevice) else emptyList(),
             )
 
     init {
@@ -379,13 +369,15 @@ constructor(
                 true
             }
 
-            is DeviceListEntry.Disconnect,
-            is DeviceListEntry.Mock,
-            -> {
+            is DeviceListEntry.Mock -> {
                 changeDeviceAddress(it.fullAddress)
                 true
             }
         }
+    }
+
+    fun disconnect() {
+        changeDeviceAddress(NO_DEVICE_SELECTED)
     }
 
     private val _spinner = MutableStateFlow(false)

@@ -76,11 +76,9 @@
     <string name="send">Pošalji</string>
     <string name="warning_not_paired">Још нисте упарили Мештастик компатибилан радио са овим телефоном. Молимо вас да упарите уређај и поставите своје корисничко име.\n\nОва апликација отвореног кода је у развоју, ако нађете проблеме, молимо вас да их објавите на нашем форуму: https://github.com/orgs/meshtastic/discussions\n\nЗа више информација посетите нашу веб страницу - www.meshtastic.org.</string>
     <string name="you">Ti</string>
-    <string name="analytics_okay">Anonimne statistike korišćenja i izveštaji o greškama.</string>
     <string name="accept">Prihvati</string>
     <string name="cancel">Otkaži</string>
     <string name="new_channel_rcvd">Primljen novi link kanala</string>
-    <string name="permission_missing">Meshtastic treba dozvolu za lokaciju i lokacija mora biti uključena da bi se pronašli novi uređaji preko Bluetooth-a. Možete je ponovo isključiti nakon toga.</string>
     <string name="report_bug">Prijavi grešku</string>
     <string name="report_a_bug">Prijavi grešku</string>
     <string name="report_bug_text">\"Da li ste sigurni da želite da prijavite grešku? Nakon prijavljivanja, molimo vas da postavite na https://github.com/orgs/meshtastic/discussions kako bismo mogli da povežemo izveštaj sa onim što ste pronašli.</string>
@@ -92,7 +90,7 @@
     <string name="disconnected">Raskačeno</string>
     <string name="device_sleeping">Uređaj je u stanju spavanja</string>
     <string name="ip_address">IP adresa: </string>
-    <string name="connected">Povezan na radio uređaj</string>
+    <string name="connected">Блутут повезан</string>
     <string name="connected_to">Povezan na radio uređaj (%s)</string>
     <string name="not_connected">Nije povezan</string>
     <string name="connected_sleeping">Povezan na radio uređaj, ali uređaj je u stanju spavanja</string>
@@ -114,6 +112,7 @@
     <string name="save_rangetest">Извези rangetest.csv</string>
     <string name="reset">Поново покрени</string>
     <string name="scan">Скенирај</string>
+    <string name="add_network_device">Додај</string>
     <string name="are_you_sure_change_default">Да ли сте сигурни да желите да промените на подразумевани канал?</string>
     <string name="reset_to_defaults">Врати на подразумевана подешавања</string>
     <string name="apply">Примени</string>
@@ -153,8 +152,6 @@
     <string name="quick_chat_append">Надодај на поруку</string>
     <string name="quick_chat_instant">Моментално пошаљи</string>
     <string name="factory_reset">Рестартовање на фабричка подешавања</string>
-    <string name="bluetooth_disabled">Блутут је онемогућен</string>
-    <string name="permission_missing_31">Мештастик захтева дозволу за приступ уређајима у близини да би пронашли и повезали се са уређајима преко блутута. Можете га искључити када се не користи.</string>
     <string name="direct_message">Директне поруке</string>
     <string name="nodedb_reset">Ресетовање базе чворова</string>
     <string name="delivery_confirmed">Испорука потврђена</string>
@@ -341,8 +338,9 @@
     <string name="secondary">Секундарни</string>
     <string name="actions">Акције</string>
     <string name="firmware">Фирмвер</string>
-    <string name="map">Мапа</string>
+    <string name="map">Мапа меша</string>
     <string name="nodes">Чворови</string>
+    <string name="bottom_nav_settings">Подешавања</string>
     <string name="reply">Одговори</string>
     <string name="expires">Истиче</string>
     <string name="time">Време</string>

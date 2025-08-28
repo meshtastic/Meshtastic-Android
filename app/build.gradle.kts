@@ -30,7 +30,7 @@ plugins {
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.detekt)
     alias(libs.plugins.datadog)
-    alias(libs.plugins.secrets.gradle.plugin)
+    alias(libs.plugins.secrets)
     alias(libs.plugins.spotless)
 }
 
@@ -57,7 +57,11 @@ android {
         applicationId = Configs.APPLICATION_ID
         minSdk = Configs.MIN_SDK
         targetSdk = Configs.TARGET_SDK
-        versionCode = System.getenv("VERSION_CODE")?.toIntOrNull() ?: 30630
+        // Prioritize ENV, then fallback for versionCode
+        versionCode =
+            System.getenv("VERSION_CODE")?.toIntOrNull()
+                ?: (System.currentTimeMillis() / 1000).toInt() // Meshtastic Development Build
+        versionName = System.getenv("VERSION_NAME") ?: Configs.VERSION_NAME_BASE
         testInstrumentationRunner = "com.geeksville.mesh.TestRunner"
         buildConfigField("String", "MIN_FW_VERSION", "\"${Configs.MIN_FW_VERSION}\"")
         buildConfigField("String", "ABS_MIN_FW_VERSION", "\"${Configs.ABS_MIN_FW_VERSION}\"")
@@ -112,18 +116,21 @@ android {
     }
     flavorDimensions.add("default")
     productFlavors {
-        val versionCode = defaultConfig.versionCode
+        // Read versionCode from defaultConfig after it's been potentially set by ENV or fallback
+        val resolvedVersionCode = defaultConfig.versionCode
+        val resolvedVersionName = defaultConfig.versionName
+
         create("fdroid") {
             dimension = "default"
             dependenciesInfo { includeInApk = false }
-            versionName = "${Configs.VERSION_NAME_BASE} ($versionCode) fdroid"
+            versionName = "$resolvedVersionName ($resolvedVersionCode) fdroid"
         }
         create("google") {
             dimension = "default"
             // Enable Firebase Crashlytics for Google Play builds
             apply(plugin = libs.plugins.google.services.get().pluginId)
             apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
-            versionName = "${Configs.VERSION_NAME_BASE} ($versionCode) google"
+            versionName = "$resolvedVersionName ($resolvedVersionCode) google"
         }
     }
     buildTypes {
@@ -142,7 +149,6 @@ android {
     }
     bundle { language { enableSplit = false } }
     buildFeatures {
-        viewBinding = true
         compose = true
         aidl = true
         buildConfig = true
@@ -175,9 +181,9 @@ secrets {
 }
 
 datadog {
-    // compose instrumentation is broken for kotlin 2.2.x - see:
-    // https://github.com/DataDog/dd-sdk-android-gradle-plugin/issues/407
-    //  composeInstrumentation = InstrumentationMode.AUTO
+    //    if (!gradle.startParameter.taskNames.any { it.contains("fdroid", ignoreCase = true) }) {
+    //        composeInstrumentation = InstrumentationMode.AUTO
+    //    }
 }
 
 // per protobuf-gradle-plugin docs, this is recommended for android
@@ -285,8 +291,6 @@ ksp {
     //    arg("room.generateKotlin", "true")
     arg("room.schemaLocation", "$projectDir/schemas")
 }
-
-repositories { maven { url = uri("https://jitpack.io") } }
 
 detekt {
     config.setFrom("../config/detekt/detekt.yml")

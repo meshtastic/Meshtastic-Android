@@ -17,8 +17,7 @@
 
 package com.geeksville.mesh.ui.map
 
-import android.content.SharedPreferences
-import androidx.core.content.edit
+import com.geeksville.mesh.android.prefs.MapPrefs
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,12 +27,14 @@ import javax.inject.Inject
 class MapViewModel
 @Inject
 constructor(
-    preferences: SharedPreferences,
+    mapPrefs: MapPrefs,
     packetRepository: PacketRepository,
     nodeRepository: NodeRepository,
-) : BaseMapViewModel(preferences, nodeRepository, packetRepository) {
+) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository) {
 
     var mapStyleId: Int
-        get() = preferences.getInt(MAP_STYLE_ID, 0)
-        set(value) = preferences.edit { putInt(MAP_STYLE_ID, value) }
+        get() = mapPrefs.mapStyle
+        set(value) {
+            mapPrefs.mapStyle = value
+        }
 }

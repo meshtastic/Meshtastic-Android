@@ -77,11 +77,9 @@
     <string name="send">Verzend</string>
     <string name="warning_not_paired">Je hebt nog geen Meshtastic compatibele radio met deze telefoon gekoppeld. Paar alstublieft een apparaat en voer je gebruikersnaam in.\n\nDeze open-source applicatie is in alpha-test, indien je een probleem vaststelt, kan je het posten op onze forum: https://github.com/orgs/meshtastic/discussions\n\nVoor meer informatie bezoek onze web pagina - www.meshtastic.org.</string>
     <string name="you">Jij</string>
-    <string name="analytics_okay">Anonieme gebruiksstatistieken en crashmeldingen.</string>
     <string name="accept">Accepteer</string>
     <string name="cancel">Annuleer</string>
     <string name="new_channel_rcvd">Nieuw kanaal URL ontvangen</string>
-    <string name="permission_missing">Een vereiste toelating ontbreekt, Meshtastic kan niet goed werken. Graag aanzetten in Instellingen.</string>
     <string name="report_bug">Rapporteer bug</string>
     <string name="report_a_bug">Rapporteer een bug</string>
     <string name="report_bug_text">Ben je zeker dat je een bug wil rapporteren? Na het doorsturen, graag een post in https://github.com/orgs/meshtastic/discussions zodat we het rapport kunnen toetsen aan hetgeen je ondervond.</string>
@@ -95,7 +93,7 @@
     <string name="connected_count">Verbonden: %1$s online</string>
     <string name="ip_address">IP-adres:</string>
     <string name="ip_port">Poort:</string>
-    <string name="connected">Verbonden met radio</string>
+    <string name="connected">Verbonden</string>
     <string name="connected_to">Verbonden met radio (%s)</string>
     <string name="not_connected">Niet verbonden</string>
     <string name="connected_sleeping">Verbonden met radio in slaapstand</string>
@@ -117,6 +115,7 @@
     <string name="save_rangetest">Exporteer rangetest.csv</string>
     <string name="reset">Reset</string>
     <string name="scan">Scan</string>
+    <string name="add_network_device">Voeg toe</string>
     <string name="are_you_sure_change_default">Weet je zeker dat je naar het standaard kanaal wilt wijzigen?</string>
     <string name="reset_to_defaults">Standaardinstellingen terugzetten</string>
     <string name="apply">Toepassen</string>
@@ -155,8 +154,6 @@
     <string name="quick_chat_append">Aan einde bericht toevoegen</string>
     <string name="quick_chat_instant">Direct verzenden</string>
     <string name="factory_reset">Reset naar fabrieksinstellingen</string>
-    <string name="bluetooth_disabled">Bluetooth uitgeschakeld</string>
-    <string name="permission_missing_31">Meshtastic heeft de \'Apparaten in de buurt\' toestemming nodig om apparaten te vinden en te verbinden via Bluetooth. Je kan het uitschakelen als het niet in gebruik is.</string>
     <string name="direct_message">Privébericht</string>
     <string name="nodedb_reset">NodeDB reset</string>
     <string name="delivery_confirmed">Aflevering bevestigd</string>
@@ -453,7 +450,7 @@
     <string name="import_label">Importeer</string>
     <string name="request_metadata">Metadata opvragen</string>
     <string name="actions">Acties</string>
-    <string name="map">Kaart</string>
+    <string name="bottom_nav_settings">Instellingen</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->

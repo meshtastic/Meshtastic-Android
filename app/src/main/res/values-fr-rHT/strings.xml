@@ -69,11 +69,9 @@
     <string name="send">Voye</string>
     <string name="warning_not_paired">Ou poko konekte ak yon radyo ki konpatib ak Meshtastic sou telefòn sa a. Tanpri konekte yon aparèy epi mete non itilizatè w lan.\n\nSa a se yon aplikasyon piblik ki nan tès Alpha. Si ou gen pwoblèm, tanpri pataje sou fowòm nou an: https://github.com/orgs/meshtastic/discussions\n\nPou plis enfòmasyon, vizite sit wèb nou an - www.meshtastic.org.</string>
     <string name="you">Ou</string>
-    <string name="analytics_okay">Statistik itilizasyon anonim ak rapò aksidantèl.</string>
     <string name="accept">Aksepte</string>
     <string name="cancel">Anile</string>
     <string name="new_channel_rcvd">Nouvo kanal URL resevwa</string>
-    <string name="permission_missing">Manke pèmisyon obligatwa, Meshtastic p ap ka fonksyone byen. Tanpri ale bay pèmisyon an nan paramèt aplikasyon android ou.</string>
     <string name="report_bug">Rapòte yon pwoblèm</string>
     <string name="report_a_bug">Rapòte pwoblèm</string>
     <string name="report_bug_text">Èske ou sèten ou vle rapòte yon pwoblèm? Aprew fin rapòte, tanpri pataje sou https://github.com/orgs/meshtastic/discussions pou nou ka konpare rapò a ak sa ou jwenn nan.</string>
@@ -85,7 +83,6 @@
     <string name="disconnected">Dekonekte</string>
     <string name="device_sleeping">Aparèy ap dòmi</string>
     <string name="ip_address">Adrès IP:</string>
-    <string name="connected">Konekte ak radyo</string>
     <string name="connected_to">Konekte ak radyo (%s)</string>
     <string name="not_connected">Pa konekte</string>
     <string name="connected_sleeping">Konekte ak radyo, men li ap dòmi</string>
@@ -106,6 +103,7 @@
     <string name="save_rangetest">Eksporte rangetest.csv</string>
     <string name="reset">Reyajiste</string>
     <string name="scan">Eskane</string>
+    <string name="add_network_device">Ajoute</string>
     <string name="are_you_sure_change_default">Eske ou sèten ou vle chanje pou kanal default la?</string>
     <string name="reset_to_defaults">Reyajiste nan paramèt default yo</string>
     <string name="apply">Aplike</string>
@@ -143,8 +141,6 @@
     <string name="quick_chat_append">Ajoute nan mesaj</string>
     <string name="quick_chat_instant">Voye imedyatman</string>
     <string name="factory_reset">Reyajiste nan faktori</string>
-    <string name="bluetooth_disabled">Bluetooth dezaktive</string>
-    <string name="permission_missing_31">Meshtastic bezwen pèmisyon \"Aparèy tou pre\" pou jwenn epi konekte ak aparèy atravè Bluetooth. Ou ka dezaktive l lè ou pa itilize li.</string>
     <string name="direct_message">Mesaj dirèk</string>
     <string name="nodedb_reset">Reyajiste NodeDB</string>
     <string name="delivery_confirmed">Livrezon konfime</string>

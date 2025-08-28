@@ -27,7 +27,7 @@ import androidx.compose.ui.test.performClick
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.geeksville.mesh.R
-import com.geeksville.mesh.ui.radioconfig.components.MapReportingPreference
+import com.geeksville.mesh.ui.settings.radio.components.MapReportingPreference
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -36,30 +36,19 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class MapReportingPreferenceTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+    @get:Rule val composeTestRule = createComposeRule()
 
-    private fun getString(id: Int): String =
-        InstrumentationRegistry.getInstrumentation().targetContext.getString(id)
+    private fun getString(id: Int): String = InstrumentationRegistry.getInstrumentation().targetContext.getString(id)
 
     var mapReportingEnabled = false
     var shouldReportLocation = false
     var positionPrecision = 5
     var positionReportingInterval = 60
 
-    var mapReportingEnabledChanged = { enabled: Boolean ->
-        mapReportingEnabled = enabled
-    }
-    var shouldReportLocationChanged = { enabled: Boolean ->
-        shouldReportLocation = enabled
-    }
-    var positionPrecisionChanged = { precision: Int ->
-        positionPrecision = precision
-    }
-    var positionReportingIntervalChanged = { interval: Int ->
-        positionReportingInterval = interval
-    }
-
+    var mapReportingEnabledChanged = { enabled: Boolean -> mapReportingEnabled = enabled }
+    var shouldReportLocationChanged = { enabled: Boolean -> shouldReportLocation = enabled }
+    var positionPrecisionChanged = { precision: Int -> positionPrecision = precision }
+    var positionReportingIntervalChanged = { interval: Int -> positionReportingInterval = interval }
 
     private fun testMapReportingPreference() = composeTestRule.setContent {
         Column {

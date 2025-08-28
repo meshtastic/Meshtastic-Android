@@ -17,11 +17,9 @@
 
 package com.geeksville.mesh.repository.map
 
-import android.content.Context
-import androidx.core.content.edit
+import com.geeksville.mesh.android.prefs.MapTileProviderPrefs
 import com.geeksville.mesh.di.IoDispatcher
 import com.geeksville.mesh.ui.map.CustomTileProviderConfig
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,19 +31,14 @@ import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val KEY_CUSTOM_TILE_PROVIDERS = "custom_tile_providers"
-private const val PREFS_NAME_TILE = "map_tile_provider_prefs"
-
 @Singleton
 class SharedPreferencesCustomTileProviderRepository
 @Inject
 constructor(
-    @ApplicationContext private val context: Context,
     private val json: Json,
     @IoDispatcher private val ioDispatcher: CoroutineDispatcher,
+    private val mapTileProviderPrefs: MapTileProviderPrefs,
 ) : CustomTileProviderRepository {
-
-    private val sharedPreferences = context.getSharedPreferences(PREFS_NAME_TILE, Context.MODE_PRIVATE)
 
     private val customTileProvidersStateFlow = MutableStateFlow<List<CustomTileProviderConfig>>(emptyList())
 
@@ -54,7 +47,7 @@ constructor(
     }
 
     private fun loadDataFromPrefs() {
-        val jsonString = sharedPreferences.getString(KEY_CUSTOM_TILE_PROVIDERS, null)
+        val jsonString = mapTileProviderPrefs.customTileProviders
         if (jsonString != null) {
             try {
                 customTileProvidersStateFlow.value = json.decodeFromString<List<CustomTileProviderConfig>>(jsonString)
@@ -71,7 +64,7 @@ constructor(
         withContext(ioDispatcher) {
             try {
                 val jsonString = json.encodeToString(providers)
-                sharedPreferences.edit { putString(KEY_CUSTOM_TILE_PROVIDERS, jsonString) }
+                mapTileProviderPrefs.customTileProviders = jsonString
             } catch (e: SerializationException) {
                 Timber.tag("TileRepo").e(e, "Error serializing tile providers")
             }

@@ -32,11 +32,9 @@
     <string name="unknown_username">اسم المستخدم غير معروف</string>
     <string name="send">ارسل</string>
     <string name="you">أنت</string>
-    <string name="analytics_okay">إحصاءات الاستخدام المجهولة الهُوِيَّة وتقارير الأعطال.</string>
     <string name="accept">قبول</string>
     <string name="cancel">إلغاء</string>
     <string name="new_channel_rcvd">تم تلقي رابط القناة الجديدة</string>
-    <string name="permission_missing">تحتاج الشبكة إلى إذن الموقع والموقع يجب تشغيله للعثور على أجهزة جديدة عبر البلوتوث. يمكنك إيقافه مرة أخرى بعد ذلك.</string>
     <string name="report_bug">الإبلاغ عن الخطأ</string>
     <string name="report_a_bug">الإبلاغ عن خطأ</string>
     <string name="report_bug_text">هل أنت متأكد من أنك تريد الإبلاغ عن خطأ؟ بعد الإبلاغ، يرجى النشر في https://github.com/orgs/meshtastic/discussions حتى نتمكن من مطابقة التقرير مع ما وجدته.</string>
@@ -48,7 +46,6 @@
     <string name="disconnected">انقطع الاتصال</string>
     <string name="device_sleeping">الجهاز في وضعية السكون</string>
     <string name="ip_address">عنوان الـ IP:</string>
-    <string name="connected">متصل بالراديو</string>
     <string name="connected_to">متصل بالراديو (%s)</string>
     <string name="not_connected">غير متصل</string>
     <string name="connected_sleeping">تم الاتصال بالراديو، إلا أن الجهاز في وضعية السكون</string>
@@ -60,6 +57,7 @@
     <string name="okay">حسنا</string>
     <string name="must_set_region">واجب إدخال المنطقة!</string>
     <string name="scan">البحث</string>
+    <string name="add_network_device">أضف</string>
     <string name="apply">تفعيل</string>
     <string name="name">الاسم</string>
     <string name="description">الوصف</string>
@@ -135,7 +133,7 @@
     <string name="baro_pressure">الضغط الجوي</string>
     <string name="messages">الرسائل</string>
     <string name="distance">المسافة</string>
-    <string name="map">الخريطة</string>
+    <string name="bottom_nav_settings">الإعدادات</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->

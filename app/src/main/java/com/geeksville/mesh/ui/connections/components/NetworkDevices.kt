@@ -17,47 +17,51 @@
 
 package com.geeksville.mesh.ui.connections.components
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.rememberTextFieldState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.WifiFind
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Wifi
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextFieldLabelPosition
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Alignment.Companion.CenterHorizontally
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.service.ConnectionState
+import com.geeksville.mesh.ui.common.components.TitledCard
+import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.connections.isIPAddress
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Suppress("MagicNumber", "LongMethod")
 @Composable
 fun NetworkDevices(
@@ -67,138 +71,203 @@ fun NetworkDevices(
     selectedDevice: String,
     scanModel: BTScanModel,
 ) {
-    val manualIpAddress = rememberTextFieldState("")
-    val manualIpPort = rememberTextFieldState(NetworkRepository.Companion.SERVICE_PORT.toString())
+    val searchDialogState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+    var showSearchDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+
     var deviceToDelete by remember { mutableStateOf<DeviceListEntry?>(null) }
-    Text(
-        text = stringResource(R.string.network),
-        style = MaterialTheme.typography.titleLarge,
-        modifier = Modifier.padding(vertical = 8.dp),
-    )
-    DeviceListItem(
-        connectionState = connectionState,
-        device = scanModel.disconnectDevice,
-        selected = scanModel.disconnectDevice.fullAddress == selectedDevice,
-        onSelect = { scanModel.onSelected(scanModel.disconnectDevice) },
-    )
-    if (discoveredNetworkDevices.isNotEmpty()) {
-        Text(
-            text = stringResource(R.string.discovered_network_devices),
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(vertical = 8.dp),
-        )
-        discoveredNetworkDevices.forEach { device ->
-            DeviceListItem(
-                connectionState,
-                device,
-                device.fullAddress == selectedDevice,
-                onSelect = { scanModel.onSelected(device) },
-            )
-        }
-    }
-    if (recentNetworkDevices.isNotEmpty()) {
-        Text(
-            text = stringResource(R.string.recent_network_devices),
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.padding(vertical = 8.dp),
-        )
-        recentNetworkDevices.forEach { device ->
-            DeviceListItem(
-                connectionState,
-                device,
-                device.fullAddress == selectedDevice,
-                onSelect = { scanModel.onSelected(device) },
-                modifier =
-                Modifier.combinedClickable(
-                    onClick = { scanModel.onSelected(device) },
-                    onLongClick = {
-                        deviceToDelete = device
-                        showDeleteDialog = true
-                    },
-                ),
-            )
-        }
-    }
-    if (showDeleteDialog && deviceToDelete != null) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text(stringResource(R.string.delete)) },
-            text = { Text(stringResource(R.string.confirm_delete_node)) },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        scanModel.removeRecentAddress(deviceToDelete!!.fullAddress)
-                        showDeleteDialog = false
-                    },
-                ) {
-                    Text(stringResource(R.string.delete))
-                }
-            },
-            dismissButton = {
-                Button(onClick = { showDeleteDialog = false }) { Text(stringResource(R.string.cancel)) }
+
+    if (showSearchDialog) {
+        AddDeviceDialog(
+            searchDialogState,
+            onHideDialog = { showSearchDialog = false },
+            onClickAdd = { ipAddress, fullAddress ->
+                scanModel.onSelected(DeviceListEntry.Tcp(ipAddress, fullAddress))
+                showSearchDialog = false
             },
         )
     }
-    if (discoveredNetworkDevices.isEmpty() && recentNetworkDevices.isEmpty()) {
-        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp), horizontalAlignment = CenterHorizontally) {
-            Icon(
-                imageVector = Icons.Default.WifiFind,
-                contentDescription = stringResource(R.string.no_network_devices),
-                modifier = Modifier.size(96.dp),
-            )
-            Text(
-                text = stringResource(R.string.no_network_devices),
-                style = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier.padding(vertical = 8.dp),
+
+    if (showDeleteDialog) {
+        deviceToDelete?.let {
+            ConfirmDeleteDialog(
+                it.fullAddress,
+                onHideDialog = { showDeleteDialog = false },
+                onConfirm = { deviceFullAddress -> scanModel.removeRecentAddress(deviceFullAddress) },
             )
         }
     }
 
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(8.dp),
-        verticalAlignment = Alignment.Companion.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp, CenterHorizontally),
-    ) {
-        OutlinedTextField(
-            state = manualIpAddress,
-            lineLimits = TextFieldLineLimits.SingleLine,
-            label = { Text(stringResource(R.string.ip_address)) },
-            keyboardOptions =
-            KeyboardOptions(keyboardType = KeyboardType.Companion.Decimal, imeAction = ImeAction.Next),
-            modifier = Modifier.weight(.7f, fill = false), // Fill 70% of the space
-        )
-        OutlinedTextField(
-            state = manualIpPort,
-            placeholder = { Text(NetworkRepository.SERVICE_PORT.toString()) },
-            lineLimits = TextFieldLineLimits.SingleLine,
-            label = { Text(stringResource(R.string.ip_port)) },
-            keyboardOptions =
-            KeyboardOptions(keyboardType = KeyboardType.Companion.Decimal, imeAction = ImeAction.Done),
-            modifier = Modifier.weight(.3f, fill = false), // Fill remaining space
-        )
-        IconButton(
-            onClick = {
-                if (manualIpAddress.text.toString().isIPAddress()) {
-                    val fullAddress =
-                        "t" +
-                            if (
-                                manualIpPort.text.isNotEmpty() &&
-                                manualIpPort.text.toString().toInt() != NetworkRepository.SERVICE_PORT
-                            ) {
-                                "${manualIpAddress.text}:${manualIpPort.text}"
-                            } else {
-                                manualIpAddress.text.toString()
-                            }
-                    scanModel.onSelected(DeviceListEntry.Tcp(manualIpAddress.text.toString(), fullAddress))
+    Column(verticalArrangement = Arrangement.spacedBy(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        val addButton: @Composable () -> Unit = {
+            Button(onClick = { showSearchDialog = true }) {
+                Icon(imageVector = Icons.Rounded.Add, contentDescription = stringResource(R.string.add_network_device))
+                Text(stringResource(R.string.add_network_device))
+            }
+        }
+
+        when {
+            discoveredNetworkDevices.isEmpty() && recentNetworkDevices.isEmpty() -> {
+                EmptyStateContent(
+                    imageVector = Icons.Rounded.Wifi,
+                    text = stringResource(R.string.no_network_devices),
+                    actionButton = addButton,
+                )
+            }
+
+            else -> {
+                if (recentNetworkDevices.isNotEmpty()) {
+                    TitledCard(title = stringResource(R.string.recent_network_devices)) {
+                        recentNetworkDevices.forEach { device ->
+                            DeviceListItem(
+                                connected =
+                                connectionState == ConnectionState.CONNECTED &&
+                                    device.fullAddress == selectedDevice,
+                                device = device,
+                                onSelect = { scanModel.onSelected(device) },
+                                modifier =
+                                Modifier.combinedClickable(
+                                    onClick = { scanModel.onSelected(device) },
+                                    onLongClick = {
+                                        deviceToDelete = device
+                                        showDeleteDialog = true
+                                    },
+                                ),
+                            )
+                        }
+                    }
                 }
-            },
-        ) {
-            Icon(
-                imageVector = Icons.Default.WifiFind,
-                contentDescription = stringResource(R.string.add),
-                modifier = Modifier.size(32.dp),
-            )
+
+                if (discoveredNetworkDevices.isNotEmpty()) {
+                    TitledCard(title = stringResource(R.string.discovered_network_devices)) {
+                        discoveredNetworkDevices.forEach { device ->
+                            DeviceListItem(
+                                connected =
+                                connectionState == ConnectionState.CONNECTED &&
+                                    device.fullAddress == selectedDevice,
+                                device = device,
+                                onSelect = { scanModel.onSelected(device) },
+                            )
+                        }
+                    }
+                }
+
+                addButton()
+            }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun AddDeviceDialog(
+    sheetState: SheetState,
+    onHideDialog: () -> Unit,
+    onClickAdd: (ipAddress: String, fullAddress: String) -> Unit,
+) {
+    val ipState = rememberTextFieldState("")
+    val portState = rememberTextFieldState(NetworkRepository.SERVICE_PORT.toString())
+
+    val scope = rememberCoroutineScope()
+
+    @Suppress("MagicNumber")
+    ModalBottomSheet(onDismissRequest = onHideDialog, sheetState = sheetState) {
+        Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    state = ipState,
+                    labelPosition = TextFieldLabelPosition.Above(),
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    label = { Text(stringResource(R.string.ip_address)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Next),
+                    modifier = Modifier.weight(.7f),
+                )
+
+                OutlinedTextField(
+                    state = portState,
+                    labelPosition = TextFieldLabelPosition.Above(),
+                    placeholder = { Text(NetworkRepository.SERVICE_PORT.toString()) },
+                    lineLimits = TextFieldLineLimits.SingleLine,
+                    label = { Text(stringResource(R.string.ip_port)) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal, imeAction = ImeAction.Done),
+                    modifier = Modifier.weight(.3f),
+                )
+            }
+
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                Button(modifier = Modifier.weight(1f), onClick = { onHideDialog() }) {
+                    Text(stringResource(R.string.cancel))
+                }
+
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        val ipAddress = ipState.text.toString()
+                        if (ipAddress.isIPAddress()) {
+                            val portString = portState.text.toString()
+
+                            val combinedString =
+                                if (portString.isNotEmpty() && portString.toInt() != NetworkRepository.SERVICE_PORT) {
+                                    "$ipAddress:$portString"
+                                } else {
+                                    ipAddress
+                                }
+
+                            onClickAdd(ipState.text.toString(), "t$combinedString")
+
+                            scope
+                                .launch { sheetState.hide() }
+                                .invokeOnCompletion {
+                                    if (!sheetState.isVisible) {
+                                        onHideDialog()
+                                    }
+                                }
+                        }
+                    },
+                ) {
+                    Text(stringResource(R.string.add_network_device))
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ConfirmDeleteDialog(
+    fullAddressToDelete: String,
+    onHideDialog: () -> Unit,
+    onConfirm: (deviceFullAddress: String) -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onHideDialog,
+        title = { Text(stringResource(R.string.delete)) },
+        text = { Text(stringResource(R.string.confirm_delete_node)) },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onConfirm(fullAddressToDelete)
+                    onHideDialog()
+                },
+            ) {
+                Text(stringResource(R.string.delete))
+            }
+        },
+        dismissButton = { Button(onClick = { onHideDialog() }) { Text(stringResource(R.string.cancel)) } },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@PreviewLightDark
+@Composable
+private fun SearchDialogPreview() {
+    AppTheme {
+        AddDeviceDialog(sheetState = rememberModalBottomSheetState(), onHideDialog = {}, onClickAdd = { _, _ -> })
+    }
+}
+
+@PreviewLightDark
+@Composable
+private fun ConfirmDeleteDialogPreview() {
+    AppTheme { ConfirmDeleteDialog(fullAddressToDelete = "", onHideDialog = {}, onConfirm = {}) }
 }

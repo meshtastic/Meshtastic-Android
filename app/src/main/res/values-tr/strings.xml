@@ -78,12 +78,10 @@
     <string name="send">Gönder</string>
     <string name="warning_not_paired">Telefonu, Meshtastic uyumlu bir cihaz ile eşleştirmediniz. Bir cihazla eşleştirin ve kullanıcı adınızı belirleyin.\n\nAçık kaynaklı bu uygulama şu an alfa-test aşamasında, problem fark ederseniz forumda lütfen paylaşın: https://github.com/orgs/meshtastic/discussions\n\nDaha fazla bilgi için, sitemiz: www.meshtastic.org.</string>
     <string name="you">Siz</string>
-    <string name="analytics_okay">Anonim kullanim istatistikleri ve hata raporları.</string>
     <string name="accept">Kabul et</string>
     <string name="cancel">İptal</string>
     <string name="clear_changes">Değişiklikleri Temizle</string>
     <string name="new_channel_rcvd">Yeni Kanal Adresi(URL) alındı</string>
-    <string name="permission_missing">Meshtastic\'in konum iznine ihtiyacı var ve Bluetooth ile yeni cihazlar bulmak için konumun açık olması gerekiyor. Daha sonra isterseniz kapatabilirsiniz.</string>
     <string name="report_bug">Hata Bildir</string>
     <string name="report_a_bug">Hata Bildir</string>
     <string name="report_bug_text">Hata bildirmek istediğinizden emin misiniz? Hata bildirdikten sonra, lütfen https://github.com/orgs/meshtastic/discussions sayfasında paylaşınız ki raporu bulgularınızla eşleştirebilelim.</string>
@@ -97,7 +95,7 @@
     <string name="connected_count">Bağlı: %1$s çevrimiçi</string>
     <string name="ip_address">IP Adresi:</string>
     <string name="ip_port">Bağlantı noktası:</string>
-    <string name="connected">Cihaza bağlandı</string>
+    <string name="connected">Bağlandı</string>
     <string name="connected_to">(%s) telsizine bağlandı </string>
     <string name="not_connected">Bağlı değil</string>
     <string name="connected_sleeping">Cihaza bağlandı, ancak uyku durumunda</string>
@@ -126,6 +124,7 @@
     <string name="save_rangetest">Dışa aktar: rangetest.csv</string>
     <string name="reset">Sıfırla</string>
     <string name="scan">Tara</string>
+    <string name="add_network_device">Ekle</string>
     <string name="are_you_sure_change_default">Varsayılan kanala geçmek istediğinizden emin misiniz?</string>
     <string name="reset_to_defaults">Varsayılana dön</string>
     <string name="apply">Uygula</string>
@@ -164,8 +163,6 @@
     <string name="quick_chat_append">Mesaj sonuna ekle</string>
     <string name="quick_chat_instant">Hemen gönder</string>
     <string name="factory_reset">Fabrika ayarları</string>
-    <string name="bluetooth_disabled">Bluetooth devre dışı</string>
-    <string name="permission_missing_31">Meshtastic\' in Bluetooth ile cihazları bulup bağlanması için Yakındaki cihazlar iznine ihtiyacı var. Kullanılmadığı zaman kapatabilirsiniz.</string>
     <string name="direct_message">Direkt Mesaj</string>
     <string name="nodedb_reset">NodeDB sıfırla</string>
     <string name="delivery_confirmed">Teslim Edildi</string>
@@ -572,7 +569,7 @@
     <string name="disk_free">Boş Disk</string>
     <string name="load">Yükle</string>
     <string name="user_string">Kullanıcı Karakter Dizisi</string>
-    <string name="map">Harita</string>
+    <string name="bottom_nav_settings">Ayarlar</string>
     <string name="i_agree">Katılıyorum.</string>
     <string name="time">Zaman</string>
     <string name="date">Tarih</string>
@@ -601,5 +598,4 @@
     <string name="configure_critical_alerts">Kritik Uyarı Yapılandır</string>
     <string name="notification_permissions_description">Meshtastic, yeni mesajlar ve diğer önemli etkinlikler hakkında sizi bilgilendirmek için bildirimleri kullanır. Bildirim izinlerinizi istediğiniz zaman ayarlardan güncelleyebilirsiniz.</string>
     <string name="next">Sonraki</string>
-    <string name="grant_permissions_and_scan">İzinleri Verin ve Tarayın</string>
 </resources>

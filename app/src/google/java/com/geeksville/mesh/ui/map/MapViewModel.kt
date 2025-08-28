@@ -18,12 +18,13 @@
 package com.geeksville.mesh.ui.map
 
 import android.app.Application
-import android.content.SharedPreferences
 import android.net.Uri
-import android.util.Log
+import androidx.core.net.toFile
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.android.BuildUtils.debug
+import com.geeksville.mesh.android.prefs.GoogleMapsPrefs
+import com.geeksville.mesh.android.prefs.MapPrefs
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
@@ -33,6 +34,7 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.TileProvider
 import com.google.android.gms.maps.model.UrlTileProvider
 import com.google.maps.android.compose.MapType
+import com.google.maps.android.data.geojson.GeoJsonLayer
 import com.google.maps.android.data.kml.KmlLayer
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -43,13 +45,14 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
+import org.json.JSONObject
+import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -70,18 +73,19 @@ data class MapCameraPosition(
     val bearing: Float,
 )
 
-@Suppress("TooManyFunctions")
+@Suppress("TooManyFunctions", "LongParameterList")
 @HiltViewModel
 class MapViewModel
 @Inject
 constructor(
     private val application: Application,
-    preferences: SharedPreferences,
+    mapPrefs: MapPrefs,
+    private val googleMapsPrefs: GoogleMapsPrefs,
     nodeRepository: NodeRepository,
     packetRepository: PacketRepository,
     radioConfigRepository: RadioConfigRepository,
     private val customTileProviderRepository: CustomTileProviderRepository,
-) : BaseMapViewModel(preferences, nodeRepository, packetRepository) {
+) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository) {
 
     private val _errorFlow = MutableSharedFlow<String>()
     val errorFlow: SharedFlow<String> = _errorFlow.asSharedFlow()
@@ -94,7 +98,7 @@ constructor(
     private val _selectedCustomTileProviderUrl = MutableStateFlow<String?>(null)
     val selectedCustomTileProviderUrl: StateFlow<String?> = _selectedCustomTileProviderUrl.asStateFlow()
 
-    private val _selectedGoogleMapType = MutableStateFlow<MapType>(MapType.NORMAL)
+    private val _selectedGoogleMapType = MutableStateFlow(MapType.NORMAL)
     val selectedGoogleMapType: StateFlow<MapType> = _selectedGoogleMapType.asStateFlow()
 
     private val _cameraPosition = MutableStateFlow<MapCameraPosition?>(null)
@@ -182,6 +186,8 @@ constructor(
 
             if (configToRemove != null && _selectedCustomTileProviderUrl.value == configToRemove.urlTemplate) {
                 _selectedCustomTileProviderUrl.value = null
+                // Also clear from prefs
+                googleMapsPrefs.selectedCustomTileUrl = null
             }
         }
     }
@@ -189,26 +195,31 @@ constructor(
     fun selectCustomTileProvider(config: CustomTileProviderConfig?) {
         if (config != null) {
             if (!isValidTileUrlTemplate(config.urlTemplate)) {
-                Log.w("MapViewModel", "Attempted to select invalid URL template: ${config.urlTemplate}")
+                Timber.tag("MapViewModel").w("Attempted to select invalid URL template: ${config.urlTemplate}")
                 _selectedCustomTileProviderUrl.value = null
+                googleMapsPrefs.selectedCustomTileUrl = null
                 return
             }
             _selectedCustomTileProviderUrl.value = config.urlTemplate
+            _selectedGoogleMapType.value = MapType.NORMAL // Reset to a default or keep last? For now, reset.
+            googleMapsPrefs.selectedCustomTileUrl = config.urlTemplate
+            googleMapsPrefs.selectedGoogleMapType = null
         } else {
             _selectedCustomTileProviderUrl.value = null
+            googleMapsPrefs.selectedCustomTileUrl = null
         }
     }
 
     fun setSelectedGoogleMapType(mapType: MapType) {
         _selectedGoogleMapType.value = mapType
-        if (_selectedCustomTileProviderUrl.value != null) {
-            _selectedCustomTileProviderUrl.value = null
-        }
+        _selectedCustomTileProviderUrl.value = null // Clear custom selection
+        googleMapsPrefs.selectedGoogleMapType = mapType.name
+        googleMapsPrefs.selectedCustomTileUrl = null
     }
 
     fun createUrlTileProvider(urlString: String): TileProvider? {
         if (!isValidTileUrlTemplate(urlString)) {
-            Log.e("MapViewModel", "Tile URL does not contain valid {x}, {y}, and {z} placeholders: $urlString")
+            Timber.tag("MapViewModel").e("Tile URL does not contain valid {x}, {y}, and {z} placeholders: $urlString")
             return null
         }
         return object : UrlTileProvider(TILE_SIZE, TILE_SIZE) {
@@ -221,7 +232,7 @@ constructor(
                 return try {
                     URL(formattedUrl)
                 } catch (e: MalformedURLException) {
-                    Log.e("MapViewModel", "Malformed URL: $formattedUrl", e)
+                    Timber.tag("MapViewModel").e(e, "Malformed URL: $formattedUrl")
                     null
                 }
             }
@@ -237,6 +248,35 @@ constructor(
 
     init {
         loadPersistedLayers()
+        loadPersistedMapType()
+    }
+
+    private fun loadPersistedMapType() {
+        val savedCustomUrl = googleMapsPrefs.selectedCustomTileUrl
+        if (savedCustomUrl != null) {
+            // Check if this custom provider still exists
+            if (
+                customTileProviderConfigs.value.any { it.urlTemplate == savedCustomUrl } &&
+                isValidTileUrlTemplate(savedCustomUrl)
+            ) {
+                _selectedCustomTileProviderUrl.value = savedCustomUrl
+                _selectedGoogleMapType.value = MapType.NORMAL // Default, as custom is active
+            } else {
+                // The saved custom URL is no longer valid or doesn't exist, remove preference
+                googleMapsPrefs.selectedCustomTileUrl = null
+                // Fallback to default Google Map type
+                _selectedGoogleMapType.value = MapType.NORMAL
+            }
+        } else {
+            val savedGoogleMapTypeName = googleMapsPrefs.selectedGoogleMapType
+            try {
+                _selectedGoogleMapType.value = MapType.valueOf(savedGoogleMapTypeName ?: MapType.NORMAL.name)
+            } catch (e: IllegalArgumentException) {
+                Timber.e(e, "Invalid saved Google Map type: $savedGoogleMapTypeName")
+                _selectedGoogleMapType.value = MapType.NORMAL // Fallback in case of invalid stored name
+                googleMapsPrefs.selectedGoogleMapType = null
+            }
+        }
     }
 
     private fun loadPersistedLayers() {
@@ -250,25 +290,39 @@ constructor(
                         val loadedItems =
                             persistedLayerFiles.mapNotNull { file ->
                                 if (file.isFile) {
-                                    MapLayerItem(
-                                        name = file.nameWithoutExtension,
-                                        uri = Uri.fromFile(file),
-                                        isVisible = true,
-                                    )
+                                    val layerType =
+                                        when (file.extension.lowercase()) {
+                                            "kml",
+                                            "kmz",
+                                            -> LayerType.KML
+                                            "geojson",
+                                            "json",
+                                            -> LayerType.GEOJSON
+                                            else -> null
+                                        }
+
+                                    layerType?.let {
+                                        MapLayerItem(
+                                            name = file.nameWithoutExtension,
+                                            uri = Uri.fromFile(file),
+                                            isVisible = true,
+                                            layerType = it,
+                                        )
+                                    }
                                 } else {
                                     null
                                 }
                             }
                         _mapLayers.value = loadedItems
                         if (loadedItems.isNotEmpty()) {
-                            Log.i("MapViewModel", "Loaded ${loadedItems.size} persisted map layers.")
+                            Timber.tag("MapViewModel").i("Loaded ${loadedItems.size} persisted map layers.")
                         }
                     }
                 } else {
-                    Log.i("MapViewModel", "Map layers directory does not exist. No layers loaded.")
+                    Timber.tag("MapViewModel").i("Map layers directory does not exist. No layers loaded.")
                 }
             } catch (e: Exception) {
-                Log.e("MapViewModel", "Error loading persisted map layers", e)
+                Timber.tag("MapViewModel").e(e, "Error loading persisted map layers")
                 _mapLayers.value = emptyList()
             }
         }
@@ -276,14 +330,41 @@ constructor(
 
     fun addMapLayer(uri: Uri, fileName: String?) {
         viewModelScope.launch {
-            val layerName = fileName ?: "Layer ${mapLayers.value.size + 1}"
-            val localFileUri = copyFileToInternalStorage(uri, fileName ?: "layer_${UUID.randomUUID()}")
+            val layerName = fileName?.substringBeforeLast('.') ?: "Layer ${mapLayers.value.size + 1}"
+
+            val extension =
+                fileName?.substringAfterLast('.', "")?.lowercase()
+                    ?: application.contentResolver.getType(uri)?.split('/')?.last()
+
+            val kmlExtensions = listOf("kml", "kmz", "vnd.google-earth.kml+xml", "vnd.google-earth.kmz")
+            val geoJsonExtensions = listOf("geojson", "json")
+
+            val layerType =
+                when (extension) {
+                    in kmlExtensions -> LayerType.KML
+                    in geoJsonExtensions -> LayerType.GEOJSON
+                    else -> null
+                }
+
+            if (layerType == null) {
+                Timber.tag("MapViewModel").e("Unsupported map layer file type: $extension")
+                return@launch
+            }
+
+            val finalFileName =
+                if (fileName != null) {
+                    "$layerName.$extension"
+                } else {
+                    "layer_${UUID.randomUUID()}.$extension"
+                }
+
+            val localFileUri = copyFileToInternalStorage(uri, finalFileName)
 
             if (localFileUri != null) {
-                val newItem = MapLayerItem(name = layerName, uri = localFileUri)
+                val newItem = MapLayerItem(name = layerName, uri = localFileUri, layerType = layerType)
                 _mapLayers.value = _mapLayers.value + newItem
             } else {
-                Log.e("MapViewModel", "Failed to copy KML/KMZ file to internal storage.")
+                Timber.tag("MapViewModel").e("Failed to copy file to internal storage.")
             }
         }
     }
@@ -301,7 +382,7 @@ constructor(
             inputStream?.use { input -> outputStream.use { output -> input.copyTo(output) } }
             Uri.fromFile(outputFile)
         } catch (e: IOException) {
-            Log.e("MapViewModel", "Error copying file to internal storage", e)
+            Timber.tag("MapViewModel").e(e, "Error copying file to internal storage")
             null
         }
     }
@@ -313,58 +394,85 @@ constructor(
     fun removeMapLayer(layerId: String) {
         viewModelScope.launch {
             val layerToRemove = _mapLayers.value.find { it.id == layerId }
-            layerToRemove?.kmlLayerData?.removeLayerFromMap()
-            layerToRemove?.uri?.let { uri -> deleteFileFromInternalStorage(uri) }
+            when (layerToRemove?.layerType) {
+                LayerType.KML -> layerToRemove.kmlLayerData?.removeLayerFromMap()
+                LayerType.GEOJSON -> layerToRemove.geoJsonLayerData?.removeLayerFromMap()
+                null -> {}
+            }
+            layerToRemove?.uri?.let { uri -> deleteFileToInternalStorage(uri) }
             _mapLayers.value = _mapLayers.value.filterNot { it.id == layerId }
         }
     }
 
-    private suspend fun deleteFileFromInternalStorage(uri: Uri) {
+    private suspend fun deleteFileToInternalStorage(uri: Uri) {
         withContext(Dispatchers.IO) {
             try {
-                val file = File(uri.path ?: return@withContext)
+                val file = uri.toFile()
                 if (file.exists()) {
                     file.delete()
                 }
             } catch (e: Exception) {
-                Log.e("MapViewModel", "Error deleting file from internal storage", e)
+                Timber.tag("MapViewModel").e(e, "Error deleting file from internal storage")
             }
         }
     }
 
     @Suppress("Recycle")
-    suspend fun getInputStreamFromUri(layerItem: MapLayerItem): InputStream? {
+    private suspend fun getInputStreamFromUri(layerItem: MapLayerItem): InputStream? {
         val uriToLoad = layerItem.uri ?: return null
-        val stream =
-            withContext(Dispatchers.IO) {
-                try {
-                    application.contentResolver.openInputStream(uriToLoad)
-                } catch (_: Exception) {
-                    debug("MapViewModel: Error opening InputStream from URI: $uriToLoad")
-                    null
-                }
+        return withContext(Dispatchers.IO) {
+            try {
+                application.contentResolver.openInputStream(uriToLoad)
+            } catch (_: Exception) {
+                debug("MapViewModel: Error opening InputStream from URI: $uriToLoad")
+                null
             }
-        return stream
+        }
     }
 
-    suspend fun loadKmlLayerIfNeeded(map: GoogleMap, layerItem: MapLayerItem): KmlLayer? {
-        if (layerItem.kmlLayerData != null) {
-            return layerItem.kmlLayerData
-        }
-
-        return try {
-            getInputStreamFromUri(layerItem)?.use { inputStream ->
-                val kmlLayer = KmlLayer(map, inputStream, application.applicationContext)
-                _mapLayers.update { currentLayers ->
-                    currentLayers.map { if (it.id == layerItem.id) it.copy(kmlLayerData = kmlLayer) else it }
+    suspend fun loadMapLayerIfNeeded(map: GoogleMap, layerItem: MapLayerItem) {
+        if (layerItem.kmlLayerData != null || layerItem.geoJsonLayerData != null) return
+        try {
+            when (layerItem.layerType) {
+                LayerType.KML -> {
+                    val kmlLayer =
+                        getInputStreamFromUri(layerItem)?.use { KmlLayer(map, it, application.applicationContext) }
+                    _mapLayers.update { currentLayers ->
+                        currentLayers.map {
+                            if (it.id == layerItem.id) {
+                                it.copy(kmlLayerData = kmlLayer)
+                            } else {
+                                it
+                            }
+                        }
+                    }
                 }
-                kmlLayer
+                LayerType.GEOJSON -> {
+                    val geoJsonLayer =
+                        getInputStreamFromUri(layerItem)?.use { inputStream ->
+                            val jsonObject = JSONObject(inputStream.bufferedReader().use { it.readText() })
+                            GeoJsonLayer(map, jsonObject)
+                        }
+                    _mapLayers.update { currentLayers ->
+                        currentLayers.map {
+                            if (it.id == layerItem.id) {
+                                it.copy(geoJsonLayerData = geoJsonLayer)
+                            } else {
+                                it
+                            }
+                        }
+                    }
+                }
             }
         } catch (e: Exception) {
-            Log.e("MapViewModel", "Error loading KML for ${layerItem.uri}", e)
-            null
+            Timber.tag("MapViewModel").e(e, "Error loading map layer for ${layerItem.uri}")
         }
     }
+}
+
+enum class LayerType {
+    KML,
+    GEOJSON,
 }
 
 data class MapLayerItem(
@@ -373,6 +481,8 @@ data class MapLayerItem(
     val uri: Uri? = null,
     var isVisible: Boolean = true,
     var kmlLayerData: KmlLayer? = null,
+    var geoJsonLayerData: GeoJsonLayer? = null,
+    val layerType: LayerType,
 )
 
 @Serializable

@@ -23,7 +23,6 @@ import android.content.SharedPreferences
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
-import androidx.core.content.edit
 import androidx.navigation.NavHostController
 import com.datadog.android.Datadog
 import com.datadog.android.DatadogSite
@@ -49,15 +48,21 @@ import com.datadog.android.trace.TraceConfiguration
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.analytics.AnalyticsProvider
 import com.geeksville.mesh.analytics.FirebaseAnalytics
+import com.geeksville.mesh.android.prefs.AnalyticsPrefs
 import com.geeksville.mesh.model.DeviceHardware
 import com.geeksville.mesh.util.exceptionReporter
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailabilityLight
+import com.google.firebase.Firebase
+import com.google.firebase.analytics.analytics
+import com.google.firebase.crashlytics.crashlytics
+import com.google.firebase.crashlytics.setCustomKeys
+import com.google.firebase.initialize
 import com.suddenh4x.ratingdialog.AppRating
 import io.opentracing.util.GlobalTracer
 import timber.log.Timber
 
-open class GeeksvilleApplication :
+abstract class GeeksvilleApplication :
     Application(),
     Logging {
 
@@ -75,30 +80,7 @@ open class GeeksvilleApplication :
             return "true" == testLabSetting
         }
 
-    private val analyticsPrefs: SharedPreferences by lazy { getSharedPreferences("analytics-prefs", MODE_PRIVATE) }
-
-    var isAnalyticsAllowed: Boolean
-        get() = analyticsPrefs.getBoolean("allowed", true)
-        set(value) {
-            analyticsPrefs.edit { putBoolean("allowed", value) }
-            val newConsent =
-                if (value && !isInTestLab) {
-                    TrackingConsent.GRANTED
-                } else {
-                    TrackingConsent.NOT_GRANTED
-                }
-
-            info(if (value) "Analytics enabled" else "Analytics disabled")
-
-            if (Datadog.isInitialized()) {
-                Datadog.setTrackingConsent(newConsent)
-            } else {
-                initDatadog()
-            }
-
-            // Change the flag with the providers
-            analytics.setEnabled(value && !isInTestLab) // Never do analytics in the test lab
-        }
+    abstract val analyticsPrefs: AnalyticsPrefs
 
     private val minimumLaunchTimes: Int = 10
     private val minimumDays: Int = 10
@@ -131,18 +113,70 @@ open class GeeksvilleApplication :
         }
     }
 
+    lateinit var analyticsPrefsChangedListener: SharedPreferences.OnSharedPreferenceChangeListener
+
     override fun onCreate() {
         super.onCreate()
-
-        val firebaseAnalytics = FirebaseAnalytics(this)
-        analytics = firebaseAnalytics
-
-        // Set analytics per prefs
-        isAnalyticsAllowed = isAnalyticsAllowed
         initDatadog()
+        initCrashlytics()
+        updateAnalyticsConsent()
+        // listen for changes to analytics prefs
+        analyticsPrefsChangedListener =
+            SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+                if (key == "allowed") {
+                    updateAnalyticsConsent()
+                }
+            }
+        getSharedPreferences("analytics-prefs", MODE_PRIVATE)
+            .registerOnSharedPreferenceChangeListener(analyticsPrefsChangedListener)
     }
 
     private val sampleRate = 100f
+
+    private fun initCrashlytics() {
+        analytics = FirebaseAnalytics(analyticsPrefs.installId)
+        Firebase.initialize(this)
+        Firebase.crashlytics.setUserId(analyticsPrefs.installId)
+        Timber.plant(CrashlyticsTree())
+    }
+
+    private fun updateAnalyticsConsent() {
+        if (!isAnalyticsAvailable || isInTestLab) {
+            info("Analytics not available")
+            return
+        }
+        val isAnalyticsAllowed = analyticsPrefs.analyticsAllowed
+        info(if (isAnalyticsAllowed) "Analytics enabled" else "Analytics disabled")
+        Datadog.setTrackingConsent(if (isAnalyticsAllowed) TrackingConsent.GRANTED else TrackingConsent.NOT_GRANTED)
+
+        analytics.setEnabled(isAnalyticsAllowed)
+        Firebase.crashlytics.isCrashlyticsCollectionEnabled = isAnalyticsAllowed
+        Firebase.analytics.setAnalyticsCollectionEnabled(isAnalyticsAllowed)
+        Firebase.crashlytics.sendUnsentReports()
+    }
+
+    private class CrashlyticsTree : Timber.Tree() {
+
+        companion object {
+            private const val KEY_PRIORITY = "priority"
+            private const val KEY_TAG = "tag"
+            private const val KEY_MESSAGE = "message"
+        }
+
+        override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+            Firebase.crashlytics.setCustomKeys {
+                key(KEY_PRIORITY, priority)
+                key(KEY_TAG, tag ?: "No Tag")
+                key(KEY_MESSAGE, message)
+            }
+
+            if (t == null) {
+                Firebase.crashlytics.recordException(Exception(message))
+            } else {
+                Firebase.crashlytics.recordException(t)
+            }
+        }
+    }
 
     private fun initDatadog() {
         val logger =
@@ -162,13 +196,9 @@ open class GeeksvilleApplication :
                 .setCrashReportsEnabled(true)
                 .setUseDeveloperModeWhenDebuggable(true)
                 .build()
-        val consent =
-            if (isAnalyticsAllowed && !isInTestLab) {
-                TrackingConsent.GRANTED
-            } else {
-                TrackingConsent.NOT_GRANTED
-            }
+        val consent = TrackingConsent.PENDING
         Datadog.initialize(this, configuration, consent)
+        Datadog.setUserInfo(analyticsPrefs.installId)
 
         val rumConfiguration =
             RumConfiguration.Builder(BuildConfig.datadogApplicationId)
@@ -177,9 +207,7 @@ open class GeeksvilleApplication :
                 .trackFrustrations(true)
                 .trackLongTasks()
                 .trackNonFatalAnrs(true)
-                // Re-enable tracking when auto instrumentation available. See note in `app/build.gradle`
-                .disableUserInteractionTracking()
-                // .trackUserInteractions()
+                .trackUserInteractions()
                 .enableComposeActionTracking()
                 .build()
         Rum.enable(rumConfiguration)
@@ -210,11 +238,16 @@ fun setAttributes(firmwareVersion: String, deviceHardware: DeviceHardware) {
     GlobalRumMonitor.get().addAttribute("device_hardware", deviceHardware.hwModelSlug)
 }
 
-val Context.isGooglePlayAvailable: Boolean
+private val Context.isGooglePlayAvailable: Boolean
     get() =
         GoogleApiAvailabilityLight.getInstance().isGooglePlayServicesAvailable(this).let {
             it != ConnectionResult.SERVICE_MISSING && it != ConnectionResult.SERVICE_INVALID
         }
+
+private val isDatadogAvailable: Boolean = Datadog.isInitialized()
+
+val Context.isAnalyticsAvailable: Boolean
+    get() = isDatadogAvailable && isGooglePlayAvailable
 
 @OptIn(ExperimentalTrackingApi::class)
 @Composable

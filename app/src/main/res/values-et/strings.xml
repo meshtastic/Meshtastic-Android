@@ -83,12 +83,10 @@
     <string name="send">Saada</string>
     <string name="warning_not_paired">Ei ole veel ühendanud Meshtastic -kokku sobivat raadiot telefoniga. Seo seade selle telefoniga ja määra kasutajanimi.\n\nSee avatud lähtekoodiga programm on alpha-testi staatuses. Kui märkad vigu, saada palun sõnum meie foorumisse: https://github.com/orgs/meshtastic/discussions\n\nLisateave kodulehel - www.meshtastic.org.</string>
     <string name="you">Sina</string>
-    <string name="analytics_okay">Anonüümne kasutus statistika ja krahhiaruanded.</string>
     <string name="accept">Nõustu</string>
     <string name="cancel">Tühista</string>
     <string name="clear_changes">Võta tagasi</string>
     <string name="new_channel_rcvd">Uued kanalid vastu võetud</string>
-    <string name="permission_missing">Meshtastic vajab sinihamba kaudu uute seadmete tuvastamiseks luba asukoha kasutamiseks,  asukoht peab olema sisse lülitatud. Hiljem saad asukoha uuesti välja lülitada.</string>
     <string name="report_bug">Teata veast</string>
     <string name="report_a_bug">Teata veast</string>
     <string name="report_bug_text">Kas soovid kindlasti veast teatada? Saada hiljem selgitus aadressile https://github.com/orgs/meshtastic/discussions, et saaksime selgitust leituga sobitada.</string>
@@ -103,7 +101,7 @@
     <string name="connected_count">Ühendatud: %1$s aktiivset</string>
     <string name="ip_address">IP-aadress:</string>
     <string name="ip_port">Port:</string>
-    <string name="connected">Ühendatud raadioga</string>
+    <string name="connected">Ühendatud</string>
     <string name="connected_to">Ühendatud raadioga (%s)</string>
     <string name="not_connected">Ei ole ühendatud</string>
     <string name="connected_sleeping">Ühendatud raadioga, aga see on unerežiimis</string>
@@ -142,6 +140,7 @@
     <string name="save_rangetest">Lae alla rangetest.csv</string>
     <string name="reset">Taasta</string>
     <string name="scan">Otsi</string>
+    <string name="add_network_device">Lisa</string>
     <string name="are_you_sure_change_default">Kas oled kindel, et soovid vaikekanalit muuta?</string>
     <string name="reset_to_defaults">Taasta vaikesätted</string>
     <string name="apply">Rakenda</string>
@@ -184,8 +183,6 @@
     <string name="quick_chat_show">Kuva kiirsõnumite valik</string>
     <string name="quick_chat_hide">Peida kiirsõnumite valik</string>
     <string name="factory_reset">Tehasesätted</string>
-    <string name="bluetooth_disabled">Bluetooth väljas</string>
-    <string name="permission_missing_31">Meshtastic vajab luba läheduses asuvate seadmete leidmiseks ja sinihamba ​​kaudu ühenduse loomiseks. Saad selle välja lülitada, kui seda ei kasutata.</string>
     <string name="direct_message">Otsesõnum</string>
     <string name="nodedb_reset">NodeDB lähtestamine</string>
     <string name="delivery_confirmed">Kohale toimetatud</string>
@@ -604,10 +601,8 @@
     <string name="load">Lae</string>
     <string name="user_string">Kasutaja string</string>
     <string name="navigate_into_label">Mine asukohta</string>
-    <string name="connections">Ühendus</string>
-    <string name="map">Kaart</string>
-    <string name="contacts">Kontaktid</string>
     <string name="nodes">Sõlmed</string>
+    <string name="bottom_nav_settings">Sätted</string>
     <string name="set_your_region">Määra regioon</string>
     <string name="reply">Vasta</string>
     <string name="map_reporting_summary">Teie sõlm saadab pidevalt määratletud MQTT serverile krüpteerimata kaardiaruande pakete, mis sisaldab ID-d, pikka- ja lühinime, ligikaudset asukohta, riistvaramudelit, rolli, püsivara versiooni, LoRa regiooni, modemi eelseadistust ja peamise kanali nime.</string>
@@ -635,7 +630,6 @@
     <string name="node_count_template">(%1$d võrgus / %2$d kokku)</string>
     <string name="react">Reageeri</string>
     <string name="disconnect">Katkesta ühendus</string>
-    <string name="no_ble_devices">Sinihamba seadmeid ei leitud.</string>
     <string name="no_network_devices">Võrguseadmeid ei leitud.</string>
     <string name="no_usb_devices">USB seadmeid ei leita.</string>
     <string name="scroll_to_bottom">Mine lõppu</string>
@@ -732,7 +726,6 @@
     <string name="configure_critical_alerts">Kriitiliste hoiatuste seadistamine</string>
     <string name="notification_permissions_description">Meshtastic kasutab märguandeid, et hoida teid kursis uute sõnumite ja muude oluliste sündmustega. Saate oma märguannete õigusi igal ajal seadetes muuta.</string>
     <string name="next">Järgmine</string>
-    <string name="grant_permissions_and_scan">Anna õigused ja skanneeri</string>
     <string name="nodes_queued_for_deletion">%d eemaldatavat sõlme nimekirjas:</string>
     <string name="clean_node_database_description">Hoiatus: See eemaldab sõlmed rakendusest, kui ka seadmest.\nValikud on lisaks eelnevale.</string>
     <string name="connecting_to_device">Ühendan seadet</string>

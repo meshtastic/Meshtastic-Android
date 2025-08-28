@@ -54,7 +54,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.model.Node
-import com.geeksville.mesh.ui.common.components.AutoLinkText
+import com.geeksville.mesh.ui.common.components.MDText
 import com.geeksville.mesh.ui.common.components.Rssi
 import com.geeksville.mesh.ui.common.components.Snr
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
@@ -164,7 +164,7 @@ internal fun MessageItem(
                 }
 
                 Column(modifier = Modifier.padding(horizontal = 8.dp)) {
-                    AutoLinkText(
+                    MDText(
                         modifier = Modifier.fillMaxWidth(),
                         text = message.text,
                         style = MaterialTheme.typography.bodyMedium,

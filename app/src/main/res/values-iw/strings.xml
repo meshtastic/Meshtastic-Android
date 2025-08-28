@@ -30,11 +30,9 @@
     <string name="send">שלח</string>
     <string name="warning_not_paired">עוד לא צימדת מכשיר תומך משטסטיק לטלפון זה. בבקשה צמד מכשיר והגדר שם משתמש.\n\nאפליקציית קוד פתוח זה נמצא בפיתוח, במקשר של בעיות בבקשה גש לפורום: https://github.com/orgs/meshtastic/discussions\n\n למידע נוסף בקרו באתר - www.meshtastic.org.</string>
     <string name="you">אתה</string>
-    <string name="analytics_okay">שלח סטטיסטיקות שימוש אנונימיות ודוחות קריסה.</string>
     <string name="accept">אישור</string>
     <string name="cancel">בטל</string>
     <string name="new_channel_rcvd">התקבל כתובת ערוץ חדשה</string>
-    <string name="permission_missing">משטסטיק צריך גישה למיקום ועל מיקום להיות דולק בכדי למצוא מכשירי בלוטוס. ניתן לכבות חזרה לאחר מכן.</string>
     <string name="report_bug">דווח על באג</string>
     <string name="report_a_bug">דווח על באג</string>
     <string name="report_bug_text">בטוח שתרצה לדווח על באג? לאחר דיווח, בבקשה תעלה פוסט לפורום https://github.com/orgs/meshtastic/discussions כדי שנוכל לחבר בין חווייתך לדווח זה.</string>
@@ -47,7 +45,6 @@
     <string name="device_sleeping">מכשיר במצב שינה</string>
     <string name="ip_address">‏כתובת IP:</string>
     <string name="ip_port">פורט:</string>
-    <string name="connected">מחובר למכשיר</string>
     <string name="connected_to">מחובר למכשיר (%s)</string>
     <string name="not_connected">לא מחובר</string>
     <string name="connected_sleeping">מחובר למכשיר, אך הוא במצב שינה</string>
@@ -69,6 +66,7 @@
     <string name="save_rangetest">ייצא rangetest.csv</string>
     <string name="reset">איפוס</string>
     <string name="scan">סריקה</string>
+    <string name="add_network_device">הוסף</string>
     <string name="are_you_sure_change_default">לשנות לערוץ ברירת המחדל?</string>
     <string name="reset_to_defaults">איפוס לברירת מחדל</string>
     <string name="apply">החל</string>
@@ -109,8 +107,6 @@
     <string name="quick_chat_append">הוסף להודעה</string>
     <string name="quick_chat_instant">שלח מייד</string>
     <string name="factory_reset">איפוס להגדרות היצרן</string>
-    <string name="bluetooth_disabled">בלוטוס כבוי</string>
-    <string name="permission_missing_31">משטסטיק צריך גישה ל\"מכשירים קרובים\" בכדי למצוא ולהתחבר למכשירים באמצעות הבלוטוס. ניתן לכבות כשלא בשימוש.</string>
     <string name="direct_message">הודעה ישירה</string>
     <string name="nodedb_reset">איפוס NodeDB</string>
     <string name="error">שגיאה</string>
@@ -144,7 +140,7 @@
     <string name="error_duty_cycle">הגעת לרף ה-duty cycle. לא ניתן לשלוח הודעות כרגע, בבקשה נסה שוב מאוחר יותר.</string>
     <string name="messages">הודעות</string>
     <string name="distance">מרחק</string>
-    <string name="map">מפה</string>
+    <string name="bottom_nav_settings">הגדרות</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->

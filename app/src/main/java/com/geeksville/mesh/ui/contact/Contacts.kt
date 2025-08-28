@@ -32,15 +32,19 @@ import androidx.compose.material.icons.automirrored.twotone.VolumeUp
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.SelectAll
+import androidx.compose.material.icons.rounded.QrCode2
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -64,13 +68,16 @@ import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.model.UIViewModel
 import java.util.concurrent.TimeUnit
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod")
 @Composable
 fun ContactsScreen(
     uiViewModel: UIViewModel = hiltViewModel(),
     onNavigateToMessages: (String) -> Unit = {},
     onNavigateToNodeDetails: (Int) -> Unit = {},
+    onNavigateToShare: () -> Unit,
 ) {
+    val isConnected by uiViewModel.isConnectedStateFlow.collectAsStateWithLifecycle()
     var showMuteDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -145,6 +152,14 @@ fun ContactsScreen(
                     },
                     isAllMuted = isAllMuted, // Pass the derived state
                 )
+            }
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                modifier = Modifier.animateFloatingActionButton(visible = isConnected, alignment = Alignment.BottomEnd),
+                onClick = onNavigateToShare,
+            ) {
+                Icon(Icons.Rounded.QrCode2, contentDescription = null)
             }
         },
     ) { paddingValues ->

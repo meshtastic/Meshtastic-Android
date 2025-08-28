@@ -104,7 +104,7 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:hardwareAccelerated="true"
-        android:theme="@style/AppTheme"
+        android:theme="@style/SplashTheme"
         android:localeConfig="@xml/locales_config">
 
         <!-- Default crash collection and analytics off until we (possibly) turn it on in application.onCreate -->
@@ -162,18 +162,15 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:scheme="meshtastic" />
-                <data android:host="meshtastic" />
-                <data android:pathPrefix="/messages" />
-                <data android:pathPrefix="/share" />
-                <data android:pathPrefix="/settings" />
+                <data android:scheme="meshtastic" android:host="meshtastic" />
             </intent-filter>
 
             <intent-filter android:autoVerify="true">
-                <!-- The QR codes to share channel settings are shared as meshtastic URLS
+                <!-- The QR codes to share channel settings and contacts are shared as meshtastic URLS
 
                 an approximate example:
                 https://meshtastic.org/e/YXNkZnF3ZXJhc2RmcXdlcmFzZGZxd2Vy
+                https://meshtastic.org/v/#CNar9vwDEi0KCSEzZjgyOTVkNhIPV2F0ZXJmYWxsIDIg4piGGgPimaciBu2eP4KV1igJOAI
                 -->
                 <action android:name="android.intent.action.VIEW" />
 
