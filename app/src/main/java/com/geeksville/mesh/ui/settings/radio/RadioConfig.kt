@@ -193,7 +193,7 @@ fun RadioConfigItemList(
         AdminRoute.entries.forEach { NavButton(it.title, enabled) { onRouteClick(it) } }
     }
 
-    TitledCard(title = "Advanced", modifier = Modifier.padding(top = 16.dp)) {
+    TitledCard(title = stringResource(R.string.advanced_title), modifier = Modifier.padding(top = 16.dp)) {
         if (isManaged) {
             ManagedMessage()
         }
