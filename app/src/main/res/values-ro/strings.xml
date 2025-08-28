@@ -25,7 +25,6 @@
     <string name="send">Trimite</string>
     <string name="warning_not_paired">Încă nu ai asociat un radio compatibil cu Meshtastic cu acest telefon. Te rugăm să asociezi un dispozitiv și să îți setezi numele de utilizator.\n\nAceastă aplicaţie open-source este în dezvoltare, dacă întâmpinaţi probleme, vă rugăm să postaţi pe forumul nostru: https://github.com/orgs/meshtastic/discussions\n\nPentru mai multe informații, consultați pagina noastră de internet - www.meshtastic.org.</string>
     <string name="you">Tu</string>
-    <string name="analytics_okay">Trimite în mod anonim statistici de utilizare și raporturi de crash.</string>
     <string name="accept">Accept</string>
     <string name="cancel">Renunta</string>
     <string name="new_channel_rcvd">Am primit un nou URL de canal</string>
