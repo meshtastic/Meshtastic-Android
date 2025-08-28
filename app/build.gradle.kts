@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import com.datadog.gradle.plugin.InstrumentationMode
 import io.gitlab.arturbosch.detekt.Detekt
 import java.io.FileInputStream
 import java.util.Properties
@@ -182,9 +181,9 @@ secrets {
 }
 
 datadog {
-    if (!gradle.startParameter.taskNames.any { it.contains("fdroid", ignoreCase = true) }) {
-        composeInstrumentation = InstrumentationMode.AUTO
-    }
+    //    if (!gradle.startParameter.taskNames.any { it.contains("fdroid", ignoreCase = true) }) {
+    //        composeInstrumentation = InstrumentationMode.AUTO
+    //    }
 }
 
 // per protobuf-gradle-plugin docs, this is recommended for android

@@ -19,6 +19,7 @@ package com.geeksville.mesh.android
 
 import android.app.Application
 import android.content.Context
+import android.content.SharedPreferences
 import android.provider.Settings
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
@@ -52,6 +53,11 @@ import com.geeksville.mesh.model.DeviceHardware
 import com.geeksville.mesh.util.exceptionReporter
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailabilityLight
+import com.google.firebase.Firebase
+import com.google.firebase.analytics.analytics
+import com.google.firebase.crashlytics.crashlytics
+import com.google.firebase.crashlytics.setCustomKeys
+import com.google.firebase.initialize
 import com.suddenh4x.ratingdialog.AppRating
 import io.opentracing.util.GlobalTracer
 import timber.log.Timber
@@ -75,29 +81,6 @@ abstract class GeeksvilleApplication :
         }
 
     abstract val analyticsPrefs: AnalyticsPrefs
-
-    var isAnalyticsAllowed: Boolean
-        get() = analyticsPrefs.analyticsAllowed
-        set(value) {
-            analyticsPrefs.analyticsAllowed = value
-            val newConsent =
-                if (value && !isInTestLab) {
-                    TrackingConsent.GRANTED
-                } else {
-                    TrackingConsent.NOT_GRANTED
-                }
-
-            info(if (value) "Analytics enabled" else "Analytics disabled")
-
-            if (Datadog.isInitialized()) {
-                Datadog.setTrackingConsent(newConsent)
-            } else {
-                initDatadog()
-            }
-
-            // Change the flag with the providers
-            analytics.setEnabled(value && !isInTestLab) // Never do analytics in the test lab
-        }
 
     private val minimumLaunchTimes: Int = 10
     private val minimumDays: Int = 10
@@ -130,18 +113,70 @@ abstract class GeeksvilleApplication :
         }
     }
 
+    lateinit var analyticsPrefsChangedListener: SharedPreferences.OnSharedPreferenceChangeListener
+
     override fun onCreate() {
         super.onCreate()
-
-        val firebaseAnalytics = FirebaseAnalytics(analyticsPrefs.installId)
-        analytics = firebaseAnalytics
-
-        // Set analytics per prefs
-        isAnalyticsAllowed = isAnalyticsAllowed
         initDatadog()
+        initCrashlytics()
+        updateAnalyticsConsent()
+        // listen for changes to analytics prefs
+        analyticsPrefsChangedListener =
+            SharedPreferences.OnSharedPreferenceChangeListener { _, key ->
+                if (key == "allowed") {
+                    updateAnalyticsConsent()
+                }
+            }
+        getSharedPreferences("analytics-prefs", MODE_PRIVATE)
+            .registerOnSharedPreferenceChangeListener(analyticsPrefsChangedListener)
     }
 
     private val sampleRate = 100f
+
+    private fun initCrashlytics() {
+        analytics = FirebaseAnalytics(analyticsPrefs.installId)
+        Firebase.initialize(this)
+        Firebase.crashlytics.setUserId(analyticsPrefs.installId)
+        Timber.plant(CrashlyticsTree())
+    }
+
+    private fun updateAnalyticsConsent() {
+        if (!isAnalyticsAvailable || isInTestLab) {
+            info("Analytics not available")
+            return
+        }
+        val isAnalyticsAllowed = analyticsPrefs.analyticsAllowed
+        info(if (isAnalyticsAllowed) "Analytics enabled" else "Analytics disabled")
+        Datadog.setTrackingConsent(if (isAnalyticsAllowed) TrackingConsent.GRANTED else TrackingConsent.NOT_GRANTED)
+
+        analytics.setEnabled(isAnalyticsAllowed)
+        Firebase.crashlytics.isCrashlyticsCollectionEnabled = isAnalyticsAllowed
+        Firebase.analytics.setAnalyticsCollectionEnabled(isAnalyticsAllowed)
+        Firebase.crashlytics.sendUnsentReports()
+    }
+
+    private class CrashlyticsTree : Timber.Tree() {
+
+        companion object {
+            private const val KEY_PRIORITY = "priority"
+            private const val KEY_TAG = "tag"
+            private const val KEY_MESSAGE = "message"
+        }
+
+        override fun log(priority: Int, tag: String?, message: String, t: Throwable?) {
+            Firebase.crashlytics.setCustomKeys {
+                key(KEY_PRIORITY, priority)
+                key(KEY_TAG, tag ?: "No Tag")
+                key(KEY_MESSAGE, message)
+            }
+
+            if (t == null) {
+                Firebase.crashlytics.recordException(Exception(message))
+            } else {
+                Firebase.crashlytics.recordException(t)
+            }
+        }
+    }
 
     private fun initDatadog() {
         val logger =
@@ -161,13 +196,9 @@ abstract class GeeksvilleApplication :
                 .setCrashReportsEnabled(true)
                 .setUseDeveloperModeWhenDebuggable(true)
                 .build()
-        val consent =
-            if (isAnalyticsAllowed && !isInTestLab) {
-                TrackingConsent.GRANTED
-            } else {
-                TrackingConsent.NOT_GRANTED
-            }
+        val consent = TrackingConsent.PENDING
         Datadog.initialize(this, configuration, consent)
+        Datadog.setUserInfo(analyticsPrefs.installId)
 
         val rumConfiguration =
             RumConfiguration.Builder(BuildConfig.datadogApplicationId)
@@ -207,11 +238,16 @@ fun setAttributes(firmwareVersion: String, deviceHardware: DeviceHardware) {
     GlobalRumMonitor.get().addAttribute("device_hardware", deviceHardware.hwModelSlug)
 }
 
-val Context.isGooglePlayAvailable: Boolean
+private val Context.isGooglePlayAvailable: Boolean
     get() =
         GoogleApiAvailabilityLight.getInstance().isGooglePlayServicesAvailable(this).let {
             it != ConnectionResult.SERVICE_MISSING && it != ConnectionResult.SERVICE_INVALID
         }
+
+private val isDatadogAvailable: Boolean = Datadog.isInitialized()
+
+val Context.isAnalyticsAvailable: Boolean
+    get() = isDatadogAvailable && isGooglePlayAvailable
 
 @OptIn(ExperimentalTrackingApi::class)
 @Composable

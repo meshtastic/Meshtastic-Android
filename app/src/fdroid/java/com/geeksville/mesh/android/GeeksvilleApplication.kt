@@ -40,11 +40,6 @@ abstract class GeeksvilleApplication :
         lateinit var analytics: AnalyticsProvider
     }
 
-    val isGooglePlayAvailable: Boolean
-        get() {
-            return false
-        }
-
     // / Are we running inside the testlab?
     val isInTestLab: Boolean
         get() {
@@ -57,19 +52,8 @@ abstract class GeeksvilleApplication :
 
     abstract val analyticsPrefs: AnalyticsPrefs
 
-    var isAnalyticsAllowed: Boolean
-        get() = analyticsPrefs.analyticsAllowed
-        set(value) {
-            analyticsPrefs.analyticsAllowed = value
-
-            // Change the flag with the providers
-            analytics.setEnabled(value && !isInTestLab) // Never do analytics in the test lab
-        }
-
-    @Suppress("UnusedParameter")
-    fun askToRate(activity: AppCompatActivity) {
-        // No-op for F-Droid version
-    }
+    @Suppress("EmptyFunctionBlock", "UnusedParameter")
+    fun askToRate(application: AppCompatActivity) {}
 
     override fun onCreate() {
         super.onCreate()
@@ -80,12 +64,8 @@ abstract class GeeksvilleApplication :
 
         val nopAnalytics = NopAnalytics(this)
         analytics = nopAnalytics
-        isAnalyticsAllowed = false
     }
 }
-
-val Context.isGooglePlayAvailable: Boolean
-    get() = false
 
 @Suppress("UnusedParameter")
 fun setAttributes(deviceVersion: String, deviceHardware: DeviceHardware) {
@@ -100,3 +80,6 @@ fun AddNavigationTracking(navController: NavHostController) {
         debug("Navigation changed to: ${destination.route}")
     }
 }
+
+val Context.isAnalyticsAvailable: Boolean
+    get() = false

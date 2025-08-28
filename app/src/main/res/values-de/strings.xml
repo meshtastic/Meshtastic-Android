@@ -83,7 +83,6 @@
     <string name="send">Senden</string>
     <string name="warning_not_paired">Sie haben noch kein zu Meshtastic kompatibles Funkgerät mit diesem Telefon gekoppelt. Bitte koppeln Sie ein Gerät und legen Sie Ihren Benutzernamen fest.\n\nDiese quelloffene App befindet sich im Test. Wenn Sie Probleme finden, veröffentlichen Sie diese bitte auf unserer Website im Chat.\n\nWeitere Informationen finden Sie auf unserer Webseite - www.meshtastic.org.</string>
     <string name="you">Du</string>
-    <string name="analytics_okay">Anonyme Nutzungsstatistiken und Absturzberichte.</string>
     <string name="accept">Akzeptieren</string>
     <string name="cancel">Abbrechen</string>
     <string name="clear_changes">Änderungen löschen</string>
@@ -739,7 +738,7 @@
         Berechtigung erteilen. Bitte aktivieren Sie dies in den Benachrichtigungseinstellungen.
     </string>
     <string name="configure_critical_alerts">Kritische Warnungen konfigurieren</string>
-    <string name="notification_permissions_description">Meshtastic verwendet Benachrichtigungen, um Sie über neue Nachrichten und andere wichtige Ereignisse auf dem Laufenden zu halten. Sie können Ihre Benachrichtigungsrechte jederzeit in den Einstellungen aktualisieren.</string>
+    <string name="notification_permissions_description">Meshtastic nutzt Benachrichtigungen, um Sie über neue Nachrichten und andere wichtige Ereignisse auf dem Laufenden zu halten. Sie können Ihre Benachrichtigungsrechte jederzeit in den Einstellungen aktualisieren.</string>
     <string name="next">Weiter</string>
     <string name="grant_permissions">Berechtigungen erteilen</string>
     <string name="nodes_queued_for_deletion">%d Knoten in der Warteschlange zum Löschen:</string>

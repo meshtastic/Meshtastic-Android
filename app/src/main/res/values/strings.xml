@@ -100,7 +100,7 @@
     <string name="send">Send</string>
     <string name="warning_not_paired">You haven\'t yet paired a Meshtastic compatible radio with this phone. Please pair a device and set your username.\n\nThis open-source application is in development, if you find problems please post on our forum: https://github.com/orgs/meshtastic/discussions.\n\nFor more information see our web page - www.meshtastic.org.</string>
     <string name="you">You</string>
-    <string name="analytics_okay">Anonymous usage statistics and crash reports.</string>
+    <string name="analytics_okay">Allow analytics and crash reporting.</string>
     <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
     <string name="clear_changes">Clear changes</string>
@@ -777,6 +777,7 @@
     <string name="map_type_terrain">Terrain</string>
     <string name="map_type_hybrid">Hybrid</string>
     <string name="manage_map_layers">Manage Map Layers</string>
+    <string name="map_layer_formats">Custom layers support .kml or .kmz files.</string>
     <string name="map_layers_title">Map Layers</string>
     <string name="no_map_layers_loaded">No custom layers loaded.</string>
     <string name="add_layer_button">Add Layer</string>
@@ -798,4 +799,5 @@
     <string name="url_template">URL Template</string>
     <string name="url_template_hint" translatable="false">https://a.tile.openstreetmap.org/{z}/{x}/{y}.png</string>
     <string name="track_point">track point</string>
+    <string name="phone_settings">Phone Settings</string>
 </resources>

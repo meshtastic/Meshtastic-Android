@@ -79,7 +79,6 @@
     <string name="send">Enviar</string>
     <string name="warning_not_paired">Ainda não emparelhou um rádio compatível com Meshtastic com este telefone. Emparelhe um dispositivo e defina seu nome de usuário.\n\nEste aplicativo de código aberto está em teste alfa, se encontrar problemas, por favor reporte através do nosso forum em: https://github.com/orgs/meshtastic/discussions\n\nPara obter mais informações, consulte a nossa página web - www.meshtastic.org.</string>
     <string name="you">Você</string>
-    <string name="analytics_okay">Estatísticas de uso anônimas e relatórios de falhas.</string>
     <string name="accept">Aceitar</string>
     <string name="cancel">Cancelar</string>
     <string name="new_channel_rcvd">Novo Link Recebido do Canal</string>

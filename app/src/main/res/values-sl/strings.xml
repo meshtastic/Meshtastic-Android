@@ -76,7 +76,6 @@
     <string name="send">Pošlji</string>
     <string name="warning_not_paired">S tem telefonom še niste seznanili združljivega Meshtastic radia. Prosimo povežite napravo in nastavite svoje uporabniško ime. \n\nTa odprtokodna aplikacija je v alfa testiranju, če imate težave, objavite na našem spletnem klepetu.\n\nZa več informacij glejte našo spletno stran - www.meshtastic.org.</string>
     <string name="you">Jaz</string>
-    <string name="analytics_okay">Anonimna statistika uporabe in poročila o zrušitvah.</string>
     <string name="accept">Sprejmi</string>
     <string name="cancel">Prekliči/zavrzi</string>
     <string name="new_channel_rcvd">Prejet je bil novi URL kanala</string>

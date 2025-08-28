@@ -23,7 +23,6 @@
     <string name="send">Senda</string>
     <string name="warning_not_paired">Þú hefur ekki parað Meshtastic radíó við þennan síma. Vinsamlegast paraðu búnað og veldu notendnafn.\n\nÞessi opni hugbúnaður er enn í þróun, finnir þú vandamál vinsamlegast búðu til þráð á spjallborðinu okkar: https://github.com/orgs/meshtastic/discussions\n\nFyrir frekari upplýsingar sjá vefsíðu - www.meshtastic.org.</string>
     <string name="you">Þú</string>
-    <string name="analytics_okay">Ópersónurekjanleg gögn um notkun og villumeldingar.</string>
     <string name="accept">Samþykkja</string>
     <string name="cancel">Hætta við</string>
     <string name="new_channel_rcvd">Ný slóð fyrir rás móttekin</string>

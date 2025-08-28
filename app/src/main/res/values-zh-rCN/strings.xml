@@ -83,7 +83,6 @@
     <string name="send">传送</string>
     <string name="warning_not_paired">您尚未将手机与 Meshtastic 兼容的装置配对。请先配对装置并设置您的用户名称。\n\n此开源应用程序仍在开发中，如有问题，请在我们的论坛 https://github.com/orgs/meshtastic/discussions 上面发文询问。\n\n 也可参阅我们的网页 - www.meshtastic.org。</string>
     <string name="you">你</string>
-    <string name="analytics_okay">匿名使用统计信息和故障报告</string>
     <string name="accept">接受</string>
     <string name="cancel">取消</string>
     <string name="clear_changes">清除更改</string>
