@@ -17,9 +17,13 @@
 
 package com.geeksville.mesh.ui.common.components
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.toggleable
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.Switch
@@ -30,6 +34,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SwitchPreference(
     modifier: Modifier = Modifier,
@@ -40,46 +45,47 @@ fun SwitchPreference(
     onCheckedChange: (Boolean) -> Unit,
     padding: PaddingValues? = null,
     containerColor: Color? = null,
+    loading: Boolean = false,
 ) {
     ListItem(
-        colors = ListItemDefaults.colors().copy(
-            headlineColor = if (enabled) {
-                ListItemDefaults.colors().headlineColor
-            } else {
-                ListItemDefaults.colors().headlineColor.copy(alpha = 0.5f)
-            },
-            supportingTextColor = if (enabled) {
-                ListItemDefaults.colors().supportingTextColor
-            } else {
-                ListItemDefaults.colors().supportingTextColor.copy(alpha = 0.5f)
-            },
-            containerColor = containerColor ?: ListItemDefaults.colors().containerColor,
-        ),
-        modifier = (padding?.let { Modifier.padding(it) } ?: modifier).toggleable(
+        colors =
+        ListItemDefaults.colors()
+            .copy(
+                headlineColor =
+                if (enabled) {
+                    ListItemDefaults.colors().headlineColor
+                } else {
+                    ListItemDefaults.colors().headlineColor.copy(alpha = 0.5f)
+                },
+                supportingTextColor =
+                if (enabled) {
+                    ListItemDefaults.colors().supportingTextColor
+                } else {
+                    ListItemDefaults.colors().supportingTextColor.copy(alpha = 0.5f)
+                },
+                containerColor = containerColor ?: ListItemDefaults.colors().containerColor,
+            ),
+        modifier =
+        (padding?.let { Modifier.padding(it) } ?: modifier).toggleable(
             value = checked,
             enabled = enabled,
             onValueChange = onCheckedChange,
         ),
         trailingContent = {
-            Switch(
-                enabled = enabled,
-                checked = checked,
-                onCheckedChange = null,
-            )
+            AnimatedContent(targetState = loading) { loading ->
+                if (loading) {
+                    CircularWavyProgressIndicator(modifier = Modifier.size(24.dp))
+                } else {
+                    Switch(enabled = enabled, checked = checked, onCheckedChange = null)
+                }
+            }
         },
         supportingContent = {
             if (summary.isNotEmpty()) {
-                Text(
-                    text = summary,
-                    modifier = Modifier.padding(bottom = 16.dp),
-                )
+                Text(text = summary, modifier = Modifier.padding(bottom = 16.dp))
             }
         },
-        headlineContent = {
-            Text(
-                text = title,
-            )
-        }
+        headlineContent = { Text(text = title) },
     )
 }
 

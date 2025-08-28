@@ -39,6 +39,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.twotone.KeyboardArrowRight
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.twotone.Warning
@@ -79,6 +80,7 @@ import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.settings.components.SettingsItem
+import com.geeksville.mesh.ui.settings.components.SettingsItemSwitch
 import com.geeksville.mesh.ui.settings.radio.components.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
 import kotlinx.coroutines.delay
@@ -201,6 +203,7 @@ fun RadioConfigScreen(
             deviceProfile = null
             showEditDeviceProfileDialog = true
         },
+        onToggleAnalytics = { viewModel.toggleAnalytics() },
         onNavigate = onNavigate,
     )
 }
@@ -286,6 +289,7 @@ private fun RadioConfigItemList(
     onRouteClick: (Enum<*>) -> Unit = {},
     onImport: () -> Unit = {},
     onExport: () -> Unit = {},
+    onToggleAnalytics: () -> Unit = {},
     onNavigate: (Route) -> Unit,
 ) {
     val enabled = state.connected && !state.responseState.isWaiting() && !isManaged
@@ -362,6 +366,18 @@ private fun RadioConfigItemList(
                     enabled = enabled,
                     onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
                 )
+            }
+        }
+        item {
+            if (state.analyticsAvailable) {
+                TitledCard(title = stringResource(R.string.phone_settings), modifier = Modifier.padding(top = 16.dp)) {
+                    SettingsItemSwitch(
+                        text = stringResource(R.string.analytics_okay),
+                        checked = state.analyticsEnabled,
+                        leadingIcon = Icons.Default.BugReport,
+                        onClick = onToggleAnalytics,
+                    )
+                }
             }
         }
     }
