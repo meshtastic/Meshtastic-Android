@@ -962,14 +962,17 @@
     "hwModelSlug": "SEEED_WIO_TRACKER_L1_EINK",
     "platformioTarget": "seeed_wio_tracker_L1_eink",
     "architecture": "nrf52840",
-    "activelySupported": false,
+    "activelySupported": true,
     "supportLevel": 1,
     "displayName": "Seeed Wio Tracker L1 E-Ink",
     "tags": [
       "Seeed"
     ],
     "requiresDfu": true,
-    "hasInkHud": true
+    "hasInkHud": true,
+    "images": [
+      "wio_tracker_l1_eink.svg"
+    ]
   },
   {
     "hwModel": 97,
@@ -1044,5 +1047,56 @@
     "requiresDfu": true,
     "hasMui": false,
     "partitionScheme": "16MB"
+  },
+  {
+    "hwModel": 103,
+    "hwModelSlug": "T_LORA_PAGER",
+    "platformioTarget": "tlora-pager",
+    "architecture": "esp32-s3",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "LILYGO T-LoRa Pager",
+    "tags": [
+      "LilyGo"
+    ],
+    "requiresDfu": true,
+    "hasMui": false,
+    "partitionScheme": "16MB",
+    "images": [
+      "lilygo-tlora-pager.svg"
+    ]
+  },
+  {
+    "hwModel": 108,
+    "hwModelSlug": "HELTEC_MESH_SOLAR",
+    "platformioTarget": "heltec-mesh-solar",
+    "architecture": "nrf52840",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "Heltec MeshSolar",
+    "tags": [
+      "Heltec"
+    ],
+    "requiresDfu": true,
+    "images": [
+      "heltec-mesh-solar.svg"
+    ]
+  },
+  {
+    "hwModel": 109,
+    "hwModelSlug": "T_ECHO_LITE",
+    "platformioTarget": "t-echo-lite",
+    "architecture": "nrf52840",
+    "activelySupported": false,
+    "supportLevel": 1,
+    "displayName": "LILYGO T-Echo Lite",
+    "tags": [
+      "LilyGo"
+    ],
+    "requiresDfu": true,
+    "hasInkHud": false,
+    "images": [
+      "techo_lite.svg"
+    ]
   }
 ]
