@@ -83,6 +83,7 @@
     <string name="send">Envoyer</string>
     <string name="warning_not_paired">Aucune radio Meshtastic compatible n\'a été jumelée à ce téléphone. Jumelez un appareil et spécifiez votre nom d\'utilisateur.\n\nL\'application open-source est en test alpha, si vous rencontrez des problèmes postez au chat sur notre site web.\n\nPour plus d\'information visitez notre site web - www.meshtastic.org.</string>
     <string name="you">Vous</string>
+    <string name="analytics_okay">Allow analytics and crash reporting.</string>
     <string name="accept">Accepter</string>
     <string name="cancel">Annuler</string>
     <string name="clear_changes">Annuler modifications</string>
@@ -747,6 +748,7 @@
     <string name="map_type_terrain">Terrain</string>
     <string name="map_type_hybrid">Hybride</string>
     <string name="manage_map_layers">Gérer les calques de la carte</string>
+    <string name="map_layer_formats">Custom layers support .kml or .kmz files.</string>
     <string name="map_layers_title">Couches cartographiques</string>
     <string name="no_map_layers_loaded">Aucun calque personnalisé chargé.</string>
     <string name="add_layer_button">Ajouter un calque</string>
@@ -767,4 +769,5 @@
     <string name="url_must_contain_placeholders">L\'URL doit contenir des espaces réservés.</string>
     <string name="url_template">Modèle d\'URL</string>
     <string name="track_point">Point de suivi</string>
+    <string name="phone_settings">Phone Settings</string>
 </resources>
