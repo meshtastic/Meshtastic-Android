@@ -83,10 +83,12 @@
     <string name="send">Saada</string>
     <string name="warning_not_paired">Ei ole veel ühendanud Meshtastic -kokku sobivat raadiot telefoniga. Seo seade selle telefoniga ja määra kasutajanimi.\n\nSee avatud lähtekoodiga programm on alpha-testi staatuses. Kui märkad vigu, saada palun sõnum meie foorumisse: https://github.com/orgs/meshtastic/discussions\n\nLisateave kodulehel - www.meshtastic.org.</string>
     <string name="you">Sina</string>
+    <string name="analytics_okay">Luba analüüsi ja krahhi aruandlus.</string>
     <string name="accept">Nõustu</string>
     <string name="cancel">Tühista</string>
     <string name="clear_changes">Võta tagasi</string>
     <string name="new_channel_rcvd">Uued kanalid vastu võetud</string>
+    <string name="permission_missing">Meshtastic vajab sinihambaga kaudu seadmete leidmiseks asukohalubasid. Saate need keelata, kui neid ei kasutata.</string>
     <string name="report_bug">Teata veast</string>
     <string name="report_a_bug">Teata veast</string>
     <string name="report_bug_text">Kas soovid kindlasti veast teatada? Saada hiljem selgitus aadressile https://github.com/orgs/meshtastic/discussions, et saaksime selgitust leituga sobitada.</string>
@@ -183,7 +185,10 @@
     <string name="quick_chat_show">Kuva kiirsõnumite valik</string>
     <string name="quick_chat_hide">Peida kiirsõnumite valik</string>
     <string name="factory_reset">Tehasesätted</string>
-    <string name="open_settings">Ava sätted</string>
+    <string name="bluetooth_disabled">Sinihammas keelatud. Luba see sätetes.</string>
+    <string name="open_settings">Ava seaded</string>
+    <string name="firmware_version">Püsivara versioon: %1$s</string>
+    <string name="permission_missing_31">Meshtastic vajab seadmete leidmiseks ja nendega sinihamba ​​kaudu ühenduse loomiseks „Lähi seadmed” luba. Saate selle keelata, kui seda ei kasutata.</string>
     <string name="direct_message">Otsesõnum</string>
     <string name="nodedb_reset">NodeDB lähtestamine</string>
     <string name="delivery_confirmed">Kohale toimetatud</string>
@@ -602,6 +607,9 @@
     <string name="load">Lae</string>
     <string name="user_string">Kasutaja string</string>
     <string name="navigate_into_label">Mine asukohta</string>
+    <string name="connections">Ühendus</string>
+    <string name="map">Mesh kaart</string>
+    <string name="conversations">Vestlused</string>
     <string name="nodes">Sõlmed</string>
     <string name="bottom_nav_settings">Sätted</string>
     <string name="set_your_region">Määra regioon</string>
@@ -631,6 +639,8 @@
     <string name="node_count_template">(%1$d võrgus / %2$d kokku)</string>
     <string name="react">Reageeri</string>
     <string name="disconnect">Katkesta ühendus</string>
+    <string name="scanning_bluetooth">Otsin sinihamba seadmeid…</string>
+    <string name="no_ble_devices">Pole seotud sinihamba seadmeid.</string>
     <string name="no_network_devices">Võrguseadmeid ei leitud.</string>
     <string name="no_usb_devices">USB seadmeid ei leita.</string>
     <string name="scroll_to_bottom">Mine lõppu</string>
@@ -644,6 +654,8 @@
     <string name="overflow_menu">Lisa valikud</string>
     <string name="uv_lux">UV Luks</string>
     <string name="unknown">Tundmatu</string>
+    <string name="message_device_managed">Seda raadio on hallatud ja muudab ainult kaughaldur.</string>
+    <string name="advanced_title">Täpsem</string>
     <string name="clean_node_database_title">Tühjenda sõlmede andmebaas</string>
     <string name="clean_nodes_older_than">Eemalda sõlmed mida pole nähtud rohkem kui %1$d päeva</string>
     <string name="clean_unknown_nodes">Eemalda tundmatud sõlmed</string>
@@ -679,6 +691,9 @@
     <string name="no_pax_metrics_logs">PAX andurite logi ei ole saadaval.</string>
     <string name="wifi_devices">WiFi seadmed</string>
     <string name="ble_devices">Sinihamba seadmed</string>
+    <string name="bluetooth_paired_devices">Seotud seadmed</string>
+    <string name="connected_device">Ühendatud seadmed</string>
+    <string name="action_go">Mine</string>
     <string name="routing_error_rate_limit_exceeded">Limiit ületatud. Proovi hiljem uuesti.</string>
     <string name="view_release">Näita versioon</string>
     <string name="download">Lae alla</string>
@@ -727,6 +742,7 @@
     <string name="configure_critical_alerts">Kriitiliste hoiatuste seadistamine</string>
     <string name="notification_permissions_description">Meshtastic kasutab märguandeid, et hoida teid kursis uute sõnumite ja muude oluliste sündmustega. Saate oma märguannete õigusi igal ajal seadetes muuta.</string>
     <string name="next">Järgmine</string>
+    <string name="grant_permissions">Anna luba</string>
     <string name="nodes_queued_for_deletion">%d eemaldatavat sõlme nimekirjas:</string>
     <string name="clean_node_database_description">Hoiatus: See eemaldab sõlmed rakendusest, kui ka seadmest.\nValikud on lisaks eelnevale.</string>
     <string name="connecting_to_device">Ühendan seadet</string>
@@ -735,6 +751,7 @@
     <string name="map_type_terrain">Maastik</string>
     <string name="map_type_hybrid">Hübriid</string>
     <string name="manage_map_layers">Halda kaardikihte</string>
+    <string name="map_layer_formats">Kohandatud kihid toetavad .kml või .kmz faile.</string>
     <string name="map_layers_title">Kaardikihid</string>
     <string name="no_map_layers_loaded">Kaardikihid laadimata.</string>
     <string name="add_layer_button">Lisa kiht</string>
@@ -755,4 +772,5 @@
     <string name="url_must_contain_placeholders">URL peab sisaldama vahesümboleid.</string>
     <string name="url_template">URL mall</string>
     <string name="track_point">jälgimispunkt</string>
+    <string name="phone_settings">Telefoni seaded</string>
 </resources>
