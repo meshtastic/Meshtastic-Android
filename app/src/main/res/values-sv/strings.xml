@@ -293,6 +293,7 @@
     <string name="reply">Svara</string>
     <string name="meshtastic">Meshtastic</string>
     <string name="unknown">Okänd</string>
+    <string name="advanced_title">Advancerat</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->

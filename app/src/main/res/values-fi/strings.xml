@@ -655,6 +655,7 @@
     <string name="uv_lux">UV-valon voimakkuus</string>
     <string name="unknown">Tuntematon</string>
     <string name="message_device_managed">Tätä radiota hallitaan etänä, ja sitä voi muuttaa vain etähallinnassa oleva ylläpitäjä.</string>
+    <string name="advanced_title">Lisäasetukset</string>
     <string name="clean_node_database_title">Tyhjennä NodeDB-tietokanta</string>
     <string name="clean_nodes_older_than">Poista laitteet, joita ei ole nähty yli %1$d päivään</string>
     <string name="clean_unknown_nodes">Poista vain tuntemattomat laitteet</string>

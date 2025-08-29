@@ -654,6 +654,7 @@
     <string name="uv_lux">UV Lux</string>
     <string name="unknown">Inconnu</string>
     <string name="message_device_managed">Cette radio est gérée et ne peut être modifiée que par un administrateur distant.</string>
+    <string name="advanced_title">Avancé</string>
     <string name="clean_node_database_title">Nettoyer la base de données des nœuds</string>
     <string name="clean_nodes_older_than">Nettoyer les nœuds vus pour la dernière fois depuis %1$d jours</string>
     <string name="clean_unknown_nodes">Nettoyer uniquement les nœuds inconnus</string>

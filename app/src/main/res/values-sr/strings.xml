@@ -347,6 +347,7 @@
     <string name="date">Датум</string>
     <string name="disconnect">Прекините везу</string>
     <string name="unknown">Непознато</string>
+    <string name="advanced_title">Напредно</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
