@@ -177,7 +177,7 @@ inline fun <reified T> EditListPreference(
 private fun EditListPreferencePreview() {
     Column {
         EditListPreference(
-            title = "Ignore incoming",
+            title = stringResource(R.string.ignore_incoming),
             list = listOf(12345, 67890),
             maxCount = 4,
             enabled = true,
