@@ -25,7 +25,9 @@
       "matchPackageNames": [
         "https://github.com/meshtastic/protobufs.git"
       ],
-      "changelogUrl": "https://github.com/meshtastic/protobufs/compare/{{currentDigest}}...{{newDigest}}"
+      "changelogUrl": "https://github.com/meshtastic/protobufs/compare/{{currentDigest}}...{{newDigest}}",
+      "groupName": "Meshtastic Protobufs",
+      "groupSlug": "meshtastic-protobufs"
     },
     {
       "matchPackageNames": [
