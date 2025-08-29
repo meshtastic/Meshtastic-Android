@@ -1,272 +1,34 @@
-name: Make Release
+name: Build Debug APK (fdroid)
 
 on:
   workflow_dispatch:
   push:
-    tags:
-      - 'v*'
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  contents: write
-  pull-requests: read
-  id-token: write
-  attestations: write
+    branches: [ main, master ]  # 想要就加
 
 jobs:
-  prepare-build-info:
+  build-fdroid-debug:
     runs-on: ubuntu-latest
-    outputs:
-      APP_VERSION_NAME: ${{ steps.get_version_name.outputs.APP_VERSION_NAME }}
-      APP_VERSION_CODE: ${{ steps.calculate_version_code.outputs.versionCode }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
+      - name: Checkout (with submodules)
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0
-          submodules: 'recursive'
+          submodules: recursive
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v4
         with:
-          java-version: '21'
-          distribution: 'jetbrains'
+          distribution: temurin
+          java-version: 21
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          build-scan-publish: true
-          build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
-          build-scan-terms-of-use-agree: 'yes'
 
-      - name: Determine Version Name from Tag
-        id: get_version_name
-        run: echo "APP_VERSION_NAME=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
+      - name: Build fdroidDebug
+        run: ./gradlew :app:assembleFdroidDebug --parallel --scan
 
-      - name: Calculate Version Code
-        id: calculate_version_code
-        uses: ./.github/actions/calculate-version-code
-
-  build-fdroid:
-    runs-on: ubuntu-latest
-    needs: prepare-build-info
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-          submodules: 'recursive'
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v5
-        with:
-          java-version: '21'
-          distribution: 'jetbrains'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          build-scan-publish: true
-          build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
-          build-scan-terms-of-use-agree: 'yes'
-
-      - name: Load Fdroid secrets
-        run: |
-          echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
-          echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
-        env:
-          KEYSTORE: ${{ secrets.KEYSTORE }}
-          KEYSTORE_FILENAME: ${{ secrets.KEYSTORE_FILENAME }}
-          KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
-
-      - name: Build F-Droid Release APK
-        run: |
-          ./gradlew :app:assembleFdroidRelease --parallel --continue --scan
-        env:
-          VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
-          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
-
-      - name: Upload F-Droid APK artifact
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: fdroid-apk
-          path: app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
-          retention-days: 1
-
-  build-google:
-    runs-on: ubuntu-latest
-    needs: prepare-build-info
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-          submodules: 'recursive'
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v5
-        with:
-          java-version: '21'
-          distribution: 'jetbrains'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
-          build-scan-publish: true
-          build-scan-terms-of-use-url: 'https://gradle.com/terms-of-service'
-          build-scan-terms-of-use-agree: 'yes'
-
-      - name: Load Google secrets
-        env:
-          GSERVICES: ${{ secrets.GSERVICES }}
-          KEYSTORE: ${{ secrets.KEYSTORE }}
-          KEYSTORE_FILENAME: ${{ secrets.KEYSTORE_FILENAME }}
-          KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
-          DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
-          DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
-          GOOGLE_MAPS_API_KEY: ${{ secrets.GOOGLE_MAPS_API_KEY }}
-        run: |
-          rm -f ./app/google-services.json # Ensure clean state
-          echo $GSERVICES > ./app/google-services.json
-          echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
-          echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
-          echo "datadogApplicationId=$DATADOG_APPLICATION_ID" >> ./secrets.properties
-          echo "datadogClientToken=$DATADOG_CLIENT_TOKEN" >> ./secrets.properties
-          echo "MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> ./secrets.properties
-
-      - name: Build Google Release Artifacts (AAB and APK)
-        run: |
-          ./gradlew :app:bundleGoogleRelease :app:assembleGoogleRelease --parallel --continue --scan
-        env:
-          VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
-          VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
-
-      - name: Upload Google AAB artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: google-aab
-          path: app/build/outputs/bundle/googleRelease/app-google-release.aab
-          retention-days: 1
-
-      - name: Upload Google APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: google-apk
-          path: app/build/outputs/apk/google/release/app-google-release.apk
-          retention-days: 1
-
-      - name: Upload Mapping File
-        uses: actions/upload-artifact@v4
-        with:
-          name: mapping
-          path: app/build/outputs/mapping/googleRelease/mapping.txt
-          retention-days: 1
-
-  publish-release:
-    runs-on: ubuntu-latest
-    needs: [prepare-build-info, build-fdroid, build-google]
-    outputs:
-      RELEASE_UPLOAD_URL: ${{ steps.create_gh_release.outputs.upload_url }}
-      CHANGELOG: ${{ steps.generate_changelog.outputs.changelog }}
-      APP_VERSION_NAME: ${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}
-      APP_VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v5
-        with:
-          fetch-depth: 0
-          submodules: 'recursive'
-
-      - name: Download F-Droid APK
-        uses: actions/download-artifact@v5
-        with:
-          name: fdroid-apk
-          path: ./build-artifacts/fdroid
-
-      - name: Download Google AAB
-        uses: actions/download-artifact@v5
-        with:
-          name: google-aab
-          path: ./build-artifacts/google/bundle
-
-      - name: Download Google APK
-        uses: actions/download-artifact@v5
-        with:
-          name: google-apk
-          path: ./build-artifacts/google/apk
-
-      - name: Download Mapping File
-        uses: actions/download-artifact@v5
-        with:
-          name: mapping
-          path: ./build-artifacts/google/mapping
-
-      - name: Create version_info.txt
-        run: |
-          echo "versionNameBase=${{ needs.prepare-build-info.outputs.APP_VERSION_NAME }}" > ./version_info.txt
-          echo "versionCode=${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}" >> ./version_info.txt
-
-      - name: Create GitHub Release
-        id: create_gh_release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_name }}
-          name: Release ${{ github.ref_name }}
-          generate_release_notes: true
-          files: |
-            ./build-artifacts/google/bundle/app-google-release.aab
-            ./build-artifacts/google/apk/app-google-release.apk
-            ./build-artifacts/fdroid/app-fdroid-release.apk
-            ./version_info.txt
-          draft: true
-          prerelease: ${{ contains(github.ref_name, '-internal') || contains(github.ref_name, '-closed') || contains(github.ref_name, '-open') }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Play Store whatsnew File
-        run: |
-          mkdir -p whatsnew
-          echo "For detailed release notes, please visit: ${{ steps.create_gh_release.outputs.url }}" > whatsnew/whatsnew-en-US
-        shell: bash
-
-      # Attest the build artifacts for supply chain security.
-      # See: https://github.com/meshtastic/Meshtastic-Android/attestations
-      - name: Attest Build Provenance
-        uses: actions/attest-build-provenance@v3
-        with:
-          subject-path: |
-            ./build-artifacts/google/bundle/app-google-release.aab
-            ./build-artifacts/google/apk/app-google-release.apk
-            ./build-artifacts/fdroid/app-fdroid-release.apk
-
-      - name: Determine Play Store Track
-        id: get_track
-        run: |
-          TAG_NAME="${{ github.ref_name }}"
-          if [[ "$TAG_NAME" == *"-internal"* ]]; then
-            echo "track=internal" >> $GITHUB_OUTPUT
-          elif [[ "$TAG_NAME" == *"-closed"* ]]; then
-            echo "track=NewAlpha" >> $GITHUB_OUTPUT
-          elif [[ "$TAG_NAME" == *"-open"* ]]; then
-            echo "track=beta" >> $GITHUB_OUTPUT
-          else
-            echo "track=production" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Upload AAB to Google Play
-        if: success() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
-        uses: r0adkll/upload-google-play@v1.1.3
-        with:
-          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
-          packageName: com.geeksville.mesh
-          releaseFiles: ./build-artifacts/google/bundle/app-google-release.aab
-          track: ${{ steps.get_track.outputs.track }}
-          status: ${{ steps.get_track.outputs.track == 'internal' && 'completed' || 'draft' }}
-          whatsNewDirectory: ./whatsnew/
-          mappingFile: ./build-artifacts/google/mapping/mapping.txt
+          name: app-fdroid-debug-apk
+          path: app/build/outputs/apk/fdroid/debug/app-fdroid-debug.apk
+          retention-days: 7
