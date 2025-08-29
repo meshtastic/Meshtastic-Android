@@ -16,6 +16,6 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
-    <string name="app_name">MeshServiceExample</string>
-    <string name="send_hello_message">Send Hello Message</string>
+    <string name="app_name">Mesh 服務範例</string>
+    <string name="send_hello_message">發送打招呼訊息</string>
 </resources>
