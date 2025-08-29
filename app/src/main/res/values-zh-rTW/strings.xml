@@ -486,8 +486,8 @@
     <string name="longitude">經度</string>
     <string name="altitude_meters">高度（米）</string>
     <string name="position_config_set_fixed_from_phone">使用手機目前定位</string>
-    <string name="gps_mode">GPS模式</string>
-    <string name="gps_update_interval_seconds">GPS更新間隔（秒）</string>
+    <string name="gps_mode">GPS 模式</string>
+    <string name="gps_update_interval_seconds">GPS 更新間隔（秒）</string>
     <string name="redefine_gps_rx_pin">重定義 GPS_RX_PIN</string>
     <string name="redefine_gps_tx_pin">重定義 GPS_TX_PIN</string>
     <string name="redefine_pin_gps_en">重定義 PIN_GPS_EN</string>
