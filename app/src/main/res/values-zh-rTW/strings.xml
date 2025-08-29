@@ -653,6 +653,7 @@
     <string name="uv_lux">紫外線強度 (UV Lux)</string>
     <string name="unknown">不明</string>
     <string name="message_device_managed">該裝置已受託管理，並只能由遠端管理員進行變更。</string>
+    <string name="advanced_title">進階</string>
     <string name="clean_node_database_title">清除節點資料庫</string>
     <string name="clean_nodes_older_than">清除最後出現時間超過 %1$d 日的節點</string>
     <string name="clean_unknown_nodes">僅清除不明節點</string>
