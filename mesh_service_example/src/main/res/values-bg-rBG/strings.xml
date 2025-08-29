@@ -16,5 +16,6 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
+    <string name="app_name">MeshServiceExample</string>
     <string name="send_hello_message">Изпратете съобщение за здравей</string>
 </resources>
