@@ -183,6 +183,7 @@
     <string name="quick_chat_show">Kuva kiirsõnumite valik</string>
     <string name="quick_chat_hide">Peida kiirsõnumite valik</string>
     <string name="factory_reset">Tehasesätted</string>
+    <string name="open_settings">Ava sätted</string>
     <string name="direct_message">Otsesõnum</string>
     <string name="nodedb_reset">NodeDB lähtestamine</string>
     <string name="delivery_confirmed">Kohale toimetatud</string>
