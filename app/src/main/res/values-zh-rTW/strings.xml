@@ -30,8 +30,8 @@
     <string name="node_sort_distance">距離</string>
     <string name="node_sort_hops_away">依轉跳排序</string>
     <string name="node_sort_last_heard">最近一次收到排序</string>
-    <string name="node_sort_via_mqtt">有節點 MQTT 排序</string>
-    <string name="via_mqtt">有節點 MQTT 排序</string>
+    <string name="node_sort_via_mqtt">透過 MQTT 排序</string>
+    <string name="via_mqtt">經由 MQTT</string>
     <string name="node_sort_via_favorite">通過喜好</string>
     <string name="node_filter_show_ignored">已忽略節點</string>
     <string name="unrecognized">無法識別</string>
@@ -456,10 +456,10 @@
     <string name="root_topic">根話題</string>
     <string name="proxy_to_client_enabled">啟用對客戶端的代理</string>
     <string name="map_reporting">地圖報告</string>
-    <string name="map_reporting_interval_seconds">地圖報告間隔（毫秒）</string>
+    <string name="map_reporting_interval_seconds">地圖報告間隔（秒）</string>
     <string name="neighbor_info_config">鄰居資訊配置</string>
     <string name="neighbor_info_enabled">啟用鄰居資訊</string>
-    <string name="update_interval_seconds">更新間隔（毫秒）</string>
+    <string name="update_interval_seconds">更新間隔（秒）</string>
     <string name="transmit_over_lora">通過 Lora 無線電傳輸</string>
     <string name="network_config">網路配置</string>
     <string name="wifi_enabled">啟用 WiFi</string>
