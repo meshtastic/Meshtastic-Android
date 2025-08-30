@@ -61,55 +61,56 @@ inline fun <reified T> EditListPreference(
     val listState = remember(list) { mutableStateListOf<T>().apply { addAll(list) } }
 
     Column(modifier = modifier) {
-        Text(
-            modifier = modifier.padding(16.dp),
-            text = title,
-            style = MaterialTheme.typography.bodyMedium,
-        )
+        Text(modifier = modifier.padding(16.dp), text = title, style = MaterialTheme.typography.bodyMedium)
         listState.forEachIndexed { index, value ->
-            val trailingIcon = @Composable {
-                IconButton(
-                    onClick = {
-                        focusManager.clearFocus()
-                        listState.removeAt(index)
-                        onValuesChanged(listState)
+            val trailingIcon =
+                @Composable {
+                    IconButton(
+                        onClick = {
+                            focusManager.clearFocus()
+                            listState.removeAt(index)
+                            onValuesChanged(listState)
+                        },
+                    ) {
+                        Icon(
+                            imageVector = Icons.TwoTone.Close,
+                            contentDescription = stringResource(R.string.delete),
+                            modifier = Modifier.wrapContentSize(),
+                        )
                     }
-                ) {
-                    Icon(
-                        imageVector = Icons.TwoTone.Close,
-                        contentDescription = stringResource(R.string.delete),
-                        modifier = Modifier.wrapContentSize(),
-                    )
                 }
-            }
 
             // handle lora.ignoreIncoming: List<Int>
-            if (value is Int) EditTextPreference(
-                title = "${index + 1}/$maxCount",
-                value = value,
-                enabled = enabled,
-                keyboardActions = keyboardActions,
-                onValueChanged = {
-                    listState[index] = it as T
-                    onValuesChanged(listState)
-                },
-                modifier = modifier.fillMaxWidth(),
-                trailingIcon = trailingIcon,
-            )
+            if (value is Int) {
+                EditTextPreference(
+                    title = "${index + 1}/$maxCount",
+                    value = value,
+                    enabled = enabled,
+                    keyboardActions = keyboardActions,
+                    onValueChanged = {
+                        listState[index] = it as T
+                        onValuesChanged(listState)
+                    },
+                    modifier = modifier.fillMaxWidth(),
+                    trailingIcon = trailingIcon,
+                )
+            }
 
             // handle security.adminKey: List<ByteString>
-            if (value is ByteString) EditBase64Preference(
-                title = "${index + 1}/$maxCount",
-                value = value,
-                enabled = enabled,
-                keyboardActions = keyboardActions,
-                onValueChange = {
-                    listState[index] = it as T
-                    onValuesChanged(listState)
-                },
-                modifier = modifier.fillMaxWidth(),
-                trailingIcon = trailingIcon,
-            )
+            if (value is ByteString) {
+                EditBase64Preference(
+                    title = "${index + 1}/$maxCount",
+                    value = value,
+                    enabled = enabled,
+                    keyboardActions = keyboardActions,
+                    onValueChange = {
+                        listState[index] = it as T
+                        onValuesChanged(listState)
+                    },
+                    modifier = modifier.fillMaxWidth(),
+                    trailingIcon = trailingIcon,
+                )
+            }
 
             // handle remoteHardware.availablePins: List<RemoteHardwarePin>
             if (value is RemoteHardwarePin) {
@@ -131,9 +132,8 @@ inline fun <reified T> EditListPreference(
                     maxSize = 14, // name max_size:15
                     enabled = enabled,
                     isError = false,
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Text, imeAction = ImeAction.Done
-                    ),
+                    keyboardOptions =
+                    KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = keyboardActions,
                     onValueChanged = {
                         listState[index] = value.copy { name = it } as T
@@ -144,7 +144,8 @@ inline fun <reified T> EditListPreference(
                 DropDownPreference(
                     title = stringResource(R.string.type),
                     enabled = enabled,
-                    items = RemoteHardwarePinType.entries
+                    items =
+                    RemoteHardwarePinType.entries
                         .filter { it != RemoteHardwarePinType.UNRECOGNIZED }
                         .map { it to it.name },
                     selectedItem = value.type,
@@ -159,16 +160,19 @@ inline fun <reified T> EditListPreference(
             modifier = Modifier.fillMaxWidth(),
             onClick = {
                 // Add element based on the type T
-                val newElement = when (T::class) {
-                    Int::class -> 0 as T
-                    ByteString::class -> ByteString.EMPTY as T
-                    RemoteHardwarePin::class -> remoteHardwarePin {} as T
-                    else -> throw IllegalArgumentException("Unsupported type: ${T::class}")
-                }
+                val newElement =
+                    when (T::class) {
+                        Int::class -> 0 as T
+                        ByteString::class -> ByteString.EMPTY as T
+                        RemoteHardwarePin::class -> remoteHardwarePin {} as T
+                        else -> throw IllegalArgumentException("Unsupported type: ${T::class}")
+                    }
                 listState.add(listState.size, newElement)
             },
             enabled = maxCount > listState.size,
-        ) { Text(text = stringResource(R.string.add)) }
+        ) {
+            Text(text = stringResource(R.string.add))
+        }
     }
 }
 
@@ -186,7 +190,8 @@ private fun EditListPreferencePreview() {
         )
         EditListPreference(
             title = "Available pins",
-            list = listOf(
+            list =
+            listOf(
                 remoteHardwarePin {
                     gpioPin = 12
                     name = "Front door"
