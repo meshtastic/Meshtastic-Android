@@ -115,9 +115,10 @@ private fun ChannelCard(
     index: Int,
     title: String,
     enabled: Boolean,
+    channelSettings: ChannelSettings,
+    loraConfig: LoRaConfig,
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
-    channel: Channel,
     sharesLocation: Boolean,
 ) = ChannelItem(index = index, title = title, enabled = enabled, onClick = onEditClick) {
     if (sharesLocation) {
@@ -127,21 +128,21 @@ private fun ChannelCard(
             modifier = Modifier.wrapContentSize().padding(horizontal = 5.dp),
         )
     }
-    if (channel.settings.uplinkEnabled) {
+    if (channelSettings.uplinkEnabled) {
         Icon(
             imageVector = ChannelIcons.UPLINK.icon,
             contentDescription = stringResource(ChannelIcons.UPLINK.descriptionResId),
             modifier = Modifier.wrapContentSize().padding(horizontal = 5.dp),
         )
     }
-    if (channel.settings.downlinkEnabled) {
+    if (channelSettings.downlinkEnabled) {
         Icon(
             imageVector = ChannelIcons.DOWNLINK.icon,
             contentDescription = stringResource(ChannelIcons.DOWNLINK.descriptionResId),
             modifier = Modifier.wrapContentSize().padding(horizontal = 5.dp),
         )
     }
-    SecurityIcon(channel)
+    SecurityIcon(channelSettings, loraConfig)
     Spacer(modifier = Modifier.width(10.dp))
     IconButton(onClick = { onDeleteClick() }) {
         Icon(
@@ -279,14 +280,14 @@ private fun ChannelSettingsItemList(
                         channel,
                         isDragging,
                     ->
-                    // TODO trigger composition when making edits
                     ChannelCard(
                         index = index,
                         title = channel.name.ifEmpty { modemPresetName },
                         enabled = enabled,
+                        channelSettings = channel,
+                        loraConfig = loraConfig,
                         onEditClick = { showEditChannelDialog = index },
                         onDeleteClick = { settingsListInput.removeAt(index) },
-                        channel = Channel(channel, loraConfig),
                         sharesLocation = locationChannel == index,
                     )
                 }
