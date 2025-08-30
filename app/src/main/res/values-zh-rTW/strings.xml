@@ -442,7 +442,7 @@
     <string name="ignore_incoming">忽略來訊</string>
     <string name="sx126x_rx_boosted_gain">SX126X 接收增益提升</string>
     <string name="override_frequency_mhz">複寫頻率(MHz)</string>
-    <string name="pa_fan_disabled">不使用PA风扇</string>
+    <string name="pa_fan_disabled">停用PA風扇</string>
     <string name="ignore_mqtt">無視MQTT</string>
     <string name="ok_to_mqtt">將消息轉發至MQTT</string>
     <string name="mqtt_config">MQTT配置</string>
@@ -456,10 +456,10 @@
     <string name="root_topic">根話題</string>
     <string name="proxy_to_client_enabled">啟用對客戶端的代理</string>
     <string name="map_reporting">地圖報告</string>
-    <string name="map_reporting_interval_seconds">地圖報告間隔（毫秒）</string>
+    <string name="map_reporting_interval_seconds">地圖報告間隔（秒）</string>
     <string name="neighbor_info_config">鄰居資訊配置</string>
     <string name="neighbor_info_enabled">啟用鄰居資訊</string>
-    <string name="update_interval_seconds">更新間隔（毫秒）</string>
+    <string name="update_interval_seconds">更新間隔（秒）</string>
     <string name="transmit_over_lora">通過Lora無線電傳輸</string>
     <string name="network_config">網路配置</string>
     <string name="wifi_enabled">啟用WiFi</string>
@@ -503,7 +503,7 @@
     <string name="battery_ina_2xx_i2c_address">電池 INA_2XX I2C 地址</string>
     <string name="range_test_config">範圍測試設定</string>
     <string name="range_test_enabled">啟用範圍測試</string>
-    <string name="sender_message_interval_seconds">訊息發送間隔(秒)</string>
+    <string name="sender_message_interval_seconds">訊息發送間隔（秒）</string>
     <string name="save_csv_in_storage_esp32_only">將 .CSV 保存到內部儲存空間(僅限ESP32)</string>
     <string name="remote_hardware_config">遠端硬體設定</string>
     <string name="remote_hardware_enabled">啟動遠端硬體</string>
