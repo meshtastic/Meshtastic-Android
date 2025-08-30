@@ -34,10 +34,22 @@
       "changelogUrl": "https://github.com/meshtastic/design/compare/{{currentDigest}}...{{newDigest}}"
     },
     {
-      "description": "Group all AndroidX dependencies",
+      "description": "Group all AndroidX dependencies (excluding more specific AndroidX groups)",
       "matchPackagePatterns": ["^androidx\\."],
-      "groupName": "AndroidX",
-      "groupSlug": "androidx"
+      "excludePackagePatterns": [
+        "^androidx\\.room",
+        "^androidx\\.lifecycle",
+        "^androidx\\.navigation",
+        "^androidx\\.datastore",
+        "^androidx\\.compose\\.material3\\.adaptive",
+        "^androidx\\.compose\\.material3:material3-adaptive-navigation-suite$",
+        "^androidx\\.test\\.espresso",
+        "^androidx\\.test\\.ext",
+        "^androidx\\.compose\\.ui:ui-test-junit4$",
+        "^androidx\\.hilt"
+      ],
+      "groupName": "AndroidX (General)",
+      "groupSlug": "androidx-general"
     },
     {
       "description": "Group Kotlin standard library, coroutines, and serialization",
