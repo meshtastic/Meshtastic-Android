@@ -261,9 +261,10 @@ constructor(
                 .onEach { (node, ourNode) ->
                     // Create a fallback node if not found in database (for hidden clients, etc.)
                     val actualNode = node ?: createFallbackNode(destNum)
-                    val deviceHardware = actualNode.user.hwModel.safeNumber().let { 
-                        deviceHardwareRepository.getDeviceHardwareByModel(it) 
-                    }
+                    val deviceHardware =
+                        actualNode.user.hwModel.safeNumber().let {
+                            deviceHardwareRepository.getDeviceHardwareByModel(it)
+                        }
                     _state.update { state ->
                         state.copy(
                             node = actualNode,

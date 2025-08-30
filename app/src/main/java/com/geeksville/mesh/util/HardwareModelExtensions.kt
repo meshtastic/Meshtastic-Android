@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -22,33 +22,31 @@ import com.geeksville.mesh.android.BuildUtils.warn
 
 /**
  * Safely extracts the hardware model number from a HardwareModel enum.
- * 
- * This function handles unknown enum values gracefully by catching IllegalArgumentException
- * and returning a fallback value. This prevents crashes when the app receives data
- * from devices with hardware models not yet defined in the current protobuf version.
- * 
+ *
+ * This function handles unknown enum values gracefully by catching IllegalArgumentException and returning a fallback
+ * value. This prevents crashes when the app receives data from devices with hardware models not yet defined in the
+ * current protobuf version.
+ *
  * @param fallbackValue The value to return if the enum is unknown (defaults to 0 for UNSET)
  * @return The hardware model number, or the fallback value if the enum is unknown
  */
-fun MeshProtos.HardwareModel.safeNumber(fallbackValue: Int = 0): Int {
-    return try {
-        this.number
-    } catch (e: IllegalArgumentException) {
-        warn("Unknown hardware model enum value: $this, using fallback value: $fallbackValue")
-        fallbackValue
-    }
+@Suppress("detekt:SwallowedException")
+fun MeshProtos.HardwareModel.safeNumber(fallbackValue: Int = -1): Int = try {
+    this.number
+} catch (e: IllegalArgumentException) {
+    warn("Unknown hardware model enum value: $this, using fallback value: $fallbackValue")
+    fallbackValue
 }
 
 /**
  * Checks if the hardware model is a known/supported value.
- * 
+ *
  * @return true if the hardware model is known and supported, false otherwise
  */
-fun MeshProtos.HardwareModel.isKnown(): Boolean {
-    return try {
-        this.number
-        true
-    } catch (e: IllegalArgumentException) {
-        false
-    }
+@Suppress("detekt:SwallowedException")
+fun MeshProtos.HardwareModel.isKnown(): Boolean = try {
+    this.number
+    true
+} catch (e: IllegalArgumentException) {
+    false
 }
