@@ -34,6 +34,156 @@
         "https://github.com/meshtastic/design.git"
       ],
       "changelogUrl": "https://github.com/meshtastic/design/compare/{{currentDigest}}...{{newDigest}}"
+    },
+    {
+      "description": "Group all AndroidX dependencies (excluding more specific AndroidX groups)",
+      "matchPackagePatterns": ["^androidx\\."],
+      "excludePackagePatterns": [
+        "^androidx\\.room",
+        "^androidx\\.lifecycle",
+        "^androidx\\.navigation",
+        "^androidx\\.datastore",
+        "^androidx\\.compose\\.material3\\.adaptive",
+        "^androidx\\.compose\\.material3:material3-adaptive-navigation-suite$",
+        "^androidx\\.test\\.espresso",
+        "^androidx\\.test\\.ext",
+        "^androidx\\.compose\\.ui:ui-test-junit4$",
+        "^androidx\\.hilt"
+      ],
+      "groupName": "AndroidX (General)",
+      "groupSlug": "androidx-general"
+    },
+    {
+      "description": "Group Kotlin standard library, coroutines, and serialization",
+      "matchPackagePatterns": ["^org\\.jetbrains\\.kotlin", "^org\\.jetbrains\\.kotlinx"],
+      "groupName": "Kotlin Ecosystem",
+      "groupSlug": "kotlin"
+    },
+    {
+      "description": "Group Dagger and Hilt dependencies",
+      "matchPackagePatterns": ["^com\\.google\\.dagger", "^androidx\\.hilt"],
+      "groupName": "Dagger & Hilt",
+      "groupSlug": "hilt"
+    },
+    {
+      "description": "Group Accompanist libraries",
+      "matchPackagePatterns": ["^com\\.google\\.accompanist"],
+      "groupName": "Accompanist",
+      "groupSlug": "accompanist"
+    },
+    {
+      "description": "Group JVM testing libraries (JUnit, Mockito, Robolectric)",
+      "matchPackagePatterns": [
+        "^junit:junit$",
+        "^org\\.mockito:",
+        "^org\\.robolectric:robolectric$"
+      ],
+      "groupName": "JVM Testing Libraries",
+      "groupSlug": "jvm-testing"
+    },
+    {
+      "description": "Group AndroidX Testing libraries",
+      "matchPackagePatterns": [
+        "^androidx\\.test\\.espresso",
+        "^androidx\\.test\\.ext",
+        "^androidx\\.compose\\.ui:ui-test-junit4$"
+      ],
+      "groupName": "AndroidX Testing",
+      "groupSlug": "androidx-testing"
+    },
+    {
+      "description": "Group Square networking libraries (OkHttp, Retrofit)",
+      "matchPackagePatterns": ["^com\\.squareup\\.okhttp3", "^com\\.squareup\\.retrofit2"],
+      "groupName": "Square Networking",
+      "groupSlug": "square-network"
+    },
+    {
+      "description": "Group Coil image loading library",
+      "matchPackagePatterns": ["^io\\.coil-kt\\.coil3"],
+      "groupName": "Coil",
+      "groupSlug": "coil"
+    },
+    {
+      "description": "Group ZXing barcode scanning libraries",
+      "matchPackagePatterns": ["^com\\.journeyapps:zxing-android-embedded", "^com\\.google\\.zxing:core"],
+      "groupName": "ZXing",
+      "groupSlug": "zxing"
+    },
+    {
+      "description": "Group Eclipse Paho MQTT client libraries",
+      "matchPackagePatterns": ["^org\\.eclipse\\.paho"],
+      "groupName": "MQTT Paho Client",
+      "groupSlug": "mqtt-paho"
+    },
+    {
+      "description": "Group Mike Penz Markdown renderer libraries",
+      "matchPackagePatterns": ["^com\\.mikepenz"],
+      "groupName": "Markdown Renderer (Mike Penz)",
+      "groupSlug": "markdown-renderer-mikepenz"
+    },
+    {
+      "description": "Group Firebase libraries",
+      "matchPackagePatterns": ["^com\\.google\\.firebase"],
+      "groupName": "Firebase",
+      "groupSlug": "firebase"
+    },
+    {
+      "description": "Group Datadog libraries",
+      "matchPackagePatterns": ["^com\\.datadoghq"],
+      "groupName": "Datadog",
+      "groupSlug": "datadog"
+    },
+    {
+      "description": "Group OpenStreetMap (OSM) libraries",
+      "matchPackagePatterns": ["^org\\.osmdroid", "^com\\.github\\.MKergall\\.osmbonuspack", "^mil\\.nga"],
+      "groupName": "OSM Libraries",
+      "groupSlug": "osm-libraries"
+    },
+    {
+      "description": "Group Google Maps Compose libraries",
+      "matchPackagePatterns": ["^com\\.google\\.android\\.gms:play-services-location", "^com\\.google\\.maps\\.android"],
+      "groupName": "Google Maps Compose",
+      "groupSlug": "google-maps-compose"
+    },
+    {
+      "description": "Group Google Protobuf runtime libraries",
+      "matchPackagePatterns": ["^com\\.google\\.protobuf"],
+      "excludePackageNames": ["https://github.com/meshtastic/protobufs.git"],
+      "groupName": "Protobuf Runtime",
+      "groupSlug": "protobuf-runtime"
+    },
+    {
+      "description": "Group AndroidX Room libraries",
+      "matchPackagePatterns": ["^androidx\\.room"],
+      "groupName": "AndroidX Room",
+      "groupSlug": "androidx-room"
+    },
+    {
+      "description": "Group AndroidX Lifecycle libraries",
+      "matchPackagePatterns": ["^androidx\\.lifecycle"],
+      "groupName": "AndroidX Lifecycle",
+      "groupSlug": "androidx-lifecycle"
+    },
+    {
+      "description": "Group AndroidX Navigation libraries",
+      "matchPackagePatterns": ["^androidx\\.navigation"],
+      "groupName": "AndroidX Navigation",
+      "groupSlug": "androidx-navigation"
+    },
+    {
+      "description": "Group AndroidX DataStore libraries",
+      "matchPackagePatterns": ["^androidx\\.datastore"],
+      "groupName": "AndroidX DataStore",
+      "groupSlug": "androidx-datastore"
+    },
+    {
+      "description": "Group AndroidX Adaptive UI libraries",
+      "matchPackagePatterns": [
+        "^androidx\\.compose\\.material3\\.adaptive",
+        "^androidx\\.compose\\.material3:material3-adaptive-navigation-suite$"
+      ],
+      "groupName": "AndroidX Adaptive UI",
+      "groupSlug": "androidx-adaptive-ui"
     }
   ]
 }
