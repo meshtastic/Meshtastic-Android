@@ -30,7 +30,6 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
@@ -51,6 +50,9 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -140,7 +142,7 @@ fun ChannelScreen(
 
     var showResetDialog by remember { mutableStateOf(false) }
 
-    var shouldAddChannelsState by remember { mutableStateOf(false) }
+    var shouldAddChannelsState by remember { mutableStateOf(true) }
 
     /* Animate waiting for the configurations */
     var isWaiting by remember { mutableStateOf(false) }
@@ -285,26 +287,21 @@ fun ChannelScreen(
             )
         }
         item {
-            Row(modifier = Modifier.padding(top = 12.dp)) {
-                val selectedColors = ButtonDefaults.buttonColors()
-                val unselectedColors =
-                    ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
-
-                OutlinedButton(
-                    onClick = { shouldAddChannelsState = true },
-                    modifier = Modifier.height(48.dp).weight(1f),
-                    colors = if (shouldAddChannelsState) selectedColors else unselectedColors,
-                ) {
-                    Text(text = stringResource(R.string.add))
-                }
-                Spacer(modifier = Modifier.width(8.dp))
-                OutlinedButton(
+            SingleChoiceSegmentedButtonRow(modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)) {
+                SegmentedButton(
+                    label = { Text(text = stringResource(R.string.replace)) },
                     onClick = { shouldAddChannelsState = false },
-                    modifier = Modifier.height(48.dp).weight(1f),
-                    colors = if (!shouldAddChannelsState) selectedColors else unselectedColors,
-                ) {
-                    Text(text = stringResource(R.string.replace))
-                }
+                    selected = !shouldAddChannelsState,
+                    shape = SegmentedButtonDefaults.itemShape(0, 2)
+                )
+                SegmentedButton(
+                    label = { Text(text = stringResource(R.string.add)) },
+                    onClick = { shouldAddChannelsState = true },
+                    selected = shouldAddChannelsState,
+                    shape = SegmentedButtonDefaults.itemShape(1, 2)
+                )
             }
         }
         item {
@@ -492,7 +489,9 @@ private fun ChannelListView(
             QrCodeImage(
                 enabled = enabled,
                 channelSet = selectedChannelSet,
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
                 shouldAddChannel = shouldAddChannel,
             )
         },
@@ -503,13 +502,18 @@ private fun ChannelListView(
 private fun ModemPresetInfo(modemPresetName: String, onClick: () -> Unit) {
     Row(
         modifier =
-        Modifier.padding(top = 12.dp)
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .border(1.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(8.dp)),
+            Modifier
+                .padding(top = 12.dp)
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .border(1.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(8.dp)),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(modifier = Modifier.weight(1f).padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .weight(1f)
+                .padding(16.dp)
+        ) {
             Text(text = stringResource(R.string.modem_preset), fontSize = 16.sp)
             Text(text = modemPresetName, fontSize = 14.sp)
         }
