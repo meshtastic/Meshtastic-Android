@@ -198,9 +198,8 @@ private fun ChannelSettingsItemList(
     val primarySettings = settingsList.getOrNull(0) ?: return
     val modemPresetName by remember(loraConfig) { mutableStateOf(Channel(loraConfig = loraConfig).name) }
     val primaryChannel by remember(loraConfig) { mutableStateOf(Channel(primarySettings, loraConfig)) }
-    val fwVersion by remember(firmwareVersion) {
-        mutableStateOf(DeviceVersion(firmwareVersion.substringBeforeLast(".")))
-    }
+    val fwVersion by
+        remember(firmwareVersion) { mutableStateOf(DeviceVersion(firmwareVersion.substringBeforeLast("."))) }
 
     val focusManager = LocalFocusManager.current
     val settingsListInput =
@@ -357,7 +356,7 @@ private fun ChannelsConfigHeader(frequency: Float, slot: Int) {
  * @param settingsList Current list of channels on the node.
  * @return the index of the channel within `settingsList`.
  */
-private fun determineLocationSharingChannel(firmwareVersion: DeviceVersion, settingsList:List<ChannelSettings>): Int {
+private fun determineLocationSharingChannel(firmwareVersion: DeviceVersion, settingsList: List<ChannelSettings>): Int {
     var output = -1
     if (firmwareVersion >= DeviceVersion(asString = SECONDARY_CHANNEL_EPOCH)) {
         /* Essentially the first index with the setting enabled */

@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -49,10 +49,9 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DeviceVersion
 
 /**
- * At this firmware version periodic position sharing on a secondary channel was implemented. To
- * enable this feature the user must disable position on the primary channel and enable on a secondary
- * channel. The lowest indexed secondary channel with the position enabled will conduct the automatic
- * position broadcasts.
+ * At this firmware version periodic position sharing on a secondary channel was implemented. To enable this feature the
+ * user must disable position on the primary channel and enable on a secondary channel. The lowest indexed secondary
+ * channel with the position enabled will conduct the automatic position broadcasts.
  */
 internal const val SECONDARY_CHANNEL_EPOCH = "2.6.10"
 
@@ -64,33 +63,28 @@ internal enum class ChannelIcons(
     LOCATION(
         icon = Icons.Filled.LocationOn,
         descriptionResId = R.string.location_sharing,
-        additionalInfoResId = R.string.periodic_position_broadcast
+        additionalInfoResId = R.string.periodic_position_broadcast,
     ),
     UPLINK(
         icon = Icons.Filled.CloudUpload,
         descriptionResId = R.string.uplink_enabled,
-        additionalInfoResId = R.string.uplink_feature_description
+        additionalInfoResId = R.string.uplink_feature_description,
     ),
     DOWNLINK(
         icon = Icons.Filled.CloudDownload,
         descriptionResId = R.string.downlink_enabled,
-        additionalInfoResId = R.string.downlink_feature_description
+        additionalInfoResId = R.string.downlink_feature_description,
     ),
 }
 
 @Composable
 internal fun ChannelLegend(onClick: () -> Unit) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick.invoke() },
+        modifier = Modifier.fillMaxWidth().clickable { onClick.invoke() },
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         Row {
-            Icon(
-                imageVector = Icons.Filled.Info,
-                contentDescription = stringResource(R.string.info),
-            )
+            Icon(imageVector = Icons.Filled.Info, contentDescription = stringResource(R.string.info))
             Text(
                 text = stringResource(R.string.primary),
                 color = MaterialTheme.colorScheme.primary,
@@ -119,32 +113,33 @@ internal fun ChannelLegendDialog(firmwareVersion: DeviceVersion, onDismiss: () -
                 Text(
                     text = stringResource(R.string.primary),
                     color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
                     text = "- ${stringResource(R.string.primary_channel_feature)}",
                     color = MaterialTheme.colorScheme.primary,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
                 )
                 Text(
                     text = stringResource(R.string.secondary),
                     color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.titleMedium
+                    style = MaterialTheme.typography.titleMedium,
                 )
                 Text(
                     text = "- ${stringResource(R.string.secondary_no_telemetry)}",
                     color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
                 )
                 Text(
-                    text = if(firmwareVersion >= DeviceVersion(asString = SECONDARY_CHANNEL_EPOCH)) {
+                    text =
+                    if (firmwareVersion >= DeviceVersion(asString = SECONDARY_CHANNEL_EPOCH)) {
                         /* 2.6.10+ */
                         "- ${stringResource(R.string.secondary_channel_position_feature)}"
                     } else {
                         "- ${stringResource(R.string.manual_position_request)}"
                     },
                     color = MaterialTheme.colorScheme.onBackground,
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
                 )
                 IconDefinitions()
             }
@@ -163,10 +158,7 @@ internal fun ChannelLegendDialog(firmwareVersion: DeviceVersion, onDismiss: () -
 
 @Composable
 private fun IconDefinitions() {
-    Text(
-        text = stringResource(R.string.icon_meanings),
-        style = MaterialTheme.typography.titleLarge
-    )
+    Text(text = stringResource(R.string.icon_meanings), style = MaterialTheme.typography.titleLarge)
     ChannelIcons.entries.forEach { icon ->
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(imageVector = icon.icon, contentDescription = stringResource(icon.descriptionResId))
@@ -184,5 +176,5 @@ private fun IconDefinitions() {
 @Preview
 @Composable
 private fun PreviewChannelLegendDialog() {
-    ChannelLegendDialog(firmwareVersion = DeviceVersion(asString = SECONDARY_CHANNEL_EPOCH)) {  }
+    ChannelLegendDialog(firmwareVersion = DeviceVersion(asString = SECONDARY_CHANNEL_EPOCH)) {}
 }
