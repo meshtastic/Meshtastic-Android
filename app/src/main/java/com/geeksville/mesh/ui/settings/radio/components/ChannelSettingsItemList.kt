@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
@@ -59,6 +58,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -73,6 +73,7 @@ import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig
 import com.geeksville.mesh.R
 import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.model.Channel
+import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
 import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.common.components.SecurityIcon
@@ -89,18 +90,20 @@ private fun ChannelItem(
     onClick: () -> Unit = {},
     content: @Composable RowScope.() -> Unit,
 ) {
+    val fontColor = if (index == 0) MaterialTheme.colorScheme.primary else Color.Unspecified
     Card(modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp).clickable(enabled = enabled) { onClick() }) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(vertical = 4.dp, horizontal = 4.dp),
         ) {
-            AssistChip(onClick = onClick, label = { Text(text = "$index") })
+            AssistChip(onClick = onClick, label = { Text(text = "$index", color = fontColor) })
             Text(
                 text = title,
                 modifier = Modifier.weight(1f),
                 overflow = TextOverflow.Ellipsis,
                 maxLines = 1,
                 style = MaterialTheme.typography.bodyLarge,
+                color = fontColor,
             )
             content()
         }
@@ -115,7 +118,29 @@ private fun ChannelCard(
     onEditClick: () -> Unit,
     onDeleteClick: () -> Unit,
     channel: Channel,
+    sharesLocation: Boolean,
 ) = ChannelItem(index = index, title = title, enabled = enabled, onClick = onEditClick) {
+    if (sharesLocation) {
+        Icon(
+            imageVector = ChannelIcons.LOCATION.icon,
+            contentDescription = stringResource(ChannelIcons.LOCATION.descriptionResId),
+            modifier = Modifier.wrapContentSize().padding(horizontal = 5.dp),
+        )
+    }
+    if (channel.settings.uplinkEnabled) {
+        Icon(
+            imageVector = ChannelIcons.UPLINK.icon,
+            contentDescription = stringResource(ChannelIcons.UPLINK.descriptionResId),
+            modifier = Modifier.wrapContentSize().padding(horizontal = 5.dp),
+        )
+    }
+    if (channel.settings.downlinkEnabled) {
+        Icon(
+            imageVector = ChannelIcons.DOWNLINK.icon,
+            contentDescription = stringResource(ChannelIcons.DOWNLINK.descriptionResId),
+            modifier = Modifier.wrapContentSize().padding(horizontal = 5.dp),
+        )
+    }
     SecurityIcon(channel)
     Spacer(modifier = Modifier.width(10.dp))
     IconButton(onClick = { onDeleteClick() }) {
@@ -135,7 +160,7 @@ fun ChannelSelection(
     isSelected: Boolean,
     onSelected: (Boolean) -> Unit,
     channel: Channel,
-) = ChannelItem(index = index, title = title, enabled = enabled, onClick = {}) {
+) = ChannelItem(index = index, title = title, enabled = enabled) {
     SecurityIcon(channel)
     Spacer(modifier = Modifier.width(10.dp))
     Checkbox(enabled = enabled, checked = isSelected, onCheckedChange = onSelected)
@@ -152,25 +177,29 @@ fun ChannelConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
     ChannelSettingsItemList(
         settingsList = state.channelList,
         loraConfig = state.radioConfig.lora,
-        enabled = state.connected,
         maxChannels = viewModel.maxChannels,
+        firmwareVersion = state.metadata?.firmwareVersion ?: "0.0.0",
+        enabled = state.connected,
         onPositiveClicked = { channelListInput -> viewModel.updateChannels(channelListInput, state.channelList) },
     )
 }
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-fun ChannelSettingsItemList(
+private fun ChannelSettingsItemList(
     settingsList: List<ChannelSettings>,
     loraConfig: LoRaConfig,
     maxChannels: Int = 8,
+    firmwareVersion: String,
     enabled: Boolean,
-    onNegativeClicked: () -> Unit = {},
     onPositiveClicked: (List<ChannelSettings>) -> Unit,
 ) {
     val primarySettings = settingsList.getOrNull(0) ?: return
     val modemPresetName by remember(loraConfig) { mutableStateOf(Channel(loraConfig = loraConfig).name) }
     val primaryChannel by remember(loraConfig) { mutableStateOf(Channel(primarySettings, loraConfig)) }
+    val fwVersion by remember(firmwareVersion) {
+        mutableStateOf(DeviceVersion(firmwareVersion.substringBeforeLast(".")))
+    }
 
     val focusManager = LocalFocusManager.current
     val settingsListInput =
@@ -180,7 +209,7 @@ fun ChannelSettingsItemList(
 
     val listState = rememberLazyListState()
     val dragDropState =
-        rememberDragDropState(listState, headerCount = 1) { fromIndex, toIndex ->
+        rememberDragDropState(listState) { fromIndex, toIndex ->
             if (toIndex in settingsListInput.indices && fromIndex in settingsListInput.indices) {
                 settingsListInput.apply { add(toIndex, removeAt(fromIndex)) }
             }
@@ -191,6 +220,7 @@ fun ChannelSettingsItemList(
             settingsList.zip(settingsListInput).any { (item1, item2) -> item1 != item2 }
 
     var showEditChannelDialog: Int? by rememberSaveable { mutableStateOf(null) }
+    var showChannelLegendDialog by rememberSaveable { mutableStateOf(false) }
 
     if (showEditChannelDialog != null) {
         val index = showEditChannelDialog ?: return
@@ -207,6 +237,10 @@ fun ChannelSettingsItemList(
             },
             onDismissRequest = { showEditChannelDialog = null },
         )
+    }
+
+    if (showChannelLegendDialog) {
+        ChannelLegendDialog(fwVersion) { showChannelLegendDialog = false }
     }
 
     Box(modifier = Modifier.fillMaxSize().clickable(onClick = {}, enabled = false)) {
@@ -230,11 +264,11 @@ fun ChannelSettingsItemList(
                 fontSize = 11.sp,
                 modifier = Modifier.padding(start = 16.dp),
             )
-            Text(
-                text = stringResource(R.string.primary),
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(start = 16.dp),
-            )
+
+            ChannelLegend { showChannelLegendDialog = true }
+
+            val locationChannel = determineLocationSharingChannel(fwVersion, settingsListInput.toList())
+
             LazyColumn(
                 modifier = Modifier.dragContainer(dragDropState = dragDropState, haptics = LocalHapticFeedback.current),
                 state = listState,
@@ -245,38 +279,16 @@ fun ChannelSettingsItemList(
                         channel,
                         isDragging,
                     ->
-                    val channelObj = Channel(channel, loraConfig)
+                    // TODO trigger composition when making edits
                     ChannelCard(
                         index = index,
                         title = channel.name.ifEmpty { modemPresetName },
                         enabled = enabled,
                         onEditClick = { showEditChannelDialog = index },
                         onDeleteClick = { settingsListInput.removeAt(index) },
-                        channel = channelObj,
+                        channel = Channel(channel, loraConfig),
+                        sharesLocation = locationChannel == index,
                     )
-                    if (index == 0 && !isDragging) {
-                        Text(
-                            text = stringResource(R.string.primary_channel_feature),
-                            color = MaterialTheme.colorScheme.primary,
-                            fontSize = 10.sp,
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(text = stringResource(R.string.secondary), color = MaterialTheme.colorScheme.onBackground)
-                    }
-                }
-                item {
-                    Column {
-                        Text(
-                            text = stringResource(R.string.secondary_no_telemetry),
-                            color = MaterialTheme.colorScheme.onBackground,
-                            fontSize = 10.sp,
-                        )
-                        Text(
-                            text = stringResource(R.string.manual_position_request),
-                            color = MaterialTheme.colorScheme.onBackground,
-                            fontSize = 10.sp,
-                        )
-                    }
                 }
                 item {
                     PreferenceFooter(
@@ -286,7 +298,6 @@ fun ChannelSettingsItemList(
                             focusManager.clearFocus()
                             settingsListInput.clear()
                             settingsListInput.addAll(settingsList)
-                            onNegativeClicked()
                         },
                         positiveText = R.string.send,
                         onPositiveClicked = {
@@ -338,6 +349,33 @@ private fun ChannelsConfigHeader(frequency: Float, slot: Int) {
     }
 }
 
+/**
+ * Determines what [Channel] if any is enabled to conduct automatic location sharing.
+ *
+ * @param firmwareVersion of the connected node.
+ * @param settingsList Current list of channels on the node.
+ * @return the index of the channel within `settingsList`.
+ */
+private fun determineLocationSharingChannel(firmwareVersion: DeviceVersion, settingsList:List<ChannelSettings>): Int {
+    var output = -1
+    if (firmwareVersion >= DeviceVersion(asString = SECONDARY_CHANNEL_EPOCH)) {
+        /* Essentially the first index with the setting enabled */
+        for ((i, settings) in settingsList.withIndex()) {
+            if (settings.moduleSettings.positionPrecision > 0) {
+                output = i
+                break
+            }
+        }
+    } else {
+        /* Only the primary channel at index 0 can share locations automatically */
+        val primary = settingsList[0]
+        if (primary.moduleSettings.positionPrecision > 0) {
+            output = 0
+        }
+    }
+    return output
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun ChannelSettingsPreview() {
@@ -351,6 +389,7 @@ private fun ChannelSettingsPreview() {
             channelSettings { name = stringResource(R.string.channel_name) },
         ),
         loraConfig = Channel.default.loraConfig,
+        firmwareVersion = "1.3.2",
         enabled = true,
         onPositiveClicked = {},
     )
