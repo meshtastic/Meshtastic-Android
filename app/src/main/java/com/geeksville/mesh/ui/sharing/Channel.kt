@@ -142,7 +142,7 @@ fun ChannelScreen(
 
     var showResetDialog by remember { mutableStateOf(false) }
 
-    var shouldAddChannelsState by remember { mutableStateOf(true) }
+    var shouldAddChannelsState by remember { mutableStateOf(false) }
 
     /* Animate waiting for the configurations */
     var isWaiting by remember { mutableStateOf(false) }
@@ -287,20 +287,18 @@ fun ChannelScreen(
             )
         }
         item {
-            SingleChoiceSegmentedButtonRow(modifier = Modifier
-                .fillMaxWidth()
-                .padding(8.dp)) {
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
                 SegmentedButton(
                     label = { Text(text = stringResource(R.string.replace)) },
                     onClick = { shouldAddChannelsState = false },
                     selected = !shouldAddChannelsState,
-                    shape = SegmentedButtonDefaults.itemShape(0, 2)
+                    shape = SegmentedButtonDefaults.itemShape(0, 2),
                 )
                 SegmentedButton(
                     label = { Text(text = stringResource(R.string.add)) },
                     onClick = { shouldAddChannelsState = true },
                     selected = shouldAddChannelsState,
-                    shape = SegmentedButtonDefaults.itemShape(1, 2)
+                    shape = SegmentedButtonDefaults.itemShape(1, 2),
                 )
             }
         }
@@ -489,9 +487,7 @@ private fun ChannelListView(
             QrCodeImage(
                 enabled = enabled,
                 channelSet = selectedChannelSet,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                 shouldAddChannel = shouldAddChannel,
             )
         },
@@ -502,18 +498,13 @@ private fun ChannelListView(
 private fun ModemPresetInfo(modemPresetName: String, onClick: () -> Unit) {
     Row(
         modifier =
-            Modifier
-                .padding(top = 12.dp)
-                .fillMaxWidth()
-                .clickable(onClick = onClick)
-                .border(1.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(8.dp)),
+        Modifier.padding(top = 12.dp)
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+            .border(1.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(8.dp)),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(16.dp)
-        ) {
+        Column(modifier = Modifier.weight(1f).padding(16.dp)) {
             Text(text = stringResource(R.string.modem_preset), fontSize = 16.sp)
             Text(text = modemPresetName, fontSize = 14.sp)
         }
