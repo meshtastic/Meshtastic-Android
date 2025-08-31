@@ -240,7 +240,7 @@
     <string name="humidity">Влажност</string>
     <string name="soil_temperature">Температура на почвата</string>
     <string name="soil_moisture">Влажност на почвата</string>
-    <string name="logs">Журнали</string>
+    <string name="logs">записа</string>
     <string name="hops_away">Брой отскоци</string>
     <string name="hops_away_template">Брой отскоци: %1$d</string>
     <string name="info">Информация</string>
