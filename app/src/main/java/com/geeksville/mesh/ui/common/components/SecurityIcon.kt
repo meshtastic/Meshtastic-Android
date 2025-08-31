@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+@file:Suppress("TooManyFunctions")
+
 package com.geeksville.mesh.ui.common.components
 
 import androidx.annotation.StringRes
