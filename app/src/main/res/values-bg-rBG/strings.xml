@@ -32,7 +32,7 @@
     <string name="node_sort_last_heard">Последно чут</string>
     <string name="node_sort_via_mqtt">с MQTT</string>
     <string name="via_mqtt">с MQTT</string>
-    <string name="node_sort_via_favorite">чрез Любим</string>
+    <string name="node_sort_via_favorite">чрез любим</string>
     <string name="node_filter_show_ignored">Игнорирани възли</string>
     <string name="unrecognized">Неразпознат</string>
     <string name="message_status_enroute">Изчакване за потвърждение</string>
@@ -83,7 +83,7 @@
     <string name="send">Изпрати</string>
     <string name="warning_not_paired">Все още не сте сдвоили радио, съвместимо с Meshtastic, с този телефон. Моля, сдвоете устройство и задайте вашето потребителско име.\n\nТова приложение с отворен код е в процес на разработка, ако откриете проблеми, моля, публикувайте в нашия форум: https://github.com/orgs/meshtastic/discussions\n\nЗа повече информация вижте нашата уеб страница на адрес www.meshtastic.org.</string>
     <string name="you">Вие</string>
-    <string name="analytics_okay">Allow analytics and crash reporting.</string>
+    <string name="analytics_okay">Разрешаване на анализи и докладване за сривове.</string>
     <string name="accept">Приеми</string>
     <string name="cancel">Отказ</string>
     <string name="clear_changes">Изчистване на промените</string>
@@ -240,7 +240,7 @@
     <string name="humidity">Влажност</string>
     <string name="soil_temperature">Температура на почвата</string>
     <string name="soil_moisture">Влажност на почвата</string>
-    <string name="logs">Журнали</string>
+    <string name="logs">записа</string>
     <string name="hops_away">Брой отскоци</string>
     <string name="hops_away_template">Брой отскоци: %1$d</string>
     <string name="info">Информация</string>
@@ -266,7 +266,7 @@
     <string name="position_log">Журнал на позициите</string>
     <string name="last_position_update">Последна актуализация на позицията</string>
     <string name="env_metrics_log">Журнал на показателите на околната среда</string>
-    <string name="sig_metrics_log">Signal Metrics Log</string>
+    <string name="sig_metrics_log">Журнал на показателите на сигнала</string>
     <string name="administration">Администриране</string>
     <string name="remote_admin">Отдалечено администриране</string>
     <string name="bad">Лош</string>
@@ -279,8 +279,8 @@
     <string name="traceroute_log">Traceroute Log</string>
     <string name="traceroute_direct">Директно</string>
     <plurals name="traceroute_hops">
-        <item quantity="one">1 хоп</item>
-        <item quantity="other">%d хопа</item>
+        <item quantity="one">1 отскок</item>
+        <item quantity="other">%d отскока</item>
     </plurals>
     <string name="traceroute_diff">Отскоци към %1$d Отскоци на връщане %2$d</string>
     <string name="twenty_four_hours">24Ч</string>
@@ -487,7 +487,7 @@
     <string name="latitude">Геогр. ширина</string>
     <string name="longitude">Геогр. дължина</string>
     <string name="altitude_meters">Надм. височина (метри)</string>
-    <string name="position_config_set_fixed_from_phone">Set from current phone location</string>
+    <string name="position_config_set_fixed_from_phone">Зададено от текущото местоположение на телефона</string>
     <string name="gps_mode">Режим на GPS</string>
     <string name="gps_update_interval_seconds">Интервал на актуализиране на GPS (секунди)</string>
     <string name="redefine_gps_rx_pin">Redefine GPS_RX_PIN</string>
@@ -563,7 +563,7 @@
     <string name="indoor_air_quality_iaq">Качество на въздуха на закрито (IAQ)</string>
     <string name="url">URL</string>
     <string name="backup_restore"><![CDATA[Архивиране & Възстановяване]]></string>
-    <string name="import_configuration">Конфигуриране на конфигурацията</string>
+    <string name="import_configuration">Импортиране на конфигурацията</string>
     <string name="export_configuration">Експортиране на конфигурацията</string>
     <string name="hardware">Хардуер</string>
     <string name="supported">Поддържан</string>
@@ -772,5 +772,5 @@
     <string name="url_must_contain_placeholders">URL must contain placeholders.</string>
     <string name="url_template">Шаблон за URL</string>
     <string name="track_point">track point</string>
-    <string name="phone_settings">Phone Settings</string>
+    <string name="phone_settings">Настройки на телефона</string>
 </resources>
