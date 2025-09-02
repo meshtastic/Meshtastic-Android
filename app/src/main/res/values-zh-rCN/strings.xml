@@ -83,10 +83,12 @@
     <string name="send">传送</string>
     <string name="warning_not_paired">您尚未将手机与 Meshtastic 兼容的装置配对。请先配对装置并设置您的用户名称。\n\n此开源应用程序仍在开发中，如有问题，请在我们的论坛 https://github.com/orgs/meshtastic/discussions 上面发文询问。\n\n 也可参阅我们的网页 - www.meshtastic.org。</string>
     <string name="you">你</string>
+    <string name="analytics_okay">Allow analytics and crash reporting.</string>
     <string name="accept">接受</string>
     <string name="cancel">取消</string>
     <string name="clear_changes">清除更改</string>
     <string name="new_channel_rcvd">收到新的频道 URL</string>
+    <string name="permission_missing">Meshtastic needs location permissions enabled to find new devices via Bluetooth. You can disable when not in use.</string>
     <string name="report_bug">报告 Bug</string>
     <string name="report_a_bug">报告 Bug 详细信息</string>
     <string name="report_bug_text">您确定要报告错误吗？报告后，请在 https://github.com/orgs/meshtastic/discussions 上贴文，以便我们可以将报告与您发现的问题匹配。</string>
@@ -184,6 +186,10 @@
     <string name="quick_chat_show">显示快速聊天菜单</string>
     <string name="quick_chat_hide">隐藏快速聊天菜单</string>
     <string name="factory_reset">恢复出厂设置</string>
+    <string name="bluetooth_disabled">Bluetooth is disabled. Please enable it in your device settings.</string>
+    <string name="open_settings">Open settings</string>
+    <string name="firmware_version">Firmware version: %1$s</string>
+    <string name="permission_missing_31">Meshtastic needs \"Nearby devices\" permissions enabled to find and connect to devices via Bluetooth. You can disable when not in use.</string>
     <string name="direct_message">私信</string>
     <string name="nodedb_reset">重置节点数据库</string>
     <string name="delivery_confirmed">已送达</string>
@@ -601,7 +607,9 @@
     <string name="load">负载</string>
     <string name="user_string">用户字符串</string>
     <string name="navigate_into_label">导航到</string>
+    <string name="connections">Connection</string>
     <string name="map">Mesh 地图</string>
+    <string name="conversations">Conversations</string>
     <string name="nodes">节点</string>
     <string name="bottom_nav_settings">设置</string>
     <string name="set_your_region">设置您的地区</string>
@@ -631,6 +639,8 @@
     <string name="node_count_template">(%1$d 在线 / %2$d 总计)</string>
     <string name="react">互动</string>
     <string name="disconnect">断开连接</string>
+    <string name="scanning_bluetooth">Scanning for Bluetooth devices…</string>
+    <string name="no_ble_devices">No paired Bluetooth devices.</string>
     <string name="no_network_devices">未找到网络设备。</string>
     <string name="no_usb_devices">未找到 USB 串口设备。</string>
     <string name="scroll_to_bottom">滚动到底部</string>
@@ -644,6 +654,8 @@
     <string name="overflow_menu">溢出菜单</string>
     <string name="uv_lux">紫外线强度</string>
     <string name="unknown">未知</string>
+    <string name="message_device_managed">This radio is managed and can only be changed by a remote admin.</string>
+    <string name="advanced_title">高级</string>
     <string name="clean_node_database_title">清理节点数据库</string>
     <string name="clean_nodes_older_than">清理上次看到的 %1$d 天以上的节点</string>
     <string name="clean_unknown_nodes">仅清理未知节点</string>
@@ -679,6 +691,9 @@
     <string name="no_pax_metrics_logs">无可用的 PAX 计量日志。</string>
     <string name="wifi_devices">WiFi 设备</string>
     <string name="ble_devices">BLE 设备</string>
+    <string name="bluetooth_paired_devices">Paired Devices</string>
+    <string name="connected_device">Connected Device</string>
+    <string name="action_go">Go</string>
     <string name="routing_error_rate_limit_exceeded">超过速率限制。请稍后再试。</string>
     <string name="view_release">查看发行版</string>
     <string name="download">下载</string>
@@ -726,6 +741,7 @@
     <string name="configure_critical_alerts">配置关键警报</string>
     <string name="notification_permissions_description">Meshtastic 使用通知来随时更新新消息和其他重要事件。您可以随时从设置中更新您的通知权限。</string>
     <string name="next">下一步</string>
+    <string name="grant_permissions">Grant Permissions</string>
     <string name="nodes_queued_for_deletion">%d 节点待删除：</string>
     <string name="clean_node_database_description">注意：这将从应用内和设备上的数据库中移除节点。\n选择是附加性的。</string>
     <string name="connecting_to_device">正在连接设备</string>
@@ -734,6 +750,7 @@
     <string name="map_type_terrain">地形</string>
     <string name="map_type_hybrid">混合</string>
     <string name="manage_map_layers">管理地图图层</string>
+    <string name="map_layer_formats">Custom layers support .kml or .kmz files.</string>
     <string name="map_layers_title">地图图层</string>
     <string name="no_map_layers_loaded">没有自定义图层被加载。</string>
     <string name="add_layer_button">添加图层</string>
@@ -754,4 +771,5 @@
     <string name="url_must_contain_placeholders">URL 必须包含占位符。</string>
     <string name="url_template">URL 模板</string>
     <string name="track_point">轨迹点</string>
+    <string name="phone_settings">Phone Settings</string>
 </resources>

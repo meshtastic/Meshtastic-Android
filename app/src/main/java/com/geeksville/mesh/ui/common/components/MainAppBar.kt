@@ -208,8 +208,6 @@ private fun TopBarActions(
 enum class MainMenuAction(@StringRes val stringRes: Int) {
     DEBUG(R.string.debug_panel),
     EXPORT_RANGETEST(R.string.save_rangetest),
-    THEME(R.string.theme),
-    LANGUAGE(R.string.preferences_language),
     SHOW_INTRO(R.string.intro_show),
     QUICK_CHAT(R.string.quick_chat),
 }
