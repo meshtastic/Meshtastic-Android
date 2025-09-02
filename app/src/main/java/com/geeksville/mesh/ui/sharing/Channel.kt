@@ -142,7 +142,7 @@ fun ChannelScreen(
 
     var showResetDialog by remember { mutableStateOf(false) }
 
-    var shouldAddChannelsState by remember { mutableStateOf(false) }
+    var shouldAddChannelsState by remember { mutableStateOf(true) }
 
     /* Animate waiting for the configurations */
     var isWaiting by remember { mutableStateOf(false) }
