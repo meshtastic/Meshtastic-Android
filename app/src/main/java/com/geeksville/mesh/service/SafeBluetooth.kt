@@ -557,8 +557,12 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun asyncConnect(autoConnect: Boolean = false, cb: (Result<Unit>) -> Unit, lostConnectCb: () -> Unit) {
         logAssert(workQueue.isEmpty())
+
+        // If there's already connection work in progress, clear it before starting new connection
+        // This can happen during reconnection where previous connection work wasn't properly cleared
         if (currentWork != null) {
-            throw AssertionError("currentWork was not null: $currentWork")
+            warn("Found existing work during asyncConnect: $currentWork - clearing it")
+            synchronized(workQueue) { stopCurrentWork() }
         }
 
         lostConnectCallback = lostConnectCb
