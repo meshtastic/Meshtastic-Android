@@ -19,8 +19,10 @@ package com.geeksville.mesh.ui.map.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocationDisabled
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Map
+import androidx.compose.material.icons.outlined.MyLocation
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingToolbarScrollBehavior
@@ -46,6 +48,10 @@ fun MapControlsOverlay(
     onManageCustomTileProvidersClicked: () -> Unit, // New parameter
     showFilterButton: Boolean,
     scrollBehavior: FloatingToolbarScrollBehavior,
+    // Location tracking parameters
+    hasLocationPermission: Boolean = false,
+    isLocationTrackingEnabled: Boolean = false,
+    onToggleLocationTracking: () -> Unit = {},
 ) {
     VerticalFloatingToolbar(
         modifier = modifier,
@@ -88,6 +94,20 @@ fun MapControlsOverlay(
                 contentDescription = stringResource(id = R.string.manage_map_layers),
                 onClick = onManageLayersClicked,
             )
+
+            // Location tracking button
+            if (hasLocationPermission) {
+                MapButton(
+                    icon =
+                    if (isLocationTrackingEnabled) {
+                        Icons.Default.LocationDisabled
+                    } else {
+                        Icons.Outlined.MyLocation
+                    },
+                    contentDescription = stringResource(id = R.string.toggle_my_position),
+                    onClick = onToggleLocationTracking,
+                )
+            }
         },
     )
 }
