@@ -20,6 +20,7 @@ package com.geeksville.mesh.ui.map.components
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationDisabled
+import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.MyLocation
@@ -52,6 +53,7 @@ fun MapControlsOverlay(
     hasLocationPermission: Boolean = false,
     isLocationTrackingEnabled: Boolean = false,
     onToggleLocationTracking: () -> Unit = {},
+    onOrientNorth: () -> Unit = {},
 ) {
     VerticalFloatingToolbar(
         modifier = modifier,
@@ -95,6 +97,8 @@ fun MapControlsOverlay(
                 onClick = onManageLayersClicked,
             )
 
+            CompassButton(onOrientNorth = onOrientNorth)
+
             // Location tracking button
             if (hasLocationPermission) {
                 MapButton(
@@ -109,5 +113,14 @@ fun MapControlsOverlay(
                 )
             }
         },
+    )
+}
+
+@Composable
+private fun CompassButton(onOrientNorth: () -> Unit) {
+    MapButton(
+        icon = Icons.Outlined.Explore,
+        contentDescription = stringResource(id = R.string.orient_north),
+        onClick = onOrientNorth,
     )
 }
