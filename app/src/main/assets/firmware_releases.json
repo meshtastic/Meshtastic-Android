@@ -196,7 +196,7 @@
     },
     {
       "id": "7583",
-      "title": "Update meshtastic/web to v2.6.6",
+      "title": "chore(deps): update meshtastic/web to v2.6.6",
       "page_url": "https://github.com/meshtastic/firmware/pull/7583",
       "zip_url": "https://github.com/meshtastic/firmware/actions/runs/17070663764"
     }
