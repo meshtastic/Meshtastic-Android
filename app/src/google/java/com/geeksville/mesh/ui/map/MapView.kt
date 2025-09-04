@@ -37,6 +37,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.TripOrigin
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,6 +51,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberFloatingToolbarState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
@@ -94,6 +96,11 @@ import com.geeksville.mesh.util.mpsToKmph
 import com.geeksville.mesh.util.mpsToMph
 import com.geeksville.mesh.util.toString
 import com.geeksville.mesh.waypoint
+import com.google.android.gms.location.LocationCallback
+import com.google.android.gms.location.LocationRequest
+import com.google.android.gms.location.LocationResult
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptor
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
@@ -188,6 +195,9 @@ fun MapView(
     var hasLocationPermission by remember { mutableStateOf(false) }
     val displayUnits by mapViewModel.displayUnits.collectAsStateWithLifecycle()
 
+    // Location tracking state
+    var isLocationTrackingEnabled by remember { mutableStateOf(false) }
+
     LocationPermissionsHandler { isGranted -> hasLocationPermission = isGranted }
 
     val filePickerLauncher =
@@ -219,6 +229,53 @@ fun MapView(
                 CameraPosition(LatLng(it.targetLat, it.targetLng), it.zoom, it.tilt, it.bearing)
             } ?: CameraPosition.fromLatLngZoom(defaultLatLng, 7f)
     }
+
+    // Location tracking functionality
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+    val locationCallback = remember {
+        object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult) {
+                if (isLocationTrackingEnabled) {
+                    locationResult.lastLocation?.let { location ->
+                        val latLng = LatLng(location.latitude, location.longitude)
+                        coroutineScope.launch {
+                            try {
+                                cameraPositionState.animate(
+                                    CameraUpdateFactory.newLatLngZoom(latLng, cameraPositionState.position.zoom),
+                                )
+                            } catch (e: IllegalStateException) {
+                                debug("Error animating camera to location: ${e.message}")
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    // Start/stop location tracking based on state
+    LaunchedEffect(isLocationTrackingEnabled, hasLocationPermission) {
+        if (isLocationTrackingEnabled && hasLocationPermission) {
+            val locationRequest =
+                LocationRequest.Builder(Priority.PRIORITY_HIGH_ACCURACY, 5000L)
+                    .setMinUpdateIntervalMillis(2000L)
+                    .build()
+
+            try {
+                fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
+                debug("Started location tracking")
+            } catch (e: SecurityException) {
+                debug("Location permission not available: ${e.message}")
+                isLocationTrackingEnabled = false
+            }
+        } else {
+            fusedLocationClient.removeLocationUpdates(locationCallback)
+            debug("Stopped location tracking")
+        }
+    }
+
+    // Clean up location tracking on disposal
+    DisposableEffect(Unit) { onDispose { fusedLocationClient.removeLocationUpdates(locationCallback) } }
 
     val floatingToolbarState = rememberFloatingToolbarState()
     val exitAlwaysScrollBehavior =
@@ -324,7 +381,7 @@ fun MapView(
                     zoomControlsEnabled = true,
                     mapToolbarEnabled = true,
                     compassEnabled = true,
-                    myLocationButtonEnabled = hasLocationPermission,
+                    myLocationButtonEnabled = false, // Disabled - we use custom location button
                     rotationGesturesEnabled = true,
                     scrollGesturesEnabled = true,
                     tiltGesturesEnabled = true,
@@ -557,6 +614,34 @@ fun MapView(
                 },
                 showFilterButton = focusedNodeNum == null,
                 scrollBehavior = exitAlwaysScrollBehavior,
+                hasLocationPermission = hasLocationPermission,
+                isLocationTrackingEnabled = isLocationTrackingEnabled,
+                onToggleLocationTracking = {
+                    if (hasLocationPermission) {
+                        if (!isLocationTrackingEnabled) {
+                            // When enabling tracking, get current location and center on it
+                            try {
+                                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                                    location?.let {
+                                        val latLng = LatLng(it.latitude, it.longitude)
+                                        coroutineScope.launch {
+                                            try {
+                                                cameraPositionState.animate(
+                                                    CameraUpdateFactory.newLatLngZoom(latLng, 16f),
+                                                )
+                                            } catch (e: IllegalStateException) {
+                                                debug("Error centering camera on location: ${e.message}")
+                                            }
+                                        }
+                                    }
+                                }
+                            } catch (e: SecurityException) {
+                                debug("Location permission not available: ${e.message}")
+                            }
+                        }
+                        isLocationTrackingEnabled = !isLocationTrackingEnabled
+                    }
+                },
             )
         }
         if (showLayersBottomSheet) {
