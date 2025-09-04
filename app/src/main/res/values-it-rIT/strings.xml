@@ -314,6 +314,7 @@
     <string name="udp_config">Configurazione UDP</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Ricevuto l\'ultima volta: %2$s<br>Posizione più recente: %3$s<br>Batteria: %4$s]]></string>
     <string name="toggle_my_position">Attiva/disattiva posizione</string>
+    <string name="orient_north">Orient north</string>
     <string name="user">Utente</string>
     <string name="channels">Canali</string>
     <string name="device">Dispositivo</string>

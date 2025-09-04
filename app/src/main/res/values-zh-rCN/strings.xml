@@ -314,6 +314,7 @@
     <string name="udp_config">UDP 设置</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>最后听到: %2$s<br>最后位置: %3$s<br>电量: %4$s]]></string>
     <string name="toggle_my_position">切换我的位置</string>
+    <string name="orient_north">Orient north</string>
     <string name="user">用户</string>
     <string name="channels">频道</string>
     <string name="device">设备</string>
