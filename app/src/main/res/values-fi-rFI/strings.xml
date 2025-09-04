@@ -314,7 +314,7 @@
     <string name="udp_config">UDP asetukset</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Viimeksi kuultu: %2$s<br>Viimeisin sijainti: %3$s<br>Akku: %4$s]]></string>
     <string name="toggle_my_position">Kytke sijainti päälle</string>
-    <string name="orient_north">Orient north</string>
+    <string name="orient_north">Aseta kompassi pohjoiseen</string>
     <string name="user">Käyttäjä</string>
     <string name="channels">Kanavat</string>
     <string name="device">Laite</string>
