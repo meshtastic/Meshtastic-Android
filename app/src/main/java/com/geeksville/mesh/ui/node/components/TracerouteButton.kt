@@ -22,12 +22,15 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Route
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ProgressIndicatorDefaults
+import androidx.compose.material3.CircularWavyProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -60,9 +63,12 @@ fun TracerouteButton(
     TracerouteButton(text = text, progress = progress.value, onClick = onClick)
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 private fun TracerouteButton(text: String, progress: Float, onClick: () -> Unit) {
     val isCoolingDown = progress > 0f
+
+    val stroke = Stroke(width = with(LocalDensity.current) { 2.dp.toPx() }, cap = StrokeCap.Round)
 
     SettingsItem(
         text = text,
@@ -70,12 +76,12 @@ private fun TracerouteButton(text: String, progress: Float, onClick: () -> Unit)
         leadingIcon = Icons.Default.Route,
         trailingContent = {
             if (isCoolingDown) {
-                CircularProgressIndicator(
+                CircularWavyProgressIndicator(
                     progress = { progress },
                     modifier = Modifier.size(24.dp),
-                    strokeWidth = 2.dp,
-                    trackColor = ProgressIndicatorDefaults.circularDeterminateTrackColor,
-                    strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
+                    stroke = stroke,
+                    trackStroke = stroke,
+                    wavelength = 8.dp,
                 )
             }
         },
