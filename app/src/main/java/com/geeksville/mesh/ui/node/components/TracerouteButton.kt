@@ -26,14 +26,13 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
+import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.settings.components.SettingsItem
 
 private const val COOL_DOWN_TIME_MS = 30000L
@@ -45,22 +44,25 @@ fun TracerouteButton(
     onClick: () -> Unit,
 ) {
     val progress = remember { Animatable(0f) }
-    var isCoolingDown by remember { mutableStateOf(false) }
 
     LaunchedEffect(lastTracerouteTime) {
         val timeSinceLast = System.currentTimeMillis() - (lastTracerouteTime ?: 0)
-        isCoolingDown = timeSinceLast < COOL_DOWN_TIME_MS
-
-        if (isCoolingDown) {
+        if (timeSinceLast < COOL_DOWN_TIME_MS) {
             val remainingTime = COOL_DOWN_TIME_MS - timeSinceLast
             progress.snapTo(remainingTime / COOL_DOWN_TIME_MS.toFloat())
             progress.animateTo(
                 targetValue = 0f,
                 animationSpec = tween(durationMillis = remainingTime.toInt(), easing = { it }),
             )
-            isCoolingDown = false
         }
     }
+
+    TracerouteButton(text = text, progress = progress.value, onClick = onClick)
+}
+
+@Composable
+private fun TracerouteButton(text: String, progress: Float, onClick: () -> Unit) {
+    val isCoolingDown = progress > 0f
 
     SettingsItem(
         text = text,
@@ -69,7 +71,7 @@ fun TracerouteButton(
         trailingContent = {
             if (isCoolingDown) {
                 CircularProgressIndicator(
-                    progress = { progress.value },
+                    progress = { progress },
                     modifier = Modifier.size(24.dp),
                     strokeWidth = 2.dp,
                     trackColor = ProgressIndicatorDefaults.circularDeterminateTrackColor,
@@ -83,4 +85,10 @@ fun TracerouteButton(
             }
         },
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun TracerouteButtonPreview() {
+    AppTheme { TracerouteButton(text = "Traceroute", progress = .6f, onClick = {}) }
 }
