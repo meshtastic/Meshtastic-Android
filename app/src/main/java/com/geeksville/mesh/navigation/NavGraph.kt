@@ -74,7 +74,7 @@ fun NavGraph(
     mapViewModel: MapViewModel = hiltViewModel(),
     navController: NavHostController = rememberNavController(),
 ) {
-    NavHost(navController = navController, startDestination = ConnectionsRoutes.ConnectionsGraph, modifier = modifier) {
+    NavHost(navController = navController, startDestination = NodesRoutes.NodesGraph, modifier = modifier) {
         contactsGraph(navController, uIViewModel)
         nodesGraph(navController, uIViewModel)
         mapGraph(navController, uIViewModel, mapViewModel)
