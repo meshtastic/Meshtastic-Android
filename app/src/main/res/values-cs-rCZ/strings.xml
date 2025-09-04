@@ -318,6 +318,7 @@
     <string name="udp_config">UDP Konfigurace</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Naposledy slyšen: %2$s<br>Poslední pozice: %3$s<br>Baterie: %4$s]]></string>
     <string name="toggle_my_position">Zapnout/vypnout pozici</string>
+    <string name="orient_north">Orient north</string>
     <string name="user">Uživatel</string>
     <string name="channels">Kanály</string>
     <string name="device">Zařízení</string>

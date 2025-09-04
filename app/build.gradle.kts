@@ -114,23 +114,24 @@ android {
         )
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64") }
     }
-    flavorDimensions.add("default")
+    flavorDimensions += "default"
     productFlavors {
         // Read versionCode from defaultConfig after it's been potentially set by ENV or fallback
         val resolvedVersionCode = defaultConfig.versionCode
         val resolvedVersionName = defaultConfig.versionName
 
-        create("fdroid") {
-            dimension = "default"
-            dependenciesInfo { includeInApk = false }
-            versionName = "$resolvedVersionName ($resolvedVersionCode) fdroid"
-        }
         create("google") {
             dimension = "default"
+            isDefault = true
             // Enable Firebase Crashlytics for Google Play builds
             apply(plugin = libs.plugins.google.services.get().pluginId)
             apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
             versionName = "$resolvedVersionName ($resolvedVersionCode) google"
+        }
+        create("fdroid") {
+            dimension = "default"
+            dependenciesInfo { includeInApk = false }
+            versionName = "$resolvedVersionName ($resolvedVersionCode) fdroid"
         }
     }
     buildTypes {

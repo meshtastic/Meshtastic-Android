@@ -318,6 +318,7 @@
     <string name="udp_config">Konfigurácia UDP</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Last heard: %2$s<br>Last position: %3$s<br>Battery: %4$s]]></string>
     <string name="toggle_my_position">Zapnúť lokalizáciu</string>
+    <string name="orient_north">Orient north</string>
     <string name="user">Užívateľ</string>
     <string name="channels">Kanále</string>
     <string name="device">Zariadenie</string>
