@@ -642,6 +642,21 @@ fun MapView(
                         isLocationTrackingEnabled = !isLocationTrackingEnabled
                     }
                 },
+                onOrientNorth = {
+                    coroutineScope.launch {
+                        try {
+                            val currentPosition = cameraPositionState.position
+                            val newCameraPosition =
+                                CameraPosition.Builder(currentPosition)
+                                    .bearing(0f) // Orient to north
+                                    .build()
+                            cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(newCameraPosition))
+                            debug("Oriented map to north")
+                        } catch (e: IllegalStateException) {
+                            debug("Error orienting map to north: ${e.message}")
+                        }
+                    }
+                },
             )
         }
         if (showLayersBottomSheet) {
