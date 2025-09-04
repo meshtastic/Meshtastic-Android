@@ -314,6 +314,7 @@
     <string name="udp_config">UDP Ayarları</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Last heard: %2$s<br>Last position: %3$s<br>Battery: %4$s]]></string>
     <string name="toggle_my_position">Konumunumu aç/kapa</string>
+    <string name="orient_north">Orient north</string>
     <string name="user">Kullanıcı</string>
     <string name="channels">Kanallar</string>
     <string name="device">Cihaz</string>
