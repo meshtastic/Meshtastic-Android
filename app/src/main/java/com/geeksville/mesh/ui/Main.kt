@@ -352,7 +352,6 @@ fun MainScreen(
                         if (action is MainMenuAction) {
                             when (action) {
                                 MainMenuAction.QUICK_CHAT -> navController.navigate(ContactsRoutes.QuickChat)
-                                MainMenuAction.SHOW_INTRO -> uIViewModel.onMainMenuAction(action)
                                 else -> onAction(action)
                             }
                         } else if (action is NodeMenuAction) {

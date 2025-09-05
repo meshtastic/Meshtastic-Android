@@ -30,6 +30,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.rounded.FormatPaint
 import androidx.compose.material.icons.rounded.Language
+import androidx.compose.material.icons.rounded.WavingHand
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -211,6 +212,14 @@ fun SettingsScreen(
                     message = "",
                     choices = themeMap.mapValues { (_, value) -> { uiViewModel.setTheme(value) } },
                 )
+            }
+
+            SettingsItem(
+                text = stringResource(R.string.intro_show),
+                leadingIcon = Icons.Rounded.WavingHand,
+                trailingIcon = null,
+            ) {
+                uiViewModel.showAppIntro()
             }
         }
     }
