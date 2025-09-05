@@ -79,7 +79,7 @@ fun SettingsItem(
             leading = { leadingIcon.Icon(leadingIconTint) },
             text = text,
             textColor = textColor,
-            trailing = trailingContent
+            trailing = trailingContent,
         )
     }
 }
