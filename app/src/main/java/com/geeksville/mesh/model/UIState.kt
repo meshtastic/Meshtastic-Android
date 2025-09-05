@@ -847,7 +847,7 @@ constructor(
 
     /** Write the persisted packet data out to a CSV file in the specified location. */
     @Suppress("detekt:CyclomaticComplexMethod", "detekt:LongMethod")
-    fun saveRangetestCSV(uri: Uri) {
+    fun saveRangeTestCsv(uri: Uri) {
         viewModelScope.launch(Dispatchers.Main) {
             // Extract distances to this device from position messages and put (node,SNR,distance)
             // in
