@@ -331,6 +331,7 @@
     <string name="udp_config">UDP Config</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Last heard: %2$s<br>Last position: %3$s<br>Battery: %4$s]]></string>
     <string name="toggle_my_position">Toggle my position</string>
+    <string name="orient_north">Orient north</string>
     <string name="user">User</string>
     <string name="channels">Channels</string>
     <string name="device">Device</string>
@@ -673,6 +674,7 @@
     <string name="unknown">Unknown</string>
 
     <string name="message_device_managed">This radio is managed and can only be changed by a remote admin.</string>
+    <string name="advanced_title">Advanced</string>
     <string name="clean_node_database_title">Clean Node Database</string>
     <string name="clean_nodes_older_than">Clean up nodes last seen older than %1$d days</string>
     <string name="clean_unknown_nodes">Clean up only unknown nodes</string>

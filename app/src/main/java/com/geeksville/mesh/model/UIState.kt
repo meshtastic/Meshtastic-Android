@@ -67,6 +67,7 @@ import com.geeksville.mesh.ui.common.components.MainMenuAction
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.util.getShortDate
 import com.geeksville.mesh.util.positionToMeter
+import com.geeksville.mesh.util.safeNumber
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -228,8 +229,8 @@ constructor(
     val deviceHardware: StateFlow<DeviceHardware?> =
         ourNodeInfo
             .mapNotNull { nodeInfo ->
-                nodeInfo?.user?.hwModel?.let {
-                    deviceHardwareRepository.getDeviceHardwareByModel(it.number).getOrNull()
+                nodeInfo?.user?.hwModel?.let { hwModel ->
+                    deviceHardwareRepository.getDeviceHardwareByModel(hwModel.safeNumber()).getOrNull()
                 }
             }
             .stateIn(scope = viewModelScope, started = SharingStarted.WhileSubscribed(5_000), initialValue = null)

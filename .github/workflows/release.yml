@@ -238,7 +238,7 @@ jobs:
       # Attest the build artifacts for supply chain security.
       # See: https://github.com/meshtastic/Meshtastic-Android/attestations
       - name: Attest Build Provenance
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v3
         with:
           subject-path: |
             ./build-artifacts/google/bundle/app-google-release.aab

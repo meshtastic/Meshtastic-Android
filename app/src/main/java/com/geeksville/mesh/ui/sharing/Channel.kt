@@ -50,6 +50,9 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -138,6 +141,8 @@ fun ChannelScreen(
     val modemPresetName by remember(channels) { mutableStateOf(Channel(loraConfig = channels.loraConfig).name) }
 
     var showResetDialog by remember { mutableStateOf(false) }
+
+    var shouldAddChannelsState by remember { mutableStateOf(true) }
 
     /* Animate waiting for the configurations */
     var isWaiting by remember { mutableStateOf(false) }
@@ -269,6 +274,7 @@ fun ChannelScreen(
                 channelSet = channelSet,
                 modemPresetName = modemPresetName,
                 channelSelections = channelSelections,
+                shouldAddChannel = shouldAddChannelsState,
                 onClick = {
                     isWaiting = true
                     radioConfigViewModel.setResponseStateLoading(ConfigRoute.CHANNELS)
@@ -276,9 +282,25 @@ fun ChannelScreen(
             )
             EditChannelUrl(
                 enabled = enabled,
-                channelUrl = selectedChannelSet.getChannelUrl(),
+                channelUrl = selectedChannelSet.getChannelUrl(shouldAdd = shouldAddChannelsState),
                 onConfirm = viewModel::requestChannelUrl,
             )
+        }
+        item {
+            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                SegmentedButton(
+                    label = { Text(text = stringResource(R.string.replace)) },
+                    onClick = { shouldAddChannelsState = false },
+                    selected = !shouldAddChannelsState,
+                    shape = SegmentedButtonDefaults.itemShape(0, 2),
+                )
+                SegmentedButton(
+                    label = { Text(text = stringResource(R.string.add)) },
+                    onClick = { shouldAddChannelsState = true },
+                    selected = shouldAddChannelsState,
+                    shape = SegmentedButtonDefaults.itemShape(1, 2),
+                )
+            }
         }
         item {
             ModemPresetInfo(
@@ -401,9 +423,15 @@ private fun EditChannelUrl(enabled: Boolean, channelUrl: Uri, modifier: Modifier
 }
 
 @Composable
-private fun QrCodeImage(enabled: Boolean, channelSet: ChannelSet, modifier: Modifier = Modifier) = Image(
+private fun QrCodeImage(
+    enabled: Boolean,
+    channelSet: ChannelSet,
+    modifier: Modifier = Modifier,
+    shouldAddChannel: Boolean = false,
+) = Image(
     painter =
-    channelSet.qrCode?.let { BitmapPainter(it.asImageBitmap()) } ?: painterResource(id = R.drawable.qrcode),
+    channelSet.qrCode(shouldAddChannel)?.let { BitmapPainter(it.asImageBitmap()) }
+        ?: painterResource(id = R.drawable.qrcode),
     contentDescription = stringResource(R.string.qr_code),
     modifier = modifier,
     contentScale = ContentScale.Inside,
@@ -417,6 +445,7 @@ private fun ChannelListView(
     channelSet: ChannelSet,
     modemPresetName: String,
     channelSelections: SnapshotStateList<Boolean>,
+    shouldAddChannel: Boolean = false,
     onClick: () -> Unit = {},
 ) {
     val selectedChannelSet =
@@ -459,6 +488,7 @@ private fun ChannelListView(
                 enabled = enabled,
                 channelSet = selectedChannelSet,
                 modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                shouldAddChannel = shouldAddChannel,
             )
         },
     )

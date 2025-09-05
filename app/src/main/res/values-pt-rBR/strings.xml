@@ -83,6 +83,7 @@
     <string name="send">Enviar</string>
     <string name="warning_not_paired">Você ainda não pareou um rádio compatível ao Meshtastic com este smartphone. Por favor pareie um dispositivo e configure seu nome de usuário.\n\nEste aplicativo open source está em desenvolvimento, caso encontre algum problema por favor publique em nosso fórum: https://github.com/orgs/meshtastic/discussions\n\nPara mais informações acesse nossa página: www.meshtastic.org.</string>
     <string name="you">Você</string>
+    <string name="analytics_okay">Allow analytics and crash reporting.</string>
     <string name="accept">Aceitar</string>
     <string name="cancel">Cancelar</string>
     <string name="clear_changes">Limpar mudanças</string>
@@ -313,6 +314,7 @@
     <string name="udp_config">Configuração UDP</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Última vez: %2$s<br>Última posição: %3$s<br>Bateria: %4$s]]></string>
     <string name="toggle_my_position">Ativar minha posição</string>
+    <string name="orient_north">Orient north</string>
     <string name="user">Usuário</string>
     <string name="channels">Canais</string>
     <string name="device">Dispositivo</string>
@@ -654,6 +656,7 @@
     <string name="uv_lux">Luz UV</string>
     <string name="unknown">Desconhecido</string>
     <string name="message_device_managed">Este rádio é gerenciado e só pode ser alterado por um administrador remoto.</string>
+    <string name="advanced_title">Advanced</string>
     <string name="clean_node_database_title">Limpar Banco de Dados de Nó</string>
     <string name="clean_nodes_older_than">Limpar nós vistos há mais de %1$d dias</string>
     <string name="clean_unknown_nodes">Limpar somente nós desconhecidos</string>
@@ -749,6 +752,7 @@
     <string name="map_type_terrain">Terreno</string>
     <string name="map_type_hybrid">Híbrido</string>
     <string name="manage_map_layers">Gerenciar Camadas do Mapa</string>
+    <string name="map_layer_formats">Custom layers support .kml or .kmz files.</string>
     <string name="map_layers_title">Camadas do Mapa</string>
     <string name="no_map_layers_loaded">Nenhuma camada personalizada carregada.</string>
     <string name="add_layer_button">Adicionar Camada</string>
@@ -769,4 +773,5 @@
     <string name="url_must_contain_placeholders">A URL deve conter espaços reservados.</string>
     <string name="url_template">Modelo de URL</string>
     <string name="track_point">ponto de rastreamento</string>
+    <string name="phone_settings">Phone Settings</string>
 </resources>

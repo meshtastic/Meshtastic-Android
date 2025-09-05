@@ -56,8 +56,8 @@ import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.MeshProtos.DeviceMetadata
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.ui.settings.SettingsScreen
 import com.geeksville.mesh.ui.settings.radio.CleanNodeDatabaseScreen
-import com.geeksville.mesh.ui.settings.radio.RadioConfigScreen
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.AmbientLightingConfigScreen
 import com.geeksville.mesh.ui.settings.radio.components.AudioConfigScreen
@@ -161,7 +161,7 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController, uiViewModel:
         ) { backStackEntry ->
             val parentEntry =
                 remember(backStackEntry) { navController.getBackStackEntry(SettingsRoutes.SettingsGraph::class) }
-            RadioConfigScreen(uiViewModel = uiViewModel, viewModel = hiltViewModel(parentEntry)) {
+            SettingsScreen(uiViewModel = uiViewModel, viewModel = hiltViewModel(parentEntry)) {
                 navController.navigate(it) { popUpTo(SettingsRoutes.Settings()) { inclusive = false } }
             }
         }

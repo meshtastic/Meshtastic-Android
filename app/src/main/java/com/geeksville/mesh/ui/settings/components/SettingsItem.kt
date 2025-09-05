@@ -26,7 +26,6 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Android
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -52,17 +51,32 @@ fun SettingsItem(
     trailingIconTint: Color = LocalContentColor.current,
     onClick: () -> Unit,
 ) {
+    SettingsItem(
+        text = text,
+        enabled = enabled,
+        leadingIcon = leadingIcon,
+        leadingIconTint = leadingIconTint,
+        trailingContent = { trailingIcon.Icon(trailingIconTint) },
+        onClick = onClick,
+    )
+}
+
+/** A clickable settings button item. */
+@Composable
+fun SettingsItem(
+    text: String,
+    enabled: Boolean = true,
+    leadingIcon: ImageVector? = null,
+    leadingIconTint: Color = LocalContentColor.current,
+    trailingContent: @Composable (() -> Unit),
+    onClick: () -> Unit,
+) {
     ClickableWrapper(enabled = enabled, onClick = onClick) {
-        Content(
-            leading = { leadingIcon.Icon(leadingIconTint) },
-            text = text,
-            trailing = { trailingIcon.Icon(trailingIconTint) },
-        )
+        Content(leading = { leadingIcon.Icon(leadingIconTint) }, text = text, trailing = trailingContent)
     }
 }
 
 /** A toggleable settings switch item. */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsItemSwitch(
     checked: Boolean,

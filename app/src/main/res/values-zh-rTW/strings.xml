@@ -312,6 +312,7 @@
     <string name="udp_config">UDP設置</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>最後接收: %2$s<br>最後位置: %3$s<br>電量: %4$s]]></string>
     <string name="toggle_my_position">切換我的位置</string>
+    <string name="orient_north">Orient north</string>
     <string name="user">用戶</string>
     <string name="channels">頻道</string>
     <string name="device">裝置</string>
@@ -442,7 +443,7 @@
     <string name="ignore_incoming">忽略來訊</string>
     <string name="sx126x_rx_boosted_gain">SX126X 接收增益提升</string>
     <string name="override_frequency_mhz">複寫頻率(MHz)</string>
-    <string name="pa_fan_disabled">不使用PA风扇</string>
+    <string name="pa_fan_disabled">停用PA風扇</string>
     <string name="ignore_mqtt">無視MQTT</string>
     <string name="ok_to_mqtt">將消息轉發至MQTT</string>
     <string name="mqtt_config">MQTT配置</string>
@@ -456,10 +457,10 @@
     <string name="root_topic">根話題</string>
     <string name="proxy_to_client_enabled">啟用對客戶端的代理</string>
     <string name="map_reporting">地圖報告</string>
-    <string name="map_reporting_interval_seconds">地圖報告間隔（毫秒）</string>
+    <string name="map_reporting_interval_seconds">地圖報告間隔（秒）</string>
     <string name="neighbor_info_config">鄰居資訊配置</string>
     <string name="neighbor_info_enabled">啟用鄰居資訊</string>
-    <string name="update_interval_seconds">更新間隔（毫秒）</string>
+    <string name="update_interval_seconds">更新間隔（秒）</string>
     <string name="transmit_over_lora">通過Lora無線電傳輸</string>
     <string name="network_config">網路配置</string>
     <string name="wifi_enabled">啟用WiFi</string>
@@ -503,7 +504,7 @@
     <string name="battery_ina_2xx_i2c_address">電池 INA_2XX I2C 地址</string>
     <string name="range_test_config">範圍測試設定</string>
     <string name="range_test_enabled">啟用範圍測試</string>
-    <string name="sender_message_interval_seconds">訊息發送間隔(秒)</string>
+    <string name="sender_message_interval_seconds">訊息發送間隔（秒）</string>
     <string name="save_csv_in_storage_esp32_only">將 .CSV 保存到內部儲存空間(僅限ESP32)</string>
     <string name="remote_hardware_config">遠端硬體設定</string>
     <string name="remote_hardware_enabled">啟動遠端硬體</string>
@@ -653,6 +654,7 @@
     <string name="uv_lux">紫外線強度 (UV Lux)</string>
     <string name="unknown">不明</string>
     <string name="message_device_managed">該裝置已受託管理，並只能由遠端管理員進行變更。</string>
+    <string name="advanced_title">進階</string>
     <string name="clean_node_database_title">清除節點資料庫</string>
     <string name="clean_nodes_older_than">清除最後出現時間超過 %1$d 日的節點</string>
     <string name="clean_unknown_nodes">僅清除不明節點</string>

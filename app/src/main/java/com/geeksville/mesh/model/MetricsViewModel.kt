@@ -47,6 +47,7 @@ import com.geeksville.mesh.repository.api.DeviceHardwareRepository
 import com.geeksville.mesh.repository.api.FirmwareReleaseRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.service.ServiceAction
+import com.geeksville.mesh.util.safeNumber
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -261,7 +262,9 @@ constructor(
                     // Create a fallback node if not found in database (for hidden clients, etc.)
                     val actualNode = node ?: createFallbackNode(destNum)
                     val deviceHardware =
-                        actualNode.user.hwModel.number.let { deviceHardwareRepository.getDeviceHardwareByModel(it) }
+                        actualNode.user.hwModel.safeNumber().let {
+                            deviceHardwareRepository.getDeviceHardwareByModel(it)
+                        }
                     _state.update { state ->
                         state.copy(
                             node = actualNode,

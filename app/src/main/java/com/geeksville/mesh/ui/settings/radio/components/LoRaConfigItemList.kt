@@ -42,7 +42,6 @@ import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.RegionInfo
 import com.geeksville.mesh.model.numChannels
 import com.geeksville.mesh.ui.common.components.DropDownPreference
-import com.geeksville.mesh.ui.common.components.EditListPreference
 import com.geeksville.mesh.ui.common.components.EditTextPreference
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
 import com.geeksville.mesh.ui.common.components.PreferenceFooter
@@ -218,23 +217,6 @@ fun LoRaConfigItemList(
             )
         }
         item { HorizontalDivider() }
-
-        item {
-            EditListPreference(
-                title = stringResource(R.string.ignore_incoming),
-                list = loraInput.ignoreIncomingList,
-                maxCount = 3, // ignore_incoming max_count:3
-                enabled = enabled,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValuesChanged = { list ->
-                    loraInput =
-                        loraInput.copy {
-                            ignoreIncoming.clear()
-                            ignoreIncoming.addAll(list.filter { it != 0 })
-                        }
-                },
-            )
-        }
 
         item {
             SwitchPreference(
