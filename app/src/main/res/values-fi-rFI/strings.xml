@@ -636,6 +636,7 @@
     <string name="export_keys">Vie avaimet</string>
     <string name="export_keys_confirmation">Vie julkiset ja yksityiset avaimet tiedostoon. Säilytä tiedosto turvallisessa paikassa.</string>
     <string name="modules_unlocked">Lukitsemattomat moduulit</string>
+    <string name="modules_already_unlocked">Modules already unlocked</string>
     <string name="remote">Etäyhteys</string>
     <string name="node_count_template">(%1$d yhdistetty / %2$d yhteensä)</string>
     <string name="react">Reagoi</string>
@@ -773,7 +774,8 @@
     <string name="url_must_contain_placeholders">URL-osoitteessa on oltava paikkamerkkejä.</string>
     <string name="url_template">URL-mallipohja</string>
     <string name="track_point">seurantapiste</string>
-    <string name="phone_settings">Puhelimen asetukset</string>
+    <string name="app_settings">App</string>
+    <string name="app_version">Version</string>
     <string name="channel_features">Kanavan ominaisuudet</string>
     <string name="location_sharing">Sijainnin jakaminen</string>
     <string name="periodic_position_broadcast">Sijainnin toistuva lähetys</string>
