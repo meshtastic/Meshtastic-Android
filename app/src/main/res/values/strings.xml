@@ -802,7 +802,7 @@
     <string name="url_template">URL Template</string>
     <string name="url_template_hint" translatable="false">https://a.tile.openstreetmap.org/{z}/{x}/{y}.png</string>
     <string name="track_point">track point</string>
-    <string name="app_settings">App Settings</string>
+    <string name="app_settings">App</string>
     <string name="app_version">Version</string>
     <string name="channel_features">Channel Features</string>
     <string name="location_sharing">Location Sharing</string>
