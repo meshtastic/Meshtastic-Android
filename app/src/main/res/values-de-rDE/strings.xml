@@ -774,4 +774,11 @@
     <string name="url_template">URL Vorlage</string>
     <string name="track_point">Verlaufspunkt</string>
     <string name="phone_settings">Telefoneinstellungen</string>
+    <string name="channel_features">Kanalfunktionen</string>
+    <string name="location_sharing">Standortfreigabe</string>
+    <string name="periodic_position_broadcast">Regelmäßige Standortübertragung</string>
+    <string name="uplink_feature_description">Wenn aktiviert, werden Nachrichten aus dem Mesh über das konfigurierte Gateway eines beliebigen Knotens an das **öffentliche** Internet gesendet.</string>
+    <string name="downlink_feature_description">Nachrichten von einem öffentlichen Internet Gateway werden an das lokale Mesh weitergeleitet. Aufgrund der Nullsprungrichtlinie wird der Datenverkehr vom MQTT Standardserver nicht über dieses Gerät hinaus weitergeleitet.</string>
+    <string name="icon_meanings">Symbolbedeutung</string>
+    <string name="secondary_channel_position_feature">Durch Deaktivieren des Standortes auf dem primären Kanal werden regelmäßige Standortübertragungen auf dem ersten sekundären Kanal mit aktiviertem Standort ermöglicht, andernfalls ist eine manuelle Standortanforderung erforderlich.</string>
 </resources>

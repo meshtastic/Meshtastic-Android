@@ -774,4 +774,11 @@
     <string name="url_template">URL-mallipohja</string>
     <string name="track_point">seurantapiste</string>
     <string name="phone_settings">Puhelimen asetukset</string>
+    <string name="channel_features">Kanavan ominaisuudet</string>
+    <string name="location_sharing">Sijainnin jakaminen</string>
+    <string name="periodic_position_broadcast">Sijainnin toistuva lähetys</string>
+    <string name="uplink_feature_description">Verkosta tulevat viestit lähetetään julkiseen internetiin minkä tahansa laitteen määritetyn yhdyskäytävän kautta.</string>
+    <string name="downlink_feature_description">Julkisesta internet-yhdyskäytävästä tulevat viestit välitetään paikalliseen mesh-verkkoon. Nollahyppysääntöjen vuoksi oletuksena MQTT-palvelimelta tuleva liikenne ei etene tätä laitetta pidemmälle.</string>
+    <string name="icon_meanings">Kuvakkeiden merkitykset</string>
+    <string name="secondary_channel_position_feature">Sijainnin poistaminen käytöstä ensisijaisella kanavalla mahdollistaa sijainnin jaksottaisen lähetyksen ensimmäisellä toissijaisella kanavalla, jossa sijainti on käytössä. Muussa tapauksessa vaaditaan manuaalinen sijaintipyyntö.</string>
 </resources>
