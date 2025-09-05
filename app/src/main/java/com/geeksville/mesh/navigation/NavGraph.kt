@@ -31,14 +31,11 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navDeepLink
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
-import com.geeksville.mesh.ui.debug.DebugScreen
 import com.geeksville.mesh.ui.map.MapViewModel
 import kotlinx.serialization.Serializable
 
@@ -53,10 +50,7 @@ const val DEEP_LINK_BASE_URI = "meshtastic://meshtastic"
 
 @Serializable sealed interface Graph : Route
 
-@Serializable
-sealed interface Route {
-    @Serializable data object DebugPanel : Route
-}
+@Serializable sealed interface Route
 
 fun NavDestination.isConfigRoute(): Boolean =
     ConfigRoute.entries.any { hasRoute(it.route::class) } || ModuleRoute.entries.any { hasRoute(it.route::class) }
@@ -86,11 +80,6 @@ fun NavGraph(
         mapGraph(navController, uIViewModel, mapViewModel)
         channelsGraph(navController, uIViewModel)
         connectionsGraph(navController, uIViewModel, bluetoothViewModel)
-        composable<Route.DebugPanel>(
-            deepLinks = listOf(navDeepLink<Route.DebugPanel>(basePath = "$DEEP_LINK_BASE_URI/debug_panel")),
-        ) {
-            DebugScreen()
-        }
         settingsGraph(navController, uIViewModel)
     }
 }
