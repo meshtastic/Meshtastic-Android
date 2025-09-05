@@ -20,18 +20,20 @@ package com.geeksville.mesh.ui.map.components
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationDisabled
-import androidx.compose.material.icons.outlined.Explore
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.MyLocation
+import androidx.compose.material.icons.outlined.Navigation
 import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FloatingToolbarScrollBehavior
-import androidx.compose.material3.VerticalFloatingToolbar
+import androidx.compose.material3.HorizontalFloatingToolbar
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.stringResource
 import com.geeksville.mesh.R
+import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.map.MapViewModel
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -48,20 +50,20 @@ fun MapControlsOverlay(
     onManageLayersClicked: () -> Unit,
     onManageCustomTileProvidersClicked: () -> Unit, // New parameter
     showFilterButton: Boolean,
-    scrollBehavior: FloatingToolbarScrollBehavior,
     // Location tracking parameters
     hasLocationPermission: Boolean = false,
     isLocationTrackingEnabled: Boolean = false,
     onToggleLocationTracking: () -> Unit = {},
+    bearing: Float = 0f,
     onOrientNorth: () -> Unit = {},
 ) {
-    VerticalFloatingToolbar(
+    HorizontalFloatingToolbar(
         modifier = modifier,
         expanded = true,
         leadingContent = {},
         trailingContent = {},
-        scrollBehavior = scrollBehavior,
         content = {
+            CompassButton(onOrientNorth = onOrientNorth, bearing = bearing)
             if (showFilterButton) {
                 Box {
                     MapButton(
@@ -97,8 +99,6 @@ fun MapControlsOverlay(
                 onClick = onManageLayersClicked,
             )
 
-            CompassButton(onOrientNorth = onOrientNorth)
-
             // Location tracking button
             if (hasLocationPermission) {
                 MapButton(
@@ -117,9 +117,13 @@ fun MapControlsOverlay(
 }
 
 @Composable
-private fun CompassButton(onOrientNorth: () -> Unit) {
+private fun CompassButton(onOrientNorth: () -> Unit, bearing: Float) {
+    val icon = Icons.Outlined.Navigation
+
     MapButton(
-        icon = Icons.Outlined.Explore,
+        modifier = Modifier.rotate(-bearing),
+        icon = icon,
+        iconTint = MaterialTheme.colorScheme.StatusRed.takeIf { bearing == 0f },
         contentDescription = stringResource(id = R.string.orient_north),
         onClick = onOrientNorth,
     )

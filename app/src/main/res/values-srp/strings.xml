@@ -316,6 +316,7 @@
     <string name="udp_config">UDP конфигурација</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Last heard: %2$s<br>Last position: %3$s<br>Battery: %4$s]]></string>
     <string name="toggle_my_position">Toggle my position</string>
+    <string name="orient_north">Orient north</string>
     <string name="user">Корисник</string>
     <string name="channels">Канали</string>
     <string name="device">Уређај</string>

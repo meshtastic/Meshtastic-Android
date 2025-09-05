@@ -14,7 +14,7 @@ core-location-altitude = "1.0.0-alpha03"
 core-splashscreen = "1.0.1"
 crashlytics = "3.0.6"
 datastore = "1.1.7"
-dd-sdk-android = "2.26.0"
+dd-sdk-android = "3.0.0"
 dd-sdk-android-gradle-plugin = "1.19.0"
 detekt = "1.23.8"
 devtools-ksp = "2.2.10-2.0.2"
@@ -94,6 +94,7 @@ dd-sdk-android-session-replay = { group = "com.datadoghq", name = "dd-sdk-androi
 dd-sdk-android-session-replay-compose = { group = "com.datadoghq", name = "dd-sdk-android-session-replay-compose", version.ref = "dd-sdk-android" }
 dd-sdk-android-timber = { group = "com.datadoghq", name = "dd-sdk-android-timber", version.ref = "dd-sdk-android" }
 dd-sdk-android-trace = { group = "com.datadoghq", name = "dd-sdk-android-trace", version.ref = "dd-sdk-android" }
+dd-sdk-android-trace-otel = { group = "com.datadoghq", name = "dd-sdk-android-trace-otel", version.ref = "dd-sdk-android" }
 detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name = "detekt-formatting", version.ref = "detekt" }
 emoji2-emojipicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
@@ -193,7 +194,7 @@ maps-compose = ["location-services", "maps-compose", "maps-compose-utils", "maps
 firebase = ["firebase-analytics", "firebase-crashlytics"]
 
 # Datadog
-datadog = ["dd-sdk-android-compose", "dd-sdk-android-logs", "dd-sdk-android-okhttp", "dd-sdk-android-rum", "dd-sdk-android-session-replay", "dd-sdk-android-session-replay-compose", "dd-sdk-android-timber", "dd-sdk-android-trace"]
+datadog = ["dd-sdk-android-compose", "dd-sdk-android-logs", "dd-sdk-android-okhttp", "dd-sdk-android-rum", "dd-sdk-android-session-replay", "dd-sdk-android-session-replay-compose", "dd-sdk-android-timber", "dd-sdk-android-trace", "dd-sdk-android-trace-otel"]
 
 # Protobuf
 protobuf = ["protobuf-kotlin"]

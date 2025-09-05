@@ -55,7 +55,6 @@ import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.ContactsRoutes
 import com.geeksville.mesh.navigation.NodesRoutes
-import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.navigation.showLongNameTitle
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
@@ -88,7 +87,7 @@ fun MainAppBar(
         when {
             currentDestination == null || currentDestination.isTopLevel() -> stringResource(id = R.string.app_name)
 
-            currentDestination.hasRoute<Route.DebugPanel>() -> stringResource(id = R.string.debug_panel)
+            currentDestination.hasRoute<SettingsRoutes.DebugPanel>() -> stringResource(id = R.string.debug_panel)
 
             currentDestination.hasRoute<ContactsRoutes.QuickChat>() -> stringResource(id = R.string.quick_chat)
 
@@ -120,7 +119,7 @@ fun MainAppBar(
                 when {
                     it.isTopLevel() -> MainMenuActions(onAction)
 
-                    currentDestination.hasRoute<Route.DebugPanel>() -> DebugMenuActions()
+                    currentDestination.hasRoute<SettingsRoutes.DebugPanel>() -> DebugMenuActions()
 
                     currentDestination.hasRoute<SettingsRoutes.Settings>() ->
                         RadioConfigMenuActions(viewModel = viewModel)
@@ -206,7 +205,6 @@ private fun TopBarActions(
 }
 
 enum class MainMenuAction(@StringRes val stringRes: Int) {
-    DEBUG(R.string.debug_panel),
     EXPORT_RANGETEST(R.string.save_rangetest),
     SHOW_INTRO(R.string.intro_show),
     QUICK_CHAT(R.string.quick_chat),

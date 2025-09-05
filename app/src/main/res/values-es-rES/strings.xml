@@ -315,6 +315,7 @@ Rango de Valores 0 - 500.</string>
     <string name="udp_config">Configuración UDP</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Última escucha: %2$s<br>Última posición: %3$s<br>Batería: %4$s]]></string>
     <string name="toggle_my_position">Cambiar mi posición</string>
+    <string name="orient_north">Orient north</string>
     <string name="user">Usuario</string>
     <string name="channels">Canales</string>
     <string name="device">Dispositivo</string>

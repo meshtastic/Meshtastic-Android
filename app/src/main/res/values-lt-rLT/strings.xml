@@ -318,6 +318,7 @@
     <string name="udp_config">UDP Config</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Last heard: %2$s<br>Last position: %3$s<br>Battery: %4$s]]></string>
     <string name="toggle_my_position">Toggle my position</string>
+    <string name="orient_north">Orient north</string>
     <string name="user">User</string>
     <string name="channels">Channels</string>
     <string name="device">Device</string>

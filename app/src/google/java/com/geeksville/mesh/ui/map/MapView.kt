@@ -27,29 +27,23 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.animation.core.animate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.TripOrigin
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FloatingToolbarDefaults
-import androidx.compose.material3.FloatingToolbarExitDirection.Companion.End
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberFloatingToolbarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -62,7 +56,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -123,7 +116,7 @@ import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.TileOverlay
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
-import com.google.maps.android.compose.widgets.DisappearingScaleBar
+import com.google.maps.android.compose.widgets.ScaleBar
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -214,7 +207,6 @@ fun MapView(
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     val ourNodeInfo by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     var editingWaypoint by remember { mutableStateOf<Waypoint?>(null) }
-    val savedCameraPosition by mapViewModel.cameraPosition.collectAsStateWithLifecycle()
 
     val selectedGoogleMapType by mapViewModel.selectedGoogleMapType.collectAsStateWithLifecycle()
     val currentCustomTileProviderUrl by mapViewModel.selectedCustomTileProviderUrl.collectAsStateWithLifecycle()
@@ -222,13 +214,7 @@ fun MapView(
     var mapTypeMenuExpanded by remember { mutableStateOf(false) }
     var showCustomTileManagerSheet by remember { mutableStateOf(false) }
 
-    val defaultLatLng = LatLng(0.0, 0.0)
-    val cameraPositionState = rememberCameraPositionState {
-        position =
-            savedCameraPosition?.let {
-                CameraPosition(LatLng(it.targetLat, it.targetLng), it.zoom, it.tilt, it.bearing)
-            } ?: CameraPosition.fromLatLngZoom(defaultLatLng, 7f)
-    }
+    val cameraPositionState = rememberCameraPositionState {}
 
     // Location tracking functionality
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
@@ -276,29 +262,6 @@ fun MapView(
 
     // Clean up location tracking on disposal
     DisposableEffect(Unit) { onDispose { fusedLocationClient.removeLocationUpdates(locationCallback) } }
-
-    val floatingToolbarState = rememberFloatingToolbarState()
-    val exitAlwaysScrollBehavior =
-        FloatingToolbarDefaults.exitAlwaysScrollBehavior(exitDirection = End, state = floatingToolbarState)
-
-    LaunchedEffect(cameraPositionState.isMoving, floatingToolbarState.offsetLimit) {
-        val targetOffset =
-            if (cameraPositionState.isMoving) {
-                floatingToolbarState.offsetLimit
-            } else {
-                mapViewModel.onCameraPositionChanged(cameraPositionState.position)
-                0f
-            }
-        if (floatingToolbarState.offset != targetOffset) {
-            if (targetOffset == 0f || floatingToolbarState.offsetLimit != 0f) {
-                launch {
-                    animate(initialValue = floatingToolbarState.offset, targetValue = targetOffset) { value, _ ->
-                        floatingToolbarState.offset = value
-                    }
-                }
-            }
-        }
-    }
 
     val allNodes by
         mapViewModel.nodes
@@ -370,7 +333,7 @@ fun MapView(
 
     var showClusterItemsDialog by remember { mutableStateOf<List<NodeClusterItem>?>(null) }
 
-    Scaffold(modifier = Modifier.nestedScroll(exitAlwaysScrollBehavior)) { paddingValues ->
+    Scaffold { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             GoogleMap(
                 mapColorScheme = mapColorScheme,
@@ -380,7 +343,7 @@ fun MapView(
                 MapUiSettings(
                     zoomControlsEnabled = true,
                     mapToolbarEnabled = true,
-                    compassEnabled = true,
+                    compassEnabled = false,
                     myLocationButtonEnabled = false, // Disabled - we use custom location button
                     rotationGesturesEnabled = true,
                     scrollGesturesEnabled = true,
@@ -399,32 +362,27 @@ fun MapView(
                     }
                 },
                 onMapLoaded = {
-                    if (
-                        savedCameraPosition?.targetLat == defaultLatLng.latitude &&
-                        savedCameraPosition?.targetLng == defaultLatLng.longitude
-                    ) {
-                        val pointsToBound: List<LatLng> =
-                            when {
-                                !nodeTrack.isNullOrEmpty() -> nodeTrack.map { it.toLatLng() }
+                    val pointsToBound: List<LatLng> =
+                        when {
+                            !nodeTrack.isNullOrEmpty() -> nodeTrack.map { it.toLatLng() }
 
-                                allNodes.isNotEmpty() || displayableWaypoints.isNotEmpty() ->
-                                    allNodes.mapNotNull { it.toLatLng() } + displayableWaypoints.map { it.toLatLng() }
+                            allNodes.isNotEmpty() || displayableWaypoints.isNotEmpty() ->
+                                allNodes.mapNotNull { it.toLatLng() } + displayableWaypoints.map { it.toLatLng() }
 
-                                else -> emptyList()
+                            else -> emptyList()
+                        }
+
+                    if (pointsToBound.isNotEmpty()) {
+                        val bounds = LatLngBounds.builder().apply { pointsToBound.forEach(::include) }.build()
+
+                        val padding = if (!pointsToBound.isEmpty()) 100 else 48
+
+                        try {
+                            coroutineScope.launch {
+                                cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(bounds, padding))
                             }
-
-                        if (pointsToBound.isNotEmpty()) {
-                            val bounds = LatLngBounds.builder().apply { pointsToBound.forEach(::include) }.build()
-
-                            val padding = if (!pointsToBound.isEmpty()) 100 else 48
-
-                            try {
-                                coroutineScope.launch {
-                                    cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(bounds, padding))
-                                }
-                            } catch (e: IllegalStateException) {
-                                warn("MapView Could not animate to bounds: ${e.message}")
-                            }
+                        } catch (e: IllegalStateException) {
+                            warn("MapView Could not animate to bounds: ${e.message}")
                         }
                     }
                 },
@@ -550,6 +508,7 @@ fun MapView(
                                         }
                                     }
                                 }
+
                                 LayerType.GEOJSON -> {
                                     layerItem.geoJsonLayerData?.let { geoJsonLayer ->
                                         if (layerItem.isVisible && !geoJsonLayer.isLayerOnMap) {
@@ -565,12 +524,10 @@ fun MapView(
                 }
             }
 
-            val currentCameraPosition = cameraPositionState.position
-            var displayedZoom by remember { mutableStateOf(currentCameraPosition.zoom) }
-
-            if (displayedZoom != 0f) {
-                DisappearingScaleBar(cameraPositionState = cameraPositionState)
-            }
+            ScaleBar(
+                cameraPositionState = cameraPositionState,
+                modifier = Modifier.align(Alignment.BottomStart).padding(bottom = 48.dp),
+            )
             editingWaypoint?.let { waypointToEdit ->
                 EditWaypointDialog(
                     waypoint = waypointToEdit,
@@ -599,7 +556,7 @@ fun MapView(
             }
 
             MapControlsOverlay(
-                modifier = Modifier.align(Alignment.TopEnd).padding(top = 50.dp),
+                modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp),
                 mapFilterMenuExpanded = mapFilterMenuExpanded,
                 onMapFilterMenuDismissRequest = { mapFilterMenuExpanded = false },
                 onToggleMapFilterMenu = { mapFilterMenuExpanded = true },
@@ -613,7 +570,6 @@ fun MapView(
                     showCustomTileManagerSheet = true
                 },
                 showFilterButton = focusedNodeNum == null,
-                scrollBehavior = exitAlwaysScrollBehavior,
                 hasLocationPermission = hasLocationPermission,
                 isLocationTrackingEnabled = isLocationTrackingEnabled,
                 onToggleLocationTracking = {
@@ -642,6 +598,7 @@ fun MapView(
                         isLocationTrackingEnabled = !isLocationTrackingEnabled
                     }
                 },
+                bearing = cameraPositionState.position.bearing,
                 onOrientNorth = {
                     coroutineScope.launch {
                         try {

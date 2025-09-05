@@ -312,6 +312,7 @@
     <string name="udp_config">UDP設置</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>最後接收: %2$s<br>最後位置: %3$s<br>電量: %4$s]]></string>
     <string name="toggle_my_position">切換我的位置</string>
+    <string name="orient_north">Orient north</string>
     <string name="user">用戶</string>
     <string name="channels">頻道</string>
     <string name="device">裝置</string>

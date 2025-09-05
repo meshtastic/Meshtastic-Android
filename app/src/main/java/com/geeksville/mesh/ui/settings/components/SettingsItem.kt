@@ -26,7 +26,6 @@ import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.rounded.Android
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
@@ -45,6 +44,7 @@ import com.geeksville.mesh.ui.common.theme.AppTheme
 @Composable
 fun SettingsItem(
     text: String,
+    textColor: Color = LocalContentColor.current,
     enabled: Boolean = true,
     leadingIcon: ImageVector? = null,
     leadingIconTint: Color = LocalContentColor.current,
@@ -52,21 +52,44 @@ fun SettingsItem(
     trailingIconTint: Color = LocalContentColor.current,
     onClick: () -> Unit,
 ) {
+    SettingsItem(
+        text = text,
+        textColor = textColor,
+        enabled = enabled,
+        leadingIcon = leadingIcon,
+        leadingIconTint = leadingIconTint,
+        trailingContent = { trailingIcon.Icon(trailingIconTint) },
+        onClick = onClick,
+    )
+}
+
+/** A clickable settings button item. */
+@Composable
+fun SettingsItem(
+    text: String,
+    textColor: Color = LocalContentColor.current,
+    enabled: Boolean = true,
+    leadingIcon: ImageVector? = null,
+    leadingIconTint: Color = LocalContentColor.current,
+    trailingContent: @Composable (() -> Unit),
+    onClick: () -> Unit,
+) {
     ClickableWrapper(enabled = enabled, onClick = onClick) {
         Content(
             leading = { leadingIcon.Icon(leadingIconTint) },
             text = text,
-            trailing = { trailingIcon.Icon(trailingIconTint) },
+            textColor = textColor,
+            trailing = trailingContent,
         )
     }
 }
 
 /** A toggleable settings switch item. */
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun SettingsItemSwitch(
     checked: Boolean,
     text: String,
+    textColor: Color = LocalContentColor.current,
     enabled: Boolean = true,
     leadingIcon: ImageVector? = null,
     leadingIconTint: Color = LocalContentColor.current,
@@ -76,6 +99,7 @@ fun SettingsItemSwitch(
         Content(
             leading = { leadingIcon.Icon(leadingIconTint) },
             text = text,
+            textColor = textColor,
             trailing = { Switch(checked = checked, enabled = enabled, onCheckedChange = null) },
         )
     }
@@ -85,6 +109,7 @@ fun SettingsItemSwitch(
 @Composable
 fun SettingsItemDetail(
     text: String,
+    textColor: Color = LocalContentColor.current,
     icon: ImageVector? = null,
     iconTint: Color = LocalContentColor.current,
     trailingText: String? = null,
@@ -92,7 +117,12 @@ fun SettingsItemDetail(
     onClick: (() -> Unit)? = null,
 ) {
     val content: @Composable ColumnScope.() -> Unit = {
-        Content(leading = { icon.Icon(iconTint) }, text = text, trailing = { trailingText?.let { Text(text = it) } })
+        Content(
+            leading = { icon.Icon(iconTint) },
+            text = text,
+            textColor = textColor,
+            trailing = { trailingText?.let { Text(text = it) } },
+        )
     }
 
     if (onClick != null) {
@@ -116,11 +146,11 @@ private fun ClickableWrapper(enabled: Boolean, onClick: () -> Unit, content: @Co
 
 /** The row content to display for a settings item. */
 @Composable
-private fun Content(leading: @Composable () -> Unit, text: String, trailing: @Composable () -> Unit) {
+private fun Content(leading: @Composable () -> Unit, text: String, textColor: Color, trailing: @Composable () -> Unit) {
     ListItem(
         modifier = Modifier.padding(horizontal = 8.dp),
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
-        headlineContent = { Text(text) },
+        headlineContent = { Text(text = text, color = textColor) },
         leadingContent = { leading() },
         trailingContent = { trailing() },
     )
