@@ -1177,7 +1177,9 @@ class MeshService :
 
                 // Generate our own hopsAway, comparing hopStart to hopLimit.
                 it.hopsAway =
-                    if (packet.hopStart == 0 || packet.hopLimit > packet.hopStart) {
+                    if (packet.decoded.portnumValue == Portnums.PortNum.RANGE_TEST_APP_VALUE) {
+                        0 // These don't come with the .hop params, but do not propogate, so they must be 0
+                    } else if (packet.hopStart == 0 || packet.hopLimit > packet.hopStart) {
                         -1
                     } else {
                         packet.hopStart - packet.hopLimit
