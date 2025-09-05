@@ -116,7 +116,7 @@ import com.google.maps.android.compose.Polyline
 import com.google.maps.android.compose.TileOverlay
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
-import com.google.maps.android.compose.widgets.DisappearingScaleBar
+import com.google.maps.android.compose.widgets.ScaleBar
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -537,12 +537,10 @@ fun MapView(
                 }
             }
 
-            val currentCameraPosition = cameraPositionState.position
-            var displayedZoom by remember { mutableStateOf(currentCameraPosition.zoom) }
-
-            if (displayedZoom != 0f) {
-                DisappearingScaleBar(cameraPositionState = cameraPositionState)
-            }
+            ScaleBar(
+                cameraPositionState = cameraPositionState,
+                modifier = Modifier.align(Alignment.BottomStart).padding(bottom = 48.dp),
+            )
             editingWaypoint?.let { waypointToEdit ->
                 EditWaypointDialog(
                     waypoint = waypointToEdit,
