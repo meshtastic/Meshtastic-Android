@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.ui.common.components
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
@@ -68,7 +67,7 @@ fun PositionPrecisionPreference(
             },
             padding = PaddingValues(0.dp),
         )
-        AnimatedVisibility(visible = value != POSITION_DISABLED) {
+        if (value != POSITION_DISABLED) {
             SwitchPreference(
                 title = stringResource(R.string.precise_location),
                 checked = value == POSITION_ENABLED,
@@ -80,7 +79,7 @@ fun PositionPrecisionPreference(
                 padding = PaddingValues(0.dp),
             )
         }
-        AnimatedVisibility(visible = value in (POSITION_DISABLED + 1)..<POSITION_ENABLED) {
+        if (value in (POSITION_DISABLED + 1) until POSITION_ENABLED) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Slider(
                     value = value.toFloat(),

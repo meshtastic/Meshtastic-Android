@@ -256,7 +256,7 @@ private fun VoltageCurrentDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics
             Spacer(modifier = Modifier.height(4.dp))
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
-                    text = "%s %.2f A".format(stringResource(R.string.current), current),
+                    text = "%s %.2f mA".format(stringResource(R.string.current), current),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                 )

@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+@file:Suppress("TooManyFunctions")
+
 package com.geeksville.mesh.ui.common.components
 
 import androidx.annotation.StringRes
@@ -59,6 +61,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.AppOnlyProtos
+import com.geeksville.mesh.ChannelProtos.ChannelSettings
+import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.getChannel
@@ -160,7 +164,7 @@ private fun SecurityIconDisplay(
                     Icon(
                         imageVector = badgeIcon,
                         contentDescription = stringResource(R.string.security_icon_badge_warning_description),
-                        tint = badgeIconColor ?: MaterialTheme.colorScheme.onError, // Default for contrast
+                        tint = badgeIconColor ?: colorScheme.onError, // Default for contrast
                         modifier = Modifier.size(16.dp), // Adjusted badge icon size
                     )
                 }
@@ -290,6 +294,29 @@ fun SecurityIcon(
     baseContentDescription = baseContentDescription,
     externalOnClick = externalOnClick,
 )
+
+/**
+ * Overload for [SecurityIcon] that enables recomposition when making changes to the [ChannelSettings].
+ *
+ * @param baseContentDescription The base content description for the icon.
+ * @param externalOnClick Optional lambda for external actions, invoked when the icon is clicked.
+ */
+@Composable
+fun SecurityIcon(
+    channelSettings: ChannelSettings,
+    loraConfig: LoRaConfig,
+    baseContentDescription: String = stringResource(id = R.string.security_icon_description),
+    externalOnClick: (() -> Unit)? = null,
+) {
+    val channel = Channel(channelSettings, loraConfig)
+    SecurityIcon(
+        isLowEntropyKey = channel.isLowEntropyKey,
+        isPreciseLocation = channel.isPreciseLocation,
+        isMqttEnabled = channel.isMqttEnabled,
+        baseContentDescription = baseContentDescription,
+        externalOnClick = externalOnClick,
+    )
+}
 
 /**
  * Overload for [SecurityIcon] that takes an [AppOnlyProtos.ChannelSet] and a channel index. If the channel at the given

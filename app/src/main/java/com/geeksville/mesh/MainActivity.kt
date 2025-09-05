@@ -28,7 +28,6 @@ import android.os.Bundle
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -47,7 +46,6 @@ import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.DEEP_LINK_BASE_URI
 import com.geeksville.mesh.ui.MainScreen
-import com.geeksville.mesh.ui.common.components.MainMenuAction
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.MODE_DYNAMIC
 import com.geeksville.mesh.ui.intro.AppIntroductionScreen
@@ -117,11 +115,7 @@ class MainActivity :
                         },
                     )
                 } else {
-                    MainScreen(
-                        uIViewModel = model,
-                        bluetoothViewModel = bluetoothViewModel,
-                        onAction = ::onMainMenuAction,
-                    )
+                    MainScreen(uIViewModel = model, bluetoothViewModel = bluetoothViewModel)
                 }
             }
         }
@@ -204,30 +198,7 @@ class MainActivity :
         return resultPendingIntent!!
     }
 
-    private val createRangetestLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == RESULT_OK) {
-                it.data?.data?.let { file_uri -> model.saveRangetestCSV(file_uri) }
-            }
-        }
-
     private fun showSettingsPage() {
         createSettingsIntent().send()
-    }
-
-    private fun onMainMenuAction(action: MainMenuAction) {
-        when (action) {
-            MainMenuAction.EXPORT_RANGETEST -> {
-                val intent =
-                    Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "application/csv"
-                        putExtra(Intent.EXTRA_TITLE, "rangetest.csv")
-                    }
-                createRangetestLauncher.launch(intent)
-            }
-
-            else -> warn("Unexpected action: $action")
-        }
     }
 }
