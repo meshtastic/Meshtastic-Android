@@ -27,29 +27,23 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.compose.animation.core.animate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.TripOrigin
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FloatingToolbarDefaults
-import androidx.compose.material3.FloatingToolbarExitDirection.Companion.End
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberFloatingToolbarState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -62,7 +56,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -277,29 +270,6 @@ fun MapView(
     // Clean up location tracking on disposal
     DisposableEffect(Unit) { onDispose { fusedLocationClient.removeLocationUpdates(locationCallback) } }
 
-    val floatingToolbarState = rememberFloatingToolbarState()
-    val exitAlwaysScrollBehavior =
-        FloatingToolbarDefaults.exitAlwaysScrollBehavior(exitDirection = End, state = floatingToolbarState)
-
-    LaunchedEffect(cameraPositionState.isMoving, floatingToolbarState.offsetLimit) {
-        val targetOffset =
-            if (cameraPositionState.isMoving) {
-                floatingToolbarState.offsetLimit
-            } else {
-                mapViewModel.onCameraPositionChanged(cameraPositionState.position)
-                0f
-            }
-        if (floatingToolbarState.offset != targetOffset) {
-            if (targetOffset == 0f || floatingToolbarState.offsetLimit != 0f) {
-                launch {
-                    animate(initialValue = floatingToolbarState.offset, targetValue = targetOffset) { value, _ ->
-                        floatingToolbarState.offset = value
-                    }
-                }
-            }
-        }
-    }
-
     val allNodes by
         mapViewModel.nodes
             .map { nodes -> nodes.filter { node -> node.validPosition != null } }
@@ -369,8 +339,9 @@ fun MapView(
         }
 
     var showClusterItemsDialog by remember { mutableStateOf<List<NodeClusterItem>?>(null) }
+    LaunchedEffect(cameraPositionState.position) { mapViewModel.onCameraPositionChanged(cameraPositionState.position) }
 
-    Scaffold(modifier = Modifier.nestedScroll(exitAlwaysScrollBehavior)) { paddingValues ->
+    Scaffold { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             GoogleMap(
                 mapColorScheme = mapColorScheme,
@@ -550,6 +521,7 @@ fun MapView(
                                         }
                                     }
                                 }
+
                                 LayerType.GEOJSON -> {
                                     layerItem.geoJsonLayerData?.let { geoJsonLayer ->
                                         if (layerItem.isVisible && !geoJsonLayer.isLayerOnMap) {
@@ -599,7 +571,7 @@ fun MapView(
             }
 
             MapControlsOverlay(
-                modifier = Modifier.align(Alignment.TopEnd).padding(top = 50.dp),
+                modifier = Modifier.align(Alignment.TopCenter).padding(top = 8.dp),
                 mapFilterMenuExpanded = mapFilterMenuExpanded,
                 onMapFilterMenuDismissRequest = { mapFilterMenuExpanded = false },
                 onToggleMapFilterMenu = { mapFilterMenuExpanded = true },
@@ -613,7 +585,6 @@ fun MapView(
                     showCustomTileManagerSheet = true
                 },
                 showFilterButton = focusedNodeNum == null,
-                scrollBehavior = exitAlwaysScrollBehavior,
                 hasLocationPermission = hasLocationPermission,
                 isLocationTrackingEnabled = isLocationTrackingEnabled,
                 onToggleLocationTracking = {
