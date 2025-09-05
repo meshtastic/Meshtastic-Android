@@ -20,8 +20,6 @@ package com.geeksville.mesh.ui.node
 import android.content.Intent
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -93,11 +91,9 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -150,6 +146,7 @@ import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
 import com.geeksville.mesh.ui.node.components.NodeActionDialogs
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
+import com.geeksville.mesh.ui.node.components.TracerouteButton
 import com.geeksville.mesh.ui.settings.components.SettingsItem
 import com.geeksville.mesh.ui.settings.components.SettingsItemDetail
 import com.geeksville.mesh.ui.settings.components.SettingsItemSwitch
@@ -631,8 +628,7 @@ private fun RemoteDeviceActions(node: Node, lastTracerouteTime: Long?, onAction:
         trailingIcon = null,
         onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.RequestUserInfo(node))) },
     )
-    TracerouteActionButton(
-        title = stringResource(id = R.string.traceroute),
+    TracerouteButton(
         lastTracerouteTime = lastTracerouteTime,
         onClick = { onAction(NodeDetailAction.HandleNodeMenuAction(NodeMenuAction.TraceRoute(node))) },
     )
@@ -1031,59 +1027,6 @@ private fun PowerMetrics(node: Node) {
                     InfoCard(icon = metric.icon, text = stringResource(metric.label), value = metric.value)
                 }
             }
-        }
-    }
-}
-
-private const val COOL_DOWN_TIME_MS = 30000L
-
-@Composable
-fun TracerouteActionButton(title: String, lastTracerouteTime: Long?, onClick: () -> Unit) {
-    val progress = remember { Animatable(0f) }
-    var isCoolingDown by remember { mutableStateOf(false) }
-
-    LaunchedEffect(lastTracerouteTime) {
-        val timeSinceLast = System.currentTimeMillis() - (lastTracerouteTime ?: 0)
-        isCoolingDown = timeSinceLast < COOL_DOWN_TIME_MS
-
-        if (isCoolingDown) {
-            val remainingTime = COOL_DOWN_TIME_MS - timeSinceLast
-            progress.snapTo(remainingTime / COOL_DOWN_TIME_MS.toFloat())
-            progress.animateTo(
-                targetValue = 0f,
-                animationSpec = tween(durationMillis = remainingTime.toInt(), easing = { it }),
-            )
-            isCoolingDown = false
-        }
-    }
-
-    Button(
-        onClick = {
-            if (!isCoolingDown) {
-                onClick()
-            }
-        },
-        enabled = !isCoolingDown,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp).height(48.dp),
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            if (isCoolingDown) {
-                CircularProgressIndicator(
-                    progress = { progress.value },
-                    modifier = Modifier.size(24.dp),
-                    strokeWidth = 2.dp,
-                    trackColor = ProgressIndicatorDefaults.circularDeterminateTrackColor,
-                    strokeCap = ProgressIndicatorDefaults.CircularDeterminateStrokeCap,
-                )
-            } else {
-                Icon(
-                    imageVector = Icons.Default.Route,
-                    contentDescription = stringResource(R.string.traceroute),
-                    modifier = Modifier.size(24.dp),
-                )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(text = title, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
         }
     }
 }
