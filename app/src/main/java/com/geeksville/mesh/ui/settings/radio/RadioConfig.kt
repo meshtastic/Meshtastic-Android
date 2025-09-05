@@ -30,6 +30,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.twotone.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -202,6 +203,13 @@ fun RadioConfigItemList(
             text = stringResource(R.string.clean_node_database_title),
             enabled = enabled,
             onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
+        )
+
+        SettingsItem(
+            text = stringResource(R.string.debug_panel),
+            leadingIcon = Icons.Rounded.BugReport,
+            enabled = enabled,
+            onClick = { onNavigate(SettingsRoutes.DebugPanel) },
         )
     }
 }
