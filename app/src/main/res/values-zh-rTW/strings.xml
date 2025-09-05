@@ -312,7 +312,7 @@
     <string name="udp_config">UDP設置</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>最後接收: %2$s<br>最後位置: %3$s<br>電量: %4$s]]></string>
     <string name="toggle_my_position">切換我的位置</string>
-    <string name="orient_north">Orient north</string>
+    <string name="orient_north">以北為上</string>
     <string name="user">用戶</string>
     <string name="channels">頻道</string>
     <string name="device">裝置</string>
@@ -337,7 +337,7 @@
     <string name="detection_sensor">檢測傳感器</string>
     <string name="paxcounter">客流量計數</string>
     <string name="audio_config">音頻設置</string>
-    <string name="codec_2_enabled">啟用 CODEC2</string>
+    <string name="codec_2_enabled">CODEC 2 已啟用</string>
     <string name="ptt_pin">PTT針腳</string>
     <string name="codec2_sample_rate">CODEC2 取樣率</string>
     <string name="i2s_word_select">I2S WS 訊號選擇</string>
@@ -475,8 +475,8 @@
     <string name="subnet">子網</string>
     <string name="paxcounter_config">Paxcount設置</string>
     <string name="paxcounter_enabled">啟用Paxcount</string>
-    <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI 閾值(缺省-80)</string>
-    <string name="ble_rssi_threshold_defaults_to_80">藍牙 RSSI 閾值(缺省-80)</string>
+    <string name="wifi_rssi_threshold_defaults_to_80">WiFi RSSI 閾值(預設為-80)</string>
+    <string name="ble_rssi_threshold_defaults_to_80">藍牙 RSSI 閾值(預設為-80)</string>
     <string name="position_config">位置設定</string>
     <string name="position_broadcast_interval_seconds">位置廣播間隔（秒）</string>
     <string name="smart_position_enabled">啟用智慧位置</string>
