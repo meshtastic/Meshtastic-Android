@@ -28,7 +28,6 @@ import android.os.Bundle
 import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -204,29 +203,12 @@ class MainActivity :
         return resultPendingIntent!!
     }
 
-    private val createRangetestLauncher =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-            if (it.resultCode == RESULT_OK) {
-                it.data?.data?.let { file_uri -> model.saveRangetestCSV(file_uri) }
-            }
-        }
-
     private fun showSettingsPage() {
         createSettingsIntent().send()
     }
 
     private fun onMainMenuAction(action: MainMenuAction) {
         when (action) {
-            MainMenuAction.EXPORT_RANGETEST -> {
-                val intent =
-                    Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "application/csv"
-                        putExtra(Intent.EXTRA_TITLE, "rangetest.csv")
-                    }
-                createRangetestLauncher.launch(intent)
-            }
-
             else -> warn("Unexpected action: $action")
         }
     }

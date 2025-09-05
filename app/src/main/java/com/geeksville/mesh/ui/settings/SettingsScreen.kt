@@ -21,6 +21,7 @@ import android.app.Activity
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AppCompatActivity.RESULT_OK
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
@@ -30,6 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.rounded.FormatPaint
 import androidx.compose.material.icons.rounded.Language
+import androidx.compose.material.icons.rounded.Output
 import androidx.compose.material.icons.rounded.WavingHand
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -212,6 +214,26 @@ fun SettingsScreen(
                     message = "",
                     choices = themeMap.mapValues { (_, value) -> { uiViewModel.setTheme(value) } },
                 )
+            }
+
+            val exportRangeTestLauncher =
+                rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                    if (it.resultCode == RESULT_OK) {
+                        it.data?.data?.let { uri -> uiViewModel.saveRangeTestCsv(uri) }
+                    }
+                }
+            SettingsItem(
+                text = stringResource(R.string.save_rangetest),
+                leadingIcon = Icons.Rounded.Output,
+                trailingIcon = null,
+            ) {
+                val intent =
+                    Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "application/csv"
+                        putExtra(Intent.EXTRA_TITLE, "rangetest.csv")
+                    }
+                exportRangeTestLauncher.launch(intent)
             }
 
             SettingsItem(

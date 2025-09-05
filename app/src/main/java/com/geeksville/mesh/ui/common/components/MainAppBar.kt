@@ -205,7 +205,6 @@ private fun TopBarActions(
 }
 
 enum class MainMenuAction(@StringRes val stringRes: Int) {
-    EXPORT_RANGETEST(R.string.save_rangetest),
     QUICK_CHAT(R.string.quick_chat),
 }
 
