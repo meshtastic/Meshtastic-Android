@@ -775,4 +775,11 @@
     <string name="url_template">Шаблон URL</string>
     <string name="track_point">track point</string>
     <string name="phone_settings">Phone Settings</string>
+    <string name="channel_features">Channel Features</string>
+    <string name="location_sharing">Location Sharing</string>
+    <string name="periodic_position_broadcast">Periodic position broadcast</string>
+    <string name="uplink_feature_description">Messages from the mesh will be sent to the public internet through any node\'s configured gateway.</string>
+    <string name="downlink_feature_description">Messages from a public internet gateway are forwarded to the local mesh. Due to the zero-hop policy, traffic from the default MQTT server will not propagate further than this device.</string>
+    <string name="icon_meanings">Icon Meanings</string>
+    <string name="secondary_channel_position_feature">Disabling position on the primary channel allows periodic position broadcasts on the first secondary channel with the position enabled, otherwise manual position request required.</string>
 </resources>
