@@ -18,6 +18,9 @@
 package com.geeksville.mesh.ui.common.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -36,6 +39,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -182,8 +186,16 @@ private fun TopBarActions(
     actions: @Composable () -> Unit,
     onAction: (NodeMenuAction) -> Unit,
 ) {
-    AnimatedVisibility(showNodeChip) {
-        ourNode?.let { NodeChip(node = it, isThisNode = true, isConnected = isConnected, onAction = onAction) }
+    AnimatedVisibility(visible = showNodeChip, enter = fadeIn(), exit = fadeOut()) {
+        ourNode?.let {
+            NodeChip(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                node = it,
+                isThisNode = true,
+                isConnected = isConnected,
+                onAction = onAction,
+            )
+        }
     }
 
     actions()
