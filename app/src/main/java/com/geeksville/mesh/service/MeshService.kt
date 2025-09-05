@@ -199,7 +199,7 @@ class MeshService :
 
         private const val CONFIG_ONLY_NONCE = 69420
         private const val NODE_INFO_ONLY_NONCE = 69421
-        private const val CONFIG_WAIT_MS = 250L
+        private const val CONFIG_WAIT_MS = 50L
     }
 
     private var previousSummary: String? = null
@@ -1750,9 +1750,6 @@ class MeshService :
         processQueuedPackets() // send any packets that were queued up
         startMqttClientProxy()
         serviceBroadcasts.broadcastConnection()
-        packetHandler.sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { setTimeOnly = currentSecond() }) {
-            connectionState
-        }
         sendAnalytics()
         reportConnection()
     }
@@ -1824,6 +1821,11 @@ class MeshService :
 
             sendAnalytics()
             onNodeDBChanged()
+        }
+        packetHandler.sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
+            setTimeOnly = currentSecond()
+        }) {
+            connectionState
         }
     }
 
