@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Upload
+import androidx.compose.material.icons.rounded.CleaningServices
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
@@ -162,6 +163,7 @@ fun RadioConfigItemList(
 
         SettingsItem(
             text = stringResource(R.string.clean_node_database_title),
+            leadingIcon = Icons.Rounded.CleaningServices,
             enabled = enabled,
             onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
         )
