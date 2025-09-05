@@ -1822,9 +1822,7 @@ class MeshService :
             sendAnalytics()
             onNodeDBChanged()
         }
-        packetHandler.sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket {
-            setTimeOnly = currentSecond()
-        }) {
+        packetHandler.sendToRadio(newMeshPacketTo(myNodeNum).buildAdminPacket { setTimeOnly = currentSecond() }) {
             connectionState
         }
     }
