@@ -343,7 +343,7 @@ fun MapView(
                 MapUiSettings(
                     zoomControlsEnabled = true,
                     mapToolbarEnabled = true,
-                    compassEnabled = true,
+                    compassEnabled = false,
                     myLocationButtonEnabled = false, // Disabled - we use custom location button
                     rotationGesturesEnabled = true,
                     scrollGesturesEnabled = true,
@@ -598,6 +598,7 @@ fun MapView(
                         isLocationTrackingEnabled = !isLocationTrackingEnabled
                     }
                 },
+                bearing = cameraPositionState.position.bearing,
                 onOrientNorth = {
                     coroutineScope.launch {
                         try {
