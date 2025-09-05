@@ -53,7 +53,6 @@ import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.debug.DebugMenuActions
 import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
-import com.geeksville.mesh.ui.settings.radio.RadioConfigMenuActions
 
 @Suppress("CyclomaticComplexMethod")
 @Composable
@@ -110,10 +109,6 @@ fun MainAppBar(
             currentDestination?.let {
                 when {
                     currentDestination.hasRoute<SettingsRoutes.DebugPanel>() -> DebugMenuActions()
-
-                    currentDestination.hasRoute<SettingsRoutes.Settings>() ->
-                        RadioConfigMenuActions(viewModel = viewModel)
-
                     else -> {}
                 }
             }

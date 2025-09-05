@@ -19,6 +19,7 @@ package com.geeksville.mesh.ui.settings
 
 import android.app.Activity
 import android.content.Intent
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity.RESULT_OK
@@ -31,10 +32,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.rounded.FormatPaint
 import androidx.compose.material.icons.rounded.Language
+import androidx.compose.material.icons.rounded.Memory
 import androidx.compose.material.icons.rounded.Output
 import androidx.compose.material.icons.rounded.WavingHand
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -44,8 +48,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
-import com.geeksville.mesh.DeviceUIProtos.Language
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.model.UIViewModel
@@ -54,12 +58,15 @@ import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.common.theme.MODE_DYNAMIC
 import com.geeksville.mesh.ui.settings.components.SettingsItem
+import com.geeksville.mesh.ui.settings.components.SettingsItemDetail
 import com.geeksville.mesh.ui.settings.components.SettingsItemSwitch
 import com.geeksville.mesh.ui.settings.radio.RadioConfigItemList
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
 import com.geeksville.mesh.util.LanguageUtils
+import kotlinx.coroutines.delay
+import kotlin.time.Duration.Companion.seconds
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -242,6 +249,46 @@ fun SettingsScreen(
                 trailingIcon = null,
             ) {
                 uiViewModel.showAppIntro()
+            }
+
+            AppVersionButton(excludedModulesUnlocked) { uiViewModel.unlockExcludedModules() }
+        }
+    }
+}
+
+private const val UNLOCK_CLICK_COUNT = 5 // Number of clicks required to unlock excluded modules.
+private const val UNLOCKED_CLICK_COUNT = 3 // Number of clicks before we toast that modules are already unlocked.
+private const val UNLOCK_TIMEOUT_SECONDS = 1 // Timeout in seconds to reset the click counter.
+
+/** A button to display the app version. Clicking it 5 times will unlock the excluded modules. */
+@Composable
+private fun AppVersionButton(excludedModulesUnlocked: Boolean, onUnlockExcludedModules: () -> Unit) {
+    val context = LocalContext.current
+    var clickCount by remember { mutableIntStateOf(0) }
+
+    LaunchedEffect(clickCount) {
+        if (clickCount in 1..<UNLOCK_CLICK_COUNT) {
+            delay(UNLOCK_TIMEOUT_SECONDS.seconds)
+            clickCount = 0
+        }
+    }
+
+    SettingsItemDetail(
+        text = stringResource(R.string.app_version),
+        icon = Icons.Rounded.Memory,
+        trailingText = BuildConfig.VERSION_NAME,
+    ) {
+        clickCount = clickCount.inc().coerceIn(0, UNLOCK_CLICK_COUNT)
+
+        when {
+            clickCount == UNLOCKED_CLICK_COUNT && excludedModulesUnlocked -> {
+                clickCount = 0
+                Toast.makeText(context, context.getString(R.string.modules_already_unlocked), Toast.LENGTH_LONG).show()
+            }
+            clickCount == UNLOCK_CLICK_COUNT -> {
+                clickCount = 0
+                onUnlockExcludedModules()
+                Toast.makeText(context, context.getString(R.string.modules_unlocked), Toast.LENGTH_LONG).show()
             }
         }
     }

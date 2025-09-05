@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.ui.settings.radio
 
-import android.widget.Toast
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -25,24 +24,19 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.CleaningServices
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.geeksville.mesh.R
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.AdminRoute
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.ModuleRoute
@@ -53,8 +47,6 @@ import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.settings.components.SettingsItem
 import com.geeksville.mesh.ui.settings.radio.components.WarningDialog
-import kotlinx.coroutines.delay
-import kotlin.time.Duration.Companion.seconds
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -166,32 +158,6 @@ fun RadioConfigItemList(
             onClick = { onNavigate(SettingsRoutes.DebugPanel) },
         )
     }
-}
-
-private const val UNLOCK_CLICK_COUNT = 5 // Number of clicks required to unlock excluded modules.
-private const val UNLOCK_TIMEOUT_SECONDS = 3 // Timeout in seconds to reset the click counter.
-
-@Composable
-fun RadioConfigMenuActions(modifier: Modifier = Modifier, viewModel: UIViewModel = hiltViewModel()) {
-    val context = LocalContext.current
-    var counter by remember { mutableIntStateOf(0) }
-    LaunchedEffect(counter) {
-        if (counter > 0 && counter < UNLOCK_CLICK_COUNT) {
-            delay(UNLOCK_TIMEOUT_SECONDS.seconds)
-            counter = 0
-        }
-    }
-    IconButton(
-        enabled = counter < UNLOCK_CLICK_COUNT,
-        onClick = {
-            counter++
-            if (counter == UNLOCK_CLICK_COUNT) {
-                viewModel.unlockExcludedModules()
-                Toast.makeText(context, context.getString(R.string.modules_unlocked), Toast.LENGTH_LONG).show()
-            }
-        },
-        modifier = modifier,
-    ) {}
 }
 
 @Preview(showBackground = true)
