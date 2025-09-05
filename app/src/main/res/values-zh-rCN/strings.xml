@@ -636,6 +636,7 @@
     <string name="export_keys">导出密钥</string>
     <string name="export_keys_confirmation">导出公钥和私钥到文件。请安全地存储某处。</string>
     <string name="modules_unlocked">模块已解锁</string>
+    <string name="modules_already_unlocked">Modules already unlocked</string>
     <string name="remote">远程</string>
     <string name="node_count_template">(%1$d 在线 / %2$d 总计)</string>
     <string name="react">互动</string>
@@ -772,7 +773,8 @@
     <string name="url_must_contain_placeholders">URL 必须包含占位符。</string>
     <string name="url_template">URL 模板</string>
     <string name="track_point">轨迹点</string>
-    <string name="phone_settings">Phone Settings</string>
+    <string name="app_settings">App</string>
+    <string name="app_version">Version</string>
     <string name="channel_features">Channel Features</string>
     <string name="location_sharing">Location Sharing</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>
