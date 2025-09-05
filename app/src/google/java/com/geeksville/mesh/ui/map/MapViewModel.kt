@@ -30,7 +30,6 @@ import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.map.CustomTileProviderRepository
 import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.TileProvider
 import com.google.android.gms.maps.model.UrlTileProvider
 import com.google.maps.android.compose.MapType
@@ -101,10 +100,6 @@ constructor(
     private val _selectedGoogleMapType = MutableStateFlow(MapType.NORMAL)
     val selectedGoogleMapType: StateFlow<MapType> = _selectedGoogleMapType.asStateFlow()
 
-    private val _cameraPosition = MutableStateFlow<MapCameraPosition?>(null)
-
-    val cameraPosition: StateFlow<MapCameraPosition?> = _cameraPosition.asStateFlow()
-
     val displayUnits =
         radioConfigRepository.deviceProfileFlow
             .mapNotNull { it.config.display.units }
@@ -113,17 +108,6 @@ constructor(
                 started = SharingStarted.WhileSubscribed(5000),
                 initialValue = ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC,
             )
-
-    fun onCameraPositionChanged(cameraPosition: CameraPosition) {
-        _cameraPosition.value =
-            MapCameraPosition(
-                targetLat = cameraPosition.target.latitude,
-                targetLng = cameraPosition.target.longitude,
-                zoom = cameraPosition.zoom,
-                tilt = cameraPosition.tilt,
-                bearing = cameraPosition.bearing,
-            )
-    }
 
     fun addCustomTileProvider(name: String, urlTemplate: String) {
         viewModelScope.launch {

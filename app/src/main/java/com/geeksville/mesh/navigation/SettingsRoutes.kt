@@ -56,6 +56,7 @@ import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.MeshProtos.DeviceMetadata
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.ui.debug.DebugScreen
 import com.geeksville.mesh.ui.settings.SettingsScreen
 import com.geeksville.mesh.ui.settings.radio.CleanNodeDatabaseScreen
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
@@ -147,6 +148,8 @@ sealed class SettingsRoutes {
 
     @Serializable data object CleanNodeDb : Route
 
+    @Serializable data object DebugPanel : Route
+
     // endregion
 }
 
@@ -177,6 +180,12 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController, uiViewModel:
         }
         configRoutesScreens(navController)
         moduleRoutesScreens(navController)
+        composable<SettingsRoutes.DebugPanel>(
+            deepLinks =
+            listOf(navDeepLink<SettingsRoutes.DebugPanel>(basePath = "$DEEP_LINK_BASE_URI/settings/debug_panel")),
+        ) {
+            DebugScreen()
+        }
     }
 }
 

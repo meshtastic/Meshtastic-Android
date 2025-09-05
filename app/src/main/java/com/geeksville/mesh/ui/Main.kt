@@ -351,7 +351,6 @@ fun MainScreen(
                     onAction = { action ->
                         if (action is MainMenuAction) {
                             when (action) {
-                                MainMenuAction.DEBUG -> navController.navigate(Route.DebugPanel)
                                 MainMenuAction.QUICK_CHAT -> navController.navigate(ContactsRoutes.QuickChat)
                                 MainMenuAction.SHOW_INTRO -> uIViewModel.onMainMenuAction(action)
                                 else -> onAction(action)

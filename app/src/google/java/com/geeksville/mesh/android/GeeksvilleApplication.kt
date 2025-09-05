@@ -42,9 +42,9 @@ import com.datadog.android.sessionreplay.SessionReplay
 import com.datadog.android.sessionreplay.SessionReplayConfiguration
 import com.datadog.android.sessionreplay.compose.ComposeExtensionSupport
 import com.datadog.android.timber.DatadogTree
-import com.datadog.android.trace.AndroidTracer
 import com.datadog.android.trace.Trace
 import com.datadog.android.trace.TraceConfiguration
+import com.datadog.android.trace.opentelemetry.DatadogOpenTelemetry
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.analytics.AnalyticsProvider
 import com.geeksville.mesh.analytics.FirebaseAnalytics
@@ -59,7 +59,7 @@ import com.google.firebase.crashlytics.crashlytics
 import com.google.firebase.crashlytics.setCustomKeys
 import com.google.firebase.initialize
 import com.suddenh4x.ratingdialog.AppRating
-import io.opentracing.util.GlobalTracer
+import io.opentelemetry.api.GlobalOpenTelemetry
 import timber.log.Timber
 
 abstract class GeeksvilleApplication :
@@ -218,8 +218,7 @@ abstract class GeeksvilleApplication :
         val traceConfig = TraceConfiguration.Builder().build()
         Trace.enable(traceConfig)
 
-        val tracer = AndroidTracer.Builder().build()
-        GlobalTracer.registerIfAbsent(tracer)
+        GlobalOpenTelemetry.set(DatadogOpenTelemetry(BuildConfig.APPLICATION_ID))
 
         val sessionReplayConfig =
             SessionReplayConfiguration.Builder(sampleRate = 20.0f)
