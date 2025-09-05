@@ -232,6 +232,7 @@ dependencies {
     implementation(libs.bundles.adaptive)
     implementation(libs.bundles.lifecycle)
     implementation(libs.bundles.navigation)
+    implementation(libs.bundles.navigation3)
     implementation(libs.bundles.coroutines)
     implementation(libs.bundles.datastore)
     implementation(libs.bundles.room)

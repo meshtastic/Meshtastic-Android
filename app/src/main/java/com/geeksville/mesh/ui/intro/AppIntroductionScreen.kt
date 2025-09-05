@@ -23,14 +23,17 @@ import android.os.Build
 import android.provider.Settings
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
+import androidx.navigation3.runtime.NavKey
+import androidx.navigation3.runtime.entry
+import androidx.navigation3.runtime.entryProvider
+import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.ui.NavDisplay
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
+import kotlinx.serialization.Serializable
 
 /**
  * Composable function for the main application introduction screen. This screen guides the user through initial setup
@@ -43,7 +46,6 @@ import com.google.accompanist.permissions.rememberPermissionState
 @Composable
 fun AppIntroductionScreen(onDone: () -> Unit) {
     val context = LocalContext.current
-    val navController = rememberNavController()
 
     val notificationPermissionState: PermissionState? =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -56,56 +58,76 @@ fun AppIntroductionScreen(onDone: () -> Unit) {
         listOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
     val locationPermissionState = rememberMultiplePermissionsState(permissions = locationPermissions)
 
-    NavHost(navController = navController, startDestination = IntroRoute.Welcome.route) {
-        composable(IntroRoute.Welcome.route) {
-            WelcomeScreen(onGetStarted = { navController.navigate(IntroRoute.Notifications.route) })
-        }
-        composable(IntroRoute.Notifications.route) {
-            val notificationsAlreadyGranted = notificationPermissionState?.status?.isGranted ?: true
-            NotificationsScreen(
-                showNextButton = notificationsAlreadyGranted,
-                onSkip = { navController.navigate(IntroRoute.Location.route) },
-                onConfigure = {
-                    if (notificationsAlreadyGranted) {
-                        navController.navigate(IntroRoute.CriticalAlerts.route)
-                    } else {
-                        // For Android Tiramisu (API 33) and above, this requests POST_NOTIFICATIONS
-                        // For lower versions, notificationPermissionState will be null, and this branch isn't taken.
-                        notificationPermissionState.launchPermissionRequest()
-                    }
-                },
-            )
-        }
-        composable(IntroRoute.CriticalAlerts.route) {
-            CriticalAlertsScreen(
-                onSkip = { navController.navigate(IntroRoute.Location.route) },
-                onConfigure = {
-                    // Intent to open the specific notification channel settings for "my_alerts"
-                    // This allows the user to enable critical alerts if they were initially denied
-                    // or to adjust settings for notifications that can bypass Do Not Disturb.
-                    val intent =
-                        Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
-                            putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-                            putExtra(Settings.EXTRA_CHANNEL_ID, "my_alerts")
+    val backStack = rememberNavBackStack(Welcome)
+
+    NavDisplay(
+        backStack = backStack,
+        onBack = { backStack.removeLastOrNull() },
+        entryProvider =
+        entryProvider {
+            entry<Welcome> { WelcomeScreen(onGetStarted = { backStack.add(Notifications) }) }
+
+            entry<Notifications> {
+                val notificationsAlreadyGranted = notificationPermissionState?.status?.isGranted ?: true
+                NotificationsScreen(
+                    showNextButton = notificationsAlreadyGranted,
+                    onSkip = {
+                        // Skip this screen and the Critical Alerts screen. Proceed to Location screen.
+                        backStack.add(Location)
+                    },
+                    onConfigure = {
+                        if (notificationsAlreadyGranted) {
+                            backStack.add(CriticalAlerts)
+                        } else {
+                            // For Android Tiramisu (API 33) and above, this requests POST_NOTIFICATIONS
+                            // For lower versions, notificationPermissionState will be null, and this branch isn't
+                            // taken.
+                            notificationPermissionState?.launchPermissionRequest()
                         }
-                    context.startActivity(intent)
-                    navController.navigate(IntroRoute.Location.route)
-                },
-            )
-        }
-        composable(IntroRoute.Location.route) {
-            val locationAlreadyGranted = locationPermissionState.allPermissionsGranted
-            LocationScreen(
-                showNextButton = locationAlreadyGranted,
-                onSkip = onDone, // Callback to signify completion of the intro flow
-                onConfigure = {
-                    if (locationAlreadyGranted) {
-                        onDone() // Permissions already granted, proceed to finish
-                    } else {
-                        locationPermissionState.launchMultiplePermissionRequest()
-                    }
-                },
-            )
-        }
-    }
+                    },
+                )
+            }
+
+            entry<CriticalAlerts> {
+                CriticalAlertsScreen(
+                    onSkip = { backStack.add(Location) },
+                    onConfigure = {
+                        // Intent to open the specific notification channel settings for "my_alerts"
+                        // This allows the user to enable critical alerts if they were initially denied
+                        // or to adjust settings for notifications that can bypass Do Not Disturb.
+                        val intent =
+                            Intent(Settings.ACTION_CHANNEL_NOTIFICATION_SETTINGS).apply {
+                                putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                                putExtra(Settings.EXTRA_CHANNEL_ID, "my_alerts")
+                            }
+                        context.startActivity(intent)
+                        backStack.add(Location)
+                    },
+                )
+            }
+
+            entry<Location> {
+                val locationAlreadyGranted = locationPermissionState.allPermissionsGranted
+                LocationScreen(
+                    showNextButton = locationAlreadyGranted,
+                    onSkip = onDone, // Callback to signify completion of the intro flow
+                    onConfigure = {
+                        if (locationAlreadyGranted) {
+                            onDone() // Permissions already granted, proceed to finish
+                        } else {
+                            locationPermissionState.launchMultiplePermissionRequest()
+                        }
+                    },
+                )
+            }
+        },
+    )
 }
+
+@Serializable private data object Welcome : NavKey
+
+@Serializable private data object Notifications : NavKey
+
+@Serializable private data object CriticalAlerts : NavKey
+
+@Serializable private data object Location : NavKey
