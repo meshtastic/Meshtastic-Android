@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.rounded.CleaningServices
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -136,19 +135,10 @@ fun RadioConfigItemList(
                 )
             }
 
-            val contentColor =
-                when (route) {
-                    AdminRoute.FACTORY_RESET,
-                    AdminRoute.NODEDB_RESET,
-                    -> MaterialTheme.colorScheme.StatusRed
-                    else -> LocalContentColor.current
-                }
             SettingsItem(
                 enabled = enabled,
                 text = stringResource(route.title),
-                textColor = contentColor,
                 leadingIcon = route.icon,
-                leadingIconTint = contentColor,
                 trailingIcon = null,
             ) {
                 showDialog = true
