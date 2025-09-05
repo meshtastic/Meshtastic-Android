@@ -636,6 +636,7 @@
     <string name="export_keys">Salvesta võtmed</string>
     <string name="export_keys_confirmation">Ekspordib avalikud- ja privaatvõtmed faili. Palun hoidke kuskil turvalises kohas.</string>
     <string name="modules_unlocked">Moodulid on lukustamata</string>
+    <string name="modules_already_unlocked">Modules already unlocked</string>
     <string name="remote">Kaugjuhtimine</string>
     <string name="node_count_template">(%1$d võrgus / %2$d kokku)</string>
     <string name="react">Reageeri</string>
@@ -773,7 +774,8 @@
     <string name="url_must_contain_placeholders">URL peab sisaldama vahesümboleid.</string>
     <string name="url_template">URL mall</string>
     <string name="track_point">jälgimispunkt</string>
-    <string name="phone_settings">Telefoni seaded</string>
+    <string name="app_settings">App</string>
+    <string name="app_version">Version</string>
     <string name="channel_features">Channel Features</string>
     <string name="location_sharing">Location Sharing</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>
