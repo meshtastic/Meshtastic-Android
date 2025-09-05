@@ -636,6 +636,7 @@
     <string name="export_keys">Експортиране на ключовете</string>
     <string name="export_keys_confirmation">Експортира публичния и частния ключове във файл. Моля, съхранявайте го на сигурно място.</string>
     <string name="modules_unlocked">Modules unlocked</string>
+    <string name="modules_already_unlocked">Modules already unlocked</string>
     <string name="remote">Отдалечен</string>
     <string name="node_count_template">(%1$d онлайн / %2$d общо)</string>
     <string name="react">React</string>
@@ -773,7 +774,8 @@
     <string name="url_must_contain_placeholders">URL must contain placeholders.</string>
     <string name="url_template">Шаблон за URL</string>
     <string name="track_point">track point</string>
-    <string name="phone_settings">Настройки на телефона</string>
+    <string name="app_settings">App</string>
+    <string name="app_version">Version</string>
     <string name="channel_features">Channel Features</string>
     <string name="location_sharing">Location Sharing</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>
