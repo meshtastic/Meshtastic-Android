@@ -337,7 +337,7 @@
     <string name="detection_sensor">檢測傳感器</string>
     <string name="paxcounter">客流量計數</string>
     <string name="audio_config">音頻設置</string>
-    <string name="codec_2_enabled">啟用 CODEC2</string>
+    <string name="codec_2_enabled">CODEC 2 已啟用</string>
     <string name="ptt_pin">PTT針腳</string>
     <string name="codec2_sample_rate">CODEC2 取樣率</string>
     <string name="i2s_word_select">I2S WS 訊號選擇</string>
