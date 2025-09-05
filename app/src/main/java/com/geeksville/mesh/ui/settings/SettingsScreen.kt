@@ -168,7 +168,7 @@ fun SettingsScreen(
             onNavigate = onNavigate,
         )
 
-        TitledCard(title = stringResource(R.string.phone_settings), modifier = Modifier.padding(top = 16.dp)) {
+        TitledCard(title = stringResource(R.string.app_settings), modifier = Modifier.padding(top = 16.dp)) {
             if (state.analyticsAvailable) {
                 SettingsItemSwitch(
                     text = stringResource(R.string.analytics_okay),
