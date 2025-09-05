@@ -312,6 +312,7 @@
     <string name="udp_config">UDP 설정</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>최근 수신: %2$s<br>최근 위치: %3$s<br>배터리: %4$s]]></string>
     <string name="toggle_my_position">내 위치 토글</string>
+    <string name="orient_north">Orient north</string>
     <string name="user">사용자</string>
     <string name="channels">채널</string>
     <string name="device">장치</string>

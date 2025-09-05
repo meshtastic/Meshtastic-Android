@@ -314,6 +314,7 @@
     <string name="udp_config">Конфигуриране на UDP</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Последно чут: %2$s<br>Последна позиция: %3$s<br>Батерия: %4$s]]></string>
     <string name="toggle_my_position">Toggle my position</string>
+    <string name="orient_north">Orient north</string>
     <string name="user">Потребител</string>
     <string name="channels">Канали</string>
     <string name="device">Устройство</string>
