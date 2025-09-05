@@ -18,27 +18,16 @@
 package com.geeksville.mesh.ui.settings.radio
 
 import android.widget.Toast
-import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.rounded.BugReport
-import androidx.compose.material.icons.twotone.Warning
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.Icon
+import androidx.compose.material.icons.rounded.CleaningServices
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,7 +35,6 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -64,64 +52,11 @@ import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.settings.components.SettingsItem
+import com.geeksville.mesh.ui.settings.radio.components.WarningDialog
 import kotlinx.coroutines.delay
 import kotlin.time.Duration.Companion.seconds
 
-@Suppress("LongMethod")
-@Composable
-private fun NavButton(@StringRes title: Int, enabled: Boolean, onClick: () -> Unit) {
-    var showDialog by remember { mutableStateOf(false) }
-    if (showDialog) {
-        AlertDialog(
-            onDismissRequest = {},
-            shape = RoundedCornerShape(16.dp),
-            title = {
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                    Icon(
-                        imageVector = Icons.TwoTone.Warning,
-                        contentDescription = stringResource(id = R.string.warning),
-                        modifier = Modifier.padding(end = 8.dp),
-                    )
-                    Text(text = "${stringResource(title)}?\n")
-                    Icon(
-                        imageVector = Icons.TwoTone.Warning,
-                        contentDescription = stringResource(id = R.string.warning),
-                        modifier = Modifier.padding(start = 8.dp),
-                    )
-                }
-            },
-            confirmButton = {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    TextButton(modifier = Modifier.weight(1f), onClick = { showDialog = false }) {
-                        Text(stringResource(R.string.cancel))
-                    }
-                    Button(
-                        modifier = Modifier.weight(1f),
-                        onClick = {
-                            showDialog = false
-                            onClick()
-                        },
-                    ) {
-                        Text(stringResource(R.string.send))
-                    }
-                }
-            },
-        )
-    }
-
-    Column {
-        Spacer(modifier = Modifier.height(4.dp))
-        Button(modifier = Modifier.fillMaxWidth().height(48.dp), enabled = enabled, onClick = { showDialog = true }) {
-            Text(text = stringResource(title))
-        }
-    }
-}
-
-@Suppress("LongMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun RadioConfigItemList(
     state: RadioConfigState,
@@ -190,8 +125,26 @@ fun RadioConfigItemList(
         }
     }
 
-    Column(modifier = Modifier.padding(top = 16.dp)) {
-        AdminRoute.entries.forEach { NavButton(it.title, enabled) { onRouteClick(it) } }
+    TitledCard(title = stringResource(R.string.administration), modifier = Modifier.padding(top = 16.dp)) {
+        AdminRoute.entries.forEach { route ->
+            var showDialog by remember { mutableStateOf(false) }
+            if (showDialog) {
+                WarningDialog(
+                    title = "${stringResource(route.title)}?",
+                    onDismiss = { showDialog = false },
+                    onConfirm = { onRouteClick(route) },
+                )
+            }
+
+            SettingsItem(
+                enabled = enabled,
+                text = stringResource(route.title),
+                leadingIcon = route.icon,
+                trailingIcon = null,
+            ) {
+                showDialog = true
+            }
+        }
     }
 
     TitledCard(title = stringResource(R.string.advanced_title), modifier = Modifier.padding(top = 16.dp)) {
@@ -201,6 +154,7 @@ fun RadioConfigItemList(
 
         SettingsItem(
             text = stringResource(R.string.clean_node_database_title),
+            leadingIcon = Icons.Rounded.CleaningServices,
             enabled = enabled,
             onClick = { onNavigate(SettingsRoutes.CleanNodeDb) },
         )

@@ -18,8 +18,14 @@
 package com.geeksville.mesh.navigation
 
 import androidx.annotation.StringRes
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.PowerSettingsNew
+import androidx.compose.material.icons.rounded.RestartAlt
+import androidx.compose.material.icons.rounded.Restore
+import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -33,11 +39,11 @@ import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.map.MapViewModel
 import kotlinx.serialization.Serializable
 
-enum class AdminRoute(@StringRes val title: Int) {
-    REBOOT(R.string.reboot),
-    SHUTDOWN(R.string.shutdown),
-    FACTORY_RESET(R.string.factory_reset),
-    NODEDB_RESET(R.string.nodedb_reset),
+enum class AdminRoute(val icon: ImageVector, @StringRes val title: Int) {
+    REBOOT(Icons.Rounded.RestartAlt, R.string.reboot),
+    SHUTDOWN(Icons.Rounded.PowerSettingsNew, R.string.shutdown),
+    FACTORY_RESET(Icons.Rounded.Restore, R.string.factory_reset),
+    NODEDB_RESET(Icons.Rounded.Storage, R.string.nodedb_reset),
 }
 
 const val DEEP_LINK_BASE_URI = "meshtastic://meshtastic"
