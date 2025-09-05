@@ -636,6 +636,7 @@
     <string name="export_keys">Exporter les clés</string>
     <string name="export_keys_confirmation">Exporte les clés publiques et privées vers un fichier. Veuillez stocker quelque part en toute sécurité.</string>
     <string name="modules_unlocked">Modules déverrouillés</string>
+    <string name="modules_already_unlocked">Modules already unlocked</string>
     <string name="remote">Distant</string>
     <string name="node_count_template">(%1$d en ligne / %2$d total)</string>
     <string name="react">Réagir</string>
@@ -770,7 +771,8 @@
     <string name="url_must_contain_placeholders">L\'URL doit contenir des espaces réservés.</string>
     <string name="url_template">Modèle d\'URL</string>
     <string name="track_point">Point de suivi</string>
-    <string name="phone_settings">Phone Settings</string>
+    <string name="app_settings">App</string>
+    <string name="app_version">Version</string>
     <string name="channel_features">Channel Features</string>
     <string name="location_sharing">Location Sharing</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>
