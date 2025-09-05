@@ -35,6 +35,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -189,8 +190,25 @@ fun RadioConfigItemList(
         }
     }
 
-    Column(modifier = Modifier.padding(top = 16.dp)) {
-        AdminRoute.entries.forEach { NavButton(it.title, enabled) { onRouteClick(it) } }
+    TitledCard(title = stringResource(R.string.administration), modifier = Modifier.padding(top = 16.dp)) {
+        AdminRoute.entries.forEach {
+            val contentColor =
+                when (it) {
+                    AdminRoute.FACTORY_RESET,
+                    AdminRoute.NODEDB_RESET,
+                    -> MaterialTheme.colorScheme.StatusRed
+                    else -> LocalContentColor.current
+                }
+            SettingsItem(
+                text = stringResource(it.title),
+                textColor = contentColor,
+                leadingIcon = it.icon,
+                leadingIconTint = contentColor,
+                trailingIcon = null,
+            ) {
+                onRouteClick(it)
+            }
+        }
     }
 
     TitledCard(title = stringResource(R.string.advanced_title), modifier = Modifier.padding(top = 16.dp)) {
