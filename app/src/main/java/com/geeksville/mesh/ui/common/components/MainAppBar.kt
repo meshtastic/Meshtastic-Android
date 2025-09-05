@@ -17,27 +17,18 @@
 
 package com.geeksville.mesh.ui.common.components
 
-import androidx.annotation.StringRes
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -61,6 +52,7 @@ import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.debug.DebugMenuActions
 import com.geeksville.mesh.ui.node.components.NodeChip
+import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.settings.radio.RadioConfigMenuActions
 
 @Suppress("CyclomaticComplexMethod")
@@ -69,7 +61,7 @@ fun MainAppBar(
     modifier: Modifier = Modifier,
     viewModel: UIViewModel = hiltViewModel(),
     navController: NavHostController,
-    onAction: (Any?) -> Unit,
+    onAction: (NodeMenuAction) -> Unit,
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = backStackEntry?.destination
@@ -117,8 +109,6 @@ fun MainAppBar(
         actions = {
             currentDestination?.let {
                 when {
-                    it.isTopLevel() -> MainMenuActions(onAction)
-
                     currentDestination.hasRoute<SettingsRoutes.DebugPanel>() -> DebugMenuActions()
 
                     currentDestination.hasRoute<SettingsRoutes.Settings>() ->
@@ -144,7 +134,7 @@ private fun MainAppBar(
     canNavigateUp: Boolean,
     onNavigateUp: () -> Unit,
     actions: @Composable () -> Unit,
-    onAction: (Any?) -> Unit,
+    onAction: (NodeMenuAction) -> Unit,
 ) {
     TopAppBar(
         title = {
@@ -195,42 +185,13 @@ private fun TopBarActions(
     isConnected: Boolean,
     showNodeChip: Boolean,
     actions: @Composable () -> Unit,
-    onAction: (Any?) -> Unit,
+    onAction: (NodeMenuAction) -> Unit,
 ) {
     AnimatedVisibility(showNodeChip) {
         ourNode?.let { NodeChip(node = it, isThisNode = true, isConnected = isConnected, onAction = onAction) }
     }
 
     actions()
-}
-
-enum class MainMenuAction(@StringRes val stringRes: Int) {
-    QUICK_CHAT(R.string.quick_chat),
-}
-
-@Composable
-private fun MainMenuActions(onAction: (MainMenuAction) -> Unit) {
-    var showMenu by remember { mutableStateOf(false) }
-    IconButton(onClick = { showMenu = true }) {
-        Icon(imageVector = Icons.Default.MoreVert, contentDescription = stringResource(R.string.overflow_menu))
-    }
-
-    DropdownMenu(
-        expanded = showMenu,
-        onDismissRequest = { showMenu = false },
-        modifier = Modifier.background(colorScheme.background.copy(alpha = 1f)),
-    ) {
-        MainMenuAction.entries.forEach { action ->
-            DropdownMenuItem(
-                text = { Text(stringResource(id = action.stringRes)) },
-                onClick = {
-                    onAction(action)
-                    showMenu = false
-                },
-                enabled = true,
-            )
-        }
-    }
 }
 
 @PreviewLightDark
@@ -245,7 +206,7 @@ private fun MainAppBarPreview(@PreviewParameter(BooleanProvider::class) canNavig
             showNodeChip = true,
             canNavigateUp = canNavigateUp,
             onNavigateUp = {},
-            actions = { MainMenuActions(onAction = {}) },
+            actions = {},
         ) {}
     }
 }

@@ -94,7 +94,6 @@ import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.service.MeshService
 import com.geeksville.mesh.ui.common.components.MainAppBar
-import com.geeksville.mesh.ui.common.components.MainMenuAction
 import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
@@ -146,7 +145,6 @@ fun MainScreen(
     uIViewModel: UIViewModel = hiltViewModel(),
     bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
     scanModel: BTScanModel = hiltViewModel(),
-    onAction: (MainMenuAction) -> Unit,
 ) {
     val navController = rememberNavController()
     val connectionState by uIViewModel.connectionState.collectAsStateWithLifecycle()
@@ -349,26 +347,19 @@ fun MainScreen(
                     viewModel = uIViewModel,
                     navController = navController,
                     onAction = { action ->
-                        if (action is MainMenuAction) {
-                            when (action) {
-                                MainMenuAction.QUICK_CHAT -> navController.navigate(ContactsRoutes.QuickChat)
-                                else -> onAction(action)
+                        when (action) {
+                            is NodeMenuAction.MoreDetails -> {
+                                navController.navigate(
+                                    NodesRoutes.NodeDetailGraph(action.node.num),
+                                    {
+                                        launchSingleTop = true
+                                        restoreState = true
+                                    },
+                                )
                             }
-                        } else if (action is NodeMenuAction) {
-                            when (action) {
-                                is NodeMenuAction.MoreDetails -> {
-                                    navController.navigate(
-                                        NodesRoutes.NodeDetailGraph(action.node.num),
-                                        {
-                                            launchSingleTop = true
-                                            restoreState = true
-                                        },
-                                    )
-                                }
 
-                                is NodeMenuAction.Share -> sharedContact = action.node
-                                else -> {}
-                            }
+                            is NodeMenuAction.Share -> sharedContact = action.node
+                            else -> {}
                         }
                     },
                 )
