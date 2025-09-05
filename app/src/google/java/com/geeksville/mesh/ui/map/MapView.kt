@@ -207,7 +207,6 @@ fun MapView(
     val mapFilterState by mapViewModel.mapFilterStateFlow.collectAsStateWithLifecycle()
     val ourNodeInfo by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     var editingWaypoint by remember { mutableStateOf<Waypoint?>(null) }
-    val savedCameraPosition by mapViewModel.cameraPosition.collectAsStateWithLifecycle()
 
     val selectedGoogleMapType by mapViewModel.selectedGoogleMapType.collectAsStateWithLifecycle()
     val currentCustomTileProviderUrl by mapViewModel.selectedCustomTileProviderUrl.collectAsStateWithLifecycle()
@@ -215,13 +214,7 @@ fun MapView(
     var mapTypeMenuExpanded by remember { mutableStateOf(false) }
     var showCustomTileManagerSheet by remember { mutableStateOf(false) }
 
-    val defaultLatLng = LatLng(0.0, 0.0)
-    val cameraPositionState = rememberCameraPositionState {
-        position =
-            savedCameraPosition?.let {
-                CameraPosition(LatLng(it.targetLat, it.targetLng), it.zoom, it.tilt, it.bearing)
-            } ?: CameraPosition.fromLatLngZoom(defaultLatLng, 7f)
-    }
+    val cameraPositionState = rememberCameraPositionState {}
 
     // Location tracking functionality
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
@@ -339,7 +332,6 @@ fun MapView(
         }
 
     var showClusterItemsDialog by remember { mutableStateOf<List<NodeClusterItem>?>(null) }
-    LaunchedEffect(cameraPositionState.position) { mapViewModel.onCameraPositionChanged(cameraPositionState.position) }
 
     Scaffold { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
@@ -370,32 +362,27 @@ fun MapView(
                     }
                 },
                 onMapLoaded = {
-                    if (
-                        savedCameraPosition?.targetLat == defaultLatLng.latitude &&
-                        savedCameraPosition?.targetLng == defaultLatLng.longitude
-                    ) {
-                        val pointsToBound: List<LatLng> =
-                            when {
-                                !nodeTrack.isNullOrEmpty() -> nodeTrack.map { it.toLatLng() }
+                    val pointsToBound: List<LatLng> =
+                        when {
+                            !nodeTrack.isNullOrEmpty() -> nodeTrack.map { it.toLatLng() }
 
-                                allNodes.isNotEmpty() || displayableWaypoints.isNotEmpty() ->
-                                    allNodes.mapNotNull { it.toLatLng() } + displayableWaypoints.map { it.toLatLng() }
+                            allNodes.isNotEmpty() || displayableWaypoints.isNotEmpty() ->
+                                allNodes.mapNotNull { it.toLatLng() } + displayableWaypoints.map { it.toLatLng() }
 
-                                else -> emptyList()
+                            else -> emptyList()
+                        }
+
+                    if (pointsToBound.isNotEmpty()) {
+                        val bounds = LatLngBounds.builder().apply { pointsToBound.forEach(::include) }.build()
+
+                        val padding = if (!pointsToBound.isEmpty()) 100 else 48
+
+                        try {
+                            coroutineScope.launch {
+                                cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(bounds, padding))
                             }
-
-                        if (pointsToBound.isNotEmpty()) {
-                            val bounds = LatLngBounds.builder().apply { pointsToBound.forEach(::include) }.build()
-
-                            val padding = if (!pointsToBound.isEmpty()) 100 else 48
-
-                            try {
-                                coroutineScope.launch {
-                                    cameraPositionState.animate(CameraUpdateFactory.newLatLngBounds(bounds, padding))
-                                }
-                            } catch (e: IllegalStateException) {
-                                warn("MapView Could not animate to bounds: ${e.message}")
-                            }
+                        } catch (e: IllegalStateException) {
+                            warn("MapView Could not animate to bounds: ${e.message}")
                         }
                     }
                 },
