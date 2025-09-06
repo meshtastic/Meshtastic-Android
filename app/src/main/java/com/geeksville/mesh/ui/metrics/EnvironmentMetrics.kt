@@ -259,7 +259,7 @@ private fun GasCompositionDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics
     val iaqValue = envMetrics.iaq
     val gasResistance = envMetrics.gasResistance
 
-    if ((iaqValue != null && iaqValue != Int.MIN_VALUE) || gasResistance?.isFinite()) {
+    if ((iaqValue != null && iaqValue != Int.MIN_VALUE) || (gasResistance?.isFinite() == true)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             if (iaqValue != null && iaqValue != Int.MIN_VALUE) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
