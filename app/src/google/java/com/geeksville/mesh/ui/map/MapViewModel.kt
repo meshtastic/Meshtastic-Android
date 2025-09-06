@@ -44,6 +44,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapNotNull
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -231,8 +232,11 @@ constructor(
     val mapLayers: StateFlow<List<MapLayerItem>> = _mapLayers.asStateFlow()
 
     init {
+        viewModelScope.launch {
+            customTileProviderRepository.getCustomTileProviders().first()
+            loadPersistedMapType()
+        }
         loadPersistedLayers()
-        loadPersistedMapType()
     }
 
     private fun loadPersistedMapType() {
@@ -271,6 +275,7 @@ constructor(
                     val persistedLayerFiles = layersDir.listFiles()
 
                     if (persistedLayerFiles != null) {
+                        val hiddenLayerUrls = googleMapsPrefs.hiddenLayerUrls
                         val loadedItems =
                             persistedLayerFiles.mapNotNull { file ->
                                 if (file.isFile) {
@@ -286,10 +291,11 @@ constructor(
                                         }
 
                                     layerType?.let {
+                                        val uri = Uri.fromFile(file)
                                         MapLayerItem(
                                             name = file.nameWithoutExtension,
-                                            uri = Uri.fromFile(file),
-                                            isVisible = true,
+                                            uri = uri,
+                                            isVisible = !hiddenLayerUrls.contains(uri.toString()),
                                             layerType = it,
                                         )
                                     }
@@ -372,7 +378,25 @@ constructor(
     }
 
     fun toggleLayerVisibility(layerId: String) {
-        _mapLayers.value = _mapLayers.value.map { if (it.id == layerId) it.copy(isVisible = !it.isVisible) else it }
+        var toggledLayer: MapLayerItem? = null
+        val updatedLayers =
+            _mapLayers.value.map {
+                if (it.id == layerId) {
+                    toggledLayer = it.copy(isVisible = !it.isVisible)
+                    toggledLayer
+                } else {
+                    it
+                }
+            }
+        _mapLayers.value = updatedLayers
+
+        toggledLayer?.let {
+            if (it.isVisible) {
+                googleMapsPrefs.hiddenLayerUrls -= it.uri.toString()
+            } else {
+                googleMapsPrefs.hiddenLayerUrls += it.uri.toString()
+            }
+        }
     }
 
     fun removeMapLayer(layerId: String) {
@@ -383,7 +407,10 @@ constructor(
                 LayerType.GEOJSON -> layerToRemove.geoJsonLayerData?.removeLayerFromMap()
                 null -> {}
             }
-            layerToRemove?.uri?.let { uri -> deleteFileToInternalStorage(uri) }
+            layerToRemove?.uri?.let { uri ->
+                deleteFileToInternalStorage(uri)
+                googleMapsPrefs.hiddenLayerUrls -= uri.toString()
+            }
             _mapLayers.value = _mapLayers.value.filterNot { it.id == layerId }
         }
     }
@@ -420,7 +447,11 @@ constructor(
             when (layerItem.layerType) {
                 LayerType.KML -> {
                     val kmlLayer =
-                        getInputStreamFromUri(layerItem)?.use { KmlLayer(map, it, application.applicationContext) }
+                        getInputStreamFromUri(layerItem)?.use {
+                            KmlLayer(map, it, application.applicationContext).apply {
+                                if (!layerItem.isVisible) removeLayerFromMap()
+                            }
+                        }
                     _mapLayers.update { currentLayers ->
                         currentLayers.map {
                             if (it.id == layerItem.id) {
@@ -435,7 +466,9 @@ constructor(
                     val geoJsonLayer =
                         getInputStreamFromUri(layerItem)?.use { inputStream ->
                             val jsonObject = JSONObject(inputStream.bufferedReader().use { it.readText() })
-                            GeoJsonLayer(map, jsonObject)
+                            GeoJsonLayer(map, jsonObject).apply {
+                                if (!layerItem.isVisible) removeLayerFromMap()
+                            }
                         }
                     _mapLayers.update { currentLayers ->
                         currentLayers.map {
@@ -450,6 +483,14 @@ constructor(
             }
         } catch (e: Exception) {
             Timber.tag("MapViewModel").e(e, "Error loading map layer for ${layerItem.uri}")
+        }
+    }
+
+    fun clearLoadedLayerData() {
+        _mapLayers.update { currentLayers ->
+            currentLayers.map {
+                it.copy(kmlLayerData = null, geoJsonLayerData = null)
+            }
         }
     }
 }
