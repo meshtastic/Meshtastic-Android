@@ -18,8 +18,10 @@
 package com.geeksville.mesh.ui.debug
 
 import android.content.Context
-import android.os.Environment
+import android.net.Uri
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -88,8 +90,6 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
 import java.io.OutputStreamWriter
 import java.nio.charset.StandardCharsets
 import java.text.SimpleDateFormat
@@ -136,6 +136,14 @@ internal fun DebugScreen(viewModel: DebugViewModel = hiltViewModel()) {
             listState.requestScrollToItem(searchState.allMatches[searchState.currentMatchIndex].logIndex)
         }
     }
+    // Prepare a document creator for exporting logs via SAF
+    val exportLogsLauncher =
+        rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("text/plain")) { createdUri ->
+            if (createdUri != null) {
+                scope.launch { exportAllLogsToUri(context, createdUri, filteredLogs) }
+            }
+        }
+
     Column(modifier = Modifier.fillMaxSize()) {
         LazyColumn(modifier = Modifier.fillMaxSize(), state = listState) {
             stickyHeader {
@@ -149,7 +157,11 @@ internal fun DebugScreen(viewModel: DebugViewModel = hiltViewModel()) {
                     logs = logs,
                     filterMode = filterMode,
                     onFilterModeChange = { filterMode = it },
-                    onExportLogs = { scope.launch { exportAllLogs(context, filteredLogs) } },
+                    onExportLogs = {
+                        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+                        val fileName = "meshtastic_debug_$timestamp.txt"
+                        exportLogsLauncher.launch(fileName)
+                    },
                 )
             }
             items(filteredLogs, key = { it.uuid }) { log ->
@@ -338,57 +350,54 @@ fun DebugMenuActions(viewModel: DebugViewModel = hiltViewModel(), modifier: Modi
     }
 }
 
-private suspend fun exportAllLogs(context: Context, logs: List<UiMeshLog>) = withContext(Dispatchers.IO) {
-    try {
-        val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-        val fileName = "meshtastic_debug_$timestamp.txt"
-
-        val downloadsDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
-        val logFile = File(downloadsDir, fileName)
-
-        OutputStreamWriter(FileOutputStream(logFile), StandardCharsets.UTF_8).use { writer ->
-            logs.forEach { log ->
-                writer.write("${log.formattedReceivedDate} [${log.messageType}]\n")
-                writer.write(log.logMessage)
-                if (!log.decodedPayload.isNullOrBlank()) {
-                    writer.write("\n\nDecoded Payload:\n{")
-                    writer.write("\n")
-                    // Redact Decoded keys.
-                    log.decodedPayload.lineSequence().forEach { line ->
-                        var outputLine = line
-                        val redacted = redactedKeys.firstOrNull { line.contains(it) }
-                        if (redacted != null) {
-                            val idx = line.indexOf(':')
-                            if (idx != -1) {
-                                outputLine = line.substring(0, idx + 1)
-                                outputLine += "<redacted>"
+private suspend fun exportAllLogsToUri(context: Context, targetUri: Uri, logs: List<UiMeshLog>) =
+    withContext(Dispatchers.IO) {
+        try {
+            context.contentResolver.openOutputStream(targetUri)?.use { os ->
+                OutputStreamWriter(os, StandardCharsets.UTF_8).use { writer ->
+                    logs.forEach { log ->
+                        writer.write("${log.formattedReceivedDate} [${log.messageType}]\n")
+                        writer.write(log.logMessage)
+                        if (!log.decodedPayload.isNullOrBlank()) {
+                            writer.write("\n\nDecoded Payload:\n{")
+                            writer.write("\n")
+                            // Redact Decoded keys.
+                            log.decodedPayload.lineSequence().forEach { line ->
+                                var outputLine = line
+                                val redacted = redactedKeys.firstOrNull { line.contains(it) }
+                                if (redacted != null) {
+                                    val idx = line.indexOf(':')
+                                    if (idx != -1) {
+                                        outputLine = line.substring(0, idx + 1)
+                                        outputLine += "<redacted>"
+                                    }
+                                }
+                                writer.write(outputLine)
+                                writer.write("\n")
                             }
+                            writer.write("\n}")
                         }
-                        writer.write(outputLine)
-                        writer.write("\n")
+                        writer.write("\n\n")
                     }
-                    writer.write("\n}")
                 }
-                writer.write("\n\n")
-            }
-        }
+            } ?: run { throw IOException("Unable to open output stream for URI: $targetUri") }
 
-        withContext(Dispatchers.Main) {
-            Toast.makeText(context, "${logs.size} logs exported to ${logFile.absolutePath}", Toast.LENGTH_LONG)
-                .show()
+            withContext(Dispatchers.Main) {
+                Toast.makeText(context, context.getString(R.string.debug_export_success, logs.size), Toast.LENGTH_LONG)
+                    .show()
+            }
+        } catch (e: IOException) {
+            withContext(Dispatchers.Main) {
+                Toast.makeText(
+                    context,
+                    context.getString(R.string.debug_export_failed, e.message ?: ""),
+                    Toast.LENGTH_LONG,
+                )
+                    .show()
+            }
+            warn("Error:IOException: " + e.toString())
         }
-    } catch (e: SecurityException) {
-        withContext(Dispatchers.Main) {
-            Toast.makeText(context, "Permission denied: Cannot write to Downloads folder", Toast.LENGTH_LONG).show()
-            warn("Error:SecurityException: " + e.toString())
-        }
-    } catch (e: IOException) {
-        withContext(Dispatchers.Main) {
-            Toast.makeText(context, "Failed to write log file: ${e.message}", Toast.LENGTH_LONG).show()
-        }
-        warn("Error:IOException: " + e.toString())
     }
-}
 
 @Composable
 private fun DecodedPayloadBlock(

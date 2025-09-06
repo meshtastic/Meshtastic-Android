@@ -18,18 +18,18 @@
 package com.geeksville.mesh.android.prefs
 
 import android.content.SharedPreferences
-import com.google.maps.android.compose.MapType
+import androidx.core.content.edit
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
-/** Interface for prefs specific to Google Maps. For general map prefs, see MapPrefs. */
-interface GoogleMapsPrefs {
-    var selectedGoogleMapType: String?
-    var selectedCustomTileUrl: String?
-    var hiddenLayerUrls: Set<String>
-}
+class StringSetPrefDelegate(
+    private val prefs: SharedPreferences,
+    private val key: String,
+    private val defaultValue: Set<String>,
+) : ReadWriteProperty<Any?, Set<String>> {
+    override fun getValue(thisRef: Any?, property: KProperty<*>): Set<String> =
+        prefs.getStringSet(key, defaultValue) ?: emptySet()
 
-class GoogleMapsPrefsImpl(prefs: SharedPreferences) : GoogleMapsPrefs {
-    override var selectedGoogleMapType: String? by
-        NullableStringPrefDelegate(prefs, "selected_google_map_type", MapType.NORMAL.name)
-    override var selectedCustomTileUrl: String? by NullableStringPrefDelegate(prefs, "selected_custom_tile_url", null)
-    override var hiddenLayerUrls: Set<String> by StringSetPrefDelegate(prefs, "hidden_layer_urls", emptySet())
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: Set<String>) =
+        prefs.edit { putStringSet(key, value) }
 }

@@ -63,6 +63,7 @@ import com.geeksville.mesh.model.fullRouteDiscovery
 import com.geeksville.mesh.model.getTracerouteResponse
 import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
 import com.geeksville.mesh.ui.common.theme.AppTheme
+import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import java.text.DateFormat
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -88,9 +89,9 @@ fun TracerouteLogScreen(modifier: Modifier = Modifier, viewModel: MetricsViewMod
         items(state.tracerouteRequests, key = { it.uuid }) { log ->
             val result =
                 remember(state.tracerouteRequests) {
-                    state.tracerouteResults.find { it.decoded.requestId == log.fromRadio.packet.id }
+                    state.tracerouteResults.find { it.fromRadio.packet.decoded.requestId == log.fromRadio.packet.id }
                 }
-            val route = remember(result) { result?.fullRouteDiscovery }
+            val route = remember(result) { result?.fromRadio?.packet?.fullRouteDiscovery }
 
             val time = dateFormat.format(log.received_date)
             val (text, icon) = route.getTextAndIcon()
@@ -103,7 +104,15 @@ fun TracerouteLogScreen(modifier: Modifier = Modifier, viewModel: MetricsViewMod
                     modifier =
                     Modifier.combinedClickable(onLongClick = { expanded = true }) {
                         if (result != null) {
-                            showDialog = result.getTracerouteResponse(::getUsername)
+                            val full = route
+                            if (full != null && full.routeList.isNotEmpty() && full.routeBackList.isNotEmpty()) {
+                                val elapsedMs = (result.received_date - log.received_date).coerceAtLeast(0)
+                                val seconds = elapsedMs.toDouble() / MS_PER_SEC
+                                val base = result.fromRadio.packet.getTracerouteResponse(::getUsername)
+                                showDialog = "$base\n\nDuration: ${"%.1f".format(seconds)} s"
+                            } else {
+                                showDialog = result.fromRadio.packet.getTracerouteResponse(::getUsername)
+                            }
                         }
                     },
                 )

@@ -116,6 +116,9 @@
     <string name="debug_panel">Панель отладки</string>
     <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">Экспортировать логи</string>
+    <string name="debug_export_cancelled">Export canceled</string>
+    <string name="debug_export_success">%1$d logs exported</string>
+    <string name="debug_export_failed">Failed to write log file: %1$s</string>
     <string name="debug_filters">Фильтры</string>
     <string name="debug_active_filters">Активные фильтры</string>
     <string name="debug_default_search">Искать в журнале…</string>
@@ -139,7 +142,8 @@
     <string name="okay">Лады</string>
     <string name="must_set_region">Вы должны задать регион!</string>
     <string name="cant_change_no_radio">Не удалось изменить канал, потому что радио еще не подключено. Пожалуйста, попробуйте еще раз.</string>
-    <string name="save_rangetest">Экспортировать rangetest.csv</string>
+    <string name="save_rangetest">Export rangetest packets</string>
+    <string name="export_data_csv">Export all packets</string>
     <string name="reset">Сброс</string>
     <string name="scan">Сканирования</string>
     <string name="add_network_device">Добавить</string>
@@ -640,6 +644,7 @@
     <string name="export_keys">Экспортировать ключи</string>
     <string name="export_keys_confirmation">Экспортирует публичный и приватный ключи в файл. Пожалуйста, храните их где-нибудь в безопасности.</string>
     <string name="modules_unlocked">Модули разблокированы</string>
+    <string name="modules_already_unlocked">Modules already unlocked</string>
     <string name="remote">Удаленные</string>
     <string name="node_count_template">(%1$d в сети / всего %2$d)</string>
     <string name="react">Среагировать</string>
@@ -774,7 +779,8 @@
     <string name="url_must_contain_placeholders">URL должен содержать placeholders.</string>
     <string name="url_template">Шаблон URL</string>
     <string name="track_point">track point</string>
-    <string name="phone_settings">Phone Settings</string>
+    <string name="app_settings">App</string>
+    <string name="app_version">Version</string>
     <string name="channel_features">Channel Features</string>
     <string name="location_sharing">Location Sharing</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>

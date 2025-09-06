@@ -116,6 +116,9 @@
     <string name="debug_panel">Panel de depuración</string>
     <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">Exportar registros</string>
+    <string name="debug_export_cancelled">Export canceled</string>
+    <string name="debug_export_success">%1$d logs exported</string>
+    <string name="debug_export_failed">Failed to write log file: %1$s</string>
     <string name="debug_filters">Filtros</string>
     <string name="debug_active_filters">Filtros activos</string>
     <string name="debug_default_search">Buscar en registros…</string>
@@ -139,7 +142,8 @@
     <string name="okay">Vale</string>
     <string name="must_set_region">¡Debe establecer una región!</string>
     <string name="cant_change_no_radio">No se puede cambiar de canal porque la radio aún no está conectada. Por favor inténtelo de nuevo.</string>
-    <string name="save_rangetest">Guardar rangetest.csv</string>
+    <string name="save_rangetest">Export rangetest packets</string>
+    <string name="export_data_csv">Export all packets</string>
     <string name="reset">Reiniciar</string>
     <string name="scan">Escanear</string>
     <string name="add_network_device">Añadir</string>
@@ -637,6 +641,7 @@ Rango de Valores 0 - 500.</string>
     <string name="export_keys">Export Keys</string>
     <string name="export_keys_confirmation">Exports public and private keys to a file. Please store somewhere securely.</string>
     <string name="modules_unlocked">Modules unlocked</string>
+    <string name="modules_already_unlocked">Modules already unlocked</string>
     <string name="remote">Remote</string>
     <string name="node_count_template">(%1$d online / %2$d total)</string>
     <string name="react">Reaccionar</string>
@@ -774,7 +779,8 @@ Rango de Valores 0 - 500.</string>
     <string name="url_must_contain_placeholders">URL must contain placeholders.</string>
     <string name="url_template">URL Template</string>
     <string name="track_point">track point</string>
-    <string name="phone_settings">Phone Settings</string>
+    <string name="app_settings">App</string>
+    <string name="app_version">Version</string>
     <string name="channel_features">Channel Features</string>
     <string name="location_sharing">Location Sharing</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>

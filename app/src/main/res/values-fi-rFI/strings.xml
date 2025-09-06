@@ -116,6 +116,9 @@
     <string name="debug_panel">Vianetsintäpaneeli</string>
     <string name="debug_decoded_payload">Dekoodattu data:</string>
     <string name="debug_logs_export">Vie lokitiedot</string>
+    <string name="debug_export_cancelled">Vienti peruutettu</string>
+    <string name="debug_export_success">%1$d lokitietoa viety</string>
+    <string name="debug_export_failed">Lokitiedoston kirjoittaminen epäonnistui: %1$s</string>
     <string name="debug_filters">Suodattimet</string>
     <string name="debug_active_filters">Aktiiviset suodattimet</string>
     <string name="debug_default_search">Hae lokitiedoista…</string>
@@ -139,7 +142,8 @@
     <string name="okay">OK</string>
     <string name="must_set_region">Sinun täytyy määrittää alue!</string>
     <string name="cant_change_no_radio">Kanavaa ei voitu vaihtaa, koska radiota ei ole vielä yhdistetty. Yritä uudelleen.</string>
-    <string name="save_rangetest">Vie rangetest.csv</string>
+    <string name="save_rangetest">Vie kuuluvuustestin paketit</string>
+    <string name="export_data_csv">Vie kaikki paketit</string>
     <string name="reset">Palauta</string>
     <string name="scan">Etsi</string>
     <string name="add_network_device">Lisää</string>
@@ -636,6 +640,7 @@
     <string name="export_keys">Vie avaimet</string>
     <string name="export_keys_confirmation">Vie julkiset ja yksityiset avaimet tiedostoon. Säilytä tiedosto turvallisessa paikassa.</string>
     <string name="modules_unlocked">Lukitsemattomat moduulit</string>
+    <string name="modules_already_unlocked">Moduulit ovat jo käytettävissä</string>
     <string name="remote">Etäyhteys</string>
     <string name="node_count_template">(%1$d yhdistetty / %2$d yhteensä)</string>
     <string name="react">Reagoi</string>
@@ -773,7 +778,8 @@
     <string name="url_must_contain_placeholders">URL-osoitteessa on oltava paikkamerkkejä.</string>
     <string name="url_template">URL-mallipohja</string>
     <string name="track_point">seurantapiste</string>
-    <string name="phone_settings">Puhelimen asetukset</string>
+    <string name="app_settings">Sovellus</string>
+    <string name="app_version">Versio</string>
     <string name="channel_features">Kanavan ominaisuudet</string>
     <string name="location_sharing">Sijainnin jakaminen</string>
     <string name="periodic_position_broadcast">Sijainnin toistuva lähetys</string>

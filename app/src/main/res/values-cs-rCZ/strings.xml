@@ -116,6 +116,9 @@
     <string name="debug_panel">Panel pro ladění</string>
     <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">Export Logs</string>
+    <string name="debug_export_cancelled">Export canceled</string>
+    <string name="debug_export_success">%1$d logs exported</string>
+    <string name="debug_export_failed">Failed to write log file: %1$s</string>
     <string name="debug_filters">Filtry</string>
     <string name="debug_active_filters">Aktivní filtry</string>
     <string name="debug_default_search">Hledat v protokolech…</string>
@@ -139,7 +142,8 @@
     <string name="okay">OK</string>
     <string name="must_set_region">Musíte specifikovat region!</string>
     <string name="cant_change_no_radio">Kanál nelze změnit, protože rádio ještě není připojeno. Zkuste to znovu.</string>
-    <string name="save_rangetest">Exportovat rangetest.csv</string>
+    <string name="save_rangetest">Export rangetest packets</string>
+    <string name="export_data_csv">Export all packets</string>
     <string name="reset">Reset</string>
     <string name="scan">Skenovat</string>
     <string name="add_network_device">Přidat</string>
@@ -640,6 +644,7 @@
     <string name="export_keys">Exportovat klíče</string>
     <string name="export_keys_confirmation">Exportuje veřejné a soukromé klíče do souboru. Uložte je prosím bezpečně.</string>
     <string name="modules_unlocked">Modules unlocked</string>
+    <string name="modules_already_unlocked">Modules already unlocked</string>
     <string name="remote">Remote</string>
     <string name="node_count_template">(%1$d online / %2$d celkem)</string>
     <string name="react">Odpovědět</string>
@@ -777,7 +782,8 @@
     <string name="url_must_contain_placeholders">URL must contain placeholders.</string>
     <string name="url_template">URL Template</string>
     <string name="track_point">track point</string>
-    <string name="phone_settings">Phone Settings</string>
+    <string name="app_settings">App</string>
+    <string name="app_version">Version</string>
     <string name="channel_features">Channel Features</string>
     <string name="location_sharing">Location Sharing</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>

@@ -66,6 +66,9 @@ import com.geeksville.mesh.ui.settings.radio.components.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
 import com.geeksville.mesh.util.LanguageUtils
 import kotlinx.coroutines.delay
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlin.time.Duration.Companion.seconds
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
@@ -132,11 +135,15 @@ fun SettingsScreen(
                     viewModel.installProfile(it)
                 } else {
                     deviceProfile = it
+                    val nodeName = it.shortName.ifBlank { "node" }
+                    val dateFormat = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault())
+                    val dateStr = dateFormat.format(java.util.Date())
+                    val fileName = "Meshtastic_${nodeName}_${dateStr}_nodeConfig.cfg"
                     val intent =
                         Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                             addCategory(Intent.CATEGORY_OPENABLE)
                             type = "application/*"
-                            putExtra(Intent.EXTRA_TITLE, "device_profile.cfg")
+                            putExtra(Intent.EXTRA_TITLE, fileName)
                         }
                     exportConfigLauncher.launch(intent)
                 }
@@ -222,11 +229,12 @@ fun SettingsScreen(
                     choices = themeMap.mapValues { (_, value) -> { uiViewModel.setTheme(value) } },
                 )
             }
+            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
 
             val exportRangeTestLauncher =
                 rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                     if (it.resultCode == RESULT_OK) {
-                        it.data?.data?.let { uri -> uiViewModel.saveRangeTestCsv(uri) }
+                        it.data?.data?.let { uri -> uiViewModel.saveDataCsv(uri) }
                     }
                 }
             SettingsItem(
@@ -238,9 +246,29 @@ fun SettingsScreen(
                     Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                         addCategory(Intent.CATEGORY_OPENABLE)
                         type = "application/csv"
-                        putExtra(Intent.EXTRA_TITLE, "rangetest.csv")
+                        putExtra(Intent.EXTRA_TITLE, "Meshtastic_rangetest_$timestamp.csv")
                     }
                 exportRangeTestLauncher.launch(intent)
+            }
+
+            val exportDataLauncher =
+                rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                    if (it.resultCode == RESULT_OK) {
+                        it.data?.data?.let { uri -> uiViewModel.saveDataCsv(uri) }
+                    }
+                }
+            SettingsItem(
+                text = stringResource(R.string.export_data_csv),
+                leadingIcon = Icons.Rounded.Output,
+                trailingIcon = null,
+            ) {
+                val intent =
+                    Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                        addCategory(Intent.CATEGORY_OPENABLE)
+                        type = "application/csv"
+                        putExtra(Intent.EXTRA_TITLE, "Meshtastic_datalog_$timestamp.csv")
+                    }
+                exportDataLauncher.launch(intent)
             }
 
             SettingsItem(

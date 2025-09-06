@@ -116,6 +116,9 @@
     <string name="debug_panel">除錯面板</string>
     <string name="debug_decoded_payload">解析封包：</string>
     <string name="debug_logs_export">匯出日誌</string>
+    <string name="debug_export_cancelled">Export canceled</string>
+    <string name="debug_export_success">%1$d logs exported</string>
+    <string name="debug_export_failed">Failed to write log file: %1$s</string>
     <string name="debug_filters">篩選</string>
     <string name="debug_active_filters">啟動篩選功能</string>
     <string name="debug_default_search">在日誌中搜尋…</string>
@@ -139,7 +142,8 @@
     <string name="okay">好的</string>
     <string name="must_set_region">您必須設定一個區域！</string>
     <string name="cant_change_no_radio">無法更改頻道，因為裝置尚未連接。請再試一次。</string>
-    <string name="save_rangetest">匯出範圍測試資料.csv</string>
+    <string name="save_rangetest">Export rangetest packets</string>
+    <string name="export_data_csv">Export all packets</string>
     <string name="reset">重設</string>
     <string name="scan">掃描</string>
     <string name="add_network_device">新增</string>
@@ -634,6 +638,7 @@
     <string name="export_keys">匯出金鑰</string>
     <string name="export_keys_confirmation">請將匯出後的私鑰及公鑰妥善保存。</string>
     <string name="modules_unlocked">模組已解鎖</string>
+    <string name="modules_already_unlocked">Modules already unlocked</string>
     <string name="remote">遠端</string>
     <string name="node_count_template">(%1$d 個上線 / 共計 %2$d 個)</string>
     <string name="react">回應</string>
@@ -771,7 +776,8 @@
     <string name="url_must_contain_placeholders">網址必須包含佔位符。</string>
     <string name="url_template">URL 範本</string>
     <string name="track_point">軌跡點</string>
-    <string name="phone_settings">手機設定</string>
+    <string name="app_settings">App</string>
+    <string name="app_version">Version</string>
     <string name="channel_features">Channel Features</string>
     <string name="location_sharing">Location Sharing</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>
