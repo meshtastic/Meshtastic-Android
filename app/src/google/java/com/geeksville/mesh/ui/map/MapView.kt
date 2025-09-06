@@ -19,11 +19,13 @@
 
 package com.geeksville.mesh.ui.map
 
+import android.app.Activity
 import android.content.Intent
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.location.Location
 import android.net.Uri
+import android.view.WindowManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
@@ -348,6 +350,17 @@ fun MapView(
         }
 
     var showClusterItemsDialog by remember { mutableStateOf<List<NodeClusterItem>?>(null) }
+
+    LaunchedEffect(isLocationTrackingEnabled) {
+        val activity = context as? Activity ?: return@LaunchedEffect
+        val window = activity.window
+
+        if (isLocationTrackingEnabled) {
+            window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        } else {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+    }
 
     Scaffold { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
