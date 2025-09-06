@@ -445,42 +445,47 @@ constructor(
         if (layerItem.kmlLayerData != null || layerItem.geoJsonLayerData != null) return
         try {
             when (layerItem.layerType) {
-                LayerType.KML -> {
-                    val kmlLayer =
-                        getInputStreamFromUri(layerItem)?.use {
-                            KmlLayer(map, it, application.applicationContext).apply {
-                                if (!layerItem.isVisible) removeLayerFromMap()
-                            }
-                        }
-                    _mapLayers.update { currentLayers ->
-                        currentLayers.map {
-                            if (it.id == layerItem.id) {
-                                it.copy(kmlLayerData = kmlLayer)
-                            } else {
-                                it
-                            }
-                        }
-                    }
-                }
-                LayerType.GEOJSON -> {
-                    val geoJsonLayer =
-                        getInputStreamFromUri(layerItem)?.use { inputStream ->
-                            val jsonObject = JSONObject(inputStream.bufferedReader().use { it.readText() })
-                            GeoJsonLayer(map, jsonObject).apply { if (!layerItem.isVisible) removeLayerFromMap() }
-                        }
-                    _mapLayers.update { currentLayers ->
-                        currentLayers.map {
-                            if (it.id == layerItem.id) {
-                                it.copy(geoJsonLayerData = geoJsonLayer)
-                            } else {
-                                it
-                            }
-                        }
-                    }
-                }
+                LayerType.KML -> loadKmlLayerIfNeeded(layerItem, map)
+
+                LayerType.GEOJSON -> loadGeoJsonLayerIfNeeded(layerItem, map)
             }
         } catch (e: Exception) {
             Timber.tag("MapViewModel").e(e, "Error loading map layer for ${layerItem.uri}")
+        }
+    }
+
+    private suspend fun loadKmlLayerIfNeeded(layerItem: MapLayerItem, map: GoogleMap) {
+        val kmlLayer =
+            getInputStreamFromUri(layerItem)?.use {
+                KmlLayer(map, it, application.applicationContext).apply {
+                    if (!layerItem.isVisible) removeLayerFromMap()
+                }
+            }
+        _mapLayers.update { currentLayers ->
+            currentLayers.map {
+                if (it.id == layerItem.id) {
+                    it.copy(kmlLayerData = kmlLayer)
+                } else {
+                    it
+                }
+            }
+        }
+    }
+
+    private suspend fun loadGeoJsonLayerIfNeeded(layerItem: MapLayerItem, map: GoogleMap) {
+        val geoJsonLayer =
+            getInputStreamFromUri(layerItem)?.use { inputStream ->
+                val jsonObject = JSONObject(inputStream.bufferedReader().use { it.readText() })
+                GeoJsonLayer(map, jsonObject).apply { if (!layerItem.isVisible) removeLayerFromMap() }
+            }
+        _mapLayers.update { currentLayers ->
+            currentLayers.map {
+                if (it.id == layerItem.id) {
+                    it.copy(geoJsonLayerData = geoJsonLayer)
+                } else {
+                    it
+                }
+            }
         }
     }
 
