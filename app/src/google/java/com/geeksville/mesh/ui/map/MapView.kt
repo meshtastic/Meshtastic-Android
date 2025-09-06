@@ -217,7 +217,16 @@ fun MapView(
     var mapTypeMenuExpanded by remember { mutableStateOf(false) }
     var showCustomTileManagerSheet by remember { mutableStateOf(false) }
 
-    val cameraPositionState = rememberCameraPositionState {}
+    val cameraPositionState = rememberCameraPositionState {
+        position =
+            CameraPosition.fromLatLngZoom(
+                LatLng(
+                    ourNodeInfo?.position?.latitudeI?.times(DEG_D) ?: 0.0,
+                    ourNodeInfo?.position?.longitudeI?.times(DEG_D) ?: 0.0,
+                ),
+                7f,
+            )
+    }
 
     // Location tracking functionality
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
@@ -279,7 +288,12 @@ fun MapView(
         }
     }
 
-    DisposableEffect(Unit) { onDispose { fusedLocationClient.removeLocationUpdates(locationCallback) } }
+    DisposableEffect(Unit) {
+        onDispose {
+            fusedLocationClient.removeLocationUpdates(locationCallback)
+            mapViewModel.clearLoadedLayerData()
+        }
+    }
 
     val allNodes by
         mapViewModel.nodes
