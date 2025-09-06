@@ -116,6 +116,9 @@
     <string name="debug_panel">Панель отладки</string>
     <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">Экспортировать логи</string>
+    <string name="debug_export_cancelled">Export canceled</string>
+    <string name="debug_export_success">%1$d logs exported</string>
+    <string name="debug_export_failed">Failed to write log file: %1$s</string>
     <string name="debug_filters">Фильтры</string>
     <string name="debug_active_filters">Активные фильтры</string>
     <string name="debug_default_search">Искать в журнале…</string>
@@ -139,7 +142,8 @@
     <string name="okay">Лады</string>
     <string name="must_set_region">Вы должны задать регион!</string>
     <string name="cant_change_no_radio">Не удалось изменить канал, потому что радио еще не подключено. Пожалуйста, попробуйте еще раз.</string>
-    <string name="save_rangetest">Экспортировать rangetest.csv</string>
+    <string name="save_rangetest">Export rangetest packets</string>
+    <string name="export_data_csv">Export all packets</string>
     <string name="reset">Сброс</string>
     <string name="scan">Сканирования</string>
     <string name="add_network_device">Добавить</string>
