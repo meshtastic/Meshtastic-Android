@@ -116,6 +116,9 @@
     <string name="debug_panel">Панел за отстраняване на грешки</string>
     <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">Експортиране на журнали</string>
+    <string name="debug_export_cancelled">Export canceled</string>
+    <string name="debug_export_success">%1$d logs exported</string>
+    <string name="debug_export_failed">Failed to write log file: %1$s</string>
     <string name="debug_filters">Филтри</string>
     <string name="debug_active_filters">Активни филтри</string>
     <string name="debug_default_search">Търсене в журналите…</string>
@@ -139,7 +142,8 @@
     <string name="okay">Добре</string>
     <string name="must_set_region">Трябва да зададете регион!</string>
     <string name="cant_change_no_radio">Каналът не може да бъде сменен, тъй като радиото все още не е свързано. Моля, опитайте отново.</string>
-    <string name="save_rangetest">Експорт на rangetest.csv</string>
+    <string name="save_rangetest">Export rangetest packets</string>
+    <string name="export_data_csv">Export all packets</string>
     <string name="reset">Нулиране</string>
     <string name="scan">Сканиране</string>
     <string name="add_network_device">Добавяне</string>

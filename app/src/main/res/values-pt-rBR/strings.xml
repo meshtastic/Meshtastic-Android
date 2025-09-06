@@ -116,6 +116,9 @@
     <string name="debug_panel">Painel de depuração</string>
     <string name="debug_decoded_payload">Pacote Decodificado:</string>
     <string name="debug_logs_export">Exportar Logs</string>
+    <string name="debug_export_cancelled">Export canceled</string>
+    <string name="debug_export_success">%1$d logs exported</string>
+    <string name="debug_export_failed">Failed to write log file: %1$s</string>
     <string name="debug_filters">Filtros</string>
     <string name="debug_active_filters">Filtros ativos</string>
     <string name="debug_default_search">Pesquisar nos logs…</string>
@@ -139,7 +142,8 @@
     <string name="okay">Ok</string>
     <string name="must_set_region">Você deve informar uma região!</string>
     <string name="cant_change_no_radio">Não foi possível mudar de canal, rádio não conectado. Tente novamente.</string>
-    <string name="save_rangetest">Exportar rangetest.csv</string>
+    <string name="save_rangetest">Export rangetest packets</string>
+    <string name="export_data_csv">Export all packets</string>
     <string name="reset">Redefinir</string>
     <string name="scan">Escanear</string>
     <string name="add_network_device">Adicionar</string>

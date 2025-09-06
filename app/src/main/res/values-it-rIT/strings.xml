@@ -116,6 +116,9 @@
     <string name="debug_panel">Pannello Di Debug</string>
     <string name="debug_decoded_payload">Payload decodificato:</string>
     <string name="debug_logs_export">Esporta i logs</string>
+    <string name="debug_export_cancelled">Export canceled</string>
+    <string name="debug_export_success">%1$d logs exported</string>
+    <string name="debug_export_failed">Failed to write log file: %1$s</string>
     <string name="debug_filters">Filtri</string>
     <string name="debug_active_filters">Filtri attivi</string>
     <string name="debug_default_search">Cerca nei log…</string>
@@ -139,7 +142,8 @@
     <string name="okay">Ok</string>
     <string name="must_set_region">Devi impostare una regione!</string>
     <string name="cant_change_no_radio">Impossibile cambiare il canale, perché la radio non è ancora connessa. Riprova.</string>
-    <string name="save_rangetest">Esporta rangetest.csv</string>
+    <string name="save_rangetest">Export rangetest packets</string>
+    <string name="export_data_csv">Export all packets</string>
     <string name="reset">Reset</string>
     <string name="scan">Scan</string>
     <string name="add_network_device">Aggiungere</string>

@@ -116,6 +116,9 @@
     <string name="debug_panel">Arendaja paneel</string>
     <string name="debug_decoded_payload">Dekodeeritud andmed:</string>
     <string name="debug_logs_export">Salvesta logi</string>
+    <string name="debug_export_cancelled">Export canceled</string>
+    <string name="debug_export_success">%1$d logs exported</string>
+    <string name="debug_export_failed">Failed to write log file: %1$s</string>
     <string name="debug_filters">Filtrid</string>
     <string name="debug_active_filters">Aktiivsed filtrid</string>
     <string name="debug_default_search">Otsi logist…</string>
@@ -139,7 +142,8 @@
     <string name="okay">Olgu</string>
     <string name="must_set_region">Pead valima regiooni!</string>
     <string name="cant_change_no_radio">Kanalit ei saanud vahetada, kuna raadio pole veel ühendatud. Proovi uuesti.</string>
-    <string name="save_rangetest">Lae alla rangetest.csv</string>
+    <string name="save_rangetest">Export rangetest packets</string>
+    <string name="export_data_csv">Export all packets</string>
     <string name="reset">Taasta</string>
     <string name="scan">Otsi</string>
     <string name="add_network_device">Lisa</string>

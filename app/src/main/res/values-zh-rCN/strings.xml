@@ -116,6 +116,9 @@
     <string name="debug_panel">调试面板</string>
     <string name="debug_decoded_payload">解码Payload：</string>
     <string name="debug_logs_export">导出程序日志</string>
+    <string name="debug_export_cancelled">Export canceled</string>
+    <string name="debug_export_success">%1$d logs exported</string>
+    <string name="debug_export_failed">Failed to write log file: %1$s</string>
     <string name="debug_filters">筛选器</string>
     <string name="debug_active_filters">启用的过滤器</string>
     <string name="debug_default_search">搜索日志…</string>
@@ -139,7 +142,8 @@
     <string name="okay">确定</string>
     <string name="must_set_region">您必须先选择一个地区</string>
     <string name="cant_change_no_radio">无法更改频道，因为装置尚未连接。请再试一次。</string>
-    <string name="save_rangetest">导出信号测试数据.csv</string>
+    <string name="save_rangetest">Export rangetest packets</string>
+    <string name="export_data_csv">Export all packets</string>
     <string name="reset">重置</string>
     <string name="scan">扫描</string>
     <string name="add_network_device">新增</string>
