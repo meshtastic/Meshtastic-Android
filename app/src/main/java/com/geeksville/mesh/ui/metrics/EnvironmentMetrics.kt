@@ -310,7 +310,7 @@ private fun RadiationDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
         if (!radiation.isNaN() && radiation > 0f) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
-                    text = "%s %.2f µSv/h".format(stringResource(R.string.radiation), radiation),
+                    text = "%s %.2f µR/h".format(stringResource(R.string.radiation), radiation),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                 )
