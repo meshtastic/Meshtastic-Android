@@ -466,9 +466,7 @@ constructor(
                     val geoJsonLayer =
                         getInputStreamFromUri(layerItem)?.use { inputStream ->
                             val jsonObject = JSONObject(inputStream.bufferedReader().use { it.readText() })
-                            GeoJsonLayer(map, jsonObject).apply {
-                                if (!layerItem.isVisible) removeLayerFromMap()
-                            }
+                            GeoJsonLayer(map, jsonObject).apply { if (!layerItem.isVisible) removeLayerFromMap() }
                         }
                     _mapLayers.update { currentLayers ->
                         currentLayers.map {
@@ -488,9 +486,7 @@ constructor(
 
     fun clearLoadedLayerData() {
         _mapLayers.update { currentLayers ->
-            currentLayers.map {
-                it.copy(kmlLayerData = null, geoJsonLayerData = null)
-            }
+            currentLayers.map { it.copy(kmlLayerData = null, geoJsonLayerData = null) }
         }
     }
 }
