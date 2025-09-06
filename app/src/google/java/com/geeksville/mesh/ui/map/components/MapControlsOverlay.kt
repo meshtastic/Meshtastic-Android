@@ -20,6 +20,7 @@ package com.geeksville.mesh.ui.map.components
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationDisabled
+import androidx.compose.material.icons.filled.Navigation
 import androidx.compose.material.icons.outlined.Layers
 import androidx.compose.material.icons.outlined.Map
 import androidx.compose.material.icons.outlined.MyLocation
@@ -55,7 +56,8 @@ fun MapControlsOverlay(
     isLocationTrackingEnabled: Boolean = false,
     onToggleLocationTracking: () -> Unit = {},
     bearing: Float = 0f,
-    onOrientNorth: () -> Unit = {},
+    onCompassClick: () -> Unit = {},
+    followPhoneBearing: Boolean,
 ) {
     HorizontalFloatingToolbar(
         modifier = modifier,
@@ -63,7 +65,7 @@ fun MapControlsOverlay(
         leadingContent = {},
         trailingContent = {},
         content = {
-            CompassButton(onOrientNorth = onOrientNorth, bearing = bearing)
+            CompassButton(onClick = onCompassClick, bearing = bearing, isFollowing = followPhoneBearing)
             if (showFilterButton) {
                 Box {
                     MapButton(
@@ -117,14 +119,14 @@ fun MapControlsOverlay(
 }
 
 @Composable
-private fun CompassButton(onOrientNorth: () -> Unit, bearing: Float) {
-    val icon = Icons.Outlined.Navigation
+private fun CompassButton(onClick: () -> Unit, bearing: Float, isFollowing: Boolean) {
+    val icon = if (isFollowing) Icons.Filled.Navigation else Icons.Outlined.Navigation
 
     MapButton(
         modifier = Modifier.rotate(-bearing),
         icon = icon,
         iconTint = MaterialTheme.colorScheme.StatusRed.takeIf { bearing == 0f },
         contentDescription = stringResource(id = R.string.orient_north),
-        onClick = onOrientNorth,
+        onClick = onClick,
     )
 }
