@@ -845,13 +845,21 @@ constructor(
         }
     }
 
-    /** Write the persisted packet data out to a CSV file in the specified location. */
+    /**
+     * Export all persisted packet data to a CSV file at the given URI.
+     *
+     * The CSV will include all packets, or only those matching the given port number if specified. Each row contains:
+     * date, time, sender node number, sender name, sender latitude, sender longitude, receiver latitude, receiver
+     * longitude, receiver elevation, received SNR, distance, hop limit, and payload.
+     *
+     * @param uri The destination URI for the CSV file.
+     * @param filterPortnum If provided, only packets with this port number will be exported.
+     */
     @Suppress("detekt:CyclomaticComplexMethod", "detekt:LongMethod")
-    fun saveRangeTestCsv(uri: Uri) {
+    fun saveDataCsv(uri: Uri, filterPortnum: Int? = null) {
         viewModelScope.launch(Dispatchers.Main) {
             // Extract distances to this device from position messages and put (node,SNR,distance)
-            // in
-            // the file_uri
+            // in the file_uri
             val myNodeNum = myNodeNum ?: return@launch
 
             // Capture the current node value while we're still on main thread
@@ -888,9 +896,10 @@ constructor(
                             }
                         }
 
-                        // Only look at range test messages, with SNR reported.
+                        // packets must have rxSNR, and optionally match the filter given as a param.
                         if (
-                            proto.decoded.portnumValue == Portnums.PortNum.RANGE_TEST_APP_VALUE && proto.rxSnr != 0.0f
+                            (filterPortnum == null || proto.decoded.portnumValue == filterPortnum) &&
+                            proto.rxSnr != 0.0f
                         ) {
                             val rxDateTime = dateFormat.format(packet.received_date)
                             val rxFrom = proto.from.toUInt()
