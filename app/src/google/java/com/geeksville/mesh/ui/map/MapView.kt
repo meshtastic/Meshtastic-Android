@@ -190,6 +190,7 @@ fun MapView(
 
     // Location tracking state
     var isLocationTrackingEnabled by remember { mutableStateOf(false) }
+    var followPhoneBearing by remember { mutableStateOf(false) }
 
     LocationPermissionsHandler { isGranted -> hasLocationPermission = isGranted }
 
@@ -224,11 +225,27 @@ fun MapView(
                 if (isLocationTrackingEnabled) {
                     locationResult.lastLocation?.let { location ->
                         val latLng = LatLng(location.latitude, location.longitude)
+                        val cameraUpdate =
+                            if (followPhoneBearing) {
+                                val bearing =
+                                    if (location.hasBearing()) {
+                                        location.bearing
+                                    } else {
+                                        cameraPositionState.position.bearing
+                                    }
+                                CameraUpdateFactory.newCameraPosition(
+                                    CameraPosition.Builder()
+                                        .target(latLng)
+                                        .zoom(cameraPositionState.position.zoom)
+                                        .bearing(bearing)
+                                        .build(),
+                                )
+                            } else {
+                                CameraUpdateFactory.newLatLngZoom(latLng, cameraPositionState.position.zoom)
+                            }
                         coroutineScope.launch {
                             try {
-                                cameraPositionState.animate(
-                                    CameraUpdateFactory.newLatLngZoom(latLng, cameraPositionState.position.zoom),
-                                )
+                                cameraPositionState.animate(cameraUpdate)
                             } catch (e: IllegalStateException) {
                                 debug("Error animating camera to location: ${e.message}")
                             }
@@ -260,7 +277,6 @@ fun MapView(
         }
     }
 
-    // Clean up location tracking on disposal
     DisposableEffect(Unit) { onDispose { fusedLocationClient.removeLocationUpdates(locationCallback) } }
 
     val allNodes by
@@ -344,7 +360,7 @@ fun MapView(
                     zoomControlsEnabled = true,
                     mapToolbarEnabled = true,
                     compassEnabled = false,
-                    myLocationButtonEnabled = false, // Disabled - we use custom location button
+                    myLocationButtonEnabled = false,
                     rotationGesturesEnabled = true,
                     scrollGesturesEnabled = true,
                     tiltGesturesEnabled = true,
@@ -574,46 +590,30 @@ fun MapView(
                 isLocationTrackingEnabled = isLocationTrackingEnabled,
                 onToggleLocationTracking = {
                     if (hasLocationPermission) {
-                        if (!isLocationTrackingEnabled) {
-                            // When enabling tracking, get current location and center on it
-                            try {
-                                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
-                                    location?.let {
-                                        val latLng = LatLng(it.latitude, it.longitude)
-                                        coroutineScope.launch {
-                                            try {
-                                                cameraPositionState.animate(
-                                                    CameraUpdateFactory.newLatLngZoom(latLng, 16f),
-                                                )
-                                            } catch (e: IllegalStateException) {
-                                                debug("Error centering camera on location: ${e.message}")
-                                            }
-                                        }
-                                    }
-                                }
-                            } catch (e: SecurityException) {
-                                debug("Location permission not available: ${e.message}")
-                            }
-                        }
                         isLocationTrackingEnabled = !isLocationTrackingEnabled
+                        if (!isLocationTrackingEnabled) {
+                            followPhoneBearing = false
+                        }
                     }
                 },
                 bearing = cameraPositionState.position.bearing,
-                onOrientNorth = {
-                    coroutineScope.launch {
-                        try {
-                            val currentPosition = cameraPositionState.position
-                            val newCameraPosition =
-                                CameraPosition.Builder(currentPosition)
-                                    .bearing(0f) // Orient to north
-                                    .build()
-                            cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(newCameraPosition))
-                            debug("Oriented map to north")
-                        } catch (e: IllegalStateException) {
-                            debug("Error orienting map to north: ${e.message}")
+                onCompassClick = {
+                    if (isLocationTrackingEnabled) {
+                        followPhoneBearing = !followPhoneBearing
+                    } else {
+                        coroutineScope.launch {
+                            try {
+                                val currentPosition = cameraPositionState.position
+                                val newCameraPosition = CameraPosition.Builder(currentPosition).bearing(0f).build()
+                                cameraPositionState.animate(CameraUpdateFactory.newCameraPosition(newCameraPosition))
+                                debug("Oriented map to north")
+                            } catch (e: IllegalStateException) {
+                                debug("Error orienting map to north: ${e.message}")
+                            }
                         }
                     }
                 },
+                followPhoneBearing = followPhoneBearing,
             )
         }
         if (showLayersBottomSheet) {
