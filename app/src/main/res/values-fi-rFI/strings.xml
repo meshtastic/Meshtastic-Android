@@ -116,6 +116,9 @@
     <string name="debug_panel">Vianetsintäpaneeli</string>
     <string name="debug_decoded_payload">Dekoodattu data:</string>
     <string name="debug_logs_export">Vie lokitiedot</string>
+    <string name="debug_export_cancelled">Export canceled</string>
+    <string name="debug_export_success">%1$d logs exported</string>
+    <string name="debug_export_failed">Failed to write log file: %1$s</string>
     <string name="debug_filters">Suodattimet</string>
     <string name="debug_active_filters">Aktiiviset suodattimet</string>
     <string name="debug_default_search">Hae lokitiedoista…</string>
@@ -139,7 +142,8 @@
     <string name="okay">OK</string>
     <string name="must_set_region">Sinun täytyy määrittää alue!</string>
     <string name="cant_change_no_radio">Kanavaa ei voitu vaihtaa, koska radiota ei ole vielä yhdistetty. Yritä uudelleen.</string>
-    <string name="save_rangetest">Vie rangetest.csv</string>
+    <string name="save_rangetest">Export rangetest packets</string>
+    <string name="export_data_csv">Export all packets</string>
     <string name="reset">Palauta</string>
     <string name="scan">Etsi</string>
     <string name="add_network_device">Lisää</string>
