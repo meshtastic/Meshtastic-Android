@@ -135,11 +135,15 @@ fun SettingsScreen(
                     viewModel.installProfile(it)
                 } else {
                     deviceProfile = it
+                    val nodeName = it.shortName.ifBlank { "node" }
+                    val dateFormat = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault())
+                    val dateStr = dateFormat.format(java.util.Date())
+                    val fileName = "Meshtastic_${nodeName}_${dateStr}_nodeConfig.cfg"
                     val intent =
                         Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                             addCategory(Intent.CATEGORY_OPENABLE)
                             type = "application/*"
-                            putExtra(Intent.EXTRA_TITLE, "device_profile.cfg")
+                            putExtra(Intent.EXTRA_TITLE, fileName)
                         }
                     exportConfigLauncher.launch(intent)
                 }
