@@ -84,7 +84,7 @@ data class MetricsState(
     val powerMetrics: List<Telemetry> = emptyList(),
     val hostMetrics: List<Telemetry> = emptyList(),
     val tracerouteRequests: List<MeshLog> = emptyList(),
-    val tracerouteResults: List<MeshPacket> = emptyList(),
+    val tracerouteResults: List<MeshLog> = emptyList(),
     val positionLogs: List<Position> = emptyList(),
     val deviceHardware: DeviceHardware? = null,
     val isLocalDevice: Boolean = false,
@@ -321,7 +321,7 @@ constructor(
 
             combine(
                 meshLogRepository.getLogsFrom(nodeNum = 0, PortNum.TRACEROUTE_APP_VALUE),
-                meshLogRepository.getMeshPacketsFrom(destNum, PortNum.TRACEROUTE_APP_VALUE),
+                meshLogRepository.getLogsFrom(destNum ?: 0, PortNum.TRACEROUTE_APP_VALUE),
             ) { request, response ->
                 _state.update { state ->
                     state.copy(

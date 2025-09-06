@@ -73,7 +73,7 @@ import com.geeksville.mesh.fromRadio
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.model.Node
-import com.geeksville.mesh.model.getTracerouteResponse
+import com.geeksville.mesh.model.getFullTracerouteResponse
 import com.geeksville.mesh.position
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
@@ -147,6 +147,8 @@ class MeshService :
     @Inject lateinit var serviceNotifications: MeshServiceNotifications
 
     @Inject lateinit var meshPrefs: MeshPrefs
+
+    private val tracerouteStartTimes = ConcurrentHashMap<Int, Long>()
 
     companion object : Logging {
 
@@ -848,7 +850,21 @@ class MeshService :
                     }
 
                     Portnums.PortNum.TRACEROUTE_APP_VALUE -> {
-                        radioConfigRepository.setTracerouteResponse(packet.getTracerouteResponse(::getUserName))
+                        val full = packet.getFullTracerouteResponse(::getUserName)
+                        if (full != null) {
+                            val requestId = packet.decoded.requestId
+                            val start = tracerouteStartTimes.remove(requestId)
+                            val response =
+                                if (start != null) {
+                                    val elapsedMs = System.currentTimeMillis() - start
+                                    val seconds = elapsedMs / 1000.0
+                                    info("Traceroute $requestId complete in $seconds s")
+                                    "$full\n\nDuration: ${"%.1f".format(seconds)} s"
+                                } else {
+                                    full
+                                }
+                            radioConfigRepository.setTracerouteResponse(response)
+                        }
                     }
 
                     else -> debug("No custom processing needed for ${data.portnumValue}")
@@ -2376,6 +2392,7 @@ class MeshService :
             }
 
             override fun requestTraceroute(requestId: Int, destNum: Int) = toRemoteExceptions {
+                tracerouteStartTimes[requestId] = System.currentTimeMillis()
                 packetHandler.sendToRadio(
                     newMeshPacketTo(destNum).buildMeshPacket(
                         wantAck = true,
