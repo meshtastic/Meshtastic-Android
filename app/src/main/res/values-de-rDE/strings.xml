@@ -636,6 +636,7 @@
     <string name="export_keys">Schlüssel exportieren</string>
     <string name="export_keys_confirmation">Exportiert den öffentlichen und privaten Schlüssel in eine Datei. Bitte speichern Sie diese an einem sicheren Ort.</string>
     <string name="modules_unlocked">Entsperrte Module</string>
+    <string name="modules_already_unlocked">Modules already unlocked</string>
     <string name="remote">Entfernt</string>
     <string name="node_count_template">(%1$d Online / %2$d Gesamt)</string>
     <string name="react">Reagieren</string>
@@ -773,7 +774,8 @@
     <string name="url_must_contain_placeholders">URL muss Platzhalter enthalten.</string>
     <string name="url_template">URL Vorlage</string>
     <string name="track_point">Verlaufspunkt</string>
-    <string name="phone_settings">Telefoneinstellungen</string>
+    <string name="app_settings">App</string>
+    <string name="app_version">Version</string>
     <string name="channel_features">Kanalfunktionen</string>
     <string name="location_sharing">Standortfreigabe</string>
     <string name="periodic_position_broadcast">Regelmäßige Standortübertragung</string>

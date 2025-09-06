@@ -640,6 +640,7 @@
     <string name="export_keys">Экспортировать ключи</string>
     <string name="export_keys_confirmation">Экспортирует публичный и приватный ключи в файл. Пожалуйста, храните их где-нибудь в безопасности.</string>
     <string name="modules_unlocked">Модули разблокированы</string>
+    <string name="modules_already_unlocked">Modules already unlocked</string>
     <string name="remote">Удаленные</string>
     <string name="node_count_template">(%1$d в сети / всего %2$d)</string>
     <string name="react">Среагировать</string>
@@ -774,7 +775,8 @@
     <string name="url_must_contain_placeholders">URL должен содержать placeholders.</string>
     <string name="url_template">Шаблон URL</string>
     <string name="track_point">track point</string>
-    <string name="phone_settings">Phone Settings</string>
+    <string name="app_settings">App</string>
+    <string name="app_version">Version</string>
     <string name="channel_features">Channel Features</string>
     <string name="location_sharing">Location Sharing</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>

@@ -634,6 +634,7 @@
     <string name="export_keys">匯出金鑰</string>
     <string name="export_keys_confirmation">請將匯出後的私鑰及公鑰妥善保存。</string>
     <string name="modules_unlocked">模組已解鎖</string>
+    <string name="modules_already_unlocked">Modules already unlocked</string>
     <string name="remote">遠端</string>
     <string name="node_count_template">(%1$d 個上線 / 共計 %2$d 個)</string>
     <string name="react">回應</string>
@@ -771,7 +772,8 @@
     <string name="url_must_contain_placeholders">網址必須包含佔位符。</string>
     <string name="url_template">URL 範本</string>
     <string name="track_point">軌跡點</string>
-    <string name="phone_settings">手機設定</string>
+    <string name="app_settings">App</string>
+    <string name="app_version">Version</string>
     <string name="channel_features">Channel Features</string>
     <string name="location_sharing">Location Sharing</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>

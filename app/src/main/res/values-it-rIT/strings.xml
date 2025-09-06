@@ -636,6 +636,7 @@
     <string name="export_keys">Esporta Chiavi</string>
     <string name="export_keys_confirmation">Esporta le chiavi pubbliche e private in un file. Si prega di memorizzarlo da qualche parte in modo sicuro.</string>
     <string name="modules_unlocked">Moduli sbloccati</string>
+    <string name="modules_already_unlocked">Modules already unlocked</string>
     <string name="remote">Controllo remoto</string>
     <string name="node_count_template">(%1$d online / %2$d in totale)</string>
     <string name="react">Rispondi</string>
@@ -773,7 +774,8 @@
     <string name="url_must_contain_placeholders">L\'URL deve contenere dei placeholder.</string>
     <string name="url_template">Template dell\'URL</string>
     <string name="track_point">punto di interesse</string>
-    <string name="phone_settings">Impostazioni telefono</string>
+    <string name="app_settings">App</string>
+    <string name="app_version">Version</string>
     <string name="channel_features">Channel Features</string>
     <string name="location_sharing">Location Sharing</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>
