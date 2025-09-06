@@ -356,7 +356,7 @@ private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFa
     }
 }
 
-@file:Suppress("MagicNumber") // preview data
+@Suppress("MagicNumber") // preview data
 @Preview(showBackground = true)
 @Composable
 private fun PreviewEnvironmentMetricsContent() {
