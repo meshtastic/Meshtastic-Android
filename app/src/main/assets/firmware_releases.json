@@ -193,6 +193,12 @@
       "title": "the original ZPS module from https://github.com/a-f-G-U-C/Meshtastic-ZPS",
       "page_url": "https://github.com/meshtastic/firmware/pull/7658",
       "zip_url": "https://github.com/meshtastic/firmware/actions/runs/17074730483"
+    },
+    {
+      "id": "7583",
+      "title": "chore(deps): update meshtastic/web to v2.6.6",
+      "page_url": "https://github.com/meshtastic/firmware/pull/7583",
+      "zip_url": "https://github.com/meshtastic/firmware/actions/runs/17070663764"
     }
   ]
 }
