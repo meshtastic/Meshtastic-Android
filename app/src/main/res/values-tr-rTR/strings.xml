@@ -116,6 +116,9 @@
     <string name="debug_panel">Hata Ayıklama Paneli</string>
     <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">Export Logs</string>
+    <string name="debug_export_cancelled">Export canceled</string>
+    <string name="debug_export_success">%1$d logs exported</string>
+    <string name="debug_export_failed">Failed to write log file: %1$s</string>
     <string name="debug_filters">Filtreler</string>
     <string name="debug_active_filters">Aktif Filtreler</string>
     <string name="debug_default_search">Loglarda ara…</string>
@@ -139,7 +142,8 @@
     <string name="okay">Tamam</string>
     <string name="must_set_region">Bölge seçmelisin!</string>
     <string name="cant_change_no_radio">Radyo bağlı olmadığından, kanal değiştirilemedi. Lütfen tekrar deneyin.</string>
-    <string name="save_rangetest">Dışa aktar: rangetest.csv</string>
+    <string name="save_rangetest">Export rangetest packets</string>
+    <string name="export_data_csv">Export all packets</string>
     <string name="reset">Sıfırla</string>
     <string name="scan">Tara</string>
     <string name="add_network_device">Ekle</string>
