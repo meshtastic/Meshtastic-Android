@@ -16,10 +16,17 @@ jobs:
         uses: actions/github-script@v8
         with:
           script: |
-            const labels = context.payload.pull_request.labels.map(label => label.name);
+            // Always fetch the latest labels from the GitHub API to avoid stale context
+            const prNumber = context.payload.pull_request.number;
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+            });
+            const latestLabels = pr.labels.map(label => label.name);
             const requiredLabels = ['bugfix', 'enhancement', 'automation', 'dependencies', 'repo', 'release'];
-            const hasRequiredLabel = labels.some(label => requiredLabels.includes(label));
-            console.log(labels);
+            const hasRequiredLabel = latestLabels.some(label => requiredLabels.includes(label));
+            console.log('Latest labels:', latestLabels);
             if (!hasRequiredLabel) {
               core.setFailed(`PR must have at least one of the following labels before it can be merged: ${requiredLabels.join(', ')}.`);
             }
