@@ -259,7 +259,7 @@ private fun GasCompositionDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics
     val iaqValue = envMetrics.iaq
     val gasResistance = envMetrics.gasResistance
 
-    if ((iaqValue != null && iaqValue != Int.MIN_VALUE) || (gasResistance != null && !gasResistance.isNaN())) {
+    if ((iaqValue != null && iaqValue != Int.MIN_VALUE) || gasResistance?.isFinite()) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
             if (iaqValue != null && iaqValue != Int.MIN_VALUE) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -356,6 +356,7 @@ private fun EnvironmentMetricsContent(telemetry: Telemetry, environmentDisplayFa
     }
 }
 
+@file:Suppress("MagicNumber") // preview data
 @Preview(showBackground = true)
 @Composable
 private fun PreviewEnvironmentMetricsContent() {
