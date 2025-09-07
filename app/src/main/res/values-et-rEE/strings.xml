@@ -16,7 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
-    <string name="fallback_node_name">Meshtastic %s</string>
+    <string name="fallback_node_name">Kärgvõrgustik %s</string>
     <string name="node_filter_placeholder">Filtreeri</string>
     <string name="desc_node_filter_clear">eemalda sõlmefilter</string>
     <string name="node_filter_include_unknown">Kaasa tundmatud</string>
@@ -65,10 +65,10 @@
     <string name="role_lost_and_found">Edastab asukohta regulaarselt vaikekanalile sõnumina, et aidata seadme leidmisel.</string>
     <string name="role_tak_tracker">Võimaldab automaatseid TAK PLI saateid ja vähendab rutiinseid saateid.</string>
     <string name="role_router_late">Infrastruktuurisõlm, mis saadab pakette ainult ühe korra, ning alles peale kõiki teisi sõlmi, tagades kohalikele klastritele täiendava katvuse. Nähtav sõlmede loendis.</string>
-    <string name="rebroadcast_mode_all">Saada uuesti mis tahes jälgitav sõnum, kui see oli privaatkanali või teisest samade LoRa parameetritega võrgus.</string>
+    <string name="rebroadcast_mode_all">Saada uuesti mis tahes jälgitav sõnum, kui see oli privaatkanali või teisest samade LoRa parameetritega kärgvõrgus.</string>
     <string name="rebroadcast_mode_all_skip_decoding">Sama käitumine nagu KÕIK puhul, aga pakete ei dekodeerita vaid need lihtsalt edastatakse. Saadaval ainult Repiiteri rollis. Teise rolli puhul toob kaasa KÕIK käitumise.</string>
-    <string name="rebroadcast_mode_local_only">Ignoreerib jälgitavaid sõnumeid välisvõrkudest avatud või dekrüpteerida mittevõimalikke sõnumeid. Saadab sõnumeid ainult kohalikel primaarsetel/sekundaarsetel kanalitel.</string>
-    <string name="rebroadcast_mode_known_only">Ignoreerib välismaistest võrgusilmadest, nt AINULT KOHALIK, saadud sõnumeid, kuid läheb sammu edasi, ignoreerides ka sõnumeid sõlmedelt, mis pole veel tuntud sõlme loendis.</string>
+    <string name="rebroadcast_mode_local_only">Ignoreerib jälgitavaid sõnumeid välis kärgvõrkudest avatud või dekrüpteerida mittevõimalikke sõnumeid. Saadab sõnumeid ainult kohalikel primaarsetel/sekundaarsetel kanalitel.</string>
+    <string name="rebroadcast_mode_known_only">Ignoreerib sõnumeid välistest kärgvõrkudest, nt AINULT KOHALIK, saadud sõnumeid, kuid läheb sammu edasi, ignoreerides ka sõnumeid sõlmedelt, mis pole veel tuntud sõlme loendis.</string>
     <string name="rebroadcast_mode_none">Lubatud ainult rollidele SENSOR, TRACKER ja TAK_TRACKER, see blokeerib kõik kordus edastused, vastupidiselt CLIENT_MUTE rollile.</string>
     <string name="rebroadcast_mode_core_portnums_only">Ignoreerib pakette mittestandardsetest pordinumbritest, näiteks: TAK, RangeTest, PaxCounter jne. Edastatakse ainult standardsete pordinumbritega pakette: NodeInfo, Tekst, Asukoht, Telemeetia ja Routimine.</string>
     <string name="config_device_doubleTapAsButtonPress_summary">Topelt puudutust toetatud kiirendusmõõturitel käsitletakse kasutaja nupuvajutusena.</string>
@@ -116,9 +116,9 @@
     <string name="debug_panel">Arendaja paneel</string>
     <string name="debug_decoded_payload">Dekodeeritud andmed:</string>
     <string name="debug_logs_export">Salvesta logi</string>
-    <string name="debug_export_cancelled">Export canceled</string>
-    <string name="debug_export_success">%1$d logs exported</string>
-    <string name="debug_export_failed">Failed to write log file: %1$s</string>
+    <string name="debug_export_cancelled">Eksport katkestatud</string>
+    <string name="debug_export_success">%1$d logi eksporditud</string>
+    <string name="debug_export_failed">Ebaõnnestus kirjutada logi faili: %1$s</string>
     <string name="debug_filters">Filtrid</string>
     <string name="debug_active_filters">Aktiivsed filtrid</string>
     <string name="debug_default_search">Otsi logist…</string>
@@ -142,8 +142,8 @@
     <string name="okay">Olgu</string>
     <string name="must_set_region">Pead valima regiooni!</string>
     <string name="cant_change_no_radio">Kanalit ei saanud vahetada, kuna raadio pole veel ühendatud. Proovi uuesti.</string>
-    <string name="save_rangetest">Export rangetest packets</string>
-    <string name="export_data_csv">Export all packets</string>
+    <string name="save_rangetest">Ekspordi rangetest paketid</string>
+    <string name="export_data_csv">Ekspordi kõik paketid</string>
     <string name="reset">Taasta</string>
     <string name="scan">Otsi</string>
     <string name="add_network_device">Lisa</string>
@@ -310,15 +310,15 @@
     <string name="router_role_confirmation_text"><![CDATA[Olen lugenud <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">seadme rollide juhendit </a> ja blogi postitust <a href="http://meshtastic.org/blog/choosing-the-right-device-role">valin õige seadme rolli</a>.]]></string>
     <string name="i_know_what_i_m_doing">Ma tean mida teen.</string>
     <string name="low_battery_message">Sõlmel %1$s on akupinge madal (%2$d%%)</string>
-    <string name="meshtastic_low_battery_notifications">Madala akupinge teavitus</string>
+    <string name="meshtastic_low_battery_notifications">Madala akupinge hoiatus</string>
     <string name="low_battery_title">Madal akupinge: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Madala akupinge teated (lemmik sõlmed)</string>
     <string name="baro_pressure">Baromeetri rõhk</string>
-    <string name="mesh_via_udp_enabled">Mesh UDP kaudu lubatud</string>
+    <string name="mesh_via_udp_enabled">Kärgvõrk UDP kaudu lubatud</string>
     <string name="udp_config">UDP sätted</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Viimati kuuldud: %2$s<br>viimane asukoht: %3$s<br>Akupinge: %4$s]]></string>
     <string name="toggle_my_position">Lülita asukoht sisse</string>
-    <string name="orient_north">Orient north</string>
+    <string name="orient_north">Põhja suund</string>
     <string name="user">Kasutaja</string>
     <string name="channels">Kanal</string>
     <string name="device">Seade</string>
@@ -613,7 +613,7 @@
     <string name="user_string">Kasutaja string</string>
     <string name="navigate_into_label">Mine asukohta</string>
     <string name="connections">Ühendus</string>
-    <string name="map">Mesh kaart</string>
+    <string name="map">Kärgvõrgu kaart</string>
     <string name="conversations">Vestlused</string>
     <string name="nodes">Sõlmed</string>
     <string name="bottom_nav_settings">Sätted</string>
@@ -640,7 +640,7 @@
     <string name="export_keys">Salvesta võtmed</string>
     <string name="export_keys_confirmation">Ekspordib avalikud- ja privaatvõtmed faili. Palun hoidke kuskil turvalises kohas.</string>
     <string name="modules_unlocked">Moodulid on lukustamata</string>
-    <string name="modules_already_unlocked">Modules already unlocked</string>
+    <string name="modules_already_unlocked">Moodulid juba avatud</string>
     <string name="remote">Kaugjuhtimine</string>
     <string name="node_count_template">(%1$d võrgus / %2$d kokku)</string>
     <string name="react">Reageeri</string>
@@ -650,7 +650,7 @@
     <string name="no_network_devices">Võrguseadmeid ei leitud.</string>
     <string name="no_usb_devices">USB seadmeid ei leita.</string>
     <string name="scroll_to_bottom">Mine lõppu</string>
-    <string name="meshtastic">Meshtastic</string>
+    <string name="meshtastic">Kärgvõrgustik</string>
     <string name="scanning">Skaneerin</string>
     <string name="security_icon_description">Turvalisuse olek</string>
     <string name="security_icon_secure">Turvaline</string>
@@ -715,7 +715,7 @@
     <string name="stay_connected_anywhere">Igal pool ühenduses</string>
     <string name="communicate_off_the_grid">Saada sõnumeid sõpradele ja kommuunile ilma võrguühenduse või mobiilivõrguta.</string>
     <string name="create_your_own_networks">Loo oma võrk</string>
-    <string name="easily_set_up_private_mesh_networks">Loo hõlpsalt privaatseid meshtastic võrke turvaliseks ja usaldusväärseks suhtluseks asustamata piirkondades.</string>
+    <string name="easily_set_up_private_mesh_networks">Loo hõlpsalt privaatseid kärgvõrke turvaliseks ja usaldusväärseks suhtluseks asustamata piirkondades.</string>
     <string name="track_and_share_locations">Jälgi ja jaga asukohta</string>
     <string name="share_your_location_in_real_time">Jaga reaalajas oma asukohta ja hoia oma grupp ühtsena integreeritud GPS funktsioonide abil.</string>
     <string name="app_notifications">Rakenduse märguanded</string>
@@ -734,9 +734,9 @@
     <string name="distance_measurements">Kauguse mõõtmised</string>
     <string name="distance_measurements_description">Kuva telefoni ja teiste Meshtastic sõlmede asukoha vaheline kaugus.</string>
     <string name="distance_filters">Kauguse filter</string>
-    <string name="distance_filters_description">Filtreeri sõlmede loendit ja sõlmede kaarti kauguse põhjal sinu telefonist.</string>
+    <string name="distance_filters_description">Filtreeri sõlmede loendit ja kärgvõrgustiku kaarti kauguse põhjal sinu telefonist.</string>
     <string name="mesh_map_location">Meshtastic kaardi asukoht</string>
-    <string name="mesh_map_location_description">Lubab telefoni asukoha kuvamine sinisena sõlmede kaardil.</string>
+    <string name="mesh_map_location_description">Lubab telefoni asukoha kuvamine sinisena kärgvõrgu kaardil.</string>
     <string name="configure_location_permissions">Muuda asukoha kasutusload</string>
     <string name="skip">Jäta vahele</string>
     <string name="settings">sätted</string>
@@ -778,13 +778,13 @@
     <string name="url_must_contain_placeholders">URL peab sisaldama vahesümboleid.</string>
     <string name="url_template">URL mall</string>
     <string name="track_point">jälgimispunkt</string>
-    <string name="app_settings">App</string>
-    <string name="app_version">Version</string>
-    <string name="channel_features">Channel Features</string>
-    <string name="location_sharing">Location Sharing</string>
-    <string name="periodic_position_broadcast">Periodic position broadcast</string>
-    <string name="uplink_feature_description">Messages from the mesh will be sent to the public internet through any node\'s configured gateway.</string>
-    <string name="downlink_feature_description">Messages from a public internet gateway are forwarded to the local mesh. Due to the zero-hop policy, traffic from the default MQTT server will not propagate further than this device.</string>
-    <string name="icon_meanings">Icon Meanings</string>
-    <string name="secondary_channel_position_feature">Disabling position on the primary channel allows periodic position broadcasts on the first secondary channel with the position enabled, otherwise manual position request required.</string>
+    <string name="app_settings">Rakendus</string>
+    <string name="app_version">Versioon</string>
+    <string name="channel_features">Kanali funktsioonid</string>
+    <string name="location_sharing">Asukoha jagamine</string>
+    <string name="periodic_position_broadcast">Perioodiline asukoha jagamine</string>
+    <string name="uplink_feature_description">Võrgusõlme sõnumid saadetakse avalikku internetti mis tahes sõlme konfigureeritud ligipääsu kaudu.</string>
+    <string name="downlink_feature_description">Avaliku interneti ligipääsu sõnumid edastatakse kohalikku kärgvõrgu. Nullhüppe poliitika tõttu ei levi MQTT vaikeserverist tulev liiklus sellest seadmest kaugemale.</string>
+    <string name="icon_meanings">Ikooni tähendused</string>
+    <string name="secondary_channel_position_feature">Põhikanalil asukoha jagamise keelamine lubab perioodilist asukoha edastust esimesel lisakanalil, kui asukoht on lubatud, vastasel juhul on vaja käsitsi asukoha päringut teha.</string>
 </resources>
