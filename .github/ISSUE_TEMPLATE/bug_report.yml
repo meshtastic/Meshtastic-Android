@@ -139,7 +139,7 @@ body:
           - If you are using the `fdroid` flavor, please provide the output of `logcat`. You can use the following command to capture logs:
             `adb logcat -d | grep com.geeksville.mesh`
         - Mesh logs:  UI issues, communication issues etc.
-          - ` App > Menu > Debug Panel > Export specific / export all `
+          - ` App > Settings > Advanced >  Debug Panel > Export specific / export all `
         - Android logs: Potentially useful if the issue goes beyond the app (connections, network etc.)
         - Firmware logs: Useful for all connection issues with nodes
           - These are piped to the USB serial port on the node, the most foolproof is to use the 'open serial' button on the web-flasher interface, and then save the output.
