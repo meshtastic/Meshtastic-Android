@@ -13,7 +13,7 @@ body:
           required: true
         - label: "I have **also** used the search function for [**CLOSED**](https://github.com/meshtastic/Meshtastic-Android/issues?q=is%3Aissue+is%3Aclosed) issues to see if the feature was already implemented and is just waiting to be released, or if the feature was rejected."
           required: true
-        - label: "I will describe the request with as much detail as possible".
+        - label: "I will describe the request with as much detail as possible."
           required: true
         - label: "This request contains only one single feature, **not** a list of multiple (related) features."
           required: true

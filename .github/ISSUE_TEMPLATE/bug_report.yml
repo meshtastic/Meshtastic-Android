@@ -25,17 +25,23 @@ body:
     attributes:
       label: "Checklist"
       options:
-        - label: "I am able to reproduce the bug with the latest version given here: [CLICK THIS LINK](https://github.com/meshtastic/Meshtastic-Android/releases/latest)."
+        - label: |
+            I am able to reproduce the bug with the latest version given here: [CLICK THIS LINK](https://github.com/meshtastic/Meshtastic-Android/releases/latest).
           required: true
-        - label: "I made sure that there are *no existing issues* - [open](https://github.com/meshtastic/Meshtastic-Android/issues) or [closed](https://github.com/meshtastic/Meshtastic-Android/issues?q=is%3Aissue+is%3Aclosed) - which I could contribute my information to."
+        - label: |
+            I made sure that there are *no existing issues* - [open](https://github.com/meshtastic/Meshtastic-Android/issues) or [closed](https://github.com/meshtastic/Meshtastic-Android/issues?q=is%3Aissue+is%3Aclosed) - which I could contribute my information to.
           required: true
-        - label: "I have taken the time to fill in all the required details. I understand that the bug report will be dismissed otherwise."
+        - label: |
+            I have taken the time to fill in all the required details. I understand that the bug report will be dismissed otherwise.
           required: true
-        - label: "This issue contains only one bug."
+        - label: |
+            This issue contains only one bug.
           required: true
-        - label: "I have read and understood the [contribution guidelines](https://github.com/meshtastic/Meshtastic-Android/blob/main/README.md#contributing)."
+        - label: |
+            I have read and understood the [contribution guidelines](https://github.com/meshtastic/Meshtastic-Android/blob/main/README.md#contributing).
           required: true
-        - label: "I agree to follow this project's Code of Conduct"
+        - label: |
+            I agree to follow this project's Code of Conduct
           required: true
 
   - type: input
@@ -44,7 +50,8 @@ body:
       label: Affected app version
       description: |
         In which Meshtastic-Android app version did you encounter the bug?
-      placeholder: "x.y.z-channel.x (build) flavor - Can be seen on the bottom of the `Settings` screen in the app."
+        Can be seen on the bottom of the `Settings` screen in the app.
+      placeholder: "x.y.z-channel.x (build) flavor"
     validations:
       required: true
 
@@ -139,7 +146,7 @@ body:
         - Mesh logs:  UI issues, communication issues etc.
           - ` App > Settings > Advanced >  Debug Panel > Export specific / export all `
         - Broader Android logs: Potentially useful if the issue goes beyond the app (connections, network etc.)
-            - `adb logcat -d`
+             `adb logcat -d`
         - Firmware logs: Useful for all connection issues with nodes
           - These are piped to the USB serial port on the node, the most foolproof is to use the 'open serial' button on the web-flasher interface, and then save the output.
             - The app needs to be connecting to the node via Bluetooth or Network for this to work.
