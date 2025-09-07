@@ -104,13 +104,6 @@ body:
       required: true
 
   - type: textarea
-    id: expected-behavior
-    attributes:
-      label: Expected behavior
-      description: |
-        Tell us what you expect to happen.
-
-  - type: textarea
     id: actual-behavior
     attributes:
       label: Actual behavior
@@ -118,14 +111,22 @@ body:
         Tell us what happens with the steps given above.
 
   - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: |
+        Tell us what you expect to happen.
+
+  - type: textarea
     id: screen-media
     attributes:
       label: Screenshots/Screen recordings
       description: |
         A picture or video is worth a thousand words.
+        Provide as much context as possible so we know what we are looking at.
 
-        If applicable, add screenshots or a screen recording to help explain your problem.
-        GitHub supports uploading them directly in the text box.
+        Add screenshots or a screen recording to help explain your problem, provide detailed context to help us know what to look for.
+        GitHub supports uploads of images and (small) videos directly in the text box.
 
   - type: textarea
     id: logs
@@ -134,13 +135,12 @@ body:
       description: |
         Logs help us to diagnose and reproduce issues, particularly when they are unique to your setup.
         Depending on the issue, the following logs may be useful:
-        - App logs: This will help with most issues.
-          - If you are using the `google` flavor of the app, crash reports are sent automatically.
-          - If you are using the `fdroid` flavor, please provide the output of `logcat`. You can use the following command to capture logs:
+        - App logs: This will help with most issues. If possible, provide the relevant output of:
             `adb logcat -d | grep com.geeksville.mesh`
         - Mesh logs:  UI issues, communication issues etc.
           - ` App > Settings > Advanced >  Debug Panel > Export specific / export all `
-        - Android logs: Potentially useful if the issue goes beyond the app (connections, network etc.)
+        - Broader Android logs: Potentially useful if the issue goes beyond the app (connections, network etc.)
+            - `adb logcat -d`
         - Firmware logs: Useful for all connection issues with nodes
           - These are piped to the USB serial port on the node, the most foolproof is to use the 'open serial' button on the web-flasher interface, and then save the output.
             - The app needs to be connecting to the node via Bluetooth or Network for this to work.
@@ -159,4 +159,5 @@ body:
         * your ferret chewed your antennas
         * you are using a VPN
         * you live in a faraday cage
+        * you dismissed all popups telling you not to do things you shouldn't do without reading them
         * ...

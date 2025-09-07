@@ -37,7 +37,9 @@ body:
     id: reason
     attributes:
       label: Why should this be added?
-      description: What problem does the feature solve? In what use-cases is the feature needed?
+      description: |
+        What problem does the feature solve? In what use-cases is the feature needed?
+        Is this supported by the firmware? Please provide links to relevant firmware issues or PRs if applicable.
   - type: textarea
     id: screenshots
     attributes:
