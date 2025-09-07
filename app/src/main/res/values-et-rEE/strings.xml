@@ -192,7 +192,7 @@
     <string name="bluetooth_disabled">Sinihammas keelatud. Luba see sätetes.</string>
     <string name="open_settings">Ava seaded</string>
     <string name="firmware_version">Püsivara versioon: %1$s</string>
-    <string name="permission_missing_31">Meshtastic vajab seadmete leidmiseks ja nendega sinihamba ​​kaudu ühenduse loomiseks „Lähi seadmed” luba. Saate selle keelata, kui seda ei kasutata.</string>
+    <string name="permission_missing_31">Meshtastic vajab seadmete leidmiseks ja nendega sinihamba ​​kaudu ühenduse loomiseks „Lähi-seadmed” luba. Saate selle keelata, kui seda ei kasutata.</string>
     <string name="direct_message">Otsesõnum</string>
     <string name="nodedb_reset">NodeDB lähtestamine</string>
     <string name="delivery_confirmed">Kohale toimetatud</string>
