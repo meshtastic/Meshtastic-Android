@@ -377,7 +377,7 @@ class MeshServiceNotifications(private val context: Context) {
     }
 
     private fun createOpenMessageIntent(contactKey: String): PendingIntent {
-        val deepLinkUri = "$DEEP_LINK_BASE_URI/messages/$contactKey".toUri()
+        val deepLinkUri = "$DEEP_LINK_BASE_URI/messages?contactKey=$contactKey".toUri()
         val deepLinkIntent =
             Intent(Intent.ACTION_VIEW, deepLinkUri, context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_SINGLE_TOP

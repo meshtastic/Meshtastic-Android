@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.contact
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -44,13 +45,20 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
+import androidx.compose.material3.adaptive.layout.AnimatedPane
+import androidx.compose.material3.adaptive.layout.ListDetailPaneScaffoldRole
+import androidx.compose.material3.adaptive.navigation.NavigableListDetailPaneScaffold
+import androidx.compose.material3.adaptive.navigation.rememberListDetailPaneScaffoldNavigator
 import androidx.compose.material3.animateFloatingActionButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,18 +74,36 @@ import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.ui.common.components.MainAppBar
+import com.geeksville.mesh.ui.message.MessageScreen
+import com.geeksville.mesh.ui.node.components.NodeMenuAction
+import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@OptIn(ExperimentalMaterial3AdaptiveApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod")
 @Composable
-fun ContactsScreen(
+fun Contacts(
+    contactKey: String?,
+    message: String?,
     uiViewModel: UIViewModel = hiltViewModel(),
-    onNavigateToMessages: (String) -> Unit = {},
     onNavigateToNodeDetails: (Int) -> Unit = {},
     onNavigateToShare: () -> Unit,
+    onNavigateToQuickChat: () -> Unit,
 ) {
+    val navigator = rememberListDetailPaneScaffoldNavigator<String>()
+    val coroutineScope = rememberCoroutineScope()
     val isConnected by uiViewModel.isConnectedStateFlow.collectAsStateWithLifecycle()
+    val ourNode by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+
+    LaunchedEffect(contactKey) {
+        if (contactKey != null) {
+            navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, contactKey)
+        }
+    }
+
+    BackHandler(navigator.canNavigateBack()) { coroutineScope.launch { navigator.navigateBack() } }
+
     var showMuteDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -94,86 +120,124 @@ fun ContactsScreen(
     val selectedCount = remember(selectedContacts) { selectedContacts.sumOf { it.messageCount } }
     val isAllMuted = remember(selectedContacts) { selectedContacts.all { it.isMuted } }
 
-    // Callback functions for item interaction
-    val onContactClick: (Contact) -> Unit = { contact ->
-        if (isSelectionModeActive) {
-            // If in selection mode, toggle selection
-            if (selectedContactKeys.contains(contact.contactKey)) {
-                selectedContactKeys.remove(contact.contactKey)
-            } else {
-                selectedContactKeys.add(contact.contactKey)
-            }
-        } else {
-            // If not in selection mode, navigate to messages
-            onNavigateToMessages(contact.contactKey)
-        }
-    }
-
-    val onNodeChipClick: (Contact) -> Unit = { contact ->
-        if (contact.contactKey.contains("!")) {
-            // if it's a node, look up the nodeNum including the !
-            val nodeKey = contact.contactKey.substring(1)
-            val node = uiViewModel.getNode(nodeKey)
-
-            if (node != null) {
-                // navigate to node details.
-                onNavigateToNodeDetails(node.num)
-            }
-        } else {
-            // Channels
-        }
-    }
-
-    val onContactLongClick: (Contact) -> Unit = { contact ->
-        // Enter selection mode and select the item on long press
-        if (!isSelectionModeActive) {
-            selectedContactKeys.add(contact.contactKey)
-        } else {
-            // If already in selection mode, toggle selection
-            if (selectedContactKeys.contains(contact.contactKey)) {
-                selectedContactKeys.remove(contact.contactKey)
-            } else {
-                selectedContactKeys.add(contact.contactKey)
-            }
-        }
-    }
-    Scaffold(
-        topBar = {
-            if (isSelectionModeActive) {
-                // Display selection toolbar when in selection mode
-                SelectionToolbar(
-                    selectedCount = selectedContactKeys.size,
-                    onCloseSelection = { selectedContactKeys.clear() },
-                    onMuteSelected = { showMuteDialog = true },
-                    onDeleteSelected = { showDeleteDialog = true },
-                    onSelectAll = {
-                        selectedContactKeys.clear()
-                        selectedContactKeys.addAll(contacts.map { it.contactKey })
+    NavigableListDetailPaneScaffold(
+        navigator = navigator,
+        listPane = {
+            AnimatedPane {
+                Scaffold(
+                    floatingActionButton = {
+                        FloatingActionButton(
+                            modifier =
+                            Modifier.animateFloatingActionButton(
+                                visible = isConnected,
+                                alignment = Alignment.BottomEnd,
+                            ),
+                            onClick = onNavigateToShare,
+                        ) {
+                            Icon(Icons.Rounded.QrCode2, contentDescription = null)
+                        }
                     },
-                    isAllMuted = isAllMuted, // Pass the derived state
-                )
+                    topBar = {
+                        if (isSelectionModeActive) {
+                            SelectionToolbar(
+                                selectedCount = selectedContactKeys.size,
+                                onCloseSelection = { selectedContactKeys.clear() },
+                                onMuteSelected = { showMuteDialog = true },
+                                onDeleteSelected = { showDeleteDialog = true },
+                                onSelectAll = {
+                                    selectedContactKeys.clear()
+                                    selectedContactKeys.addAll(contacts.map { it.contactKey })
+                                },
+                                isAllMuted = isAllMuted, // Pass the derived state
+                            )
+                        } else {
+                            MainAppBar(
+                                title = stringResource(R.string.app_name),
+                                subtitle = stringResource(R.string.conversations),
+                                canNavigateUp = false,
+                                ourNode = ourNode,
+                                isConnected = isConnected,
+                                showNodeChip = ourNode != null && isConnected,
+                                onNavigateUp = {},
+                                actions = {},
+                                onAction = {
+                                    if (it is NodeMenuAction.MoreDetails) {
+                                        onNavigateToNodeDetails(it.node.num)
+                                    } else {
+                                        uiViewModel.handleNodeMenuAction(it)
+                                    }
+                                },
+                            )
+                        }
+                    },
+                ) { contentPadding ->
+                    Column(modifier = Modifier.padding(contentPadding)) {
+                        val channels by uiViewModel.channels.collectAsStateWithLifecycle()
+                        ConversationsListScreen(
+                            contacts = contacts,
+                            selectedList = selectedContactKeys,
+                            onClick = {
+                                if (isSelectionModeActive) {
+                                    // If in selection mode, toggle selection
+                                    if (selectedContactKeys.contains(it.contactKey)) {
+                                        selectedContactKeys.remove(it.contactKey)
+                                    } else {
+                                        selectedContactKeys.add(it.contactKey)
+                                    }
+                                } else {
+                                    coroutineScope.launch {
+                                        navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, it.contactKey)
+                                    }
+                                }
+                            },
+                            onLongClick = {
+                                // Enter selection mode and select the item on long press
+                                if (!isSelectionModeActive) {
+                                    selectedContactKeys.add(it.contactKey)
+                                } else {
+                                    // If already in selection mode, toggle selection
+                                    if (selectedContactKeys.contains(it.contactKey)) {
+                                        selectedContactKeys.remove(it.contactKey)
+                                    } else {
+                                        selectedContactKeys.add(it.contactKey)
+                                    }
+                                }
+                            },
+                            channels = channels,
+                            onNodeChipClick = {
+                                if (it.contactKey.contains("!")) {
+                                    // if it's a node, look up the nodeNum including the !
+                                    val nodeKey = it.contactKey.substring(1)
+                                    val node = uiViewModel.getNode(nodeKey)
+
+                                    onNavigateToNodeDetails(node.num)
+                                } else {
+                                    // Channels
+                                }
+                            },
+                        )
+                    }
+                }
             }
         },
-        floatingActionButton = {
-            FloatingActionButton(
-                modifier = Modifier.animateFloatingActionButton(visible = isConnected, alignment = Alignment.BottomEnd),
-                onClick = onNavigateToShare,
-            ) {
-                Icon(Icons.Rounded.QrCode2, contentDescription = null)
+        detailPane = {
+            AnimatedPane {
+                navigator.currentDestination?.contentKey?.let { key ->
+                    MessageScreen(
+                        contactKey = key,
+                        message = message ?: "",
+                        viewModel = uiViewModel,
+                        navigateToMessages = {
+                            coroutineScope.launch { navigator.navigateTo(ListDetailPaneScaffoldRole.Detail, it) }
+                        },
+                        navigateToNodeDetails = onNavigateToNodeDetails,
+                        navigateToQuickChatOptions = onNavigateToQuickChat,
+                        onNavigateBack = { coroutineScope.launch { navigator.navigateBack() } },
+                    )
+                }
             }
         },
-    ) { paddingValues ->
-        val channels by uiViewModel.channels.collectAsStateWithLifecycle()
-        ContactListView(
-            contacts = contacts,
-            selectedList = selectedContactKeys,
-            onClick = onContactClick,
-            onLongClick = onContactLongClick,
-            contentPadding = paddingValues,
-            channels = channels,
-            onNodeChipClick = onNodeChipClick,
-        )
-    }
+    )
     DeleteConfirmationDialog(
         showDialog = showDeleteDialog,
         selectedCount = selectedCount,
@@ -346,12 +410,12 @@ fun SelectionToolbar(
 }
 
 @Composable
-fun ContactListView(
+fun ConversationsListScreen(
     contacts: List<Contact>,
     selectedList: List<String>,
     onClick: (Contact) -> Unit,
     onLongClick: (Contact) -> Unit,
-    contentPadding: PaddingValues,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
     channels: AppOnlyProtos.ChannelSet? = null,
     onNodeChipClick: (Contact) -> Unit,
 ) {

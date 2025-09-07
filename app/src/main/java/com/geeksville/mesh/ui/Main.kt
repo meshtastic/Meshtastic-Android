@@ -93,7 +93,7 @@ import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.service.MeshService
-import com.geeksville.mesh.ui.common.components.MainAppBar
+import com.geeksville.mesh.ui.common.components.GlobalAppBar
 import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
@@ -116,7 +116,7 @@ import kotlinx.coroutines.launch
 import kotlin.reflect.KClass
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
-    Conversations(R.string.conversations, MeshtasticIcons.Conversations, ContactsRoutes.ContactsGraph),
+    Conversations(R.string.conversations, MeshtasticIcons.Conversations, ContactsRoutes.Messages()),
     Nodes(R.string.nodes, MeshtasticIcons.Nodes, NodesRoutes.NodesGraph),
     Map(R.string.map, MeshtasticIcons.Map, MapRoutes.Map),
     Settings(R.string.bottom_nav_settings, MeshtasticIcons.Settings, SettingsRoutes.SettingsGraph()),
@@ -125,7 +125,7 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
 
     companion object {
         fun NavDestination.isTopLevel(): Boolean = listOf<KClass<out Route>>(
-            ContactsRoutes.Contacts::class,
+            ContactsRoutes.Messages::class,
             NodesRoutes.Nodes::class,
             MapRoutes.Map::class,
             ConnectionsRoutes.Connections::class,
@@ -343,7 +343,7 @@ fun MainScreen(
                 if (sharedContact != null) {
                     SharedContactDialog(contact = sharedContact, onDismiss = { sharedContact = null })
                 }
-                MainAppBar(
+                GlobalAppBar(
                     viewModel = uIViewModel,
                     navController = navController,
                     onAction = { action ->

@@ -60,7 +60,7 @@ import com.geeksville.mesh.ui.node.components.NodeMenuAction
 
 @Suppress("CyclomaticComplexMethod")
 @Composable
-fun MainAppBar(
+fun GlobalAppBar(
     modifier: Modifier = Modifier,
     viewModel: UIViewModel = hiltViewModel(),
     navController: NavHostController,
@@ -123,7 +123,7 @@ fun MainAppBar(
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
-private fun MainAppBar(
+fun MainAppBar(
     modifier: Modifier = Modifier,
     title: String,
     subtitle: String? = null,
