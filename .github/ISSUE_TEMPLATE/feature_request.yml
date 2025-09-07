@@ -8,16 +8,31 @@ body:
     id: checklist
     attributes:
       label: Checklist
+      description: |
+        Please make sure you have done the following before submitting your feature request.
+        Requests that do not meet these criteria will be closed.
+        Links:  
+          [**OPEN ISSUES**](https://github.com/meshtastic/Meshtastic-Android/issues)
+          [**CLOSED ISSUES**](https://github.com/meshtastic/Meshtastic-Android/issues?q=is%3Aissue+is%3Aclosed)
+          [Contribution Guidelines](https://github.com/meshtastic/Meshtastic-Android/blob/main/README.md#contributing)
       options:
-        - label: "I have used the search function for [**OPEN**](https://github.com/meshtastic/Meshtastic-Android/issues) issues to see if someone else has already submitted the same feature request."
+        - label:
+            I have used the search function for **OPEN ISSUES** to see if someone else has already submitted the same feature request.
           required: true
-        - label: "I have **also** used the search function for [**CLOSED**](https://github.com/meshtastic/Meshtastic-Android/issues?q=is%3Aissue+is%3Aclosed) issues to see if the feature was already implemented and is just waiting to be released, or if the feature was rejected."
+        - label: |
+            I have **also** used the search function for **CLOSED ISSUES** to see if the feature was already implemented and is just waiting to be released, or if the feature was rejected.
           required: true
-        - label: "I will describe the request with as much detail as possible."
+        - label: |
+            I will describe the request with as much detail as possible.
           required: true
-        - label: "This request contains only one single feature, **not** a list of multiple (related) features."
+        - label: |
+            This request contains only one single feature, **not** a list of multiple (related) features.
           required: true
-        - label: "I agree to follow this project's Code of Conduct"
+        - label: |
+            I have read and understood the **Contribution Guidelines**.
+          required: true
+        - label: |
+            I agree to follow this project's Code of Conduct
           required: true
   - type: input
     id: contact

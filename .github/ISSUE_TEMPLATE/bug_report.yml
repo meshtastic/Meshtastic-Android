@@ -24,12 +24,20 @@ body:
     id: checklist
     attributes:
       label: "Checklist"
+      description: |
+        Please make sure you have done the following before submitting your bug report.
+        Bug reports that do not meet these criteria will be closed.
+        Requests that do not meet these criteria will be closed.
+        Links:
+          [**OPEN ISSUES**](https://github.com/meshtastic/Meshtastic-Android/issues)
+          [**CLOSED ISSUES**](https://github.com/meshtastic/Meshtastic-Android/issues?q=is%3Aissue+is%3Aclosed)
+          [Contribution Guidelines](https://github.com/meshtastic/Meshtastic-Android/blob/main/README.md#contributing)
       options:
         - label: |
-            I am able to reproduce the bug with the latest version given here: [CLICK THIS LINK](https://github.com/meshtastic/Meshtastic-Android/releases/latest).
+            I am able to reproduce the bug with the latest version.
           required: true
         - label: |
-            I made sure that there are *no existing issues* - [open](https://github.com/meshtastic/Meshtastic-Android/issues) or [closed](https://github.com/meshtastic/Meshtastic-Android/issues?q=is%3Aissue+is%3Aclosed) - which I could contribute my information to.
+            I made sure that there are no existing **OPEN or CLOSED issues** which I could contribute my information to.
           required: true
         - label: |
             I have taken the time to fill in all the required details. I understand that the bug report will be dismissed otherwise.
@@ -38,7 +46,7 @@ body:
             This issue contains only one bug.
           required: true
         - label: |
-            I have read and understood the [contribution guidelines](https://github.com/meshtastic/Meshtastic-Android/blob/main/README.md#contributing).
+            I have read and understood the **Contribution Guidelines**.
           required: true
         - label: |
             I agree to follow this project's Code of Conduct
