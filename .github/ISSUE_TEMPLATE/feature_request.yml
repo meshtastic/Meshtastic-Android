@@ -5,10 +5,21 @@ labels: [enhancement]
 type: Feature
 projects: [meshtastic/Meshtastic-Android]
 body:
-  - type: markdown
+  - type: checkboxes
+    id: checklist
     attributes:
-      value: |
-        Thanks for taking the time to fill out this feature request!
+      label: Checklist
+      options:
+        - label: "I have used the search function for [**OPEN**](https://github.com/meshtastic/Meshtastic-Android/issues) issues to see if someone else has already submitted the same feature request."
+          required: true
+        - label: "I have **also** used the search function for [**CLOSED**](https://github.com/meshtastic/Meshtastic-Android/issues?q=is%3Aissue+is%3Aclosed) issues to see if the feature was already implemented and is just waiting to be released, or if the feature was rejected."
+          required: true
+        - label: "I will describe the request with as much detail as possible".
+          required: true
+        - label: "This request contains only one single feature, **not** a list of multiple (related) features."
+          required: true
+        - label: "I agree to follow this project's Code of Conduct"
+          required: true
   - type: input
     id: contact
     attributes:
@@ -18,25 +29,17 @@ body:
     validations:
       required: false
   - type: textarea
-    id: request
+    id: feature
     attributes:
-      label: Tell us your idea.
-      description: Tell us what you'd like the app to do. Give as much detail as you can.
-      placeholder: Your idea
-      value: I'd like the app to...
-    validations:
-      required: true
+      label: Feature or improvement you want
+      description: Try to be as specific as possible. Please not only explain what the feature does, but also how.
   - type: textarea
-    id: logs
+    id: reason
     attributes:
-      label: Relevant log output
-      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
-      render: shell
-  - type: checkboxes
-    id: terms
+      label: Why should this be added?
+      description: What problem does the feature solve? In what use-cases is the feature needed?
+  - type: textarea
+    id: screenshots
     attributes:
-      label: Code of Conduct
-      description: By submitting this issue, you agree to follow our [Code of Conduct](https://meshtastic.org/docs/legal/conduct/).
-      options:
-        - label: I agree to follow this project's Code of Conduct
-          required: true
+      label: Screenshots / Drawings / Technical details
+      description: If your request is about (or includes) changing or extending the UI, describe what the UI would look like and how the user would interact with it.

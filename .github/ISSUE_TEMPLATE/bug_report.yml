@@ -8,7 +8,10 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for taking the time to fill out this bug report!
+        Thank you for helping to make Meshtastic-Android better by reporting a bug. :hugs:
+
+        Please provide as much detail as possible so we can efficiently address your issue and avoid unnecessary back-and-forth.
+
   - type: input
     id: contact
     attributes:
@@ -17,88 +20,143 @@ body:
       placeholder: ex. email@example.com, discord username
     validations:
       required: false
-  - type: textarea
-    id: what-happened
+
+  - type: checkboxes
+    id: checklist
     attributes:
-      label: What happened?
-      description: Also tell us, what did you expect to happen?
-      placeholder: Tell us what you see!
-      value: A bug happened!
-    validations:
-      required: true
-  - type: textarea
-    id: app_version
+      label: "Checklist"
+      options:
+        - label: "I am able to reproduce the bug with the latest version given here: [CLICK THIS LINK](https://github.com/meshtastic/Meshtastic-Android/releases/latest)."
+          required: true
+        - label: "I made sure that there are *no existing issues* - [open](https://github.com/meshtastic/Meshtastic-Android/issues) or [closed](https://github.com/meshtastic/Meshtastic-Android/issues?q=is%3Aissue+is%3Aclosed) - which I could contribute my information to."
+          required: true
+        - label: "I have taken the time to fill in all the required details. I understand that the bug report will be dismissed otherwise."
+          required: true
+        - label: "This issue contains only one bug."
+          required: true
+        - label: "I have read and understood the [contribution guidelines](https://github.com/meshtastic/Meshtastic-Android/blob/main/README.md#contributing)."
+          required: true
+        - label: "I agree to follow this project's Code of Conduct"
+          required: true
+
+  - type: input
+    id: app-version
     attributes:
-      label: App Version
-      description: What version of Meshtastic Android are you running?
-      placeholder: 2.4.1
-    validations:
-      required: true
-  - type: textarea
-    id: phone
-    attributes:
-      label: Phone
-      description: What phone/tablet and OS are you running it on?
-      placeholder: Pixel 8a, Android 15
-    validations:
-      required: true
-  - type: textarea
-    id: radio
-    attributes:
-      label: Device
-      description: Which meshtastic radio device are you connecting to?
-      placeholder: heltec v3
-    validations:
-      required: true
-  - type: textarea
-    id: firmware
-    attributes:
-      label: Firmware
-      description: Which meshtastic firmware is running on the device?
-      placeholder: 2.4.1.394e0e1 Beta
+      label: Affected app version
+      description: |
+        In which Meshtastic-Android app version did you encounter the bug?
+      placeholder: "x.y.z-channel.x (build) flavor - Can be seen in the `release` section of the repository."
     validations:
       required: true
 
-  - type: markdown
+  - type: input
+    id: phone-os
     attributes:
-      value: |
-        Logs help us to diagnose and reproduce issues, particularly when they are unique to your setup.
-        Depending on the issue, the following logs may be useful:
-        - App logs: This will help with most issues.
-            - Use logcat (with Android studio is simplest) and filter by com.geeksville.mesh
-        - Mesh logs:  UI issues, communication issues etc.
-            - ` App > Menu > Debug Panel > Export specific / export all `
-        - Android logs: Potentially useful if the issue goes beyond the app (connections, network etc.)
-            - Use logcat (with Android studio is simplest) and figure out what filters are needed to show us what is going wrong.
-        - Firmware logs: Useful for all connection issues with nodes
-          - These are piped to the USB serial port on the node, the most foolproof is to use the 'open serial' button on the web-flasher interface, and then save the output.
-            - You need to be connecting to the node via Bluetooth or Network for this to work.
-  - type: markdown
+      label: Affected Android version
+      description: |
+        With what operating system (+ version) did you encounter the bug?
+      placeholder: "Example: Android 14"
+    validations:
+      required: true
+
+  - type: input
+    id: phone-model
     attributes:
-      value: |
-        ### Relevant log output
-        <!--
-          uncomment this section to fold logs
-          <details>
-          <summary>Expand Logs ... </summary>
-        -->
+      label: Affected phone model
+      description: |
+        On what phone did you encounter the bug?
+      placeholder: "Example: Samsung Galaxy S20 / Google Pixel 8"
+    validations:
+      required: true
+
+  - type: input
+    id: hardware-model
+    attributes:
+      label: Affected node model
+      placeholder: "Example: Seeed T1000-E, Heltec v3, etc."
+      description: |
+        On which hardware device (Node) did you encounter the bug?
+    validations:
+      required: true
+
+  - type: input
+    id: firmware-version
+    attributes:
+      label: Affected node firmware version
+      placeholder: "x.x.x"
+      description: "Which Meshtastic firmware version did you encounter the bug?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to reproduce the bug
+      description: |
+        What did you do for the bug to show up?
+
+        If you can't cause the bug to show up again reliably (and hence don't have a proper set of steps to give us), please still try to give as many details as possible on how you think you encountered the bug.
+      placeholder: |
+        1. Go to '...'
+        2. Press on '....'
+        3. Swipe down to '....'
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected behavior
+      description: |
+        Tell us what you expect to happen.
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual behavior
+      description: |
+        Tell us what happens with the steps given above.
+
+  - type: textarea
+    id: screen-media
+    attributes:
+      label: Screenshots/Screen recordings
+      description: |
+        A picture or video is worth a thousand words.
+
+        If applicable, add screenshots or a screen recording to help explain your problem.
+        GitHub supports uploading them directly in the text box.
+
   - type: textarea
     id: logs
     attributes:
       label: Relevant log output
-      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      description: |
+        Logs help us to diagnose and reproduce issues, particularly when they are unique to your setup.
+        Depending on the issue, the following logs may be useful:
+        - App logs: This will help with most issues.
+          - If you are using the `google` flavor of the app, crash reports are sent automatically.
+          - If you are using the `fdroid` flavor, please provide the output of `logcat`. You can use the following command to capture logs:
+            `adb logcat -d | grep com.geeksville.mesh`
+        - Mesh logs:  UI issues, communication issues etc.
+          - ` App > Menu > Debug Panel > Export specific / export all `
+        - Android logs: Potentially useful if the issue goes beyond the app (connections, network etc.)
+        - Firmware logs: Useful for all connection issues with nodes
+          - These are piped to the USB serial port on the node, the most foolproof is to use the 'open serial' button on the web-flasher interface, and then save the output.
+            - The app needs to be connecting to the node via Bluetooth or Network for this to work.
       render: shell
-  - type: markdown
+
+  - type: textarea
+    id: additional-information
     attributes:
-      value: |
-        <!--
-          </details>
-        -->
-  - type: checkboxes
-    id: terms
-    attributes:
-      label: Code of Conduct
-      description: By submitting this issue, you agree to follow our [Code of Conduct](https://meshtastic.org/docs/legal/conduct/).
-      options:
-        - label: I agree to follow this project's Code of Conduct
-          required: true
+      label: Additional information
+      description: |
+        Any other information you'd like to include, for instance that
+        * the affected device is foldable or a TV
+        * you have disabled all animations on your device or otherwise changed system settings
+        * you are using battery optimization or power saving mode
+        * you are using a custom Android ROM or launcher
+        * your ferret chewed your antennas
+        * you are using a VPN
+        * you live in a faraday cage
+        * ...
