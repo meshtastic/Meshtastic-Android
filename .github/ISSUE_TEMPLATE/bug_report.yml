@@ -45,7 +45,7 @@ body:
       label: Affected app version
       description: |
         In which Meshtastic-Android app version did you encounter the bug?
-      placeholder: "x.y.z-channel.x (build) flavor - Can be seen in the `release` section of the repository."
+      placeholder: "x.y.z-channel.x (build) flavor - Can be seen on the bottom of the `Settings` screen in the app."
     validations:
       required: true
 
