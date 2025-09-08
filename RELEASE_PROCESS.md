@@ -5,8 +5,8 @@ zzThis document outlines the steps for releasing a new version of the Meshtastic
 **Note on Automation:** The `release.yml` GitHub Action is primarily triggered by **pushing a Git tag** matching the pattern `v*` (e.g., `v1.2.3`, `v1.2.3-open.1`). It can also be manually triggered via `workflow_dispatch` from the GitHub Actions UI (select the desired branch/tag/commit).
 
 The workflow automatically:
-*   Determines version information (version name from the tag, version code via a script).
-*   Builds F-Droid (APK) and Google (AAB, APK) artifacts in parallel.
+*   Determines version information from the tag.
+*   Builds F-Droid (APK) and Google (AAB, APK) artifacts. If artifacts for the same commit SHA have been built before, it will use the cached artifacts instead of rebuilding.
 *   Generates a changelog.
 *   Creates a **draft GitHub Release**. The release is marked as a "pre-release" if the tag name contains `-internal`, `-closed`, or `-open`.
 *   Attaches build artifacts, `version_info.txt`, and `changelog.txt` to the draft GitHub Release.
