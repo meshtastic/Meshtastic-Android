@@ -47,9 +47,13 @@ jobs:
         id: get_version_name
         run: echo "APP_VERSION_NAME=$(echo ${GITHUB_REF_NAME#v} | sed 's/-.*//')" >> $GITHUB_OUTPUT
 
-      - name: Calculate Version Code from Timestamp
+      - name: Calculate Version Code from Epoch
         id: calculate_version_code
-        run: echo "versionCode=$(date +'%y%m%d%H%M')" >> $GITHUB_OUTPUT
+        # We use epoch minutes to ensure a unique, always-incrementing version code.
+        # This is compatible with our release strategy of tagging the same commit for different
+        # channels (internal, closed, open, prod), as each build needs a unique code.
+        # This will overflow Integer.MAX_VALUE in the year 6052, hopefully we'll have moved on by then.
+        run: echo "versionCode=$(( $(date +%s) / 60 ))" >> $GITHUB_OUTPUT
 
   build-fdroid:
     runs-on: ubuntu-latest

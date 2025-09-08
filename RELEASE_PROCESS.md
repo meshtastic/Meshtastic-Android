@@ -6,7 +6,7 @@ This document outlines the steps for releasing a new version of the Meshtastic-A
 
 The workflow uses a simple and robust **"upload-only"** model. It automatically:
 *   Determines a `versionName` from the Git tag.
-*   Generates a unique, always-increasing `versionCode` based on the current timestamp (e.g., `2408231530`). This prevents all `versionCode` conflicts.
+*   Generates a unique, always-increasing `versionCode` based on the number of minutes since the Unix epoch. This prevents `versionCode` conflicts and will not overflow until the year 6052.
 *   Builds fresh F-Droid (APK) and Google (AAB, APK) artifacts for every run.
 *   Creates a **draft GitHub Release** and attaches the artifacts.
 *   Attests build provenance for the artifacts.
@@ -57,7 +57,7 @@ If you discover a critical bug in a build, the process is simple:
     git tag v1.2.3-internal.2
     git push origin v1.2.3-internal.2
     ```
-3.  **A New Build is Uploaded:** The workflow will run, generate a new timestamp-based `versionCode`, and upload a fresh build to the `internal` track. There is no risk of a `versionCode` collision.
+3.  **A New Build is Uploaded:** The workflow will run, generate a new epoch-minute-based `versionCode`, and upload a fresh build to the `internal` track. There is no risk of a `versionCode` collision.
 
 ## Managing Different Release Phases (Manual Steps Post-Workflow)
 
