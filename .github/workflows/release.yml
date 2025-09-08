@@ -259,7 +259,7 @@ jobs:
             echo "user_fraction=1.0" >> $GITHUB_OUTPUT
           elif [[ "$TAG_NAME" == *"-open"* ]]; then
             echo "track=beta" >> $GITHUB_OUTPUT
-            echo "from_track=alpha" >> $GITHUB_OUTPUT
+            echo "from_track=NewAlpha" >> $GITHUB_OUTPUT
             echo "action=promote" >> $GITHUB_OUTPUT
             echo "user_fraction=1.0" >> $GITHUB_OUTPUT
           else
