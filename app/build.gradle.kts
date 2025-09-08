@@ -32,6 +32,7 @@ plugins {
     alias(libs.plugins.datadog)
     alias(libs.plugins.secrets)
     alias(libs.plugins.spotless)
+    alias(libs.plugins.dokka)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -347,4 +348,9 @@ spotless {
         ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
         ktlint("1.7.1").setEditorConfigPath("../config/spotless/.editorconfig")
     }
+}
+
+tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
+    moduleName.set("Meshtastic App")
+    outputDirectory.set(file("build/dokka"))
 }

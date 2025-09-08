@@ -30,6 +30,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.protobuf) apply false
     alias(libs.plugins.secrets) apply false
+    alias(libs.plugins.dokka) apply false
 }
 
 tasks.register<Delete>("clean") {

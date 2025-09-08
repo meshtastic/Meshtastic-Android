@@ -55,6 +55,7 @@ work-runtime-ktx = "2.10.3"
 zxing-android-embedded = "4.3.0"
 zxing-core = "3.5.3"
 spotless = "7.2.1"
+dokka = "2.0.0"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -217,6 +218,7 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version.ref = "dd-sdk-android-gradle-plugin" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "devtools-ksp" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics" , version.ref = "crashlytics" }
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
