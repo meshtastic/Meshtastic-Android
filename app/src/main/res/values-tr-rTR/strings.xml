@@ -594,6 +594,8 @@
     <string name="dynamic">Dinamik</string>
     <string name="scan_qr_code">QR Kodu Tara</string>
     <string name="share_contact">Kişiyi paylaş</string>
+    <string name="notes">Notes</string>
+    <string name="add_a_note">Add a private note…</string>
     <string name="import_shared_contact">Paylaşılan kişiyi içe aktar?</string>
     <string name="unmessageable">Mesaj gönderilemez</string>
     <string name="unmonitored_or_infrastructure">İzlenmeyen veya Altyapı</string>
