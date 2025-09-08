@@ -220,9 +220,7 @@ androidComponents {
     }
 }
 
-project.afterEvaluate {
-    logger.lifecycle("Version code is set to: ${android.defaultConfig.versionCode}")
-}
+project.afterEvaluate { logger.lifecycle("Version code is set to: ${android.defaultConfig.versionCode}") }
 
 dependencies {
     implementation(project(":network"))
