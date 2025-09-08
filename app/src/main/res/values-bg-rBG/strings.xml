@@ -594,6 +594,8 @@
     <string name="dynamic">Динамична</string>
     <string name="scan_qr_code">Сканиране на QR кода</string>
     <string name="share_contact">Споделяне на контакт</string>
+    <string name="notes">Notes</string>
+    <string name="add_a_note">Add a private note…</string>
     <string name="import_shared_contact">Импортиране на споделен контакт?</string>
     <string name="unmessageable">Без съобщения</string>
     <string name="unmonitored_or_infrastructure">Ненаблюдаван или инфраструктурен</string>
