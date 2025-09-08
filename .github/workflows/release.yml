@@ -270,7 +270,7 @@ jobs:
       - name: Attempt to Promote on Google Play
         id: promote
         if: success() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && steps.play_action.outputs.action == 'promote'
-        uses: kevin-david/promote-play-release@v1
+        uses: kevin-david/promote-play-release@v1.2.0
         continue-on-error: true
         with:
           service-account-json-raw: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
