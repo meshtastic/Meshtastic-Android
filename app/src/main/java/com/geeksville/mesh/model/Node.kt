@@ -52,6 +52,7 @@ data class Node(
     val powerMetrics: PowerMetrics = PowerMetrics.getDefaultInstance(),
     val paxcounter: PaxcountProtos.Paxcount = PaxcountProtos.Paxcount.getDefaultInstance(),
     val publicKey: ByteString? = null,
+    val notes: String = "",
 ) {
     val colors: Pair<Int, Int>
         get() { // returns foreground and background @ColorInt for each 'num'
