@@ -594,6 +594,8 @@
     <string name="dynamic">Dinamico</string>
     <string name="scan_qr_code">Scansiona codice QR</string>
     <string name="share_contact">Condividi contatto</string>
+    <string name="notes">Notes</string>
+    <string name="add_a_note">Add a private note…</string>
     <string name="import_shared_contact">Importare Contatto Condiviso?</string>
     <string name="unmessageable">Non messaggabile</string>
     <string name="unmonitored_or_infrastructure">Non monitorato o Infrastruttura</string>

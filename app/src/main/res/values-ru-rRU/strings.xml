@@ -598,6 +598,8 @@
     <string name="dynamic">Динамический</string>
     <string name="scan_qr_code">Сканировать QR код</string>
     <string name="share_contact">Поделиться контактом</string>
+    <string name="notes">Notes</string>
+    <string name="add_a_note">Add a private note…</string>
     <string name="import_shared_contact">Импортировать контакт?</string>
     <string name="unmessageable">Не отправляемо</string>
     <string name="unmonitored_or_infrastructure">Неконтролируемые или инфраструктура</string>

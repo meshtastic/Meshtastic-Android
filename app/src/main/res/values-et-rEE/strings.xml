@@ -594,6 +594,8 @@
     <string name="dynamic">Dünaamiline</string>
     <string name="scan_qr_code">Skanneeri QR kood</string>
     <string name="share_contact">Jaga kontakti</string>
+    <string name="notes">Notes</string>
+    <string name="add_a_note">Add a private note…</string>
     <string name="import_shared_contact">Impordi jagatud kontakt?</string>
     <string name="unmessageable">Ei võta sõnumeid vastu</string>
     <string name="unmonitored_or_infrastructure">Jälgimata või infrastruktuuripõhine</string>

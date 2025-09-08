@@ -596,6 +596,8 @@
     <string name="dynamic">Dynamic</string>
     <string name="scan_qr_code">Scan QR Code</string>
     <string name="share_contact">Share Contact</string>
+    <string name="notes">Notes</string>
+    <string name="add_a_note">Add a private note…</string>
     <string name="import_shared_contact">Import Shared Contact?</string>
     <string name="unmessageable">Unmessageable</string>
     <string name="unmonitored_or_infrastructure">Unmonitored or Infrastructure</string>
