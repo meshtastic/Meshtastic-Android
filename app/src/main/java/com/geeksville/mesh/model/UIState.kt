@@ -765,8 +765,10 @@ constructor(
     fun setNodeNotes(nodeNum: Int, notes: String) = viewModelScope.launch(Dispatchers.IO) {
         try {
             nodeDB.setNodeNotes(nodeNum, notes)
-        } catch (ex: Exception) {
-            errormsg("Set node notes error: ${ex.message}")
+        } catch (ex: java.io.IOException) {
+            errormsg("Set node notes IO error: ${ex.message}")
+        } catch (ex: java.sql.SQLException) {
+            errormsg("Set node notes SQL error: ${ex.message}")
         }
     }
 

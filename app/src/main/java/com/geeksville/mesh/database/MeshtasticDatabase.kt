@@ -43,7 +43,8 @@ import com.geeksville.mesh.database.entity.QuickChatAction
 import com.geeksville.mesh.database.entity.ReactionEntity
 
 @Database(
-    entities = [
+    entities =
+    [
         MyNodeEntity::class,
         NodeEntity::class,
         Packet::class,
@@ -55,7 +56,8 @@ import com.geeksville.mesh.database.entity.ReactionEntity
         DeviceHardwareEntity::class,
         FirmwareReleaseEntity::class,
     ],
-    autoMigrations = [
+    autoMigrations =
+    [
         AutoMigration(from = 3, to = 4),
         AutoMigration(from = 4, to = 5),
         AutoMigration(from = 5, to = 6),
@@ -80,28 +82,24 @@ import com.geeksville.mesh.database.entity.ReactionEntity
 @TypeConverters(Converters::class)
 abstract class MeshtasticDatabase : RoomDatabase() {
     abstract fun nodeInfoDao(): NodeInfoDao
+
     abstract fun packetDao(): PacketDao
+
     abstract fun meshLogDao(): MeshLogDao
+
     abstract fun quickChatActionDao(): QuickChatActionDao
+
     abstract fun deviceHardwareDao(): DeviceHardwareDao
+
     abstract fun firmwareReleaseDao(): FirmwareReleaseDao
 
     companion object {
-        fun getDatabase(context: Context): MeshtasticDatabase {
-
-            return Room.databaseBuilder(
-                context.applicationContext,
-                MeshtasticDatabase::class.java,
-                "meshtastic_database"
-            )
+        fun getDatabase(context: Context): MeshtasticDatabase =
+            Room.databaseBuilder(context.applicationContext, MeshtasticDatabase::class.java, "meshtastic_database")
                 .fallbackToDestructiveMigration(false)
                 .build()
-        }
     }
 }
 
-@DeleteTable.Entries(
-    DeleteTable(tableName = "NodeInfo"),
-    DeleteTable(tableName = "MyNodeInfo")
-)
+@DeleteTable.Entries(DeleteTable(tableName = "NodeInfo"), DeleteTable(tableName = "MyNodeInfo"))
 class AutoMigration12to13 : AutoMigrationSpec
