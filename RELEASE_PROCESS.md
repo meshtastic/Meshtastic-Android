@@ -6,7 +6,7 @@ This document outlines the steps for releasing a new version of the Meshtastic-A
 
 The workflow automatically:
 *   Determines version information from the tag.
-*   Builds F-Droid (APK) and Google (AAB, APK) artifacts.
+*   Builds F-Droid (APK) and Google (AAB, APK) artifacts. If artifacts for the same commit SHA have been built before, it will use the cached artifacts instead of rebuilding.
 *   Generates a changelog.
 *   Creates a **draft GitHub Release** and attaches the artifacts.
 *   Attests build provenance for the artifacts.

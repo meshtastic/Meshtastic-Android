@@ -61,13 +61,22 @@ jobs:
           fetch-depth: 0
           submodules: 'recursive'
 
+      - name: Restore F-Droid APK from cache
+        id: cache-restore-fdroid
+        uses: actions/cache@v4
+        with:
+          path: app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
+          key: build-artifacts-fdroid-${{ github.sha }}
+
       - name: Set up JDK 21
+        if: steps.cache-restore-fdroid.outputs.cache-hit != 'true'
         uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'jetbrains'
 
       - name: Setup Gradle
+        if: steps.cache-restore-fdroid.outputs.cache-hit != 'true'
         uses: gradle/actions/setup-gradle@v4
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
@@ -76,6 +85,7 @@ jobs:
           build-scan-terms-of-use-agree: 'yes'
 
       - name: Load Fdroid secrets
+        if: steps.cache-restore-fdroid.outputs.cache-hit != 'true'
         run: |
           echo $KEYSTORE | base64 -di > ./app/$KEYSTORE_FILENAME
           echo "$KEYSTORE_PROPERTIES" > ./keystore.properties
@@ -85,6 +95,7 @@ jobs:
           KEYSTORE_PROPERTIES: ${{ secrets.KEYSTORE_PROPERTIES }}
 
       - name: Build F-Droid Release APK
+        if: steps.cache-restore-fdroid.outputs.cache-hit != 'true'
         run: |
           ./gradlew :app:assembleFdroidRelease --parallel --continue --scan
         env:
@@ -108,13 +119,25 @@ jobs:
           fetch-depth: 0
           submodules: 'recursive'
 
+      - name: Restore build artifacts from cache
+        id: cache-restore-google
+        uses: actions/cache@v4
+        with:
+          path: |
+            app/build/outputs/bundle/googleRelease/app-google-release.aab
+            app/build/outputs/apk/google/release/app-google-release.apk
+            app/build/outputs/mapping/googleRelease/mapping.txt
+          key: build-artifacts-google-${{ github.sha }}
+
       - name: Set up JDK 21
+        if: steps.cache-restore-google.outputs.cache-hit != 'true'
         uses: actions/setup-java@v5
         with:
           java-version: '21'
           distribution: 'jetbrains'
 
       - name: Setup Gradle
+        if: steps.cache-restore-google.outputs.cache-hit != 'true'
         uses: gradle/actions/setup-gradle@v4
         with:
           cache-encryption-key: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
@@ -123,6 +146,7 @@ jobs:
           build-scan-terms-of-use-agree: 'yes'
 
       - name: Load Google secrets
+        if: steps.cache-restore-google.outputs.cache-hit != 'true'
         env:
           GSERVICES: ${{ secrets.GSERVICES }}
           KEYSTORE: ${{ secrets.KEYSTORE }}
@@ -141,6 +165,7 @@ jobs:
           echo "MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> ./secrets.properties
 
       - name: Build Google Release Artifacts (AAB and APK)
+        if: steps.cache-restore-google.outputs.cache-hit != 'true'
         run: |
           ./gradlew :app:bundleGoogleRelease :app:assembleGoogleRelease --parallel --continue --scan
         env:
