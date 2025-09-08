@@ -46,7 +46,7 @@ jobs:
         run: ./gradlew :app:dokkaHtml
 
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-pages-artifact@v4
         with:
           path: app/build/dokka
 
