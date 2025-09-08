@@ -157,4 +157,8 @@ constructor(
 
     val totalNodeCount: Flow<Int> =
         nodeInfoDao.nodeDBbyNum().mapLatest { map -> map.values.count() }.flowOn(dispatchers.io).conflate()
+
+    suspend fun setNodeNotes(num: Int, notes: String) = withContext(dispatchers.io) {
+        nodeInfoDao.setNodeNotes(num, notes)
+    }
 }

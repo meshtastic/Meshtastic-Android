@@ -23,6 +23,7 @@ import androidx.room.MapColumn
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import androidx.room.Upsert
 import com.geeksville.mesh.database.entity.MetadataEntity
 import com.geeksville.mesh.database.entity.MyNodeEntity
@@ -83,7 +84,8 @@ interface NodeInfoDao {
         return if (isPublicKeyMatchingOrExistingIsEmpty) {
             // Keys match or existing key was empty: trust the incoming node data completely.
             // This allows for legitimate updates to user info and other fields.
-            incomingNode
+            val resolvedNotes = if (incomingNode.notes.isBlank()) existingNode.notes else incomingNode.notes
+            incomingNode.copy(notes = resolvedNotes)
         } else {
             existingNode.copy(
                 lastHeard = incomingNode.lastHeard,
@@ -93,6 +95,7 @@ interface NodeInfoDao {
                 // to reflect the conflict state.
                 user = existingNode.user.toBuilder().setPublicKey(ByteString.EMPTY).build(),
                 publicKey = ByteString.EMPTY,
+                notes = existingNode.notes,
             )
         }
     }
@@ -216,4 +219,7 @@ interface NodeInfoDao {
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun putAll(nodes: List<NodeEntity>)
+
+    @Query("UPDATE nodes SET notes = :notes WHERE num = :num")
+    fun setNodeNotes(num: Int, notes: String)
 }

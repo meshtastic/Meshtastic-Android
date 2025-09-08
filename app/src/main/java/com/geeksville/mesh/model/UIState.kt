@@ -762,6 +762,14 @@ constructor(
         }
     }
 
+    fun setNodeNotes(nodeNum: Int, notes: String) = viewModelScope.launch(Dispatchers.IO) {
+        try {
+            nodeDB.setNodeNotes(nodeNum, notes)
+        } catch (ex: Exception) {
+            errormsg("Set node notes error: ${ex.message}")
+        }
+    }
+
     // managed mode disables all access to configuration
     val isManaged: Boolean
         get() = config.device.isManaged || config.security.isManaged
