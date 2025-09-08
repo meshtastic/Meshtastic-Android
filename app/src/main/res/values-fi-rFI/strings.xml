@@ -594,6 +594,8 @@
     <string name="dynamic">Dynaaminen</string>
     <string name="scan_qr_code">Skannaa QR-koodi</string>
     <string name="share_contact">Jaa yhteystieto</string>
+    <string name="notes">Notes</string>
+    <string name="add_a_note">Add a private note…</string>
     <string name="import_shared_contact">Tuo jaettu yhteystieto?</string>
     <string name="unmessageable">Ei vastaanota viestejä</string>
     <string name="unmonitored_or_infrastructure">Ei seurannassa tai toimii infrastruktuurilaitteena</string>
