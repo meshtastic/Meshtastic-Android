@@ -48,7 +48,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v4
         with:
-          path: app/build/dokka
+          path: app/build/dokka/html
 
   deploy:
     if: github.repository == 'meshtastic/Meshtastic-Android'
