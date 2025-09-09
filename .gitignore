@@ -32,3 +32,5 @@ keystore.properties
 
 # Secrets
 /secrets.properties
+/fastlane/play-store-credentials.json
+/fastlane/report.xml

@@ -1,0 +1,69 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:android)
+
+platform :android do
+  desc "Runs all the tests"
+  lane :test do
+    gradle(task: "test")
+  end
+
+  desc "Deploy a new version to the internal track on Google Play"
+  lane :internal do
+    gradle(task: "clean bundleGoogleRelease assembleGoogleRelease")
+    upload_to_play_store(
+      track: 'internal',
+      aab: "app/build/outputs/bundle/googleRelease/app-google-release.aab",
+      release_status: 'completed'
+    )
+  end
+
+  desc "Deploy a new version to the closed track on Google Play"
+  lane :closed do
+    gradle(task: "clean bundleGoogleRelease assembleGoogleRelease")
+    upload_to_play_store(
+      track: 'NewAlpha',
+      aab: "app/build/outputs/bundle/googleRelease/app-google-release.aab",
+      release_status: 'completed'
+    )
+  end
+
+  desc "Deploy a new version to the open track on Google Play"
+  lane :open do
+    gradle(task: "clean bundleGoogleRelease assembleGoogleRelease")
+    upload_to_play_store(
+      track: 'beta',
+      aab: "app/build/outputs/bundle/googleRelease/app-google-release.aab",
+      release_status: 'inProgress',
+      rollout: '0.25'
+    )
+  end
+
+  desc "Deploy a new version to the production track on Google Play"
+  lane :production do
+    gradle(task: "clean bundleGoogleRelease assembleGoogleRelease")
+    upload_to_play_store(
+      track: 'production',
+      aab: "app/build/outputs/bundle/googleRelease/app-google-release.aab",
+      release_status: 'draft'
+    )
+  end
+
+  desc "Build the F-Droid release"
+  lane :fdroid_build do
+    gradle(task: "clean assembleFdroidRelease")
+  end
+end
