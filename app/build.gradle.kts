@@ -16,6 +16,7 @@
  */
 
 import io.gitlab.arturbosch.detekt.Detekt
+import org.gradle.kotlin.dsl.invoke
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -288,6 +289,7 @@ dependencies {
     androidTestImplementation(libs.bundles.testing.room)
 
     detektPlugins(libs.detekt.formatting)
+    dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
 
 ksp {
@@ -350,7 +352,24 @@ spotless {
     }
 }
 
-tasks.withType<org.jetbrains.dokka.gradle.DokkaTask>().configureEach {
+dokka {
     moduleName.set("Meshtastic App")
-    outputDirectory.set(file("build/dokka"))
+    dokkaSourceSets.main {
+        sourceLink {
+            enableJdkDocumentationLink.set(true)
+            enableKotlinStdLibDocumentationLink.set(true)
+            enableJdkDocumentationLink.set(true)
+            reportUndocumented.set(true)
+            localDirectory.set(file("src/main/java"))
+            remoteUrl("https://github.com/geeksville/Meshtastic-Android/app/src/main/java")
+            remoteLineSuffix.set("#L")
+        }
+    }
+    dokkaPublications.html {
+        suppressInheritedMembers.set(true)
+    }
+    dokkaGeneratorIsolation = ProcessIsolation {
+        // Configures heap size
+        maxHeapSize = "6g"
+    }
 }
