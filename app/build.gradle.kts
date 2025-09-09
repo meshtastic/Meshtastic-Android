@@ -365,9 +365,7 @@ dokka {
             remoteLineSuffix.set("#L")
         }
     }
-    dokkaPublications.html {
-        suppressInheritedMembers.set(true)
-    }
+    dokkaPublications.html { suppressInheritedMembers.set(true) }
     dokkaGeneratorIsolation = ProcessIsolation {
         // Configures heap size
         maxHeapSize = "6g"
