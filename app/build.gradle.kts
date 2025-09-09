@@ -374,10 +374,7 @@ kover {
                     "com.geeksville.mesh.telemetry",
                 )
                 // excludes all classes annotated with specified annotations, from all reports
-                annotatedBy(
-                    "*Generated",
-                    "androidx.compose.ui.tooling.preview.Preview"
-                )
+                annotatedBy("*Generated", "androidx.compose.ui.tooling.preview.Preview")
             }
         }
     }
