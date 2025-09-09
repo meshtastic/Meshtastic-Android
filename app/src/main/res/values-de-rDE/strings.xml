@@ -595,7 +595,7 @@
     <string name="scan_qr_code">QR Code scannen</string>
     <string name="share_contact">Kontakt teilen</string>
     <string name="notes">Knoten</string>
-    <string name="add_a_note">Add a private note…</string>
+    <string name="add_a_note">Persönliche Notiz hinzufügen.</string>
     <string name="import_shared_contact">Geteilte Kontakte importieren?</string>
     <string name="unmessageable">Nicht erreichbar</string>
     <string name="unmonitored_or_infrastructure">Unbeaufsichtigt oder Infrastruktur</string>
