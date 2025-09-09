@@ -77,16 +77,14 @@ git push origin v2.3.5-closed.1
 ```
 This triggers the workflow again, but this time it will send the build to the `NewAlpha` track for your closed testers. You can then continue the cycle of testing, fixing, and promoting all the way to production.
 
-### 4. Merging Back to `main`
-After the final production release is complete and verified, merge the release branch back into `main` to ensure any hotfixes are included. Then, delete the release branch.
-```bash
-git checkout main
-git pull origin main
-git merge release/2.3.5
-git push origin main
-git branch -d release/2.3.5
-git push origin --delete release/2.3.5
-```
+### 4. Finalizing the Release
+After the final production release is complete and verified, open a Pull Request to merge the release branch back into `main`. This ensures any hotfixes applied during the release cycle are properly reviewed and integrated.
+
+*   **Title:** `Release/2.3.5`
+*   **Base Branch:** `main`
+*   **Compare Branch:** `release/2.3.5`
+
+Once the PR is approved and merged, you can safely delete the release branch.
 
 ## Manual Finalization Steps
 
