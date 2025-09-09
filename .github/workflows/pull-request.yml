@@ -35,13 +35,36 @@ jobs:
     secrets:
       GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
 
+  upload_coverage_report:
+    name: Upload Coverage Report
+    runs-on: ubuntu-latest
+    needs: [build_and_detekt, androidTest]
+    steps:
+      - name: Download unit test coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: kover-report-unit
+          path: ./unit-test-coverage
+      - name: Download instrumented test coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: kover-report-instrumented-api-35
+          path: ./instrumented-test-coverage
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: meshtastic/Meshtastic-Android
+          files: ./unit-test-coverage/report.xml,./instrumented-test-coverage/googleDebugAndroidTestReport.xml
+          
   check-workflow-status:
     name: Check Workflow Status
     runs-on: ubuntu-latest
     needs:
       [
         build_and_detekt,
-        androidTest
+        androidTest,
+        upload_coverage_report
       ]
     if: always()
     steps:
@@ -55,3 +78,4 @@ jobs:
           }
           exit_on_result "build_and_detekt" "${{ needs.build_and_detekt.result }}"
           exit_on_result "androidTest" "${{ needs.androidTest.result }}"
+          exit_on_result "upload_coverage_report" "${{ needs.upload_coverage_report.result }}"
