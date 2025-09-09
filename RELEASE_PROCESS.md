@@ -1,92 +1,131 @@
 # Meshtastic-Android Release Process
 
-This document outlines the steps for releasing a new version of the Meshtastic-Android application. Adhering to this process ensures consistency and helps manage the release lifecycle, leveraging automation via the `release.yml` GitHub Action.
+This document outlines the steps for releasing a new version of the Meshtastic-Android application. The process is heavily automated using GitHub Actions and Fastlane, triggered by pushing a Git tag from a `release/*` branch.
 
-**Note on Automation:** The `release.yml` GitHub Action is primarily triggered by **pushing a Git tag** matching the pattern `v*` (e.g., `v1.2.3`, `v1.2.3-open.1`). It can also be manually triggered via `workflow_dispatch` from the GitHub Actions UI.
+## High-Level Overview
 
-The workflow uses a simple and robust **"upload-only"** model. It automatically:
-*   Determines a `versionName` from the Git tag.
-*   Generates a unique, always-increasing `versionCode` based on the number of minutes since the Unix epoch. This prevents `versionCode` conflicts and will not overflow until the year 6052.
-*   Builds fresh F-Droid (APK) and Google (AAB, APK) artifacts for every run.
-*   Creates a **draft GitHub Release** and attaches the artifacts.
-*   Attests build provenance for the artifacts.
-*   **Uploads** the newly built AAB directly to the appropriate track in the Google Play Console based on the tag.
+The automation is designed to be safe, repeatable, and efficient. When a new tag matching the `v*` pattern is pushed from a release branch, the `release.yml` GitHub Action workflow will:
 
-There is no promotion of builds between tracks; every release is a new, independent upload. Finalizing and publishing the GitHub Release and the Google Play Store submission remain **manual steps**.
+1.  **Determine Versioning:** A `versionName` is derived from the Git tag, and a unique, always-increasing `versionCode` is generated from the current timestamp.
+2.  **Build in Parallel:** Two jobs run simultaneously to build the `google` and `fdroid` flavors of the app.
+3.  **Deploy to Google Play:** The `google` build job uses Fastlane to automatically upload the Android App Bundle (AAB) to the correct track on the Google Play Console, based on the tag name.
+4.  **Create a Draft GitHub Release:** After both builds are complete, a final job gathers the artifacts (AAB, Google APK, and F-Droid APK) and creates a single, consolidated **draft** release on GitHub.
 
-## Prerequisites
+Finalizing and publishing the release on both GitHub and the Google Play Console are the only **manual steps**.
 
-Before initiating the release process, ensure the following are completed:
+## Versioning and Tagging Strategy
 
-1.  **Main Branch Stability:** The `main` branch (or your chosen release branch) must be stable, with all features and bug fixes intended for the release merged and thoroughly tested.
-2.  **Automated Testing:** All automated tests must be passing.
-3.  **Versioning and Tagging Strategy:**
-    *   Tags **must** start with `v` and follow Semantic Versioning (e.g., `vX.X.X`).
-    *   Use the correct suffixes for the desired release track:
-        *   **Internal/QA:** `vX.X.X-internal.Y`
-        *   **Closed Alpha:** `vX.X.X-closed.Y`
-        *   **Open Alpha/Beta:** `vX.X.X-open.Y`
-        *   **Production:** `vX.X.X` (no suffix)
-    *   **Recommendation:** Before tagging, update `VERSION_NAME_BASE` in `buildSrc/src/main/kotlin/Configs.kt` to match the `X.X.X` part of your tag. This ensures consistency for local development builds.
+The entire process is driven by your Git tagging strategy. Tags **must** start with `v` and should follow Semantic Versioning. Use the correct suffix for the desired release track:
 
-## Core Release Workflow: Triggering via Tag Push
+*   **Internal Track:** `vX.X.X-internal.Y` (e.g., `v2.3.5-internal.1`)
+*   **Closed Track:** `vX.X.X-closed.Y` (e.g., `v2.3.5-closed.1`)
+*   **Open Track:** `vX.X.X-open.Y` (e.g., `v2.3.5-open.1`)
+*   **Production Track:** `vX.X.X` (e.g., `v2.3.5`)
 
-1.  **Create and push a tag for the desired release track.**
-    ```bash
-    # This build will be uploaded and rolled out on the 'internal' track
-    git tag v1.2.3-internal.1
-    git push origin v1.2.3-internal.1
-    ```
-2.  **Wait for the workflow to complete.**
-3.  **Verify the build** in the Google Play Console and with testers.
-4.  When ready to advance to the next track, create and push a new tag.
-    ```bash
-    # This will create and upload a NEW build to the 'NewAlpha' (closed alpha) track
-    git tag v1.2.3-closed.1
-    git push origin v1.2.3-closed.1
-    ```
+The `.Y` suffix is for iterations. If you find a bug in `v2.3.5-closed.1`, you would fix it on the release branch and tag the new commit as `v2.3.5-closed.2`.
 
-## Iterating on a Bad Build
+## Core Release Workflow
 
-If you discover a critical bug in a build, the process is simple:
+The entire release process happens on a dedicated release branch, allowing `main` to remain open for new feature development.
 
-1.  **Fix the Code:** Merge the necessary bug fixes into your main branch.
-2.  **Create a New Iteration Tag:** Create a new tag for the same release phase, simply incrementing the final number.
-    ```bash
-    # If v1.2.3-internal.1 was bad, the new build is v1.2.3-internal.2
-    git tag v1.2.3-internal.2
-    git push origin v1.2.3-internal.2
-    ```
-3.  **A New Build is Uploaded:** The workflow will run, generate a new epoch-minute-based `versionCode`, and upload a fresh build to the `internal` track. There is no risk of a `versionCode` collision.
+### 1. Creating the Release Branch
+First, create a `release/X.X.X` branch from a stable `main`. This branch is now "feature frozen." Only critical bug fixes should be added.
 
-## Managing Different Release Phases (Manual Steps Post-Workflow)
+As a housekeeping step, it's recommended to update the `VERSION_NAME_BASE` in `buildSrc/src/main/kotlin/Configs.kt` on this new branch. While the final release version is set by the Git tag in CI, this ensures local development builds have a sensible version name.
 
-After the `release.yml` workflow completes, manual actions are needed on GitHub and in the Google Play Console.
+```bash
+git checkout main
+git pull origin main
+git checkout -b release/2.3.5
+# (Now, update the version in buildSrc, commit the change, and then push)
+git push origin release/2.3.5
+```
 
-### Phase 1: Internal / QA Release
-*   **Tag format:** `vX.X.X-internal.Y`
-*   **Automated Action:** The AAB is **uploaded** to the `internal` track and rolled out automatically.
-*   **Manual Steps:**
-    1.  **GitHub:** Find the **draft release**, verify artifacts, and publish it if desired.
-    2.  **Google Play Console:** Verify the release has been successfully rolled out to internal testers.
+### 2. Testing and Iterating on a Track
+Start by deploying to the `internal` track to begin testing.
 
-### Phase 2: Closed Alpha Release
-*   **Tag format:** `vX.X.X-closed.Y`
-*   **Automated Action:** A new AAB is built and **uploaded** as a **draft** to the `NewAlpha` track.
-*   **Manual Steps:**
-    1.  **GitHub:** Find and publish the **draft release**.
-    2.  **Google Play Console:** Manually review the draft release and submit it for your closed alpha testers.
+**A. Create and Push a Tag:**
+Tag a commit on the release branch to trigger the automation.
+```bash
+# Ensure you are on the release branch
+git checkout release/2.3.5
 
-### Phase 3: Open Alpha / Beta Release
-*   **Tag format:** `vX.X.X-open.Y`
-*   **Automated Action:** A new AAB is built and **uploaded** as a **draft** to the `beta` track.
-*   **Manual Steps:**
-    1.  **GitHub:** Find and publish the **draft pre-release**.
-    2.  **Google Play Console:** Manually review the draft, add release notes, and submit it.
+# Tag for the "Internal" track
+git tag v2.3.5-internal.1
+git push origin v2.3.5-internal.1
+```
 
-### Phase 4: Production Release
-*   **Tag format:** `vX.X.X`
-*   **Automated Action:** A new AAB is built and **uploaded** to the `production` track. By default, it is configured for a 10% staged rollout.
-*   **Manual Steps:**
-    1.  **GitHub:** Find the **draft release**. **Crucially, uncheck "This is a pre-release"** before publishing.
-    2.  **Google Play Console:** Manually review the release, add release notes, and **start the staged rollout**.
+**B. Monitor and Verify:**
+Monitor the workflow in GitHub Actions. Once complete, verify the build in the Google Play Console and with your internal testers.
+
+**C. Apply Fixes (If Necessary):**
+If a bug is found, commit the fix to the release branch. Remember to also cherry-pick or merge this fix back to `main`. Then, create an iterated tag.
+```bash
+# Assuming you've committed a fix
+git tag v2.3.5-internal.2
+git push origin v2.3.5-internal.2
+```
+This will upload a new, fixed build to the same `internal` track. Repeat this process until the build is stable.
+
+### 3. Promoting to the Next Track
+Once you are confident that a build is stable, you can "promote" it to a wider audience by tagging the **exact same commit** for the next track.
+
+```bash
+# The commit tagged as v2.3.5-internal.2 is stable and ready for the "Closed" track
+git tag v2.3.5-closed.1
+git push origin v2.3.5-closed.1
+```
+This triggers the workflow again, but this time it will send the build to the `NewAlpha` track for your closed testers. You can then continue the cycle of testing, fixing, and promoting all the way to production.
+
+### 4. Merging Back to `main`
+After the final production release is complete and verified, merge the release branch back into `main` to ensure any hotfixes are included. Then, delete the release branch.
+```bash
+git checkout main
+git pull origin main
+git merge release/2.3.5
+git push origin main
+git branch -d release/2.3.5
+git push origin --delete release/2.3.5
+```
+
+## Manual Finalization Steps
+
+### For Internal Releases
+
+*   **Automated Action:** The AAB is uploaded to the `internal` track and is **rolled out to 100% of testers automatically**.
+*   **Your Manual Step:**
+    1.  **Verify the build** in the Google Play Console and with your internal testers.
+
+### For Closed Releases
+
+*   **Automated Action:** The AAB is uploaded to the `NewAlpha` track and is **rolled out to 100% of testers automatically**.
+*   **Your Manual Step:**
+    1.  **Verify the build** in the Google Play Console and with your closed track testers.
+
+### For Open Releases
+
+*   **Automated Action:** The AAB is uploaded to the `beta` track and begins a **staged rollout to 25% of your open track testers automatically**.
+*   **Your Manual Steps:**
+    1.  **Verify the build** in the Google Play Console.
+    2.  **(Optional)** Go to the GitHub "Releases" page, find the **draft release**, and publish it so your open track testers can see the official release notes.
+
+### For Production Releases
+
+*   **Automated Action:**
+    *   The AAB is uploaded to the `production` track in a **draft** state. It is **not** rolled out to any users.
+    *   A corresponding **draft** release is created on GitHub with all build artifacts.
+*   **Your Manual Steps:**
+    1.  **Publish on GitHub First:** Go to the GitHub "Releases" page and find the draft. Review the release notes and artifacts, then **Publish release**. This makes the release notes publicly visible.
+    2.  **Promote on Google Play Second:** *After* publishing on GitHub, go to your Google Play Console. Find the draft release, review it, and then proceed to **start the rollout to production**.
+
+## Monitoring the Release
+
+After a release has been rolled out to users (especially for Open and Production), it is crucial to monitor its performance.
+
+*   **Google Play Console:** Keep a close eye on the **Vitals** section for your app. Pay special attention to the crash rate and ANR (Application Not Responding) rate. A sudden spike in these numbers is a strong indicator of a problem.
+*   **Datadog:** Check your Datadog dashboards for any unusual trends or new errors that may have been introduced with the release.
+*   **Crashlytics:** Review crash reports in Firebase Crashlytics to identify any new issues that users may be experiencing.
+*   **User Reviews:** Monitor user reviews on the Google Play Store for any negative feedback or reports of bugs.
+*   **Community Feedback:** Monitor Discord, GitHub Issues, and community forums for feedback from users who have received the update.
+
+If you identify a critical issue, be prepared to halt the rollout in the Google Play Console and tag a new, fixed version.

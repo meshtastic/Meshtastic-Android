@@ -1,0 +1,86 @@
+# This file contains the fastlane.tools configuration
+# You can find the documentation at https://docs.fastlane.tools
+#
+# For a list of all available actions, check out
+#
+#     https://docs.fastlane.tools/actions
+#
+# For a list of all available plugins, check out
+#
+#     https://docs.fastlane.tools/plugins/available-plugins
+#
+
+# Uncomment the line if you want fastlane to automatically update itself
+# update_fastlane
+
+default_platform(:android)
+
+platform :android do
+  desc "Runs all the tests"
+  lane :test do
+    gradle(task: "test")
+  end
+
+  desc "Deploy a new version to the internal track on Google Play"
+  lane :internal do
+    aab_path = build_google_release
+    upload_to_play_store(
+      track: 'internal',
+      aab: aab_path,
+      release_status: 'completed'
+    )
+  end
+
+  desc "Deploy a new version to the closed track on Google Play"
+  lane :closed do
+    aab_path = build_google_release
+    upload_to_play_store(
+      track: 'NewAlpha',
+      aab: aab_path,
+      release_status: 'completed'
+    )
+  end
+
+  desc "Deploy a new version to the open track on Google Play"
+  lane :open do
+    aab_path = build_google_release
+    upload_to_play_store(
+      track: 'beta',
+      aab: aab_path,
+      release_status: 'inProgress',
+      rollout: '0.25'
+    )
+  end
+
+  desc "Deploy a new version to the production track on Google Play"
+  lane :production do
+    aab_path = build_google_release
+    upload_to_play_store(
+      track: 'production',
+      aab: aab_path,
+      release_status: 'draft'
+    )
+  end
+
+  desc "Build the F-Droid release"
+  lane :fdroid_build do
+    gradle(
+      task: "clean assembleFdroidRelease",
+      properties: {
+        "android.injected.version.name" => ENV['VERSION_NAME'],
+        "android.injected.version.code" => ENV['VERSION_CODE']
+      }
+    )
+  end
+
+  private_lane :build_google_release do
+    gradle(
+      task: "clean bundleGoogleRelease assembleGoogleRelease",
+      print_command: false,
+      properties: {
+        "android.injected.version.name" => ENV['VERSION_NAME'],
+        "android.injected.version.code" => ENV['VERSION_CODE']
+      }
+    )
+  end
+end
