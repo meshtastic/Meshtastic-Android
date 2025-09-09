@@ -47,9 +47,13 @@ jobs:
         id: get_version_name
         run: echo "APP_VERSION_NAME=$(echo ${GITHUB_REF_NAME#v} | sed 's/-.*//')" >> $GITHUB_OUTPUT
 
-      - name: Calculate Version Code
+      - name: Calculate Version Code from Epoch
         id: calculate_version_code
-        uses: ./.github/actions/calculate-version-code
+        # We use epoch minutes to ensure a unique, always-incrementing version code.
+        # This is compatible with our release strategy of tagging the same commit for different
+        # channels (internal, closed, open, prod), as each build needs a unique code.
+        # This will overflow Integer.MAX_VALUE in the year 6052, hopefully we'll have moved on by then.
+        run: echo "versionCode=$(( $(date +%s) / 60 ))" >> $GITHUB_OUTPUT
 
   build-fdroid:
     runs-on: ubuntu-latest
@@ -245,50 +249,31 @@ jobs:
             ./build-artifacts/google/apk/app-google-release.apk
             ./build-artifacts/fdroid/app-fdroid-release.apk
 
-      - name: Determine Play Store Action
-        id: play_action
+      - name: Determine Play Store Track
+        id: play_track
         run: |
           TAG_NAME="${{ github.ref_name }}"
           if [[ "$TAG_NAME" == *"-internal"* ]]; then
             echo "track=internal" >> $GITHUB_OUTPUT
-            echo "action=upload" >> $GITHUB_OUTPUT
           elif [[ "$TAG_NAME" == *"-closed"* ]]; then
             echo "track=NewAlpha" >> $GITHUB_OUTPUT
-            echo "from_track=internal" >> $GITHUB_OUTPUT
-            echo "action=promote" >> $GITHUB_OUTPUT
-            echo "user_fraction=1.0" >> $GITHUB_OUTPUT
           elif [[ "$TAG_NAME" == *"-open"* ]]; then
             echo "track=beta" >> $GITHUB_OUTPUT
-            echo "from_track=NewAlpha" >> $GITHUB_OUTPUT
-            echo "action=promote" >> $GITHUB_OUTPUT
-            echo "user_fraction=1.0" >> $GITHUB_OUTPUT
           else
             echo "track=production" >> $GITHUB_OUTPUT
-            echo "from_track=beta" >> $GITHUB_OUTPUT
-            echo "action=promote" >> $GITHUB_OUTPUT
             echo "user_fraction=0.1" >> $GITHUB_OUTPUT
+            echo "status=inProgress" >> $GITHUB_OUTPUT
           fi
 
-      - name: Attempt to Promote on Google Play
-        id: promote
-        if: success() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && steps.play_action.outputs.action == 'promote'
-        uses: kevin-david/promote-play-release@v1.2.0
-        continue-on-error: true
-        with:
-          service-account-json-raw: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
-          package-name: com.geeksville.mesh
-          to-track: ${{ steps.play_action.outputs.track }}
-          from-track: ${{ steps.play_action.outputs.from_track }}
-          user-fraction: ${{ steps.play_action.outputs.user_fraction }}
-
       - name: Upload to Google Play
-        if: success() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && (steps.play_action.outputs.action == 'upload' || steps.promote.outcome == 'failure')
+        if: success() && github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
         uses: r0adkll/upload-google-play@v1.1.3
         with:
           serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_JSON_KEY }}
           packageName: com.geeksville.mesh
           releaseFiles: ./build-artifacts/google/bundle/app-google-release.aab
-          track: ${{ steps.play_action.outputs.track }}
-          status: ${{ steps.play_action.outputs.track == 'internal' && 'completed' || 'draft' }}
+          track: ${{ steps.play_track.outputs.track }}
+          status: ${{ steps.play_track.outputs.status || (steps.play_track.outputs.track == 'internal' && 'completed' || 'draft') }}
+          userFraction: ${{ steps.play_track.outputs.userFraction }}
           whatsNewDirectory: ./whatsnew/
           mappingFile: ./build-artifacts/google/mapping/mapping.txt

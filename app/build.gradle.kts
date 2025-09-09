@@ -42,6 +42,8 @@ if (keystorePropertiesFile.exists()) {
     FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
 }
 
+val gitVersionProvider = providers.of(GitVersionValueSource::class.java) {}
+
 android {
     namespace = "com.geeksville.mesh"
 
@@ -58,10 +60,8 @@ android {
         applicationId = Configs.APPLICATION_ID
         minSdk = Configs.MIN_SDK
         targetSdk = Configs.TARGET_SDK
-        // Prioritize ENV, then fallback for versionCode
-        versionCode =
-            System.getenv("VERSION_CODE")?.toIntOrNull()
-                ?: (System.currentTimeMillis() / 1000).toInt() // Meshtastic Development Build
+        // Prioritize ENV, then fallback to git commit count for versionCode
+        versionCode = (System.getenv("VERSION_CODE") ?: gitVersionProvider.get()).toInt()
         versionName = System.getenv("VERSION_NAME") ?: Configs.VERSION_NAME_BASE
         testInstrumentationRunner = "com.geeksville.mesh.TestRunner"
         buildConfigField("String", "MIN_FW_VERSION", "\"${Configs.MIN_FW_VERSION}\"")
@@ -220,6 +220,8 @@ androidComponents {
         }
     }
 }
+
+project.afterEvaluate { logger.lifecycle("Version code is set to: ${android.defaultConfig.versionCode}") }
 
 dependencies {
     implementation(project(":network"))
