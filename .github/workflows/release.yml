@@ -99,10 +99,6 @@ jobs:
           echo "MAPS_API_KEY=$GOOGLE_MAPS_API_KEY" >> ./secrets.properties
           echo "$GOOGLE_PLAY_JSON_KEY" > ./fastlane/play-store-credentials.json
 
-      - name: Save short release notes to file
-        run: |
-          echo "For detailed release notes, please visit: https://github.com/${{ github.repository }}/releases/" > fastlane/metadata/android/en-US/changelogs/${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}.txt
-
       - name: Setup Fastlane
         uses: ruby/setup-ruby@v1
         with:
@@ -195,7 +191,7 @@ jobs:
           path: app/build/outputs/apk/fdroid/release/app-fdroid-release.apk
           retention-days: 1
 
-  publish-release:
+  finalize-release:
     runs-on: ubuntu-latest
     needs: [release-google, release-fdroid]
     steps:
@@ -217,7 +213,7 @@ jobs:
           name: fdroid-apk
           path: ./fdroid
 
-      - name: Finalize GitHub Release
+      - name: Create GitHub Release
         id: create_gh_release
         uses: softprops/action-gh-release@v2
         with:

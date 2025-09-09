@@ -23,30 +23,30 @@ platform :android do
 
   desc "Deploy a new version to the internal track on Google Play"
   lane :internal do
-    gradle(task: "clean bundleGoogleRelease assembleGoogleRelease")
+    aab_path = build_google_release
     upload_to_play_store(
       track: 'internal',
-      aab: "app/build/outputs/bundle/googleRelease/app-google-release.aab",
+      aab: aab_path,
       release_status: 'completed'
     )
   end
 
   desc "Deploy a new version to the closed track on Google Play"
   lane :closed do
-    gradle(task: "clean bundleGoogleRelease assembleGoogleRelease")
+    aab_path = build_google_release
     upload_to_play_store(
       track: 'NewAlpha',
-      aab: "app/build/outputs/bundle/googleRelease/app-google-release.aab",
+      aab: aab_path,
       release_status: 'completed'
     )
   end
 
   desc "Deploy a new version to the open track on Google Play"
   lane :open do
-    gradle(task: "clean bundleGoogleRelease assembleGoogleRelease")
+    aab_path = build_google_release
     upload_to_play_store(
       track: 'beta',
-      aab: "app/build/outputs/bundle/googleRelease/app-google-release.aab",
+      aab: aab_path,
       release_status: 'inProgress',
       rollout: '0.25'
     )
@@ -54,16 +54,33 @@ platform :android do
 
   desc "Deploy a new version to the production track on Google Play"
   lane :production do
-    gradle(task: "clean bundleGoogleRelease assembleGoogleRelease")
+    aab_path = build_google_release
     upload_to_play_store(
       track: 'production',
-      aab: "app/build/outputs/bundle/googleRelease/app-google-release.aab",
+      aab: aab_path,
       release_status: 'draft'
     )
   end
 
   desc "Build the F-Droid release"
   lane :fdroid_build do
-    gradle(task: "clean assembleFdroidRelease")
+    gradle(
+      task: "clean assembleFdroidRelease",
+      properties: {
+        "android.injected.version.name" => ENV['VERSION_NAME'],
+        "android.injected.version.code" => ENV['VERSION_CODE']
+      }
+    )
+  end
+
+  private_lane :build_google_release do
+    gradle(
+      task: "clean bundleGoogleRelease assembleGoogleRelease",
+      print_command: false,
+      properties: {
+        "android.injected.version.name" => ENV['VERSION_NAME'],
+        "android.injected.version.code" => ENV['VERSION_CODE']
+      }
+    )
   end
 end
