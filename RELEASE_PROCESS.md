@@ -115,7 +115,7 @@ git push origin --delete release/2.3.5
     *   The AAB is uploaded to the `production` track in a **draft** state. It is **not** rolled out to any users.
     *   A corresponding **draft** release is created on GitHub with all build artifacts.
 *   **Your Manual Steps:**
-    1.  **Publish on GitHub First:** Go to the GitHub "Releges" page and find the draft. Review the release notes and artifacts, then **Publish release**. This makes the release notes publicly visible.
+    1.  **Publish on GitHub First:** Go to the GitHub "Releases" page and find the draft. Review the release notes and artifacts, then **Publish release**. This makes the release notes publicly visible.
     2.  **Promote on Google Play Second:** *After* publishing on GitHub, go to your Google Play Console. Find the draft release, review it, and then proceed to **start the rollout to production**.
 
 ## Monitoring the Release
