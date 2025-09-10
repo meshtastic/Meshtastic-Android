@@ -760,7 +760,7 @@
     <string name="map_type_terrain">Ландшафт</string>
     <string name="map_type_hybrid">Смешанный</string>
     <string name="manage_map_layers">Управление Слоями Карты</string>
-    <string name="map_layer_formats">Custom layers support .kml or .kmz files.</string>
+    <string name="map_layer_formats">Custom layers support .kml, .kmz, or GeoJSON files.</string>
     <string name="map_layers_title">Слои карты</string>
     <string name="no_map_layers_loaded">Пользовательские слои не загружены.</string>
     <string name="add_layer_button">Добавить слой</string>

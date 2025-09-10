@@ -759,7 +759,7 @@
     <string name="map_type_terrain">Maastik</string>
     <string name="map_type_hybrid">Hübriid</string>
     <string name="manage_map_layers">Halda kaardikihte</string>
-    <string name="map_layer_formats">Kohandatud kihid toetavad .kml või .kmz faile.</string>
+    <string name="map_layer_formats">Custom layers support .kml, .kmz, or GeoJSON files.</string>
     <string name="map_layers_title">Kaardikihid</string>
     <string name="no_map_layers_loaded">Kaardikihid laadimata.</string>
     <string name="add_layer_button">Lisa kiht</string>

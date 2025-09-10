@@ -756,7 +756,7 @@
     <string name="map_type_terrain">Terrain</string>
     <string name="map_type_hybrid">Hybride</string>
     <string name="manage_map_layers">Gérer les calques de la carte</string>
-    <string name="map_layer_formats">Custom layers support .kml or .kmz files.</string>
+    <string name="map_layer_formats">Custom layers support .kml, .kmz, or GeoJSON files.</string>
     <string name="map_layers_title">Couches cartographiques</string>
     <string name="no_map_layers_loaded">Aucun calque personnalisé chargé.</string>
     <string name="add_layer_button">Ajouter un calque</string>

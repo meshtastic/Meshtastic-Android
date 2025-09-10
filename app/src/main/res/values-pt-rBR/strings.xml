@@ -759,7 +759,7 @@
     <string name="map_type_terrain">Terreno</string>
     <string name="map_type_hybrid">Híbrido</string>
     <string name="manage_map_layers">Gerenciar Camadas do Mapa</string>
-    <string name="map_layer_formats">Custom layers support .kml or .kmz files.</string>
+    <string name="map_layer_formats">Custom layers support .kml, .kmz, or GeoJSON files.</string>
     <string name="map_layers_title">Camadas do Mapa</string>
     <string name="no_map_layers_loaded">Nenhuma camada personalizada carregada.</string>
     <string name="add_layer_button">Adicionar Camada</string>
