@@ -34,6 +34,7 @@ jobs:
       # upload_artifacts defaults to true, so no need to explicitly set
     secrets:
       GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
           
   check-workflow-status:
     name: Check Workflow Status
