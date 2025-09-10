@@ -23,7 +23,7 @@
     <locale android:name="ja-JP"/>
     <locale android:name="ko-KR"/>
     <locale android:name="lt-LT"/>
-    <locale android:name.="nl-NL"/>
+    <locale android:name="nl-NL"/>
     <locale android:name="nb-NO"/>
     <locale android:name="pl-PL"/>
     <locale android:name="pt-BR"/>
