@@ -759,7 +759,7 @@
     <string name="map_type_terrain">Терен</string>
     <string name="map_type_hybrid">Хибриден</string>
     <string name="manage_map_layers">Управление на слоевете на картата</string>
-    <string name="map_layer_formats">Персонализираните слоеве поддържат .kml или .kmz файлове.</string>
+    <string name="map_layer_formats">Custom layers support .kml, .kmz, or GeoJSON files.</string>
     <string name="map_layers_title">Слоеве на картата</string>
     <string name="no_map_layers_loaded">Няма заредени персонализирани слоеве.</string>
     <string name="add_layer_button">Добавяне на слой</string>
