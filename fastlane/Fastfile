@@ -49,8 +49,7 @@ platform :android do
     upload_to_play_store(
       track: 'beta',
       aab: aab_path,
-      release_status: 'inProgress',
-      rollout: '0.25',
+      release_status: 'draft',
       skip_upload_apk: true
     )
   end
