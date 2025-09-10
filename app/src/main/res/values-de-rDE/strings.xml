@@ -759,7 +759,7 @@
     <string name="map_type_terrain">Gelände</string>
     <string name="map_type_hybrid">Hybrid</string>
     <string name="manage_map_layers">Kartenebenen verwalten</string>
-    <string name="map_layer_formats">Custom layers support .kml, .kmz, or GeoJSON files.</string>
+    <string name="map_layer_formats">Benutzerdefinierte Ebenen unterstützen .kml, .kmz oder GeoJSON Dateien.</string>
     <string name="map_layers_title">Kartenebenen</string>
     <string name="no_map_layers_loaded">Keine benutzerdefinierten Ebenen geladen.</string>
     <string name="add_layer_button">Ebene hinzufügen</string>
