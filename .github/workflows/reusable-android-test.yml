@@ -16,6 +16,8 @@ on:
     secrets:
       GRADLE_ENCRYPTION_KEY:
         required: false
+      CODECOV_TOKEN:
+        required: true
 
 jobs:
   androidTest:
@@ -64,6 +66,11 @@ jobs:
           emulator-options: -no-snapshot-save -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-metrics -camera-back none
           disable-animations: true
           script: ./gradlew :app:connectedFdroidDebugAndroidTest :app:connectedGoogleDebugAndroidTest --configuration-cache --scan && ( killall -INT crashpad_handler || true )
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
       - name: Upload Test Results
         if: ${{ inputs.upload_artifacts }}
         uses: actions/upload-artifact@v4
