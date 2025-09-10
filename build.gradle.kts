@@ -31,7 +31,44 @@ plugins {
     alias(libs.plugins.protobuf) apply false
     alias(libs.plugins.secrets) apply false
     alias(libs.plugins.dokka) apply false
-    alias(libs.plugins.kover) apply false
+    alias(libs.plugins.kover)
+}
+
+kover {
+    reports {
+        total {
+            filters {
+                excludes {
+                    // Exclude generated classes
+                    classes("*_Impl")
+                    classes("*Binding")
+                    classes("*Factory")
+                    classes("*.BuildConfig")
+                    classes("*.R")
+                    classes("*.R$*")
+
+                    // Exclude UI components
+                    annotatedBy("*Preview")
+
+                    // Exclude declarations
+                    annotatedBy(
+                        "*.HiltAndroidApp",
+                        "*.AndroidEntryPoint",
+                        "*.Module",
+                        "*.Provides",
+                        "*.Binds",
+                        "*.Composable",
+                    )
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    kover(project(":app"))
+    kover(project(":network"))
+    kover(project(":mesh_service_example"))
 }
 
 tasks.register<Delete>("clean") {

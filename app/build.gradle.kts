@@ -359,27 +359,6 @@ spotless {
     }
 }
 
-kover {
-    reports {
-        filters {
-            excludes {
-                // excludes all classes located in specified packages, and their subpackages, from all reports
-                packages(
-                    "com.geeksville.mesh.service",
-                    "com.geeksville.mesh.ui.components",
-                    "com.geeksville.mesh.ui.theme",
-                    "com.geeksville.mesh.util",
-                    "com.geeksville.mesh.countries",
-                    "com.geeksville.mesh.mqtt",
-                    "com.geeksville.mesh.telemetry",
-                )
-                // excludes all classes annotated with specified annotations, from all reports
-                annotatedBy("*Generated", "androidx.compose.ui.tooling.preview.Preview")
-            }
-        }
-    }
-}
-
 dokka {
     moduleName.set("Meshtastic App")
     dokkaSourceSets.main {
