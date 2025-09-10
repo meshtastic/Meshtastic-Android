@@ -757,7 +757,7 @@
     <string name="map_type_terrain">地形</string>
     <string name="map_type_hybrid">混合</string>
     <string name="manage_map_layers">管理地圖圖層</string>
-    <string name="map_layer_formats">自定義圖層支援 .kml 或 .kmz 格式檔案。</string>
+    <string name="map_layer_formats">Custom layers support .kml, .kmz, or GeoJSON files.</string>
     <string name="map_layers_title">地圖圖層</string>
     <string name="no_map_layers_loaded">未載入自訂圖層。</string>
     <string name="add_layer_button">添加圖層</string>
