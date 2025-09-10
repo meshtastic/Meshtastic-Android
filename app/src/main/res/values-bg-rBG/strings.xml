@@ -22,7 +22,7 @@
     <string name="node_filter_include_unknown">Включително неизвестните</string>
     <string name="node_filter_only_online">Скриване на офлайн възлите</string>
     <string name="node_filter_only_direct">Показване само на директни възли</string>
-    <string name="node_filter_ignored">Преглеждате игнорирани възли.\nНатиснете , за да се върнете към списъка с възли.</string>
+    <string name="node_filter_ignored">Преглеждате игнорирани възли.\nНатиснете, за да се върнете към списъка с възли.</string>
     <string name="node_filter_show_details">Показване на детайли</string>
     <string name="node_sort_button">Опции за сортиране на възлите</string>
     <string name="node_sort_alpha">А-Я</string>
@@ -495,8 +495,8 @@
     <string name="position_config_set_fixed_from_phone">Зададено от текущото местоположение на телефона</string>
     <string name="gps_mode">Режим на GPS</string>
     <string name="gps_update_interval_seconds">Интервал на актуализиране на GPS (секунди)</string>
-    <string name="redefine_gps_rx_pin">Redefine GPS_RX_PIN</string>
-    <string name="redefine_gps_tx_pin">Redefine GPS_TX_PIN</string>
+    <string name="redefine_gps_rx_pin">Предефиниране на GPS_RX_PIN</string>
+    <string name="redefine_gps_tx_pin">Предефиниране на GPS_TX_PIN</string>
     <string name="redefine_pin_gps_en">Redefine PIN_GPS_EN</string>
     <string name="position_flags">Position flags</string>
     <string name="power_config">Конфигуриране на захранването</string>
@@ -506,7 +506,7 @@
     <string name="wait_for_bluetooth_duration_seconds">Wait for Bluetooth duration (seconds)</string>
     <string name="super_deep_sleep_duration_seconds">Super deep sleep duration (seconds)</string>
     <string name="light_sleep_duration_seconds">Light sleep duration (seconds)</string>
-    <string name="minimum_wake_time_seconds">Minimum wake time (seconds)</string>
+    <string name="minimum_wake_time_seconds">Минимално време за събуждане (секунди)</string>
     <string name="battery_ina_2xx_i2c_address">Battery INA_2XX I2C address</string>
     <string name="range_test_config">Конфигуриране на Тест на обхвата</string>
     <string name="range_test_enabled">Тест на обхвата е активиран</string>
@@ -594,6 +594,8 @@
     <string name="dynamic">Динамична</string>
     <string name="scan_qr_code">Сканиране на QR кода</string>
     <string name="share_contact">Споделяне на контакт</string>
+    <string name="notes">Notes</string>
+    <string name="add_a_note">Add a private note…</string>
     <string name="import_shared_contact">Импортиране на споделен контакт?</string>
     <string name="unmessageable">Без съобщения</string>
     <string name="unmonitored_or_infrastructure">Ненаблюдаван или инфраструктурен</string>
@@ -645,8 +647,8 @@
     <string name="node_count_template">(%1$d онлайн / %2$d общо)</string>
     <string name="react">React</string>
     <string name="disconnect">Disconnect</string>
-    <string name="scanning_bluetooth">Scanning for Bluetooth devices…</string>
-    <string name="no_ble_devices">No paired Bluetooth devices.</string>
+    <string name="scanning_bluetooth">Сканиране за Bluetooth устройства…</string>
+    <string name="no_ble_devices">Няма сдвоени Bluetooth устройства.</string>
     <string name="no_network_devices">Няма открити мрежови устройства.</string>
     <string name="no_usb_devices">Няма открити USB серийни устройства.</string>
     <string name="scroll_to_bottom">Превъртане до края</string>
@@ -757,7 +759,7 @@
     <string name="map_type_terrain">Терен</string>
     <string name="map_type_hybrid">Хибриден</string>
     <string name="manage_map_layers">Управление на слоевете на картата</string>
-    <string name="map_layer_formats">Custom layers support .kml or .kmz files.</string>
+    <string name="map_layer_formats">Custom layers support .kml, .kmz, or GeoJSON files.</string>
     <string name="map_layers_title">Слоеве на картата</string>
     <string name="no_map_layers_loaded">Няма заредени персонализирани слоеве.</string>
     <string name="add_layer_button">Добавяне на слой</string>
@@ -778,8 +780,8 @@
     <string name="url_must_contain_placeholders">URL must contain placeholders.</string>
     <string name="url_template">Шаблон за URL</string>
     <string name="track_point">track point</string>
-    <string name="app_settings">App</string>
-    <string name="app_version">Version</string>
+    <string name="app_settings">Приложение</string>
+    <string name="app_version">Версия</string>
     <string name="channel_features">Channel Features</string>
     <string name="location_sharing">Location Sharing</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>

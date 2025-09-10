@@ -91,6 +91,7 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -331,7 +332,33 @@ private fun NodeDetailContent(
         },
         modifier = modifier,
         availableLogs = availableLogs,
+        onSaveNotes = { num, notes -> uiViewModel.setNodeNotes(num, notes) },
     )
+}
+
+@Composable
+private fun notesSection(node: Node, onSaveNotes: (Int, String) -> Unit) {
+    if (node.isFavorite) {
+        TitledCard(title = stringResource(R.string.notes)) {
+            val originalNotes = node.notes
+            var notes by remember(node.notes) { mutableStateOf(node.notes) }
+            OutlinedTextField(
+                value = notes,
+                onValueChange = { notes = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text(stringResource(id = R.string.add_a_note)) },
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            val edited = notes.trim() != originalNotes.trim()
+            if (edited) {
+                NodeActionButton(
+                    title = stringResource(id = R.string.save),
+                    enabled = true,
+                    onClick = { onSaveNotes(node.num, notes.trim()) },
+                )
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -344,6 +371,7 @@ private fun NodeDetailList(
     metricsState: MetricsState,
     onAction: (NodeDetailAction) -> Unit,
     availableLogs: Set<LogsType>,
+    onSaveNotes: (Int, String) -> Unit,
 ) {
     var showFirmwareSheet by remember { mutableStateOf(false) }
     var selectedFirmware by remember { mutableStateOf<FirmwareRelease?>(null) }
@@ -369,6 +397,7 @@ private fun NodeDetailList(
         TitledCard(title = stringResource(R.string.details)) {
             NodeDetailsContent(node, ourNode, metricsState.displayUnits)
         }
+        notesSection(node = node, onSaveNotes = onSaveNotes)
 
         DeviceActions(
             isLocal = metricsState.isLocal,
@@ -1067,6 +1096,7 @@ private fun NodeDetailsPreview(@PreviewParameter(NodePreviewParameterProvider::c
             metricsState = MetricsState.Empty,
             availableLogs = emptySet(),
             onAction = {},
+            onSaveNotes = { _, _ -> },
         )
     }
 }

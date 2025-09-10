@@ -594,6 +594,8 @@
     <string name="dynamic">Dinamico</string>
     <string name="scan_qr_code">Scansiona codice QR</string>
     <string name="share_contact">Condividi contatto</string>
+    <string name="notes">Notes</string>
+    <string name="add_a_note">Add a private note…</string>
     <string name="import_shared_contact">Importare Contatto Condiviso?</string>
     <string name="unmessageable">Non messaggabile</string>
     <string name="unmonitored_or_infrastructure">Non monitorato o Infrastruttura</string>
@@ -757,7 +759,7 @@
     <string name="map_type_terrain">Terreno</string>
     <string name="map_type_hybrid">Ibrido</string>
     <string name="manage_map_layers">Gestisci livelli della mappa</string>
-    <string name="map_layer_formats">I livelli personalizzati supportano file .kml o .kmz.</string>
+    <string name="map_layer_formats">Custom layers support .kml, .kmz, or GeoJSON files.</string>
     <string name="map_layers_title">Livelli della mappa</string>
     <string name="no_map_layers_loaded">Nessun livello personalizzato caricato.</string>
     <string name="add_layer_button">Aggiungi livello</string>

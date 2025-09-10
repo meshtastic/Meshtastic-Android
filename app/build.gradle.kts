@@ -33,6 +33,8 @@ plugins {
     alias(libs.plugins.datadog)
     alias(libs.plugins.secrets)
     alias(libs.plugins.spotless)
+    alias(libs.plugins.dokka)
+    alias(libs.plugins.kover)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -302,6 +304,7 @@ dependencies {
     androidTestImplementation(libs.bundles.testing.room)
 
     detektPlugins(libs.detekt.formatting)
+    dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
 
 ksp {
@@ -361,5 +364,25 @@ spotless {
         target("**/*.gradle.kts")
         ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
         ktlint("1.7.1").setEditorConfigPath("../config/spotless/.editorconfig")
+    }
+}
+
+dokka {
+    moduleName.set("Meshtastic App")
+    dokkaSourceSets.main {
+        sourceLink {
+            enableJdkDocumentationLink.set(true)
+            enableKotlinStdLibDocumentationLink.set(true)
+            enableJdkDocumentationLink.set(true)
+            reportUndocumented.set(true)
+            localDirectory.set(file("src/main/java"))
+            remoteUrl("https://github.com/geeksville/Meshtastic-Android/app/src/main/java")
+            remoteLineSuffix.set("#L")
+        }
+    }
+    dokkaPublications.html { suppressInheritedMembers.set(true) }
+    dokkaGeneratorIsolation = ProcessIsolation {
+        // Configures heap size
+        maxHeapSize = "6g"
     }
 }

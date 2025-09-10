@@ -230,9 +230,10 @@ jobs:
           name: Release ${{ github.ref_name }}
           generate_release_notes: true
           files: |
-            ./google/bundle/app-google-release.aab
-            ./google/apk/app-google-release.apk
-            ./fdroid/app-fdroid-release.apk
+            ./build-artifacts/google/bundle/app-google-release.aab
+            ./build-artifacts/google/apk/app-google-release.apk
+            ./build-artifacts/fdroid/app-fdroid-release.apk
+            ./version_info.txt
           draft: ${{ contains(github.ref_name, '-internal') }}
           prerelease: ${{ contains(github.ref_name, '-internal') || contains(github.ref_name, '-closed') || contains(github.ref_name, '-open') }}
         env:
