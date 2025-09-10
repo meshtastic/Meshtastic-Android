@@ -69,7 +69,7 @@ jobs:
           echo "datadogApplicationId=$DATADOG_APPLICATION_ID" >> ./secrets.properties
           echo "datadogClientToken=$DATADOG_CLIENT_TOKEN" >> ./secrets.properties
       - name: Run Spotless, Detekt, Build, Lint, and Local Tests
-        run: ./gradlew :app:spotlessCheck :app:detekt :app:lintFdroidDebug :app:lintGoogleDebug :app:assembleDebug :app:testFdroidDebug :app:testGoogleDebug :app:koverXmlReport --configuration-cache --scan
+        run: ./gradlew :app:spotlessCheck :app:detekt :app:lintFdroidDebug :app:lintGoogleDebug :app:assembleDebug :app:testFdroidDebug :app:testGoogleDebug koverXmlReport --configuration-cache --scan
         env:
           VERSION_CODE: ${{ env.VERSION_CODE }}
       - name: Upload F-Droid debug artifact
@@ -101,4 +101,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: kover-report-unit
-          path: app/build/reports/kover/xml/report.xml
+          path: build/reports/kover/xml/report.xml
