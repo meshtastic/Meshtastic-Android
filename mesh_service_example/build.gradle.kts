@@ -23,6 +23,7 @@ plugins {
     alias(libs.plugins.compose)
     alias(libs.plugins.protobuf)
     alias(libs.plugins.detekt)
+    alias(libs.plugins.kover)
 }
 
 android {

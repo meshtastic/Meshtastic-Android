@@ -34,6 +34,7 @@ plugins {
     alias(libs.plugins.secrets)
     alias(libs.plugins.spotless)
     alias(libs.plugins.dokka)
+    alias(libs.plugins.kover)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -62,12 +63,18 @@ android {
         minSdk = Configs.MIN_SDK
         targetSdk = Configs.TARGET_SDK
         // Prioritize injected props, then ENV, then fallback to git commit count
-        versionCode = (project.findProperty("android.injected.version.code")?.toString()?.toInt()
-            ?: System.getenv("VERSION_CODE")?.toInt()
-            ?: gitVersionProvider.get().toInt())
-        versionName = (project.findProperty("android.injected.version.name")?.toString()
-            ?: System.getenv("VERSION_NAME")
-            ?: Configs.VERSION_NAME_BASE)
+        versionCode =
+            (
+                project.findProperty("android.injected.version.code")?.toString()?.toInt()
+                    ?: System.getenv("VERSION_CODE")?.toInt()
+                    ?: gitVersionProvider.get().toInt()
+                )
+        versionName =
+            (
+                project.findProperty("android.injected.version.name")?.toString()
+                    ?: System.getenv("VERSION_NAME")
+                    ?: Configs.VERSION_NAME_BASE
+                )
         testInstrumentationRunner = "com.geeksville.mesh.TestRunner"
         buildConfigField("String", "MIN_FW_VERSION", "\"${Configs.MIN_FW_VERSION}\"")
         buildConfigField("String", "ABS_MIN_FW_VERSION", "\"${Configs.ABS_MIN_FW_VERSION}\"")
