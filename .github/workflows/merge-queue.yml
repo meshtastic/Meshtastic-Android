@@ -18,6 +18,7 @@ jobs:
       GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
       DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   androidTest:
     if: github.repository == 'meshtastic/Meshtastic-Android'
