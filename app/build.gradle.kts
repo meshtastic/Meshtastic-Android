@@ -86,7 +86,7 @@ android {
             listOf(
                 "en",
                 "ar-rSA",
-                "sr-Latn",
+                "b+sr+Latn",
                 "bg-rBG",
                 "ca-rES",
                 "cs-rCZ",
