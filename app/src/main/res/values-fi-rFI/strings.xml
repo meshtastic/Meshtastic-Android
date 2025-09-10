@@ -759,7 +759,7 @@
     <string name="map_type_terrain">Maasto</string>
     <string name="map_type_hybrid">Hybridi</string>
     <string name="manage_map_layers">Hallitse Karttatasoja</string>
-    <string name="map_layer_formats">Mukautetut karttatasot tukevat .kml- tai .kmz-tiedostoja.</string>
+    <string name="map_layer_formats">Mukautetut karttatasot tukevat .kml-, .kmz- tai GeoJSON-tiedostoja.</string>
     <string name="map_layers_title">Karttatasot</string>
     <string name="no_map_layers_loaded">Mukautettuja karttatasoja ei ladattu.</string>
     <string name="add_layer_button">Lisää taso</string>
