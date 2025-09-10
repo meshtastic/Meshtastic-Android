@@ -25,6 +25,7 @@ plugins {
     alias(libs.plugins.detekt)
     id("kotlinx-serialization")
     alias(libs.plugins.dokka)
+    alias(libs.plugins.kover)
 }
 
 android {
