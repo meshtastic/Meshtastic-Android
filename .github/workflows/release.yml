@@ -205,19 +205,19 @@ jobs:
     needs: [release-google, release-fdroid]
     steps:
       - name: Download Google AAB
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: google-aab
           path: ./google/bundle
 
       - name: Download Google APK
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: google-apk
           path: ./google/apk
 
       - name: Download F-Droid APK
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: fdroid-apk
           path: ./fdroid
