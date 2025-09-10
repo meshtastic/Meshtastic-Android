@@ -420,7 +420,7 @@ private fun VersionChecks(viewModel: UIViewModel) {
     LaunchedEffect(connectionState, myNodeInfo) {
         if (connectionState == ConnectionState.CONNECTED) {
             myNodeInfo?.let { info ->
-                val isOld = info.minAppVersion > BuildConfig.VERSION_CODE
+                val isOld = info.minAppVersion > BuildConfig.VERSION_CODE && BuildConfig.DEBUG.not()
                 if (isOld) {
                     viewModel.showAlert(
                         context.getString(R.string.app_too_old),
