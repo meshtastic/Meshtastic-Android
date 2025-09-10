@@ -27,7 +27,8 @@ platform :android do
     upload_to_play_store(
       track: 'internal',
       aab: aab_path,
-      release_status: 'completed'
+      release_status: 'completed',
+      skip_upload_apk: true
     )
   end
 
@@ -37,7 +38,8 @@ platform :android do
     upload_to_play_store(
       track: 'NewAlpha',
       aab: aab_path,
-      release_status: 'completed'
+      release_status: 'completed',
+      skip_upload_apk: true
     )
   end
 
@@ -48,7 +50,8 @@ platform :android do
       track: 'beta',
       aab: aab_path,
       release_status: 'inProgress',
-      rollout: '0.25'
+      rollout: '0.25',
+      skip_upload_apk: true
     )
   end
 
@@ -58,7 +61,8 @@ platform :android do
     upload_to_play_store(
       track: 'production',
       aab: aab_path,
-      release_status: 'draft'
+      release_status: 'draft',
+      skip_upload_apk: true
     )
   end
 
