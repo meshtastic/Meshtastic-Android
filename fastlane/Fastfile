@@ -82,6 +82,6 @@ platform :android do
         "android.injected.version.code" => ENV['VERSION_CODE']
       }
     )
-    return lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]
+    lane_context[SharedValues::GRADLE_AAB_OUTPUT_PATH]
   end
 end
