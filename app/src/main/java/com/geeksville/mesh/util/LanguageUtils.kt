@@ -57,7 +57,7 @@ object LanguageUtils : Logging {
             context.resources.getXml(R.xml.locales_config).use {
                 while (it.eventType != XmlPullParser.END_DOCUMENT) {
                     if (it.eventType == XmlPullParser.START_TAG && it.name == "locale") {
-                        languageTags += it.getAttributeValue(0)
+                        it.getAttributeValue(0)?.let { tag -> languageTags += tag }
                     }
                     it.next()
                 }
@@ -66,7 +66,7 @@ object LanguageUtils : Logging {
             errormsg("Error parsing locale_config.xml ${e.message}")
         }
         return languageTags.associateBy { tag ->
-            val loc = Locale(tag)
+            val loc = Locale.forLanguageTag(tag)
             when (tag) {
                 SYSTEM_DEFAULT -> context.getString(R.string.preferences_system_default)
                 "fr-HT" -> context.getString(R.string.fr_HT)
