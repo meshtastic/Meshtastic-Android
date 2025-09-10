@@ -233,7 +233,7 @@ jobs:
             ./google/bundle/app-google-release.aab
             ./google/apk/app-google-release.apk
             ./fdroid/app-fdroid-release.apk
-          draft: false
+          draft: ${{ contains(github.ref_name, '-internal') }}
           prerelease: ${{ contains(github.ref_name, '-internal') || contains(github.ref_name, '-closed') || contains(github.ref_name, '-open') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
