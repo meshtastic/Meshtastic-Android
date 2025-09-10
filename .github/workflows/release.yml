@@ -105,6 +105,15 @@ jobs:
           ruby-version: '3.2'
           bundler-cache: true
 
+      - name: Generate Changelog for Pre-Releases
+        if: contains(github.ref_name, '-closed') || contains(github.ref_name, '-open')
+        env:
+          APP_VERSION_CODE: ${{ needs.prepare-build-info.outputs.APP_VERSION_CODE }}
+        run: |
+          CHANGELOG_PATH="./fastlane/metadata/android/en-US/changelogs/${APP_VERSION_CODE}.txt"
+          echo "For a detailed list of changes, please see the GitHub release notes:" > $CHANGELOG_PATH
+          echo "https://github.com/${{ github.repository }}/releases/tag/${{ github.ref_name }}" >> $CHANGELOG_PATH
+
       - name: Determine Fastlane Lane
         id: fastlane_lane
         run: |
@@ -224,7 +233,7 @@ jobs:
             ./google/bundle/app-google-release.aab
             ./google/apk/app-google-release.apk
             ./fdroid/app-fdroid-release.apk
-          draft: true
+          draft: false
           prerelease: ${{ contains(github.ref_name, '-internal') || contains(github.ref_name, '-closed') || contains(github.ref_name, '-open') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
