@@ -47,6 +47,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.geeksville.mesh.DataPacket.CREATOR.ID_BROADCAST
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.Reaction
@@ -188,6 +189,7 @@ internal fun MessageList(
                             }
                         }
                     },
+                    showNodeInfo = contactKey.contains(ID_BROADCAST), // Hide node info for DMs
                 )
             }
         }

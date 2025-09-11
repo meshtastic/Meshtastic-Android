@@ -27,8 +27,10 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.FormatQuote
@@ -55,8 +57,6 @@ import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.ui.common.components.MDText
-import com.geeksville.mesh.ui.common.components.Rssi
-import com.geeksville.mesh.ui.common.components.Snr
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.MessageItemColors
@@ -81,6 +81,7 @@ internal fun MessageItem(
     onStatusClick: () -> Unit = {},
     isConnected: Boolean,
     onNavigateToOriginalMessage: (Int) -> Unit = {},
+    showNodeInfo: Boolean,
 ) = Column(
     modifier =
     modifier
@@ -100,108 +101,108 @@ internal fun MessageItem(
     val cardColors =
         CardDefaults.cardColors()
             .copy(containerColor = containerColor, contentColor = contentColorFor(containerColor))
-    val messageModifier =
-        Modifier.padding(start = 8.dp, top = 8.dp, end = 8.dp)
-            .then(
-                if (containsBel) {
-                    Modifier.border(2.dp, MessageItemColors.Red, shape = MaterialTheme.shapes.medium)
-                } else {
-                    Modifier
-                },
-            )
-    Box {
-        Card(
-            modifier =
-            Modifier.align(if (message.fromLocal) Alignment.BottomEnd else Alignment.BottomStart)
-                .padding(
-                    top = 4.dp,
-                    start = if (!message.fromLocal) 0.dp else 16.dp,
-                    end = if (message.fromLocal) 0.dp else 16.dp,
-                )
-                .combinedClickable(onClick = onClick, onLongClick = onLongClick)
-                .then(messageModifier),
-            colors = cardColors,
+
+    if (!message.fromLocal && showNodeInfo) {
+        Row(
+            modifier = Modifier.padding(horizontal = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically,
         ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                OriginalMessageSnippet(
-                    message = message,
-                    ourNode = ourNode,
-                    cardColors = cardColors,
-                    onNavigateToOriginalMessage = onNavigateToOriginalMessage,
+            NodeChip(node = node, onAction = onAction, isConnected = isConnected, isThisNode = false)
+
+            Column {
+                Text(
+                    text = with(node.user) { longName },
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    style = MaterialTheme.typography.labelMedium,
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                ) {
-                    NodeChip(
-                        node = if (message.fromLocal) ourNode else node,
-                        onAction = onAction,
-                        isConnected = isConnected,
-                        isThisNode = message.fromLocal,
-                    )
-                    Text(
-                        text = with(if (message.fromLocal) ourNode.user else node.user) { "$longName ($id)" },
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1,
-                        style = MaterialTheme.typography.labelMedium,
-                        modifier = Modifier.weight(1f, fill = true),
-                    )
-                    if (message.viaMqtt) {
-                        Icon(
-                            Icons.Default.Cloud,
-                            contentDescription = stringResource(R.string.via_mqtt),
-                            modifier = Modifier.size(16.dp),
-                        )
-                    }
-                    MessageActions(
-                        isLocal = message.fromLocal,
-                        status = message.status,
-                        onSendReaction = sendReaction,
-                        onSendReply = onReply,
-                        onStatusClick = onStatusClick,
-                    )
-                }
 
-                Column(modifier = Modifier.padding(horizontal = 8.dp)) {
-                    MDText(
-                        modifier = Modifier.fillMaxWidth(),
-                        text = message.text,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = cardColors.contentColor,
-                    )
-
-                    val topPadding = if (!message.fromLocal) 2.dp else 0.dp
-                    Row(
-                        modifier = Modifier.fillMaxWidth().padding(top = topPadding, bottom = 4.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        if (!message.fromLocal) {
-                            if (message.hopsAway == 0) {
-                                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    Snr(message.snr, fontSize = MaterialTheme.typography.labelSmall.fontSize)
-                                    Rssi(message.rssi, fontSize = MaterialTheme.typography.labelSmall.fontSize)
-                                }
-                            } else {
-                                Text(
-                                    text = stringResource(R.string.hops_away_template, message.hopsAway),
-                                    style = MaterialTheme.typography.labelSmall,
-                                )
-                            }
-                        }
-                        Spacer(modifier = Modifier.weight(1f))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (containsBel) {
-                                Text(text = "\uD83D\uDD14", modifier = Modifier.padding(end = 4.dp))
-                            }
-                            Text(text = message.time, style = MaterialTheme.typography.labelSmall)
-                        }
-                    }
-                }
+                Text(
+                    text = with(node.user) { id },
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1,
+                    style = MaterialTheme.typography.labelSmall,
+                )
             }
         }
     }
+
+    Box(
+        modifier =
+        Modifier.fillMaxWidth()
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+    ) {
+        @Suppress("MagicNumber")
+        Column(
+            modifier =
+            Modifier.fillMaxWidth(.75f)
+                .align(if (message.fromLocal) Alignment.CenterEnd else Alignment.CenterStart),
+            horizontalAlignment = if (message.fromLocal) Alignment.End else Alignment.Start,
+        ) {
+            Card(
+                modifier =
+                Modifier.wrapContentSize()
+                    .then(
+                        if (containsBel) {
+                            Modifier.border(2.dp, MessageItemColors.Red, shape = MaterialTheme.shapes.medium)
+                        } else {
+                            Modifier
+                        },
+                    ),
+                colors = cardColors,
+            ) {
+                Column(modifier = Modifier.padding(8.dp)) {
+                    OriginalMessageSnippet(
+                        message = message,
+                        ourNode = ourNode,
+                        cardColors = cardColors,
+                        onNavigateToOriginalMessage = onNavigateToOriginalMessage,
+                    )
+
+                    Column {
+                        MDText(
+                            text = message.text,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = cardColors.contentColor,
+                        )
+                    }
+
+                    Row(
+                        modifier = Modifier.padding(horizontal = 4.dp).align(Alignment.End),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    ) {
+                        if (message.viaMqtt) {
+                            Icon(
+                                Icons.Default.Cloud,
+                                contentDescription = stringResource(R.string.via_mqtt),
+                                modifier = Modifier.size(12.dp),
+                            )
+                        }
+                            /*   MessageActions(
+                                isLocal = message.fromLocal,
+                                status = message.status,
+                                onSendReaction = sendReaction,
+                                onSendReply = onReply,
+                                onStatusClick = onStatusClick,
+                            )*/
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (containsBel) {
+                    Text(text = "\uD83D\uDD14", modifier = Modifier.padding(end = 4.dp))
+                }
+                Text(text = message.time, style = MaterialTheme.typography.labelSmall)
+            }
+        }
+    }
+
     ReactionRow(
         modifier = Modifier.fillMaxWidth(),
         reactions = emojis,
@@ -279,7 +280,7 @@ private fun MessageItemPreview() {
         )
     val received =
         Message(
-            text = "This is a received message",
+            text = "Yo",
             time = "10:10",
             fromLocal = false,
             status = MessageStatus.RECEIVED,
@@ -294,7 +295,7 @@ private fun MessageItemPreview() {
             packetId = 4545,
             emojis = listOf(),
             replyId = null,
-            viaMqtt = false,
+            viaMqtt = true,
         )
     val receivedWithOriginalMessage =
         Message(
@@ -317,7 +318,10 @@ private fun MessageItemPreview() {
             viaMqtt = true,
         )
     AppTheme {
-        Column(modifier = Modifier.background(MaterialTheme.colorScheme.background).padding(vertical = 16.dp)) {
+        Column(
+            modifier = Modifier.background(MaterialTheme.colorScheme.background),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
             MessageItem(
                 message = sent,
                 node = sent.node,
@@ -327,6 +331,7 @@ private fun MessageItemPreview() {
                 onStatusClick = {},
                 isConnected = true,
                 ourNode = sent.node,
+                showNodeInfo = true,
             )
 
             MessageItem(
@@ -338,6 +343,7 @@ private fun MessageItemPreview() {
                 onStatusClick = {},
                 isConnected = true,
                 ourNode = sent.node,
+                showNodeInfo = true,
             )
 
             MessageItem(
@@ -349,6 +355,7 @@ private fun MessageItemPreview() {
                 onStatusClick = {},
                 isConnected = true,
                 ourNode = sent.node,
+                showNodeInfo = true,
             )
         }
     }
