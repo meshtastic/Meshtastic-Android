@@ -41,8 +41,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -118,7 +116,6 @@ internal fun MessageList(
     contactKey: String,
     onReply: (Message?) -> Unit,
 ) {
-    val haptics = LocalHapticFeedback.current
     val inSelectionMode by remember { derivedStateOf { selectedIds.value.isNotEmpty() } }
     AutoScrollToBottom(listState, messages)
     UpdateUnreadCount(listState, messages, onUnreadChanged)
@@ -169,11 +166,6 @@ internal fun MessageList(
                     ourNode = ourNode!!,
                     message = msg,
                     selected = selected,
-                    onClick = { if (inSelectionMode) selectedIds.toggle(msg.uuid) },
-                    onLongClick = {
-                        selectedIds.toggle(msg.uuid)
-                        haptics.performHapticFeedback(HapticFeedbackType.LongPress)
-                    },
                     onAction = onNodeMenuAction,
                     onStatusClick = { showStatusDialog = msg },
                     onReply = { onReply(msg) },

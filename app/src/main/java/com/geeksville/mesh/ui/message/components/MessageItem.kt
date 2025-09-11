@@ -44,6 +44,10 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -57,6 +61,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.Reaction
 import com.geeksville.mesh.model.Message
 import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.ui.common.components.EmojiPickerDialog
 import com.geeksville.mesh.ui.common.components.MDText
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.common.theme.AppTheme
@@ -76,19 +81,35 @@ internal fun MessageItem(
     sendReaction: (String) -> Unit = {},
     onShowReactions: () -> Unit = {},
     emojis: List<Reaction> = emptyList(),
-    onClick: () -> Unit = {},
-    onLongClick: () -> Unit = {},
     onAction: (NodeMenuAction) -> Unit = {},
     onStatusClick: () -> Unit = {},
     isConnected: Boolean,
     onNavigateToOriginalMessage: (Int) -> Unit = {},
     showNodeInfo: Boolean,
-) = Column(
-    modifier =
-    modifier
-        .fillMaxWidth()
-        .background(color = if (selected) Color.Gray else MaterialTheme.colorScheme.background),
-) {
+) = Column(modifier = modifier.fillMaxWidth()) {
+    var showMessageActionsDialog by remember { mutableStateOf(false) }
+    var showEmojiPickerDialog by remember { mutableStateOf(false) }
+
+    if (showMessageActionsDialog) {
+        MessageActionsDialog(
+            status = if (message.fromLocal) message.status else null,
+            onDismiss = { showMessageActionsDialog = false },
+            onShowEmojiDialog = { showEmojiPickerDialog = true },
+            onClickReply = { onReply() },
+            onClickStatus = onStatusClick,
+        )
+    }
+
+    if (showEmojiPickerDialog) {
+        EmojiPickerDialog(
+            onConfirm = { selectedEmoji ->
+                showEmojiPickerDialog = false
+                sendReaction(selectedEmoji)
+            },
+            onDismiss = { showEmojiPickerDialog = false },
+        )
+    }
+
     val containsBel = message.text.contains('\u0007')
     val containerColor =
         Color(
@@ -132,7 +153,12 @@ internal fun MessageItem(
     Box(
         modifier =
         Modifier.fillMaxWidth()
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+            .combinedClickable(
+                interactionSource = null,
+                indication = null,
+                onLongClick = { showMessageActionsDialog = true },
+                onClick = {},
+            )
             .padding(horizontal = 8.dp, vertical = 4.dp),
     ) {
         @Suppress("MagicNumber")
@@ -183,13 +209,6 @@ internal fun MessageItem(
                                 modifier = Modifier.size(12.dp),
                             )
                         }
-                            /*   MessageActions(
-                                isLocal = message.fromLocal,
-                                status = message.status,
-                                onSendReaction = sendReaction,
-                                onSendReply = onReply,
-                                onStatusClick = onStatusClick,
-                            )*/
                     }
                 }
             }
@@ -328,8 +347,6 @@ private fun MessageItemPreview() {
                 message = sent,
                 node = sent.node,
                 selected = false,
-                onClick = {},
-                onLongClick = {},
                 onStatusClick = {},
                 isConnected = true,
                 ourNode = sent.node,
@@ -340,8 +357,6 @@ private fun MessageItemPreview() {
                 message = received,
                 node = received.node,
                 selected = false,
-                onClick = {},
-                onLongClick = {},
                 onStatusClick = {},
                 isConnected = true,
                 ourNode = sent.node,
@@ -352,8 +367,6 @@ private fun MessageItemPreview() {
                 message = receivedWithOriginalMessage,
                 node = receivedWithOriginalMessage.node,
                 selected = false,
-                onClick = {},
-                onLongClick = {},
                 onStatusClick = {},
                 isConnected = true,
                 ourNode = sent.node,
