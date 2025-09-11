@@ -1,21 +1,21 @@
-Meshtastic is a tool for using Android devices with open-source, off-grid mesh radios. This app is the main client for the Meshtastic project, allowing you to manage your mesh devices and communicate with other users.
+Meshtastic on työkalu, jolla Android-laitteita voi käyttää avoimen lähdekoodin, verkosta riippumattomien mesh-radioiden kanssa. Tämä sovellus on Meshtastic-projektin pääasiakasohjelma, jonka avulla voit hallita mesh-laitteitasi ja viestiä muiden käyttäjien kanssa.
 
-For more information about the Meshtastic project, please visit our website: [meshtastic.org](https://www.meshtastic.org). The firmware that runs on the radio devices is a separate open-source project, which you can find here: [https://github.com/meshtastic/Meshtastic-device](https://github.com/meshtastic/Meshtastic-device).
+Lisätietoja Meshtastic-projektista saat verkkosivuiltamme: [meshtastic.org](https://www.meshtastic.org). Radiolaitteissa toimiva laiteohjelmisto on erillinen avoimen lähdekoodin projekti, jonka löydät täältä: [https://github.com/meshtastic/Meshtastic-device](https://github.com/meshtastic/Meshtastic-device).
 
-**Community and Support**
+**Käyttäjäyhteisö ja tukipalvelut**
 
-This project is currently in beta. We would love to hear from you! If you have questions, feedback, or encounter any problems, please join our friendly and active community:
+Projekti on vielä kehitysvaiheessa (beta). Otamme mielellämme yhteydenottoja vastaan! Jos sinulla on kysyttävää, palautetta tai ongelmia, tule mukaan meidän ystävälliseen ja aktiiviseen yhteisöömme:
 
-*   **Discussion Forum:** [https://github.com/orgs/meshtastic/discussions](https://github.com/orgs/meshtastic/discussions)
+*   **Keskustelufoorumi:** [https://github.com/orgs/meshtastic/discussions](https://github.com/orgs/meshtastic/discussions)
 *   **Discord:** [https://discord.gg/meshtastic](https://discord.gg/meshtastic)
-*   **Report an Issue:** [https://github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues)
+*   **Raportoi ongelmasta:** [https://github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues)
 
-**Documentation**
+***Dokumentaatio*
 
-To learn more about the features and capabilities of this app and Meshtastic, please view our official documentation:
-[**View Documentation**](https://meshtastic.org/docs/)
+Lisätietoja tämän sovelluksen ja Meshtasticin ominaisuuksista ja toiminnoista saat katsomalla virallisen dokumentaatiomme:
+[**Katso dokumentaatio**](https://meshtastic.org/docs/)
 
-**Translations**
+**Käännökset**
 
-You can help translate the app into your native language using Crowdin:
+Voit auttaa kääntämään sovelluksen omalle kielellesi Crowdinin avulla:
 [https://crowdin.meshtastic.org/android](https://crowdin.meshtastic.org/android)
