@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.FormatQuote
@@ -151,9 +152,10 @@ internal fun MessageItem(
                             Modifier
                         },
                     ),
+                shape = RoundedCornerShape(20.dp),
                 colors = cardColors,
             ) {
-                Column(modifier = Modifier.padding(8.dp)) {
+                Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
                     OriginalMessageSnippet(
                         message = message,
                         ourNode = ourNode,
