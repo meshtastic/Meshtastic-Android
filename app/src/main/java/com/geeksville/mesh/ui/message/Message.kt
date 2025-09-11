@@ -39,7 +39,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.input.TextFieldLineLimits
 import androidx.compose.foundation.text.input.TextFieldState
 import androidx.compose.foundation.text.input.clearText
 import androidx.compose.foundation.text.input.rememberTextFieldState
@@ -47,7 +46,7 @@ import androidx.compose.foundation.text.input.setTextAndPlaceCursorAtEnd
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Reply
-import androidx.compose.material.icons.automirrored.filled.Send
+import androidx.compose.material.icons.automirrored.rounded.Send
 import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material.icons.filled.ChatBubbleOutline
 import androidx.compose.material.icons.filled.Close
@@ -59,9 +58,12 @@ import androidx.compose.material.icons.filled.SpeakerNotes
 import androidx.compose.material.icons.filled.SpeakerNotesOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -739,6 +741,7 @@ private fun QuickChatRow(
  * @param maxByteSize The maximum allowed size of the message in bytes.
  * @param onSendMessage Callback invoked when the send button is pressed or send IME action is triggered.
  */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod") // Due to multiple parts of the OutlinedTextField
 @Composable
 private fun MessageInput(
@@ -758,51 +761,57 @@ private fun MessageInput(
     val isOverLimit = currentByteLength > maxByteSize
     val canSend = !isOverLimit && currentText.isNotEmpty() && isEnabled
 
-    OutlinedTextField(
-        modifier = modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
-        state = textFieldState,
-        lineLimits = TextFieldLineLimits.SingleLine,
-        label = { Text(stringResource(R.string.message_input_label)) },
-        enabled = isEnabled,
-        shape = RoundedCornerShape(ROUNDED_CORNER_PERCENT.toFloat()),
-        isError = isOverLimit,
-        placeholder = { Text(stringResource(R.string.type_a_message)) },
-        keyboardOptions =
-        KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Send),
-        onKeyboardAction = {
-            if (canSend) {
-                onSendMessage()
-            }
-        },
-        supportingText = {
-            if (isEnabled) { // Only show supporting text if input is enabled
-                Text(
-                    text = "$currentByteLength/$maxByteSize",
-                    style = MaterialTheme.typography.bodySmall,
-                    color =
-                    if (isOverLimit) {
-                        MaterialTheme.colorScheme.error
-                    } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.End,
-                )
-            }
-        },
-        // Direct byte limiting via inputTransformation in TextFieldState is complex.
-        // The current approach (show error, disable send) is generally preferred for UX.
-        // If strict real-time byte trimming is required, it needs careful handling of
-        // cursor position and multi-byte characters, likely outside simple inputTransformation.
-        trailingIcon = {
-            IconButton(onClick = { if (canSend) onSendMessage() }, enabled = canSend) {
+    Column(modifier = modifier.padding(8.dp)) {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.Bottom) {
+            OutlinedTextField(
+                modifier = Modifier.fillMaxWidth().weight(1f),
+                state = textFieldState,
+                enabled = isEnabled,
+                shape = RoundedCornerShape(ROUNDED_CORNER_PERCENT.toFloat()),
+                isError = isOverLimit,
+                placeholder = { Text(stringResource(R.string.message_input_label)) },
+                keyboardOptions =
+                KeyboardOptions(capitalization = KeyboardCapitalization.Sentences, imeAction = ImeAction.Send),
+                onKeyboardAction = {
+                    if (canSend) {
+                        onSendMessage()
+                    }
+                },
+                // Direct byte limiting via inputTransformation in TextFieldState is complex.
+                // The current approach (show error, disable send) is generally preferred for UX.
+                // If strict real-time byte trimming is required, it needs careful handling of
+                // cursor position and multi-byte characters, likely outside simple inputTransformation.
+            )
+
+            FilledIconButton(
+                onClick = { if (canSend) onSendMessage() },
+                enabled = canSend,
+                modifier = Modifier.size(ButtonDefaults.MediumContainerHeight),
+            ) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Default.Send,
+                    imageVector = Icons.AutoMirrored.Rounded.Send,
+                    modifier = Modifier.size(ButtonDefaults.MediumIconSize),
                     contentDescription = stringResource(id = R.string.send),
                 )
             }
-        },
-    )
+        }
+
+        if (isEnabled) { // Only show supporting text if input is enabled
+            @Suppress("MagicNumber")
+            Text(
+                text = "$currentByteLength/$maxByteSize",
+                style = MaterialTheme.typography.bodySmall,
+                color =
+                if (isOverLimit) {
+                    MaterialTheme.colorScheme.error
+                } else {
+                    MaterialTheme.colorScheme.onSurfaceVariant
+                },
+                modifier = Modifier.fillMaxWidth().padding(top = 2.dp, end = 84.dp),
+                textAlign = TextAlign.End,
+            )
+        }
+    }
 }
 
 @PreviewLightDark
@@ -810,7 +819,7 @@ private fun MessageInput(
 private fun MessageInputPreview() {
     AppTheme {
         Surface {
-            Column(modifier = Modifier.padding(8.dp)) {
+            Column {
                 MessageInput(isEnabled = true, textFieldState = rememberTextFieldState("Hello"), onSendMessage = {})
                 Spacer(Modifier.size(16.dp))
                 MessageInput(isEnabled = false, textFieldState = rememberTextFieldState("Disabled"), onSendMessage = {})
