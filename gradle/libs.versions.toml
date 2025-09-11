@@ -58,6 +58,10 @@ zxing-android-embedded = "4.3.0"
 zxing-core = "3.5.3"
 spotless = "7.2.1"
 dokka = "2.0.0"
+androidTools = "31.13.0"
+firebasePerfPlugin = "2.0.1"
+truth = "1.4.5"
+androidxLintGradle = "1.0.0-alpha05"
 
 [libraries]
 accompanist-permissions = { module = "com.google.accompanist:accompanist-permissions", version.ref = "accompanistPermissions" }
@@ -158,6 +162,18 @@ usb-serial-android = { group = "com.github.mik3y", name = "usb-serial-for-androi
 work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "work-runtime-ktx" }
 zxing-android-embedded = { group = "com.journeyapps", name = "zxing-android-embedded", version.ref = "zxing-android-embedded" }
 zxing-core = { group = "com.google.zxing", name = "core", version.ref = "zxing-core" }
+truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
+
+# Dependencies of the included build-logic
+android-gradleApiPlugin = { group = "com.android.tools.build", name = "gradle-api", version.ref = "agp" }
+android-tools-common = { group = "com.android.tools", name = "common", version.ref = "androidTools" }
+compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
+firebase-crashlytics-gradlePlugin = { group = "com.google.firebase", name = "firebase-crashlytics-gradle", version.ref = "crashlytics" }
+firebase-performance-gradlePlugin = { group = "com.google.firebase", name = "perf-plugin", version.ref = "firebasePerfPlugin" }
+ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "devtools-ksp" }
+room-gradlePlugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
+androidx-lint-gradle = { group = "androidx.lint", name = "lint-gradle", version.ref = "androidxLintGradle" }
+
 
 [bundles]
 # Core AndroidX
@@ -235,4 +251,20 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 protobuf = { id = "com.google.protobuf", version.ref = "protobuf-gradle-plugin" }
 secrets = { id = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin", version.ref = "secrets-gradle-plugin" }
-spotless = { id = "com.diffplug.spotless", version .ref= "spotless" }
+spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
+
+# Plugins defined by this project
+meshtastic-android-application = { id = "meshtastic.android.application" }
+#meshtastic-android-application-compose = { id = "meshtastic.android.application.compose" }
+#meshtastic-android-application-firebase = { id = "meshtastic.android.application.firebase" }
+#meshtastic-android-application-flavors = { id = "meshtastic.android.application.flavors" }
+#meshtastic-android-application-jacoco = { id = "meshtastic.android.application.jacoco" }
+#meshtastic-android-feature = { id = "meshtastic.android.feature" }
+#meshtastic-android-library = { id = "meshtastic.android.library" }
+#meshtastic-android-library-compose = { id = "meshtastic.android.library.compose" }
+#meshtastic-android-library-jacoco = { id = "meshtastic.android.library.jacoco" }
+#meshtastic-android-lint = { id = "meshtastic.android.lint" }
+#meshtastic-android-room = { id = "meshtastic.android.room" }
+#meshtastic-android-test = { id = "meshtastic.android.test" }
+#meshtastic-hilt = { id = "meshtastic.hilt" }
+#meshtastic-jvm-library = { id = "meshtastic.jvm.library" }

@@ -34,3 +34,4 @@ keystore.properties
 /secrets.properties
 /fastlane/play-store-credentials.json
 /fastlane/report.xml
+/build-logic/convention/build/*
