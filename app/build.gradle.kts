@@ -18,10 +18,13 @@
 import com.google.protobuf.gradle.proto
 import java.io.FileInputStream
 import java.util.Properties
+import com.geeksville.mesh.buildlogic.Configs
+import com.geeksville.mesh.buildlogic.GitVersionValueSource
+
+val gitVersionProvider = providers.of(GitVersionValueSource::class.java) {}
 
 plugins {
     alias(libs.plugins.meshtastic.android.application)
-    alias(libs.plugins.meshtastic.android.application.flavors)
     alias(libs.plugins.meshtastic.android.application.compose)
     alias(libs.plugins.meshtastic.android.application.firebase)
 
@@ -45,6 +48,8 @@ if (keystorePropertiesFile.exists()) {
 
 android {
     namespace = "com.geeksville.mesh"
+    // Assuming Configs object is available (e.g., from buildSrc)
+    compileSdk = Configs.COMPILE_SDK
 
     signingConfigs {
         create("release") {
@@ -55,22 +60,26 @@ android {
         }
     }
     defaultConfig {
+        applicationId = Configs.APPLICATION_ID
+        minSdk = Configs.MIN_SDK
+        targetSdk = Configs.TARGET_SDK
+
         // Prioritize injected props, then ENV, then fallback to git commit count
         versionCode =
             (
                 project.findProperty("android.injected.version.code")?.toString()?.toInt()
                     ?: System.getenv("VERSION_CODE")?.toInt()
-                    ?: 1
+                    ?: gitVersionProvider.get().toInt() // Restored GitVersionValueSource fallback
                 )
         versionName =
             (
                 project.findProperty("android.injected.version.name")?.toString()
                     ?: System.getenv("VERSION_NAME")
-                    ?: "0.0.1"
+                    ?: Configs.VERSION_NAME_BASE // Restored Configs.VERSION_NAME_BASE fallback
                 )
         testInstrumentationRunner = "com.geeksville.mesh.TestRunner"
-        buildConfigField("String", "MIN_FW_VERSION", "\"1.0.0\"")
-        buildConfigField("String", "ABS_MIN_FW_VERSION", "\"1.0.0\"")
+        buildConfigField("String", "MIN_FW_VERSION", "\"${Configs.MIN_FW_VERSION}\"") // Used Configs
+        buildConfigField("String", "ABS_MIN_FW_VERSION", "\"${Configs.ABS_MIN_FW_VERSION}\"") // Used Configs
         // per https://developer.android.com/studio/write/vector-asset-studio
         vectorDrawables.useSupportLibrary = true
         // We have to list all translated languages here,
@@ -122,6 +131,18 @@ android {
         )
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "xBG", "xBG_64") }
     }
+
+    // Configure existing product flavors (defined by convention plugin)
+    // with their dynamic version names.
+    productFlavors {
+        named("google") {
+            versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) google"
+        }
+        named("fdroid") {
+            versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) fdroid"
+        }
+    }
+
     buildTypes {
         release {
             if (keystoreProperties["storeFile"] != null) {
@@ -135,7 +156,7 @@ android {
     bundle { language { enableSplit = false } }
     buildFeatures {
         aidl = true
-        compose = true
+        compose = true // compose setup is likely in com.meshtastic.android.application.compose
         buildConfig = true
     }
     sourceSets {
@@ -203,19 +224,11 @@ dependencies {
     implementation(libs.bundles.protobuf)
     implementation(libs.bundles.coil)
 
-    // OSM
-    "fdroidImplementation"(libs.bundles.osm)
-    "fdroidImplementation"(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
-
-    "googleImplementation"(libs.bundles.maps.compose)
-
     // ZXing
     implementation(libs.zxing.android.embedded) { isTransitive = false }
     implementation(libs.zxing.core)
 
-    // Individual dependencies
-    "googleImplementation"(libs.awesome.app.rating)
-    "googleImplementation"(libs.bundles.datadog)
+    // Individual dependencies (flavor-specific ones removed)
     implementation(libs.core.splashscreen)
     implementation(libs.emoji2.emojipicker)
     implementation(libs.kotlinx.collections.immutable)
@@ -235,22 +248,6 @@ dependencies {
     androidTestImplementation(libs.bundles.testing.room)
 
     dokkaPlugin(libs.dokka.android.documentation.plugin)
-}
-
-secrets {
-    propertiesFileName = "secrets.properties"
-    defaultPropertiesFileName = "secrets.defaults.properties"
-}
-
-val googleServiceKeywords = listOf("crashlytics", "google", "datadog")
-
-tasks.configureEach {
-    if (
-        googleServiceKeywords.any { name.contains(it, ignoreCase = true) } && name.contains("fdroid", ignoreCase = true)
-    ) {
-        project.logger.lifecycle("Disabling task for F-Droid: $name")
-        enabled = false
-    }
 }
 
 dokka {

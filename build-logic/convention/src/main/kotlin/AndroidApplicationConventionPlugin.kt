@@ -16,13 +16,17 @@
  */
 
 import com.android.build.api.dsl.ApplicationExtension
+import com.geeksville.mesh.buildlogic.configureFlavors
 import com.geeksville.mesh.buildlogic.configureKotlinAndroid
+import com.geeksville.mesh.buildlogic.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.exclude
 import org.gradle.kotlin.dsl.withType
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -37,6 +41,10 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
             apply(plugin = "meshtastic.hilt")
 
             extensions.configure<ApplicationExtension> {
+                configureKotlinAndroid(this)
+                configureFlavors(this)
+                defaultConfig.targetSdk = 36
+                testOptions.animationsDisabled = true
 
                 defaultConfig {
                     targetSdk = 36
@@ -58,17 +66,27 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                         isPseudoLocalesEnabled = true
                     }
                 }
-                
+
                 buildFeatures {
                     buildConfig = true
                 }
+                dependencies {
+                    // F-Droid specific dependencies
+                    "fdroidImplementation"(libs.findBundle("osm").get())
+                    "fdroidImplementation"(libs.findLibrary("osmdroid-geopackage").get()) {
+                        exclude(group = "com.j256.ormlite")
+                    }
+
+                    // Google specific dependencies
+                    "googleImplementation"(libs.findBundle("maps-compose").get())
+                    "googleImplementation"(libs.findLibrary("awesome-app-rating").get())
+                    "googleImplementation"(platform(libs.findLibrary("firebase-bom").get()))
+                    "googleImplementation"(libs.findBundle("datadog").get())
+                }
+
             }
 
-            extensions.configure<ApplicationExtension> {
-                configureKotlinAndroid(this)
-                defaultConfig.targetSdk = 36
-                testOptions.animationsDisabled = true
-            }
+
             
             extensions.configure<JavaPluginExtension> {
                 toolchain {
