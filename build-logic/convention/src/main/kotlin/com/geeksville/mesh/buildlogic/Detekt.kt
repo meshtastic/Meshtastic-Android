@@ -25,7 +25,7 @@ import org.gradle.kotlin.dsl.named
 
 internal fun Project.configureDetekt(extension: DetektExtension) = extension.apply {
     extension.apply {
-        toolVersion = libs.findLibrary("detekt-gradle").get().get().version.toString()
+        toolVersion = libs.findVersion("detekt").get().toString()
         config.setFrom("$rootDir/config/detekt/detekt.yml")
         buildUponDefaultConfig = true
         allRules = false
@@ -47,6 +47,7 @@ internal fun Project.configureDetekt(extension: DetektExtension) = extension.app
         }
     }
     dependencies {
+        "detektPlugins"(libs.findLibrary("detekt-formatting").get())
         "detektPlugins"(libs.findLibrary("detekt-compose").get())
     }
 }
