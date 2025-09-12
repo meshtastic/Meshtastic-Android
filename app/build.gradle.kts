@@ -24,9 +24,6 @@ plugins {
     alias(libs.plugins.meshtastic.android.application.flavors)
     alias(libs.plugins.meshtastic.android.application.compose)
     alias(libs.plugins.meshtastic.android.application.firebase)
-    alias(libs.plugins.meshtastic.android.lint)
-    alias(libs.plugins.meshtastic.hilt)
-    alias(libs.plugins.meshtastic.android.room)
 
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
@@ -231,11 +228,9 @@ dependencies {
     implementation(libs.accompanist.permissions)
     implementation(libs.timber)
 
-
-    // Testing
     testImplementation(libs.bundles.testing)
-    debugImplementation(libs.bundles.testing.android.manifest)
     androidTestImplementation(libs.bundles.testing.android)
+    androidTestImplementation(libs.bundles.testing.hilt)
     androidTestImplementation(libs.bundles.testing.navigation)
     androidTestImplementation(libs.bundles.testing.room)
 

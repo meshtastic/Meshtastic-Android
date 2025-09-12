@@ -32,8 +32,9 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
 
             apply(plugin = "com.android.application")
             apply(plugin = "org.jetbrains.kotlin.android")
-            apply(plugin = "org.jetbrains.kotlin.plugin.compose")
             apply(plugin = "meshtastic.android.lint")
+            apply(plugin = "meshtastic.android.room")
+            apply(plugin = "meshtastic.hilt")
 
             extensions.configure<ApplicationExtension> {
 
