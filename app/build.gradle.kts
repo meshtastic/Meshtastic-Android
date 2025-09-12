@@ -19,6 +19,8 @@ import com.google.protobuf.gradle.proto
 import java.io.FileInputStream
 import java.util.Properties
 
+// FIXME: fdroid branching logic + anything else that might have been munged
+
 plugins {
     alias(libs.plugins.meshtastic.android.application)
     alias(libs.plugins.meshtastic.android.application.flavors)
@@ -26,8 +28,7 @@ plugins {
     alias(libs.plugins.meshtastic.android.application.firebase)
     alias(libs.plugins.meshtastic.android.lint)
     alias(libs.plugins.meshtastic.hilt)
-//    alias(libs.plugins.meshtastic.android.room)
-
+    alias(libs.plugins.meshtastic.android.room)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.protobuf)
@@ -200,7 +201,6 @@ dependencies {
     implementation(libs.bundles.markdown)
     implementation(libs.bundles.coroutines)
     implementation(libs.bundles.datastore)
-    implementation(libs.bundles.room)
     implementation(libs.bundles.protobuf)
     implementation(libs.bundles.coil)
 
@@ -230,22 +230,13 @@ dependencies {
     implementation(libs.timber)
 
 
-    // ksp
-    ksp(libs.room.compiler)
-
     // Testing
     testImplementation(libs.bundles.testing)
     debugImplementation(libs.bundles.testing.android.manifest)
     androidTestImplementation(libs.bundles.testing.android)
     androidTestImplementation(libs.bundles.testing.navigation)
-    androidTestImplementation(libs.bundles.testing.room)
 
     dokkaPlugin(libs.dokka.android.documentation.plugin)
-}
-
-ksp {
-    //    arg("room.generateKotlin", "true")
-    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 secrets {

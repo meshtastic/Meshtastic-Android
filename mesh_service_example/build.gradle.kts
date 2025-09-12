@@ -63,7 +63,6 @@ dependencies {
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
 
-    implementation(libs.bundles.androidx)
     implementation(libs.bundles.protobuf)
 
     implementation(libs.kotlinx.serialization.json)
