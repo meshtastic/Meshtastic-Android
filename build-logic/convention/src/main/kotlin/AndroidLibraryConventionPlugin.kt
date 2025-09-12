@@ -19,6 +19,7 @@ import com.android.build.api.variant.LibraryAndroidComponentsExtension
 import com.geeksville.mesh.buildlogic.configureFlavors
 import com.geeksville.mesh.buildlogic.configureKotlinAndroid
 import com.geeksville.mesh.buildlogic.disableUnnecessaryAndroidTests
+import com.geeksville.mesh.buildlogic.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply

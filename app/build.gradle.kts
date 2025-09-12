@@ -8,7 +8,7 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR a PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
@@ -16,7 +16,6 @@
  */
 
 import com.google.protobuf.gradle.proto
-import io.gitlab.arturbosch.detekt.Detekt
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -25,6 +24,7 @@ plugins {
     alias(libs.plugins.meshtastic.android.application.flavors)
     alias(libs.plugins.meshtastic.android.application.compose)
     alias(libs.plugins.meshtastic.android.application.firebase)
+    alias(libs.plugins.meshtastic.android.lint)
     alias(libs.plugins.meshtastic.hilt)
 //    alias(libs.plugins.meshtastic.android.room)
 
@@ -32,10 +32,9 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.protobuf)
     alias(libs.plugins.devtools.ksp)
-    alias(libs.plugins.detekt)
+    alias(libs.plugins.spotless)
     alias(libs.plugins.datadog)
     alias(libs.plugins.secrets)
-    alias(libs.plugins.spotless)
     alias(libs.plugins.dokka)
     alias(libs.plugins.kover)
 }
@@ -124,7 +123,7 @@ android {
                 "zh-rTW",
             ),
         )
-        ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64") }
+        ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "xBG", "xBG_64") }
     }
     buildTypes {
         release {
@@ -161,7 +160,7 @@ datadog {
 
 // per protobuf-gradle-plugin docs, this is recommended for android
 protobuf {
-    protoc { artifact = "com.google.protobuf:protoc:${libs.findVersion("protobuf").get()}" }
+    protoc { artifact = libs.protoc.get().toString() }
     generateProtoTasks {
         all().forEach { task ->
             task.builtins {
@@ -196,80 +195,57 @@ project.afterEvaluate { logger.lifecycle("Version code is set to: ${android.defa
 
 dependencies {
     implementation(project(":network"))
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-//
-//    // Bundles
-    implementation(libs.findBundle("androidx").get())
-    implementation(libs.findBundle("ui").get())
-    implementation(libs.findBundle("markdown").get())
-    debugImplementation(libs.findBundle("ui.tooling").get())
-    implementation(libs.findBundle("adaptive").get())
-    implementation(libs.findBundle("lifecycle").get())
-    implementation(libs.findBundle("navigation").get())
-    implementation(libs.findBundle("navigation3").get())
-    implementation(libs.findBundle("coroutines").get())
-    implementation(libs.findBundle("datastore").get())
-    implementation(libs.findBundle("room").get())
-    implementation(libs.findBundle("hilt").get())
-    implementation(libs.findBundle("protobuf").get())
-    implementation(libs.findBundle("coil").get())
-    // OSM
-    "fdroidImplementation"(libs.findBundle("osm").get())
-    "fdroidImplementation"(
-        libs.findLibrary("osmdroid-geopackage").get()
-    ) { exclude(group = "com.j256.ormlite") }
+    // Bundles
+    implementation(libs.bundles.androidx)
+    implementation(libs.bundles.markdown)
+    implementation(libs.bundles.coroutines)
+    implementation(libs.bundles.datastore)
+    implementation(libs.bundles.room)
+    implementation(libs.bundles.protobuf)
+    implementation(libs.bundles.coil)
 
-    "googleImplementation"(libs.findBundle("maps-compose").get())
-    // ZXing (JourneyApps)
-    implementation(libs.findLibrary("zxing-android-embedded").get()) { isTransitive = false }
-    implementation(libs.findLibrary("zxing-core").get())
+    // OSM
+    "fdroidImplementation"(libs.bundles.osm)
+    "fdroidImplementation"(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
+
+    "googleImplementation"(libs.bundles.maps.compose)
+
+    // ZXing
+    implementation(libs.zxing.android.embedded) { isTransitive = false }
+    implementation(libs.zxing.core)
 
     // Individual dependencies
-    "googleImplementation"(libs.findLibrary("awesome-app-rating").get())
-    implementation(libs.findLibrary("core-splashscreen").get())
-    implementation(libs.findLibrary("emoji2-emojipicker").get())
-    implementation(libs.findLibrary("kotlinx-collections-immutable").get())
-    implementation(libs.findLibrary("kotlinx-serialization-json").get())
-    implementation(libs.findLibrary("org-eclipse-paho-client-mqttv3").get())
-    implementation(libs.findLibrary("streamsupport-minifuture").get())
-    implementation(libs.findLibrary("usb-serial-android").get())
-    implementation(libs.findLibrary("work-runtime-ktx").get())
-    implementation(libs.findLibrary("core-location-altitude").get())
-    implementation(libs.findLibrary("accompanist-permissions").get())
-    implementation(libs.findLibrary("timber").get())
+    "googleImplementation"(libs.awesome.app.rating)
+    "googleImplementation"(libs.bundles.datadog)
+    implementation(libs.core.splashscreen)
+    implementation(libs.emoji2.emojipicker)
+    implementation(libs.kotlinx.collections.immutable)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.org.eclipse.paho.client.mqttv3)
+    implementation(libs.streamsupport.minifuture)
+    implementation(libs.usb.serial.android)
+    implementation(libs.work.runtime.ktx)
+    implementation(libs.core.location.altitude)
+    implementation(libs.accompanist.permissions)
+    implementation(libs.timber)
 
-    // Compose BOM
-
-    // Firebase BOM
-    "googleImplementation"(libs.findBundle("datadog").get())
 
     // ksp
-    ksp(libs.findLibrary("room.compiler").get())
-    ksp(libs.findLibrary("hilt.compiler").get())
-    kspAndroidTest(libs.findLibrary("hilt.compiler").get())
+    ksp(libs.room.compiler)
 
     // Testing
-    testImplementation(libs.findBundle("testing").get())
-    debugImplementation(libs.findBundle("testing-android-manifest").get())
-    androidTestImplementation(libs.findBundle("testing-android").get())
-    androidTestImplementation(libs.findBundle("testing-hilt").get())
-    androidTestImplementation(libs.findBundle("testing-navigation").get())
-    androidTestImplementation(libs.findBundle("testing-room").get())
+    testImplementation(libs.bundles.testing)
+    debugImplementation(libs.bundles.testing.android.manifest)
+    androidTestImplementation(libs.bundles.testing.android)
+    androidTestImplementation(libs.bundles.testing.navigation)
+    androidTestImplementation(libs.bundles.testing.room)
 
-    detektPlugins(libs.findLibrary("detekt-formatting").get())
-    dokkaPlugin(libs.findLibrary("dokka-android-documentation-plugin").get())
+    dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
 
 ksp {
     //    arg("room.generateKotlin", "true")
     arg("room.schemaLocation", "$projectDir/schemas")
-}
-
-detekt {
-    config.setFrom("../config/detekt/detekt.yml")
-    baseline = file("../config/detekt/detekt-baseline.xml")
-    source.setFrom(files("src/main/java", "src/google/java", "src/fdroid/java"))
-    parallel = true
 }
 
 secrets {
@@ -285,38 +261,6 @@ tasks.configureEach {
     ) {
         project.logger.lifecycle("Disabling task for F-Droid: $name")
         enabled = false
-    }
-}
-
-tasks.withType<Detekt> {
-    reports {
-        xml.required = true
-        xml.outputLocation = file("build/reports/detekt/detekt.xml")
-        html.required = true
-        html.outputLocation = file("build/reports/detekt/detekt.html")
-        sarif.required = true
-        sarif.outputLocation = file("build/reports/detekt/detekt.sarif")
-        md.required = true
-        md.outputLocation = file("build/reports/detekt/detekt.md")
-    }
-    debug = true
-    include("**/*.kt")
-    include("**/*.kts")
-}
-
-spotless {
-    ratchetFrom("origin/main")
-    kotlin {
-        target("src/*/kotlin/**/*.kt", "src/*/java/**/*.kt")
-        targetExclude("**/build/**/*.kt")
-        ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
-        ktlint("1.7.1").setEditorConfigPath("../config/spotless/.editorconfig")
-        licenseHeaderFile(rootProject.file("config/spotless/copyright.txt"))
-    }
-    kotlinGradle {
-        target("**/*.gradle.kts")
-        ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
-        ktlint("1.7.1").setEditorConfigPath("../config/spotless/.editorconfig")
     }
 }
 

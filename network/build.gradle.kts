@@ -17,10 +17,10 @@
 
 plugins {
     alias(libs.plugins.meshtastic.android.library)
-//    alias(libs.plugins.hilt)
-    alias(libs.plugins.devtools.ksp)
-    alias(libs.plugins.detekt)
+    alias(libs.plugins.meshtastic.android.lint)
+    alias(libs.plugins.meshtastic.hilt)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.spotless)
     alias(libs.plugins.dokka)
     alias(libs.plugins.kover)
     alias(libs.plugins.protobuf)
@@ -43,24 +43,9 @@ kotlin {
 }
 
 dependencies {
-    implementation(libs.findBundle("hilt").get())
-    implementation(libs.findBundle("retrofit").get())
-    implementation(libs.findBundle("coil").get())
-    implementation(libs.findBundle("protobuf").get())
-    "googleImplementation"(libs.findBundle("datadog").get())
-    ksp(libs.findLibrary("hilt.compiler").get())
-    implementation(libs.findLibrary("kotlinx.serialization.json").get())
-    detektPlugins(libs.findLibrary("detekt.formatting").get())
-}
-
-detekt {
-    config.setFrom("../config/detekt/detekt.yml")
-    baseline = file("../config/detekt/detekt-baseline-network.xml")
-    source.setFrom(
-        files(
-            "src/main/java",
-            "google/main/java",
-            "fdroid/main/java",
-        )
-    )
+    implementation(libs.bundles.hilt)
+    implementation(libs.bundles.retrofit)
+    implementation(libs.bundles.coil)
+    "googleImplementation"(libs.bundles.datadog)
+    implementation(libs.kotlinx.serialization.json)
 }

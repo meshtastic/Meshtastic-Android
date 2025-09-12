@@ -14,6 +14,7 @@
  *   limitations under the License.
  */
 
+import com.geeksville.mesh.buildlogic.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
@@ -38,7 +39,7 @@ class HiltConventionPlugin : Plugin<Project> {
             pluginManager.withPlugin("com.android.base") {
                 apply(plugin = "dagger.hilt.android.plugin")
                 dependencies {
-                    "implementation"(libs.findLibrary("hilt.android").get())
+                    "implementation"(libs.findBundle("hilt").get())
                 }
             }
         }

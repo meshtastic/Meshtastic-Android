@@ -17,11 +17,8 @@
 package com.geeksville.mesh.buildlogic
 
 import com.android.build.api.dsl.CommonExtension
-import libs
 import org.gradle.api.Project
-import org.gradle.api.artifacts.dsl.DependencyHandler
 import org.gradle.api.provider.Provider
-import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradlePluginExtension
@@ -46,6 +43,12 @@ internal fun Project.configureAndroidCompose(
             val bom = libs.findLibrary("androidx-compose-bom").get()
             "implementation"(platform(bom))
             "androidTestImplementation"(platform(bom))
+            "implementation"(libs.findBundle("ui").get())
+            "implementation"(libs.findBundle("adaptive").get())
+            "implementation"(libs.findBundle("lifecycle").get())
+            "implementation"(libs.findBundle("navigation").get())
+            "implementation"(libs.findBundle("navigation3").get())
+            "implementation"(libs.findBundle("ui-tooling").get())
             "implementation"(libs.findLibrary("androidx-compose-ui-tooling-preview").get())
             "debugImplementation"(libs.findLibrary("androidx-compose-ui-tooling").get())
         }

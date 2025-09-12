@@ -19,12 +19,12 @@ import org.gradle.kotlin.dsl.androidTestImplementation
 
 plugins {
     alias(libs.plugins.meshtastic.android.application)
-    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.meshtastic.android.application.compose)
+    alias(libs.plugins.meshtastic.android.lint)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.compose)
     alias(libs.plugins.protobuf)
-    alias(libs.plugins.detekt)
+    alias(libs.plugins.spotless)
     alias(libs.plugins.kover)
 }
 
@@ -55,28 +55,22 @@ protobuf {
 }
 
 dependencies {
-    implementation(libs.findLibrary("appcompat").get())
-    implementation(libs.findLibrary("material").get())
-    implementation(libs.findLibrary("activity").get())
-    implementation(libs.findLibrary("constraintlayout").get())
-    testImplementation(libs.findLibrary("junit").get())
-    androidTestImplementation(libs.findLibrary("ext.junit").get())
-    androidTestImplementation(libs.findLibrary("espresso.core").get())
+    implementation(libs.appcompat)
+    implementation(libs.material)
+    implementation(libs.activity)
+    implementation(libs.constraintlayout)
+    testImplementation(libs.junit)
+    androidTestImplementation(libs.ext.junit)
+    androidTestImplementation(libs.espresso.core)
 
-    implementation(libs.findBundle("androidx").get())
-    implementation(libs.findBundle("protobuf").get())
+    implementation(libs.bundles.androidx)
+    implementation(libs.bundles.protobuf)
 
-    implementation(libs.findLibrary("kotlinx.serialization.json").get())
+    implementation(libs.kotlinx.serialization.json)
 
     // OSM
-    implementation(libs.findBundle("osm").get() )
-    implementation(libs.findLibrary("osmdroid.geopackage").get()) {
+    implementation(libs.bundles.osm)
+    implementation(libs.osmdroid.geopackage) {
         exclude(group = "com.j256.ormlite")
     }
-    detektPlugins(libs.findLibrary("detekt.formatting").get())
-}
-
-detekt {
-    config.setFrom("../config/detekt/detekt.yml")
-    baseline = file("../config/detekt/detekt-baseline-meshserviceexample.xml")
 }
