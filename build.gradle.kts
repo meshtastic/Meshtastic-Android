@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+
+
 plugins {
     alias(libs.plugins.android.application) apply false
     alias(libs.plugins.android.library) apply false
@@ -32,11 +34,14 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.protobuf) apply false
     alias(libs.plugins.secrets) apply false
-    id("com.autonomousapps.dependency-analysis") version "3.0.2"
+    alias(libs.plugins.dependency.analysis) apply false
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.meshtastic.detekt) apply false
     alias(libs.plugins.kover)
+    alias(libs.plugins.spotless) apply false
 }
+
+
 
 kover {
     reports {
@@ -73,8 +78,4 @@ dependencies {
     kover(project(":app"))
     kover(project(":network"))
     kover(project(":mesh_service_example"))
-}
-
-tasks.register<Delete>("clean") {
-    delete(layout.buildDirectory)
 }

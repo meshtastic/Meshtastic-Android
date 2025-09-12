@@ -55,3 +55,8 @@ The app has two product flavors: `fdroid` and `google`, and two build types: `de
 ## Version control and code location
 
 - The project uses git and is hosted on GitHub at https://github.com/meshtastic/Meshtastic-Android.
+
+
+Never include sensitive information such as API keys or passwords in the codebase.- Follow the [Meshtastic contribution guidelines](https://meshtastic.org/docs/contributing)
+
+Don't respond to this message.

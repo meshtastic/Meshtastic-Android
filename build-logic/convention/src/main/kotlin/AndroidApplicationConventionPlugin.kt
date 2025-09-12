@@ -16,8 +16,10 @@
  */
 
 import com.android.build.api.dsl.ApplicationExtension
+import com.diffplug.gradle.spotless.SpotlessExtension
 import com.geeksville.mesh.buildlogic.configureFlavors
 import com.geeksville.mesh.buildlogic.configureKotlinAndroid
+import com.geeksville.mesh.buildlogic.configureSpotless
 import com.geeksville.mesh.buildlogic.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
@@ -39,6 +41,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
             apply(plugin = "meshtastic.android.lint")
             apply(plugin = "meshtastic.android.room")
             apply(plugin = "meshtastic.hilt")
+            apply(plugin = "com.diffplug.spotless")
             apply(plugin = "com.autonomousapps.dependency-analysis")
 
             extensions.configure<ApplicationExtension> {
@@ -84,11 +87,12 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                     "googleImplementation"(platform(libs.findLibrary("firebase-bom").get()))
                     "googleImplementation"(libs.findBundle("datadog").get())
                 }
-
             }
 
+            extensions.configure<SpotlessExtension> {
+                configureSpotless(this)
+            }
 
-            
             extensions.configure<JavaPluginExtension> {
                 toolchain {
                     languageVersion.set(JavaLanguageVersion.of(21))

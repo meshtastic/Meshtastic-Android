@@ -15,11 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import com.geeksville.mesh.buildlogic.Configs
+import com.geeksville.mesh.buildlogic.GitVersionValueSource
 import com.google.protobuf.gradle.proto
 import java.io.FileInputStream
 import java.util.Properties
-import com.geeksville.mesh.buildlogic.Configs
-import com.geeksville.mesh.buildlogic.GitVersionValueSource
 
 val gitVersionProvider = providers.of(GitVersionValueSource::class.java) {}
 
@@ -136,12 +136,8 @@ android {
     // Configure existing product flavors (defined by convention plugin)
     // with their dynamic version names.
     productFlavors {
-        named("google") {
-            versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) google"
-        }
-        named("fdroid") {
-            versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) fdroid"
-        }
+        named("google") { versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) google" }
+        named("fdroid") { versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) fdroid" }
     }
 
     buildTypes {
@@ -161,9 +157,7 @@ android {
         buildConfig = true
     }
     sourceSets {
-        named("main") {
-            proto { srcDir("src/main/proto") }
-        }
+        named("main") { proto { srcDir("src/main/proto") } }
         // Adds exported schema location as test app assets.
         named("androidTest") { assets.srcDirs(files("$projectDir/schemas")) }
     }

@@ -17,8 +17,10 @@
 
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.LibraryAndroidComponentsExtension
+import com.diffplug.gradle.spotless.SpotlessExtension
 import com.geeksville.mesh.buildlogic.configureFlavors
 import com.geeksville.mesh.buildlogic.configureKotlinAndroid
+import com.geeksville.mesh.buildlogic.configureSpotless
 import com.geeksville.mesh.buildlogic.disableUnnecessaryAndroidTests
 import com.geeksville.mesh.buildlogic.libs
 import org.gradle.api.Plugin
@@ -26,12 +28,6 @@ import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
-import kotlin.collections.distinct
-import kotlin.collections.drop
-import kotlin.collections.joinToString
-import kotlin.text.lowercase
-import kotlin.text.split
-import kotlin.text.toRegex
 
 class AndroidLibraryConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -39,6 +35,7 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             apply(plugin = "com.android.library")
             apply(plugin = "org.jetbrains.kotlin.android")
             apply(plugin = "meshtastic.android.lint")
+            apply(plugin = "com.diffplug.spotless")
 
             extensions.configure<LibraryExtension> {
                 configureKotlinAndroid(this)
@@ -54,7 +51,6 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                         .lowercase() + "_"
             }
             extensions.configure<LibraryAndroidComponentsExtension> {
-//                configurePrintApksTask(this)
                 disableUnnecessaryAndroidTests(target)
             }
             dependencies {
@@ -62,6 +58,9 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 "testImplementation"(libs.findLibrary("kotlin.test").get())
 
                 "implementation"(libs.findLibrary("androidx.tracing.ktx").get())
+            }
+            extensions.configure<SpotlessExtension> {
+                configureSpotless(this)
             }
         }
     }

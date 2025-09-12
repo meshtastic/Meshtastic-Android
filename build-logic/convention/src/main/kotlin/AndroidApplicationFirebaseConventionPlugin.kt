@@ -35,8 +35,7 @@ class AndroidApplicationFirebaseConventionPlugin : Plugin<Project> {
             dependencies {
                 val bom = libs.findLibrary("firebase-bom").get()
                 "implementation"(platform(bom))
-                "implementation"(libs.findLibrary("firebase.analytics").get())
-                "implementation"(libs.findLibrary("firebase.performance").get()) {
+                "implementation"(libs.findBundle("firebase").get()){
                     /*
                     Exclusion of protobuf / protolite dependencies is necessary as the
                     datastore-proto brings in protobuf dependencies. These are the source of truth

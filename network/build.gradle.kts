@@ -27,20 +27,14 @@ plugins {
 }
 
 android {
-    buildFeatures {
-        buildConfig = true
-    }
+    buildFeatures { buildConfig = true }
     compileSdk = 36
-    defaultConfig {
-        minSdk = 26
-    }
+    defaultConfig { minSdk = 26 }
 
     namespace = "com.geeksville.mesh.network"
 }
 
-kotlin {
-    jvmToolchain(21)
-}
+kotlin { jvmToolchain(21) }
 
 dependencies {
     implementation(libs.bundles.retrofit)
