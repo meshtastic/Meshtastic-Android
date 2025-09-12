@@ -25,15 +25,14 @@ val gitVersionProvider = providers.of(GitVersionValueSource::class.java) {}
 
 plugins {
     alias(libs.plugins.meshtastic.android.application)
+    alias(libs.plugins.meshtastic.android.application.flavors)
     alias(libs.plugins.meshtastic.android.application.compose)
     alias(libs.plugins.meshtastic.android.application.firebase)
     alias(libs.plugins.meshtastic.detekt)
-
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.protobuf)
     alias(libs.plugins.devtools.ksp)
-    alias(libs.plugins.spotless)
     alias(libs.plugins.datadog)
     alias(libs.plugins.secrets)
     alias(libs.plugins.dokka)

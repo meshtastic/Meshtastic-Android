@@ -17,15 +17,31 @@
 
 import com.android.build.api.dsl.ApplicationExtension
 import com.geeksville.mesh.buildlogic.configureFlavors
+import com.geeksville.mesh.buildlogic.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.dependencies
+import org.gradle.kotlin.dsl.exclude
 
 class AndroidApplicationFlavorsConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             extensions.configure<ApplicationExtension> {
                 configureFlavors(this)
+                dependencies {
+                    // F-Droid specific dependencies
+                    "fdroidImplementation"(libs.findBundle("osm").get())
+                    "fdroidImplementation"(libs.findLibrary("osmdroid-geopackage").get()) {
+                        exclude(group = "com.j256.ormlite")
+                    }
+
+                    // Google specific dependencies
+                    "googleImplementation"(libs.findBundle("maps-compose").get())
+                    "googleImplementation"(libs.findLibrary("awesome-app-rating").get())
+                    "googleImplementation"(platform(libs.findLibrary("firebase-bom").get()))
+                    "googleImplementation"(libs.findBundle("datadog").get())
+                }
             }
         }
     }
