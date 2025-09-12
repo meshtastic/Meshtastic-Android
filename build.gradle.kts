@@ -32,7 +32,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization) apply false
     alias(libs.plugins.protobuf) apply false
     alias(libs.plugins.secrets) apply false
-    alias(libs.plugins.dokka) apply false
+    id("com.autonomousapps.dependency-analysis") version "3.0.2"
     alias(libs.plugins.detekt) apply false
     alias(libs.plugins.meshtastic.detekt) apply false
     alias(libs.plugins.kover)

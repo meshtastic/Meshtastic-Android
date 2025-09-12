@@ -258,6 +258,7 @@ android-lint = { id = "com.android.lint", version.ref = "agp" }
 compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version.ref = "dd-sdk-android-gradle-plugin" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version = "3.0.2" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "devtools-ksp" }
 firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }

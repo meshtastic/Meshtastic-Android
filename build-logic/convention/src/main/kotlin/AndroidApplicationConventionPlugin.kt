@@ -39,6 +39,7 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
             apply(plugin = "meshtastic.android.lint")
             apply(plugin = "meshtastic.android.room")
             apply(plugin = "meshtastic.hilt")
+            apply(plugin = "com.autonomousapps.dependency-analysis")
 
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(this)
