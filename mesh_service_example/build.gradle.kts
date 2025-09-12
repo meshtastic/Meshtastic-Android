@@ -1,3 +1,5 @@
+import org.gradle.kotlin.dsl.androidTestImplementation
+
 /*
  * Copyright (c) 2025 Meshtastic LLC
  *
@@ -28,27 +30,6 @@ plugins {
 
 android {
     namespace = "com.meshtastic.android.meshserviceexample"
-    compileSdk = Configs.COMPILE_SDK
-
-    defaultConfig {
-        applicationId = "com.meshtastic.android.meshserviceexample"
-        minSdk = 26
-        targetSdk = Configs.TARGET_SDK
-        versionCode = 1
-        versionName = "1.0"
-
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    }
-
-    buildTypes {
-        release {
-            isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
     buildFeatures {
         aidl = true
     }
@@ -61,7 +42,7 @@ kotlin {
 // per protobuf-gradle-plugin docs, this is recommended for android
 protobuf {
     protoc {
-        artifact = libs.protobuf.protoc.get().toString()
+        protoc { artifact = "com.google.protobuf:protoc:4.32.0" }
     }
     generateProtoTasks {
         all().forEach { task ->
@@ -74,25 +55,25 @@ protobuf {
 }
 
 dependencies {
-    implementation(libs.appcompat)
-    implementation(libs.material)
-    implementation(libs.activity)
-    implementation(libs.constraintlayout)
-    testImplementation(libs.junit)
-    androidTestImplementation(libs.ext.junit)
-    androidTestImplementation(libs.espresso.core)
+    implementation(libs.findLibrary("appcompat").get())
+    implementation(libs.findLibrary("material").get())
+    implementation(libs.findLibrary("activity").get())
+    implementation(libs.findLibrary("constraintlayout").get())
+    testImplementation(libs.findLibrary("junit").get())
+    androidTestImplementation(libs.findLibrary("ext.junit").get())
+    androidTestImplementation(libs.findLibrary("espresso.core").get())
 
-    implementation(libs.bundles.androidx)
-    implementation(libs.bundles.protobuf)
+    implementation(libs.findBundle("androidx").get())
+    implementation(libs.findBundle("protobuf").get())
 
-    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.findLibrary("kotlinx.serialization.json").get())
 
     // OSM
-    implementation(libs.bundles.osm)
-    implementation(libs.osmdroid.geopackage) {
+    implementation(libs.findBundle("osm").get() )
+    implementation(libs.findLibrary("osmdroid.geopackage").get()) {
         exclude(group = "com.j256.ormlite")
     }
-    detektPlugins(libs.detekt.formatting)
+    detektPlugins(libs.findLibrary("detekt.formatting").get())
 }
 
 detekt {

@@ -16,36 +16,26 @@
  */
 
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.hilt)
+    alias(libs.plugins.meshtastic.android.library)
+//    alias(libs.plugins.hilt)
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.detekt)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.dokka)
     alias(libs.plugins.kover)
+    alias(libs.plugins.protobuf)
 }
 
 android {
     buildFeatures {
         buildConfig = true
     }
-    compileSdk = Configs.COMPILE_SDK
+    compileSdk = 36
     defaultConfig {
-        minSdk = Configs.MIN_SDK
+        minSdk = 26
     }
 
     namespace = "com.geeksville.mesh.network"
-
-    flavorDimensions += "default"
-    productFlavors {
-        create("fdroid") {
-            dimension = "default"
-        }
-        create("google") {
-            dimension = "default"
-        }
-    }
 }
 
 kotlin {
@@ -53,13 +43,14 @@ kotlin {
 }
 
 dependencies {
-    implementation(libs.bundles.hilt)
-    implementation(libs.bundles.retrofit)
-    implementation(libs.bundles.coil)
-    "googleImplementation"(libs.bundles.datadog)
-    ksp(libs.hilt.compiler)
-    implementation(libs.kotlinx.serialization.json)
-    detektPlugins(libs.detekt.formatting)
+    implementation(libs.findBundle("hilt").get())
+    implementation(libs.findBundle("retrofit").get())
+    implementation(libs.findBundle("coil").get())
+    implementation(libs.findBundle("protobuf").get())
+    "googleImplementation"(libs.findBundle("datadog").get())
+    ksp(libs.findLibrary("hilt.compiler").get())
+    implementation(libs.findLibrary("kotlinx.serialization.json").get())
+    detektPlugins(libs.findLibrary("detekt.formatting").get())
 }
 
 detekt {

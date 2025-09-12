@@ -4,7 +4,14 @@ accompanistPermissions = "0.37.3"
 adaptive = "1.2.0-beta02"
 adaptive-navigation-suite = "1.3.2"
 agp = "8.13.0"
+androidDesugarJdkLibs = "2.1.5"
 androidDocumentationPlugin = "2.0.0"
+androidxComposeBom = "2025.08.01"
+androidxComposeFoundation = "1.8.0-alpha07"
+androidxComposeMaterial3Adaptive = "1.2.0-beta02"
+androidxComposeRuntimeTracing = "1.7.6"
+androidxTracing = "1.3.0"
+
 appcompat = "1.7.1"
 awesome-app-rating = "2.8.0"
 coil = "3.3.0"
@@ -22,6 +29,7 @@ devtools-ksp = "2.2.20-2.0.2"
 emoji2 = "1.6.0"
 espresso-core = "3.7.0"
 firebase-bom = "34.2.0"
+firebaseCrashlyticsPlugin = "3.0.6"
 google-services = "4.4.3"
 hilt = "2.57.1"
 hilt-navigation-compose = "1.3.0"
@@ -46,7 +54,7 @@ org-eclipse-paho-client-mqttv3 = "1.2.5"
 osmbonuspack = "6.9.0"
 osmdroid-android = "6.1.20"
 protobuf-gradle-plugin = "0.9.5"
-protobuf-kotlin = "4.32.1"
+protobuf = "4.32.1"
 retrofit = "3.0.0"
 room = "2.8.0"
 secrets-gradle-plugin = "2.0.1"
@@ -68,11 +76,24 @@ accompanist-permissions = { module = "com.google.accompanist:accompanist-permiss
 activity = { group = "androidx.activity", name = "activity" }
 actvity-ktx = { group = "androidx.activity", name = "activity-ktx" }
 activity-compose = { group = "androidx.activity", name = "activity-compose" }
-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive", version.ref = "adaptive" }
-adaptive-layout = { group = "androidx.compose.material3.adaptive", name = "adaptive-layout", version.ref = "adaptive" }
-adaptive-navigation = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation", version.ref = "adaptive" }
-adaptive-navigation-android = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation-android", version.ref = "adaptive" }
-adaptive-navigation-suite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite", version.ref = "adaptive-navigation-suite" }
+android-desugarJdkLibs = { group = "com.android.tools", name = "desugar_jdk_libs", version.ref = "androidDesugarJdkLibs" }
+androidx-tracing-ktx = { group = "androidx.tracing", name = "tracing-ktx", version.ref = "androidxTracing" }
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom-alpha", version.ref = "androidxComposeBom" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "androidxComposeFoundation" }
+androidx-compose-foundation-layout = { group = "androidx.compose.foundation", name = "foundation-layout" }
+androidx-compose-material-iconsExtended = { group = "androidx.compose.material", name = "material-icons-extended" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-compose-material3-navigationSuite = { group = "androidx.compose.material3", name = "material3-adaptive-navigation-suite" }
+androidx-compose-material3-adaptive = { group = "androidx.compose.material3.adaptive", name = "adaptive", version.ref = "androidxComposeMaterial3Adaptive" }
+androidx-compose-material3-adaptive-layout = { group = "androidx.compose.material3.adaptive", name = "adaptive-layout", version.ref = "androidxComposeMaterial3Adaptive" }
+androidx-compose-material3-adaptive-navigation = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation", version.ref = "androidxComposeMaterial3Adaptive" }
+androidx-compose-material3-windowSizeClass = { group = "androidx.compose.material3", name = "material3-window-size-class" }
+androidx-compose-runtime = { group = "androidx.compose.runtime", name = "runtime" }
+androidx-compose-runtime-tracing = { group = "androidx.compose.runtime", name = "runtime-tracing", version.ref = "androidxComposeRuntimeTracing" }
+androidx-compose-ui-test = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+androidx-compose-ui-testManifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
 appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
 appcompat-resources = { group = "androidx.appcompat", name = "appcompat-resources", version.ref = "appcompat" }
 awesome-app-rating = { group = "com.suddenh4x.ratingdialog", name = "awesome-app-rating", version.ref = "awesome-app-rating" }
@@ -81,7 +102,6 @@ coil-network-core = { group = "io.coil-kt.coil3", name = "coil-network-core", ve
 coil-network-okhttp = { group = "io.coil-kt.coil3", name = "coil-network-okhttp", version.ref = "coil" }
 coil-svg = { group = "io.coil-kt.coil3", name = "coil-svg", version.ref = "coil" }
 compose-material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
 compose-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 compose-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata" }
 compose-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
@@ -111,6 +131,7 @@ ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junit-
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics" }
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
+firebase-performance = { group = "com.google.firebase", name = "firebase-perf" }
 gradle = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
@@ -122,6 +143,7 @@ kotlinx-collections-immutable = { group = "org.jetbrains.kotlinx", name = "kotli
 kotlinx-coroutines-android = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-android", version.ref = "kotlinx-coroutines-android" }
 kotlinx-coroutines-guava = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-guava", version.ref = "kotlinx-coroutines-android" }
 kotlinx-serialization-json = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization-json" }
+kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
 lifecycle-common-java8 = { group = "androidx.lifecycle", name = "lifecycle-common-java8", version.ref = "lifecycle" }
 lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecycle-livedata-ktx", version.ref = "lifecycle" }
 lifecycle-process = { group = "androidx.lifecycle", name = "lifecycle-process", version.ref = "lifecycle" }
@@ -148,8 +170,8 @@ org-eclipse-paho-client-mqttv3 = { group = "org.eclipse.paho", name = "org.eclip
 osmbonuspack = { group = "com.github.MKergall", name = "osmbonuspack", version.ref = "osmbonuspack" }
 osmdroid-android = { group = "org.osmdroid", name = "osmdroid-android", version.ref = "osmdroid-android" }
 osmdroid-geopackage = { group = "org.osmdroid", name = "osmdroid-geopackage", version.ref = "osmdroid-android" }
-protobuf-kotlin = { group = "com.google.protobuf", name = "protobuf-kotlin", version.ref = "protobuf-kotlin" }
-protobuf-protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf-kotlin" }
+protobuf-kotlin = { group = "com.google.protobuf", name = "protobuf-kotlin", version.ref = "protobuf" }
+protoc = { group = "com.google.protobuf", name = "protoc", version.ref = "protobuf" }
 retrofit2 = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit" }
 retrofit2-kotlin-serialization = { group = "com.squareup.retrofit2", name = "converter-kotlinx-serialization", version.ref = "retrofit" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
@@ -181,7 +203,7 @@ androidx = ["core-ktx", "appcompat", "appcompat-resources", "actvity-ktx", "acti
 
 # UI
 ui = ["material", "constraintlayout", "compose-material3", "compose-material-icons-extended", "compose-ui-tooling-preview", "compose-runtime-livedata"]
-adaptive = ["adaptive", "adaptive-layout", "adaptive-navigation", "adaptive-navigation-android", "adaptive-navigation-suite"]
+adaptive = ["androidx-compose-material3-adaptive", "androidx-compose-material3-adaptive-layout", "androidx-compose-material3-adaptive-navigation", "androidx-compose-material3-navigationSuite"]
 ui-tooling = ["compose-ui-tooling"] #Separate for debugImplementation
 markdown = ["markdown-renderer", "markdown-renderer-m3", "markdown-renderer-android"]
 
@@ -218,9 +240,6 @@ osm = ["osmdroid-android", "osmbonuspack", "mgrs"]
 # Google Maps (Compose)
 maps-compose = ["location-services", "maps-compose", "maps-compose-utils", "maps-compose-widgets"]
 
-# Firebase
-firebase = ["firebase-analytics", "firebase-crashlytics"]
-
 # Datadog
 datadog = ["dd-sdk-android-compose", "dd-sdk-android-logs", "dd-sdk-android-okhttp", "dd-sdk-android-rum", "dd-sdk-android-session-replay", "dd-sdk-android-session-replay-compose", "dd-sdk-android-timber", "dd-sdk-android-trace", "dd-sdk-android-trace-otel"]
 
@@ -241,7 +260,8 @@ datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version.ref = "dd
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version.ref = "dokka" }
 devtools-ksp = { id = "com.google.devtools.ksp", version.ref = "devtools-ksp" }
-firebase-crashlytics = { id = "com.google.firebase.crashlytics" , version.ref = "crashlytics" }
+firebase-crashlytics = { id = "com.google.firebase.crashlytics", version.ref = "firebaseCrashlyticsPlugin" }
+firebase-perf = { id = "com.google.firebase.firebase-perf", version.ref = "firebasePerfPlugin" }
 google-services = { id = "com.google.gms.google-services", version.ref = "google-services" }
 hilt = { id = "com.google.dagger.hilt.android" , version.ref = "hilt" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
@@ -255,16 +275,16 @@ spotless = { id = "com.diffplug.spotless", version.ref = "spotless" }
 
 # Plugins defined by this project
 meshtastic-android-application = { id = "meshtastic.android.application" }
-#meshtastic-android-application-compose = { id = "meshtastic.android.application.compose" }
-#meshtastic-android-application-firebase = { id = "meshtastic.android.application.firebase" }
-#meshtastic-android-application-flavors = { id = "meshtastic.android.application.flavors" }
+meshtastic-android-library = { id = "meshtastic.android.library" }
+meshtastic-android-application-flavors = { id = "meshtastic.android.application.flavors" }
+meshtastic-android-lint = { id = "meshtastic.android.lint" }
+meshtastic-android-application-compose = { id = "meshtastic.android.application.compose" }
+meshtastic-android-application-firebase = { id = "meshtastic.android.application.firebase" }
+meshtastic-android-library-compose = { id = "meshtastic.android.library.compose" }
+meshtastic-android-room = { id = "meshtastic.android.room" }
+meshtastic-android-test = { id = "meshtastic.android.test" }
+meshtastic-hilt = { id = "meshtastic.hilt" }
 #meshtastic-android-application-jacoco = { id = "meshtastic.android.application.jacoco" }
 #meshtastic-android-feature = { id = "meshtastic.android.feature" }
-#meshtastic-android-library = { id = "meshtastic.android.library" }
-#meshtastic-android-library-compose = { id = "meshtastic.android.library.compose" }
 #meshtastic-android-library-jacoco = { id = "meshtastic.android.library.jacoco" }
-#meshtastic-android-lint = { id = "meshtastic.android.lint" }
-#meshtastic-android-room = { id = "meshtastic.android.room" }
-#meshtastic-android-test = { id = "meshtastic.android.test" }
-#meshtastic-hilt = { id = "meshtastic.hilt" }
 #meshtastic-jvm-library = { id = "meshtastic.jvm.library" }

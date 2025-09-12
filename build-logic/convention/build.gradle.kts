@@ -48,12 +48,52 @@ dependencies {
     implementation(libs.truth)
 }
 
+tasks {
+    validatePlugins {
+        enableStricterValidation = true
+        failOnWarning = true
+    }
+}
+
 
 gradlePlugin {
     plugins {
         register("androidApplication") {
-            id = libs.plugins.meshtastic.android.application.get().pluginId
+            id = libs.plugins.meshtastic.android.application.asProvider().get().pluginId
             implementationClass = "AndroidApplicationConventionPlugin"
         }
+        register("androidFlavors") {
+            id = libs.plugins.meshtastic.android.application.flavors.get().pluginId
+            implementationClass = "AndroidApplicationFlavorsConventionPlugin"
+        }
+        register("androidLibrary") {
+            id = libs.plugins.meshtastic.android.library.asProvider().get().pluginId
+            implementationClass = "AndroidLibraryConventionPlugin"
+        }
+        register("androidLint") {
+            id = libs.plugins.meshtastic.android.lint.get().pluginId
+            implementationClass = "AndroidLintConventionPlugin"
+        }
+        register("androidFirebase") {
+            id = libs.plugins.meshtastic.android.application.firebase.get().pluginId
+            implementationClass = "AndroidApplicationFirebaseConventionPlugin"
+        }
+        register("androidLibraryCompose") {
+            id = libs.plugins.meshtastic.android.library.compose.get().pluginId
+            implementationClass = "AndroidLibraryComposeConventionPlugin"
+        }
+        register("androidApplicationCompose") {
+            id = libs.plugins.meshtastic.android.application.compose.get().pluginId
+            implementationClass = "AndroidApplicationComposeConventionPlugin"
+        }
+        register("hilt") {
+            id = libs.plugins.meshtastic.hilt.get().pluginId
+            implementationClass = "HiltConventionPlugin"
+        }
+        register("androidRoom") {
+            id = libs.plugins.meshtastic.android.room.get().pluginId
+            implementationClass = "AndroidRoomConventionPlugin"
+        }
+
     }
 }

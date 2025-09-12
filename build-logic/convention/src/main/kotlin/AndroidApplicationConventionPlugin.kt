@@ -15,15 +15,76 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import com.android.build.api.dsl.ApplicationExtension
+import com.geeksville.mesh.buildlogic.configureKotlinAndroid
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.withType
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 class AndroidApplicationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
+
             apply(plugin = "com.android.application")
             apply(plugin = "org.jetbrains.kotlin.android")
+            apply(plugin = "org.jetbrains.kotlin.plugin.compose")
+            apply(plugin = "meshtastic.android.lint")
+
+            extensions.configure<ApplicationExtension> {
+
+                defaultConfig {
+                    targetSdk = 36
+                    testInstrumentationRunner = "com.geeksville.mesh.TestRunner"
+                    vectorDrawables.useSupportLibrary = true
+                }
+
+                buildTypes {
+                    getByName("release") {
+                        isMinifyEnabled = true
+                        isShrinkResources = true
+                        proguardFiles(
+                            getDefaultProguardFile("proguard-android-optimize.txt"),
+                            "proguard-rules.pro"
+                        )
+                    }
+                    getByName("debug") {
+                        isDebuggable = true
+                        isPseudoLocalesEnabled = true
+                    }
+                }
+                
+                buildFeatures {
+                    buildConfig = true
+                }
+            }
+
+            extensions.configure<ApplicationExtension> {
+                configureKotlinAndroid(this)
+                defaultConfig.targetSdk = 36
+                testOptions.animationsDisabled = true
+            }
+            
+            extensions.configure<JavaPluginExtension> {
+                toolchain {
+                    languageVersion.set(JavaLanguageVersion.of(21))
+                }
+            }
+
+            tasks.withType<KotlinCompile>().configureEach {
+                compilerOptions {
+                    freeCompilerArgs.addAll(
+                        "-opt-in=kotlin.RequiresOptIn",
+                        "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
+                        "-Xcontext-receivers",
+                        "-Xannotation-default-target=param-property",
+                    )
+                }
+            }
         }
     }
 }

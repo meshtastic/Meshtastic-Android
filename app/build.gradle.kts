@@ -15,19 +15,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import com.google.protobuf.gradle.proto
 import io.gitlab.arturbosch.detekt.Detekt
-import org.gradle.kotlin.dsl.invoke
 import java.io.FileInputStream
 import java.util.Properties
 
 plugins {
     alias(libs.plugins.meshtastic.android.application)
-//    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.compose)
+    alias(libs.plugins.meshtastic.android.application.flavors)
+    alias(libs.plugins.meshtastic.android.application.compose)
+    alias(libs.plugins.meshtastic.android.application.firebase)
+    alias(libs.plugins.meshtastic.hilt)
+//    alias(libs.plugins.meshtastic.android.room)
+
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.hilt)
     alias(libs.plugins.protobuf)
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.detekt)
@@ -45,8 +47,6 @@ if (keystorePropertiesFile.exists()) {
     FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
 }
 
-val gitVersionProvider = providers.of(GitVersionValueSource::class.java) {}
-
 android {
     namespace = "com.geeksville.mesh"
 
@@ -58,27 +58,23 @@ android {
             storePassword = keystoreProperties["storePassword"] as String?
         }
     }
-    compileSdk = Configs.COMPILE_SDK
     defaultConfig {
-        applicationId = Configs.APPLICATION_ID
-        minSdk = Configs.MIN_SDK
-        targetSdk = Configs.TARGET_SDK
         // Prioritize injected props, then ENV, then fallback to git commit count
         versionCode =
             (
                 project.findProperty("android.injected.version.code")?.toString()?.toInt()
                     ?: System.getenv("VERSION_CODE")?.toInt()
-                    ?: gitVersionProvider.get().toInt()
+                    ?: 1
                 )
         versionName =
             (
                 project.findProperty("android.injected.version.name")?.toString()
                     ?: System.getenv("VERSION_NAME")
-                    ?: Configs.VERSION_NAME_BASE
+                    ?: "0.0.1"
                 )
         testInstrumentationRunner = "com.geeksville.mesh.TestRunner"
-        buildConfigField("String", "MIN_FW_VERSION", "\"${Configs.MIN_FW_VERSION}\"")
-        buildConfigField("String", "ABS_MIN_FW_VERSION", "\"${Configs.ABS_MIN_FW_VERSION}\"")
+        buildConfigField("String", "MIN_FW_VERSION", "\"1.0.0\"")
+        buildConfigField("String", "ABS_MIN_FW_VERSION", "\"1.0.0\"")
         // per https://developer.android.com/studio/write/vector-asset-studio
         vectorDrawables.useSupportLibrary = true
         // We have to list all translated languages here,
@@ -130,65 +126,25 @@ android {
         )
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64") }
     }
-    flavorDimensions += "default"
-    productFlavors {
-        // Read versionCode from defaultConfig after it's been potentially set by ENV or fallback
-        val resolvedVersionCode = defaultConfig.versionCode
-        val resolvedVersionName = defaultConfig.versionName
-
-        create("google") {
-            dimension = "default"
-            isDefault = true
-            // Enable Firebase Crashlytics for Google Play builds
-            apply(plugin = libs.plugins.google.services.get().pluginId)
-            apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
-            versionName = "$resolvedVersionName ($resolvedVersionCode) google"
-        }
-        create("fdroid") {
-            dimension = "default"
-            dependenciesInfo { includeInApk = false }
-            versionName = "$resolvedVersionName ($resolvedVersionCode) fdroid"
-        }
-    }
     buildTypes {
         release {
             if (keystoreProperties["storeFile"] != null) {
                 signingConfig = signingConfigs.named("release").get()
             }
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-        }
-        debug {
-            isDebuggable = true
-            isPseudoLocalesEnabled = true
         }
     }
     bundle { language { enableSplit = false } }
     buildFeatures {
-        compose = true
         aidl = true
+        compose = true
         buildConfig = true
     }
-    lint {
-        abortOnError = false
-        disable.add("MissingTranslation")
-    }
     sourceSets {
+        named("main") {
+            proto { srcDir("src/main/proto") }
+        }
         // Adds exported schema location as test app assets.
         named("androidTest") { assets.srcDirs(files("$projectDir/schemas")) }
-    }
-}
-
-kotlin {
-    compilerOptions {
-        jvmToolchain(21)
-        freeCompilerArgs.addAll(
-            "-opt-in=kotlin.RequiresOptIn",
-            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-            "-Xcontext-receivers",
-            "-Xannotation-default-target=param-property",
-        )
     }
 }
 
@@ -205,7 +161,7 @@ datadog {
 
 // per protobuf-gradle-plugin docs, this is recommended for android
 protobuf {
-    protoc { artifact = libs.protobuf.protoc.get().toString() }
+    protoc { artifact = "com.google.protobuf:protoc:${libs.findVersion("protobuf").get()}" }
     generateProtoTasks {
         all().forEach { task ->
             task.builtins {
@@ -241,71 +197,67 @@ project.afterEvaluate { logger.lifecycle("Version code is set to: ${android.defa
 dependencies {
     implementation(project(":network"))
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
-
-    // Bundles
-    implementation(libs.bundles.androidx)
-    implementation(libs.bundles.ui)
-    implementation(libs.bundles.markdown)
-    debugImplementation(libs.bundles.ui.tooling)
-    implementation(libs.bundles.adaptive)
-    implementation(libs.bundles.lifecycle)
-    implementation(libs.bundles.navigation)
-    implementation(libs.bundles.navigation3)
-    implementation(libs.bundles.coroutines)
-    implementation(libs.bundles.datastore)
-    implementation(libs.bundles.room)
-    implementation(libs.bundles.hilt)
-    implementation(libs.bundles.protobuf)
-    implementation(libs.bundles.coil)
-
+//
+//    // Bundles
+    implementation(libs.findBundle("androidx").get())
+    implementation(libs.findBundle("ui").get())
+    implementation(libs.findBundle("markdown").get())
+    debugImplementation(libs.findBundle("ui.tooling").get())
+    implementation(libs.findBundle("adaptive").get())
+    implementation(libs.findBundle("lifecycle").get())
+    implementation(libs.findBundle("navigation").get())
+    implementation(libs.findBundle("navigation3").get())
+    implementation(libs.findBundle("coroutines").get())
+    implementation(libs.findBundle("datastore").get())
+    implementation(libs.findBundle("room").get())
+    implementation(libs.findBundle("hilt").get())
+    implementation(libs.findBundle("protobuf").get())
+    implementation(libs.findBundle("coil").get())
     // OSM
-    "fdroidImplementation"(libs.bundles.osm)
-    "fdroidImplementation"(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
+    "fdroidImplementation"(libs.findBundle("osm").get())
+    "fdroidImplementation"(
+        libs.findLibrary("osmdroid-geopackage").get()
+    ) { exclude(group = "com.j256.ormlite") }
 
-    "googleImplementation"(libs.bundles.maps.compose)
-
-    // ZXing
-    implementation(libs.zxing.android.embedded) { isTransitive = false }
-    implementation(libs.zxing.core)
+    "googleImplementation"(libs.findBundle("maps-compose").get())
+    // ZXing (JourneyApps)
+    implementation(libs.findLibrary("zxing-android-embedded").get()) { isTransitive = false }
+    implementation(libs.findLibrary("zxing-core").get())
 
     // Individual dependencies
-    "googleImplementation"(libs.awesome.app.rating)
-    implementation(libs.core.splashscreen)
-    implementation(libs.emoji2.emojipicker)
-    implementation(libs.kotlinx.collections.immutable)
-    implementation(libs.kotlinx.serialization.json)
-    implementation(libs.org.eclipse.paho.client.mqttv3)
-    implementation(libs.streamsupport.minifuture)
-    implementation(libs.usb.serial.android)
-    implementation(libs.work.runtime.ktx)
-    implementation(libs.core.location.altitude)
-    implementation(libs.accompanist.permissions)
-    implementation(libs.timber)
+    "googleImplementation"(libs.findLibrary("awesome-app-rating").get())
+    implementation(libs.findLibrary("core-splashscreen").get())
+    implementation(libs.findLibrary("emoji2-emojipicker").get())
+    implementation(libs.findLibrary("kotlinx-collections-immutable").get())
+    implementation(libs.findLibrary("kotlinx-serialization-json").get())
+    implementation(libs.findLibrary("org-eclipse-paho-client-mqttv3").get())
+    implementation(libs.findLibrary("streamsupport-minifuture").get())
+    implementation(libs.findLibrary("usb-serial-android").get())
+    implementation(libs.findLibrary("work-runtime-ktx").get())
+    implementation(libs.findLibrary("core-location-altitude").get())
+    implementation(libs.findLibrary("accompanist-permissions").get())
+    implementation(libs.findLibrary("timber").get())
 
     // Compose BOM
-    implementation(platform(libs.compose.bom))
-    androidTestImplementation(platform(libs.compose.bom))
 
     // Firebase BOM
-    "googleImplementation"(platform(libs.firebase.bom))
-    "googleImplementation"(libs.bundles.firebase)
-    "googleImplementation"(libs.bundles.datadog)
+    "googleImplementation"(libs.findBundle("datadog").get())
 
     // ksp
-    ksp(libs.room.compiler)
-    ksp(libs.hilt.compiler)
-    kspAndroidTest(libs.hilt.compiler)
+    ksp(libs.findLibrary("room.compiler").get())
+    ksp(libs.findLibrary("hilt.compiler").get())
+    kspAndroidTest(libs.findLibrary("hilt.compiler").get())
 
     // Testing
-    testImplementation(libs.bundles.testing)
-    debugImplementation(libs.bundles.testing.android.manifest)
-    androidTestImplementation(libs.bundles.testing.android)
-    androidTestImplementation(libs.bundles.testing.hilt)
-    androidTestImplementation(libs.bundles.testing.navigation)
-    androidTestImplementation(libs.bundles.testing.room)
+    testImplementation(libs.findBundle("testing").get())
+    debugImplementation(libs.findBundle("testing-android-manifest").get())
+    androidTestImplementation(libs.findBundle("testing-android").get())
+    androidTestImplementation(libs.findBundle("testing-hilt").get())
+    androidTestImplementation(libs.findBundle("testing-navigation").get())
+    androidTestImplementation(libs.findBundle("testing-room").get())
 
-    detektPlugins(libs.detekt.formatting)
-    dokkaPlugin(libs.dokka.android.documentation.plugin)
+    detektPlugins(libs.findLibrary("detekt-formatting").get())
+    dokkaPlugin(libs.findLibrary("dokka-android-documentation-plugin").get())
 }
 
 ksp {
