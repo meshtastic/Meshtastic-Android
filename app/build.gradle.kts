@@ -19,8 +19,6 @@ import com.google.protobuf.gradle.proto
 import java.io.FileInputStream
 import java.util.Properties
 
-// FIXME: fdroid branching logic + anything else that might have been munged
-
 plugins {
     alias(libs.plugins.meshtastic.android.application)
     alias(libs.plugins.meshtastic.android.application.flavors)
@@ -29,6 +27,7 @@ plugins {
     alias(libs.plugins.meshtastic.android.lint)
     alias(libs.plugins.meshtastic.hilt)
     alias(libs.plugins.meshtastic.android.room)
+
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.protobuf)
@@ -131,6 +130,9 @@ android {
             if (keystoreProperties["storeFile"] != null) {
                 signingConfig = signingConfigs.named("release").get()
             }
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
     bundle { language { enableSplit = false } }
@@ -235,6 +237,7 @@ dependencies {
     debugImplementation(libs.bundles.testing.android.manifest)
     androidTestImplementation(libs.bundles.testing.android)
     androidTestImplementation(libs.bundles.testing.navigation)
+    androidTestImplementation(libs.bundles.testing.room)
 
     dokkaPlugin(libs.dokka.android.documentation.plugin)
 }

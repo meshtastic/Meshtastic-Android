@@ -242,6 +242,8 @@ osm = ["osmdroid-android", "osmbonuspack", "mgrs"]
 # Google Maps (Compose)
 maps-compose = ["location-services", "maps-compose", "maps-compose-utils", "maps-compose-widgets"]
 
+# Firebase
+firebase = ["firebase-analytics", "firebase-crashlytics", "firebase-performance"]
 # Datadog
 datadog = ["dd-sdk-android-compose", "dd-sdk-android-logs", "dd-sdk-android-okhttp", "dd-sdk-android-rum", "dd-sdk-android-session-replay", "dd-sdk-android-session-replay-compose", "dd-sdk-android-timber", "dd-sdk-android-trace", "dd-sdk-android-trace-otel"]
 
