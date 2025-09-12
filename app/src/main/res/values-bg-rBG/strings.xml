@@ -143,7 +143,7 @@
     <string name="must_set_region">Трябва да зададете регион!</string>
     <string name="cant_change_no_radio">Каналът не може да бъде сменен, тъй като радиото все още не е свързано. Моля, опитайте отново.</string>
     <string name="save_rangetest">Export rangetest packets</string>
-    <string name="export_data_csv">Export all packets</string>
+    <string name="export_data_csv">Експортиране на всички пакети</string>
     <string name="reset">Нулиране</string>
     <string name="scan">Сканиране</string>
     <string name="add_network_device">Добавяне</string>
@@ -497,7 +497,7 @@
     <string name="gps_update_interval_seconds">Интервал на актуализиране на GPS (секунди)</string>
     <string name="redefine_gps_rx_pin">Предефиниране на GPS_RX_PIN</string>
     <string name="redefine_gps_tx_pin">Предефиниране на GPS_TX_PIN</string>
-    <string name="redefine_pin_gps_en">Redefine PIN_GPS_EN</string>
+    <string name="redefine_pin_gps_en">Предефиниране на PIN_GPS_EN</string>
     <string name="position_flags">Position flags</string>
     <string name="power_config">Конфигуриране на захранването</string>
     <string name="enable_power_saving_mode">Активиране на енергоспестяващ режим</string>
@@ -594,8 +594,8 @@
     <string name="dynamic">Динамична</string>
     <string name="scan_qr_code">Сканиране на QR кода</string>
     <string name="share_contact">Споделяне на контакт</string>
-    <string name="notes">Notes</string>
-    <string name="add_a_note">Add a private note…</string>
+    <string name="notes">Бележки</string>
+    <string name="add_a_note">Добавяне на лична бележка...</string>
     <string name="import_shared_contact">Импортиране на споделен контакт?</string>
     <string name="unmessageable">Без съобщения</string>
     <string name="unmonitored_or_infrastructure">Ненаблюдаван или инфраструктурен</string>
@@ -614,7 +614,7 @@
     <string name="load">Load</string>
     <string name="user_string">User String</string>
     <string name="navigate_into_label">Navigate Into</string>
-    <string name="connections">Connection</string>
+    <string name="connections">Свързване</string>
     <string name="map">Карта на Mesh</string>
     <string name="conversations">Разговори</string>
     <string name="nodes">Възли</string>
