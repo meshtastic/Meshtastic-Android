@@ -1,8 +1,6 @@
 #[allow(unused)]
 [versions]
 accompanistPermissions = "0.37.3"
-adaptive = "1.2.0-beta02"
-adaptive-navigation-suite = "1.3.2"
 agp = "8.13.0"
 androidDesugarJdkLibs = "2.1.5"
 androidDocumentationPlugin = "2.0.0"
@@ -11,11 +9,9 @@ androidxComposeFoundation = "1.8.0-alpha07"
 androidxComposeMaterial3Adaptive = "1.2.0-beta02"
 androidxComposeRuntimeTracing = "1.7.6"
 androidxTracing = "1.3.0"
-
 appcompat = "1.7.1"
 awesome-app-rating = "2.8.0"
 coil = "3.3.0"
-compose-bom = "2025.09.00"
 constraintlayout = "2.2.1"
 core-ktx = "1.17.0"
 core-location-altitude = "1.0.0-alpha03"
@@ -132,7 +128,6 @@ firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebase-bom" }
 firebase-crashlytics = { group = "com.google.firebase", name = "firebase-crashlytics" }
 firebase-performance = { group = "com.google.firebase", name = "firebase-perf" }
-gradle = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-android-testing = { group = "com.google.dagger", name = "hilt-android-testing", version.ref = "hilt" }
 hilt-compiler = { group = "com.google.dagger", name = "hilt-compiler", version.ref = "hilt" }
@@ -291,7 +286,3 @@ meshtastic-android-room = { id = "meshtastic.android.room" }
 meshtastic-android-test = { id = "meshtastic.android.test" }
 meshtastic-hilt = { id = "meshtastic.hilt" }
 meshtastic-detekt = { id = "meshtastic.detekt" }
-#meshtastic-android-application-jacoco = { id = "meshtastic.android.application.jacoco" }
-#meshtastic-android-feature = { id = "meshtastic.android.feature" }
-#meshtastic-android-library-jacoco = { id = "meshtastic.android.library.jacoco" }
-#meshtastic-jvm-library = { id = "meshtastic.jvm.library" }
