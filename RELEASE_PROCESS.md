@@ -31,7 +31,7 @@ The entire release process happens on a dedicated release branch, allowing `main
 ### 1. Creating the Release Branch
 First, create a `release/X.X.X` branch from a stable `main`. This branch is now "feature frozen." Only critical bug fixes should be added.
 
-As a housekeeping step, it's recommended to update the `VERSION_NAME_BASE` in `buildSrc/src/main/kotlin/Configs.kt` on this new branch. While the final release version is set by the Git tag in CI, this ensures local development builds have a sensible version name.
+As a housekeeping step, it's recommended to update the `VERSION_NAME_BASE` in `build-logic/convention/src/main/kotlin/com/geeksville/mesh/buildlogic/Configs.kt` on this new branch. While the final release version is set by the Git tag in CI, this ensures local development builds have a sensible version name.
 
 ```bash
 git checkout main
