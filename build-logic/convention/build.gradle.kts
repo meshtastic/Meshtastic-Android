@@ -41,7 +41,7 @@ dependencies {
     compileOnly(libs.android.gradleApiPlugin)
     compileOnly(libs.android.tools.common)
     compileOnly(libs.compose.gradlePlugin)
-    compileOnly(libs.detekt.gradlePlugin)
+    compileOnly(libs.detekt.gradle)
     compileOnly(libs.firebase.crashlytics.gradlePlugin)
     compileOnly(libs.firebase.performance.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
@@ -92,6 +92,10 @@ gradlePlugin {
         register("hilt") {
             id = libs.plugins.meshtastic.hilt.get().pluginId
             implementationClass = "HiltConventionPlugin"
+        }
+        register("detekt") {
+            id = libs.plugins.meshtastic.detekt.get().pluginId
+            implementationClass = "DetektConventionPlugin"
         }
         register("androidRoom") {
             id = libs.plugins.meshtastic.android.room.get().pluginId

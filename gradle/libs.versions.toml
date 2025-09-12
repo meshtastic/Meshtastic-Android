@@ -25,6 +25,7 @@ datastore = "1.1.7"
 dd-sdk-android = "3.0.0"
 dd-sdk-android-gradle-plugin = "1.19.0"
 detekt = "1.23.8"
+detektCompose = "1.0.0"
 devtools-ksp = "2.2.20-2.0.2"
 emoji2 = "1.6.0"
 espresso-core = "3.7.0"
@@ -123,7 +124,6 @@ dd-sdk-android-session-replay-compose = { group = "com.datadoghq", name = "dd-sd
 dd-sdk-android-timber = { group = "com.datadoghq", name = "dd-sdk-android-timber", version.ref = "dd-sdk-android" }
 dd-sdk-android-trace = { group = "com.datadoghq", name = "dd-sdk-android-trace", version.ref = "dd-sdk-android" }
 dd-sdk-android-trace-otel = { group = "com.datadoghq", name = "dd-sdk-android-trace-otel", version.ref = "dd-sdk-android" }
-detekt-formatting = { group = "io.gitlab.arturbosch.detekt", name = "detekt-formatting", version.ref = "detekt" }
 dokka-android-documentation-plugin = { module = "org.jetbrains.dokka:android-documentation-plugin", version.ref = "androidDocumentationPlugin" }
 emoji2-emojipicker = { group = "androidx.emoji2", name = "emoji2-emojipicker", version.ref = "emoji2" }
 espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espresso-core" }
@@ -190,14 +190,14 @@ truth = { group = "com.google.truth", name = "truth", version.ref = "truth" }
 android-gradleApiPlugin = { group = "com.android.tools.build", name = "gradle-api", version.ref = "agp" }
 android-tools-common = { group = "com.android.tools", name = "common", version.ref = "androidTools" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
-detekt-gradlePlugin = { group = "io.gitlab.arturbosch.detekt", name = "detekt-gradle-plugin", version.ref = "detekt" }
 firebase-crashlytics-gradlePlugin = { group = "com.google.firebase", name = "firebase-crashlytics-gradle", version.ref = "crashlytics" }
 firebase-performance-gradlePlugin = { group = "com.google.firebase", name = "perf-plugin", version.ref = "firebasePerfPlugin" }
 ksp-gradlePlugin = { group = "com.google.devtools.ksp", name = "com.google.devtools.ksp.gradle.plugin", version.ref = "devtools-ksp" }
 room-gradlePlugin = { group = "androidx.room", name = "room-gradle-plugin", version.ref = "room" }
 spotless-gradlePlugin = { group = "com.diffplug.spotless", name = "spotless-plugin-gradle", version.ref = "spotless" }
 androidx-lint-gradle = { group = "androidx.lint", name = "lint-gradle", version.ref = "androidxLintGradle" }
-
+detekt-gradle = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version.ref = "detekt" }
+detekt-compose = { module = "io.nlopez.compose.rules:detekt", version.ref = "detektCompose" }
 
 [bundles]
 # Core AndroidX
@@ -290,6 +290,7 @@ meshtastic-android-library-compose = { id = "meshtastic.android.library.compose"
 meshtastic-android-room = { id = "meshtastic.android.room" }
 meshtastic-android-test = { id = "meshtastic.android.test" }
 meshtastic-hilt = { id = "meshtastic.hilt" }
+meshtastic-detekt = { id = "meshtastic.detekt" }
 #meshtastic-android-application-jacoco = { id = "meshtastic.android.application.jacoco" }
 #meshtastic-android-feature = { id = "meshtastic.android.feature" }
 #meshtastic-android-library-jacoco = { id = "meshtastic.android.library.jacoco" }
