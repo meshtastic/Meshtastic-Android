@@ -27,6 +27,7 @@ plugins {
     alias(libs.plugins.meshtastic.android.application)
     alias(libs.plugins.meshtastic.android.application.compose)
     alias(libs.plugins.meshtastic.android.application.firebase)
+    alias(libs.plugins.meshtastic.detekt)
 
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
@@ -129,7 +130,7 @@ android {
                 "zh-rTW",
             ),
         )
-        ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "xBG", "xBG_64") }
+        ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64") }
     }
 
     // Configure existing product flavors (defined by convention plugin)
