@@ -17,5 +17,5 @@
   -->
 <resources>
     <string name="app_name">MeshServiceExample</string>
-    <string name="send_hello_message">Send Hello Message</string>
+    <string name="send_hello_message">Hello Üzenet Küldés</string>
 </resources>
