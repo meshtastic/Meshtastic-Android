@@ -18,9 +18,10 @@ import org.gradle.kotlin.dsl.maven
  */
 
 include(":app", ":network", ":mesh_service_example")
-rootProject.name = "Meshtastic Android"
+rootProject.name = "MeshtasticAndroid"
 
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         google()
         mavenCentral()
@@ -64,3 +65,6 @@ toolchainManagement {
         }
     }
 }
+
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+include(":app", ":network", ":mesh_service_example")

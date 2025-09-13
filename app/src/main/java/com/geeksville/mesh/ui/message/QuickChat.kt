@@ -68,7 +68,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.QuickChatAction
@@ -79,18 +79,16 @@ import com.geeksville.mesh.ui.common.components.rememberDragDropState
 import com.geeksville.mesh.ui.common.theme.AppTheme
 
 @Composable
-internal fun QuickChatScreen(
-    modifier: Modifier = Modifier,
-    viewModel: UIViewModel = hiltViewModel(),
-) {
+internal fun QuickChatScreen(modifier: Modifier = Modifier, viewModel: UIViewModel = hiltViewModel()) {
     val actions by viewModel.quickChatActions.collectAsStateWithLifecycle()
     var showActionDialog by remember { mutableStateOf<QuickChatAction?>(null) }
 
     val listState = rememberLazyListState()
-    val dragDropState = rememberDragDropState(listState) { fromIndex, toIndex ->
-        val list = actions.toMutableList().apply { add(toIndex, removeAt(fromIndex)) }
-        viewModel.updateActionPositions(list)
-    }
+    val dragDropState =
+        rememberDragDropState(listState) { fromIndex, toIndex ->
+            val list = actions.toMutableList().apply { add(toIndex, removeAt(fromIndex)) }
+            viewModel.updateActionPositions(list)
+        }
 
     Box(modifier = modifier.fillMaxSize()) {
         if (showActionDialog != null) {
@@ -99,41 +97,30 @@ internal fun QuickChatScreen(
                 action = action,
                 onSave = viewModel::addQuickChatAction,
                 onDelete = viewModel::deleteQuickChatAction,
-            ) { showActionDialog = null }
+            ) {
+                showActionDialog = null
+            }
         }
 
         LazyColumn(
-            modifier = Modifier.dragContainer(
-                dragDropState = dragDropState,
-                haptics = LocalHapticFeedback.current,
-            ),
+            modifier = Modifier.dragContainer(dragDropState = dragDropState, haptics = LocalHapticFeedback.current),
             state = listState,
             contentPadding = PaddingValues(16.dp),
         ) {
-            dragDropItemsIndexed(
-                items = actions,
-                dragDropState = dragDropState,
-                key = { _, item -> item.uuid },
-            ) { _, action, isDragging ->
-                QuickChatItem(
-                    action = action,
-                    onEdit = { showActionDialog = it },
-                )
+            dragDropItemsIndexed(items = actions, dragDropState = dragDropState, key = { _, item -> item.uuid }) {
+                    _,
+                    action,
+                    isDragging,
+                ->
+                QuickChatItem(action = action, onEdit = { showActionDialog = it })
             }
         }
 
         FloatingActionButton(
-            onClick = {
-                showActionDialog = QuickChatAction(position = actions.size)
-            },
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp)
+            onClick = { showActionDialog = QuickChatAction(position = actions.size) },
+            modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
         ) {
-            Icon(
-                imageVector = Icons.Default.Add,
-                contentDescription = stringResource(id = R.string.add),
-            )
+            Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(id = R.string.add))
         }
     }
 }
@@ -172,116 +159,111 @@ private fun EditQuickChatDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        text =
-            {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = stringResource(id = title),
-                        modifier = Modifier.fillMaxWidth(),
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold,
-                            textAlign = TextAlign.Center,
-                        ),
-                    )
+        text = {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = stringResource(id = title),
+                    modifier = Modifier.fillMaxWidth(),
+                    style =
+                    MaterialTheme.typography.titleLarge.copy(
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                    ),
+                )
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                    OutlinedTextFieldWithCounter(
-                        label = stringResource(R.string.name),
-                        value = actionInput.name,
-                        maxSize = 5,
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth(),
-                    ) { actionInput = actionInput.copy(name = it.uppercase()) }
+                OutlinedTextFieldWithCounter(
+                    label = stringResource(R.string.name),
+                    value = actionInput.name,
+                    maxSize = 5,
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    actionInput = actionInput.copy(name = it.uppercase())
+                }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                    OutlinedTextFieldWithCounter(
-                        label = stringResource(id = R.string.message),
-                        value = actionInput.message,
-                        maxSize = 200,
-                        getSize = { it.toByteArray().size + 1 },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .focusRequester(focusRequester),
-                    ) {
-                        actionInput = actionInput.copy(message = it)
-                        if (newQuickChat) {
-                            actionInput = actionInput.copy(name = getMessageName(it))
-                        }
+                OutlinedTextFieldWithCounter(
+                    label = stringResource(id = R.string.message),
+                    value = actionInput.message,
+                    maxSize = 200,
+                    getSize = { it.toByteArray().size + 1 },
+                    modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
+                ) {
+                    actionInput = actionInput.copy(message = it)
+                    if (newQuickChat) {
+                        actionInput = actionInput.copy(name = getMessageName(it))
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(8.dp))
 
-                    val (text, icon) = if (isInstant) {
+                val (text, icon) =
+                    if (isInstant) {
                         R.string.quick_chat_instant to Icons.Default.FastForward
                     } else {
                         R.string.quick_chat_append to Icons.Default.Add
                     }
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-                        if (isInstant) {
-                            Icon(
-                                imageVector = icon,
-                                contentDescription = stringResource(id = text),
-                            )
-                            Spacer(Modifier.width(12.dp))
-                        }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    if (isInstant) {
+                        Icon(imageVector = icon, contentDescription = stringResource(id = text))
+                        Spacer(Modifier.width(12.dp))
+                    }
 
-                        Text(
-                            text = stringResource(text),
-                            modifier = Modifier.weight(1f),
-                        )
+                    Text(text = stringResource(text), modifier = Modifier.weight(1f))
 
-                        Switch(
-                            checked = isInstant,
-                            onCheckedChange = { checked ->
-                                actionInput = actionInput.copy(
-                                    mode = when (checked) {
+                    Switch(
+                        checked = isInstant,
+                        onCheckedChange = { checked ->
+                            actionInput =
+                                actionInput.copy(
+                                    mode =
+                                    when (checked) {
                                         true -> QuickChatAction.Mode.Instant
                                         false -> QuickChatAction.Mode.Append
-                                    }
+                                    },
                                 )
-                            },
-                        )
-                    }
+                        },
+                    )
                 }
-            },
-        confirmButton =
-            {
-                FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                ) {
-                    TextButton(
-                        modifier = Modifier.weight(1f),
-                        onClick = onDismiss,
-                    ) { Text(stringResource(R.string.cancel)) }
+            }
+        },
+        confirmButton = {
+            FlowRow(
+                modifier = Modifier.fillMaxWidth().padding(start = 24.dp, end = 24.dp, bottom = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                TextButton(modifier = Modifier.weight(1f), onClick = onDismiss) {
+                    Text(stringResource(R.string.cancel))
+                }
 
-                    if (!newQuickChat) {
-                        Button(
-                            modifier = Modifier.weight(1f),
-                            onClick = {
-                                onDelete(actionInput)
-                                onDismiss()
-                            },
-                        ) { Text(text = stringResource(R.string.delete)) }
-                    }
-
+                if (!newQuickChat) {
                     Button(
                         modifier = Modifier.weight(1f),
                         onClick = {
-                            onSave(actionInput)
+                            onDelete(actionInput)
                             onDismiss()
                         },
-                        enabled = actionInput.name.isNotEmpty() && actionInput.message.isNotEmpty(),
-                    ) { Text(text = stringResource(R.string.save)) }
+                    ) {
+                        Text(text = stringResource(R.string.delete))
+                    }
                 }
-            },
+
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        onSave(actionInput)
+                        onDismiss()
+                    },
+                    enabled = actionInput.name.isNotEmpty() && actionInput.message.isNotEmpty(),
+                ) {
+                    Text(text = stringResource(R.string.save))
+                }
+            }
+        },
     )
 }
 
@@ -311,9 +293,7 @@ private fun OutlinedTextFieldWithCounter(
         Text(
             text = "${getSize(value)}/$maxSize",
             style = MaterialTheme.typography.bodySmall,
-            modifier = Modifier
-                .align(Alignment.End)
-                .padding(top = 4.dp, end = 16.dp)
+            modifier = Modifier.align(Alignment.End).padding(top = 4.dp, end = 16.dp),
         )
     }
 }
@@ -324,12 +304,7 @@ private fun QuickChatItem(
     modifier: Modifier = Modifier,
     onEdit: (QuickChatAction) -> Unit = {},
 ) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        shape = RoundedCornerShape(12.dp),
-    ) {
+    Card(modifier = modifier.fillMaxWidth().padding(8.dp), shape = RoundedCornerShape(12.dp)) {
         ListItem(
             leadingContent = {
                 if (action.mode == QuickChatAction.Mode.Instant) {
@@ -342,13 +317,8 @@ private fun QuickChatItem(
             headlineContent = { Text(text = action.name) },
             supportingContent = { Text(text = action.message) },
             trailingContent = {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    IconButton(
-                        onClick = { onEdit(action) },
-                        modifier = Modifier.size(48.dp)
-                    ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    IconButton(onClick = { onEdit(action) }, modifier = Modifier.size(48.dp)) {
                         Icon(
                             imageVector = Icons.Default.Edit,
                             contentDescription = stringResource(id = R.string.quick_chat_edit),
@@ -359,7 +329,7 @@ private fun QuickChatItem(
                         contentDescription = stringResource(id = R.string.quick_chat),
                     )
                 }
-            }
+            },
         )
     }
 }
@@ -367,15 +337,7 @@ private fun QuickChatItem(
 @PreviewLightDark
 @Composable
 private fun QuickChatItemPreview() {
-    AppTheme {
-        QuickChatItem(
-            action = QuickChatAction(
-                name = "TST",
-                message = "Test",
-                position = 0,
-            ),
-        )
-    }
+    AppTheme { QuickChatItem(action = QuickChatAction(name = "TST", message = "Test", position = 0)) }
 }
 
 @PreviewLightDark
@@ -383,14 +345,10 @@ private fun QuickChatItemPreview() {
 private fun EditQuickChatDialogPreview() {
     AppTheme {
         EditQuickChatDialog(
-            action = QuickChatAction(
-                name = "TST",
-                message = "Test",
-                position = 0,
-            ),
+            action = QuickChatAction(name = "TST", message = "Test", position = 0),
             onSave = {},
             onDelete = {},
-            onDismiss = {}
+            onDismiss = {},
         )
     }
 }

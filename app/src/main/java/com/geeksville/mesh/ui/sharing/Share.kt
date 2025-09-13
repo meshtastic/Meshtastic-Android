@@ -37,7 +37,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Contact
@@ -46,23 +46,14 @@ import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.contact.ContactItem
 
 @Composable
-fun ShareScreen(
-    viewModel: UIViewModel = hiltViewModel(),
-    onConfirm: (String) -> Unit
-) {
+fun ShareScreen(viewModel: UIViewModel = hiltViewModel(), onConfirm: (String) -> Unit) {
     val contactList by viewModel.contactList.collectAsStateWithLifecycle()
 
-    ShareScreen(
-        contacts = contactList,
-        onConfirm = onConfirm,
-    )
+    ShareScreen(contacts = contactList, onConfirm = onConfirm)
 }
 
 @Composable
-fun ShareScreen(
-    contacts: List<Contact>,
-    onConfirm: (String) -> Unit
-) {
+fun ShareScreen(contacts: List<Contact>, onConfirm: (String) -> Unit) {
     var selectedContact by remember { mutableStateOf("") }
 
     Column {
@@ -73,26 +64,18 @@ fun ShareScreen(
         ) {
             items(contacts, key = { it.contactKey }) { contact ->
                 val selected = contact.contactKey == selectedContact
-                ContactItem(
-                    contact = contact,
-                    selected = selected,
-                    onClick = { selectedContact = contact.contactKey },
-                )
+                ContactItem(contact = contact, selected = selected, onClick = { selectedContact = contact.contactKey })
             }
         }
 
         Button(
-            onClick = {
-                onConfirm(selectedContact)
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
+            onClick = { onConfirm(selectedContact) },
+            modifier = Modifier.fillMaxWidth().padding(24.dp),
             enabled = selectedContact.isNotEmpty(),
         ) {
             Icon(
                 imageVector = Icons.AutoMirrored.Default.Send,
-                contentDescription = stringResource(id = R.string.share)
+                contentDescription = stringResource(id = R.string.share),
             )
         }
     }
@@ -103,7 +86,8 @@ fun ShareScreen(
 private fun ShareScreenPreview() {
     AppTheme {
         ShareScreen(
-            contacts = listOf(
+            contacts =
+            listOf(
                 Contact(
                     contactKey = "0^all",
                     shortName = stringResource(R.string.some_username),
