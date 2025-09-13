@@ -49,6 +49,7 @@ class MainActivity : AppCompatActivity() {
     private var serviceConnection: ServiceConnection? = null
     private var isMeshServiceBound = false
 
+    @Suppress("LongMethod", "TooGenericExceptionCaught", "ReturnCount", "MagicNumber")
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -166,7 +167,7 @@ class MainActivity : AppCompatActivity() {
                                 Log.d(TAG, "Position App NodeInfo: $ni")
                                 mainTextView.text = "Position App NodeInfo: $ni"
                             } catch (e: Exception) {
-                                e.printStackTrace()
+                                Log.e(TAG, e.toString())
                                 return
                             }
                         }
