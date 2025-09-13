@@ -2,9 +2,9 @@ Meshtastic is a tool for using Android devices with open-source, off-grid mesh r
 
 For more information about the Meshtastic project, please visit our website: [meshtastic.org](https://www.meshtastic.org). The firmware that runs on the radio devices is a separate open-source project, which you can find here: [https://github.com/meshtastic/Meshtastic-device](https://github.com/meshtastic/Meshtastic-device).
 
-**Community and Support**
+**Kommuun ja tugi**
 
-This project is currently in beta. We would love to hear from you! If you have questions, feedback, or encounter any problems, please join our friendly and active community:
+See projekt on hetkel beeta arenduses. Võtame meeleldi teie sõnumeid vastu! Kui sul on küsimusi, tagasisidet või probleeme, palun liitu meie sõbraliku ja aktiivse kommuuniga:
 
 *   **Discussion Forum:** [https://github.com/orgs/meshtastic/discussions](https://github.com/orgs/meshtastic/discussions)
 *   **Discord:** [https://discord.gg/meshtastic](https://discord.gg/meshtastic)
