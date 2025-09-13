@@ -18,9 +18,6 @@
 package com.geeksville.mesh.ui.connections
 
 import android.Manifest
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
 import android.net.InetAddresses
 import android.os.Build
 import android.util.Patterns
@@ -477,12 +474,6 @@ fun ConnectionsScreen(
             )
         }
     }
-}
-
-private tailrec fun Context.findActivity(): Activity = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> error("No activity found")
 }
 
 private const val SCAN_PERIOD: Long = 10000 // 10 seconds
