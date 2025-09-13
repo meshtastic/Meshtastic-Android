@@ -24,6 +24,7 @@ plugins {
     alias(libs.plugins.protobuf)
     alias(libs.plugins.detekt)
     alias(libs.plugins.kover)
+    alias(libs.plugins.spotless)
 }
 
 android {
@@ -43,26 +44,17 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
-    buildFeatures {
-        aidl = true
-    }
+    buildFeatures { aidl = true }
 }
 
-kotlin {
-    jvmToolchain(21)
-}
+kotlin { jvmToolchain(21) }
 
 // per protobuf-gradle-plugin docs, this is recommended for android
 protobuf {
-    protoc {
-        artifact = libs.protobuf.protoc.get().toString()
-    }
+    protoc { artifact = libs.protobuf.protoc.get().toString() }
     generateProtoTasks {
         all().forEach { task ->
             task.builtins {
@@ -89,13 +81,27 @@ dependencies {
 
     // OSM
     implementation(libs.bundles.osm)
-    implementation(libs.osmdroid.geopackage) {
-        exclude(group = "com.j256.ormlite")
-    }
+    implementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
     detektPlugins(libs.detekt.formatting)
 }
 
 detekt {
     config.setFrom("../config/detekt/detekt.yml")
     baseline = file("../config/detekt/detekt-baseline-meshserviceexample.xml")
+}
+
+spotless {
+    ratchetFrom("origin/main")
+    kotlin {
+        target("src/*/kotlin/**/*.kt")
+        targetExclude("**/build/**/*.kt")
+        ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
+        ktlint("1.7.1").setEditorConfigPath("../config/spotless/.editorconfig")
+        licenseHeaderFile(rootProject.file("config/spotless/copyright.txt"))
+    }
+    kotlinGradle {
+        target("**/*.gradle.kts")
+        ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
+        ktlint("1.7.1").setEditorConfigPath("../config/spotless/.editorconfig")
+    }
 }
