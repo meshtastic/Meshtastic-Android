@@ -291,11 +291,11 @@
     <string name="forty_eight_hours">48 óra</string>
     <string name="one_week">1 hét</string>
     <string name="two_weeks">2 hét</string>
-    <string name="four_weeks">4W</string>
+    <string name="four_weeks">4 hét</string>
     <string name="max">Max</string>
-    <string name="unknown_age">Unknown Age</string>
-    <string name="copy">Copy</string>
-    <string name="alert_bell_text">Alert Bell Character!</string>
+    <string name="unknown_age">Ismeretlen ideje</string>
+    <string name="copy">Másolás</string>
+    <string name="alert_bell_text">Riasztási harang karakter!</string>
     <string name="critical_alert">Kritikus riasztás!</string>
     <string name="favorite">Kedvenc</string>
     <string name="favorite_add">Hozzáadod „%s”-t kedvenc csomópontként?</string>
