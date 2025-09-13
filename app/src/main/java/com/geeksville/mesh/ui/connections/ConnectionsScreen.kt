@@ -82,7 +82,6 @@ import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceListEntry
-import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.ConfigRoute
@@ -484,29 +483,6 @@ private tailrec fun Context.findActivity(): Activity = when (this) {
     is Activity -> this
     is ContextWrapper -> baseContext.findActivity()
     else -> error("No activity found")
-}
-
-enum class DeviceType {
-    BLE,
-    TCP,
-    USB,
-    ;
-
-    companion object {
-        fun fromAddress(address: String): DeviceType? = when (address.firstOrNull()) {
-            'x' -> BLE
-            's' -> USB
-            't' -> TCP
-            'm' -> USB // Treat mock as USB for UI purposes
-            'n' ->
-                when (address) {
-                    NO_DEVICE_SELECTED -> null
-                    else -> null
-                }
-
-            else -> null
-        }
-    }
 }
 
 private const val SCAN_PERIOD: Long = 10000 // 10 seconds
