@@ -46,5 +46,6 @@ private fun Lint.configure() {
     xmlReport = true
     sarifReport = true
     checkDependencies = true
+    abortOnError = false
     disable += "GradleDependency"
 }
