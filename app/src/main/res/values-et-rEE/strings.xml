@@ -131,7 +131,7 @@
     <string name="debug_clear">Puhasta logid</string>
     <string name="match_any">Sobib mõni | kõik</string>
     <string name="match_all">Sobib mõni | kõik</string>
-    <string name="debug_clear_logs_confirm">See eemaldab teie seadmest kõik logipaketid ja andmebaasikirjed – see on täielik lähtestamine ja see on jäädav.</string>
+    <string name="debug_clear_logs_confirm">See eemaldab teie seadmest kõik logipaketid ja andmebaasikirjed – see on täielik lähtestamine ja see on püsiv.</string>
     <string name="clear">Kustuta</string>
     <string name="message_delivery_status">Sõnumi edastamise olek</string>
     <string name="meshtastic_messages_notifications">Otsesõnumi teated</string>
