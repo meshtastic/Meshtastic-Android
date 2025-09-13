@@ -497,7 +497,7 @@
     <string name="gps_update_interval_seconds">GPS update interval (seconds)</string>
     <string name="redefine_gps_rx_pin">Redefine GPS_RX_PIN</string>
     <string name="redefine_gps_tx_pin">Redefine GPS_TX_PIN</string>
-    <string name="redefine_pin_gps_en">Redefine PIN_GPS_EN</string>
+    <string name="redefine_pin_gps_en">PIN_GPS_EN újradefiniálása</string>
     <string name="position_flags">Position flags</string>
     <string name="power_config">Power Config</string>
     <string name="enable_power_saving_mode">Enable power saving mode</string>
