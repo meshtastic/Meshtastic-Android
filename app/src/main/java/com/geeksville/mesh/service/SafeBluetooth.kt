@@ -15,10 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+@file:Suppress("MissingPermission")
+
 package com.geeksville.mesh.service
 
-import android.Manifest
-import android.annotation.SuppressLint
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
@@ -27,13 +27,10 @@ import android.bluetooth.BluetoothGattDescriptor
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.DeadObjectException
 import android.os.Handler
 import android.os.Looper
-import androidx.annotation.RequiresPermission
-import androidx.core.content.ContextCompat
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.concurrent.CallbackContinuation
@@ -46,11 +43,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeoutOrNull
 import java.io.Closeable
 import java.util.Random
 import java.util.UUID
+
+private val Context.bluetoothManager
+    get() = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager?
 
 // / Return a standard BLE 128 bit UUID from the short 16 bit versions
 fun longBLEUUID(hexFour: String): UUID = UUID.fromString("0000$hexFour-0000-1000-8000-00805f9b34fb")
@@ -124,87 +122,37 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
      */
     private val mHandler: Handler = Handler(Looper.getMainLooper())
 
-    /**
-     * Attempts an emergency restart of the Bluetooth adapter. This is a workaround for certain BLE stack issues. It
-     * checks for necessary permissions (BLUETOOTH_CONNECT on API 31+, BLUETOOTH_ADMIN on older versions) before
-     * attempting to disable and then re-enable the adapter.
-     */
-    @Suppress("ReturnCount")
     fun restartBle() {
         GeeksvilleApplication.analytics.track("ble_restart") // record # of times we needed to use this nasty hack
         errormsg("Doing emergency BLE restart")
-
-        val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as? BluetoothManager
-        val adapter = bluetoothManager?.adapter
-
-        if (adapter == null) {
-            errormsg("BluetoothAdapter not available for BLE restart.")
-            return
-        }
-
-        val hasPermission =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_CONNECT) ==
-                    PackageManager.PERMISSION_GRANTED
-            } else {
-                ContextCompat.checkSelfPermission(context, Manifest.permission.BLUETOOTH_ADMIN) ==
-                    PackageManager.PERMISSION_GRANTED
-            }
-
-        if (!hasPermission) {
-            errormsg("Missing Bluetooth permission (CONNECT or ADMIN) for BLE restart.")
-            return
-        }
-
-        if (adapter.isEnabled) {
-            warn("Attempting to disable Bluetooth adapter.")
-            if (!adapter.disable()) {
-                errormsg("adapter.disable() failed.")
-                return
-            }
-            // TODO: display some kind of UI about restarting BLE
-            mHandler.postDelayed(
-                object : Runnable {
-                    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-                    override fun run() {
-                        if (!adapter.isEnabled) {
-                            warn("Attempting to re-enable Bluetooth adapter.")
-                            if (!adapter.enable()) {
-                                errormsg("adapter.enable() failed.")
+        context.bluetoothManager?.adapter?.let { adp ->
+            if (adp.isEnabled) {
+                adp.disable()
+                // TODO: display some kind of UI about restarting BLE
+                mHandler.postDelayed(
+                    object : Runnable {
+                        override fun run() {
+                            if (!adp.isEnabled) {
+                                adp.enable()
                             } else {
-                                info("Bluetooth adapter re-enabled.")
+                                mHandler.postDelayed(this, 2500)
                             }
-                        } else {
-                            // Adapter might have been re-enabled by user or another process, or disable() is async and
-                            // hasn't completed.
-                            // Or, isEnabled check post-disable was too quick.
-                            // If it's still enabled, we retry enabling check later, assuming disable will eventually
-                            // take effect.
-                            warn("Adapter still enabled, retrying enable check soon.")
-                            mHandler.postDelayed(this, 2500)
                         }
-                    }
-                },
-                2500,
-            )
-        } else {
-            info("Bluetooth adapter already disabled, attempting to enable.")
-            if (!adapter.enable()) {
-                errormsg("adapter.enable() failed while adapter was already disabled.")
-            } else {
-                info("Bluetooth adapter enabled.")
+                    },
+                    2500,
+                )
             }
         }
     }
 
     companion object {
+
+        // Our own custom BLE status codes
         private const val STATUS_RELIABLE_WRITE_FAILED = 4403
         private const val STATUS_TIMEOUT = 4404
         private const val STATUS_NOSTART = 4405
         private const val STATUS_SIMFAILURE = 4406
     }
-
-    // Our own custom BLE status codes
 
     /**
      * Should we automatically try to reconnect when we lose our connection?
@@ -214,13 +162,11 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
      * responsible for reconnecting. This also prevents nasty races when sometimes both the upperlayer and this layer
      * decide to reconnect simultaneously.
      */
-    @Suppress("UnusedPrivateProperty")
     private val autoReconnect = false
 
     private val gattCallback =
         object : BluetoothGattCallback() {
 
-            @SuppressLint("MissingPermission")
             override fun onConnectionStateChange(g: BluetoothGatt, status: Int, newState: Int) = exceptionReporter {
                 info("new bluetooth connection state $newState, status $status")
 
@@ -252,10 +198,10 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                                 info("Lost connection - aborting current work: $currentWork")
 
                                 // If we get a disconnect, just try again otherwise fail all current operations
-                                // Note: if no work is pending (likely) we also just totally teardown and restart
-                                // the connection, because we won't be
+                                // Note: if no work is pending (likely) we also just totally teardown and restart the
+                                // connection, because we won't be
                                 // throwing a lost connection exception to any worker.
-                                if (autoConnect && (currentWork == null || currentWork?.isConnect() == true)) {
+                                if (autoReconnect && (currentWork == null || currentWork?.isConnect() == true)) {
                                     dropAndReconnect()
                                 } else {
                                     lostConnection("lost connection")
@@ -307,7 +253,6 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                 completeWork(status, Unit)
             }
 
-            @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
             override fun onCharacteristicWrite(
                 gatt: BluetoothGatt,
                 characteristic: BluetoothGattCharacteristic,
@@ -324,7 +269,8 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
                         // After this execute reliable completes - we can continue with normal operations (see
                         // onReliableWriteCompleted)
                     }
-                } else { // Just a standard write - do the normal flow
+                } else {
+                    // Just a standard write - do the normal flow
                     completeWork(status, characteristic)
                 }
             }
@@ -332,11 +278,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             override fun onMtuChanged(gatt: BluetoothGatt, mtu: Int, status: Int) {
                 // Alas, passing back an Int mtu isn't working and since I don't really care what MTU
                 // the device was willing to let us have I'm just punting and returning Unit
-                if (isSettingMtu) {
-                    completeWork(status, Unit)
-                } else {
-                    errormsg("Ignoring bogus onMtuChanged")
-                }
+                if (isSettingMtu) completeWork(status, Unit) else errormsg("Ignoring bogus onMtuChanged")
             }
 
             /**
@@ -429,9 +371,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             workQueue.add(btCont)
 
             // if we don't have any outstanding operations, run first item in queue
-            if (currentWork == null) {
-                startNewWork()
-            }
+            if (currentWork == null) startNewWork()
         }
     }
 
@@ -508,7 +448,6 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     // / if we are in the first non-automated lowLevel connect.
     private var currentConnectIsAuto = false
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun lowLevelConnect(autoNow: Boolean): BluetoothGatt? {
         currentConnectIsAuto = autoNow
         logAssert(gatt == null)
@@ -529,7 +468,6 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     // see https://stackoverflow.com/questions/40156699/which-correct-flag-of-autoconnect-in-connectgatt-of-ble for
     // more info.
     // Otherwise if you pass in false, it will try to connect now and will timeout and fail in 30 seconds.
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun queueConnect(autoConnect: Boolean = false, cont: Continuation<Unit>, timeout: Long = 0) {
         this.autoConnect = autoConnect
 
@@ -554,30 +492,16 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
      *
      * So you should expect your callback might be called multiple times, each time to reestablish a new connection.
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun asyncConnect(autoConnect: Boolean = false, cb: (Result<Unit>) -> Unit, lostConnectCb: () -> Unit) {
         logAssert(workQueue.isEmpty())
-
-        // If there's already connection work in progress, clear it before starting new connection
-        // This can happen during reconnection where previous connection work wasn't properly cleared
-        if (currentWork != null) {
-            warn("Found existing work during asyncConnect: $currentWork - clearing it")
-            synchronized(workQueue) { stopCurrentWork() }
-        }
+        if (currentWork != null) throw AssertionError("currentWork was not null: $currentWork")
 
         lostConnectCallback = lostConnectCb
-        connectionCallback =
-            if (autoConnect) {
-                cb
-            } else {
-                null
-            }
+        connectionCallback = if (autoConnect) cb else null
         queueConnect(autoConnect, CallbackContinuation(cb))
     }
 
     // / Restart any previous connect attempts
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
-    @Suppress("UnusedPrivateMember")
     private fun reconnect() {
         // closeGatt() // Get rid of any old gatt
 
@@ -607,7 +531,6 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     }
 
     // / Drop our current connection and then requeue a connect as needed
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun dropAndReconnect() {
         lostConnection("lost connection, reconnecting")
 
@@ -632,27 +555,22 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         }
     }
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun connect(autoConnect: Boolean = false) = makeSync<Unit> { queueConnect(autoConnect, it) }
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun queueReadCharacteristic(
         c: BluetoothGattCharacteristic,
         cont: Continuation<BluetoothGattCharacteristic>,
         timeout: Long = 0,
     ) = queueWork("readC ${c.uuid}", cont, timeout) { gatt!!.readCharacteristic(c) }
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun asyncReadCharacteristic(c: BluetoothGattCharacteristic, cb: (Result<BluetoothGattCharacteristic>) -> Unit) =
         queueReadCharacteristic(c, CallbackContinuation(cb))
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun readCharacteristic(c: BluetoothGattCharacteristic, timeout: Long = timeoutMsec): BluetoothGattCharacteristic =
         makeSync {
             queueReadCharacteristic(c, it, timeout)
         }
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun queueDiscoverServices(cont: Continuation<Unit>, timeout: Long = 0) {
         queueWork("discover", cont, timeout) {
             gatt?.discoverServices()
@@ -661,12 +579,10 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         }
     }
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun asyncDiscoverServices(cb: (Result<Unit>) -> Unit) {
         queueDiscoverServices(CallbackContinuation(cb))
     }
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun discoverServices() = makeSync<Unit> { queueDiscoverServices(it) }
 
     /** On some phones we receive bogus mtu gatt callbacks, we need to ignore them if we weren't setting the mtu */
@@ -676,23 +592,19 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
      * mtu operations seem to hang sometimes. To cope with this we have a 5 second timeout before throwing an exception
      * and cancelling the work
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun queueRequestMtu(len: Int, cont: Continuation<Unit>) = queueWork("reqMtu", cont, 10 * 1000) {
         isSettingMtu = true
         gatt?.requestMtu(len) ?: false
     }
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun asyncRequestMtu(len: Int, cb: (Result<Unit>) -> Unit) {
         queueRequestMtu(len, CallbackContinuation(cb))
     }
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun requestMtu(len: Int): Unit = makeSync { queueRequestMtu(len, it) }
 
     private var currentReliableWrite: ByteArray? = null
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun queueWriteCharacteristic(
         c: BluetoothGattCharacteristic,
         v: ByteArray,
@@ -704,14 +616,12 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         gatt?.writeCharacteristic(c) ?: false
     }
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun asyncWriteCharacteristic(
         c: BluetoothGattCharacteristic,
         v: ByteArray,
         cb: (Result<BluetoothGattCharacteristic>) -> Unit,
     ) = queueWriteCharacteristic(c, v, CallbackContinuation(cb))
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun writeCharacteristic(
         c: BluetoothGattCharacteristic,
         v: ByteArray,
@@ -722,7 +632,6 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
      * Like write, but we use the extra reliable flow documented here:
      * https://stackoverflow.com/questions/24485536/what-is-reliable-write-in-ble
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun queueWriteReliable(c: BluetoothGattCharacteristic, cont: Continuation<Unit>, timeout: Long = 0) =
         queueWork("rwriteC ${c.uuid}", cont, timeout) {
             logAssert(gatt!!.beginReliableWrite())
@@ -730,21 +639,17 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             gatt?.writeCharacteristic(c) ?: false
         }
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun asyncWriteReliable(c: BluetoothGattCharacteristic, cb: (Result<Unit>) -> Unit) =
         queueWriteReliable(c, CallbackContinuation(cb))
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun writeReliable(c: BluetoothGattCharacteristic): Unit = makeSync { queueWriteReliable(c, it) }
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     private fun queueWriteDescriptor(
         c: BluetoothGattDescriptor,
         cont: Continuation<BluetoothGattDescriptor>,
         timeout: Long = 0,
     ) = queueWork("writeD", cont, timeout) { gatt?.writeDescriptor(c) ?: false }
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun asyncWriteDescriptor(c: BluetoothGattDescriptor, cb: (Result<BluetoothGattDescriptor>) -> Unit) =
         queueWriteDescriptor(c, CallbackContinuation(cb))
 
@@ -770,7 +675,6 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     @Volatile private var isClosing = false
 
     /** Close just the GATT device but keep our pending callbacks active */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun closeGatt() {
         gatt?.let { g ->
             info("Closing our GATT connection")
@@ -778,18 +682,16 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
             try {
                 g.disconnect()
 
-                // Wait for our callback to run and handle the disconnect, with a timeout.
-                runBlocking {
-                    withTimeoutOrNull(1000) {
-                        while (gatt != null) {
-                            delay(100)
-                        }
-                    }
+                // Wait for our callback to run and handle hte disconnect
+                var msecsLeft = 1000
+                while (gatt != null && msecsLeft >= 0) {
+                    Thread.sleep(100)
+                    msecsLeft -= 100
                 }
 
                 gatt?.let { g2 ->
                     warn("Android onConnectionStateChange did not run, manually closing")
-                    gatt = null // clear gatt before calling close, because close might throw dead object exception
+                    gatt = null // clear gat before calling close, bcause close might throw dead object exception
                     g2.close()
                 }
             } catch (ex: NullPointerException) {
@@ -809,7 +711,6 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
      * Close down any existing connection, any existing calls (including async connects will be cancelled and you'll
      * need to recall connect to use this againt
      */
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun closeConnection() {
         // Set these to null _before_ calling gatt.disconnect(), because we don't want the old lostConnectCallback to
         // get called
@@ -824,7 +725,6 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
         failAllWork(BLEConnectionClosing())
     }
 
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     /** Close and destroy this SafeBluetooth instance. You'll need to make a new instance before using it again */
     override fun close() {
         closeConnection()
@@ -833,7 +733,6 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     }
 
     // / asyncronously turn notification on/off for a characteristic
-    @RequiresPermission(Manifest.permission.BLUETOOTH_CONNECT)
     fun setNotify(c: BluetoothGattCharacteristic, enable: Boolean, onChanged: (BluetoothGattCharacteristic) -> Unit) {
         debug("starting setNotify(${c.uuid}, $enable)")
         notifyHandlers[c.uuid] = onChanged
