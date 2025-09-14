@@ -1,21 +1,21 @@
-Meshtastic is a tool for using Android devices with open-source, off-grid mesh radios. This app is the main client for the Meshtastic project, allowing you to manage your mesh devices and communicate with other users.
+A Meshtastic egy eszköz, amellyel Android készülékeket lehet használni nyílt forráskódú, hálózaton kívüli (off-grid) mesh rádiókkal. Ez az alkalmazás a Meshtastic projekt fő kliensprogramja, amely lehetővé teszi a mesh eszközök kezelését és a kommunikációt más felhasználókkal.
 
-For more information about the Meshtastic project, please visit our website: [meshtastic.org](https://www.meshtastic.org). The firmware that runs on the radio devices is a separate open-source project, which you can find here: [https://github.com/meshtastic/Meshtastic-device](https://github.com/meshtastic/Meshtastic-device).
+További információkért a Meshtastic projektről látogasd meg weboldalunkat: [meshtastic.org](https://www.meshtastic.org). A rádióeszközökön futó firmware egy külön nyílt forráskódú projekt, amely itt található:[https://github.com/meshtastic/Meshtastic-device](https://github.com/meshtastic/Meshtastic-device).
 
-**Community and Support**
+Közösség és támogatás
 
-This project is currently in beta. We would love to hear from you! If you have questions, feedback, or encounter any problems, please join our friendly and active community:
+Ez a projekt jelenleg béta állapotban van. Örömmel fogadjuk a visszajelzéseidet! Ha kérdésed van, visszajelzést adnál vagy problémába ütközöl, csatlakozz a barátságos és aktív közösségünkhöz:
 
-*   **Discussion Forum:** [https://github.com/orgs/meshtastic/discussions](https://github.com/orgs/meshtastic/discussions)
+*   **Fórum:** [https://github.com/orgs/meshtastic/discussions](https://github.com/orgs/meshtastic/discussions)
 *   **Discord:** [https://discord.gg/meshtastic](https://discord.gg/meshtastic)
-*   **Report an Issue:** [https://github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues)
+*   **Hiba jelentése:** [https://github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues)
 
-**Documentation**
+**Dokumentáció**
 
-To learn more about the features and capabilities of this app and Meshtastic, please view our official documentation:
-[**View Documentation**](https://meshtastic.org/docs/)
+Ha szeretnél többet megtudni az alkalmazás és a Meshtastic funkcióiról és lehetőségeiről, tekintsd meg a hivatalos dokumentációt:
+[**Dokumentáció megtekintése**](https://meshtastic.org/docs/)
 
-**Translations**
+**Fordítás**
 
-You can help translate the app into your native language using Crowdin:
+Segíthetsz az alkalmazás lefordításában anyanyelvedre a Crowdin segítségével:
 [https://crowdin.meshtastic.org/android](https://crowdin.meshtastic.org/android)
