@@ -26,6 +26,8 @@
     <string name="some_username" translatable="false">SKH</string>
     <string name="sample_message" translatable="false">hey I found the cache, it is over here next to the big tiger. I\'m kinda scared.</string>
 
+    <string name="default_mqtt_address" translatable="false">mqtt.meshtastic.org</string>
+
     <string name="fallback_node_name">Meshtastic %s</string>
     <string name="node_filter_placeholder">Filter</string>
     <string name="desc_node_filter_clear">clear node filter</string>
