@@ -86,7 +86,7 @@
     <string name="analytics_okay">Povolit analýzu a hlášení pádů.</string>
     <string name="accept">Přijmout</string>
     <string name="cancel">Zrušit</string>
-    <string name="clear_changes">conn</string>
+    <string name="clear_changes">Smazat změny</string>
     <string name="new_channel_rcvd">Nová URL kanálu přijata</string>
     <string name="permission_missing">Meshtastic needs location permissions enabled to find new devices via Bluetooth. You can disable when not in use.</string>
     <string name="report_bug">Nahlášení chyby</string>
