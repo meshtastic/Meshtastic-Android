@@ -594,8 +594,8 @@
     <string name="dynamic">Dünaamiline</string>
     <string name="scan_qr_code">Skanneeri QR kood</string>
     <string name="share_contact">Jaga kontakti</string>
-    <string name="notes">Notes</string>
-    <string name="add_a_note">Add a private note…</string>
+    <string name="notes">Sõnumid</string>
+    <string name="add_a_note">Lisa privaatsõnum…</string>
     <string name="import_shared_contact">Impordi jagatud kontakt?</string>
     <string name="unmessageable">Ei võta sõnumeid vastu</string>
     <string name="unmonitored_or_infrastructure">Jälgimata või infrastruktuuripõhine</string>
@@ -759,7 +759,7 @@
     <string name="map_type_terrain">Maastik</string>
     <string name="map_type_hybrid">Hübriid</string>
     <string name="manage_map_layers">Halda kaardikihte</string>
-    <string name="map_layer_formats">Custom layers support .kml, .kmz, or GeoJSON files.</string>
+    <string name="map_layer_formats">Kohandatud kihid toetavad .kml, .kmz või GeoJSON-faile.</string>
     <string name="map_layers_title">Kaardikihid</string>
     <string name="no_map_layers_loaded">Kaardikihid laadimata.</string>
     <string name="add_layer_button">Lisa kiht</string>
