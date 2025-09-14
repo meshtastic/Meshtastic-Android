@@ -31,7 +31,7 @@ import com.geeksville.mesh.android.prefs.RadioPrefs
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.network.NetworkRepository
-import com.geeksville.mesh.service.ConnectionState // Added import
+import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.util.anonymize
 import com.geeksville.mesh.util.ignoreException
 import com.geeksville.mesh.util.toRemoteExceptions
@@ -195,8 +195,8 @@ constructor(
         }
     }
 
-    private fun broadcastConnectionChanged(newState: ConnectionState) { // Parameter changed
-        debug("Broadcasting connection state change to $newState") // Updated log
+    private fun broadcastConnectionChanged(newState: ConnectionState) {
+        debug("Broadcasting connection state change to $newState")
         processLifecycle.coroutineScope.launch(dispatchers.default) {
             _connectionState.emit(newState)
         }
