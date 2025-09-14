@@ -162,10 +162,11 @@ fun MQTTConfigItemList(
         item {
             val defaultAddress = stringResource(R.string.default_mqtt_address)
             val isDefault = mqttInput.address.isEmpty() || mqttInput.address.contains(defaultAddress)
+            val enforceTls = isDefault && mqttInput.proxyToClientEnabled
             SwitchPreference(
                 title = stringResource(R.string.tls_enabled),
-                checked = mqttInput.tlsEnabled || isDefault,
-                enabled = enabled && !isDefault,
+                checked = mqttInput.tlsEnabled || enforceTls,
+                enabled = enabled && !enforceTls,
                 onCheckedChange = { mqttInput = mqttInput.copy { tlsEnabled = it } },
             )
         }
