@@ -58,7 +58,7 @@ platform :android do
       track: 'beta',
       aab: aab_path,
       release_status: 'draft',
-      skip_upload_apk: true
+      skip_upload_apk: true,
       skip_upload_metadata: true,
       skip_upload_changelogs: true,
       skip_upload_images: true,
@@ -73,7 +73,7 @@ platform :android do
       track: 'production',
       aab: aab_path,
       release_status: 'draft',
-      skip_upload_apk: true
+      skip_upload_apk: true,
       skip_upload_metadata: true,
       skip_upload_changelogs: true,
       skip_upload_images: true,
