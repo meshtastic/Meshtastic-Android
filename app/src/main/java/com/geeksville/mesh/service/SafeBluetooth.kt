@@ -502,6 +502,7 @@ class SafeBluetooth(private val context: Context, private val device: BluetoothD
     }
 
     // / Restart any previous connect attempts
+    @Suppress("unused")
     private fun reconnect() {
         // closeGatt() // Get rid of any old gatt
 
