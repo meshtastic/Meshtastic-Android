@@ -1378,11 +1378,17 @@ class MeshService :
         val isRouter = localConfig.device.role == ConfigProtos.Config.DeviceConfig.Role.ROUTER
         val lsEnabled = localConfig.power.isPowerSaving || isRouter
 
-        val effectiveState = when (newState) {
-            ConnectionState.CONNECTED -> ConnectionState.CONNECTED
-            ConnectionState.DEVICE_SLEEP -> if (lsEnabled) ConnectionState.DEVICE_SLEEP else ConnectionState.DISCONNECTED
-            ConnectionState.DISCONNECTED -> ConnectionState.DISCONNECTED
-        }
+        val effectiveState =
+            when (newState) {
+                ConnectionState.CONNECTED -> ConnectionState.CONNECTED
+                ConnectionState.DEVICE_SLEEP ->
+                    if (lsEnabled) {
+                        ConnectionState.DEVICE_SLEEP
+                    } else {
+                        ConnectionState.DISCONNECTED
+                    }
+                ConnectionState.DISCONNECTED -> ConnectionState.DISCONNECTED
+            }
         onConnectionChanged(effectiveState)
     }
 
