@@ -200,7 +200,7 @@ class MeshService :
 
         private const val CONFIG_ONLY_NONCE = 69420
         private const val NODE_INFO_ONLY_NONCE = 69421
-        private const val CONFIG_WAIT_MS = 50L
+        private const val CONFIG_WAIT_MS = 250L
     }
 
     private var previousSummary: String? = null
