@@ -65,6 +65,3 @@ toolchainManagement {
         }
     }
 }
-
-enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
-include(":app", ":network", ":mesh_service_example")
