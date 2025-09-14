@@ -75,8 +75,8 @@ constructor(
     private val interfaceFactory: InterfaceFactory,
 ) : Logging {
 
-    private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED) // Changed type and initial value
-    val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow() // Exposed as ConnectionState
+    private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
+    val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
 
     private val _receivedData = MutableSharedFlow<ByteArray>()
     val receivedData: SharedFlow<ByteArray> = _receivedData
@@ -87,7 +87,7 @@ constructor(
 
     private val logSends = false
     private val logReceives = false
-    private lateinit var sentPacketsLog: BinaryLogFile // inited in onCreate
+    private lateinit var sentPacketsLog: BinaryLogFile
     private lateinit var receivedPacketsLog: BinaryLogFile
 
     val mockInterfaceAddress: String by lazy { toInterfaceAddress(InterfaceId.MOCK, "") }
@@ -103,8 +103,6 @@ constructor(
      * Note: an interface may be started without necessarily yet having a connection
      */
     private var isStarted = false
-
-    // Removed: private var isConnected = false
 
     private fun initStateListeners() {
         bluetoothRepository.state
