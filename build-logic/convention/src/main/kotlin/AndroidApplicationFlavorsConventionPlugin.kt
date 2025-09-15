@@ -39,7 +39,6 @@ class AndroidApplicationFlavorsConventionPlugin : Plugin<Project> {
                     // Google specific dependencies
                     "googleImplementation"(libs.findBundle("maps-compose").get())
                     "googleImplementation"(libs.findLibrary("awesome-app-rating").get())
-                    "googleImplementation"(platform(libs.findLibrary("firebase-bom").get()))
                     "googleImplementation"(libs.findBundle("datadog").get())
                 }
             }

@@ -28,7 +28,6 @@ plugins {
     alias(libs.plugins.meshtastic.android.application.flavors)
     alias(libs.plugins.meshtastic.android.application.compose)
     alias(libs.plugins.meshtastic.android.application.firebase)
-    alias(libs.plugins.meshtastic.detekt)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.protobuf)
@@ -239,7 +238,7 @@ dependencies {
     androidTestImplementation(libs.bundles.testing.android)
     androidTestImplementation(libs.bundles.testing.hilt)
     androidTestImplementation(libs.bundles.testing.navigation)
-    androidTestImplementation(libs.bundles.testing.room)
+//    androidTestImplementation(libs.bundles.testing.room)
 
     dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
