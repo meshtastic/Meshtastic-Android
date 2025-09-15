@@ -79,7 +79,6 @@ import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.network.MQTTRepository
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
-import com.geeksville.mesh.repository.radio.RadioServiceConnectionState
 import com.geeksville.mesh.telemetry
 import com.geeksville.mesh.user
 import com.geeksville.mesh.util.anonymize
@@ -1373,19 +1372,24 @@ class MeshService :
         }
     }
 
-    private fun onRadioConnectionState(state: RadioServiceConnectionState) {
-        // sleep now disabled by default on ESP32, permanent is true unless light sleep enabled
+    private fun onRadioConnectionState(newState: ConnectionState) {
+        // Respect light sleep (lsEnabled) setting: if device reports sleep
+        // but lsEnabled is false, treat as disconnected.
         val isRouter = localConfig.device.role == ConfigProtos.Config.DeviceConfig.Role.ROUTER
         val lsEnabled = localConfig.power.isPowerSaving || isRouter
-        val connected = state.isConnected
-        val permanent = state.isPermanent || !lsEnabled
-        onConnectionChanged(
-            when {
-                connected -> ConnectionState.CONNECTED
-                permanent -> ConnectionState.DISCONNECTED
-                else -> ConnectionState.DEVICE_SLEEP
-            },
-        )
+
+        val effectiveState =
+            when (newState) {
+                ConnectionState.CONNECTED -> ConnectionState.CONNECTED
+                ConnectionState.DEVICE_SLEEP ->
+                    if (lsEnabled) {
+                        ConnectionState.DEVICE_SLEEP
+                    } else {
+                        ConnectionState.DISCONNECTED
+                    }
+                ConnectionState.DISCONNECTED -> ConnectionState.DISCONNECTED
+            }
+        onConnectionChanged(effectiveState)
     }
 
     private val packetHandlers: Map<PayloadVariantCase, ((MeshProtos.FromRadio) -> Unit)> by lazy {

@@ -16,7 +16,7 @@
   ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
   -->
 <resources>
-    <string name="fallback_node_name">Meshtastic %s</string>
+    <string name="fallback_node_name">Meshtastic %s%s</string>
     <string name="node_filter_placeholder">Filtro</string>
     <string name="desc_node_filter_clear">elimina filtro nodi</string>
     <string name="node_filter_include_unknown">Includi sconosciuti</string>
@@ -116,9 +116,9 @@
     <string name="debug_panel">Pannello Di Debug</string>
     <string name="debug_decoded_payload">Payload decodificato:</string>
     <string name="debug_logs_export">Esporta i logs</string>
-    <string name="debug_export_cancelled">Export canceled</string>
-    <string name="debug_export_success">%1$d logs exported</string>
-    <string name="debug_export_failed">Failed to write log file: %1$s</string>
+    <string name="debug_export_cancelled">Esportazione annullata</string>
+    <string name="debug_export_success">%1$d registri esportati</string>
+    <string name="debug_export_failed">Impossibile scrivere il file di log: %1$s</string>
     <string name="debug_filters">Filtri</string>
     <string name="debug_active_filters">Filtri attivi</string>
     <string name="debug_default_search">Cerca nei log…</string>
@@ -142,8 +142,8 @@
     <string name="okay">Ok</string>
     <string name="must_set_region">Devi impostare una regione!</string>
     <string name="cant_change_no_radio">Impossibile cambiare il canale, perché la radio non è ancora connessa. Riprova.</string>
-    <string name="save_rangetest">Export rangetest packets</string>
-    <string name="export_data_csv">Export all packets</string>
+    <string name="save_rangetest">Esporta pacchetti di test di portata</string>
+    <string name="export_data_csv">Esporta tutti i pacchetti</string>
     <string name="reset">Reset</string>
     <string name="scan">Scan</string>
     <string name="add_network_device">Aggiungere</string>
@@ -318,7 +318,7 @@
     <string name="udp_config">Configurazione UDP</string>
     <string name="map_node_popup_details"><![CDATA[%1$s<br>Ricevuto l\'ultima volta: %2$s<br>Posizione più recente: %3$s<br>Batteria: %4$s]]></string>
     <string name="toggle_my_position">Attiva/disattiva posizione</string>
-    <string name="orient_north">Orient north</string>
+    <string name="orient_north">Orientamento nord</string>
     <string name="user">Utente</string>
     <string name="channels">Canali</string>
     <string name="device">Dispositivo</string>
@@ -594,8 +594,8 @@
     <string name="dynamic">Dinamico</string>
     <string name="scan_qr_code">Scansiona codice QR</string>
     <string name="share_contact">Condividi contatto</string>
-    <string name="notes">Notes</string>
-    <string name="add_a_note">Add a private note…</string>
+    <string name="notes">Note</string>
+    <string name="add_a_note">Aggiungi una nota privata...</string>
     <string name="import_shared_contact">Importare Contatto Condiviso?</string>
     <string name="unmessageable">Non messaggabile</string>
     <string name="unmonitored_or_infrastructure">Non monitorato o Infrastruttura</string>
@@ -642,7 +642,7 @@
     <string name="export_keys">Esporta Chiavi</string>
     <string name="export_keys_confirmation">Esporta le chiavi pubbliche e private in un file. Si prega di memorizzarlo da qualche parte in modo sicuro.</string>
     <string name="modules_unlocked">Moduli sbloccati</string>
-    <string name="modules_already_unlocked">Modules already unlocked</string>
+    <string name="modules_already_unlocked">Moduli già sbloccati</string>
     <string name="remote">Controllo remoto</string>
     <string name="node_count_template">(%1$d online / %2$d in totale)</string>
     <string name="react">Rispondi</string>
@@ -759,7 +759,7 @@
     <string name="map_type_terrain">Terreno</string>
     <string name="map_type_hybrid">Ibrido</string>
     <string name="manage_map_layers">Gestisci livelli della mappa</string>
-    <string name="map_layer_formats">Custom layers support .kml, .kmz, or GeoJSON files.</string>
+    <string name="map_layer_formats">I livelli personalizzati supportano file .kml, .kmz o GeoJSON.</string>
     <string name="map_layers_title">Livelli della mappa</string>
     <string name="no_map_layers_loaded">Nessun livello personalizzato caricato.</string>
     <string name="add_layer_button">Aggiungi livello</string>
@@ -781,12 +781,12 @@
     <string name="url_template">Template dell\'URL</string>
     <string name="track_point">punto di interesse</string>
     <string name="app_settings">App</string>
-    <string name="app_version">Version</string>
-    <string name="channel_features">Channel Features</string>
-    <string name="location_sharing">Location Sharing</string>
-    <string name="periodic_position_broadcast">Periodic position broadcast</string>
-    <string name="uplink_feature_description">Messages from the mesh will be sent to the public internet through any node\'s configured gateway.</string>
-    <string name="downlink_feature_description">Messages from a public internet gateway are forwarded to the local mesh. Due to the zero-hop policy, traffic from the default MQTT server will not propagate further than this device.</string>
-    <string name="icon_meanings">Icon Meanings</string>
-    <string name="secondary_channel_position_feature">Disabling position on the primary channel allows periodic position broadcasts on the first secondary channel with the position enabled, otherwise manual position request required.</string>
+    <string name="app_version">Versione</string>
+    <string name="channel_features">Caratteristiche del canale</string>
+    <string name="location_sharing">Condivisione della posizione</string>
+    <string name="periodic_position_broadcast">Trasmissione periodica della posizione</string>
+    <string name="uplink_feature_description">I messaggi provenienti dalla rete mesh saranno inviati alla rete Internet pubblica attraverso il gateway configurato di qualsiasi nodo.</string>
+    <string name="downlink_feature_description">I messaggi provenienti da un gateway Internet pubblico vengono inoltrati alla rete mesh locale. A causa della politica zero-hop, il traffico proveniente dal server MQTT predefinito non si propagherà oltre questo dispositivo.</string>
+    <string name="icon_meanings">Significato delle icone</string>
+    <string name="secondary_channel_position_feature">Disabilitando la posizione sul canale primario è possibile trasmettere periodicamente la posizione sul primo canale secondario con la posizione abilitata, altrimenti è necessaria una richiesta manuale della posizione.</string>
 </resources>

@@ -116,7 +116,7 @@
     <string name="debug_panel">除錯面板</string>
     <string name="debug_decoded_payload">解析封包：</string>
     <string name="debug_logs_export">匯出日誌</string>
-    <string name="debug_export_cancelled">Export canceled</string>
+    <string name="debug_export_cancelled">已取消匯出</string>
     <string name="debug_export_success">%1$d logs exported</string>
     <string name="debug_export_failed">Failed to write log file: %1$s</string>
     <string name="debug_filters">篩選</string>
@@ -779,9 +779,9 @@
     <string name="url_template">URL 範本</string>
     <string name="track_point">軌跡點</string>
     <string name="app_settings">App</string>
-    <string name="app_version">Version</string>
+    <string name="app_version">版本</string>
     <string name="channel_features">Channel Features</string>
-    <string name="location_sharing">Location Sharing</string>
+    <string name="location_sharing">位置分享</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>
     <string name="uplink_feature_description">Messages from the mesh will be sent to the public internet through any node\'s configured gateway.</string>
     <string name="downlink_feature_description">Messages from a public internet gateway are forwarded to the local mesh. Due to the zero-hop policy, traffic from the default MQTT server will not propagate further than this device.</string>

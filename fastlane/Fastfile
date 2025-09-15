@@ -28,7 +28,11 @@ platform :android do
       track: 'internal',
       aab: aab_path,
       release_status: 'completed',
-      skip_upload_apk: true
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_changelogs: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
     )
   end
 
@@ -39,7 +43,11 @@ platform :android do
       track: 'NewAlpha',
       aab: aab_path,
       release_status: 'completed',
-      skip_upload_apk: true
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_changelogs: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
     )
   end
 
@@ -50,7 +58,11 @@ platform :android do
       track: 'beta',
       aab: aab_path,
       release_status: 'draft',
-      skip_upload_apk: true
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_changelogs: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
     )
   end
 
@@ -61,7 +73,11 @@ platform :android do
       track: 'production',
       aab: aab_path,
       release_status: 'draft',
-      skip_upload_apk: true
+      skip_upload_apk: true,
+      skip_upload_metadata: true,
+      skip_upload_changelogs: true,
+      skip_upload_images: true,
+      skip_upload_screenshots: true,
     )
   end
 

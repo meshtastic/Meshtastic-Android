@@ -31,6 +31,7 @@ import com.geeksville.mesh.android.prefs.RadioPrefs
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.network.NetworkRepository
+import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.util.anonymize
 import com.geeksville.mesh.util.ignoreException
 import com.geeksville.mesh.util.toRemoteExceptions
@@ -74,8 +75,8 @@ constructor(
     private val interfaceFactory: InterfaceFactory,
 ) : Logging {
 
-    private val _connectionState = MutableStateFlow(RadioServiceConnectionState())
-    val connectionState = _connectionState.asStateFlow()
+    private val _connectionState = MutableStateFlow(ConnectionState.DISCONNECTED)
+    val connectionState: StateFlow<ConnectionState> = _connectionState.asStateFlow()
 
     private val _receivedData = MutableSharedFlow<ByteArray>()
     val receivedData: SharedFlow<ByteArray> = _receivedData
@@ -86,7 +87,7 @@ constructor(
 
     private val logSends = false
     private val logReceives = false
-    private lateinit var sentPacketsLog: BinaryLogFile // inited in onCreate
+    private lateinit var sentPacketsLog: BinaryLogFile
     private lateinit var receivedPacketsLog: BinaryLogFile
 
     val mockInterfaceAddress: String by lazy { toInterfaceAddress(InterfaceId.MOCK, "") }
@@ -102,9 +103,6 @@ constructor(
      * Note: an interface may be started without necessarily yet having a connection
      */
     private var isStarted = false
-
-    // true if our interface is currently connected to a device
-    private var isConnected = false
 
     private fun initStateListeners() {
         bluetoothRepository.state
@@ -195,11 +193,10 @@ constructor(
         }
     }
 
-    private fun broadcastConnectionChanged(isConnected: Boolean, isPermanent: Boolean) {
-        debug("Broadcasting connection=$isConnected")
-
+    private fun broadcastConnectionChanged(newState: ConnectionState) {
+        debug("Broadcasting connection state change to $newState")
         processLifecycle.coroutineScope.launch(dispatchers.default) {
-            _connectionState.emit(RadioServiceConnectionState(isConnected, isPermanent))
+            _connectionState.emit(newState)
         }
     }
 
@@ -227,16 +224,15 @@ constructor(
     }
 
     fun onConnect() {
-        if (!isConnected) {
-            isConnected = true
-            broadcastConnectionChanged(isConnected = true, isPermanent = false)
+        if (_connectionState.value != ConnectionState.CONNECTED) {
+            broadcastConnectionChanged(ConnectionState.CONNECTED)
         }
     }
 
     fun onDisconnect(isPermanent: Boolean) {
-        if (isConnected) {
-            isConnected = false
-            broadcastConnectionChanged(isConnected = false, isPermanent = isPermanent)
+        val newTargetState = if (isPermanent) ConnectionState.DISCONNECTED else ConnectionState.DEVICE_SLEEP
+        if (_connectionState.value != newTargetState) {
+            broadcastConnectionChanged(newTargetState)
         }
     }
 
