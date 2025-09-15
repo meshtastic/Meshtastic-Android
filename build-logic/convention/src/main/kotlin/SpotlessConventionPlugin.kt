@@ -9,11 +9,9 @@ import org.gradle.kotlin.dsl.getByType
 class SpotlessConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            allprojects {
-                apply(plugin = libs.findPlugin("spotless").get().get().pluginId)
-                val extension = extensions.getByType<SpotlessExtension>()
-                configureSpotless(extension)
-            }
+            apply(plugin = libs.findPlugin("spotless").get().get().pluginId)
+            val extension = extensions.getByType<SpotlessExtension>()
+            configureSpotless(extension)
         }
     }
 }

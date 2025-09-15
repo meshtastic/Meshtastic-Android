@@ -9,11 +9,9 @@ import org.gradle.kotlin.dsl.getByType
 class DetektConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            allprojects {
-                apply(plugin = libs.findPlugin("detekt").get().get().pluginId)
-                val extension = extensions.getByType<DetektExtension>()
-                configureDetekt(extension)
-            }
+            apply(plugin = libs.findPlugin("detekt").get().get().pluginId)
+            val extension = extensions.getByType<DetektExtension>()
+            configureDetekt(extension)
         }
     }
 }
