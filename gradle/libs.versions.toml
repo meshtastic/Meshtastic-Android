@@ -29,8 +29,8 @@ actvity-ktx = { module = "androidx.activity:activity-ktx" }
 activity-compose = { module = "androidx.activity:activity-compose" }
 android-desugarJdkLibs = { module = "com.android.tools:desugar_jdk_libs", version = "2.1.5" }
 androidx-tracing-ktx = { module = "androidx.tracing:tracing-ktx", version = "1.3.0" }
-androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2025.08.01" }
-androidx-compose-foundation = { module = "androidx.compose.foundation:foundation", version = "1.8.0-alpha07" }
+androidx-compose-bom = { module = "androidx.compose:compose-bom-alpha", version = "2025.09.00" }
+androidx-compose-foundation = { module = "androidx.compose.foundation:foundation", version = "1.9.1" }
 androidx-compose-foundation-layout = { module = "androidx.compose.foundation:foundation-layout" }
 androidx-compose-material-iconsExtended = { module = "androidx.compose.material:material-icons-extended" }
 androidx-compose-material3 = { module = "androidx.compose.material3:material3" }
@@ -40,7 +40,7 @@ androidx-compose-material3-adaptive-layout = { module = "androidx.compose.materi
 androidx-compose-material3-adaptive-navigation = { module = "androidx.compose.material3.adaptive:adaptive-navigation", version.ref = "androidxComposeMaterial3Adaptive" }
 androidx-compose-material3-windowSizeClass = { module = "androidx.compose.material3:material3-window-size-class" }
 androidx-compose-runtime = { module = "androidx.compose.runtime:runtime" }
-androidx-compose-runtime-tracing = { module = "androidx.compose.runtime:runtime-tracing", version = "1.7.6" }
+androidx-compose-runtime-tracing = { module = "androidx.compose.runtime:runtime-tracing", version = "1.9.1" }
 androidx-compose-ui-test = { module = "androidx.compose.ui:ui-test-junit4" }
 androidx-compose-ui-testManifest = { module = "androidx.compose.ui:ui-test-manifest" }
 androidx-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling" }
