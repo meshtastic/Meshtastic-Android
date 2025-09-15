@@ -43,13 +43,9 @@ fun MDText(
     val colors =
         DefaultMarkdownColors(
             text = color,
-            codeText = MaterialTheme.colorScheme.onSurface,
-            inlineCodeText = MaterialTheme.colorScheme.onSurface,
-            linkText = HyperlinkBlue,
             codeBackground = MaterialTheme.colorScheme.surfaceContainerHigh,
             inlineCodeBackground = MaterialTheme.colorScheme.surfaceContainerHigh,
             dividerColor = MaterialTheme.colorScheme.onSurface,
-            tableText = MaterialTheme.colorScheme.onSurface,
             tableBackground = MaterialTheme.colorScheme.surfaceContainer,
         )
 
@@ -79,7 +75,6 @@ fun MDText(
             ordered = MaterialTheme.typography.bodyMedium.copy(color = color),
             bullet = MaterialTheme.typography.bodyMedium.copy(color = color),
             list = MaterialTheme.typography.bodyMedium.copy(color = color),
-            link = TextStyle(color = HyperlinkBlue, textDecoration = TextDecoration.Underline),
             textLink =
             TextLinkStyles(style = SpanStyle(color = HyperlinkBlue, textDecoration = TextDecoration.Underline)),
             table = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface),
