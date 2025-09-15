@@ -76,11 +76,8 @@ android {
                     ?: System.getenv("VERSION_NAME")
                     ?: Configs.VERSION_NAME_BASE // Restored Configs.VERSION_NAME_BASE fallback
                 )
-        testInstrumentationRunner = "com.geeksville.mesh.TestRunner"
         buildConfigField("String", "MIN_FW_VERSION", "\"${Configs.MIN_FW_VERSION}\"") // Used Configs
         buildConfigField("String", "ABS_MIN_FW_VERSION", "\"${Configs.ABS_MIN_FW_VERSION}\"") // Used Configs
-        // per https://developer.android.com/studio/write/vector-asset-studio
-        vectorDrawables.useSupportLibrary = true
         // We have to list all translated languages here,
         // because some of our libs have bogus languages that google play
         // doesn't like and we need to strip them (gr)
@@ -143,17 +140,10 @@ android {
             if (keystoreProperties["storeFile"] != null) {
                 signingConfig = signingConfigs.named("release").get()
             }
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
     bundle { language { enableSplit = false } }
-    buildFeatures {
-        aidl = true
-        compose = true // compose setup is likely in com.meshtastic.android.application.compose
-        buildConfig = true
-    }
+    buildFeatures { aidl = true }
     sourceSets {
         named("main") { proto { srcDir("src/main/proto") } }
         // Adds exported schema location as test app assets.
@@ -210,7 +200,6 @@ project.afterEvaluate { logger.lifecycle("Version code is set to: ${android.defa
 dependencies {
     implementation(project(":network"))
     // Bundles
-    implementation(libs.bundles.androidx)
     implementation(libs.bundles.markdown)
     implementation(libs.bundles.coroutines)
     implementation(libs.bundles.datastore)
