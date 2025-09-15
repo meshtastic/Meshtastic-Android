@@ -234,8 +234,6 @@ dependencies {
     implementation(libs.accompanist.permissions)
     implementation(libs.timber)
 
-    androidTestImplementation(libs.bundles.testing.navigation)
-
     dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
 
