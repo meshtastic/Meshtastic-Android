@@ -17,10 +17,6 @@
 
 package com.geeksville.mesh.ui.connections
 
-import android.Manifest
-import android.app.Activity
-import android.content.Context
-import android.content.ContextWrapper
 import android.net.InetAddresses
 import android.os.Build
 import android.util.Patterns
@@ -34,24 +30,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Bluetooth
-import androidx.compose.material.icons.filled.Usb
-import androidx.compose.material.icons.filled.Wifi
-import androidx.compose.material.icons.rounded.Bluetooth
-import androidx.compose.material.icons.rounded.Usb
-import androidx.compose.material.icons.rounded.Wifi
-import androidx.compose.material3.Card
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -65,12 +48,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -78,11 +58,9 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
-import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceListEntry
-import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.ConfigRoute
@@ -90,8 +68,8 @@ import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.service.ConnectionState
-import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.connections.components.BLEDevices
+import com.geeksville.mesh.ui.connections.components.ConnectionsSegmentedBar
 import com.geeksville.mesh.ui.connections.components.CurrentlyConnectedCard
 import com.geeksville.mesh.ui.connections.components.NetworkDevices
 import com.geeksville.mesh.ui.connections.components.UsbDevices
@@ -99,7 +77,6 @@ import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.delay
 
 fun String?.isIPAddress(): Boolean = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -114,7 +91,7 @@ fun String?.isIPAddress(): Boolean = if (Build.VERSION.SDK_INT < Build.VERSION_C
  * displays connection status.
  */
 @OptIn(ExperimentalPermissionsApi::class)
-@Suppress("CyclomaticComplexMethod", "LongMethod", "MagicNumber")
+@Suppress("CyclomaticComplexMethod", "LongMethod", "MagicNumber", "ModifierMissing", "ComposableParamOrder")
 @Composable
 fun ConnectionsScreen(
     uiViewModel: UIViewModel = hiltViewModel(),
@@ -165,12 +142,6 @@ fun ConnectionsScreen(
         )
     }
 
-    val isGpsDisabled = context.gpsDisabled()
-    LaunchedEffect(isGpsDisabled) {
-        if (isGpsDisabled) {
-            uiViewModel.showSnackBar(context.getString(R.string.location_disabled))
-        }
-    }
     // when scanning is true - wait 10000ms and then stop scanning
     LaunchedEffect(scanning) {
         if (scanning) {
@@ -206,27 +177,6 @@ fun ConnectionsScreen(
         SharedContactDialog(contact = showSharedContact, onDismiss = { showSharedContact = null })
     }
 
-    val locationPermissionsState =
-        rememberMultiplePermissionsState(permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION))
-    val provideLocation by uiViewModel.provideLocation.collectAsState(false)
-
-    LaunchedEffect(provideLocation, locationPermissionsState.allPermissionsGranted, isGpsDisabled) {
-        if (provideLocation) {
-            if (locationPermissionsState.allPermissionsGranted) {
-                if (!isGpsDisabled) {
-                    uiViewModel.meshService?.startProvideLocation()
-                } else {
-                    uiViewModel.showSnackBar(context.getString(R.string.location_disabled))
-                }
-            } else {
-                // Request permissions if not granted and user wants to provide location
-                locationPermissionsState.launchMultiplePermissionRequest()
-            }
-        } else {
-            uiViewModel.meshService?.stopProvideLocation()
-        }
-    }
-
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxSize().weight(1f)) {
             Column(
@@ -254,18 +204,6 @@ fun ConnectionsScreen(
                                 onClickDisconnect = { scanModel.disconnect() },
                             )
                         }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Card {
-                            SwitchPreference(
-                                title = stringResource(R.string.provide_location_to_mesh),
-                                checked = provideLocation,
-                                enabled = !isGpsDisabled,
-                                onCheckedChange = { checked -> uiViewModel.setProvideLocation(checked) },
-                                containerColor = Color.Transparent,
-                            )
-                        }
                     }
                 }
 
@@ -289,73 +227,7 @@ fun ConnectionsScreen(
                     DeviceType.fromAddress(selectedDevice)?.let { type -> selectedDeviceType = type }
                 }
 
-                SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                    SegmentedButton(
-                        shape = SegmentedButtonDefaults.itemShape(DeviceType.BLE.ordinal, DeviceType.entries.size),
-                        onClick = { selectedDeviceType = DeviceType.BLE },
-                        selected = (selectedDeviceType == DeviceType.BLE),
-                        icon = {
-                            Icon(
-                                imageVector = Icons.Rounded.Bluetooth,
-                                contentDescription = stringResource(id = R.string.bluetooth),
-                                // modifier = Modifier.padding(end = 8.dp), // Add padding to separate icon from text
-                            )
-                        },
-                        label = {
-                            Text(
-                                text = stringResource(id = R.string.bluetooth),
-                                maxLines = 1,
-                                softWrap = true,
-                                // textAlign = TextAlign.Center,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        },
-                    )
-                    SegmentedButton(
-                        shape = SegmentedButtonDefaults.itemShape(DeviceType.TCP.ordinal, DeviceType.entries.size),
-                        onClick = { selectedDeviceType = DeviceType.TCP },
-                        selected = (selectedDeviceType == DeviceType.TCP),
-                        icon = {
-                            Icon(
-                                imageVector = Icons.Rounded.Wifi,
-                                contentDescription = stringResource(id = R.string.network),
-                                modifier = Modifier.padding(end = 8.dp), // Add padding to separate icon from text
-                            )
-                        },
-                        label = {
-                            Text(
-                                text = stringResource(id = R.string.network),
-                                modifier = Modifier.padding(top = 2.dp),
-                                maxLines = 1,
-                                softWrap = true,
-                                textAlign = TextAlign.Center,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        },
-                    )
-                    SegmentedButton(
-                        shape = SegmentedButtonDefaults.itemShape(DeviceType.USB.ordinal, DeviceType.entries.size),
-                        onClick = { selectedDeviceType = DeviceType.USB },
-                        selected = (selectedDeviceType == DeviceType.USB),
-                        icon = {
-                            Icon(
-                                imageVector = Icons.Rounded.Usb,
-                                contentDescription = stringResource(id = R.string.serial),
-                                modifier = Modifier.padding(end = 8.dp), // Add padding to separate icon from text
-                            )
-                        },
-                        label = {
-                            Text(
-                                text = stringResource(id = R.string.serial),
-                                modifier = Modifier.padding(top = 2.dp),
-                                maxLines = 1,
-                                softWrap = true,
-                                textAlign = TextAlign.Center,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        },
-                    )
-                }
+                ConnectionsSegmentedBar(modifier = Modifier.fillMaxWidth()) { selectedDeviceType = it }
 
                 Spacer(modifier = Modifier.height(4.dp))
 
@@ -480,131 +352,4 @@ fun ConnectionsScreen(
     }
 }
 
-private tailrec fun Context.findActivity(): Activity = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> error("No activity found")
-}
-
-enum class DeviceType {
-    BLE,
-    TCP,
-    USB,
-    ;
-
-    companion object {
-        fun fromAddress(address: String): DeviceType? = when (address.firstOrNull()) {
-            'x' -> BLE
-            's' -> USB
-            't' -> TCP
-            'm' -> USB // Treat mock as USB for UI purposes
-            'n' ->
-                when (address) {
-                    NO_DEVICE_SELECTED -> null
-                    else -> null
-                }
-
-            else -> null
-        }
-    }
-}
-
 private const val SCAN_PERIOD: Long = 10000 // 10 seconds
-
-@Preview(showBackground = true)
-@Composable
-private fun PreviewConnectionsSegmentedBar() {
-    MaterialTheme {
-        Column {
-            // Preview with a long string
-            var selectedDeviceTypeLong by remember { mutableStateOf(DeviceType.USB) }
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-                DeviceType.entries.forEach { deviceType ->
-                    SegmentedButton(
-                        shape = SegmentedButtonDefaults.itemShape(deviceType.ordinal, DeviceType.entries.size),
-                        onClick = { selectedDeviceTypeLong = deviceType },
-                        selected = (selectedDeviceTypeLong == deviceType),
-                        icon = {
-                            Icon(
-                                imageVector =
-                                when (deviceType) {
-                                    DeviceType.BLE -> Icons.Default.Bluetooth
-                                    DeviceType.TCP -> Icons.Default.Wifi
-                                    DeviceType.USB -> Icons.Default.Usb
-                                },
-                                contentDescription = stringResource(id = R.string.bluetooth), // Placeholder
-                                modifier = Modifier.size(24.dp),
-                            )
-                        },
-                        label = {
-                            Text(
-                                text =
-                                when (deviceType) {
-                                    DeviceType.BLE -> stringResource(id = R.string.bluetooth)
-                                    DeviceType.TCP -> stringResource(id = R.string.network)
-                                    //                                DeviceType.USB -> stringResource(id =
-                                    // R.string.serial)
-                                    DeviceType.USB -> "Some outrageously long translation string that will happen"
-                                },
-                                modifier = Modifier.padding(top = 2.dp),
-                                maxLines = 1,
-                                softWrap = true,
-                                textAlign = TextAlign.Center,
-                                overflow = TextOverflow.Ellipsis,
-                            )
-                        },
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.height(16.dp)) // Add some spacing for the second preview
-            // Preview with normal length strings
-            ConnectionsSegmentedBarInternal(initialSelection = DeviceType.BLE)
-        }
-    }
-}
-
-@Composable
-private fun ConnectionsSegmentedBarInternal(initialSelection: DeviceType) {
-    var selectedDeviceType by remember { mutableStateOf(initialSelection) }
-    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
-        DeviceType.entries.forEach { deviceType ->
-            SegmentedButton(
-                shape = SegmentedButtonDefaults.itemShape(deviceType.ordinal, DeviceType.entries.size),
-                onClick = { selectedDeviceType = deviceType },
-                selected = (selectedDeviceType == deviceType),
-                icon = {
-                    Icon(
-                        imageVector =
-                        when (deviceType) {
-                            DeviceType.BLE -> Icons.Default.Bluetooth
-                            DeviceType.TCP -> Icons.Default.Wifi
-                            DeviceType.USB -> Icons.Default.Usb
-                        },
-                        contentDescription =
-                        when (deviceType) {
-                            DeviceType.BLE -> stringResource(id = R.string.bluetooth)
-                            DeviceType.TCP -> stringResource(id = R.string.network)
-                            DeviceType.USB -> stringResource(id = R.string.serial)
-                        },
-                        modifier = Modifier.size(24.dp),
-                    )
-                },
-                label = {
-                    Text(
-                        text =
-                        when (deviceType) {
-                            DeviceType.BLE -> stringResource(id = R.string.bluetooth)
-                            DeviceType.TCP -> stringResource(id = R.string.network)
-                            DeviceType.USB -> stringResource(id = R.string.serial)
-                        },
-                        modifier = Modifier.padding(top = 2.dp),
-                        maxLines = 1,
-                        softWrap = true,
-                        textAlign = TextAlign.Center,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                },
-            )
-        }
-    }
-}
