@@ -91,7 +91,7 @@ fun String?.isIPAddress(): Boolean = if (Build.VERSION.SDK_INT < Build.VERSION_C
  * displays connection status.
  */
 @OptIn(ExperimentalPermissionsApi::class)
-@Suppress("CyclomaticComplexMethod", "LongMethod", "MagicNumber")
+@Suppress("CyclomaticComplexMethod", "LongMethod", "MagicNumber", "ModifierMissing", "ComposableParamOrder")
 @Composable
 fun ConnectionsScreen(
     uiViewModel: UIViewModel = hiltViewModel(),

@@ -41,6 +41,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.connections.DeviceType
 
+@Suppress("LambdaParameterEventTrailing")
 @Composable
 fun ConnectionsSegmentedBar(modifier: Modifier = Modifier, onClickDeviceType: (DeviceType) -> Unit) {
     var selectedItem by remember { mutableStateOf(Item.BLUETOOTH) }
