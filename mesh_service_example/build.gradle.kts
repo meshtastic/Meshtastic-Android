@@ -53,7 +53,7 @@ kotlin { jvmToolchain(21) }
 
 // per protobuf-gradle-plugin docs, this is recommended for android
 protobuf {
-    protoc { protoc { artifact = "com.google.protobuf:protoc:4.32.0" } }
+    protoc { protoc { artifact = "com.google.protobuf:protoc:4.32.1" } }
     generateProtoTasks {
         all().forEach { task ->
             task.builtins {
