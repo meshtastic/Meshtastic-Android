@@ -124,6 +124,18 @@ fun DisplayConfigItemList(displayConfig: DisplayConfig, enabled: Boolean, onSave
                 onItemSelected = { displayInput = displayInput.copy { units = it } },
             )
         }
+        item { HorizontalDivider()}
+        item {
+            DropDownPreference(
+                title = stringResource(R.string.gps_coordinates_format),
+                enabled = enabled,
+                items = DisplayConfig.GpsCoordinateFormat.entries
+                    .filter { it != DisplayConfig.GpsCoordinateFormat.UNRECOGNIZED }
+                    .map { it to it.name },
+                selectedItem = displayInput.gpsFormat,
+                onItemSelected = { displayInput = displayInput.copy { gpsFormat = it } }
+            )
+        }
         item { HorizontalDivider() }
 
         item {
