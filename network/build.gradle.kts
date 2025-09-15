@@ -15,63 +15,30 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
-
 plugins {
-    alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.hilt)
-    alias(libs.plugins.devtools.ksp)
-    alias(libs.plugins.detekt)
-    id("kotlinx-serialization")
+    alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.meshtastic.android.lint)
+    alias(libs.plugins.meshtastic.hilt)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.spotless)
     alias(libs.plugins.dokka)
     alias(libs.plugins.kover)
+    alias(libs.plugins.protobuf)
 }
 
 android {
-    buildFeatures {
-        buildConfig = true
-    }
-    compileSdk = Configs.COMPILE_SDK
-    defaultConfig {
-        minSdk = Configs.MIN_SDK
-    }
+    buildFeatures { buildConfig = true }
+    compileSdk = 36
+    defaultConfig { minSdk = 26 }
 
     namespace = "com.geeksville.mesh.network"
-
-    flavorDimensions += "default"
-    productFlavors {
-        create("fdroid") {
-            dimension = "default"
-        }
-        create("google") {
-            dimension = "default"
-        }
-    }
 }
 
-kotlin {
-    jvmToolchain(21)
-}
+kotlin { jvmToolchain(21) }
 
 dependencies {
-    implementation(libs.bundles.hilt)
     implementation(libs.bundles.retrofit)
     implementation(libs.bundles.coil)
     "googleImplementation"(libs.bundles.datadog)
-    ksp(libs.hilt.compiler)
     implementation(libs.kotlinx.serialization.json)
-    detektPlugins(libs.detekt.formatting)
-}
-
-detekt {
-    config.setFrom("../config/detekt/detekt.yml")
-    baseline = file("../config/detekt/detekt-baseline-network.xml")
-    source.setFrom(
-        files(
-            "src/main/java",
-            "google/main/java",
-            "fdroid/main/java",
-        )
-    )
 }

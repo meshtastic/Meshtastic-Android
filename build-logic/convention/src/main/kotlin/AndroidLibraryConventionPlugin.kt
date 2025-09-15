@@ -1,0 +1,67 @@
+/*
+ * Copyright (c) 2025 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+import com.android.build.api.dsl.LibraryExtension
+import com.android.build.api.variant.LibraryAndroidComponentsExtension
+import com.diffplug.gradle.spotless.SpotlessExtension
+import com.geeksville.mesh.buildlogic.configureFlavors
+import com.geeksville.mesh.buildlogic.configureKotlinAndroid
+import com.geeksville.mesh.buildlogic.configureSpotless
+import com.geeksville.mesh.buildlogic.disableUnnecessaryAndroidTests
+import com.geeksville.mesh.buildlogic.libs
+import org.gradle.api.Plugin
+import org.gradle.api.Project
+import org.gradle.kotlin.dsl.apply
+import org.gradle.kotlin.dsl.configure
+import org.gradle.kotlin.dsl.dependencies
+
+class AndroidLibraryConventionPlugin : Plugin<Project> {
+    override fun apply(target: Project) {
+        with(target) {
+            apply(plugin = "com.android.library")
+            apply(plugin = "org.jetbrains.kotlin.android")
+            apply(plugin = "meshtastic.android.lint")
+            apply(plugin = "com.diffplug.spotless")
+
+            extensions.configure<LibraryExtension> {
+                configureKotlinAndroid(this)
+                testOptions.targetSdk = 36
+                lint.targetSdk = 36
+                defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+                testOptions.animationsDisabled = true
+                configureFlavors(this)
+                // The resource prefix is derived from the module name,
+                // so resources inside ":core:module1" must be prefixed with "core_module1_"
+                resourcePrefix =
+                    path.split("""\W""".toRegex()).drop(1).distinct().joinToString(separator = "_")
+                        .lowercase() + "_"
+            }
+            extensions.configure<LibraryAndroidComponentsExtension> {
+                disableUnnecessaryAndroidTests(target)
+            }
+            dependencies {
+                "androidTestImplementation"(libs.findLibrary("kotlin.test").get())
+                "testImplementation"(libs.findLibrary("kotlin.test").get())
+
+                "implementation"(libs.findLibrary("androidx.tracing.ktx").get())
+            }
+            extensions.configure<SpotlessExtension> {
+                configureSpotless(this)
+            }
+        }
+    }
+}
