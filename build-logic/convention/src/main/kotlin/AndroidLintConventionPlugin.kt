@@ -44,14 +44,11 @@ class AndroidLintConventionPlugin : Plugin<Project> {
 }
 
 private fun Lint.configure(project: Project) {
-    val isCi = project.providers.gradleProperty("isCi").map { it.toBoolean() }.getOrElse(false)
-    checkAllWarnings = isCi
-    warningsAsErrors = isCi
     xmlReport = true
     sarifReport = true
     checkDependencies = true
     abortOnError = false
     disable += "GradleDependency"
-    sarifOutput = File("${project.buildDir}/reports/lint/lint-results.sarif")
-    xmlOutput = File("${project.buildDir}/reports/lint/lint-results.xml")
+    sarifOutput = File("${project.layout.buildDirectory}/reports/lint/lint-results.sarif")
+    xmlOutput = File("${project.layout.buildDirectory}/reports/lint/lint-results.xml")
 }

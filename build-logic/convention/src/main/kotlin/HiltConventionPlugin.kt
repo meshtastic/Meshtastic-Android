@@ -29,6 +29,7 @@ class HiltConventionPlugin : Plugin<Project> {
             dependencies {
                 "ksp"(libs.findLibrary("hilt.compiler").get())
                 "implementation"(libs.findBundle("hilt").get())
+                "androidTestImplementation"(libs.findBundle("testing.hilt").get())
             }
 
             // Add support for Jvm Module, base on org.jetbrains.kotlin.jvm

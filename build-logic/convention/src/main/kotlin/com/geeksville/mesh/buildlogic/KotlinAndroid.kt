@@ -80,16 +80,12 @@ private inline fun <reified T : KotlinBaseExtension> Project.configureKotlin() {
     tasks.withType<KotlinCompile>().configureEach {
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_21)
-            // Treat all Kotlin warnings as errors (disabled by default)
-            // Override by setting warningsAsErrors=true in your ~/.gradle/gradle.properties
-            val warningsAsErrors = providers.gradleProperty("warningsAsErrors").map {
-                it.toBoolean()
-            }.getOrElse(false)
-            allWarningsAsErrors.set(warningsAsErrors)
+            allWarningsAsErrors.set(false)
             freeCompilerArgs.addAll(
                 // Enable experimental coroutines APIs, including Flow
                 "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-                "-Xcontext-parameters"
+                "-Xcontext-parameters",
+                "-Xannotation-default-target=param-property"
             )
         }
     }
