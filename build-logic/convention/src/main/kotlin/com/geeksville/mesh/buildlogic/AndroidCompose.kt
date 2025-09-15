@@ -22,11 +22,6 @@ import org.gradle.api.provider.Provider
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.jetbrains.kotlin.compose.compiler.gradle.ComposeCompilerGradlePluginExtension
-import kotlin.apply
-import kotlin.io.toRelativeString
-import kotlin.let
-import kotlin.takeIf
-import kotlin.text.toBoolean
 
 /**
  * Configure Compose-specific options
@@ -47,9 +42,12 @@ internal fun Project.configureAndroidCompose(
             "implementation"(libs.findBundle("adaptive").get())
             "implementation"(libs.findBundle("lifecycle").get())
             "implementation"(libs.findBundle("navigation").get())
+            "androidTestImplementation"(libs.findBundle("testing.navigation").get())
             "implementation"(libs.findBundle("navigation3").get())
             "implementation"(libs.findBundle("ui-tooling").get())
             "implementation"(libs.findLibrary("androidx-compose-ui-tooling-preview").get())
+            "implementation"(libs.findLibrary("androidx-compose-runtime").get())
+            "implementation"(libs.findLibrary("androidx-compose-runtime-tracing").get())
             "debugImplementation"(libs.findLibrary("androidx-compose-ui-tooling").get())
             "debugImplementation"(libs.findLibrary("androidx-compose-ui-testManifest").get())
         }

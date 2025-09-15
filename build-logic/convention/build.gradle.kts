@@ -20,6 +20,7 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 plugins {
     `kotlin-dsl`
     alias(libs.plugins.android.lint)
+    alias(libs.plugins.dependency.analysis)
 }
 
 group = "com.geeksville.mesh.buildlogic"
@@ -89,17 +90,22 @@ gradlePlugin {
             id = libs.plugins.meshtastic.android.application.compose.get().pluginId
             implementationClass = "AndroidApplicationComposeConventionPlugin"
         }
-        register("hilt") {
+        register("meshtasticHilt") {
             id = libs.plugins.meshtastic.hilt.get().pluginId
             implementationClass = "HiltConventionPlugin"
         }
-        register("detekt") {
+        register("meshtasticDetekt") {
             id = libs.plugins.meshtastic.detekt.get().pluginId
             implementationClass = "DetektConventionPlugin"
         }
         register("androidRoom") {
             id = libs.plugins.meshtastic.android.room.get().pluginId
             implementationClass = "AndroidRoomConventionPlugin"
+        }
+
+        register("meshtasticSpotless") {
+            id = libs.plugins.meshtastic.spotless.get().pluginId
+            implementationClass = "SpotlessConventionPlugin"
         }
 
     }

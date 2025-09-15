@@ -16,6 +16,7 @@
  */
 
 import com.android.build.api.dsl.ApplicationExtension
+import com.geeksville.mesh.buildlogic.MeshtasticFlavor
 import com.geeksville.mesh.buildlogic.libs
 import com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension
 import org.gradle.api.Plugin
@@ -24,6 +25,7 @@ import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.exclude
+import org.gradle.language.nativeplatform.internal.Dimensions.applicationVariants
 
 class AndroidApplicationFirebaseConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -32,23 +34,22 @@ class AndroidApplicationFirebaseConventionPlugin : Plugin<Project> {
             apply(plugin = "com.google.firebase.firebase-perf")
             apply(plugin = "com.google.firebase.crashlytics")
 
-            dependencies {
-                val bom = libs.findLibrary("firebase-bom").get()
-                "implementation"(platform(bom))
-                "implementation"(libs.findBundle("firebase").get()){
-                    /*
-                    Exclusion of protobuf / protolite dependencies is necessary as the
-                    datastore-proto brings in protobuf dependencies. These are the source of truth
-                    for Now in Android.
-                    That's why the duplicate classes from below dependencies are excluded.
-                    */
-                    exclude(group = "com.google.protobuf", module = "protobuf-java")
-                    exclude(group = "com.google.protobuf", module = "protobuf-kotlin")
-                    exclude(group = "com.google.protobuf", module = "protobuf-javalite")
-                    exclude(group = "com.google.firebase", module = "protolite-well-known-types")
+                dependencies {
+                    val bom = libs.findLibrary("firebase-bom").get()
+                    "implementation"(platform(bom))
+                    "implementation"(libs.findBundle("firebase").get()) {
+                        /*
+                        Exclusion of protobuf / protolite dependencies is necessary as the
+                        datastore-proto brings in protobuf dependencies. These are the source of truth
+                        for Now in Android.
+                        That's why the duplicate classes from below dependencies are excluded.
+                        */
+                        exclude(group = "com.google.protobuf", module = "protobuf-java")
+                        exclude(group = "com.google.protobuf", module = "protobuf-kotlin")
+                        exclude(group = "com.google.protobuf", module = "protobuf-javalite")
+                        exclude(group = "com.google.firebase", module = "protolite-well-known-types")
+                    }
                 }
-                "implementation"(libs.findLibrary("firebase.crashlytics").get())
-            }
 
             extensions.configure<ApplicationExtension> {
                 buildTypes.configureEach {

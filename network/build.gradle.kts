@@ -17,10 +17,8 @@
 
 plugins {
     alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.android.lint)
     alias(libs.plugins.meshtastic.hilt)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.spotless)
     alias(libs.plugins.dokka)
     alias(libs.plugins.kover)
     alias(libs.plugins.protobuf)
@@ -28,13 +26,8 @@ plugins {
 
 android {
     buildFeatures { buildConfig = true }
-    compileSdk = 36
-    defaultConfig { minSdk = 26 }
-
     namespace = "com.geeksville.mesh.network"
 }
-
-kotlin { jvmToolchain(21) }
 
 dependencies {
     implementation(libs.bundles.retrofit)

@@ -22,6 +22,7 @@ import io.gitlab.arturbosch.detekt.extensions.DetektExtension
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.named
+import java.io.File
 
 internal fun Project.configureDetekt(extension: DetektExtension) = extension.apply {
     extension.apply {
@@ -45,6 +46,11 @@ internal fun Project.configureDetekt(extension: DetektExtension) = extension.app
             sarif.required.set(true)
             md.required.set(true)
         }
+        reports.xml.outputLocation.set(File("$rootDir/build/reports/detekt/detekt.xml"))
+        reports.html.outputLocation.set(File("$rootDir/build/reports/detekt/detekt.html"))
+        reports.txt.outputLocation.set(File("$rootDir/build/reports/detekt/detekt.txt"))
+        reports.sarif.outputLocation.set(File("$rootDir/build/reports/detekt/detekt.sarif"))
+        reports.md.outputLocation.set(File("$rootDir/build/reports/detekt/detekt.md"))
     }
     dependencies {
         "detektPlugins"(libs.findLibrary("detekt-formatting").get())

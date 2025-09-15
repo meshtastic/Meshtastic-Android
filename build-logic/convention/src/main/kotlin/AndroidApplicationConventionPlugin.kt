@@ -16,17 +16,13 @@
  */
 
 import com.android.build.api.dsl.ApplicationExtension
-import com.diffplug.gradle.spotless.SpotlessExtension
 import com.geeksville.mesh.buildlogic.configureKotlinAndroid
-import com.geeksville.mesh.buildlogic.configureSpotless
+import com.geeksville.mesh.buildlogic.libs
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.gradle.api.plugins.JavaPluginExtension
-import org.gradle.jvm.toolchain.JavaLanguageVersion
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.withType
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.gradle.kotlin.dsl.dependencies
 
 class AndroidApplicationConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -35,9 +31,8 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
             apply(plugin = "com.android.application")
             apply(plugin = "org.jetbrains.kotlin.android")
             apply(plugin = "meshtastic.android.lint")
-            apply(plugin = "meshtastic.android.room")
-            apply(plugin = "meshtastic.hilt")
-            apply(plugin = "com.diffplug.spotless")
+            apply(plugin = "meshtastic.detekt")
+            apply(plugin = "meshtastic.spotless")
             apply(plugin = "com.autonomousapps.dependency-analysis")
 
             extensions.configure<ApplicationExtension> {
@@ -70,27 +65,11 @@ class AndroidApplicationConventionPlugin : Plugin<Project> {
                     buildConfig = true
                 }
 
-            }
-
-            extensions.configure<SpotlessExtension> {
-                configureSpotless(this)
-            }
-
-            extensions.configure<JavaPluginExtension> {
-                toolchain {
-                    languageVersion.set(JavaLanguageVersion.of(21))
+                dependencies {
+                    "testImplementation"(libs.findBundle("testing").get())
+                    "androidTestImplementation"(libs.findBundle("testing.android").get())
                 }
-            }
 
-            tasks.withType<KotlinCompile>().configureEach {
-                compilerOptions {
-                    freeCompilerArgs.addAll(
-                        "-opt-in=kotlin.RequiresOptIn",
-                        "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-                        "-Xcontext-receivers",
-                        "-Xannotation-default-target=param-property",
-                    )
-                }
             }
         }
     }

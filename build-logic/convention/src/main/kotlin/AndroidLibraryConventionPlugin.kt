@@ -35,7 +35,9 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
             apply(plugin = "com.android.library")
             apply(plugin = "org.jetbrains.kotlin.android")
             apply(plugin = "meshtastic.android.lint")
-            apply(plugin = "com.diffplug.spotless")
+            apply(plugin = "meshtastic.detekt")
+            apply(plugin = "meshtastic.spotless")
+            apply(plugin = "com.autonomousapps.dependency-analysis")
 
             extensions.configure<LibraryExtension> {
                 configureKotlinAndroid(this)
@@ -57,10 +59,6 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 "androidTestImplementation"(libs.findLibrary("kotlin.test").get())
                 "testImplementation"(libs.findLibrary("kotlin.test").get())
 
-                "implementation"(libs.findLibrary("androidx.tracing.ktx").get())
-            }
-            extensions.configure<SpotlessExtension> {
-                configureSpotless(this)
             }
         }
     }
