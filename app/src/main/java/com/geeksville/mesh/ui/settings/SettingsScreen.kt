@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.settings
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
 import android.widget.Toast
@@ -32,11 +33,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.rounded.FormatPaint
 import androidx.compose.material.icons.rounded.Language
+import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Memory
 import androidx.compose.material.icons.rounded.Output
 import androidx.compose.material.icons.rounded.WavingHand
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +55,7 @@ import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
+import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
@@ -65,12 +69,15 @@ import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
 import com.geeksville.mesh.util.LanguageUtils
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.time.Duration.Companion.seconds
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun SettingsScreen(
@@ -182,6 +189,8 @@ fun SettingsScreen(
             onNavigate = onNavigate,
         )
 
+        val context = LocalContext.current
+
         TitledCard(title = stringResource(R.string.app_settings), modifier = Modifier.padding(top = 16.dp)) {
             if (state.analyticsAvailable) {
                 SettingsItemSwitch(
@@ -192,7 +201,37 @@ fun SettingsScreen(
                 )
             }
 
-            val context = LocalContext.current
+            val locationPermissionsState =
+                rememberMultiplePermissionsState(permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION))
+            val isGpsDisabled = context.gpsDisabled()
+            val provideLocation by uiViewModel.provideLocation.collectAsState(false)
+
+            LaunchedEffect(provideLocation, locationPermissionsState.allPermissionsGranted, isGpsDisabled) {
+                if (provideLocation) {
+                    if (locationPermissionsState.allPermissionsGranted) {
+                        if (!isGpsDisabled) {
+                            uiViewModel.meshService?.startProvideLocation()
+                        } else {
+                            uiViewModel.showSnackBar(context.getString(R.string.location_disabled))
+                        }
+                    } else {
+                        // Request permissions if not granted and user wants to provide location
+                        locationPermissionsState.launchMultiplePermissionRequest()
+                    }
+                } else {
+                    uiViewModel.meshService?.stopProvideLocation()
+                }
+            }
+
+            SettingsItemSwitch(
+                text = stringResource(R.string.provide_location_to_mesh),
+                leadingIcon = Icons.Rounded.LocationOn,
+                enabled = !isGpsDisabled,
+                checked = provideLocation,
+            ) {
+                uiViewModel.setProvideLocation(!provideLocation)
+            }
+
             val languageTags = remember { LanguageUtils.getLanguageTags(context) }
             SettingsItem(
                 text = stringResource(R.string.preferences_language),

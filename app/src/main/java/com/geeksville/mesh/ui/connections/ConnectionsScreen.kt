@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.ui.connections
 
-import android.Manifest
 import android.net.InetAddresses
 import android.os.Build
 import android.util.Patterns
@@ -35,7 +34,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -50,7 +48,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -61,7 +58,6 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
-import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceListEntry
@@ -72,7 +68,6 @@ import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.service.ConnectionState
-import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.connections.components.BLEDevices
 import com.geeksville.mesh.ui.connections.components.ConnectionsSegmentedBar
 import com.geeksville.mesh.ui.connections.components.CurrentlyConnectedCard
@@ -82,7 +77,6 @@ import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.delay
 
 fun String?.isIPAddress(): Boolean = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
@@ -148,12 +142,6 @@ fun ConnectionsScreen(
         )
     }
 
-    val isGpsDisabled = context.gpsDisabled()
-    LaunchedEffect(isGpsDisabled) {
-        if (isGpsDisabled) {
-            uiViewModel.showSnackBar(context.getString(R.string.location_disabled))
-        }
-    }
     // when scanning is true - wait 10000ms and then stop scanning
     LaunchedEffect(scanning) {
         if (scanning) {
@@ -189,27 +177,6 @@ fun ConnectionsScreen(
         SharedContactDialog(contact = showSharedContact, onDismiss = { showSharedContact = null })
     }
 
-    val locationPermissionsState =
-        rememberMultiplePermissionsState(permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION))
-    val provideLocation by uiViewModel.provideLocation.collectAsState(false)
-
-    LaunchedEffect(provideLocation, locationPermissionsState.allPermissionsGranted, isGpsDisabled) {
-        if (provideLocation) {
-            if (locationPermissionsState.allPermissionsGranted) {
-                if (!isGpsDisabled) {
-                    uiViewModel.meshService?.startProvideLocation()
-                } else {
-                    uiViewModel.showSnackBar(context.getString(R.string.location_disabled))
-                }
-            } else {
-                // Request permissions if not granted and user wants to provide location
-                locationPermissionsState.launchMultiplePermissionRequest()
-            }
-        } else {
-            uiViewModel.meshService?.stopProvideLocation()
-        }
-    }
-
     Column(modifier = Modifier.fillMaxSize()) {
         Box(modifier = Modifier.fillMaxSize().weight(1f)) {
             Column(
@@ -235,18 +202,6 @@ fun ConnectionsScreen(
                                 onSetShowSharedContact = { showSharedContact = it },
                                 onNavigateToSettings = onNavigateToSettings,
                                 onClickDisconnect = { scanModel.disconnect() },
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        Card {
-                            SwitchPreference(
-                                title = stringResource(R.string.provide_location_to_mesh),
-                                checked = provideLocation,
-                                enabled = !isGpsDisabled,
-                                onCheckedChange = { checked -> uiViewModel.setProvideLocation(checked) },
-                                containerColor = Color.Transparent,
                             )
                         }
                     }
