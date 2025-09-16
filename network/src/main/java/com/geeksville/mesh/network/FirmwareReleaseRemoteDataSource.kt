@@ -18,15 +18,12 @@
 package com.geeksville.mesh.network
 
 import com.geeksville.mesh.network.model.NetworkFirmwareReleases
-import com.geeksville.mesh.network.retrofit.ApiService
+import com.geeksville.mesh.network.service.ApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class FirmwareReleaseRemoteDataSource @Inject constructor(
-    private val apiService: ApiService,
-) {
-    suspend fun getFirmwareReleases(): NetworkFirmwareReleases? = withContext(Dispatchers.IO) {
-        apiService.getFirmwareReleases().body()
-    }
+class FirmwareReleaseRemoteDataSource @Inject constructor(private val apiService: ApiService) {
+    suspend fun getFirmwareReleases(): NetworkFirmwareReleases =
+        withContext(Dispatchers.IO) { apiService.getFirmwareReleases() }
 }

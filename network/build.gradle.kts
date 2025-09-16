@@ -22,6 +22,7 @@ plugins {
     alias(libs.plugins.dokka)
     alias(libs.plugins.kover)
     alias(libs.plugins.protobuf)
+    alias(libs.plugins.ktorfit)
 }
 
 android {
@@ -30,7 +31,7 @@ android {
 }
 
 dependencies {
-    implementation(libs.bundles.retrofit)
+    implementation(libs.bundles.ktor)
     implementation(libs.bundles.coil)
     "googleImplementation"(libs.bundles.datadog)
     implementation(libs.kotlinx.serialization.json)

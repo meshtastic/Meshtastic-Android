@@ -18,15 +18,12 @@
 package com.geeksville.mesh.network
 
 import com.geeksville.mesh.network.model.NetworkDeviceHardware
-import com.geeksville.mesh.network.retrofit.ApiService
+import com.geeksville.mesh.network.service.ApiService
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class DeviceHardwareRemoteDataSource @Inject constructor(
-    private val apiService: ApiService,
-) {
-    suspend fun getAllDeviceHardware(): List<NetworkDeviceHardware>? = withContext(Dispatchers.IO) {
-        apiService.getDeviceHardware().body()
-    }
+class DeviceHardwareRemoteDataSource @Inject constructor(private val apiService: ApiService) {
+    suspend fun getAllDeviceHardware(): List<NetworkDeviceHardware> =
+        withContext(Dispatchers.IO) { apiService.getDeviceHardware() }
 }
