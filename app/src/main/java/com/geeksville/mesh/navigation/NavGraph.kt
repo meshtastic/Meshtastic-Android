@@ -15,6 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+@file:Suppress("MatchingDeclarationName")
+
 package com.geeksville.mesh.navigation
 
 import androidx.annotation.StringRes
@@ -37,7 +39,6 @@ import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.map.MapViewModel
-import kotlinx.serialization.Serializable
 
 enum class AdminRoute(val icon: ImageVector, @StringRes val title: Int) {
     REBOOT(Icons.Rounded.RestartAlt, R.string.reboot),
@@ -47,10 +48,6 @@ enum class AdminRoute(val icon: ImageVector, @StringRes val title: Int) {
 }
 
 const val DEEP_LINK_BASE_URI = "meshtastic://meshtastic"
-
-@Serializable sealed interface Graph : Route
-
-@Serializable sealed interface Route
 
 fun NavDestination.isConfigRoute(): Boolean =
     ConfigRoute.entries.any { hasRoute(it.route::class) } || ModuleRoute.entries.any { hasRoute(it.route::class) }
