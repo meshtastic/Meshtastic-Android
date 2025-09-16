@@ -29,8 +29,8 @@ import coil3.util.Logger
 import com.datadog.android.okhttp.DatadogEventListener
 import com.datadog.android.okhttp.DatadogInterceptor
 import com.geeksville.mesh.network.BuildConfig
-import com.geeksville.mesh.network.retrofit.ApiService
-import com.geeksville.mesh.network.retrofit.createApiService
+import com.geeksville.mesh.network.service.ApiService
+import com.geeksville.mesh.network.service.createApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

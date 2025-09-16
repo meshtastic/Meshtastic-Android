@@ -15,18 +15,16 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.network.retrofit
+package com.geeksville.mesh.network.service
 
 import com.geeksville.mesh.network.model.NetworkDeviceHardware
 import com.geeksville.mesh.network.model.NetworkFirmwareReleases
-import javax.inject.Inject
-import javax.inject.Singleton
+import de.jensklingenberg.ktorfit.http.GET
 
-@Singleton
-class NoOpApiService @Inject constructor() : ApiService {
-    override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> =
-        throw NotImplementedError("API calls to getDeviceHardware are not supported on Fdroid builds.")
+interface ApiService {
+    @GET("resource/deviceHardware")
+    suspend fun getDeviceHardware(): List<NetworkDeviceHardware>
 
-    override suspend fun getFirmwareReleases(): NetworkFirmwareReleases =
-        throw NotImplementedError("API calls to getFirmwareReleases are not supported on Fdroid builds.")
+    @GET("github/firmware/list")
+    suspend fun getFirmwareReleases(): NetworkFirmwareReleases
 }
