@@ -27,8 +27,6 @@ import coil3.svg.SvgDecoder
 import coil3.util.DebugLogger
 import coil3.util.Logger
 import com.geeksville.mesh.network.BuildConfig
-import com.geeksville.mesh.network.service.ApiService
-import com.geeksville.mesh.network.service.NoOpApiService
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -42,24 +40,23 @@ private const val MEMORY_CACHE_PERCENT = 0.25
 
 @InstallIn(SingletonComponent::class)
 @Module
-class ApiModule {
-
-    @Provides @Singleton
-    fun provideApiService(): ApiService = NoOpApiService()
+class NetworkModule {
 
     @Provides
     @Singleton
-    fun imageLoader(httpClient: OkHttpClient, @ApplicationContext application: Context): ImageLoader {
-        val sharedOkHttp = httpClient.newBuilder().build()
-        return ImageLoader.Builder(application)
+    fun provideImageLoader(okHttpClient: OkHttpClient, @ApplicationContext application: Context): ImageLoader {
+        val sharedOkHttp = okHttpClient.newBuilder().build()
+        return ImageLoader.Builder(context = application)
             .components {
-                add(OkHttpNetworkFetcherFactory({ sharedOkHttp }))
+                add(OkHttpNetworkFetcherFactory(callFactory = { sharedOkHttp }))
                 add(SvgDecoder.Factory())
             }
-            .memoryCache { MemoryCache.Builder().maxSizePercent(application, MEMORY_CACHE_PERCENT).build() }
-            .diskCache { DiskCache.Builder().maxSizePercent(DISK_CACHE_PERCENT).build() }
-            .logger(if (BuildConfig.DEBUG) DebugLogger(Logger.Level.Verbose) else null)
-            .crossfade(true)
+            .memoryCache {
+                MemoryCache.Builder().maxSizePercent(context = application, percent = MEMORY_CACHE_PERCENT).build()
+            }
+            .diskCache { DiskCache.Builder().maxSizePercent(percent = DISK_CACHE_PERCENT).build() }
+            .logger(logger = if (BuildConfig.DEBUG) DebugLogger(minLevel = Logger.Level.Verbose) else null)
+            .crossfade(enable = true)
             .build()
     }
 }
