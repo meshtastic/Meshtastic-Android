@@ -19,6 +19,8 @@ package com.geeksville.mesh.navigation
 
 import kotlinx.serialization.Serializable
 
+const val DEEP_LINK_BASE_URI = "meshtastic://meshtastic"
+
 interface Route
 
 interface Graph : Route

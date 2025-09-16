@@ -47,6 +47,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavDestination
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
@@ -119,6 +121,9 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController, uiViewModel:
         }
     }
 }
+
+fun NavDestination.isConfigRoute(): Boolean =
+    ConfigRoute.entries.any { hasRoute(it.route::class) } || ModuleRoute.entries.any { hasRoute(it.route::class) }
 
 /**
  * Helper to define a composable route for a radio configuration screen within the radio config graph.

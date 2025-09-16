@@ -42,6 +42,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -51,7 +52,8 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.ContactsRoutes
 import com.geeksville.mesh.navigation.NodesRoutes
 import com.geeksville.mesh.navigation.SettingsRoutes
-import com.geeksville.mesh.navigation.showLongNameTitle
+import com.geeksville.mesh.navigation.isConfigRoute
+import com.geeksville.mesh.navigation.isNodeDetailRoute
 import com.geeksville.mesh.ui.TopLevelDestination.Companion.isTopLevel
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.debug.DebugMenuActions
@@ -177,6 +179,14 @@ private fun MainAppBar(
         },
     )
 }
+
+fun NavDestination.showLongNameTitle(): Boolean = !this.isTopLevel() &&
+    (
+        this.hasRoute<SettingsRoutes.Settings>() ||
+            this.hasRoute<NodesRoutes.NodeDetail>() ||
+            this.isConfigRoute() ||
+            this.isNodeDetailRoute()
+        )
 
 @Composable
 private fun TopBarActions(
