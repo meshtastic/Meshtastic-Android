@@ -51,37 +51,6 @@ import com.geeksville.mesh.ui.metrics.TracerouteLogScreen
 import com.geeksville.mesh.ui.node.NodeDetailScreen
 import com.geeksville.mesh.ui.node.NodeMapScreen
 import com.geeksville.mesh.ui.node.NodeScreen
-import kotlinx.serialization.Serializable
-
-sealed class NodesRoutes {
-    @Serializable data object Nodes : Route
-
-    @Serializable data object NodesGraph : Graph
-
-    @Serializable data class NodeDetailGraph(val destNum: Int? = null) : Graph
-
-    @Serializable data class NodeDetail(val destNum: Int? = null) : Route
-}
-
-sealed class NodeDetailRoutes {
-    @Serializable data object DeviceMetrics : Route
-
-    @Serializable data object NodeMap : Route
-
-    @Serializable data object PositionLog : Route
-
-    @Serializable data object EnvironmentMetrics : Route
-
-    @Serializable data object SignalMetrics : Route
-
-    @Serializable data object PowerMetrics : Route
-
-    @Serializable data object TracerouteLog : Route
-
-    @Serializable data object HostMetricsLog : Route
-
-    @Serializable data object PaxMetrics : Route
-}
 
 fun NavGraphBuilder.nodesGraph(navController: NavHostController, uiViewModel: UIViewModel) {
     navigation<NodesRoutes.NodesGraph>(startDestination = NodesRoutes.Nodes) {

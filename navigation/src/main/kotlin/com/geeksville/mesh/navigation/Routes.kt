@@ -50,3 +50,33 @@ object ContactsRoutes {
 object MapRoutes {
     @Serializable data object Map : Route
 }
+
+object NodesRoutes {
+    @Serializable data object NodesGraph : Graph
+
+    @Serializable data object Nodes : Route
+
+    @Serializable data class NodeDetailGraph(val destNum: Int? = null) : Graph
+
+    @Serializable data class NodeDetail(val destNum: Int? = null) : Route
+}
+
+object NodeDetailRoutes {
+    @Serializable data object DeviceMetrics : Route
+
+    @Serializable data object NodeMap : Route
+
+    @Serializable data object PositionLog : Route
+
+    @Serializable data object EnvironmentMetrics : Route
+
+    @Serializable data object SignalMetrics : Route
+
+    @Serializable data object PowerMetrics : Route
+
+    @Serializable data object TracerouteLog : Route
+
+    @Serializable data object HostMetricsLog : Route
+
+    @Serializable data object PaxMetrics : Route
+}
