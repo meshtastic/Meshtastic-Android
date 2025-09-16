@@ -23,10 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class FirmwareReleaseRemoteDataSource @Inject constructor(
-    private val apiService: ApiService,
-) {
-    suspend fun getFirmwareReleases(): NetworkFirmwareReleases? = withContext(Dispatchers.IO) {
-        apiService.getFirmwareReleases().body()
-    }
+class FirmwareReleaseRemoteDataSource @Inject constructor(private val apiService: ApiService) {
+    suspend fun getFirmwareReleases(): NetworkFirmwareReleases =
+        withContext(Dispatchers.IO) { apiService.getFirmwareReleases() }
 }

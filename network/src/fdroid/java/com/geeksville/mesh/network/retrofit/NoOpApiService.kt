@@ -19,19 +19,14 @@ package com.geeksville.mesh.network.retrofit
 
 import com.geeksville.mesh.network.model.NetworkDeviceHardware
 import com.geeksville.mesh.network.model.NetworkFirmwareReleases
-import okhttp3.ResponseBody.Companion.toResponseBody
-import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private const val ERROR_NO_OP = 420
 @Singleton
-class NoOpApiService@Inject constructor() : ApiService {
-    override suspend fun getDeviceHardware(): Response<List<NetworkDeviceHardware>> {
-        return Response.error(ERROR_NO_OP, "Not Found".toResponseBody(null))
-    }
+class NoOpApiService @Inject constructor() : ApiService {
+    override suspend fun getDeviceHardware(): List<NetworkDeviceHardware> =
+        throw NotImplementedError("API calls to getDeviceHardware are not supported on Fdroid builds.")
 
-    override suspend fun getFirmwareReleases(): Response<NetworkFirmwareReleases> {
-        return Response.error(ERROR_NO_OP, "Not Found".toResponseBody(null))
-    }
+    override suspend fun getFirmwareReleases(): NetworkFirmwareReleases =
+        throw NotImplementedError("API calls to getFirmwareReleases are not supported on Fdroid builds.")
 }

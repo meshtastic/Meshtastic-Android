@@ -19,13 +19,12 @@ package com.geeksville.mesh.network.retrofit
 
 import com.geeksville.mesh.network.model.NetworkDeviceHardware
 import com.geeksville.mesh.network.model.NetworkFirmwareReleases
-import retrofit2.Response
-import retrofit2.http.GET
+import de.jensklingenberg.ktorfit.http.GET
 
 interface ApiService {
     @GET("resource/deviceHardware")
-    suspend fun getDeviceHardware(): Response<List<NetworkDeviceHardware>>
+    suspend fun getDeviceHardware(): List<NetworkDeviceHardware>
 
-    @GET("/github/firmware/list")
-    suspend fun getFirmwareReleases(): Response<NetworkFirmwareReleases>
+    @GET("github/firmware/list")
+    suspend fun getFirmwareReleases(): NetworkFirmwareReleases
 }

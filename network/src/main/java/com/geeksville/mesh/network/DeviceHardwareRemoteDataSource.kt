@@ -23,10 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class DeviceHardwareRemoteDataSource @Inject constructor(
-    private val apiService: ApiService,
-) {
-    suspend fun getAllDeviceHardware(): List<NetworkDeviceHardware>? = withContext(Dispatchers.IO) {
-        apiService.getDeviceHardware().body()
-    }
+class DeviceHardwareRemoteDataSource @Inject constructor(private val apiService: ApiService) {
+    suspend fun getAllDeviceHardware(): List<NetworkDeviceHardware> =
+        withContext(Dispatchers.IO) { apiService.getDeviceHardware() }
 }

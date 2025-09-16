@@ -25,7 +25,6 @@ import com.geeksville.mesh.model.DeviceHardware
 import com.geeksville.mesh.network.DeviceHardwareRemoteDataSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.IOException
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -69,8 +68,7 @@ constructor(
             // 2. Fetch from remote API
             runCatching {
                 debug("Fetching device hardware from remote API.")
-                val remoteHardware =
-                    remoteDataSource.getAllDeviceHardware() ?: throw IOException("Empty response from server")
+                val remoteHardware = remoteDataSource.getAllDeviceHardware()
 
                 localDataSource.insertAllDeviceHardware(remoteHardware)
                 localDataSource.getByHwModel(hwModel)?.asExternalModel()
