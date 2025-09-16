@@ -50,6 +50,7 @@ class MainActivity : AppCompatActivity() {
     private var isMeshServiceBound = false
 
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+    @Suppress("TooGenericExceptionCaught", "LongMethod")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         this.enableEdgeToEdge()
@@ -109,6 +110,7 @@ class MainActivity : AppCompatActivity() {
         val meshtasticReceiver: BroadcastReceiver =
             object : BroadcastReceiver() {
                 @SuppressLint("SetTextI18n")
+                @Suppress("ReturnCount")
                 override fun onReceive(context: Context?, intent: Intent?) {
                     if (intent == null) {
                         Log.w(TAG, "Received null intent")
@@ -166,7 +168,7 @@ class MainActivity : AppCompatActivity() {
                                 Log.d(TAG, "Position App NodeInfo: $ni")
                                 mainTextView.text = "Position App NodeInfo: $ni"
                             } catch (e: Exception) {
-                                e.printStackTrace()
+                                Log.e(TAG, "onReceive: $e")
                                 return
                             }
                         }
@@ -189,7 +191,8 @@ class MainActivity : AppCompatActivity() {
 
         while (!bindMeshService()) {
             try {
-                Thread.sleep(1000)
+                @Suppress("MagicNumber")
+                Thread.sleep(1_000)
             } catch (e: InterruptedException) {
                 Log.e(TAG, "Binding interrupted", e)
                 break
