@@ -16,6 +16,7 @@ room = "2.8.0"
 # Kotlin
 kotlin = "2.2.20"
 kotlinx-coroutines-android = "1.10.2"
+kotlinx-serialization = "1.9.0"
 
 # Google
 hilt = "2.57.1"
@@ -112,7 +113,8 @@ kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotl
 kotlinx-collections-immutable = { module = "org.jetbrains.kotlinx:kotlinx-collections-immutable", version = "0.4.0" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinx-coroutines-android" }
 kotlinx-coroutines-guava = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-guava", version.ref = "kotlinx-coroutines-android" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version = "1.9.0" }
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinx-serialization" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
 
 # Networking
 ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
@@ -258,4 +260,5 @@ meshtastic-android-room = { id = "meshtastic.android.room" }
 meshtastic-android-test = { id = "meshtastic.android.test" }
 meshtastic-detekt = { id = "meshtastic.detekt" }
 meshtastic-hilt = { id = "meshtastic.hilt" }
+meshtastic-kotlinx-serialization = { id = "meshtastic.kotlinx.serialization" }
 meshtastic-spotless = { id = "meshtastic.spotless" }

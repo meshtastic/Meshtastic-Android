@@ -31,7 +31,7 @@ plugins {
     alias(libs.plugins.meshtastic.hilt)
     alias(libs.plugins.meshtastic.android.room)
     alias(libs.plugins.kotlin.parcelize)
-    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.protobuf)
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.datadog)
