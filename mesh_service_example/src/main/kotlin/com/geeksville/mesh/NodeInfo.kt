@@ -19,9 +19,9 @@ package com.geeksville.mesh
 
 import android.graphics.Color
 import android.os.Parcelable
+import com.geeksville.mesh.util.anonymize
 import com.geeksville.mesh.util.bearing
 import com.geeksville.mesh.util.latLongToMeter
-import com.geeksville.mesh.util.anonymize
 import kotlinx.parcelize.Parcelize
 
 //
@@ -38,33 +38,27 @@ data class MeshUser(
     val role: Int = 0,
 ) : Parcelable {
 
-    override fun toString(): String {
-        return "MeshUser(id=${id.anonymize}, " +
-                "longName=${longName.anonymize}, " +
-                "shortName=${shortName.anonymize}, " +
-                "hwModel=$hwModelString, " +
-                "isLicensed=$isLicensed, " +
-                "role=$role)"
-    }
+    override fun toString(): String = "MeshUser(id=${id.anonymize}, " +
+        "longName=${longName.anonymize}, " +
+        "shortName=${shortName.anonymize}, " +
+        "hwModel=$hwModelString, " +
+        "isLicensed=$isLicensed, " +
+        "role=$role)"
 
-    /** Create our model object from a protobuf.
+    /** Create our model object from a protobuf. */
+    constructor(p: MeshProtos.User) : this(p.id, p.longName, p.shortName, p.hwModel, p.isLicensed, p.roleValue)
+
+    /**
+     * a string version of the hardware model, converted into pretty lowercase and changing _ to -, and p to dot or null
+     * if unset
      */
-    constructor(p: MeshProtos.User) : this(
-        p.id,
-        p.longName,
-        p.shortName,
-        p.hwModel,
-        p.isLicensed,
-        p.roleValue
-    )
-
-    /** a string version of the hardware model, converted into pretty lowercase and changing _ to -, and p to dot
-     * or null if unset
-     * */
     val hwModelString: String?
         get() =
-            if (hwModel == MeshProtos.HardwareModel.UNSET) null
-            else hwModel.name.replace('_', '-').replace('p', '.').lowercase()
+            if (hwModel == MeshProtos.HardwareModel.UNSET) {
+                null
+            } else {
+                hwModel.name.replace('_', '-').replace('p', '.').lowercase()
+            }
 }
 
 @Parcelize
@@ -80,16 +74,22 @@ data class Position(
 ) : Parcelable {
 
     companion object {
-        /// Convert to a double representation of degrees
+        // / Convert to a double representation of degrees
         fun degD(i: Int) = i * 1e-7
+
         fun degI(d: Double) = (d * 1e7).toInt()
 
         fun currentTime() = (System.currentTimeMillis() / 1000).toInt()
     }
 
-    /** Create our model object from a protobuf.  If time is unspecified in the protobuf, the provided default time will be used.
+    /**
+     * Create our model object from a protobuf. If time is unspecified in the protobuf, the provided default time will
+     * be used.
      */
-    constructor(position: MeshProtos.Position, defaultTime: Int = currentTime()) : this(
+    constructor(
+        position: MeshProtos.Position,
+        defaultTime: Int = currentTime(),
+    ) : this(
         // We prefer the int version of lat/lon but if not available use the depreciated legacy version
         degD(position.latitudeI),
         degD(position.longitudeI),
@@ -98,27 +98,24 @@ data class Position(
         position.satsInView,
         position.groundSpeed,
         position.groundTrack,
-        position.precisionBits
+        position.precisionBits,
     )
 
-    /// @return distance in meters to some other node (or null if unknown)
+    // / @return distance in meters to some other node (or null if unknown)
     fun distance(o: Position) = latLongToMeter(latitude, longitude, o.latitude, o.longitude)
 
-    /// @return bearing to the other position in degrees
+    // / @return bearing to the other position in degrees
     fun bearing(o: Position) = bearing(latitude, longitude, o.latitude, o.longitude)
 
     // If GPS gives a crap position don't crash our app
-    fun isValid(): Boolean {
-        return latitude != 0.0 && longitude != 0.0 &&
-                (latitude >= -90 && latitude <= 90.0) &&
-                (longitude >= -180 && longitude <= 180)
-    }
+    fun isValid(): Boolean = latitude != 0.0 &&
+        longitude != 0.0 &&
+        (latitude >= -90 && latitude <= 90.0) &&
+        (longitude >= -180 && longitude <= 180)
 
-    override fun toString(): String {
-        return "Position(lat=${latitude.anonymize}, lon=${longitude.anonymize}, alt=${altitude.anonymize}, time=${time})"
-    }
+    override fun toString(): String =
+        "Position(lat=${latitude.anonymize}, lon=${longitude.anonymize}, alt=${altitude.anonymize}, time=$time)"
 }
-
 
 @Parcelize
 data class DeviceMetrics(
@@ -133,16 +130,11 @@ data class DeviceMetrics(
         fun currentTime() = (System.currentTimeMillis() / 1000).toInt()
     }
 
-    /** Create our model object from a protobuf.
-     */
-    constructor(p: TelemetryProtos.DeviceMetrics, telemetryTime: Int = currentTime()) : this(
-        telemetryTime,
-        p.batteryLevel,
-        p.voltage,
-        p.channelUtilization,
-        p.airUtilTx,
-        p.uptimeSeconds,
-    )
+    /** Create our model object from a protobuf. */
+    constructor(
+        p: TelemetryProtos.DeviceMetrics,
+        telemetryTime: Int = currentTime(),
+    ) : this(telemetryTime, p.batteryLevel, p.voltage, p.channelUtilization, p.airUtilTx, p.uptimeSeconds)
 }
 
 @Parcelize
@@ -172,7 +164,7 @@ data class NodeInfo(
     var deviceMetrics: DeviceMetrics? = null,
     var channel: Int = 0,
     var environmentMetrics: EnvironmentMetrics? = null,
-    var hopsAway: Int = 0
+    var hopsAway: Int = 0,
 ) : Parcelable {
 
     val colors: Pair<Int, Int>
@@ -184,13 +176,17 @@ data class NodeInfo(
             return (if (brightness > 0.5) Color.BLACK else Color.WHITE) to Color.rgb(r, g, b)
         }
 
-    val batteryLevel get() = deviceMetrics?.batteryLevel
-    val voltage get() = deviceMetrics?.voltage
-    val batteryStr get() = if (batteryLevel in 1..100) String.format("%d%%", batteryLevel) else ""
+    val batteryLevel
+        get() = deviceMetrics?.batteryLevel
 
-    /**
-     * true if the device was heard from recently
-     */
+    val voltage
+        get() = deviceMetrics?.voltage
+
+    val batteryStr
+        get() = if (batteryLevel in 1..100) String.format("%d%%", batteryLevel) else ""
+
+    /** true if the device was heard from recently */
+    @Suppress("MagicNumber")
     val isOnline: Boolean
         get() {
             val now = System.currentTimeMillis() / 1000
@@ -198,34 +194,38 @@ data class NodeInfo(
             return (now - lastHeard <= timeout)
         }
 
-    /// return the position if it is valid, else null
+    // / return the position if it is valid, else null
     val validPosition: Position?
         get() {
             return position?.takeIf { it.isValid() }
         }
 
-    /// @return distance in meters to some other node (or null if unknown)
+    // / @return distance in meters to some other node (or null if unknown)
     fun distance(o: NodeInfo?): Int? {
         val p = validPosition
         val op = o?.validPosition
         return if (p != null && op != null) p.distance(op).toInt() else null
     }
 
-    /// @return bearing to the other position in degrees
+    // / @return bearing to the other position in degrees
     fun bearing(o: NodeInfo?): Int? {
         val p = validPosition
         val op = o?.validPosition
         return if (p != null && op != null) p.bearing(op).toInt() else null
     }
 
-    /// @return a nice human readable string for the distance, or null for unknown
+    // / @return a nice human readable string for the distance, or null for unknown
     fun distanceStr(o: NodeInfo?, prefUnits: Int = 0) = distance(o)?.let { dist ->
         when {
             dist == 0 -> null // same point
-            prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC_VALUE && dist < 1000 -> "%.0f m".format(dist.toDouble())
-            prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC_VALUE && dist >= 1000 -> "%.1f km".format(dist / 1000.0)
-            prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.IMPERIAL_VALUE && dist < 1609 -> "%.0f ft".format(dist.toDouble()*3.281)
-            prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.IMPERIAL_VALUE && dist >= 1609 -> "%.1f mi".format(dist / 1609.34)
+            prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC_VALUE && dist < 1000 ->
+                "%.0f m".format(dist.toDouble())
+            prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.METRIC_VALUE && dist >= 1000 ->
+                "%.1f km".format(dist / 1000.0)
+            prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.IMPERIAL_VALUE && dist < 1609 ->
+                "%.0f ft".format(dist.toDouble() * 3.281)
+            prefUnits == ConfigProtos.Config.DisplayConfig.DisplayUnits.IMPERIAL_VALUE && dist >= 1609 ->
+                "%.1f mi".format(dist / 1609.34)
             else -> null
         }
     }
