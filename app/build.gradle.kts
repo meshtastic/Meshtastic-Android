@@ -200,8 +200,9 @@ androidComponents {
 project.afterEvaluate { logger.lifecycle("Version code is set to: ${android.defaultConfig.versionCode}") }
 
 dependencies {
-    implementation(project(":navigation"))
-    implementation(project(":network"))
+    implementation(projects.navigation)
+    implementation(projects.network)
+
     // Bundles
     implementation(libs.bundles.markdown)
     implementation(libs.bundles.coroutines)

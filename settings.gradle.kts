@@ -20,6 +20,9 @@ import org.gradle.kotlin.dsl.maven
 include(":app", ":mesh_service_example", ":navigation", ":network")
 rootProject.name = "MeshtasticAndroid"
 
+// https://docs.gradle.org/current/userguide/declaring_dependencies.html#sec:type-safe-project-accessors
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
+
 pluginManagement {
     includeBuild("build-logic")
     repositories {
