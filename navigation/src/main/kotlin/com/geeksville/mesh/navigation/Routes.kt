@@ -46,3 +46,7 @@ object ContactsRoutes {
 
     @Serializable data object QuickChat : Route
 }
+
+object MapRoutes {
+    @Serializable data object Map : Route
+}
