@@ -28,3 +28,9 @@ object ChannelsRoutes {
 
     @Serializable data object Channels : Route
 }
+
+object ConnectionsRoutes {
+    @Serializable data object ConnectionsGraph : Graph
+
+    @Serializable data object Connections : Route
+}
