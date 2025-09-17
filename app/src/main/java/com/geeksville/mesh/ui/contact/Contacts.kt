@@ -18,7 +18,6 @@
 package com.geeksville.mesh.ui.contact
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -66,6 +65,7 @@ import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.ui.common.components.MainAppBar
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -78,6 +78,7 @@ fun ContactsScreen(
     onNavigateToShare: () -> Unit,
 ) {
     val isConnected by uiViewModel.isConnectedStateFlow.collectAsStateWithLifecycle()
+    val ourNode by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     var showMuteDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
 
@@ -139,6 +140,27 @@ fun ContactsScreen(
     }
     Scaffold(
         topBar = {
+            MainAppBar(
+                title = stringResource(R.string.conversations),
+                ourNode = ourNode,
+                isConnected = isConnected,
+                showNodeChip = ourNode != null && isConnected,
+                canNavigateUp = false,
+                onNavigateUp = {},
+                actions = {},
+                onAction = {},
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                modifier = Modifier.animateFloatingActionButton(visible = isConnected, alignment = Alignment.BottomEnd),
+                onClick = onNavigateToShare,
+            ) {
+                Icon(Icons.Rounded.QrCode2, contentDescription = null)
+            }
+        },
+    ) { paddingValues ->
+        Column(modifier = Modifier.padding(paddingValues)) {
             if (isSelectionModeActive) {
                 // Display selection toolbar when in selection mode
                 SelectionToolbar(
@@ -153,26 +175,17 @@ fun ContactsScreen(
                     isAllMuted = isAllMuted, // Pass the derived state
                 )
             }
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                modifier = Modifier.animateFloatingActionButton(visible = isConnected, alignment = Alignment.BottomEnd),
-                onClick = onNavigateToShare,
-            ) {
-                Icon(Icons.Rounded.QrCode2, contentDescription = null)
-            }
-        },
-    ) { paddingValues ->
-        val channels by uiViewModel.channels.collectAsStateWithLifecycle()
-        ContactListView(
-            contacts = contacts,
-            selectedList = selectedContactKeys,
-            onClick = onContactClick,
-            onLongClick = onContactLongClick,
-            contentPadding = paddingValues,
-            channels = channels,
-            onNodeChipClick = onNodeChipClick,
-        )
+
+            val channels by uiViewModel.channels.collectAsStateWithLifecycle()
+            ContactListView(
+                contacts = contacts,
+                selectedList = selectedContactKeys,
+                onClick = onContactClick,
+                onLongClick = onContactLongClick,
+                channels = channels,
+                onNodeChipClick = onNodeChipClick,
+            )
+        }
     }
     DeleteConfirmationDialog(
         showDialog = showDeleteDialog,
@@ -351,12 +364,11 @@ fun ContactListView(
     selectedList: List<String>,
     onClick: (Contact) -> Unit,
     onLongClick: (Contact) -> Unit,
-    contentPadding: PaddingValues,
     channels: AppOnlyProtos.ChannelSet? = null,
     onNodeChipClick: (Contact) -> Unit,
 ) {
     val haptics = LocalHapticFeedback.current
-    LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
+    LazyColumn(modifier = Modifier.fillMaxSize()) {
         items(contacts, key = { it.contactKey }) { contact ->
             val selected by remember { derivedStateOf { selectedList.contains(contact.contactKey) } }
 

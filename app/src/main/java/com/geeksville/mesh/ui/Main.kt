@@ -354,6 +354,7 @@ fun MainScreen(
                     // List of screens to exclude from having the global app bar
                     listOf(
                         ConnectionsRoutes.Connections::class,
+                        ContactsRoutes.Contacts::class,
                         NodesRoutes.Nodes::class,
                         SettingsRoutes.Settings::class,
                     )
