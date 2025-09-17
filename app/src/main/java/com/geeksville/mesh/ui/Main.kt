@@ -22,6 +22,7 @@ package com.geeksville.mesh.ui
 import android.Manifest
 import android.os.Build
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -135,7 +136,6 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
             NodesRoutes.Nodes::class,
             MapRoutes.Map::class,
             ConnectionsRoutes.Connections::class,
-            SettingsRoutes.Settings::class,
         )
             .any { this.hasRoute(it) }
 
@@ -349,26 +349,33 @@ fun MainScreen(
                 if (sharedContact != null) {
                     SharedContactDialog(contact = sharedContact, onDismiss = { sharedContact = null })
                 }
-                MainAppBar(
-                    viewModel = uIViewModel,
-                    navController = navController,
-                    onAction = { action ->
-                        when (action) {
-                            is NodeMenuAction.MoreDetails -> {
-                                navController.navigate(
-                                    NodesRoutes.NodeDetailGraph(action.node.num),
-                                    {
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    },
-                                )
-                            }
 
-                            is NodeMenuAction.Share -> sharedContact = action.node
-                            else -> {}
-                        }
-                    },
-                )
+                fun NavDestination.hasGlobalAppBar(): Boolean =
+                    // List of screens to exclude from having the global app bar
+                    listOf<KClass<out Route>>(SettingsRoutes.Settings::class).none { this.hasRoute(it) }
+
+                AnimatedVisibility(visible = currentDestination?.hasGlobalAppBar() ?: true) {
+                    MainAppBar(
+                        viewModel = uIViewModel,
+                        navController = navController,
+                        onAction = { action ->
+                            when (action) {
+                                is NodeMenuAction.MoreDetails -> {
+                                    navController.navigate(
+                                        NodesRoutes.NodeDetailGraph(action.node.num),
+                                        {
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        },
+                                    )
+                                }
+
+                                is NodeMenuAction.Share -> sharedContact = action.node
+                                else -> {}
+                            }
+                        },
+                    )
+                }
 
                 NavHost(
                     navController = navController,
