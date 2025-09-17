@@ -355,6 +355,7 @@ fun MainScreen(
                     listOf(
                         ConnectionsRoutes.Connections::class,
                         ContactsRoutes.Contacts::class,
+                        MapRoutes.Map::class,
                         NodesRoutes.Nodes::class,
                         SettingsRoutes.Settings::class,
                     )
