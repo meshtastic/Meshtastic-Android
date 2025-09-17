@@ -701,7 +701,6 @@
     <string name="ble_devices">Appareils BLE</string>
     <string name="bluetooth_paired_devices">Périphériques appairés</string>
     <string name="connected_device">Périphérique connecté</string>
-    <string name="action_go">Go</string>
     <string name="routing_error_rate_limit_exceeded">Limite de débit dépassée. Veuillez réessayer plus tard.</string>
     <string name="view_release">Voir la version</string>
     <string name="download">Télécharger</string>
