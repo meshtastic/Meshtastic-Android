@@ -74,11 +74,11 @@ import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.connections.components.BLEDevices
 import com.geeksville.mesh.ui.connections.components.ConnectionsSegmentedBar
-import com.geeksville.mesh.ui.connections.components.CurrentlyConnectedCard
+import com.geeksville.mesh.ui.connections.components.CurrentlyConnectedInfo
 import com.geeksville.mesh.ui.connections.components.NetworkDevices
 import com.geeksville.mesh.ui.connections.components.UsbDevices
-import com.geeksville.mesh.ui.settings.components.SettingsItem
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
+import com.geeksville.mesh.ui.settings.components.SettingsItem
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
@@ -219,19 +219,15 @@ fun ConnectionsScreen(
                     ) {
                         Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                             ourNode?.let { node ->
-                                Text(
-                                    stringResource(R.string.connected_device),
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    style = MaterialTheme.typography.titleLarge,
-                                )
-
-                                CurrentlyConnectedCard(
-                                    node = node,
-                                    onNavigateToNodeDetails = onNavigateToNodeDetails,
-                                    onSetShowSharedContact = { showSharedContact = it },
-                                    onNavigateToSettings = onNavigateToSettings,
-                                    onClickDisconnect = { scanModel.disconnect() },
-                                )
+                                TitledCard(title = stringResource(R.string.connected_device)) {
+                                    CurrentlyConnectedInfo(
+                                        node = node,
+                                        onNavigateToNodeDetails = onNavigateToNodeDetails,
+                                        onSetShowSharedContact = { showSharedContact = it },
+                                        onNavigateToSettings = onNavigateToSettings,
+                                        onClickDisconnect = { scanModel.disconnect() },
+                                    )
+                                }
                             }
 
                             if (regionUnset && selectedDevice != "m") {
@@ -249,11 +245,14 @@ fun ConnectionsScreen(
                     }
 
                     var selectedDeviceType by remember { mutableStateOf(DeviceType.BLE) }
-                    LaunchedEffect(selectedDevice) {
-                        DeviceType.fromAddress(selectedDevice)?.let { type -> selectedDeviceType = type }
-                    }
+                    LaunchedEffect(Unit) { DeviceType.fromAddress(selectedDevice)?.let { selectedDeviceType = it } }
 
-                    ConnectionsSegmentedBar(modifier = Modifier.fillMaxWidth()) { selectedDeviceType = it }
+                    ConnectionsSegmentedBar(
+                        selectedDeviceType = selectedDeviceType,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        selectedDeviceType = it
+                    }
 
                     Spacer(modifier = Modifier.height(4.dp))
 

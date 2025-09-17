@@ -27,7 +27,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -53,71 +52,69 @@ import com.geeksville.mesh.ui.node.components.NodeChip
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 
 @Composable
-fun CurrentlyConnectedCard(
+fun CurrentlyConnectedInfo(
     node: Node,
-    modifier: Modifier = Modifier,
     onNavigateToNodeDetails: (Int) -> Unit,
     onSetShowSharedContact: (Node) -> Unit,
     onNavigateToSettings: () -> Unit,
     onClickDisconnect: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
-    Card(modifier = modifier) {
-        Column {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                Column(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    NodeChip(
-                        node = node,
-                        isThisNode = true,
-                        isConnected = true,
-                        onAction = { action ->
-                            when (action) {
-                                is NodeMenuAction.MoreDetails -> onNavigateToNodeDetails(node.num)
-
-                                is NodeMenuAction.Share -> onSetShowSharedContact(node)
-                                else -> {}
-                            }
-                        },
-                    )
-
-                    MaterialBatteryInfo(level = node.batteryLevel)
-                }
-
-                Column(modifier = Modifier.weight(1f, fill = true)) {
-                    Text(text = node.user.longName, style = MaterialTheme.typography.titleMedium)
-
-                    node.metadata?.firmwareVersion?.let { firmwareVersion ->
-                        Text(
-                            text = stringResource(R.string.firmware_version, firmwareVersion),
-                            style = MaterialTheme.typography.bodySmall,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                        )
-                    }
-                }
-
-                IconButton(enabled = true, onClick = onNavigateToSettings) {
-                    Icon(
-                        imageVector = Icons.Default.Settings,
-                        contentDescription = stringResource(id = R.string.radio_configuration),
-                    )
-                }
-            }
-
-            Button(
-                shape = RectangleShape,
-                modifier = Modifier.fillMaxWidth().height(40.dp),
-                colors =
-                ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.StatusRed,
-                    contentColor = Color.White,
-                ),
-                onClick = onClickDisconnect,
+    Column(modifier = modifier) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                Text(stringResource(R.string.disconnect))
+                NodeChip(
+                    node = node,
+                    isThisNode = true,
+                    isConnected = true,
+                    onAction = { action ->
+                        when (action) {
+                            is NodeMenuAction.MoreDetails -> onNavigateToNodeDetails(node.num)
+
+                            is NodeMenuAction.Share -> onSetShowSharedContact(node)
+                            else -> {}
+                        }
+                    },
+                )
+
+                MaterialBatteryInfo(level = node.batteryLevel)
             }
+
+            Column(modifier = Modifier.weight(1f, fill = true)) {
+                Text(text = node.user.longName, style = MaterialTheme.typography.titleMedium)
+
+                node.metadata?.firmwareVersion?.let { firmwareVersion ->
+                    Text(
+                        text = stringResource(R.string.firmware_version, firmwareVersion),
+                        style = MaterialTheme.typography.bodySmall,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+            }
+
+            IconButton(enabled = true, onClick = onNavigateToSettings) {
+                Icon(
+                    imageVector = Icons.Default.Settings,
+                    contentDescription = stringResource(id = R.string.radio_configuration),
+                )
+            }
+        }
+
+        Button(
+            shape = RectangleShape,
+            modifier = Modifier.fillMaxWidth().height(40.dp),
+            colors =
+            ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.StatusRed,
+                contentColor = Color.White,
+            ),
+            onClick = onClickDisconnect,
+        ) {
+            Text(stringResource(R.string.disconnect))
         }
     }
 }
@@ -125,9 +122,9 @@ fun CurrentlyConnectedCard(
 @Suppress("MagicNumber")
 @PreviewLightDark
 @Composable
-private fun CurrentlyConnectedCardPreview() {
+private fun CurrentlyConnectedInfoPreview() {
     AppTheme {
-        CurrentlyConnectedCard(
+        CurrentlyConnectedInfo(
             node =
             Node(
                 num = 13444,
