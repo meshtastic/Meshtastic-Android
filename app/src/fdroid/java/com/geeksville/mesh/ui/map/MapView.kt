@@ -59,6 +59,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.DataPacket
@@ -211,7 +212,7 @@ private fun Context.purgeTileSource(onResult: (String) -> Unit) {
 @Composable
 fun MapView(
     uiViewModel: UIViewModel = viewModel(),
-    mapViewModel: MapViewModel = viewModel(),
+    mapViewModel: MapViewModel = hiltViewModel(),
     navigateToNodeDetails: (Int) -> Unit,
 ) {
     var mapFilterExpanded by remember { mutableStateOf(false) }
