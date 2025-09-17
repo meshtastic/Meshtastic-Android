@@ -75,8 +75,6 @@ fun MainAppBar(
     }
 
     val longTitle by viewModel.title.collectAsStateWithLifecycle("")
-    val onlineNodeCount by viewModel.onlineNodeCount.collectAsStateWithLifecycle(0)
-    val totalNodeCount by viewModel.totalNodeCount.collectAsStateWithLifecycle(0)
     val ourNode by viewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val isConnected by viewModel.isConnectedStateFlow.collectAsStateWithLifecycle(false)
 
@@ -95,17 +93,10 @@ fun MainAppBar(
             else -> stringResource(id = R.string.app_name)
         }
 
-    val subtitle =
-        if (currentDestination?.hasRoute<NodesRoutes.Nodes>() == true) {
-            stringResource(R.string.node_count_template, onlineNodeCount, totalNodeCount)
-        } else {
-            null
-        }
-
     MainAppBar(
         modifier = modifier,
         title = title,
-        subtitle = subtitle,
+        subtitle = null,
         canNavigateUp = navController.previousBackStackEntry != null && currentDestination?.isTopLevel() == false,
         ourNode = ourNode,
         isConnected = isConnected,

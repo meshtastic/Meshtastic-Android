@@ -352,9 +352,12 @@ fun MainScreen(
 
                 fun NavDestination.hasGlobalAppBar(): Boolean =
                     // List of screens to exclude from having the global app bar
-                    listOf(ConnectionsRoutes.Connections::class, SettingsRoutes.Settings::class).none {
-                        this.hasRoute(it)
-                    }
+                    listOf(
+                        ConnectionsRoutes.Connections::class,
+                        NodesRoutes.Nodes::class,
+                        SettingsRoutes.Settings::class,
+                    )
+                        .none { this.hasRoute(it) }
 
                 AnimatedVisibility(visible = currentDestination?.hasGlobalAppBar() ?: true) {
                     MainAppBar(
