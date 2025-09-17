@@ -57,7 +57,7 @@ private fun UsbDevices(
             EmptyStateContent(imageVector = Icons.Rounded.UsbOff, text = stringResource(R.string.no_usb_devices))
 
         else ->
-            TitledCard(title = "") {
+            TitledCard(title = null) {
                 usbDevices.forEach { device ->
                     DeviceListItem(
                         connected =

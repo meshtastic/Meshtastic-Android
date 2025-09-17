@@ -97,7 +97,16 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController, uiViewModel:
         ) { backStackEntry ->
             val parentEntry =
                 remember(backStackEntry) { navController.getBackStackEntry(SettingsRoutes.SettingsGraph::class) }
-            SettingsScreen(uiViewModel = uiViewModel, viewModel = hiltViewModel(parentEntry)) {
+            SettingsScreen(
+                uiViewModel = uiViewModel,
+                viewModel = hiltViewModel(parentEntry),
+                onClickNodeChip = {
+                    navController.navigate(NodesRoutes.NodeDetailGraph(it)) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
+            ) {
                 navController.navigate(it) { popUpTo(SettingsRoutes.Settings()) { inclusive = false } }
             }
         }

@@ -38,6 +38,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -69,12 +70,14 @@ import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.service.ConnectionState
+import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.connections.components.BLEDevices
 import com.geeksville.mesh.ui.connections.components.ConnectionsSegmentedBar
-import com.geeksville.mesh.ui.connections.components.CurrentlyConnectedCard
+import com.geeksville.mesh.ui.connections.components.CurrentlyConnectedInfo
 import com.geeksville.mesh.ui.connections.components.NetworkDevices
 import com.geeksville.mesh.ui.connections.components.UsbDevices
+import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.settings.components.SettingsItem
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
@@ -101,6 +104,7 @@ fun ConnectionsScreen(
     scanModel: BTScanModel = hiltViewModel(),
     bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
     radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
+    onClickNodeChip: (Int) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToNodeDetails: (Int) -> Unit,
     onConfigNavigate: (Route) -> Unit,
@@ -114,6 +118,7 @@ fun ConnectionsScreen(
     val scanning by scanModel.spinner.collectAsStateWithLifecycle(false)
     val context = LocalContext.current
     val info by connectionsViewModel.myNodeInfo.collectAsStateWithLifecycle()
+    val ourNode by connectionsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val bluetoothEnabled by bluetoothViewModel.enabled.collectAsStateWithLifecycle(false)
     val regionUnset = config.lora.region == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET
@@ -179,171 +184,191 @@ fun ConnectionsScreen(
         SharedContactDialog(contact = showSharedContact, onDismiss = { showSharedContact = null })
     }
 
-    Column(modifier = Modifier.fillMaxSize()) {
-        Box(modifier = Modifier.fillMaxSize().weight(1f)) {
-            Column(
-                modifier = Modifier.fillMaxSize().verticalScroll(scrollState).height(IntrinsicSize.Max).padding(16.dp),
-            ) {
-                val ourNode by connectionsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
-
-                AnimatedVisibility(
-                    visible = connectionState.isConnected(),
-                    modifier = Modifier.padding(bottom = 16.dp),
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                title = stringResource(R.string.connections),
+                ourNode = ourNode,
+                isConnected = connectionState.isConnected(),
+                showNodeChip = ourNode != null && connectionState.isConnected(),
+                canNavigateUp = false,
+                onNavigateUp = {},
+                actions = {},
+                onAction = { action ->
+                    when (action) {
+                        is NodeMenuAction.MoreDetails -> onClickNodeChip(action.node.num)
+                        else -> {}
+                    }
+                },
+            )
+        },
+    ) { paddingValues ->
+        Column(modifier = Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.fillMaxSize().weight(1f)) {
+                Column(
+                    modifier =
+                    Modifier.fillMaxSize()
+                        .verticalScroll(scrollState)
+                        .height(IntrinsicSize.Max)
+                        .padding(paddingValues)
+                        .padding(16.dp),
                 ) {
-                    Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        ourNode?.let { node ->
-                            Text(
-                                stringResource(R.string.connected_device),
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                style = MaterialTheme.typography.titleLarge,
-                            )
-
-                            Spacer(modifier = Modifier.height(8.dp))
-
-                            CurrentlyConnectedCard(
-                                node = node,
-                                onNavigateToNodeDetails = onNavigateToNodeDetails,
-                                onSetShowSharedContact = { showSharedContact = it },
-                                onNavigateToSettings = onNavigateToSettings,
-                                onClickDisconnect = { scanModel.disconnect() },
-                            )
-                        }
-
-                        if (regionUnset && selectedDevice != "m") {
-                            TitledCard(title = null) {
-                                SettingsItem(
-                                    leadingIcon = Icons.Rounded.Language,
-                                    text = stringResource(id = R.string.set_your_region),
-                                ) {
-                                    isWaiting = true
-                                    radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
+                    AnimatedVisibility(
+                        visible = connectionState.isConnected(),
+                        modifier = Modifier.padding(bottom = 16.dp),
+                    ) {
+                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                            ourNode?.let { node ->
+                                TitledCard(title = stringResource(R.string.connected_device)) {
+                                    CurrentlyConnectedInfo(
+                                        node = node,
+                                        onNavigateToNodeDetails = onNavigateToNodeDetails,
+                                        onSetShowSharedContact = { showSharedContact = it },
+                                        onNavigateToSettings = onNavigateToSettings,
+                                        onClickDisconnect = { scanModel.disconnect() },
+                                    )
                                 }
                             }
-                        }
-                    }
-                }
 
-                var selectedDeviceType by remember { mutableStateOf(DeviceType.BLE) }
-                LaunchedEffect(selectedDevice) {
-                    DeviceType.fromAddress(selectedDevice)?.let { type -> selectedDeviceType = type }
-                }
-
-                ConnectionsSegmentedBar(modifier = Modifier.fillMaxWidth()) { selectedDeviceType = it }
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Column(modifier = Modifier.fillMaxSize()) {
-                    when (selectedDeviceType) {
-                        DeviceType.BLE -> {
-                            BLEDevices(
-                                connectionState = connectionState,
-                                btDevices = bleDevices,
-                                selectedDevice = selectedDevice,
-                                scanModel = scanModel,
-                                bluetoothEnabled = bluetoothEnabled,
-                            )
-                        }
-
-                        DeviceType.TCP -> {
-                            NetworkDevices(
-                                connectionState = connectionState,
-                                discoveredNetworkDevices = discoveredTcpDevices,
-                                recentNetworkDevices = recentTcpDevices,
-                                selectedDevice = selectedDevice,
-                                scanModel = scanModel,
-                            )
-                        }
-
-                        DeviceType.USB -> {
-                            UsbDevices(
-                                connectionState = connectionState,
-                                usbDevices = usbDevices,
-                                selectedDevice = selectedDevice,
-                                scanModel = scanModel,
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(16.dp))
-
-                    // Warning Not Paired
-                    val hasShownNotPairedWarning by
-                        connectionsViewModel.hasShownNotPairedWarning.collectAsStateWithLifecycle()
-                    val showWarningNotPaired =
-                        !connectionState.isConnected() &&
-                            !hasShownNotPairedWarning &&
-                            bleDevices.none { it is DeviceListEntry.Ble && it.bonded }
-                    if (showWarningNotPaired) {
-                        Text(
-                            text = stringResource(R.string.warning_not_paired),
-                            color = MaterialTheme.colorScheme.error,
-                            style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        LaunchedEffect(Unit) { connectionsViewModel.suppressNoPairedWarning() }
-                    }
-                }
-            }
-
-            // Compose Device Scan Dialog
-            if (showScanDialog) {
-                Dialog(
-                    onDismissRequest = {
-                        showScanDialog = false
-                        scanModel.clearScanResults()
-                    },
-                ) {
-                    Surface(shape = MaterialTheme.shapes.medium) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = "Select a Bluetooth device",
-                                style = MaterialTheme.typography.titleLarge,
-                                modifier = Modifier.padding(bottom = 16.dp),
-                            )
-                            Column(modifier = Modifier.selectableGroup()) {
-                                scanResults.values.forEach { device ->
-                                    Row(
-                                        modifier =
-                                        Modifier.fillMaxWidth()
-                                            .selectable(
-                                                selected = false, // No pre-selection in this dialog
-                                                onClick = {
-                                                    scanModel.onSelected(device)
-                                                    scanModel.clearScanResults()
-                                                    showScanDialog = false
-                                                },
-                                            )
-                                            .padding(vertical = 8.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
+                            if (regionUnset && selectedDevice != "m") {
+                                TitledCard(title = null) {
+                                    SettingsItem(
+                                        leadingIcon = Icons.Rounded.Language,
+                                        text = stringResource(id = R.string.set_your_region),
                                     ) {
-                                        Text(text = device.name)
+                                        isWaiting = true
+                                        radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
                                     }
                                 }
                             }
+                        }
+                    }
+
+                    var selectedDeviceType by remember { mutableStateOf(DeviceType.BLE) }
+                    LaunchedEffect(Unit) { DeviceType.fromAddress(selectedDevice)?.let { selectedDeviceType = it } }
+
+                    ConnectionsSegmentedBar(
+                        selectedDeviceType = selectedDeviceType,
+                        modifier = Modifier.fillMaxWidth(),
+                    ) {
+                        selectedDeviceType = it
+                    }
+
+                    Spacer(modifier = Modifier.height(4.dp))
+
+                    Column(modifier = Modifier.fillMaxSize()) {
+                        when (selectedDeviceType) {
+                            DeviceType.BLE -> {
+                                BLEDevices(
+                                    connectionState = connectionState,
+                                    btDevices = bleDevices,
+                                    selectedDevice = selectedDevice,
+                                    scanModel = scanModel,
+                                    bluetoothEnabled = bluetoothEnabled,
+                                )
+                            }
+
+                            DeviceType.TCP -> {
+                                NetworkDevices(
+                                    connectionState = connectionState,
+                                    discoveredNetworkDevices = discoveredTcpDevices,
+                                    recentNetworkDevices = recentTcpDevices,
+                                    selectedDevice = selectedDevice,
+                                    scanModel = scanModel,
+                                )
+                            }
+
+                            DeviceType.USB -> {
+                                UsbDevices(
+                                    connectionState = connectionState,
+                                    usbDevices = usbDevices,
+                                    selectedDevice = selectedDevice,
+                                    scanModel = scanModel,
+                                )
+                            }
+                        }
+
+                        Spacer(modifier = Modifier.height(16.dp))
+
+                        // Warning Not Paired
+                        val hasShownNotPairedWarning by
+                            connectionsViewModel.hasShownNotPairedWarning.collectAsStateWithLifecycle()
+                        val showWarningNotPaired =
+                            !connectionState.isConnected() &&
+                                !hasShownNotPairedWarning &&
+                                bleDevices.none { it is DeviceListEntry.Ble && it.bonded }
+                        if (showWarningNotPaired) {
+                            Text(
+                                text = stringResource(R.string.warning_not_paired),
+                                color = MaterialTheme.colorScheme.error,
+                                style = MaterialTheme.typography.bodyMedium,
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                            )
                             Spacer(modifier = Modifier.height(16.dp))
-                            TextButton(
-                                onClick = {
-                                    scanModel.clearScanResults()
-                                    showScanDialog = false
-                                },
-                            ) {
-                                Text(stringResource(R.string.cancel))
+
+                            LaunchedEffect(Unit) { connectionsViewModel.suppressNoPairedWarning() }
+                        }
+                    }
+                }
+
+                // Compose Device Scan Dialog
+                if (showScanDialog) {
+                    Dialog(
+                        onDismissRequest = {
+                            showScanDialog = false
+                            scanModel.clearScanResults()
+                        },
+                    ) {
+                        Surface(shape = MaterialTheme.shapes.medium) {
+                            Column(modifier = Modifier.padding(16.dp)) {
+                                Text(
+                                    text = "Select a Bluetooth device",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    modifier = Modifier.padding(bottom = 16.dp),
+                                )
+                                Column(modifier = Modifier.selectableGroup()) {
+                                    scanResults.values.forEach { device ->
+                                        Row(
+                                            modifier =
+                                            Modifier.fillMaxWidth()
+                                                .selectable(
+                                                    selected = false, // No pre-selection in this dialog
+                                                    onClick = {
+                                                        scanModel.onSelected(device)
+                                                        scanModel.clearScanResults()
+                                                        showScanDialog = false
+                                                    },
+                                                )
+                                                .padding(vertical = 8.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                        ) {
+                                            Text(text = device.name)
+                                        }
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                                TextButton(
+                                    onClick = {
+                                        scanModel.clearScanResults()
+                                        showScanDialog = false
+                                    },
+                                ) {
+                                    Text(stringResource(R.string.cancel))
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
-        Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            Text(
-                text = scanStatusText.orEmpty(),
-                modifier = Modifier.fillMaxWidth(),
-                fontSize = 10.sp,
-                textAlign = TextAlign.End,
-            )
+            Box(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+                Text(
+                    text = scanStatusText.orEmpty(),
+                    modifier = Modifier.fillMaxWidth(),
+                    fontSize = 10.sp,
+                    textAlign = TextAlign.End,
+                )
+            }
         }
     }
 }

@@ -37,6 +37,12 @@ fun NavGraphBuilder.contactsGraph(navController: NavHostController, uiViewModel:
         ) {
             ContactsScreen(
                 uiViewModel,
+                onClickNodeChip = {
+                    navController.navigate(NodesRoutes.NodeDetailGraph(it)) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
                 onNavigateToMessages = { navController.navigate(ContactsRoutes.Messages(it)) },
                 onNavigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
                 onNavigateToShare = { navController.navigate(ChannelsRoutes.ChannelsGraph) },

@@ -92,6 +92,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -138,6 +139,7 @@ import com.geeksville.mesh.navigation.NodeDetailRoutes
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.service.ServiceAction
+import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.common.theme.AppTheme
@@ -176,12 +178,13 @@ private data class DrawableMetricInfo(
     val rotateIcon: Float = 0f,
 )
 
+@Suppress("LongMethod")
 @Composable
 fun NodeDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: MetricsViewModel = hiltViewModel(),
     uiViewModel: UIViewModel = hiltViewModel(),
-    navigateToMessages: (String) -> Unit,
+    navigateToMessages: (String) -> Unit = {},
     onNavigate: (Route) -> Unit = {},
     onNavigateUp: () -> Unit = {},
 ) {
@@ -189,6 +192,7 @@ fun NodeDetailScreen(
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
     val lastTracerouteTime by uiViewModel.lastTraceRouteTime.collectAsStateWithLifecycle()
     val ourNode by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val isConnected by uiViewModel.isConnectedStateFlow.collectAsStateWithLifecycle(false)
 
     val availableLogs by
         remember(state, environmentState) {
@@ -210,29 +214,49 @@ fun NodeDetailScreen(
         }
 
     val node = state.node
-    if (node != null) {
-        NodeDetailContent(
-            node = node,
-            ourNode = ourNode,
-            metricsState = state,
-            lastTracerouteTime = lastTracerouteTime,
-            availableLogs = availableLogs,
-            uiViewModel = uiViewModel,
-            onAction = { action ->
-                handleNodeAction(
-                    action = action,
-                    uiViewModel = uiViewModel,
-                    node = node,
-                    navigateToMessages = navigateToMessages,
-                    onNavigateUp = onNavigateUp,
-                    onNavigate = onNavigate,
-                    viewModel = viewModel,
-                )
-            },
-            modifier = modifier,
-        )
-    } else {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+
+    @Suppress("ModifierNotUsedAtRoot")
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                title = node?.user?.longName ?: "",
+                ourNode = ourNode,
+                isConnected = isConnected,
+                showNodeChip = false,
+                canNavigateUp = true,
+                onNavigateUp = onNavigateUp,
+                actions = {},
+                onAction = {},
+            )
+        },
+    ) { paddingValues ->
+        if (node != null) {
+            @Suppress("ViewModelForwarding")
+            NodeDetailContent(
+                node = node,
+                ourNode = ourNode,
+                metricsState = state,
+                lastTracerouteTime = lastTracerouteTime,
+                availableLogs = availableLogs,
+                uiViewModel = uiViewModel,
+                onAction = { action ->
+                    handleNodeAction(
+                        action = action,
+                        uiViewModel = uiViewModel,
+                        node = node,
+                        navigateToMessages = navigateToMessages,
+                        onNavigateUp = onNavigateUp,
+                        onNavigate = onNavigate,
+                        viewModel = viewModel,
+                    )
+                },
+                modifier = modifier.padding(paddingValues),
+            )
+        } else {
+            Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
     }
 }
 

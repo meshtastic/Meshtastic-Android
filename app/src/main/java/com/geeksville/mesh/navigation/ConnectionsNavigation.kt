@@ -42,6 +42,12 @@ fun NavGraphBuilder.connectionsGraph(navController: NavHostController, bluetooth
             ConnectionsScreen(
                 bluetoothViewModel = bluetoothViewModel,
                 radioConfigViewModel = hiltViewModel(parentEntry),
+                onClickNodeChip = {
+                    navController.navigate(NodesRoutes.NodeDetailGraph(it)) {
+                        launchSingleTop = true
+                        restoreState = true
+                    }
+                },
                 onNavigateToSettings = { navController.navigate(SettingsRoutes.Settings()) },
                 onNavigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
                 onConfigNavigate = { route -> navController.navigate(route) },
