@@ -701,7 +701,6 @@
     <string name="ble_devices">BLE eszközök</string>
     <string name="bluetooth_paired_devices">Párosított eszközök</string>
     <string name="connected_device">Csatlakoztatott eszköz</string>
-    <string name="action_go">Indítás</string>
     <string name="routing_error_rate_limit_exceeded">Túllépted a sebességkorlátot. Próbáld újra később.</string>
     <string name="view_release">Kiadás megtekintése</string>
     <string name="download">Letöltés</string>
