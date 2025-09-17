@@ -70,6 +70,7 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.BuildConfig
@@ -86,10 +87,15 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.ConnectionsRoutes
 import com.geeksville.mesh.navigation.ContactsRoutes
 import com.geeksville.mesh.navigation.MapRoutes
-import com.geeksville.mesh.navigation.NavGraph
 import com.geeksville.mesh.navigation.NodesRoutes
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.SettingsRoutes
+import com.geeksville.mesh.navigation.channelsGraph
+import com.geeksville.mesh.navigation.connectionsGraph
+import com.geeksville.mesh.navigation.contactsGraph
+import com.geeksville.mesh.navigation.mapGraph
+import com.geeksville.mesh.navigation.nodesGraph
+import com.geeksville.mesh.navigation.settingsGraph
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.service.MeshService
@@ -363,12 +369,19 @@ fun MainScreen(
                         }
                     },
                 )
-                NavGraph(
-                    modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding().imePadding(),
-                    uIViewModel = uIViewModel,
-                    bluetoothViewModel = bluetoothViewModel,
+
+                NavHost(
                     navController = navController,
-                )
+                    startDestination = NodesRoutes.NodesGraph,
+                    modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding().imePadding(),
+                ) {
+                    contactsGraph(navController, uiViewModel = uIViewModel)
+                    nodesGraph(navController, uiViewModel = uIViewModel)
+                    mapGraph(navController, uiViewModel = uIViewModel)
+                    channelsGraph(navController, uiViewModel = uIViewModel)
+                    connectionsGraph(navController, uiViewModel = uIViewModel, bluetoothViewModel)
+                    settingsGraph(navController, uiViewModel = uIViewModel)
+                }
             }
         }
     }

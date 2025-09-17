@@ -28,14 +28,6 @@ import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.connections.ConnectionsScreen
 import com.geeksville.mesh.ui.settings.radio.components.LoRaConfigScreen
-import kotlinx.serialization.Serializable
-
-@Serializable
-sealed class ConnectionsRoutes {
-    @Serializable data object ConnectionsGraph : Graph
-
-    @Serializable data object Connections : Route
-}
 
 /** Navigation graph for for the top level ConnectionsScreen - [ConnectionsRoutes.Connections]. */
 fun NavGraphBuilder.connectionsGraph(

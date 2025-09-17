@@ -28,19 +28,6 @@ import com.geeksville.mesh.ui.contact.ContactsScreen
 import com.geeksville.mesh.ui.message.MessageScreen
 import com.geeksville.mesh.ui.message.QuickChatScreen
 import com.geeksville.mesh.ui.sharing.ShareScreen
-import kotlinx.serialization.Serializable
-
-sealed class ContactsRoutes {
-    @Serializable data object Contacts : Route
-
-    @Serializable data class Messages(val contactKey: String, val message: String = "") : Route
-
-    @Serializable data class Share(val message: String) : Route
-
-    @Serializable data object QuickChat : Route
-
-    @Serializable data object ContactsGraph : Graph
-}
 
 @Suppress("LongMethod")
 fun NavGraphBuilder.contactsGraph(navController: NavHostController, uiViewModel: UIViewModel) {

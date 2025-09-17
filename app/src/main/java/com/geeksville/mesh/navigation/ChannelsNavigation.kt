@@ -28,14 +28,6 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.settings.radio.components.ChannelConfigScreen
 import com.geeksville.mesh.ui.settings.radio.components.LoRaConfigScreen
 import com.geeksville.mesh.ui.sharing.ChannelScreen
-import kotlinx.serialization.Serializable
-
-@Serializable
-sealed class ChannelsRoutes {
-    @Serializable data object ChannelsGraph : Graph
-
-    @Serializable data object Channels : Route
-}
 
 /** Navigation graph for for the top level ChannelScreen - [ChannelsRoutes.Channels]. */
 fun NavGraphBuilder.channelsGraph(navController: NavHostController, uiViewModel: UIViewModel) {

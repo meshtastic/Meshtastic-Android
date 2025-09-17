@@ -23,18 +23,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.map.MapView
-import com.geeksville.mesh.ui.map.MapViewModel
-import kotlinx.serialization.Serializable
 
-sealed class MapRoutes {
-    @Serializable data object Map : Route
-}
-
-fun NavGraphBuilder.mapGraph(navController: NavHostController, uiViewModel: UIViewModel, mapViewModel: MapViewModel) {
+fun NavGraphBuilder.mapGraph(navController: NavHostController, uiViewModel: UIViewModel) {
     composable<MapRoutes.Map>(deepLinks = listOf(navDeepLink<MapRoutes.Map>(basePath = "$DEEP_LINK_BASE_URI/map"))) {
         MapView(
             uiViewModel = uiViewModel,
-            mapViewModel = mapViewModel,
             navigateToNodeDetails = { navController.navigate(NodesRoutes.NodeDetailGraph(it)) },
         )
     }
