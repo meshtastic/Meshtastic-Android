@@ -701,7 +701,6 @@
     <string name="ble_devices">Dispositivos BLE</string>
     <string name="bluetooth_paired_devices">Dispositivos Pareados</string>
     <string name="connected_device">Dispositivo Conectado</string>
-    <string name="action_go">Ir</string>
     <string name="routing_error_rate_limit_exceeded">Limite excedido. Por favor, tente novamente mais tarde.</string>
     <string name="view_release">Ver Lançamento</string>
     <string name="download">Baixar</string>
