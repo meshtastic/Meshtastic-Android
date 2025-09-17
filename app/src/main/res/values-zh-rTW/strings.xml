@@ -699,7 +699,6 @@
     <string name="ble_devices">藍牙裝置</string>
     <string name="bluetooth_paired_devices">配對裝置</string>
     <string name="connected_device">連接裝置</string>
-    <string name="action_go">到</string>
     <string name="routing_error_rate_limit_exceeded">超過速率限制，請稍後再嘗試。</string>
     <string name="view_release">查看版本資訊</string>
     <string name="download">下載</string>
