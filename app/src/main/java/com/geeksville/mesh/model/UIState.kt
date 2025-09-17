@@ -333,15 +333,6 @@ constructor(
     private val _showQuickChat = MutableStateFlow(uiPrefs.showQuickChat)
     val showQuickChat: StateFlow<Boolean> = _showQuickChat
 
-    private val _hasShownNotPairedWarning = MutableStateFlow(uiPrefs.hasShownNotPairedWarning)
-
-    val hasShownNotPairedWarning: StateFlow<Boolean> = _hasShownNotPairedWarning.asStateFlow()
-
-    fun suppressNoPairedWarning() {
-        _hasShownNotPairedWarning.value = true
-        uiPrefs.hasShownNotPairedWarning = true
-    }
-
     fun toggleShowIgnored() = toggle(_showIgnored) { uiPrefs.showIgnored = it }
 
     fun toggleShowQuickChat() = toggle(_showQuickChat) { uiPrefs.showQuickChat = it }
@@ -816,10 +807,6 @@ constructor(
 
         val newConfig = config { lora = channelSet.loraConfig }
         if (config.lora != newConfig.lora) setConfig(newConfig)
-    }
-
-    fun refreshProvideLocation() {
-        viewModelScope.launch { setProvideLocation(getProvidePref()) }
     }
 
     private fun getProvidePref(): Boolean = uiPrefs.shouldProvideNodeLocation(myNodeNum)
