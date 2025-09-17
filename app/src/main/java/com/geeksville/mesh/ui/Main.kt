@@ -112,7 +112,6 @@ import com.geeksville.mesh.ui.common.theme.StatusColors.StatusBlue
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
 import com.geeksville.mesh.ui.connections.DeviceType
 import com.geeksville.mesh.ui.connections.components.TopLevelNavIcon
-import com.geeksville.mesh.ui.map.MapViewModel
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -371,7 +370,6 @@ fun MainScreen(
                     },
                 )
 
-                val mapViewModel: MapViewModel = hiltViewModel()
                 NavHost(
                     navController = navController,
                     startDestination = NodesRoutes.NodesGraph,
@@ -379,7 +377,7 @@ fun MainScreen(
                 ) {
                     contactsGraph(navController, uiViewModel = uIViewModel)
                     nodesGraph(navController, uiViewModel = uIViewModel)
-                    mapGraph(navController, uiViewModel = uIViewModel, mapViewModel = mapViewModel)
+                    mapGraph(navController, uiViewModel = uIViewModel)
                     channelsGraph(navController, uiViewModel = uIViewModel)
                     connectionsGraph(navController, uiViewModel = uIViewModel, bluetoothViewModel)
                     settingsGraph(navController, uiViewModel = uIViewModel)
