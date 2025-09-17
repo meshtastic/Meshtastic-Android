@@ -72,6 +72,7 @@ import com.geeksville.mesh.ui.connections.components.ConnectionsSegmentedBar
 import com.geeksville.mesh.ui.connections.components.CurrentlyConnectedCard
 import com.geeksville.mesh.ui.connections.components.NetworkDevices
 import com.geeksville.mesh.ui.connections.components.UsbDevices
+import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
@@ -97,6 +98,7 @@ fun ConnectionsScreen(
     scanModel: BTScanModel = hiltViewModel(),
     bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
     radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
+    onClickNodeChip: (Int) -> Unit,
     onNavigateToSettings: () -> Unit,
     onNavigateToNodeDetails: (Int) -> Unit,
     onConfigNavigate: (Route) -> Unit,
@@ -188,7 +190,12 @@ fun ConnectionsScreen(
                 canNavigateUp = false,
                 onNavigateUp = {},
                 actions = {},
-                onAction = {},
+                onAction = { action ->
+                    when (action) {
+                        is NodeMenuAction.MoreDetails -> onClickNodeChip(action.node.num)
+                        else -> {}
+                    }
+                },
             )
         },
     ) { paddingValues ->

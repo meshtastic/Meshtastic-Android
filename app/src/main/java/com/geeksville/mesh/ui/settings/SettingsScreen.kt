@@ -63,6 +63,7 @@ import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.common.theme.MODE_DYNAMIC
+import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.settings.components.SettingsItem
 import com.geeksville.mesh.ui.settings.components.SettingsItemDetail
 import com.geeksville.mesh.ui.settings.components.SettingsItemSwitch
@@ -85,6 +86,7 @@ import kotlin.time.Duration.Companion.seconds
 fun SettingsScreen(
     viewModel: RadioConfigViewModel = hiltViewModel(),
     uiViewModel: UIViewModel = hiltViewModel(),
+    onClickNodeChip: (Int) -> Unit = {},
     onNavigate: (Route) -> Unit = {},
 ) {
     val excludedModulesUnlocked by uiViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
@@ -174,7 +176,12 @@ fun SettingsScreen(
                 canNavigateUp = false,
                 onNavigateUp = {},
                 actions = {},
-                onAction = {},
+                onAction = { action ->
+                    when (action) {
+                        is NodeMenuAction.MoreDetails -> onClickNodeChip(action.node.num)
+                        else -> {}
+                    }
+                },
             )
         },
     ) { paddingValues ->

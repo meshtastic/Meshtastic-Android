@@ -66,6 +66,7 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.common.components.MainAppBar
+import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
@@ -73,6 +74,7 @@ import java.util.concurrent.TimeUnit
 @Composable
 fun ContactsScreen(
     uiViewModel: UIViewModel = hiltViewModel(),
+    onClickNodeChip: (Int) -> Unit = {},
     onNavigateToMessages: (String) -> Unit = {},
     onNavigateToNodeDetails: (Int) -> Unit = {},
     onNavigateToShare: () -> Unit,
@@ -148,7 +150,12 @@ fun ContactsScreen(
                 canNavigateUp = false,
                 onNavigateUp = {},
                 actions = {},
-                onAction = {},
+                onAction = { action ->
+                    when (action) {
+                        is NodeMenuAction.MoreDetails -> onClickNodeChip(action.node.num)
+                        else -> {}
+                    }
+                },
             )
         },
         floatingActionButton = {
