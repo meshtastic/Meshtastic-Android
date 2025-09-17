@@ -21,6 +21,7 @@ import android.net.InetAddresses
 import android.os.Build
 import android.util.Patterns
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -34,6 +35,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Language
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -62,16 +65,19 @@ import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.common.components.MainAppBar
+import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.connections.components.BLEDevices
 import com.geeksville.mesh.ui.connections.components.ConnectionsSegmentedBar
 import com.geeksville.mesh.ui.connections.components.CurrentlyConnectedCard
 import com.geeksville.mesh.ui.connections.components.NetworkDevices
 import com.geeksville.mesh.ui.connections.components.UsbDevices
+import com.geeksville.mesh.ui.settings.components.SettingsItem
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
@@ -105,7 +111,6 @@ fun ConnectionsScreen(
 ) {
     val radioConfigState by radioConfigViewModel.radioConfigState.collectAsStateWithLifecycle()
     val config by connectionsViewModel.localConfig.collectAsStateWithLifecycle()
-    val currentRegion = config.lora.region
     val scrollState = rememberScrollState()
     val scanStatusText by scanModel.errorText.observeAsState("")
     val connectionState by
@@ -116,8 +121,7 @@ fun ConnectionsScreen(
     val ourNode by connectionsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val bluetoothEnabled by bluetoothViewModel.enabled.collectAsStateWithLifecycle(false)
-    val regionUnset =
-        currentRegion == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET && connectionState == ConnectionState.CONNECTED
+    val regionUnset = config.lora.region == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET
 
     val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
     val discoveredTcpDevices by scanModel.discoveredTcpDevicesForUi.collectAsStateWithLifecycle()
@@ -213,15 +217,13 @@ fun ConnectionsScreen(
                         visible = connectionState.isConnected(),
                         modifier = Modifier.padding(bottom = 16.dp),
                     ) {
-                        Column {
+                        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
                             ourNode?.let { node ->
                                 Text(
                                     stringResource(R.string.connected_device),
                                     modifier = Modifier.padding(horizontal = 16.dp),
                                     style = MaterialTheme.typography.titleLarge,
                                 )
-
-                                Spacer(modifier = Modifier.height(8.dp))
 
                                 CurrentlyConnectedCard(
                                     node = node,
@@ -231,23 +233,20 @@ fun ConnectionsScreen(
                                     onClickDisconnect = { scanModel.disconnect() },
                                 )
                             }
+
+                            if (regionUnset && selectedDevice != "m") {
+                                TitledCard(title = null) {
+                                    SettingsItem(
+                                        leadingIcon = Icons.Rounded.Language,
+                                        text = stringResource(id = R.string.set_your_region),
+                                    ) {
+                                        isWaiting = true
+                                        radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
+                                    }
+                                }
+                            }
                         }
                     }
-
-                    /*val setRegionText = stringResource(id = R.string.set_your_region)
-                    val actionText = stringResource(id = R.string.action_go)
-                    LaunchedEffect(connectionState.isConnected() && regionUnset && selectedDevice != "m") {
-                        if (connectionState.isConnected() && regionUnset && selectedDevice != "m") {
-                            uiViewModel.showSnackBar(
-                                text = setRegionText,
-                                actionLabel = actionText,
-                                onActionPerformed = {
-                                    isWaiting = true
-                                    radioConfigViewModel.setResponseStateLoading(ConfigRoute.LORA)
-                                },
-                            )
-                        }
-                    }*/
 
                     var selectedDeviceType by remember { mutableStateOf(DeviceType.BLE) }
                     LaunchedEffect(selectedDevice) {

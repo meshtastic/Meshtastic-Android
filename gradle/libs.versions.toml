@@ -8,7 +8,7 @@ accompanist = "0.37.3"
 androidxComposeMaterial3Adaptive = "1.2.0-beta02"
 androidxTracing = "1.9.1"
 datastore = "1.1.7"
-lifecycle = "2.9.3"
+lifecycle = "2.9.4"
 navigation = "2.9.4"
 navigation3 = "1.0.0-alpha09"
 room = "2.8.0"
@@ -241,7 +241,7 @@ firebase-perf = { id = "com.google.firebase.firebase-perf", version = "2.0.1" }
 
 # Other
 datadog = { id = "com.datadoghq.dd-sdk-android-gradle-plugin", version = "1.20.0" }
-dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version = "3.0.3" }
+dependency-analysis = { id = "com.autonomousapps.dependency-analysis", version = "3.0.4" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
 dokka = { id = "org.jetbrains.dokka", version = "2.0.0" }
 protobuf = { id = "com.google.protobuf", version = "0.9.5" }
