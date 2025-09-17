@@ -79,6 +79,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -809,22 +810,21 @@ constructor(
         if (config.lora != newConfig.lora) setConfig(newConfig)
     }
 
-    private fun getProvidePref(): Boolean = uiPrefs.shouldProvideNodeLocation(myNodeNum)
-
-    private val _provideLocation = MutableStateFlow(getProvidePref())
     val provideLocation: StateFlow<Boolean>
-        get() = _provideLocation.asStateFlow()
+        get() =
+            myNodeInfo
+                .flatMapLatest { myNodeEntity ->
+                    // When myNodeInfo changes, set up emissions for the "provide-location-nodeNum" pref.
+                    if (myNodeEntity == null) {
+                        flowOf(false)
+                    } else {
+                        uiPrefs.shouldProvideNodeLocation(myNodeEntity.myNodeNum)
+                    }
+                }
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     fun setProvideLocation(value: Boolean) {
-        viewModelScope.launch {
-            uiPrefs.setShouldProvideNodeLocation(myNodeNum, value)
-            _provideLocation.value = value
-            if (value) {
-                meshService?.startProvideLocation()
-            } else {
-                meshService?.stopProvideLocation()
-            }
-        }
+        myNodeNum?.let { uiPrefs.setShouldProvideNodeLocation(it, value) }
     }
 
     fun setOwner(name: String) {

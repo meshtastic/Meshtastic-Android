@@ -263,12 +263,6 @@ fun ConnectionsScreen(
                         }
                     }
 
-                    LaunchedEffect(ourNode) {
-                        if (ourNode != null) {
-                            connectionsViewModel.refreshProvideLocation()
-                        }
-                    }
-
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Warning Not Paired

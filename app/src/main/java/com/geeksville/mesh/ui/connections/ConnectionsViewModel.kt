@@ -19,7 +19,6 @@ package com.geeksville.mesh.ui.connections
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.android.prefs.UiPrefs
 import com.geeksville.mesh.database.NodeRepository
@@ -32,7 +31,6 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
@@ -40,7 +38,7 @@ class ConnectionsViewModel
 @Inject
 constructor(
     private val radioConfigRepository: RadioConfigRepository,
-    private val nodeDB: NodeRepository,
+    private val nodeRepository: NodeRepository,
     private val uiPrefs: UiPrefs,
 ) : ViewModel() {
     val localConfig: StateFlow<LocalConfig> =
@@ -54,16 +52,10 @@ constructor(
         get() = radioConfigRepository.connectionState
 
     val myNodeInfo: StateFlow<MyNodeEntity?>
-        get() = nodeDB.myNodeInfo
-
-    val myNodeNum
-        get() = myNodeInfo.value?.myNodeNum
+        get() = nodeRepository.myNodeInfo
 
     val ourNodeInfo: StateFlow<Node?>
-        get() = nodeDB.ourNodeInfo
-
-    private val meshService: IMeshService?
-        get() = radioConfigRepository.meshService
+        get() = nodeRepository.ourNodeInfo
 
     private val _hasShownNotPairedWarning = MutableStateFlow(uiPrefs.hasShownNotPairedWarning)
     val hasShownNotPairedWarning: StateFlow<Boolean> = _hasShownNotPairedWarning.asStateFlow()
@@ -72,21 +64,4 @@ constructor(
         _hasShownNotPairedWarning.value = true
         uiPrefs.hasShownNotPairedWarning = true
     }
-
-    fun refreshProvideLocation() {
-        viewModelScope.launch { setProvideLocation(getProvidePref()) }
-    }
-
-    fun setProvideLocation(value: Boolean) {
-        viewModelScope.launch {
-            uiPrefs.setShouldProvideNodeLocation(myNodeNum, value)
-            if (value) {
-                meshService?.startProvideLocation()
-            } else {
-                meshService?.stopProvideLocation()
-            }
-        }
-    }
-
-    private fun getProvidePref(): Boolean = uiPrefs.shouldProvideNodeLocation(myNodeNum)
 }
