@@ -705,7 +705,6 @@
     <string name="ble_devices">BLE Devices</string>
     <string name="bluetooth_paired_devices">Spárovaná zařízení</string>
     <string name="connected_device">Připojená zařízení</string>
-    <string name="action_go">Go</string>
     <string name="routing_error_rate_limit_exceeded">Rate Limit Exceeded. Please try again later.</string>
     <string name="view_release">View Release</string>
     <string name="download">Download</string>
