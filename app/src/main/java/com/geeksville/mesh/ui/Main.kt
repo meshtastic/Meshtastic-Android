@@ -359,6 +359,7 @@ fun MainScreen(
                         MapRoutes.Map::class,
                         NodeDetailRoutes.NodeMap::class,
                         NodesRoutes.Nodes::class,
+                        NodesRoutes.NodeDetail::class,
                         SettingsRoutes.Settings::class,
                     )
                         .none { this.hasRoute(it) }
