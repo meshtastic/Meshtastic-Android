@@ -170,7 +170,7 @@ fun SettingsScreen(
                 title = stringResource(R.string.bottom_nav_settings),
                 ourNode = ourNode,
                 isConnected = isConnected,
-                showNodeChip = true,
+                showNodeChip = ourNode != null && isConnected,
                 canNavigateUp = false,
                 onNavigateUp = {},
                 actions = {},
