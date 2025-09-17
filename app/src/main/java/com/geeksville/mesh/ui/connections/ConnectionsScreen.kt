@@ -40,7 +40,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
@@ -62,8 +61,6 @@ import com.geeksville.mesh.model.BTScanModel
 import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.model.Node
-import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.navigation.getNavRouteFrom
@@ -94,7 +91,7 @@ fun String?.isIPAddress(): Boolean = if (Build.VERSION.SDK_INT < Build.VERSION_C
 @Suppress("CyclomaticComplexMethod", "LongMethod", "MagicNumber", "ModifierMissing", "ComposableParamOrder")
 @Composable
 fun ConnectionsScreen(
-    uiViewModel: UIViewModel = hiltViewModel(),
+    connectionsViewModel: ConnectionsViewModel = hiltViewModel(),
     scanModel: BTScanModel = hiltViewModel(),
     bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
     radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
@@ -103,14 +100,15 @@ fun ConnectionsScreen(
     onConfigNavigate: (Route) -> Unit,
 ) {
     val radioConfigState by radioConfigViewModel.radioConfigState.collectAsStateWithLifecycle()
-    val config by uiViewModel.localConfig.collectAsStateWithLifecycle()
+    val config by connectionsViewModel.localConfig.collectAsStateWithLifecycle()
     val currentRegion = config.lora.region
     val scrollState = rememberScrollState()
     val scanStatusText by scanModel.errorText.observeAsState("")
-    val connectionState by uiViewModel.connectionState.collectAsStateWithLifecycle(ConnectionState.DISCONNECTED)
+    val connectionState by
+        connectionsViewModel.connectionState.collectAsStateWithLifecycle(ConnectionState.DISCONNECTED)
     val scanning by scanModel.spinner.collectAsStateWithLifecycle(false)
     val context = LocalContext.current
-    val info by uiViewModel.myNodeInfo.collectAsStateWithLifecycle()
+    val info by connectionsViewModel.myNodeInfo.collectAsStateWithLifecycle()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
     val bluetoothEnabled by bluetoothViewModel.enabled.collectAsStateWithLifecycle(false)
     val regionUnset =
@@ -182,10 +180,12 @@ fun ConnectionsScreen(
             Column(
                 modifier = Modifier.fillMaxSize().verticalScroll(scrollState).height(IntrinsicSize.Max).padding(16.dp),
             ) {
-                val isConnected by uiViewModel.isConnectedStateFlow.collectAsState(false)
-                val ourNode by uiViewModel.ourNodeInfo.collectAsState()
+                val ourNode by connectionsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
 
-                AnimatedVisibility(visible = isConnected, modifier = Modifier.padding(bottom = 16.dp)) {
+                AnimatedVisibility(
+                    visible = connectionState.isConnected(),
+                    modifier = Modifier.padding(bottom = 16.dp),
+                ) {
                     Column {
                         ourNode?.let { node ->
                             Text(
@@ -207,10 +207,10 @@ fun ConnectionsScreen(
                     }
                 }
 
-                val setRegionText = stringResource(id = R.string.set_your_region)
+                /*val setRegionText = stringResource(id = R.string.set_your_region)
                 val actionText = stringResource(id = R.string.action_go)
-                LaunchedEffect(isConnected && regionUnset && selectedDevice != "m") {
-                    if (isConnected && regionUnset && selectedDevice != "m") {
+                LaunchedEffect(connectionState.isConnected() && regionUnset && selectedDevice != "m") {
+                    if (connectionState.isConnected() && regionUnset && selectedDevice != "m") {
                         uiViewModel.showSnackBar(
                             text = setRegionText,
                             actionLabel = actionText,
@@ -220,7 +220,7 @@ fun ConnectionsScreen(
                             },
                         )
                     }
-                }
+                }*/
 
                 var selectedDeviceType by remember { mutableStateOf(DeviceType.BLE) }
                 LaunchedEffect(selectedDevice) {
@@ -263,18 +263,13 @@ fun ConnectionsScreen(
                         }
                     }
 
-                    LaunchedEffect(ourNode) {
-                        if (ourNode != null) {
-                            uiViewModel.refreshProvideLocation()
-                        }
-                    }
-
                     Spacer(modifier = Modifier.height(16.dp))
 
                     // Warning Not Paired
-                    val hasShownNotPairedWarning by uiViewModel.hasShownNotPairedWarning.collectAsStateWithLifecycle()
+                    val hasShownNotPairedWarning by
+                        connectionsViewModel.hasShownNotPairedWarning.collectAsStateWithLifecycle()
                     val showWarningNotPaired =
-                        !isConnected &&
+                        !connectionState.isConnected() &&
                             !hasShownNotPairedWarning &&
                             bleDevices.none { it is DeviceListEntry.Ble && it.bonded }
                     if (showWarningNotPaired) {
@@ -286,7 +281,7 @@ fun ConnectionsScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
 
-                        LaunchedEffect(Unit) { uiViewModel.suppressNoPairedWarning() }
+                        LaunchedEffect(Unit) { connectionsViewModel.suppressNoPairedWarning() }
                     }
                 }
             }

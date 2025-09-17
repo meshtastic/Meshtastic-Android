@@ -22,6 +22,10 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
 import com.geeksville.mesh.model.NodeSortOption
 import com.geeksville.mesh.util.LanguageUtils
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import java.util.concurrent.ConcurrentHashMap
 
 interface UiPrefs {
     var lang: String
@@ -36,12 +40,31 @@ interface UiPrefs {
     var showIgnored: Boolean
     var showQuickChat: Boolean
 
-    fun shouldProvideNodeLocation(nodeNum: Int?): Boolean
+    fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean>
 
-    fun setShouldProvideNodeLocation(nodeNum: Int?, value: Boolean)
+    fun setShouldProvideNodeLocation(nodeNum: Int, value: Boolean)
 }
 
 class UiPrefsImpl(private val prefs: SharedPreferences) : UiPrefs {
+
+    // Maps nodeNum to a flow for the for the "provide-location-nodeNum" pref
+    private val provideNodeLocationFlows = ConcurrentHashMap<Int, MutableStateFlow<Boolean>>()
+
+    private val sharedPreferencesListener =
+        SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
+            // Check if the changed key is one of our node location keys
+            provideNodeLocationFlows.keys.forEach { nodeNum ->
+                if (key == provideLocationKey(nodeNum)) {
+                    val newValue = sharedPreferences.getBoolean(key, false)
+                    provideNodeLocationFlows[nodeNum]?.tryEmit(newValue)
+                }
+            }
+        }
+
+    init {
+        prefs.registerOnSharedPreferenceChangeListener(sharedPreferencesListener)
+    }
+
     override var lang: String by PrefDelegate(prefs, "lang", LanguageUtils.SYSTEM_DEFAULT)
     override var theme: Int by PrefDelegate(prefs, "theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
     override var appIntroCompleted: Boolean by PrefDelegate(prefs, "app_intro_completed", false)
@@ -54,12 +77,14 @@ class UiPrefsImpl(private val prefs: SharedPreferences) : UiPrefs {
     override var showIgnored: Boolean by PrefDelegate(prefs, "show-ignored", false)
     override var showQuickChat: Boolean by PrefDelegate(prefs, "show-quick-chat", false)
 
-    override fun shouldProvideNodeLocation(nodeNum: Int?): Boolean =
-        prefs.getBoolean(provideLocationKey(nodeNum), false)
+    override fun shouldProvideNodeLocation(nodeNum: Int): StateFlow<Boolean> = provideNodeLocationFlows
+        .getOrPut(nodeNum) { MutableStateFlow(prefs.getBoolean(provideLocationKey(nodeNum), false)) }
+        .asStateFlow()
 
-    override fun setShouldProvideNodeLocation(nodeNum: Int?, value: Boolean) {
+    override fun setShouldProvideNodeLocation(nodeNum: Int, value: Boolean) {
         prefs.edit { putBoolean(provideLocationKey(nodeNum), value) }
+        provideNodeLocationFlows[nodeNum]?.tryEmit(value)
     }
 
-    private fun provideLocationKey(nodeNum: Int?) = "provide-location-$nodeNum"
+    private fun provideLocationKey(nodeNum: Int) = "provide-location-$nodeNum"
 }

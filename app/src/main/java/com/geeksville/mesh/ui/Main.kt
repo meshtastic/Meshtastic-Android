@@ -379,7 +379,7 @@ fun MainScreen(
                     nodesGraph(navController, uiViewModel = uIViewModel)
                     mapGraph(navController, uiViewModel = uIViewModel)
                     channelsGraph(navController, uiViewModel = uIViewModel)
-                    connectionsGraph(navController, uiViewModel = uIViewModel, bluetoothViewModel)
+                    connectionsGraph(navController, bluetoothViewModel)
                     settingsGraph(navController, uiViewModel = uIViewModel)
                 }
             }
