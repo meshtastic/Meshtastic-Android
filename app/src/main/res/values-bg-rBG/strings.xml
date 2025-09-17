@@ -701,7 +701,6 @@
     <string name="ble_devices">BLE устройства</string>
     <string name="bluetooth_paired_devices">Сдвоени устройства</string>
     <string name="connected_device">Свързано устройство</string>
-    <string name="action_go">Go</string>
     <string name="routing_error_rate_limit_exceeded">Rate Limit Exceeded. Please try again later.</string>
     <string name="view_release">Преглед на изданието</string>
     <string name="download">Изтегляне</string>
