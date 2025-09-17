@@ -22,7 +22,6 @@ import org.gradle.api.Plugin
 import org.gradle.api.Project
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
-import java.io.File
 
 class AndroidLintConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
@@ -49,6 +48,4 @@ private fun Lint.configure(project: Project) {
     checkDependencies = true
     abortOnError = false
     disable += "GradleDependency"
-    sarifOutput = File("${project.layout.buildDirectory}/reports/lint/lint-results.sarif")
-    xmlOutput = File("${project.layout.buildDirectory}/reports/lint/lint-results.xml")
 }
