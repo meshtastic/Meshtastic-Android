@@ -74,7 +74,6 @@ import com.geeksville.mesh.android.BuildUtils.warn
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.map.components.ClusterItemsListDialog
 import com.geeksville.mesh.ui.map.components.CustomMapLayersSheet
 import com.geeksville.mesh.ui.map.components.CustomTileProviderManagerSheet
@@ -377,20 +376,7 @@ fun MapView(
         }
     }
 
-    Scaffold(
-        topBar = {
-            MainAppBar(
-                title = stringResource(R.string.map),
-                ourNode = ourNodeInfo,
-                isConnected = isConnected,
-                showNodeChip = ourNodeInfo != null && isConnected,
-                canNavigateUp = false,
-                onNavigateUp = {},
-                actions = {},
-                onAction = {},
-            )
-        },
-    ) { paddingValues ->
+    Scaffold { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             GoogleMap(
                 mapColorScheme = mapColorScheme,

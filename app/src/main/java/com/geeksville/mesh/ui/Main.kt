@@ -88,6 +88,7 @@ import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.ConnectionsRoutes
 import com.geeksville.mesh.navigation.ContactsRoutes
 import com.geeksville.mesh.navigation.MapRoutes
+import com.geeksville.mesh.navigation.NodeDetailRoutes
 import com.geeksville.mesh.navigation.NodesRoutes
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.SettingsRoutes
@@ -356,6 +357,7 @@ fun MainScreen(
                         ConnectionsRoutes.Connections::class,
                         ContactsRoutes.Contacts::class,
                         MapRoutes.Map::class,
+                        NodeDetailRoutes.NodeMap::class,
                         NodesRoutes.Nodes::class,
                         SettingsRoutes.Settings::class,
                     )
