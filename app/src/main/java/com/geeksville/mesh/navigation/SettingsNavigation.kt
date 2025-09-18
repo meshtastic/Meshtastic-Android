@@ -86,8 +86,7 @@ import com.geeksville.mesh.ui.settings.radio.components.TelemetryConfigScreen
 import com.geeksville.mesh.ui.settings.radio.components.UserConfigScreen
 
 fun getNavRouteFrom(routeName: String): Route? =
-    ConfigRoute.entries.find { it.name == routeName }?.route
-        ?: ModuleRoute.entries.find { it.name == routeName }?.route
+    ConfigRoute.entries.find { it.name == routeName }?.route ?: ModuleRoute.entries.find { it.name == routeName }?.route
 
 @Suppress("LongMethod")
 fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
@@ -173,11 +172,7 @@ private fun NavGraphBuilder.configRoutesScreens(navController: NavHostController
     ConfigRoute.entries.forEach { entry ->
         when (entry.route) {
             is SettingsRoutes.User ->
-                addRadioConfigScreenComposable<SettingsRoutes.User>(
-                    navController,
-                    entry.name,
-                    entry.screenComposable
-                )
+                addRadioConfigScreenComposable<SettingsRoutes.User>(navController, entry.name, entry.screenComposable)
             is SettingsRoutes.ChannelConfig ->
                 addRadioConfigScreenComposable<SettingsRoutes.ChannelConfig>(
                     navController,
@@ -207,11 +202,7 @@ private fun NavGraphBuilder.configRoutesScreens(navController: NavHostController
                     entry.screenComposable,
                 )
             is SettingsRoutes.LoRa ->
-                addRadioConfigScreenComposable<SettingsRoutes.LoRa>(
-                    navController,
-                    entry.name,
-                    entry.screenComposable
-                )
+                addRadioConfigScreenComposable<SettingsRoutes.LoRa>(navController, entry.name, entry.screenComposable)
             is SettingsRoutes.Bluetooth ->
                 addRadioConfigScreenComposable<SettingsRoutes.Bluetooth>(
                     navController,
@@ -313,12 +304,7 @@ enum class ConfigRoute(
     val type: Int = 0,
     val screenComposable: @Composable (viewModel: RadioConfigViewModel) -> Unit,
 ) {
-    USER(
-        R.string.user,
-        SettingsRoutes.User,
-        Icons.Default.Person,
-        0,
-        { vm -> UserConfigScreen(vm) }),
+    USER(R.string.user, SettingsRoutes.User, Icons.Default.Person, 0, { vm -> UserConfigScreen(vm) }),
     CHANNELS(
         R.string.channels,
         SettingsRoutes.ChannelConfig,
@@ -385,8 +371,7 @@ enum class ConfigRoute(
     ;
 
     companion object {
-        private fun filterExcludedFrom(metadata: DeviceMetadata?): List<ConfigRoute> =
-            entries.filter {
+        private fun filterExcludedFrom(metadata: DeviceMetadata?): List<ConfigRoute> = entries.filter {
             when {
                 metadata == null -> true // Include all routes if metadata is null
                 it == BLUETOOTH -> metadata.hasBluetooth
@@ -396,6 +381,7 @@ enum class ConfigRoute(
         }
 
         val radioConfigRoutes = listOf(LORA, CHANNELS, SECURITY)
+
         fun deviceConfigRoutes(metadata: DeviceMetadata?): List<ConfigRoute> =
             filterExcludedFrom(metadata) - radioConfigRoutes
     }
