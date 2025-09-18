@@ -17,6 +17,6 @@
 
 plugins { alias(libs.plugins.meshtastic.android.library) }
 
-android { namespace = "org.meshtastic.core.prefs" }
+android { namespace = "org.meshtastic.core.navigation" }
 
 dependencies {}
