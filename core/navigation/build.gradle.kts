@@ -18,6 +18,7 @@
 plugins {
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
+    alias(libs.plugins.kover)
 }
 
 android { namespace = "org.meshtastic.core.navigation" }
