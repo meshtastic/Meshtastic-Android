@@ -20,30 +20,24 @@ package com.geeksville.mesh.repository.api
 import com.geeksville.mesh.database.dao.DeviceHardwareDao
 import com.geeksville.mesh.database.entity.DeviceHardwareEntity
 import com.geeksville.mesh.database.entity.asEntity
-import com.geeksville.mesh.network.model.NetworkDeviceHardware
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.network.model.NetworkDeviceHardware
 import javax.inject.Inject
 
-class DeviceHardwareLocalDataSource @Inject constructor(
-    private val deviceHardwareDaoLazy: dagger.Lazy<DeviceHardwareDao>
+class DeviceHardwareLocalDataSource
+@Inject
+constructor(
+    private val deviceHardwareDaoLazy: dagger.Lazy<DeviceHardwareDao>,
 ) {
-    private val deviceHardwareDao by lazy {
-        deviceHardwareDaoLazy.get()
+    private val deviceHardwareDao by lazy { deviceHardwareDaoLazy.get() }
+
+    suspend fun insertAllDeviceHardware(deviceHardware: List<NetworkDeviceHardware>) = withContext(Dispatchers.IO) {
+        deviceHardware.forEach { deviceHardware -> deviceHardwareDao.insert(deviceHardware.asEntity()) }
     }
 
-    suspend fun insertAllDeviceHardware(deviceHardware: List<NetworkDeviceHardware>) =
-        withContext(Dispatchers.IO) {
-            deviceHardware.forEach { deviceHardware ->
-                deviceHardwareDao.insert(deviceHardware.asEntity())
-            }
-        }
+    suspend fun deleteAllDeviceHardware() = withContext(Dispatchers.IO) { deviceHardwareDao.deleteAll() }
 
-    suspend fun deleteAllDeviceHardware() = withContext(Dispatchers.IO) {
-        deviceHardwareDao.deleteAll()
-    }
-
-    suspend fun getByHwModel(hwModel: Int): DeviceHardwareEntity? = withContext(Dispatchers.IO) {
-        deviceHardwareDao.getByHwModel(hwModel)
-    }
+    suspend fun getByHwModel(hwModel: Int): DeviceHardwareEntity? =
+        withContext(Dispatchers.IO) { deviceHardwareDao.getByHwModel(hwModel) }
 }

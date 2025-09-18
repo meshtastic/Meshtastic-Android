@@ -21,27 +21,19 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.geeksville.mesh.model.DeviceVersion
-import com.geeksville.mesh.network.model.NetworkFirmwareRelease
 import kotlinx.serialization.Serializable
+import org.meshtastic.core.network.model.NetworkFirmwareRelease
 
 @Serializable
 @Entity(tableName = "firmware_release")
 data class FirmwareReleaseEntity(
-    @PrimaryKey
-    @ColumnInfo(name = "id")
-    val id: String = "",
-    @ColumnInfo(name = "page_url")
-    val pageUrl: String = "",
-    @ColumnInfo(name = "release_notes")
-    val releaseNotes: String = "",
-    @ColumnInfo(name = "title")
-    val title: String = "",
-    @ColumnInfo(name = "zip_url")
-    val zipUrl: String = "",
-    @ColumnInfo(name = "last_updated")
-    val lastUpdated: Long = System.currentTimeMillis(),
-    @ColumnInfo(name = "release_type")
-    val releaseType: FirmwareReleaseType = FirmwareReleaseType.STABLE,
+    @PrimaryKey @ColumnInfo(name = "id") val id: String = "",
+    @ColumnInfo(name = "page_url") val pageUrl: String = "",
+    @ColumnInfo(name = "release_notes") val releaseNotes: String = "",
+    @ColumnInfo(name = "title") val title: String = "",
+    @ColumnInfo(name = "zip_url") val zipUrl: String = "",
+    @ColumnInfo(name = "last_updated") val lastUpdated: Long = System.currentTimeMillis(),
+    @ColumnInfo(name = "release_type") val releaseType: FirmwareReleaseType = FirmwareReleaseType.STABLE,
 )
 
 fun NetworkFirmwareRelease.asEntity(releaseType: FirmwareReleaseType) = FirmwareReleaseEntity(
@@ -74,19 +66,11 @@ data class FirmwareRelease(
     val releaseType: FirmwareReleaseType = FirmwareReleaseType.STABLE,
 )
 
-fun FirmwareReleaseEntity.asDeviceVersion(): DeviceVersion {
-    return DeviceVersion(
-        id.substringBeforeLast(".").replace("v", "")
-    )
-}
+fun FirmwareReleaseEntity.asDeviceVersion(): DeviceVersion = DeviceVersion(id.substringBeforeLast(".").replace("v", ""))
 
-fun FirmwareRelease.asDeviceVersion(): DeviceVersion {
-    return DeviceVersion(
-        id.substringBeforeLast(".").replace("v", "")
-    )
-}
+fun FirmwareRelease.asDeviceVersion(): DeviceVersion = DeviceVersion(id.substringBeforeLast(".").replace("v", ""))
 
 enum class FirmwareReleaseType {
     STABLE,
-    ALPHA
+    ALPHA,
 }

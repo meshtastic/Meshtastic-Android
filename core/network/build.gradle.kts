@@ -15,8 +15,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-plugins { alias(libs.plugins.meshtastic.android.library) }
+plugins {
+    alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.meshtastic.hilt)
+    alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.dokka)
+    alias(libs.plugins.kover)
+    alias(libs.plugins.protobuf)
+    alias(libs.plugins.ktorfit)
+}
 
-android { namespace = "org.meshtastic.core.network" }
+android {
+    buildFeatures { buildConfig = true }
+    namespace = "org.meshtastic.core.network"
+}
 
-dependencies {}
+dependencies {
+    implementation(libs.bundles.ktor)
+    implementation(libs.bundles.coil)
+    "googleImplementation"(libs.bundles.datadog)
+    implementation(libs.kotlinx.serialization.json)
+}

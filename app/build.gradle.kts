@@ -203,7 +203,6 @@ dependencies {
     implementation(projects.core.navigation)
     implementation(projects.core.network)
     implementation(projects.core.prefs)
-    implementation(projects.network)
 
     // Bundles
     implementation(libs.bundles.markdown)

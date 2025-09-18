@@ -77,6 +77,5 @@ kover {
 
 dependencies {
     kover(project(":app"))
-    kover(project(":network"))
     kover(project(":mesh_service_example"))
 }
