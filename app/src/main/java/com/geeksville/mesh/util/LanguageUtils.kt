@@ -22,16 +22,12 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.android.prefs.UiPrefs
 import org.xmlpull.v1.XmlPullParser
 import java.util.Locale
 
 object LanguageUtils : Logging {
 
     const val SYSTEM_DEFAULT = "zz"
-    const val SYSTEM_MANAGED = "appcompat"
-
-    fun getLocale(): String = AppCompatDelegate.getApplicationLocales().toLanguageTags().ifEmpty { SYSTEM_DEFAULT }
 
     fun setLocale(lang: String) {
         AppCompatDelegate.setApplicationLocales(
@@ -41,13 +37,6 @@ object LanguageUtils : Logging {
                 LocaleListCompat.forLanguageTags(lang)
             },
         )
-    }
-
-    fun migrateLanguagePrefs(uiPrefs: UiPrefs) {
-        val currentLang = uiPrefs.lang
-        debug("Migrating in-app language prefs: $currentLang")
-        uiPrefs.lang = SYSTEM_MANAGED
-        setLocale(currentLang)
     }
 
     /** Build a list from locales_config.xml of native language names paired to its Locale tag (ex: "English", "en") */
