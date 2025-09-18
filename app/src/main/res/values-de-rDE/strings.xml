@@ -701,7 +701,6 @@
     <string name="ble_devices">BLE Geräte</string>
     <string name="bluetooth_paired_devices">Gekoppelte Geräte</string>
     <string name="connected_device">Verbundene Geräte</string>
-    <string name="action_go">Ausführen</string>
     <string name="routing_error_rate_limit_exceeded">Sendebegrenzung überschritten. Bitte versuchen Sie es später erneut.</string>
     <string name="view_release">Version ansehen</string>
     <string name="download">Herunterladen</string>

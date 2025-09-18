@@ -701,7 +701,6 @@
     <string name="ble_devices">Bluetooth-laitteet</string>
     <string name="bluetooth_paired_devices">Paritetut laitteet</string>
     <string name="connected_device">Yhdistetty laite</string>
-    <string name="action_go">Mene</string>
     <string name="routing_error_rate_limit_exceeded">Käyttöraja ylitetty. Yritä myöhemmin uudelleen.</string>
     <string name="view_release">Näytä versio</string>
     <string name="download">Lataa</string>
