@@ -822,19 +822,9 @@ constructor(
         nodeFilterText.value = text
     }
 
-    // region Main menu actions logic
-
-    private val _showAppIntro: MutableStateFlow<Boolean> = MutableStateFlow(!uiPrefs.appIntroCompleted)
-    val showAppIntro: StateFlow<Boolean> = _showAppIntro.asStateFlow()
-
-    fun showAppIntro() {
-        _showAppIntro.update { true }
-    }
-
-    // endregion
+    val appIntroCompleted: StateFlow<Boolean> = uiPrefs.appIntroCompletedFlow
 
     fun onAppIntroCompleted() {
         uiPrefs.appIntroCompleted = true
-        _showAppIntro.update { false }
     }
 }

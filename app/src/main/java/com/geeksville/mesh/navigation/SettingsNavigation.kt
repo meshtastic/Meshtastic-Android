@@ -57,7 +57,6 @@ import androidx.navigation.navigation
 import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.MeshProtos.DeviceMetadata
 import com.geeksville.mesh.R
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.debug.DebugScreen
 import com.geeksville.mesh.ui.settings.SettingsScreen
 import com.geeksville.mesh.ui.settings.radio.CleanNodeDatabaseScreen
@@ -90,7 +89,7 @@ fun getNavRouteFrom(routeName: String): Route? =
     ConfigRoute.entries.find { it.name == routeName }?.route ?: ModuleRoute.entries.find { it.name == routeName }?.route
 
 @Suppress("LongMethod")
-fun NavGraphBuilder.settingsGraph(navController: NavHostController, uiViewModel: UIViewModel) {
+fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
     navigation<SettingsRoutes.SettingsGraph>(startDestination = SettingsRoutes.Settings()) {
         composable<SettingsRoutes.Settings>(
             deepLinks = listOf(navDeepLink<SettingsRoutes.Settings>(basePath = "$DEEP_LINK_BASE_URI/settings")),
@@ -98,7 +97,6 @@ fun NavGraphBuilder.settingsGraph(navController: NavHostController, uiViewModel:
             val parentEntry =
                 remember(backStackEntry) { navController.getBackStackEntry(SettingsRoutes.SettingsGraph::class) }
             SettingsScreen(
-                uiViewModel = uiViewModel,
                 viewModel = hiltViewModel(parentEntry),
                 onClickNodeChip = {
                     navController.navigate(NodesRoutes.NodeDetailGraph(it)) {

@@ -114,6 +114,10 @@ constructor(
         uiPrefs.theme = theme
     }
 
+    fun showAppIntro() {
+        uiPrefs.appIntroCompleted = false
+    }
+
     fun unlockExcludedModules() {
         viewModelScope.launch { _excludedModulesUnlocked.value = true }
     }

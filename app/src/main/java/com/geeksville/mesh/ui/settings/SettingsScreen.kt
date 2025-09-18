@@ -55,7 +55,6 @@ import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.gpsDisabled
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.common.components.MainAppBar
@@ -85,7 +84,6 @@ import kotlin.time.Duration.Companion.seconds
 fun SettingsScreen(
     settingsViewModel: SettingsViewModel = hiltViewModel(),
     viewModel: RadioConfigViewModel = hiltViewModel(),
-    uiViewModel: UIViewModel = hiltViewModel(),
     onClickNodeChip: (Int) -> Unit = {},
     onNavigate: (Route) -> Unit = {},
 ) {
@@ -335,7 +333,7 @@ fun SettingsScreen(
                     leadingIcon = Icons.Rounded.WavingHand,
                     trailingIcon = null,
                 ) {
-                    uiViewModel.showAppIntro()
+                    settingsViewModel.showAppIntro()
                 }
 
                 AppVersionButton(excludedModulesUnlocked) { settingsViewModel.unlockExcludedModules() }
