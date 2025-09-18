@@ -84,6 +84,10 @@ import com.geeksville.mesh.ui.settings.radio.components.SerialConfigScreen
 import com.geeksville.mesh.ui.settings.radio.components.StoreForwardConfigScreen
 import com.geeksville.mesh.ui.settings.radio.components.TelemetryConfigScreen
 import com.geeksville.mesh.ui.settings.radio.components.UserConfigScreen
+import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
+import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.navigation.SettingsRoutes
 
 fun getNavRouteFrom(routeName: String): Route? =
     ConfigRoute.entries.find { it.name == routeName }?.route ?: ModuleRoute.entries.find { it.name == routeName }?.route

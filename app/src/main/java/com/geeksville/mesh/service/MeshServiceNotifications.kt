@@ -39,9 +39,9 @@ import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.database.entity.NodeEntity
-import com.geeksville.mesh.navigation.DEEP_LINK_BASE_URI
 import com.geeksville.mesh.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
 import com.geeksville.mesh.util.formatUptime
+import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 
 /**
  * Manages the creation and display of all app notifications.

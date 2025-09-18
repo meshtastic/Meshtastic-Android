@@ -15,7 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-plugins { alias(libs.plugins.meshtastic.android.library) }
+plugins {
+    alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.meshtastic.kotlinx.serialization)
+}
 
 android { namespace = "org.meshtastic.core.navigation" }
 

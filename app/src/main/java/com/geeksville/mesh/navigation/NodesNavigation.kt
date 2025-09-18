@@ -53,6 +53,11 @@ import com.geeksville.mesh.ui.metrics.TracerouteLogScreen
 import com.geeksville.mesh.ui.node.NodeDetailScreen
 import com.geeksville.mesh.ui.node.NodeMapScreen
 import com.geeksville.mesh.ui.node.NodeScreen
+import org.meshtastic.core.navigation.ContactsRoutes
+import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
+import org.meshtastic.core.navigation.NodeDetailRoutes
+import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.navigation.Route
 
 fun NavGraphBuilder.nodesGraph(navController: NavHostController, uiViewModel: UIViewModel) {
     navigation<NodesRoutes.NodesGraph>(startDestination = NodesRoutes.Nodes) {
