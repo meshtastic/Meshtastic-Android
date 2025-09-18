@@ -24,6 +24,7 @@ import com.geeksville.mesh.android.prefs.UiPrefs
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -37,8 +38,9 @@ import javax.inject.Inject
 class ConnectionsViewModel
 @Inject
 constructor(
-    private val radioConfigRepository: RadioConfigRepository,
-    private val nodeRepository: NodeRepository,
+    radioConfigRepository: RadioConfigRepository,
+    nodeRepository: NodeRepository,
+    bluetoothRepository: BluetoothRepository,
     private val uiPrefs: UiPrefs,
 ) : ViewModel() {
     val localConfig: StateFlow<LocalConfig> =
@@ -48,14 +50,13 @@ constructor(
             LocalConfig.getDefaultInstance(),
         )
 
-    val connectionState
-        get() = radioConfigRepository.connectionState
+    val connectionState = radioConfigRepository.connectionState
 
-    val myNodeInfo: StateFlow<MyNodeEntity?>
-        get() = nodeRepository.myNodeInfo
+    val myNodeInfo: StateFlow<MyNodeEntity?> = nodeRepository.myNodeInfo
 
-    val ourNodeInfo: StateFlow<Node?>
-        get() = nodeRepository.ourNodeInfo
+    val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
+
+    val bluetoothState = bluetoothRepository.state
 
     private val _hasShownNotPairedWarning = MutableStateFlow(uiPrefs.hasShownNotPairedWarning)
     val hasShownNotPairedWarning: StateFlow<Boolean> = _hasShownNotPairedWarning.asStateFlow()
