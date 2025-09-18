@@ -70,6 +70,7 @@ import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
 import com.geeksville.mesh.util.LanguageUtils
+import com.geeksville.mesh.util.LanguageUtils.getLanguageMap
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.delay
@@ -383,14 +384,17 @@ private fun AppVersionButton(excludedModulesUnlocked: Boolean, onUnlockExcludedM
 @Composable
 private fun LanguagePickerDialog(onDismiss: () -> Unit) {
     val context = LocalContext.current
-    val languages = remember {
-        LanguageUtils.getLanguageTags(context).mapValues { (_, value) -> { LanguageUtils.setLocale(value) } }
+    val choices = remember {
+        context
+            .getLanguageMap()
+            .map { (languageTag, languageName) -> languageName to { LanguageUtils.setAppLocale(languageTag) } }
+            .toMap()
     }
 
     MultipleChoiceAlertDialog(
         title = stringResource(R.string.preferences_language),
         message = "",
-        choices = languages,
+        choices = choices,
         onDismissRequest = onDismiss,
     )
 }
