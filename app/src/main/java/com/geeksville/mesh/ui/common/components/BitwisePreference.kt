@@ -17,15 +17,16 @@
 
 package com.geeksville.mesh.ui.common.components
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.KeyboardArrowDown
-import androidx.compose.material.icons.twotone.KeyboardArrowUp
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -36,8 +37,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BitwisePreference(
     title: String,
@@ -46,44 +49,43 @@ fun BitwisePreference(
     items: List<Pair<Int, String>>,
     onItemSelected: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    summary: String? = null,
 ) {
-    var dropDownExpanded by remember { mutableStateOf(value = false) }
+    var expanded by remember { mutableStateOf(false) }
 
-    RegularPreference(
-        title = title,
-        subtitle = value.toString(),
-        onClick = { dropDownExpanded = !dropDownExpanded },
-        enabled = enabled,
-        trailingIcon = if (dropDownExpanded) {
-            Icons.TwoTone.KeyboardArrowUp
-        } else {
-            Icons.TwoTone.KeyboardArrowDown
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = {
+            if (enabled) {
+                expanded = !expanded
+            }
         },
-    )
-
-    Box {
-        DropdownMenu(
-            expanded = dropDownExpanded,
-            onDismissRequest = { dropDownExpanded = !dropDownExpanded },
-        ) {
+        modifier = modifier.padding(vertical = 8.dp),
+    ) {
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled),
+            readOnly = true,
+            value = value.toString(),
+            onValueChange = {},
+            label = { Text(title) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+            enabled = enabled,
+            supportingText = { if (summary != null) Text(text = summary) },
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             items.forEach { item ->
                 DropdownMenuItem(
-                    onClick = { onItemSelected(value xor item.first) },
-                    modifier = modifier.fillMaxWidth(),
                     text = {
-                        Text(
-                            text = item.second,
-                            overflow = TextOverflow.Ellipsis,
-                        )
+                        Text(text = item.second, overflow = TextOverflow.Ellipsis)
                         Checkbox(
-                            modifier = modifier
-                                .fillMaxWidth()
-                                .wrapContentWidth(Alignment.End),
+                            modifier = Modifier.fillMaxWidth().wrapContentWidth(Alignment.End),
                             checked = value and item.first != 0,
                             onCheckedChange = { onItemSelected(value xor item.first) },
                             enabled = enabled,
                         )
-                    }
+                    },
+                    onClick = { onItemSelected(value xor item.first) },
                 )
             }
             PreferenceFooter(
@@ -91,7 +93,7 @@ fun BitwisePreference(
                 negativeText = R.string.clear,
                 onNegativeClicked = { onItemSelected(0) },
                 positiveText = R.string.close,
-                onPositiveClicked = { dropDownExpanded = false },
+                onPositiveClicked = { expanded = false },
             )
         }
     }
@@ -103,8 +105,9 @@ private fun BitwisePreferencePreview() {
     BitwisePreference(
         title = "Settings",
         value = 3,
+        summary = "This is a summary",
         enabled = true,
         items = listOf(1 to "TEST1", 2 to "TEST2"),
-        onItemSelected = {}
+        onItemSelected = {},
     )
 }

@@ -177,6 +177,8 @@ fun SettingsScreen(
         )
     }
 
+    val title =
+
     Scaffold(
         topBar = {
             MainAppBar(

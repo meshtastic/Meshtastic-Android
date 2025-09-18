@@ -65,6 +65,8 @@ fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
 fun PowerConfigItemList(powerConfig: PowerConfig, enabled: Boolean, onSaveClicked: (PowerConfig) -> Unit) {
     val focusManager = LocalFocusManager.current
     var powerInput by rememberSaveable { mutableStateOf(powerConfig) }
+    var shutdownOnPowerLoss by rememberSaveable { mutableStateOf(powerConfig.onBatteryShutdownAfterSecs > 0) }
+    var adcOverride by rememberSaveable { mutableStateOf(powerConfig.adcMultiplierOverride > 0f) }
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         item { PreferenceCategory(text = stringResource(R.string.power_config)) }
@@ -72,6 +74,7 @@ fun PowerConfigItemList(powerConfig: PowerConfig, enabled: Boolean, onSaveClicke
         item {
             SwitchPreference(
                 title = stringResource(R.string.enable_power_saving_mode),
+                summary = stringResource(id = R.string.config_power_is_power_saving_summary),
                 checked = powerInput.isPowerSaving,
                 enabled = enabled,
                 onCheckedChange = { powerInput = powerInput.copy { isPowerSaving = it } },
@@ -80,24 +83,56 @@ fun PowerConfigItemList(powerConfig: PowerConfig, enabled: Boolean, onSaveClicke
         item { HorizontalDivider() }
 
         item {
-            EditTextPreference(
-                title = stringResource(R.string.shutdown_on_battery_delay_seconds),
-                value = powerInput.onBatteryShutdownAfterSecs,
+            SwitchPreference(
+                title = stringResource(R.string.shutdown_on_power_loss),
+                checked = shutdownOnPowerLoss,
                 enabled = enabled,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { powerInput = powerInput.copy { onBatteryShutdownAfterSecs = it } },
+                onCheckedChange = {
+                    shutdownOnPowerLoss = it
+                    if (!it) powerInput = powerInput.copy { onBatteryShutdownAfterSecs = 0 }
+                },
             )
         }
 
+        if (shutdownOnPowerLoss) {
+            item {
+                EditTextPreference(
+                    title = stringResource(R.string.shutdown_on_battery_delay_seconds),
+                    value = powerInput.onBatteryShutdownAfterSecs,
+                    enabled = enabled,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { powerInput = powerInput.copy { onBatteryShutdownAfterSecs = it } },
+                )
+            }
+        }
+
+        item { HorizontalDivider() }
+
         item {
-            EditTextPreference(
-                title = stringResource(R.string.adc_multiplier_override_ratio),
-                value = powerInput.adcMultiplierOverride,
+            SwitchPreference(
+                title = stringResource(R.string.adc_multiplier_override),
+                checked = adcOverride,
                 enabled = enabled,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { powerInput = powerInput.copy { adcMultiplierOverride = it } },
+                onCheckedChange = {
+                    adcOverride = it
+                    if (!it) powerInput = powerInput.copy { adcMultiplierOverride = 0f }
+                },
             )
         }
+
+        if (adcOverride) {
+            item {
+                EditTextPreference(
+                    title = stringResource(R.string.adc_multiplier_override_ratio),
+                    value = powerInput.adcMultiplierOverride,
+                    enabled = enabled,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { powerInput = powerInput.copy { adcMultiplierOverride = it } },
+                )
+            }
+        }
+
+        item { HorizontalDivider() }
 
         item {
             EditTextPreference(

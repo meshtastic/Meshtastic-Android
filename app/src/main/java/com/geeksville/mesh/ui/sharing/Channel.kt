@@ -287,7 +287,9 @@ fun ChannelScreen(
             )
         }
         item {
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+            SingleChoiceSegmentedButtonRow(modifier = Modifier
+                .fillMaxWidth()
+                .padding(8.dp)) {
                 SegmentedButton(
                     label = { Text(text = stringResource(R.string.replace)) },
                     onClick = { shouldAddChannelsState = false },
@@ -487,7 +489,9 @@ private fun ChannelListView(
             QrCodeImage(
                 enabled = enabled,
                 channelSet = selectedChannelSet,
-                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp),
                 shouldAddChannel = shouldAddChannel,
             )
         },
@@ -498,13 +502,16 @@ private fun ChannelListView(
 private fun ModemPresetInfo(modemPresetName: String, onClick: () -> Unit) {
     Row(
         modifier =
-        Modifier.padding(top = 12.dp)
+        Modifier
+            .padding(top = 12.dp)
             .fillMaxWidth()
             .clickable(onClick = onClick)
             .border(1.dp, MaterialTheme.colorScheme.onBackground, RoundedCornerShape(8.dp)),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Column(modifier = Modifier.weight(1f).padding(16.dp)) {
+        Column(modifier = Modifier
+            .weight(1f)
+            .padding(16.dp)) {
             Text(text = stringResource(R.string.modem_preset), fontSize = 16.sp)
             Text(text = modemPresetName, fontSize = 14.sp)
         }

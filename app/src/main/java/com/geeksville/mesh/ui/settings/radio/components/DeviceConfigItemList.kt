@@ -43,6 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -78,6 +79,25 @@ private val DeviceConfig.Role.stringRes: Int
             else -> R.string.unrecognized
         }
 
+// TODO: Add actual string resources
+private val DeviceConfig.Role.description: Int
+    get() =
+        when (this) {
+            DeviceConfig.Role.CLIENT -> R.string.role_client_desc
+            DeviceConfig.Role.CLIENT_MUTE -> R.string.role_client_mute_desc
+            DeviceConfig.Role.ROUTER -> R.string.role_router_desc
+            DeviceConfig.Role.ROUTER_CLIENT -> R.string.role_router_client_desc
+            DeviceConfig.Role.REPEATER -> R.string.role_repeater_desc
+            DeviceConfig.Role.TRACKER -> R.string.role_tracker_desc
+            DeviceConfig.Role.SENSOR -> R.string.role_sensor_desc
+            DeviceConfig.Role.TAK -> R.string.role_tak_desc
+            DeviceConfig.Role.CLIENT_HIDDEN -> R.string.role_client_hidden_desc
+            DeviceConfig.Role.LOST_AND_FOUND -> R.string.role_lost_and_found_desc
+            DeviceConfig.Role.TAK_TRACKER -> R.string.role_tak_tracker_desc
+            DeviceConfig.Role.ROUTER_LATE -> R.string.role_router_late_desc
+            else -> R.string.unrecognized
+        }
+
 private val DeviceConfig.RebroadcastMode.stringRes: Int
     get() =
         when (this) {
@@ -87,6 +107,19 @@ private val DeviceConfig.RebroadcastMode.stringRes: Int
             DeviceConfig.RebroadcastMode.KNOWN_ONLY -> R.string.rebroadcast_mode_known_only
             DeviceConfig.RebroadcastMode.NONE -> R.string.rebroadcast_mode_none
             DeviceConfig.RebroadcastMode.CORE_PORTNUMS_ONLY -> R.string.rebroadcast_mode_core_portnums_only
+            else -> R.string.unrecognized
+        }
+
+// TODO: Add actual string resources
+private val DeviceConfig.RebroadcastMode.description: Int
+    get() =
+        when (this) {
+            DeviceConfig.RebroadcastMode.ALL -> R.string.rebroadcast_mode_all_desc
+            DeviceConfig.RebroadcastMode.ALL_SKIP_DECODING -> R.string.rebroadcast_mode_all_skip_decoding_desc
+            DeviceConfig.RebroadcastMode.LOCAL_ONLY -> R.string.rebroadcast_mode_local_only_desc
+            DeviceConfig.RebroadcastMode.KNOWN_ONLY -> R.string.rebroadcast_mode_known_only_desc
+            DeviceConfig.RebroadcastMode.NONE -> R.string.rebroadcast_mode_none_desc
+            DeviceConfig.RebroadcastMode.CORE_PORTNUMS_ONLY -> R.string.rebroadcast_mode_core_portnums_only_desc
             else -> R.string.unrecognized
         }
 
@@ -160,60 +193,49 @@ fun DeviceConfigItemList(deviceConfig: DeviceConfig, enabled: Boolean, onSaveCli
         }
     }
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        item { PreferenceCategory(text = stringResource(R.string.device_config)) }
-
+        item { PreferenceCategory(text = stringResource(R.string.options)) }
         item {
             DropDownPreference(
                 title = stringResource(R.string.role),
                 enabled = enabled,
                 selectedItem = deviceInput.role,
                 onItemSelected = { selectedRole = it },
-                summary = stringResource(id = deviceInput.role.stringRes),
-            )
-            HorizontalDivider()
-        }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.redefine_pin_button),
-                value = deviceInput.buttonGpio,
-                enabled = enabled,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { deviceInput = deviceInput.copy { buttonGpio = it } },
+                summary =
+                buildAnnotatedString {
+                    append(stringResource(id = deviceInput.role.stringRes))
+                    append("\n")
+                    append(stringResource(id = deviceInput.role.description))
+                }
+                    .toString(),
             )
         }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.redefine_pin_buzzer),
-                value = deviceInput.buzzerGpio,
-                enabled = enabled,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { deviceInput = deviceInput.copy { buzzerGpio = it } },
-            )
-        }
-
+        item { HorizontalDivider() }
         item {
             DropDownPreference(
                 title = stringResource(R.string.rebroadcast_mode),
                 enabled = enabled,
                 selectedItem = deviceInput.rebroadcastMode,
                 onItemSelected = { deviceInput = deviceInput.copy { rebroadcastMode = it } },
-                summary = stringResource(id = deviceInput.rebroadcastMode.stringRes),
+                summary =
+                buildAnnotatedString {
+                    append(stringResource(id = deviceInput.rebroadcastMode.stringRes))
+                    append("\n")
+                    append(stringResource(id = deviceInput.rebroadcastMode.description))
+                }
+                    .toString(),
             )
-            HorizontalDivider()
         }
-
+        item { HorizontalDivider() }
         item {
             EditTextPreference(
-                title = stringResource(R.string.nodeinfo_broadcast_interval_seconds),
+                title = stringResource(R.string.nodeinfo_broadcast_interval),
                 value = deviceInput.nodeInfoBroadcastSecs,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = { deviceInput = deviceInput.copy { nodeInfoBroadcastSecs = it } },
             )
         }
-
+        item { PreferenceCategory(text = stringResource(R.string.hardware)) }
         item {
             SwitchPreference(
                 title = stringResource(R.string.double_tap_as_button_press),
@@ -222,24 +244,35 @@ fun DeviceConfigItemList(deviceConfig: DeviceConfig, enabled: Boolean, onSaveCli
                 enabled = enabled,
                 onCheckedChange = { deviceInput = deviceInput.copy { doubleTapAsButtonPress = it } },
             )
-            HorizontalDivider()
         }
-
+        item { HorizontalDivider() }
         item {
             SwitchPreference(
-                title = stringResource(R.string.disable_triple_click),
-                summary = stringResource(id = R.string.config_device_disableTripleClick_summary),
-                checked = deviceInput.disableTripleClick,
+                title = stringResource(R.string.triple_click_adhoc_ping),
+                summary = stringResource(id = R.string.config_device_tripleClickAsAdHocPing_summary),
+                checked = !deviceInput.disableTripleClick,
                 enabled = enabled,
-                onCheckedChange = { deviceInput = deviceInput.copy { disableTripleClick = it } },
+                onCheckedChange = { deviceInput = deviceInput.copy { disableTripleClick = !it } },
             )
-            HorizontalDivider()
         }
+        item { HorizontalDivider() }
+        item {
+            SwitchPreference(
+                title = stringResource(R.string.led_heartbeat),
+                summary = stringResource(id = R.string.config_device_ledHeartbeatEnabled_summary),
+                checked = !deviceInput.ledHeartbeatDisabled,
+                enabled = enabled,
+                onCheckedChange = { deviceInput = deviceInput.copy { ledHeartbeatDisabled = !it } },
+            )
+        }
+        item { HorizontalDivider() }
 
+        item { PreferenceCategory(text = stringResource(R.string.debug)) }
         item {
             EditTextPreference(
-                title = stringResource(R.string.posix_timezone),
+                title = stringResource(R.string.time_zone),
                 value = deviceInput.tzdef,
+                summary = stringResource(id = R.string.config_device_tzdef_summary),
                 maxSize = 64, // tzdef max_size:65
                 enabled = enabled,
                 isError = false,
@@ -250,17 +283,25 @@ fun DeviceConfigItemList(deviceConfig: DeviceConfig, enabled: Boolean, onSaveCli
             )
         }
 
+        item { PreferenceCategory(text = stringResource(R.string.gpio)) }
         item {
-            SwitchPreference(
-                title = stringResource(R.string.disable_led_heartbeat),
-                summary = stringResource(id = R.string.config_device_ledHeartbeatDisabled_summary),
-                checked = deviceInput.ledHeartbeatDisabled,
+            EditTextPreference(
+                title = stringResource(R.string.button_gpio),
+                value = deviceInput.buttonGpio,
                 enabled = enabled,
-                onCheckedChange = { deviceInput = deviceInput.copy { ledHeartbeatDisabled = it } },
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { deviceInput = deviceInput.copy { buttonGpio = it } },
             )
-            HorizontalDivider()
         }
-
+        item {
+            EditTextPreference(
+                title = stringResource(R.string.buzzer_gpio),
+                value = deviceInput.buzzerGpio,
+                enabled = enabled,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { deviceInput = deviceInput.copy { buzzerGpio = it } },
+            )
+        }
         item {
             PreferenceFooter(
                 enabled = enabled && deviceInput != deviceConfig,
