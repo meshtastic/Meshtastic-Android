@@ -124,7 +124,6 @@ fun PositionConfigItemList(
         }
     var locationInput by rememberSaveable { mutableStateOf(location) }
     var positionInput by rememberSaveable { mutableStateOf(positionConfig) }
-    val maxInt32 = 2147483647
     val defaultBroadcastSecs: Int = 900
 
     LaunchedEffect(phoneLocation) {
@@ -148,21 +147,21 @@ fun PositionConfigItemList(
         item { PreferenceCategory(text = stringResource(R.string.position_config)) }
         item {
             SwitchPreference(
-                title = "Broadcast Position",
-                checked = positionInput.positionBroadcastSecs < maxInt32,
+                title = stringResource(R.string.broadcast_position),
+                checked = positionInput.positionBroadcastSecs < Int.MAX_VALUE,
                 enabled = enabled,
                 onCheckedChange = { isChecked ->
                     positionInput =
                         positionInput.copy {
                             positionBroadcastSecs =
                                 if (isChecked) {
-                                    if (positionBroadcastSecs >= maxInt32) {
+                                    if (positionBroadcastSecs >= Int.MAX_VALUE) {
                                         defaultBroadcastSecs
                                     } else {
                                         positionBroadcastSecs
                                     }
                                 } else {
-                                    maxInt32
+                                    Int.MAX_VALUE
                                 }
                         }
                 },
@@ -172,14 +171,14 @@ fun PositionConfigItemList(
             EditTextPreference(
                 title = stringResource(R.string.position_broadcast_interval_seconds),
                 value = positionInput.positionBroadcastSecs,
-                enabled = enabled && positionInput.positionBroadcastSecs < maxInt32,
+                enabled = enabled && positionInput.positionBroadcastSecs < Int.MAX_VALUE,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     positionInput =
                         positionInput.copy {
                             positionBroadcastSecs = it
-                            if (it >= maxInt32) {
-                                positionBroadcastSecs = maxInt32
+                            if (it >= Int.MAX_VALUE) {
+                                positionBroadcastSecs = Int.MAX_VALUE
                             }
                         }
                 },

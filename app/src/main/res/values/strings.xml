@@ -818,4 +818,6 @@
     <string name="downlink_feature_description">Messages from a public internet gateway are forwarded to the local mesh. Due to the zero-hop policy, traffic from the default MQTT server will not propagate further than this device.</string>
     <string name="icon_meanings">Icon Meanings</string>
     <string name="secondary_channel_position_feature">Disabling position on the primary channel allows periodic position broadcasts on the first secondary channel with the position enabled, otherwise manual position request required.</string>
+    <string name="broadcast_position">Broadcast Position</string>
+    <string name="broadcast_device_metrics">Broadcast Device Metrics</string>
 </resources>

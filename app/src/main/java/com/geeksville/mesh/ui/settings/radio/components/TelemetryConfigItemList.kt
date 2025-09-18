@@ -69,7 +69,6 @@ fun TelemetryConfigItemList(
 ) {
     val focusManager = LocalFocusManager.current
     var telemetryInput by rememberSaveable { mutableStateOf(telemetryConfig) }
-    val maxInt32 = 2147483647
     val defaultBroadcastSecs: Int = 1800
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -77,17 +76,21 @@ fun TelemetryConfigItemList(
 
         item {
             SwitchPreference(
-                title = "Broadcast Device Metrics",
-                checked = telemetryInput.deviceUpdateInterval < maxInt32,
+                title = stringResource(R.string.broadcast_device_metrics),
+                checked = telemetryInput.deviceUpdateInterval < Int.MAX_VALUE,
                 enabled = enabled,
                 onCheckedChange = { isChecked ->
                     telemetryInput =
                         telemetryInput.copy {
                             deviceUpdateInterval =
                                 if (isChecked) {
-                                    if (deviceUpdateInterval >= maxInt32) defaultBroadcastSecs else deviceUpdateInterval
+                                    if (deviceUpdateInterval >= Int.MAX_VALUE) {
+                                        defaultBroadcastSecs
+                                    } else {
+                                        deviceUpdateInterval
+                                    }
                                 } else {
-                                    maxInt32
+                                    Int.MAX_VALUE
                                 }
                         }
                 },
@@ -98,15 +101,15 @@ fun TelemetryConfigItemList(
             EditTextPreference(
                 title = stringResource(R.string.device_metrics_update_interval_seconds),
                 value = telemetryInput.deviceUpdateInterval,
-                enabled = enabled && telemetryInput.deviceUpdateInterval < maxInt32,
+                enabled = enabled && telemetryInput.deviceUpdateInterval < Int.MAX_VALUE,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
                     telemetryInput =
                         telemetryInput.copy {
                             deviceUpdateInterval = it
                             // Update broadcast toggle based on interval value
-                            if (it >= maxInt32) {
-                                deviceUpdateInterval = maxInt32
+                            if (it >= Int.MAX_VALUE) {
+                                deviceUpdateInterval = Int.MAX_VALUE
                             }
                         }
                 },
