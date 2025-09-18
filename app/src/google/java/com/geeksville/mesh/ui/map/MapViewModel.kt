@@ -85,7 +85,7 @@ constructor(
     packetRepository: PacketRepository,
     radioConfigRepository: RadioConfigRepository,
     private val customTileProviderRepository: CustomTileProviderRepository,
-) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository) {
+) : BaseMapViewModel(mapPrefs, nodeRepository, packetRepository, radioConfigRepository) {
 
     private val _errorFlow = MutableSharedFlow<String>()
     val errorFlow: SharedFlow<String> = _errorFlow.asSharedFlow()

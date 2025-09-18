@@ -24,6 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.UIViewModel
@@ -31,11 +32,19 @@ import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 
 @Composable
-fun MapScreen(uiViewModel: UIViewModel, onClickNodeChip: (Int) -> Unit, navigateToNodeDetails: (Int) -> Unit) {
-    val ourNodeInfo by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val isConnected by uiViewModel.isConnectedStateFlow.collectAsStateWithLifecycle()
+fun MapScreen(
+    onClickNodeChip: (Int) -> Unit,
+    navigateToNodeDetails: (Int) -> Unit,
+    uiViewModel: UIViewModel,
+    modifier: Modifier = Modifier,
+    mapViewModel: MapViewModel = hiltViewModel(),
+) {
+    val ourNodeInfo by mapViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val isConnected by mapViewModel.isConnected.collectAsStateWithLifecycle()
 
+    @Suppress("ViewModelForwarding")
     Scaffold(
+        modifier = modifier,
         topBar = {
             MainAppBar(
                 title = stringResource(R.string.map),
@@ -55,7 +64,11 @@ fun MapScreen(uiViewModel: UIViewModel, onClickNodeChip: (Int) -> Unit, navigate
         },
     ) { paddingValues ->
         Box(modifier = Modifier.padding(paddingValues)) {
-            MapView(uiViewModel = uiViewModel, navigateToNodeDetails = navigateToNodeDetails)
+            MapView(
+                uiViewModel = uiViewModel,
+                mapViewModel = mapViewModel,
+                navigateToNodeDetails = navigateToNodeDetails,
+            )
         }
     }
 }

@@ -24,6 +24,7 @@ import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.database.entity.Packet
 import com.geeksville.mesh.model.Node
+import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -37,6 +38,7 @@ abstract class BaseMapViewModel(
     protected val mapPrefs: MapPrefs,
     nodeRepository: NodeRepository,
     packetRepository: PacketRepository,
+    radioConfigRepository: RadioConfigRepository,
 ) : ViewModel() {
 
     val nodes: StateFlow<List<Node>> =
@@ -66,6 +68,13 @@ abstract class BaseMapViewModel(
     private val showWaypointsOnMap = MutableStateFlow(mapPrefs.showWaypointsOnMap)
 
     private val showPrecisionCircleOnMap = MutableStateFlow(mapPrefs.showPrecisionCircleOnMap)
+
+    val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
+
+    val isConnected =
+        radioConfigRepository.connectionState
+            .map { it.isConnected() }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     fun toggleOnlyFavorites() {
         val current = showOnlyFavorites.value
