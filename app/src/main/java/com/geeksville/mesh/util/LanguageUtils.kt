@@ -40,6 +40,7 @@ object LanguageUtils : Logging {
     }
 
     /** Using locales_config.xml, maps language tags to their localized language names (e.g.: "en" -> "English") */
+    @Suppress("CyclomaticComplexMethod")
     fun Context.getLanguageMap(): Map<String, String> {
         val languageTags = buildList {
             add(SYSTEM_DEFAULT)
