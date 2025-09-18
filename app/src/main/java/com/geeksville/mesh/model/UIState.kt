@@ -79,7 +79,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -215,13 +214,6 @@ constructor(
     private val _lastTraceRouteTime = MutableStateFlow<Long?>(null)
     val lastTraceRouteTime: StateFlow<Long?> = _lastTraceRouteTime.asStateFlow()
 
-    private val _excludedModulesUnlocked = MutableStateFlow(false)
-    val excludedModulesUnlocked: StateFlow<Boolean> = _excludedModulesUnlocked.asStateFlow()
-
-    fun unlockExcludedModules() {
-        viewModelScope.launch { _excludedModulesUnlocked.value = true }
-    }
-
     val firmwareVersion = myNodeInfo.mapNotNull { nodeInfo -> nodeInfo?.firmwareVersion }
 
     val firmwareEdition = meshLogRepository.getMyNodeInfo().map { nodeInfo -> nodeInfo?.firmwareEdition }
@@ -294,16 +286,13 @@ constructor(
         viewModelScope.launch { _title.value = title }
     }
 
-    val receivingLocationUpdates: StateFlow<Boolean>
-        get() = locationRepository.receivingLocationUpdates
-
     val meshService: IMeshService?
         get() = radioConfigRepository.meshService
 
-    private val _localConfig = MutableStateFlow<LocalConfig>(LocalConfig.getDefaultInstance())
-    val localConfig: StateFlow<LocalConfig> = _localConfig
+    private val localConfig = MutableStateFlow<LocalConfig>(LocalConfig.getDefaultInstance())
+
     val config
-        get() = _localConfig.value
+        get() = localConfig.value
 
     private val _moduleConfig = MutableStateFlow<LocalModuleConfig>(LocalModuleConfig.getDefaultInstance())
     val moduleConfig: StateFlow<LocalModuleConfig> = _moduleConfig
@@ -482,7 +471,7 @@ constructor(
             }
             .launchIn(viewModelScope)
 
-        radioConfigRepository.localConfigFlow.onEach { config -> _localConfig.value = config }.launchIn(viewModelScope)
+        radioConfigRepository.localConfigFlow.onEach { config -> localConfig.value = config }.launchIn(viewModelScope)
         radioConfigRepository.moduleConfigFlow
             .onEach { config -> _moduleConfig.value = config }
             .launchIn(viewModelScope)
@@ -808,23 +797,6 @@ constructor(
 
         val newConfig = config { lora = channelSet.loraConfig }
         if (config.lora != newConfig.lora) setConfig(newConfig)
-    }
-
-    val provideLocation: StateFlow<Boolean>
-        get() =
-            myNodeInfo
-                .flatMapLatest { myNodeEntity ->
-                    // When myNodeInfo changes, set up emissions for the "provide-location-nodeNum" pref.
-                    if (myNodeEntity == null) {
-                        flowOf(false)
-                    } else {
-                        uiPrefs.shouldProvideNodeLocation(myNodeEntity.myNodeNum)
-                    }
-                }
-                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
-
-    fun setProvideLocation(value: Boolean) {
-        myNodeNum?.let { uiPrefs.setShouldProvideNodeLocation(it, value) }
     }
 
     fun setOwner(name: String) {

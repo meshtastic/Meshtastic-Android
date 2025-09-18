@@ -40,7 +40,6 @@ import androidx.compose.material.icons.rounded.WavingHand
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -84,15 +83,16 @@ import kotlin.time.Duration.Companion.seconds
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun SettingsScreen(
+    settingsViewModel: SettingsViewModel = hiltViewModel(),
     viewModel: RadioConfigViewModel = hiltViewModel(),
     uiViewModel: UIViewModel = hiltViewModel(),
     onClickNodeChip: (Int) -> Unit = {},
     onNavigate: (Route) -> Unit = {},
 ) {
-    val excludedModulesUnlocked by uiViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
-    val localConfig by uiViewModel.localConfig.collectAsStateWithLifecycle()
-    val ourNode by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val isConnected by uiViewModel.isConnectedStateFlow.collectAsStateWithLifecycle(false)
+    val excludedModulesUnlocked by settingsViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
+    val localConfig by settingsViewModel.localConfig.collectAsStateWithLifecycle()
+    val ourNode by settingsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val isConnected by settingsViewModel.isConnected.collectAsStateWithLifecycle(false)
 
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     var isWaiting by remember { mutableStateOf(false) }
@@ -227,22 +227,27 @@ fun SettingsScreen(
                 val locationPermissionsState =
                     rememberMultiplePermissionsState(permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION))
                 val isGpsDisabled = context.gpsDisabled()
-                val provideLocation by uiViewModel.provideLocation.collectAsState(false)
+                val provideLocation by settingsViewModel.provideLocation.collectAsStateWithLifecycle()
 
                 LaunchedEffect(provideLocation, locationPermissionsState.allPermissionsGranted, isGpsDisabled) {
                     if (provideLocation) {
                         if (locationPermissionsState.allPermissionsGranted) {
                             if (!isGpsDisabled) {
-                                uiViewModel.meshService?.startProvideLocation()
+                                settingsViewModel.meshService?.startProvideLocation()
                             } else {
-                                uiViewModel.showSnackBar(context.getString(R.string.location_disabled))
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.location_disabled),
+                                    Toast.LENGTH_LONG,
+                                )
+                                    .show()
                             }
                         } else {
                             // Request permissions if not granted and user wants to provide location
                             locationPermissionsState.launchMultiplePermissionRequest()
                         }
                     } else {
-                        uiViewModel.meshService?.stopProvideLocation()
+                        settingsViewModel.meshService?.stopProvideLocation()
                     }
                 }
 
@@ -252,7 +257,7 @@ fun SettingsScreen(
                     enabled = !isGpsDisabled,
                     checked = provideLocation,
                 ) {
-                    uiViewModel.setProvideLocation(!provideLocation)
+                    settingsViewModel.setProvideLocation(!provideLocation)
                 }
 
                 val languageTags = remember { LanguageUtils.getLanguageTags(context) }
@@ -341,7 +346,7 @@ fun SettingsScreen(
                     uiViewModel.showAppIntro()
                 }
 
-                AppVersionButton(excludedModulesUnlocked) { uiViewModel.unlockExcludedModules() }
+                AppVersionButton(excludedModulesUnlocked) { settingsViewModel.unlockExcludedModules() }
             }
         }
     }
