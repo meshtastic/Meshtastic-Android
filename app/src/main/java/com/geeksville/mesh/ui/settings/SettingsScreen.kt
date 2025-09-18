@@ -301,7 +301,7 @@ fun SettingsScreen(
                 val exportRangeTestLauncher =
                     rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                         if (it.resultCode == RESULT_OK) {
-                            it.data?.data?.let { uri -> uiViewModel.saveDataCsv(uri) }
+                            it.data?.data?.let { uri -> settingsViewModel.saveDataCsv(uri) }
                         }
                     }
                 SettingsItem(
@@ -321,7 +321,7 @@ fun SettingsScreen(
                 val exportDataLauncher =
                     rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                         if (it.resultCode == RESULT_OK) {
-                            it.data?.data?.let { uri -> uiViewModel.saveDataCsv(uri) }
+                            it.data?.data?.let { uri -> settingsViewModel.saveDataCsv(uri) }
                         }
                     }
                 SettingsItem(
