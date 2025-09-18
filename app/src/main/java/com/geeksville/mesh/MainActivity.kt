@@ -106,16 +106,16 @@ class MainActivity :
                     SideEffect { AppCompatDelegate.setDefaultNightMode(theme) }
                 }
 
-                val showAppIntro by model.showAppIntro.collectAsStateWithLifecycle()
-                if (showAppIntro) {
+                val appIntroCompleted by model.appIntroCompleted.collectAsStateWithLifecycle()
+                if (appIntroCompleted) {
+                    MainScreen(uIViewModel = model, bluetoothViewModel = bluetoothViewModel)
+                } else {
                     AppIntroductionScreen(
                         onDone = {
                             model.onAppIntroCompleted()
                             (application as GeeksvilleApplication).askToRate(this@MainActivity)
                         },
                     )
-                } else {
-                    MainScreen(uIViewModel = model, bluetoothViewModel = bluetoothViewModel)
                 }
             }
         }

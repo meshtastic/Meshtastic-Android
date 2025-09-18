@@ -37,7 +37,6 @@ import com.geeksville.mesh.IMeshService
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.Position
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
@@ -58,14 +57,12 @@ import com.geeksville.mesh.database.entity.asDeviceVersion
 import com.geeksville.mesh.repository.api.DeviceHardwareRepository
 import com.geeksville.mesh.repository.api.FirmwareReleaseRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
-import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.repository.radio.RadioInterfaceService
 import com.geeksville.mesh.service.MeshServiceNotifications
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.util.getShortDate
-import com.geeksville.mesh.util.positionToMeter
 import com.geeksville.mesh.util.safeNumber
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -79,7 +76,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
@@ -88,14 +84,7 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.BufferedWriter
-import java.io.FileNotFoundException
-import java.io.FileWriter
-import java.text.SimpleDateFormat
-import java.util.Locale
 import javax.inject.Inject
-import kotlin.math.roundToInt
 
 // Given a human name, strip out the first letter of the first three words and return that as the
 // initials for
@@ -197,30 +186,16 @@ constructor(
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val packetRepository: PacketRepository,
     private val quickChatActionRepository: QuickChatActionRepository,
-    private val locationRepository: LocationRepository,
     firmwareReleaseRepository: FirmwareReleaseRepository,
     private val uiPrefs: UiPrefs,
     private val meshServiceNotifications: MeshServiceNotifications,
 ) : ViewModel(),
     Logging {
 
-    private val _theme = MutableStateFlow(uiPrefs.theme)
-    val theme: StateFlow<Int> = _theme.asStateFlow()
-
-    fun setTheme(theme: Int) {
-        _theme.value = theme
-        uiPrefs.theme = theme
-    }
+    val theme: StateFlow<Int> = uiPrefs.themeFlow
 
     private val _lastTraceRouteTime = MutableStateFlow<Long?>(null)
     val lastTraceRouteTime: StateFlow<Long?> = _lastTraceRouteTime.asStateFlow()
-
-    private val _excludedModulesUnlocked = MutableStateFlow(false)
-    val excludedModulesUnlocked: StateFlow<Boolean> = _excludedModulesUnlocked.asStateFlow()
-
-    fun unlockExcludedModules() {
-        viewModelScope.launch { _excludedModulesUnlocked.value = true }
-    }
 
     val firmwareVersion = myNodeInfo.mapNotNull { nodeInfo -> nodeInfo?.firmwareVersion }
 
@@ -294,16 +269,13 @@ constructor(
         viewModelScope.launch { _title.value = title }
     }
 
-    val receivingLocationUpdates: StateFlow<Boolean>
-        get() = locationRepository.receivingLocationUpdates
-
     val meshService: IMeshService?
         get() = radioConfigRepository.meshService
 
-    private val _localConfig = MutableStateFlow<LocalConfig>(LocalConfig.getDefaultInstance())
-    val localConfig: StateFlow<LocalConfig> = _localConfig
+    private val localConfig = MutableStateFlow<LocalConfig>(LocalConfig.getDefaultInstance())
+
     val config
-        get() = _localConfig.value
+        get() = localConfig.value
 
     private val _moduleConfig = MutableStateFlow<LocalModuleConfig>(LocalModuleConfig.getDefaultInstance())
     val moduleConfig: StateFlow<LocalModuleConfig> = _moduleConfig
@@ -482,7 +454,7 @@ constructor(
             }
             .launchIn(viewModelScope)
 
-        radioConfigRepository.localConfigFlow.onEach { config -> _localConfig.value = config }.launchIn(viewModelScope)
+        radioConfigRepository.localConfigFlow.onEach { config -> localConfig.value = config }.launchIn(viewModelScope)
         radioConfigRepository.moduleConfigFlow
             .onEach { config -> _moduleConfig.value = config }
             .launchIn(viewModelScope)
@@ -810,23 +782,6 @@ constructor(
         if (config.lora != newConfig.lora) setConfig(newConfig)
     }
 
-    val provideLocation: StateFlow<Boolean>
-        get() =
-            myNodeInfo
-                .flatMapLatest { myNodeEntity ->
-                    // When myNodeInfo changes, set up emissions for the "provide-location-nodeNum" pref.
-                    if (myNodeEntity == null) {
-                        flowOf(false)
-                    } else {
-                        uiPrefs.shouldProvideNodeLocation(myNodeEntity.myNodeNum)
-                    }
-                }
-                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
-
-    fun setProvideLocation(value: Boolean) {
-        myNodeNum?.let { uiPrefs.setShouldProvideNodeLocation(it, value) }
-    }
-
     fun setOwner(name: String) {
         val user =
             ourNodeInfo.value?.user?.copy {
@@ -839,140 +794,6 @@ constructor(
             meshService?.setRemoteOwner(myNodeNum ?: return, user.toByteArray())
         } catch (ex: RemoteException) {
             errormsg("Can't set username on device, is device offline? ${ex.message}")
-        }
-    }
-
-    /**
-     * Export all persisted packet data to a CSV file at the given URI.
-     *
-     * The CSV will include all packets, or only those matching the given port number if specified. Each row contains:
-     * date, time, sender node number, sender name, sender latitude, sender longitude, receiver latitude, receiver
-     * longitude, receiver elevation, received SNR, distance, hop limit, and payload.
-     *
-     * @param uri The destination URI for the CSV file.
-     * @param filterPortnum If provided, only packets with this port number will be exported.
-     */
-    @Suppress("detekt:CyclomaticComplexMethod", "detekt:LongMethod")
-    fun saveDataCsv(uri: Uri, filterPortnum: Int? = null) {
-        viewModelScope.launch(Dispatchers.Main) {
-            // Extract distances to this device from position messages and put (node,SNR,distance)
-            // in the file_uri
-            val myNodeNum = myNodeNum ?: return@launch
-
-            // Capture the current node value while we're still on main thread
-            val nodes = nodeDB.nodeDBbyNum.value
-
-            val positionToPos: (MeshProtos.Position?) -> Position? = { meshPosition ->
-                meshPosition?.let { Position(it) }.takeIf { it?.isValid() == true }
-            }
-
-            writeToUri(uri) { writer ->
-                val nodePositions = mutableMapOf<Int, MeshProtos.Position?>()
-
-                @Suppress("MaxLineLength")
-                writer.appendLine(
-                    "\"date\",\"time\",\"from\",\"sender name\",\"sender lat\",\"sender long\",\"rx lat\",\"rx long\",\"rx elevation\",\"rx snr\",\"distance\",\"hop limit\",\"payload\"",
-                )
-
-                // Packets are ordered by time, we keep most recent position of
-                // our device in localNodePosition.
-                val dateFormat = SimpleDateFormat("\"yyyy-MM-dd\",\"HH:mm:ss\"", Locale.getDefault())
-                meshLogRepository.getAllLogsInReceiveOrder(Int.MAX_VALUE).first().forEach { packet ->
-                    // If we get a NodeInfo packet, use it to update our position data (if valid)
-                    packet.nodeInfo?.let { nodeInfo ->
-                        positionToPos.invoke(nodeInfo.position)?.let { nodePositions[nodeInfo.num] = nodeInfo.position }
-                    }
-
-                    packet.meshPacket?.let { proto ->
-                        // If the packet contains position data then use it to update, if valid
-                        packet.position?.let { position ->
-                            positionToPos.invoke(position)?.let {
-                                nodePositions[
-                                    proto.from.takeIf { it != 0 } ?: myNodeNum,
-                                ] = position
-                            }
-                        }
-
-                        // packets must have rxSNR, and optionally match the filter given as a param.
-                        if (
-                            (filterPortnum == null || proto.decoded.portnumValue == filterPortnum) &&
-                            proto.rxSnr != 0.0f
-                        ) {
-                            val rxDateTime = dateFormat.format(packet.received_date)
-                            val rxFrom = proto.from.toUInt()
-                            val senderName = nodes[proto.from]?.user?.longName ?: ""
-
-                            // sender lat & long
-                            val senderPosition = nodePositions[proto.from]
-                            val senderPos = positionToPos.invoke(senderPosition)
-                            val senderLat = senderPos?.latitude ?: ""
-                            val senderLong = senderPos?.longitude ?: ""
-
-                            // rx lat, long, and elevation
-                            val rxPosition = nodePositions[myNodeNum]
-                            val rxPos = positionToPos.invoke(rxPosition)
-                            val rxLat = rxPos?.latitude ?: ""
-                            val rxLong = rxPos?.longitude ?: ""
-                            val rxAlt = rxPos?.altitude ?: ""
-                            val rxSnr = proto.rxSnr
-
-                            // Calculate the distance if both positions are valid
-
-                            val dist =
-                                if (senderPos == null || rxPos == null) {
-                                    ""
-                                } else {
-                                    positionToMeter(
-                                        Position(rxPosition!!), // Use rxPosition but only if rxPos was
-                                        // valid
-                                        Position(senderPosition!!), // Use senderPosition but only if
-                                        // senderPos was valid
-                                    )
-                                        .roundToInt()
-                                        .toString()
-                                }
-
-                            val hopLimit = proto.hopLimit
-
-                            val payload =
-                                when {
-                                    proto.decoded.portnumValue !in
-                                        setOf(
-                                            Portnums.PortNum.TEXT_MESSAGE_APP_VALUE,
-                                            Portnums.PortNum.RANGE_TEST_APP_VALUE,
-                                        ) -> "<${proto.decoded.portnum}>"
-
-                                    proto.hasDecoded() -> proto.decoded.payload.toStringUtf8().replace("\"", "\"\"")
-
-                                    proto.hasEncrypted() -> "${proto.encrypted.size()} encrypted bytes"
-                                    else -> ""
-                                }
-
-                            //  date,time,from,sender name,sender lat,sender long,rx lat,rx long,rx
-                            // elevation,rx
-                            // snr,distance,hop limit,payload
-                            @Suppress("MaxLineLength")
-                            writer.appendLine(
-                                "$rxDateTime,\"$rxFrom\",\"$senderName\",\"$senderLat\",\"$senderLong\",\"$rxLat\",\"$rxLong\",\"$rxAlt\",\"$rxSnr\",\"$dist\",\"$hopLimit\",\"$payload\"",
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    private suspend inline fun writeToUri(uri: Uri, crossinline block: suspend (BufferedWriter) -> Unit) {
-        withContext(Dispatchers.IO) {
-            try {
-                app.contentResolver.openFileDescriptor(uri, "wt")?.use { parcelFileDescriptor ->
-                    FileWriter(parcelFileDescriptor.fileDescriptor).use { fileWriter ->
-                        BufferedWriter(fileWriter).use { writer -> block.invoke(writer) }
-                    }
-                }
-            } catch (ex: FileNotFoundException) {
-                errormsg("Can't write file error: ${ex.message}")
-            }
         }
     }
 
@@ -1001,19 +822,9 @@ constructor(
         nodeFilterText.value = text
     }
 
-    // region Main menu actions logic
-
-    private val _showAppIntro: MutableStateFlow<Boolean> = MutableStateFlow(!uiPrefs.appIntroCompleted)
-    val showAppIntro: StateFlow<Boolean> = _showAppIntro.asStateFlow()
-
-    fun showAppIntro() {
-        _showAppIntro.update { true }
-    }
-
-    // endregion
+    val appIntroCompleted: StateFlow<Boolean> = uiPrefs.appIntroCompletedFlow
 
     fun onAppIntroCompleted() {
         uiPrefs.appIntroCompleted = true
-        _showAppIntro.update { false }
     }
 }

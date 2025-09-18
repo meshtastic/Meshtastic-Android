@@ -40,7 +40,6 @@ import androidx.compose.material.icons.rounded.WavingHand
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -55,12 +54,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
-import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.gpsDisabled
-import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.common.components.MainAppBar
+import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.common.theme.MODE_DYNAMIC
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
@@ -84,15 +82,15 @@ import kotlin.time.Duration.Companion.seconds
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun SettingsScreen(
+    settingsViewModel: SettingsViewModel = hiltViewModel(),
     viewModel: RadioConfigViewModel = hiltViewModel(),
-    uiViewModel: UIViewModel = hiltViewModel(),
     onClickNodeChip: (Int) -> Unit = {},
     onNavigate: (Route) -> Unit = {},
 ) {
-    val excludedModulesUnlocked by uiViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
-    val localConfig by uiViewModel.localConfig.collectAsStateWithLifecycle()
-    val ourNode by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
-    val isConnected by uiViewModel.isConnectedStateFlow.collectAsStateWithLifecycle(false)
+    val excludedModulesUnlocked by settingsViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
+    val localConfig by settingsViewModel.localConfig.collectAsStateWithLifecycle()
+    val ourNode by settingsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val isConnected by settingsViewModel.isConnected.collectAsStateWithLifecycle(false)
 
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     var isWaiting by remember { mutableStateOf(false) }
@@ -166,6 +164,19 @@ fun SettingsScreen(
         )
     }
 
+    var showLanguagePickerDialog by remember { mutableStateOf(false) }
+    if (showLanguagePickerDialog) {
+        LanguagePickerDialog { showLanguagePickerDialog = false }
+    }
+
+    var showThemePickerDialog by remember { mutableStateOf(false) }
+    if (showThemePickerDialog) {
+        ThemePickerDialog(
+            onClickTheme = { settingsViewModel.setTheme(it) },
+            onDismiss = { showThemePickerDialog = false },
+        )
+    }
+
     Scaffold(
         topBar = {
             MainAppBar(
@@ -227,22 +238,27 @@ fun SettingsScreen(
                 val locationPermissionsState =
                     rememberMultiplePermissionsState(permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION))
                 val isGpsDisabled = context.gpsDisabled()
-                val provideLocation by uiViewModel.provideLocation.collectAsState(false)
+                val provideLocation by settingsViewModel.provideLocation.collectAsStateWithLifecycle()
 
                 LaunchedEffect(provideLocation, locationPermissionsState.allPermissionsGranted, isGpsDisabled) {
                     if (provideLocation) {
                         if (locationPermissionsState.allPermissionsGranted) {
                             if (!isGpsDisabled) {
-                                uiViewModel.meshService?.startProvideLocation()
+                                settingsViewModel.meshService?.startProvideLocation()
                             } else {
-                                uiViewModel.showSnackBar(context.getString(R.string.location_disabled))
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.location_disabled),
+                                    Toast.LENGTH_LONG,
+                                )
+                                    .show()
                             }
                         } else {
                             // Request permissions if not granted and user wants to provide location
                             locationPermissionsState.launchMultiplePermissionRequest()
                         }
                     } else {
-                        uiViewModel.meshService?.stopProvideLocation()
+                        settingsViewModel.meshService?.stopProvideLocation()
                     }
                 }
 
@@ -252,51 +268,30 @@ fun SettingsScreen(
                     enabled = !isGpsDisabled,
                     checked = provideLocation,
                 ) {
-                    uiViewModel.setProvideLocation(!provideLocation)
+                    settingsViewModel.setProvideLocation(!provideLocation)
                 }
 
-                val languageTags = remember { LanguageUtils.getLanguageTags(context) }
                 SettingsItem(
                     text = stringResource(R.string.preferences_language),
                     leadingIcon = Icons.Rounded.Language,
                     trailingIcon = null,
                 ) {
-                    val lang = LanguageUtils.getLocale()
-                    debug("Lang from prefs: $lang")
-                    val langMap = languageTags.mapValues { (_, value) -> { LanguageUtils.setLocale(value) } }
-
-                    uiViewModel.showAlert(
-                        title = context.getString(R.string.preferences_language),
-                        message = "",
-                        choices = langMap,
-                    )
+                    showLanguagePickerDialog = true
                 }
 
-                val themeMap = remember {
-                    mapOf(
-                        context.getString(R.string.dynamic) to MODE_DYNAMIC,
-                        context.getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
-                        context.getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
-                        context.getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
-                    )
-                }
                 SettingsItem(
                     text = stringResource(R.string.theme),
                     leadingIcon = Icons.Rounded.FormatPaint,
                     trailingIcon = null,
                 ) {
-                    uiViewModel.showAlert(
-                        title = context.getString(R.string.choose_theme),
-                        message = "",
-                        choices = themeMap.mapValues { (_, value) -> { uiViewModel.setTheme(value) } },
-                    )
+                    showThemePickerDialog = true
                 }
                 val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
 
                 val exportRangeTestLauncher =
                     rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                         if (it.resultCode == RESULT_OK) {
-                            it.data?.data?.let { uri -> uiViewModel.saveDataCsv(uri) }
+                            it.data?.data?.let { uri -> settingsViewModel.saveDataCsv(uri) }
                         }
                     }
                 SettingsItem(
@@ -316,7 +311,7 @@ fun SettingsScreen(
                 val exportDataLauncher =
                     rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
                         if (it.resultCode == RESULT_OK) {
-                            it.data?.data?.let { uri -> uiViewModel.saveDataCsv(uri) }
+                            it.data?.data?.let { uri -> settingsViewModel.saveDataCsv(uri) }
                         }
                     }
                 SettingsItem(
@@ -338,10 +333,10 @@ fun SettingsScreen(
                     leadingIcon = Icons.Rounded.WavingHand,
                     trailingIcon = null,
                 ) {
-                    uiViewModel.showAppIntro()
+                    settingsViewModel.showAppIntro()
                 }
 
-                AppVersionButton(excludedModulesUnlocked) { uiViewModel.unlockExcludedModules() }
+                AppVersionButton(excludedModulesUnlocked) { settingsViewModel.unlockExcludedModules() }
             }
         }
     }
@@ -383,4 +378,40 @@ private fun AppVersionButton(excludedModulesUnlocked: Boolean, onUnlockExcludedM
             }
         }
     }
+}
+
+@Composable
+private fun LanguagePickerDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val languages = remember {
+        LanguageUtils.getLanguageTags(context).mapValues { (_, value) -> { LanguageUtils.setLocale(value) } }
+    }
+
+    MultipleChoiceAlertDialog(
+        title = stringResource(R.string.preferences_language),
+        message = "",
+        choices = languages,
+        onDismissRequest = onDismiss,
+    )
+}
+
+@Composable
+private fun ThemePickerDialog(onClickTheme: (Int) -> Unit, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val themeMap = remember {
+        mapOf(
+            context.getString(R.string.dynamic) to MODE_DYNAMIC,
+            context.getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
+            context.getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
+            context.getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+        )
+            .mapValues { (_, value) -> { onClickTheme(value) } }
+    }
+
+    MultipleChoiceAlertDialog(
+        title = stringResource(R.string.choose_theme),
+        message = "",
+        choices = themeMap,
+        onDismissRequest = onDismiss,
+    )
 }
