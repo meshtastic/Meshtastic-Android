@@ -54,12 +54,12 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
-import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.common.components.MainAppBar
+import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.common.theme.MODE_DYNAMIC
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
@@ -166,6 +166,11 @@ fun SettingsScreen(
         )
     }
 
+    var showLanguagePickerDialog by remember { mutableStateOf(false) }
+    if (showLanguagePickerDialog) {
+        LanguagePickerDialog { showLanguagePickerDialog = false }
+    }
+
     Scaffold(
         topBar = {
             MainAppBar(
@@ -260,21 +265,12 @@ fun SettingsScreen(
                     settingsViewModel.setProvideLocation(!provideLocation)
                 }
 
-                val languageTags = remember { LanguageUtils.getLanguageTags(context) }
                 SettingsItem(
                     text = stringResource(R.string.preferences_language),
                     leadingIcon = Icons.Rounded.Language,
                     trailingIcon = null,
                 ) {
-                    val lang = LanguageUtils.getLocale()
-                    debug("Lang from prefs: $lang")
-                    val langMap = languageTags.mapValues { (_, value) -> { LanguageUtils.setLocale(value) } }
-
-                    uiViewModel.showAlert(
-                        title = context.getString(R.string.preferences_language),
-                        message = "",
-                        choices = langMap,
-                    )
+                    showLanguagePickerDialog = true
                 }
 
                 val themeMap = remember {
@@ -388,4 +384,19 @@ private fun AppVersionButton(excludedModulesUnlocked: Boolean, onUnlockExcludedM
             }
         }
     }
+}
+
+@Composable
+private fun LanguagePickerDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val languages = remember {
+        LanguageUtils.getLanguageTags(context).mapValues { (_, value) -> { LanguageUtils.setLocale(value) } }
+    }
+
+    MultipleChoiceAlertDialog(
+        title = stringResource(R.string.preferences_language),
+        message = "",
+        choices = languages,
+        onDismissRequest = onDismiss,
+    )
 }
