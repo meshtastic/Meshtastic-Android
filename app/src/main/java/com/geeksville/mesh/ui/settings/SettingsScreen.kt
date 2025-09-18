@@ -171,6 +171,14 @@ fun SettingsScreen(
         LanguagePickerDialog { showLanguagePickerDialog = false }
     }
 
+    var showThemePickerDialog by remember { mutableStateOf(false) }
+    if (showThemePickerDialog) {
+        ThemePickerDialog(
+            onClickTheme = { settingsViewModel.setTheme(it) },
+            onDismiss = { showThemePickerDialog = false },
+        )
+    }
+
     Scaffold(
         topBar = {
             MainAppBar(
@@ -273,24 +281,12 @@ fun SettingsScreen(
                     showLanguagePickerDialog = true
                 }
 
-                val themeMap = remember {
-                    mapOf(
-                        context.getString(R.string.dynamic) to MODE_DYNAMIC,
-                        context.getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
-                        context.getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
-                        context.getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
-                    )
-                }
                 SettingsItem(
                     text = stringResource(R.string.theme),
                     leadingIcon = Icons.Rounded.FormatPaint,
                     trailingIcon = null,
                 ) {
-                    uiViewModel.showAlert(
-                        title = context.getString(R.string.choose_theme),
-                        message = "",
-                        choices = themeMap.mapValues { (_, value) -> { uiViewModel.setTheme(value) } },
-                    )
+                    showThemePickerDialog = true
                 }
                 val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
 
@@ -397,6 +393,27 @@ private fun LanguagePickerDialog(onDismiss: () -> Unit) {
         title = stringResource(R.string.preferences_language),
         message = "",
         choices = languages,
+        onDismissRequest = onDismiss,
+    )
+}
+
+@Composable
+private fun ThemePickerDialog(onClickTheme: (Int) -> Unit, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val themeMap = remember {
+        mapOf(
+            context.getString(R.string.dynamic) to MODE_DYNAMIC,
+            context.getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
+            context.getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
+            context.getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+        )
+            .mapValues { (_, value) -> { onClickTheme(value) } }
+    }
+
+    MultipleChoiceAlertDialog(
+        title = stringResource(R.string.choose_theme),
+        message = "",
+        choices = themeMap,
         onDismissRequest = onDismiss,
     )
 }

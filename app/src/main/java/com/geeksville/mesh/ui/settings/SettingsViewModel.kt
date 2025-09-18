@@ -110,6 +110,10 @@ constructor(
         myNodeNum?.let { uiPrefs.setShouldProvideNodeLocation(it, value) }
     }
 
+    fun setTheme(theme: Int) {
+        uiPrefs.theme = theme
+    }
+
     fun unlockExcludedModules() {
         viewModelScope.launch { _excludedModulesUnlocked.value = true }
     }

@@ -25,11 +25,13 @@ import com.geeksville.mesh.util.LanguageUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import java.util.concurrent.ConcurrentHashMap
 
 interface UiPrefs {
     var lang: String
     var theme: Int
+    val themeFlow: StateFlow<Int>
     var appIntroCompleted: Boolean
     var hasShownNotPairedWarning: Boolean
     var nodeSortOption: Int
@@ -45,19 +47,29 @@ interface UiPrefs {
     fun setShouldProvideNodeLocation(nodeNum: Int, value: Boolean)
 }
 
+const val KEY_THEME = "theme"
+
 class UiPrefsImpl(private val prefs: SharedPreferences) : UiPrefs {
+
+    override var theme: Int by PrefDelegate(prefs, KEY_THEME, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+    private var _themeFlow = MutableStateFlow(theme)
+    override val themeFlow = _themeFlow.asStateFlow()
 
     // Maps nodeNum to a flow for the for the "provide-location-nodeNum" pref
     private val provideNodeLocationFlows = ConcurrentHashMap<Int, MutableStateFlow<Boolean>>()
 
     private val sharedPreferencesListener =
         SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
-            // Check if the changed key is one of our node location keys
-            provideNodeLocationFlows.keys.forEach { nodeNum ->
-                if (key == provideLocationKey(nodeNum)) {
-                    val newValue = sharedPreferences.getBoolean(key, false)
-                    provideNodeLocationFlows[nodeNum]?.tryEmit(newValue)
-                }
+            when (key) {
+                KEY_THEME -> _themeFlow.update { theme }
+                // Check if the changed key is one of our node location keys
+                else ->
+                    provideNodeLocationFlows.keys.forEach { nodeNum ->
+                        if (key == provideLocationKey(nodeNum)) {
+                            val newValue = sharedPreferences.getBoolean(key, false)
+                            provideNodeLocationFlows[nodeNum]?.tryEmit(newValue)
+                        }
+                    }
             }
         }
 
@@ -66,7 +78,6 @@ class UiPrefsImpl(private val prefs: SharedPreferences) : UiPrefs {
     }
 
     override var lang: String by PrefDelegate(prefs, "lang", LanguageUtils.SYSTEM_DEFAULT)
-    override var theme: Int by PrefDelegate(prefs, "theme", AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
     override var appIntroCompleted: Boolean by PrefDelegate(prefs, "app_intro_completed", false)
     override var hasShownNotPairedWarning: Boolean by PrefDelegate(prefs, "has_shown_not_paired_warning", false)
     override var nodeSortOption: Int by PrefDelegate(prefs, "node-sort-option", NodeSortOption.VIA_FAVORITE.ordinal)
