@@ -24,12 +24,11 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
-import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.ui.connections.ConnectionsScreen
 import com.geeksville.mesh.ui.settings.radio.components.LoRaConfigScreen
 
 /** Navigation graph for for the top level ConnectionsScreen - [ConnectionsRoutes.Connections]. */
-fun NavGraphBuilder.connectionsGraph(navController: NavHostController, bluetoothViewModel: BluetoothViewModel) {
+fun NavGraphBuilder.connectionsGraph(navController: NavHostController) {
     @Suppress("ktlint:standard:max-line-length")
     navigation<ConnectionsRoutes.ConnectionsGraph>(startDestination = ConnectionsRoutes.Connections) {
         composable<ConnectionsRoutes.Connections>(
@@ -40,7 +39,6 @@ fun NavGraphBuilder.connectionsGraph(navController: NavHostController, bluetooth
             val parentEntry =
                 remember(backStackEntry) { navController.getBackStackEntry(ConnectionsRoutes.ConnectionsGraph) }
             ConnectionsScreen(
-                bluetoothViewModel = bluetoothViewModel,
                 radioConfigViewModel = hiltViewModel(parentEntry),
                 onClickNodeChip = {
                     navController.navigate(NodesRoutes.NodeDetailGraph(it)) {

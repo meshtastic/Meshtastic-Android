@@ -81,7 +81,6 @@ import com.geeksville.mesh.android.AddNavigationTracking
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.setAttributes
 import com.geeksville.mesh.model.BTScanModel
-import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
@@ -148,11 +147,7 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-fun MainScreen(
-    uIViewModel: UIViewModel = hiltViewModel(),
-    bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
-    scanModel: BTScanModel = hiltViewModel(),
-) {
+fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanModel = hiltViewModel()) {
     val navController = rememberNavController()
     val connectionState by uIViewModel.connectionState.collectAsStateWithLifecycle()
     val requestChannelSet by uIViewModel.requestChannelSet.collectAsStateWithLifecycle()
@@ -396,7 +391,7 @@ fun MainScreen(
                     nodesGraph(navController, uiViewModel = uIViewModel)
                     mapGraph(navController, uiViewModel = uIViewModel)
                     channelsGraph(navController, uiViewModel = uIViewModel)
-                    connectionsGraph(navController, bluetoothViewModel)
+                    connectionsGraph(navController)
                     settingsGraph(navController)
                 }
             }

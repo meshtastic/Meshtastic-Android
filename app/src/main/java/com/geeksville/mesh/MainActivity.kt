@@ -42,7 +42,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.prefs.UiPrefs
-import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.DEEP_LINK_BASE_URI
 import com.geeksville.mesh.ui.MainScreen
@@ -58,7 +57,6 @@ import javax.inject.Inject
 class MainActivity :
     AppCompatActivity(),
     Logging {
-    private val bluetoothViewModel: BluetoothViewModel by viewModels()
     private val model: UIViewModel by viewModels()
 
     // This is aware of the Activity lifecycle and handles binding to the mesh service.
@@ -108,7 +106,7 @@ class MainActivity :
 
                 val appIntroCompleted by model.appIntroCompleted.collectAsStateWithLifecycle()
                 if (appIntroCompleted) {
-                    MainScreen(uIViewModel = model, bluetoothViewModel = bluetoothViewModel)
+                    MainScreen(uIViewModel = model)
                 } else {
                     AppIntroductionScreen(
                         onDone = {

@@ -62,7 +62,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.model.BTScanModel
-import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.navigation.ConfigRoute
@@ -102,7 +101,6 @@ fun String?.isIPAddress(): Boolean = if (Build.VERSION.SDK_INT < Build.VERSION_C
 fun ConnectionsScreen(
     connectionsViewModel: ConnectionsViewModel = hiltViewModel(),
     scanModel: BTScanModel = hiltViewModel(),
-    bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
     radioConfigViewModel: RadioConfigViewModel = hiltViewModel(),
     onClickNodeChip: (Int) -> Unit,
     onNavigateToSettings: () -> Unit,
@@ -120,7 +118,7 @@ fun ConnectionsScreen(
     val info by connectionsViewModel.myNodeInfo.collectAsStateWithLifecycle()
     val ourNode by connectionsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
     val selectedDevice by scanModel.selectedNotNullFlow.collectAsStateWithLifecycle()
-    val bluetoothEnabled by bluetoothViewModel.enabled.collectAsStateWithLifecycle(false)
+    val bluetoothState by connectionsViewModel.bluetoothState.collectAsStateWithLifecycle()
     val regionUnset = config.lora.region == ConfigProtos.Config.LoRaConfig.RegionCode.UNSET
 
     val bleDevices by scanModel.bleDevicesForUi.collectAsStateWithLifecycle()
@@ -264,7 +262,7 @@ fun ConnectionsScreen(
                                     btDevices = bleDevices,
                                     selectedDevice = selectedDevice,
                                     scanModel = scanModel,
-                                    bluetoothEnabled = bluetoothEnabled,
+                                    bluetoothEnabled = bluetoothState.enabled,
                                 )
                             }
 
