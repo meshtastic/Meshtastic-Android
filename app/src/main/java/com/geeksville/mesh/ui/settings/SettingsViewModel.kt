@@ -45,6 +45,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.BufferedWriter
@@ -66,14 +67,12 @@ constructor(
     private val uiPrefs: UiPrefs,
 ) : ViewModel(),
     Logging {
-    val myNodeInfo: StateFlow<MyNodeEntity?>
-        get() = nodeRepository.myNodeInfo
+    val myNodeInfo: StateFlow<MyNodeEntity?> = nodeRepository.myNodeInfo
 
     val myNodeNum
         get() = myNodeInfo.value?.myNodeNum
 
-    val ourNodeInfo: StateFlow<Node?>
-        get() = nodeRepository.ourNodeInfo
+    val ourNodeInfo: StateFlow<Node?> = nodeRepository.ourNodeInfo
 
     val isConnected =
         radioConfigRepository.connectionState
@@ -90,18 +89,17 @@ constructor(
     val meshService: IMeshService?
         get() = radioConfigRepository.meshService
 
-    val provideLocation: StateFlow<Boolean>
-        get() =
-            myNodeInfo
-                .flatMapLatest { myNodeEntity ->
-                    // When myNodeInfo changes, set up emissions for the "provide-location-nodeNum" pref.
-                    if (myNodeEntity == null) {
-                        flowOf(false)
-                    } else {
-                        uiPrefs.shouldProvideNodeLocation(myNodeEntity.myNodeNum)
-                    }
+    val provideLocation: StateFlow<Boolean> =
+        myNodeInfo
+            .flatMapLatest { myNodeEntity ->
+                // When myNodeInfo changes, set up emissions for the "provide-location-nodeNum" pref.
+                if (myNodeEntity == null) {
+                    flowOf(false)
+                } else {
+                    uiPrefs.shouldProvideNodeLocation(myNodeEntity.myNodeNum)
                 }
-                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
+            }
+            .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), false)
 
     private val _excludedModulesUnlocked = MutableStateFlow(false)
     val excludedModulesUnlocked: StateFlow<Boolean> = _excludedModulesUnlocked.asStateFlow()
@@ -119,7 +117,7 @@ constructor(
     }
 
     fun unlockExcludedModules() {
-        viewModelScope.launch { _excludedModulesUnlocked.value = true }
+        _excludedModulesUnlocked.update { true }
     }
 
     /**
