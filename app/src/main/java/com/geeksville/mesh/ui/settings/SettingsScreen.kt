@@ -177,170 +177,169 @@ fun SettingsScreen(
         )
     }
 
-    val title =
-        Scaffold(
-            topBar = {
-                MainAppBar(
-                    title = stringResource(R.string.bottom_nav_settings),
-                    ourNode = ourNode,
-                    isConnected = isConnected,
-                    showNodeChip = ourNode != null && isConnected,
-                    canNavigateUp = false,
-                    onNavigateUp = {},
-                    actions = {},
-                    onAction = { action ->
-                        when (action) {
-                            is NodeMenuAction.MoreDetails -> onClickNodeChip(action.node.num)
-                            else -> {}
-                        }
-                    },
-                )
-            },
-        ) { paddingValues ->
-            Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(paddingValues).padding(16.dp)) {
-                RadioConfigItemList(
-                    state = state,
-                    isManaged = localConfig.security.isManaged,
-                    excludedModulesUnlocked = excludedModulesUnlocked,
-                    onRouteClick = { route ->
-                        isWaiting = true
-                        viewModel.setResponseStateLoading(route)
-                    },
-                    onImport = {
-                        viewModel.clearPacketResponse()
-                        deviceProfile = null
-                        val intent =
-                            Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                                addCategory(Intent.CATEGORY_OPENABLE)
-                                type = "application/*"
-                            }
-                        importConfigLauncher.launch(intent)
-                    },
-                    onExport = {
-                        viewModel.clearPacketResponse()
-                        deviceProfile = null
-                        showEditDeviceProfileDialog = true
-                    },
-                    onNavigate = onNavigate,
-                )
-
-                val context = LocalContext.current
-
-                TitledCard(title = stringResource(R.string.app_settings), modifier = Modifier.padding(top = 16.dp)) {
-                    if (state.analyticsAvailable) {
-                        SettingsItemSwitch(
-                            text = stringResource(R.string.analytics_okay),
-                            checked = state.analyticsEnabled,
-                            leadingIcon = Icons.Default.BugReport,
-                            onClick = { viewModel.toggleAnalytics() },
-                        )
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                title = stringResource(R.string.bottom_nav_settings),
+                ourNode = ourNode,
+                isConnected = isConnected,
+                showNodeChip = ourNode != null && isConnected,
+                canNavigateUp = false,
+                onNavigateUp = {},
+                actions = {},
+                onAction = { action ->
+                    when (action) {
+                        is NodeMenuAction.MoreDetails -> onClickNodeChip(action.node.num)
+                        else -> {}
                     }
+                },
+            )
+        },
+    ) { paddingValues ->
+        Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(paddingValues).padding(16.dp)) {
+            RadioConfigItemList(
+                state = state,
+                isManaged = localConfig.security.isManaged,
+                excludedModulesUnlocked = excludedModulesUnlocked,
+                onRouteClick = { route ->
+                    isWaiting = true
+                    viewModel.setResponseStateLoading(route)
+                },
+                onImport = {
+                    viewModel.clearPacketResponse()
+                    deviceProfile = null
+                    val intent =
+                        Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            type = "application/*"
+                        }
+                    importConfigLauncher.launch(intent)
+                },
+                onExport = {
+                    viewModel.clearPacketResponse()
+                    deviceProfile = null
+                    showEditDeviceProfileDialog = true
+                },
+                onNavigate = onNavigate,
+            )
 
-                    val locationPermissionsState =
-                        rememberMultiplePermissionsState(permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION))
-                    val isGpsDisabled = context.gpsDisabled()
-                    val provideLocation by settingsViewModel.provideLocation.collectAsStateWithLifecycle()
+            val context = LocalContext.current
 
-                    LaunchedEffect(provideLocation, locationPermissionsState.allPermissionsGranted, isGpsDisabled) {
-                        if (provideLocation) {
-                            if (locationPermissionsState.allPermissionsGranted) {
-                                if (!isGpsDisabled) {
-                                    settingsViewModel.meshService?.startProvideLocation()
-                                } else {
-                                    Toast.makeText(
-                                        context,
-                                        context.getString(R.string.location_disabled),
-                                        Toast.LENGTH_LONG,
-                                    )
-                                        .show()
-                                }
+            TitledCard(title = stringResource(R.string.app_settings), modifier = Modifier.padding(top = 16.dp)) {
+                if (state.analyticsAvailable) {
+                    SettingsItemSwitch(
+                        text = stringResource(R.string.analytics_okay),
+                        checked = state.analyticsEnabled,
+                        leadingIcon = Icons.Default.BugReport,
+                        onClick = { viewModel.toggleAnalytics() },
+                    )
+                }
+
+                val locationPermissionsState =
+                    rememberMultiplePermissionsState(permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION))
+                val isGpsDisabled = context.gpsDisabled()
+                val provideLocation by settingsViewModel.provideLocation.collectAsStateWithLifecycle()
+
+                LaunchedEffect(provideLocation, locationPermissionsState.allPermissionsGranted, isGpsDisabled) {
+                    if (provideLocation) {
+                        if (locationPermissionsState.allPermissionsGranted) {
+                            if (!isGpsDisabled) {
+                                settingsViewModel.meshService?.startProvideLocation()
                             } else {
-                                // Request permissions if not granted and user wants to provide location
-                                locationPermissionsState.launchMultiplePermissionRequest()
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.location_disabled),
+                                    Toast.LENGTH_LONG,
+                                )
+                                    .show()
                             }
                         } else {
-                            settingsViewModel.meshService?.stopProvideLocation()
+                            // Request permissions if not granted and user wants to provide location
+                            locationPermissionsState.launchMultiplePermissionRequest()
                         }
+                    } else {
+                        settingsViewModel.meshService?.stopProvideLocation()
                     }
-
-                    SettingsItemSwitch(
-                        text = stringResource(R.string.provide_location_to_mesh),
-                        leadingIcon = Icons.Rounded.LocationOn,
-                        enabled = !isGpsDisabled,
-                        checked = provideLocation,
-                    ) {
-                        settingsViewModel.setProvideLocation(!provideLocation)
-                    }
-
-                    SettingsItem(
-                        text = stringResource(R.string.preferences_language),
-                        leadingIcon = Icons.Rounded.Language,
-                        trailingIcon = null,
-                    ) {
-                        showLanguagePickerDialog = true
-                    }
-
-                    SettingsItem(
-                        text = stringResource(R.string.theme),
-                        leadingIcon = Icons.Rounded.FormatPaint,
-                        trailingIcon = null,
-                    ) {
-                        showThemePickerDialog = true
-                    }
-                    val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-
-                    val exportRangeTestLauncher =
-                        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                            if (it.resultCode == RESULT_OK) {
-                                it.data?.data?.let { uri -> settingsViewModel.saveDataCsv(uri) }
-                            }
-                        }
-                    SettingsItem(
-                        text = stringResource(R.string.save_rangetest),
-                        leadingIcon = Icons.Rounded.Output,
-                        trailingIcon = null,
-                    ) {
-                        val intent =
-                            Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                                addCategory(Intent.CATEGORY_OPENABLE)
-                                type = "application/csv"
-                                putExtra(Intent.EXTRA_TITLE, "Meshtastic_rangetest_$timestamp.csv")
-                            }
-                        exportRangeTestLauncher.launch(intent)
-                    }
-
-                    val exportDataLauncher =
-                        rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                            if (it.resultCode == RESULT_OK) {
-                                it.data?.data?.let { uri -> settingsViewModel.saveDataCsv(uri) }
-                            }
-                        }
-                    SettingsItem(
-                        text = stringResource(R.string.export_data_csv),
-                        leadingIcon = Icons.Rounded.Output,
-                        trailingIcon = null,
-                    ) {
-                        val intent =
-                            Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                                addCategory(Intent.CATEGORY_OPENABLE)
-                                type = "application/csv"
-                                putExtra(Intent.EXTRA_TITLE, "Meshtastic_datalog_$timestamp.csv")
-                            }
-                        exportDataLauncher.launch(intent)
-                    }
-
-                    SettingsItem(
-                        text = stringResource(R.string.intro_show),
-                        leadingIcon = Icons.Rounded.WavingHand,
-                        trailingIcon = null,
-                    ) {
-                        settingsViewModel.showAppIntro()
-                    }
-
-                    AppVersionButton(excludedModulesUnlocked) { settingsViewModel.unlockExcludedModules() }
                 }
+
+                SettingsItemSwitch(
+                    text = stringResource(R.string.provide_location_to_mesh),
+                    leadingIcon = Icons.Rounded.LocationOn,
+                    enabled = !isGpsDisabled,
+                    checked = provideLocation,
+                ) {
+                    settingsViewModel.setProvideLocation(!provideLocation)
+                }
+
+                SettingsItem(
+                    text = stringResource(R.string.preferences_language),
+                    leadingIcon = Icons.Rounded.Language,
+                    trailingIcon = null,
+                ) {
+                    showLanguagePickerDialog = true
+                }
+
+                SettingsItem(
+                    text = stringResource(R.string.theme),
+                    leadingIcon = Icons.Rounded.FormatPaint,
+                    trailingIcon = null,
+                ) {
+                    showThemePickerDialog = true
+                }
+                val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+
+                val exportRangeTestLauncher =
+                    rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                        if (it.resultCode == RESULT_OK) {
+                            it.data?.data?.let { uri -> settingsViewModel.saveDataCsv(uri) }
+                        }
+                    }
+                SettingsItem(
+                    text = stringResource(R.string.save_rangetest),
+                    leadingIcon = Icons.Rounded.Output,
+                    trailingIcon = null,
+                ) {
+                    val intent =
+                        Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            type = "application/csv"
+                            putExtra(Intent.EXTRA_TITLE, "Meshtastic_rangetest_$timestamp.csv")
+                        }
+                    exportRangeTestLauncher.launch(intent)
+                }
+
+                val exportDataLauncher =
+                    rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                        if (it.resultCode == RESULT_OK) {
+                            it.data?.data?.let { uri -> settingsViewModel.saveDataCsv(uri) }
+                        }
+                    }
+                SettingsItem(
+                    text = stringResource(R.string.export_data_csv),
+                    leadingIcon = Icons.Rounded.Output,
+                    trailingIcon = null,
+                ) {
+                    val intent =
+                        Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            type = "application/csv"
+                            putExtra(Intent.EXTRA_TITLE, "Meshtastic_datalog_$timestamp.csv")
+                        }
+                    exportDataLauncher.launch(intent)
+                }
+
+                SettingsItem(
+                    text = stringResource(R.string.intro_show),
+                    leadingIcon = Icons.Rounded.WavingHand,
+                    trailingIcon = null,
+                ) {
+                    settingsViewModel.showAppIntro()
+                }
+
+                AppVersionButton(excludedModulesUnlocked) { settingsViewModel.unlockExcludedModules() }
             }
         }
+    }
 }
 
 private const val UNLOCK_CLICK_COUNT = 5 // Number of clicks required to unlock excluded modules.

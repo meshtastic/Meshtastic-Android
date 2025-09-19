@@ -43,7 +43,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLinkStyles
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -200,13 +199,7 @@ fun DeviceConfigItemList(deviceConfig: DeviceConfig, enabled: Boolean, onSaveCli
                 enabled = enabled,
                 selectedItem = deviceInput.role,
                 onItemSelected = { selectedRole = it },
-                summary =
-                buildAnnotatedString {
-                    append(stringResource(id = deviceInput.role.stringRes))
-                    append("\n")
-                    append(stringResource(id = deviceInput.role.description))
-                }
-                    .toString(),
+                summary = stringResource(id = deviceInput.role.description),
             )
         }
         item { HorizontalDivider() }
@@ -216,13 +209,7 @@ fun DeviceConfigItemList(deviceConfig: DeviceConfig, enabled: Boolean, onSaveCli
                 enabled = enabled,
                 selectedItem = deviceInput.rebroadcastMode,
                 onItemSelected = { deviceInput = deviceInput.copy { rebroadcastMode = it } },
-                summary =
-                buildAnnotatedString {
-                    append(stringResource(id = deviceInput.rebroadcastMode.stringRes))
-                    append("\n")
-                    append(stringResource(id = deviceInput.rebroadcastMode.description))
-                }
-                    .toString(),
+                summary = stringResource(id = deviceInput.rebroadcastMode.description),
             )
         }
         item { HorizontalDivider() }
