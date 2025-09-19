@@ -83,4 +83,5 @@ dependencies {
     kover(projects.core.navigation)
     kover(projects.core.network)
     kover(projects.core.prefs)
+    kover(projects.feature.map)
 }
