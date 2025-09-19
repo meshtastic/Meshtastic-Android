@@ -55,13 +55,13 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import com.geeksville.mesh.R
-import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.ui.common.components.CopyIconButton
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
 import com.google.protobuf.ByteString
+import org.meshtastic.core.model.Channel
 
 @Composable
 private fun KeyStatusDialog(@StringRes title: Int, @StringRes text: Int, key: ByteString?, onDismiss: () -> Unit = {}) =

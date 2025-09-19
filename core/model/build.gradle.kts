@@ -16,10 +16,11 @@
  */
 
 plugins {
-    alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.kover)
+    alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.meshtastic.kotlinx.serialization)
 }
 
 android { namespace = "org.meshtastic.core.model" }
 
-dependencies {}
+dependencies { implementation(projects.core.proto) }

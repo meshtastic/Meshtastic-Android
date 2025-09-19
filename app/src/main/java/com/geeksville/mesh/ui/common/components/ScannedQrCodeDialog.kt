@@ -55,9 +55,9 @@ import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig.ModemPreset
 import com.geeksville.mesh.R
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.settings.radio.components.ChannelSelection
+import org.meshtastic.core.model.Channel
 
 @Composable
 fun ScannedQrCodeDialog(viewModel: UIViewModel, incoming: ChannelSet) {

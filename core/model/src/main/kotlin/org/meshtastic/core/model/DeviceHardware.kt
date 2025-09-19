@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.model
+package org.meshtastic.core.model
 
 import kotlinx.serialization.Serializable
 
@@ -33,5 +33,5 @@ data class DeviceHardware(
     val platformioTarget: String = "",
     val requiresDfu: Boolean? = null,
     val supportLevel: Int? = null,
-    val tags: List<String>? = null
+    val tags: List<String>? = null,
 )

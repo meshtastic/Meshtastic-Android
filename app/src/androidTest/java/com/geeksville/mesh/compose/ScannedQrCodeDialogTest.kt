@@ -29,21 +29,19 @@ import com.geeksville.mesh.R
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.ui.common.components.ScannedQrCodeDialog
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.meshtastic.core.model.Channel
 
 @RunWith(AndroidJUnit4::class)
 class ScannedQrCodeDialogTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+    @get:Rule val composeTestRule = createComposeRule()
 
-    private fun getString(id: Int): String =
-        InstrumentationRegistry.getInstrumentation().targetContext.getString(id)
+    private fun getString(id: Int): String = InstrumentationRegistry.getInstrumentation().targetContext.getString(id)
 
     private fun getRandomKey() = Channel.getRandomKey()
 
@@ -56,26 +54,28 @@ class ScannedQrCodeDialogTest {
         settings.addAll(
             listOf(
                 Channel.default.settings,
-                channelSettings { name = "2"; psk = getRandomKey() },
-                channelSettings { name = "3"; psk = getRandomKey() },
-                channelSettings { name = "admin"; psk = getRandomKey() },
-            )
+                channelSettings {
+                    name = "2"
+                    psk = getRandomKey()
+                },
+                channelSettings {
+                    name = "3"
+                    psk = getRandomKey()
+                },
+                channelSettings {
+                    name = "admin"
+                    psk = getRandomKey()
+                },
+            ),
         )
-        loraConfig = Channel.default.loraConfig
-            .copy { modemPreset = ConfigProtos.Config.LoRaConfig.ModemPreset.SHORT_FAST }
+        loraConfig =
+            Channel.default.loraConfig.copy { modemPreset = ConfigProtos.Config.LoRaConfig.ModemPreset.SHORT_FAST }
     }
 
-    private fun testScannedQrCodeDialog(
-        onDismiss: () -> Unit = {},
-        onConfirm: (ChannelSet) -> Unit = {},
-    ) = composeTestRule.setContent {
-        ScannedQrCodeDialog(
-            channels = channels,
-            incoming = incoming,
-            onDismiss = onDismiss,
-            onConfirm = onConfirm,
-        )
-    }
+    private fun testScannedQrCodeDialog(onDismiss: () -> Unit = {}, onConfirm: (ChannelSet) -> Unit = {}) =
+        composeTestRule.setContent {
+            ScannedQrCodeDialog(channels = channels, incoming = incoming, onDismiss = onDismiss, onConfirm = onConfirm)
+        }
 
     @Test
     fun testScannedQrCodeDialog_showsDialogTitle() {
@@ -149,11 +149,12 @@ class ScannedQrCodeDialogTest {
         }
 
         // Verify onConfirm is called with the correct ChannelSet
-        val expectedChannelSet = channels.copy {
-            val list = LinkedHashSet(settings + incoming.settingsList)
-            settings.clear()
-            settings.addAll(list)
-        }
+        val expectedChannelSet =
+            channels.copy {
+                val list = LinkedHashSet(settings + incoming.settingsList)
+                settings.clear()
+                settings.addAll(list)
+            }
         Assert.assertEquals(expectedChannelSet, actualChannelSet)
     }
 }
