@@ -204,6 +204,7 @@ dependencies {
     implementation(projects.core.navigation)
     implementation(projects.core.network)
     implementation(projects.core.prefs)
+    implementation(projects.core.proto)
 
     // Bundles
     implementation(libs.bundles.markdown)
