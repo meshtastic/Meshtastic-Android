@@ -34,14 +34,12 @@ import com.google.protobuf.gradle.proto
  */
 
 plugins {
-    alias(libs.plugins.kover)
     alias(libs.plugins.meshtastic.android.library)
     alias(libs.plugins.protobuf)
 }
 
 android {
     namespace = "org.meshtastic.core.proto"
-    sourceSets { named("main") { proto { srcDir("$rootDir/app/src/main/proto") } } }
 }
 
 // per protobuf-gradle-plugin docs, this is recommended for android
