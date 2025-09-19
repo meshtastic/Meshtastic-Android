@@ -60,25 +60,6 @@ import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 
-private val DeviceConfig.Role.stringRes: Int
-    get() =
-        when (this) {
-            DeviceConfig.Role.CLIENT -> R.string.role_client
-            DeviceConfig.Role.CLIENT_MUTE -> R.string.role_client_mute
-            DeviceConfig.Role.ROUTER -> R.string.role_router
-            DeviceConfig.Role.ROUTER_CLIENT -> R.string.role_router_client
-            DeviceConfig.Role.REPEATER -> R.string.role_repeater
-            DeviceConfig.Role.TRACKER -> R.string.role_tracker
-            DeviceConfig.Role.SENSOR -> R.string.role_sensor
-            DeviceConfig.Role.TAK -> R.string.role_tak
-            DeviceConfig.Role.CLIENT_HIDDEN -> R.string.role_client_hidden
-            DeviceConfig.Role.LOST_AND_FOUND -> R.string.role_lost_and_found
-            DeviceConfig.Role.TAK_TRACKER -> R.string.role_tak_tracker
-            DeviceConfig.Role.ROUTER_LATE -> R.string.role_router_late
-            else -> R.string.unrecognized
-        }
-
-// TODO: Add actual string resources
 private val DeviceConfig.Role.description: Int
     get() =
         when (this) {
@@ -97,19 +78,6 @@ private val DeviceConfig.Role.description: Int
             else -> R.string.unrecognized
         }
 
-private val DeviceConfig.RebroadcastMode.stringRes: Int
-    get() =
-        when (this) {
-            DeviceConfig.RebroadcastMode.ALL -> R.string.rebroadcast_mode_all
-            DeviceConfig.RebroadcastMode.ALL_SKIP_DECODING -> R.string.rebroadcast_mode_all_skip_decoding
-            DeviceConfig.RebroadcastMode.LOCAL_ONLY -> R.string.rebroadcast_mode_local_only
-            DeviceConfig.RebroadcastMode.KNOWN_ONLY -> R.string.rebroadcast_mode_known_only
-            DeviceConfig.RebroadcastMode.NONE -> R.string.rebroadcast_mode_none
-            DeviceConfig.RebroadcastMode.CORE_PORTNUMS_ONLY -> R.string.rebroadcast_mode_core_portnums_only
-            else -> R.string.unrecognized
-        }
-
-// TODO: Add actual string resources
 private val DeviceConfig.RebroadcastMode.description: Int
     get() =
         when (this) {
