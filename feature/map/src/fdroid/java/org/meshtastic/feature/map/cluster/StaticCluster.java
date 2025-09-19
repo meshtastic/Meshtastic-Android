@@ -15,9 +15,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.model.map.clustering;
+package org.meshtastic.feature.map.cluster;
 
-import com.geeksville.mesh.model.map.MarkerWithLabel;
+import org.meshtastic.feature.map.model.MarkerWithLabel;
 
 import org.osmdroid.util.BoundingBox;
 import org.osmdroid.util.GeoPoint;

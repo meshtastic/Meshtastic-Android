@@ -15,21 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.android
+package org.meshtastic.feature.map.model
 
-import android.app.Activity
-import android.content.Context
-import android.view.inputmethod.InputMethodManager
-import android.widget.Toast
+class CustomTileSource {
 
-// / show a toast
-fun Context.toast(message: CharSequence) = Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
-
-// / Utility function to hide the soft keyboard per stack overflow
-fun Activity.hideKeyboard() {
-    // Check if no view has focus:
-    currentFocus?.let { v ->
-        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-        imm?.hideSoftInputFromWindow(v.windowToken, 0)
+    companion object {
+        fun getTileSource(index: Int) {
+            index
+        }
     }
 }

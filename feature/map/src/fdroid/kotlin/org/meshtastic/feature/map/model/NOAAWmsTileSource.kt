@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.model.map
+package org.meshtastic.feature.map.model
 
 import android.content.res.Resources
 import android.util.Log

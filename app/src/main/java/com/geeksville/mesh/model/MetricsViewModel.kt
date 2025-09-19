@@ -41,7 +41,6 @@ import com.geeksville.mesh.android.prefs.MapPrefs
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.entity.FirmwareRelease
 import com.geeksville.mesh.database.entity.MeshLog
-import com.geeksville.mesh.model.map.CustomTileSource
 import com.geeksville.mesh.repository.api.DeviceHardwareRepository
 import com.geeksville.mesh.repository.api.FirmwareReleaseRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
@@ -64,6 +63,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.feature.map.model.CustomTileSource
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter
