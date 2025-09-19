@@ -15,15 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.model.map
+package org.meshtastic.feature.map.model
 
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.RectF
 import android.view.MotionEvent
-import com.geeksville.mesh.android.dpToPx
-import com.geeksville.mesh.android.spToPx
+import org.meshtastic.feature.map.dpToPx
+import org.meshtastic.feature.map.spToPx
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Marker
 import org.osmdroid.views.overlay.Polygon

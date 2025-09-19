@@ -15,11 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-plugins {
-    alias(libs.plugins.kover)
-    alias(libs.plugins.meshtastic.android.library)
+package org.meshtastic.feature.map.model
+
+class CustomTileSource {
+
+    companion object {
+        fun getTileSource(index: Int) {
+            index
+        }
+    }
 }
-
-android { namespace = "org.meshtastic.feature.map" }
-
-dependencies { implementation(libs.bundles.osm) }

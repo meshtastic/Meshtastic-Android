@@ -15,8 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.util
+package org.meshtastic.feature.map
 
+import android.content.Context
+import android.util.TypedValue
 import org.osmdroid.util.BoundingBox
 import org.osmdroid.util.GeoPoint
 import kotlin.math.log2
@@ -69,3 +71,11 @@ fun BoundingBox.zoomIn(zoomFactor: Double): BoundingBox {
         center.longitude - newLonDiff / 2,
     )
 }
+
+// Converts SP to pixels.
+fun Context.spToPx(sp: Float): Int =
+    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_SP, sp, resources.displayMetrics).toInt()
+
+// Converts DP to pixels.
+fun Context.dpToPx(dp: Float): Int =
+    TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp, resources.displayMetrics).toInt()
