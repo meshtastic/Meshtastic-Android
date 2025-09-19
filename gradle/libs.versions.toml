@@ -28,7 +28,7 @@ ktorfit = "2.6.4"
 
 # Other
 coil = "3.3.0"
-dd-sdk-android = "3.0.0"
+dd-sdk-android = "3.1.0"
 detekt = "1.23.8"
 devtools-ksp = "2.2.20-2.0.2"
 markdownRenderer = "0.37.0"
@@ -92,7 +92,7 @@ compose-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata
 # Google
 android-desugarJdkLibs = { module = "com.android.tools:desugar_jdk_libs", version = "2.1.5" }
 firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
-firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.2.0" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version = "34.3.0" }
 firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
 firebase-performance = { module = "com.google.firebase:firebase-perf" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
@@ -199,7 +199,6 @@ coil = ["coil", "coil-network-core", "coil-network-okhttp", "coil-svg"]
 datadog = ["dd-sdk-android-compose", "dd-sdk-android-logs", "dd-sdk-android-okhttp", "dd-sdk-android-rum", "dd-sdk-android-session-replay", "dd-sdk-android-session-replay-compose", "dd-sdk-android-timber", "dd-sdk-android-trace", "dd-sdk-android-trace-otel"]
 markdown = ["markdown-renderer", "markdown-renderer-m3", "markdown-renderer-android"]
 osm = ["osmdroid-android", "osmbonuspack", "mgrs"]
-protobuf = ["protobuf-kotlin"]
 
 # Testing
 testing = ["junit", "ext-junit"]

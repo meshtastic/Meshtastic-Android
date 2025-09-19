@@ -18,15 +18,13 @@
 package com.geeksville.mesh.repository.api
 
 import android.app.Application
-import com.geeksville.mesh.network.model.NetworkDeviceHardware
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
+import org.meshtastic.core.network.model.NetworkDeviceHardware
 import javax.inject.Inject
 
-class DeviceHardwareJsonDataSource @Inject constructor(
-    private val application: Application,
-) {
+class DeviceHardwareJsonDataSource @Inject constructor(private val application: Application) {
     @OptIn(ExperimentalSerializationApi::class)
     fun loadDeviceHardwareFromJsonAsset(): List<NetworkDeviceHardware> {
         val inputStream = application.assets.open("device_hardware.json")

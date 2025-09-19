@@ -64,11 +64,11 @@ import com.geeksville.mesh.AppOnlyProtos
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig
 import com.geeksville.mesh.R
-import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.getChannel
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
+import org.meshtastic.core.model.Channel
 
 private const val PRECISE_POSITION_BITS = 32
 

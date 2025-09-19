@@ -46,7 +46,6 @@ import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.ChargingStation
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.ForkLeft
 import androidx.compose.material.icons.filled.Height
@@ -128,16 +127,12 @@ import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.FirmwareRelease
 import com.geeksville.mesh.database.entity.asDeviceVersion
-import com.geeksville.mesh.model.DeviceHardware
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.isUnmessageableRole
-import com.geeksville.mesh.navigation.NodeDetailRoutes
-import com.geeksville.mesh.navigation.Route
-import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.service.ServiceAction
 import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.common.components.TitledCard
@@ -163,6 +158,10 @@ import com.geeksville.mesh.util.toDistanceString
 import com.geeksville.mesh.util.toSmallDistanceString
 import com.geeksville.mesh.util.toSpeedString
 import com.mikepenz.markdown.m3.Markdown
+import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.navigation.NodeDetailRoutes
+import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.navigation.SettingsRoutes
 
 private data class VectorMetricInfo(
     @StringRes val label: Int,

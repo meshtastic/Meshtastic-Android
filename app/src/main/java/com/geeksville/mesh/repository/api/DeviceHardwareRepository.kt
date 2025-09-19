@@ -21,10 +21,10 @@ import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.warn
 import com.geeksville.mesh.database.entity.DeviceHardwareEntity
 import com.geeksville.mesh.database.entity.asExternalModel
-import com.geeksville.mesh.model.DeviceHardware
-import com.geeksville.mesh.network.DeviceHardwareRemoteDataSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.network.DeviceHardwareRemoteDataSource
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton

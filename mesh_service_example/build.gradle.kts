@@ -14,41 +14,50 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
+import com.geeksville.mesh.buildlogic.FlavorDimension
+import com.geeksville.mesh.buildlogic.MeshtasticFlavor
+
+/*
+ * Copyright (c) 2025 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
 
 plugins {
     alias(libs.plugins.meshtastic.android.application)
     alias(libs.plugins.meshtastic.android.application.compose)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.protobuf)
     alias(libs.plugins.kover)
 }
 
 android {
     namespace = "com.meshtastic.android.meshserviceexample"
     buildFeatures { aidl = true }
-}
-
-// per protobuf-gradle-plugin docs, this is recommended for android
-protobuf {
-    protoc { protoc { artifact = "com.google.protobuf:protoc:4.32.1" } }
-    generateProtoTasks {
-        all().forEach { task ->
-            task.builtins {
-                create("java")
-                create("kotlin")
-            }
-        }
+    defaultConfig {
+        // Force this app to use the Google variant of any modules it's using that apply AndroidLibraryConventionPlugin
+        missingDimensionStrategy(FlavorDimension.marketplace.name, MeshtasticFlavor.google.name)
     }
 }
 
 dependencies {
+    implementation(projects.core.proto)
+
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
     implementation(libs.constraintlayout)
-
-    implementation(libs.bundles.protobuf)
 
     implementation(libs.kotlinx.serialization.json)
 

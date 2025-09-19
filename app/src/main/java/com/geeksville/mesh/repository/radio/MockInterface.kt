@@ -32,13 +32,13 @@ import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.config
 import com.geeksville.mesh.deviceMetadata
 import com.geeksville.mesh.fromRadio
-import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.getInitials
 import com.geeksville.mesh.queueStatus
 import com.google.protobuf.ByteString
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.delay
+import org.meshtastic.core.model.Channel
 import kotlin.random.Random
 
 private val defaultLoRaConfig =

@@ -23,6 +23,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navDeepLink
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.map.MapScreen
+import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
+import org.meshtastic.core.navigation.MapRoutes
+import org.meshtastic.core.navigation.NodesRoutes
 
 fun NavGraphBuilder.mapGraph(navController: NavHostController, uiViewModel: UIViewModel) {
     composable<MapRoutes.Map>(deepLinks = listOf(navDeepLink<MapRoutes.Map>(basePath = "$DEEP_LINK_BASE_URI/map"))) {

@@ -20,6 +20,8 @@ package com.geeksville.mesh.ui.settings
 import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
+import android.provider.Settings.ACTION_APP_LOCALE_SETTINGS
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -30,6 +32,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.rounded.FormatPaint
 import androidx.compose.material.icons.rounded.Language
@@ -49,13 +52,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.gpsDisabled
-import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
@@ -70,9 +73,11 @@ import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
 import com.geeksville.mesh.util.LanguageUtils
+import com.geeksville.mesh.util.LanguageUtils.getLanguageMap
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.delay
+import org.meshtastic.core.navigation.Route
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -271,12 +276,27 @@ fun SettingsScreen(
                     settingsViewModel.setProvideLocation(!provideLocation)
                 }
 
+                val settingsLauncher =
+                    rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {}
+                // On Android 12 and below, system app settings for language are not available. Use the in-app language
+                // picker for these devices.
+                val useInAppLangPicker = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
                 SettingsItem(
                     text = stringResource(R.string.preferences_language),
                     leadingIcon = Icons.Rounded.Language,
-                    trailingIcon = null,
+                    trailingIcon = if (useInAppLangPicker) null else Icons.AutoMirrored.Rounded.KeyboardArrowRight,
                 ) {
-                    showLanguagePickerDialog = true
+                    if (useInAppLangPicker) {
+                        showLanguagePickerDialog = true
+                    } else {
+                        val intent = Intent(ACTION_APP_LOCALE_SETTINGS, "package:${context.packageName}".toUri())
+                        if (intent.resolveActivity(context.packageManager) != null) {
+                            settingsLauncher.launch(intent)
+                        } else {
+                            // Fall back to the in-app picker
+                            showLanguagePickerDialog = true
+                        }
+                    }
                 }
 
                 SettingsItem(
@@ -383,14 +403,17 @@ private fun AppVersionButton(excludedModulesUnlocked: Boolean, onUnlockExcludedM
 @Composable
 private fun LanguagePickerDialog(onDismiss: () -> Unit) {
     val context = LocalContext.current
-    val languages = remember {
-        LanguageUtils.getLanguageTags(context).mapValues { (_, value) -> { LanguageUtils.setLocale(value) } }
+    val choices = remember {
+        context
+            .getLanguageMap()
+            .map { (languageTag, languageName) -> languageName to { LanguageUtils.setAppLocale(languageTag) } }
+            .toMap()
     }
 
     MultipleChoiceAlertDialog(
         title = stringResource(R.string.preferences_language),
         message = "",
-        choices = languages,
+        choices = choices,
         onDismissRequest = onDismiss,
     )
 }

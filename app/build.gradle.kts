@@ -17,7 +17,6 @@
 
 import com.geeksville.mesh.buildlogic.Configs
 import com.geeksville.mesh.buildlogic.GitVersionValueSource
-import com.google.protobuf.gradle.proto
 import java.io.FileInputStream
 import java.util.Properties
 
@@ -32,7 +31,6 @@ plugins {
     alias(libs.plugins.meshtastic.android.room)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.meshtastic.kotlinx.serialization)
-    alias(libs.plugins.protobuf)
     alias(libs.plugins.devtools.ksp)
     alias(libs.plugins.datadog)
     alias(libs.plugins.secrets)
@@ -147,7 +145,6 @@ android {
     bundle { language { enableSplit = false } }
     buildFeatures { aidl = true }
     sourceSets {
-        named("main") { proto { srcDir("src/main/proto") } }
         // Adds exported schema location as test app assets.
         named("androidTest") { assets.srcDirs(files("$projectDir/schemas")) }
     }
@@ -164,27 +161,8 @@ datadog {
     //    }
 }
 
-// per protobuf-gradle-plugin docs, this is recommended for android
-protobuf {
-    protoc { artifact = libs.protoc.get().toString() }
-    generateProtoTasks {
-        all().forEach { task ->
-            task.builtins {
-                create("java") {}
-                create("kotlin") {}
-            }
-        }
-    }
-}
-
 // workaround for https://github.com/google/ksp/issues/1590
 androidComponents {
-    onVariants(selector().all()) { variant ->
-        project.afterEvaluate {
-            val variantNameCapped = variant.name.replaceFirstChar { it.uppercase() }
-            tasks.named("ksp${variantNameCapped}Kotlin") { dependsOn("generate${variantNameCapped}Proto") }
-        }
-    }
     onVariants(selector().withBuildType("release")) { variant ->
         if (variant.flavorName == "google") {
             val variantNameCapped = variant.name.replaceFirstChar { it.uppercase() }
@@ -200,14 +178,16 @@ androidComponents {
 project.afterEvaluate { logger.lifecycle("Version code is set to: ${android.defaultConfig.versionCode}") }
 
 dependencies {
-    implementation(projects.navigation)
-    implementation(projects.network)
+    implementation(projects.core.model)
+    implementation(projects.core.navigation)
+    implementation(projects.core.network)
+    implementation(projects.core.prefs)
+    implementation(projects.core.proto)
 
     // Bundles
     implementation(libs.bundles.markdown)
     implementation(libs.bundles.coroutines)
     implementation(libs.bundles.datastore)
-    implementation(libs.bundles.protobuf)
     implementation(libs.bundles.coil)
 
     // ZXing

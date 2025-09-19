@@ -21,7 +21,6 @@ import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
 import com.geeksville.mesh.model.NodeSortOption
-import com.geeksville.mesh.util.LanguageUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -29,7 +28,6 @@ import kotlinx.coroutines.flow.update
 import java.util.concurrent.ConcurrentHashMap
 
 interface UiPrefs {
-    var lang: String
     var theme: Int
     val themeFlow: StateFlow<Int>
     var appIntroCompleted: Boolean
@@ -84,7 +82,6 @@ class UiPrefsImpl(private val prefs: SharedPreferences) : UiPrefs {
         prefs.registerOnSharedPreferenceChangeListener(sharedPreferencesListener)
     }
 
-    override var lang: String by PrefDelegate(prefs, "lang", LanguageUtils.SYSTEM_DEFAULT)
     override var hasShownNotPairedWarning: Boolean by PrefDelegate(prefs, "has_shown_not_paired_warning", false)
     override var nodeSortOption: Int by PrefDelegate(prefs, "node-sort-option", NodeSortOption.VIA_FAVORITE.ordinal)
     override var includeUnknown: Boolean by PrefDelegate(prefs, "include-unknown", false)
