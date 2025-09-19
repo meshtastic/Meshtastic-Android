@@ -147,8 +147,7 @@ class DebugSearchTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val activeFiltersLabel = context.getString(R.string.debug_active_filters)
         composeTestRule.setContent {
-            var filterTexts by
-                androidx.compose.runtime.remember { mutableStateOf(listOf<String>()) }
+            var filterTexts by androidx.compose.runtime.remember { mutableStateOf(listOf<String>()) }
             var customFilterText by androidx.compose.runtime.remember { mutableStateOf("") }
             Column(modifier = Modifier.padding(16.dp)) {
                 com.geeksville.mesh.ui.debug.DebugActiveFilters(
