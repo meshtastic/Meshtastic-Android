@@ -14,7 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import com.google.protobuf.gradle.proto
 
 /*
  * Copyright (c) 2025 Meshtastic LLC
@@ -38,9 +37,7 @@ plugins {
     alias(libs.plugins.protobuf)
 }
 
-android {
-    namespace = "org.meshtastic.core.proto"
-}
+android { namespace = "org.meshtastic.core.proto" }
 
 // per protobuf-gradle-plugin docs, this is recommended for android
 protobuf {
