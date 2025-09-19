@@ -48,7 +48,6 @@ import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.MODE_DYNAMIC
 import com.geeksville.mesh.ui.intro.AppIntroductionScreen
 import com.geeksville.mesh.ui.sharing.toSharedContact
-import com.geeksville.mesh.util.LanguageUtils
 import dagger.hilt.android.AndroidEntryPoint
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import javax.inject.Inject
@@ -78,10 +77,6 @@ class MainActivity :
         super.onCreate(savedInstanceState)
 
         if (savedInstanceState == null) {
-            val lang = uiPrefs.lang
-            if (lang != LanguageUtils.SYSTEM_MANAGED) LanguageUtils.migrateLanguagePrefs(uiPrefs)
-            info("in-app language is ${LanguageUtils.getLocale()}")
-
             if (uiPrefs.appIntroCompleted) {
                 (application as GeeksvilleApplication).askToRate(this)
             }

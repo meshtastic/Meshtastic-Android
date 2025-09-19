@@ -22,61 +22,59 @@ import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.android.prefs.UiPrefs
 import org.xmlpull.v1.XmlPullParser
 import java.util.Locale
 
 object LanguageUtils : Logging {
 
     const val SYSTEM_DEFAULT = "zz"
-    const val SYSTEM_MANAGED = "appcompat"
 
-    fun getLocale(): String = AppCompatDelegate.getApplicationLocales().toLanguageTags().ifEmpty { SYSTEM_DEFAULT }
-
-    fun setLocale(lang: String) {
+    fun setAppLocale(languageTag: String) {
         AppCompatDelegate.setApplicationLocales(
-            if (lang == SYSTEM_DEFAULT) {
+            if (languageTag == SYSTEM_DEFAULT) {
                 LocaleListCompat.getEmptyLocaleList()
             } else {
-                LocaleListCompat.forLanguageTags(lang)
+                LocaleListCompat.forLanguageTags(languageTag)
             },
         )
     }
 
-    fun migrateLanguagePrefs(uiPrefs: UiPrefs) {
-        val currentLang = uiPrefs.lang
-        debug("Migrating in-app language prefs: $currentLang")
-        uiPrefs.lang = SYSTEM_MANAGED
-        setLocale(currentLang)
-    }
+    /** Using locales_config.xml, maps language tags to their localized language names (e.g.: "en" -> "English") */
+    @Suppress("CyclomaticComplexMethod")
+    fun Context.getLanguageMap(): Map<String, String> {
+        val languageTags = buildList {
+            add(SYSTEM_DEFAULT)
 
-    /** Build a list from locales_config.xml of native language names paired to its Locale tag (ex: "English", "en") */
-    fun getLanguageTags(context: Context): Map<String, String> {
-        val languageTags = mutableListOf(SYSTEM_DEFAULT)
-        try {
-            context.resources.getXml(R.xml.locales_config).use {
-                while (it.eventType != XmlPullParser.END_DOCUMENT) {
-                    if (it.eventType == XmlPullParser.START_TAG && it.name == "locale") {
-                        it.getAttributeValue(0)?.let { tag -> languageTags += tag }
+            try {
+                resources.getXml(R.xml.locales_config).use { parser ->
+                    while (parser.eventType != XmlPullParser.END_DOCUMENT) {
+                        if (parser.eventType == XmlPullParser.START_TAG && parser.name == "locale") {
+                            val languageTag =
+                                parser.getAttributeValue("http://schemas.android.com/apk/res/android", "name")
+                            languageTag?.let { add(it) }
+                        }
+                        parser.next()
                     }
-                    it.next()
                 }
+            } catch (e: Exception) {
+                errormsg("Error parsing locale_config.xml: ${e.message}")
             }
-        } catch (e: Exception) {
-            errormsg("Error parsing locale_config.xml ${e.message}")
         }
-        return languageTags.associateBy { tag ->
-            val loc = Locale.forLanguageTag(tag)
-            when (tag) {
-                SYSTEM_DEFAULT -> context.getString(R.string.preferences_system_default)
-                "fr-HT" -> context.getString(R.string.fr_HT)
-                "pt-BR" -> context.getString(R.string.pt_BR)
-                "zh-CN" -> context.getString(R.string.zh_CN)
-                "zh-TW" -> context.getString(R.string.zh_TW)
-                else ->
-                    loc.getDisplayLanguage(loc).replaceFirstChar {
-                        if (it.isLowerCase()) it.titlecase(loc) else it.toString()
+
+        return languageTags.associateWith { languageTag ->
+            when (languageTag) {
+                SYSTEM_DEFAULT -> getString(R.string.preferences_system_default)
+                "fr-HT" -> getString(R.string.fr_HT)
+                "pt-BR" -> getString(R.string.pt_BR)
+                "zh-CN" -> getString(R.string.zh_CN)
+                "zh-TW" -> getString(R.string.zh_TW)
+                else -> {
+                    Locale.forLanguageTag(languageTag).let { locale ->
+                        locale.getDisplayLanguage(locale).replaceFirstChar { char ->
+                            if (char.isLowerCase()) char.titlecase(locale) else char.toString()
+                        }
                     }
+                }
             }
         }
     }
