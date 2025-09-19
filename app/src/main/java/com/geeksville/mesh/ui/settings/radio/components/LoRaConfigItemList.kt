@@ -83,8 +83,18 @@ fun LoRaConfigItemList(
     val primaryChannel by remember(loraInput) { mutableStateOf(Channel(primarySettings, loraInput)) }
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        item { PreferenceCategory(text = stringResource(R.string.lora_config)) }
-
+        item { PreferenceCategory(text = stringResource(R.string.options)) }
+        item {
+            DropDownPreference(
+                title = stringResource(R.string.region_frequency_plan),
+                summary = stringResource(id = R.string.config_lora_region_summary),
+                enabled = enabled,
+                items = RegionInfo.entries.map { it.regionCode to it.description },
+                selectedItem = loraInput.region,
+                onItemSelected = { loraInput = loraInput.copy { region = it } },
+            )
+        }
+        item { HorizontalDivider() }
         item {
             SwitchPreference(
                 title = stringResource(R.string.use_modem_preset),
@@ -99,6 +109,7 @@ fun LoRaConfigItemList(
             item {
                 DropDownPreference(
                     title = stringResource(R.string.modem_preset),
+                    summary = stringResource(id = R.string.config_lora_modem_preset_summary),
                     enabled = enabled && loraInput.usePreset,
                     items =
                     LoRaConfig.ModemPreset.entries
@@ -140,37 +151,26 @@ fun LoRaConfigItemList(
                 )
             }
         }
+        item { PreferenceCategory(text = stringResource(R.string.advanced)) }
 
         item {
-            EditTextPreference(
-                title = stringResource(R.string.frequency_offset_mhz),
-                value = loraInput.frequencyOffset,
+            SwitchPreference(
+                title = stringResource(R.string.ignore_mqtt),
+                checked = loraInput.ignoreMqtt,
                 enabled = enabled,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { loraInput = loraInput.copy { frequencyOffset = it } },
-            )
-        }
-
-        item {
-            DropDownPreference(
-                title = stringResource(R.string.region_frequency_plan),
-                enabled = enabled,
-                items = RegionInfo.entries.map { it.regionCode to it.description },
-                selectedItem = loraInput.region,
-                onItemSelected = { loraInput = loraInput.copy { region = it } },
+                onCheckedChange = { loraInput = loraInput.copy { ignoreMqtt = it } },
             )
         }
         item { HorizontalDivider() }
-
         item {
-            EditTextPreference(
-                title = stringResource(R.string.hop_limit),
-                value = loraInput.hopLimit,
+            SwitchPreference(
+                title = stringResource(R.string.ok_to_mqtt),
+                checked = loraInput.configOkToMqtt,
                 enabled = enabled,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { loraInput = loraInput.copy { hopLimit = it } },
+                onCheckedChange = { loraInput = loraInput.copy { configOkToMqtt = it } },
             )
         }
+        item { HorizontalDivider() }
 
         item {
             SwitchPreference(
@@ -181,21 +181,23 @@ fun LoRaConfigItemList(
             )
         }
         item { HorizontalDivider() }
-
         item {
-            SignedIntegerEditTextPreference(
-                title = stringResource(R.string.tx_power_dbm),
-                value = loraInput.txPower,
+            EditTextPreference(
+                title = stringResource(R.string.hop_limit),
+                summary = stringResource(id = R.string.config_lora_hop_limit_summary),
+                value = loraInput.hopLimit,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { loraInput = loraInput.copy { txPower = it } },
+                onValueChanged = { loraInput = loraInput.copy { hopLimit = it } },
             )
         }
+        item { HorizontalDivider() }
 
         item {
             var isFocused by remember { mutableStateOf(false) }
             EditTextPreference(
                 title = stringResource(R.string.frequency_slot),
+                summary = stringResource(id = R.string.config_lora_frequency_slot_summary),
                 value = if (isFocused || loraInput.channelNum != 0) loraInput.channelNum else primaryChannel.channelNum,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -207,17 +209,7 @@ fun LoRaConfigItemList(
                 },
             )
         }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.override_duty_cycle),
-                checked = loraInput.overrideDutyCycle,
-                enabled = enabled,
-                onCheckedChange = { loraInput = loraInput.copy { overrideDutyCycle = it } },
-            )
-        }
         item { HorizontalDivider() }
-
         item {
             SwitchPreference(
                 title = stringResource(R.string.sx126x_rx_boosted_gain),
@@ -227,7 +219,6 @@ fun LoRaConfigItemList(
             )
         }
         item { HorizontalDivider() }
-
         item {
             var isFocused by remember { mutableStateOf(false) }
             EditTextPreference(
@@ -244,6 +235,16 @@ fun LoRaConfigItemList(
                 onValueChanged = { loraInput = loraInput.copy { overrideFrequency = it } },
             )
         }
+        item { HorizontalDivider() }
+        item {
+            SignedIntegerEditTextPreference(
+                title = stringResource(R.string.tx_power_dbm),
+                value = loraInput.txPower,
+                enabled = enabled,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { loraInput = loraInput.copy { txPower = it } },
+            )
+        }
 
         if (hasPaFan) {
             item {
@@ -256,26 +257,6 @@ fun LoRaConfigItemList(
             }
             item { HorizontalDivider() }
         }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.ignore_mqtt),
-                checked = loraInput.ignoreMqtt,
-                enabled = enabled,
-                onCheckedChange = { loraInput = loraInput.copy { ignoreMqtt = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.ok_to_mqtt),
-                checked = loraInput.configOkToMqtt,
-                enabled = enabled,
-                onCheckedChange = { loraInput = loraInput.copy { configOkToMqtt = it } },
-            )
-        }
-        item { HorizontalDivider() }
 
         item {
             PreferenceFooter(

@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.common.components
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
@@ -54,6 +55,7 @@ import org.meshtastic.core.model.Channel
 fun EditBase64Preference(
     modifier: Modifier = Modifier,
     title: String,
+    summary: String? = null,
     value: ByteString,
     enabled: Boolean,
     readOnly: Boolean = false,
@@ -79,50 +81,59 @@ fun EditBase64Preference(
             onGenerateKey != null && !isFocused -> Icons.TwoTone.Refresh to stringResource(R.string.reset)
             else -> null to null
         }
-
-    OutlinedTextField(
-        value = valueState,
-        onValueChange = {
-            valueState = it
-            runCatching { it.toByteString() }.onSuccess(onValueChange)
-        },
-        modifier = modifier.fillMaxWidth().onFocusChanged { focusState -> isFocused = focusState.isFocused },
-        enabled = enabled,
-        readOnly = readOnly,
-        label = { Text(text = title) },
-        isError = isError,
-        keyboardOptions =
-        KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
-        keyboardActions = keyboardActions,
-        trailingIcon = {
-            if (icon != null) {
-                IconButton(
-                    onClick = {
-                        if (isError) {
-                            valueState = value.encodeToString()
-                            onValueChange(value)
-                        } else if (onGenerateKey != null && !isFocused) {
-                            onGenerateKey()
-                        }
-                    },
-                    enabled = enabled,
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = description,
-                        tint =
-                        if (isError) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            LocalContentColor.current
+    Column(modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+        OutlinedTextField(
+            value = valueState,
+            onValueChange = {
+                valueState = it
+                runCatching { it.toByteString() }.onSuccess(onValueChange)
+            },
+            modifier = Modifier.fillMaxWidth().onFocusChanged { focusState -> isFocused = focusState.isFocused },
+            enabled = enabled,
+            readOnly = readOnly,
+            label = { Text(text = title) },
+            isError = isError,
+            keyboardOptions =
+            KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+            keyboardActions = keyboardActions,
+            trailingIcon = {
+                if (icon != null) {
+                    IconButton(
+                        onClick = {
+                            if (isError) {
+                                valueState = value.encodeToString()
+                                onValueChange(value)
+                            } else if (onGenerateKey != null && !isFocused) {
+                                onGenerateKey()
+                            }
                         },
-                    )
+                        enabled = enabled,
+                    ) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = description,
+                            tint =
+                            if (isError) {
+                                MaterialTheme.colorScheme.error
+                            } else {
+                                LocalContentColor.current
+                            },
+                        )
+                    }
+                } else if (trailingIcon != null) {
+                    trailingIcon()
                 }
-            } else if (trailingIcon != null) {
-                trailingIcon()
-            }
-        },
-    )
+            },
+        )
+        if (summary != null) {
+            Text(
+                text = summary,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
+    }
 }
 
 @Preview(showBackground = true)
@@ -130,6 +141,7 @@ fun EditBase64Preference(
 private fun EditBase64PreferencePreview() {
     EditBase64Preference(
         title = "Title",
+        summary = "This is a summary",
         value = Channel.getRandomKey(),
         enabled = true,
         keyboardActions = KeyboardActions {},

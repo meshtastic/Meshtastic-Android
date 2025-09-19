@@ -17,13 +17,14 @@
 
 package com.geeksville.mesh.ui.common.components
 
-import androidx.compose.foundation.background
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.twotone.KeyboardArrowDown
-import androidx.compose.material.icons.twotone.KeyboardArrowUp
-import androidx.compose.material3.DropdownMenu
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -31,11 +32,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import com.geeksville.mesh.R
+import androidx.compose.ui.unit.dp
 import com.google.protobuf.ProtocolMessageEnum
 
 @Composable
@@ -50,8 +48,9 @@ fun <T : Enum<T>> DropDownPreference(
     DropDownPreference(
         title = title,
         enabled = enabled,
-        items = selectedItem.declaringJavaClass.enumConstants
-            ?.filter { it.name != "UNRECOGNIZED" }?.map { it to it.name } ?: emptyList(),
+        items =
+        selectedItem.declaringJavaClass.enumConstants?.filter { it.name != "UNRECOGNIZED" }?.map { it to it.name }
+            ?: emptyList(),
         selectedItem = selectedItem,
         onItemSelected = onItemSelected,
         modifier = modifier,
@@ -59,6 +58,7 @@ fun <T : Enum<T>> DropDownPreference(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> DropDownPreference(
     title: String,
@@ -69,7 +69,7 @@ fun <T> DropDownPreference(
     modifier: Modifier = Modifier,
     summary: String? = null,
 ) {
-    var dropDownExpanded by remember { mutableStateOf(value = false) }
+    var expanded by remember { mutableStateOf(false) }
 
     val deprecatedItems: List<T> = remember {
         if (selectedItem is ProtocolMessageEnum) {
@@ -77,58 +77,46 @@ fun <T> DropDownPreference(
             val descriptor = (selectedItem as ProtocolMessageEnum).descriptorForType
 
             @Suppress("UNCHECKED_CAST")
-            enum?.filter { entries ->
-                descriptor.values.any { it.name == entries.name && it.options.deprecated }
-            } as? List<T> ?: emptyList() // Safe cast to List<T> or return emptyList if cast fails
+            enum?.filter { entries -> descriptor.values.any { it.name == entries.name && it.options.deprecated } }
+                as? List<T> ?: emptyList() // Safe cast to List<T> or return emptyList if cast fails
         } else {
             emptyList()
         }
     }
-    RegularPreference(
-        title = title,
-        subtitle = items.find { it.first == selectedItem }?.second
-            ?: stringResource(id = R.string.unrecognized),
-        onClick = {
-            dropDownExpanded = true
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = {
+            if (enabled) {
+                expanded = !expanded
+            }
         },
-        enabled = enabled,
-        trailingIcon = if (dropDownExpanded) {
-            Icons.TwoTone.KeyboardArrowUp
-        } else {
-            Icons.TwoTone.KeyboardArrowDown
-        },
-        summary = summary,
-        dropdownMenu = {
-            DropdownMenu(
-                expanded = dropDownExpanded,
-                onDismissRequest = { dropDownExpanded = !dropDownExpanded },
-            ) {
-                items.filterNot { it.first in deprecatedItems }.forEach { item ->
+        modifier = modifier.padding(vertical = 8.dp),
+    ) {
+        OutlinedTextField(
+            modifier = Modifier.fillMaxWidth().menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, enabled),
+            readOnly = true,
+            value = items.firstOrNull { it.first == selectedItem }?.second ?: "",
+            onValueChange = {},
+            label = { Text(title) },
+            trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+            colors = ExposedDropdownMenuDefaults.textFieldColors(),
+            enabled = enabled,
+            supportingText = { if (summary != null) Text(text = summary) },
+        )
+        ExposedDropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            items
+                .filterNot { it.first in deprecatedItems }
+                .forEach { selectionOption ->
                     DropdownMenuItem(
+                        text = { Text(selectionOption.second) },
                         onClick = {
-                            dropDownExpanded = false
-                            onItemSelected(item.first)
+                            onItemSelected(selectionOption.first)
+                            expanded = false
                         },
-                        modifier = modifier
-                            .background(
-                                color = if (selectedItem == item.first) {
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.3f)
-                                } else {
-                                    Color.Unspecified
-                                },
-                            ),
-                        text = {
-                            Text(
-                                text = item.second,
-                                overflow = TextOverflow.Ellipsis,
-                                maxLines = 1,
-                            )
-                        }
                     )
                 }
-            }
         }
-    )
+    }
 }
 
 @Preview(showBackground = true)
@@ -140,6 +128,6 @@ private fun DropDownPreferencePreview() {
         enabled = true,
         items = listOf("TEST1" to "text1", "TEST2" to "text2"),
         selectedItem = "TEST2",
-        onItemSelected = {}
+        onItemSelected = {},
     )
 }

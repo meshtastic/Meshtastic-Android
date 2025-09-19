@@ -219,6 +219,7 @@ private fun NavGraphBuilder.configRoutesScreens(navController: NavHostController
                     entry.name,
                     entry.screenComposable,
                 )
+
             else -> Unit // Should not happen if ConfigRoute enum is exhaustive for this context
         }
     }
@@ -374,7 +375,7 @@ enum class ConfigRoute(
     ;
 
     companion object {
-        fun filterExcludedFrom(metadata: DeviceMetadata?): List<ConfigRoute> = entries.filter {
+        private fun filterExcludedFrom(metadata: DeviceMetadata?): List<ConfigRoute> = entries.filter {
             when {
                 metadata == null -> true // Include all routes if metadata is null
                 it == BLUETOOTH -> metadata.hasBluetooth
@@ -382,6 +383,11 @@ enum class ConfigRoute(
                 else -> true // Include all other routes by default
             }
         }
+
+        val radioConfigRoutes = listOf(LORA, CHANNELS, SECURITY)
+
+        fun deviceConfigRoutes(metadata: DeviceMetadata?): List<ConfigRoute> =
+            filterExcludedFrom(metadata) - radioConfigRoutes
     }
 }
 

@@ -131,63 +131,87 @@ fun NetworkConfigItemList(
     }
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        item { PreferenceCategory(text = stringResource(R.string.network_config)) }
+        if (hasWifi) {
+            item { PreferenceCategory(text = stringResource(R.string.wifi_config)) }
+            item {
+                SwitchPreference(
+                    title = stringResource(R.string.wifi_enabled),
+                    summary = stringResource(id = R.string.config_network_wifi_enabled_summary),
+                    checked = networkInput.wifiEnabled,
+                    enabled = enabled && hasWifi,
+                    onCheckedChange = { networkInput = networkInput.copy { wifiEnabled = it } },
+                )
+                HorizontalDivider()
+            }
 
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.wifi_enabled),
-                checked = networkInput.wifiEnabled,
-                enabled = enabled && hasWifi,
-                onCheckedChange = { networkInput = networkInput.copy { wifiEnabled = it } },
-            )
-            HorizontalDivider()
+            item {
+                EditTextPreference(
+                    title = stringResource(R.string.ssid),
+                    value = networkInput.wifiSsid,
+                    maxSize = 32, // wifi_ssid max_size:33
+                    enabled = enabled && hasWifi,
+                    isError = false,
+                    keyboardOptions =
+                    KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { networkInput = networkInput.copy { wifiSsid = it } },
+                )
+            }
+
+            item {
+                EditPasswordPreference(
+                    title = stringResource(R.string.password),
+                    value = networkInput.wifiPsk,
+                    maxSize = 64, // wifi_psk max_size:65
+                    enabled = enabled && hasWifi,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { networkInput = networkInput.copy { wifiPsk = it } },
+                )
+            }
+
+            item {
+                Button(
+                    onClick = { zxingScan() },
+                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).height(48.dp),
+                    enabled = enabled && hasWifi,
+                ) {
+                    Text(text = stringResource(R.string.wifi_qr_code_scan))
+                }
+            }
         }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.ssid),
-                value = networkInput.wifiSsid,
-                maxSize = 32, // wifi_ssid max_size:33
-                enabled = enabled && hasWifi,
-                isError = false,
-                keyboardOptions =
-                KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { networkInput = networkInput.copy { wifiSsid = it } },
-            )
-        }
-
-        item {
-            EditPasswordPreference(
-                title = stringResource(R.string.psk),
-                value = networkInput.wifiPsk,
-                maxSize = 64, // wifi_psk max_size:65
-                enabled = enabled && hasWifi,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { networkInput = networkInput.copy { wifiPsk = it } },
-            )
-        }
-
-        item {
-            Button(
-                onClick = { zxingScan() },
-                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).height(48.dp),
-                enabled = enabled && hasWifi,
-            ) {
-                Text(text = stringResource(R.string.wifi_qr_code_scan))
+        if (hasEthernet) {
+            item { PreferenceCategory(text = stringResource(R.string.ethernet_config)) }
+            item {
+                SwitchPreference(
+                    title = stringResource(R.string.ethernet_enabled),
+                    summary = stringResource(id = R.string.config_network_eth_enabled_summary),
+                    checked = networkInput.ethEnabled,
+                    enabled = enabled && hasEthernet,
+                    onCheckedChange = { networkInput = networkInput.copy { ethEnabled = it } },
+                )
+                HorizontalDivider()
             }
         }
 
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.ethernet_enabled),
-                checked = networkInput.ethEnabled,
-                enabled = enabled && hasEthernet,
-                onCheckedChange = { networkInput = networkInput.copy { ethEnabled = it } },
-            )
-            HorizontalDivider()
+        if (hasEthernet || hasWifi) {
+            item { PreferenceCategory(text = stringResource(R.string.udp_config)) }
+
+            item {
+                SwitchPreference(
+                    title = stringResource(R.string.udp_enabled),
+                    summary = stringResource(id = R.string.config_network_udp_enabled_summary),
+                    checked = networkInput.enabledProtocols == 1,
+                    enabled = enabled,
+                    onCheckedChange = {
+                        networkInput = networkInput.copy { if (it) enabledProtocols = 1 else enabledProtocols = 0 }
+                    },
+                )
+            }
+
+            item { HorizontalDivider() }
         }
 
+        item { PreferenceCategory(text = stringResource(R.string.advanced)) }
         item {
             EditTextPreference(
                 title = stringResource(R.string.ntp_server),
@@ -282,22 +306,7 @@ fun NetworkConfigItemList(
             )
         }
         item { HorizontalDivider() }
-        if (hasEthernet || hasWifi) {
-            item { PreferenceCategory(text = stringResource(R.string.udp_config)) }
 
-            item {
-                SwitchPreference(
-                    title = stringResource(R.string.mesh_via_udp_enabled),
-                    checked = networkInput.enabledProtocols == 1,
-                    enabled = enabled,
-                    onCheckedChange = {
-                        networkInput = networkInput.copy { if (it) enabledProtocols = 1 else enabledProtocols = 0 }
-                    },
-                )
-            }
-
-            item { HorizontalDivider() }
-        }
         item {
             PreferenceFooter(
                 enabled = enabled && networkInput != networkConfig,

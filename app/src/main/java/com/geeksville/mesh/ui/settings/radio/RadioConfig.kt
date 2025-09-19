@@ -80,8 +80,18 @@ fun RadioConfigItemList(
             if (isManaged) {
                 ManagedMessage()
             }
+            ConfigRoute.radioConfigRoutes.forEach {
+                SettingsItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) {
+                    onRouteClick(it)
+                }
+            }
+        }
 
-            ConfigRoute.filterExcludedFrom(state.metadata).forEach {
+        TitledCard(title = stringResource(R.string.device_configuration), modifier = Modifier.padding(top = 16.dp)) {
+            if (isManaged) {
+                ManagedMessage()
+            }
+            ConfigRoute.deviceConfigRoutes(state.metadata).forEach {
                 SettingsItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) {
                     onRouteClick(it)
                 }
