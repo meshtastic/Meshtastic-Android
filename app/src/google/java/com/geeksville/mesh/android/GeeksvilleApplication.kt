@@ -49,7 +49,6 @@ import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.analytics.AnalyticsProvider
 import com.geeksville.mesh.analytics.FirebaseAnalytics
 import com.geeksville.mesh.android.prefs.AnalyticsPrefs
-import com.geeksville.mesh.model.DeviceHardware
 import com.geeksville.mesh.util.exceptionReporter
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailabilityLight
@@ -60,6 +59,7 @@ import com.google.firebase.crashlytics.setCustomKeys
 import com.google.firebase.initialize
 import com.suddenh4x.ratingdialog.AppRating
 import io.opentelemetry.api.GlobalOpenTelemetry
+import org.meshtastic.core.model.DeviceHardware
 import timber.log.Timber
 
 abstract class GeeksvilleApplication :
