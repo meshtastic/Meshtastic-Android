@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.TelemetryConfig
 import com.geeksville.mesh.R
@@ -61,6 +61,7 @@ fun TelemetryConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
 }
 
 @Composable
+@Suppress("MagicNumber", "LongMethod")
 fun TelemetryConfigItemList(
     telemetryConfig: TelemetryConfig,
     enabled: Boolean,
@@ -68,19 +69,54 @@ fun TelemetryConfigItemList(
 ) {
     val focusManager = LocalFocusManager.current
     var telemetryInput by rememberSaveable { mutableStateOf(telemetryConfig) }
+    val defaultBroadcastSecs: Int = 1800
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         item { PreferenceCategory(text = stringResource(R.string.telemetry_config)) }
 
         item {
+            SwitchPreference(
+                title = stringResource(R.string.broadcast_device_metrics),
+                checked = telemetryInput.deviceUpdateInterval < Int.MAX_VALUE,
+                enabled = enabled,
+                onCheckedChange = { isChecked ->
+                    telemetryInput =
+                        telemetryInput.copy {
+                            deviceUpdateInterval =
+                                if (isChecked) {
+                                    if (deviceUpdateInterval >= Int.MAX_VALUE) {
+                                        defaultBroadcastSecs
+                                    } else {
+                                        deviceUpdateInterval
+                                    }
+                                } else {
+                                    Int.MAX_VALUE
+                                }
+                        }
+                },
+            )
+        }
+
+        item {
             EditTextPreference(
                 title = stringResource(R.string.device_metrics_update_interval_seconds),
                 value = telemetryInput.deviceUpdateInterval,
-                enabled = enabled,
+                enabled = enabled && telemetryInput.deviceUpdateInterval < Int.MAX_VALUE,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { telemetryInput = telemetryInput.copy { deviceUpdateInterval = it } },
+                onValueChanged = {
+                    telemetryInput =
+                        telemetryInput.copy {
+                            deviceUpdateInterval = it
+                            // Update broadcast toggle based on interval value
+                            if (it >= Int.MAX_VALUE) {
+                                deviceUpdateInterval = Int.MAX_VALUE
+                            }
+                        }
+                },
             )
         }
+
+        item { HorizontalDivider() }
 
         item {
             EditTextPreference(

@@ -42,7 +42,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.location.LocationCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.ConfigProtos.Config.PositionConfig
 import com.geeksville.mesh.Position
 import com.geeksville.mesh.R
@@ -105,7 +104,7 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
 }
 
 @OptIn(ExperimentalPermissionsApi::class)
-@Suppress("LongMethod", "CyclomaticComplexMethod")
+@Suppress("LongMethod", "CyclomaticComplexMethod", "MagicNumber")
 @Composable
 fun PositionConfigItemList(
     phoneLocation: Location? = null,
@@ -125,6 +124,7 @@ fun PositionConfigItemList(
         }
     var locationInput by rememberSaveable { mutableStateOf(location) }
     var positionInput by rememberSaveable { mutableStateOf(positionConfig) }
+    val defaultBroadcastSecs: Int = 900
 
     LaunchedEffect(phoneLocation) {
         if (phoneLocation != null) {
@@ -145,16 +145,47 @@ fun PositionConfigItemList(
     }
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         item { PreferenceCategory(text = stringResource(R.string.position_config)) }
-
+        item {
+            SwitchPreference(
+                title = stringResource(R.string.broadcast_position),
+                checked = positionInput.positionBroadcastSecs < Int.MAX_VALUE,
+                enabled = enabled,
+                onCheckedChange = { isChecked ->
+                    positionInput =
+                        positionInput.copy {
+                            positionBroadcastSecs =
+                                if (isChecked) {
+                                    if (positionBroadcastSecs >= Int.MAX_VALUE) {
+                                        defaultBroadcastSecs
+                                    } else {
+                                        positionBroadcastSecs
+                                    }
+                                } else {
+                                    Int.MAX_VALUE
+                                }
+                        }
+                },
+            )
+        }
         item {
             EditTextPreference(
                 title = stringResource(R.string.position_broadcast_interval_seconds),
                 value = positionInput.positionBroadcastSecs,
-                enabled = enabled,
+                enabled = enabled && positionInput.positionBroadcastSecs < Int.MAX_VALUE,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { positionInput = positionInput.copy { positionBroadcastSecs = it } },
+                onValueChanged = {
+                    positionInput =
+                        positionInput.copy {
+                            positionBroadcastSecs = it
+                            if (it >= Int.MAX_VALUE) {
+                                positionBroadcastSecs = Int.MAX_VALUE
+                            }
+                        }
+                },
             )
         }
+
+        item { HorizontalDivider() }
 
         item {
             SwitchPreference(
@@ -249,8 +280,8 @@ fun PositionConfigItemList(
                 title = stringResource(R.string.gps_mode),
                 enabled = enabled,
                 items =
-                ConfigProtos.Config.PositionConfig.GpsMode.entries
-                    .filter { it != ConfigProtos.Config.PositionConfig.GpsMode.UNRECOGNIZED }
+                PositionConfig.GpsMode.entries
+                    .filter { it != PositionConfig.GpsMode.UNRECOGNIZED }
                     .map { it to it.name },
                 selectedItem = positionInput.gpsMode,
                 onItemSelected = { positionInput = positionInput.copy { gpsMode = it } },
@@ -274,7 +305,7 @@ fun PositionConfigItemList(
                 value = positionInput.positionFlags,
                 enabled = enabled,
                 items =
-                ConfigProtos.Config.PositionConfig.PositionFlags.entries
+                PositionConfig.PositionFlags.entries
                     .filter {
                         it != PositionConfig.PositionFlags.UNSET && it != PositionConfig.PositionFlags.UNRECOGNIZED
                     }
