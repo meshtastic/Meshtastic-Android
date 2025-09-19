@@ -55,7 +55,6 @@ import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.gpsDisabled
-import com.geeksville.mesh.navigation.Route
 import com.geeksville.mesh.navigation.getNavRouteFrom
 import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
@@ -73,6 +72,7 @@ import com.geeksville.mesh.util.LanguageUtils
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.delay
+import org.meshtastic.core.navigation.Route
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

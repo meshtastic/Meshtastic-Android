@@ -17,7 +17,7 @@ import org.gradle.kotlin.dsl.maven
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-include(":app", ":mesh_service_example", ":navigation", ":network")
+include(":app", ":core:model", ":core:navigation", ":core:network", ":core:prefs", ":mesh_service_example")
 rootProject.name = "MeshtasticAndroid"
 
 // https://docs.gradle.org/current/userguide/declaring_dependencies.html#sec:type-safe-project-accessors

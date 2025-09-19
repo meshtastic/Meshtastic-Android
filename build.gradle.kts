@@ -76,7 +76,11 @@ kover {
 }
 
 dependencies {
-    kover(project(":app"))
-    kover(project(":network"))
-    kover(project(":mesh_service_example"))
+    kover(projects.app)
+    kover(projects.meshServiceExample)
+
+    kover(projects.core.model)
+    kover(projects.core.navigation)
+    kover(projects.core.network)
+    kover(projects.core.prefs)
 }

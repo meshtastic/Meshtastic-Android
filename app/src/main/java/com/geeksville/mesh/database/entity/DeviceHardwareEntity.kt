@@ -21,8 +21,8 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.geeksville.mesh.model.DeviceHardware
-import com.geeksville.mesh.network.model.NetworkDeviceHardware
 import kotlinx.serialization.Serializable
+import org.meshtastic.core.network.model.NetworkDeviceHardware
 
 @Serializable
 @Entity(tableName = "device_hardware")

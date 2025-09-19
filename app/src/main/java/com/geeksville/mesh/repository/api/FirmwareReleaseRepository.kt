@@ -23,9 +23,9 @@ import com.geeksville.mesh.database.entity.FirmwareRelease
 import com.geeksville.mesh.database.entity.FirmwareReleaseEntity
 import com.geeksville.mesh.database.entity.FirmwareReleaseType
 import com.geeksville.mesh.database.entity.asExternalModel
-import com.geeksville.mesh.network.FirmwareReleaseRemoteDataSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import org.meshtastic.core.network.FirmwareReleaseRemoteDataSource
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
