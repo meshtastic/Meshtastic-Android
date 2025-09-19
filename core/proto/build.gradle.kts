@@ -14,8 +14,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import com.geeksville.mesh.buildlogic.FlavorDimension
-import com.geeksville.mesh.buildlogic.MeshtasticFlavor
 
 /*
  * Copyright (c) 2025 Meshtastic LLC
@@ -35,33 +33,26 @@ import com.geeksville.mesh.buildlogic.MeshtasticFlavor
  */
 
 plugins {
-    alias(libs.plugins.meshtastic.android.application)
-    alias(libs.plugins.meshtastic.android.application.compose)
-    alias(libs.plugins.kotlin.parcelize)
-    alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.kover)
+    alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.protobuf)
 }
 
-android {
-    namespace = "com.meshtastic.android.meshserviceexample"
-    buildFeatures { aidl = true }
-    defaultConfig {
-        // Force this app to use the Google variant of any modules it's using that apply AndroidLibraryConventionPlugin
-        missingDimensionStrategy(FlavorDimension.marketplace.name, MeshtasticFlavor.google.name)
+android { namespace = "org.meshtastic.core.proto" }
+
+// per protobuf-gradle-plugin docs, this is recommended for android
+protobuf {
+    protoc { artifact = libs.protoc.get().toString() }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.builtins {
+                create("java") {}
+                create("kotlin") {}
+            }
+        }
     }
 }
 
 dependencies {
-    implementation(projects.core.proto)
-
-    implementation(libs.appcompat)
-    implementation(libs.material)
-    implementation(libs.activity)
-    implementation(libs.constraintlayout)
-
-    implementation(libs.kotlinx.serialization.json)
-
-    // OSM
-    implementation(libs.bundles.osm)
-    implementation(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
+    // This needs to be API for consuming modules
+    api(libs.protobuf.kotlin)
 }
