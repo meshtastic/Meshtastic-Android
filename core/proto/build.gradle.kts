@@ -57,4 +57,7 @@ protobuf {
     }
 }
 
-dependencies { implementation(libs.bundles.protobuf) }
+dependencies {
+    // This needs to be API for consuming modules
+    api(libs.protobuf.kotlin)
+}
