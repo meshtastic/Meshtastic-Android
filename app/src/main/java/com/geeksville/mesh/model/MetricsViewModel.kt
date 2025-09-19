@@ -61,6 +61,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.feature.map.model.CustomTileSource
 import java.io.BufferedWriter

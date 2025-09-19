@@ -25,6 +25,7 @@ import com.geeksville.mesh.android.BuildUtils.errormsg
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.MultiFormatWriter
 import com.journeyapps.barcodescanner.BarcodeEncoder
+import org.meshtastic.core.model.Channel
 import java.net.MalformedURLException
 import kotlin.jvm.Throws
 

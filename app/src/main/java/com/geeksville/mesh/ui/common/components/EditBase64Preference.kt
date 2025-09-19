@@ -44,10 +44,10 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
-import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.util.encodeToString
 import com.geeksville.mesh.util.toByteString
 import com.google.protobuf.ByteString
+import org.meshtastic.core.model.Channel
 
 @Suppress("LongMethod")
 @Composable
@@ -62,7 +62,6 @@ fun EditBase64Preference(
     onGenerateKey: (() -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
 ) {
-
     var valueState by remember { mutableStateOf(value.encodeToString()) }
     val isError = value.encodeToString() != valueState
 
@@ -74,11 +73,12 @@ fun EditBase64Preference(
         }
     }
 
-    val (icon, description) = when {
-        isError -> Icons.TwoTone.Close to stringResource(R.string.error)
-        onGenerateKey != null && !isFocused -> Icons.TwoTone.Refresh to stringResource(R.string.reset)
-        else -> null to null
-    }
+    val (icon, description) =
+        when {
+            isError -> Icons.TwoTone.Close to stringResource(R.string.error)
+            onGenerateKey != null && !isFocused -> Icons.TwoTone.Refresh to stringResource(R.string.reset)
+            else -> null to null
+        }
 
     OutlinedTextField(
         value = valueState,
@@ -86,16 +86,13 @@ fun EditBase64Preference(
             valueState = it
             runCatching { it.toByteString() }.onSuccess(onValueChange)
         },
-        modifier = modifier
-            .fillMaxWidth()
-            .onFocusChanged { focusState -> isFocused = focusState.isFocused },
+        modifier = modifier.fillMaxWidth().onFocusChanged { focusState -> isFocused = focusState.isFocused },
         enabled = enabled,
         readOnly = readOnly,
         label = { Text(text = title) },
         isError = isError,
-        keyboardOptions = KeyboardOptions.Default.copy(
-            keyboardType = KeyboardType.Password, imeAction = ImeAction.Done
-        ),
+        keyboardOptions =
+        KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
         keyboardActions = keyboardActions,
         trailingIcon = {
             if (icon != null) {
@@ -113,11 +110,12 @@ fun EditBase64Preference(
                     Icon(
                         imageVector = icon,
                         contentDescription = description,
-                        tint = if (isError) {
+                        tint =
+                        if (isError) {
                             MaterialTheme.colorScheme.error
                         } else {
                             LocalContentColor.current
-                        }
+                        },
                     )
                 }
             } else if (trailingIcon != null) {
@@ -137,6 +135,6 @@ private fun EditBase64PreferencePreview() {
         keyboardActions = KeyboardActions {},
         onValueChange = {},
         onGenerateKey = {},
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier.padding(16.dp),
     )
 }

@@ -20,8 +20,8 @@ package com.geeksville.mesh.database.entity
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.geeksville.mesh.model.DeviceHardware
 import kotlinx.serialization.Serializable
+import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.network.model.NetworkDeviceHardware
 
 @Serializable
