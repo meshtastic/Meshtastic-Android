@@ -46,7 +46,6 @@ import androidx.compose.material.icons.filled.BlurOn
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.ChargingStation
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.ForkLeft
 import androidx.compose.material.icons.filled.Height
@@ -91,6 +90,8 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -116,7 +117,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.unit.dp
 import androidx.core.net.toUri
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -126,17 +127,14 @@ import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.FirmwareRelease
 import com.geeksville.mesh.database.entity.asDeviceVersion
-import com.geeksville.mesh.model.DeviceHardware
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.MetricsState
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.model.isUnmessageableRole
-import com.geeksville.mesh.navigation.NodeDetailRoutes
-import com.geeksville.mesh.navigation.Route
-import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.service.ServiceAction
+import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.common.theme.AppTheme
@@ -160,6 +158,10 @@ import com.geeksville.mesh.util.toDistanceString
 import com.geeksville.mesh.util.toSmallDistanceString
 import com.geeksville.mesh.util.toSpeedString
 import com.mikepenz.markdown.m3.Markdown
+import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.navigation.NodeDetailRoutes
+import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.navigation.SettingsRoutes
 
 private data class VectorMetricInfo(
     @StringRes val label: Int,
@@ -175,12 +177,13 @@ private data class DrawableMetricInfo(
     val rotateIcon: Float = 0f,
 )
 
+@Suppress("LongMethod")
 @Composable
 fun NodeDetailScreen(
     modifier: Modifier = Modifier,
     viewModel: MetricsViewModel = hiltViewModel(),
     uiViewModel: UIViewModel = hiltViewModel(),
-    navigateToMessages: (String) -> Unit,
+    navigateToMessages: (String) -> Unit = {},
     onNavigate: (Route) -> Unit = {},
     onNavigateUp: () -> Unit = {},
 ) {
@@ -188,6 +191,7 @@ fun NodeDetailScreen(
     val environmentState by viewModel.environmentState.collectAsStateWithLifecycle()
     val lastTracerouteTime by uiViewModel.lastTraceRouteTime.collectAsStateWithLifecycle()
     val ourNode by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val isConnected by uiViewModel.isConnectedStateFlow.collectAsStateWithLifecycle(false)
 
     val availableLogs by
         remember(state, environmentState) {
@@ -209,29 +213,49 @@ fun NodeDetailScreen(
         }
 
     val node = state.node
-    if (node != null) {
-        NodeDetailContent(
-            node = node,
-            ourNode = ourNode,
-            metricsState = state,
-            lastTracerouteTime = lastTracerouteTime,
-            availableLogs = availableLogs,
-            uiViewModel = uiViewModel,
-            onAction = { action ->
-                handleNodeAction(
-                    action = action,
-                    uiViewModel = uiViewModel,
-                    node = node,
-                    navigateToMessages = navigateToMessages,
-                    onNavigateUp = onNavigateUp,
-                    onNavigate = onNavigate,
-                    viewModel = viewModel,
-                )
-            },
-            modifier = modifier,
-        )
-    } else {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
+
+    @Suppress("ModifierNotUsedAtRoot")
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                title = node?.user?.longName ?: "",
+                ourNode = ourNode,
+                isConnected = isConnected,
+                showNodeChip = false,
+                canNavigateUp = true,
+                onNavigateUp = onNavigateUp,
+                actions = {},
+                onAction = {},
+            )
+        },
+    ) { paddingValues ->
+        if (node != null) {
+            @Suppress("ViewModelForwarding")
+            NodeDetailContent(
+                node = node,
+                ourNode = ourNode,
+                metricsState = state,
+                lastTracerouteTime = lastTracerouteTime,
+                availableLogs = availableLogs,
+                uiViewModel = uiViewModel,
+                onAction = { action ->
+                    handleNodeAction(
+                        action = action,
+                        uiViewModel = uiViewModel,
+                        node = node,
+                        navigateToMessages = navigateToMessages,
+                        onNavigateUp = onNavigateUp,
+                        onNavigate = onNavigate,
+                        viewModel = viewModel,
+                    )
+                },
+                modifier = modifier.padding(paddingValues),
+            )
+        } else {
+            Box(modifier = Modifier.fillMaxSize().padding(paddingValues), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
     }
 }
 
@@ -331,7 +355,33 @@ private fun NodeDetailContent(
         },
         modifier = modifier,
         availableLogs = availableLogs,
+        onSaveNotes = { num, notes -> uiViewModel.setNodeNotes(num, notes) },
     )
+}
+
+@Composable
+private fun notesSection(node: Node, onSaveNotes: (Int, String) -> Unit) {
+    if (node.isFavorite) {
+        TitledCard(title = stringResource(R.string.notes)) {
+            val originalNotes = node.notes
+            var notes by remember(node.notes) { mutableStateOf(node.notes) }
+            OutlinedTextField(
+                value = notes,
+                onValueChange = { notes = it },
+                modifier = Modifier.fillMaxWidth(),
+                placeholder = { Text(stringResource(id = R.string.add_a_note)) },
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            val edited = notes.trim() != originalNotes.trim()
+            if (edited) {
+                NodeActionButton(
+                    title = stringResource(id = R.string.save),
+                    enabled = true,
+                    onClick = { onSaveNotes(node.num, notes.trim()) },
+                )
+            }
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -344,6 +394,7 @@ private fun NodeDetailList(
     metricsState: MetricsState,
     onAction: (NodeDetailAction) -> Unit,
     availableLogs: Set<LogsType>,
+    onSaveNotes: (Int, String) -> Unit,
 ) {
     var showFirmwareSheet by remember { mutableStateOf(false) }
     var selectedFirmware by remember { mutableStateOf<FirmwareRelease?>(null) }
@@ -369,6 +420,7 @@ private fun NodeDetailList(
         TitledCard(title = stringResource(R.string.details)) {
             NodeDetailsContent(node, ourNode, metricsState.displayUnits)
         }
+        notesSection(node = node, onSaveNotes = onSaveNotes)
 
         DeviceActions(
             isLocal = metricsState.isLocal,
@@ -1067,6 +1119,7 @@ private fun NodeDetailsPreview(@PreviewParameter(NodePreviewParameterProvider::c
             metricsState = MetricsState.Empty,
             availableLogs = emptySet(),
             onAction = {},
+            onSaveNotes = { _, _ -> },
         )
     }
 }

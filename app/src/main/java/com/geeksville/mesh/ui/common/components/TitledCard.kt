@@ -35,13 +35,15 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ui.common.theme.AppTheme
 
 @Composable
-fun TitledCard(title: String, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
+fun TitledCard(title: String?, modifier: Modifier = Modifier, content: @Composable ColumnScope.() -> Unit) {
     Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-            title,
-            modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
-            style = MaterialTheme.typography.titleLarge,
-        )
+        title?.let {
+            Text(
+                text = it,
+                modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
+                style = MaterialTheme.typography.titleLarge,
+            )
+        }
 
         Card(content = content)
     }

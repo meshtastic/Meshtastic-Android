@@ -594,6 +594,8 @@
     <string name="dynamic">Dynaaminen</string>
     <string name="scan_qr_code">Skannaa QR-koodi</string>
     <string name="share_contact">Jaa yhteystieto</string>
+    <string name="notes">Viestit</string>
+    <string name="add_a_note">Lisää yksityinen viesti…</string>
     <string name="import_shared_contact">Tuo jaettu yhteystieto?</string>
     <string name="unmessageable">Ei vastaanota viestejä</string>
     <string name="unmonitored_or_infrastructure">Ei seurannassa tai toimii infrastruktuurilaitteena</string>
@@ -699,7 +701,6 @@
     <string name="ble_devices">Bluetooth-laitteet</string>
     <string name="bluetooth_paired_devices">Paritetut laitteet</string>
     <string name="connected_device">Yhdistetty laite</string>
-    <string name="action_go">Mene</string>
     <string name="routing_error_rate_limit_exceeded">Käyttöraja ylitetty. Yritä myöhemmin uudelleen.</string>
     <string name="view_release">Näytä versio</string>
     <string name="download">Lataa</string>
@@ -757,7 +758,7 @@
     <string name="map_type_terrain">Maasto</string>
     <string name="map_type_hybrid">Hybridi</string>
     <string name="manage_map_layers">Hallitse Karttatasoja</string>
-    <string name="map_layer_formats">Mukautetut karttatasot tukevat .kml- tai .kmz-tiedostoja.</string>
+    <string name="map_layer_formats">Mukautetut karttatasot tukevat .kml-, .kmz- tai GeoJSON-tiedostoja.</string>
     <string name="map_layers_title">Karttatasot</string>
     <string name="no_map_layers_loaded">Mukautettuja karttatasoja ei ladattu.</string>
     <string name="add_layer_button">Lisää taso</string>

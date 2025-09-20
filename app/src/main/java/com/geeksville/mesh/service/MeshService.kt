@@ -60,6 +60,7 @@ import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.android.prefs.MeshPrefs
+import com.geeksville.mesh.android.prefs.UiPrefs
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.MeshLogRepository
@@ -73,7 +74,6 @@ import com.geeksville.mesh.fromRadio
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.NO_DEVICE_SELECTED
 import com.geeksville.mesh.model.Node
-import com.geeksville.mesh.model.getFullTracerouteResponse
 import com.geeksville.mesh.position
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
@@ -99,8 +99,11 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import org.meshtastic.core.model.getFullTracerouteResponse
 import java.util.Random
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -146,6 +149,8 @@ class MeshService :
     @Inject lateinit var serviceNotifications: MeshServiceNotifications
 
     @Inject lateinit var meshPrefs: MeshPrefs
+
+    @Inject lateinit var uiPrefs: UiPrefs
 
     private val tracerouteStartTimes = ConcurrentHashMap<Int, Long>()
 
@@ -334,6 +339,23 @@ class MeshService :
         radioConfigRepository.moduleConfigFlow.onEach { moduleConfig = it }.launchIn(serviceScope)
         radioConfigRepository.channelSetFlow.onEach { channelSet = it }.launchIn(serviceScope)
         radioConfigRepository.serviceAction.onEach(::onServiceAction).launchIn(serviceScope)
+        radioConfigRepository.myNodeInfo
+            .flatMapLatest { myNodeEntity ->
+                // When myNodeInfo changes, set up emissions for the "provide-location-nodeNum" pref.
+                if (myNodeEntity == null) {
+                    flowOf(false)
+                } else {
+                    uiPrefs.shouldProvideNodeLocation(myNodeEntity.myNodeNum)
+                }
+            }
+            .onEach { shouldProvideNodeLocation ->
+                if (shouldProvideNodeLocation) {
+                    startLocationRequests()
+                } else {
+                    stopLocationRequests()
+                }
+            }
+            .launchIn(serviceScope)
 
         loadSettings() // Load our last known node DB
 

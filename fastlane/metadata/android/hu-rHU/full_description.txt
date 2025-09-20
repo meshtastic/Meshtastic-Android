@@ -1,0 +1,21 @@
+A Meshtastic egy eszköz, amellyel Android készülékeket lehet használni nyílt forráskódú, hálózaton kívüli (off-grid) mesh rádiókkal. Ez az alkalmazás a Meshtastic projekt fő kliensprogramja, amely lehetővé teszi a mesh eszközök kezelését és a kommunikációt más felhasználókkal.
+
+További információkért a Meshtastic projektről látogasd meg weboldalunkat: [meshtastic.org](https://www.meshtastic.org). A rádióeszközökön futó firmware egy külön nyílt forráskódú projekt, amely itt található:[https://github.com/meshtastic/Meshtastic-device](https://github.com/meshtastic/Meshtastic-device).
+
+Közösség és támogatás
+
+Ez a projekt jelenleg béta állapotban van. Örömmel fogadjuk a visszajelzéseidet! Ha kérdésed van, visszajelzést adnál vagy problémába ütközöl, csatlakozz a barátságos és aktív közösségünkhöz:
+
+*   **Fórum:** [https://github.com/orgs/meshtastic/discussions](https://github.com/orgs/meshtastic/discussions)
+*   **Discord:** [https://discord.gg/meshtastic](https://discord.gg/meshtastic)
+*   **Hiba jelentése:** [https://github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues)
+
+**Dokumentáció**
+
+Ha szeretnél többet megtudni az alkalmazás és a Meshtastic funkcióiról és lehetőségeiről, tekintsd meg a hivatalos dokumentációt:
+[**Dokumentáció megtekintése**](https://meshtastic.org/docs/)
+
+**Fordítás**
+
+Segíthetsz az alkalmazás lefordításában anyanyelvedre a Crowdin segítségével:
+[https://crowdin.meshtastic.org/android](https://crowdin.meshtastic.org/android)

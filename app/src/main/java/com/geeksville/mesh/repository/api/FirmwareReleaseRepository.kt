@@ -23,10 +23,9 @@ import com.geeksville.mesh.database.entity.FirmwareRelease
 import com.geeksville.mesh.database.entity.FirmwareReleaseEntity
 import com.geeksville.mesh.database.entity.FirmwareReleaseType
 import com.geeksville.mesh.database.entity.asExternalModel
-import com.geeksville.mesh.network.FirmwareReleaseRemoteDataSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
-import java.io.IOException
+import org.meshtastic.core.network.FirmwareReleaseRemoteDataSource
 import java.util.concurrent.TimeUnit
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -99,8 +98,7 @@ constructor(
         val remoteFetchSuccess =
             runCatching {
                 debug("Fetching fresh firmware releases from remote API.")
-                val networkReleases =
-                    remoteDataSource.getFirmwareReleases() ?: throw IOException("Empty response from server")
+                val networkReleases = remoteDataSource.getFirmwareReleases()
 
                 // The API fetches all release types, so we cache them all at once.
                 localDataSource.insertFirmwareReleases(networkReleases.releases.stable, FirmwareReleaseType.STABLE)

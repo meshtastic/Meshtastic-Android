@@ -17,20 +17,56 @@
 
 package com.geeksville.mesh.ui.node
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.ui.Modifier
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.UIViewModel
+import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.map.MapView
 
 const val DEG_D = 1e-7
 
 @Composable
-fun NodeMapScreen(uiViewModel: UIViewModel, metricsViewModel: MetricsViewModel = hiltViewModel()) {
+fun NodeMapScreen(
+    navController: NavHostController,
+    uiViewModel: UIViewModel,
+    metricsViewModel: MetricsViewModel = hiltViewModel(),
+) {
     val state by metricsViewModel.state.collectAsState()
     val positions = state.positionLogs
     val destNum = state.node?.num
-    MapView(uiViewModel = uiViewModel, focusedNodeNum = destNum, nodeTrack = positions, navigateToNodeDetails = {})
+    val ourNodeInfo by uiViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val isConnected by uiViewModel.isConnectedStateFlow.collectAsStateWithLifecycle()
+
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                title = state.node?.user?.longName ?: "",
+                ourNode = ourNodeInfo,
+                isConnected = isConnected,
+                showNodeChip = false,
+                canNavigateUp = true,
+                onNavigateUp = navController::navigateUp,
+                actions = {},
+                onAction = {},
+            )
+        },
+    ) { paddingValues ->
+        Box(modifier = Modifier.padding(paddingValues)) {
+            MapView(
+                uiViewModel = uiViewModel,
+                focusedNodeNum = destNum,
+                nodeTrack = positions,
+                navigateToNodeDetails = {},
+            )
+        }
+    }
 }

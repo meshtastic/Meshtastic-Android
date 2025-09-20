@@ -594,6 +594,8 @@
     <string name="dynamic">Dynamisch</string>
     <string name="scan_qr_code">QR Code scannen</string>
     <string name="share_contact">Kontakt teilen</string>
+    <string name="notes">Knoten</string>
+    <string name="add_a_note">Persönliche Notiz hinzufügen.</string>
     <string name="import_shared_contact">Geteilte Kontakte importieren?</string>
     <string name="unmessageable">Nicht erreichbar</string>
     <string name="unmonitored_or_infrastructure">Unbeaufsichtigt oder Infrastruktur</string>
@@ -699,7 +701,6 @@
     <string name="ble_devices">BLE Geräte</string>
     <string name="bluetooth_paired_devices">Gekoppelte Geräte</string>
     <string name="connected_device">Verbundene Geräte</string>
-    <string name="action_go">Ausführen</string>
     <string name="routing_error_rate_limit_exceeded">Sendebegrenzung überschritten. Bitte versuchen Sie es später erneut.</string>
     <string name="view_release">Version ansehen</string>
     <string name="download">Herunterladen</string>
@@ -757,7 +758,7 @@
     <string name="map_type_terrain">Gelände</string>
     <string name="map_type_hybrid">Hybrid</string>
     <string name="manage_map_layers">Kartenebenen verwalten</string>
-    <string name="map_layer_formats">Benutzerdefinierte Ebenen für .kml oder .kmz Dateien.</string>
+    <string name="map_layer_formats">Benutzerdefinierte Ebenen unterstützen .kml, .kmz oder GeoJSON Dateien.</string>
     <string name="map_layers_title">Kartenebenen</string>
     <string name="no_map_layers_loaded">Keine benutzerdefinierten Ebenen geladen.</string>
     <string name="add_layer_button">Ebene hinzufügen</string>

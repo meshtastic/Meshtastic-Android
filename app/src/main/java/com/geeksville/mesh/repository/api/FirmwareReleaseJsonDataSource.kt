@@ -18,21 +18,17 @@
 package com.geeksville.mesh.repository.api
 
 import android.app.Application
-import com.geeksville.mesh.network.model.NetworkFirmwareReleases
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromStream
+import org.meshtastic.core.network.model.NetworkFirmwareReleases
 import javax.inject.Inject
 
-class FirmwareReleaseJsonDataSource @Inject constructor(
-    private val application: Application,
-) {
+class FirmwareReleaseJsonDataSource @Inject constructor(private val application: Application) {
     @OptIn(ExperimentalSerializationApi::class)
     fun loadFirmwareReleaseFromJsonAsset(): NetworkFirmwareReleases {
         val inputStream = application.assets.open("firmware_releases.json")
-        val result = inputStream.use {
-            Json.decodeFromStream<NetworkFirmwareReleases>(inputStream)
-        }
+        val result = inputStream.use { Json.decodeFromStream<NetworkFirmwareReleases>(inputStream) }
         return result
     }
 }

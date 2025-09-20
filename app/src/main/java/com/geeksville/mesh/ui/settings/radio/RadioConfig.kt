@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.settings.radio
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -24,6 +25,10 @@ import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material.icons.rounded.BugReport
 import androidx.compose.material.icons.rounded.CleaningServices
+import androidx.compose.material.icons.rounded.PowerSettingsNew
+import androidx.compose.material.icons.rounded.RestartAlt
+import androidx.compose.material.icons.rounded.Restore
+import androidx.compose.material.icons.rounded.Storage
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -33,20 +38,20 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
-import com.geeksville.mesh.navigation.AdminRoute
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.ModuleRoute
-import com.geeksville.mesh.navigation.Route
-import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.settings.components.SettingsItem
 import com.geeksville.mesh.ui.settings.radio.components.WarningDialog
+import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.navigation.SettingsRoutes
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
@@ -75,8 +80,18 @@ fun RadioConfigItemList(
             if (isManaged) {
                 ManagedMessage()
             }
+            ConfigRoute.radioConfigRoutes.forEach {
+                SettingsItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) {
+                    onRouteClick(it)
+                }
+            }
+        }
 
-            ConfigRoute.filterExcludedFrom(state.metadata).forEach {
+        TitledCard(title = stringResource(R.string.device_configuration), modifier = Modifier.padding(top = 16.dp)) {
+            if (isManaged) {
+                ManagedMessage()
+            }
+            ConfigRoute.deviceConfigRoutes(state.metadata).forEach {
                 SettingsItem(text = stringResource(it.title), leadingIcon = it.icon, enabled = enabled) {
                     onRouteClick(it)
                 }
@@ -158,6 +173,13 @@ fun RadioConfigItemList(
             onClick = { onNavigate(SettingsRoutes.DebugPanel) },
         )
     }
+}
+
+enum class AdminRoute(val icon: ImageVector, @StringRes val title: Int) {
+    REBOOT(Icons.Rounded.RestartAlt, R.string.reboot),
+    SHUTDOWN(Icons.Rounded.PowerSettingsNew, R.string.shutdown),
+    FACTORY_RESET(Icons.Rounded.Restore, R.string.factory_reset),
+    NODEDB_RESET(Icons.Rounded.Storage, R.string.nodedb_reset),
 }
 
 @Preview(showBackground = true)

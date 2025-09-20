@@ -1,0 +1,21 @@
+Meshtastic on työkalu, jolla Android-laitteita voi käyttää avoimen lähdekoodin, verkosta riippumattomien mesh-radioiden kanssa. Tämä sovellus on Meshtastic-projektin pääasiakasohjelma, jonka avulla voit hallita mesh-laitteitasi ja viestiä muiden käyttäjien kanssa.
+
+Lisätietoja Meshtastic-projektista saat verkkosivuiltamme: [meshtastic.org](https://www.meshtastic.org). Radiolaitteissa toimiva laiteohjelmisto on erillinen avoimen lähdekoodin projekti, jonka löydät täältä: [https://github.com/meshtastic/Meshtastic-device](https://github.com/meshtastic/Meshtastic-device).
+
+**Käyttäjäyhteisö ja tukipalvelut**
+
+Projekti on vielä kehitysvaiheessa (beta). Otamme mielellämme yhteydenottoja vastaan! Jos sinulla on kysyttävää, palautetta tai ongelmia, tule mukaan meidän ystävälliseen ja aktiiviseen yhteisöömme:
+
+*   **Keskustelufoorumi:** [https://github.com/orgs/meshtastic/discussions](https://github.com/orgs/meshtastic/discussions)
+*   **Discord:** [https://discord.gg/meshtastic](https://discord.gg/meshtastic)
+*   **Raportoi ongelmasta:** [https://github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues)
+
+***Dokumentaatio*
+
+Lisätietoja tämän sovelluksen ja Meshtasticin ominaisuuksista ja toiminnoista saat katsomalla virallisen dokumentaatiomme:
+[**Katso dokumentaatio**](https://meshtastic.org/docs/)
+
+**Käännökset**
+
+Voit auttaa kääntämään sovelluksen omalle kielellesi Crowdinin avulla:
+[https://crowdin.meshtastic.org/android](https://crowdin.meshtastic.org/android)

@@ -24,8 +24,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.map.rememberMapViewWithLifecycle
@@ -40,6 +41,7 @@ private const val DEG_D = 1e-7
 
 @Composable
 fun NodeMapScreen(
+    navController: NavHostController,
     @Suppress("UNUSED_PARAMETER") uiViewModel: UIViewModel = hiltViewModel(),
     viewModel: MetricsViewModel = hiltViewModel(),
 ) {

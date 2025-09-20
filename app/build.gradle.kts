@@ -8,31 +8,34 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR a PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import io.gitlab.arturbosch.detekt.Detekt
-import org.gradle.kotlin.dsl.invoke
+import com.geeksville.mesh.buildlogic.Configs
+import com.geeksville.mesh.buildlogic.GitVersionValueSource
 import java.io.FileInputStream
 import java.util.Properties
 
+val gitVersionProvider = providers.of(GitVersionValueSource::class.java) {}
+
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.compose)
+    alias(libs.plugins.meshtastic.android.application)
+    alias(libs.plugins.meshtastic.android.application.flavors)
+    alias(libs.plugins.meshtastic.android.application.compose)
+    alias(libs.plugins.meshtastic.android.application.firebase)
+    alias(libs.plugins.meshtastic.hilt)
+    alias(libs.plugins.meshtastic.android.room)
     alias(libs.plugins.kotlin.parcelize)
-    alias(libs.plugins.kotlin.serialization)
-    alias(libs.plugins.hilt)
-    alias(libs.plugins.protobuf)
+    alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.devtools.ksp)
-    alias(libs.plugins.detekt)
     alias(libs.plugins.datadog)
     alias(libs.plugins.secrets)
-    alias(libs.plugins.spotless)
+    alias(libs.plugins.dokka)
+    alias(libs.plugins.kover)
 }
 
 val keystorePropertiesFile = rootProject.file("keystore.properties")
@@ -42,10 +45,10 @@ if (keystorePropertiesFile.exists()) {
     FileInputStream(keystorePropertiesFile).use { keystoreProperties.load(it) }
 }
 
-val gitVersionProvider = providers.of(GitVersionValueSource::class.java) {}
-
 android {
     namespace = "com.geeksville.mesh"
+    // Assuming Configs object is available (e.g., from buildSrc)
+    compileSdk = Configs.COMPILE_SDK
 
     signingConfigs {
         create("release") {
@@ -55,29 +58,26 @@ android {
             storePassword = keystoreProperties["storePassword"] as String?
         }
     }
-    compileSdk = Configs.COMPILE_SDK
     defaultConfig {
         applicationId = Configs.APPLICATION_ID
         minSdk = Configs.MIN_SDK
         targetSdk = Configs.TARGET_SDK
+
         // Prioritize injected props, then ENV, then fallback to git commit count
         versionCode =
             (
                 project.findProperty("android.injected.version.code")?.toString()?.toInt()
                     ?: System.getenv("VERSION_CODE")?.toInt()
-                    ?: gitVersionProvider.get().toInt()
+                    ?: gitVersionProvider.get().toInt() // Restored GitVersionValueSource fallback
                 )
         versionName =
             (
                 project.findProperty("android.injected.version.name")?.toString()
                     ?: System.getenv("VERSION_NAME")
-                    ?: Configs.VERSION_NAME_BASE
+                    ?: Configs.VERSION_NAME_BASE // Restored Configs.VERSION_NAME_BASE fallback
                 )
-        testInstrumentationRunner = "com.geeksville.mesh.TestRunner"
-        buildConfigField("String", "MIN_FW_VERSION", "\"${Configs.MIN_FW_VERSION}\"")
-        buildConfigField("String", "ABS_MIN_FW_VERSION", "\"${Configs.ABS_MIN_FW_VERSION}\"")
-        // per https://developer.android.com/studio/write/vector-asset-studio
-        vectorDrawables.useSupportLibrary = true
+        buildConfigField("String", "MIN_FW_VERSION", "\"${Configs.MIN_FW_VERSION}\"") // Used Configs
+        buildConfigField("String", "ABS_MIN_FW_VERSION", "\"${Configs.ABS_MIN_FW_VERSION}\"") // Used Configs
         // We have to list all translated languages here,
         // because some of our libs have bogus languages that google play
         // doesn't like and we need to strip them (gr)
@@ -127,65 +127,26 @@ android {
         )
         ndk { abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64") }
     }
-    flavorDimensions += "default"
-    productFlavors {
-        // Read versionCode from defaultConfig after it's been potentially set by ENV or fallback
-        val resolvedVersionCode = defaultConfig.versionCode
-        val resolvedVersionName = defaultConfig.versionName
 
-        create("google") {
-            dimension = "default"
-            isDefault = true
-            // Enable Firebase Crashlytics for Google Play builds
-            apply(plugin = libs.plugins.google.services.get().pluginId)
-            apply(plugin = libs.plugins.firebase.crashlytics.get().pluginId)
-            versionName = "$resolvedVersionName ($resolvedVersionCode) google"
-        }
-        create("fdroid") {
-            dimension = "default"
-            dependenciesInfo { includeInApk = false }
-            versionName = "$resolvedVersionName ($resolvedVersionCode) fdroid"
-        }
+    // Configure existing product flavors (defined by convention plugin)
+    // with their dynamic version names.
+    productFlavors {
+        named("google") { versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) google" }
+        named("fdroid") { versionName = "${defaultConfig.versionName} (${defaultConfig.versionCode}) fdroid" }
     }
+
     buildTypes {
         release {
             if (keystoreProperties["storeFile"] != null) {
                 signingConfig = signingConfigs.named("release").get()
             }
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-        }
-        debug {
-            isDebuggable = true
-            isPseudoLocalesEnabled = true
         }
     }
     bundle { language { enableSplit = false } }
-    buildFeatures {
-        compose = true
-        aidl = true
-        buildConfig = true
-    }
-    lint {
-        abortOnError = false
-        disable.add("MissingTranslation")
-    }
+    buildFeatures { aidl = true }
     sourceSets {
         // Adds exported schema location as test app assets.
         named("androidTest") { assets.srcDirs(files("$projectDir/schemas")) }
-    }
-}
-
-kotlin {
-    compilerOptions {
-        jvmToolchain(21)
-        freeCompilerArgs.addAll(
-            "-opt-in=kotlin.RequiresOptIn",
-            "-opt-in=kotlinx.coroutines.ExperimentalCoroutinesApi",
-            "-Xcontext-receivers",
-            "-Xannotation-default-target=param-property",
-        )
     }
 }
 
@@ -200,27 +161,8 @@ datadog {
     //    }
 }
 
-// per protobuf-gradle-plugin docs, this is recommended for android
-protobuf {
-    protoc { artifact = libs.protobuf.protoc.get().toString() }
-    generateProtoTasks {
-        all().forEach { task ->
-            task.builtins {
-                create("java") {}
-                create("kotlin") {}
-            }
-        }
-    }
-}
-
 // workaround for https://github.com/google/ksp/issues/1590
 androidComponents {
-    onVariants(selector().all()) { variant ->
-        project.afterEvaluate {
-            val variantNameCapped = variant.name.replaceFirstChar { it.uppercase() }
-            tasks.named("ksp${variantNameCapped}Kotlin") { dependsOn("generate${variantNameCapped}Proto") }
-        }
-    }
     onVariants(selector().withBuildType("release")) { variant ->
         if (variant.flavorName == "google") {
             val variantNameCapped = variant.name.replaceFirstChar { it.uppercase() }
@@ -236,37 +178,24 @@ androidComponents {
 project.afterEvaluate { logger.lifecycle("Version code is set to: ${android.defaultConfig.versionCode}") }
 
 dependencies {
-    implementation(project(":network"))
-    implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar"))))
+    implementation(projects.core.model)
+    implementation(projects.core.navigation)
+    implementation(projects.core.network)
+    implementation(projects.core.prefs)
+    implementation(projects.core.proto)
+    implementation(projects.feature.map)
 
     // Bundles
-    implementation(libs.bundles.androidx)
-    implementation(libs.bundles.ui)
     implementation(libs.bundles.markdown)
-    debugImplementation(libs.bundles.ui.tooling)
-    implementation(libs.bundles.adaptive)
-    implementation(libs.bundles.lifecycle)
-    implementation(libs.bundles.navigation)
-    implementation(libs.bundles.navigation3)
     implementation(libs.bundles.coroutines)
     implementation(libs.bundles.datastore)
-    implementation(libs.bundles.room)
-    implementation(libs.bundles.hilt)
-    implementation(libs.bundles.protobuf)
     implementation(libs.bundles.coil)
-
-    // OSM
-    "fdroidImplementation"(libs.bundles.osm)
-    "fdroidImplementation"(libs.osmdroid.geopackage) { exclude(group = "com.j256.ormlite") }
-
-    "googleImplementation"(libs.bundles.maps.compose)
 
     // ZXing
     implementation(libs.zxing.android.embedded) { isTransitive = false }
     implementation(libs.zxing.core)
 
-    // Individual dependencies
-    "googleImplementation"(libs.awesome.app.rating)
+    // Individual dependencies (flavor-specific ones removed)
     implementation(libs.core.splashscreen)
     implementation(libs.emoji2.emojipicker)
     implementation(libs.kotlinx.collections.immutable)
@@ -279,87 +208,25 @@ dependencies {
     implementation(libs.accompanist.permissions)
     implementation(libs.timber)
 
-    // Compose BOM
-    implementation(platform(libs.compose.bom))
-    androidTestImplementation(platform(libs.compose.bom))
-
-    // Firebase BOM
-    "googleImplementation"(platform(libs.firebase.bom))
-    "googleImplementation"(libs.bundles.firebase)
-    "googleImplementation"(libs.bundles.datadog)
-
-    // ksp
-    ksp(libs.room.compiler)
-    ksp(libs.hilt.compiler)
-    kspAndroidTest(libs.hilt.compiler)
-
-    // Testing
-    testImplementation(libs.bundles.testing)
-    debugImplementation(libs.bundles.testing.android.manifest)
-    androidTestImplementation(libs.bundles.testing.android)
-    androidTestImplementation(libs.bundles.testing.hilt)
-    androidTestImplementation(libs.bundles.testing.navigation)
-    androidTestImplementation(libs.bundles.testing.room)
-
-    detektPlugins(libs.detekt.formatting)
+    dokkaPlugin(libs.dokka.android.documentation.plugin)
 }
 
-ksp {
-    //    arg("room.generateKotlin", "true")
-    arg("room.schemaLocation", "$projectDir/schemas")
-}
-
-detekt {
-    config.setFrom("../config/detekt/detekt.yml")
-    baseline = file("../config/detekt/detekt-baseline.xml")
-    source.setFrom(files("src/main/java", "src/google/java", "src/fdroid/java"))
-    parallel = true
-}
-
-secrets {
-    propertiesFileName = "secrets.properties"
-    defaultPropertiesFileName = "secrets.defaults.properties"
-}
-
-val googleServiceKeywords = listOf("crashlytics", "google", "datadog")
-
-tasks.configureEach {
-    if (
-        googleServiceKeywords.any { name.contains(it, ignoreCase = true) } && name.contains("fdroid", ignoreCase = true)
-    ) {
-        project.logger.lifecycle("Disabling task for F-Droid: $name")
-        enabled = false
+dokka {
+    moduleName.set("Meshtastic App")
+    dokkaSourceSets.main {
+        sourceLink {
+            enableJdkDocumentationLink.set(true)
+            enableKotlinStdLibDocumentationLink.set(true)
+            enableJdkDocumentationLink.set(true)
+            reportUndocumented.set(true)
+            localDirectory.set(file("src/main/java"))
+            remoteUrl("https://github.com/geeksville/Meshtastic-Android/app/src/main/java")
+            remoteLineSuffix.set("#L")
+        }
     }
-}
-
-tasks.withType<Detekt> {
-    reports {
-        xml.required = true
-        xml.outputLocation = file("build/reports/detekt/detekt.xml")
-        html.required = true
-        html.outputLocation = file("build/reports/detekt/detekt.html")
-        sarif.required = true
-        sarif.outputLocation = file("build/reports/detekt/detekt.sarif")
-        md.required = true
-        md.outputLocation = file("build/reports/detekt/detekt.md")
-    }
-    debug = true
-    include("**/*.kt")
-    include("**/*.kts")
-}
-
-spotless {
-    ratchetFrom("origin/main")
-    kotlin {
-        target("src/*/kotlin/**/*.kt", "src/*/java/**/*.kt")
-        targetExclude("**/build/**/*.kt")
-        ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
-        ktlint("1.7.1").setEditorConfigPath("../config/spotless/.editorconfig")
-        licenseHeaderFile(rootProject.file("config/spotless/copyright.txt"))
-    }
-    kotlinGradle {
-        target("**/*.gradle.kts")
-        ktfmt().kotlinlangStyle().configure { it.setMaxWidth(120) }
-        ktlint("1.7.1").setEditorConfigPath("../config/spotless/.editorconfig")
+    dokkaPublications.html { suppressInheritedMembers.set(true) }
+    dokkaGeneratorIsolation = ProcessIsolation {
+        // Configures heap size
+        maxHeapSize = "6g"
     }
 }

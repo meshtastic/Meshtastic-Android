@@ -116,7 +116,7 @@
     <string name="debug_panel">除錯面板</string>
     <string name="debug_decoded_payload">解析封包：</string>
     <string name="debug_logs_export">匯出日誌</string>
-    <string name="debug_export_cancelled">Export canceled</string>
+    <string name="debug_export_cancelled">已取消匯出</string>
     <string name="debug_export_success">%1$d logs exported</string>
     <string name="debug_export_failed">Failed to write log file: %1$s</string>
     <string name="debug_filters">篩選</string>
@@ -341,7 +341,7 @@
     <string name="detection_sensor">檢測傳感器</string>
     <string name="paxcounter">客流量計數</string>
     <string name="audio_config">音頻設置</string>
-    <string name="codec_2_enabled">CODEC 2 已啟用</string>
+    <string name="codec_2_enabled">啟用 CODEC 2</string>
     <string name="ptt_pin">PTT針腳</string>
     <string name="codec2_sample_rate">CODEC2 取樣率</string>
     <string name="i2s_word_select">I2S WS 訊號選擇</string>
@@ -592,6 +592,8 @@
     <string name="dynamic">動態</string>
     <string name="scan_qr_code">掃描 QR Code</string>
     <string name="share_contact">分享聯絡人</string>
+    <string name="notes">Notes</string>
+    <string name="add_a_note">Add a private note…</string>
     <string name="import_shared_contact">是否匯入聯絡人？</string>
     <string name="unmessageable">不接收訊息</string>
     <string name="unmonitored_or_infrastructure">無監控裝置或基礎設施</string>
@@ -697,7 +699,6 @@
     <string name="ble_devices">藍牙裝置</string>
     <string name="bluetooth_paired_devices">配對裝置</string>
     <string name="connected_device">連接裝置</string>
-    <string name="action_go">到</string>
     <string name="routing_error_rate_limit_exceeded">超過速率限制，請稍後再嘗試。</string>
     <string name="view_release">查看版本資訊</string>
     <string name="download">下載</string>
@@ -755,7 +756,7 @@
     <string name="map_type_terrain">地形</string>
     <string name="map_type_hybrid">混合</string>
     <string name="manage_map_layers">管理地圖圖層</string>
-    <string name="map_layer_formats">自定義圖層支援 .kml 或 .kmz 格式檔案。</string>
+    <string name="map_layer_formats">Custom layers support .kml, .kmz, or GeoJSON files.</string>
     <string name="map_layers_title">地圖圖層</string>
     <string name="no_map_layers_loaded">未載入自訂圖層。</string>
     <string name="add_layer_button">添加圖層</string>
@@ -777,9 +778,9 @@
     <string name="url_template">URL 範本</string>
     <string name="track_point">軌跡點</string>
     <string name="app_settings">App</string>
-    <string name="app_version">Version</string>
+    <string name="app_version">版本</string>
     <string name="channel_features">Channel Features</string>
-    <string name="location_sharing">Location Sharing</string>
+    <string name="location_sharing">位置分享</string>
     <string name="periodic_position_broadcast">Periodic position broadcast</string>
     <string name="uplink_feature_description">Messages from the mesh will be sent to the public internet through any node\'s configured gateway.</string>
     <string name="downlink_feature_description">Messages from a public internet gateway are forwarded to the local mesh. Due to the zero-hop policy, traffic from the default MQTT server will not propagate further than this device.</string>

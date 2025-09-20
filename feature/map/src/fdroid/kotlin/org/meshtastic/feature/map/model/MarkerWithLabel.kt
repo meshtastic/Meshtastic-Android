@@ -1,0 +1,139 @@
+/*
+ * Copyright (c) 2025 Meshtastic LLC
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
+package org.meshtastic.feature.map.model
+
+import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.RectF
+import android.view.MotionEvent
+import org.meshtastic.feature.map.dpToPx
+import org.meshtastic.feature.map.spToPx
+import org.osmdroid.views.MapView
+import org.osmdroid.views.overlay.Marker
+import org.osmdroid.views.overlay.Polygon
+
+class MarkerWithLabel(mapView: MapView?, label: String, emoji: String? = null) : Marker(mapView) {
+
+    companion object {
+        private const val LABEL_CORNER_RADIUS_DP = 4f
+        private const val LABEL_Y_OFFSET_DP = 34f
+        private const val FONT_SIZE_SP = 14f
+        private const val EMOJI_FONT_SIZE_SP = 20f
+    }
+
+    private val labelYOffsetPx by lazy { mapView?.context?.dpToPx(LABEL_Y_OFFSET_DP) ?: 100 }
+
+    private val labelCornerRadiusPx by lazy { mapView?.context?.dpToPx(LABEL_CORNER_RADIUS_DP) ?: 12 }
+
+    private var nodeColor: Int = Color.GRAY
+
+    fun setNodeColors(colors: Pair<Int, Int>) {
+        nodeColor = colors.second
+    }
+
+    private var precisionBits: Int? = null
+
+    fun setPrecisionBits(bits: Int) {
+        precisionBits = bits
+    }
+
+    @Suppress("MagicNumber")
+    private fun getPrecisionMeters(): Double? = when (precisionBits) {
+        10 -> 23345.484932
+        11 -> 11672.7369
+        12 -> 5836.36288
+        13 -> 2918.175876
+        14 -> 1459.0823719999053
+        15 -> 729.53562
+        16 -> 364.7622
+        17 -> 182.375556
+        18 -> 91.182212
+        19 -> 45.58554
+        else -> null
+    }
+
+    private var onLongClickListener: (() -> Boolean)? = null
+
+    fun setOnLongClickListener(listener: () -> Boolean) {
+        onLongClickListener = listener
+    }
+
+    private val mLabel = label
+    private val mEmoji = emoji
+    private val textPaint =
+        Paint().apply {
+            textSize = mapView?.context?.spToPx(FONT_SIZE_SP)?.toFloat() ?: 40f
+            color = Color.DKGRAY
+            isAntiAlias = true
+            isFakeBoldText = true
+            textAlign = Paint.Align.CENTER
+        }
+    private val emojiPaint =
+        Paint().apply {
+            textSize = mapView?.context?.spToPx(EMOJI_FONT_SIZE_SP)?.toFloat() ?: 80f
+            isAntiAlias = true
+            textAlign = Paint.Align.CENTER
+        }
+
+    private val bgPaint = Paint().apply { color = Color.WHITE }
+
+    private fun getTextBackgroundSize(text: String, x: Float, y: Float): RectF {
+        val fontMetrics = textPaint.fontMetrics
+        val halfTextLength = textPaint.measureText(text) / 2 + 3
+        return RectF((x - halfTextLength), (y + fontMetrics.top), (x + halfTextLength), (y + fontMetrics.bottom))
+    }
+
+    override fun onLongPress(event: MotionEvent?, mapView: MapView?): Boolean {
+        val touched = hitTest(event, mapView)
+        if (touched && this.id != null) {
+            return onLongClickListener?.invoke() ?: super.onLongPress(event, mapView)
+        }
+        return super.onLongPress(event, mapView)
+    }
+
+    @Suppress("MagicNumber")
+    override fun draw(c: Canvas, osmv: MapView?, shadow: Boolean) {
+        super.draw(c, osmv, false)
+        val p = mPositionPixels
+        val bgRect = getTextBackgroundSize(mLabel, p.x.toFloat(), (p.y - labelYOffsetPx.toFloat()))
+        bgRect.inset(-8F, -2F)
+
+        if (mLabel.isNotEmpty()) {
+            c.drawRoundRect(bgRect, labelCornerRadiusPx.toFloat(), labelCornerRadiusPx.toFloat(), bgPaint)
+            c.drawText(mLabel, (p.x - 0F), (p.y - labelYOffsetPx.toFloat()), textPaint)
+        }
+        mEmoji?.let { c.drawText(it, (p.x - 0f), (p.y - 30f), emojiPaint) }
+
+        getPrecisionMeters()?.let { radius ->
+            val polygon =
+                Polygon(osmv).apply {
+                    points = Polygon.pointsAsCircle(position, radius)
+                    fillPaint.apply {
+                        color = nodeColor
+                        alpha = 48
+                    }
+                    outlinePaint.apply {
+                        color = nodeColor
+                        alpha = 64
+                    }
+                }
+            polygon.draw(c, osmv, false)
+        }
+    }
+}

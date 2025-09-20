@@ -44,7 +44,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos.Config.SecurityConfig
 import com.geeksville.mesh.MeshProtos
@@ -154,18 +154,19 @@ fun SecurityConfigItemList(
     }
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        item { PreferenceCategory(text = stringResource(R.string.security_config)) }
+        item { PreferenceCategory(text = stringResource(R.string.direct_message_key)) }
 
         item {
             EditBase64Preference(
                 title = stringResource(R.string.public_key),
+                summary = stringResource(id = R.string.config_security_public_key),
                 value = publicKey,
                 enabled = enabled,
                 readOnly = true,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChange = {
                     if (it.size() == 32) {
-                        securityInput = securityInput.copy { publicKey = it }
+                        securityInput = securityInput.copy { this.publicKey = it }
                     }
                 },
                 trailingIcon = { CopyIconButton(valueToCopy = securityInput.publicKey.encodeToString()) },
@@ -175,6 +176,7 @@ fun SecurityConfigItemList(
         item {
             EditBase64Preference(
                 title = stringResource(R.string.private_key),
+                summary = stringResource(id = R.string.config_security_private_key),
                 value = securityInput.privateKey,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -206,10 +208,11 @@ fun SecurityConfigItemList(
                 onClick = { showEditSecurityConfigDialog = true },
             )
         }
-
+        item { PreferenceCategory(text = stringResource(R.string.admin_keys)) }
         item {
             EditListPreference(
                 title = stringResource(R.string.admin_key),
+                summary = stringResource(id = R.string.config_security_admin_key),
                 list = securityInput.adminKeyList,
                 maxCount = 3,
                 enabled = enabled,
@@ -223,20 +226,11 @@ fun SecurityConfigItemList(
                 },
             )
         }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.managed_mode),
-                checked = securityInput.isManaged,
-                enabled = enabled && securityInput.adminKeyCount > 0,
-                onCheckedChange = { securityInput = securityInput.copy { isManaged = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
+        item { PreferenceCategory(text = stringResource(R.string.logs)) }
         item {
             SwitchPreference(
                 title = stringResource(R.string.serial_console),
+                summary = stringResource(id = R.string.config_security_serial_enabled),
                 checked = securityInput.serialEnabled,
                 enabled = enabled,
                 onCheckedChange = { securityInput = securityInput.copy { serialEnabled = it } },
@@ -247,9 +241,21 @@ fun SecurityConfigItemList(
         item {
             SwitchPreference(
                 title = stringResource(R.string.debug_log_api_enabled),
+                summary = stringResource(id = R.string.config_security_debug_log_api_enabled),
                 checked = securityInput.debugLogApiEnabled,
                 enabled = enabled,
                 onCheckedChange = { securityInput = securityInput.copy { debugLogApiEnabled = it } },
+            )
+        }
+        item { HorizontalDivider() }
+        item { PreferenceCategory(text = stringResource(R.string.administration)) }
+        item {
+            SwitchPreference(
+                title = stringResource(R.string.managed_mode),
+                summary = stringResource(id = R.string.config_security_is_managed),
+                checked = securityInput.isManaged,
+                enabled = enabled && securityInput.adminKeyCount > 0,
+                onCheckedChange = { securityInput = securityInput.copy { isManaged = it } },
             )
         }
         item { HorizontalDivider() }

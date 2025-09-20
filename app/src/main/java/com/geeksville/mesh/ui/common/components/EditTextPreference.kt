@@ -27,8 +27,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Info
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +54,7 @@ fun SignedIntegerEditTextPreference(
     keyboardActions: KeyboardActions,
     onValueChanged: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    summary: String? = null,
     onFocusChanged: (FocusState) -> Unit = {},
     trailingIcon: (@Composable () -> Unit)? = null,
 ) {
@@ -63,20 +64,17 @@ fun SignedIntegerEditTextPreference(
         title = title,
         value = valueState,
         enabled = enabled,
+        summary = summary,
         isError = valueState.toIntOrNull() == null,
-        keyboardOptions = KeyboardOptions.Default.copy(
-            keyboardType = KeyboardType.Number, imeAction = ImeAction.Done
-        ),
+        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
         keyboardActions = keyboardActions,
         onValueChanged = {
             valueState = it
-            it.toIntOrNull()?.let { int ->
-                onValueChanged(int)
-            }
+            it.toIntOrNull()?.let { int -> onValueChanged(int) }
         },
         onFocusChanged = onFocusChanged,
         modifier = modifier,
-        trailingIcon = trailingIcon
+        trailingIcon = trailingIcon,
     )
 }
 
@@ -89,6 +87,7 @@ fun EditTextPreference(
     keyboardActions: KeyboardActions,
     onValueChanged: (Int) -> Unit,
     modifier: Modifier = Modifier,
+    summary: String? = null,
     onFocusChanged: (FocusState) -> Unit = {},
     trailingIcon: (@Composable () -> Unit)? = null,
 ) {
@@ -98,21 +97,23 @@ fun EditTextPreference(
         title = title,
         value = valueState,
         enabled = enabled,
+        summary = summary,
         isError = value.toUInt().toString() != valueState || isError,
-        keyboardOptions = KeyboardOptions.Default.copy(
-            keyboardType = KeyboardType.Number, imeAction = ImeAction.Done
-        ),
+        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
         keyboardActions = keyboardActions,
         onValueChanged = {
-            if (it.isEmpty()) valueState = it
-            else it.toUIntOrNull()?.toInt()?.let { int ->
+            if (it.isEmpty()) {
                 valueState = it
-                onValueChanged(int)
+            } else {
+                it.toUIntOrNull()?.toInt()?.let { int ->
+                    valueState = it
+                    onValueChanged(int)
+                }
             }
         },
         onFocusChanged = onFocusChanged,
         modifier = modifier,
-        trailingIcon = trailingIcon
+        trailingIcon = trailingIcon,
     )
 }
 
@@ -124,28 +125,31 @@ fun EditTextPreference(
     keyboardActions: KeyboardActions,
     onValueChanged: (Float) -> Unit,
     modifier: Modifier = Modifier,
+    summary: String? = null,
     onFocusChanged: (FocusState) -> Unit = {},
-    ) {
+) {
     var valueState by remember(value) { mutableStateOf(value.toString()) }
 
     EditTextPreference(
         title = title,
         value = valueState,
         enabled = enabled,
+        summary = summary,
         isError = value.toString() != valueState,
-        keyboardOptions = KeyboardOptions.Default.copy(
-            keyboardType = KeyboardType.Number, imeAction = ImeAction.Done
-        ),
+        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
         keyboardActions = keyboardActions,
         onValueChanged = {
-            if (it.isEmpty()) valueState = it
-            else it.toFloatOrNull()?.let { float ->
+            if (it.isEmpty()) {
                 valueState = it
-                onValueChanged(float)
+            } else {
+                it.toFloatOrNull()?.let { float ->
+                    valueState = it
+                    onValueChanged(float)
+                }
             }
         },
         onFocusChanged = onFocusChanged,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -157,6 +161,7 @@ fun EditTextPreference(
     keyboardActions: KeyboardActions,
     onValueChanged: (Double) -> Unit,
     modifier: Modifier = Modifier,
+    summary: String? = null,
 ) {
     var valueState by remember(value) { mutableStateOf(value.toString()) }
     val decimalSeparators = setOf('.', ',', '٫', '、', '·') // set of possible decimal separators
@@ -165,20 +170,22 @@ fun EditTextPreference(
         title = title,
         value = valueState,
         enabled = enabled,
+        summary = summary,
         isError = value.toString() != valueState,
-        keyboardOptions = KeyboardOptions.Default.copy(
-            keyboardType = KeyboardType.Number, imeAction = ImeAction.Done
-        ),
+        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number, imeAction = ImeAction.Done),
         keyboardActions = keyboardActions,
         onValueChanged = {
-            if (it.length <= 1 || it.first() in decimalSeparators) valueState = it
-            else it.toDoubleOrNull()?.let { double ->
+            if (it.length <= 1 || it.first() in decimalSeparators) {
                 valueState = it
-                onValueChanged(double)
+            } else {
+                it.toDoubleOrNull()?.let { double ->
+                    valueState = it
+                    onValueChanged(double)
+                }
             }
         },
         onFocusChanged = {},
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -192,6 +199,7 @@ fun EditTextPreference(
     keyboardActions: KeyboardActions,
     onValueChanged: (String) -> Unit,
     modifier: Modifier = Modifier,
+    summary: String? = null,
     maxSize: Int = 0, // max_size - 1 (in bytes)
     onFocusChanged: (FocusState) -> Unit = {},
     trailingIcon: (@Composable () -> Unit)? = null,
@@ -199,49 +207,60 @@ fun EditTextPreference(
 ) {
     var isFocused by remember { mutableStateOf(false) }
 
-    TextField(
-        value = value,
-        singleLine = true,
-        modifier = modifier
-            .fillMaxWidth()
-            .onFocusEvent { isFocused = it.isFocused; onFocusChanged(it) },
-        enabled = enabled,
-        isError = isError,
-        onValueChange = {
-            if (maxSize > 0) {
-                if (it.toByteArray().size <= maxSize) {
+    Column(modifier = modifier.padding(vertical = 8.dp)) {
+        OutlinedTextField(
+            value = value,
+            singleLine = true,
+            modifier =
+            Modifier.fillMaxWidth().onFocusEvent {
+                isFocused = it.isFocused
+                onFocusChanged(it)
+            },
+            enabled = enabled,
+            isError = isError,
+            onValueChange = {
+                if (maxSize > 0) {
+                    if (it.toByteArray().size <= maxSize) {
+                        onValueChanged(it)
+                    }
+                } else {
                     onValueChanged(it)
                 }
-            } else onValueChanged(it)
-        },
-        label = { Text(title) },
-        keyboardOptions = keyboardOptions,
-        keyboardActions = keyboardActions,
-        visualTransformation = visualTransformation,
-        trailingIcon = {
-            if (trailingIcon != null) {
-                trailingIcon()
-            } else if (isError) {
-                Icon(
-                    imageVector = Icons.TwoTone.Info,
-                    contentDescription = stringResource(id = R.string.error),
-                    tint = MaterialTheme.colorScheme.error
+            },
+            label = { Text(title) },
+            keyboardOptions = keyboardOptions,
+            keyboardActions = keyboardActions,
+            visualTransformation = visualTransformation,
+            trailingIcon = {
+                if (trailingIcon != null) {
+                    trailingIcon()
+                } else if (isError) {
+                    Icon(
+                        imageVector = Icons.TwoTone.Info,
+                        contentDescription = stringResource(id = R.string.error),
+                        tint = MaterialTheme.colorScheme.error,
+                    )
+                }
+            },
+        )
+        if (summary != null) {
+            Text(
+                text = summary,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
+
+        if (maxSize > 0 && isFocused) {
+            Box(contentAlignment = Alignment.BottomEnd, modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    text = "${value.toByteArray().size}/$maxSize",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground,
+                    modifier = Modifier.padding(end = 8.dp, bottom = 4.dp),
                 )
             }
-        },
-    )
-
-    if (maxSize > 0 && isFocused) {
-        Box(
-            contentAlignment = Alignment.BottomEnd,
-            modifier = modifier.fillMaxWidth()
-        ) {
-            Text(
-                text = "${value.toByteArray().size}/$maxSize",
-                style = MaterialTheme.typography.bodySmall,
-                color = if (isError) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onBackground,
-                modifier = Modifier.padding(end = 8.dp, bottom = 4.dp)
-            )
         }
     }
 }
@@ -253,6 +272,7 @@ private fun EditTextPreferencePreview() {
         EditTextPreference(
             title = "String",
             value = "Meshtastic",
+            summary = "This is a summary",
             maxSize = 39,
             enabled = true,
             isError = false,
@@ -265,7 +285,7 @@ private fun EditTextPreferencePreview() {
             value = UInt.MAX_VALUE.toInt(),
             enabled = true,
             keyboardActions = KeyboardActions {},
-            onValueChanged = {}
+            onValueChanged = {},
         )
     }
 }

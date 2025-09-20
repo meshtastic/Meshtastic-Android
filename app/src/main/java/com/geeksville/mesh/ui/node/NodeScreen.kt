@@ -42,14 +42,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.DataPacket
+import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.service.ConnectionState
+import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.common.components.rememberTimeTickWithLifecycle
 import com.geeksville.mesh.ui.node.components.NodeFilterTextField
 import com.geeksville.mesh.ui.node.components.NodeItem
@@ -70,6 +73,8 @@ fun NodeScreen(
 
     val nodes by model.nodeList.collectAsStateWithLifecycle()
     val ourNode by model.ourNodeInfo.collectAsStateWithLifecycle()
+    val onlineNodeCount by model.onlineNodeCount.collectAsStateWithLifecycle(0)
+    val totalNodeCount by model.totalNodeCount.collectAsStateWithLifecycle(0)
     val unfilteredNodes by model.unfilteredNodeList.collectAsStateWithLifecycle()
     val ignoredNodeCount = unfilteredNodes.count { it.isIgnored }
 
@@ -85,6 +90,19 @@ fun NodeScreen(
 
     val isScrollInProgress by remember { derivedStateOf { listState.isScrollInProgress } }
     Scaffold(
+        topBar = {
+            MainAppBar(
+                title = stringResource(R.string.nodes),
+                subtitle = stringResource(R.string.node_count_template, onlineNodeCount, totalNodeCount),
+                ourNode = ourNode,
+                isConnected = connectionState.isConnected(),
+                showNodeChip = false,
+                canNavigateUp = false,
+                onNavigateUp = {},
+                actions = {},
+                onAction = {},
+            )
+        },
         floatingActionButton = {
             val firmwareVersion = DeviceVersion(ourNode?.metadata?.firmwareVersion ?: "0.0.0")
             val shareCapable = firmwareVersion.supportsQrCodeSharing()

@@ -56,10 +56,8 @@ import com.geeksville.mesh.model.getChannelList
 import com.geeksville.mesh.model.getStringResFrom
 import com.geeksville.mesh.model.toChannelSet
 import com.geeksville.mesh.moduleConfig
-import com.geeksville.mesh.navigation.AdminRoute
 import com.geeksville.mesh.navigation.ConfigRoute
 import com.geeksville.mesh.navigation.ModuleRoute
-import com.geeksville.mesh.navigation.SettingsRoutes
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import com.geeksville.mesh.repository.location.LocationRepository
 import com.geeksville.mesh.service.ConnectionState
@@ -79,6 +77,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import org.meshtastic.core.navigation.SettingsRoutes
 import java.io.FileOutputStream
 import javax.inject.Inject
 

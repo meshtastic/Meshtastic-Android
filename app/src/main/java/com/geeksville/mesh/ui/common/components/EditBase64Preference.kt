@@ -17,6 +17,7 @@
 
 package com.geeksville.mesh.ui.common.components
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardActions
@@ -44,16 +45,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.R
-import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.util.encodeToString
 import com.geeksville.mesh.util.toByteString
 import com.google.protobuf.ByteString
+import org.meshtastic.core.model.Channel
 
 @Suppress("LongMethod")
 @Composable
 fun EditBase64Preference(
     modifier: Modifier = Modifier,
     title: String,
+    summary: String? = null,
     value: ByteString,
     enabled: Boolean,
     readOnly: Boolean = false,
@@ -62,7 +64,6 @@ fun EditBase64Preference(
     onGenerateKey: (() -> Unit)? = null,
     trailingIcon: (@Composable () -> Unit)? = null,
 ) {
-
     var valueState by remember { mutableStateOf(value.encodeToString()) }
     val isError = value.encodeToString() != valueState
 
@@ -74,57 +75,65 @@ fun EditBase64Preference(
         }
     }
 
-    val (icon, description) = when {
-        isError -> Icons.TwoTone.Close to stringResource(R.string.error)
-        onGenerateKey != null && !isFocused -> Icons.TwoTone.Refresh to stringResource(R.string.reset)
-        else -> null to null
-    }
-
-    OutlinedTextField(
-        value = valueState,
-        onValueChange = {
-            valueState = it
-            runCatching { it.toByteString() }.onSuccess(onValueChange)
-        },
-        modifier = modifier
-            .fillMaxWidth()
-            .onFocusChanged { focusState -> isFocused = focusState.isFocused },
-        enabled = enabled,
-        readOnly = readOnly,
-        label = { Text(text = title) },
-        isError = isError,
-        keyboardOptions = KeyboardOptions.Default.copy(
-            keyboardType = KeyboardType.Password, imeAction = ImeAction.Done
-        ),
-        keyboardActions = keyboardActions,
-        trailingIcon = {
-            if (icon != null) {
-                IconButton(
-                    onClick = {
-                        if (isError) {
-                            valueState = value.encodeToString()
-                            onValueChange(value)
-                        } else if (onGenerateKey != null && !isFocused) {
-                            onGenerateKey()
-                        }
-                    },
-                    enabled = enabled,
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = description,
-                        tint = if (isError) {
-                            MaterialTheme.colorScheme.error
-                        } else {
-                            LocalContentColor.current
-                        }
-                    )
+    val (icon, description) =
+        when {
+            isError -> Icons.TwoTone.Close to stringResource(R.string.error)
+            onGenerateKey != null && !isFocused -> Icons.TwoTone.Refresh to stringResource(R.string.reset)
+            else -> null to null
+        }
+    Column(modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+        OutlinedTextField(
+            value = valueState,
+            onValueChange = {
+                valueState = it
+                runCatching { it.toByteString() }.onSuccess(onValueChange)
+            },
+            modifier = Modifier.fillMaxWidth().onFocusChanged { focusState -> isFocused = focusState.isFocused },
+            enabled = enabled,
+            readOnly = readOnly,
+            label = { Text(text = title) },
+            isError = isError,
+            keyboardOptions =
+            KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
+            keyboardActions = keyboardActions,
+            trailingIcon = {
+                if (icon != null) {
+                    IconButton(
+                        onClick = {
+                            if (isError) {
+                                valueState = value.encodeToString()
+                                onValueChange(value)
+                            } else if (onGenerateKey != null && !isFocused) {
+                                onGenerateKey()
+                            }
+                        },
+                        enabled = enabled,
+                    ) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = description,
+                            tint =
+                            if (isError) {
+                                MaterialTheme.colorScheme.error
+                            } else {
+                                LocalContentColor.current
+                            },
+                        )
+                    }
+                } else if (trailingIcon != null) {
+                    trailingIcon()
                 }
-            } else if (trailingIcon != null) {
-                trailingIcon()
-            }
-        },
-    )
+            },
+        )
+        if (summary != null) {
+            Text(
+                text = summary,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
+    }
 }
 
 @Preview(showBackground = true)
@@ -132,11 +141,12 @@ fun EditBase64Preference(
 private fun EditBase64PreferencePreview() {
     EditBase64Preference(
         title = "Title",
+        summary = "This is a summary",
         value = Channel.getRandomKey(),
         enabled = true,
         keyboardActions = KeyboardActions {},
         onValueChange = {},
         onGenerateKey = {},
-        modifier = Modifier.padding(16.dp)
+        modifier = Modifier.padding(16.dp),
     )
 }

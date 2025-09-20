@@ -594,6 +594,8 @@
     <string name="dynamic">动态</string>
     <string name="scan_qr_code">扫描二维码</string>
     <string name="share_contact">分享联系人</string>
+    <string name="notes">Notes</string>
+    <string name="add_a_note">Add a private note…</string>
     <string name="import_shared_contact">导入分享的联系人？</string>
     <string name="unmessageable">无法发送消息</string>
     <string name="unmonitored_or_infrastructure">不受监测或基础设施</string>
@@ -699,7 +701,6 @@
     <string name="ble_devices">BLE 设备</string>
     <string name="bluetooth_paired_devices">Paired Devices</string>
     <string name="connected_device">Connected Device</string>
-    <string name="action_go">Go</string>
     <string name="routing_error_rate_limit_exceeded">超过速率限制。请稍后再试。</string>
     <string name="view_release">查看发行版</string>
     <string name="download">下载</string>
@@ -756,7 +757,7 @@
     <string name="map_type_terrain">地形</string>
     <string name="map_type_hybrid">混合</string>
     <string name="manage_map_layers">管理地图图层</string>
-    <string name="map_layer_formats">Custom layers support .kml or .kmz files.</string>
+    <string name="map_layer_formats">Custom layers support .kml, .kmz, or GeoJSON files.</string>
     <string name="map_layers_title">地图图层</string>
     <string name="no_map_layers_loaded">没有自定义图层被加载。</string>
     <string name="add_layer_button">添加图层</string>

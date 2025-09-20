@@ -1,0 +1,21 @@
+Meshtastic ist ein Tool zur Verwendung von Android-Geräten mit unabhängigen, vernetzten Open Source Funkgeräten. Diese App ist die Hauptanwendung für das Meshtastic Projekt und ermöglicht Ihnen die Verwaltung Ihrer Meshtastic Geräte und die Kommunikation mit anderen Benutzern.
+
+Weitere Informationen zum Meshtastic Projekt finden Sie auf unserer Website: [meshtastic.org](https://www.meshtastic.org). Die auf den Funkgeräten laufende Firmware ist ein separates Open Source Projekt, das Sie hier finden: [https://github.com/meshtastic/Meshtastic-device](https://github.com/meshtastic/Meshtastic-device).
+
+**Die Gemeinschaft und Unterstützung**
+
+Dieses Projekt befindet sich derzeit in der Betaphase. Wir freuen uns, von Ihnen zu hören! Wenn Sie Fragen oder Feedback haben oder auf Probleme stoßen, treten Sie bitte unserer freundlichen und aktiven Gemeinschaft bei:
+
+* **Diskussionsforum:** [https://github.com/orgs/meshtastic/discussions](https://github.com/orgs/meshtastic/discussions)
+*   **Discord:** [https://discord.gg/meshtastic](https://discord.gg/meshtastic)
+* **Problem melden:** [https://github.com/meshtastic/Meshtastic-Android/issues](https://github.com/meshtastic/Meshtastic-Android/issues)
+
+**Dokumentation**
+
+Um mehr über die Funktionen und Möglichkeiten dieser Anwendung und von Meshtastic zu erfahren, sehen Sie sich bitte unsere offizielle Dokumentation an:
+[**Dokumentation anzeigen**](https://meshtastic.org/docs/)
+
+**Übersetzung**
+
+Sie können mit Crowdin bei der Übersetzung der Anwendung in Ihre Muttersprache helfen:
+[https://crowdin.meshtastic.org/android](https://crowdin.meshtastic.org/android)

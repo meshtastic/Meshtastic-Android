@@ -46,7 +46,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.EnvironmentMetrics
 import com.geeksville.mesh.R
@@ -310,7 +310,7 @@ private fun RadiationDisplay(envMetrics: TelemetryProtos.EnvironmentMetrics) {
         if (!radiation.isNaN() && radiation > 0f) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
-                    text = "%s %.2f µSv/h".format(stringResource(R.string.radiation), radiation),
+                    text = "%s %.2f µR/h".format(stringResource(R.string.radiation), radiation),
                     color = MaterialTheme.colorScheme.onSurface,
                     fontSize = MaterialTheme.typography.labelLarge.fontSize,
                 )

@@ -22,7 +22,7 @@
     <string name="node_filter_include_unknown">Включително неизвестните</string>
     <string name="node_filter_only_online">Скриване на офлайн възлите</string>
     <string name="node_filter_only_direct">Показване само на директни възли</string>
-    <string name="node_filter_ignored">Преглеждате игнорирани възли.\nНатиснете , за да се върнете към списъка с възли.</string>
+    <string name="node_filter_ignored">Преглеждате игнорирани възли.\nНатиснете, за да се върнете към списъка с възли.</string>
     <string name="node_filter_show_details">Показване на детайли</string>
     <string name="node_sort_button">Опции за сортиране на възлите</string>
     <string name="node_sort_alpha">А-Я</string>
@@ -143,7 +143,7 @@
     <string name="must_set_region">Трябва да зададете регион!</string>
     <string name="cant_change_no_radio">Каналът не може да бъде сменен, тъй като радиото все още не е свързано. Моля, опитайте отново.</string>
     <string name="save_rangetest">Export rangetest packets</string>
-    <string name="export_data_csv">Export all packets</string>
+    <string name="export_data_csv">Експортиране на всички пакети</string>
     <string name="reset">Нулиране</string>
     <string name="scan">Сканиране</string>
     <string name="add_network_device">Добавяне</string>
@@ -495,9 +495,9 @@
     <string name="position_config_set_fixed_from_phone">Зададено от текущото местоположение на телефона</string>
     <string name="gps_mode">Режим на GPS</string>
     <string name="gps_update_interval_seconds">Интервал на актуализиране на GPS (секунди)</string>
-    <string name="redefine_gps_rx_pin">Redefine GPS_RX_PIN</string>
-    <string name="redefine_gps_tx_pin">Redefine GPS_TX_PIN</string>
-    <string name="redefine_pin_gps_en">Redefine PIN_GPS_EN</string>
+    <string name="redefine_gps_rx_pin">Предефиниране на GPS_RX_PIN</string>
+    <string name="redefine_gps_tx_pin">Предефиниране на GPS_TX_PIN</string>
+    <string name="redefine_pin_gps_en">Предефиниране на PIN_GPS_EN</string>
     <string name="position_flags">Position flags</string>
     <string name="power_config">Конфигуриране на захранването</string>
     <string name="enable_power_saving_mode">Активиране на енергоспестяващ режим</string>
@@ -506,7 +506,7 @@
     <string name="wait_for_bluetooth_duration_seconds">Wait for Bluetooth duration (seconds)</string>
     <string name="super_deep_sleep_duration_seconds">Super deep sleep duration (seconds)</string>
     <string name="light_sleep_duration_seconds">Light sleep duration (seconds)</string>
-    <string name="minimum_wake_time_seconds">Minimum wake time (seconds)</string>
+    <string name="minimum_wake_time_seconds">Минимално време за събуждане (секунди)</string>
     <string name="battery_ina_2xx_i2c_address">Battery INA_2XX I2C address</string>
     <string name="range_test_config">Конфигуриране на Тест на обхвата</string>
     <string name="range_test_enabled">Тест на обхвата е активиран</string>
@@ -594,6 +594,8 @@
     <string name="dynamic">Динамична</string>
     <string name="scan_qr_code">Сканиране на QR кода</string>
     <string name="share_contact">Споделяне на контакт</string>
+    <string name="notes">Бележки</string>
+    <string name="add_a_note">Добавяне на лична бележка...</string>
     <string name="import_shared_contact">Импортиране на споделен контакт?</string>
     <string name="unmessageable">Без съобщения</string>
     <string name="unmonitored_or_infrastructure">Ненаблюдаван или инфраструктурен</string>
@@ -612,7 +614,7 @@
     <string name="load">Load</string>
     <string name="user_string">User String</string>
     <string name="navigate_into_label">Navigate Into</string>
-    <string name="connections">Connection</string>
+    <string name="connections">Свързване</string>
     <string name="map">Карта на Mesh</string>
     <string name="conversations">Разговори</string>
     <string name="nodes">Възли</string>
@@ -644,9 +646,9 @@
     <string name="remote">Отдалечен</string>
     <string name="node_count_template">(%1$d онлайн / %2$d общо)</string>
     <string name="react">React</string>
-    <string name="disconnect">Disconnect</string>
-    <string name="scanning_bluetooth">Scanning for Bluetooth devices…</string>
-    <string name="no_ble_devices">No paired Bluetooth devices.</string>
+    <string name="disconnect">Прекъсване на връзката</string>
+    <string name="scanning_bluetooth">Сканиране за Bluetooth устройства…</string>
+    <string name="no_ble_devices">Няма сдвоени Bluetooth устройства.</string>
     <string name="no_network_devices">Няма открити мрежови устройства.</string>
     <string name="no_usb_devices">Няма открити USB серийни устройства.</string>
     <string name="scroll_to_bottom">Превъртане до края</string>
@@ -699,7 +701,6 @@
     <string name="ble_devices">BLE устройства</string>
     <string name="bluetooth_paired_devices">Сдвоени устройства</string>
     <string name="connected_device">Свързано устройство</string>
-    <string name="action_go">Go</string>
     <string name="routing_error_rate_limit_exceeded">Rate Limit Exceeded. Please try again later.</string>
     <string name="view_release">Преглед на изданието</string>
     <string name="download">Изтегляне</string>
@@ -737,7 +738,7 @@
     <string name="distance_filters_description">Filter the node list and mesh map based on proximity to your phone.</string>
     <string name="mesh_map_location">Mesh Map Location</string>
     <string name="mesh_map_location_description">Enables the blue location dot for your phone in the mesh map.</string>
-    <string name="configure_location_permissions">Configure Location Permissions</string>
+    <string name="configure_location_permissions">Конфигуриране на разрешенията за местоположение</string>
     <string name="skip">Пропускане</string>
     <string name="settings">настройки</string>
     <string name="critical_alerts">Критични предупреждения</string>
@@ -749,7 +750,7 @@
     <string name="notification_permissions_description">Meshtastic използва известия, за да ви държи в течение за нови съобщения и други важни събития. Можете да актуализирате разрешенията си за известия по всяко време от настройките.</string>
     <string name="next">Напред</string>
     <string name="grant_permissions">Grant Permissions</string>
-    <string name="nodes_queued_for_deletion">%d nodes queued for deletion:</string>
+    <string name="nodes_queued_for_deletion">%d възела са на опашка за изтриване:</string>
     <string name="clean_node_database_description">Caution: This removes nodes from in-app and on-device databases.\nSelections are additive.</string>
     <string name="connecting_to_device">Свързване с устройство</string>
     <string name="map_type_normal">Нормален</string>
@@ -757,7 +758,7 @@
     <string name="map_type_terrain">Терен</string>
     <string name="map_type_hybrid">Хибриден</string>
     <string name="manage_map_layers">Управление на слоевете на картата</string>
-    <string name="map_layer_formats">Custom layers support .kml or .kmz files.</string>
+    <string name="map_layer_formats">Персонализираните слоеве поддържат .kml, .kmz или GeoJSON файлове.</string>
     <string name="map_layers_title">Слоеве на картата</string>
     <string name="no_map_layers_loaded">Няма заредени персонализирани слоеве.</string>
     <string name="add_layer_button">Добавяне на слой</string>
@@ -778,11 +779,11 @@
     <string name="url_must_contain_placeholders">URL must contain placeholders.</string>
     <string name="url_template">Шаблон за URL</string>
     <string name="track_point">track point</string>
-    <string name="app_settings">App</string>
-    <string name="app_version">Version</string>
+    <string name="app_settings">Приложение</string>
+    <string name="app_version">Версия</string>
     <string name="channel_features">Channel Features</string>
     <string name="location_sharing">Location Sharing</string>
-    <string name="periodic_position_broadcast">Periodic position broadcast</string>
+    <string name="periodic_position_broadcast">Периодично излъчване на позиция</string>
     <string name="uplink_feature_description">Messages from the mesh will be sent to the public internet through any node\'s configured gateway.</string>
     <string name="downlink_feature_description">Messages from a public internet gateway are forwarded to the local mesh. Due to the zero-hop policy, traffic from the default MQTT server will not propagate further than this device.</string>
     <string name="icon_meanings">Icon Meanings</string>

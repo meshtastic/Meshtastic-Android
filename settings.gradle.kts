@@ -17,10 +17,14 @@ import org.gradle.kotlin.dsl.maven
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-include(":app", ":network", ":mesh_service_example")
-rootProject.name = "Meshtastic Android"
+include(":app", ":core:model", ":core:navigation", ":core:network", ":core:prefs", ":core:proto", ":feature:map", ":mesh_service_example")
+rootProject.name = "MeshtasticAndroid"
+
+// https://docs.gradle.org/current/userguide/declaring_dependencies.html#sec:type-safe-project-accessors
+enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
 pluginManagement {
+    includeBuild("build-logic")
     repositories {
         google()
         mavenCentral()
@@ -41,8 +45,8 @@ dependencyResolutionManagement {
 
 plugins {
     id("org.gradle.toolchains.foojay-resolver") version "1.0.0"
-    id("com.gradle.develocity") version("4.1.1")
-    id("com.gradle.common-custom-user-data-gradle-plugin") version "2.3"
+    id("com.gradle.develocity") version("4.2")
+    id("com.gradle.common-custom-user-data-gradle-plugin") version "2.4.0"
 }
 
 develocity {

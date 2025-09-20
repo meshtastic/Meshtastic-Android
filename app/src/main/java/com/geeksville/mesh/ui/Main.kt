@@ -22,6 +22,7 @@ package com.geeksville.mesh.ui
 import android.Manifest
 import android.os.Build
 import androidx.annotation.StringRes
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
@@ -64,12 +65,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.BuildConfig
@@ -79,17 +81,15 @@ import com.geeksville.mesh.android.AddNavigationTracking
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.setAttributes
 import com.geeksville.mesh.model.BTScanModel
-import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.navigation.ConnectionsRoutes
-import com.geeksville.mesh.navigation.ContactsRoutes
-import com.geeksville.mesh.navigation.MapRoutes
-import com.geeksville.mesh.navigation.NavGraph
-import com.geeksville.mesh.navigation.NodesRoutes
-import com.geeksville.mesh.navigation.Route
-import com.geeksville.mesh.navigation.SettingsRoutes
+import com.geeksville.mesh.navigation.channelsGraph
+import com.geeksville.mesh.navigation.connectionsGraph
+import com.geeksville.mesh.navigation.contactsGraph
+import com.geeksville.mesh.navigation.mapGraph
+import com.geeksville.mesh.navigation.nodesGraph
+import com.geeksville.mesh.navigation.settingsGraph
 import com.geeksville.mesh.repository.radio.MeshActivity
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.service.MeshService
@@ -113,6 +113,13 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.meshtastic.core.navigation.ConnectionsRoutes
+import org.meshtastic.core.navigation.ContactsRoutes
+import org.meshtastic.core.navigation.MapRoutes
+import org.meshtastic.core.navigation.NodeDetailRoutes
+import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.navigation.SettingsRoutes
 import kotlin.reflect.KClass
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {
@@ -129,7 +136,6 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
             NodesRoutes.Nodes::class,
             MapRoutes.Map::class,
             ConnectionsRoutes.Connections::class,
-            SettingsRoutes.Settings::class,
         )
             .any { this.hasRoute(it) }
 
@@ -141,11 +147,7 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
-fun MainScreen(
-    uIViewModel: UIViewModel = hiltViewModel(),
-    bluetoothViewModel: BluetoothViewModel = hiltViewModel(),
-    scanModel: BTScanModel = hiltViewModel(),
-) {
+fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanModel = hiltViewModel()) {
     val navController = rememberNavController()
     val connectionState by uIViewModel.connectionState.collectAsStateWithLifecycle()
     val requestChannelSet by uIViewModel.requestChannelSet.collectAsStateWithLifecycle()
@@ -343,32 +345,55 @@ fun MainScreen(
                 if (sharedContact != null) {
                     SharedContactDialog(contact = sharedContact, onDismiss = { sharedContact = null })
                 }
-                MainAppBar(
-                    viewModel = uIViewModel,
-                    navController = navController,
-                    onAction = { action ->
-                        when (action) {
-                            is NodeMenuAction.MoreDetails -> {
-                                navController.navigate(
-                                    NodesRoutes.NodeDetailGraph(action.node.num),
-                                    {
-                                        launchSingleTop = true
-                                        restoreState = true
-                                    },
-                                )
-                            }
 
-                            is NodeMenuAction.Share -> sharedContact = action.node
-                            else -> {}
-                        }
-                    },
-                )
-                NavGraph(
-                    modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding().imePadding(),
-                    uIViewModel = uIViewModel,
-                    bluetoothViewModel = bluetoothViewModel,
+                fun NavDestination.hasGlobalAppBar(): Boolean =
+                    // List of screens to exclude from having the global app bar
+                    listOf(
+                        ConnectionsRoutes.Connections::class,
+                        ContactsRoutes.Contacts::class,
+                        MapRoutes.Map::class,
+                        NodeDetailRoutes.NodeMap::class,
+                        NodesRoutes.Nodes::class,
+                        NodesRoutes.NodeDetail::class,
+                        SettingsRoutes.Settings::class,
+                    )
+                        .none { this.hasRoute(it) }
+
+                AnimatedVisibility(visible = currentDestination?.hasGlobalAppBar() ?: true) {
+                    MainAppBar(
+                        viewModel = uIViewModel,
+                        navController = navController,
+                        onAction = { action ->
+                            when (action) {
+                                is NodeMenuAction.MoreDetails -> {
+                                    navController.navigate(
+                                        NodesRoutes.NodeDetailGraph(action.node.num),
+                                        {
+                                            launchSingleTop = true
+                                            restoreState = true
+                                        },
+                                    )
+                                }
+
+                                is NodeMenuAction.Share -> sharedContact = action.node
+                                else -> {}
+                            }
+                        },
+                    )
+                }
+
+                NavHost(
                     navController = navController,
-                )
+                    startDestination = NodesRoutes.NodesGraph,
+                    modifier = Modifier.fillMaxSize().recalculateWindowInsets().safeDrawingPadding().imePadding(),
+                ) {
+                    contactsGraph(navController, uiViewModel = uIViewModel)
+                    nodesGraph(navController, uiViewModel = uIViewModel)
+                    mapGraph(navController, uiViewModel = uIViewModel)
+                    channelsGraph(navController, uiViewModel = uIViewModel)
+                    connectionsGraph(navController)
+                    settingsGraph(navController)
+                }
             }
         }
     }

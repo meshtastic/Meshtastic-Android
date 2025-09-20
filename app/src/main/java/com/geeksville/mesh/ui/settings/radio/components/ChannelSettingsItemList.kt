@@ -66,13 +66,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig
 import com.geeksville.mesh.R
 import com.geeksville.mesh.channelSettings
-import com.geeksville.mesh.model.Channel
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
 import com.geeksville.mesh.ui.common.components.PreferenceFooter
@@ -81,6 +80,7 @@ import com.geeksville.mesh.ui.common.components.dragContainer
 import com.geeksville.mesh.ui.common.components.dragDropItemsIndexed
 import com.geeksville.mesh.ui.common.components.rememberDragDropState
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
+import org.meshtastic.core.model.Channel
 
 @Composable
 private fun ChannelItem(

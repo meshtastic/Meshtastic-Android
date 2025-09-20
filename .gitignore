@@ -10,12 +10,14 @@
 .gradle
 /local.properties
 .DS_Store
-/build
+**/build/**
 /captures
 .externalNativeBuild
 .cxx
 /app/release
 /buildSrc/build
+**/debug/**
+**/release/**
 
 # Java KeyStore certificates
 *.jks
@@ -33,4 +35,9 @@ keystore.properties
 # Secrets
 /secrets.properties
 /fastlane/play-store-credentials.json
+**/google-services.json
+
 /fastlane/report.xml
+
+/build-logic/convention/build/*
+/build-logic/build/

@@ -17,8 +17,11 @@
 
 package com.geeksville.mesh.ui.settings
 
+import android.Manifest
 import android.app.Activity
 import android.content.Intent
+import android.os.Build
+import android.provider.Settings.ACTION_APP_LOCALE_SETTINGS
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -29,12 +32,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.KeyboardArrowRight
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.rounded.FormatPaint
 import androidx.compose.material.icons.rounded.Language
+import androidx.compose.material.icons.rounded.LocationOn
 import androidx.compose.material.icons.rounded.Memory
 import androidx.compose.material.icons.rounded.Output
 import androidx.compose.material.icons.rounded.WavingHand
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -46,17 +52,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.core.net.toUri
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.R
-import com.geeksville.mesh.android.BuildUtils.debug
-import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.navigation.Route
+import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.navigation.getNavRouteFrom
+import com.geeksville.mesh.ui.common.components.MainAppBar
+import com.geeksville.mesh.ui.common.components.MultipleChoiceAlertDialog
 import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.common.theme.MODE_DYNAMIC
+import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.settings.components.SettingsItem
 import com.geeksville.mesh.ui.settings.components.SettingsItemDetail
 import com.geeksville.mesh.ui.settings.components.SettingsItemSwitch
@@ -65,23 +73,29 @@ import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.ui.settings.radio.components.EditDeviceProfileDialog
 import com.geeksville.mesh.ui.settings.radio.components.PacketResponseStateDialog
 import com.geeksville.mesh.util.LanguageUtils
+import com.geeksville.mesh.util.LanguageUtils.getLanguageMap
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.delay
+import org.meshtastic.core.navigation.Route
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import kotlin.time.Duration.Companion.seconds
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 fun SettingsScreen(
+    settingsViewModel: SettingsViewModel = hiltViewModel(),
     viewModel: RadioConfigViewModel = hiltViewModel(),
-    uiViewModel: UIViewModel = hiltViewModel(),
+    onClickNodeChip: (Int) -> Unit = {},
     onNavigate: (Route) -> Unit = {},
 ) {
-    uiViewModel.setTitle(stringResource(R.string.bottom_nav_settings))
-
-    val excludedModulesUnlocked by uiViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
-    val localConfig by uiViewModel.localConfig.collectAsStateWithLifecycle()
+    val excludedModulesUnlocked by settingsViewModel.excludedModulesUnlocked.collectAsStateWithLifecycle()
+    val localConfig by settingsViewModel.localConfig.collectAsStateWithLifecycle()
+    val ourNode by settingsViewModel.ourNodeInfo.collectAsStateWithLifecycle()
+    val isConnected by settingsViewModel.isConnected.collectAsStateWithLifecycle(false)
 
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     var isWaiting by remember { mutableStateOf(false) }
@@ -155,131 +169,195 @@ fun SettingsScreen(
         )
     }
 
-    Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(16.dp)) {
-        RadioConfigItemList(
-            state = state,
-            isManaged = localConfig.security.isManaged,
-            excludedModulesUnlocked = excludedModulesUnlocked,
-            onRouteClick = { route ->
-                isWaiting = true
-                viewModel.setResponseStateLoading(route)
-            },
-            onImport = {
-                viewModel.clearPacketResponse()
-                deviceProfile = null
-                val intent =
-                    Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "application/*"
-                    }
-                importConfigLauncher.launch(intent)
-            },
-            onExport = {
-                viewModel.clearPacketResponse()
-                deviceProfile = null
-                showEditDeviceProfileDialog = true
-            },
-            onNavigate = onNavigate,
-        )
+    var showLanguagePickerDialog by remember { mutableStateOf(false) }
+    if (showLanguagePickerDialog) {
+        LanguagePickerDialog { showLanguagePickerDialog = false }
+    }
 
-        TitledCard(title = stringResource(R.string.app_settings), modifier = Modifier.padding(top = 16.dp)) {
-            if (state.analyticsAvailable) {
-                SettingsItemSwitch(
-                    text = stringResource(R.string.analytics_okay),
-                    checked = state.analyticsEnabled,
-                    leadingIcon = Icons.Default.BugReport,
-                    onClick = { viewModel.toggleAnalytics() },
-                )
-            }
+    var showThemePickerDialog by remember { mutableStateOf(false) }
+    if (showThemePickerDialog) {
+        ThemePickerDialog(
+            onClickTheme = { settingsViewModel.setTheme(it) },
+            onDismiss = { showThemePickerDialog = false },
+        )
+    }
+
+    Scaffold(
+        topBar = {
+            MainAppBar(
+                title = stringResource(R.string.bottom_nav_settings),
+                ourNode = ourNode,
+                isConnected = isConnected,
+                showNodeChip = ourNode != null && isConnected,
+                canNavigateUp = false,
+                onNavigateUp = {},
+                actions = {},
+                onAction = { action ->
+                    when (action) {
+                        is NodeMenuAction.MoreDetails -> onClickNodeChip(action.node.num)
+                        else -> {}
+                    }
+                },
+            )
+        },
+    ) { paddingValues ->
+        Column(modifier = Modifier.verticalScroll(rememberScrollState()).padding(paddingValues).padding(16.dp)) {
+            RadioConfigItemList(
+                state = state,
+                isManaged = localConfig.security.isManaged,
+                excludedModulesUnlocked = excludedModulesUnlocked,
+                onRouteClick = { route ->
+                    isWaiting = true
+                    viewModel.setResponseStateLoading(route)
+                },
+                onImport = {
+                    viewModel.clearPacketResponse()
+                    deviceProfile = null
+                    val intent =
+                        Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            type = "application/*"
+                        }
+                    importConfigLauncher.launch(intent)
+                },
+                onExport = {
+                    viewModel.clearPacketResponse()
+                    deviceProfile = null
+                    showEditDeviceProfileDialog = true
+                },
+                onNavigate = onNavigate,
+            )
 
             val context = LocalContext.current
-            val languageTags = remember { LanguageUtils.getLanguageTags(context) }
-            SettingsItem(
-                text = stringResource(R.string.preferences_language),
-                leadingIcon = Icons.Rounded.Language,
-                trailingIcon = null,
-            ) {
-                val lang = LanguageUtils.getLocale()
-                debug("Lang from prefs: $lang")
-                val langMap = languageTags.mapValues { (_, value) -> { LanguageUtils.setLocale(value) } }
 
-                uiViewModel.showAlert(
-                    title = context.getString(R.string.preferences_language),
-                    message = "",
-                    choices = langMap,
-                )
-            }
+            TitledCard(title = stringResource(R.string.app_settings), modifier = Modifier.padding(top = 16.dp)) {
+                if (state.analyticsAvailable) {
+                    SettingsItemSwitch(
+                        text = stringResource(R.string.analytics_okay),
+                        checked = state.analyticsEnabled,
+                        leadingIcon = Icons.Default.BugReport,
+                        onClick = { viewModel.toggleAnalytics() },
+                    )
+                }
 
-            val themeMap = remember {
-                mapOf(
-                    context.getString(R.string.dynamic) to MODE_DYNAMIC,
-                    context.getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
-                    context.getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
-                    context.getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
-                )
-            }
-            SettingsItem(
-                text = stringResource(R.string.theme),
-                leadingIcon = Icons.Rounded.FormatPaint,
-                trailingIcon = null,
-            ) {
-                uiViewModel.showAlert(
-                    title = context.getString(R.string.choose_theme),
-                    message = "",
-                    choices = themeMap.mapValues { (_, value) -> { uiViewModel.setTheme(value) } },
-                )
-            }
-            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+                val locationPermissionsState =
+                    rememberMultiplePermissionsState(permissions = listOf(Manifest.permission.ACCESS_FINE_LOCATION))
+                val isGpsDisabled = context.gpsDisabled()
+                val provideLocation by settingsViewModel.provideLocation.collectAsStateWithLifecycle()
 
-            val exportRangeTestLauncher =
-                rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                    if (it.resultCode == RESULT_OK) {
-                        it.data?.data?.let { uri -> uiViewModel.saveDataCsv(uri) }
+                LaunchedEffect(provideLocation, locationPermissionsState.allPermissionsGranted, isGpsDisabled) {
+                    if (provideLocation) {
+                        if (locationPermissionsState.allPermissionsGranted) {
+                            if (!isGpsDisabled) {
+                                settingsViewModel.meshService?.startProvideLocation()
+                            } else {
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.location_disabled),
+                                    Toast.LENGTH_LONG,
+                                )
+                                    .show()
+                            }
+                        } else {
+                            // Request permissions if not granted and user wants to provide location
+                            locationPermissionsState.launchMultiplePermissionRequest()
+                        }
+                    } else {
+                        settingsViewModel.meshService?.stopProvideLocation()
                     }
                 }
-            SettingsItem(
-                text = stringResource(R.string.save_rangetest),
-                leadingIcon = Icons.Rounded.Output,
-                trailingIcon = null,
-            ) {
-                val intent =
-                    Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "application/csv"
-                        putExtra(Intent.EXTRA_TITLE, "Meshtastic_rangetest_$timestamp.csv")
-                    }
-                exportRangeTestLauncher.launch(intent)
-            }
 
-            val exportDataLauncher =
-                rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-                    if (it.resultCode == RESULT_OK) {
-                        it.data?.data?.let { uri -> uiViewModel.saveDataCsv(uri) }
+                SettingsItemSwitch(
+                    text = stringResource(R.string.provide_location_to_mesh),
+                    leadingIcon = Icons.Rounded.LocationOn,
+                    enabled = !isGpsDisabled,
+                    checked = provideLocation,
+                ) {
+                    settingsViewModel.setProvideLocation(!provideLocation)
+                }
+
+                val settingsLauncher =
+                    rememberLauncherForActivityResult(contract = ActivityResultContracts.StartActivityForResult()) {}
+                // On Android 12 and below, system app settings for language are not available. Use the in-app language
+                // picker for these devices.
+                val useInAppLangPicker = Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU
+                SettingsItem(
+                    text = stringResource(R.string.preferences_language),
+                    leadingIcon = Icons.Rounded.Language,
+                    trailingIcon = if (useInAppLangPicker) null else Icons.AutoMirrored.Rounded.KeyboardArrowRight,
+                ) {
+                    if (useInAppLangPicker) {
+                        showLanguagePickerDialog = true
+                    } else {
+                        val intent = Intent(ACTION_APP_LOCALE_SETTINGS, "package:${context.packageName}".toUri())
+                        if (intent.resolveActivity(context.packageManager) != null) {
+                            settingsLauncher.launch(intent)
+                        } else {
+                            // Fall back to the in-app picker
+                            showLanguagePickerDialog = true
+                        }
                     }
                 }
-            SettingsItem(
-                text = stringResource(R.string.export_data_csv),
-                leadingIcon = Icons.Rounded.Output,
-                trailingIcon = null,
-            ) {
-                val intent =
-                    Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
-                        addCategory(Intent.CATEGORY_OPENABLE)
-                        type = "application/csv"
-                        putExtra(Intent.EXTRA_TITLE, "Meshtastic_datalog_$timestamp.csv")
+
+                SettingsItem(
+                    text = stringResource(R.string.theme),
+                    leadingIcon = Icons.Rounded.FormatPaint,
+                    trailingIcon = null,
+                ) {
+                    showThemePickerDialog = true
+                }
+                val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+
+                val exportRangeTestLauncher =
+                    rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                        if (it.resultCode == RESULT_OK) {
+                            it.data?.data?.let { uri -> settingsViewModel.saveDataCsv(uri) }
+                        }
                     }
-                exportDataLauncher.launch(intent)
-            }
+                SettingsItem(
+                    text = stringResource(R.string.save_rangetest),
+                    leadingIcon = Icons.Rounded.Output,
+                    trailingIcon = null,
+                ) {
+                    val intent =
+                        Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            type = "application/csv"
+                            putExtra(Intent.EXTRA_TITLE, "Meshtastic_rangetest_$timestamp.csv")
+                        }
+                    exportRangeTestLauncher.launch(intent)
+                }
 
-            SettingsItem(
-                text = stringResource(R.string.intro_show),
-                leadingIcon = Icons.Rounded.WavingHand,
-                trailingIcon = null,
-            ) {
-                uiViewModel.showAppIntro()
-            }
+                val exportDataLauncher =
+                    rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+                        if (it.resultCode == RESULT_OK) {
+                            it.data?.data?.let { uri -> settingsViewModel.saveDataCsv(uri) }
+                        }
+                    }
+                SettingsItem(
+                    text = stringResource(R.string.export_data_csv),
+                    leadingIcon = Icons.Rounded.Output,
+                    trailingIcon = null,
+                ) {
+                    val intent =
+                        Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                            type = "application/csv"
+                            putExtra(Intent.EXTRA_TITLE, "Meshtastic_datalog_$timestamp.csv")
+                        }
+                    exportDataLauncher.launch(intent)
+                }
 
-            AppVersionButton(excludedModulesUnlocked) { uiViewModel.unlockExcludedModules() }
+                SettingsItem(
+                    text = stringResource(R.string.intro_show),
+                    leadingIcon = Icons.Rounded.WavingHand,
+                    trailingIcon = null,
+                ) {
+                    settingsViewModel.showAppIntro()
+                }
+
+                AppVersionButton(excludedModulesUnlocked) { settingsViewModel.unlockExcludedModules() }
+            }
         }
     }
 }
@@ -320,4 +398,43 @@ private fun AppVersionButton(excludedModulesUnlocked: Boolean, onUnlockExcludedM
             }
         }
     }
+}
+
+@Composable
+private fun LanguagePickerDialog(onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val choices = remember {
+        context
+            .getLanguageMap()
+            .map { (languageTag, languageName) -> languageName to { LanguageUtils.setAppLocale(languageTag) } }
+            .toMap()
+    }
+
+    MultipleChoiceAlertDialog(
+        title = stringResource(R.string.preferences_language),
+        message = "",
+        choices = choices,
+        onDismissRequest = onDismiss,
+    )
+}
+
+@Composable
+private fun ThemePickerDialog(onClickTheme: (Int) -> Unit, onDismiss: () -> Unit) {
+    val context = LocalContext.current
+    val themeMap = remember {
+        mapOf(
+            context.getString(R.string.dynamic) to MODE_DYNAMIC,
+            context.getString(R.string.theme_light) to AppCompatDelegate.MODE_NIGHT_NO,
+            context.getString(R.string.theme_dark) to AppCompatDelegate.MODE_NIGHT_YES,
+            context.getString(R.string.theme_system) to AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+        )
+            .mapValues { (_, value) -> { onClickTheme(value) } }
+    }
+
+    MultipleChoiceAlertDialog(
+        title = stringResource(R.string.choose_theme),
+        message = "",
+        choices = themeMap,
+        onDismissRequest = onDismiss,
+    )
 }

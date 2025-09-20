@@ -598,6 +598,8 @@
     <string name="dynamic">Dynamic</string>
     <string name="scan_qr_code">Scan QR Code</string>
     <string name="share_contact">Share Contact</string>
+    <string name="notes">Notes</string>
+    <string name="add_a_note">Add a private note…</string>
     <string name="import_shared_contact">Import Shared Contact?</string>
     <string name="unmessageable">Unmessageable</string>
     <string name="unmonitored_or_infrastructure">Unmonitored or Infrastructure</string>
@@ -703,7 +705,6 @@
     <string name="ble_devices">BLE Devices</string>
     <string name="bluetooth_paired_devices">Paired Devices</string>
     <string name="connected_device">Connected Device</string>
-    <string name="action_go">Go</string>
     <string name="routing_error_rate_limit_exceeded">Rate Limit Exceeded. Please try again later.</string>
     <string name="view_release">View Release</string>
     <string name="download">Download</string>
@@ -761,7 +762,7 @@
     <string name="map_type_terrain">Terrain</string>
     <string name="map_type_hybrid">Hybrid</string>
     <string name="manage_map_layers">Manage Map Layers</string>
-    <string name="map_layer_formats">Custom layers support .kml or .kmz files.</string>
+    <string name="map_layer_formats">Custom layers support .kml, .kmz, or GeoJSON files.</string>
     <string name="map_layers_title">Map Layers</string>
     <string name="no_map_layers_loaded">No custom layers loaded.</string>
     <string name="add_layer_button">Add Layer</string>

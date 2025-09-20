@@ -52,8 +52,8 @@ fun WaypointMarkers(
                 } else {
                     unicodeEmojiToBitmapProvider(waypoint.icon)
                 },
-                title = waypoint.name,
-                snippet = waypoint.description,
+                title = waypoint.name.replace('\n', ' ').replace('\b', ' '),
+                snippet = waypoint.description.replace('\n', ' ').replace('\b', ' '),
                 visible = true,
                 onInfoWindowClick = {
                     if (waypoint.lockedTo == 0 || waypoint.lockedTo == myNodeNum || !isConnected) {

@@ -18,6 +18,7 @@ jobs:
       GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
       DATADOG_APPLICATION_ID: ${{ secrets.DATADOG_APPLICATION_ID }}
       DATADOG_CLIENT_TOKEN: ${{ secrets.DATADOG_CLIENT_TOKEN }}
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   androidTest:
     if: github.repository == 'meshtastic/Meshtastic-Android'
@@ -27,6 +28,7 @@ jobs:
       upload_artifacts: false
     secrets:
       GRADLE_ENCRYPTION_KEY: ${{ secrets.GRADLE_ENCRYPTION_KEY }}
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   check-workflow-status:
     name: Check Workflow Status  # Matches another in pull-request, and is required for merge to main.

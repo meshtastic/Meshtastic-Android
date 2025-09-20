@@ -17,51 +17,56 @@
 
 package com.geeksville.mesh.compose
 
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.junit4.createComposeRule
-import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
 import com.geeksville.mesh.R
+import com.geeksville.mesh.ui.debug.FilterMode
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
-import androidx.test.platform.app.InstrumentationRegistry
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
-import com.geeksville.mesh.ui.debug.FilterMode
 
 @RunWith(AndroidJUnit4::class)
 class DebugFiltersTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+    @get:Rule val composeTestRule = createComposeRule()
 
     @Test
     fun debugFilterBar_showsFilterButtonAndMenu() {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val filterLabel = context.getString(R.string.debug_filters)
         composeTestRule.setContent {
-            var filterTexts by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(listOf<String>()) }
+            var filterTexts by
+                androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(listOf<String>()) }
             var customFilterText by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
             val presetFilters = listOf("Error", "Warning", "Info")
-            val logs = listOf(
-                com.geeksville.mesh.model.DebugViewModel.UiMeshLog(
-                    uuid = "1",
-                    messageType = "Info",
-                    formattedReceivedDate = "2024-01-01 12:00:00",
-                    logMessage = "Sample log message"
+            val logs =
+                listOf(
+                    com.geeksville.mesh.model.DebugViewModel.UiMeshLog(
+                        uuid = "1",
+                        messageType = "Info",
+                        formattedReceivedDate = "2024-01-01 12:00:00",
+                        logMessage = "Sample log message",
+                    ),
                 )
-            )
             com.geeksville.mesh.ui.debug.DebugFilterBar(
                 filterTexts = filterTexts,
                 onFilterTextsChange = { filterTexts = it },
                 customFilterText = customFilterText,
                 onCustomFilterTextChange = { customFilterText = it },
                 presetFilters = presetFilters,
-                logs = logs
+                logs = logs,
             )
         }
         // The filter button should be visible
@@ -73,27 +78,32 @@ class DebugFiltersTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val activeFiltersLabel = context.getString(R.string.debug_active_filters)
         composeTestRule.setContent {
-            var filterTexts by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(listOf<String>()) }
+            var filterTexts by
+                androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(listOf<String>()) }
             var customFilterText by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf("") }
-            com.geeksville.mesh.ui.debug.DebugActiveFilters(
-                filterTexts = filterTexts,
-                onFilterTextsChange = { filterTexts = it }, 
-                filterMode = FilterMode.OR,
-                onFilterModeChange = {}
-            )
-            com.geeksville.mesh.ui.debug.DebugCustomFilterInput(
-                customFilterText = customFilterText,
-                onCustomFilterTextChange = { customFilterText = it },
-                filterTexts = filterTexts,
-                onFilterTextsChange = { filterTexts = it },
-            )
+            Column(modifier = Modifier.padding(16.dp)) {
+                com.geeksville.mesh.ui.debug.DebugActiveFilters(
+                    filterTexts = filterTexts,
+                    onFilterTextsChange = { filterTexts = it },
+                    filterMode = FilterMode.OR,
+                    onFilterModeChange = {},
+                )
+                com.geeksville.mesh.ui.debug.DebugCustomFilterInput(
+                    customFilterText = customFilterText,
+                    onCustomFilterTextChange = { customFilterText = it },
+                    filterTexts = filterTexts,
+                    onFilterTextsChange = { filterTexts = it },
+                )
+            }
         }
-        // Add a custom filter
-        composeTestRule.onNodeWithText("Add custom filter").performTextInput("MyFilter")
-        composeTestRule.onNodeWithContentDescription("Add filter").performClick()
-        // The active filters label and the filter chip should be visible
-        composeTestRule.onNodeWithText(activeFiltersLabel).assertIsDisplayed()
-        composeTestRule.onNodeWithText("MyFilter").assertIsDisplayed()
+        with(composeTestRule) {
+            // Add a custom filter
+            onNodeWithText("Add custom filter").performTextInput("MyFilter")
+            onNodeWithContentDescription("Add filter").performClick()
+            // The active filters label and the filter chip should be visible
+            onNodeWithText(activeFiltersLabel).assertIsDisplayed()
+            onNodeWithText("MyFilter").assertIsDisplayed()
+        }
     }
 
     @Test
@@ -101,12 +111,13 @@ class DebugFiltersTest {
         val context = InstrumentationRegistry.getInstrumentation().targetContext
         val activeFiltersLabel = context.getString(R.string.debug_active_filters)
         composeTestRule.setContent {
-            var filterTexts by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(listOf("A", "B")) }
+            var filterTexts by
+                androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(listOf("A", "B")) }
             com.geeksville.mesh.ui.debug.DebugActiveFilters(
                 filterTexts = filterTexts,
                 onFilterTextsChange = { filterTexts = it },
                 filterMode = FilterMode.OR,
-                onFilterModeChange = {}
+                onFilterModeChange = {},
             )
         }
         // The active filters label and chips should be visible
@@ -119,4 +130,4 @@ class DebugFiltersTest {
         composeTestRule.onNodeWithText("A").assertDoesNotExist()
         composeTestRule.onNodeWithText("B").assertDoesNotExist()
     }
-} 
+}

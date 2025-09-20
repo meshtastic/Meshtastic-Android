@@ -35,7 +35,7 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.android.BuildUtils.errormsg
-import com.geeksville.mesh.util.requiredZoomLevel
+import org.meshtastic.feature.map.requiredZoomLevel
 import org.osmdroid.config.Configuration
 import org.osmdroid.tileprovider.tilesource.ITileSource
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory

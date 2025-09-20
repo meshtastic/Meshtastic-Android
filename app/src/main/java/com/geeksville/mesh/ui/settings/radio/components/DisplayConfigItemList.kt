@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
 import com.geeksville.mesh.R
@@ -69,52 +69,40 @@ fun DisplayConfigItemList(displayConfig: DisplayConfig, enabled: Boolean, onSave
 
     LazyColumn(modifier = Modifier.fillMaxSize()) {
         item { PreferenceCategory(text = stringResource(R.string.display_config)) }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.screen_timeout_seconds),
-                value = displayInput.screenOnSecs,
-                enabled = enabled,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { displayInput = displayInput.copy { screenOnSecs = it } },
-            )
-        }
-
-        item { HorizontalDivider() }
-
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.auto_screen_carousel_seconds),
-                value = displayInput.autoScreenCarouselSecs,
-                enabled = enabled,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { displayInput = displayInput.copy { autoScreenCarouselSecs = it } },
-            )
-        }
-
         item {
             SwitchPreference(
-                title = stringResource(R.string.compass_north_top),
+                title = stringResource(R.string.always_point_north),
+                summary = stringResource(id = R.string.config_display_compass_north_top_summary),
                 checked = displayInput.compassNorthTop,
                 enabled = enabled,
                 onCheckedChange = { displayInput = displayInput.copy { compassNorthTop = it } },
             )
         }
         item { HorizontalDivider() }
-
         item {
             SwitchPreference(
-                title = stringResource(R.string.flip_screen),
-                checked = displayInput.flipScreen,
+                title = stringResource(R.string.use_12h_format),
+                summary = stringResource(R.string.display_time_in_12h_format),
                 enabled = enabled,
-                onCheckedChange = { displayInput = displayInput.copy { flipScreen = it } },
+                checked = displayInput.use12HClock,
+                onCheckedChange = { displayInput = displayInput.copy { use12HClock = it } },
             )
         }
         item { HorizontalDivider() }
-
+        item {
+            SwitchPreference(
+                title = stringResource(R.string.bold_heading),
+                summary = stringResource(id = R.string.config_display_heading_bold_summary),
+                checked = displayInput.headingBold,
+                enabled = enabled,
+                onCheckedChange = { displayInput = displayInput.copy { headingBold = it } },
+            )
+        }
+        item { HorizontalDivider() }
         item {
             DropDownPreference(
                 title = stringResource(R.string.display_units),
+                summary = stringResource(id = R.string.config_display_units_summary),
                 enabled = enabled,
                 items =
                 DisplayConfig.DisplayUnits.entries
@@ -126,23 +114,54 @@ fun DisplayConfigItemList(displayConfig: DisplayConfig, enabled: Boolean, onSave
         }
         item { HorizontalDivider() }
 
+        item { PreferenceCategory(text = stringResource(R.string.advanced)) }
         item {
-            DropDownPreference(
-                title = stringResource(R.string.override_oled_auto_detect),
+            EditTextPreference(
+                title = stringResource(R.string.screen_on_for),
+                summary = stringResource(id = R.string.config_display_screen_on_secs_summary),
+                value = displayInput.screenOnSecs,
                 enabled = enabled,
-                items =
-                DisplayConfig.OledType.entries
-                    .filter { it != DisplayConfig.OledType.UNRECOGNIZED }
-                    .map { it to it.name },
-                selectedItem = displayInput.oled,
-                onItemSelected = { displayInput = displayInput.copy { oled = it } },
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { displayInput = displayInput.copy { screenOnSecs = it } },
             )
         }
         item { HorizontalDivider() }
 
         item {
+            EditTextPreference(
+                title = stringResource(R.string.carousel_interval),
+                summary = stringResource(id = R.string.config_display_auto_screen_carousel_secs_summary),
+                value = displayInput.autoScreenCarouselSecs,
+                enabled = enabled,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { displayInput = displayInput.copy { autoScreenCarouselSecs = it } },
+            )
+        }
+        item { HorizontalDivider() }
+        item {
+            SwitchPreference(
+                title = stringResource(R.string.wake_on_tap_or_motion),
+                summary = stringResource(id = R.string.config_display_wake_on_tap_or_motion_summary),
+                checked = displayInput.wakeOnTapOrMotion,
+                enabled = enabled,
+                onCheckedChange = { displayInput = displayInput.copy { wakeOnTapOrMotion = it } },
+            )
+        }
+        item { HorizontalDivider() }
+        item {
+            SwitchPreference(
+                title = stringResource(R.string.flip_screen),
+                summary = stringResource(id = R.string.config_display_flip_screen_summary),
+                checked = displayInput.flipScreen,
+                enabled = enabled,
+                onCheckedChange = { displayInput = displayInput.copy { flipScreen = it } },
+            )
+        }
+        item { HorizontalDivider() }
+        item {
             DropDownPreference(
                 title = stringResource(R.string.display_mode),
+                summary = stringResource(id = R.string.config_display_displaymode_summary),
                 enabled = enabled,
                 items =
                 DisplayConfig.DisplayMode.entries
@@ -153,27 +172,20 @@ fun DisplayConfigItemList(displayConfig: DisplayConfig, enabled: Boolean, onSave
             )
         }
         item { HorizontalDivider() }
-
         item {
-            SwitchPreference(
-                title = stringResource(R.string.heading_bold),
-                checked = displayInput.headingBold,
+            DropDownPreference(
+                title = stringResource(R.string.oled_type),
+                summary = stringResource(id = R.string.config_display_oled_summary),
                 enabled = enabled,
-                onCheckedChange = { displayInput = displayInput.copy { headingBold = it } },
+                items =
+                DisplayConfig.OledType.entries
+                    .filter { it != DisplayConfig.OledType.UNRECOGNIZED }
+                    .map { it to it.name },
+                selectedItem = displayInput.oled,
+                onItemSelected = { displayInput = displayInput.copy { oled = it } },
             )
         }
         item { HorizontalDivider() }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.wake_screen_on_tap_or_motion),
-                checked = displayInput.wakeOnTapOrMotion,
-                enabled = enabled,
-                onCheckedChange = { displayInput = displayInput.copy { wakeOnTapOrMotion = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
         item {
             DropDownPreference(
                 title = stringResource(R.string.compass_orientation),
@@ -184,17 +196,6 @@ fun DisplayConfigItemList(displayConfig: DisplayConfig, enabled: Boolean, onSave
                     .map { it to it.name },
                 selectedItem = displayInput.compassOrientation,
                 onItemSelected = { displayInput = displayInput.copy { compassOrientation = it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.use_12h_format),
-                summary = stringResource(R.string.display_time_in_12h_format),
-                enabled = enabled,
-                checked = displayInput.use12HClock,
-                onCheckedChange = { displayInput = displayInput.copy { use12HClock = it } },
             )
         }
         item { HorizontalDivider() }

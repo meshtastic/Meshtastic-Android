@@ -5,6 +5,7 @@
 
 ![GitHub all releases](https://img.shields.io/github/downloads/meshtastic/meshtastic-android/total)
 [![Android CI](https://github.com/meshtastic/Meshtastic-Android/actions/workflows/pull-request.yml/badge.svg?branch=main)](https://github.com/meshtastic/Meshtastic-Android/actions/workflows/pull-request.yml)
+[![codecov](https://codecov.io/gh/meshtastic/Meshtastic-Android/graph/badge.svg)](https://codecov.io/gh/meshtastic/Meshtastic-Android)
 [![Crowdin](https://badges.crowdin.net/e/f440f1a5e094a5858dd86deb1adfe83d/localized.svg)](https://crowdin.meshtastic.org/android)
 [![CLA assistant](https://cla-assistant.io/readme/badge/meshtastic/Meshtastic-Android)](https://cla-assistant.io/meshtastic/Meshtastic-Android)
 [![Fiscal Contributors](https://opencollective.com/meshtastic/tiers/badge.svg?label=Fiscal%20Contributors&color=deeppink)](https://opencollective.com/meshtastic/)
@@ -37,6 +38,23 @@ width="24%">](https://play.google.com/store/apps/details?id=com.geeksville.mesh&
 
 The play store is the last to update of these options, but if you want to join the Play Store testing program go to [this URL](https://play.google.com/apps/testing/com.geeksville.mesh) and opt-in to become a tester.
 If you encounter any problems or have questions, [ask us on the discord](https://discord.gg/meshtastic), [create an issue](https://github.com/meshtastic/Meshtastic-Android/issues), or [post in the forum](https://github.com/orgs/meshtastic/discussions) and we'll help as we can.
+
+## Documentation
+
+The project's documentation is generated with [Dokka](https://kotlinlang.org/docs/dokka-introduction.html) and hosted on GitHub Pages. It is automatically updated on every push to the `main` branch.
+
+[**View Documentation**](https://meshtastic.github.io/Meshtastic-Android/)
+
+### Generating Locally
+
+You can generate the documentation locally to preview your changes.
+
+1.  **Run the Dokka task:**
+    ```bash
+    ./gradlew :app:dokkaHtml
+    ```
+2.  **View the output:**
+    The generated HTML files will be located in the `app/build/dokka/html` directory. You can open the `index.html` file in your browser to view the documentation.
 
 ## Translations
 

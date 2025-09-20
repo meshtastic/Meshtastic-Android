@@ -40,7 +40,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.location.LocationCompat
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.ConfigProtos.Config.PositionConfig
@@ -144,11 +144,12 @@ fun PositionConfigItemList(
         }
     }
     LazyColumn(modifier = Modifier.fillMaxSize()) {
-        item { PreferenceCategory(text = stringResource(R.string.position_config)) }
+        item { PreferenceCategory(text = stringResource(R.string.position_packet)) }
 
         item {
             EditTextPreference(
-                title = stringResource(R.string.position_broadcast_interval_seconds),
+                title = stringResource(R.string.broadcast_interval),
+                summary = stringResource(id = R.string.config_position_broadcast_secs_summary),
                 value = positionInput.positionBroadcastSecs,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -158,7 +159,7 @@ fun PositionConfigItemList(
 
         item {
             SwitchPreference(
-                title = stringResource(R.string.smart_position_enabled),
+                title = stringResource(R.string.smart_position),
                 checked = positionInput.positionBroadcastSmartEnabled,
                 enabled = enabled,
                 onCheckedChange = { positionInput = positionInput.copy { positionBroadcastSmartEnabled = it } },
@@ -169,28 +170,30 @@ fun PositionConfigItemList(
         if (positionInput.positionBroadcastSmartEnabled) {
             item {
                 EditTextPreference(
-                    title = stringResource(R.string.smart_broadcast_minimum_distance_meters),
-                    value = positionInput.broadcastSmartMinimumDistance,
-                    enabled = enabled,
-                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { positionInput = positionInput.copy { broadcastSmartMinimumDistance = it } },
-                )
-            }
-
-            item {
-                EditTextPreference(
-                    title = stringResource(R.string.smart_broadcast_minimum_interval_seconds),
+                    title = stringResource(R.string.minimum_interval),
+                    summary =
+                    stringResource(id = R.string.config_position_broadcast_smart_minimum_interval_secs_summary),
                     value = positionInput.broadcastSmartMinimumIntervalSecs,
                     enabled = enabled,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { positionInput = positionInput.copy { broadcastSmartMinimumIntervalSecs = it } },
                 )
             }
+            item {
+                EditTextPreference(
+                    title = stringResource(R.string.minimum_distance),
+                    summary = stringResource(id = R.string.config_position_broadcast_smart_minimum_distance_summary),
+                    value = positionInput.broadcastSmartMinimumDistance,
+                    enabled = enabled,
+                    keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                    onValueChanged = { positionInput = positionInput.copy { broadcastSmartMinimumDistance = it } },
+                )
+            }
         }
-
+        item { PreferenceCategory(text = stringResource(R.string.device_gps)) }
         item {
             SwitchPreference(
-                title = stringResource(R.string.use_fixed_position),
+                title = stringResource(R.string.fixed_position),
                 checked = positionInput.fixedPosition,
                 enabled = enabled,
                 onCheckedChange = { positionInput = positionInput.copy { fixedPosition = it } },
@@ -227,7 +230,7 @@ fun PositionConfigItemList(
             }
             item {
                 EditTextPreference(
-                    title = stringResource(R.string.altitude_meters),
+                    title = stringResource(R.string.altitude),
                     value = locationInput.altitude,
                     enabled = enabled,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -260,17 +263,19 @@ fun PositionConfigItemList(
 
         item {
             EditTextPreference(
-                title = stringResource(R.string.gps_update_interval_seconds),
+                title = stringResource(R.string.update_interval),
+                summary = stringResource(id = R.string.config_position_gps_update_interval_summary),
                 value = positionInput.gpsUpdateInterval,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = { positionInput = positionInput.copy { gpsUpdateInterval = it } },
             )
         }
-
+        item { PreferenceCategory(text = stringResource(R.string.position_flags)) }
         item {
             BitwisePreference(
                 title = stringResource(R.string.position_flags),
+                summary = stringResource(id = R.string.config_position_flags_summary),
                 value = positionInput.positionFlags,
                 enabled = enabled,
                 items =
@@ -283,10 +288,11 @@ fun PositionConfigItemList(
             )
         }
         item { HorizontalDivider() }
+        item { PreferenceCategory(text = stringResource(R.string.advanced_device_gps)) }
 
         item {
             EditTextPreference(
-                title = stringResource(R.string.redefine_gps_rx_pin),
+                title = stringResource(R.string.gps_receive_gpio),
                 value = positionInput.rxGpio,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -296,7 +302,7 @@ fun PositionConfigItemList(
 
         item {
             EditTextPreference(
-                title = stringResource(R.string.redefine_gps_tx_pin),
+                title = stringResource(R.string.gps_transmit_gpio),
                 value = positionInput.txGpio,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
@@ -306,7 +312,7 @@ fun PositionConfigItemList(
 
         item {
             EditTextPreference(
-                title = stringResource(R.string.redefine_pin_gps_en),
+                title = stringResource(R.string.gps_en_gpio),
                 value = positionInput.gpsEnGpio,
                 enabled = enabled,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),

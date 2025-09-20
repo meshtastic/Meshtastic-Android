@@ -42,23 +42,20 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.prefs.UiPrefs
-import com.geeksville.mesh.model.BluetoothViewModel
 import com.geeksville.mesh.model.UIViewModel
-import com.geeksville.mesh.navigation.DEEP_LINK_BASE_URI
 import com.geeksville.mesh.ui.MainScreen
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.MODE_DYNAMIC
 import com.geeksville.mesh.ui.intro.AppIntroductionScreen
 import com.geeksville.mesh.ui.sharing.toSharedContact
-import com.geeksville.mesh.util.LanguageUtils
 import dagger.hilt.android.AndroidEntryPoint
+import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity :
     AppCompatActivity(),
     Logging {
-    private val bluetoothViewModel: BluetoothViewModel by viewModels()
     private val model: UIViewModel by viewModels()
 
     // This is aware of the Activity lifecycle and handles binding to the mesh service.
@@ -80,10 +77,6 @@ class MainActivity :
         super.onCreate(savedInstanceState)
 
         if (savedInstanceState == null) {
-            val lang = uiPrefs.lang
-            if (lang != LanguageUtils.SYSTEM_MANAGED) LanguageUtils.migrateLanguagePrefs(uiPrefs)
-            info("in-app language is ${LanguageUtils.getLocale()}")
-
             if (uiPrefs.appIntroCompleted) {
                 (application as GeeksvilleApplication).askToRate(this)
             }
@@ -106,16 +99,16 @@ class MainActivity :
                     SideEffect { AppCompatDelegate.setDefaultNightMode(theme) }
                 }
 
-                val showAppIntro by model.showAppIntro.collectAsStateWithLifecycle()
-                if (showAppIntro) {
+                val appIntroCompleted by model.appIntroCompleted.collectAsStateWithLifecycle()
+                if (appIntroCompleted) {
+                    MainScreen(uIViewModel = model)
+                } else {
                     AppIntroductionScreen(
                         onDone = {
                             model.onAppIntroCompleted()
                             (application as GeeksvilleApplication).askToRate(this@MainActivity)
                         },
                     )
-                } else {
-                    MainScreen(uIViewModel = model, bluetoothViewModel = bluetoothViewModel)
                 }
             }
         }

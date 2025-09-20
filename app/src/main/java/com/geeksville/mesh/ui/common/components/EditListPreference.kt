@@ -47,6 +47,7 @@ import com.geeksville.mesh.copy
 import com.geeksville.mesh.remoteHardwarePin
 import com.google.protobuf.ByteString
 
+@Suppress("LongMethod")
 @Composable
 inline fun <reified T> EditListPreference(
     title: String,
@@ -56,12 +57,21 @@ inline fun <reified T> EditListPreference(
     keyboardActions: KeyboardActions,
     crossinline onValuesChanged: (List<T>) -> Unit,
     modifier: Modifier = Modifier,
+    summary: String? = null,
 ) {
     val focusManager = LocalFocusManager.current
     val listState = remember(list) { mutableStateListOf<T>().apply { addAll(list) } }
 
-    Column(modifier = modifier) {
-        Text(modifier = modifier.padding(16.dp), text = title, style = MaterialTheme.typography.bodyMedium)
+    Column(modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+        Text(text = title, style = MaterialTheme.typography.titleLarge)
+        if (summary != null) {
+            Text(
+                text = summary,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp),
+            )
+        }
         listState.forEachIndexed { index, value ->
             val trailingIcon =
                 @Composable {
@@ -80,80 +90,75 @@ inline fun <reified T> EditListPreference(
                     }
                 }
 
-            // handle lora.ignoreIncoming: List<Int>
-            if (value is Int) {
-                EditTextPreference(
-                    title = "${index + 1}/$maxCount",
-                    value = value,
-                    enabled = enabled,
-                    keyboardActions = keyboardActions,
-                    onValueChanged = {
-                        listState[index] = it as T
-                        onValuesChanged(listState)
-                    },
-                    modifier = modifier.fillMaxWidth(),
-                    trailingIcon = trailingIcon,
-                )
-            }
-
-            // handle security.adminKey: List<ByteString>
-            if (value is ByteString) {
-                EditBase64Preference(
-                    title = "${index + 1}/$maxCount",
-                    value = value,
-                    enabled = enabled,
-                    keyboardActions = keyboardActions,
-                    onValueChange = {
-                        listState[index] = it as T
-                        onValuesChanged(listState)
-                    },
-                    modifier = modifier.fillMaxWidth(),
-                    trailingIcon = trailingIcon,
-                )
-            }
-
-            // handle remoteHardware.availablePins: List<RemoteHardwarePin>
-            if (value is RemoteHardwarePin) {
-                EditTextPreference(
-                    title = stringResource(R.string.gpio_pin),
-                    value = value.gpioPin,
-                    enabled = enabled,
-                    keyboardActions = keyboardActions,
-                    onValueChanged = {
-                        if (it in 0..255) {
-                            listState[index] = value.copy { gpioPin = it } as T
+            when (value) {
+                is Int -> {
+                    EditTextPreference(
+                        title = "${index + 1}/$maxCount",
+                        value = value,
+                        enabled = enabled,
+                        keyboardActions = keyboardActions,
+                        onValueChanged = {
+                            listState[index] = it as T
                             onValuesChanged(listState)
-                        }
-                    },
-                )
-                EditTextPreference(
-                    title = stringResource(R.string.name),
-                    value = value.name,
-                    maxSize = 14, // name max_size:15
-                    enabled = enabled,
-                    isError = false,
-                    keyboardOptions =
-                    KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
-                    keyboardActions = keyboardActions,
-                    onValueChanged = {
-                        listState[index] = value.copy { name = it } as T
-                        onValuesChanged(listState)
-                    },
-                    trailingIcon = trailingIcon,
-                )
-                DropDownPreference(
-                    title = stringResource(R.string.type),
-                    enabled = enabled,
-                    items =
-                    RemoteHardwarePinType.entries
-                        .filter { it != RemoteHardwarePinType.UNRECOGNIZED }
-                        .map { it to it.name },
-                    selectedItem = value.type,
-                    onItemSelected = {
-                        listState[index] = value.copy { type = it } as T
-                        onValuesChanged(listState)
-                    },
-                )
+                        },
+                        trailingIcon = trailingIcon,
+                    )
+                }
+                is ByteString -> {
+                    EditBase64Preference(
+                        title = "${index + 1}/$maxCount",
+                        value = value,
+                        enabled = enabled,
+                        keyboardActions = keyboardActions,
+                        onValueChange = {
+                            listState[index] = it as T
+                            onValuesChanged(listState)
+                        },
+                        trailingIcon = trailingIcon,
+                    )
+                }
+                is RemoteHardwarePin -> {
+                    EditTextPreference(
+                        title = stringResource(R.string.gpio_pin),
+                        value = value.gpioPin,
+                        enabled = enabled,
+                        keyboardActions = keyboardActions,
+                        onValueChanged = {
+                            if (it in 0..255) {
+                                listState[index] = value.copy { gpioPin = it } as T
+                                onValuesChanged(listState)
+                            }
+                        },
+                    )
+                    EditTextPreference(
+                        title = stringResource(R.string.name),
+                        value = value.name,
+                        maxSize = 14, // name max_size:15
+                        enabled = enabled,
+                        isError = false,
+                        keyboardOptions =
+                        KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+                        keyboardActions = keyboardActions,
+                        onValueChanged = {
+                            listState[index] = value.copy { name = it } as T
+                            onValuesChanged(listState)
+                        },
+                        trailingIcon = trailingIcon,
+                    )
+                    DropDownPreference(
+                        title = stringResource(R.string.type),
+                        enabled = enabled,
+                        items =
+                        RemoteHardwarePinType.entries
+                            .filter { it != RemoteHardwarePinType.UNRECOGNIZED }
+                            .map { it to it.name },
+                        selectedItem = value.type,
+                        onItemSelected = {
+                            listState[index] = value.copy { type = it } as T
+                            onValuesChanged(listState)
+                        },
+                    )
+                }
             }
         }
         OutlinedButton(
@@ -182,6 +187,7 @@ private fun EditListPreferencePreview() {
     Column {
         EditListPreference(
             title = stringResource(R.string.ignore_incoming),
+            summary = "This is a summary",
             list = listOf(12345, 67890),
             maxCount = 4,
             enabled = true,

@@ -594,6 +594,8 @@
     <string name="dynamic">Dynamique</string>
     <string name="scan_qr_code">Scanner le code QR</string>
     <string name="share_contact">Partager le contact</string>
+    <string name="notes">Notes</string>
+    <string name="add_a_note">Add a private note…</string>
     <string name="import_shared_contact">Importer le contact partagé ?</string>
     <string name="unmessageable">Non joignable par message</string>
     <string name="unmonitored_or_infrastructure">Non surveillé ou Infrastructure</string>
@@ -699,7 +701,6 @@
     <string name="ble_devices">Appareils BLE</string>
     <string name="bluetooth_paired_devices">Périphériques appairés</string>
     <string name="connected_device">Périphérique connecté</string>
-    <string name="action_go">Go</string>
     <string name="routing_error_rate_limit_exceeded">Limite de débit dépassée. Veuillez réessayer plus tard.</string>
     <string name="view_release">Voir la version</string>
     <string name="download">Télécharger</string>
@@ -754,7 +755,7 @@
     <string name="map_type_terrain">Terrain</string>
     <string name="map_type_hybrid">Hybride</string>
     <string name="manage_map_layers">Gérer les calques de la carte</string>
-    <string name="map_layer_formats">Custom layers support .kml or .kmz files.</string>
+    <string name="map_layer_formats">Custom layers support .kml, .kmz, or GeoJSON files.</string>
     <string name="map_layers_title">Couches cartographiques</string>
     <string name="no_map_layers_loaded">Aucun calque personnalisé chargé.</string>
     <string name="add_layer_button">Ajouter un calque</string>
