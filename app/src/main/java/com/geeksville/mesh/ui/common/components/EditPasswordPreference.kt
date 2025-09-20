@@ -35,7 +35,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
-import com.geeksville.mesh.R
+import org.meshtastic.core.ui.R
 
 @Composable
 fun EditPasswordPreference(
@@ -55,20 +55,18 @@ fun EditPasswordPreference(
         maxSize = maxSize,
         enabled = enabled,
         isError = false,
-        keyboardOptions = KeyboardOptions.Default.copy(
-            keyboardType = KeyboardType.Password, imeAction = ImeAction.Done
-        ),
+        keyboardOptions =
+        KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done),
         keyboardActions = keyboardActions,
-        onValueChanged = {
-            onValueChanged(it)
-        },
+        onValueChanged = { onValueChanged(it) },
         onFocusChanged = {},
         visualTransformation = if (isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
             IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
                 Icon(
                     imageVector = if (isPasswordVisible) Icons.TwoTone.VisibilityOff else Icons.TwoTone.VisibilityOff,
-                    contentDescription = if (isPasswordVisible) {
+                    contentDescription =
+                    if (isPasswordVisible) {
                         stringResource(R.string.hide_password)
                     } else {
                         stringResource(R.string.show_password)
@@ -76,7 +74,7 @@ fun EditPasswordPreference(
                 )
             }
         },
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -89,6 +87,6 @@ private fun EditPasswordPreferencePreview() {
         maxSize = 63,
         enabled = true,
         keyboardActions = KeyboardActions {},
-        onValueChanged = {}
+        onValueChanged = {},
     )
 }

@@ -32,30 +32,24 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.common.theme.AppTheme
+import org.meshtastic.core.ui.R
 
 @Composable
-fun BatteryInfo(
-    modifier: Modifier = Modifier,
-    batteryLevel: Int?,
-    voltage: Float?
-) {
+fun BatteryInfo(modifier: Modifier = Modifier, batteryLevel: Int?, voltage: Float?) {
     val infoString = "%d%% %.2fV".format(batteryLevel, voltage)
-    val (image, level) = when (batteryLevel) {
-        in 0 .. 4 -> R.drawable.ic_battery_alert to " $infoString"
-        in 5 .. 14 -> R.drawable.ic_battery_outline to infoString
-        in 15..34 -> R.drawable.ic_battery_low to infoString
-        in 35..79 -> R.drawable.ic_battery_medium to infoString
-        in 80..100 -> R.drawable.ic_battery_high to infoString
-        101 -> R.drawable.ic_power_plug_24 to "%.2fV".format(voltage)
-        else -> R.drawable.ic_battery_unknown to (voltage?.let { "%.2fV".format(it) } ?: "")
-    }
+    val (image, level) =
+        when (batteryLevel) {
+            in 0..4 -> R.drawable.ic_battery_alert to " $infoString"
+            in 5..14 -> R.drawable.ic_battery_outline to infoString
+            in 15..34 -> R.drawable.ic_battery_low to infoString
+            in 35..79 -> R.drawable.ic_battery_medium to infoString
+            in 80..100 -> R.drawable.ic_battery_high to infoString
+            101 -> R.drawable.ic_power_plug_24 to "%.2fV".format(voltage)
+            else -> R.drawable.ic_battery_unknown to (voltage?.let { "%.2fV".format(it) } ?: "")
+        }
 
-    Row(
-        modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+    Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         Icon(
             modifier = Modifier.height(18.dp),
             imageVector = ImageVector.vectorResource(id = image),
@@ -65,46 +59,34 @@ fun BatteryInfo(
         Text(
             text = level,
             color = MaterialTheme.colorScheme.onSurface,
-            fontSize = MaterialTheme.typography.labelLarge.fontSize
+            fontSize = MaterialTheme.typography.labelLarge.fontSize,
         )
     }
 }
 
 @PreviewLightDark
 @Composable
-fun BatteryInfoPreview(
-    @PreviewParameter(BatteryInfoPreviewParameterProvider::class)
-    batteryInfo: Pair<Int?, Float?>
-) {
-    AppTheme {
-        BatteryInfo(
-            batteryLevel = batteryInfo.first,
-            voltage = batteryInfo.second
-        )
-    }
+fun BatteryInfoPreview(@PreviewParameter(BatteryInfoPreviewParameterProvider::class) batteryInfo: Pair<Int?, Float?>) {
+    AppTheme { BatteryInfo(batteryLevel = batteryInfo.first, voltage = batteryInfo.second) }
 }
 
 @Composable
 @Preview
 fun BatteryInfoPreviewSimple() {
-    AppTheme {
-        BatteryInfo(
-            batteryLevel = 85,
-            voltage = 3.7F
-        )
-    }
+    AppTheme { BatteryInfo(batteryLevel = 85, voltage = 3.7F) }
 }
 
 class BatteryInfoPreviewParameterProvider : PreviewParameterProvider<Pair<Int?, Float?>> {
     override val values: Sequence<Pair<Int?, Float?>>
-        get() = sequenceOf(
-            85 to 3.7F,
-            2 to 3.7F,
-            12 to 3.7F,
-            28 to 3.7F,
-            50 to 3.7F,
-            101 to 4.9F,
-            null to 4.5F,
-            null to null
-        )
+        get() =
+            sequenceOf(
+                85 to 3.7F,
+                2 to 3.7F,
+                12 to 3.7F,
+                28 to 3.7F,
+                50 to 3.7F,
+                101 to 4.9F,
+                null to 4.5F,
+                null to null,
+            )
 }

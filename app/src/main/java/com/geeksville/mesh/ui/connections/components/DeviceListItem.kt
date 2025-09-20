@@ -34,8 +34,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DeviceListEntry
+import org.meshtastic.core.ui.R
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable

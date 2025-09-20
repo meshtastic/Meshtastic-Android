@@ -36,7 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.R
+import org.meshtastic.core.ui.R
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable

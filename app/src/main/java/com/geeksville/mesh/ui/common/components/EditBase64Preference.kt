@@ -44,11 +44,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.R
 import com.geeksville.mesh.util.encodeToString
 import com.geeksville.mesh.util.toByteString
 import com.google.protobuf.ByteString
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.ui.R
 
 @Suppress("LongMethod")
 @Composable

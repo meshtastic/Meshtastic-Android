@@ -38,7 +38,6 @@ import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.Position
-import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.prefs.UiPrefs
 import com.geeksville.mesh.channel
@@ -84,6 +83,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.ui.R
 import javax.inject.Inject
 
 // Given a human name, strip out the first letter of the first three words and return that as the

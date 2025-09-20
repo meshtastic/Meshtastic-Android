@@ -33,9 +33,9 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
-import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.connections.DeviceType
+import org.meshtastic.core.ui.R
 
 @Suppress("LambdaParameterEventTrailing")
 @Composable
