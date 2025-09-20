@@ -76,7 +76,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.geeksville.mesh.BuildConfig
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.R
 import com.geeksville.mesh.android.AddNavigationTracking
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.setAttributes
@@ -120,6 +119,7 @@ import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.ui.R
 import kotlin.reflect.KClass
 
 enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector, val route: Route) {

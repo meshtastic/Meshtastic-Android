@@ -26,48 +26,46 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
-import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.common.theme.AppTheme
+import org.meshtastic.core.ui.R
 
 const val MAX_VALID_SNR = 100F
 const val MAX_VALID_RSSI = 0
 
 @Composable
-fun SignalInfo(
-    modifier: Modifier = Modifier,
-    node: Node,
-    isThisNode: Boolean
-) {
-    val text = if (isThisNode) {
-        stringResource(R.string.channel_air_util).format(
-            node.deviceMetrics.channelUtilization,
-            node.deviceMetrics.airUtilTx
-        )
-    } else {
-        buildList {
-            val hopsString = "%s: %s".format(
-                stringResource(R.string.hops_away),
-                if (node.hopsAway == -1) {
-                    "?"
-                } else {
-                    node.hopsAway.toString()
+fun SignalInfo(modifier: Modifier = Modifier, node: Node, isThisNode: Boolean) {
+    val text =
+        if (isThisNode) {
+            stringResource(R.string.channel_air_util)
+                .format(node.deviceMetrics.channelUtilization, node.deviceMetrics.airUtilTx)
+        } else {
+            buildList {
+                val hopsString =
+                    "%s: %s"
+                        .format(
+                            stringResource(R.string.hops_away),
+                            if (node.hopsAway == -1) {
+                                "?"
+                            } else {
+                                node.hopsAway.toString()
+                            },
+                        )
+                if (node.channel > 0) {
+                    add("ch:${node.channel}")
                 }
-            )
-            if (node.channel > 0) {
-                add("ch:${node.channel}")
+                if (node.hopsAway != 0) add(hopsString)
             }
-            if (node.hopsAway != 0) add(hopsString)
-        }.joinToString(" ")
-    }
+                .joinToString(" ")
+        }
     Column {
         if (text.isNotEmpty()) {
             Text(
                 modifier = modifier,
                 text = text,
                 color = MaterialTheme.colorScheme.onSurface,
-                fontSize = MaterialTheme.typography.bodySmall.fontSize
+                fontSize = MaterialTheme.typography.bodySmall.fontSize,
             )
         }
         /* We only know the Signal Quality from direct nodes aka 0 hop. */
@@ -84,43 +82,20 @@ fun SignalInfo(
 fun SignalInfoSimplePreview() {
     AppTheme {
         SignalInfo(
-            node = Node(
-                num = 1,
-                lastHeard = 0,
-                channel = 0,
-                snr = 12.5F,
-                rssi = -42,
-                hopsAway = 0
-            ),
-            isThisNode = false
+            node = Node(num = 1, lastHeard = 0, channel = 0, snr = 12.5F, rssi = -42, hopsAway = 0),
+            isThisNode = false,
         )
     }
 }
 
 @PreviewLightDark
 @Composable
-fun SignalInfoPreview(
-    @PreviewParameter(NodePreviewParameterProvider::class)
-    node: Node
-) {
-    AppTheme {
-        SignalInfo(
-            node = node,
-            isThisNode = false
-        )
-    }
+fun SignalInfoPreview(@PreviewParameter(NodePreviewParameterProvider::class) node: Node) {
+    AppTheme { SignalInfo(node = node, isThisNode = false) }
 }
 
 @Composable
 @PreviewLightDark
-fun SignalInfoSelfPreview(
-    @PreviewParameter(NodePreviewParameterProvider::class)
-    node: Node
-) {
-    AppTheme {
-        SignalInfo(
-            node = node,
-            isThisNode = true
-        )
-    }
+fun SignalInfoSelfPreview(@PreviewParameter(NodePreviewParameterProvider::class) node: Node) {
+    AppTheme { SignalInfo(node = node, isThisNode = true) }
 }

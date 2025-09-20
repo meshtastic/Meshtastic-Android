@@ -42,7 +42,6 @@ import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.ModuleConfigProtos
 import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.Position
-import com.geeksville.mesh.R
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.isAnalyticsAvailable
@@ -78,6 +77,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.ui.R
 import java.io.FileOutputStream
 import javax.inject.Inject
 

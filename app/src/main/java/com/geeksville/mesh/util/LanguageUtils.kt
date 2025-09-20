@@ -20,8 +20,8 @@ package com.geeksville.mesh.util
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
-import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
+import org.meshtastic.core.ui.R
 import org.xmlpull.v1.XmlPullParser
 import java.util.Locale
 

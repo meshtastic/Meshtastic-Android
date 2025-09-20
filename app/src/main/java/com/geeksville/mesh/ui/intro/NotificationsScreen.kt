@@ -37,7 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.R
+import org.meshtastic.core.ui.R
 
 /**
  * Screen for configuring notification permissions during the app introduction. It explains why notification permissions
