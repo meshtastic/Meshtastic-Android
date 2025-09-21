@@ -46,7 +46,7 @@ object LanguageUtils : Logging {
             add(SYSTEM_DEFAULT)
 
             try {
-                resources.getXml(R.xml.locales_config).use { parser ->
+                resources.getXml(com.geeksville.mesh.R.xml.locales_config).use { parser ->
                     while (parser.eventType != XmlPullParser.END_DOCUMENT) {
                         if (parser.eventType == XmlPullParser.START_TAG && parser.name == "locale") {
                             val languageTag =
