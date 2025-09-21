@@ -466,8 +466,8 @@
     <string name="time_zone">Zeitzone</string>
     <string name="led_heartbeat">LED Heartbeat</string>
     <string name="display_config">Anzeige</string>
-    <string name="screen_on_for">Screen on for</string>
-    <string name="carousel_interval">Carousel interval</string>
+    <string name="screen_on_for">Bildschirm eingeschaltet für</string>
+    <string name="carousel_interval">Karussellintervall</string>
     <string name="compass_north_top">Kompass Norden oben</string>
     <string name="flip_screen">Bildschirm spiegeln</string>
     <string name="display_units">Anzeigeeinheiten</string>
@@ -475,7 +475,7 @@
     <string name="display_mode">Anzeigemodus</string>
     <string name="always_point_north">Immer nach Norden zeigen</string>
     <string name="bold_heading">Fette Überschrift</string>
-    <string name="wake_on_tap_or_motion">Wake on tap or motion</string>
+    <string name="wake_on_tap_or_motion">Aufwachen durch Tippen oder Bewegung</string>
     <string name="compass_orientation">Kompassausrichtung</string>
     <string name="external_notification_config">Einstellungen für externe Benachrichtigungen</string>
     <string name="external_notification_enabled">Externe Benachrichtigungen aktiviert</string>
