@@ -15,7 +15,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import com.datadog.gradle.plugin.InstrumentationMode
 import com.geeksville.mesh.buildlogic.Configs
 import com.geeksville.mesh.buildlogic.GitVersionValueSource
 import java.io.FileInputStream
