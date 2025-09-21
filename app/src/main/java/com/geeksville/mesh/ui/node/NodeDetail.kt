@@ -124,7 +124,6 @@ import coil3.request.ImageRequest
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.FirmwareRelease
 import com.geeksville.mesh.database.entity.asDeviceVersion
 import com.geeksville.mesh.model.DeviceVersion
@@ -162,6 +161,7 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.ui.R
 
 private data class VectorMetricInfo(
     @StringRes val label: Int,

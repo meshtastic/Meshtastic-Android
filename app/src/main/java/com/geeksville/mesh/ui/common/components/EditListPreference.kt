@@ -42,10 +42,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ModuleConfigProtos.RemoteHardwarePin
 import com.geeksville.mesh.ModuleConfigProtos.RemoteHardwarePinType
-import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.remoteHardwarePin
 import com.google.protobuf.ByteString
+import org.meshtastic.core.ui.R
 
 @Suppress("LongMethod")
 @Composable

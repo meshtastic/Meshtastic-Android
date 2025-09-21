@@ -34,7 +34,6 @@ import com.geeksville.mesh.MeshProtos.MeshPacket
 import com.geeksville.mesh.MeshProtos.Position
 import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.Portnums.PortNum
-import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.prefs.MapPrefs
@@ -63,6 +62,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.ui.R
 import org.meshtastic.feature.map.model.CustomTileSource
 import java.io.BufferedWriter
 import java.io.FileNotFoundException

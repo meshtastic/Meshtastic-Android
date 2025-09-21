@@ -37,7 +37,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.R
+import org.meshtastic.core.ui.R
 
 @Composable
 fun SimpleAlertDialog(
@@ -45,40 +45,34 @@ fun SimpleAlertDialog(
     message: String?,
     html: String? = null,
     onDismissRequest: () -> Unit,
-    onConfirmRequest: () -> Unit = onDismissRequest // Default confirm to dismiss
+    onConfirmRequest: () -> Unit = onDismissRequest, // Default confirm to dismiss
 ) {
-
-    val annotatedString = html?.let {
-        AnnotatedString.fromHtml(
-            html,
-            linkStyles = TextLinkStyles(
-                style = SpanStyle(
-                    textDecoration = TextDecoration.Underline,
-                    fontStyle = FontStyle.Italic,
-                    color = MaterialTheme.colorScheme.primary
-                )
+    val annotatedString =
+        html?.let {
+            AnnotatedString.fromHtml(
+                html,
+                linkStyles =
+                TextLinkStyles(
+                    style =
+                    SpanStyle(
+                        textDecoration = TextDecoration.Underline,
+                        fontStyle = FontStyle.Italic,
+                        color = MaterialTheme.colorScheme.primary,
+                    ),
+                ),
             )
-        )
-    }
+        }
     AlertDialog(
         onDismissRequest = onDismissRequest,
         title = { Text(text = title) },
         text = {
             if (annotatedString != null) {
-                Text(
-                    text = annotatedString,
-                )
+                Text(text = annotatedString)
             } else {
-                Text(
-                    text = message.orEmpty()
-                )
+                Text(text = message.orEmpty())
             }
         },
-        confirmButton = {
-            TextButton(onClick = onConfirmRequest) {
-                Text(stringResource(id = R.string.okay))
-            }
-        },
+        confirmButton = { TextButton(onClick = onConfirmRequest) { Text(stringResource(id = R.string.okay)) } },
     )
 }
 
@@ -94,15 +88,8 @@ fun MultipleChoiceAlertDialog(
         onDismissRequest = onDismissRequest,
         title = { Text(text = title) },
         text = {
-            Column(
-                modifier = Modifier.verticalScroll(rememberScrollState())
-            ) {
-                message?.let {
-                    Text(
-                        text = it,
-                        modifier = Modifier.padding(bottom = 8.dp)
-                    )
-                }
+            Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                message?.let { Text(text = it, modifier = Modifier.padding(bottom = 8.dp)) }
                 choices.forEach { (choice, action) ->
                     Button(
                         modifier = Modifier.fillMaxWidth().padding(8.dp),
@@ -116,7 +103,6 @@ fun MultipleChoiceAlertDialog(
                 }
             }
         },
-        confirmButton = {
-        }
+        confirmButton = {},
     )
 }

@@ -55,13 +55,13 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.PaxcountProtos
 import com.geeksville.mesh.Portnums.PortNum
-import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.MeshLog
 import com.geeksville.mesh.model.MetricsViewModel
 import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.ui.common.components.OptionLabel
 import com.geeksville.mesh.ui.common.components.SlidingSelector
 import com.geeksville.mesh.util.formatUptime
+import org.meshtastic.core.ui.R
 import java.text.DateFormat
 import java.util.Date
 

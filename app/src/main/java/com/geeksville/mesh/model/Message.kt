@@ -20,8 +20,8 @@ package com.geeksville.mesh.model
 import androidx.annotation.StringRes
 import com.geeksville.mesh.MeshProtos.Routing
 import com.geeksville.mesh.MessageStatus
-import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.Reaction
+import org.meshtastic.core.ui.R
 
 @Suppress("CyclomaticComplexMethod")
 @StringRes
@@ -67,12 +67,13 @@ data class Message(
 ) {
     fun getStatusStringRes(): Pair<Int, Int> {
         val title = if (routingError > 0) R.string.error else R.string.message_delivery_status
-        val text = when (status) {
-            MessageStatus.RECEIVED -> R.string.delivery_confirmed
-            MessageStatus.QUEUED -> R.string.message_status_queued
-            MessageStatus.ENROUTE -> R.string.message_status_enroute
-            else -> getStringResFrom(routingError)
-        }
+        val text =
+            when (status) {
+                MessageStatus.RECEIVED -> R.string.delivery_confirmed
+                MessageStatus.QUEUED -> R.string.message_status_queued
+                MessageStatus.ENROUTE -> R.string.message_status_enroute
+                else -> getStringResFrom(routingError)
+            }
         return title to text
     }
 }

@@ -28,8 +28,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import androidx.compose.ui.res.stringResource
-import com.geeksville.mesh.R
 import kotlinx.coroutines.launch
+import org.meshtastic.core.ui.R
 
 @Composable
 fun CopyIconButton(
@@ -47,11 +47,8 @@ fun CopyIconButton(
                 val clipEntry = ClipEntry(clipData)
                 clipboardManager.setClipEntry(clipEntry)
             }
-        }
+        },
     ) {
-        Icon(
-            imageVector = Icons.TwoTone.ContentCopy,
-            contentDescription = label
-        )
+        Icon(imageVector = Icons.TwoTone.ContentCopy, contentDescription = label)
     }
 }

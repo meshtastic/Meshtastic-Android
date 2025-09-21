@@ -40,13 +40,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.geeksville.mesh.MessageStatus
-import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.common.components.EmojiPickerDialog
+import org.meshtastic.core.ui.R
 
 @Composable
-fun ReactionButton(
-    onSendReaction: (String) -> Unit = {},
-) {
+fun ReactionButton(onSendReaction: (String) -> Unit = {}) {
     var showEmojiPickerDialog by remember { mutableStateOf(false) }
     if (showEmojiPickerDialog) {
         EmojiPickerDialog(
@@ -54,54 +52,40 @@ fun ReactionButton(
                 showEmojiPickerDialog = false
                 onSendReaction(selectedEmoji)
             },
-            onDismiss = { showEmojiPickerDialog = false }
+            onDismiss = { showEmojiPickerDialog = false },
         )
     }
-    IconButton(
-        onClick = { showEmojiPickerDialog = true },
-    ) {
-        Icon(
-            imageVector = Icons.Default.EmojiEmotions,
-            contentDescription = stringResource(R.string.react),
-        )
+    IconButton(onClick = { showEmojiPickerDialog = true }) {
+        Icon(imageVector = Icons.Default.EmojiEmotions, contentDescription = stringResource(R.string.react))
     }
 }
 
 @Composable
-fun ReplyButton(
-    onClick: () -> Unit = {},
-) = IconButton(
+fun ReplyButton(onClick: () -> Unit = {}) = IconButton(
     onClick = onClick,
     content = {
-        Icon(
-            imageVector = Icons.AutoMirrored.Filled.Reply,
-            contentDescription = stringResource(R.string.reply),
-        )
-    }
+        Icon(imageVector = Icons.AutoMirrored.Filled.Reply, contentDescription = stringResource(R.string.reply))
+    },
 )
 
 @Composable
-fun MessageStatusButton(
-    onStatusClick: () -> Unit = {},
-    status: MessageStatus,
-    fromLocal: Boolean,
-) = AnimatedVisibility(visible = fromLocal) {
-    IconButton(
-        onClick = onStatusClick
-    ) {
-        Icon(
-            imageVector = when (status) {
-                MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
-                MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
-                MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
-                MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
-                MessageStatus.ERROR -> Icons.TwoTone.CloudOff
-                else -> Icons.TwoTone.Warning
-            },
-            contentDescription = stringResource(R.string.message_delivery_status),
-        )
+fun MessageStatusButton(onStatusClick: () -> Unit = {}, status: MessageStatus, fromLocal: Boolean) =
+    AnimatedVisibility(visible = fromLocal) {
+        IconButton(onClick = onStatusClick) {
+            Icon(
+                imageVector =
+                when (status) {
+                    MessageStatus.RECEIVED -> Icons.TwoTone.HowToReg
+                    MessageStatus.QUEUED -> Icons.TwoTone.CloudUpload
+                    MessageStatus.DELIVERED -> Icons.TwoTone.CloudDone
+                    MessageStatus.ENROUTE -> Icons.TwoTone.Cloud
+                    MessageStatus.ERROR -> Icons.TwoTone.CloudOff
+                    else -> Icons.TwoTone.Warning
+                },
+                contentDescription = stringResource(R.string.message_delivery_status),
+            )
+        }
     }
-}
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -113,16 +97,13 @@ fun MessageActions(
     onSendReply: () -> Unit = {},
     onStatusClick: () -> Unit = {},
 ) {
-    Row(
-        modifier = modifier.wrapContentSize(),
-    ) {
-
+    Row(modifier = modifier.wrapContentSize()) {
         ReactionButton { onSendReaction(it) }
         ReplyButton { onSendReply() }
         MessageStatusButton(
             onStatusClick = onStatusClick,
             status = status ?: MessageStatus.UNKNOWN,
-            fromLocal = isLocal
+            fromLocal = isLocal,
         )
     }
 }

@@ -33,9 +33,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.stringResource
-import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.map.MapViewModel
+import org.meshtastic.core.ui.R
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable

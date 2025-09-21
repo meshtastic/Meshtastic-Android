@@ -53,12 +53,12 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
-import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DebugViewModel
 import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
 import com.geeksville.mesh.model.LogSearchManager.SearchMatch
 import com.geeksville.mesh.model.LogSearchManager.SearchState
 import com.geeksville.mesh.ui.common.theme.AppTheme
+import org.meshtastic.core.ui.R
 
 @Composable
 internal fun DebugSearchNavigation(
@@ -189,7 +189,7 @@ internal fun DebugSearchState(
                 IconButton(onClick = onExport, modifier = Modifier) {
                     Icon(
                         imageVector = Icons.Outlined.FileDownload,
-                        contentDescription = stringResource(id = com.geeksville.mesh.R.string.debug_logs_export),
+                        contentDescription = stringResource(id = R.string.debug_logs_export),
                         modifier = Modifier.size(24.dp),
                     )
                 }

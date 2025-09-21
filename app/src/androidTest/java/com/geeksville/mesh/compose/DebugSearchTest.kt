@@ -32,13 +32,13 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import com.geeksville.mesh.R
 import com.geeksville.mesh.model.LogSearchManager.SearchState
 import com.geeksville.mesh.ui.debug.DebugSearchBar
 import com.geeksville.mesh.ui.debug.FilterMode
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.meshtastic.core.ui.R
 
 @RunWith(AndroidJUnit4::class)
 class DebugSearchTest {
