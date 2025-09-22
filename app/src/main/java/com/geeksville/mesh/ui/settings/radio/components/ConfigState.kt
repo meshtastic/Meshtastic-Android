@@ -62,8 +62,8 @@ class ConfigState<T : MessageLite>(private val initialValue: T) {
  * Creates and remembers a [ConfigState] instance, correctly handling process death and recomposition. When the
  * `initialValue` changes, the config state will be reset.
  *
- * @param initialValue The initial value to populate the config with. The config will be reset if this value changes across
- *   recompositions.
+ * @param initialValue The initial value to populate the config with. The config will be reset if this value changes
+ *   across recompositions.
  */
 @Composable
 fun <T : MessageLite> rememberConfigState(initialValue: T): ConfigState<T> =
