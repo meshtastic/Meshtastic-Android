@@ -26,14 +26,14 @@ import androidx.compose.runtime.setValue
 import com.google.protobuf.MessageLite
 
 /**
- * A state holder for managing form data within a Composable.
+ * A state holder for managing config data within a Composable.
  *
  * This class encapsulates the common logic for handling editable state that is derived from an initial value. It tracks
  * whether the current value has been modified ("dirty"), and provides simple methods to save the changes or reset to
  * the initial state.
  *
  * @param T The type of the data being managed, typically a Protobuf message.
- * @property initialValue The original, unmodified value of the form data.
+ * @property initialValue The original, unmodified value of the config data.
  */
 class ConfigState<T : MessageLite>(private val initialValue: T) {
     var value by mutableStateOf(initialValue)
@@ -60,9 +60,9 @@ class ConfigState<T : MessageLite>(private val initialValue: T) {
 
 /**
  * Creates and remembers a [ConfigState] instance, correctly handling process death and recomposition. When the
- * `initialValue` changes, the form state will be reset.
+ * `initialValue` changes, the config state will be reset.
  *
- * @param initialValue The initial value to populate the form with. The form will be reset if this value changes across
+ * @param initialValue The initial value to populate the config with. The config will be reset if this value changes across
  *   recompositions.
  */
 @Composable
