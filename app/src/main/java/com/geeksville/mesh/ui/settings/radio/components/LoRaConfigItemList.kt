@@ -48,7 +48,7 @@ fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val loraConfig = state.radioConfig.lora
     val primarySettings = state.channelList.getOrNull(0) ?: return
-    val formState = rememberFormState(initialValue = loraConfig)
+    val formState = rememberConfigState(initialValue = loraConfig)
 
     val primaryChannel by remember(formState.value) { mutableStateOf(Channel(primarySettings, formState.value)) }
     val focusManager = LocalFocusManager.current

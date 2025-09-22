@@ -66,5 +66,5 @@ class ConfigState<T : MessageLite>(private val initialValue: T) {
  *   recompositions.
  */
 @Composable
-fun <T : MessageLite> rememberFormState(initialValue: T): ConfigState<T> =
+fun <T : MessageLite> rememberConfigState(initialValue: T): ConfigState<T> =
     rememberSaveable(initialValue, saver = ConfigState.saver(initialValue)) { ConfigState(initialValue) }

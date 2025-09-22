@@ -39,7 +39,7 @@ import org.meshtastic.core.strings.R
 fun PaxcounterConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val paxcounterConfig = state.moduleConfig.paxcounter
-    val formState = rememberFormState(initialValue = paxcounterConfig)
+    val formState = rememberConfigState(initialValue = paxcounterConfig)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(

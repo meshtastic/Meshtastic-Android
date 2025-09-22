@@ -38,7 +38,7 @@ import org.meshtastic.core.strings.R
 fun TelemetryConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val telemetryConfig = state.moduleConfig.telemetry
-    val formState = rememberFormState(initialValue = telemetryConfig)
+    val formState = rememberConfigState(initialValue = telemetryConfig)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(

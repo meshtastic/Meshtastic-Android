@@ -65,7 +65,7 @@ fun SecurityConfigScreen(navController: NavController, viewModel: RadioConfigVie
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val node by viewModel.destNode.collectAsStateWithLifecycle()
     val securityConfig = state.radioConfig.security
-    val formState = rememberFormState(initialValue = securityConfig)
+    val formState = rememberConfigState(initialValue = securityConfig)
 
     var publicKey by rememberSaveable { mutableStateOf(formState.value.publicKey) }
     LaunchedEffect(formState.value.privateKey) {

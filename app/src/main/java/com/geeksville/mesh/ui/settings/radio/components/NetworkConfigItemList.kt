@@ -63,7 +63,7 @@ private fun ScanErrorDialog(onDismiss: () -> Unit = {}) =
 fun NetworkConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val networkConfig = state.radioConfig.network
-    val formState = rememberFormState(initialValue = networkConfig)
+    val formState = rememberConfigState(initialValue = networkConfig)
 
     var showScanErrorDialog: Boolean by rememberSaveable { mutableStateOf(false) }
     if (showScanErrorDialog) {

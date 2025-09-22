@@ -38,7 +38,7 @@ import org.meshtastic.core.strings.R
 fun RemoteHardwareConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val remoteHardwareConfig = state.moduleConfig.remoteHardware
-    val formState = rememberFormState(initialValue = remoteHardwareConfig)
+    val formState = rememberConfigState(initialValue = remoteHardwareConfig)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(

@@ -91,7 +91,7 @@ private val DeviceConfig.RebroadcastMode.description: Int
 fun DeviceConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val deviceConfig = state.radioConfig.device
-    val formState = rememberFormState(initialValue = deviceConfig)
+    val formState = rememberConfigState(initialValue = deviceConfig)
     var selectedRole by rememberSaveable { mutableStateOf(formState.value.role) }
     val infrastructureRoles = listOf(DeviceConfig.Role.ROUTER, DeviceConfig.Role.REPEATER)
     if (selectedRole != formState.value.role) {

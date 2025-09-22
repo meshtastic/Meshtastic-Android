@@ -38,7 +38,7 @@ import org.meshtastic.core.strings.R
 fun AmbientLightingConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val ambientLightingConfig = state.moduleConfig.ambientLighting
-    val formState = rememberFormState(initialValue = ambientLightingConfig)
+    val formState = rememberConfigState(initialValue = ambientLightingConfig)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(

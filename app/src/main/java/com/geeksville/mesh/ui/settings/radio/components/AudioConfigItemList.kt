@@ -40,7 +40,7 @@ import org.meshtastic.core.strings.R
 fun AudioConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val audioConfig = state.moduleConfig.audio
-    val formState = rememberFormState(initialValue = audioConfig)
+    val formState = rememberConfigState(initialValue = audioConfig)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(

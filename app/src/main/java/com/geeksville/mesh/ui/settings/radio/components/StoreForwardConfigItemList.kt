@@ -38,7 +38,7 @@ import org.meshtastic.core.strings.R
 fun StoreForwardConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val storeForwardConfig = state.moduleConfig.storeForward
-    val formState = rememberFormState(initialValue = storeForwardConfig)
+    val formState = rememberConfigState(initialValue = storeForwardConfig)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(

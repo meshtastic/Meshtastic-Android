@@ -40,7 +40,7 @@ import org.meshtastic.core.strings.R
 fun SerialConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val serialConfig = state.moduleConfig.serial
-    val formState = rememberFormState(initialValue = serialConfig)
+    val formState = rememberConfigState(initialValue = serialConfig)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(

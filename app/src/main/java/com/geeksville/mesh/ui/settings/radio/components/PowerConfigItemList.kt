@@ -38,7 +38,7 @@ import org.meshtastic.core.strings.R
 fun PowerConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val powerConfig = state.radioConfig.power
-    val formState = rememberFormState(initialValue = powerConfig)
+    val formState = rememberConfigState(initialValue = powerConfig)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(

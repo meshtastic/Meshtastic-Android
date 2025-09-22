@@ -40,7 +40,7 @@ import org.meshtastic.core.strings.R
 fun BluetoothConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val bluetoothConfig = state.radioConfig.bluetooth
-    val formState = rememberFormState(initialValue = bluetoothConfig)
+    val formState = rememberConfigState(initialValue = bluetoothConfig)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(

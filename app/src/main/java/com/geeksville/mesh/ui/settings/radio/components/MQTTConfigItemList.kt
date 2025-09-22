@@ -46,7 +46,7 @@ fun MQTTConfigScreen(navController: NavController, viewModel: RadioConfigViewMod
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val destNum = destNode?.num
     val mqttConfig = state.moduleConfig.mqtt
-    val formState = rememberFormState(initialValue = mqttConfig)
+    val formState = rememberConfigState(initialValue = mqttConfig)
 
     if (!formState.value.mapReportSettings.shouldReportLocation) {
         val settings =

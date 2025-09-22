@@ -70,7 +70,7 @@ fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigVie
             time = 1, // ignore time for fixed_position
         )
     val positionConfig = state.radioConfig.position
-    val formState = rememberFormState(initialValue = positionConfig)
+    val formState = rememberConfigState(initialValue = positionConfig)
     var locationInput by rememberSaveable { mutableStateOf(currentPosition) }
 
     val locationPermissionState =

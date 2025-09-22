@@ -43,7 +43,7 @@ import org.meshtastic.core.strings.R
 fun DetectionSensorConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val detectionSensorConfig = state.moduleConfig.detectionSensor
-    val formState = rememberFormState(initialValue = detectionSensorConfig)
+    val formState = rememberConfigState(initialValue = detectionSensorConfig)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(

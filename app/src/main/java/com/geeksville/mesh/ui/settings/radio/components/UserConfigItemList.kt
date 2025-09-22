@@ -44,7 +44,7 @@ import org.meshtastic.core.strings.R
 fun UserConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val userConfig = state.userConfig
-    val formState = rememberFormState(initialValue = userConfig)
+    val formState = rememberConfigState(initialValue = userConfig)
     val firmwareVersion = DeviceVersion(state.metadata?.firmwareVersion ?: "")
 
     val validLongName = formState.value.longName.isNotBlank()

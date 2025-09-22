@@ -38,7 +38,7 @@ import org.meshtastic.core.strings.R
 fun NeighborInfoConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val neighborInfoConfig = state.moduleConfig.neighborInfo
-    val formState = rememberFormState(initialValue = neighborInfoConfig)
+    val formState = rememberConfigState(initialValue = neighborInfoConfig)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(

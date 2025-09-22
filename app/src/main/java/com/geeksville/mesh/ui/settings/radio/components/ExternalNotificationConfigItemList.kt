@@ -46,7 +46,7 @@ fun ExternalNotificationConfigScreen(navController: NavController, viewModel: Ra
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val extNotificationConfig = state.moduleConfig.externalNotification
     val ringtone = state.ringtone
-    val formState = rememberFormState(initialValue = extNotificationConfig)
+    val formState = rememberConfigState(initialValue = extNotificationConfig)
     var ringtoneInput by rememberSaveable(ringtone) { mutableStateOf(ringtone) }
     val focusManager = LocalFocusManager.current
 

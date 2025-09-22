@@ -47,7 +47,7 @@ fun CannedMessageConfigScreen(navController: NavController, viewModel: RadioConf
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val cannedMessageConfig = state.moduleConfig.cannedMessage
     val messages = state.cannedMessageMessages
-    val formState = rememberFormState(initialValue = cannedMessageConfig)
+    val formState = rememberConfigState(initialValue = cannedMessageConfig)
     var messagesInput by rememberSaveable(messages) { mutableStateOf(messages) }
     val focusManager = LocalFocusManager.current
 

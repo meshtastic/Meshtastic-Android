@@ -38,7 +38,7 @@ import org.meshtastic.core.strings.R
 fun RangeTestConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val rangeTestConfig = state.moduleConfig.rangeTest
-    val formState = rememberFormState(initialValue = rangeTestConfig)
+    val formState = rememberConfigState(initialValue = rangeTestConfig)
     val focusManager = LocalFocusManager.current
 
     RadioConfigScreenList(
