@@ -415,7 +415,7 @@ class MeshServiceNotifications(private val context: Context) {
         type: NotificationType,
         contentIntent: PendingIntent? = null,
     ): NotificationCompat.Builder {
-        val smallIcon = R.drawable.app_icon
+        val smallIcon = com.geeksville.mesh.R.drawable.app_icon
 
         return NotificationCompat.Builder(context, type.channelId)
             .setSmallIcon(smallIcon)

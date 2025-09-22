@@ -153,7 +153,7 @@ fun MainAppBar(
             {
                 IconButton(enabled = false, onClick = {}) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.app_icon),
+                        imageVector = ImageVector.vectorResource(id = com.geeksville.mesh.R.drawable.app_icon),
                         contentDescription = stringResource(id = R.string.application_icon),
                     )
                 }
