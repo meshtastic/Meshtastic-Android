@@ -569,15 +569,15 @@
     <string name="position_flags">Position flags</string>
     <string name="power_config">Конфигуриране на захранването</string>
     <string name="enable_power_saving_mode">Активиране на енергоспестяващ режим</string>
-    <string name="shutdown_on_power_loss">Shutdown on power loss</string>
-    <string name="shutdown_on_battery_delay_seconds">Shutdown on battery delay (seconds)</string>
+    <string name="shutdown_on_power_loss">Изключване при загуба на захранване</string>
+    <string name="shutdown_on_battery_delay_seconds">Забавяне при изключване при изтощаване на батерията (секунди)</string>
     <string name="adc_multiplier_override">ADC multiplier override</string>
     <string name="adc_multiplier_override_ratio">ADC multiplier override ratio</string>
     <string name="wait_for_bluetooth_duration_seconds">Wait for Bluetooth duration (seconds)</string>
     <string name="super_deep_sleep_duration_seconds">Super deep sleep duration (seconds)</string>
     <string name="light_sleep_duration_seconds">Light sleep duration (seconds)</string>
     <string name="minimum_wake_time_seconds">Минимално време за събуждане (секунди)</string>
-    <string name="battery_ina_2xx_i2c_address">Battery INA_2XX I2C address</string>
+    <string name="battery_ina_2xx_i2c_address">I2C адрес на батерията INA_2XX</string>
     <string name="range_test_config">Конфигуриране на Тест на обхвата</string>
     <string name="range_test_enabled">Тест на обхвата е активиран</string>
     <string name="sender_message_interval_seconds">Sender message interval (seconds)</string>
@@ -662,7 +662,7 @@
     <string name="secondary_no_telemetry">Без периодично излъчване на телеметрия</string>
     <string name="manual_position_request">Manual position request required</string>
     <string name="press_and_drag">Натиснете и плъзнете, за да пренаредите</string>
-    <string name="unmute">Unmute</string>
+    <string name="unmute">Включване на звука</string>
     <string name="dynamic">Динамична</string>
     <string name="scan_qr_code">Сканиране на QR кода</string>
     <string name="share_contact">Споделяне на контакт</string>
