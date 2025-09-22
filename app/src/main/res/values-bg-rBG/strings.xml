@@ -699,7 +699,7 @@
     <string name="i_agree_to_share_my_location">I have read and understand the above. I voluntarily consent to the unencrypted transmission of my node data via MQTT</string>
     <string name="i_agree">Съгласен съм.</string>
     <string name="should_update_firmware">Препоръчва се актуализация на фърмуера.</string>
-    <string name="should_update">To benefit from the latest fixes and features, please update your node firmware.\n\nLatest stable firmware version: %1$s</string>
+    <string name="should_update">За да се възползвате от най-новите корекции и функции, моля, актуализирайте фърмуера на своя възел.\n\nНай-новата стабилна версия на фърмуера е: %1$s</string>
     <string name="expires">Изтича</string>
     <string name="time">Време</string>
     <string name="date">Дата</string>
@@ -743,13 +743,13 @@
     <string name="clean_ignored_nodes">Почистване на игнорираните възли</string>
     <string name="clean_now">Почистете сега</string>
     <string name="clean_node_database_confirmation">Това ще премахне %1$d възела от вашата база данни. Това действие не може да бъде отменено.</string>
-    <string name="security_icon_help_green_lock">A green lock means the channel is securely encrypted with either a 128 or 256 bit AES key.</string>
+    <string name="security_icon_help_green_lock">Зеленият катинар означава, че каналът е сигурно криптиран със 128 или 256-битов AES ключ.</string>
     <!-- INSECURE_NO_PRECISE State (Yellow Open Lock) -->
-    <string name="security_icon_insecure_no_precise">Insecure Channel, Not Precise</string>
-    <string name="security_icon_help_yellow_open_lock">A yellow open lock means the channel is not securely encrypted, is not used for precise location data, and uses either no key at all or a 1 byte known key.</string>
+    <string name="security_icon_insecure_no_precise">Несигурен канал, не е прецизен</string>
+    <string name="security_icon_help_yellow_open_lock">Жълтият отворен катинар означава, че каналът не е сигурно криптиран, не се използва за точни данни за местоположение и не използва ключ или използва известен ключ от 1 байт.</string>
     <!-- INSECURE_PRECISE_ONLY State (Red Open Lock) -->
     <string name="security_icon_insecure_precise_only">Несигурен канал, прецизно местоположение</string>
-    <string name="security_icon_help_red_open_lock">A red open lock means the channel is not securely encrypted, is used for precise location data, and uses either no key at all or a 1 byte known key.</string>
+    <string name="security_icon_help_red_open_lock">Червеният отворен катинар означава, че каналът не е сигурно криптиран, използва се за точни данни за местоположение и не използва ключ или използва известен ключ от 1 байт.</string>
     <!-- INSECURE_PRECISE_MQTT_WARNING State (Red Open Lock with Warning Badge) -->
     <string name="security_icon_warning_precise_mqtt">Warning: Insecure, Precise Location &amp; MQTT Uplink</string>
     <string name="security_icon_help_warning_precise_mqtt">A red open lock with a warning means the channel is not securely encrypted, is used for precise location data which is being uplinked to the internet via MQTT, and uses either no key at all or a 1 byte known key.</string>
@@ -808,8 +808,8 @@
     <string name="distance_measurements_description">Display the distance between your phone and other Meshtastic nodes with positions.</string>
     <string name="distance_filters">Distance Filters</string>
     <string name="distance_filters_description">Filter the node list and mesh map based on proximity to your phone.</string>
-    <string name="mesh_map_location">Mesh Map Location</string>
-    <string name="mesh_map_location_description">Enables the blue location dot for your phone in the mesh map.</string>
+    <string name="mesh_map_location">Местоположение на mesh карта</string>
+    <string name="mesh_map_location_description">Активира синята точка за местоположение на телефона ви в mesh карта.</string>
     <string name="configure_location_permissions">Конфигуриране на разрешенията за местоположение</string>
     <string name="skip">Пропускане</string>
     <string name="settings">настройки</string>
@@ -854,10 +854,10 @@
     <string name="app_settings">Приложение</string>
     <string name="app_version">Версия</string>
     <string name="channel_features">Channel Features</string>
-    <string name="location_sharing">Location Sharing</string>
+    <string name="location_sharing">Споделяне на местоположение</string>
     <string name="periodic_position_broadcast">Периодично излъчване на позиция</string>
-    <string name="uplink_feature_description">Messages from the mesh will be sent to the public internet through any node\'s configured gateway.</string>
-    <string name="downlink_feature_description">Messages from a public internet gateway are forwarded to the local mesh. Due to the zero-hop policy, traffic from the default MQTT server will not propagate further than this device.</string>
+    <string name="uplink_feature_description">Съобщенията от mesh мрежата ще бъдат изпращани до публичния интернет през конфигурирания шлюз на всеки възел.</string>
+    <string name="downlink_feature_description">Съобщенията от шлюза към публичния интернет се препращат към локалната mesh мрежа. Поради политиката за нулев отскок, трафикът от MQTT сървъра по подразбиране няма да се разпространява по-далеч от това устройство.</string>
     <string name="icon_meanings">Icon Meanings</string>
     <string name="secondary_channel_position_feature">Disabling position on the primary channel allows periodic position broadcasts on the first secondary channel with the position enabled, otherwise manual position request required.</string>
     <string name="device_configuration">Конфигурация на устройството</string>
