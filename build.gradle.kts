@@ -80,6 +80,7 @@ dependencies {
     kover(projects.meshServiceExample)
 
     kover(projects.core.data)
+    kover(projects.core.datastore)
     kover(projects.core.model)
     kover(projects.core.navigation)
     kover(projects.core.network)
