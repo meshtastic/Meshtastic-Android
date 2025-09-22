@@ -36,12 +36,11 @@ platform :android do
     )
   end
 
-  desc "Deploy a new version to the closed track on Google Play"
+  desc "Promote from internal track to the closed track on Google Play"
   lane :closed do
-    aab_path = build_google_release
     upload_to_play_store(
-      track: 'NewAlpha',
-      aab: aab_path,
+      track: 'internal',
+      track_promote_to: 'NewAlpha',
       release_status: 'completed',
       skip_upload_apk: true,
       skip_upload_metadata: true,
@@ -51,12 +50,11 @@ platform :android do
     )
   end
 
-  desc "Deploy a new version to the open track on Google Play"
+  desc "Promote from closed track to the open track on Google Play"
   lane :open do
-    aab_path = build_google_release
     upload_to_play_store(
-      track: 'beta',
-      aab: aab_path,
+      track: 'NewAlpha',
+      track_promote_to: 'beta',
       release_status: 'draft',
       skip_upload_apk: true,
       skip_upload_metadata: true,
@@ -66,12 +64,11 @@ platform :android do
     )
   end
 
-  desc "Deploy a new version to the production track on Google Play"
+  desc "Promote from open track to the production track on Google Play"
   lane :production do
-    aab_path = build_google_release
     upload_to_play_store(
-      track: 'production',
-      aab: aab_path,
+      track: 'open',
+      track_promote_to: 'production',
       release_status: 'draft',
       skip_upload_apk: true,
       skip_upload_metadata: true,
