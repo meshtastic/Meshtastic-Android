@@ -19,12 +19,9 @@ package com.geeksville.mesh.ui.settings.radio.components
 
 import android.app.Activity
 import android.content.Intent
-import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.twotone.Warning
@@ -42,19 +39,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.geeksville.mesh.ConfigProtos.Config.SecurityConfig
-import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.common.components.CopyIconButton
 import com.geeksville.mesh.ui.common.components.EditBase64Preference
 import com.geeksville.mesh.ui.common.components.EditListPreference
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
-import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.node.NodeActionButton
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
@@ -64,45 +59,19 @@ import com.google.protobuf.ByteString
 import org.meshtastic.core.strings.R
 import java.security.SecureRandom
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun SecurityConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun SecurityConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val node by viewModel.destNode.collectAsStateWithLifecycle()
+    val securityConfig = state.radioConfig.security
+    val formState = rememberFormState(initialValue = securityConfig)
 
-    if (state.responseState.isWaiting()) {
-        PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
-    }
-
-    SecurityConfigItemList(
-        user = node?.user,
-        securityConfig = state.radioConfig.security,
-        enabled = state.connected,
-        onConfirm = { securityInput ->
-            val config = config { security = securityInput }
-            viewModel.setConfig(config)
-        },
-        onExport = { uri, securityConfig -> viewModel.exportSecurityConfig(uri, securityConfig) },
-    )
-}
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Suppress("LongMethod")
-@Composable
-fun SecurityConfigItemList(
-    user: MeshProtos.User? = null,
-    securityConfig: SecurityConfig,
-    enabled: Boolean,
-    onConfirm: (config: SecurityConfig) -> Unit,
-    onExport: (uri: Uri, securityConfig: SecurityConfig) -> Unit = { _, _ -> },
-) {
-    val focusManager = LocalFocusManager.current
-    var securityInput by rememberSaveable { mutableStateOf(securityConfig) }
-
-    var publicKey by rememberSaveable { mutableStateOf(securityInput.publicKey) }
-    LaunchedEffect(securityInput.privateKey) {
-        if (securityInput.privateKey != securityConfig.privateKey) {
+    var publicKey by rememberSaveable { mutableStateOf(formState.value.publicKey) }
+    LaunchedEffect(formState.value.privateKey) {
+        if (formState.value.privateKey != securityConfig.privateKey) {
             publicKey = "".toByteString()
-        } else if (securityInput.privateKey == securityConfig.privateKey) {
+        } else if (formState.value.privateKey == securityConfig.privateKey) {
             publicKey = securityConfig.publicKey
         }
     }
@@ -110,18 +79,18 @@ fun SecurityConfigItemList(
     val exportConfigLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
             if (it.resultCode == Activity.RESULT_OK) {
-                it.data?.data?.let { uri -> onExport(uri, securityConfig) }
+                it.data?.data?.let { uri -> viewModel.exportSecurityConfig(uri, securityConfig) }
             }
         }
 
     var showKeyGenerationDialog by rememberSaveable { mutableStateOf(false) }
     PrivateKeyRegenerateDialog(
         showKeyGenerationDialog = showKeyGenerationDialog,
-        config = securityInput,
-        onConfirm = { newConfig ->
-            securityInput = newConfig
+        onConfirm = {
+            formState.value = it
             showKeyGenerationDialog = false
-            onConfirm(securityInput)
+            val config = config { security = formState.value }
+            viewModel.setConfig(config)
         },
         onDismiss = { showKeyGenerationDialog = false },
     )
@@ -141,7 +110,7 @@ fun SecurityConfigItemList(
                                 type = "application/*"
                                 putExtra(
                                     Intent.EXTRA_TITLE,
-                                    "${user?.shortName}_keys_${System.currentTimeMillis()}.json",
+                                    "${node?.user?.shortName}_keys_${System.currentTimeMillis()}.json",
                                 )
                             }
                         exportConfigLauncher.launch(intent)
@@ -153,7 +122,19 @@ fun SecurityConfigItemList(
         )
     }
 
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    val focusManager = LocalFocusManager.current
+    RadioConfigScreenList(
+        title = stringResource(id = R.string.security),
+        onBack = { navController.popBackStack() },
+        configState = formState,
+        enabled = state.connected,
+        responseState = state.responseState,
+        onDismissPacketResponse = viewModel::clearPacketResponse,
+        onSave = {
+            val config = config { security = it }
+            viewModel.setConfig(config)
+        },
+    ) {
         item { PreferenceCategory(text = stringResource(R.string.direct_message_key)) }
 
         item {
@@ -161,15 +142,15 @@ fun SecurityConfigItemList(
                 title = stringResource(R.string.public_key),
                 summary = stringResource(id = R.string.config_security_public_key),
                 value = publicKey,
-                enabled = enabled,
+                enabled = state.connected,
                 readOnly = true,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChange = {
                     if (it.size() == 32) {
-                        securityInput = securityInput.copy { this.publicKey = it }
+                        formState.value = formState.value.copy { this.publicKey = it }
                     }
                 },
-                trailingIcon = { CopyIconButton(valueToCopy = securityInput.publicKey.encodeToString()) },
+                trailingIcon = { CopyIconButton(valueToCopy = formState.value.publicKey.encodeToString()) },
             )
         }
 
@@ -177,15 +158,15 @@ fun SecurityConfigItemList(
             EditBase64Preference(
                 title = stringResource(R.string.private_key),
                 summary = stringResource(id = R.string.config_security_private_key),
-                value = securityInput.privateKey,
-                enabled = enabled,
+                value = formState.value.privateKey,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChange = {
                     if (it.size() == 32) {
-                        securityInput = securityInput.copy { privateKey = it }
+                        formState.value = formState.value.copy { privateKey = it }
                     }
                 },
-                trailingIcon = { CopyIconButton(valueToCopy = securityInput.privateKey.encodeToString()) },
+                trailingIcon = { CopyIconButton(valueToCopy = formState.value.privateKey.encodeToString()) },
             )
         }
 
@@ -193,7 +174,7 @@ fun SecurityConfigItemList(
             NodeActionButton(
                 modifier = Modifier.padding(horizontal = 8.dp),
                 title = stringResource(R.string.regenerate_private_key),
-                enabled = enabled,
+                enabled = state.connected,
                 icon = Icons.TwoTone.Warning,
                 onClick = { showKeyGenerationDialog = true },
             )
@@ -203,7 +184,7 @@ fun SecurityConfigItemList(
             NodeActionButton(
                 modifier = Modifier.padding(horizontal = 8.dp),
                 title = stringResource(R.string.export_keys),
-                enabled = enabled,
+                enabled = state.connected,
                 icon = Icons.TwoTone.Warning,
                 onClick = { showEditSecurityConfigDialog = true },
             )
@@ -213,13 +194,13 @@ fun SecurityConfigItemList(
             EditListPreference(
                 title = stringResource(R.string.admin_key),
                 summary = stringResource(id = R.string.config_security_admin_key),
-                list = securityInput.adminKeyList,
+                list = formState.value.adminKeyList,
                 maxCount = 3,
-                enabled = enabled,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValuesChanged = {
-                    securityInput =
-                        securityInput.copy {
+                    formState.value =
+                        formState.value.copy {
                             adminKey.clear()
                             adminKey.addAll(it)
                         }
@@ -231,9 +212,9 @@ fun SecurityConfigItemList(
             SwitchPreference(
                 title = stringResource(R.string.serial_console),
                 summary = stringResource(id = R.string.config_security_serial_enabled),
-                checked = securityInput.serialEnabled,
-                enabled = enabled,
-                onCheckedChange = { securityInput = securityInput.copy { serialEnabled = it } },
+                checked = formState.value.serialEnabled,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { serialEnabled = it } },
             )
         }
         item { HorizontalDivider() }
@@ -242,9 +223,9 @@ fun SecurityConfigItemList(
             SwitchPreference(
                 title = stringResource(R.string.debug_log_api_enabled),
                 summary = stringResource(id = R.string.config_security_debug_log_api_enabled),
-                checked = securityInput.debugLogApiEnabled,
-                enabled = enabled,
-                onCheckedChange = { securityInput = securityInput.copy { debugLogApiEnabled = it } },
+                checked = formState.value.debugLogApiEnabled,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { debugLogApiEnabled = it } },
             )
         }
         item { HorizontalDivider() }
@@ -253,9 +234,9 @@ fun SecurityConfigItemList(
             SwitchPreference(
                 title = stringResource(R.string.managed_mode),
                 summary = stringResource(id = R.string.config_security_is_managed),
-                checked = securityInput.isManaged,
-                enabled = enabled && securityInput.adminKeyCount > 0,
-                onCheckedChange = { securityInput = securityInput.copy { isManaged = it } },
+                checked = formState.value.isManaged,
+                enabled = state.connected && formState.value.adminKeyCount > 0,
+                onCheckedChange = { formState.value = formState.value.copy { isManaged = it } },
             )
         }
         item { HorizontalDivider() }
@@ -263,26 +244,12 @@ fun SecurityConfigItemList(
         item {
             SwitchPreference(
                 title = stringResource(R.string.legacy_admin_channel),
-                checked = securityInput.adminChannelEnabled,
-                enabled = enabled,
-                onCheckedChange = { securityInput = securityInput.copy { adminChannelEnabled = it } },
+                checked = formState.value.adminChannelEnabled,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { adminChannelEnabled = it } },
             )
         }
         item { HorizontalDivider() }
-
-        item {
-            PreferenceFooter(
-                enabled = enabled && securityInput != securityConfig,
-                onCancelClicked = {
-                    focusManager.clearFocus()
-                    securityInput = securityConfig
-                },
-                onSaveClicked = {
-                    focusManager.clearFocus()
-                    onConfirm(securityInput)
-                },
-            )
-        }
     }
 }
 
@@ -290,11 +257,9 @@ fun SecurityConfigItemList(
 @Composable
 fun PrivateKeyRegenerateDialog(
     showKeyGenerationDialog: Boolean,
-    config: SecurityConfig,
     onConfirm: (SecurityConfig) -> Unit,
     onDismiss: () -> Unit = {},
 ) {
-    var securityInput by rememberSaveable { mutableStateOf(config) }
     if (showKeyGenerationDialog) {
         AlertDialog(
             onDismissRequest = onDismiss,
@@ -303,20 +268,22 @@ fun PrivateKeyRegenerateDialog(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        securityInput =
-                            securityInput.copy {
-                                clearPrivateKey()
-                                clearPublicKey()
-                                // Generate a random "f" value
-                                val f = ByteArray(32).apply { SecureRandom().nextBytes(this) }
-                                // Adjust the value to make it valid as an "s" value for eval().
-                                // According to the specification we need to mask off the 3
-                                // right-most bits of f[0], mask off the left-most bit of f[31],
-                                // and set the second to left-most bit of f[31].
-                                f[0] = (f[0].toInt() and 0xF8).toByte()
-                                f[31] = ((f[31].toInt() and 0x7F) or 0x40).toByte()
-                                privateKey = ByteString.copyFrom(f)
-                            }
+                        val securityInput =
+                            SecurityConfig.newBuilder()
+                                .apply {
+                                    clearPrivateKey()
+                                    clearPublicKey()
+                                    // Generate a random "f" value
+                                    val f = ByteArray(32).apply { SecureRandom().nextBytes(this) }
+                                    // Adjust the value to make it valid as an "s" value for eval().
+                                    // According to the specification we need to mask off the 3
+                                    // right-most bits of f[0], mask off the left-most bit of f[31],
+                                    // and set the second to left-most bit of f[31].
+                                    f[0] = (f[0].toInt() and 0xF8).toByte()
+                                    f[31] = ((f[31].toInt() and 0x7F) or 0x40).toByte()
+                                    privateKey = ByteString.copyFrom(f)
+                                }
+                                .build()
                         onConfirm(securityInput)
                     },
                 ) {
@@ -326,10 +293,4 @@ fun PrivateKeyRegenerateDialog(
             dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun SecurityConfigPreview() {
-    SecurityConfigItemList(securityConfig = SecurityConfig.getDefaultInstance(), enabled = true, onConfirm = {})
 }

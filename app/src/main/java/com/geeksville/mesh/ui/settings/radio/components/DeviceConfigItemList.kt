@@ -20,9 +20,7 @@ package com.geeksville.mesh.ui.settings.radio.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
@@ -46,16 +44,15 @@ import androidx.compose.ui.text.TextLinkStyles
 import androidx.compose.ui.text.fromHtml
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
 import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.common.components.DropDownPreference
 import com.geeksville.mesh.ui.common.components.EditTextPreference
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
-import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import org.meshtastic.core.strings.R
@@ -91,24 +88,135 @@ private val DeviceConfig.RebroadcastMode.description: Int
         }
 
 @Composable
-fun DeviceConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun DeviceConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-
-    if (state.responseState.isWaiting()) {
-        PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
+    val deviceConfig = state.radioConfig.device
+    val formState = rememberFormState(initialValue = deviceConfig)
+    var selectedRole by rememberSaveable { mutableStateOf(formState.value.role) }
+    val infrastructureRoles = listOf(DeviceConfig.Role.ROUTER, DeviceConfig.Role.REPEATER)
+    if (selectedRole != formState.value.role) {
+        if (selectedRole in infrastructureRoles) {
+            RouterRoleConfirmationDialog(
+                onDismiss = { selectedRole = formState.value.role },
+                onConfirm = { formState.value = formState.value.copy { role = selectedRole } },
+            )
+        } else {
+            formState.value = formState.value.copy { role = selectedRole }
+        }
     }
-
-    DeviceConfigItemList(
-        deviceConfig = state.radioConfig.device,
+    val focusManager = LocalFocusManager.current
+    RadioConfigScreenList(
+        title = stringResource(id = R.string.device),
+        onBack = { navController.popBackStack() },
+        configState = formState,
         enabled = state.connected,
-        onSaveClicked = { deviceInput ->
-            val config = config { device = deviceInput }
+        responseState = state.responseState,
+        onDismissPacketResponse = viewModel::clearPacketResponse,
+        onSave = {
+            val config = config { device = it }
             viewModel.setConfig(config)
         },
-    )
+    ) {
+        item { PreferenceCategory(text = stringResource(R.string.options)) }
+        item {
+            DropDownPreference(
+                title = stringResource(R.string.role),
+                enabled = state.connected,
+                selectedItem = formState.value.role,
+                onItemSelected = { selectedRole = it },
+                summary = stringResource(id = formState.value.role.description),
+            )
+        }
+        item { HorizontalDivider() }
+        item {
+            DropDownPreference(
+                title = stringResource(R.string.rebroadcast_mode),
+                enabled = state.connected,
+                selectedItem = formState.value.rebroadcastMode,
+                onItemSelected = { formState.value = formState.value.copy { rebroadcastMode = it } },
+                summary = stringResource(id = formState.value.rebroadcastMode.description),
+            )
+        }
+        item { HorizontalDivider() }
+        item {
+            EditTextPreference(
+                title = stringResource(R.string.nodeinfo_broadcast_interval),
+                value = formState.value.nodeInfoBroadcastSecs,
+                enabled = state.connected,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { formState.value = formState.value.copy { nodeInfoBroadcastSecs = it } },
+            )
+        }
+        item { PreferenceCategory(text = stringResource(R.string.hardware)) }
+        item {
+            SwitchPreference(
+                title = stringResource(R.string.double_tap_as_button_press),
+                summary = stringResource(id = R.string.config_device_doubleTapAsButtonPress_summary),
+                checked = formState.value.doubleTapAsButtonPress,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { doubleTapAsButtonPress = it } },
+            )
+        }
+        item { HorizontalDivider() }
+        item {
+            SwitchPreference(
+                title = stringResource(R.string.triple_click_adhoc_ping),
+                summary = stringResource(id = R.string.config_device_tripleClickAsAdHocPing_summary),
+                checked = !formState.value.disableTripleClick,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { disableTripleClick = !it } },
+            )
+        }
+        item { HorizontalDivider() }
+        item {
+            SwitchPreference(
+                title = stringResource(R.string.led_heartbeat),
+                summary = stringResource(id = R.string.config_device_ledHeartbeatEnabled_summary),
+                checked = !formState.value.ledHeartbeatDisabled,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { ledHeartbeatDisabled = !it } },
+            )
+        }
+        item { HorizontalDivider() }
+
+        item { PreferenceCategory(text = stringResource(R.string.debug)) }
+        item {
+            EditTextPreference(
+                title = stringResource(R.string.time_zone),
+                value = formState.value.tzdef,
+                summary = stringResource(id = R.string.config_device_tzdef_summary),
+                maxSize = 64, // tzdef max_size:65
+                enabled = state.connected,
+                isError = false,
+                keyboardOptions =
+                KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { formState.value = formState.value.copy { tzdef = it } },
+            )
+        }
+
+        item { PreferenceCategory(text = stringResource(R.string.gpio)) }
+        item {
+            EditTextPreference(
+                title = stringResource(R.string.button_gpio),
+                value = formState.value.buttonGpio,
+                enabled = state.connected,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { formState.value = formState.value.copy { buttonGpio = it } },
+            )
+        }
+        item {
+            EditTextPreference(
+                title = stringResource(R.string.buzzer_gpio),
+                value = formState.value.buzzerGpio,
+                enabled = state.connected,
+                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
+                onValueChanged = { formState.value = formState.value.copy { buzzerGpio = it } },
+            )
+        }
+    }
 }
 
-@Suppress("LongMethod")
 @Composable
 fun RouterRoleConfirmationDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
     val dialogTitle = stringResource(R.string.are_you_sure)
@@ -140,141 +248,4 @@ fun RouterRoleConfirmationDialog(onDismiss: () -> Unit, onConfirm: () -> Unit) {
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.cancel)) } },
     )
-}
-
-@Suppress("LongMethod")
-@Composable
-fun DeviceConfigItemList(deviceConfig: DeviceConfig, enabled: Boolean, onSaveClicked: (DeviceConfig) -> Unit) {
-    val focusManager = LocalFocusManager.current
-    var deviceInput by rememberSaveable { mutableStateOf(deviceConfig) }
-    var selectedRole by rememberSaveable { mutableStateOf(deviceInput.role) }
-    val infrastructureRoles = listOf(DeviceConfig.Role.ROUTER, DeviceConfig.Role.REPEATER)
-    if (selectedRole != deviceInput.role) {
-        if (selectedRole in infrastructureRoles) {
-            RouterRoleConfirmationDialog(
-                onDismiss = { selectedRole = deviceInput.role },
-                onConfirm = { deviceInput = deviceInput.copy { role = selectedRole } },
-            )
-        } else {
-            deviceInput = deviceInput.copy { role = selectedRole }
-        }
-    }
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
-        item { PreferenceCategory(text = stringResource(R.string.options)) }
-        item {
-            DropDownPreference(
-                title = stringResource(R.string.role),
-                enabled = enabled,
-                selectedItem = deviceInput.role,
-                onItemSelected = { selectedRole = it },
-                summary = stringResource(id = deviceInput.role.description),
-            )
-        }
-        item { HorizontalDivider() }
-        item {
-            DropDownPreference(
-                title = stringResource(R.string.rebroadcast_mode),
-                enabled = enabled,
-                selectedItem = deviceInput.rebroadcastMode,
-                onItemSelected = { deviceInput = deviceInput.copy { rebroadcastMode = it } },
-                summary = stringResource(id = deviceInput.rebroadcastMode.description),
-            )
-        }
-        item { HorizontalDivider() }
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.nodeinfo_broadcast_interval),
-                value = deviceInput.nodeInfoBroadcastSecs,
-                enabled = enabled,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { deviceInput = deviceInput.copy { nodeInfoBroadcastSecs = it } },
-            )
-        }
-        item { PreferenceCategory(text = stringResource(R.string.hardware)) }
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.double_tap_as_button_press),
-                summary = stringResource(id = R.string.config_device_doubleTapAsButtonPress_summary),
-                checked = deviceInput.doubleTapAsButtonPress,
-                enabled = enabled,
-                onCheckedChange = { deviceInput = deviceInput.copy { doubleTapAsButtonPress = it } },
-            )
-        }
-        item { HorizontalDivider() }
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.triple_click_adhoc_ping),
-                summary = stringResource(id = R.string.config_device_tripleClickAsAdHocPing_summary),
-                checked = !deviceInput.disableTripleClick,
-                enabled = enabled,
-                onCheckedChange = { deviceInput = deviceInput.copy { disableTripleClick = !it } },
-            )
-        }
-        item { HorizontalDivider() }
-        item {
-            SwitchPreference(
-                title = stringResource(R.string.led_heartbeat),
-                summary = stringResource(id = R.string.config_device_ledHeartbeatEnabled_summary),
-                checked = !deviceInput.ledHeartbeatDisabled,
-                enabled = enabled,
-                onCheckedChange = { deviceInput = deviceInput.copy { ledHeartbeatDisabled = !it } },
-            )
-        }
-        item { HorizontalDivider() }
-
-        item { PreferenceCategory(text = stringResource(R.string.debug)) }
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.time_zone),
-                value = deviceInput.tzdef,
-                summary = stringResource(id = R.string.config_device_tzdef_summary),
-                maxSize = 64, // tzdef max_size:65
-                enabled = enabled,
-                isError = false,
-                keyboardOptions =
-                KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { deviceInput = deviceInput.copy { tzdef = it } },
-            )
-        }
-
-        item { PreferenceCategory(text = stringResource(R.string.gpio)) }
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.button_gpio),
-                value = deviceInput.buttonGpio,
-                enabled = enabled,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { deviceInput = deviceInput.copy { buttonGpio = it } },
-            )
-        }
-        item {
-            EditTextPreference(
-                title = stringResource(R.string.buzzer_gpio),
-                value = deviceInput.buzzerGpio,
-                enabled = enabled,
-                keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { deviceInput = deviceInput.copy { buzzerGpio = it } },
-            )
-        }
-        item {
-            PreferenceFooter(
-                enabled = enabled && deviceInput != deviceConfig,
-                onCancelClicked = {
-                    focusManager.clearFocus()
-                    deviceInput = deviceConfig
-                },
-                onSaveClicked = {
-                    focusManager.clearFocus()
-                    onSaveClicked(deviceInput)
-                },
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun DeviceConfigPreview() {
-    DeviceConfigItemList(deviceConfig = DeviceConfig.getDefaultInstance(), enabled = true, onSaveClicked = {})
 }

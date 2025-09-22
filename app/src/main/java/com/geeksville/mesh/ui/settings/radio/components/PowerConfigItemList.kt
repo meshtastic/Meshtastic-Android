@@ -17,67 +17,51 @@
 
 package com.geeksville.mesh.ui.settings.radio.components
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.ConfigProtos.Config.PowerConfig
+import androidx.navigation.NavController
 import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.common.components.EditTextPreference
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
-import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import org.meshtastic.core.strings.R
 
 @Composable
-fun PowerConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun PowerConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val powerConfig = state.radioConfig.power
+    val formState = rememberFormState(initialValue = powerConfig)
+    val focusManager = LocalFocusManager.current
 
-    if (state.responseState.isWaiting()) {
-        PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
-    }
-
-    PowerConfigItemList(
-        powerConfig = state.radioConfig.power,
+    RadioConfigScreenList(
+        title = stringResource(id = R.string.power),
+        onBack = { navController.popBackStack() },
+        configState = formState,
         enabled = state.connected,
-        onSaveClicked = { powerInput ->
-            val config = config { power = powerInput }
+        responseState = state.responseState,
+        onDismissPacketResponse = viewModel::clearPacketResponse,
+        onSave = {
+            val config = config { power = it }
             viewModel.setConfig(config)
         },
-    )
-}
-
-@Suppress("LongMethod")
-@Composable
-fun PowerConfigItemList(powerConfig: PowerConfig, enabled: Boolean, onSaveClicked: (PowerConfig) -> Unit) {
-    val focusManager = LocalFocusManager.current
-    var powerInput by rememberSaveable { mutableStateOf(powerConfig) }
-    var shutdownOnPowerLoss by rememberSaveable { mutableStateOf(powerConfig.onBatteryShutdownAfterSecs > 0) }
-    var adcOverride by rememberSaveable { mutableStateOf(powerConfig.adcMultiplierOverride > 0f) }
-
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    ) {
         item { PreferenceCategory(text = stringResource(R.string.power_config)) }
 
         item {
             SwitchPreference(
                 title = stringResource(R.string.enable_power_saving_mode),
                 summary = stringResource(id = R.string.config_power_is_power_saving_summary),
-                checked = powerInput.isPowerSaving,
-                enabled = enabled,
-                onCheckedChange = { powerInput = powerInput.copy { isPowerSaving = it } },
+                checked = formState.value.isPowerSaving,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { isPowerSaving = it } },
             )
         }
         item { HorizontalDivider() }
@@ -85,23 +69,22 @@ fun PowerConfigItemList(powerConfig: PowerConfig, enabled: Boolean, onSaveClicke
         item {
             SwitchPreference(
                 title = stringResource(R.string.shutdown_on_power_loss),
-                checked = shutdownOnPowerLoss,
-                enabled = enabled,
+                checked = formState.value.onBatteryShutdownAfterSecs > 0,
+                enabled = state.connected,
                 onCheckedChange = {
-                    shutdownOnPowerLoss = it
-                    if (!it) powerInput = powerInput.copy { onBatteryShutdownAfterSecs = 0 }
+                    formState.value = formState.value.copy { onBatteryShutdownAfterSecs = if (it) 3600 else 0 }
                 },
             )
         }
 
-        if (shutdownOnPowerLoss) {
+        if (formState.value.onBatteryShutdownAfterSecs > 0) {
             item {
                 EditTextPreference(
                     title = stringResource(R.string.shutdown_on_battery_delay_seconds),
-                    value = powerInput.onBatteryShutdownAfterSecs,
-                    enabled = enabled,
+                    value = formState.value.onBatteryShutdownAfterSecs,
+                    enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { powerInput = powerInput.copy { onBatteryShutdownAfterSecs = it } },
+                    onValueChanged = { formState.value = formState.value.copy { onBatteryShutdownAfterSecs = it } },
                 )
             }
         }
@@ -111,23 +94,22 @@ fun PowerConfigItemList(powerConfig: PowerConfig, enabled: Boolean, onSaveClicke
         item {
             SwitchPreference(
                 title = stringResource(R.string.adc_multiplier_override),
-                checked = adcOverride,
-                enabled = enabled,
+                checked = formState.value.adcMultiplierOverride > 0f,
+                enabled = state.connected,
                 onCheckedChange = {
-                    adcOverride = it
-                    if (!it) powerInput = powerInput.copy { adcMultiplierOverride = 0f }
+                    formState.value = formState.value.copy { adcMultiplierOverride = if (it) 1.0f else 0.0f }
                 },
             )
         }
 
-        if (adcOverride) {
+        if (formState.value.adcMultiplierOverride > 0f) {
             item {
                 EditTextPreference(
                     title = stringResource(R.string.adc_multiplier_override_ratio),
-                    value = powerInput.adcMultiplierOverride,
-                    enabled = enabled,
+                    value = formState.value.adcMultiplierOverride,
+                    enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { powerInput = powerInput.copy { adcMultiplierOverride = it } },
+                    onValueChanged = { formState.value = formState.value.copy { adcMultiplierOverride = it } },
                 )
             }
         }
@@ -137,61 +119,41 @@ fun PowerConfigItemList(powerConfig: PowerConfig, enabled: Boolean, onSaveClicke
         item {
             EditTextPreference(
                 title = stringResource(R.string.wait_for_bluetooth_duration_seconds),
-                value = powerInput.waitBluetoothSecs,
-                enabled = enabled,
+                value = formState.value.waitBluetoothSecs,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { powerInput = powerInput.copy { waitBluetoothSecs = it } },
+                onValueChanged = { formState.value = formState.value.copy { waitBluetoothSecs = it } },
             )
         }
 
         item {
             EditTextPreference(
                 title = stringResource(R.string.super_deep_sleep_duration_seconds),
-                value = powerInput.sdsSecs,
-                enabled = enabled,
+                value = formState.value.sdsSecs,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { powerInput = powerInput.copy { sdsSecs = it } },
+                onValueChanged = { formState.value = formState.value.copy { sdsSecs = it } },
             )
         }
 
         item {
             EditTextPreference(
                 title = stringResource(R.string.minimum_wake_time_seconds),
-                value = powerInput.minWakeSecs,
-                enabled = enabled,
+                value = formState.value.minWakeSecs,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { powerInput = powerInput.copy { minWakeSecs = it } },
+                onValueChanged = { formState.value = formState.value.copy { minWakeSecs = it } },
             )
         }
 
         item {
             EditTextPreference(
                 title = stringResource(R.string.battery_ina_2xx_i2c_address),
-                value = powerInput.deviceBatteryInaAddress,
-                enabled = enabled,
+                value = formState.value.deviceBatteryInaAddress,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { powerInput = powerInput.copy { deviceBatteryInaAddress = it } },
-            )
-        }
-
-        item {
-            PreferenceFooter(
-                enabled = enabled && powerInput != powerConfig,
-                onCancelClicked = {
-                    focusManager.clearFocus()
-                    powerInput = powerConfig
-                },
-                onSaveClicked = {
-                    focusManager.clearFocus()
-                    onSaveClicked(powerInput)
-                },
+                onValueChanged = { formState.value = formState.value.copy { deviceBatteryInaAddress = it } },
             )
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PowerConfigPreview() {
-    PowerConfigItemList(powerConfig = PowerConfig.getDefaultInstance(), enabled = true, onSaveClicked = {})
 }

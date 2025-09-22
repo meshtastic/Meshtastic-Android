@@ -17,32 +17,23 @@
 
 package com.geeksville.mesh.ui.settings.radio.components
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.MeshProtos
+import androidx.navigation.NavController
 import com.geeksville.mesh.copy
-import com.geeksville.mesh.deviceMetadata
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.model.isUnmessageableRole
 import com.geeksville.mesh.ui.common.components.EditTextPreference
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
-import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.common.components.RegularPreference
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
@@ -50,74 +41,65 @@ import com.geeksville.mesh.user
 import org.meshtastic.core.strings.R
 
 @Composable
-fun UserConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun UserConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val userConfig = state.userConfig
+    val formState = rememberFormState(initialValue = userConfig)
+    val firmwareVersion = DeviceVersion(state.metadata?.firmwareVersion ?: "")
 
-    if (state.responseState.isWaiting()) {
-        PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
-    }
-
-    UserConfigItemList(
-        userConfig = state.userConfig,
-        enabled = true,
-        onSaveClicked = viewModel::setOwner,
-        metadata = state.metadata,
-    )
-}
-
-@Suppress("LongMethod")
-@Composable
-fun UserConfigItemList(
-    metadata: MeshProtos.DeviceMetadata?,
-    userConfig: MeshProtos.User,
-    enabled: Boolean,
-    onSaveClicked: (MeshProtos.User) -> Unit,
-) {
-    val focusManager = LocalFocusManager.current
-    var userInput by rememberSaveable { mutableStateOf(userConfig) }
-    val firmwareVersion = DeviceVersion(metadata?.firmwareVersion ?: "")
-
-    val validLongName = userInput.longName.isNotBlank()
-    val validShortName = userInput.shortName.isNotBlank()
+    val validLongName = formState.value.longName.isNotBlank()
+    val validShortName = formState.value.shortName.isNotBlank()
     val validNames = validLongName && validShortName
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    val focusManager = LocalFocusManager.current
+
+    RadioConfigScreenList(
+        title = stringResource(id = R.string.user),
+        onBack = { navController.popBackStack() },
+        configState = formState,
+        enabled = state.connected && validNames,
+        responseState = state.responseState,
+        onDismissPacketResponse = viewModel::clearPacketResponse,
+        onSave = viewModel::setOwner,
+    ) {
         item { PreferenceCategory(text = stringResource(R.string.user_config)) }
 
-        item { RegularPreference(title = stringResource(R.string.node_id), subtitle = userInput.id, onClick = {}) }
+        item {
+            RegularPreference(title = stringResource(R.string.node_id), subtitle = formState.value.id, onClick = {})
+        }
         item { HorizontalDivider() }
 
         item {
             EditTextPreference(
                 title = stringResource(R.string.long_name),
-                value = userInput.longName,
+                value = formState.value.longName,
                 maxSize = 39, // long_name max_size:40
-                enabled = enabled,
+                enabled = state.connected,
                 isError = !validLongName,
                 keyboardOptions =
                 KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { userInput = userInput.copy { longName = it } },
+                onValueChanged = { formState.value = formState.value.copy { longName = it } },
             )
         }
 
         item {
             EditTextPreference(
                 title = stringResource(R.string.short_name),
-                value = userInput.shortName,
+                value = formState.value.shortName,
                 maxSize = 4, // short_name max_size:5
-                enabled = enabled,
+                enabled = state.connected,
                 isError = !validShortName,
                 keyboardOptions =
                 KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { userInput = userInput.copy { shortName = it } },
+                onValueChanged = { formState.value = formState.value.copy { shortName = it } },
             )
         }
 
         item {
             RegularPreference(
                 title = stringResource(R.string.hardware_model),
-                subtitle = userInput.hwModel.name,
+                subtitle = formState.value.hwModel.name,
                 onClick = {},
             )
         }
@@ -128,10 +110,10 @@ fun UserConfigItemList(
                 title = stringResource(R.string.unmessageable),
                 summary = stringResource(R.string.unmonitored_or_infrastructure),
                 checked =
-                userInput.isUnmessagable ||
-                    (firmwareVersion < DeviceVersion("2.6.9") && userInput.role.isUnmessageableRole()),
-                enabled = userInput.hasIsUnmessagable() || firmwareVersion >= DeviceVersion("2.6.9"),
-                onCheckedChange = { userInput = userInput.copy { isUnmessagable = it } },
+                formState.value.isUnmessagable ||
+                    (firmwareVersion < DeviceVersion("2.6.9") && formState.value.role.isUnmessageableRole()),
+                enabled = formState.value.hasIsUnmessagable() || firmwareVersion >= DeviceVersion("2.6.9"),
+                onCheckedChange = { formState.value = formState.value.copy { isUnmessagable = it } },
             )
         }
 
@@ -141,43 +123,11 @@ fun UserConfigItemList(
             SwitchPreference(
                 title = stringResource(R.string.licensed_amateur_radio),
                 summary = stringResource(R.string.licensed_amateur_radio_text),
-                checked = userInput.isLicensed,
-                enabled = enabled,
-                onCheckedChange = { userInput = userInput.copy { isLicensed = it } },
+                checked = formState.value.isLicensed,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { isLicensed = it } },
             )
         }
         item { HorizontalDivider() }
-
-        item {
-            PreferenceFooter(
-                enabled = enabled && userInput != userConfig && validNames,
-                onCancelClicked = {
-                    focusManager.clearFocus()
-                    userInput = userConfig
-                },
-                onSaveClicked = {
-                    focusManager.clearFocus()
-                    onSaveClicked(userInput)
-                },
-            )
-        }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun UserConfigPreview() {
-    UserConfigItemList(
-        userConfig =
-        user {
-            id = "!a280d9c8"
-            longName = "Meshtastic d9c8"
-            shortName = "d9c8"
-            hwModel = MeshProtos.HardwareModel.RAK4631
-            isLicensed = false
-        },
-        enabled = true,
-        onSaveClicked = {},
-        metadata = deviceMetadata { firmwareVersion = "2.8.0" },
-    )
 }

@@ -133,7 +133,6 @@ enum class TopLevelDestination(@StringRes val label: Int, val icon: ImageVector,
     companion object {
         fun NavDestination.isTopLevel(): Boolean = listOf<KClass<out Route>>(
             ContactsRoutes.Contacts::class,
-            NodesRoutes.Nodes::class,
             MapRoutes.Map::class,
             ConnectionsRoutes.Connections::class,
         )
@@ -356,10 +355,34 @@ fun MainScreen(uIViewModel: UIViewModel = hiltViewModel(), scanModel: BTScanMode
                         NodesRoutes.Nodes::class,
                         NodesRoutes.NodeDetail::class,
                         SettingsRoutes.Settings::class,
+                        SettingsRoutes.AmbientLighting::class,
+                        SettingsRoutes.LoRa::class,
+                        SettingsRoutes.Security::class,
+                        SettingsRoutes.Audio::class,
+                        SettingsRoutes.Bluetooth::class,
+                        SettingsRoutes.ChannelConfig::class,
+                        SettingsRoutes.DetectionSensor::class,
+                        SettingsRoutes.Display::class,
+                        SettingsRoutes.Telemetry::class,
+                        SettingsRoutes.Network::class,
+                        SettingsRoutes.Paxcounter::class,
+                        SettingsRoutes.Power::class,
+                        SettingsRoutes.Position::class,
+                        SettingsRoutes.User::class,
+                        SettingsRoutes.StoreForward::class,
+                        SettingsRoutes.MQTT::class,
+                        SettingsRoutes.Serial::class,
+                        SettingsRoutes.ExtNotification::class,
+                        SettingsRoutes.CleanNodeDb::class,
+                        SettingsRoutes.DebugPanel::class,
+                        SettingsRoutes.RangeTest::class,
+                        SettingsRoutes.CannedMessage::class,
+                        SettingsRoutes.RemoteHardware::class,
+                        SettingsRoutes.NeighborInfo::class,
                     )
                         .none { this.hasRoute(it) }
 
-                AnimatedVisibility(visible = currentDestination?.hasGlobalAppBar() ?: true) {
+                AnimatedVisibility(visible = currentDestination?.hasGlobalAppBar() ?: false) {
                     MainAppBar(
                         viewModel = uIViewModel,
                         navController = navController,

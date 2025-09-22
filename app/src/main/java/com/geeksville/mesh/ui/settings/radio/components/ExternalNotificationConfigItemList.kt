@@ -17,8 +17,6 @@
 
 package com.geeksville.mesh.ui.settings.radio.components
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.HorizontalDivider
@@ -27,80 +25,69 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.ExternalNotificationConfig
+import androidx.navigation.NavController
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.ui.common.components.EditTextPreference
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
-import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.common.components.TextDividerPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import org.meshtastic.core.strings.R
 
 @Composable
-fun ExternalNotificationConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun ExternalNotificationConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val extNotificationConfig = state.moduleConfig.externalNotification
+    val ringtone = state.ringtone
+    val formState = rememberFormState(initialValue = extNotificationConfig)
+    var ringtoneInput by rememberSaveable(ringtone) { mutableStateOf(ringtone) }
+    val focusManager = LocalFocusManager.current
 
-    if (state.responseState.isWaiting()) {
-        PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
-    }
-
-    ExternalNotificationConfigItemList(
-        ringtone = state.ringtone,
-        extNotificationConfig = state.moduleConfig.externalNotification,
+    RadioConfigScreenList(
+        title = stringResource(id = R.string.external_notification),
+        onBack = { navController.popBackStack() },
+        configState = formState,
         enabled = state.connected,
-        onSaveClicked = { ringtoneInput, extNotificationInput ->
-            if (ringtoneInput != state.ringtone) {
+        responseState = state.responseState,
+        onDismissPacketResponse = viewModel::clearPacketResponse,
+        onSave = {
+            if (ringtoneInput != ringtone) {
                 viewModel.setRingtone(ringtoneInput)
             }
-            if (extNotificationInput != state.moduleConfig.externalNotification) {
-                val config = moduleConfig { externalNotification = extNotificationInput }
+            if (formState.value != extNotificationConfig) {
+                val config = moduleConfig { externalNotification = formState.value }
                 viewModel.setModuleConfig(config)
             }
         },
-    )
-}
-
-@Composable
-fun ExternalNotificationConfigItemList(
-    ringtone: String,
-    extNotificationConfig: ExternalNotificationConfig,
-    enabled: Boolean,
-    onSaveClicked: (ringtone: String, config: ExternalNotificationConfig) -> Unit,
-) {
-    val focusManager = LocalFocusManager.current
-    var ringtoneInput by rememberSaveable { mutableStateOf(ringtone) }
-    var externalNotificationInput by rememberSaveable { mutableStateOf(extNotificationConfig) }
-
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    ) {
         item { PreferenceCategory(text = stringResource(R.string.external_notification_config)) }
 
         item {
             SwitchPreference(
                 title = stringResource(R.string.external_notification_enabled),
-                checked = externalNotificationInput.enabled,
-                enabled = enabled,
-                onCheckedChange = { externalNotificationInput = externalNotificationInput.copy { this.enabled = it } },
+                checked = formState.value.enabled,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
             )
         }
 
-        item { TextDividerPreference(stringResource(R.string.notifications_on_message_receipt), enabled = enabled) }
+        item {
+            TextDividerPreference(stringResource(R.string.notifications_on_message_receipt), enabled = state.connected)
+        }
 
         item {
             SwitchPreference(
                 title = stringResource(R.string.alert_message_led),
-                checked = externalNotificationInput.alertMessage,
-                enabled = enabled,
-                onCheckedChange = { externalNotificationInput = externalNotificationInput.copy { alertMessage = it } },
+                checked = formState.value.alertMessage,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { alertMessage = it } },
             )
         }
         item { HorizontalDivider() }
@@ -108,11 +95,9 @@ fun ExternalNotificationConfigItemList(
         item {
             SwitchPreference(
                 title = stringResource(R.string.alert_message_buzzer),
-                checked = externalNotificationInput.alertMessageBuzzer,
-                enabled = enabled,
-                onCheckedChange = {
-                    externalNotificationInput = externalNotificationInput.copy { alertMessageBuzzer = it }
-                },
+                checked = formState.value.alertMessageBuzzer,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { alertMessageBuzzer = it } },
             )
         }
         item { HorizontalDivider() }
@@ -120,22 +105,25 @@ fun ExternalNotificationConfigItemList(
         item {
             SwitchPreference(
                 title = stringResource(R.string.alert_message_vibra),
-                checked = externalNotificationInput.alertMessageVibra,
-                enabled = enabled,
-                onCheckedChange = {
-                    externalNotificationInput = externalNotificationInput.copy { alertMessageVibra = it }
-                },
+                checked = formState.value.alertMessageVibra,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { alertMessageVibra = it } },
             )
         }
 
-        item { TextDividerPreference(stringResource(R.string.notifications_on_alert_bell_receipt), enabled = enabled) }
+        item {
+            TextDividerPreference(
+                stringResource(R.string.notifications_on_alert_bell_receipt),
+                enabled = state.connected,
+            )
+        }
 
         item {
             SwitchPreference(
                 title = stringResource(R.string.alert_bell_led),
-                checked = externalNotificationInput.alertBell,
-                enabled = enabled,
-                onCheckedChange = { externalNotificationInput = externalNotificationInput.copy { alertBell = it } },
+                checked = formState.value.alertBell,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { alertBell = it } },
             )
         }
         item { HorizontalDivider() }
@@ -143,11 +131,9 @@ fun ExternalNotificationConfigItemList(
         item {
             SwitchPreference(
                 title = stringResource(R.string.alert_bell_buzzer),
-                checked = externalNotificationInput.alertBellBuzzer,
-                enabled = enabled,
-                onCheckedChange = {
-                    externalNotificationInput = externalNotificationInput.copy { alertBellBuzzer = it }
-                },
+                checked = formState.value.alertBellBuzzer,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { alertBellBuzzer = it } },
             )
         }
         item { HorizontalDivider() }
@@ -155,11 +141,9 @@ fun ExternalNotificationConfigItemList(
         item {
             SwitchPreference(
                 title = stringResource(R.string.alert_bell_vibra),
-                checked = externalNotificationInput.alertBellVibra,
-                enabled = enabled,
-                onCheckedChange = {
-                    externalNotificationInput = externalNotificationInput.copy { alertBellVibra = it }
-                },
+                checked = formState.value.alertBellVibra,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { alertBellVibra = it } },
             )
         }
         item { HorizontalDivider() }
@@ -167,20 +151,20 @@ fun ExternalNotificationConfigItemList(
         item {
             EditTextPreference(
                 title = stringResource(R.string.output_led_gpio),
-                value = externalNotificationInput.output,
-                enabled = enabled,
+                value = formState.value.output,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { externalNotificationInput = externalNotificationInput.copy { output = it } },
+                onValueChanged = { formState.value = formState.value.copy { output = it } },
             )
         }
 
-        if (externalNotificationInput.output != 0) {
+        if (formState.value.output != 0) {
             item {
                 SwitchPreference(
                     title = stringResource(R.string.output_led_active_high),
-                    checked = externalNotificationInput.active,
-                    enabled = enabled,
-                    onCheckedChange = { externalNotificationInput = externalNotificationInput.copy { active = it } },
+                    checked = formState.value.active,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { active = it } },
                 )
             }
         }
@@ -189,20 +173,20 @@ fun ExternalNotificationConfigItemList(
         item {
             EditTextPreference(
                 title = stringResource(R.string.output_buzzer_gpio),
-                value = externalNotificationInput.outputBuzzer,
-                enabled = enabled,
+                value = formState.value.outputBuzzer,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { externalNotificationInput = externalNotificationInput.copy { outputBuzzer = it } },
+                onValueChanged = { formState.value = formState.value.copy { outputBuzzer = it } },
             )
         }
 
-        if (externalNotificationInput.outputBuzzer != 0) {
+        if (formState.value.outputBuzzer != 0) {
             item {
                 SwitchPreference(
                     title = stringResource(R.string.use_pwm_buzzer),
-                    checked = externalNotificationInput.usePwm,
-                    enabled = enabled,
-                    onCheckedChange = { externalNotificationInput = externalNotificationInput.copy { usePwm = it } },
+                    checked = formState.value.usePwm,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { usePwm = it } },
                 )
             }
         }
@@ -211,30 +195,30 @@ fun ExternalNotificationConfigItemList(
         item {
             EditTextPreference(
                 title = stringResource(R.string.output_vibra_gpio),
-                value = externalNotificationInput.outputVibra,
-                enabled = enabled,
+                value = formState.value.outputVibra,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { externalNotificationInput = externalNotificationInput.copy { outputVibra = it } },
+                onValueChanged = { formState.value = formState.value.copy { outputVibra = it } },
             )
         }
 
         item {
             EditTextPreference(
                 title = stringResource(R.string.output_duration_milliseconds),
-                value = externalNotificationInput.outputMs,
-                enabled = enabled,
+                value = formState.value.outputMs,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { externalNotificationInput = externalNotificationInput.copy { outputMs = it } },
+                onValueChanged = { formState.value = formState.value.copy { outputMs = it } },
             )
         }
 
         item {
             EditTextPreference(
                 title = stringResource(R.string.nag_timeout_seconds),
-                value = externalNotificationInput.nagTimeout,
-                enabled = enabled,
+                value = formState.value.nagTimeout,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { externalNotificationInput = externalNotificationInput.copy { nagTimeout = it } },
+                onValueChanged = { formState.value = formState.value.copy { nagTimeout = it } },
             )
         }
 
@@ -243,7 +227,7 @@ fun ExternalNotificationConfigItemList(
                 title = stringResource(R.string.ringtone),
                 value = ringtoneInput,
                 maxSize = 230, // ringtone max_size:231
-                enabled = enabled,
+                enabled = state.connected,
                 isError = false,
                 keyboardOptions =
                 KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
@@ -255,39 +239,11 @@ fun ExternalNotificationConfigItemList(
         item {
             SwitchPreference(
                 title = stringResource(R.string.use_i2s_as_buzzer),
-                checked = externalNotificationInput.useI2SAsBuzzer,
-                enabled = enabled,
-                onCheckedChange = {
-                    externalNotificationInput = externalNotificationInput.copy { useI2SAsBuzzer = it }
-                },
+                checked = formState.value.useI2SAsBuzzer,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { useI2SAsBuzzer = it } },
             )
         }
         item { HorizontalDivider() }
-
-        item {
-            PreferenceFooter(
-                enabled = enabled && externalNotificationInput != extNotificationConfig || ringtoneInput != ringtone,
-                onCancelClicked = {
-                    focusManager.clearFocus()
-                    ringtoneInput = ringtone
-                    externalNotificationInput = extNotificationConfig
-                },
-                onSaveClicked = {
-                    focusManager.clearFocus()
-                    onSaveClicked(ringtoneInput, externalNotificationInput)
-                },
-            )
-        }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun ExternalNotificationConfigPreview() {
-    ExternalNotificationConfigItemList(
-        ringtone = "",
-        extNotificationConfig = ExternalNotificationConfig.getDefaultInstance(),
-        enabled = true,
-        onSaveClicked = { _, _ -> },
-    )
 }

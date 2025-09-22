@@ -186,9 +186,16 @@ fun SettingsScreen(
         topBar = {
             MainAppBar(
                 title = stringResource(R.string.bottom_nav_settings),
+                subtitle =
+                if (state.isLocal) {
+                    ourNode?.user?.longName
+                } else {
+                    val remoteName = viewModel.destNode.value?.user?.longName ?: ""
+                    stringResource(R.string.remotely_administrating, remoteName)
+                },
                 ourNode = ourNode,
                 isConnected = isConnected,
-                showNodeChip = ourNode != null && isConnected,
+                showNodeChip = ourNode != null && isConnected && state.isLocal,
                 canNavigateUp = false,
                 onNavigateUp = {},
                 actions = {},
