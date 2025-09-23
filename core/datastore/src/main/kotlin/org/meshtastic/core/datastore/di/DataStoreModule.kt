@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.repository.datastore
+package org.meshtastic.core.datastore.di
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -30,16 +30,19 @@ import androidx.datastore.preferences.preferencesDataStoreFile
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
 import com.geeksville.mesh.LocalOnlyProtos.LocalConfig
 import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
-import com.geeksville.mesh.repository.datastore.recentaddresses.RecentAddressesRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import org.meshtastic.core.datastore.RecentAddressesRepository
+import org.meshtastic.core.datastore.serializer.ChannelSetSerializer
+import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
+import org.meshtastic.core.datastore.serializer.ModuleConfigSerializer
+import javax.inject.Singleton
 
 private const val USER_PREFERENCES_NAME = "user_preferences"
 
@@ -48,12 +51,9 @@ private const val USER_PREFERENCES_NAME = "user_preferences"
 object DataStoreModule {
     @Singleton
     @Provides
-    fun providePreferencesDataStore(
-        @ApplicationContext appContext: Context
-    ): DataStore<Preferences> =
+    fun providePreferencesDataStore(@ApplicationContext appContext: Context): DataStore<Preferences> =
         PreferenceDataStoreFactory.create(
-            corruptionHandler =
-                ReplaceFileCorruptionHandler(produceNewData = { emptyPreferences() }),
+            corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { emptyPreferences() }),
             migrations = listOf(SharedPreferencesMigration(appContext, USER_PREFERENCES_NAME)),
             scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
             produceFile = { appContext.preferencesDataStoreFile(USER_PREFERENCES_NAME) },
@@ -61,36 +61,27 @@ object DataStoreModule {
 
     @Singleton
     @Provides
-    fun provideRecentAddressesRepository(
-        @ApplicationContext context: Context,
-        dataStore: DataStore<Preferences>,
-    ): RecentAddressesRepository = RecentAddressesRepository(context, dataStore)
+    fun provideRecentAddressesRepository(dataStore: DataStore<Preferences>): RecentAddressesRepository =
+        RecentAddressesRepository(dataStore)
 
     @Singleton
     @Provides
-    fun provideLocalConfigDataStore(
-        @ApplicationContext appContext: Context
-    ): DataStore<LocalConfig> =
+    fun provideLocalConfigDataStore(@ApplicationContext appContext: Context): DataStore<LocalConfig> =
         DataStoreFactory.create(
             serializer = LocalConfigSerializer,
             produceFile = { appContext.dataStoreFile("local_config.pb") },
-            corruptionHandler =
-                ReplaceFileCorruptionHandler(produceNewData = { LocalConfig.getDefaultInstance() }),
+            corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { LocalConfig.getDefaultInstance() }),
             scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
         )
 
     @Singleton
     @Provides
-    fun provideModuleConfigDataStore(
-        @ApplicationContext appContext: Context
-    ): DataStore<LocalModuleConfig> =
+    fun provideModuleConfigDataStore(@ApplicationContext appContext: Context): DataStore<LocalModuleConfig> =
         DataStoreFactory.create(
             serializer = ModuleConfigSerializer,
             produceFile = { appContext.dataStoreFile("module_config.pb") },
             corruptionHandler =
-                ReplaceFileCorruptionHandler(
-                    produceNewData = { LocalModuleConfig.getDefaultInstance() }
-                ),
+            ReplaceFileCorruptionHandler(produceNewData = { LocalModuleConfig.getDefaultInstance() }),
             scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
         )
 
@@ -100,8 +91,7 @@ object DataStoreModule {
         DataStoreFactory.create(
             serializer = ChannelSetSerializer,
             produceFile = { appContext.dataStoreFile("channel_set.pb") },
-            corruptionHandler =
-                ReplaceFileCorruptionHandler(produceNewData = { ChannelSet.getDefaultInstance() }),
+            corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { ChannelSet.getDefaultInstance() }),
             scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
         )
 }

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.repository.datastore
+package org.meshtastic.core.datastore.serializer
 
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
@@ -24,9 +24,7 @@ import com.google.protobuf.InvalidProtocolBufferException
 import java.io.InputStream
 import java.io.OutputStream
 
-/**
- * Serializer for the [LocalModuleConfig] object defined in localonly.proto.
- */
+/** Serializer for the [LocalModuleConfig] object defined in localonly.proto. */
 @Suppress("BlockingMethodInNonBlockingContext")
 object ModuleConfigSerializer : Serializer<LocalModuleConfig> {
     override val defaultValue: LocalModuleConfig = LocalModuleConfig.getDefaultInstance()

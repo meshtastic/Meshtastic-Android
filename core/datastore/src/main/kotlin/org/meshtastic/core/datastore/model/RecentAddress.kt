@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.repository.datastore.recentaddresses
+package org.meshtastic.core.datastore.model
 
 import kotlinx.serialization.Serializable
 

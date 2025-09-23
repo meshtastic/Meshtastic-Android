@@ -29,8 +29,6 @@ import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
-import com.geeksville.mesh.repository.datastore.recentaddresses.RecentAddress
-import com.geeksville.mesh.repository.datastore.recentaddresses.RecentAddressesRepository
 import com.geeksville.mesh.repository.network.NetworkRepository
 import com.geeksville.mesh.repository.network.NetworkRepository.Companion.toAddressString
 import com.geeksville.mesh.repository.radio.InterfaceId
@@ -53,6 +51,8 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import org.meshtastic.core.datastore.RecentAddressesRepository
+import org.meshtastic.core.datastore.model.RecentAddress
 import javax.inject.Inject
 
 /**

@@ -45,6 +45,9 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import org.meshtastic.core.datastore.ChannelSetRepository
+import org.meshtastic.core.datastore.LocalConfigRepository
+import org.meshtastic.core.datastore.ModuleConfigRepository
 import javax.inject.Inject
 
 /**

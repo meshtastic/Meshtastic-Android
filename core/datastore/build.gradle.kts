@@ -17,9 +17,17 @@
 
 plugins {
     alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.meshtastic.hilt)
+    alias(libs.plugins.meshtastic.kotlinx.serialization)
     alias(libs.plugins.kover)
 }
 
 android { namespace = "org.meshtastic.core.datastore" }
 
-dependencies {}
+dependencies {
+    implementation(projects.core.proto)
+
+    implementation(libs.bundles.datastore)
+    implementation(libs.kotlinx.serialization.json)
+    implementation(libs.timber)
+}
