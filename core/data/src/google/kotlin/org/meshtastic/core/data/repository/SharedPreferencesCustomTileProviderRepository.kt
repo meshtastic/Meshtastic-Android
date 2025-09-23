@@ -15,9 +15,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.repository.map
+package org.meshtastic.core.data.repository
 
-import com.geeksville.mesh.ui.map.CustomTileProviderConfig
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,11 +24,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import org.meshtastic.core.data.model.CustomTileProviderConfig
 import org.meshtastic.core.di.annotation.IoDispatcher
 import org.meshtastic.core.prefs.map.MapTileProviderPrefs
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlin.collections.plus
 
 @Singleton
 class SharedPreferencesCustomTileProviderRepository
@@ -52,7 +53,7 @@ constructor(
             try {
                 customTileProvidersStateFlow.value = json.decodeFromString<List<CustomTileProviderConfig>>(jsonString)
             } catch (e: SerializationException) {
-                Timber.tag("TileRepo").e(e, "Error deserializing tile providers")
+                Timber.e(e, "Error deserializing tile providers")
                 customTileProvidersStateFlow.value = emptyList()
             }
         } else {
@@ -66,7 +67,7 @@ constructor(
                 val jsonString = json.encodeToString(providers)
                 mapTileProviderPrefs.customTileProviders = jsonString
             } catch (e: SerializationException) {
-                Timber.tag("TileRepo").e(e, "Error serializing tile providers")
+                Timber.e(e, "Error serializing tile providers")
             }
         }
     }

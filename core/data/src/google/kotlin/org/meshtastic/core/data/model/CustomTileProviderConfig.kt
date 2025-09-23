@@ -15,19 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.repository.map
+package org.meshtastic.core.data.model
 
-import com.geeksville.mesh.ui.map.CustomTileProviderConfig
-import kotlinx.coroutines.flow.Flow
+import kotlinx.serialization.Serializable
+import java.util.UUID
 
-interface CustomTileProviderRepository {
-    fun getCustomTileProviders(): Flow<List<CustomTileProviderConfig>>
-
-    suspend fun addCustomTileProvider(config: CustomTileProviderConfig)
-
-    suspend fun updateCustomTileProvider(config: CustomTileProviderConfig)
-
-    suspend fun deleteCustomTileProvider(configId: String)
-
-    suspend fun getCustomTileProviderById(configId: String): CustomTileProviderConfig?
-}
+@Serializable
+data class CustomTileProviderConfig(
+    val id: String = UUID.randomUUID().toString(),
+    val name: String,
+    val urlTemplate: String,
+)

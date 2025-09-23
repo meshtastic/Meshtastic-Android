@@ -15,20 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.di
+package org.meshtastic.core.data.repository
 
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.components.SingletonComponent
-import kotlinx.serialization.json.Json
-import javax.inject.Singleton
+import kotlinx.coroutines.flow.Flow
+import org.meshtastic.core.data.model.CustomTileProviderConfig
 
-@Module
-@InstallIn(SingletonComponent::class)
-object MapModule {
+interface CustomTileProviderRepository {
+    fun getCustomTileProviders(): Flow<List<CustomTileProviderConfig>>
 
-    // Serialization Provider (from original SerializationModule)
-    @Provides @Singleton
-    fun provideJson(): Json = Json { prettyPrint = false }
+    suspend fun addCustomTileProvider(config: CustomTileProviderConfig)
+
+    suspend fun updateCustomTileProvider(config: CustomTileProviderConfig)
+
+    suspend fun deleteCustomTileProvider(configId: String)
+
+    suspend fun getCustomTileProviderById(configId: String): CustomTileProviderConfig?
 }

@@ -15,20 +15,23 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.di
+package org.meshtastic.core.data.di
 
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kotlinx.serialization.json.Json
+import org.meshtastic.core.data.repository.CustomTileProviderRepository
+import org.meshtastic.core.data.repository.SharedPreferencesCustomTileProviderRepository
 import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object MapModule {
+abstract class GoogleDataModule {
 
-    // Serialization Provider (from original SerializationModule)
-    @Provides @Singleton
-    fun provideJson(): Json = Json { prettyPrint = false }
+    @Binds
+    @Singleton
+    abstract fun bindCustomTileProviderRepository(
+        impl: SharedPreferencesCustomTileProviderRepository,
+    ): CustomTileProviderRepository
 }
