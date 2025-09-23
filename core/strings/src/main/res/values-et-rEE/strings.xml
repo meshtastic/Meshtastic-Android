@@ -861,4 +861,5 @@
     <string name="icon_meanings">Ikooni tähendused</string>
     <string name="secondary_channel_position_feature">Põhikanalil asukoha jagamise keelamine lubab perioodilist asukoha edastust esimesel lisakanalil, kui asukoht on lubatud, vastasel juhul on vaja käsitsi asukoha päringut teha.</string>
     <string name="device_configuration">Device configuration</string>
+    <string name="remotely_administrating">"[Remote] %1$s"</string>
 </resources>
