@@ -15,11 +15,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-plugins {
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.hilt)
-}
+package org.meshtastic.core.di.annotation
 
-android { namespace = "org.meshtastic.core.di" }
+import javax.inject.Qualifier
 
-dependencies {}
+@Qualifier
+@Retention(AnnotationRetention.BINARY)
+annotation class IoDispatcher

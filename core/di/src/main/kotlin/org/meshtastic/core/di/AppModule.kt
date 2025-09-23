@@ -15,11 +15,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-plugins {
-    alias(libs.plugins.meshtastic.android.library)
-    alias(libs.plugins.meshtastic.hilt)
+package org.meshtastic.core.di
+
+import dagger.Module
+import dagger.Provides
+import dagger.hilt.InstallIn
+import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import org.meshtastic.core.di.annotation.DefaultDispatcher
+import org.meshtastic.core.di.annotation.IoDispatcher
+
+@Module
+@InstallIn(SingletonComponent::class)
+object AppModule {
+
+    @Provides @DefaultDispatcher
+    fun provideDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
+
+    @Provides @IoDispatcher
+    fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 }
-
-android { namespace = "org.meshtastic.core.di" }
-
-dependencies {}
