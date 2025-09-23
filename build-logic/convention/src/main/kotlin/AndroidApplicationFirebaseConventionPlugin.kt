@@ -25,13 +25,11 @@ import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.configure
 import org.gradle.kotlin.dsl.dependencies
 import org.gradle.kotlin.dsl.exclude
-import org.gradle.language.nativeplatform.internal.Dimensions.applicationVariants
 
 class AndroidApplicationFirebaseConventionPlugin : Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
             apply(plugin = "com.google.gms.google-services")
-            apply(plugin = "com.google.firebase.firebase-perf")
             apply(plugin = "com.google.firebase.crashlytics")
 
                 dependencies {
