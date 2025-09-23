@@ -32,8 +32,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.common.theme.AppTheme
+import org.meshtastic.core.strings.R
 
 @Composable
 fun SimpleAlertDialog(
@@ -48,31 +48,25 @@ fun SimpleAlertDialog(
     dismissButton = {
         TextButton(
             onClick = onDismiss,
-            modifier = Modifier
-                .padding(horizontal = 16.dp),
-            colors = ButtonDefaults.textButtonColors(
-                contentColor = MaterialTheme.colorScheme.onSurface,
-            ),
-        ) { Text(text = dismissText ?: stringResource(id = R.string.cancel)) }
+            modifier = Modifier.padding(horizontal = 16.dp),
+            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+        ) {
+            Text(text = dismissText ?: stringResource(id = R.string.cancel))
+        }
     },
     confirmButton = {
         onConfirm?.let {
-        TextButton(
-            onClick = onConfirm,
-            modifier = Modifier
-                .padding(horizontal = 16.dp),
-            colors = ButtonDefaults.textButtonColors(
-                contentColor = MaterialTheme.colorScheme.onSurface,
-            ),
-        ) { Text(text = confirmText ?: stringResource(id = R.string.okay)) }
+            TextButton(
+                onClick = onConfirm,
+                modifier = Modifier.padding(horizontal = 16.dp),
+                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface),
+            ) {
+                Text(text = confirmText ?: stringResource(id = R.string.okay))
+            }
         }
     },
     title = {
-        Text(
-            text = stringResource(id = title),
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-        )
+        Text(text = stringResource(id = title), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
     },
     text = text,
     shape = RoundedCornerShape(16.dp),
@@ -89,11 +83,7 @@ fun SimpleAlertDialog(
     onDismiss = onDismiss,
     title = title,
     text = {
-        Text(
-            text = stringResource(id = text),
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-        )
+        Text(text = stringResource(id = text), modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
     },
 )
 
@@ -107,22 +97,11 @@ fun SimpleAlertDialog(
     onConfirm = onConfirm,
     onDismiss = onDismiss,
     title = title,
-    text = {
-        Text(
-            text = text,
-            modifier = Modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-        )
-    },
+    text = { Text(text = text, modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center) },
 )
 
 @PreviewLightDark
 @Composable
 private fun SimpleAlertDialogPreview() {
-    AppTheme {
-        SimpleAlertDialog(
-            title = R.string.message,
-            text = R.string.sample_message,
-        )
-    }
+    AppTheme { SimpleAlertDialog(title = R.string.message, text = R.string.sample_message) }
 }

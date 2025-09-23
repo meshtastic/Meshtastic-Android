@@ -64,7 +64,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MeshProtos.Waypoint
-import com.geeksville.mesh.R
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.gpsDisabled
 import com.geeksville.mesh.android.hasGps
@@ -85,6 +84,7 @@ import com.geeksville.mesh.waypoint
 import com.google.accompanist.permissions.ExperimentalPermissionsApi // Added for Accompanist
 import com.google.accompanist.permissions.rememberMultiplePermissionsState // Added for Accompanist
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.cluster.RadiusMarkerClusterer
 import org.meshtastic.feature.map.model.CustomTileSource
 import org.meshtastic.feature.map.model.MarkerWithLabel
@@ -276,11 +276,11 @@ fun MapView(
                 MyLocationNewOverlay(this).apply {
                     enableMyLocation()
                     enableFollowLocation()
-                    getBitmapFromVectorDrawable(context, R.drawable.ic_map_location_dot_24)?.let {
+                    getBitmapFromVectorDrawable(context, com.geeksville.mesh.R.drawable.ic_map_location_dot_24)?.let {
                         setPersonIcon(it)
                         setPersonAnchor(0.5f, 0.5f)
                     }
-                    getBitmapFromVectorDrawable(context, R.drawable.ic_map_navigation_24)?.let {
+                    getBitmapFromVectorDrawable(context, com.geeksville.mesh.R.drawable.ic_map_navigation_24)?.let {
                         setDirectionIcon(it)
                         setDirectionAnchor(0.5f, 0.5f)
                     }
@@ -307,7 +307,9 @@ fun MapView(
     val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
 
-    val markerIcon = remember { AppCompatResources.getDrawable(context, R.drawable.ic_baseline_location_on_24) }
+    val markerIcon = remember {
+        AppCompatResources.getDrawable(context, com.geeksville.mesh.R.drawable.ic_baseline_location_on_24)
+    }
 
     fun MapView.onNodesChanged(nodes: Collection<Node>): List<MarkerWithLabel> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }

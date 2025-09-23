@@ -45,8 +45,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.R
 import com.geeksville.mesh.model.DeviceVersion
+import org.meshtastic.core.strings.R
 
 /**
  * At this firmware version periodic position sharing on a secondary channel was implemented. To enable this feature the

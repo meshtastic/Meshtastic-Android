@@ -124,7 +124,6 @@ import coil3.request.ImageRequest
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.DataPacket
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.R
 import com.geeksville.mesh.database.entity.FirmwareRelease
 import com.geeksville.mesh.database.entity.asDeviceVersion
 import com.geeksville.mesh.model.DeviceVersion
@@ -162,6 +161,7 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.strings.R
 
 private data class VectorMetricInfo(
     @StringRes val label: Int,
@@ -717,7 +717,12 @@ private fun ColumnScope.DeviceDetailsContent(state: MetricsState) {
         } else {
             stringResource(R.string.supported_by_community)
         },
-        icon = if (isSupported) Icons.TwoTone.Verified else ImageVector.vectorResource(R.drawable.unverified),
+        icon =
+        if (isSupported) {
+            Icons.TwoTone.Verified
+        } else {
+            ImageVector.vectorResource(com.geeksville.mesh.R.drawable.unverified)
+        },
         trailingText = "",
         iconTint = if (isSupported) colorScheme.StatusGreen else colorScheme.StatusRed,
     )
@@ -731,9 +736,9 @@ fun DeviceHardwareImage(deviceHardware: DeviceHardware, modifier: Modifier = Mod
         model = ImageRequest.Builder(LocalContext.current).data(imageUrl).build(),
         contentScale = ContentScale.Inside,
         contentDescription = deviceHardware.displayName,
-        placeholder = painterResource(R.drawable.hw_unknown),
-        error = painterResource(R.drawable.hw_unknown),
-        fallback = painterResource(R.drawable.hw_unknown),
+        placeholder = painterResource(com.geeksville.mesh.R.drawable.hw_unknown),
+        error = painterResource(com.geeksville.mesh.R.drawable.hw_unknown),
+        fallback = painterResource(com.geeksville.mesh.R.drawable.hw_unknown),
         modifier = modifier.padding(16.dp),
     )
 }
@@ -982,7 +987,7 @@ private fun EnvironmentMetrics(
                             DrawableMetricInfo(
                                 R.string.dew_point,
                                 dewPoint.toTempString(isFahrenheit),
-                                R.drawable.ic_outlined_dew_point_24,
+                                com.geeksville.mesh.R.drawable.ic_outlined_dew_point_24,
                             ),
                         )
                     }
@@ -991,7 +996,7 @@ private fun EnvironmentMetrics(
                             DrawableMetricInfo(
                                 R.string.soil_temperature,
                                 soilTemperature.toTempString(isFahrenheit),
-                                R.drawable.soil_temperature,
+                                com.geeksville.mesh.R.drawable.soil_temperature,
                             ),
                         )
                     }
@@ -1000,7 +1005,7 @@ private fun EnvironmentMetrics(
                             DrawableMetricInfo(
                                 R.string.soil_moisture,
                                 "%d%%".format(soilMoisture),
-                                R.drawable.soil_moisture,
+                                com.geeksville.mesh.R.drawable.soil_moisture,
                             ),
                         )
                     }
@@ -1009,7 +1014,7 @@ private fun EnvironmentMetrics(
                             DrawableMetricInfo(
                                 R.string.radiation,
                                 "%.1f µR/h".format(radiation),
-                                R.drawable.ic_filled_radioactive_24,
+                                com.geeksville.mesh.R.drawable.ic_filled_radioactive_24,
                             ),
                         )
                     }

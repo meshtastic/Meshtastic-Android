@@ -22,9 +22,7 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.geeksville.mesh.MessageStatus
-import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Message
-import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.message.components.MessageItem
 import org.junit.Rule
@@ -34,30 +32,30 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class MessageItemTest {
 
-    @get:Rule
-    val composeTestRule = createComposeRule()
+    @get:Rule val composeTestRule = createComposeRule()
 
     @Test
     fun mqttIconIsDisplayedWhenViaMqttIsTrue() {
         val testNode = NodePreviewParameterProvider().minnieMouse
-        val messageWithMqtt = Message(
-            text = "Test message via MQTT",
-            time = "10:00",
-            fromLocal = false,
-            status = MessageStatus.RECEIVED,
-            snr = 2.5f,
-            rssi = 90,
-            hopsAway = 0,
-            uuid = 1L,
-            receivedTime = System.currentTimeMillis(),
-            node = testNode,
-            read = false,
-            routingError = 0,
-            packetId = 1234,
-            emojis = listOf(),
-            replyId = null,
-            viaMqtt = true
-        )
+        val messageWithMqtt =
+            Message(
+                text = "Test message via MQTT",
+                time = "10:00",
+                fromLocal = false,
+                status = MessageStatus.RECEIVED,
+                snr = 2.5f,
+                rssi = 90,
+                hopsAway = 0,
+                uuid = 1L,
+                receivedTime = System.currentTimeMillis(),
+                node = testNode,
+                read = false,
+                routingError = 0,
+                packetId = 1234,
+                emojis = listOf(),
+                replyId = null,
+                viaMqtt = true,
+            )
 
         composeTestRule.setContent {
             MessageItem(
@@ -79,24 +77,25 @@ class MessageItemTest {
     @Test
     fun mqttIconIsNotDisplayedWhenViaMqttIsFalse() {
         val testNode = NodePreviewParameterProvider().minnieMouse
-        val messageWithoutMqtt = Message(
-            text = "Test message not via MQTT",
-            time = "10:00",
-            fromLocal = false,
-            status = MessageStatus.RECEIVED,
-            snr = 2.5f,
-            rssi = 90,
-            hopsAway = 0,
-            uuid = 1L,
-            receivedTime = System.currentTimeMillis(),
-            node = testNode,
-            read = false,
-            routingError = 0,
-            packetId = 1234,
-            emojis = listOf(),
-            replyId = null,
-            viaMqtt = false
-        )
+        val messageWithoutMqtt =
+            Message(
+                text = "Test message not via MQTT",
+                time = "10:00",
+                fromLocal = false,
+                status = MessageStatus.RECEIVED,
+                snr = 2.5f,
+                rssi = 90,
+                hopsAway = 0,
+                uuid = 1L,
+                receivedTime = System.currentTimeMillis(),
+                node = testNode,
+                read = false,
+                routingError = 0,
+                packetId = 1234,
+                emojis = listOf(),
+                replyId = null,
+                viaMqtt = false,
+            )
 
         composeTestRule.setContent {
             MessageItem(
@@ -114,4 +113,4 @@ class MessageItemTest {
         // Check that the MQTT icon is not displayed
         composeTestRule.onNodeWithContentDescription("via MQTT").assertDoesNotExist()
     }
-} 
+}

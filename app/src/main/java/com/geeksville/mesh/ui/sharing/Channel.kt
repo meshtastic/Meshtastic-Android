@@ -89,7 +89,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
 import com.geeksville.mesh.ChannelProtos
 import com.geeksville.mesh.ConfigProtos
-import com.geeksville.mesh.R
 import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.errormsg
@@ -116,6 +115,7 @@ import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.navigation.Route
+import org.meshtastic.core.strings.R
 
 /**
  * Composable screen for managing and sharing Meshtastic channels. Allows users to view, edit, and share channel
@@ -431,7 +431,7 @@ private fun QrCodeImage(
 ) = Image(
     painter =
     channelSet.qrCode(shouldAddChannel)?.let { BitmapPainter(it.asImageBitmap()) }
-        ?: painterResource(id = R.drawable.qrcode),
+        ?: painterResource(id = com.geeksville.mesh.R.drawable.qrcode),
     contentDescription = stringResource(R.string.qr_code),
     modifier = modifier,
     contentScale = ContentScale.Inside,

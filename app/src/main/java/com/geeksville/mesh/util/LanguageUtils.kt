@@ -20,8 +20,8 @@ package com.geeksville.mesh.util
 import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
-import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
+import org.meshtastic.core.strings.R
 import org.xmlpull.v1.XmlPullParser
 import java.util.Locale
 
@@ -46,7 +46,7 @@ object LanguageUtils : Logging {
             add(SYSTEM_DEFAULT)
 
             try {
-                resources.getXml(R.xml.locales_config).use { parser ->
+                resources.getXml(com.geeksville.mesh.R.xml.locales_config).use { parser ->
                     while (parser.eventType != XmlPullParser.END_DOCUMENT) {
                         if (parser.eventType == XmlPullParser.START_TAG && parser.name == "locale") {
                             val languageTag =

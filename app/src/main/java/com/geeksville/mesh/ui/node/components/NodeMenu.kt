@@ -38,10 +38,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.isUnmessageableRole
 import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
+import org.meshtastic.core.strings.R
 
 @Suppress("LongMethod")
 @Composable
@@ -52,12 +52,13 @@ fun NodeMenu(
     onDismissMenuRequest: () -> Unit,
     onAction: (NodeMenuAction) -> Unit,
 ) {
-    val isUnmessageable = if (node.user.hasIsUnmessagable()) {
-        node.user.isUnmessagable
-    } else {
-        // for older firmwares
-        node.user.role?.isUnmessageableRole() == true
-    }
+    val isUnmessageable =
+        if (node.user.hasIsUnmessagable()) {
+            node.user.isUnmessagable
+        } else {
+            // for older firmwares
+            node.user.role?.isUnmessageableRole() == true
+        }
 
     var displayFavoriteDialog by remember { mutableStateOf(false) }
     var displayIgnoreDialog by remember { mutableStateOf(false) }
@@ -79,14 +80,13 @@ fun NodeMenu(
         displayIgnoreDialog = displayIgnoreDialog,
         displayRemoveDialog = displayRemoveDialog,
         onDismissMenuRequest = dialogDismissRequest,
-        onAction = onMenuAction
+        onAction = onMenuAction,
     )
     DropdownMenu(
         modifier = Modifier.background(MaterialTheme.colorScheme.background.copy(alpha = 1f)),
         expanded = expanded,
         onDismissRequest = onDismissMenuRequest,
     ) {
-
         if (showFullMenu) {
             if (!isUnmessageable) {
                 DropdownMenuItem(
@@ -94,7 +94,7 @@ fun NodeMenu(
                         dialogDismissRequest()
                         onMenuAction(NodeMenuAction.DirectMessage(node))
                     },
-                    text = { Text(stringResource(R.string.direct_message)) }
+                    text = { Text(stringResource(R.string.direct_message)) },
                 )
             }
             DropdownMenuItem(
@@ -102,21 +102,21 @@ fun NodeMenu(
                     dialogDismissRequest()
                     onMenuAction(NodeMenuAction.RequestUserInfo(node))
                 },
-                text = { Text(stringResource(R.string.exchange_userinfo)) }
+                text = { Text(stringResource(R.string.exchange_userinfo)) },
             )
             DropdownMenuItem(
                 onClick = {
                     dialogDismissRequest()
                     onMenuAction(NodeMenuAction.RequestPosition(node))
                 },
-                text = { Text(stringResource(R.string.exchange_position)) }
+                text = { Text(stringResource(R.string.exchange_position)) },
             )
             DropdownMenuItem(
                 onClick = {
                     dialogDismissRequest()
                     onMenuAction(NodeMenuAction.TraceRoute(node))
                 },
-                text = { Text(stringResource(R.string.traceroute)) }
+                text = { Text(stringResource(R.string.traceroute)) },
             )
             DropdownMenuItem(
                 onClick = {
@@ -124,24 +124,20 @@ fun NodeMenu(
                     displayFavoriteDialog = true
                 },
                 enabled = !node.isIgnored,
-                text = {
-                    Text(stringResource(R.string.favorite))
-                },
+                text = { Text(stringResource(R.string.favorite)) },
                 trailingIcon = {
                     Icon(
                         imageVector = if (node.isFavorite) Icons.Filled.Star else Icons.TwoTone.StarBorder,
                         contentDescription = stringResource(R.string.favorite),
                     )
-                }
+                },
             )
             DropdownMenuItem(
                 onClick = {
                     dialogDismissRequest()
                     displayIgnoreDialog = true
                 },
-                text = {
-                    Text(stringResource(R.string.ignore))
-                },
+                text = { Text(stringResource(R.string.ignore)) },
                 trailingIcon = {
                     Checkbox(
                         checked = node.isIgnored,
@@ -151,7 +147,7 @@ fun NodeMenu(
                         },
                         modifier = Modifier.size(24.dp),
                     )
-                }
+                },
             )
             DropdownMenuItem(
                 onClick = {
@@ -159,7 +155,7 @@ fun NodeMenu(
                     displayRemoveDialog = true
                 },
                 enabled = !node.isIgnored,
-                text = { Text(stringResource(R.string.remove)) }
+                text = { Text(stringResource(R.string.remove)) },
             )
             HorizontalDivider(Modifier.padding(vertical = 8.dp))
         }
@@ -168,7 +164,7 @@ fun NodeMenu(
                 dialogDismissRequest()
                 onMenuAction(NodeMenuAction.Share(node))
             },
-            text = { Text(stringResource(R.string.share_contact)) }
+            text = { Text(stringResource(R.string.share_contact)) },
         )
 
         DropdownMenuItem(
@@ -176,7 +172,7 @@ fun NodeMenu(
                 dialogDismissRequest()
                 onMenuAction(NodeMenuAction.MoreDetails(node))
             },
-            text = { Text(stringResource(R.string.more_details)) }
+            text = { Text(stringResource(R.string.more_details)) },
         )
     }
 }
@@ -188,34 +184,36 @@ fun NodeActionDialogs(
     displayIgnoreDialog: Boolean,
     displayRemoveDialog: Boolean,
     onDismissMenuRequest: () -> Unit,
-    onAction: (NodeMenuAction) -> Unit
+    onAction: (NodeMenuAction) -> Unit,
 ) {
     if (displayFavoriteDialog) {
         SimpleAlertDialog(
             title = R.string.favorite,
-            text = stringResource(
+            text =
+            stringResource(
                 id = if (node.isFavorite) R.string.favorite_remove else R.string.favorite_add,
-                node.user.longName
+                node.user.longName,
             ),
             onConfirm = {
                 onDismissMenuRequest()
                 onAction(NodeMenuAction.Favorite(node))
             },
-            onDismiss = onDismissMenuRequest
+            onDismiss = onDismissMenuRequest,
         )
     }
     if (displayIgnoreDialog) {
         SimpleAlertDialog(
             title = R.string.ignore,
-            text = stringResource(
+            text =
+            stringResource(
                 id = if (node.isIgnored) R.string.ignore_remove else R.string.ignore_add,
-                node.user.longName
+                node.user.longName,
             ),
             onConfirm = {
                 onDismissMenuRequest()
                 onAction(NodeMenuAction.Ignore(node))
             },
-            onDismiss = onDismissMenuRequest
+            onDismiss = onDismissMenuRequest,
         )
     }
     if (displayRemoveDialog) {
@@ -226,19 +224,27 @@ fun NodeActionDialogs(
                 onDismissMenuRequest()
                 onAction(NodeMenuAction.Remove(node))
             },
-            onDismiss = onDismissMenuRequest
+            onDismiss = onDismissMenuRequest,
         )
     }
 }
 
 sealed class NodeMenuAction {
     data class Remove(val node: Node) : NodeMenuAction()
+
     data class Ignore(val node: Node) : NodeMenuAction()
+
     data class Favorite(val node: Node) : NodeMenuAction()
+
     data class DirectMessage(val node: Node) : NodeMenuAction()
+
     data class RequestUserInfo(val node: Node) : NodeMenuAction()
+
     data class RequestPosition(val node: Node) : NodeMenuAction()
+
     data class TraceRoute(val node: Node) : NodeMenuAction()
+
     data class MoreDetails(val node: Node) : NodeMenuAction()
+
     data class Share(val node: Node) : NodeMenuAction()
 }

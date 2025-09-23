@@ -18,7 +18,7 @@
 package com.geeksville.mesh.model
 
 import androidx.annotation.StringRes
-import com.geeksville.mesh.R
+import org.meshtastic.core.strings.R
 
 enum class NodeSortOption(val sqlValue: String, @StringRes val stringRes: Int) {
     LAST_HEARD("last_heard", R.string.node_sort_last_heard),

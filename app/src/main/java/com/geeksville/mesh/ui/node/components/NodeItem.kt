@@ -51,7 +51,6 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ConfigProtos.Config.DeviceConfig
 import com.geeksville.mesh.ConfigProtos.Config.DisplayConfig
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.isUnmessageableRole
 import com.geeksville.mesh.ui.common.components.BatteryInfo
@@ -59,6 +58,7 @@ import com.geeksville.mesh.ui.common.components.SignalInfo
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.util.toDistanceString
+import org.meshtastic.core.strings.R
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable

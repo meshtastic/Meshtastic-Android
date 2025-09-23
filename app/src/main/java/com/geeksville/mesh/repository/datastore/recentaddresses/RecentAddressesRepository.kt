@@ -22,11 +22,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.geeksville.mesh.R
 import com.geeksville.mesh.android.Logging
 import dagger.hilt.android.qualifiers.ApplicationContext
-import javax.inject.Inject
-import javax.inject.Singleton
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -34,6 +31,9 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
+import org.meshtastic.core.strings.R
+import javax.inject.Inject
+import javax.inject.Singleton
 
 @Singleton
 class RecentAddressesRepository
@@ -53,15 +53,11 @@ constructor(
                 try {
                     Json.decodeFromString<List<RecentAddress>>(jsonString)
                 } catch (e: IllegalArgumentException) {
-                    warn(
-                        "Could not parse recent addresses, falling back to legacy parsing: ${e.message}"
-                    )
+                    warn("Could not parse recent addresses, falling back to legacy parsing: ${e.message}")
                     // Fallback to legacy parsing
                     parseLegacyRecentAddresses(jsonString)
                 } catch (e: SerializationException) {
-                    warn(
-                        "Could not parse recent addresses, falling back to legacy parsing: ${e.message}"
-                    )
+                    warn("Could not parse recent addresses, falling back to legacy parsing: ${e.message}")
                     // Fallback to legacy parsing
                     parseLegacyRecentAddresses(jsonString)
                 }
@@ -76,10 +72,7 @@ constructor(
             when (val item = jsonArray.get(i)) {
                 is JSONObject -> {
                     // Modern format: JSONObject with address and name
-                    RecentAddress(
-                        address = item.getString("address"),
-                        name = item.getString("name"),
-                    )
+                    RecentAddress(address = item.getString("address"), name = item.getString("name"))
                 }
                 is String -> {
                     // Old format: just the address string

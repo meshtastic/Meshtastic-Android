@@ -31,7 +31,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.stringResource
-import com.geeksville.mesh.R
+import org.meshtastic.core.strings.R
 
 @Composable
 internal fun DownloadButton(enabled: Boolean, onClick: () -> Unit) {
