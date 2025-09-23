@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.geeksville.mesh.R
+import org.meshtastic.core.strings.R
 
 @Composable
 fun PreferenceFooter(
@@ -59,32 +59,15 @@ fun PreferenceFooter(
     modifier: Modifier = Modifier,
 ) {
     Row(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(64.dp),
+        modifier = modifier.fillMaxWidth().height(64.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        OutlinedButton(
-            modifier = modifier
-                .height(48.dp)
-                .weight(1f),
-            onClick = onNegativeClicked,
-        ) {
-            Text(
-                text = stringResource(id = negativeText),
-            )
+        OutlinedButton(modifier = Modifier.height(48.dp).weight(1f), onClick = onNegativeClicked) {
+            Text(text = stringResource(id = negativeText))
         }
-        OutlinedButton(
-            modifier = modifier
-                .height(48.dp)
-                .weight(1f),
-            enabled = enabled,
-            onClick = onPositiveClicked,
-        ) {
-            Text(
-                text = stringResource(id = positiveText),
-            )
+        OutlinedButton(modifier = Modifier.height(48.dp).weight(1f), enabled = enabled, onClick = onPositiveClicked) {
+            Text(text = stringResource(id = positiveText))
         }
     }
 }

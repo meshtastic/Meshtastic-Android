@@ -39,11 +39,11 @@ import androidx.compose.ui.tooling.preview.PreviewScreenSizes
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.contact.ContactItem
+import org.meshtastic.core.strings.R
 
 @Composable
 fun ShareScreen(viewModel: UIViewModel = hiltViewModel(), onConfirm: (String) -> Unit) {

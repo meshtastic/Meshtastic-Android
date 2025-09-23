@@ -19,83 +19,72 @@
 
 package com.geeksville.mesh.ui.settings.radio.components
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.MQTTConfig
-import com.geeksville.mesh.R
+import androidx.navigation.NavController
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.ui.common.components.EditPasswordPreference
 import com.geeksville.mesh.ui.common.components.EditTextPreference
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
-import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
+import org.meshtastic.core.strings.R
 
 @Composable
-fun MQTTConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun MQTTConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val destNode by viewModel.destNode.collectAsStateWithLifecycle()
     val destNum = destNode?.num
+    val mqttConfig = state.moduleConfig.mqtt
+    val formState = rememberConfigState(initialValue = mqttConfig)
 
-    if (state.responseState.isWaiting()) {
-        PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
+    if (!formState.value.mapReportSettings.shouldReportLocation) {
+        val settings =
+            formState.value.mapReportSettings.copy {
+                this.shouldReportLocation = viewModel.shouldReportLocation(destNum)
+            }
+        formState.value = formState.value.copy { mapReportSettings = settings }
     }
 
-    MQTTConfigItemList(
-        mqttConfig = state.moduleConfig.mqtt,
-        enabled = state.connected,
-        shouldReportLocation = viewModel.shouldReportLocation(destNum),
-        onShouldReportLocationChanged = { shouldReportLocation ->
-            viewModel.setShouldReportLocation(destNum, shouldReportLocation)
-        },
-        onSaveClicked = { mqttInput ->
-            val config = moduleConfig { mqtt = mqttInput }
+    val consentValid =
+        if (formState.value.mapReportingEnabled) {
+            formState.value.mapReportSettings.shouldReportLocation &&
+                mqttConfig.mapReportSettings.publishIntervalSecs >= MIN_INTERVAL_SECS
+        } else {
+            true
+        }
+    val focusManager = LocalFocusManager.current
+
+    RadioConfigScreenList(
+        title = stringResource(id = R.string.mqtt),
+        onBack = { navController.popBackStack() },
+        configState = formState,
+        enabled = state.connected && consentValid,
+        responseState = state.responseState,
+        onDismissPacketResponse = viewModel::clearPacketResponse,
+        onSave = {
+            val config = moduleConfig { mqtt = it }
             viewModel.setModuleConfig(config)
         },
-    )
-}
-
-@Composable
-fun MQTTConfigItemList(
-    mqttConfig: MQTTConfig,
-    enabled: Boolean,
-    shouldReportLocation: Boolean,
-    onShouldReportLocationChanged: (shouldReportLocation: Boolean) -> Unit,
-    onSaveClicked: (MQTTConfig) -> Unit,
-) {
-    val focusManager = LocalFocusManager.current
-    var mqttInput by rememberSaveable { mutableStateOf(mqttConfig) }
-    if (!mqttInput.mapReportSettings.shouldReportLocation) {
-        val settings = mqttInput.mapReportSettings.copy { this.shouldReportLocation = shouldReportLocation }
-        mqttInput = mqttInput.copy { mapReportSettings = settings }
-    }
-
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    ) {
         item { PreferenceCategory(text = stringResource(R.string.mqtt_config)) }
 
         item {
             SwitchPreference(
                 title = stringResource(R.string.mqtt_enabled),
-                checked = mqttInput.enabled,
-                enabled = enabled,
-                onCheckedChange = { mqttInput = mqttInput.copy { this.enabled = it } },
+                checked = formState.value.enabled,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
             )
         }
         item { HorizontalDivider() }
@@ -103,48 +92,48 @@ fun MQTTConfigItemList(
         item {
             EditTextPreference(
                 title = stringResource(R.string.address),
-                value = mqttInput.address,
+                value = formState.value.address,
                 maxSize = 63, // address max_size:64
-                enabled = enabled,
+                enabled = state.connected,
                 isError = false,
                 keyboardOptions =
                 KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { mqttInput = mqttInput.copy { address = it } },
+                onValueChanged = { formState.value = formState.value.copy { address = it } },
             )
         }
 
         item {
             EditTextPreference(
                 title = stringResource(R.string.username),
-                value = mqttInput.username,
+                value = formState.value.username,
                 maxSize = 63, // username max_size:64
-                enabled = enabled,
+                enabled = state.connected,
                 isError = false,
                 keyboardOptions =
                 KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { mqttInput = mqttInput.copy { username = it } },
+                onValueChanged = { formState.value = formState.value.copy { username = it } },
             )
         }
 
         item {
             EditPasswordPreference(
                 title = stringResource(R.string.password),
-                value = mqttInput.password,
+                value = formState.value.password,
                 maxSize = 63, // password max_size:64
-                enabled = enabled,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { mqttInput = mqttInput.copy { password = it } },
+                onValueChanged = { formState.value = formState.value.copy { password = it } },
             )
         }
 
         item {
             SwitchPreference(
                 title = stringResource(R.string.encryption_enabled),
-                checked = mqttInput.encryptionEnabled,
-                enabled = enabled,
-                onCheckedChange = { mqttInput = mqttInput.copy { encryptionEnabled = it } },
+                checked = formState.value.encryptionEnabled,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { encryptionEnabled = it } },
             )
         }
         item { HorizontalDivider() }
@@ -152,22 +141,22 @@ fun MQTTConfigItemList(
         item {
             SwitchPreference(
                 title = stringResource(R.string.json_output_enabled),
-                checked = mqttInput.jsonEnabled,
-                enabled = enabled,
-                onCheckedChange = { mqttInput = mqttInput.copy { jsonEnabled = it } },
+                checked = formState.value.jsonEnabled,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { jsonEnabled = it } },
             )
         }
         item { HorizontalDivider() }
 
         item {
             val defaultAddress = stringResource(R.string.default_mqtt_address)
-            val isDefault = mqttInput.address.isEmpty() || mqttInput.address.contains(defaultAddress)
-            val enforceTls = isDefault && mqttInput.proxyToClientEnabled
+            val isDefault = formState.value.address.isEmpty() || formState.value.address.contains(defaultAddress)
+            val enforceTls = isDefault && formState.value.proxyToClientEnabled
             SwitchPreference(
                 title = stringResource(R.string.tls_enabled),
-                checked = mqttInput.tlsEnabled || enforceTls,
-                enabled = enabled && !enforceTls,
-                onCheckedChange = { mqttInput = mqttInput.copy { tlsEnabled = it } },
+                checked = formState.value.tlsEnabled || enforceTls,
+                enabled = state.connected && !enforceTls,
+                onCheckedChange = { formState.value = formState.value.copy { tlsEnabled = it } },
             )
         }
         item { HorizontalDivider() }
@@ -175,23 +164,23 @@ fun MQTTConfigItemList(
         item {
             EditTextPreference(
                 title = stringResource(R.string.root_topic),
-                value = mqttInput.root,
+                value = formState.value.root,
                 maxSize = 31, // root max_size:32
-                enabled = enabled,
+                enabled = state.connected,
                 isError = false,
                 keyboardOptions =
                 KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { mqttInput = mqttInput.copy { root = it } },
+                onValueChanged = { formState.value = formState.value.copy { root = it } },
             )
         }
 
         item {
             SwitchPreference(
                 title = stringResource(R.string.proxy_to_client_enabled),
-                checked = mqttInput.proxyToClientEnabled,
-                enabled = enabled,
-                onCheckedChange = { mqttInput = mqttInput.copy { proxyToClientEnabled = it } },
+                checked = formState.value.proxyToClientEnabled,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { proxyToClientEnabled = it } },
             )
         }
         item { HorizontalDivider() }
@@ -200,63 +189,30 @@ fun MQTTConfigItemList(
 
         item {
             MapReportingPreference(
-                mapReportingEnabled = mqttInput.mapReportingEnabled,
-                onMapReportingEnabledChanged = { mqttInput = mqttInput.copy { mapReportingEnabled = it } },
-                shouldReportLocation = mqttInput.mapReportSettings.shouldReportLocation,
+                mapReportingEnabled = formState.value.mapReportingEnabled,
+                onMapReportingEnabledChanged = { formState.value = formState.value.copy { mapReportingEnabled = it } },
+                shouldReportLocation = formState.value.mapReportSettings.shouldReportLocation,
                 onShouldReportLocationChanged = {
-                    onShouldReportLocationChanged(it)
-                    val settings = mqttInput.mapReportSettings.copy { this.shouldReportLocation = it }
-                    mqttInput = mqttInput.copy { mapReportSettings = settings }
+                    viewModel.setShouldReportLocation(destNum, it)
+                    val settings = formState.value.mapReportSettings.copy { this.shouldReportLocation = it }
+                    formState.value = formState.value.copy { mapReportSettings = settings }
                 },
-                positionPrecision = mqttInput.mapReportSettings.positionPrecision,
+                positionPrecision = formState.value.mapReportSettings.positionPrecision,
                 onPositionPrecisionChanged = {
-                    val settings = mqttInput.mapReportSettings.copy { positionPrecision = it }
-                    mqttInput = mqttInput.copy { mapReportSettings = settings }
+                    val settings = formState.value.mapReportSettings.copy { positionPrecision = it }
+                    formState.value = formState.value.copy { mapReportSettings = settings }
                 },
-                publishIntervalSecs = mqttInput.mapReportSettings.publishIntervalSecs,
+                publishIntervalSecs = formState.value.mapReportSettings.publishIntervalSecs,
                 onPublishIntervalSecsChanged = {
-                    val settings = mqttInput.mapReportSettings.copy { publishIntervalSecs = it }
-                    mqttInput = mqttInput.copy { mapReportSettings = settings }
+                    val settings = formState.value.mapReportSettings.copy { publishIntervalSecs = it }
+                    formState.value = formState.value.copy { mapReportSettings = settings }
                 },
-                enabled = enabled,
+                enabled = state.connected,
                 focusManager = focusManager,
             )
         }
         item { HorizontalDivider() }
-
-        item {
-            val consentValid =
-                if (mqttInput.mapReportingEnabled) {
-                    mqttInput.mapReportSettings.shouldReportLocation &&
-                        mqttConfig.mapReportSettings.publishIntervalSecs >= MIN_INTERVAL_SECS
-                } else {
-                    true
-                }
-            PreferenceFooter(
-                enabled = enabled && mqttInput != mqttConfig && consentValid,
-                onCancelClicked = {
-                    focusManager.clearFocus()
-                    mqttInput = mqttConfig
-                },
-                onSaveClicked = {
-                    focusManager.clearFocus()
-                    onSaveClicked(mqttInput)
-                },
-            )
-        }
     }
 }
 
 private const val MIN_INTERVAL_SECS = 3600
-
-@Preview(showBackground = true)
-@Composable
-private fun MQTTConfigPreview() {
-    MQTTConfigItemList(
-        mqttConfig = MQTTConfig.getDefaultInstance(),
-        enabled = true,
-        shouldReportLocation = true,
-        onShouldReportLocationChanged = { _ -> },
-        onSaveClicked = {},
-    )
-}

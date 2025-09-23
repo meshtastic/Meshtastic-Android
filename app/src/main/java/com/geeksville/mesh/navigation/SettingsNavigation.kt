@@ -47,6 +47,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavBackStackEntry
+import androidx.navigation.NavController
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavGraphBuilder
@@ -56,7 +57,6 @@ import androidx.navigation.navDeepLink
 import androidx.navigation.navigation
 import com.geeksville.mesh.AdminProtos
 import com.geeksville.mesh.MeshProtos.DeviceMetadata
-import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.debug.DebugScreen
 import com.geeksville.mesh.ui.settings.SettingsScreen
 import com.geeksville.mesh.ui.settings.radio.CleanNodeDatabaseScreen
@@ -88,6 +88,7 @@ import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.strings.R
 
 fun getNavRouteFrom(routeName: String): Route? =
     ConfigRoute.entries.find { it.name == routeName }?.route ?: ModuleRoute.entries.find { it.name == routeName }?.route
@@ -153,7 +154,7 @@ fun NavDestination.isConfigRoute(): Boolean =
 private inline fun <reified R : Route> NavGraphBuilder.addRadioConfigScreenComposable(
     navController: NavHostController,
     routeNameString: String,
-    crossinline screenContent: @Composable (viewModel: RadioConfigViewModel) -> Unit,
+    crossinline screenContent: @Composable (navController: NavController, viewModel: RadioConfigViewModel) -> Unit,
 ) {
     composable<R>(
         deepLinks =
@@ -167,7 +168,7 @@ private inline fun <reified R : Route> NavGraphBuilder.addRadioConfigScreenCompo
         val parentEntry =
             remember(backStackEntry) { navController.getBackStackEntry(SettingsRoutes.SettingsGraph::class) }
         val viewModel = hiltViewModel<RadioConfigViewModel>(parentEntry)
-        screenContent(viewModel)
+        screenContent(navController, viewModel)
     }
 }
 
@@ -306,71 +307,71 @@ enum class ConfigRoute(
     val route: Route,
     val icon: ImageVector?,
     val type: Int = 0,
-    val screenComposable: @Composable (viewModel: RadioConfigViewModel) -> Unit,
+    val screenComposable: @Composable (navController: NavController, viewModel: RadioConfigViewModel) -> Unit,
 ) {
-    USER(R.string.user, SettingsRoutes.User, Icons.Default.Person, 0, { vm -> UserConfigScreen(vm) }),
+    USER(R.string.user, SettingsRoutes.User, Icons.Default.Person, 0, { nc, vm -> UserConfigScreen(nc, vm) }),
     CHANNELS(
         R.string.channels,
         SettingsRoutes.ChannelConfig,
         Icons.AutoMirrored.Default.List,
         0,
-        { vm -> ChannelConfigScreen(vm) },
+        { nc, vm -> ChannelConfigScreen(nc, vm) },
     ),
     DEVICE(
         R.string.device,
         SettingsRoutes.Device,
         Icons.Default.Router,
         AdminProtos.AdminMessage.ConfigType.DEVICE_CONFIG_VALUE,
-        { vm -> DeviceConfigScreen(vm) },
+        { nc, vm -> DeviceConfigScreen(nc, vm) },
     ),
     POSITION(
         R.string.position,
         SettingsRoutes.Position,
         Icons.Default.LocationOn,
         AdminProtos.AdminMessage.ConfigType.POSITION_CONFIG_VALUE,
-        { vm -> PositionConfigScreen(vm) },
+        { nc, vm -> PositionConfigScreen(nc, vm) },
     ),
     POWER(
         R.string.power,
         SettingsRoutes.Power,
         Icons.Default.Power,
         AdminProtos.AdminMessage.ConfigType.POWER_CONFIG_VALUE,
-        { vm -> PowerConfigScreen(vm) },
+        { nc, vm -> PowerConfigScreen(nc, vm) },
     ),
     NETWORK(
         R.string.network,
         SettingsRoutes.Network,
         Icons.Default.Wifi,
         AdminProtos.AdminMessage.ConfigType.NETWORK_CONFIG_VALUE,
-        { vm -> NetworkConfigScreen(vm) },
+        { nc, vm -> NetworkConfigScreen(nc, vm) },
     ),
     DISPLAY(
         R.string.display,
         SettingsRoutes.Display,
         Icons.Default.DisplaySettings,
         AdminProtos.AdminMessage.ConfigType.DISPLAY_CONFIG_VALUE,
-        { vm -> DisplayConfigScreen(vm) },
+        { nc, vm -> DisplayConfigScreen(nc, vm) },
     ),
     LORA(
         R.string.lora,
         SettingsRoutes.LoRa,
         Icons.Default.CellTower,
         AdminProtos.AdminMessage.ConfigType.LORA_CONFIG_VALUE,
-        { vm -> LoRaConfigScreen(vm) },
+        { nc, vm -> LoRaConfigScreen(nc, vm) },
     ),
     BLUETOOTH(
         R.string.bluetooth,
         SettingsRoutes.Bluetooth,
         Icons.Default.Bluetooth,
         AdminProtos.AdminMessage.ConfigType.BLUETOOTH_CONFIG_VALUE,
-        { vm -> BluetoothConfigScreen(vm) },
+        { nc, vm -> BluetoothConfigScreen(nc, vm) },
     ),
     SECURITY(
         R.string.security,
         SettingsRoutes.Security,
         Icons.Default.Security,
         AdminProtos.AdminMessage.ConfigType.SECURITY_CONFIG_VALUE,
-        { vm -> SecurityConfigScreen(vm) },
+        { nc, vm -> SecurityConfigScreen(nc, vm) },
     ),
     ;
 
@@ -397,98 +398,98 @@ enum class ModuleRoute(
     val route: Route,
     val icon: ImageVector?,
     val type: Int = 0,
-    val screenComposable: @Composable (viewModel: RadioConfigViewModel) -> Unit,
+    val screenComposable: @Composable (navController: NavController, viewModel: RadioConfigViewModel) -> Unit,
 ) {
     MQTT(
         R.string.mqtt,
         SettingsRoutes.MQTT,
         Icons.Default.Cloud,
         AdminProtos.AdminMessage.ModuleConfigType.MQTT_CONFIG_VALUE,
-        { vm -> MQTTConfigScreen(vm) },
+        { nc, vm -> MQTTConfigScreen(nc, vm) },
     ),
     SERIAL(
         R.string.serial,
         SettingsRoutes.Serial,
         Icons.Default.Usb,
         AdminProtos.AdminMessage.ModuleConfigType.SERIAL_CONFIG_VALUE,
-        { vm -> SerialConfigScreen(vm) },
+        { nc, vm -> SerialConfigScreen(nc, vm) },
     ),
     EXT_NOTIFICATION(
         R.string.external_notification,
         SettingsRoutes.ExtNotification,
         Icons.Default.Notifications,
         AdminProtos.AdminMessage.ModuleConfigType.EXTNOTIF_CONFIG_VALUE,
-        { vm -> ExternalNotificationConfigScreen(vm) },
+        { nc, vm -> ExternalNotificationConfigScreen(nc, vm) },
     ),
     STORE_FORWARD(
         R.string.store_forward,
         SettingsRoutes.StoreForward,
         Icons.AutoMirrored.Default.Forward,
         AdminProtos.AdminMessage.ModuleConfigType.STOREFORWARD_CONFIG_VALUE,
-        { vm -> StoreForwardConfigScreen(vm) },
+        { nc, vm -> StoreForwardConfigScreen(nc, vm) },
     ),
     RANGE_TEST(
         R.string.range_test,
         SettingsRoutes.RangeTest,
         Icons.Default.Speed,
         AdminProtos.AdminMessage.ModuleConfigType.RANGETEST_CONFIG_VALUE,
-        { vm -> RangeTestConfigScreen(vm) },
+        { nc, vm -> RangeTestConfigScreen(nc, vm) },
     ),
     TELEMETRY(
         R.string.telemetry,
         SettingsRoutes.Telemetry,
         Icons.Default.DataUsage,
         AdminProtos.AdminMessage.ModuleConfigType.TELEMETRY_CONFIG_VALUE,
-        { vm -> TelemetryConfigScreen(vm) },
+        { nc, vm -> TelemetryConfigScreen(nc, vm) },
     ),
     CANNED_MESSAGE(
         R.string.canned_message,
         SettingsRoutes.CannedMessage,
         Icons.AutoMirrored.Default.Message,
         AdminProtos.AdminMessage.ModuleConfigType.CANNEDMSG_CONFIG_VALUE,
-        { vm -> CannedMessageConfigScreen(vm) },
+        { nc, vm -> CannedMessageConfigScreen(nc, vm) },
     ),
     AUDIO(
         R.string.audio,
         SettingsRoutes.Audio,
         Icons.AutoMirrored.Default.VolumeUp,
         AdminProtos.AdminMessage.ModuleConfigType.AUDIO_CONFIG_VALUE,
-        { vm -> AudioConfigScreen(vm) },
+        { nc, vm -> AudioConfigScreen(nc, vm) },
     ),
     REMOTE_HARDWARE(
         R.string.remote_hardware,
         SettingsRoutes.RemoteHardware,
         Icons.Default.SettingsRemote,
         AdminProtos.AdminMessage.ModuleConfigType.REMOTEHARDWARE_CONFIG_VALUE,
-        { vm -> RemoteHardwareConfigScreen(vm) },
+        { nc, vm -> RemoteHardwareConfigScreen(nc, vm) },
     ),
     NEIGHBOR_INFO(
         R.string.neighbor_info,
         SettingsRoutes.NeighborInfo,
         Icons.Default.People,
         AdminProtos.AdminMessage.ModuleConfigType.NEIGHBORINFO_CONFIG_VALUE,
-        { vm -> NeighborInfoConfigScreen(vm) },
+        { nc, vm -> NeighborInfoConfigScreen(nc, vm) },
     ),
     AMBIENT_LIGHTING(
         R.string.ambient_lighting,
         SettingsRoutes.AmbientLighting,
         Icons.Default.LightMode,
         AdminProtos.AdminMessage.ModuleConfigType.AMBIENTLIGHTING_CONFIG_VALUE,
-        { vm -> AmbientLightingConfigScreen(vm) },
+        { nc, vm -> AmbientLightingConfigScreen(nc, vm) },
     ),
     DETECTION_SENSOR(
         R.string.detection_sensor,
         SettingsRoutes.DetectionSensor,
         Icons.Default.Sensors,
         AdminProtos.AdminMessage.ModuleConfigType.DETECTIONSENSOR_CONFIG_VALUE,
-        { vm -> DetectionSensorConfigScreen(vm) },
+        { nc, vm -> DetectionSensorConfigScreen(nc, vm) },
     ),
     PAXCOUNTER(
         R.string.paxcounter,
         SettingsRoutes.Paxcounter,
         Icons.Default.PermScanWifi,
         AdminProtos.AdminMessage.ModuleConfigType.PAXCOUNTER_CONFIG_VALUE,
-        { vm -> PaxcounterConfigScreen(vm) },
+        { nc, vm -> PaxcounterConfigScreen(nc, vm) },
     ),
     ;
 

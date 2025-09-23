@@ -50,7 +50,6 @@ import com.geeksville.mesh.NodeInfo
 import com.geeksville.mesh.PaxcountProtos
 import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.Position
-import com.geeksville.mesh.R
 import com.geeksville.mesh.StoreAndForwardProtos
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.TelemetryProtos.LocalStats
@@ -104,6 +103,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.model.getFullTracerouteResponse
+import org.meshtastic.core.strings.R
 import java.util.Random
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap

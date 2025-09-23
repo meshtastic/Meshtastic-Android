@@ -47,6 +47,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -68,9 +69,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig
-import com.geeksville.mesh.R
 import com.geeksville.mesh.channelSettings
 import com.geeksville.mesh.model.DeviceVersion
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
@@ -81,6 +82,7 @@ import com.geeksville.mesh.ui.common.components.dragDropItemsIndexed
 import com.geeksville.mesh.ui.common.components.rememberDragDropState
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.strings.R
 
 @Composable
 private fun ChannelItem(
@@ -168,7 +170,7 @@ fun ChannelSelection(
 }
 
 @Composable
-fun ChannelConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun ChannelConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
 
     if (state.responseState.isWaiting()) {
@@ -176,6 +178,8 @@ fun ChannelConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
     }
 
     ChannelSettingsItemList(
+        title = stringResource(id = R.string.channels),
+        onBack = { navController.popBackStack() },
         settingsList = state.channelList,
         loraConfig = state.radioConfig.lora,
         maxChannels = viewModel.maxChannels,
@@ -188,6 +192,8 @@ fun ChannelConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable
 private fun ChannelSettingsItemList(
+    title: String,
+    onBack: () -> Unit,
     settingsList: List<ChannelSettings>,
     loraConfig: LoRaConfig,
     maxChannels: Int = 8,
@@ -243,104 +249,116 @@ private fun ChannelSettingsItemList(
         ChannelLegendDialog(fwVersion) { showChannelLegendDialog = false }
     }
 
-    Box(modifier = Modifier.fillMaxSize().clickable(onClick = {}, enabled = false)) {
-        Column {
-            ChannelsConfigHeader(
-                frequency =
-                if (loraConfig.overrideFrequency != 0f) {
-                    loraConfig.overrideFrequency
-                } else {
-                    primaryChannel.radioFreq
-                },
-                slot =
-                if (loraConfig.channelNum != 0) {
-                    loraConfig.channelNum
-                } else {
-                    primaryChannel.channelNum
-                },
-            )
-            Text(
-                text = stringResource(R.string.press_and_drag),
-                fontSize = 11.sp,
-                modifier = Modifier.padding(start = 16.dp),
-            )
-
-            ChannelLegend { showChannelLegendDialog = true }
-
-            val locationChannel = determineLocationSharingChannel(fwVersion, settingsListInput.toList())
-
-            LazyColumn(
-                modifier = Modifier.dragContainer(dragDropState = dragDropState, haptics = LocalHapticFeedback.current),
-                state = listState,
-                contentPadding = PaddingValues(horizontal = 16.dp),
-            ) {
-                dragDropItemsIndexed(items = settingsListInput, dragDropState = dragDropState) {
-                        index,
-                        channel,
-                        isDragging,
-                    ->
-                    ChannelCard(
-                        index = index,
-                        title = channel.name.ifEmpty { modemPresetName },
-                        enabled = enabled,
-                        channelSettings = channel,
-                        loraConfig = loraConfig,
-                        onEditClick = { showEditChannelDialog = index },
-                        onDeleteClick = { settingsListInput.removeAt(index) },
-                        sharesLocation = locationChannel == index,
-                    )
-                }
-                item {
-                    PreferenceFooter(
-                        enabled = enabled && isEditing,
-                        negativeText = R.string.cancel,
-                        onNegativeClicked = {
-                            focusManager.clearFocus()
-                            settingsListInput.clear()
-                            settingsListInput.addAll(settingsList)
-                        },
-                        positiveText = R.string.send,
-                        onPositiveClicked = {
-                            focusManager.clearFocus()
-                            onPositiveClicked(settingsListInput)
-                        },
-                    )
+    Scaffold(
+        floatingActionButton = {
+            if (maxChannels > settingsListInput.size) {
+                FloatingActionButton(
+                    onClick = {
+                        if (maxChannels > settingsListInput.size) {
+                            settingsListInput.add(channelSettings { psk = Channel.default.settings.psk })
+                            showEditChannelDialog = settingsListInput.lastIndex
+                        }
+                    },
+                    modifier = Modifier.padding(16.dp),
+                ) {
+                    Icon(Icons.TwoTone.Add, stringResource(R.string.add))
                 }
             }
-        }
+        },
+    ) { innerPadding ->
+        Box(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
+            Column {
+                ChannelsConfigHeader(
+                    frequency =
+                    if (loraConfig.overrideFrequency != 0f) {
+                        loraConfig.overrideFrequency
+                    } else {
+                        primaryChannel.radioFreq
+                    },
+                    slot =
+                    if (loraConfig.channelNum != 0) {
+                        loraConfig.channelNum
+                    } else {
+                        primaryChannel.channelNum
+                    },
+                )
+                Text(
+                    text = stringResource(R.string.press_and_drag),
+                    fontSize = 11.sp,
+                    modifier = Modifier.padding(start = 16.dp),
+                )
 
-        AnimatedVisibility(
-            visible = maxChannels > settingsListInput.size,
-            modifier = Modifier.align(Alignment.BottomEnd),
-            enter =
-            slideInHorizontally(
-                initialOffsetX = { it },
-                animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing),
-            ),
-            exit =
-            slideOutHorizontally(
-                targetOffsetX = { it },
-                animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing),
-            ),
-        ) {
-            FloatingActionButton(
-                onClick = {
-                    if (maxChannels > settingsListInput.size) {
-                        settingsListInput.add(channelSettings { psk = Channel.default.settings.psk })
-                        showEditChannelDialog = settingsListInput.lastIndex
+                ChannelLegend { showChannelLegendDialog = true }
+
+                val locationChannel = determineLocationSharingChannel(fwVersion, settingsListInput.toList())
+
+                LazyColumn(
+                    modifier =
+                    Modifier.dragContainer(dragDropState = dragDropState, haptics = LocalHapticFeedback.current),
+                    state = listState,
+                    contentPadding = PaddingValues(horizontal = 16.dp),
+                ) {
+                    dragDropItemsIndexed(items = settingsListInput, dragDropState = dragDropState) {
+                            index,
+                            channel,
+                            isDragging,
+                        ->
+                        ChannelCard(
+                            index = index,
+                            title = channel.name.ifEmpty { modemPresetName },
+                            enabled = enabled,
+                            channelSettings = channel,
+                            loraConfig = loraConfig,
+                            onEditClick = { showEditChannelDialog = index },
+                            onDeleteClick = { settingsListInput.removeAt(index) },
+                            sharesLocation = locationChannel == index,
+                        )
                     }
-                },
-                modifier = Modifier.padding(16.dp),
-            ) {
-                Icon(Icons.TwoTone.Add, stringResource(R.string.add))
+                    item { Spacer(modifier = Modifier.weight(1f)) }
+                    item {
+                        PreferenceFooter(
+                            enabled = enabled && isEditing,
+                            negativeText = R.string.cancel,
+                            onNegativeClicked = {
+                                focusManager.clearFocus()
+                                settingsListInput.clear()
+                                settingsListInput.addAll(settingsList)
+                            },
+                            positiveText = R.string.send,
+                            onPositiveClicked = {
+                                focusManager.clearFocus()
+                                onPositiveClicked(settingsListInput)
+                            },
+                        )
+                    }
+                }
             }
+
+            AnimatedVisibility(
+                visible = maxChannels > settingsListInput.size,
+                modifier = Modifier.align(Alignment.BottomEnd),
+                enter =
+                slideInHorizontally(
+                    initialOffsetX = { it },
+                    animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing),
+                ),
+                exit =
+                slideOutHorizontally(
+                    targetOffsetX = { it },
+                    animationSpec = tween(durationMillis = 600, easing = FastOutSlowInEasing),
+                ),
+            ) {}
         }
     }
 }
 
 @Composable
 private fun ChannelsConfigHeader(frequency: Float, slot: Int) {
-    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
         PreferenceCategory(text = stringResource(R.string.channels))
         Column {
             Text(text = "${stringResource(R.string.freq)}: ${frequency}MHz", fontSize = 11.sp)
@@ -380,6 +398,8 @@ private fun determineLocationSharingChannel(firmwareVersion: DeviceVersion, sett
 @Composable
 private fun ChannelSettingsPreview() {
     ChannelSettingsItemList(
+        title = "Channels",
+        onBack = {},
         settingsList =
         listOf(
             channelSettings {

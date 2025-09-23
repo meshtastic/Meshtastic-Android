@@ -21,6 +21,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.geeksville.mesh.android.Logging
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -30,6 +32,9 @@ import org.json.JSONArray
 import org.json.JSONObject
 import org.meshtastic.core.datastore.model.RecentAddress
 import timber.log.Timber
+import javax.inject.Inject
+import javax.inject.Singleton
+import org.meshtastic.core.strings.R
 import javax.inject.Inject
 import javax.inject.Singleton
 

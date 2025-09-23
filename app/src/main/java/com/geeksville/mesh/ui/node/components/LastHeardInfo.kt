@@ -35,26 +35,18 @@ import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.util.formatAgo
 
 @Composable
-fun LastHeardInfo(
-    modifier: Modifier = Modifier,
-    lastHeard: Int,
-    currentTimeMillis: Long,
-) {
-
+fun LastHeardInfo(modifier: Modifier = Modifier, lastHeard: Int, currentTimeMillis: Long) {
     Row(
         modifier = modifier,
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(2.dp)
+        horizontalArrangement = Arrangement.spacedBy(2.dp),
     ) {
         Icon(
             modifier = Modifier.height(18.dp),
             imageVector = ImageVector.vectorResource(id = R.drawable.ic_antenna_24),
             contentDescription = null,
         )
-        Text(
-            text = formatAgo(lastHeard, currentTimeMillis),
-            fontSize = MaterialTheme.typography.labelLarge.fontSize
-        )
+        Text(text = formatAgo(lastHeard, currentTimeMillis), fontSize = MaterialTheme.typography.labelLarge.fontSize)
     }
 }
 
@@ -64,7 +56,7 @@ fun LastHeardInfoPreview() {
     AppTheme {
         LastHeardInfo(
             lastHeard = (System.currentTimeMillis() / 1000).toInt() - 8600,
-            currentTimeMillis = System.currentTimeMillis()
+            currentTimeMillis = System.currentTimeMillis(),
         )
     }
 }

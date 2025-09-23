@@ -22,7 +22,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
-import android.content.ContentResolver
+import android.content.ContentResolver.SCHEME_ANDROID_RESOURCE
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -36,12 +36,13 @@ import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.MeshProtos
-import com.geeksville.mesh.R
+import com.geeksville.mesh.R.raw
 import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
 import com.geeksville.mesh.util.formatUptime
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
+import org.meshtastic.core.strings.R
 
 /**
  * Manages the creation and display of all app notifications.
@@ -184,8 +185,7 @@ class MeshServiceNotifications(private val context: Context) {
                         enableLights(true)
                         enableVibration(true)
                         setBypassDnd(true)
-                        val alertSoundUri =
-                            "${ContentResolver.SCHEME_ANDROID_RESOURCE}://${context.packageName}/${R.raw.alert}".toUri()
+                        val alertSoundUri = "${SCHEME_ANDROID_RESOURCE}://${context.packageName}/${raw.alert}".toUri()
                         setSound(
                             alertSoundUri,
                             AudioAttributes.Builder()
@@ -415,7 +415,7 @@ class MeshServiceNotifications(private val context: Context) {
         type: NotificationType,
         contentIntent: PendingIntent? = null,
     ): NotificationCompat.Builder {
-        val smallIcon = R.drawable.app_icon
+        val smallIcon = com.geeksville.mesh.R.drawable.app_icon
 
         return NotificationCompat.Builder(context, type.channelId)
             .setSmallIcon(smallIcon)

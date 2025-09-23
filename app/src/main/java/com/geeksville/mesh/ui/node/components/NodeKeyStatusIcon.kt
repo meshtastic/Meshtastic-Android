@@ -54,7 +54,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
-import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.common.components.CopyIconButton
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
@@ -62,6 +61,7 @@ import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
 import com.google.protobuf.ByteString
 import org.meshtastic.core.model.Channel
+import org.meshtastic.core.strings.R
 
 @Composable
 private fun KeyStatusDialog(@StringRes title: Int, @StringRes text: Int, key: ByteString?, onDismiss: () -> Unit = {}) =
@@ -129,7 +129,9 @@ fun NodeKeyStatusIcon(
         when {
             mismatchKey -> Icons.Default.KeyOff to colorScheme.StatusRed
             hasPKC -> Icons.Default.Lock to colorScheme.StatusGreen
-            else -> ImageVector.vectorResource(R.drawable.ic_lock_open_right_24) to colorScheme.StatusYellow
+            else ->
+                ImageVector.vectorResource(com.geeksville.mesh.R.drawable.ic_lock_open_right_24) to
+                    colorScheme.StatusYellow
         }
 
     IconButton(onClick = { showEncryptionDialog = true }, modifier = modifier) {

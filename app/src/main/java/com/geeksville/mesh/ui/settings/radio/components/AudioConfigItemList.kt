@@ -17,66 +17,52 @@
 
 package com.geeksville.mesh.ui.settings.radio.components
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.AudioConfig
-import com.geeksville.mesh.R
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.ui.common.components.DropDownPreference
 import com.geeksville.mesh.ui.common.components.EditTextPreference
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
-import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
+import org.meshtastic.core.strings.R
 
 @Composable
-fun AudioConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun AudioConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val audioConfig = state.moduleConfig.audio
+    val formState = rememberConfigState(initialValue = audioConfig)
+    val focusManager = LocalFocusManager.current
 
-    if (state.responseState.isWaiting()) {
-        PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
-    }
-
-    AudioConfigItemList(
-        audioConfig = state.moduleConfig.audio,
+    RadioConfigScreenList(
+        title = stringResource(id = R.string.audio),
+        onBack = { navController.popBackStack() },
+        configState = formState,
         enabled = state.connected,
-        onSaveClicked = { audioInput ->
-            val config = moduleConfig { audio = audioInput }
+        responseState = state.responseState,
+        onDismissPacketResponse = viewModel::clearPacketResponse,
+        onSave = {
+            val config = moduleConfig { audio = it }
             viewModel.setModuleConfig(config)
         },
-    )
-}
-
-@Suppress("LongMethod")
-@Composable
-fun AudioConfigItemList(audioConfig: AudioConfig, enabled: Boolean, onSaveClicked: (AudioConfig) -> Unit) {
-    val focusManager = LocalFocusManager.current
-    var audioInput by rememberSaveable { mutableStateOf(audioConfig) }
-
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    ) {
         item { PreferenceCategory(text = stringResource(R.string.audio_config)) }
 
         item {
             SwitchPreference(
                 title = stringResource(R.string.codec_2_enabled),
-                checked = audioInput.codec2Enabled,
-                enabled = enabled,
-                onCheckedChange = { audioInput = audioInput.copy { codec2Enabled = it } },
+                checked = formState.value.codec2Enabled,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { codec2Enabled = it } },
             )
         }
         item { HorizontalDivider() }
@@ -84,85 +70,65 @@ fun AudioConfigItemList(audioConfig: AudioConfig, enabled: Boolean, onSaveClicke
         item {
             EditTextPreference(
                 title = stringResource(R.string.ptt_pin),
-                value = audioInput.pttPin,
-                enabled = enabled,
+                value = formState.value.pttPin,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { audioInput = audioInput.copy { pttPin = it } },
+                onValueChanged = { formState.value = formState.value.copy { pttPin = it } },
             )
         }
 
         item {
             DropDownPreference(
                 title = stringResource(R.string.codec2_sample_rate),
-                enabled = enabled,
+                enabled = state.connected,
                 items =
                 AudioConfig.Audio_Baud.entries
                     .filter { it != AudioConfig.Audio_Baud.UNRECOGNIZED }
                     .map { it to it.name },
-                selectedItem = audioInput.bitrate,
-                onItemSelected = { audioInput = audioInput.copy { bitrate = it } },
+                selectedItem = formState.value.bitrate,
+                onItemSelected = { formState.value = formState.value.copy { bitrate = it } },
             )
         }
-        item { Divider() }
+        item { HorizontalDivider() }
 
         item {
             EditTextPreference(
                 title = stringResource(R.string.i2s_word_select),
-                value = audioInput.i2SWs,
-                enabled = enabled,
+                value = formState.value.i2SWs,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { audioInput = audioInput.copy { i2SWs = it } },
+                onValueChanged = { formState.value = formState.value.copy { i2SWs = it } },
             )
         }
 
         item {
             EditTextPreference(
                 title = stringResource(R.string.i2s_data_in),
-                value = audioInput.i2SSd,
-                enabled = enabled,
+                value = formState.value.i2SSd,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { audioInput = audioInput.copy { i2SSd = it } },
+                onValueChanged = { formState.value = formState.value.copy { i2SSd = it } },
             )
         }
 
         item {
             EditTextPreference(
                 title = stringResource(R.string.i2s_data_out),
-                value = audioInput.i2SDin,
-                enabled = enabled,
+                value = formState.value.i2SDin,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { audioInput = audioInput.copy { i2SDin = it } },
+                onValueChanged = { formState.value = formState.value.copy { i2SDin = it } },
             )
         }
 
         item {
             EditTextPreference(
                 title = stringResource(R.string.i2s_clock),
-                value = audioInput.i2SSck,
-                enabled = enabled,
+                value = formState.value.i2SSck,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { audioInput = audioInput.copy { i2SSck = it } },
-            )
-        }
-
-        item {
-            PreferenceFooter(
-                enabled = enabled && audioInput != audioConfig,
-                onCancelClicked = {
-                    focusManager.clearFocus()
-                    audioInput = audioConfig
-                },
-                onSaveClicked = {
-                    focusManager.clearFocus()
-                    onSaveClicked(audioInput)
-                },
+                onValueChanged = { formState.value = formState.value.copy { i2SSck = it } },
             )
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun AudioConfigPreview() {
-    AudioConfigItemList(audioConfig = AudioConfig.getDefaultInstance(), enabled = true, onSaveClicked = {})
 }

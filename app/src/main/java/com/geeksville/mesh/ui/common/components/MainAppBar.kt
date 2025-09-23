@@ -46,7 +46,6 @@ import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
-import com.geeksville.mesh.R
 import com.geeksville.mesh.model.Node
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.navigation.isConfigRoute
@@ -59,6 +58,7 @@ import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.strings.R
 
 @Suppress("CyclomaticComplexMethod")
 @Composable
@@ -153,7 +153,7 @@ fun MainAppBar(
             {
                 IconButton(enabled = false, onClick = {}) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.app_icon),
+                        imageVector = ImageVector.vectorResource(id = com.geeksville.mesh.R.drawable.app_icon),
                         contentDescription = stringResource(id = R.string.application_icon),
                     )
                 }

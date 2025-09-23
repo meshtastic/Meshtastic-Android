@@ -17,67 +17,50 @@
 
 package com.geeksville.mesh.ui.settings.radio.components
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig.StoreForwardConfig
-import com.geeksville.mesh.R
+import androidx.navigation.NavController
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.ui.common.components.EditTextPreference
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
-import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
+import org.meshtastic.core.strings.R
 
 @Composable
-fun StoreForwardConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun StoreForwardConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val storeForwardConfig = state.moduleConfig.storeForward
+    val formState = rememberConfigState(initialValue = storeForwardConfig)
+    val focusManager = LocalFocusManager.current
 
-    if (state.responseState.isWaiting()) {
-        PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
-    }
-
-    StoreForwardConfigItemList(
-        storeForwardConfig = state.moduleConfig.storeForward,
+    RadioConfigScreenList(
+        title = stringResource(id = R.string.store_forward),
+        onBack = { navController.popBackStack() },
+        configState = formState,
         enabled = state.connected,
-        onSaveClicked = { storeForwardInput ->
-            val config = moduleConfig { storeForward = storeForwardInput }
+        responseState = state.responseState,
+        onDismissPacketResponse = viewModel::clearPacketResponse,
+        onSave = {
+            val config = moduleConfig { storeForward = it }
             viewModel.setModuleConfig(config)
         },
-    )
-}
-
-@Composable
-fun StoreForwardConfigItemList(
-    storeForwardConfig: StoreForwardConfig,
-    enabled: Boolean,
-    onSaveClicked: (StoreForwardConfig) -> Unit,
-) {
-    val focusManager = LocalFocusManager.current
-    var storeForwardInput by rememberSaveable { mutableStateOf(storeForwardConfig) }
-
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    ) {
         item { PreferenceCategory(text = stringResource(R.string.store_forward_config)) }
 
         item {
             SwitchPreference(
                 title = stringResource(R.string.store_forward_enabled),
-                checked = storeForwardInput.enabled,
-                enabled = enabled,
-                onCheckedChange = { storeForwardInput = storeForwardInput.copy { this.enabled = it } },
+                checked = formState.value.enabled,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
             )
         }
         item { HorizontalDivider() }
@@ -85,9 +68,9 @@ fun StoreForwardConfigItemList(
         item {
             SwitchPreference(
                 title = stringResource(R.string.heartbeat),
-                checked = storeForwardInput.heartbeat,
-                enabled = enabled,
-                onCheckedChange = { storeForwardInput = storeForwardInput.copy { heartbeat = it } },
+                checked = formState.value.heartbeat,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { heartbeat = it } },
             )
         }
         item { HorizontalDivider() }
@@ -95,65 +78,41 @@ fun StoreForwardConfigItemList(
         item {
             EditTextPreference(
                 title = stringResource(R.string.number_of_records),
-                value = storeForwardInput.records,
-                enabled = enabled,
+                value = formState.value.records,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { storeForwardInput = storeForwardInput.copy { records = it } },
+                onValueChanged = { formState.value = formState.value.copy { records = it } },
             )
         }
 
         item {
             EditTextPreference(
                 title = stringResource(R.string.history_return_max),
-                value = storeForwardInput.historyReturnMax,
-                enabled = enabled,
+                value = formState.value.historyReturnMax,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { storeForwardInput = storeForwardInput.copy { historyReturnMax = it } },
+                onValueChanged = { formState.value = formState.value.copy { historyReturnMax = it } },
             )
         }
 
         item {
             EditTextPreference(
                 title = stringResource(R.string.history_return_window),
-                value = storeForwardInput.historyReturnWindow,
-                enabled = enabled,
+                value = formState.value.historyReturnWindow,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { storeForwardInput = storeForwardInput.copy { historyReturnWindow = it } },
+                onValueChanged = { formState.value = formState.value.copy { historyReturnWindow = it } },
             )
         }
 
         item {
             SwitchPreference(
                 title = stringResource(R.string.server),
-                checked = storeForwardInput.isServer,
-                enabled = enabled,
-                onCheckedChange = { storeForwardInput = storeForwardInput.copy { isServer = it } },
+                checked = formState.value.isServer,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { isServer = it } },
             )
         }
         item { HorizontalDivider() }
-
-        item {
-            PreferenceFooter(
-                enabled = enabled && storeForwardInput != storeForwardConfig,
-                onCancelClicked = {
-                    focusManager.clearFocus()
-                    storeForwardInput = storeForwardConfig
-                },
-                onSaveClicked = {
-                    focusManager.clearFocus()
-                    onSaveClicked(storeForwardInput)
-                },
-            )
-        }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun StoreForwardConfigPreview() {
-    StoreForwardConfigItemList(
-        storeForwardConfig = StoreForwardConfig.getDefaultInstance(),
-        enabled = true,
-        onSaveClicked = {},
-    )
 }

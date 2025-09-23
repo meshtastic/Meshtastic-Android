@@ -17,106 +17,88 @@
 
 package com.geeksville.mesh.ui.settings.radio.components
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.geeksville.mesh.ChannelProtos.ChannelSettings
+import androidx.navigation.NavController
 import com.geeksville.mesh.ConfigProtos.Config.LoRaConfig
-import com.geeksville.mesh.R
 import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.common.components.DropDownPreference
 import com.geeksville.mesh.ui.common.components.EditTextPreference
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
-import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.common.components.SignedIntegerEditTextPreference
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.RegionInfo
 import org.meshtastic.core.model.numChannels
+import org.meshtastic.core.strings.R
 
 @Composable
-fun LoRaConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun LoRaConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val loraConfig = state.radioConfig.lora
+    val primarySettings = state.channelList.getOrNull(0) ?: return
+    val formState = rememberConfigState(initialValue = loraConfig)
 
-    if (state.responseState.isWaiting()) {
-        PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
-    }
+    val primaryChannel by remember(formState.value) { mutableStateOf(Channel(primarySettings, formState.value)) }
+    val focusManager = LocalFocusManager.current
 
-    LoRaConfigItemList(
-        loraConfig = state.radioConfig.lora,
-        primarySettings = state.channelList.getOrNull(0) ?: return,
+    RadioConfigScreenList(
+        title = stringResource(id = R.string.lora),
+        onBack = { navController.popBackStack() },
+        configState = formState,
         enabled = state.connected,
-        onSaveClicked = { loraInput ->
-            val config = config { lora = loraInput }
+        responseState = state.responseState,
+        onDismissPacketResponse = viewModel::clearPacketResponse,
+        onSave = {
+            val config = config { lora = it }
             viewModel.setConfig(config)
         },
-        hasPaFan = viewModel.hasPaFan,
-    )
-}
-
-@Suppress("LongMethod")
-@Composable
-fun LoRaConfigItemList(
-    loraConfig: LoRaConfig,
-    primarySettings: ChannelSettings,
-    enabled: Boolean,
-    onSaveClicked: (LoRaConfig) -> Unit,
-    hasPaFan: Boolean = false,
-) {
-    val focusManager = LocalFocusManager.current
-    var loraInput by rememberSaveable { mutableStateOf(loraConfig) }
-    val primaryChannel by remember(loraInput) { mutableStateOf(Channel(primarySettings, loraInput)) }
-
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    ) {
         item { PreferenceCategory(text = stringResource(R.string.options)) }
         item {
             DropDownPreference(
                 title = stringResource(R.string.region_frequency_plan),
                 summary = stringResource(id = R.string.config_lora_region_summary),
-                enabled = enabled,
+                enabled = state.connected,
                 items = RegionInfo.entries.map { it.regionCode to it.description },
-                selectedItem = loraInput.region,
-                onItemSelected = { loraInput = loraInput.copy { region = it } },
+                selectedItem = formState.value.region,
+                onItemSelected = { formState.value = formState.value.copy { region = it } },
             )
         }
         item { HorizontalDivider() }
         item {
             SwitchPreference(
                 title = stringResource(R.string.use_modem_preset),
-                checked = loraInput.usePreset,
-                enabled = enabled,
-                onCheckedChange = { loraInput = loraInput.copy { usePreset = it } },
+                checked = formState.value.usePreset,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { usePreset = it } },
             )
         }
         item { HorizontalDivider() }
 
-        if (loraInput.usePreset) {
+        if (formState.value.usePreset) {
             item {
                 DropDownPreference(
                     title = stringResource(R.string.modem_preset),
                     summary = stringResource(id = R.string.config_lora_modem_preset_summary),
-                    enabled = enabled && loraInput.usePreset,
+                    enabled = state.connected && formState.value.usePreset,
                     items =
                     LoRaConfig.ModemPreset.entries
                         .filter { it != LoRaConfig.ModemPreset.UNRECOGNIZED }
                         .map { it to it.name },
-                    selectedItem = loraInput.modemPreset,
-                    onItemSelected = { loraInput = loraInput.copy { modemPreset = it } },
+                    selectedItem = formState.value.modemPreset,
+                    onItemSelected = { formState.value = formState.value.copy { modemPreset = it } },
                 )
             }
             item { HorizontalDivider() }
@@ -124,30 +106,30 @@ fun LoRaConfigItemList(
             item {
                 EditTextPreference(
                     title = stringResource(R.string.bandwidth),
-                    value = loraInput.bandwidth,
-                    enabled = enabled && !loraInput.usePreset,
+                    value = formState.value.bandwidth,
+                    enabled = state.connected && !formState.value.usePreset,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { loraInput = loraInput.copy { bandwidth = it } },
+                    onValueChanged = { formState.value = formState.value.copy { bandwidth = it } },
                 )
             }
 
             item {
                 EditTextPreference(
                     title = stringResource(R.string.spread_factor),
-                    value = loraInput.spreadFactor,
-                    enabled = enabled && !loraInput.usePreset,
+                    value = formState.value.spreadFactor,
+                    enabled = state.connected && !formState.value.usePreset,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { loraInput = loraInput.copy { spreadFactor = it } },
+                    onValueChanged = { formState.value = formState.value.copy { spreadFactor = it } },
                 )
             }
 
             item {
                 EditTextPreference(
                     title = stringResource(R.string.coding_rate),
-                    value = loraInput.codingRate,
-                    enabled = enabled && !loraInput.usePreset,
+                    value = formState.value.codingRate,
+                    enabled = state.connected && !formState.value.usePreset,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { loraInput = loraInput.copy { codingRate = it } },
+                    onValueChanged = { formState.value = formState.value.copy { codingRate = it } },
                 )
             }
         }
@@ -156,18 +138,18 @@ fun LoRaConfigItemList(
         item {
             SwitchPreference(
                 title = stringResource(R.string.ignore_mqtt),
-                checked = loraInput.ignoreMqtt,
-                enabled = enabled,
-                onCheckedChange = { loraInput = loraInput.copy { ignoreMqtt = it } },
+                checked = formState.value.ignoreMqtt,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { ignoreMqtt = it } },
             )
         }
         item { HorizontalDivider() }
         item {
             SwitchPreference(
                 title = stringResource(R.string.ok_to_mqtt),
-                checked = loraInput.configOkToMqtt,
-                enabled = enabled,
-                onCheckedChange = { loraInput = loraInput.copy { configOkToMqtt = it } },
+                checked = formState.value.configOkToMqtt,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { configOkToMqtt = it } },
             )
         }
         item { HorizontalDivider() }
@@ -175,9 +157,9 @@ fun LoRaConfigItemList(
         item {
             SwitchPreference(
                 title = stringResource(R.string.tx_enabled),
-                checked = loraInput.txEnabled,
-                enabled = enabled,
-                onCheckedChange = { loraInput = loraInput.copy { txEnabled = it } },
+                checked = formState.value.txEnabled,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { txEnabled = it } },
             )
         }
         item { HorizontalDivider() }
@@ -185,10 +167,10 @@ fun LoRaConfigItemList(
             EditTextPreference(
                 title = stringResource(R.string.hop_limit),
                 summary = stringResource(id = R.string.config_lora_hop_limit_summary),
-                value = loraInput.hopLimit,
-                enabled = enabled,
+                value = formState.value.hopLimit,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { loraInput = loraInput.copy { hopLimit = it } },
+                onValueChanged = { formState.value = formState.value.copy { hopLimit = it } },
             )
         }
         item { HorizontalDivider() }
@@ -198,13 +180,18 @@ fun LoRaConfigItemList(
             EditTextPreference(
                 title = stringResource(R.string.frequency_slot),
                 summary = stringResource(id = R.string.config_lora_frequency_slot_summary),
-                value = if (isFocused || loraInput.channelNum != 0) loraInput.channelNum else primaryChannel.channelNum,
-                enabled = enabled,
+                value =
+                if (isFocused || formState.value.channelNum != 0) {
+                    formState.value.channelNum
+                } else {
+                    primaryChannel.channelNum
+                },
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onFocusChanged = { isFocused = it.isFocused },
                 onValueChanged = {
-                    if (it <= loraInput.numChannels) { // total num of LoRa channels
-                        loraInput = loraInput.copy { channelNum = it }
+                    if (it <= formState.value.numChannels) { // total num of LoRa channels
+                        formState.value = formState.value.copy { channelNum = it }
                     }
                 },
             )
@@ -213,9 +200,9 @@ fun LoRaConfigItemList(
         item {
             SwitchPreference(
                 title = stringResource(R.string.sx126x_rx_boosted_gain),
-                checked = loraInput.sx126XRxBoostedGain,
-                enabled = enabled,
-                onCheckedChange = { loraInput = loraInput.copy { sx126XRxBoostedGain = it } },
+                checked = formState.value.sx126XRxBoostedGain,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { sx126XRxBoostedGain = it } },
             )
         }
         item { HorizontalDivider() }
@@ -224,63 +211,38 @@ fun LoRaConfigItemList(
             EditTextPreference(
                 title = stringResource(R.string.override_frequency_mhz),
                 value =
-                if (isFocused || loraInput.overrideFrequency != 0f) {
-                    loraInput.overrideFrequency
+                if (isFocused || formState.value.overrideFrequency != 0f) {
+                    formState.value.overrideFrequency
                 } else {
                     primaryChannel.radioFreq
                 },
-                enabled = enabled,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onFocusChanged = { isFocused = it.isFocused },
-                onValueChanged = { loraInput = loraInput.copy { overrideFrequency = it } },
+                onValueChanged = { formState.value = formState.value.copy { overrideFrequency = it } },
             )
         }
         item { HorizontalDivider() }
         item {
             SignedIntegerEditTextPreference(
                 title = stringResource(R.string.tx_power_dbm),
-                value = loraInput.txPower,
-                enabled = enabled,
+                value = formState.value.txPower,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { loraInput = loraInput.copy { txPower = it } },
+                onValueChanged = { formState.value = formState.value.copy { txPower = it } },
             )
         }
 
-        if (hasPaFan) {
+        if (viewModel.hasPaFan) {
             item {
                 SwitchPreference(
                     title = stringResource(R.string.pa_fan_disabled),
-                    checked = loraInput.paFanDisabled,
-                    enabled = enabled,
-                    onCheckedChange = { loraInput = loraInput.copy { paFanDisabled = it } },
+                    checked = formState.value.paFanDisabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { paFanDisabled = it } },
                 )
             }
             item { HorizontalDivider() }
         }
-
-        item {
-            PreferenceFooter(
-                enabled = enabled && loraInput != loraConfig,
-                onCancelClicked = {
-                    focusManager.clearFocus()
-                    loraInput = loraConfig
-                },
-                onSaveClicked = {
-                    focusManager.clearFocus()
-                    onSaveClicked(loraInput)
-                },
-            )
-        }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun LoRaConfigPreview() {
-    LoRaConfigItemList(
-        loraConfig = Channel.default.loraConfig,
-        primarySettings = Channel.default.settings,
-        enabled = true,
-        onSaveClicked = {},
-    )
 }

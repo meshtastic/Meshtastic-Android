@@ -30,7 +30,6 @@ internal fun Project.configureDetekt(extension: DetektExtension) = extension.app
         config.setFrom("$rootDir/config/detekt/detekt.yml")
         buildUponDefaultConfig = true
         allRules = false
-        baseline = file("$rootDir/config/detekt/baseline.xml")
         source.setFrom(
             files(
                 "src/main/java",

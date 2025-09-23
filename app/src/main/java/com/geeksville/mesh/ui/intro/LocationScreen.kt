@@ -26,7 +26,7 @@ import androidx.compose.material.icons.outlined.Router
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
-import com.geeksville.mesh.R
+import org.meshtastic.core.strings.R
 
 /**
  * Screen for configuring location permissions during the app introduction. It explains why location permissions are

@@ -49,7 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.EnvironmentMetrics
-import com.geeksville.mesh.R
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.copy
@@ -62,6 +61,7 @@ import com.geeksville.mesh.ui.common.components.SlidingSelector
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.util.UnitConversions.celsiusToFahrenheit
+import org.meshtastic.core.strings.R
 
 @Composable
 fun EnvironmentMetricsScreen(viewModel: MetricsViewModel = hiltViewModel()) {
