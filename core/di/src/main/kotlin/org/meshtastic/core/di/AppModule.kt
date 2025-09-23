@@ -15,34 +15,24 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.di
+package org.meshtastic.core.di
 
-import com.geeksville.mesh.repository.map.CustomTileProviderRepository
-import com.geeksville.mesh.repository.map.SharedPreferencesCustomTileProviderRepository
-import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
-import kotlinx.serialization.json.Json
-import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
+import org.meshtastic.core.di.annotation.DefaultDispatcher
+import org.meshtastic.core.di.annotation.IoDispatcher
 
 @Module
 @InstallIn(SingletonComponent::class)
-object MapModule {
+object AppModule {
 
-    // Serialization Provider (from original SerializationModule)
-    @Provides @Singleton
-    fun provideJson(): Json = Json { prettyPrint = false }
-}
+    @Provides @DefaultDispatcher
+    fun provideDefaultDispatcher(): CoroutineDispatcher = Dispatchers.Default
 
-@Module
-@InstallIn(SingletonComponent::class)
-abstract class MapRepositoryModule {
-
-    @Binds
-    @Singleton
-    abstract fun bindCustomTileProviderRepository(
-        impl: SharedPreferencesCustomTileProviderRepository,
-    ): CustomTileProviderRepository
+    @Provides @IoDispatcher
+    fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 }
