@@ -861,4 +861,7 @@
     <string name="icon_meanings">Ikooni tähendused</string>
     <string name="secondary_channel_position_feature">Põhikanalil asukoha jagamise keelamine lubab perioodilist asukoha edastust esimesel lisakanalil, kui asukoht on lubatud, vastasel juhul on vaja käsitsi asukoha päringut teha.</string>
     <string name="device_configuration">Device configuration</string>
+    <string name="remotely_administrating">"[Remote] %1$s"</string>
+    <string name="device_telemetry_enabled">Send Device Telemetry</string>
+    <string name="device_telemetry_enabled_summary">Enable/Disable the device telemetry module to send metrics to the mesh</string>
 </resources>

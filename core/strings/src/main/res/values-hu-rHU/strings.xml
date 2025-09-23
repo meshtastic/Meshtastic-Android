@@ -858,4 +858,7 @@
     <string name="icon_meanings">Ikonmagyarázatok</string>
     <string name="secondary_channel_position_feature">Az elsődleges csatornán a pozíció letiltása lehetővé teszi az időszakos pozíció-sugárzást az első olyan másodlagos csatornán, ahol a pozíció engedélyezett, ellenkező esetben kézi pozíciólekérés szükséges.</string>
     <string name="device_configuration">Device configuration</string>
+    <string name="remotely_administrating">"[Remote] %1$s"</string>
+    <string name="device_telemetry_enabled">Send Device Telemetry</string>
+    <string name="device_telemetry_enabled_summary">Enable/Disable the device telemetry module to send metrics to the mesh</string>
 </resources>

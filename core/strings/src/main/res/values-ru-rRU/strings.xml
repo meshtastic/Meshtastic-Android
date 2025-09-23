@@ -865,4 +865,7 @@
     <string name="icon_meanings">Icon Meanings</string>
     <string name="secondary_channel_position_feature">Disabling position on the primary channel allows periodic position broadcasts on the first secondary channel with the position enabled, otherwise manual position request required.</string>
     <string name="device_configuration">Device configuration</string>
+    <string name="remotely_administrating">"[Remote] %1$s"</string>
+    <string name="device_telemetry_enabled">Send Device Telemetry</string>
+    <string name="device_telemetry_enabled_summary">Enable/Disable the device telemetry module to send metrics to the mesh</string>
 </resources>

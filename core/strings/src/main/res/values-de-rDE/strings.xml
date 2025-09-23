@@ -861,4 +861,7 @@
     <string name="icon_meanings">Symbolbedeutung</string>
     <string name="secondary_channel_position_feature">Durch Deaktivieren des Standortes auf dem primären Kanal werden regelmäßige Standortübertragungen auf dem ersten sekundären Kanal mit aktiviertem Standort ermöglicht, andernfalls ist eine manuelle Standortanforderung erforderlich.</string>
     <string name="device_configuration">Geräteeinstellungen</string>
+    <string name="remotely_administrating">"[Remote] %1$s"</string>
+    <string name="device_telemetry_enabled">Send Device Telemetry</string>
+    <string name="device_telemetry_enabled_summary">Enable/Disable the device telemetry module to send metrics to the mesh</string>
 </resources>
