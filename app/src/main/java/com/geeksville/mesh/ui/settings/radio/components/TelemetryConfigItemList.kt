@@ -56,6 +56,16 @@ fun TelemetryConfigScreen(navController: NavController, viewModel: RadioConfigVi
         item { PreferenceCategory(text = stringResource(R.string.telemetry_config)) }
 
         item {
+            SwitchPreference(
+                title = stringResource(R.string.device_telemetry_enabled),
+                summary = stringResource(R.string.device_telemetry_enabled_summary),
+                checked = formState.value.deviceTelemetryEnabled,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { deviceTelemetryEnabled = it } },
+            )
+        }
+
+        item {
             EditTextPreference(
                 title = stringResource(R.string.device_metrics_update_interval_seconds),
                 value = formState.value.deviceUpdateInterval,
