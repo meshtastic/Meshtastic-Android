@@ -178,7 +178,9 @@ fun AddContactFAB(
 
 @Composable
 private fun QrCodeImage(uri: Uri, modifier: Modifier = Modifier) = Image(
-    painter = uri.qrCode?.let { BitmapPainter(it.asImageBitmap()) } ?: painterResource(id = com.geeksville.mesh.R.drawable.qrcode),
+    painter =
+    uri.qrCode?.let { BitmapPainter(it.asImageBitmap()) }
+        ?: painterResource(id = com.geeksville.mesh.R.drawable.qrcode),
     contentDescription = stringResource(R.string.qr_code),
     modifier = modifier,
     contentScale = ContentScale.Inside,

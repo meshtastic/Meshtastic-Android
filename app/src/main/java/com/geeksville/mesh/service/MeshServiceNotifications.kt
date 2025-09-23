@@ -22,7 +22,7 @@ import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.app.TaskStackBuilder
-import android.content.ContentResolver
+import android.content.ContentResolver.SCHEME_ANDROID_RESOURCE
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -36,6 +36,7 @@ import androidx.core.content.getSystemService
 import androidx.core.net.toUri
 import com.geeksville.mesh.MainActivity
 import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.R.raw
 import com.geeksville.mesh.TelemetryProtos.LocalStats
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
@@ -185,7 +186,8 @@ class MeshServiceNotifications(private val context: Context) {
                         enableVibration(true)
                         setBypassDnd(true)
                         val alertSoundUri =
-                            "${ContentResolver.SCHEME_ANDROID_RESOURCE}://${context.packageName}/${com.geeksville.mesh.R.raw.alert}".toUri()
+                            "${SCHEME_ANDROID_RESOURCE}://${context.packageName}/${raw.alert}"
+                                .toUri()
                         setSound(
                             alertSoundUri,
                             AudioAttributes.Builder()

@@ -717,7 +717,12 @@ private fun ColumnScope.DeviceDetailsContent(state: MetricsState) {
         } else {
             stringResource(R.string.supported_by_community)
         },
-        icon = if (isSupported) Icons.TwoTone.Verified else ImageVector.vectorResource(com.geeksville.mesh.R.drawable.unverified),
+        icon =
+        if (isSupported) {
+            Icons.TwoTone.Verified
+        } else {
+            ImageVector.vectorResource(com.geeksville.mesh.R.drawable.unverified)
+        },
         trailingText = "",
         iconTint = if (isSupported) colorScheme.StatusGreen else colorScheme.StatusRed,
     )

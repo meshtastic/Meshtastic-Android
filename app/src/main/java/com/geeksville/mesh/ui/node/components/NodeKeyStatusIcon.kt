@@ -129,7 +129,9 @@ fun NodeKeyStatusIcon(
         when {
             mismatchKey -> Icons.Default.KeyOff to colorScheme.StatusRed
             hasPKC -> Icons.Default.Lock to colorScheme.StatusGreen
-            else -> ImageVector.vectorResource(com.geeksville.mesh.R.drawable.ic_lock_open_right_24) to colorScheme.StatusYellow
+            else ->
+                ImageVector.vectorResource(com.geeksville.mesh.R.drawable.ic_lock_open_right_24) to
+                    colorScheme.StatusYellow
         }
 
     IconButton(onClick = { showEncryptionDialog = true }, modifier = modifier) {
