@@ -44,15 +44,14 @@ import javax.net.ssl.SSLContext
 import javax.net.ssl.TrustManager
 
 @Singleton
-class MQTTRepository @Inject constructor(
-    private val radioConfigRepository: RadioConfigRepository,
-) : Logging {
+class MQTTRepository @Inject constructor(private val radioConfigRepository: RadioConfigRepository) : Logging {
 
     companion object {
         /**
          * Quality of Service (QoS) levels in MQTT:
          * - QoS 0: "at most once". Packets are sent once without validation if it has been received.
-         * - QoS 1: "at least once". Packets are sent and stored until the client receives confirmation from the server. MQTT ensures delivery, but duplicates may occur.
+         * - QoS 1: "at least once". Packets are sent and stored until the client receives confirmation from the server.
+         *   MQTT ensures delivery, but duplicates may occur.
          * - QoS 2: "exactly once". Similar to QoS 1, but with no duplicates.
          */
         private const val DEFAULT_QOS = 1
@@ -84,63 +83,72 @@ class MQTTRepository @Inject constructor(
 
         val rootTopic = mqttConfig.root.ifEmpty { DEFAULT_TOPIC_ROOT }
 
-        val connectOptions = MqttConnectOptions().apply {
-            userName = mqttConfig.username
-            password = mqttConfig.password.toCharArray()
-            isAutomaticReconnect = true
-            if (mqttConfig.tlsEnabled) {
-                socketFactory = sslContext.socketFactory
-            }
-        }
-
-        val bufferOptions = DisconnectedBufferOptions().apply {
-            isBufferEnabled = true
-            bufferSize = 512
-            isPersistBuffer = false
-            isDeleteOldestMessages = true
-        }
-
-        val callback = object : MqttCallbackExtended {
-            override fun connectComplete(reconnect: Boolean, serverURI: String) {
-                info("MQTT connectComplete: $serverURI reconnect: $reconnect")
-                channelSet.subscribeList.ifEmpty { return }.forEach { globalId ->
-                    subscribe("$rootTopic$DEFAULT_TOPIC_LEVEL$globalId/+")
-                    if (mqttConfig.jsonEnabled) subscribe("$rootTopic$JSON_TOPIC_LEVEL$globalId/+")
+        val connectOptions =
+            MqttConnectOptions().apply {
+                userName = mqttConfig.username
+                password = mqttConfig.password.toCharArray()
+                isAutomaticReconnect = true
+                if (mqttConfig.tlsEnabled) {
+                    socketFactory = sslContext.socketFactory
                 }
-                subscribe("$rootTopic${DEFAULT_TOPIC_LEVEL}PKI/+")
             }
 
-            override fun connectionLost(cause: Throwable) {
-                info("MQTT connectionLost cause: $cause")
-                if (cause is IllegalArgumentException) close(cause)
+        val bufferOptions =
+            DisconnectedBufferOptions().apply {
+                isBufferEnabled = true
+                bufferSize = 512
+                isPersistBuffer = false
+                isDeleteOldestMessages = true
             }
 
-            override fun messageArrived(topic: String, message: MqttMessage) {
-                trySend(mqttClientProxyMessage {
-                    this.topic = topic
-                    data = ByteString.copyFrom(message.payload)
-                    retained = message.isRetained
-                })
-            }
+        val callback =
+            object : MqttCallbackExtended {
+                override fun connectComplete(reconnect: Boolean, serverURI: String) {
+                    info("MQTT connectComplete: $serverURI reconnect: $reconnect")
+                    channelSet.subscribeList
+                        .ifEmpty {
+                            return
+                        }
+                        .forEach { globalId ->
+                            subscribe("$rootTopic$DEFAULT_TOPIC_LEVEL$globalId/+")
+                            if (mqttConfig.jsonEnabled) subscribe("$rootTopic$JSON_TOPIC_LEVEL$globalId/+")
+                        }
+                    subscribe("$rootTopic${DEFAULT_TOPIC_LEVEL}PKI/+")
+                }
 
-            override fun deliveryComplete(token: IMqttDeliveryToken?) {
-                info("MQTT deliveryComplete messageId: ${token?.messageId}")
+                override fun connectionLost(cause: Throwable) {
+                    info("MQTT connectionLost cause: $cause")
+                    if (cause is IllegalArgumentException) close(cause)
+                }
+
+                override fun messageArrived(topic: String, message: MqttMessage) {
+                    trySend(
+                        mqttClientProxyMessage {
+                            this.topic = topic
+                            data = ByteString.copyFrom(message.payload)
+                            retained = message.isRetained
+                        },
+                    )
+                }
+
+                override fun deliveryComplete(token: IMqttDeliveryToken?) {
+                    info("MQTT deliveryComplete messageId: ${token?.messageId}")
+                }
             }
-        }
 
         val scheme = if (mqttConfig.tlsEnabled) "ssl" else "tcp"
-        val (host, port) = mqttConfig.address.ifEmpty { DEFAULT_SERVER_ADDRESS }
-            .split(":", limit = 2).let { it[0] to (it.getOrNull(1)?.toIntOrNull() ?: -1) }
+        val (host, port) =
+            mqttConfig.address
+                .ifEmpty { DEFAULT_SERVER_ADDRESS }
+                .split(":", limit = 2)
+                .let { it[0] to (it.getOrNull(1)?.toIntOrNull() ?: -1) }
 
-        mqttClient = MqttAsyncClient(
-            URI(scheme, null, host, port, "", "", "").toString(),
-            ownerId,
-            MemoryPersistence(),
-        ).apply {
-            setCallback(callback)
-            setBufferOpts(bufferOptions)
-            connect(connectOptions)
-        }
+        mqttClient =
+            MqttAsyncClient(URI(scheme, null, host, port, "", "", "").toString(), ownerId, MemoryPersistence()).apply {
+                setCallback(callback)
+                setBufferOpts(bufferOptions)
+                connect(connectOptions)
+            }
 
         awaitClose { disconnect() }
     }

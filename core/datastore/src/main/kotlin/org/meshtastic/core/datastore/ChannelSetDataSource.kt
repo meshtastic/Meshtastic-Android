@@ -15,30 +15,28 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.repository.datastore
+package org.meshtastic.core.datastore
 
 import androidx.datastore.core.DataStore
-import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.AppOnlyProtos.ChannelSet
 import com.geeksville.mesh.ChannelProtos.Channel
 import com.geeksville.mesh.ChannelProtos.ChannelSettings
 import com.geeksville.mesh.ConfigProtos
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import timber.log.Timber
 import java.io.IOException
 import javax.inject.Inject
+import javax.inject.Singleton
 
-/**
- * Class that handles saving and retrieving [ChannelSet] data.
- */
-class ChannelSetRepository @Inject constructor(
-    private val channelSetStore: DataStore<ChannelSet>
-) : Logging {
-    val channelSetFlow: Flow<ChannelSet> = channelSetStore.data
-        .catch { exception ->
+/** Class that handles saving and retrieving [ChannelSet] data. */
+@Singleton
+class ChannelSetDataSource @Inject constructor(private val channelSetStore: DataStore<ChannelSet>) {
+    val channelSetFlow: Flow<ChannelSet> =
+        channelSetStore.data.catch { exception ->
             // dataStore.data throws an IOException when an error is encountered when reading data
             if (exception is IOException) {
-                errormsg("Error reading DeviceConfig settings: ${exception.message}")
+                Timber.e("Error reading DeviceConfig settings: ${exception.message}")
                 emit(ChannelSet.getDefaultInstance())
             } else {
                 throw exception
@@ -46,26 +44,18 @@ class ChannelSetRepository @Inject constructor(
         }
 
     suspend fun clearChannelSet() {
-        channelSetStore.updateData { preference ->
-            preference.toBuilder().clear().build()
-        }
+        channelSetStore.updateData { preference -> preference.toBuilder().clear().build() }
     }
 
     suspend fun clearSettings() {
-        channelSetStore.updateData { preference ->
-            preference.toBuilder().clearSettings().build()
-        }
+        channelSetStore.updateData { preference -> preference.toBuilder().clearSettings().build() }
     }
 
     suspend fun addAllSettings(settingsList: List<ChannelSettings>) {
-        channelSetStore.updateData { preference ->
-            preference.toBuilder().addAllSettings(settingsList).build()
-        }
+        channelSetStore.updateData { preference -> preference.toBuilder().addAllSettings(settingsList).build() }
     }
 
-    /**
-     * Updates the [ChannelSettings] list with the provided channel.
-     */
+    /** Updates the [ChannelSettings] list with the provided channel. */
     suspend fun updateChannelSettings(channel: Channel) {
         if (channel.role == Channel.Role.DISABLED) return
         channelSetStore.updateData { preference ->
@@ -80,8 +70,6 @@ class ChannelSetRepository @Inject constructor(
     }
 
     suspend fun setLoraConfig(config: ConfigProtos.Config.LoRaConfig) {
-        channelSetStore.updateData { preference ->
-            preference.toBuilder().setLoraConfig(config).build()
-        }
+        channelSetStore.updateData { preference -> preference.toBuilder().setLoraConfig(config).build() }
     }
 }

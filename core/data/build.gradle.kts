@@ -15,8 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.repository.datastore.recentaddresses
+plugins {
+    alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.kover)
+}
 
-import kotlinx.serialization.Serializable
+android { namespace = "org.meshtastic.core.data" }
 
-@Serializable data class RecentAddress(val address: String, val name: String)
+dependencies {}
