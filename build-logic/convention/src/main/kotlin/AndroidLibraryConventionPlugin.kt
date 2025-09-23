@@ -17,10 +17,8 @@
 
 import com.android.build.api.dsl.LibraryExtension
 import com.android.build.api.variant.LibraryAndroidComponentsExtension
-import com.diffplug.gradle.spotless.SpotlessExtension
 import com.geeksville.mesh.buildlogic.configureFlavors
 import com.geeksville.mesh.buildlogic.configureKotlinAndroid
-import com.geeksville.mesh.buildlogic.configureSpotless
 import com.geeksville.mesh.buildlogic.disableUnnecessaryAndroidTests
 import com.geeksville.mesh.buildlogic.libs
 import org.gradle.api.Plugin
@@ -46,11 +44,6 @@ class AndroidLibraryConventionPlugin : Plugin<Project> {
                 defaultConfig.testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
                 testOptions.animationsDisabled = true
                 configureFlavors(this)
-                // The resource prefix is derived from the module name,
-                // so resources inside ":core:module1" must be prefixed with "core_module1_"
-                resourcePrefix =
-                    path.split("""\W""".toRegex()).drop(1).distinct().joinToString(separator = "_")
-                        .lowercase() + "_"
             }
             extensions.configure<LibraryAndroidComponentsExtension> {
                 disableUnnecessaryAndroidTests(target)
