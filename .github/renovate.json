@@ -33,12 +33,6 @@
       "groupSlug": "meshtastic-protobufs"
     },
     {
-      "matchPackageNames": [
-        "https://github.com/meshtastic/design.git"
-      ],
-      "changelogUrl": "https://github.com/meshtastic/design/compare/{{currentDigest}}...{{newDigest}}"
-    },
-    {
       "description": "Group all AndroidX dependencies (excluding more specific AndroidX groups)",
       "groupName": "AndroidX (General)",
       "groupSlug": "androidx-general",
