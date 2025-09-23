@@ -164,14 +164,14 @@
     <string name="device_sleeping">設備休眠中</string>
     <string name="connected_count">已連接:%1$s 在線</string>
     <string name="ip_address">IP地址：</string>
-    <string name="ip_port">埠號：</string>
-    <string name="connected">已连接</string>
+    <string name="ip_port">Ip_ 埠：</string>
+    <string name="connected">已連線</string>
     <string name="connected_to">已連接至設備 (%s)</string>
     <string name="not_connected">未連線</string>
     <string name="connected_sleeping">已連接至無線電，但它正在休眠中</string>
     <string name="app_too_old">需要應用程式更新</string>
-    <string name="must_update">您必須在應用商店（或 Github）更新此應用程式。它太舊無法與此無線電韌體通訊。請閱讀我們關於此主題的<a href="https://meshtastic.org/docs/software/android/installation">文件</a>。</string>
-    <string name="none">無（停用）</string>
+    <string name="must_update">您必須在應用商店(或 Github)更新此應用程式。它太舊無法與此無線電韌體通訊。請閱讀我們關於此主題的<a href="https://meshtastic.org/docs/software/android/installation">文件</a>。</string>
+    <string name="none">無(停用）</string>
     <string name="meshtastic_service_notifications">服務通知</string>
     <string name="about">關於</string>
     <string name="channel_invalid">此頻道 URL 無效，無法使用</string>
@@ -199,7 +199,7 @@
     <string name="meshtastic_messages_notifications">私訊通知</string>
     <string name="meshtastic_broadcast_notifications">廣播訊息通知</string>
     <string name="meshtastic_alerts_notifications">警告信息</string>
-    <string name="firmware_too_old">需要更新韌體。</string>
+    <string name="firmware_too_old">韌體太舊，需要更新。</string>
     <string name="firmware_old">無法與此應用程式通訊，無線電韌體太舊。有關詳細信息，請參閱<a href="https://meshtastic.org/docs/getting-started/flashing-firmware">我們的韌體安裝指南</a>。</string>
     <string name="okay">好的</string>
     <string name="must_set_region">您必須設定一個區域！</string>
@@ -254,7 +254,7 @@
     <string name="open_settings">開啟設定</string>
     <string name="firmware_version">韌體版本: %1$s</string>
     <string name="permission_missing_31">Meshtastic 應用程式需要啟用「鄰近裝置」權限，才能透過藍牙尋找並連接到裝置，可以選擇在不使用時停用。</string>
-    <string name="direct_message">直接發訊息</string>
+    <string name="direct_message">直通訊息</string>
     <string name="nodedb_reset">重設節點資料庫</string>
     <string name="delivery_confirmed">已確認送達</string>
     <string name="error">錯誤</string>
@@ -311,7 +311,7 @@
     <string name="info">資訊</string>
     <string name="ch_util_definition">目前頻道的使用情況，包括格式正確的傳輸（TX）、接收（RX）和格式錯誤的接收（也稱為雜訊）。</string>
     <string name="air_util_definition">過去一小時内傳輸所使用的通話時間（airtime）百分比。</string>
-    <string name="iaq">室内空氣品質指標 (IAQ)</string>
+    <string name="iaq">室内空氣品質指標(IAQ)</string>
     <string name="encryption_psk">共用金鑰</string>
     <string name="encryption_psk_text">私訊使用頻道的共用金鑰進行加密。</string>
     <string name="encryption_pkc">加密公鑰</string>
@@ -347,11 +347,11 @@
         <item quantity="other">%d 跳數</item>
     </plurals>
     <string name="traceroute_diff">跳轉數 往程 %1$d 次，返程 %2$d 次</string>
-    <string name="twenty_four_hours">24小時</string>
-    <string name="forty_eight_hours">48小時</string>
-    <string name="one_week">1週</string>
-    <string name="two_weeks">2週</string>
-    <string name="four_weeks">4週</string>
+    <string name="twenty_four_hours">二十四小時</string>
+    <string name="forty_eight_hours">四十八小時</string>
+    <string name="one_week">一週</string>
+    <string name="two_weeks">二週</string>
+    <string name="four_weeks">四週</string>
     <string name="max">最大值</string>
     <string name="unknown_age">未知年齡</string>
     <string name="copy">複製</string>
@@ -391,9 +391,9 @@
     <string name="bluetooth">藍芽</string>
     <string name="security">安全</string>
     <string name="mqtt">MQTT</string>
-    <string name="serial">序號</string>
+    <string name="serial">序列埠</string>
     <string name="external_notification">外部通知</string>
-    <string name="store_forward"><![CDATA[儲存 & 轉發]]></string>
+    <string name="store_forward"><![CDATA[儲存與轉發]]></string>
     <string name="range_test">範圍測試</string>
     <string name="telemetry">遙測</string>
     <string name="canned_message">罐頭訊息</string>
@@ -414,7 +414,7 @@
     <string name="bluetooth_config">藍牙配置</string>
     <string name="bluetooth_enabled">藍牙已啟用</string>
     <string name="pairing_mode">配對模式</string>
-    <string name="fixed_pin">固定引脚</string>
+    <string name="fixed_pin">固定藍牙PIN碼</string>
     <string name="uplink_enabled">已啓用上行</string>
     <string name="downlink_enabled">已啓用下行</string>
     <string name="default_">默認</string>
@@ -441,7 +441,7 @@
     <string name="generate_input_event_on_cw">順時針旋轉時產生輸入事件</string>
     <string name="generate_input_event_on_ccw">逆時針旋轉時產生輸入事件</string>
     <string name="up_down_select_input_enabled">啟用上下選擇輸入</string>
-    <string name="allow_input_source">允許輸入來源</string>
+    <string name="allow_input_source">允許外部輸入</string>
     <string name="send_bell">發送振鈴</string>
     <string name="messages">訊息</string>
     <string name="detection_sensor_config">偵測感測器設定</string>
@@ -466,7 +466,7 @@
     <string name="display_config">顯示</string>
     <string name="screen_on_for">Screen on for</string>
     <string name="carousel_interval">Carousel interval</string>
-    <string name="compass_north_top">總是以指南針北為上</string>
+    <string name="compass_north_top">指南針北方向上</string>
     <string name="flip_screen">翻轉畫面</string>
     <string name="display_units">顯示單位</string>
     <string name="oled_type">OLED type</string>
@@ -475,13 +475,13 @@
     <string name="bold_heading">Bold Heading</string>
     <string name="wake_on_tap_or_motion">Wake on tap or motion</string>
     <string name="compass_orientation">羅盤朝向</string>
-    <string name="external_notification_config">外部通知配寘</string>
+    <string name="external_notification_config">外部通知規劃</string>
     <string name="external_notification_enabled">啟用外部通知</string>
     <string name="notifications_on_message_receipt">消息已讀通知</string>
     <string name="alert_message_led">警示訊息 LED</string>
-    <string name="alert_message_buzzer">警示訊息 蜂鳴</string>
-    <string name="alert_message_vibra">警示訊息 振動</string>
-    <string name="notifications_on_alert_bell_receipt">警示/振鈴 回執通知</string>
+    <string name="alert_message_buzzer">來訊警音</string>
+    <string name="alert_message_vibra">來訊振動</string>
+    <string name="notifications_on_alert_bell_receipt">警音/振鈴 回執通知</string>
     <string name="alert_bell_led">告警 LED</string>
     <string name="alert_bell_buzzer">告警 蜂鳴</string>
     <string name="alert_bell_vibra">告警 振動</string>
@@ -578,7 +578,7 @@
     <string name="battery_ina_2xx_i2c_address">電池 INA_2XX I2C 地址</string>
     <string name="range_test_config">範圍測試設定</string>
     <string name="range_test_enabled">啟用範圍測試</string>
-    <string name="sender_message_interval_seconds">訊息發送間隔（秒）</string>
+    <string name="sender_message_interval_seconds">訊息發送間隔(秒)</string>
     <string name="save_csv_in_storage_esp32_only">將 .CSV 保存到內部儲存空間(僅限ESP32)</string>
     <string name="remote_hardware_config">遠端硬體設定</string>
     <string name="remote_hardware_enabled">啟動遠端硬體</string>
@@ -602,7 +602,7 @@
     <string name="serial_mode">序列埠模式</string>
     <string name="override_console_serial_port">覆蓋控制台序列埠</string>
     <string name="store_forward_enabled"><![CDATA[啟用儲存並轉發]]></string>
-    <string name="heartbeat">心跳</string>
+    <string name="heartbeat">心跳封包</string>
     <string name="number_of_records">紀錄數目</string>
     <string name="history_return_max">歴史紀錄最大返回值</string>
     <string name="history_return_window">歴史紀錄返回視窗</string>
@@ -619,7 +619,7 @@
     <string name="power_metrics_module_enabled">啟用電池資訊模組</string>
     <string name="power_metrics_update_interval_seconds">電量資訊更新週期（秒）</string>
     <string name="power_metrics_on_screen_enabled">在螢幕上顯示電量資訊</string>
-    <string name="user_config">使用者設定</string>
+    <string name="user_config">用戶規劃</string>
     <string name="node_id">節點 ID</string>
     <string name="long_name">節點長名稱</string>
     <string name="short_name">節點短名稱</string>
@@ -654,15 +654,15 @@
     <string name="alt">海拔</string>
     <string name="freq">頻率</string>
     <string name="slot">時隙</string>
-    <string name="primary">主要的</string>
+    <string name="primary">主要</string>
     <string name="primary_channel_feature">定期廣播位置與遙測資料</string>
-    <string name="secondary">次要的</string>
+    <string name="secondary">次要</string>
     <string name="secondary_no_telemetry">停用定期廣播遙測資料</string>
     <string name="manual_position_request">需要手動定位位置</string>
     <string name="press_and_drag">長按後可拖曳排列順序</string>
-    <string name="unmute">取消靜音</string>
+    <string name="unmute">解除靜默</string>
     <string name="dynamic">動態</string>
-    <string name="scan_qr_code">掃描 QR Code</string>
+    <string name="scan_qr_code">掃描QR碼</string>
     <string name="share_contact">分享聯絡人</string>
     <string name="notes">Notes</string>
     <string name="add_a_note">Add a private note…</string>
@@ -681,7 +681,7 @@
     <string name="host">裝置</string>
     <string name="free_memory">可用記憶體</string>
     <string name="disk_free">可用儲存空間</string>
-    <string name="load">載入</string>
+    <string name="load">負載</string>
     <string name="user_string">使用者設定</string>
     <string name="navigate_into_label">導航至</string>
     <string name="connections">連線</string>

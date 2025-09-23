@@ -117,11 +117,11 @@
     <string name="config_position_flags_summary">Optional fields to include when assembling position messages. the more fields are included, the larger the message will be - leading to longer airtime and a higher risk of packet loss.</string>
     <string name="config_power_is_power_saving_summary">Will sleep everything as much as possible, for the tracker and sensor role this will also include the lora radio. Don\'t use this setting if you want to use your device with the phone apps or are using a device without a user button.</string>
     <string name="config_security_public_key">Generated from your public key and sent out to other nodes on the mesh to allow them to compute a shared secret key.</string>
-    <string name="config_security_private_key">Used to create a shared key with a remote device.</string>
+    <string name="config_security_private_key">Utilisée pour créer une clé partagée avec un appareil distant.</string>
     <string name="config_security_admin_key">The public key authorized to send admin messages to this node.</string>
     <string name="config_security_is_managed">Device is managed by a mesh administrator, the user is unable to access any of the device settings.</string>
-    <string name="config_security_serial_enabled">Serial Console over the Stream API.</string>
-    <string name="config_security_debug_log_api_enabled">Output live debug logging over serial, view and export position-redacted device logs over Bluetooth.</string>
+    <string name="config_security_serial_enabled">Console série via l’API de flux.</string>
+    <string name="config_security_debug_log_api_enabled">Afficher en direct les journaux de débogage via le port série, consulter/exporter les journaux sans position via Bluetooth.</string>
     <!-- Position Config -->
     <string name="position_packet">Position Packet</string>
     <string name="broadcast_interval">Intervalle de diffusion</string>
@@ -170,7 +170,7 @@
     <string name="not_connected">Non connecté</string>
     <string name="connected_sleeping">Connecté à la radio, mais en mode veille</string>
     <string name="app_too_old">Mise à jour de l’application requise</string>
-    <string name="must_update">Vous devez mettre à jour cette application sur l\'app store (ou Github). Il est trop vieux pour parler à ce microprogramme radio. Veuillez lire nos docs <a href="https://meshtastic.org/docs/software/android/installation"/> sur ce sujet.</string>
+    <string name="must_update">Vous devez mettre à jour cette application sur l\'app store (ou Github). Il est trop vieux pour dialoguer avec le micrologiciel de la radio. Veuillez lire nos  <a href="https://meshtastic.org/docs/software/android/installation"> docs</a> sur ce sujet.</string>
     <string name="none">Aucun (désactivé)</string>
     <string name="meshtastic_service_notifications">Notifications de service</string>
     <string name="about">A propros</string>
@@ -307,7 +307,7 @@
     <string name="soil_temperature">Température du sol</string>
     <string name="soil_moisture">Humidité du sol</string>
     <string name="logs">Journaux</string>
-    <string name="hops_away">Passer au suivant</string>
+    <string name="hops_away">Sauts</string>
     <string name="hops_away_template">Sauts : %1$d</string>
     <string name="info">Information</string>
     <string name="ch_util_definition">Utilisation pour le canal actuel, y compris TX bien formé, RX et RX mal formé (AKA bruit).</string>
@@ -319,7 +319,7 @@
     <string name="encryption_pkc_text">Les messages directs utilisent la nouvelle infrastructure de clé publique pour le chiffrement. Nécessite une version de firmware 2.5 ou plus.</string>
     <string name="encryption_error">Les messages directs utilisent la nouvelle infrastructure de clé publique pour le chiffrement. Nécessite une version de firmware 2.5 ou plus.</string>
     <string name="encryption_error_text">La clé publique ne correspond pas à la clé enregistrée. Vous pouvez supprimer le nœud et le laisser à nouveau échanger les clés, mais cela peut indiquer un problème de sécurité plus grave. Contactez l\'utilisateur à travers un autre canal de confiance, pour déterminer si le changement de clé est dû à une réinitialisation d\'usine ou à une autre action intentionnelle.</string>
-    <string name="exchange_userinfo">Connectés : %1$s sur  en ligne</string>
+    <string name="exchange_userinfo">Échanger les informations utilisateur</string>
     <string name="meshtastic_new_nodes_notifications">Notifikasyon nouvo nœud</string>
     <string name="more_details">Plus de détails</string>
     <string name="snr">SNR</string>
@@ -360,8 +360,8 @@
     <string name="alert_bell_text">Caractère d\'appel !</string>
     <string name="critical_alert">Alerte Critique !</string>
     <string name="favorite">Favoris</string>
-    <string name="favorite_add">Ajouter \'%s\' votre noeud favoris</string>
-    <string name="favorite_remove">Supprimer \'%s\' votre noeud favoris</string>
+    <string name="favorite_add">Ajouter «%s» en tant que nœud favori ?</string>
+    <string name="favorite_remove">Supprimer «%s» comme nœud favori ?</string>
     <string name="power_metrics_log">Journal des métriques de puissance</string>
     <string name="channel_1">Canal 1</string>
     <string name="channel_2">Canal 2</string>
@@ -373,7 +373,7 @@
     <string name="i_know_what_i_m_doing">Je sais ce que je fais</string>
     <string name="low_battery_message">La batterie du nœud %1$s est faible (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Notifications de batterie faible</string>
-    <string name="low_battery_title">Batterie faible</string>
+    <string name="low_battery_title">Batterie faible : %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Notifications de batterie faible (nœuds favoris)</string>
     <string name="baro_pressure">Pression Barométrique</string>
     <string name="udp_enabled">Activé</string>
@@ -798,7 +798,7 @@
     <string name="notifications_for_newly_discovered_nodes">Notifications pour les nouveaux nœuds découverts.</string>
     <string name="low_battery">Batterie faible</string>
     <string name="notifications_for_low_battery_alerts">Notifications d\'alertes de batterie faible pour l\'appareil connecté.</string>
-    <string name="critical_alerts_description"></string>
+    <string name="critical_alerts_description">Select packets sent as critical will ignore the mute switch and Do Not Disturb settings in the OS notification center.</string>
     <string name="configure_notification_permissions">Configurer les autorisations de notification</string>
     <string name="phone_location">Localisation du téléphone</string>
     <string name="phone_location_description">Meshtastic utilise la localisation de votre téléphone pour activer un certain nombre de fonctionnalités. Vous pouvez mettre à jour vos autorisations de localisation à tout moment à partir des paramètres.</string>

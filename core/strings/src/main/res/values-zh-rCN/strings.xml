@@ -17,7 +17,7 @@
   -->
 <resources>
     <string name="fallback_node_name">Meshtastic %s</string>
-    <string name="node_filter_placeholder">筛选</string>
+    <string name="node_filter_placeholder">筛选器csvfganw</string>
     <string name="desc_node_filter_clear">清除筛选</string>
     <string name="node_filter_include_unknown">包括未知内容</string>
     <string name="node_filter_only_online">隐藏离线节点</string>
@@ -28,7 +28,7 @@
     <string name="node_sort_alpha">字母顺序</string>
     <string name="node_sort_channel">频道</string>
     <string name="node_sort_distance">距离</string>
-    <string name="node_sort_hops_away">跳数</string>
+    <string name="node_sort_hops_away">跃点数</string>
     <string name="node_sort_last_heard">上次连接时间</string>
     <string name="node_sort_via_mqtt">通过 MQTT</string>
     <string name="via_mqtt">通过 MQTT</string>
@@ -114,7 +114,7 @@
     <string name="config_position_broadcast_smart_minimum_interval_secs_summary">The fastest that position updates will be sent if the minimum distance has been satisfied.</string>
     <string name="config_position_broadcast_smart_minimum_distance_summary">智能位置广播考虑的最小距离变化（以米为单位）。</string>
     <string name="config_position_gps_update_interval_summary">尝试获取 GPS 定位的频率。</string>
-    <string name="config_position_flags_summary">Optional fields to include when assembling position messages. the more fields are included, the larger the message will be - leading to longer airtime and a higher risk of packet loss.</string>
+    <string name="config_position_flags_summary">包含的字段越多，信息就越大，导致通讯时间更长，丢包风险更高.</string>
     <string name="config_power_is_power_saving_summary">尽可能让所有设备处于睡眠状态，对于跟踪器和传感器来说，这也包括 LoRa 无线电。如果您想将电台与手机 App 一起使用，或使用没有用户按钮的电台，请不要使用此设置。</string>
     <string name="config_security_public_key">Generated from your public key and sent out to other nodes on the mesh to allow them to compute a shared secret key.</string>
     <string name="config_security_private_key">Used to create a shared key with a remote device.</string>
@@ -174,7 +174,7 @@
     <string name="none">无 (停用)</string>
     <string name="meshtastic_service_notifications">服务通知</string>
     <string name="about">关于</string>
-    <string name="channel_invalid">此频道网址无效，无法使用</string>
+    <string name="channel_invalid">此频道 URL 无效，无法使用</string>
     <string name="debug_panel">调试面板</string>
     <string name="debug_decoded_payload">解码Payload：</string>
     <string name="debug_logs_export">导出程序日志</string>
@@ -219,9 +219,9 @@
     <string name="choose_theme">选择主题</string>
     <string name="provide_location_to_mesh">向网格提供手机位置</string>
     <plurals name="delete_messages">
-        <item quantity="other">删除 消息?
+        <item quantity="other">删除消息?
 
-删除 %s 条消息?</item>
+删除 %s 条消息？</item>
     </plurals>
     <string name="delete">删除</string>
     <string name="delete_for_everyone">也从所有人的聊天纪录中删除</string>
@@ -241,7 +241,7 @@
     <string name="shutdown">关机</string>
     <string name="cant_shutdown">此设备不支持关机</string>
     <string name="reboot">重启</string>
-    <string name="traceroute">路由追踪</string>
+    <string name="traceroute">追踪器</string>
     <string name="intro_show">显示简介</string>
     <string name="message">信息</string>
     <string name="quick_chat">快速聊天选项</string>
@@ -308,7 +308,7 @@
     <string name="soil_temperature">土壤温度</string>
     <string name="soil_moisture">土壤湿度</string>
     <string name="logs">日志</string>
-    <string name="hops_away">跳数</string>
+    <string name="hops_away">跃点数</string>
     <string name="hops_away_template">越点数: %1$d</string>
     <string name="info">信息</string>
     <string name="ch_util_definition">当前信道的利用情况，包括格式正确的发送(TX）、接收（RX）以及无法解码的接收(即噪声）。</string>
@@ -343,12 +343,12 @@
     <string name="share_to">分享到…</string>
     <string name="signal">信号</string>
     <string name="signal_quality">信号质量</string>
-    <string name="traceroute_log">路由追踪日志</string>
+    <string name="traceroute_log">路由追踪</string>
     <string name="traceroute_direct">直连</string>
     <plurals name="traceroute_hops">
-        <item quantity="other">%d 跳数</item>
+        <item quantity="other">%d 越点数</item>
     </plurals>
-    <string name="traceroute_diff">传输跳数：去程 %1$d，回程 %2$d</string>
+    <string name="traceroute_diff">越点数：去程 %1$d，回程 %2$d</string>
     <string name="twenty_four_hours">24 小时</string>
     <string name="forty_eight_hours">48 小时</string>
     <string name="one_week">1 周</string>
@@ -593,15 +593,15 @@
     <string name="private_key">私钥</string>
     <string name="admin_key">管理员密钥</string>
     <string name="managed_mode">管理模式</string>
-    <string name="serial_console">串行控制</string>
+    <string name="serial_console">串口控制</string>
     <string name="debug_log_api_enabled">启用调试日志 API </string>
     <string name="legacy_admin_channel">旧版管理频道</string>
     <string name="serial_config">串口配置</string>
-    <string name="serial_enabled">启用串行</string>
+    <string name="serial_enabled">启用串口</string>
     <string name="echo_enabled">启用Echo</string>
-    <string name="serial_baud_rate">串行波特率</string>
+    <string name="serial_baud_rate">串口波特率</string>
     <string name="timeout">超时</string>
-    <string name="serial_mode">串行模式</string>
+    <string name="serial_mode">串口模式</string>
     <string name="override_console_serial_port">覆盖控制台串口端口</string>
     <string name="store_forward_enabled"><![CDATA[启用存储和转发]]></string>
     <string name="heartbeat">心跳</string>
@@ -718,7 +718,7 @@
     <string name="remote">远程</string>
     <string name="node_count_template">(%1$d 在线 / %2$d 总计)</string>
     <string name="react">互动</string>
-    <string name="disconnect">断开连接</string>
+    <string name="disconnect">断开</string>
     <string name="scanning_bluetooth">Scanning for Bluetooth devices…</string>
     <string name="no_ble_devices">No paired Bluetooth devices.</string>
     <string name="no_network_devices">未找到网络设备。</string>

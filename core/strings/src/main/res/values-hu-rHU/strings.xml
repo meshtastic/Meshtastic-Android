@@ -77,7 +77,7 @@
     <string name="role_tak_tracker_desc">Automatikus TAK PLI sugárzást engedélyez és csökkenti a rutin-sugárzásokat.</string>
     <string name="role_router_late">Router Late</string>
     <string name="role_router_late_desc">Infrastruktúra-csomópont, amely minden csomagot egyszer újraküld, de csak az összes más mód után, extra lefedettséget biztosítva a helyi klasztereknek. Látható a listában.</string>
-    <string name="rebroadcast_mode_all">All</string>
+    <string name="rebroadcast_mode_all">Összes</string>
     <string name="rebroadcast_mode_all_desc">Újrasugároz minden észlelt üzenetet, ha az a privát csatornánkon volt, vagy más, azonos LoRa-paraméterű hálózatból származik.</string>
     <string name="rebroadcast_mode_all_skip_decoding">All Skip Decoding</string>
     <string name="rebroadcast_mode_all_skip_decoding_desc">Ugyanaz, mint az „ALL” viselkedés, de kihagyja a csomag dekódolását és egyszerűen újrasugározza. Csak Ismétlő (Repeater) szerepkörben elérhető; más szerepkörben az „ALL” mód érvényesül.</string>

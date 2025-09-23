@@ -812,7 +812,7 @@
     <string name="mesh_map_location_description">Enables the blue location dot for your phone in the mesh map.</string>
     <string name="configure_location_permissions">Configure Location Permissions</string>
     <string name="skip">Skip</string>
-    <string name="settings">settings</string>
+    <string name="settings">ρυθμίσεις</string>
     <string name="critical_alerts">Critical Alerts</string>
     <string name="critical_alerts_dnd_request_text">To ensure you receive critical alerts, such as
         SOS messages, even when your device is in \"Do Not Disturb\" mode, you need to grant special

@@ -202,7 +202,7 @@
     <string name="firmware_too_old">Je vyžadována aktualizace firmwaru.</string>
     <string name="firmware_old">Firmware rádia je příliš starý na to, aby mohl komunikovat s touto aplikací. Více informací o tomto naleznete v <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">naší firmware instalační příručce</a>.</string>
     <string name="okay">OK</string>
-    <string name="must_set_region">Musíte specifikovat region!</string>
+    <string name="must_set_region">Musíte nastavit region!</string>
     <string name="cant_change_no_radio">Kanál nelze změnit, protože rádio ještě není připojeno. Zkuste to znovu.</string>
     <string name="save_rangetest">Export rangetest packets</string>
     <string name="export_data_csv">Export all packets</string>
@@ -234,7 +234,7 @@
     <string name="map_download_region">Stáhnout oblast</string>
     <string name="name">Jméno</string>
     <string name="description">Popis</string>
-    <string name="locked">Uzamčeno</string>
+    <string name="locked">Uzamknout</string>
     <string name="save">Uložit</string>
     <string name="preferences_language">Jazyk</string>
     <string name="preferences_system_default">Podle systému</string>
@@ -397,12 +397,12 @@
     <string name="bluetooth">Bluetooth</string>
     <string name="security">Zabezpečení</string>
     <string name="mqtt">MQTT</string>
-    <string name="serial">Sériová komunikace</string>
+    <string name="serial">Sériový</string>
     <string name="external_notification">Externí oznámení</string>
     <string name="store_forward"><![CDATA[Uložit a přeposlat]]></string>
     <string name="range_test">Zkouška dosahu</string>
     <string name="telemetry">Telemetrie</string>
-    <string name="canned_message">Předpřipravené zprávy</string>
+    <string name="canned_message">Přednastavené zprávy</string>
     <string name="audio">Zvuk</string>
     <string name="remote_hardware">Vzdálený hardware</string>
     <string name="neighbor_info">Informace o sousedech</string>
@@ -614,16 +614,16 @@
     <string name="history_return_window">History return window</string>
     <string name="server">Server</string>
     <string name="telemetry_config">Nastavení telemetrie</string>
-    <string name="device_metrics_update_interval_seconds">Interval aktualizace měření spotřeby (v sekundách)</string>
-    <string name="environment_metrics_update_interval_seconds">Interval aktualizace měření životního prostředí (v sekundách)</string>
+    <string name="device_metrics_update_interval_seconds">Interval aktualizace metrik zařízení (v sekundách)</string>
+    <string name="environment_metrics_update_interval_seconds">Interval aktualizace metrik životního prostředí (v sekundách)</string>
     <string name="environment_metrics_module_enabled">Modul měření životního prostředí povolen</string>
     <string name="environment_metrics_on_screen_enabled">Zobrazení měření životního prostředí povoleno</string>
     <string name="environment_metrics_use_fahrenheit">Měření životního prostředí používá Fahrenheit</string>
     <string name="air_quality_metrics_module_enabled">Modul měření kvality ovzduší povolen</string>
-    <string name="air_quality_metrics_update_interval_seconds">Interval aktualizace měření životního prostředí (v sekundách)</string>
+    <string name="air_quality_metrics_update_interval_seconds">Interval aktualizace metrik kvality ovzduší (v sekundách)</string>
     <string name="air_quality_icon">Air quality icon</string>
     <string name="power_metrics_module_enabled">Modul měření spotřeby povolen</string>
-    <string name="power_metrics_update_interval_seconds">Interval aktualizace měření spotřeby (v sekundách)</string>
+    <string name="power_metrics_update_interval_seconds">Interval aktualizace metrik napájení (v sekundách)</string>
     <string name="power_metrics_on_screen_enabled">Měření spotřeby na obrazovce povoleno</string>
     <string name="user_config">Nastavení uživatele</string>
     <string name="node_id">Identifikátor uzlu</string>
@@ -816,7 +816,7 @@
     <string name="mesh_map_location_description">Zobrazí modrou tečku polohy vašeho telefonu v mesh mapě.</string>
     <string name="configure_location_permissions">Configure Location Permissions</string>
     <string name="skip">Přeskočit</string>
-    <string name="settings">settings</string>
+    <string name="settings">nastavení</string>
     <string name="critical_alerts">Kritická upozornění</string>
     <string name="critical_alerts_dnd_request_text">Chcete-li dostávat kritická upozornění (např. SOS) i v režimu Nerušit, povolte speciální oprávnění v nastavení oznámení.</string>
     <string name="configure_critical_alerts">Nastavit kritická upozornění</string>

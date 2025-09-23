@@ -153,10 +153,10 @@
     <string name="permission_missing">Meshtastic needs location permissions enabled to find new devices via Bluetooth. You can disable when not in use.</string>
     <string name="report_bug">버그 보고</string>
     <string name="report_a_bug">버그 보고</string>
-    <string name="report_bug_text">버그를 보고하시겠습니까? 보고 후 Meshtastic 포럼 https://github.com/orgs/meshtastic/discussions 에 당신이 발견한 내용을 게시해주시면 신고 내용과 귀하가 찾은 내용을 일치시킬 수 있습니다.</string>
+    <string name="report_bug_text">버그를 보고하시겠습니까? 보고 후 Meshtastic 포럼 https://github.com/orgs/meshtastic/discussions 에 당신이 발견한 내용을 게시해주시면 신고 내용과 귀하가 찾은 내용을 일치 시킬 수 있습니다.</string>
     <string name="report">보고</string>
-    <string name="pairing_completed">페어링 완료, 서비스를 시작합니다.</string>
-    <string name="pairing_failed_try_again">페어링 실패, 다시 시도해주세요.</string>
+    <string name="pairing_completed">연결 완료, 서비스를 시작합니다.</string>
+    <string name="pairing_failed_try_again">연결 실패, 다시 시도해주세요.</string>
     <string name="location_disabled">위치 접근 권한 해제, 메시에 위치를 제공할 수 없습니다.</string>
     <string name="share">공유</string>
     <string name="new_node_seen">New Node Seen: %s</string>
@@ -174,7 +174,7 @@
     <string name="none">없음 (연결해제)</string>
     <string name="meshtastic_service_notifications">서비스 알림</string>
     <string name="about">앱에 대하여</string>
-    <string name="channel_invalid">이 채널 URL은 잘못 되었습니다. 따라서 사용할 수 없습니다.</string>
+    <string name="channel_invalid">이 채널 URL은 유효하지 않으며 사용할 수 없습니다.</string>
     <string name="debug_panel">디버그 패널</string>
     <string name="debug_decoded_payload">Decoded Payload:</string>
     <string name="debug_logs_export">로그 내보내기</string>
@@ -194,12 +194,12 @@
     <string name="match_any">Match Any | All</string>
     <string name="match_all">Match All | Any</string>
     <string name="debug_clear_logs_confirm">This will remove all log packets and database entries from your device - It is a full reset, and is permanent.</string>
-    <string name="clear">초기화</string>
+    <string name="clear">삭제</string>
     <string name="message_delivery_status">메시지 전송 상태</string>
     <string name="meshtastic_messages_notifications">DM 알림</string>
     <string name="meshtastic_broadcast_notifications">메시지 발송 알림</string>
     <string name="meshtastic_alerts_notifications">경고 알림</string>
-    <string name="firmware_too_old">펌웨어 업데이트 필요.</string>
+    <string name="firmware_too_old">펌웨어 업데이트가 필요합니다.</string>
     <string name="firmware_old">이 장치의 펌웨어가 매우 오래되어 이 앱과 호환되지않습니다. 더 자세한 정보는 <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">펌웨어 업데이트 가이드를</a> 참고해주세요.</string>
     <string name="okay">확인</string>
     <string name="must_set_region">지역을 설정해 주세요!</string>
@@ -237,7 +237,7 @@
     <string name="preferences_system_default">시스템 기본값</string>
     <string name="resend">재전송</string>
     <string name="shutdown">종료</string>
-    <string name="cant_shutdown">이 장치에서 재시작이 지원되지 않습니다</string>
+    <string name="cant_shutdown">종료 기능이 이 장치에서 지원되지 않습니다</string>
     <string name="reboot">재부팅</string>
     <string name="traceroute">추적 루트</string>
     <string name="intro_show">기능 소개</string>
@@ -255,7 +255,7 @@
     <string name="firmware_version">Firmware version: %1$s</string>
     <string name="permission_missing_31">Meshtastic needs \"Nearby devices\" permissions enabled to find and connect to devices via Bluetooth. You can disable when not in use.</string>
     <string name="direct_message">다이렉트 메시지</string>
-    <string name="nodedb_reset">노드목록 리셋</string>
+    <string name="nodedb_reset">노드 목록 리셋</string>
     <string name="delivery_confirmed">발송 확인 됨</string>
     <string name="error">오류</string>
     <string name="ignore">무시하기</string>
@@ -316,7 +316,7 @@
     <string name="encryption_psk_text">다이렉트 메시지는 채널의 공유 키를 사용합니다.</string>
     <string name="encryption_pkc">공개 키 암호화</string>
     <string name="encryption_pkc_text">다이렉트 메시지는 새로운 공개 키 인프라를 사용해 암호화합니다. 펌웨어 버전 2.5 이상이 필요합니다.</string>
-    <string name="encryption_error">공개키가 일치하지 않습니다</string>
+    <string name="encryption_error">공개 키가 일치하지 않습니다</string>
     <string name="encryption_error_text">공개 키가 기록된 키와 일치하지 않습니다. 노드를 제거하고 키를 다시 교환할 수 있지만 이는 더 심각한 보안 문제를 나타낼 수 있습니다. 다른 신뢰할 수 있는 채널을 통해 사용자에게 연락하여 키 변경이 공장 초기화 또는 기타 의도적인 작업 때문인지 확인하세요.</string>
     <string name="exchange_userinfo">유저 정보 교환</string>
     <string name="meshtastic_new_nodes_notifications">새로운 노드 알림</string>
@@ -443,7 +443,7 @@
     <string name="up_down_select_input_enabled">업/다운/선택 입력 활성화</string>
     <string name="allow_input_source">입력 소스 허용</string>
     <string name="send_bell">벨 전송</string>
-    <string name="messages">메시지</string>
+    <string name="messages">메시지기기</string>
     <string name="detection_sensor_config">감지 센서 설정</string>
     <string name="detection_sensor_enabled">감지 센서 활성화</string>
     <string name="minimum_broadcast_seconds">최소 전송 간격 (초)</string>
@@ -566,7 +566,7 @@
     <string name="redefine_pin_gps_en">PIN_GPS_EN 재정의</string>
     <string name="position_flags">위치 전송값 옵션</string>
     <string name="power_config">전원 설정</string>
-    <string name="enable_power_saving_mode">저젼력 모드 설정</string>
+    <string name="enable_power_saving_mode">저전력 모드 설정</string>
     <string name="shutdown_on_power_loss">Shutdown on power loss</string>
     <string name="shutdown_on_battery_delay_seconds">Shutdown on battery delay (seconds)</string>
     <string name="adc_multiplier_override">ADC multiplier override</string>
@@ -667,7 +667,7 @@
     <string name="notes">Notes</string>
     <string name="add_a_note">Add a private note…</string>
     <string name="import_shared_contact">공유된 연락처를 내려받겠습니까?</string>
-    <string name="unmessageable">메시지를 보낼 수 없음</string>
+    <string name="unmessageable">메시지 제한</string>
     <string name="unmonitored_or_infrastructure">감시되지 않거나 인프라 노드</string>
     <string name="import_known_shared_contact_text">경고: 이 연락처는 이미 등록되어 있습니다. 내려받으면 이전 연락처 정보가 덮어쓰어질 수 있습니다.</string>
     <string name="public_key_changed">공개 키 변경됨</string>
@@ -677,7 +677,7 @@
     <string name="firmware">펌웨어</string>
     <string name="use_12h_format">12시간제 보기</string>
     <string name="display_time_in_12h_format">활성화 하면 장치의 디스플레이에서 시간이 12시간제로 표시됩니다.</string>
-    <string name="host_metrics_log">Host Metrics Log</string>
+    <string name="host_metrics_log">전원 메트릭 로그</string>
     <string name="host">Host</string>
     <string name="free_memory">Free Memory</string>
     <string name="disk_free">Disk Free</string>
@@ -810,7 +810,7 @@
     <string name="mesh_map_location_description">Enables the blue location dot for your phone in the mesh map.</string>
     <string name="configure_location_permissions">Configure Location Permissions</string>
     <string name="skip">Skip</string>
-    <string name="settings">settings</string>
+    <string name="settings">설정</string>
     <string name="critical_alerts">Critical Alerts</string>
     <string name="critical_alerts_dnd_request_text">To ensure you receive critical alerts, such as
         SOS messages, even when your device is in \"Do Not Disturb\" mode, you need to grant special

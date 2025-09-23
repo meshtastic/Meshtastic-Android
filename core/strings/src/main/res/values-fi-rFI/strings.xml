@@ -49,7 +49,7 @@
     <string name="routing_error_bad_request">Virheellinen pyyntö</string>
     <string name="routing_error_duty_cycle_limit">Alueellisen toimintasyklin raja saavutettu</string>
     <string name="routing_error_not_authorized">Ei oikeuksia</string>
-    <string name="routing_error_pki_failed">Salattu lähetys epäonnistui</string>
+    <string name="routing_error_pki_failed">Salatun viestin lähetys epäonnistui</string>
     <string name="routing_error_pki_unknown_pubkey">Tuntematon julkinen avain</string>
     <string name="routing_error_admin_bad_session_key">Virheellinen istuntoavain</string>
     <string name="routing_error_admin_public_key_unauthorized">Julkinen avain ei ole valtuutettu</string>
@@ -256,7 +256,7 @@
     <string name="firmware_version">Firmwaren versio: %1$s</string>
     <string name="permission_missing_31">Meshtastic tarvitsee \"lähistön laitteet\" -oikeudet, jotta se voi löytää ja yhdistää laitteisiin Bluetoothin kautta. Voit poistaa oikeuden käytöstä, kun et käytä sovellusta.</string>
     <string name="direct_message">Yksityisviesti</string>
-    <string name="nodedb_reset">Tyhjennä NodeDB tietokanta</string>
+    <string name="nodedb_reset">Tyhjennä NodeDB-tietokanta</string>
     <string name="delivery_confirmed">Toimitus vahvistettu</string>
     <string name="error">Virhe</string>
     <string name="ignore">Jätä huomiotta</string>
@@ -306,7 +306,7 @@
     <string name="humidity">Kosteus</string>
     <string name="soil_temperature">Maaperän lämpötila</string>
     <string name="soil_moisture">Maaperän kosteus</string>
-    <string name="logs">lokitietoa</string>
+    <string name="logs">Lokitiedot</string>
     <string name="hops_away">Hyppyjä</string>
     <string name="hops_away_template">Hyppyjä: %1$d</string>
     <string name="info">Tiedot</string>
@@ -328,7 +328,7 @@
     <string name="rssi_definition">Vastaanotetun signaalin voimakkuusindikaattori (RSSI) on mittari, jota käytetään määrittämään antennilla vastaanotetun signaalin voimakkuus. Korkeampi RSSI-arvo yleensä osoittaa vahvemman ja vakaamman yhteyden.</string>
     <string name="iaq_definition">Sisäilman laatu (IAQ) on suhteellinen asteikko, jota voidaan mitata mm. Bosch BME680 anturilla ja sen arvoväli on 0–500.</string>
     <string name="device_metrics_log">Laitteen mittausloki</string>
-    <string name="node_map">Solmukartta</string>
+    <string name="node_map">Laitekartta</string>
     <string name="position_log">Sijainnin Loki</string>
     <string name="last_position_update">Viimeisin sijainnin päivitys</string>
     <string name="env_metrics_log">Ympäristöanturit</string>
@@ -575,7 +575,7 @@
     <string name="adc_multiplier_override_ratio">Korvaava AD-muuntimen kerroin</string>
     <string name="wait_for_bluetooth_duration_seconds">Bluetoothin odotusaika (sekuntia)</string>
     <string name="super_deep_sleep_duration_seconds">Syväunivaiheen kesto (sekuntia)</string>
-    <string name="light_sleep_duration_seconds">Kevyen lepotilan kesto (sekintia)</string>
+    <string name="light_sleep_duration_seconds">Kevyen lepotilan kesto (sekuntia)</string>
     <string name="minimum_wake_time_seconds">Vähimmäisheräämisaika (sekuntia)</string>
     <string name="battery_ina_2xx_i2c_address">INA_2XX-akun valvontapiirin I2C-osoite</string>
     <string name="range_test_config">Kuuluvuustestin asetukset</string>
@@ -630,7 +630,7 @@
     <string name="licensed_amateur_radio_text">Jos otat tämän asetuksen käyttöön, salaus poistetaan käytöstä, eikä laite ole enää yhteensopiva oletusasetuksilla toimivan Meshtastic-verkon kanssa.</string>
     <string name="dew_point">Kastepiste</string>
     <string name="pressure">Ilmanpaine</string>
-    <string name="gas_resistance">Kaasun vastus</string>
+    <string name="gas_resistance">Kaasuvastus</string>
     <string name="distance">Etäisyys</string>
     <string name="lux">Luksi</string>
     <string name="wind">Tuuli</string>

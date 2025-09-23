@@ -40,7 +40,7 @@
     <string name="routing_error_none">Acknowledged</string>
     <string name="routing_error_no_route">No route</string>
     <string name="routing_error_got_nak">Received a negative acknowledgment</string>
-    <string name="routing_error_timeout">Timeout</string>
+    <string name="routing_error_timeout">Таймаут</string>
     <string name="routing_error_no_interface">No Interface</string>
     <string name="routing_error_max_retransmit">Max Retransmission Reached</string>
     <string name="routing_error_no_channel">Канал відсутній</string>
@@ -241,7 +241,7 @@
     <string name="resend">Перенадіслати</string>
     <string name="shutdown">Вимкнути</string>
     <string name="cant_shutdown">Shutdown not supported on this device</string>
-    <string name="reboot">Перезавантаження</string>
+    <string name="reboot">Перевантажити</string>
     <string name="traceroute">Маршрут</string>
     <string name="intro_show">Показати підказки</string>
     <string name="message">Повідомлення</string>
@@ -252,7 +252,7 @@
     <string name="quick_chat_instant">Миттєво відправити</string>
     <string name="quick_chat_show">Show quick chat menu</string>
     <string name="quick_chat_hide">Hide quick chat menu</string>
-    <string name="factory_reset">Скидання до заводських налаштувань</string>
+    <string name="factory_reset">Скинути до заводських налаштувань</string>
     <string name="bluetooth_disabled">Bluetooth is disabled. Please enable it in your device settings.</string>
     <string name="open_settings">Open settings</string>
     <string name="firmware_version">Firmware version: %1$s</string>
@@ -369,7 +369,7 @@
     <string name="power_metrics_log">Power Metrics Log</string>
     <string name="channel_1">Канал 1</string>
     <string name="channel_2">Канал 2</string>
-    <string name="channel_3"></string>
+    <string name="channel_3">Канал 3</string>
     <string name="current">Current</string>
     <string name="voltage">Напруга</string>
     <string name="are_you_sure">Ви впевнені?</string>
@@ -508,7 +508,7 @@
     <string name="bandwidth">Bandwidth</string>
     <string name="spread_factor">Spread Factor</string>
     <string name="coding_rate">Coding Rate</string>
-    <string name="frequency_offset_mhz">Frequency offset (MHz)</string>
+    <string name="frequency_offset_mhz">Зсув частоти (МГц)</string>
     <string name="region_frequency_plan">Регіон</string>
     <string name="hop_limit">Number of hops</string>
     <string name="tx_enabled">Transmit Enabled</string>
@@ -519,7 +519,7 @@
     <string name="sx126x_rx_boosted_gain">RX Boosted Gain</string>
     <string name="override_frequency_mhz">Frequency Override</string>
     <string name="pa_fan_disabled">PA fan disabled</string>
-    <string name="ignore_mqtt">Ignore MQTT</string>
+    <string name="ignore_mqtt">Ігнорувати MQTT</string>
     <string name="ok_to_mqtt">Ok to MQTT</string>
     <string name="mqtt_config">MQTT Config</string>
     <string name="mqtt_enabled">MQTT enabled</string>
@@ -572,7 +572,7 @@
     <string name="redefine_pin_gps_en">Перевизначити PIN_GPS_EN</string>
     <string name="position_flags">Position flags</string>
     <string name="power_config">Налаштування живлення</string>
-    <string name="enable_power_saving_mode">Enable power saving mode</string>
+    <string name="enable_power_saving_mode">Увімкнути енергоощадний режим</string>
     <string name="shutdown_on_power_loss">Shutdown on power loss</string>
     <string name="shutdown_on_battery_delay_seconds">Shutdown on battery delay (seconds)</string>
     <string name="adc_multiplier_override">ADC multiplier override</string>
@@ -582,10 +582,10 @@
     <string name="light_sleep_duration_seconds">Light sleep duration (seconds)</string>
     <string name="minimum_wake_time_seconds">Minimum wake time (seconds)</string>
     <string name="battery_ina_2xx_i2c_address">Battery INA_2XX I2C address</string>
-    <string name="range_test_config">Range Test Config</string>
-    <string name="range_test_enabled">Range test enabled</string>
+    <string name="range_test_config">Налаштування тесту дальності</string>
+    <string name="range_test_enabled">Тест на відстань увімкнений</string>
     <string name="sender_message_interval_seconds">Sender message interval (seconds)</string>
-    <string name="save_csv_in_storage_esp32_only">Save .CSV in storage (ESP32 only)</string>
+    <string name="save_csv_in_storage_esp32_only">Зберегти .CSV у сховищі (лише ESP32)</string>
     <string name="remote_hardware_config">Remote Hardware Config</string>
     <string name="remote_hardware_enabled">Remote Hardware enabled</string>
     <string name="allow_undefined_pin_access">Allow undefined pin access</string>
@@ -643,9 +643,9 @@
     <string name="store_forward_config"><![CDATA[Store & Forward Config]]></string>
     <string name="indoor_air_quality_iaq">Indoor Air Quality (IAQ)</string>
     <string name="url">URL</string>
-    <string name="backup_restore"><![CDATA[Backup & Restore]]></string>
-    <string name="import_configuration">Import configuration</string>
-    <string name="export_configuration">Export configuration</string>
+    <string name="backup_restore"><![CDATA[Резервна копія & Відновлення]]></string>
+    <string name="import_configuration">Імпортувати налаштування</string>
+    <string name="export_configuration">Експортувати налаштування</string>
     <string name="hardware">Hardware</string>
     <string name="supported">Supported</string>
     <string name="node_number">Node Number</string>
@@ -658,11 +658,11 @@
     <string name="speed">Speed</string>
     <string name="sats">Sats</string>
     <string name="alt">Alt</string>
-    <string name="freq">Freq</string>
+    <string name="freq">Част</string>
     <string name="slot">Slot</string>
-    <string name="primary">Primary</string>
+    <string name="primary">Основний</string>
     <string name="primary_channel_feature">Periodic position and telemetry broadcast</string>
-    <string name="secondary">Secondary</string>
+    <string name="secondary">Вторинний</string>
     <string name="secondary_no_telemetry">No periodic telemetry broadcast</string>
     <string name="manual_position_request">Manual position request required</string>
     <string name="press_and_drag">Press and drag to reorder</string>
@@ -681,7 +681,7 @@
     <string name="request_metadata">Запитати метадані</string>
     <string name="actions">Дії</string>
     <string name="firmware">Прошивка</string>
-    <string name="use_12h_format">Use 12h clock format</string>
+    <string name="use_12h_format">Використовувати 12-г формат часу</string>
     <string name="display_time_in_12h_format">Якщо увімкнено, пристрій буде показувати час у 12-годинному форматі на екрані.</string>
     <string name="host_metrics_log">Host Metrics Log</string>
     <string name="host">Host</string>
@@ -693,10 +693,10 @@
     <string name="connections">Connection</string>
     <string name="map">Mesh Map</string>
     <string name="conversations">Conversations</string>
-    <string name="nodes">Nodes</string>
+    <string name="nodes">Вузли</string>
     <string name="bottom_nav_settings">Налаштування</string>
     <string name="set_your_region">Set your region</string>
-    <string name="reply">Reply</string>
+    <string name="reply">Відповісти</string>
     <string name="map_reporting_summary">Your node will periodically send an unencrypted map report packet to the configured MQTT server, this includes id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset and primary channel name.</string>
     <string name="map_reporting_consent_header">Consent to Share Unencrypted Node Data via MQTT</string>
     <string name="map_reporting_consent_text">By enabling this feature, you acknowledge and expressly consent to the transmission of your device’s real-time geographic location over the MQTT protocol without encryption. This location data may be used for purposes such as live map reporting, device tracking, and related telemetry functions.</string>
@@ -816,7 +816,7 @@
     <string name="mesh_map_location_description">Enables the blue location dot for your phone in the mesh map.</string>
     <string name="configure_location_permissions">Configure Location Permissions</string>
     <string name="skip">Skip</string>
-    <string name="settings">settings</string>
+    <string name="settings">налаштування</string>
     <string name="critical_alerts">Critical Alerts</string>
     <string name="critical_alerts_dnd_request_text">To ensure you receive critical alerts, such as
         SOS messages, even when your device is in \"Do Not Disturb\" mode, you need to grant special

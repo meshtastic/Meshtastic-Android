@@ -50,7 +50,7 @@
     <string name="routing_error_duty_cycle_limit">Limite do Duty Cycle Regional Atingido</string>
     <string name="routing_error_not_authorized">Não Autorizado</string>
     <string name="routing_error_pki_failed">Envio cifrado falhou</string>
-    <string name="routing_error_pki_unknown_pubkey">Public Key desconhecida</string>
+    <string name="routing_error_pki_unknown_pubkey">Chave pública desconhecida</string>
     <string name="routing_error_admin_bad_session_key">Chave de sessão inválida</string>
     <string name="routing_error_admin_public_key_unauthorized">Public Key não autorizada</string>
     <string name="role_client">Client</string>
@@ -199,7 +199,7 @@
     <string name="meshtastic_messages_notifications">Direct message notifications</string>
     <string name="meshtastic_broadcast_notifications">Broadcast message notifications</string>
     <string name="meshtastic_alerts_notifications">Notificações de alerta</string>
-    <string name="firmware_too_old">Atualização do firmware necessária.</string>
+    <string name="firmware_too_old">Necessário atualização de firmware.</string>
     <string name="firmware_old">Versão de firmware do rádio muito antiga para comunicar com este aplicativo. Para mais informações consultar <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Nosso guia de instalação de firmware</a>.</string>
     <string name="okay">Okay</string>
     <string name="must_set_region">Você deve informar uma região!</string>
@@ -379,7 +379,7 @@
     <string name="udp_enabled">Enabled</string>
     <string name="udp_broadcast">UDP Broadcast</string>
     <string name="udp_config">Configuração UDP</string>
-    <string name="map_node_popup_details"><![CDATA[%1$s<br>Last heard: %2$s<br>Last position: %3$s<br>Battery: %4$s]]></string>
+    <string name="map_node_popup_details"><![CDATA[%1$s<br>Ouvido última vez: %2$s<br>Última posição: %3$s<br>Bateria: %4$s]]></string>
     <string name="toggle_my_position">Toggle my position</string>
     <string name="orient_north">Orient north</string>
     <string name="user">Utilizador</string>
@@ -691,12 +691,12 @@
     <string name="conversations">Conversations</string>
     <string name="nodes">Nodes</string>
     <string name="bottom_nav_settings">Definições</string>
-    <string name="set_your_region">Set your region</string>
-    <string name="reply">Reply</string>
-    <string name="map_reporting_summary">Your node will periodically send an unencrypted map report packet to the configured MQTT server, this includes id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset and primary channel name.</string>
-    <string name="map_reporting_consent_header">Consent to Share Unencrypted Node Data via MQTT</string>
-    <string name="map_reporting_consent_text">By enabling this feature, you acknowledge and expressly consent to the transmission of your device’s real-time geographic location over the MQTT protocol without encryption. This location data may be used for purposes such as live map reporting, device tracking, and related telemetry functions.</string>
-    <string name="i_agree_to_share_my_location">I have read and understand the above. I voluntarily consent to the unencrypted transmission of my node data via MQTT</string>
+    <string name="set_your_region">Definir a sua região</string>
+    <string name="reply">Responder</string>
+    <string name="map_reporting_summary">O seu node enviará periodicamente um pacote de relatório de mapa não criptografado para o servidor MQTT configurado, isso inclui id, nome longo e curto nome. localização aproximada, modelo de hardware, papel, versão do firmware, região LoRa, predefinição de modem e nome do canal primário.</string>
+    <string name="map_reporting_consent_header">Consentimento para partilhar dados não criptografados do node via MQTT</string>
+    <string name="map_reporting_consent_text">Ao ativar este recurso, reconhece e consente expressamente com a transmissão da localização geográfica em tempo real do seu dispositivo pelo protocolo MQTT sem criptografia. Esses dados de localização podem ser usados para propósitos como relatório de mapas ao vivo, rastreamento do dispositivo e funções de telemetria relacionadas.</string>
+    <string name="i_agree_to_share_my_location">Eu li e entendi a informação acima. Eu concordo voluntariamente com a transmissão não criptografada dos dados do meu node via MQTT</string>
     <string name="i_agree">Estou de acordo.</string>
     <string name="should_update_firmware">Atualização de firmware recomendada.</string>
     <string name="should_update">Para beneficiar das últimas correções e funcionalidades, por favor, atualize o firmware do node.\n\nÚltima versão estável do firmware: %1$s</string>
@@ -718,7 +718,7 @@
     <string name="remote">Remote</string>
     <string name="node_count_template">(%1$d online / %2$d total)</string>
     <string name="react">React</string>
-    <string name="disconnect">Disconnect</string>
+    <string name="disconnect">Desligar</string>
     <string name="scanning_bluetooth">Scanning for Bluetooth devices…</string>
     <string name="no_ble_devices">No paired Bluetooth devices.</string>
     <string name="no_network_devices">No Network devices found.</string>
@@ -812,7 +812,7 @@
     <string name="mesh_map_location_description">Enables the blue location dot for your phone in the mesh map.</string>
     <string name="configure_location_permissions">Configure Location Permissions</string>
     <string name="skip">Skip</string>
-    <string name="settings">settings</string>
+    <string name="settings">definições</string>
     <string name="critical_alerts">Critical Alerts</string>
     <string name="critical_alerts_dnd_request_text">To ensure you receive critical alerts, such as
         SOS messages, even when your device is in \"Do Not Disturb\" mode, you need to grant special

@@ -117,11 +117,11 @@
     <string name="config_position_flags_summary">Optional fields to include when assembling position messages. the more fields are included, the larger the message will be - leading to longer airtime and a higher risk of packet loss.</string>
     <string name="config_power_is_power_saving_summary">Will sleep everything as much as possible, for the tracker and sensor role this will also include the lora radio. Don\'t use this setting if you want to use your device with the phone apps or are using a device without a user button.</string>
     <string name="config_security_public_key">Generated from your public key and sent out to other nodes on the mesh to allow them to compute a shared secret key.</string>
-    <string name="config_security_private_key">Used to create a shared key with a remote device.</string>
+    <string name="config_security_private_key">Används för att skapa en delad nyckel med en fjärrnod.</string>
     <string name="config_security_admin_key">The public key authorized to send admin messages to this node.</string>
     <string name="config_security_is_managed">Device is managed by a mesh administrator, the user is unable to access any of the device settings.</string>
-    <string name="config_security_serial_enabled">Serial Console over the Stream API.</string>
-    <string name="config_security_debug_log_api_enabled">Output live debug logging over serial, view and export position-redacted device logs over Bluetooth.</string>
+    <string name="config_security_serial_enabled">Seriell kommunikation över Stream API.</string>
+    <string name="config_security_debug_log_api_enabled">Skriv felsökningsloggar över seriell kommunikation samt visa och exportera positions-rensade loggar över Bluetooth.</string>
     <!-- Position Config -->
     <string name="position_packet">Position Packet</string>
     <string name="broadcast_interval">Sändningsintervall</string>
@@ -366,7 +366,7 @@
     <string name="channel_1">Channel 1</string>
     <string name="channel_2">Channel 2</string>
     <string name="channel_3">Channel 3</string>
-    <string name="current">Current</string>
+    <string name="current">Ström</string>
     <string name="voltage">Spänning</string>
     <string name="are_you_sure">Är du säker?</string>
     <string name="router_role_confirmation_text"><![CDATA[I have read the <a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Device Role Documentation</a> and the blog post about <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Choosing The Right Device Role</a>.]]></string>
@@ -384,7 +384,7 @@
     <string name="orient_north">Orient north</string>
     <string name="user">User</string>
     <string name="channels">Kanaler</string>
-    <string name="device">Device</string>
+    <string name="device">Enhet</string>
     <string name="position">Plats</string>
     <string name="power">Ström</string>
     <string name="network">Nätverk</string>
@@ -396,14 +396,14 @@
     <string name="serial">Seriell kommunikation</string>
     <string name="external_notification">External Notification</string>
     <string name="store_forward"><![CDATA[Store & Forward]]></string>
-    <string name="range_test">Range Test</string>
-    <string name="telemetry">Telemetry</string>
+    <string name="range_test">Räckvidd</string>
+    <string name="telemetry">Telemetri</string>
     <string name="canned_message">Canned Message</string>
-    <string name="audio">Audio</string>
+    <string name="audio">Ljud</string>
     <string name="remote_hardware">Remote Hardware</string>
-    <string name="neighbor_info">Neighbor Info</string>
-    <string name="ambient_lighting">Ambient Lighting</string>
-    <string name="detection_sensor">Detection Sensor</string>
+    <string name="neighbor_info">Granninformation</string>
+    <string name="ambient_lighting">Omgivande belysning</string>
+    <string name="detection_sensor">Detekteringssensor</string>
     <string name="paxcounter">Paxcounter</string>
     <string name="audio_config">Audio Config</string>
     <string name="codec_2_enabled">CODEC 2 enabled</string>
@@ -430,9 +430,9 @@
     <string name="environment">Environment</string>
     <string name="ambient_lighting_config">Ambient Lighting Config</string>
     <string name="led_state">LED state</string>
-    <string name="red">Red</string>
-    <string name="green">Green</string>
-    <string name="blue">Blue</string>
+    <string name="red">Rött</string>
+    <string name="green">Grönt</string>
+    <string name="blue">Blått</string>
     <string name="canned_message_config">Canned Message Config</string>
     <string name="canned_message_enabled">Canned message enabled</string>
     <string name="rotary_encoder_1_enabled">Rotary encoder #1 enabled</string>
@@ -525,7 +525,7 @@
     <string name="encryption_enabled">Encryption enabled</string>
     <string name="json_output_enabled">JSON output enabled</string>
     <string name="tls_enabled">TLS enabled</string>
-    <string name="root_topic">Root topic</string>
+    <string name="root_topic">Rotämne (root topic)</string>
     <string name="proxy_to_client_enabled">Proxy to client enabled</string>
     <string name="map_reporting">Map reporting</string>
     <string name="map_reporting_interval_seconds">Map reporting interval (seconds)</string>
@@ -567,8 +567,8 @@
     <string name="redefine_gps_tx_pin">Redefine GPS_TX_PIN</string>
     <string name="redefine_pin_gps_en">Redefine PIN_GPS_EN</string>
     <string name="position_flags">Position flags</string>
-    <string name="power_config">Power Config</string>
-    <string name="enable_power_saving_mode">Enable power saving mode</string>
+    <string name="power_config">Ströminställningar</string>
+    <string name="enable_power_saving_mode">Aktivera strömsparläge</string>
     <string name="shutdown_on_power_loss">Shutdown on power loss</string>
     <string name="shutdown_on_battery_delay_seconds">Shutdown on battery delay (seconds)</string>
     <string name="adc_multiplier_override">ADC multiplier override</string>
@@ -605,13 +605,13 @@
     <string name="override_console_serial_port">Override console serial port</string>
     <string name="store_forward_enabled"><![CDATA[Store & Forward enabled]]></string>
     <string name="heartbeat">Heartbeat</string>
-    <string name="number_of_records">Number of records</string>
-    <string name="history_return_max">History return max</string>
-    <string name="history_return_window">History return window</string>
+    <string name="number_of_records">Antal poster</string>
+    <string name="history_return_max">Maxstorlek för historik</string>
+    <string name="history_return_window">Returfönstrets storlek för historik</string>
     <string name="server">Server</string>
     <string name="telemetry_config">Telemetry Config</string>
-    <string name="device_metrics_update_interval_seconds">Device metrics update interval (seconds)</string>
-    <string name="environment_metrics_update_interval_seconds">Environment metrics update interval (seconds)</string>
+    <string name="device_metrics_update_interval_seconds">Uppdateringsintervall för enhetsdata</string>
+    <string name="environment_metrics_update_interval_seconds">Uppdateringsintervall för miljömätningar</string>
     <string name="environment_metrics_module_enabled">Environment metrics module enabled</string>
     <string name="environment_metrics_on_screen_enabled">Environment metrics on-screen enabled</string>
     <string name="environment_metrics_use_fahrenheit">Environment metrics use Fahrenheit</string>
@@ -649,7 +649,7 @@
     <string name="uptime">Drifttid</string>
     <string name="load_indexed">Load %1$d</string>
     <string name="disk_free_indexed">Disk Free %1$d</string>
-    <string name="timestamp">Timestamp</string>
+    <string name="timestamp">Tidsstämpel</string>
     <string name="heading">Heading</string>
     <string name="speed">Speed</string>
     <string name="sats">Sats</string>
@@ -707,7 +707,7 @@
     <string name="only_favorites">Only Favorites</string>
     <string name="show_waypoints">Show Waypoints</string>
     <string name="show_precision_circle">Show Precision Circles</string>
-    <string name="client_notification">Client Notification</string>
+    <string name="client_notification">Meddelande från enheten</string>
     <string name="compromised_keys">Compromised keys detected, select OK to regenerate.</string>
     <string name="regenerate_private_key">Regenerate Private Key</string>
     <string name="regenerate_keys_confirmation">Are you sure you want to regenerate your Private Key?\n\nNodes that may have previously exchanged keys with this node will need to Remove that node and re-exchange keys in order to resume secure communication.</string>
@@ -718,7 +718,7 @@
     <string name="remote">Remote</string>
     <string name="node_count_template">(%1$d online / %2$d total)</string>
     <string name="react">React</string>
-    <string name="disconnect">Disconnect</string>
+    <string name="disconnect">Koppla från</string>
     <string name="scanning_bluetooth">Scanning for Bluetooth devices…</string>
     <string name="no_ble_devices">No paired Bluetooth devices.</string>
     <string name="no_network_devices">No Network devices found.</string>

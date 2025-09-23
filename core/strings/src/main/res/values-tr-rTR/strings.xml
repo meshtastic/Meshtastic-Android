@@ -199,7 +199,7 @@
     <string name="meshtastic_messages_notifications">Direct message notifications</string>
     <string name="meshtastic_broadcast_notifications">Broadcast message notifications</string>
     <string name="meshtastic_alerts_notifications">Uyarı bildirimleri</string>
-    <string name="firmware_too_old">Yazılım güncellemesi gerekli.</string>
+    <string name="firmware_too_old">Yazılım güncellemesi gerekiyor.</string>
     <string name="firmware_old">Radyo yazılımı bu uygulamayla iletişim kurmak için çok eski. Bu konuda daha fazla bilgi için: <a href="https://meshtastic.org/docs/getting-started/flashing-firmware">Yazılım yükleme kılavuzumuza</a> bakın.</string>
     <string name="okay">Tamam</string>
     <string name="must_set_region">Bölge seçmelisin!</string>
@@ -371,7 +371,7 @@
     <string name="are_you_sure">Emin misiniz?</string>
     <string name="router_role_confirmation_text"><![CDATA[<a href="https://meshtastic.org/docs/configuration/radio/device/#roles">Cihaz Rolü Dokümantasyonu</a> ve <a href="http://meshtastic.org/blog/choosing-the-right-device-role">Doğru Cihaz Rolünü Seçme</a> hakkındaki blog yazılarını okudum.]]></string>
     <string name="i_know_what_i_m_doing">Ne yaptığımı biliyorum.</string>
-    <string name="low_battery_message">Node %1$s has a low battery (%2$d%%)</string>
+    <string name="low_battery_message">%1$s Düğümünün pili düşük (%2$d%%)</string>
     <string name="meshtastic_low_battery_notifications">Düşük pil bildirimleri</string>
     <string name="low_battery_title">Düşük pil: %s</string>
     <string name="meshtastic_low_battery_temporary_remote_notifications">Düşük pil bildirimleri (favori düğümler)</string>
@@ -379,7 +379,7 @@
     <string name="udp_enabled">Açık</string>
     <string name="udp_broadcast">UDP Broadcast</string>
     <string name="udp_config">UDP Ayarları</string>
-    <string name="map_node_popup_details"><![CDATA[%1$s<br>Last heard: %2$s<br>Last position: %3$s<br>Battery: %4$s]]></string>
+    <string name="map_node_popup_details"><![CDATA[%1$s<br>Son duyulma: %2$s<br>Son konum: %3$s<br>Pil: %4$s]]></string>
     <string name="toggle_my_position">Konumunumu aç/kapa</string>
     <string name="orient_north">Orient north</string>
     <string name="user">Kullanıcı</string>
@@ -676,7 +676,7 @@
     <string name="import_label">İçeri aktar</string>
     <string name="request_metadata">İstek Meta Verisi</string>
     <string name="actions">işlemler</string>
-    <string name="firmware">Aygıt Yazılımı</string>
+    <string name="firmware">Yazılım</string>
     <string name="use_12h_format">12h saat formatını kullan</string>
     <string name="display_time_in_12h_format">Aktif edildiğinde, cihaz ekranda saati 12 saat formatında gösterecek</string>
     <string name="host_metrics_log">Sunucu Ölçüm Kayıtları</string>
@@ -689,10 +689,10 @@
     <string name="connections">Connection</string>
     <string name="map">Mesh Map</string>
     <string name="conversations">Conversations</string>
-    <string name="nodes">Nodes</string>
+    <string name="nodes">Düğümler</string>
     <string name="bottom_nav_settings">Ayarlar</string>
-    <string name="set_your_region">Set your region</string>
-    <string name="reply">Reply</string>
+    <string name="set_your_region">Bölgenizi Seçin</string>
+    <string name="reply">Yanıtla</string>
     <string name="map_reporting_summary">Your node will periodically send an unencrypted map report packet to the configured MQTT server, this includes id, long and short name, approximate location, hardware model, role, firmware version, LoRa region, modem preset and primary channel name.</string>
     <string name="map_reporting_consent_header">Consent to Share Unencrypted Node Data via MQTT</string>
     <string name="map_reporting_consent_text">By enabling this feature, you acknowledge and expressly consent to the transmission of your device’s real-time geographic location over the MQTT protocol without encryption. This location data may be used for purposes such as live map reporting, device tracking, and related telemetry functions.</string>
@@ -718,7 +718,7 @@
     <string name="remote">Remote</string>
     <string name="node_count_template">(%1$d online / %2$d total)</string>
     <string name="react">React</string>
-    <string name="disconnect">Disconnect</string>
+    <string name="disconnect">Bağlantıyı Kes</string>
     <string name="scanning_bluetooth">Scanning for Bluetooth devices…</string>
     <string name="no_ble_devices">No paired Bluetooth devices.</string>
     <string name="no_network_devices">No Network devices found.</string>
@@ -733,7 +733,7 @@
     <string name="warning">Warning</string>
     <string name="overflow_menu">Overflow menu</string>
     <string name="uv_lux">UV Lux</string>
-    <string name="unknown">Unknown</string>
+    <string name="unknown">Bilinmeyen</string>
     <string name="message_device_managed">This radio is managed and can only be changed by a remote admin.</string>
     <string name="advanced_title">Gelişmiş</string>
     <string name="clean_node_database_title">Clean Node Database</string>

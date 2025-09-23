@@ -600,7 +600,7 @@
     <string name="serial_enabled">Serial enabled</string>
     <string name="echo_enabled">Echo enabled</string>
     <string name="serial_baud_rate">Serial baud rate</string>
-    <string name="timeout">Timeout</string>
+    <string name="timeout">Temps esgotat</string>
     <string name="serial_mode">Serial mode</string>
     <string name="override_console_serial_port">Override console serial port</string>
     <string name="store_forward_enabled"><![CDATA[Store & Forward enabled]]></string>
