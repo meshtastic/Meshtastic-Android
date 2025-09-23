@@ -39,7 +39,6 @@ import com.geeksville.mesh.LocalOnlyProtos.LocalModuleConfig
 import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.Position
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.android.prefs.UiPrefs
 import com.geeksville.mesh.channel
 import com.geeksville.mesh.channelSet
 import com.geeksville.mesh.channelSettings
@@ -83,6 +82,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.strings.R
 import javax.inject.Inject
 

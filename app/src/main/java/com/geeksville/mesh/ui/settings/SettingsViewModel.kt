@@ -27,7 +27,6 @@ import com.geeksville.mesh.MeshProtos
 import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.Position
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.android.prefs.UiPrefs
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.entity.MyNodeEntity
@@ -48,6 +47,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.prefs.ui.UiPrefs
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
 import java.io.FileWriter

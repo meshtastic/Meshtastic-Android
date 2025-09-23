@@ -15,10 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.android.prefs
+package org.meshtastic.core.prefs.map
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import org.meshtastic.core.prefs.di.MapConsentSharedPreferences
+import javax.inject.Inject
+import javax.inject.Singleton
 
 interface MapConsentPrefs {
     fun shouldReportLocation(nodeNum: Int?): Boolean
@@ -26,7 +29,9 @@ interface MapConsentPrefs {
     fun setShouldReportLocation(nodeNum: Int?, value: Boolean)
 }
 
-class MapConsentPrefsImpl(private val prefs: SharedPreferences) : MapConsentPrefs {
+@Singleton
+class MapConsentPrefsImpl @Inject constructor(@MapConsentSharedPreferences private val prefs: SharedPreferences) :
+    MapConsentPrefs {
     override fun shouldReportLocation(nodeNum: Int?) = prefs.getBoolean(nodeNum.toString(), false)
 
     override fun setShouldReportLocation(nodeNum: Int?, value: Boolean) {

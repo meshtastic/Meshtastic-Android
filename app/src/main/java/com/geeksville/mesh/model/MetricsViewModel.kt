@@ -36,7 +36,6 @@ import com.geeksville.mesh.Portnums
 import com.geeksville.mesh.Portnums.PortNum
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.android.prefs.MapPrefs
 import com.geeksville.mesh.database.MeshLogRepository
 import com.geeksville.mesh.database.entity.FirmwareRelease
 import com.geeksville.mesh.database.entity.MeshLog
@@ -62,6 +61,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.navigation.NodesRoutes
+import org.meshtastic.core.prefs.map.MapPrefs
 import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.model.CustomTileSource
 import java.io.BufferedWriter

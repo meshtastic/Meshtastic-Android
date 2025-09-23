@@ -15,10 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.android.prefs
+package org.meshtastic.core.prefs.map
 
 import android.content.SharedPreferences
 import com.google.maps.android.compose.MapType
+import org.meshtastic.core.prefs.NullableStringPrefDelegate
+import org.meshtastic.core.prefs.StringSetPrefDelegate
+import org.meshtastic.core.prefs.di.GoogleMapsSharedPreferences
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /** Interface for prefs specific to Google Maps. For general map prefs, see MapPrefs. */
 interface GoogleMapsPrefs {
@@ -27,7 +32,8 @@ interface GoogleMapsPrefs {
     var hiddenLayerUrls: Set<String>
 }
 
-class GoogleMapsPrefsImpl(prefs: SharedPreferences) : GoogleMapsPrefs {
+@Singleton
+class GoogleMapsPrefsImpl @Inject constructor(@GoogleMapsSharedPreferences prefs: SharedPreferences) : GoogleMapsPrefs {
     override var selectedGoogleMapType: String? by
         NullableStringPrefDelegate(prefs, "selected_google_map_type", MapType.NORMAL.name)
     override var selectedCustomTileUrl: String? by NullableStringPrefDelegate(prefs, "selected_custom_tile_url", null)

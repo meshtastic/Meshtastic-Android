@@ -17,7 +17,6 @@
 
 package com.geeksville.mesh.repository.map
 
-import com.geeksville.mesh.android.prefs.MapTileProviderPrefs
 import com.geeksville.mesh.di.IoDispatcher
 import com.geeksville.mesh.ui.map.CustomTileProviderConfig
 import kotlinx.coroutines.CoroutineDispatcher
@@ -27,6 +26,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
+import org.meshtastic.core.prefs.map.MapTileProviderPrefs
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton

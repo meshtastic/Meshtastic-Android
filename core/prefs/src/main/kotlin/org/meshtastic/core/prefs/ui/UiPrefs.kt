@@ -15,17 +15,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.android.prefs
+package org.meshtastic.core.prefs.ui
 
 import android.content.SharedPreferences
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
-import com.geeksville.mesh.model.NodeSortOption
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import org.meshtastic.core.prefs.PrefDelegate
+import org.meshtastic.core.prefs.di.UiSharedPreferences
 import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
+import javax.inject.Singleton
 
 interface UiPrefs {
     var theme: Int
@@ -49,7 +52,8 @@ interface UiPrefs {
 const val KEY_THEME = "theme"
 const val KEY_APP_INTRO_COMPLETED = "app_intro_completed"
 
-class UiPrefsImpl(private val prefs: SharedPreferences) : UiPrefs {
+@Singleton
+class UiPrefsImpl @Inject constructor(@UiSharedPreferences private val prefs: SharedPreferences) : UiPrefs {
 
     override var theme: Int by PrefDelegate(prefs, KEY_THEME, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
     private var _themeFlow = MutableStateFlow(theme)
@@ -83,7 +87,7 @@ class UiPrefsImpl(private val prefs: SharedPreferences) : UiPrefs {
     }
 
     override var hasShownNotPairedWarning: Boolean by PrefDelegate(prefs, "has_shown_not_paired_warning", false)
-    override var nodeSortOption: Int by PrefDelegate(prefs, "node-sort-option", NodeSortOption.VIA_FAVORITE.ordinal)
+    override var nodeSortOption: Int by PrefDelegate(prefs, "node-sort-option", -1)
     override var includeUnknown: Boolean by PrefDelegate(prefs, "include-unknown", false)
     override var showDetails: Boolean by PrefDelegate(prefs, "show-details", false)
     override var onlyOnline: Boolean by PrefDelegate(prefs, "only-online", false)

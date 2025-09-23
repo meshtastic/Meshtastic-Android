@@ -15,28 +15,21 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.android.prefs
+package org.meshtastic.core.prefs
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KProperty
 
-interface MeshPrefs {
-    var deviceAddress: String?
+internal class StringSetPrefDelegate(
+    private val prefs: SharedPreferences,
+    private val key: String,
+    private val defaultValue: Set<String>,
+) : ReadWriteProperty<Any?, Set<String>> {
+    override fun getValue(thisRef: Any?, property: KProperty<*>): Set<String> =
+        prefs.getStringSet(key, defaultValue) ?: emptySet()
 
-    fun shouldProvideNodeLocation(nodeNum: Int?): Boolean
-
-    fun setShouldProvideNodeLocation(nodeNum: Int?, value: Boolean)
-}
-
-class MeshPrefsImpl(private val prefs: SharedPreferences) : MeshPrefs {
-    override var deviceAddress: String? by NullableStringPrefDelegate(prefs, "device_address", null)
-
-    override fun shouldProvideNodeLocation(nodeNum: Int?): Boolean =
-        prefs.getBoolean(provideLocationKey(nodeNum), false)
-
-    override fun setShouldProvideNodeLocation(nodeNum: Int?, value: Boolean) {
-        prefs.edit { putBoolean(provideLocationKey(nodeNum), value) }
-    }
-
-    private fun provideLocationKey(nodeNum: Int?) = "provide-location-$nodeNum"
+    override fun setValue(thisRef: Any?, property: KProperty<*>, value: Set<String>) =
+        prefs.edit { putStringSet(key, value) }
 }

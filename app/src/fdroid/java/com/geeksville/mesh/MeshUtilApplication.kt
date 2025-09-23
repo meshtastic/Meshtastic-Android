@@ -18,8 +18,8 @@
 package com.geeksville.mesh
 
 import com.geeksville.mesh.android.GeeksvilleApplication
-import com.geeksville.mesh.android.prefs.AnalyticsPrefs
 import dagger.hilt.android.HiltAndroidApp
+import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import javax.inject.Inject
 
 @HiltAndroidApp

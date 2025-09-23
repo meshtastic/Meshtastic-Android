@@ -15,21 +15,20 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.android.prefs
+package org.meshtastic.core.prefs.emoji
 
 import android.content.SharedPreferences
-import androidx.core.content.edit
-import kotlin.properties.ReadWriteProperty
-import kotlin.reflect.KProperty
+import org.meshtastic.core.prefs.NullableStringPrefDelegate
+import org.meshtastic.core.prefs.di.CustomEmojiSharedPreferences
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class StringSetPrefDelegate(
-    private val prefs: SharedPreferences,
-    private val key: String,
-    private val defaultValue: Set<String>,
-) : ReadWriteProperty<Any?, Set<String>> {
-    override fun getValue(thisRef: Any?, property: KProperty<*>): Set<String> =
-        prefs.getStringSet(key, defaultValue) ?: emptySet()
+interface CustomEmojiPrefs {
+    var customEmojiFrequency: String?
+}
 
-    override fun setValue(thisRef: Any?, property: KProperty<*>, value: Set<String>) =
-        prefs.edit { putStringSet(key, value) }
+@Singleton
+class CustomEmojiPrefsImpl @Inject constructor(@CustomEmojiSharedPreferences prefs: SharedPreferences) :
+    CustomEmojiPrefs {
+    override var customEmojiFrequency: String? by NullableStringPrefDelegate(prefs, "pref_key_custom_emoji_freq", null)
 }

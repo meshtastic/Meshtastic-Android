@@ -15,37 +15,40 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.android.prefs
+package org.meshtastic.core.prefs.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import org.meshtastic.core.prefs.map.GoogleMapsPrefs
+import org.meshtastic.core.prefs.map.GoogleMapsPrefsImpl
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
-// Pref store qualifiers are private to prevent prefs stores from being injected directly.
+// Pref store qualifiers are internal to prevent prefs stores from being injected directly.
 // Consuming code should always inject one of the prefs repositories.
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-private annotation class GoogleMapsSharedPreferences
+internal annotation class GoogleMapsSharedPreferences
 
 @InstallIn(SingletonComponent::class)
 @Module
-object GoogleMapsModule {
+interface GoogleMapsModule {
 
-    @Provides
-    @Singleton
-    @GoogleMapsSharedPreferences
-    fun provideGoogleMapsSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-        context.getSharedPreferences("google_maps_prefs", Context.MODE_PRIVATE)
+    @Binds fun bindGoogleMapsPrefs(googleMapsPrefsImpl: GoogleMapsPrefsImpl): GoogleMapsPrefs
 
-    @Provides
-    @Singleton
-    fun provideGoogleMapsPrefs(@GoogleMapsSharedPreferences sharedPreferences: SharedPreferences): GoogleMapsPrefs =
-        GoogleMapsPrefsImpl(sharedPreferences)
+    companion object {
+
+        @Provides
+        @Singleton
+        @GoogleMapsSharedPreferences
+        fun provideGoogleMapsSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
+            context.getSharedPreferences("google_maps_prefs", Context.MODE_PRIVATE)
+    }
 }

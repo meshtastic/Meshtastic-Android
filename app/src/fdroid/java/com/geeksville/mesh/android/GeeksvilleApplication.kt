@@ -28,8 +28,8 @@ import com.geeksville.mesh.analytics.AnalyticsProvider
 import com.geeksville.mesh.analytics.NopAnalytics
 import com.geeksville.mesh.android.BuildUtils.debug
 import com.geeksville.mesh.android.BuildUtils.info
-import com.geeksville.mesh.android.prefs.AnalyticsPrefs
 import org.meshtastic.core.model.DeviceHardware
+import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
 import timber.log.Timber
 
 abstract class GeeksvilleApplication :

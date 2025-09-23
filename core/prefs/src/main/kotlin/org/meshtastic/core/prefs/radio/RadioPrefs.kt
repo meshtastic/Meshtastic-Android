@@ -15,22 +15,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.android.prefs
+package org.meshtastic.core.prefs.radio
 
 import android.content.SharedPreferences
-import java.util.UUID
+import org.meshtastic.core.prefs.NullableStringPrefDelegate
+import org.meshtastic.core.prefs.di.RadioSharedPreferences
+import javax.inject.Inject
+import javax.inject.Singleton
 
-interface AnalyticsPrefs {
-    var analyticsAllowed: Boolean
-    val installId: String
+interface RadioPrefs {
+    var devAddr: String?
 }
 
-// Having an additional app prefs store is maintaining the existing behavior.
-class AnalyticsPrefsImpl(analyticsPrefs: SharedPreferences, appPrefs: SharedPreferences) : AnalyticsPrefs {
-    override var analyticsAllowed: Boolean by PrefDelegate(analyticsPrefs, "allowed", true)
-
-    private var _installId: String? by NullableStringPrefDelegate(appPrefs, "appPrefs_install_id", null)
-
-    override val installId: String
-        get() = _installId ?: UUID.randomUUID().toString().also { _installId = it }
+@Singleton
+class RadioPrefsImpl @Inject constructor(@RadioSharedPreferences prefs: SharedPreferences) : RadioPrefs {
+    override var devAddr: String? by NullableStringPrefDelegate(prefs, "devAddr2", null)
 }

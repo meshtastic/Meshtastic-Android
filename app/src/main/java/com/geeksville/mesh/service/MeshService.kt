@@ -58,8 +58,6 @@ import com.geeksville.mesh.analytics.DataPair
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.hasLocationPermission
-import com.geeksville.mesh.android.prefs.MeshPrefs
-import com.geeksville.mesh.android.prefs.UiPrefs
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.MeshLogRepository
@@ -103,6 +101,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.model.getFullTracerouteResponse
+import org.meshtastic.core.prefs.mesh.MeshPrefs
+import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.strings.R
 import java.util.Random
 import java.util.UUID

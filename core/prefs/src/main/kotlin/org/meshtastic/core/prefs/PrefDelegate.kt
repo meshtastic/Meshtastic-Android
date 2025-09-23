@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.android.prefs
+package org.meshtastic.core.prefs
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
@@ -30,8 +30,11 @@ import kotlin.reflect.KProperty
  * @param defaultValue The default value to return if no value is found.
  * @throws IllegalArgumentException if the type is not supported.
  */
-class PrefDelegate<T>(private val prefs: SharedPreferences, private val key: String, private val defaultValue: T) :
-    ReadWriteProperty<Any?, T> {
+internal class PrefDelegate<T>(
+    private val prefs: SharedPreferences,
+    private val key: String,
+    private val defaultValue: T,
+) : ReadWriteProperty<Any?, T> {
 
     @Suppress("UNCHECKED_CAST")
     override fun getValue(thisRef: Any?, property: KProperty<*>): T = when (defaultValue) {

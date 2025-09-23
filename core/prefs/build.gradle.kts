@@ -17,9 +17,14 @@
 
 plugins {
     alias(libs.plugins.meshtastic.android.library)
+    alias(libs.plugins.meshtastic.hilt)
     alias(libs.plugins.kover)
 }
 
 android { namespace = "org.meshtastic.core.prefs" }
 
-dependencies {}
+dependencies {
+    implementation(libs.bundles.coroutines)
+    implementation(libs.appcompat)
+    googleImplementation(libs.maps.compose)
+}
