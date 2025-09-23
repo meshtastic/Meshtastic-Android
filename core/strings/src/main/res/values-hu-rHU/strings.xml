@@ -858,4 +858,5 @@
     <string name="icon_meanings">Ikonmagyarázatok</string>
     <string name="secondary_channel_position_feature">Az elsődleges csatornán a pozíció letiltása lehetővé teszi az időszakos pozíció-sugárzást az első olyan másodlagos csatornán, ahol a pozíció engedélyezett, ellenkező esetben kézi pozíciólekérés szükséges.</string>
     <string name="device_configuration">Device configuration</string>
+    <string name="remotely_administrating">"[Remote] %1$s"</string>
 </resources>
