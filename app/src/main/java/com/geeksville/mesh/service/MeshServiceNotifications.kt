@@ -185,9 +185,7 @@ class MeshServiceNotifications(private val context: Context) {
                         enableLights(true)
                         enableVibration(true)
                         setBypassDnd(true)
-                        val alertSoundUri =
-                            "${SCHEME_ANDROID_RESOURCE}://${context.packageName}/${raw.alert}"
-                                .toUri()
+                        val alertSoundUri = "${SCHEME_ANDROID_RESOURCE}://${context.packageName}/${raw.alert}".toUri()
                         setSound(
                             alertSoundUri,
                             AudioAttributes.Builder()
