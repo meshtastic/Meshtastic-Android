@@ -862,6 +862,6 @@
     <string name="secondary_channel_position_feature">Sijainnin poistaminen käytöstä ensisijaisella kanavalla mahdollistaa sijainnin jaksottaisen lähetyksen ensimmäisellä toissijaisella kanavalla, jossa sijainti on käytössä. Muussa tapauksessa vaaditaan manuaalinen sijaintipyyntö.</string>
     <string name="device_configuration">Laitteen asetukset</string>
     <string name="remotely_administrating">"[Etälaite] %1$s"</string>
-    <string name="device_telemetry_enabled">Send Device Telemetry</string>
-    <string name="device_telemetry_enabled_summary">Enable/Disable the device telemetry module to send metrics to the mesh</string>
+    <string name="device_telemetry_enabled">Lähetä laitteen telemetriatiedot</string>
+    <string name="device_telemetry_enabled_summary">Ota käyttöön/poista käytöstä telemetriamoduuli laitteen mittaustietojen lähettämiseksi mesh-verkkoon</string>
 </resources>
