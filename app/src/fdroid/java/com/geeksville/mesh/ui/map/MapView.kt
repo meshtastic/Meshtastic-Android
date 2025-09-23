@@ -276,11 +276,11 @@ fun MapView(
                 MyLocationNewOverlay(this).apply {
                     enableMyLocation()
                     enableFollowLocation()
-                    getBitmapFromVectorDrawable(context, R.drawable.ic_map_location_dot_24)?.let {
+                    getBitmapFromVectorDrawable(context, com.geeksville.mesh.R.drawable.ic_map_location_dot_24)?.let {
                         setPersonIcon(it)
                         setPersonAnchor(0.5f, 0.5f)
                     }
-                    getBitmapFromVectorDrawable(context, R.drawable.ic_map_navigation_24)?.let {
+                    getBitmapFromVectorDrawable(context, com.geeksville.mesh.R.drawable.ic_map_navigation_24)?.let {
                         setDirectionIcon(it)
                         setDirectionAnchor(0.5f, 0.5f)
                     }
@@ -307,7 +307,9 @@ fun MapView(
     val nodes by mapViewModel.nodes.collectAsStateWithLifecycle()
     val waypoints by mapViewModel.waypoints.collectAsStateWithLifecycle(emptyMap())
 
-    val markerIcon = remember { AppCompatResources.getDrawable(context, R.drawable.ic_baseline_location_on_24) }
+    val markerIcon = remember {
+        AppCompatResources.getDrawable(context, com.geeksville.mesh.R.drawable.ic_baseline_location_on_24)
+    }
 
     fun MapView.onNodesChanged(nodes: Collection<Node>): List<MarkerWithLabel> {
         val nodesWithPosition = nodes.filter { it.validPosition != null }
