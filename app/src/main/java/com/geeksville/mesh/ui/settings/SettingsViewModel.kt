@@ -111,7 +111,7 @@ constructor(
     }
 
     fun setTheme(theme: Int) {
-        uiPrefs.theme = theme
+        uiPreferencesDataSource.setTheme(theme)
     }
 
     fun showAppIntro() {

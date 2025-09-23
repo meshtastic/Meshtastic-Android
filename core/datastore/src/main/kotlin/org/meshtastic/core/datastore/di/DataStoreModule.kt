@@ -39,6 +39,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import org.meshtastic.core.datastore.KEY_APP_INTRO_COMPLETED
+import org.meshtastic.core.datastore.KEY_THEME
 import org.meshtastic.core.datastore.serializer.ChannelSetSerializer
 import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
 import org.meshtastic.core.datastore.serializer.ModuleConfigSerializer
@@ -60,7 +61,7 @@ object DataStoreModule {
                 SharedPreferencesMigration(
                     context = appContext,
                     sharedPreferencesName = "ui-prefs",
-                    keysToMigrate = setOf(KEY_APP_INTRO_COMPLETED),
+                    keysToMigrate = setOf(KEY_APP_INTRO_COMPLETED, KEY_THEME),
                 ),
             ),
             scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),

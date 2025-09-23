@@ -194,7 +194,7 @@ constructor(
 ) : ViewModel(),
     Logging {
 
-    val theme: StateFlow<Int> = uiPrefs.themeFlow
+    val theme: StateFlow<Int> = uiPreferencesDataSource.theme
 
     private val _lastTraceRouteTime = MutableStateFlow<Long?>(null)
     val lastTraceRouteTime: StateFlow<Long?> = _lastTraceRouteTime.asStateFlow()

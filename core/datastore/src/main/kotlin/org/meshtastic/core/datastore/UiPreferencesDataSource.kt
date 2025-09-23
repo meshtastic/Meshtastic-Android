@@ -21,6 +21,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -33,6 +34,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 internal const val KEY_APP_INTRO_COMPLETED = "app_intro_completed"
+internal const val KEY_THEME = "theme"
 
 @Singleton
 class UiPreferencesDataSource @Inject constructor(private val dataStore: DataStore<Preferences>) {
@@ -41,8 +43,15 @@ class UiPreferencesDataSource @Inject constructor(private val dataStore: DataSto
 
     val appIntroCompleted: StateFlow<Boolean> = dataStore.prefStateFlow(key = APP_INTRO_COMPLETED, default = false)
 
+    // Default value for AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+    val theme: StateFlow<Int> = dataStore.prefStateFlow(key = THEME, default = -1)
+
     fun setAppIntroCompleted(completed: Boolean) {
         dataStore.setPref(key = APP_INTRO_COMPLETED, value = completed)
+    }
+
+    fun setTheme(value: Int) {
+        dataStore.setPref(key = THEME, value = value)
     }
 
     private fun <T : Any> DataStore<Preferences>.prefStateFlow(key: Preferences.Key<T>, default: T): StateFlow<T> =
@@ -54,5 +63,6 @@ class UiPreferencesDataSource @Inject constructor(private val dataStore: DataSto
 
     private companion object {
         val APP_INTRO_COMPLETED = booleanPreferencesKey(KEY_APP_INTRO_COMPLETED)
+        val THEME = intPreferencesKey(KEY_THEME)
     }
 }
