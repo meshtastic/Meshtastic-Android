@@ -77,7 +77,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import kotlinx.coroutines.delay
 import org.meshtastic.core.navigation.Route
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale

@@ -70,7 +70,7 @@ import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.util.GraphUtil
 import com.geeksville.mesh.util.GraphUtil.createPath
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 import kotlin.math.ceil
 import kotlin.math.floor
 

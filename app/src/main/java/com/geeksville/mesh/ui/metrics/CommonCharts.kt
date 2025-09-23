@@ -60,7 +60,7 @@ import com.geeksville.mesh.model.Environment
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_MINUTE_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MAX_PERCENT_VALUE
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 import java.text.DateFormat
 
 object CommonCharts {

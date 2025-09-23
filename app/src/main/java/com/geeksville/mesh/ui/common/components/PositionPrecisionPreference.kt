@@ -33,7 +33,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.util.DistanceUnit
 import com.geeksville.mesh.util.toDistanceString
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 import kotlin.math.pow
 import kotlin.math.roundToInt
 

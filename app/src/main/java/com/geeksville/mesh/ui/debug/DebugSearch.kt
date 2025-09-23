@@ -58,7 +58,7 @@ import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
 import com.geeksville.mesh.model.LogSearchManager.SearchMatch
 import com.geeksville.mesh.model.LogSearchManager.SearchState
 import com.geeksville.mesh.ui.common.theme.AppTheme
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Composable
 internal fun DebugSearchNavigation(

@@ -103,7 +103,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import org.meshtastic.core.model.getFullTracerouteResponse
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 import java.util.Random
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap

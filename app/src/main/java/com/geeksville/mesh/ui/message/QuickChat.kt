@@ -76,7 +76,7 @@ import com.geeksville.mesh.ui.common.components.dragContainer
 import com.geeksville.mesh.ui.common.components.dragDropItemsIndexed
 import com.geeksville.mesh.ui.common.components.rememberDragDropState
 import com.geeksville.mesh.ui.common.theme.AppTheme
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Composable
 internal fun QuickChatScreen(modifier: Modifier = Modifier, viewModel: UIViewModel = hiltViewModel()) {

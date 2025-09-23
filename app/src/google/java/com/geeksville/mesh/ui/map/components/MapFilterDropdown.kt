@@ -31,7 +31,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.geeksville.mesh.ui.map.MapViewModel
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Composable
 internal fun MapFilterDropdown(expanded: Boolean, onDismissRequest: () -> Unit, mapViewModel: MapViewModel) {

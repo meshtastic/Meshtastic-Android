@@ -40,7 +40,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ui.map.MapLayerItem
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Suppress("LongMethod")
 @Composable

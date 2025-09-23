@@ -77,7 +77,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.meshtastic.core.navigation.SettingsRoutes
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 import java.io.FileOutputStream
 import javax.inject.Inject
 

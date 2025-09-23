@@ -39,7 +39,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 /**
  * The initial welcome screen for the app introduction flow. It displays a brief overview of the app's key features.

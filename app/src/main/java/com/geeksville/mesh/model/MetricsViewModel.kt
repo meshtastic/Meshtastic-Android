@@ -62,7 +62,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.navigation.NodesRoutes
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 import org.meshtastic.feature.map.model.CustomTileSource
 import java.io.BufferedWriter
 import java.io.FileNotFoundException

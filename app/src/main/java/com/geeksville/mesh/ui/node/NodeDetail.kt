@@ -161,7 +161,7 @@ import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 private data class VectorMetricInfo(
     @StringRes val label: Int,

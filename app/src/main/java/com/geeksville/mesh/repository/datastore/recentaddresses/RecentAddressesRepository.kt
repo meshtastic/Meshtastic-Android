@@ -31,7 +31,7 @@ import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 import org.json.JSONArray
 import org.json.JSONObject
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 import javax.inject.Inject
 import javax.inject.Singleton
 

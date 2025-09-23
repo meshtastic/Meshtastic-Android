@@ -58,7 +58,7 @@ import com.geeksville.mesh.ui.common.components.SignalInfo
 import com.geeksville.mesh.ui.common.preview.NodePreviewParameterProvider
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.util.toDistanceString
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable

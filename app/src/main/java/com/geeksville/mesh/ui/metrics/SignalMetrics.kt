@@ -66,7 +66,7 @@ import com.geeksville.mesh.ui.common.components.SnrAndRssi
 import com.geeksville.mesh.ui.metrics.CommonCharts.DATE_TIME_FORMAT
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import com.geeksville.mesh.util.GraphUtil.plotPoint
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Suppress("MagicNumber")
 private enum class Metric(val color: Color, val min: Float, val max: Float) {

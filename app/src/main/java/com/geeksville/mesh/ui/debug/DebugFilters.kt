@@ -57,7 +57,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.model.DebugViewModel.UiMeshLog
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Composable
 fun DebugCustomFilterInput(

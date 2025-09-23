@@ -41,7 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.geeksville.mesh.MessageStatus
 import com.geeksville.mesh.ui.common.components.EmojiPickerDialog
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Composable
 fun ReactionButton(onSendReaction: (String) -> Unit = {}) {

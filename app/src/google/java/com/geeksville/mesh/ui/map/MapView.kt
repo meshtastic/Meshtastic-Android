@@ -120,7 +120,7 @@ import com.google.maps.android.compose.rememberUpdatedMarkerState
 import com.google.maps.android.compose.widgets.ScaleBar
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 import timber.log.Timber
 import java.text.DateFormat
 

@@ -48,7 +48,7 @@ import com.geeksville.mesh.util.encodeToString
 import com.geeksville.mesh.util.toByteString
 import com.google.protobuf.ByteString
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Suppress("LongMethod")
 @Composable

@@ -63,7 +63,7 @@ import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.metrics.CommonCharts.MS_PER_SEC
 import org.meshtastic.core.model.fullRouteDiscovery
 import org.meshtastic.core.model.getTracerouteResponse
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 import java.text.DateFormat
 
 @OptIn(ExperimentalFoundationApi::class)

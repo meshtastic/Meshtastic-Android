@@ -65,7 +65,7 @@ import com.geeksville.mesh.ui.common.theme.IAQColors.IAQHeavilyPolluted
 import com.geeksville.mesh.ui.common.theme.IAQColors.IAQLightlyPolluted
 import com.geeksville.mesh.ui.common.theme.IAQColors.IAQModeratelyPolluted
 import com.geeksville.mesh.ui.common.theme.IAQColors.IAQSeverelyPolluted
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Suppress("MagicNumber")
 enum class Iaq(val color: Color, val description: String, val range: IntRange) {

@@ -66,7 +66,7 @@ import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.common.components.MainAppBar
 import com.geeksville.mesh.ui.node.components.NodeMenuAction
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 import java.util.concurrent.TimeUnit
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)

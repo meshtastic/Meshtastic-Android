@@ -51,7 +51,7 @@ import com.geeksville.mesh.ui.settings.components.SettingsItem
 import com.geeksville.mesh.ui.settings.radio.components.WarningDialog
 import org.meshtastic.core.navigation.Route
 import org.meshtastic.core.navigation.SettingsRoutes
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Suppress("LongMethod", "CyclomaticComplexMethod")
 @Composable

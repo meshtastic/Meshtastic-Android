@@ -45,7 +45,7 @@ import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.common.components.precisionBitsToMeters
 import com.geeksville.mesh.util.DistanceUnit
 import com.geeksville.mesh.util.toDistanceString
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 import kotlin.math.roundToInt
 
 private const val POSITION_PRECISION_MIN = 12

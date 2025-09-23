@@ -32,8 +32,8 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
+import com.geeksville.mesh.R
 import com.geeksville.mesh.ui.common.theme.AppTheme
-import org.meshtastic.core.ui.R
 
 @Composable
 fun BatteryInfo(modifier: Modifier = Modifier, batteryLevel: Int?, voltage: Float?) {

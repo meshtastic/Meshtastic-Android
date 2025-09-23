@@ -43,7 +43,7 @@ import com.geeksville.mesh.model.Contact
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.contact.ContactItem
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Composable
 fun ShareScreen(viewModel: UIViewModel = hiltViewModel(), onConfirm: (String) -> Unit) {

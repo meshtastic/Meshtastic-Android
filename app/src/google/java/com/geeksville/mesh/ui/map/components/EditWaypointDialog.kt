@@ -65,7 +65,7 @@ import androidx.compose.ui.unit.sp
 import com.geeksville.mesh.MeshProtos.Waypoint
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.ui.common.components.EmojiPickerDialog
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale

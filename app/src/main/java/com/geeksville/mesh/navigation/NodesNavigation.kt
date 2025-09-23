@@ -57,7 +57,7 @@ import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
 import org.meshtastic.core.navigation.NodeDetailRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.Route
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 fun NavGraphBuilder.nodesGraph(navController: NavHostController, uiViewModel: UIViewModel) {
     navigation<NodesRoutes.NodesGraph>(startDestination = NodesRoutes.Nodes) {

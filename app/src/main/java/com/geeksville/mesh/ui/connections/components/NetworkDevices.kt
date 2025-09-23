@@ -59,7 +59,7 @@ import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.connections.isIPAddress
 import kotlinx.coroutines.launch
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Suppress("MagicNumber", "LongMethod")

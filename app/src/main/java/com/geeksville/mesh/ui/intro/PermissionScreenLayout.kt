@@ -43,7 +43,7 @@ import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 /**
  * A generic layout for screens within the app introduction flow. It typically presents a headline, a descriptive text

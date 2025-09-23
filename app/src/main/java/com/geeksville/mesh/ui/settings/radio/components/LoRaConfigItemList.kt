@@ -47,7 +47,7 @@ import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.model.RegionInfo
 import org.meshtastic.core.model.numChannels
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Composable
 fun LoRaConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {

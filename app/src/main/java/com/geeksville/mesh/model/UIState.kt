@@ -83,7 +83,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.DeviceHardware
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 import javax.inject.Inject
 
 // Given a human name, strip out the first letter of the first three words and return that as the

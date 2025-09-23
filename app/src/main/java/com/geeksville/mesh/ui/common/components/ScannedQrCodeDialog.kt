@@ -57,7 +57,7 @@ import com.geeksville.mesh.copy
 import com.geeksville.mesh.model.UIViewModel
 import com.geeksville.mesh.ui.settings.radio.components.ChannelSelection
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Composable
 fun ScannedQrCodeDialog(viewModel: UIViewModel, incoming: ChannelSet) {

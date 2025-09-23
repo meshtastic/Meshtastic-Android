@@ -58,7 +58,7 @@ import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import org.meshtastic.core.navigation.ContactsRoutes
 import org.meshtastic.core.navigation.NodesRoutes
 import org.meshtastic.core.navigation.SettingsRoutes
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Suppress("CyclomaticComplexMethod")
 @Composable

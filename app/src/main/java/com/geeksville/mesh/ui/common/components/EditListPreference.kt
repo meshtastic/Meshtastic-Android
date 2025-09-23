@@ -45,7 +45,7 @@ import com.geeksville.mesh.ModuleConfigProtos.RemoteHardwarePinType
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.remoteHardwarePin
 import com.google.protobuf.ByteString
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Suppress("LongMethod")
 @Composable

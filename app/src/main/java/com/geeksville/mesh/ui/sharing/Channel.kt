@@ -115,7 +115,7 @@ import com.journeyapps.barcodescanner.ScanOptions
 import kotlinx.coroutines.launch
 import org.meshtastic.core.model.Channel
 import org.meshtastic.core.navigation.Route
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 /**
  * Composable screen for managing and sharing Meshtastic channels. Allows users to view, edit, and share channel

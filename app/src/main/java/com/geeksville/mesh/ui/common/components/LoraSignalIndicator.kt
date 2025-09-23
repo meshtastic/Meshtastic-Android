@@ -51,7 +51,7 @@ import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusOrange
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 private const val SNR_GOOD_THRESHOLD = -7f
 private const val SNR_FAIR_THRESHOLD = -15f

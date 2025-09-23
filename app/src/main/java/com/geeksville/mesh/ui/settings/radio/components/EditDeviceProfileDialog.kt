@@ -43,7 +43,7 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.ClientOnlyProtos.DeviceProfile
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.google.protobuf.Descriptors
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 private const val SUPPORTED_FIELDS = 7
 

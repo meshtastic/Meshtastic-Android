@@ -41,7 +41,7 @@ import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.service.ReplyReceiver.Companion.KEY_TEXT_REPLY
 import com.geeksville.mesh.util.formatUptime
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 /**
  * Manages the creation and display of all app notifications.
@@ -185,7 +185,7 @@ class MeshServiceNotifications(private val context: Context) {
                         enableVibration(true)
                         setBypassDnd(true)
                         val alertSoundUri =
-                            "${ContentResolver.SCHEME_ANDROID_RESOURCE}://${context.packageName}/${R.raw.alert}".toUri()
+                            "${ContentResolver.SCHEME_ANDROID_RESOURCE}://${context.packageName}/${com.geeksville.mesh.R.raw.alert}".toUri()
                         setSound(
                             alertSoundUri,
                             AudioAttributes.Builder()

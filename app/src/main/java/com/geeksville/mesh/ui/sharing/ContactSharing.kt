@@ -70,7 +70,7 @@ import com.google.zxing.WriterException
 import com.journeyapps.barcodescanner.BarcodeEncoder
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 import timber.log.Timber
 import java.net.MalformedURLException
 

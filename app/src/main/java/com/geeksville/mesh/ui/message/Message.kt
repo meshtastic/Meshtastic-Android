@@ -108,7 +108,7 @@ import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 import java.nio.charset.StandardCharsets
 
 private const val MESSAGE_CHARACTER_LIMIT_BYTES = 200

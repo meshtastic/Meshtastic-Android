@@ -34,7 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 /**
  * Screen for explaining and guiding the user to configure critical alert settings. This screen is part of the app

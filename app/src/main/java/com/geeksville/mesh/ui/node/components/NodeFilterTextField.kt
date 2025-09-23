@@ -59,7 +59,7 @@ import androidx.compose.ui.unit.dp
 import com.geeksville.mesh.model.NodeSortOption
 import com.geeksville.mesh.ui.common.preview.LargeFontPreview
 import com.geeksville.mesh.ui.common.theme.AppTheme
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Suppress("LongParameterList")
 @Composable

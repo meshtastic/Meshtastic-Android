@@ -50,7 +50,7 @@ import com.geeksville.mesh.ui.common.components.EditTextPreference
 import com.geeksville.mesh.ui.common.components.PositionPrecisionPreference
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Suppress("LongMethod")
 @Composable

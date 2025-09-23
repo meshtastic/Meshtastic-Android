@@ -1,20 +1,3 @@
-<!--
-  ~ Copyright (c) 2025 Meshtastic LLC
-  ~
-  ~ This program is free software: you can redistribute it and/or modify
-  ~ it under the terms of the GNU General Public License as published by
-  ~ the Free Software Foundation, either version 3 of the License, or
-  ~ (at your option) any later version.
-  ~
-  ~ This program is distributed in the hope that it will be useful,
-  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
-  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  ~ GNU General Public License for more details.
-  ~
-  ~ You should have received a copy of the GNU General Public License
-  ~ along with this program.  If not, see <https://www.gnu.org/licenses/>.
-  -->
-
 <vector xmlns:android="http://schemas.android.com/apk/res/android" android:height="200dp" android:viewportHeight="32" android:viewportWidth="32" android:width="200dp">
       
     <path android:fillColor="#000000" android:pathData="M24.5,30a5.202,5.202 0,0 1,-4.626 -8.08L23.49,16.538a1.217,1.217 0,0 1,2.02 0L29.06,21.815A5.492,5.492 0,0 1,30 24.751,5.385 5.385,0 0,1 24.5,30ZM24.5,18.62 L21.564,22.987A3.208,3.208 0,0 0,24.5 28,3.385 3.385,0 0,0 28,24.751a3.435,3.435 0,0 0,-0.63 -1.867Z"/>

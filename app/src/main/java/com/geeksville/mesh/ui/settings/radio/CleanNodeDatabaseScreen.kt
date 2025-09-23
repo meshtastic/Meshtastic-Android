@@ -48,7 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import com.geeksville.mesh.database.entity.NodeEntity
 import com.geeksville.mesh.ui.node.components.NodeChip
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 /**
  * Composable screen for cleaning the node database. Allows users to specify criteria for deleting nodes. The list of

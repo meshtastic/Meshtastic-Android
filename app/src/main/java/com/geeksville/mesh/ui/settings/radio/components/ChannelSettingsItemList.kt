@@ -80,7 +80,7 @@ import com.geeksville.mesh.ui.common.components.dragDropItemsIndexed
 import com.geeksville.mesh.ui.common.components.rememberDragDropState
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Composable
 private fun ChannelItem(

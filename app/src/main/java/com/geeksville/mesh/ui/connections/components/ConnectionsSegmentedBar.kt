@@ -35,7 +35,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.ui.connections.DeviceType
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Suppress("LambdaParameterEventTrailing")
 @Composable

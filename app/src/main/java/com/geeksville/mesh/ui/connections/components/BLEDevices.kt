@@ -53,7 +53,7 @@ import com.geeksville.mesh.ui.common.components.TitledCard
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.MultiplePermissionsState
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 /**
  * Composable that displays a list of Bluetooth Low Energy (BLE) devices and allows scanning. It handles Bluetooth

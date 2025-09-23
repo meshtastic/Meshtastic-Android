@@ -57,7 +57,7 @@ import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.launch
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable

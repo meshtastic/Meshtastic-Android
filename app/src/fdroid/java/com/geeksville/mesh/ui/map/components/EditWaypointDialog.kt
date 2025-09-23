@@ -68,7 +68,7 @@ import com.geeksville.mesh.ui.common.components.EditTextPreference
 import com.geeksville.mesh.ui.common.components.EmojiPickerDialog
 import com.geeksville.mesh.ui.common.theme.AppTheme
 import com.geeksville.mesh.waypoint
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale

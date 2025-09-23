@@ -58,7 +58,7 @@ import com.geeksville.mesh.ui.common.components.PreferenceCategory
 import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 private val DeviceConfig.Role.description: Int
     get() =

@@ -68,7 +68,7 @@ import com.geeksville.mesh.ui.common.theme.StatusColors.StatusGreen
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusRed
 import com.geeksville.mesh.ui.common.theme.StatusColors.StatusYellow
 import org.meshtastic.core.model.Channel
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 private const val PRECISE_POSITION_BITS = 32
 

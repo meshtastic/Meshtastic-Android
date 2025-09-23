@@ -46,7 +46,7 @@ import com.geeksville.mesh.model.EnvironmentGraphingData
 import com.geeksville.mesh.model.TimeFrame
 import com.geeksville.mesh.util.GraphUtil.createPath
 import com.geeksville.mesh.util.GraphUtil.drawPathWithGradient
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 private const val CHART_WEIGHT = 1f
 private const val Y_AXIS_WEIGHT = 0.1f

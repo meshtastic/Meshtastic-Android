@@ -59,7 +59,7 @@ import com.geeksville.mesh.ui.node.components.NodeMenuAction
 import com.geeksville.mesh.ui.sharing.AddContactFAB
 import com.geeksville.mesh.ui.sharing.SharedContactDialog
 import com.geeksville.mesh.ui.sharing.supportsQrCodeSharing
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3ExpressiveApi::class)
 @Suppress("LongMethod", "CyclomaticComplexMethod")

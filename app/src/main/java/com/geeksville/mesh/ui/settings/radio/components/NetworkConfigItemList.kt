@@ -56,7 +56,7 @@ import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.journeyapps.barcodescanner.ScanContract
 import com.journeyapps.barcodescanner.ScanOptions
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Composable
 private fun ScanErrorDialog(onDismiss: () -> Unit = {}) =

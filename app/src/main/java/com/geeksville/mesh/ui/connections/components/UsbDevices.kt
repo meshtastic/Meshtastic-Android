@@ -28,7 +28,7 @@ import com.geeksville.mesh.model.DeviceListEntry
 import com.geeksville.mesh.service.ConnectionState
 import com.geeksville.mesh.ui.common.components.TitledCard
 import com.geeksville.mesh.ui.common.theme.AppTheme
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Composable
 fun UsbDevices(

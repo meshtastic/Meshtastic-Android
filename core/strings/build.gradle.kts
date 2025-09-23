@@ -17,4 +17,4 @@
 
 plugins { alias(libs.plugins.meshtastic.android.library) }
 
-android { namespace = "org.meshtastic.core.ui" }
+android { namespace = "org.meshtastic.core.strings" }

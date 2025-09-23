@@ -47,7 +47,7 @@ import com.geeksville.mesh.ui.common.components.RegularPreference
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.user
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 
 @Composable
 fun UserConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {

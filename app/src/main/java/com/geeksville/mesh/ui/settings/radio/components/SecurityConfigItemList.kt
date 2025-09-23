@@ -61,7 +61,7 @@ import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.geeksville.mesh.util.encodeToString
 import com.geeksville.mesh.util.toByteString
 import com.google.protobuf.ByteString
-import org.meshtastic.core.ui.R
+import org.meshtastic.core.strings.R
 import java.security.SecureRandom
 
 @Composable
