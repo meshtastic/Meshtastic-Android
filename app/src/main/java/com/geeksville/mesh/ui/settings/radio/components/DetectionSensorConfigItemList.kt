@@ -17,72 +17,55 @@
 
 package com.geeksville.mesh.ui.settings.radio.components
 
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.geeksville.mesh.ModuleConfigProtos.ModuleConfig
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.moduleConfig
 import com.geeksville.mesh.ui.common.components.DropDownPreference
 import com.geeksville.mesh.ui.common.components.EditTextPreference
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
-import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import org.meshtastic.core.strings.R
 
 @Composable
-fun DetectionSensorConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun DetectionSensorConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
+    val detectionSensorConfig = state.moduleConfig.detectionSensor
+    val formState = rememberConfigState(initialValue = detectionSensorConfig)
+    val focusManager = LocalFocusManager.current
 
-    if (state.responseState.isWaiting()) {
-        PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
-    }
-
-    DetectionSensorConfigItemList(
-        detectionSensorConfig = state.moduleConfig.detectionSensor,
+    RadioConfigScreenList(
+        title = stringResource(id = R.string.detection_sensor),
+        onBack = { navController.popBackStack() },
+        configState = formState,
         enabled = state.connected,
-        onSaveClicked = { detectionSensorInput ->
-            val config = moduleConfig { detectionSensor = detectionSensorInput }
+        responseState = state.responseState,
+        onDismissPacketResponse = viewModel::clearPacketResponse,
+        onSave = {
+            val config = moduleConfig { detectionSensor = it }
             viewModel.setModuleConfig(config)
         },
-    )
-}
-
-@Suppress("LongMethod")
-@Composable
-fun DetectionSensorConfigItemList(
-    detectionSensorConfig: ModuleConfig.DetectionSensorConfig,
-    enabled: Boolean,
-    onSaveClicked: (ModuleConfig.DetectionSensorConfig) -> Unit,
-) {
-    val focusManager = LocalFocusManager.current
-    var detectionSensorInput by rememberSaveable { mutableStateOf(detectionSensorConfig) }
-
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    ) {
         item { PreferenceCategory(text = stringResource(R.string.detection_sensor_config)) }
 
         item {
             SwitchPreference(
                 title = stringResource(R.string.detection_sensor_enabled),
-                checked = detectionSensorInput.enabled,
-                enabled = enabled,
-                onCheckedChange = { detectionSensorInput = detectionSensorInput.copy { this.enabled = it } },
+                checked = formState.value.enabled,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { this.enabled = it } },
             )
         }
         item { HorizontalDivider() }
@@ -90,29 +73,29 @@ fun DetectionSensorConfigItemList(
         item {
             EditTextPreference(
                 title = stringResource(R.string.minimum_broadcast_seconds),
-                value = detectionSensorInput.minimumBroadcastSecs,
-                enabled = enabled,
+                value = formState.value.minimumBroadcastSecs,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { detectionSensorInput = detectionSensorInput.copy { minimumBroadcastSecs = it } },
+                onValueChanged = { formState.value = formState.value.copy { minimumBroadcastSecs = it } },
             )
         }
 
         item {
             EditTextPreference(
                 title = stringResource(R.string.state_broadcast_seconds),
-                value = detectionSensorInput.stateBroadcastSecs,
-                enabled = enabled,
+                value = formState.value.stateBroadcastSecs,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { detectionSensorInput = detectionSensorInput.copy { stateBroadcastSecs = it } },
+                onValueChanged = { formState.value = formState.value.copy { stateBroadcastSecs = it } },
             )
         }
 
         item {
             SwitchPreference(
                 title = stringResource(R.string.send_bell_with_alert_message),
-                checked = detectionSensorInput.sendBell,
-                enabled = enabled,
-                onCheckedChange = { detectionSensorInput = detectionSensorInput.copy { sendBell = it } },
+                checked = formState.value.sendBell,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { sendBell = it } },
             )
         }
         item { HorizontalDivider() }
@@ -120,37 +103,37 @@ fun DetectionSensorConfigItemList(
         item {
             EditTextPreference(
                 title = stringResource(R.string.friendly_name),
-                value = detectionSensorInput.name,
+                value = formState.value.name,
                 maxSize = 19, // name max_size:20
-                enabled = enabled,
+                enabled = state.connected,
                 isError = false,
                 keyboardOptions =
                 KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { detectionSensorInput = detectionSensorInput.copy { name = it } },
+                onValueChanged = { formState.value = formState.value.copy { name = it } },
             )
         }
 
         item {
             EditTextPreference(
                 title = stringResource(R.string.gpio_pin_to_monitor),
-                value = detectionSensorInput.monitorPin,
-                enabled = enabled,
+                value = formState.value.monitorPin,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { detectionSensorInput = detectionSensorInput.copy { monitorPin = it } },
+                onValueChanged = { formState.value = formState.value.copy { monitorPin = it } },
             )
         }
 
         item {
             DropDownPreference(
                 title = stringResource(R.string.detection_trigger_type),
-                enabled = enabled,
+                enabled = state.connected,
                 items =
                 ModuleConfig.DetectionSensorConfig.TriggerType.entries
                     .filter { it != ModuleConfig.DetectionSensorConfig.TriggerType.UNRECOGNIZED }
                     .map { it to it.name },
-                selectedItem = detectionSensorInput.detectionTriggerType,
-                onItemSelected = { detectionSensorInput = detectionSensorInput.copy { detectionTriggerType = it } },
+                selectedItem = formState.value.detectionTriggerType,
+                onItemSelected = { formState.value = formState.value.copy { detectionTriggerType = it } },
             )
         }
         item { HorizontalDivider() }
@@ -158,35 +141,11 @@ fun DetectionSensorConfigItemList(
         item {
             SwitchPreference(
                 title = stringResource(R.string.use_input_pullup_mode),
-                checked = detectionSensorInput.usePullup,
-                enabled = enabled,
-                onCheckedChange = { detectionSensorInput = detectionSensorInput.copy { usePullup = it } },
+                checked = formState.value.usePullup,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { usePullup = it } },
             )
         }
         item { HorizontalDivider() }
-
-        item {
-            PreferenceFooter(
-                enabled = enabled && detectionSensorInput != detectionSensorConfig,
-                onCancelClicked = {
-                    focusManager.clearFocus()
-                    detectionSensorInput = detectionSensorConfig
-                },
-                onSaveClicked = {
-                    focusManager.clearFocus()
-                    onSaveClicked(detectionSensorInput)
-                },
-            )
-        }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun DetectionSensorConfigPreview() {
-    DetectionSensorConfigItemList(
-        detectionSensorConfig = ModuleConfig.DetectionSensorConfig.getDefaultInstance(),
-        enabled = true,
-        onSaveClicked = {},
-    )
 }

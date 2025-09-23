@@ -18,11 +18,9 @@
 package com.geeksville.mesh.ui.settings.radio.components
 
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -38,10 +36,10 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.geeksville.mesh.ConfigProtos.Config.NetworkConfig
 import com.geeksville.mesh.config
 import com.geeksville.mesh.copy
@@ -50,7 +48,6 @@ import com.geeksville.mesh.ui.common.components.EditIPv4Preference
 import com.geeksville.mesh.ui.common.components.EditPasswordPreference
 import com.geeksville.mesh.ui.common.components.EditTextPreference
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
-import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.common.components.SimpleAlertDialog
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
@@ -63,40 +60,10 @@ private fun ScanErrorDialog(onDismiss: () -> Unit = {}) =
     SimpleAlertDialog(title = R.string.error, text = R.string.wifi_qr_code_error, onDismiss = onDismiss)
 
 @Composable
-fun NetworkConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun NetworkConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
-
-    if (state.responseState.isWaiting()) {
-        PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
-    }
-
-    NetworkConfigItemList(
-        hasWifi = state.metadata?.hasWifi ?: true,
-        hasEthernet = state.metadata?.hasEthernet ?: true,
-        networkConfig = state.radioConfig.network,
-        enabled = state.connected,
-        onSaveClicked = { networkInput ->
-            val config = config { network = networkInput }
-            viewModel.setConfig(config)
-        },
-    )
-}
-
-private fun extractWifiCredentials(qrCode: String) =
-    Regex("""WIFI:S:(.*?);.*?P:(.*?);""").find(qrCode)?.destructured?.let { (ssid, password) -> ssid to password }
-        ?: (null to null)
-
-@Suppress("LongMethod", "CyclomaticComplexMethod")
-@Composable
-fun NetworkConfigItemList(
-    hasWifi: Boolean,
-    hasEthernet: Boolean,
-    networkConfig: NetworkConfig,
-    enabled: Boolean,
-    onSaveClicked: (NetworkConfig) -> Unit,
-) {
-    val focusManager = LocalFocusManager.current
-    var networkInput by rememberSaveable { mutableStateOf(networkConfig) }
+    val networkConfig = state.radioConfig.network
+    val formState = rememberConfigState(initialValue = networkConfig)
 
     var showScanErrorDialog: Boolean by rememberSaveable { mutableStateOf(false) }
     if (showScanErrorDialog) {
@@ -108,8 +75,8 @@ fun NetworkConfigItemList(
             if (result.contents != null) {
                 val (ssid, psk) = extractWifiCredentials(result.contents)
                 if (ssid != null && psk != null) {
-                    networkInput =
-                        networkInput.copy {
+                    formState.value =
+                        formState.value.copy {
                             wifiSsid = ssid
                             wifiPsk = psk
                         }
@@ -129,17 +96,29 @@ fun NetworkConfigItemList(
             }
         barcodeLauncher.launch(zxingScan)
     }
+    val focusManager = LocalFocusManager.current
 
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
-        if (hasWifi) {
+    RadioConfigScreenList(
+        title = stringResource(id = R.string.network),
+        onBack = { navController.popBackStack() },
+        configState = formState,
+        enabled = state.connected,
+        responseState = state.responseState,
+        onDismissPacketResponse = viewModel::clearPacketResponse,
+        onSave = {
+            val config = config { network = it }
+            viewModel.setConfig(config)
+        },
+    ) {
+        if (state.metadata?.hasWifi == true) {
             item { PreferenceCategory(text = stringResource(R.string.wifi_config)) }
             item {
                 SwitchPreference(
                     title = stringResource(R.string.wifi_enabled),
                     summary = stringResource(id = R.string.config_network_wifi_enabled_summary),
-                    checked = networkInput.wifiEnabled,
-                    enabled = enabled && hasWifi,
-                    onCheckedChange = { networkInput = networkInput.copy { wifiEnabled = it } },
+                    checked = formState.value.wifiEnabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { wifiEnabled = it } },
                 )
                 HorizontalDivider()
             }
@@ -147,25 +126,25 @@ fun NetworkConfigItemList(
             item {
                 EditTextPreference(
                     title = stringResource(R.string.ssid),
-                    value = networkInput.wifiSsid,
+                    value = formState.value.wifiSsid,
                     maxSize = 32, // wifi_ssid max_size:33
-                    enabled = enabled && hasWifi,
+                    enabled = state.connected,
                     isError = false,
                     keyboardOptions =
                     KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text, imeAction = ImeAction.Done),
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { networkInput = networkInput.copy { wifiSsid = it } },
+                    onValueChanged = { formState.value = formState.value.copy { wifiSsid = it } },
                 )
             }
 
             item {
                 EditPasswordPreference(
                     title = stringResource(R.string.password),
-                    value = networkInput.wifiPsk,
+                    value = formState.value.wifiPsk,
                     maxSize = 64, // wifi_psk max_size:65
-                    enabled = enabled && hasWifi,
+                    enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { networkInput = networkInput.copy { wifiPsk = it } },
+                    onValueChanged = { formState.value = formState.value.copy { wifiPsk = it } },
                 )
             }
 
@@ -173,37 +152,38 @@ fun NetworkConfigItemList(
                 Button(
                     onClick = { zxingScan() },
                     modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp).height(48.dp),
-                    enabled = enabled && hasWifi,
+                    enabled = state.connected,
                 ) {
                     Text(text = stringResource(R.string.wifi_qr_code_scan))
                 }
             }
         }
-        if (hasEthernet) {
+        if (state.metadata?.hasEthernet == true) {
             item { PreferenceCategory(text = stringResource(R.string.ethernet_config)) }
             item {
                 SwitchPreference(
                     title = stringResource(R.string.ethernet_enabled),
                     summary = stringResource(id = R.string.config_network_eth_enabled_summary),
-                    checked = networkInput.ethEnabled,
-                    enabled = enabled && hasEthernet,
-                    onCheckedChange = { networkInput = networkInput.copy { ethEnabled = it } },
+                    checked = formState.value.ethEnabled,
+                    enabled = state.connected,
+                    onCheckedChange = { formState.value = formState.value.copy { ethEnabled = it } },
                 )
                 HorizontalDivider()
             }
         }
 
-        if (hasEthernet || hasWifi) {
+        if (state.metadata?.hasEthernet == true || state.metadata?.hasWifi == true) {
             item { PreferenceCategory(text = stringResource(R.string.udp_config)) }
 
             item {
                 SwitchPreference(
                     title = stringResource(R.string.udp_enabled),
                     summary = stringResource(id = R.string.config_network_udp_enabled_summary),
-                    checked = networkInput.enabledProtocols == 1,
-                    enabled = enabled,
+                    checked = formState.value.enabledProtocols == 1,
+                    enabled = state.connected,
                     onCheckedChange = {
-                        networkInput = networkInput.copy { if (it) enabledProtocols = 1 else enabledProtocols = 0 }
+                        formState.value =
+                            formState.value.copy { if (it) enabledProtocols = 1 else enabledProtocols = 0 }
                     },
                 )
             }
@@ -215,41 +195,41 @@ fun NetworkConfigItemList(
         item {
             EditTextPreference(
                 title = stringResource(R.string.ntp_server),
-                value = networkInput.ntpServer,
+                value = formState.value.ntpServer,
                 maxSize = 32, // ntp_server max_size:33
-                enabled = enabled,
-                isError = networkInput.ntpServer.isEmpty(),
+                enabled = state.connected,
+                isError = formState.value.ntpServer.isEmpty(),
                 keyboardOptions =
                 KeyboardOptions.Default.copy(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { networkInput = networkInput.copy { ntpServer = it } },
+                onValueChanged = { formState.value = formState.value.copy { ntpServer = it } },
             )
         }
 
         item {
             EditTextPreference(
                 title = stringResource(R.string.rsyslog_server),
-                value = networkInput.rsyslogServer,
+                value = formState.value.rsyslogServer,
                 maxSize = 32, // rsyslog_server max_size:33
-                enabled = enabled,
+                enabled = state.connected,
                 isError = false,
                 keyboardOptions =
                 KeyboardOptions.Default.copy(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Done),
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { networkInput = networkInput.copy { rsyslogServer = it } },
+                onValueChanged = { formState.value = formState.value.copy { rsyslogServer = it } },
             )
         }
 
         item {
             DropDownPreference(
                 title = stringResource(R.string.ipv4_mode),
-                enabled = enabled,
+                enabled = state.connected,
                 items =
                 NetworkConfig.AddressMode.entries
                     .filter { it != NetworkConfig.AddressMode.UNRECOGNIZED }
                     .map { it to it.name },
-                selectedItem = networkInput.addressMode,
-                onItemSelected = { networkInput = networkInput.copy { addressMode = it } },
+                selectedItem = formState.value.addressMode,
+                onItemSelected = { formState.value = formState.value.copy { addressMode = it } },
             )
             HorizontalDivider()
         }
@@ -257,12 +237,12 @@ fun NetworkConfigItemList(
         item {
             EditIPv4Preference(
                 title = stringResource(R.string.ip),
-                value = networkInput.ipv4Config.ip,
-                enabled = enabled && networkInput.addressMode == NetworkConfig.AddressMode.STATIC,
+                value = formState.value.ipv4Config.ip,
+                enabled = state.connected && formState.value.addressMode == NetworkConfig.AddressMode.STATIC,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
-                    val ipv4 = networkInput.ipv4Config.copy { ip = it }
-                    networkInput = networkInput.copy { ipv4Config = ipv4 }
+                    val ipv4 = formState.value.ipv4Config.copy { ip = it }
+                    formState.value = formState.value.copy { ipv4Config = ipv4 }
                 },
             )
         }
@@ -270,12 +250,12 @@ fun NetworkConfigItemList(
         item {
             EditIPv4Preference(
                 title = stringResource(R.string.gateway),
-                value = networkInput.ipv4Config.gateway,
-                enabled = enabled && networkInput.addressMode == NetworkConfig.AddressMode.STATIC,
+                value = formState.value.ipv4Config.gateway,
+                enabled = state.connected && formState.value.addressMode == NetworkConfig.AddressMode.STATIC,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
-                    val ipv4 = networkInput.ipv4Config.copy { gateway = it }
-                    networkInput = networkInput.copy { ipv4Config = ipv4 }
+                    val ipv4 = formState.value.ipv4Config.copy { gateway = it }
+                    formState.value = formState.value.copy { ipv4Config = ipv4 }
                 },
             )
         }
@@ -283,12 +263,12 @@ fun NetworkConfigItemList(
         item {
             EditIPv4Preference(
                 title = stringResource(R.string.subnet),
-                value = networkInput.ipv4Config.subnet,
-                enabled = enabled && networkInput.addressMode == NetworkConfig.AddressMode.STATIC,
+                value = formState.value.ipv4Config.subnet,
+                enabled = state.connected && formState.value.addressMode == NetworkConfig.AddressMode.STATIC,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
-                    val ipv4 = networkInput.ipv4Config.copy { subnet = it }
-                    networkInput = networkInput.copy { ipv4Config = ipv4 }
+                    val ipv4 = formState.value.ipv4Config.copy { subnet = it }
+                    formState.value = formState.value.copy { ipv4Config = ipv4 }
                 },
             )
         }
@@ -296,47 +276,19 @@ fun NetworkConfigItemList(
         item {
             EditIPv4Preference(
                 title = "DNS",
-                value = networkInput.ipv4Config.dns,
-                enabled = enabled && networkInput.addressMode == NetworkConfig.AddressMode.STATIC,
+                value = formState.value.ipv4Config.dns,
+                enabled = state.connected && formState.value.addressMode == NetworkConfig.AddressMode.STATIC,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                 onValueChanged = {
-                    val ipv4 = networkInput.ipv4Config.copy { dns = it }
-                    networkInput = networkInput.copy { ipv4Config = ipv4 }
+                    val ipv4 = formState.value.ipv4Config.copy { dns = it }
+                    formState.value = formState.value.copy { ipv4Config = ipv4 }
                 },
             )
         }
         item { HorizontalDivider() }
-
-        item {
-            PreferenceFooter(
-                enabled = enabled && networkInput != networkConfig,
-                onCancelClicked = {
-                    focusManager.clearFocus()
-                    networkInput = networkConfig
-                },
-                onSaveClicked = {
-                    focusManager.clearFocus()
-                    onSaveClicked(networkInput)
-                },
-            )
-        }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun NetworkConfigPreview() {
-    NetworkConfigItemList(
-        hasWifi = true,
-        hasEthernet = true,
-        networkConfig = NetworkConfig.getDefaultInstance(),
-        enabled = true,
-        onSaveClicked = {},
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun QrCodeErrorDialogPreview() {
-    ScanErrorDialog()
-}
+private fun extractWifiCredentials(qrCode: String) =
+    Regex("""WIFI:S:(.*?);.*?P:(.*?);""").find(qrCode)?.destructured?.let { (ssid, password) -> ssid to password }
+        ?: (null to null)

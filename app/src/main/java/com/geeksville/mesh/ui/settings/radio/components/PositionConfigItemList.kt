@@ -21,8 +21,6 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.location.Location
 import android.os.Build
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
@@ -35,13 +33,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.location.LocationCompat
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.ConfigProtos.Config.PositionConfig
 import com.geeksville.mesh.Position
@@ -51,7 +48,6 @@ import com.geeksville.mesh.ui.common.components.BitwisePreference
 import com.geeksville.mesh.ui.common.components.DropDownPreference
 import com.geeksville.mesh.ui.common.components.EditTextPreference
 import com.geeksville.mesh.ui.common.components.PreferenceCategory
-import com.geeksville.mesh.ui.common.components.PreferenceFooter
 import com.geeksville.mesh.ui.common.components.SwitchPreference
 import com.geeksville.mesh.ui.settings.radio.RadioConfigViewModel
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
@@ -61,7 +57,7 @@ import org.meshtastic.core.strings.R
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
+fun PositionConfigScreen(navController: NavController, viewModel: RadioConfigViewModel = hiltViewModel()) {
     val state by viewModel.radioConfigState.collectAsStateWithLifecycle()
     val coroutineScope = rememberCoroutineScope()
     var phoneLocation: Location? by remember { mutableStateOf(null) }
@@ -73,120 +69,104 @@ fun PositionConfigScreen(viewModel: RadioConfigViewModel = hiltViewModel()) {
             altitude = node?.position?.altitude ?: 0,
             time = 1, // ignore time for fixed_position
         )
+    val positionConfig = state.radioConfig.position
+    val formState = rememberConfigState(initialValue = positionConfig)
+    var locationInput by rememberSaveable { mutableStateOf(currentPosition) }
 
-    if (state.responseState.isWaiting()) {
-        PacketResponseStateDialog(state = state.responseState, onDismiss = viewModel::clearPacketResponse)
-    }
-
-    PositionConfigItemList(
-        phoneLocation = phoneLocation,
-        location = currentPosition,
-        positionConfig = state.radioConfig.position,
-        enabled = state.connected,
-        onSaveClicked = { locationInput, positionInput ->
-            if (positionInput.fixedPosition) {
-                if (locationInput != currentPosition) {
-                    viewModel.setFixedPosition(locationInput)
-                }
-            } else {
-                if (state.radioConfig.position.fixedPosition) {
-                    // fixed position changed from enabled to disabled
-                    viewModel.removeFixedPosition()
-                }
-            }
-            val config = config { position = positionInput }
-            viewModel.setConfig(config)
-        },
-        onUseCurrentLocation = {
-            @SuppressLint("MissingPermission")
-            coroutineScope.launch { phoneLocation = viewModel.getCurrentLocation() }
-        },
-    )
-}
-
-@OptIn(ExperimentalPermissionsApi::class)
-@Suppress("LongMethod", "CyclomaticComplexMethod")
-@Composable
-fun PositionConfigItemList(
-    phoneLocation: Location? = null,
-    location: Position,
-    positionConfig: PositionConfig,
-    enabled: Boolean,
-    onSaveClicked: (position: Position, config: PositionConfig) -> Unit,
-    onUseCurrentLocation: suspend () -> Unit,
-) {
-    val focusManager = LocalFocusManager.current
-    val coroutineScope = rememberCoroutineScope()
     val locationPermissionState =
         rememberPermissionState(Manifest.permission.ACCESS_FINE_LOCATION) { granted ->
             if (granted) {
-                coroutineScope.launch { onUseCurrentLocation() }
+                @SuppressLint("MissingPermission")
+                coroutineScope.launch { phoneLocation = viewModel.getCurrentLocation() }
             }
         }
-    var locationInput by rememberSaveable { mutableStateOf(location) }
-    var positionInput by rememberSaveable { mutableStateOf(positionConfig) }
 
     LaunchedEffect(phoneLocation) {
-        if (phoneLocation != null) {
+        phoneLocation?.let { phoneLoc ->
             locationInput =
                 Position(
-                    latitude = phoneLocation.latitude,
-                    longitude = phoneLocation.longitude,
+                    latitude = phoneLoc.latitude,
+                    longitude = phoneLoc.longitude,
                     altitude =
-                    LocationCompat.hasMslAltitude(phoneLocation).let {
+                    LocationCompat.hasMslAltitude(phoneLoc).let {
                         if (it && Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                            phoneLocation.mslAltitudeMeters.toInt()
+                            phoneLoc.mslAltitudeMeters.toInt()
                         } else {
-                            phoneLocation.altitude.toInt()
+                            phoneLoc.altitude.toInt()
                         }
                     },
                 )
         }
     }
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
+    val focusManager = LocalFocusManager.current
+
+    RadioConfigScreenList(
+        title = stringResource(id = R.string.position),
+        onBack = { navController.popBackStack() },
+        configState = formState,
+        enabled = state.connected,
+        responseState = state.responseState,
+        onDismissPacketResponse = viewModel::clearPacketResponse,
+        onSave = {
+            if (formState.value.fixedPosition) {
+                if (locationInput != currentPosition) {
+                    viewModel.setFixedPosition(locationInput)
+                }
+            } else {
+                if (positionConfig.fixedPosition) {
+                    // fixed position changed from enabled to disabled
+                    viewModel.removeFixedPosition()
+                }
+            }
+            val config = config { position = it }
+            viewModel.setConfig(config)
+        },
+    ) {
         item { PreferenceCategory(text = stringResource(R.string.position_packet)) }
 
         item {
             EditTextPreference(
                 title = stringResource(R.string.broadcast_interval),
                 summary = stringResource(id = R.string.config_position_broadcast_secs_summary),
-                value = positionInput.positionBroadcastSecs,
-                enabled = enabled,
+                value = formState.value.positionBroadcastSecs,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { positionInput = positionInput.copy { positionBroadcastSecs = it } },
+                onValueChanged = { formState.value = formState.value.copy { positionBroadcastSecs = it } },
             )
         }
 
         item {
             SwitchPreference(
                 title = stringResource(R.string.smart_position),
-                checked = positionInput.positionBroadcastSmartEnabled,
-                enabled = enabled,
-                onCheckedChange = { positionInput = positionInput.copy { positionBroadcastSmartEnabled = it } },
+                checked = formState.value.positionBroadcastSmartEnabled,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { positionBroadcastSmartEnabled = it } },
             )
         }
         item { HorizontalDivider() }
 
-        if (positionInput.positionBroadcastSmartEnabled) {
+        if (formState.value.positionBroadcastSmartEnabled) {
             item {
                 EditTextPreference(
                     title = stringResource(R.string.minimum_interval),
                     summary =
                     stringResource(id = R.string.config_position_broadcast_smart_minimum_interval_secs_summary),
-                    value = positionInput.broadcastSmartMinimumIntervalSecs,
-                    enabled = enabled,
+                    value = formState.value.broadcastSmartMinimumIntervalSecs,
+                    enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { positionInput = positionInput.copy { broadcastSmartMinimumIntervalSecs = it } },
+                    onValueChanged = {
+                        formState.value = formState.value.copy { broadcastSmartMinimumIntervalSecs = it }
+                    },
                 )
             }
             item {
                 EditTextPreference(
                     title = stringResource(R.string.minimum_distance),
                     summary = stringResource(id = R.string.config_position_broadcast_smart_minimum_distance_summary),
-                    value = positionInput.broadcastSmartMinimumDistance,
-                    enabled = enabled,
+                    value = formState.value.broadcastSmartMinimumDistance,
+                    enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                    onValueChanged = { positionInput = positionInput.copy { broadcastSmartMinimumDistance = it } },
+                    onValueChanged = { formState.value = formState.value.copy { broadcastSmartMinimumDistance = it } },
                 )
             }
         }
@@ -194,19 +174,19 @@ fun PositionConfigItemList(
         item {
             SwitchPreference(
                 title = stringResource(R.string.fixed_position),
-                checked = positionInput.fixedPosition,
-                enabled = enabled,
-                onCheckedChange = { positionInput = positionInput.copy { fixedPosition = it } },
+                checked = formState.value.fixedPosition,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { fixedPosition = it } },
             )
         }
         item { HorizontalDivider() }
 
-        if (positionInput.fixedPosition) {
+        if (formState.value.fixedPosition) {
             item {
                 EditTextPreference(
                     title = stringResource(R.string.latitude),
                     value = locationInput.latitude,
-                    enabled = enabled,
+                    enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { value ->
                         if (value >= -90 && value <= 90.0) {
@@ -219,7 +199,7 @@ fun PositionConfigItemList(
                 EditTextPreference(
                     title = stringResource(R.string.longitude),
                     value = locationInput.longitude,
-                    enabled = enabled,
+                    enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { value ->
                         if (value >= -180 && value <= 180.0) {
@@ -232,14 +212,14 @@ fun PositionConfigItemList(
                 EditTextPreference(
                     title = stringResource(R.string.altitude),
                     value = locationInput.altitude,
-                    enabled = enabled,
+                    enabled = state.connected,
                     keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
                     onValueChanged = { value -> locationInput = locationInput.copy(altitude = value) },
                 )
             }
             item {
                 TextButton(
-                    enabled = enabled,
+                    enabled = state.connected,
                     onClick = { coroutineScope.launch { locationPermissionState.launchPermissionRequest() } },
                 ) {
                     Text(text = stringResource(R.string.position_config_set_fixed_from_phone))
@@ -250,13 +230,13 @@ fun PositionConfigItemList(
         item {
             DropDownPreference(
                 title = stringResource(R.string.gps_mode),
-                enabled = enabled,
+                enabled = state.connected,
                 items =
                 ConfigProtos.Config.PositionConfig.GpsMode.entries
                     .filter { it != ConfigProtos.Config.PositionConfig.GpsMode.UNRECOGNIZED }
                     .map { it to it.name },
-                selectedItem = positionInput.gpsMode,
-                onItemSelected = { positionInput = positionInput.copy { gpsMode = it } },
+                selectedItem = formState.value.gpsMode,
+                onItemSelected = { formState.value = formState.value.copy { gpsMode = it } },
             )
         }
         item { HorizontalDivider() }
@@ -265,10 +245,10 @@ fun PositionConfigItemList(
             EditTextPreference(
                 title = stringResource(R.string.update_interval),
                 summary = stringResource(id = R.string.config_position_gps_update_interval_summary),
-                value = positionInput.gpsUpdateInterval,
-                enabled = enabled,
+                value = formState.value.gpsUpdateInterval,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { positionInput = positionInput.copy { gpsUpdateInterval = it } },
+                onValueChanged = { formState.value = formState.value.copy { gpsUpdateInterval = it } },
             )
         }
         item { PreferenceCategory(text = stringResource(R.string.position_flags)) }
@@ -276,15 +256,15 @@ fun PositionConfigItemList(
             BitwisePreference(
                 title = stringResource(R.string.position_flags),
                 summary = stringResource(id = R.string.config_position_flags_summary),
-                value = positionInput.positionFlags,
-                enabled = enabled,
+                value = formState.value.positionFlags,
+                enabled = state.connected,
                 items =
                 ConfigProtos.Config.PositionConfig.PositionFlags.entries
                     .filter {
                         it != PositionConfig.PositionFlags.UNSET && it != PositionConfig.PositionFlags.UNRECOGNIZED
                     }
                     .map { it.number to it.name },
-                onItemSelected = { positionInput = positionInput.copy { positionFlags = it } },
+                onItemSelected = { formState.value = formState.value.copy { positionFlags = it } },
             )
         }
         item { HorizontalDivider() }
@@ -293,58 +273,31 @@ fun PositionConfigItemList(
         item {
             EditTextPreference(
                 title = stringResource(R.string.gps_receive_gpio),
-                value = positionInput.rxGpio,
-                enabled = enabled,
+                value = formState.value.rxGpio,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { positionInput = positionInput.copy { rxGpio = it } },
+                onValueChanged = { formState.value = formState.value.copy { rxGpio = it } },
             )
         }
 
         item {
             EditTextPreference(
                 title = stringResource(R.string.gps_transmit_gpio),
-                value = positionInput.txGpio,
-                enabled = enabled,
+                value = formState.value.txGpio,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { positionInput = positionInput.copy { txGpio = it } },
+                onValueChanged = { formState.value = formState.value.copy { txGpio = it } },
             )
         }
 
         item {
             EditTextPreference(
                 title = stringResource(R.string.gps_en_gpio),
-                value = positionInput.gpsEnGpio,
-                enabled = enabled,
+                value = formState.value.gpsEnGpio,
+                enabled = state.connected,
                 keyboardActions = KeyboardActions(onDone = { focusManager.clearFocus() }),
-                onValueChanged = { positionInput = positionInput.copy { gpsEnGpio = it } },
-            )
-        }
-
-        item {
-            PreferenceFooter(
-                enabled = enabled && positionInput != positionConfig || locationInput != location,
-                onCancelClicked = {
-                    focusManager.clearFocus()
-                    locationInput = location
-                    positionInput = positionConfig
-                },
-                onSaveClicked = {
-                    focusManager.clearFocus()
-                    onSaveClicked(locationInput, positionInput)
-                },
+                onValueChanged = { formState.value = formState.value.copy { gpsEnGpio = it } },
             )
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun PositionConfigPreview() {
-    PositionConfigItemList(
-        location = Position(0.0, 0.0, 0),
-        positionConfig = PositionConfig.getDefaultInstance(),
-        enabled = true,
-        onSaveClicked = { _, _ -> },
-        onUseCurrentLocation = {},
-    )
 }
