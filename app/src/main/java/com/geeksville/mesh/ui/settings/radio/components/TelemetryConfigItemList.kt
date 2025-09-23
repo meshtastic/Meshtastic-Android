@@ -59,9 +59,9 @@ fun TelemetryConfigScreen(navController: NavController, viewModel: RadioConfigVi
             SwitchPreference(
                 title = stringResource(R.string.device_telemetry_enabled),
                 summary = stringResource(R.string.device_telemetry_enabled_summary),
-                checked = telemetryInput.deviceTelemetryEnabled,
-                enabled = enabled,
-                onCheckedChange = { telemetryInput = telemetryInput.copy { deviceTelemetryEnabled = it } },
+                checked = formState.value.deviceTelemetryEnabled,
+                enabled = state.connected,
+                onCheckedChange = { formState.value = formState.value.copy { deviceTelemetryEnabled = it } },
             )
         }
 
