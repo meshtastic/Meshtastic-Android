@@ -15,10 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.android.prefs
+package org.meshtastic.core.prefs.map
 
 import android.content.SharedPreferences
 import com.google.maps.android.compose.MapType
+import org.meshtastic.core.prefs.NullableStringPrefDelegate
+import org.meshtastic.core.prefs.StringSetPrefDelegate
 
 /** Interface for prefs specific to Google Maps. For general map prefs, see MapPrefs. */
 interface GoogleMapsPrefs {

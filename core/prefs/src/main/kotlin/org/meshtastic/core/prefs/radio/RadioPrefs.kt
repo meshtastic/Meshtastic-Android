@@ -15,14 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.android.prefs
+package org.meshtastic.core.prefs.radio
 
 import android.content.SharedPreferences
+import org.meshtastic.core.prefs.NullableStringPrefDelegate
 
-interface CustomEmojiPrefs {
-    var customEmojiFrequency: String?
+interface RadioPrefs {
+    var devAddr: String?
 }
 
-class CustomEmojiPrefsImpl(prefs: SharedPreferences) : CustomEmojiPrefs {
-    override var customEmojiFrequency: String? by NullableStringPrefDelegate(prefs, "pref_key_custom_emoji_freq", null)
+class RadioPrefsImpl(prefs: SharedPreferences) : RadioPrefs {
+    override var devAddr: String? by NullableStringPrefDelegate(prefs, "devAddr2", null)
 }

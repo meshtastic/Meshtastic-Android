@@ -27,7 +27,6 @@ import com.geeksville.mesh.android.BinaryLogFile
 import com.geeksville.mesh.android.BuildUtils
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
-import com.geeksville.mesh.android.prefs.RadioPrefs
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.repository.bluetooth.BluetoothRepository
 import com.geeksville.mesh.repository.network.NetworkRepository
@@ -49,6 +48,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import org.meshtastic.core.prefs.radio.RadioPrefs
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -195,9 +195,7 @@ constructor(
 
     private fun broadcastConnectionChanged(newState: ConnectionState) {
         debug("Broadcasting connection state change to $newState")
-        processLifecycle.coroutineScope.launch(dispatchers.default) {
-            _connectionState.emit(newState)
-        }
+        processLifecycle.coroutineScope.launch(dispatchers.default) { _connectionState.emit(newState) }
     }
 
     // Send a packet/command out the radio link, this routine can block if it needs to

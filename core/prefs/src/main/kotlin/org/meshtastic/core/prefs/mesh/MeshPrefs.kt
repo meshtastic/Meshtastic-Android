@@ -15,10 +15,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.android.prefs
+package org.meshtastic.core.prefs.mesh
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import org.meshtastic.core.prefs.NullableStringPrefDelegate
 
 interface MeshPrefs {
     var deviceAddress: String?

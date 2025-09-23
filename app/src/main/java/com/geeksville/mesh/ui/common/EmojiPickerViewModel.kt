@@ -18,8 +18,8 @@
 package com.geeksville.mesh.ui.common
 
 import androidx.lifecycle.ViewModel
-import com.geeksville.mesh.android.prefs.CustomEmojiPrefs
 import dagger.hilt.android.lifecycle.HiltViewModel
+import org.meshtastic.core.prefs.emoji.CustomEmojiPrefs
 import javax.inject.Inject
 
 @HiltViewModel

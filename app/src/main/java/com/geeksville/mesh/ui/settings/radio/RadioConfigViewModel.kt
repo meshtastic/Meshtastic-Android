@@ -45,8 +45,6 @@ import com.geeksville.mesh.Position
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.isAnalyticsAvailable
-import com.geeksville.mesh.android.prefs.AnalyticsPrefs
-import com.geeksville.mesh.android.prefs.MapConsentPrefs
 import com.geeksville.mesh.config
 import com.geeksville.mesh.database.entity.MyNodeEntity
 import com.geeksville.mesh.deviceProfile
@@ -77,6 +75,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
 import org.meshtastic.core.navigation.SettingsRoutes
+import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
+import org.meshtastic.core.prefs.map.MapConsentPrefs
 import org.meshtastic.core.strings.R
 import java.io.FileOutputStream
 import javax.inject.Inject

@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.android.prefs
+package org.meshtastic.core.prefs.di
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -24,6 +24,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import org.meshtastic.core.prefs.map.GoogleMapsPrefs
+import org.meshtastic.core.prefs.map.GoogleMapsPrefsImpl
 import javax.inject.Qualifier
 import javax.inject.Singleton
 

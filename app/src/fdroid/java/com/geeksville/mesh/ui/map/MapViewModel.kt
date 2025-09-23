@@ -17,11 +17,11 @@
 
 package com.geeksville.mesh.ui.map
 
-import com.geeksville.mesh.android.prefs.MapPrefs
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import org.meshtastic.core.prefs.map.MapPrefs
 import javax.inject.Inject
 
 @HiltViewModel

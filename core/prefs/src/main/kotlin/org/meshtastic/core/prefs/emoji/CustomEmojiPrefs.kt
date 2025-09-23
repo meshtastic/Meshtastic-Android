@@ -15,22 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.android.prefs
+package org.meshtastic.core.prefs.emoji
 
 import android.content.SharedPreferences
-import java.util.UUID
+import org.meshtastic.core.prefs.NullableStringPrefDelegate
 
-interface AnalyticsPrefs {
-    var analyticsAllowed: Boolean
-    val installId: String
+interface CustomEmojiPrefs {
+    var customEmojiFrequency: String?
 }
 
-// Having an additional app prefs store is maintaining the existing behavior.
-class AnalyticsPrefsImpl(analyticsPrefs: SharedPreferences, appPrefs: SharedPreferences) : AnalyticsPrefs {
-    override var analyticsAllowed: Boolean by PrefDelegate(analyticsPrefs, "allowed", true)
-
-    private var _installId: String? by NullableStringPrefDelegate(appPrefs, "appPrefs_install_id", null)
-
-    override val installId: String
-        get() = _installId ?: UUID.randomUUID().toString().also { _installId = it }
+class CustomEmojiPrefsImpl(prefs: SharedPreferences) : CustomEmojiPrefs {
+    override var customEmojiFrequency: String? by NullableStringPrefDelegate(prefs, "pref_key_custom_emoji_freq", null)
 }

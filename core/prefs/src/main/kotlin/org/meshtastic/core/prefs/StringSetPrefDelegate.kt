@@ -15,14 +15,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.android.prefs
+package org.meshtastic.core.prefs
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
-class StringSetPrefDelegate(
+internal class StringSetPrefDelegate(
     private val prefs: SharedPreferences,
     private val key: String,
     private val defaultValue: Set<String>,

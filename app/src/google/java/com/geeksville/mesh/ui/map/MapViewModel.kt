@@ -23,8 +23,6 @@ import androidx.core.net.toFile
 import androidx.lifecycle.viewModelScope
 import com.geeksville.mesh.ConfigProtos
 import com.geeksville.mesh.android.BuildUtils.debug
-import com.geeksville.mesh.android.prefs.GoogleMapsPrefs
-import com.geeksville.mesh.android.prefs.MapPrefs
 import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
@@ -52,6 +50,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import org.json.JSONObject
+import org.meshtastic.core.prefs.map.GoogleMapsPrefs
+import org.meshtastic.core.prefs.map.MapPrefs
 import timber.log.Timber
 import java.io.File
 import java.io.FileOutputStream

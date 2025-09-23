@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.android.prefs
+package org.meshtastic.core.prefs
 
 import android.content.SharedPreferences
 import androidx.core.content.edit
@@ -29,7 +29,7 @@ import kotlin.reflect.KProperty
  * @param key The key used to store and retrieve the value.
  * @param defaultValue The default value to return if no value is found.
  */
-class NullableStringPrefDelegate(
+internal class NullableStringPrefDelegate(
     private val prefs: SharedPreferences,
     private val key: String,
     private val defaultValue: String?,

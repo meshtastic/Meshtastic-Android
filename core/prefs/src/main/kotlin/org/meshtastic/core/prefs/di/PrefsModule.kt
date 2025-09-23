@@ -15,7 +15,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh.android.prefs
+package org.meshtastic.core.prefs.di
 
 import android.content.Context
 import android.content.SharedPreferences
@@ -24,6 +24,22 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import org.meshtastic.core.prefs.analytics.AnalyticsPrefs
+import org.meshtastic.core.prefs.analytics.AnalyticsPrefsImpl
+import org.meshtastic.core.prefs.emoji.CustomEmojiPrefs
+import org.meshtastic.core.prefs.emoji.CustomEmojiPrefsImpl
+import org.meshtastic.core.prefs.map.MapConsentPrefs
+import org.meshtastic.core.prefs.map.MapConsentPrefsImpl
+import org.meshtastic.core.prefs.map.MapPrefs
+import org.meshtastic.core.prefs.map.MapPrefsImpl
+import org.meshtastic.core.prefs.map.MapTileProviderPrefs
+import org.meshtastic.core.prefs.map.MapTileProviderPrefsImpl
+import org.meshtastic.core.prefs.mesh.MeshPrefs
+import org.meshtastic.core.prefs.mesh.MeshPrefsImpl
+import org.meshtastic.core.prefs.radio.RadioPrefs
+import org.meshtastic.core.prefs.radio.RadioPrefsImpl
+import org.meshtastic.core.prefs.ui.UiPrefs
+import org.meshtastic.core.prefs.ui.UiPrefsImpl
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
