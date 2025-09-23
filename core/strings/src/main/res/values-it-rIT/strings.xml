@@ -861,4 +861,5 @@
     <string name="icon_meanings">Significato delle icone</string>
     <string name="secondary_channel_position_feature">Disabilitando la posizione sul canale primario è possibile trasmettere periodicamente la posizione sul primo canale secondario con la posizione abilitata, altrimenti è necessaria una richiesta manuale della posizione.</string>
     <string name="device_configuration">Device configuration</string>
+    <string name="remotely_administrating">"[Remote] %1$s"</string>
 </resources>
