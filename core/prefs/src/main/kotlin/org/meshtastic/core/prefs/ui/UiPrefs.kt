@@ -18,12 +18,10 @@
 package org.meshtastic.core.prefs.ui
 
 import android.content.SharedPreferences
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import org.meshtastic.core.prefs.PrefDelegate
 import org.meshtastic.core.prefs.di.UiSharedPreferences
 import java.util.concurrent.ConcurrentHashMap
@@ -31,10 +29,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 interface UiPrefs {
-    var theme: Int
-    val themeFlow: StateFlow<Int>
-    var appIntroCompleted: Boolean
-    val appIntroCompletedFlow: StateFlow<Boolean>
     var hasShownNotPairedWarning: Boolean
     var nodeSortOption: Int
     var includeUnknown: Boolean
@@ -49,19 +43,8 @@ interface UiPrefs {
     fun setShouldProvideNodeLocation(nodeNum: Int, value: Boolean)
 }
 
-const val KEY_THEME = "theme"
-const val KEY_APP_INTRO_COMPLETED = "app_intro_completed"
-
 @Singleton
 class UiPrefsImpl @Inject constructor(@UiSharedPreferences private val prefs: SharedPreferences) : UiPrefs {
-
-    override var theme: Int by PrefDelegate(prefs, KEY_THEME, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-    private var _themeFlow = MutableStateFlow(theme)
-    override val themeFlow = _themeFlow.asStateFlow()
-
-    override var appIntroCompleted: Boolean by PrefDelegate(prefs, KEY_APP_INTRO_COMPLETED, false)
-    private var _appIntroCompletedFlow = MutableStateFlow(appIntroCompleted)
-    override val appIntroCompletedFlow = _appIntroCompletedFlow.asStateFlow()
 
     // Maps nodeNum to a flow for the for the "provide-location-nodeNum" pref
     private val provideNodeLocationFlows = ConcurrentHashMap<Int, MutableStateFlow<Boolean>>()
@@ -69,8 +52,6 @@ class UiPrefsImpl @Inject constructor(@UiSharedPreferences private val prefs: Sh
     private val sharedPreferencesListener =
         SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
             when (key) {
-                KEY_THEME -> _themeFlow.update { theme }
-                KEY_APP_INTRO_COMPLETED -> _appIntroCompletedFlow.update { appIntroCompleted }
                 // Check if the changed key is one of our node location keys
                 else ->
                     provideNodeLocationFlows.keys.forEach { nodeNum ->

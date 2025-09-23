@@ -139,6 +139,8 @@ android {
         release {
             if (keystoreProperties["storeFile"] != null) {
                 signingConfig = signingConfigs.named("release").get()
+            } else {
+                signingConfig = signingConfigs.getByName("debug")
             }
         }
     }
