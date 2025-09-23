@@ -25,8 +25,10 @@ import kotlinx.coroutines.flow.catch
 import timber.log.Timber
 import java.io.IOException
 import javax.inject.Inject
+import javax.inject.Singleton
 
 /** Class that handles saving and retrieving [LocalModuleConfig] data. */
+@Singleton
 class ModuleConfigDataSource @Inject constructor(private val moduleConfigStore: DataStore<LocalModuleConfig>) {
     val moduleConfigFlow: Flow<LocalModuleConfig> =
         moduleConfigStore.data.catch { exception ->
