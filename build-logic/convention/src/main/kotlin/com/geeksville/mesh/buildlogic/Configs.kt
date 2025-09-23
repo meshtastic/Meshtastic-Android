@@ -52,7 +52,7 @@ object Configs {
      * to reflect the version number of the Git tag that will be created for that release.
      * @see [RELEASE_PROCESS.md]
      */
-    const val VERSION_NAME_BASE = "2.7.0"
+    const val VERSION_NAME_BASE = "2.7.1"
     const val MIN_FW_VERSION = "2.5.14" // Minimum device firmware version supported by this app
     const val ABS_MIN_FW_VERSION = "2.3.15" // Minimum device firmware version supported by this app
 }
