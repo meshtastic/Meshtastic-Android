@@ -19,6 +19,9 @@ package org.meshtastic.core.prefs.map
 
 import android.content.SharedPreferences
 import org.meshtastic.core.prefs.PrefDelegate
+import org.meshtastic.core.prefs.di.MapSharedPreferences
+import javax.inject.Inject
+import javax.inject.Singleton
 
 /** Interface for general map prefs. For Google-specific prefs, see GoogleMapsPrefs. */
 interface MapPrefs {
@@ -28,7 +31,8 @@ interface MapPrefs {
     var showPrecisionCircleOnMap: Boolean
 }
 
-class MapPrefsImpl(prefs: SharedPreferences) : MapPrefs {
+@Singleton
+class MapPrefsImpl @Inject constructor(@MapSharedPreferences prefs: SharedPreferences) : MapPrefs {
     override var mapStyle: Int by PrefDelegate(prefs, "map_style_id", 0)
     override var showOnlyFavorites: Boolean by PrefDelegate(prefs, "show_only_favorites", false)
     override var showWaypointsOnMap: Boolean by PrefDelegate(prefs, "show_waypoints", true)

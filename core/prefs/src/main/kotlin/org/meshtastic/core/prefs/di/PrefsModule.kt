@@ -19,6 +19,7 @@ package org.meshtastic.core.prefs.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import dagger.Binds
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -43,144 +44,120 @@ import org.meshtastic.core.prefs.ui.UiPrefsImpl
 import javax.inject.Qualifier
 import javax.inject.Singleton
 
-// These pref store qualifiers are private to prevent prefs stores from being injected directly.
+// These pref store qualifiers are internal to prevent prefs stores from being injected directly.
 // Consuming code should always inject one of the prefs repositories.
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-private annotation class AnalyticsSharedPreferences
+internal annotation class AnalyticsSharedPreferences
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-private annotation class AppSharedPreferences
+internal annotation class AppSharedPreferences
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-private annotation class CustomEmojiSharedPreferences
+internal annotation class CustomEmojiSharedPreferences
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-private annotation class MapSharedPreferences
+internal annotation class MapSharedPreferences
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-private annotation class MapConsentSharedPreferences
+internal annotation class MapConsentSharedPreferences
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-private annotation class MapTileProviderSharedPreferences
+internal annotation class MapTileProviderSharedPreferences
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-private annotation class MeshSharedPreferences
+internal annotation class MeshSharedPreferences
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-private annotation class RadioSharedPreferences
+internal annotation class RadioSharedPreferences
 
 @Qualifier
 @Retention(AnnotationRetention.BINARY)
-private annotation class UiSharedPreferences
+internal annotation class UiSharedPreferences
 
 @Suppress("TooManyFunctions")
 @InstallIn(SingletonComponent::class)
 @Module
-object PrefsModule {
+interface PrefsModule {
 
-    @Provides
-    @Singleton
-    @AnalyticsSharedPreferences
-    fun provideAnalyticsSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-        context.getSharedPreferences("analytics-prefs", Context.MODE_PRIVATE)
+    @Binds fun bindAnalyticsPrefs(analyticsPrefsImpl: AnalyticsPrefsImpl): AnalyticsPrefs
 
-    @Provides
-    @Singleton
-    @AppSharedPreferences
-    fun provideAppSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-        context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
+    @Binds fun bindCustomEmojiPrefs(customEmojiPrefsImpl: CustomEmojiPrefsImpl): CustomEmojiPrefs
 
-    @Provides
-    @Singleton
-    @CustomEmojiSharedPreferences
-    fun provideCustomEmojiSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-        context.getSharedPreferences("org.geeksville.emoji.prefs", Context.MODE_PRIVATE)
+    @Binds fun bindMapConsentPrefs(mapConsentPrefsImpl: MapConsentPrefsImpl): MapConsentPrefs
 
-    @Provides
-    @Singleton
-    @MapSharedPreferences
-    fun provideMapSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-        context.getSharedPreferences("map_prefs", Context.MODE_PRIVATE)
+    @Binds fun bindMapPrefs(mapPrefsImpl: MapPrefsImpl): MapPrefs
 
-    @Provides
-    @Singleton
-    @MapConsentSharedPreferences
-    fun provideMapConsentSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-        context.getSharedPreferences("map_consent_preferences", Context.MODE_PRIVATE)
+    @Binds fun bindMapTileProviderPrefs(mapTileProviderPrefsImpl: MapTileProviderPrefsImpl): MapTileProviderPrefs
 
-    @Provides
-    @Singleton
-    @MapTileProviderSharedPreferences
-    fun provideMapTileProviderSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-        context.getSharedPreferences("map_tile_provider_prefs", Context.MODE_PRIVATE)
+    @Binds fun bindMeshPrefs(meshPrefsImpl: MeshPrefsImpl): MeshPrefs
 
-    @Provides
-    @Singleton
-    @MeshSharedPreferences
-    fun provideMeshSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-        context.getSharedPreferences("mesh-prefs", Context.MODE_PRIVATE)
+    @Binds fun bindRadioPrefs(radioPrefsImpl: RadioPrefsImpl): RadioPrefs
 
-    @Provides
-    @Singleton
-    @RadioSharedPreferences
-    fun provideRadioSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-        context.getSharedPreferences("radio-prefs", Context.MODE_PRIVATE)
+    @Binds fun bindUiPrefs(uiPrefsImpl: UiPrefsImpl): UiPrefs
 
-    @Provides
-    @Singleton
-    @UiSharedPreferences
-    fun provideUiSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-        context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
+    companion object {
 
-    @Provides
-    @Singleton
-    fun provideAnalyticsPrefs(
-        @AnalyticsSharedPreferences analyticsPreferences: SharedPreferences,
-        @AppSharedPreferences appPreferences: SharedPreferences,
-    ): AnalyticsPrefs = AnalyticsPrefsImpl(analyticsPreferences, appPreferences)
+        @Provides
+        @Singleton
+        @AnalyticsSharedPreferences
+        fun provideAnalyticsSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
+            context.getSharedPreferences("analytics-prefs", Context.MODE_PRIVATE)
 
-    @Provides
-    @Singleton
-    fun provideCustomEmojiPrefs(@CustomEmojiSharedPreferences sharedPreferences: SharedPreferences): CustomEmojiPrefs =
-        CustomEmojiPrefsImpl(sharedPreferences)
+        @Provides
+        @Singleton
+        @AppSharedPreferences
+        fun provideAppSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
+            context.getSharedPreferences("prefs", Context.MODE_PRIVATE)
 
-    @Provides
-    @Singleton
-    fun provideMapPrefs(@MapSharedPreferences sharedPreferences: SharedPreferences): MapPrefs =
-        MapPrefsImpl(sharedPreferences)
+        @Provides
+        @Singleton
+        @CustomEmojiSharedPreferences
+        fun provideCustomEmojiSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
+            context.getSharedPreferences("org.geeksville.emoji.prefs", Context.MODE_PRIVATE)
 
-    @Provides
-    @Singleton
-    fun provideMapConsentPrefs(@MapConsentSharedPreferences sharedPreferences: SharedPreferences): MapConsentPrefs =
-        MapConsentPrefsImpl(sharedPreferences)
+        @Provides
+        @Singleton
+        @MapSharedPreferences
+        fun provideMapSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
+            context.getSharedPreferences("map_prefs", Context.MODE_PRIVATE)
 
-    @Provides
-    @Singleton
-    fun provideMapTileProviderPrefs(
-        @MapTileProviderSharedPreferences sharedPreferences: SharedPreferences,
-    ): MapTileProviderPrefs = MapTileProviderPrefsImpl(sharedPreferences)
+        @Provides
+        @Singleton
+        @MapConsentSharedPreferences
+        fun provideMapConsentSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
+            context.getSharedPreferences("map_consent_preferences", Context.MODE_PRIVATE)
 
-    @Provides
-    @Singleton
-    fun provideMeshPrefs(@MeshSharedPreferences sharedPreferences: SharedPreferences): MeshPrefs =
-        MeshPrefsImpl(sharedPreferences)
+        @Provides
+        @Singleton
+        @MapTileProviderSharedPreferences
+        fun provideMapTileProviderSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
+            context.getSharedPreferences("map_tile_provider_prefs", Context.MODE_PRIVATE)
 
-    @Provides
-    @Singleton
-    fun provideRadioPrefs(@RadioSharedPreferences sharedPreferences: SharedPreferences): RadioPrefs =
-        RadioPrefsImpl(sharedPreferences)
+        @Provides
+        @Singleton
+        @MeshSharedPreferences
+        fun provideMeshSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
+            context.getSharedPreferences("mesh-prefs", Context.MODE_PRIVATE)
 
-    @Provides
-    @Singleton
-    fun provideUiPrefs(@UiSharedPreferences sharedPreferences: SharedPreferences): UiPrefs =
-        UiPrefsImpl(sharedPreferences)
+        @Provides
+        @Singleton
+        @RadioSharedPreferences
+        fun provideRadioSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
+            context.getSharedPreferences("radio-prefs", Context.MODE_PRIVATE)
+
+        @Provides
+        @Singleton
+        @UiSharedPreferences
+        fun provideUiSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
+            context.getSharedPreferences("ui-prefs", Context.MODE_PRIVATE)
+    }
 }

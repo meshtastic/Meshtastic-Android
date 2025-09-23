@@ -19,11 +19,15 @@ package org.meshtastic.core.prefs.radio
 
 import android.content.SharedPreferences
 import org.meshtastic.core.prefs.NullableStringPrefDelegate
+import org.meshtastic.core.prefs.di.RadioSharedPreferences
+import javax.inject.Inject
+import javax.inject.Singleton
 
 interface RadioPrefs {
     var devAddr: String?
 }
 
-class RadioPrefsImpl(prefs: SharedPreferences) : RadioPrefs {
+@Singleton
+class RadioPrefsImpl @Inject constructor(@RadioSharedPreferences prefs: SharedPreferences) : RadioPrefs {
     override var devAddr: String? by NullableStringPrefDelegate(prefs, "devAddr2", null)
 }

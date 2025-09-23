@@ -20,6 +20,9 @@ package org.meshtastic.core.prefs.mesh
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import org.meshtastic.core.prefs.NullableStringPrefDelegate
+import org.meshtastic.core.prefs.di.MeshSharedPreferences
+import javax.inject.Inject
+import javax.inject.Singleton
 
 interface MeshPrefs {
     var deviceAddress: String?
@@ -29,7 +32,8 @@ interface MeshPrefs {
     fun setShouldProvideNodeLocation(nodeNum: Int?, value: Boolean)
 }
 
-class MeshPrefsImpl(private val prefs: SharedPreferences) : MeshPrefs {
+@Singleton
+class MeshPrefsImpl @Inject constructor(@MeshSharedPreferences private val prefs: SharedPreferences) : MeshPrefs {
     override var deviceAddress: String? by NullableStringPrefDelegate(prefs, "device_address", null)
 
     override fun shouldProvideNodeLocation(nodeNum: Int?): Boolean =

@@ -20,7 +20,11 @@ package org.meshtastic.core.prefs.analytics
 import android.content.SharedPreferences
 import org.meshtastic.core.prefs.NullableStringPrefDelegate
 import org.meshtastic.core.prefs.PrefDelegate
+import org.meshtastic.core.prefs.di.AnalyticsSharedPreferences
+import org.meshtastic.core.prefs.di.AppSharedPreferences
 import java.util.UUID
+import javax.inject.Inject
+import javax.inject.Singleton
 
 interface AnalyticsPrefs {
     var analyticsAllowed: Boolean
@@ -28,7 +32,13 @@ interface AnalyticsPrefs {
 }
 
 // Having an additional app prefs store is maintaining the existing behavior.
-class AnalyticsPrefsImpl(analyticsPrefs: SharedPreferences, appPrefs: SharedPreferences) : AnalyticsPrefs {
+@Singleton
+class AnalyticsPrefsImpl
+@Inject
+constructor(
+    @AnalyticsSharedPreferences analyticsPrefs: SharedPreferences,
+    @AppSharedPreferences appPrefs: SharedPreferences,
+) : AnalyticsPrefs {
     override var analyticsAllowed: Boolean by PrefDelegate(analyticsPrefs, "allowed", true)
 
     private var _installId: String? by NullableStringPrefDelegate(appPrefs, "appPrefs_install_id", null)

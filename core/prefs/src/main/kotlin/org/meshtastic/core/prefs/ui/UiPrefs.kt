@@ -25,7 +25,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import org.meshtastic.core.prefs.PrefDelegate
+import org.meshtastic.core.prefs.di.UiSharedPreferences
 import java.util.concurrent.ConcurrentHashMap
+import javax.inject.Inject
+import javax.inject.Singleton
 
 interface UiPrefs {
     var theme: Int
@@ -49,7 +52,8 @@ interface UiPrefs {
 const val KEY_THEME = "theme"
 const val KEY_APP_INTRO_COMPLETED = "app_intro_completed"
 
-class UiPrefsImpl(private val prefs: SharedPreferences) : UiPrefs {
+@Singleton
+class UiPrefsImpl @Inject constructor(@UiSharedPreferences private val prefs: SharedPreferences) : UiPrefs {
 
     override var theme: Int by PrefDelegate(prefs, KEY_THEME, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
     private var _themeFlow = MutableStateFlow(theme)
