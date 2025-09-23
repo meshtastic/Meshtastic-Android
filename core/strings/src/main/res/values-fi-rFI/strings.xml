@@ -861,4 +861,5 @@
     <string name="icon_meanings">Kuvakkeiden merkitykset</string>
     <string name="secondary_channel_position_feature">Sijainnin poistaminen käytöstä ensisijaisella kanavalla mahdollistaa sijainnin jaksottaisen lähetyksen ensimmäisellä toissijaisella kanavalla, jossa sijainti on käytössä. Muussa tapauksessa vaaditaan manuaalinen sijaintipyyntö.</string>
     <string name="device_configuration">Laitteen asetukset</string>
+    <string name="remotely_administrating">"[Remote] %1$s"</string>
 </resources>
