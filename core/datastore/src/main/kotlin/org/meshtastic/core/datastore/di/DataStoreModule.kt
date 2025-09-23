@@ -38,6 +38,7 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import org.meshtastic.core.datastore.KEY_APP_INTRO_COMPLETED
 import org.meshtastic.core.datastore.serializer.ChannelSetSerializer
 import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
 import org.meshtastic.core.datastore.serializer.ModuleConfigSerializer
@@ -53,7 +54,15 @@ object DataStoreModule {
     fun providePreferencesDataStore(@ApplicationContext appContext: Context): DataStore<Preferences> =
         PreferenceDataStoreFactory.create(
             corruptionHandler = ReplaceFileCorruptionHandler(produceNewData = { emptyPreferences() }),
-            migrations = listOf(SharedPreferencesMigration(appContext, USER_PREFERENCES_NAME)),
+            migrations =
+            listOf(
+                SharedPreferencesMigration(context = appContext, sharedPreferencesName = USER_PREFERENCES_NAME),
+                SharedPreferencesMigration(
+                    context = appContext,
+                    sharedPreferencesName = "ui-prefs",
+                    keysToMigrate = setOf(KEY_APP_INTRO_COMPLETED),
+                ),
+            ),
             scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
             produceFile = { appContext.preferencesDataStoreFile(USER_PREFERENCES_NAME) },
         )

@@ -81,6 +81,7 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.DeviceHardware
 import org.meshtastic.core.prefs.ui.UiPrefs
 import org.meshtastic.core.strings.R
@@ -188,6 +189,7 @@ constructor(
     private val quickChatActionRepository: QuickChatActionRepository,
     firmwareReleaseRepository: FirmwareReleaseRepository,
     private val uiPrefs: UiPrefs,
+    private val uiPreferencesDataSource: UiPreferencesDataSource,
     private val meshServiceNotifications: MeshServiceNotifications,
 ) : ViewModel(),
     Logging {
@@ -822,9 +824,9 @@ constructor(
         nodeFilterText.value = text
     }
 
-    val appIntroCompleted: StateFlow<Boolean> = uiPrefs.appIntroCompletedFlow
+    val appIntroCompleted: StateFlow<Boolean> = uiPreferencesDataSource.appIntroCompleted
 
     fun onAppIntroCompleted() {
-        uiPrefs.appIntroCompleted = true
+        uiPreferencesDataSource.setAppIntroCompleted(true)
     }
 }

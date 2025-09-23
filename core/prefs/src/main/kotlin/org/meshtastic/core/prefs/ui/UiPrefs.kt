@@ -33,8 +33,6 @@ import javax.inject.Singleton
 interface UiPrefs {
     var theme: Int
     val themeFlow: StateFlow<Int>
-    var appIntroCompleted: Boolean
-    val appIntroCompletedFlow: StateFlow<Boolean>
     var hasShownNotPairedWarning: Boolean
     var nodeSortOption: Int
     var includeUnknown: Boolean
@@ -50,7 +48,6 @@ interface UiPrefs {
 }
 
 const val KEY_THEME = "theme"
-const val KEY_APP_INTRO_COMPLETED = "app_intro_completed"
 
 @Singleton
 class UiPrefsImpl @Inject constructor(@UiSharedPreferences private val prefs: SharedPreferences) : UiPrefs {
@@ -59,10 +56,6 @@ class UiPrefsImpl @Inject constructor(@UiSharedPreferences private val prefs: Sh
     private var _themeFlow = MutableStateFlow(theme)
     override val themeFlow = _themeFlow.asStateFlow()
 
-    override var appIntroCompleted: Boolean by PrefDelegate(prefs, KEY_APP_INTRO_COMPLETED, false)
-    private var _appIntroCompletedFlow = MutableStateFlow(appIntroCompleted)
-    override val appIntroCompletedFlow = _appIntroCompletedFlow.asStateFlow()
-
     // Maps nodeNum to a flow for the for the "provide-location-nodeNum" pref
     private val provideNodeLocationFlows = ConcurrentHashMap<Int, MutableStateFlow<Boolean>>()
 
@@ -70,7 +63,6 @@ class UiPrefsImpl @Inject constructor(@UiSharedPreferences private val prefs: Sh
         SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, key ->
             when (key) {
                 KEY_THEME -> _themeFlow.update { theme }
-                KEY_APP_INTRO_COMPLETED -> _appIntroCompletedFlow.update { appIntroCompleted }
                 // Check if the changed key is one of our node location keys
                 else ->
                     provideNodeLocationFlows.keys.forEach { nodeNum ->

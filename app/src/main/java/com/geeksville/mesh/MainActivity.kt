@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.core.net.toUri
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.lifecycleScope
 import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.model.UIViewModel
@@ -48,8 +49,9 @@ import com.geeksville.mesh.ui.common.theme.MODE_DYNAMIC
 import com.geeksville.mesh.ui.intro.AppIntroductionScreen
 import com.geeksville.mesh.ui.sharing.toSharedContact
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.navigation.DEEP_LINK_BASE_URI
-import org.meshtastic.core.prefs.ui.UiPrefs
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -61,7 +63,7 @@ class MainActivity :
     // This is aware of the Activity lifecycle and handles binding to the mesh service.
     @Inject internal lateinit var meshServiceClient: MeshServiceClient
 
-    @Inject internal lateinit var uiPrefs: UiPrefs
+    @Inject internal lateinit var uiPreferencesDataSource: UiPreferencesDataSource
 
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
@@ -77,8 +79,11 @@ class MainActivity :
         super.onCreate(savedInstanceState)
 
         if (savedInstanceState == null) {
-            if (uiPrefs.appIntroCompleted) {
-                (application as GeeksvilleApplication).askToRate(this)
+            lifecycleScope.launch {
+                val appIntroCompleted = uiPreferencesDataSource.appIntroCompleted.value
+                if (appIntroCompleted) {
+                    (application as GeeksvilleApplication).askToRate(this@MainActivity)
+                }
             }
         }
 

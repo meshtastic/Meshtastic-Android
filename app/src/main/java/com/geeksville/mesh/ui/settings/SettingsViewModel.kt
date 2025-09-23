@@ -47,6 +47,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.prefs.ui.UiPrefs
 import java.io.BufferedWriter
 import java.io.FileNotFoundException
@@ -65,6 +66,7 @@ constructor(
     private val nodeRepository: NodeRepository,
     private val meshLogRepository: MeshLogRepository,
     private val uiPrefs: UiPrefs,
+    private val uiPreferencesDataSource: UiPreferencesDataSource,
 ) : ViewModel(),
     Logging {
     val myNodeInfo: StateFlow<MyNodeEntity?> = nodeRepository.myNodeInfo
@@ -113,7 +115,7 @@ constructor(
     }
 
     fun showAppIntro() {
-        uiPrefs.appIntroCompleted = false
+        uiPreferencesDataSource.setAppIntroCompleted(false)
     }
 
     fun unlockExcludedModules() {
