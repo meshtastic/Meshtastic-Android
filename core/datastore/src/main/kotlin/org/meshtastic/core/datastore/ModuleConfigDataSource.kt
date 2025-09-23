@@ -27,7 +27,7 @@ import java.io.IOException
 import javax.inject.Inject
 
 /** Class that handles saving and retrieving [LocalModuleConfig] data. */
-class ModuleConfigRepository @Inject constructor(private val moduleConfigStore: DataStore<LocalModuleConfig>) {
+class ModuleConfigDataSource @Inject constructor(private val moduleConfigStore: DataStore<LocalModuleConfig>) {
     val moduleConfigFlow: Flow<LocalModuleConfig> =
         moduleConfigStore.data.catch { exception ->
             // dataStore.data throws an IOException when an error is encountered when reading data

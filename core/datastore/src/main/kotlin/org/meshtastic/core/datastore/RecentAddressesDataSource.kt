@@ -34,7 +34,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class RecentAddressesRepository @Inject constructor(private val dataStore: DataStore<Preferences>) {
+class RecentAddressesDataSource @Inject constructor(private val dataStore: DataStore<Preferences>) {
     private object PreferencesKeys {
         val RECENT_IP_ADDRESSES = stringPreferencesKey("recent-ip-addresses")
     }

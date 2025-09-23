@@ -51,7 +51,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import org.meshtastic.core.datastore.RecentAddressesRepository
+import org.meshtastic.core.datastore.RecentAddressesDataSource
 import org.meshtastic.core.datastore.model.RecentAddress
 import javax.inject.Inject
 
@@ -107,7 +107,7 @@ constructor(
     private val usbManagerLazy: dagger.Lazy<UsbManager>,
     private val networkRepository: NetworkRepository,
     private val radioInterfaceService: RadioInterfaceService,
-    private val recentAddressesRepository: RecentAddressesRepository,
+    private val recentAddressesDataSource: RecentAddressesDataSource,
 ) : ViewModel(),
     Logging {
     private val context: Context
@@ -125,7 +125,7 @@ constructor(
 
     // Flow for discovered TCP devices, using recent addresses for potential name enrichment
     private val processedDiscoveredTcpDevicesFlow: StateFlow<List<DeviceListEntry.Tcp>> =
-        combine(networkRepository.resolvedList, recentAddressesRepository.recentAddresses) { tcpServices, recentList ->
+        combine(networkRepository.resolvedList, recentAddressesDataSource.recentAddresses) { tcpServices, recentList ->
             val recentMap = recentList.associateBy({ it.address }, { it.name })
             tcpServices
                 .map { service ->
@@ -149,7 +149,7 @@ constructor(
 
     // Flow for recent TCP devices, filtered to exclude any currently discovered devices
     private val filteredRecentTcpDevicesFlow: StateFlow<List<DeviceListEntry.Tcp>> =
-        combine(recentAddressesRepository.recentAddresses, processedDiscoveredTcpDevicesFlow) {
+        combine(recentAddressesDataSource.recentAddresses, processedDiscoveredTcpDevicesFlow) {
                 recentList,
                 discoveredDevices,
             ->
@@ -328,11 +328,11 @@ constructor(
 
     fun addRecentAddress(address: String, name: String) {
         if (!address.startsWith("t")) return
-        viewModelScope.launch { recentAddressesRepository.add(RecentAddress(address, name)) }
+        viewModelScope.launch { recentAddressesDataSource.add(RecentAddress(address, name)) }
     }
 
     fun removeRecentAddress(address: String) {
-        viewModelScope.launch { recentAddressesRepository.remove(address) }
+        viewModelScope.launch { recentAddressesDataSource.remove(address) }
     }
 
     // Called by the GUI when a new device has been selected by the user

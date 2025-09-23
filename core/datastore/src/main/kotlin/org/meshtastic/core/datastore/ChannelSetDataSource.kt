@@ -29,7 +29,7 @@ import java.io.IOException
 import javax.inject.Inject
 
 /** Class that handles saving and retrieving [ChannelSet] data. */
-class ChannelSetRepository @Inject constructor(private val channelSetStore: DataStore<ChannelSet>) {
+class ChannelSetDataSource @Inject constructor(private val channelSetStore: DataStore<ChannelSet>) {
     val channelSetFlow: Flow<ChannelSet> =
         channelSetStore.data.catch { exception ->
             // dataStore.data throws an IOException when an error is encountered when reading data

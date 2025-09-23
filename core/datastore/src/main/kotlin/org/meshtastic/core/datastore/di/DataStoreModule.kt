@@ -38,7 +38,6 @@ import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
-import org.meshtastic.core.datastore.RecentAddressesRepository
 import org.meshtastic.core.datastore.serializer.ChannelSetSerializer
 import org.meshtastic.core.datastore.serializer.LocalConfigSerializer
 import org.meshtastic.core.datastore.serializer.ModuleConfigSerializer
@@ -58,11 +57,6 @@ object DataStoreModule {
             scope = CoroutineScope(Dispatchers.IO + SupervisorJob()),
             produceFile = { appContext.preferencesDataStoreFile(USER_PREFERENCES_NAME) },
         )
-
-    @Singleton
-    @Provides
-    fun provideRecentAddressesRepository(dataStore: DataStore<Preferences>): RecentAddressesRepository =
-        RecentAddressesRepository(dataStore)
 
     @Singleton
     @Provides
