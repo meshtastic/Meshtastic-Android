@@ -55,6 +55,7 @@ import com.geeksville.mesh.android.hasLocationPermission
 import com.geeksville.mesh.concurrent.handledLaunch
 import com.geeksville.mesh.copy
 import com.geeksville.mesh.database.MeshLogRepository
+import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.database.PacketRepository
 import com.geeksville.mesh.fromRadio
 import com.geeksville.mesh.model.NO_DEVICE_SELECTED
@@ -143,6 +144,8 @@ class MeshService :
     @Inject lateinit var locationRepository: LocationRepository
 
     @Inject lateinit var radioConfigRepository: RadioConfigRepository
+
+    @Inject lateinit var nodeRepository: NodeRepository
 
     @Inject lateinit var mqttRepository: MQTTRepository
 
@@ -339,7 +342,7 @@ class MeshService :
         radioConfigRepository.moduleConfigFlow.onEach { moduleConfig = it }.launchIn(serviceScope)
         radioConfigRepository.channelSetFlow.onEach { channelSet = it }.launchIn(serviceScope)
         radioConfigRepository.serviceAction.onEach(::onServiceAction).launchIn(serviceScope)
-        radioConfigRepository.myNodeInfo
+        nodeRepository.myNodeInfo
             .flatMapLatest { myNodeEntity ->
                 // When myNodeInfo changes, set up emissions for the "provide-location-nodeNum" pref.
                 if (myNodeEntity == null) {
@@ -443,7 +446,7 @@ class MeshService :
 
     private fun loadSettings() = serviceScope.handledLaunch {
         discardNodeDB() // Get rid of any old state
-        myNodeInfo = radioConfigRepository.myNodeInfo.value
+        myNodeInfo = nodeRepository.myNodeInfo.value
         nodeDBbyNodeNum.putAll(radioConfigRepository.getNodeDBbyNum())
         // Note: we do not haveNodeDB = true because that means we've got a valid db from a real
         // device (rather than
@@ -543,7 +546,7 @@ class MeshService :
             }
     }
 
-    private fun getUserName(num: Int): String = with(radioConfigRepository.getUser(num)) { "$longName ($shortName)" }
+    private fun getUserName(num: Int): String = with(nodeRepository.getUser(num)) { "$longName ($shortName)" }
 
     private val numNodes
         get() = nodeDBbyNodeNum.size
@@ -569,7 +572,7 @@ class MeshService :
         updateFn(info)
 
         if (info.user.id.isNotEmpty() && haveNodeDB) {
-            serviceScope.handledLaunch { radioConfigRepository.upsert(info) }
+            serviceScope.handledLaunch { nodeRepository.upsert(info) }
         }
 
         if (withBroadcast) {
@@ -1857,8 +1860,8 @@ class MeshService :
             newNodes.clear() // Just to save RAM ;-)
 
             serviceScope.handledLaunch {
-                radioConfigRepository.installMyNodeInfo(myNodeInfo!!)
-                radioConfigRepository.installNodeDb(nodeDBbyNodeNum.values.toList())
+                nodeRepository.installMyNodeInfo(myNodeInfo!!)
+                nodeRepository.installNodeDb(nodeDBbyNodeNum.values.toList())
             }
 
             haveNodeDB = true // we now have nodes from real hardware
@@ -2058,7 +2061,7 @@ class MeshService :
 
     fun clearDatabases() = serviceScope.handledLaunch {
         debug("Clearing nodeDB")
-        radioConfigRepository.clearNodeDB()
+        nodeRepository.clearNodeDB()
     }
 
     private fun updateLastAddress(deviceAddr: String?) {

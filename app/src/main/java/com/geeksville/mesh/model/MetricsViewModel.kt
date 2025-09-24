@@ -36,6 +36,7 @@ import com.geeksville.mesh.Portnums.PortNum
 import com.geeksville.mesh.TelemetryProtos.Telemetry
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.MeshLogRepository
+import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.repository.api.DeviceHardwareRepository
 import com.geeksville.mesh.repository.api.FirmwareReleaseRepository
 import com.geeksville.mesh.repository.datastore.RadioConfigRepository
@@ -204,6 +205,7 @@ constructor(
     private val dispatchers: CoroutineDispatchers,
     private val meshLogRepository: MeshLogRepository,
     private val radioConfigRepository: RadioConfigRepository,
+    private val nodeRepository: NodeRepository,
     private val deviceHardwareRepository: DeviceHardwareRepository,
     private val firmwareReleaseRepository: FirmwareReleaseRepository,
     private val mapPrefs: MapPrefs,
@@ -233,7 +235,7 @@ constructor(
         return Node(num = nodeNum, user = defaultUser)
     }
 
-    fun getUser(nodeNum: Int) = radioConfigRepository.getUser(nodeNum)
+    fun getUser(nodeNum: Int) = nodeRepository.getUser(nodeNum)
 
     val tileSource
         get() = CustomTileSource.getTileSource(mapPrefs.mapStyle)
@@ -257,7 +259,7 @@ constructor(
 
     init {
         if (destNum != null) {
-            radioConfigRepository.nodeDBbyNum
+            nodeRepository.nodeDBbyNum
                 .mapLatest { nodes -> nodes[destNum] to nodes.keys.firstOrNull() }
                 .distinctUntilChanged()
                 .onEach { (node, ourNode) ->

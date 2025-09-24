@@ -45,6 +45,7 @@ import com.geeksville.mesh.android.GeeksvilleApplication
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.android.isAnalyticsAvailable
 import com.geeksville.mesh.config
+import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.deviceProfile
 import com.geeksville.mesh.model.getChannelList
 import com.geeksville.mesh.model.toChannelSet
@@ -105,6 +106,7 @@ constructor(
     savedStateHandle: SavedStateHandle,
     private val app: Application,
     private val radioConfigRepository: RadioConfigRepository,
+    private val nodeRepository: NodeRepository,
     private val locationRepository: LocationRepository,
     private val mapConsentPrefs: MapConsentPrefs,
     private val analyticsPrefs: AnalyticsPrefs,
@@ -137,7 +139,7 @@ constructor(
     }
 
     init {
-        radioConfigRepository.nodeDBbyNum
+        nodeRepository.nodeDBbyNum
             .mapLatest { nodes -> nodes[destNum] ?: nodes.values.firstOrNull() }
             .distinctUntilChanged()
             .onEach {
@@ -158,7 +160,7 @@ constructor(
         }
             .launchIn(viewModelScope)
 
-        radioConfigRepository.myNodeInfo
+        nodeRepository.myNodeInfo
             .onEach { ni ->
                 _radioConfigState.update { it.copy(isLocal = destNum == null || destNum == ni?.myNodeNum) }
             }
@@ -170,7 +172,7 @@ constructor(
     }
 
     private val myNodeInfo: StateFlow<MyNodeEntity?>
-        get() = radioConfigRepository.myNodeInfo
+        get() = nodeRepository.myNodeInfo
 
     val myNodeNum
         get() = myNodeInfo.value?.myNodeNum
@@ -342,7 +344,7 @@ constructor(
             "Request factory reset error",
         )
         if (destNum == myNodeNum) {
-            viewModelScope.launch { radioConfigRepository.clearNodeDB() }
+            viewModelScope.launch { nodeRepository.clearNodeDB() }
         }
     }
 
@@ -353,7 +355,7 @@ constructor(
             "Request NodeDB reset error",
         )
         if (destNum == myNodeNum) {
-            viewModelScope.launch { radioConfigRepository.clearNodeDB() }
+            viewModelScope.launch { nodeRepository.clearNodeDB() }
         }
     }
 

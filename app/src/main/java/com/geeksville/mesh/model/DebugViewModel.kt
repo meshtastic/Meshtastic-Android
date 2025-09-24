@@ -28,7 +28,7 @@ import com.geeksville.mesh.StoreAndForwardProtos
 import com.geeksville.mesh.TelemetryProtos
 import com.geeksville.mesh.android.Logging
 import com.geeksville.mesh.database.MeshLogRepository
-import com.geeksville.mesh.repository.datastore.RadioConfigRepository
+import com.geeksville.mesh.database.NodeRepository
 import com.geeksville.mesh.ui.debug.FilterMode
 import com.google.protobuf.InvalidProtocolBufferException
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -202,7 +202,7 @@ class DebugViewModel
 @Inject
 constructor(
     private val meshLogRepository: MeshLogRepository,
-    private val radioConfigRepository: RadioConfigRepository,
+    private val nodeRepository: NodeRepository,
 ) : ViewModel(),
     Logging {
 
@@ -345,7 +345,7 @@ constructor(
     val presetFilters: List<String>
         get() = buildList {
             // Our address if available
-            radioConfigRepository.myNodeInfo.value?.myNodeNum?.let { add("!%08x".format(it)) }
+            nodeRepository.myNodeInfo.value?.myNodeNum?.let { add("!%08x".format(it)) }
             // broadcast
             add("!ffffffff")
             // decoded

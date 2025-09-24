@@ -42,9 +42,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import org.meshtastic.core.database.entity.MetadataEntity
-import org.meshtastic.core.database.entity.MyNodeEntity
-import org.meshtastic.core.database.entity.NodeEntity
-import org.meshtastic.core.database.model.Node
 import org.meshtastic.core.datastore.ChannelSetDataSource
 import org.meshtastic.core.datastore.LocalConfigDataSource
 import org.meshtastic.core.datastore.ModuleConfigDataSource
@@ -72,38 +69,10 @@ constructor(
 
     fun setConnectionState(state: ConnectionState) = serviceRepository.setConnectionState(state)
 
-    /** Flow representing the unique userId of our node. */
-    val myId: StateFlow<String?>
-        get() = nodeDB.myId
-
-    /** Flow representing the [MyNodeEntity] database. */
-    val myNodeInfo: StateFlow<MyNodeEntity?>
-        get() = nodeDB.myNodeInfo
-
-    /** Flow representing the [Node] database. */
-    val nodeDBbyNum: StateFlow<Map<Int, Node>>
-        get() = nodeDB.nodeDBbyNum
-
-    fun getUser(nodeNum: Int) = nodeDB.getUser(nodeNum)
-
     suspend fun getNodeDBbyNum() = nodeDB.getNodeDBbyNum().first()
-
-    suspend fun upsert(node: NodeEntity) = nodeDB.upsert(node)
-
-    suspend fun installMyNodeInfo(mi: MyNodeEntity) {
-        nodeDB.installMyNodeInfo(mi)
-    }
-
-    suspend fun installNodeDb(nodes: List<NodeEntity>) {
-        nodeDB.installNodeDb(nodes)
-    }
 
     suspend fun insertMetadata(fromNum: Int, metadata: DeviceMetadata) {
         nodeDB.insertMetadata(MetadataEntity(fromNum, metadata))
-    }
-
-    suspend fun clearNodeDB() {
-        nodeDB.clearNodeDB()
     }
 
     /** Flow representing the [ChannelSet] data store. */
