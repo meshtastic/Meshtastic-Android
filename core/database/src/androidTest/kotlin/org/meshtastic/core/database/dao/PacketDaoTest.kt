@@ -15,14 +15,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh
+package org.meshtastic.core.database.dao
 
 import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.geeksville.mesh.Portnums
 import org.meshtastic.core.database.MeshtasticDatabase
-import org.meshtastic.core.database.dao.NodeInfoDao
-import org.meshtastic.core.database.dao.PacketDao
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.junit.After

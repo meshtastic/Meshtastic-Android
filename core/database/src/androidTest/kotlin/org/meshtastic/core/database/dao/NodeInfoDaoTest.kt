@@ -15,14 +15,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh
+package org.meshtastic.core.database.dao
 
 import androidx.room.Room
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import com.geeksville.mesh.MeshProtos
+import com.geeksville.mesh.copy
+import com.geeksville.mesh.user
 import org.meshtastic.core.database.MeshtasticDatabase
-import org.meshtastic.core.database.dao.NodeInfoDao
-import com.geeksville.mesh.model.NodeSortOption
 import com.google.protobuf.ByteString
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -37,6 +38,7 @@ import org.junit.runner.RunWith
 import org.meshtastic.core.database.entity.MyNodeEntity
 import org.meshtastic.core.database.entity.NodeEntity
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.model.util.onlineTimeThreshold
 
 @RunWith(AndroidJUnit4::class)

@@ -15,13 +15,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-package com.geeksville.mesh
+package org.meshtastic.core.database
 
 import androidx.room.Room
 import androidx.room.testing.MigrationTestHelper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
-import org.meshtastic.core.database.MeshtasticDatabase
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith

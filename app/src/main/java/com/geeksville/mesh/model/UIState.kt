@@ -80,6 +80,7 @@ import org.meshtastic.core.database.entity.QuickChatAction
 import org.meshtastic.core.database.entity.asDeviceVersion
 import org.meshtastic.core.database.model.Message
 import org.meshtastic.core.database.model.Node
+import org.meshtastic.core.database.model.NodeSortOption
 import org.meshtastic.core.datastore.UiPreferencesDataSource
 import org.meshtastic.core.model.DataPacket
 import org.meshtastic.core.model.DeviceHardware
